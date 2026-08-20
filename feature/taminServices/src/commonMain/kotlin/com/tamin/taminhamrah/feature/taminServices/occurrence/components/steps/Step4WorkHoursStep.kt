@@ -1,11 +1,14 @@
 package com.tamin.taminhamrah.feature.taminServices.occurrence.components.steps
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -17,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -58,7 +62,7 @@ internal fun Step4WorkHoursStep(
     uiState: OccurrenceUiState,
     onIntent: (OccurrenceIntent) -> Unit,
     onBack: () -> Unit,
-    onClose:() -> Unit,
+    onClose: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val step = uiState.workHours
@@ -67,10 +71,7 @@ internal fun Step4WorkHoursStep(
     var transportationTouched by remember { mutableStateOf(false) }
 
     var workStartTimeTouched by remember { mutableStateOf(false) }
-    var showWorkStartTimePicker by remember { mutableStateOf(false) }
-
     var workEndTimeTouched by remember { mutableStateOf(false) }
-    var showWorkEndTimePicker by remember { mutableStateOf(false) }
 
     var homeAddressHasFocused by remember { mutableStateOf(false) }
     var homeAddressTouched by remember { mutableStateOf(false) }
@@ -89,26 +90,28 @@ internal fun Step4WorkHoursStep(
     val isHomePostalCodeValid = step.homePostalCode.isNotBlank() &&
         ValidationUtils.isPostcodeValid(step.homePostalCode)
 
-    if (showWorkStartTimePicker) {
+    if (uiState.dialogs.showWorkStartTimePicker) {
         TaminJalaliTimePickerBottomSheet(
             title = stringResource(Res.string.occurrence_field_work_start_time),
-            onDismiss = { showWorkStartTimePicker = false },
+            onDismiss = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showWorkStartTimePicker = false))) },
             onConfirm = { hour, minute ->
-                val timeStr = "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"
+                val timeStr =
+                    "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"
                 onIntent(OccurrenceIntent.UpdateWorkHours(step.copy(workStartTime = timeStr)))
-                showWorkStartTimePicker = false
+                onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showWorkStartTimePicker = false)))
             },
         )
     }
 
-    if (showWorkEndTimePicker) {
+    if (uiState.dialogs.showWorkEndTimePicker) {
         TaminJalaliTimePickerBottomSheet(
             title = stringResource(Res.string.occurrence_field_work_end_time),
-            onDismiss = { showWorkEndTimePicker = false },
+            onDismiss = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showWorkEndTimePicker = false))) },
             onConfirm = { hour, minute ->
-                val timeStr = "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"
+                val timeStr =
+                    "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"
                 onIntent(OccurrenceIntent.UpdateWorkHours(step.copy(workEndTime = timeStr)))
-                showWorkEndTimePicker = false
+                onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showWorkEndTimePicker = false)))
             },
         )
     }
@@ -154,7 +157,15 @@ internal fun Step4WorkHoursStep(
                 val showTransportationError = transportationTouched && !isTransportationValid
                 StyledTextField(
                     value = step.transportation,
-                    onValueChange = { onIntent(OccurrenceIntent.UpdateWorkHours(step.copy(transportation = it))) },
+                    onValueChange = {
+                        onIntent(
+                            OccurrenceIntent.UpdateWorkHours(
+                                step.copy(
+                                    transportation = it
+                                )
+                            )
+                        )
+                    },
                     label = stringResource(Res.string.occurrence_field_transportation),
                     placeholder = "پیاده، خودروی شخصی، سرویس کارگاه، ...",
                     isValid = if (showTransportationError) false else null,
@@ -172,47 +183,64 @@ internal fun Step4WorkHoursStep(
                 Spacer(modifier = Modifier.height(Spacing.sm))
 
                 val showWorkStartTimeError = workStartTimeTouched && !isWorkStartTimeValid
-                StyledTextField(
-                    value = step.workStartTime,
-                    onValueChange = {},
-                    label = stringResource(Res.string.occurrence_field_work_start_time),
-                    placeholder = "08:00",
-                    trailingIcon = Icons.Default.AccessTime,
-                    isValid = if (showWorkStartTimeError) false else null,
-                    errorText = if (showWorkStartTimeError) stringResource(Res.string.occurrence_field_work_start_time_error) else null,
-                    isRequired = true,
-                    readOnly = true,
-                    onClick = {
-                        workStartTimeTouched = true
-                        showWorkStartTimePicker = true
-                    },
-                )
 
-                Spacer(modifier = Modifier.height(Spacing.sm))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                ) {
+                    StyledTextField(
+                        modifier = Modifier.weight(1f),
+                        value = step.workStartTime,
+                        onValueChange = {},
+                        label = stringResource(Res.string.occurrence_field_work_start_time),
+                        placeholder = "08:00",
+                        trailingIcon = Icons.Default.AccessTime,
+                        isValid = if (showWorkStartTimeError) false else null,
+                        errorText = if (showWorkStartTimeError) stringResource(Res.string.occurrence_field_work_start_time_error) else null,
+                        isRequired = true,
+                        readOnly = true,
+                        onClick = {
+                            workStartTimeTouched = true
+                            onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showWorkStartTimePicker = true)))
+                        },
+                    )
 
-                val showWorkEndTimeError = workEndTimeTouched && !isWorkEndTimeValid
-                StyledTextField(
-                    value = step.workEndTime,
-                    onValueChange = {},
-                    label = stringResource(Res.string.occurrence_field_work_end_time),
-                    placeholder = "17:00",
-                    trailingIcon = Icons.Default.AccessTime,
-                    isValid = if (showWorkEndTimeError) false else null,
-                    errorText = if (showWorkEndTimeError) stringResource(Res.string.occurrence_field_work_end_time_error) else null,
-                    isRequired = true,
-                    readOnly = true,
-                    onClick = {
-                        workEndTimeTouched = true
-                        showWorkEndTimePicker = true
-                    },
-                )
+                    Spacer(modifier = Modifier.width(Spacing.sm))
+
+                    val showWorkEndTimeError = workEndTimeTouched && !isWorkEndTimeValid
+                    StyledTextField(
+                        modifier = Modifier.weight(1f),
+                        value = step.workEndTime,
+                        onValueChange = {},
+                        label = stringResource(Res.string.occurrence_field_work_end_time),
+                        placeholder = "17:00",
+                        trailingIcon = Icons.Default.AccessTime,
+                        isValid = if (showWorkEndTimeError) false else null,
+                        errorText = if (showWorkEndTimeError) stringResource(Res.string.occurrence_field_work_end_time_error) else null,
+                        isRequired = true,
+                        readOnly = true,
+                        onClick = {
+                            workEndTimeTouched = true
+                            onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showWorkEndTimePicker = true)))
+                        },
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(Spacing.sm))
 
                 val showHomeAddressError = homeAddressTouched && !isHomeAddressValid
                 StyledTextField(
+                    singleLine = false,
                     value = step.homeAddress,
-                    onValueChange = { onIntent(OccurrenceIntent.UpdateWorkHours(step.copy(homeAddress = it))) },
+                    onValueChange = {
+                        onIntent(
+                            OccurrenceIntent.UpdateWorkHours(
+                                step.copy(
+                                    homeAddress = it
+                                )
+                            )
+                        )
+                    },
                     label = stringResource(Res.string.occurrence_field_home_address),
                     placeholder = "استان، شهر، خیابان، پلاک",
                     isValid = if (showHomeAddressError) false else null,
@@ -230,52 +258,62 @@ internal fun Step4WorkHoursStep(
                 Spacer(modifier = Modifier.height(Spacing.sm))
 
                 val showHomePhoneError = homePhoneTouched && !isHomePhoneValid
-                StyledTextField(
-                    value = step.homePhone,
-                    onValueChange = {
-                        val filtered = ValidationUtils.validatePhoneNumber(it)
-                        onIntent(OccurrenceIntent.UpdateWorkHours(step.copy(homePhone = filtered)))
-                    },
-                    label = stringResource(Res.string.occurrence_field_home_phone),
-                    placeholder = "شماره تلفن",
-                    inputRestriction = InputRestriction.DigitsOnly,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                    isValid = if (showHomePhoneError) false else null,
-                    errorText = if (showHomePhoneError) stringResource(Res.string.occurrence_field_home_phone_error) else null,
-                    isRequired = true,
-                    onFocusChanged = { isFocused ->
-                        if (isFocused) {
-                            homePhoneHasFocused = true
-                        } else if (homePhoneHasFocused) {
-                            homePhoneTouched = true
-                        }
-                    },
-                )
 
-                Spacer(modifier = Modifier.height(Spacing.sm))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.Top
+                ) {
 
-                val showHomePostalCodeError = homePostalCodeTouched && !isHomePostalCodeValid
-                StyledTextField(
-                    value = step.homePostalCode,
-                    onValueChange = {
-                        val filtered = ValidationUtils.validatePostcode(it)
-                        onIntent(OccurrenceIntent.UpdateWorkHours(step.copy(homePostalCode = filtered)))
-                    },
-                    label = stringResource(Res.string.occurrence_field_home_postal_code),
-                    placeholder = "کد پستی 10 رقمی",
-                    inputRestriction = InputRestriction.DigitsOnly,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    isValid = if (showHomePostalCodeError) false else null,
-                    errorText = if (showHomePostalCodeError) stringResource(Res.string.occurrence_field_home_postal_code_error) else null,
-                    isRequired = true,
-                    onFocusChanged = { isFocused ->
-                        if (isFocused) {
-                            homePostalCodeHasFocused = true
-                        } else if (homePostalCodeHasFocused) {
-                            homePostalCodeTouched = true
-                        }
-                    },
-                )
+                    StyledTextField(
+                        modifier = Modifier.weight(1f),
+                        value = step.homePhone,
+                        onValueChange = {
+                            val filtered = ValidationUtils.validatePhoneNumber(it)
+                            onIntent(OccurrenceIntent.UpdateWorkHours(step.copy(homePhone = filtered)))
+                        },
+                        label = stringResource(Res.string.occurrence_field_home_phone),
+                        placeholder = "شماره تلفن",
+                        inputRestriction = InputRestriction.DigitsOnly,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                        isValid = if (showHomePhoneError) false else null,
+                        errorText = if (showHomePhoneError) stringResource(Res.string.occurrence_field_home_phone_error) else null,
+                        isRequired = true,
+                        onFocusChanged = { isFocused ->
+                            if (isFocused) {
+                                homePhoneHasFocused = true
+                            } else if (homePhoneHasFocused) {
+                                homePhoneTouched = true
+                            }
+                        },
+                    )
+
+                    Spacer(modifier = Modifier.width(Spacing.sm))
+
+                    val showHomePostalCodeError = homePostalCodeTouched && !isHomePostalCodeValid
+                    StyledTextField(
+                        modifier = Modifier.weight(1f),
+                        value = step.homePostalCode,
+                        onValueChange = {
+                            val filtered = ValidationUtils.validatePostcode(it)
+                            onIntent(OccurrenceIntent.UpdateWorkHours(step.copy(homePostalCode = filtered)))
+                        },
+                        label = stringResource(Res.string.occurrence_field_home_postal_code),
+                        placeholder = "کد پستی 10 رقمی",
+                        inputRestriction = InputRestriction.DigitsOnly,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        isValid = if (showHomePostalCodeError) false else null,
+                        errorText = if (showHomePostalCodeError) stringResource(Res.string.occurrence_field_home_postal_code_error) else null,
+                        isRequired = true,
+                        onFocusChanged = { isFocused ->
+                            if (isFocused) {
+                                homePostalCodeHasFocused = true
+                            } else if (homePostalCodeHasFocused) {
+                                homePostalCodeTouched = true
+                            }
+                        },
+                    )
+                }
+
 
                 Spacer(modifier = Modifier.height(Spacing.lg))
                 Spacer(modifier = Modifier.height(padding.calculateBottomPadding()))

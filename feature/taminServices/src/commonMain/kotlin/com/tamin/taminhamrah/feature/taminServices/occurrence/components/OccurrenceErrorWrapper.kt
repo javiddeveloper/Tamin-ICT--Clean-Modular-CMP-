@@ -1,11 +1,14 @@
 package com.tamin.taminhamrah.feature.taminServices.occurrence.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,20 +32,21 @@ fun OccurrenceErrorView(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .background(taminColors.bgPage)
+            .padding(16.dp),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         TaminText(
             text = error,
-            color = taminColors.dangerText,
-            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.error,
+            textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(16.dp))
-        TaminOutlinedButton(
-            text = stringResource(Res.string.action_retry),
-            onClick = onRetry,
-        )
+        Button(onClick = onRetry) {
+            TaminText("تلاش مجدد")
+        }
     }
 }
 

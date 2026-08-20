@@ -83,12 +83,12 @@ internal fun Step2WorkshopStep(
     uiState: OccurrenceUiState,
     onIntent: (OccurrenceIntent) -> Unit,
     onBack: () -> Unit,
-    onClose:() -> Unit,
+    onClose: () -> Unit,
     modifier: Modifier = Modifier,
+    error: String? = null,
 ) {
     val taminColors = LocalTaminColors.current
     val step = uiState.workshop
-    var showWorkshopSheet by remember { mutableStateOf(false) }
 
     var employerNameHasFocused by remember { mutableStateOf(false) }
     var employerNameTouched by remember { mutableStateOf(false) }
@@ -136,7 +136,7 @@ internal fun Step2WorkshopStep(
     ) { padding ->
         OccurrenceErrorWrapper(
             isLoading = uiState.isLoading,
-            error = null,
+            error = error,
             onRetry = { onIntent(OccurrenceIntent.LoadInitialData) },
             modifier = Modifier.padding(padding),
             shimmerContent = { Step2WorkshopShimmerSkeleton(modifier = Modifier.padding(padding)) },
@@ -158,10 +158,18 @@ internal fun Step2WorkshopStep(
                   )*/
 
                 StyledTextField(
-                    value = step.selectedWorkshop?.displayCode?:"",
+                    value = step.selectedWorkshop?.displayCode ?: "",
                     label = stringResource(Res.string.occurrence_field_workshop_code),
                     placeholder = stringResource(Res.string.occurrence_field_workshop_code_hint),
-                    onClick = { showWorkshopSheet = true },
+                    onClick = {
+                        onIntent(
+                            OccurrenceIntent.UpdateDialogs(
+                                uiState.dialogs.copy(
+                                    showWorkshopSheet = true
+                                )
+                            )
+                        )
+                    },
                     onValueChange = {},
                     leadingIcon = Icons.Default.KeyboardArrowDown,
                     isRequired = true,
@@ -195,7 +203,11 @@ internal fun Step2WorkshopStep(
                                 cornerRadius = 4.dp,
                             )
                         } else {
-                            TaminText(workshop.name, color = taminColors.textPrimary)
+                            TaminText(
+                                workshop.name,
+                                color = taminColors.textPrimary,
+                                fontSize = 13.5.sp,
+                            )
                         }
                     }
                     Spacer(modifier = Modifier.height(Spacing.sm))
@@ -262,6 +274,7 @@ internal fun Step2WorkshopStep(
 
                 val showWorkshopAddressError = workshopAddressTouched && !isWorkshopAddressValid
                 StyledTextField(
+                    singleLine = false,
                     value = step.workshopAddress,
                     onValueChange = {
                         onIntent(
@@ -289,10 +302,11 @@ internal fun Step2WorkshopStep(
                 Spacer(modifier = Modifier.height(Spacing.sm))
 
                 val showWorkshopPhoneError = workshopPhoneTouched && !isWorkshopPhoneValid
-                val showWorkshopPostalCodeError = workshopPostalCodeTouched && !isWorkshopPostalCodeValid
+                val showWorkshopPostalCodeError =
+                    workshopPostalCodeTouched && !isWorkshopPostalCodeValid
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.Top
                 ) {
                     StyledTextField(
                         modifier = Modifier.weight(1f),
@@ -359,7 +373,7 @@ internal fun Step2WorkshopStep(
         }
     }
 
-    if (showWorkshopSheet) {
+    if (uiState.dialogs.showWorkshopSheet) {
         OccurrenceSelectionBottomSheet(
             title = stringResource(Res.string.occurrence_sheet_select_workshop),
             options = step.workshops.map { workshop ->
@@ -369,9 +383,17 @@ internal fun Step2WorkshopStep(
             onSelect = { option ->
                 val workshop = step.workshops.first { it.id == option.id }
                 onIntent(OccurrenceIntent.SelectWorkshop(workshop))
-                showWorkshopSheet = false
+                onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showWorkshopSheet = false)))
             },
-            onDismiss = { showWorkshopSheet = false },
+            onDismiss = {
+                onIntent(
+                    OccurrenceIntent.UpdateDialogs(
+                        uiState.dialogs.copy(
+                            showWorkshopSheet = false
+                        )
+                    )
+                )
+            },
         )
     }
 }

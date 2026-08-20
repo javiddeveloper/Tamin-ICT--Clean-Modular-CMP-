@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.taminServices.occurrence
 
 import com.tamin.taminhamrah.base.BaseViewModel
+import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.ErrorSource
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceEvent
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceIntent
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceStep
@@ -11,8 +12,6 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.model.toPR
 import com.tamin.taminhamrah.model.occurrence.OccurrenceSubmitRequestDN
 import com.tamin.taminhamrah.model.occurrence.OccurrenceUploadedDocDN
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
-import com.tamin.taminhamrah.util.PersianDateFormatter
-import com.tamin.taminhamrah.util.toJalaliParts
 import com.tamin.taminhamrah.useCases.history.GetUserInfosUseCase
 import com.tamin.taminhamrah.useCases.occurrence.GetAllWorkshopsUseCase
 import com.tamin.taminhamrah.useCases.occurrence.GetInsuredRelationUseCase
@@ -32,12 +31,6 @@ import kotlinx.coroutines.flow.onStart
 /** The legacy "occurence" submit endpoint's reporterType for a self-filed report — this flow has no reporter-type picker. */
 private const val REPORTER_TYPE_SELF = "1"
 
-/** Converts a Jalali "yyyy/mm/dd" date string to epoch milliseconds, as the legacy submit endpoint expects. */
-private fun String.toEpochMillisFromJalali(): Long {
-    val (year, month, day) = toJalaliParts() ?: return 0L
-    return PersianDateFormatter.toEpochMillis(year, month, day)
-}
-
 class OccurrenceViewModel(
     private val getPersonalInfoUseCase: GetOccurrencePersonalInfoUseCase,
     private val getUserInfosUseCase: GetUserInfosUseCase,
@@ -50,6 +43,10 @@ class OccurrenceViewModel(
 ) : BaseViewModel<OccurrenceUiState, PartialState, OccurrenceEvent, OccurrenceIntent>(
     initialState = OccurrenceUiState()
 ) {
+
+    init {
+        sendIntent(OccurrenceIntent.LoadInitialData)
+    }
 
     override fun handleIntent(intent: OccurrenceIntent): Flow<PartialState> = when (intent) {
         is OccurrenceIntent.LoadInitialData -> loadInitialData()
@@ -64,10 +61,8 @@ class OccurrenceViewModel(
         is OccurrenceIntent.UploadDocument -> uploadDocument(intent)
         is OccurrenceIntent.RemoveDocument -> removeDocument(intent)
         is OccurrenceIntent.SubmitOccurrence -> submitOccurrence()
+        is OccurrenceIntent.UpdateDialogs -> flow { emit(PartialState.DialogsUpdated(intent.dialogs)) }
     }
-
-    private fun Flow<PartialState>.ignoreError(): Flow<PartialState> =
-        catch { e -> sendEvent(OccurrenceEvent.ShowToast(e.toSingleLineMessage())) }
 
     private fun loadInitialData(): Flow<PartialState> = flow {
         var nationalId = ""
@@ -76,13 +71,13 @@ class OccurrenceViewModel(
             nationalId = userInfo.nationalID.orEmpty()
             emit(PartialState.UserInfoUpdated(userInfo.toPR()))
         } catch (e: Exception) {
-            sendEvent(OccurrenceEvent.ShowToast(e.toSingleLineMessage()))
+            emit(PartialState.Error(e.toSingleLineMessage(), ErrorSource.USER_INFO))
         }
         emitAll(
             merge(
-                fetchWorkshops(nationalId).ignoreError(),
-                fetchDocTypes().ignoreError(),
-                fetchInsuredRelation(nationalId).ignoreError(),
+                fetchWorkshops(nationalId),
+                fetchDocTypes(),
+                fetchInsuredRelation(nationalId),
             )
         )
     }.onStart {
@@ -91,17 +86,20 @@ class OccurrenceViewModel(
         emit(PartialState.Loading(false))
     }
 
-    private fun fetchWorkshops(nationalId: String): Flow<PartialState> = flow {
+    /** Feeds Step2 (workshop list) — a failure blocks that step with a full-screen [OccurrenceErrorWrapper], not a toast. */
+    private fun fetchWorkshops(nationalId: String): Flow<PartialState> = flow<PartialState> {
         val workshops = getAllWorkshopsUseCase(nationalId).map { it.toPR() }
         emit(PartialState.WorkshopUpdated(uiState.value.workshop.copy(workshops = workshops)))
-    }
+    }.catch { e -> emit(PartialState.Error(e.toSingleLineMessage(), ErrorSource.WORKSHOPS)) }
 
+    /** Feeds Step6 (document type picker) only — the last step keeps toast-only error display, so this never becomes a fatal [PartialState.Error]. */
     private fun fetchDocTypes(): Flow<PartialState> = flow {
         val types = getDocTypesUseCase().map { it.toPR() }
         emit(PartialState.DocumentSubmitUpdated(uiState.value.documentSubmit.copy(docTypes = types)))
-    }
+    }.catch { e -> sendEvent(OccurrenceEvent.ShowToast(e.toSingleLineMessage())) }
 
-    private fun fetchInsuredRelation(nationalId: String): Flow<PartialState> = flow {
+    /** Feeds Step3 (job/insurance details) — a failure blocks that step with a full-screen [OccurrenceErrorWrapper], not a toast. */
+    private fun fetchInsuredRelation(nationalId: String): Flow<PartialState> = flow<PartialState> {
         val relation = getInsuredRelationUseCase(nationalId)
         emit(
             PartialState.JobDetailsUpdated(
@@ -113,7 +111,7 @@ class OccurrenceViewModel(
                 )
             )
         )
-    }
+    }.catch { e -> emit(PartialState.Error(e.toSingleLineMessage(), ErrorSource.INSURED_RELATION)) }
 
     private fun goToPreviousStep(): Flow<PartialState> = flow {
         if (uiState.value.currentStep == OccurrenceStep.PERSON_INFO) {
@@ -134,15 +132,18 @@ class OccurrenceViewModel(
         )
         try {
             val spec = getWorkshopSpecUseCase(intent.workshop.workshopCode, intent.workshop.branchCode)
+            val current = uiState.value.workshop
             emit(
                 PartialState.WorkshopUpdated(
-                    uiState.value.workshop.copy(
+                    current.copy(
                         selectedWorkshop = intent.workshop.copy(name = spec.name),
-                        employerName = spec.employerName,
-                        employerPhone = spec.employerPhone,
-                        workshopAddress = spec.address,
-                        workshopPostalCode = spec.postalCode,
-                        workshopPhone = spec.phone,
+                        // Prefill only what the user hasn't already typed — selecting/reselecting a
+                        // workshop code must never clobber edits made before or after the pick.
+                        employerName = current.employerName.ifBlank { spec.employerName },
+                        employerPhone = current.employerPhone.ifBlank { spec.employerPhone },
+                        workshopAddress = current.workshopAddress.ifBlank { spec.address },
+                        workshopPostalCode = current.workshopPostalCode.ifBlank { spec.postalCode },
+                        workshopPhone = current.workshopPhone.ifBlank { spec.phone },
                         isWorkshopSpecLoading = false,
                     )
                 )
@@ -173,7 +174,15 @@ class OccurrenceViewModel(
 
     private fun uploadDocument(intent: OccurrenceIntent.UploadDocument): Flow<PartialState> = flow {
         val current = uiState.value.documentSubmit
-        emit(PartialState.DocumentSubmitUpdated(current.copy(isUploadingDoc = true)))
+        emit(
+            PartialState.DocumentSubmitUpdated(
+                current.copy(
+                    isUploadingDoc = true,
+                    uploadingTypeName = intent.typeName,
+                    uploadingFileName = intent.fileName,
+                )
+            )
+        )
         try {
             val guid = uploadImageUseCase(intent.fileName, intent.fileBytes)
             val newDoc = OccurrenceUploadedDocDN(
@@ -186,12 +195,22 @@ class OccurrenceViewModel(
                 PartialState.DocumentSubmitUpdated(
                     uiState.value.documentSubmit.copy(
                         isUploadingDoc = false,
+                        uploadingTypeName = "",
+                        uploadingFileName = "",
                         uploadedDocuments = uiState.value.documentSubmit.uploadedDocuments + newDoc,
                     )
                 )
             )
         } catch (e: Exception) {
-            emit(PartialState.DocumentSubmitUpdated(uiState.value.documentSubmit.copy(isUploadingDoc = false)))
+            emit(
+                PartialState.DocumentSubmitUpdated(
+                    uiState.value.documentSubmit.copy(
+                        isUploadingDoc = false,
+                        uploadingTypeName = "",
+                        uploadingFileName = "",
+                    )
+                )
+            )
             sendEvent(OccurrenceEvent.ShowToast(e.toSingleLineMessage()))
         }
     }
@@ -224,7 +243,7 @@ class OccurrenceViewModel(
                     ?: personalInfo?.insuranceNumber.orEmpty(),
                 branchCode = state.jobDetails.branchCode,
                 branchName = state.jobDetails.branchName,
-                birthDate = state.personInfo.birthDate.toEpochMillisFromJalali(),
+                birthDate = state.personInfo.birthDateTimestamp ?: 0L,
                 workshopId = state.workshop.selectedWorkshop?.id.orEmpty(),
                 workshopBranchCode = state.workshop.selectedWorkshop?.branchCode.orEmpty(),
                 workshopName = state.workshop.selectedWorkshop?.name.orEmpty(),
@@ -233,7 +252,7 @@ class OccurrenceViewModel(
                 workshopAddress = state.workshop.workshopAddress,
                 workshopPostalCode = state.workshop.workshopPostalCode,
                 workshopPhone = state.workshop.workshopPhone,
-                employmentDate = state.jobDetails.employmentDate.toEpochMillisFromJalali(),
+                employmentDate = state.jobDetails.employmentDateTimestamp ?: 0L,
                 maritalStatus = state.jobDetails.maritalStatus.toIntOrNull() ?: 0,
                 jobTitle = state.jobDetails.jobTitle,
                 workLocation = state.jobDetails.workLocation,
@@ -243,7 +262,7 @@ class OccurrenceViewModel(
                 homeAddress = state.workHours.homeAddress,
                 homePhone = state.workHours.homePhone,
                 homePostalCode = state.workHours.homePostalCode,
-                accidentDate = state.accident.accidentDate.toEpochMillisFromJalali(),
+                accidentDate = state.accident.accidentDateTimestamp ?: 0L,
                 accidentTime = state.accident.accidentTime,
                 accidentOutcomeId = state.accident.accidentOutcomeId.toIntOrNull() ?: 0,
                 exactLocation = state.accident.exactLocation,
@@ -253,7 +272,7 @@ class OccurrenceViewModel(
             )
             val result = submitOccurrenceUseCase(request)
             emit(PartialState.Submitting(false))
-            sendEvent(OccurrenceEvent.DisplaySuccessModal(result.trackingCode))
+            emit(PartialState.DialogsUpdated(uiState.value.dialogs.copy(successTrackingCode = result.trackingCode)))
         } catch (e: Exception) {
             emit(PartialState.Submitting(false))
             sendEvent(OccurrenceEvent.ShowToast(e.toSingleLineMessage()))
@@ -265,7 +284,17 @@ class OccurrenceViewModel(
         partialState: PartialState
     ): OccurrenceUiState =
         when (partialState) {
-            is PartialState.Loading -> currentState.copy(isLoading = partialState.isLoading)
+            is PartialState.Loading -> currentState.copy(
+                isLoading = partialState.isLoading,
+                // A fresh load/retry cycle re-attempts every source, so drop stale errors up front;
+                // whichever source still fails re-populates its own entry via PartialState.Error.
+                errors = if (partialState.isLoading) emptyMap() else currentState.errors,
+            )
+
+            is PartialState.Error -> currentState.copy(
+                errors = currentState.errors + (partialState.source to partialState.message)
+            )
+
             is PartialState.Submitting -> currentState.copy(isSubmitting = partialState.isSubmitting)
             is PartialState.GoToNextStep -> {
                 val next =
@@ -291,6 +320,7 @@ class OccurrenceViewModel(
             is PartialState.WorkHoursUpdated -> currentState.copy(workHours = partialState.workHours)
             is PartialState.AccidentUpdated -> currentState.copy(accident = partialState.accident)
             is PartialState.DocumentSubmitUpdated -> currentState.copy(documentSubmit = partialState.documentSubmit)
+            is PartialState.DialogsUpdated -> currentState.copy(dialogs = partialState.dialogs)
         }
 
     override fun createErrorState(message: String): PartialState {

@@ -57,7 +57,7 @@ fun OccurrenceDocTypeDTO.toDomain(): OccurrenceDocTypeDN = OccurrenceDocTypeDN(
 )
 
 fun OccurrenceResponseDTO.toDomain(): OccurrenceResultDN = OccurrenceResultDN(
-    trackingCode = trackingCode.orEmpty(),
+    trackingCode = reportRefrenceNumber.orEmpty(),
 )
 
 fun OccurrenceSubmitRequestDN.toDTO(): OccurrenceRequestDTO = OccurrenceRequestDTO(

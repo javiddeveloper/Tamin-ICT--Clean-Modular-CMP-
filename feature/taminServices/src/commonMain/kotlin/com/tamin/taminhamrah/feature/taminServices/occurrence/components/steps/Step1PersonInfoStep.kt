@@ -23,10 +23,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,6 +54,7 @@ import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.util.PersianDateFormatter
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
@@ -84,22 +81,27 @@ internal fun Step1PersonInfoStep(
     onIntent: (OccurrenceIntent) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    error: String? = null,
 ) {
     val taminColors = LocalTaminColors.current
     val step = uiState.personInfo
     val nationalCode = step.userInfo?.nationalID?.takeIf { it.isNotBlank() }
         ?: step.personalInfo?.nationalCode.orEmpty()
-    var showDatePicker by remember { mutableStateOf(false) }
 
-    if (showDatePicker) {
+    if (uiState.dialogs.showBirthDatePicker) {
         TaminJalaliDatePickerBottomSheet(
             title = stringResource(Res.string.occurrence_field_birth_date),
-            onDismiss = { showDatePicker = false },
+            onDismiss = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showBirthDatePicker = false))) },
             onConfirm = { year, month, day ->
-                val dateStr =
-                    "$year/${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')}"
-                onIntent(OccurrenceIntent.UpdatePersonInfo(step.copy(birthDate = dateStr)))
-                showDatePicker = false
+                onIntent(
+                    OccurrenceIntent.UpdatePersonInfo(
+                        step.copy(
+                            birthDate = PersianDateFormatter.format(year, month, day),
+                            birthDateTimestamp = PersianDateFormatter.toEpochMillis(year, month, day),
+                        )
+                    )
+                )
+                onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showBirthDatePicker = false)))
             },
         )
     }
@@ -127,7 +129,7 @@ internal fun Step1PersonInfoStep(
     ) { padding ->
         OccurrenceErrorWrapper(
             isLoading = uiState.isLoading,
-            error = null,
+            error = error,
             onRetry = { onIntent(OccurrenceIntent.LoadInitialData) },
             modifier = Modifier.padding(padding),
             shimmerContent = { Step1PersonInfoShimmerSkeleton(modifier = Modifier.padding(padding)) },
@@ -176,16 +178,18 @@ internal fun Step1PersonInfoStep(
                     placeholder = "انتخاب تاریخ تولد",
                     trailingIcon = vectorResource(Res.drawable.ic_tamin_calendar),
                     readOnly = true,
-                    onClick = { showDatePicker = true },
+                    onClick = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showBirthDatePicker = true))) },
                 )
 
                 Spacer(modifier = Modifier.height(Spacing.lg))
 
-                step.userInfo?.let { info ->
-                    PersonInfoCard(
-                        info = info,
-                        birthDate = step.birthDate.ifBlank { info.birthDate },
-                    )
+                if (step.birthDate.isNotBlank()) {
+                    step.userInfo?.let { info ->
+                        PersonInfoCard(
+                            info = info,
+                            birthDate = step.birthDate,
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(Spacing.lg))

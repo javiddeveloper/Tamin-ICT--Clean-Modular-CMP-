@@ -6,11 +6,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -23,6 +20,7 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.components.steps.S
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.steps.Step4WorkHoursStep
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.steps.Step5AccidentStep
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.steps.Step6DocumentSubmitStep
+import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.ErrorSource
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceEvent
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceIntent
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceStep
@@ -63,27 +61,19 @@ fun OccurrenceScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val toaster = LocalToaster.current
-    var showWarningSheet by remember { mutableStateOf(true) }
-    var successTrackingCode by remember { mutableStateOf<String?>(null) }
-
-    LaunchedEffect(Unit) {
-        viewModel.sendIntent(OccurrenceIntent.LoadInitialData)
-    }
+    val onIntent = viewModel::sendIntent
 
     viewModel.events.collectWithLifecycleAware { event ->
         when (event) {
             is OccurrenceEvent.ShowToast -> toaster.error(event.message)
-            is OccurrenceEvent.DisplaySuccessModal -> successTrackingCode = event.trackingCode
             is OccurrenceEvent.NavigateBack -> onBack()
         }
     }
 
-    var showExitConfirmation by remember { mutableStateOf(false) }
-
-    val onExitRequested = remember(uiState.currentStep, onBack) {
+    val onExitRequested = remember(uiState.currentStep, uiState.dialogs, onBack) {
         {
             if (uiState.currentStep in STEPS_REQUIRING_EXIT_CONFIRMATION) {
-                showExitConfirmation = true
+                onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showExitConfirmation = true)))
             } else {
                 onBack()
             }
@@ -92,7 +82,7 @@ fun OccurrenceScreen(
 
     BackHandler(onBack = { viewModel.sendIntent(OccurrenceIntent.GoToPreviousStep) })
 
-    if (showExitConfirmation) {
+    if (uiState.dialogs.showExitConfirmation) {
         val taminColors = LocalTaminColors.current
         TaminConfirmationDialog(
             title = stringResource(Res.string.occurrence_exit_confirmation_title),
@@ -100,7 +90,7 @@ fun OccurrenceScreen(
             confirmButton = {
                 TaminFilledButton(
                     text = stringResource(Res.string.occurrence_exit_confirmation_confirm),
-                    onClick = { showExitConfirmation = false },
+                    onClick = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showExitConfirmation = false))) },
                     modifier = Modifier.fillMaxWidth(),
                     height = 50.dp,
                     shape = RoundedCornerShape(14.dp),
@@ -111,7 +101,7 @@ fun OccurrenceScreen(
                 TaminOutlinedButton(
                     text = stringResource(Res.string.occurrence_exit_confirmation_dismiss),
                     onClick = {
-                        showExitConfirmation = false
+                        onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showExitConfirmation = false)))
                         onBack()
                     },
                     modifier = Modifier.fillMaxWidth(),
@@ -121,7 +111,7 @@ fun OccurrenceScreen(
                     contentColor = taminColors.textSecondary
                 )
             },
-            onDismissRequest = { showExitConfirmation = false },
+            onDismissRequest = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showExitConfirmation = false))) },
             icon = Icons.AutoMirrored.Outlined.HelpOutline
         )
     }
@@ -130,21 +120,21 @@ fun OccurrenceScreen(
         uiState = uiState,
         onBack = { viewModel.sendIntent(OccurrenceIntent.GoToPreviousStep) },
         onClose = onExitRequested,
-        onIntent = viewModel::sendIntent,
+        onIntent = onIntent,
     )
 
-    if (showWarningSheet) {
+    if (uiState.dialogs.showWarningSheet) {
         OccurrenceWarningBottomSheet(
-            onConfirm = { showWarningSheet = false },
+            onConfirm = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showWarningSheet = false))) },
             onDismiss = onBack,
         )
     }
 
-    successTrackingCode?.let { code ->
+    uiState.dialogs.successTrackingCode?.let { code ->
         OccurrenceSuccessModal(
             trackingCode = code,
             onDismiss = {
-                successTrackingCode = null
+                onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(successTrackingCode = null)))
                 onDone()
             },
         )
@@ -164,7 +154,8 @@ internal fun OccurrenceContent(
             uiState = uiState,
             onIntent = onIntent,
             onBack = onBack,
-            modifier = modifier
+            modifier = modifier,
+            error = uiState.errors[ErrorSource.USER_INFO]
         )
 
         OccurrenceStep.WORKSHOP_INFO -> Step2WorkshopStep(
@@ -172,7 +163,8 @@ internal fun OccurrenceContent(
             onIntent = onIntent,
             onBack = onBack,
             modifier = modifier,
-            onClose = onClose
+            onClose = onClose,
+            error = uiState.errors[ErrorSource.WORKSHOPS]
         )
 
         OccurrenceStep.JOB_DETAILS -> Step3JobDetailsStep(
@@ -180,7 +172,8 @@ internal fun OccurrenceContent(
             onIntent = onIntent,
             onBack = onBack,
             onClose = onClose,
-            modifier = modifier
+            modifier = modifier,
+            error = uiState.errors[ErrorSource.INSURED_RELATION]
         )
 
         OccurrenceStep.WORK_HOURS -> Step4WorkHoursStep(

@@ -16,10 +16,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,11 +37,11 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.model.MaritalStatu
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.TaminDivider
-import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePickerBottomSheet
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toGenderLabel
+import com.tamin.taminhamrah.util.PersianDateFormatter
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
@@ -72,21 +68,25 @@ internal fun Step3JobDetailsStep(
     onBack: () -> Unit,
     onClose:() -> Unit,
     modifier: Modifier = Modifier,
+    error: String? = null,
 ) {
     val taminColors = LocalTaminColors.current
     val step = uiState.jobDetails
-    var showMaritalSheet by remember { mutableStateOf(false) }
-    var showDatePicker by remember { mutableStateOf(false) }
 
-    if (showDatePicker) {
+    if (uiState.dialogs.showEmploymentDatePicker) {
         TaminJalaliDatePickerBottomSheet(
             title = stringResource(Res.string.occurrence_field_employment_date),
-            onDismiss = { showDatePicker = false },
+            onDismiss = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showEmploymentDatePicker = false))) },
             onConfirm = { year, month, day ->
-                val dateStr =
-                    "$year/${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')}"
-                onIntent(OccurrenceIntent.UpdateJobDetails(step.copy(employmentDate = dateStr)))
-                showDatePicker = false
+                onIntent(
+                    OccurrenceIntent.UpdateJobDetails(
+                        step.copy(
+                            employmentDate = PersianDateFormatter.format(year, month, day),
+                            employmentDateTimestamp = PersianDateFormatter.toEpochMillis(year, month, day),
+                        )
+                    )
+                )
+                onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showEmploymentDatePicker = false)))
             },
         )
     }
@@ -115,7 +115,7 @@ internal fun Step3JobDetailsStep(
     ) { padding ->
         OccurrenceErrorWrapper(
             isLoading = uiState.isLoading,
-            error = null,
+            error = error,
             onRetry = { onIntent(OccurrenceIntent.LoadInitialData) },
             modifier = Modifier.padding(padding),
             shimmerContent = { Step3JobDetailsShimmerSkeleton(modifier = Modifier.padding(padding)) },
@@ -179,7 +179,7 @@ internal fun Step3JobDetailsStep(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.Top
                 ) {
                     StyledTextField(
                         leadingIcon = Icons.Default.KeyboardArrowDown,
@@ -189,7 +189,7 @@ internal fun Step3JobDetailsStep(
                         label = stringResource(Res.string.occurrence_field_marital_status),
                         placeholder = stringResource(Res.string.occurrence_select_marital),
                         readOnly = true,
-                        onClick = { showMaritalSheet = true },
+                        onClick = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showMaritalSheet = true))) },
                     )
                     Spacer(modifier = Modifier.width(Spacing.sm))
                     StyledTextField(
@@ -200,13 +200,14 @@ internal fun Step3JobDetailsStep(
                         placeholder = "انتخاب تاریخ",
                         trailingIcon = vectorResource(Res.drawable.ic_tamin_calendar),
                         readOnly = true,
-                        onClick = { showDatePicker = true },
+                        onClick = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showEmploymentDatePicker = true))) },
                     )
                 }
 
                 Spacer(modifier = Modifier.height(Spacing.sm))
 
                 StyledTextField(
+                    singleLine = false,
                     value = step.jobTitle,
                     onValueChange = { onIntent(OccurrenceIntent.UpdateJobDetails(step.copy(jobTitle = it))) },
                     label = stringResource(Res.string.occurrence_field_job_title),
@@ -216,6 +217,7 @@ internal fun Step3JobDetailsStep(
                 Spacer(modifier = Modifier.height(Spacing.sm))
 
                 StyledTextField(
+                    singleLine = false,
                     value = step.workLocation,
                     onValueChange = {
                         onIntent(
@@ -236,16 +238,16 @@ internal fun Step3JobDetailsStep(
         }
     }
 
-    if (showMaritalSheet) {
+    if (uiState.dialogs.showMaritalSheet) {
         OccurrenceSelectionBottomSheet(
             title = stringResource(Res.string.occurrence_sheet_marital_title),
             options = MaritalStatus.entries.map { OccurrenceSheetOption(id = it.code, title = it.displayName) },
             selectedId = step.maritalStatus,
             onSelect = { option ->
                 onIntent(OccurrenceIntent.UpdateJobDetails(step.copy(maritalStatus = option.id)))
-                showMaritalSheet = false
+                onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showMaritalSheet = false)))
             },
-            onDismiss = { showMaritalSheet = false },
+            onDismiss = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showMaritalSheet = false))) },
         )
     }
 }

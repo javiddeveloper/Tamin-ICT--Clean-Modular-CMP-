@@ -1,12 +1,14 @@
 package com.tamin.taminhamrah.feature.taminServices.occurrence.components.steps
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -15,10 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceErrorWrapper
@@ -34,11 +33,11 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.Occurrenc
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceUiState
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePickerBottomSheet
 import com.tamin.taminhamrah.ui.components.TaminJalaliTimePickerBottomSheet
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.util.PersianDateFormatter
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
@@ -67,35 +66,39 @@ internal fun Step5AccidentStep(
     uiState: OccurrenceUiState,
     onIntent: (OccurrenceIntent) -> Unit,
     onBack: () -> Unit,
-    onClose:() -> Unit,
+    onClose: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val taminColors = LocalTaminColors.current
     val step = uiState.accident
-    var showOutcomeSheet by remember { mutableStateOf(false) }
-    var showDatePicker by remember { mutableStateOf(false) }
-    var showTimePicker by remember { mutableStateOf(false) }
 
-    if (showDatePicker) {
+    if (uiState.dialogs.showAccidentDatePicker) {
         TaminJalaliDatePickerBottomSheet(
             title = stringResource(Res.string.occurrence_field_accident_date),
-            onDismiss = { showDatePicker = false },
+            onDismiss = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showAccidentDatePicker = false))) },
             onConfirm = { year, month, day ->
-                val dateStr = "$year/${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')}"
-                onIntent(OccurrenceIntent.UpdateAccident(step.copy(accidentDate = dateStr)))
-                showDatePicker = false
+                onIntent(
+                    OccurrenceIntent.UpdateAccident(
+                        step.copy(
+                            accidentDate = PersianDateFormatter.format(year, month, day),
+                            accidentDateTimestamp = PersianDateFormatter.toEpochMillis(year, month, day),
+                        )
+                    )
+                )
+                onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showAccidentDatePicker = false)))
             },
         )
     }
 
-    if (showTimePicker) {
+    if (uiState.dialogs.showAccidentTimePicker) {
         TaminJalaliTimePickerBottomSheet(
             title = stringResource(Res.string.occurrence_field_accident_time),
-            onDismiss = { showTimePicker = false },
+            onDismiss = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showAccidentTimePicker = false))) },
             onConfirm = { hour, minute ->
-                val timeStr = "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"
+                val timeStr =
+                    "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"
                 onIntent(OccurrenceIntent.UpdateAccident(step.copy(accidentTime = timeStr)))
-                showTimePicker = false
+                onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showAccidentTimePicker = false)))
             },
         )
     }
@@ -155,37 +158,51 @@ internal fun Step5AccidentStep(
                     placeholder = "انتخاب کنید",
                     trailingIcon = vectorResource(Res.drawable.ic_tamin_calendar),
                     readOnly = true,
-                    onClick = { showDatePicker = true },
+                    onClick = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showAccidentDatePicker = true))) },
                 )
 
                 Spacer(modifier = Modifier.height(Spacing.sm))
 
-                StyledTextField(
-                    value = step.accidentTime,
-                    onValueChange = {},
-                    label = stringResource(Res.string.occurrence_field_accident_time),
-                    placeholder = "14:30",
-                    trailingIcon = Icons.Default.AccessTime,
-                    readOnly = true,
-                    onClick = { showTimePicker = true },
-                )
 
-                Spacer(modifier = Modifier.height(Spacing.sm))
-
-                StyledTextField(
-                    value = step.accidentOutcomeTitle,
-                    onValueChange = {},
-                    label = stringResource(Res.string.occurrence_field_accident_outcome),
-                    placeholder = stringResource(Res.string.occurrence_select_outcome_hint),
-                    readOnly = true,
-                    onClick = { showOutcomeSheet = true },
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    StyledTextField(
+                        modifier = Modifier.weight(1f),
+                        value = step.accidentTime,
+                        onValueChange = {},
+                        label = stringResource(Res.string.occurrence_field_accident_time),
+                        placeholder = "14:30",
+                        trailingIcon = Icons.Default.AccessTime,
+                        readOnly = true,
+                        onClick = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showAccidentTimePicker = true))) },
+                    )
+                    Spacer(modifier = Modifier.width(Spacing.sm))
+                    StyledTextField(
+                        modifier = Modifier.weight(1f),
+                        value = step.accidentOutcomeTitle,
+                        onValueChange = {},
+                        label = stringResource(Res.string.occurrence_field_accident_outcome),
+                        placeholder = stringResource(Res.string.occurrence_select_outcome_hint),
+                        readOnly = true,
+                        onClick = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showAccidentOutcomeSheet = true))) },
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(Spacing.sm))
 
                 StyledTextField(
                     value = step.exactLocation,
-                    onValueChange = { onIntent(OccurrenceIntent.UpdateAccident(step.copy(exactLocation = it))) },
+                    onValueChange = {
+                        onIntent(
+                            OccurrenceIntent.UpdateAccident(
+                                step.copy(
+                                    exactLocation = it
+                                )
+                            )
+                        )
+                    },
                     label = stringResource(Res.string.occurrence_field_exact_location),
                     placeholder = "شهر، خیابان، کوچه",
                 )
@@ -195,7 +212,13 @@ internal fun Step5AccidentStep(
                 StyledTextField(
                     value = step.description,
                     onValueChange = {
-                        if (it.length <= 500) onIntent(OccurrenceIntent.UpdateAccident(step.copy(description = it)))
+                        if (it.length <= 500) onIntent(
+                            OccurrenceIntent.UpdateAccident(
+                                step.copy(
+                                    description = it
+                                )
+                            )
+                        )
                     },
                     label = stringResource(Res.string.occurrence_field_description),
                     placeholder = "واقعه را بصورت کامل شرح دهید",
@@ -204,7 +227,10 @@ internal fun Step5AccidentStep(
 
                 if (step.description.isNotEmpty()) {
                     Text(
-                        text = stringResource(Res.string.occurrence_description_counter, step.description.length.toString()),
+                        text = stringResource(
+                            Res.string.occurrence_description_counter,
+                            step.description.length.toString()
+                        ),
                         style = MaterialTheme.typography.bodySmall,
                         color = taminColors.textMuted,
                         modifier = Modifier.padding(top = Spacing.xxs),
@@ -217,16 +243,28 @@ internal fun Step5AccidentStep(
         }
     }
 
-    if (showOutcomeSheet) {
+    if (uiState.dialogs.showAccidentOutcomeSheet) {
         OccurrenceSelectionBottomSheet(
             title = stringResource(Res.string.occurrence_sheet_outcome_title),
-            options = outcomeOptions.map { (id, label) -> OccurrenceSheetOption(id = id, title = label) },
+            options = outcomeOptions.map { (id, label) ->
+                OccurrenceSheetOption(
+                    id = id,
+                    title = label
+                )
+            },
             selectedId = step.accidentOutcomeId,
             onSelect = { option ->
-                onIntent(OccurrenceIntent.UpdateAccident(step.copy(accidentOutcomeId = option.id, accidentOutcomeTitle = option.title)))
-                showOutcomeSheet = false
+                onIntent(
+                    OccurrenceIntent.UpdateAccident(
+                        step.copy(
+                            accidentOutcomeId = option.id,
+                            accidentOutcomeTitle = option.title
+                        )
+                    )
+                )
+                onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showAccidentOutcomeSheet = false)))
             },
-            onDismiss = { showOutcomeSheet = false },
+            onDismiss = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showAccidentOutcomeSheet = false))) },
         )
     }
 }

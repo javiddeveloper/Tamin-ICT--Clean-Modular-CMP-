@@ -27,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,6 +61,7 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.model.WorkshopItem
 import com.tamin.taminhamrah.model.occurrence.OccurrenceUploadedDocDN
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.LiquidWaveProgressBar
 import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminDivider
@@ -117,13 +119,32 @@ internal fun Step6DocumentSubmitStep(
     val scope = rememberCoroutineScope()
     val step = uiState.documentSubmit
     val cameraPermission = rememberCameraPermission()
-    var pendingDocType by remember { mutableStateOf<OccurrenceDocTypePR?>(null) }
-    var showDocTypeSheet by remember { mutableStateOf(false) }
-    var showSourceSheet by remember { mutableStateOf(false) }
+
+    var waveAnimationComplete by remember { mutableStateOf(!step.isUploadingDoc) }
+    var pendingUploadTypeName by remember { mutableStateOf("") }
+    var pendingUploadFileName by remember { mutableStateOf("") }
+    var uploadedCountBeforeCurrent by remember { mutableStateOf(step.uploadedDocuments.size) }
+    LaunchedEffect(step.isUploadingDoc) {
+        if (step.isUploadingDoc) {
+            waveAnimationComplete = false
+            pendingUploadTypeName = step.uploadingTypeName
+            pendingUploadFileName = step.uploadingFileName
+            uploadedCountBeforeCurrent = step.uploadedDocuments.size
+        }
+    }
+    val showUploadWave = step.isUploadingDoc || !waveAnimationComplete
+    val newlyUploadedDoc = if (showUploadWave && step.uploadedDocuments.size > uploadedCountBeforeCurrent) {
+        step.uploadedDocuments.last()
+    } else {
+        null
+    }
 
     fun handlePicked(file: PlatformFile?) {
-        val docType = pendingDocType ?: return
-        if (file == null) { pendingDocType = null; return }
+        val docType = uiState.dialogs.pendingDocType ?: return
+        if (file == null) {
+            onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(pendingDocType = null)))
+            return
+        }
         scope.launch {
             try {
                 val bytes = file.readBytes()
@@ -132,7 +153,7 @@ internal fun Step6DocumentSubmitStep(
                 val msg = try { getString(Res.string.error_file_read_fallback) } catch (_: Exception) { e.message.orEmpty() }
                 toaster.error(msg)
             } finally {
-                pendingDocType = null
+                onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(pendingDocType = null)))
             }
         }
     }
@@ -198,11 +219,23 @@ internal fun Step6DocumentSubmitStep(
                         )
                     }
 
-                    if (step.uploadedDocuments.isNotEmpty()) {
+                    val docsToShowNormally = if (newlyUploadedDoc != null) {
+                        step.uploadedDocuments.dropLast(1)
+                    } else {
+                        step.uploadedDocuments
+                    }
+                    if (docsToShowNormally.isNotEmpty() || showUploadWave) {
                         Spacer(modifier = Modifier.height(Spacing.md))
                         Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                            step.uploadedDocuments.forEach { doc ->
+                            docsToShowNormally.forEach { doc ->
                                 UploadedDocRow(doc = doc, onDelete = { onIntent(OccurrenceIntent.RemoveDocument(doc.guid)) })
+                            }
+                            if (showUploadWave) {
+                                UploadingDocRow(
+                                    typeName = newlyUploadedDoc?.typeName ?: pendingUploadTypeName,
+                                    fileName = newlyUploadedDoc?.fileName ?: pendingUploadFileName,
+                                    onFillComplete = { waveAnimationComplete = true },
+                                )
                             }
                         }
                     }
@@ -212,11 +245,14 @@ internal fun Step6DocumentSubmitStep(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .alpha(if (step.isUploadingDoc) 0.5f else 1f)
+                            .alpha(if (showUploadWave) 0.5f else 1f)
                             .clip(RoundedCornerShape(CornerRadius.lg))
                             .background(taminColors.blueBg)
                             .dashedOutline(taminColors.blueText, CornerRadius.lg, Thickness.border)
-                            .clickable(enabled = !step.isUploadingDoc, onClick = { showDocTypeSheet = true })
+                            .clickable(
+                                enabled = !showUploadWave,
+                                onClick = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showDocTypeSheet = true))) }
+                            )
                             .padding(vertical = Spacing.md),
                         horizontalArrangement = Arrangement.Center,
                     ) {
@@ -317,27 +353,33 @@ internal fun Step6DocumentSubmitStep(
         }
     }
 
-    if (showDocTypeSheet) {
+    if (uiState.dialogs.showDocTypeSheet) {
         OccurrenceSelectionBottomSheet(
             title = stringResource(Res.string.occurrence_sheet_doc_type_title),
             options = step.docTypes.map { OccurrenceSheetOption(id = it.id.toString(), title = it.title) },
             selectedId = null,
             onSelect = { option ->
                 val docType = step.docTypes.first { it.id.toString() == option.id }
-                pendingDocType = docType
-                showDocTypeSheet = false
-                showSourceSheet = true
+                onIntent(
+                    OccurrenceIntent.UpdateDialogs(
+                        uiState.dialogs.copy(
+                            pendingDocType = docType,
+                            showDocTypeSheet = false,
+                            showDocumentSourceSheet = true,
+                        )
+                    )
+                )
             },
-            onDismiss = { showDocTypeSheet = false },
+            onDismiss = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showDocTypeSheet = false))) },
         )
     }
 
-    val currentPendingDocType = pendingDocType
-    if (showSourceSheet && currentPendingDocType != null) {
+    val currentPendingDocType = uiState.dialogs.pendingDocType
+    if (uiState.dialogs.showDocumentSourceSheet && currentPendingDocType != null) {
         OccurrenceDocumentSourceSheet(
             title = currentPendingDocType.title,
             onSelectCamera = {
-                showSourceSheet = false
+                onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showDocumentSourceSheet = false)))
                 if (cameraPermission.granted) {
                     cameraLauncher.launch()
                 } else {
@@ -345,7 +387,7 @@ internal fun Step6DocumentSubmitStep(
                         if (granted) {
                             cameraLauncher.launch()
                         } else {
-                            pendingDocType = null
+                            onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(pendingDocType = null)))
                             scope.launch {
                                 val msg = try {
                                     getString(Res.string.occurrence_camera_permission_denied)
@@ -359,12 +401,15 @@ internal fun Step6DocumentSubmitStep(
                 }
             },
             onSelectGallery = {
-                showSourceSheet = false
+                onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showDocumentSourceSheet = false)))
                 galleryLauncher.launch()
             },
             onDismiss = {
-                showSourceSheet = false
-                pendingDocType = null
+                onIntent(
+                    OccurrenceIntent.UpdateDialogs(
+                        uiState.dialogs.copy(showDocumentSourceSheet = false, pendingDocType = null)
+                    )
+                )
             },
         )
     }
@@ -417,6 +462,56 @@ private fun UploadedDocRow(
                 modifier = Modifier.size(IconSize.small),
             )
         }
+    }
+}
+
+@Composable
+private fun UploadingDocRow(
+    typeName: String,
+    fileName: String,
+    onFillComplete: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val taminColors = LocalTaminColors.current
+    val shape = RoundedCornerShape(CornerRadius.lg)
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .taminSurface(CornerRadius.lg)
+                .padding(Spacing.md),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(IconSize.large)
+                    .background(taminColors.blueBg, RoundedCornerShape(CornerRadius.md)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Image,
+                    contentDescription = null,
+                    tint = taminColors.blueText,
+                    modifier = Modifier.size(IconSize.medium),
+                )
+            }
+            Spacer(modifier = Modifier.width(Spacing.md))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(text = typeName, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = taminColors.textPrimary)
+                Spacer(modifier = Modifier.height(Spacing.xxs))
+                Text(text = fileName, style = MaterialTheme.typography.bodySmall, color = taminColors.textMuted)
+            }
+        }
+        LiquidWaveProgressBar(
+            modifier = Modifier
+                .matchParentSize()
+                .clip(shape),
+            onFillComplete = onFillComplete,
+        )
     }
 }
 
