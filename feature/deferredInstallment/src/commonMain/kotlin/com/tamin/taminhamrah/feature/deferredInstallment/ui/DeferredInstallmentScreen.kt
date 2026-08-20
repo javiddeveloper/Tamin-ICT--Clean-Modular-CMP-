@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -59,6 +58,8 @@ import com.tamin.taminhamrah.feature.deferredInstallment.ui.contract.GUARANTEE_F
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.layout.taminFormImeHost
+import com.tamin.taminhamrah.ui.layout.taminStickyBottomBarInsets
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.BannerCard
@@ -82,6 +83,7 @@ import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
+import com.tamin.taminhamrah.util.PersianDateFormatter
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
@@ -342,6 +344,7 @@ private fun DeferredInstallmentContent(
 
         DeferredInstallmentPicker.BIRTH_DATE -> TaminJalaliDatePickerBottomSheet(
             title = stringResource(Res.string.deferred_installment_birth_date),
+            initial = PersianDateFormatter.today(),
             onDismiss = { onIntent(DeferredInstallmentIntent.OnPickerDismissed) },
             onConfirm = { year, month, day ->
                 onIntent(DeferredInstallmentIntent.OnBirthDatePicked(year, month, day))
@@ -677,12 +680,13 @@ private fun DeferredInstallmentBottomBar(
     state: DeferredInstallmentUiState,
     onIntent: (DeferredInstallmentIntent) -> Unit,
     onBackClicked: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = Spacing.page, vertical = Spacing.md)
-            .navigationBarsPadding(),
+            .padding(horizontal = Spacing.page, vertical = Spacing.md).taminFormImeHost()
+            .taminStickyBottomBarInsets(),
     ) {
         when (state.currentStep) {
             DeferredInstallmentStep.CertificateRequest -> LoadingButton(

@@ -64,7 +64,11 @@ class DeferredInstallmentViewModel(
             emit(PartialState.NationalIdChanged(intent.value.digitsOnly().take(10)))
         }
         is DeferredInstallmentIntent.OnBirthDatePicked -> flow {
-            val millis = PersianDateFormatter.toEpochMillis(intent.year, intent.month, intent.day)
+            // Legacy deferred installment: Date(timestamp + 70200000) then
+            // HelperDate.convertServerDateFormatToMobileDateFormat → ISO string for birthDate.
+            // API expects that string, not a raw epoch millis.
+            val millis = PersianDateFormatter.toEpochMillis(intent.year, intent.month, intent.day) +
+                BIRTH_DATE_TZ_SAFETY_OFFSET_MS
             emit(
                 PartialState.BirthDateSelected(
                     label = PersianDateFormatter.format(intent.year, intent.month, intent.day),
@@ -306,6 +310,10 @@ private fun DeferredInstallmentUiState.toRequest(): DeferredInstallmentRequestDN
     )
 }
 
+/**
+ * Matches legacy `HelperDate.convertServerDateFormatToMobileDateFormat`:
+ * `yyyy-MM-dd'T'HH:mm:ss.SSS` (sent as [DeferredInstallmentRequestDN.birthDate]).
+ */
 private fun Long.toIsoDateTime(): String {
     val dateTime = Instant.fromEpochMilliseconds(this)
         .toLocalDateTime(TimeZone.currentSystemDefault())
@@ -313,3 +321,6 @@ private fun Long.toIsoDateTime(): String {
     return "${dateTime.year}-${dateTime.monthNumber.pad()}-${dateTime.dayOfMonth.pad()}" +
         "T${dateTime.hour.pad()}:${dateTime.minute.pad()}:${dateTime.second.pad()}.000"
 }
+
+/** Same +19.5h buffer the old app applied so the calendar day survives TZ parsing. */
+private const val BIRTH_DATE_TZ_SAFETY_OFFSET_MS = 70_200_000L

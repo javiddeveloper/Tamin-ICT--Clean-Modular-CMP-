@@ -160,32 +160,42 @@ internal fun DeferredInstallmentTextField(
                         )
                         Spacer(Modifier.width(Spacing.sm))
                     }
-                    BasicTextField(
-                        value = displayed,
-                        onValueChange = { incoming ->
-                            if (formatAsAmount || keyboardType == KeyboardType.Number) {
-                                onValueChange(incoming.filter { it.isDigit() || it in '۰'..'۹' })
-                            } else {
-                                onValueChange(incoming)
-                            }
-                        },
-                        readOnly = readOnly || onClick != null,
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-                        textStyle = MaterialTheme.typography.bodyMedium.copy(color = colors.textPrimary),
-                        cursorBrush = SolidColor(colors.blueText),
-                        modifier = Modifier.weight(1f),
-                        decorationBox = { inner ->
-                            if (displayed.isEmpty()) {
-                                Text(
-                                    text = placeholder,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = colors.textMuted,
-                                )
-                            }
-                            inner()
-                        },
-                    )
+                    // Pickers must not host a TextField — it consumes the click on Android/CMP.
+                    if (onClick != null) {
+                        Text(
+                            text = displayed.ifEmpty { placeholder },
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (displayed.isEmpty()) colors.textMuted else colors.textPrimary,
+                            modifier = Modifier.weight(1f),
+                        )
+                    } else {
+                        BasicTextField(
+                            value = displayed,
+                            onValueChange = { incoming ->
+                                if (formatAsAmount || keyboardType == KeyboardType.Number) {
+                                    onValueChange(incoming.filter { it.isDigit() || it in '۰'..'۹' })
+                                } else {
+                                    onValueChange(incoming)
+                                }
+                            },
+                            readOnly = readOnly,
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+                            textStyle = MaterialTheme.typography.bodyMedium.copy(color = colors.textPrimary),
+                            cursorBrush = SolidColor(colors.blueText),
+                            modifier = Modifier.weight(1f),
+                            decorationBox = { inner ->
+                                if (displayed.isEmpty()) {
+                                    Text(
+                                        text = placeholder,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = colors.textMuted,
+                                    )
+                                }
+                                inner()
+                            },
+                        )
+                    }
                     if (trailingIcon != null) {
                         Icon(
                             imageVector = trailingIcon,
