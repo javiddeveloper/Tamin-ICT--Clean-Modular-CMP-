@@ -186,7 +186,7 @@ internal fun Step4WorkHoursStep(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                    verticalAlignment = androidx.compose.ui.Alignment.Top
                 ) {
                     StyledTextField(
                         modifier = Modifier.weight(1f),
