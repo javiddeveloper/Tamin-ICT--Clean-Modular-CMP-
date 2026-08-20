@@ -35,10 +35,12 @@ import com.tamin.taminhamrah.model.pension.PaymentTypeDN
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
+import com.tamin.taminhamrah.ui.components.TaminJalaliMonthYearPickerBottomSheet
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.util.PersianDateFormatter
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
@@ -51,8 +53,9 @@ import taminx.core.core_ui.payroll_search_submit
 import taminx.core.core_ui.payroll_search_title
 
 /**
- * "جست‌وجوی فیش" — a date row (opens [PayRollDatePickerSheet]) + a payment-type single-select
- * list + submit. Single-step, unlike Edict's two-step year→month flow, matching the mockup.
+ * "جست‌وجوی فیش" — a date row (opens [TaminJalaliMonthYearPickerBottomSheet]) + a payment-type
+ * single-select list + submit. Single-step, unlike Edict's two-step year→month flow, matching the
+ * mockup.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -175,12 +178,16 @@ fun PayRollSearchSheet(
     }
 
     if (showDatePicker) {
-        PayRollDatePickerSheet(
-            searchYear = searchYear,
-            searchMonth = searchMonth,
-            onYearChanged = onYearChanged,
-            onMonthChanged = onMonthChanged,
-            onConfirm = { showDatePicker = false },
+        val initialYear = searchYear.toIntOrNull() ?: PersianDateFormatter.currentJalaliYear()
+        val initialMonth = searchMonth.toIntOrNull() ?: 1
+        TaminJalaliMonthYearPickerBottomSheet(
+            title = stringResource(Res.string.payroll_date_picker_title),
+            initial = initialYear to initialMonth,
+            onConfirm = { year, month ->
+                onYearChanged(year.toString())
+                onMonthChanged(month.toString().padStart(2, '0'))
+                showDatePicker = false
+            },
             onDismiss = { showDatePicker = false },
         )
     }

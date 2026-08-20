@@ -16,8 +16,6 @@
     <string name="payroll_search_submit">جست‌وجوی فیش حقوقی</string>
     <string name="payroll_search_clear">حذف فیلترها</string>
     <string name="payroll_date_picker_title">انتخاب ماه و سال</string>
-    <string name="payroll_date_picker_confirm">تأیید تاریخ</string>
-    <string name="payroll_date_picker_note">فیش حقوقی ماهانه صادر می‌شود؛ انتخاب روز لازم نیست.</string>
     <string name="payroll_payment_type_monthly">پرداخت ماهانه</string>
     <string name="payroll_payment_type_bonus">عیدی</string>
     <string name="payroll_payment_type_arrears">تفاوت افزایش معوقه</string>

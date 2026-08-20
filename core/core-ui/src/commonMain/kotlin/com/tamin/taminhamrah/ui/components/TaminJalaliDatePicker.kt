@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -186,18 +187,13 @@ private fun JalaliDatePickerContent(
             },
         )
 
-        DateWheels(
-            days = days,
-            months = months,
-            years = years,
-            dayIndex = clampedDay - 1,
-            monthIndex = month - 1,
-            yearIndex = year - FIRST_YEAR,
-            onDayIndex = { day = it + 1 },
-            onMonthIndex = { month = it + 1 },
-            onYearIndex = { year = FIRST_YEAR + it },
-            background = wheelsBackground,
-        )
+        WheelPanel(background = wheelsBackground) {
+            // Day sits first so that in the app's right-to-left layout it lands on the right, and
+            // the columns read «۱۱ مرداد ۱۴۰۵» across — the same order the date is written.
+            WheelColumn(items = days, selectedIndex = clampedDay - 1, onSelected = { day = it + 1 }, modifier = Modifier.weight(1f))
+            WheelColumn(items = months, selectedIndex = month - 1, onSelected = { month = it + 1 }, modifier = Modifier.weight(1f))
+            WheelColumn(items = years, selectedIndex = year - FIRST_YEAR, onSelected = { year = FIRST_YEAR + it }, modifier = Modifier.weight(1f))
+        }
 
         // انصراف first so that right-to-left puts it on the right and the wide blue
         // تأیید تاریخ on the left, as the design has them.
@@ -219,13 +215,104 @@ private fun JalaliDatePickerContent(
     }
 }
 
-/** The caller's wording on one side, the date the wheels currently spell out, and a way back to today. */
+/**
+ * Same wheels as [TaminJalaliDatePickerBottomSheet] but without the day wheel, for callers that
+ * only need a month/year period — a payroll or edict filter, say — where a day figure would be
+ * dead weight nobody can act on.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TaminJalaliMonthYearPickerBottomSheet(
+    title: String,
+    onDismiss: () -> Unit,
+    onConfirm: (year: Int, month: Int) -> Unit,
+    initial: Pair<Int, Int> = PersianDateFormatter.today().let { it.first to it.second },
+) {
+    val colors = LocalTaminColors.current
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = colors.bgPage,
+        shape = RoundedCornerShape(topStart = CornerRadius.sheet, topEnd = CornerRadius.sheet),
+    ) {
+        JalaliMonthYearPickerContent(
+            title = title,
+            onDismiss = onDismiss,
+            onConfirm = onConfirm,
+            initial = initial,
+            wheelsBackground = colors.bgSurface,
+            modifier = Modifier.navigationBarsPadding(),
+        )
+    }
+}
+
+/** The header, wheels and action row for the month/year-only bottom sheet. */
+@Composable
+private fun JalaliMonthYearPickerContent(
+    title: String,
+    onDismiss: () -> Unit,
+    onConfirm: (year: Int, month: Int) -> Unit,
+    initial: Pair<Int, Int>,
+    wheelsBackground: Color,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+    var year by remember { mutableIntStateOf(initial.first) }
+    var month by remember { mutableIntStateOf(initial.second) }
+
+    val lastYear = remember { PersianDateFormatter.currentJalaliYear() + YEARS_AHEAD }
+    val years = remember(lastYear) {
+        (FIRST_YEAR..lastYear).map { it.toString().toPersianDigits() }.toImmutableList()
+    }
+    val months = remember { PersianDateFormatter.monthNames.toImmutableList() }
+
+    Column(
+        modifier = modifier.padding(Spacing.lg),
+        verticalArrangement = Arrangement.spacedBy(Spacing.lg),
+    ) {
+        PickerHeader(
+            title = title,
+            year = year,
+            month = month,
+            day = null,
+            onToday = {
+                val today = PersianDateFormatter.today()
+                year = today.first
+                month = today.second
+            },
+        )
+
+        WheelPanel(background = wheelsBackground) {
+            WheelColumn(items = months, selectedIndex = month - 1, onSelected = { month = it + 1 }, modifier = Modifier.weight(1f))
+            WheelColumn(items = years, selectedIndex = year - FIRST_YEAR, onSelected = { year = FIRST_YEAR + it }, modifier = Modifier.weight(1f))
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
+            TaminPrimaryButton(
+                text = stringResource(Res.string.date_picker_confirm),
+                onClick = { onConfirm(year, month) },
+                background = SolidColor(colors.blueText),
+                modifier = Modifier.weight(2f),
+            )
+            CancelButton(
+                text = stringResource(Res.string.action_cancel),
+                onClick = onDismiss,
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+/**
+ * The caller's wording on one side, the date the wheels currently spell out, and a way back to
+ * today. [day] is omitted from the spelled-out date when null, for the month/year-only picker.
+ */
 @Composable
 private fun PickerHeader(
     title: String,
     year: Int,
     month: Int,
-    day: Int,
+    day: Int?,
     onToday: () -> Unit,
 ) {
     val colors = LocalTaminColors.current
@@ -242,8 +329,10 @@ private fun PickerHeader(
             )
             val headerDateText = remember(day, month, year) {
                 buildString {
-                    append(day.toString().toPersianDigits())
-                    append(' ')
+                    if (day != null) {
+                        append(day.toString().toPersianDigits())
+                        append(' ')
+                    }
                     append(PersianDateFormatter.monthNames.getOrElse(month - 1) { "" })
                     append(' ')
                     append(year.toString().toPersianDigits())
@@ -270,27 +359,19 @@ private fun PickerHeader(
 }
 
 /**
- * The three wheels on their shared panel.
- *
- * Day sits first so that in the app's right-to-left layout it lands on the right, and the columns
- * read «۱۱ مرداد ۱۴۰۵» across — the same order the date is written.
+ * The bordered panel shared by every wheel picker in this file: the fixed selection band, the
+ * wheel columns [content] provides, and the top/bottom fade — so a two-wheel and a three-wheel
+ * picker share the exact same chrome instead of two copies of it.
  */
 @Composable
-private fun DateWheels(
-    days: ImmutableList<String>,
-    months: ImmutableList<String>,
-    years: ImmutableList<String>,
-    dayIndex: Int,
-    monthIndex: Int,
-    yearIndex: Int,
-    onDayIndex: (Int) -> Unit,
-    onMonthIndex: (Int) -> Unit,
-    onYearIndex: (Int) -> Unit,
+private fun WheelPanel(
     background: Color,
+    modifier: Modifier = Modifier,
+    content: @Composable RowScope.() -> Unit,
 ) {
     val colors = LocalTaminColors.current
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(WHEEL_HEIGHT)
             .clip(RoundedCornerShape(CornerRadius.cardCompact))
@@ -311,11 +392,7 @@ private fun DateWheels(
                 .border(1.dp, colors.blueText.copy(alpha = SELECTION_BORDER_ALPHA), RoundedCornerShape(CornerRadius.chip)),
         )
 
-        Row(modifier = Modifier.fillMaxSize()) {
-            WheelColumn(items = days, selectedIndex = dayIndex, onSelected = onDayIndex, modifier = Modifier.weight(1f))
-            WheelColumn(items = months, selectedIndex = monthIndex, onSelected = onMonthIndex, modifier = Modifier.weight(1f))
-            WheelColumn(items = years, selectedIndex = yearIndex, onSelected = onYearIndex, modifier = Modifier.weight(1f))
-        }
+        Row(modifier = Modifier.fillMaxSize(), content = content)
 
         // Fades the rows away from the middle instead of tinting each one: a static overlay costs
         // one draw, where per-row alpha would have to read the scroll offset on every frame.
