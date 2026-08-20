@@ -32,10 +32,12 @@ sealed interface HistoryObjectionIntent {
     data class OnEditNotExistRequestClicked(val requestNumber: String) : HistoryObjectionIntent
     data class OnDeleteNotExistRequestClicked(val requestNumber: String) : HistoryObjectionIntent
     data class OnDescriptionChanged(val description: String) : HistoryObjectionIntent
+    data object OnSubmitClicked : HistoryObjectionIntent
 }
 
 sealed interface HistoryObjectionEvent {
     data object NavigateToAddNewObjection : HistoryObjectionEvent
     data class NavigateToEditNotExistRequest(val requestNumber: String) : HistoryObjectionEvent
     data class ConfirmDeleteNotExistRequest(val requestNumber: String) : HistoryObjectionEvent
+    data object SubmitRequested : HistoryObjectionEvent
 }

@@ -55,6 +55,11 @@ class HistoryObjectionViewModel(
         is HistoryObjectionIntent.OnDescriptionChanged -> flow {
             emit(PartialState.DescriptionChanged(intent.description))
         }
+
+        HistoryObjectionIntent.OnSubmitClicked -> {
+            sendEvent(HistoryObjectionEvent.SubmitRequested)
+            emptyFlow()
+        }
     }
 
     private fun loadHistoryObjectionData(): Flow<PartialState> = flow {

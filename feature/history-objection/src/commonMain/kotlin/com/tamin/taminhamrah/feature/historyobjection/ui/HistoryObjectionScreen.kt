@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -97,6 +99,7 @@ import taminx.core.core_ui.history_objection_insurance_number
 import taminx.core.core_ui.history_objection_list_title
 import taminx.core.core_ui.history_objection_start_date
 import taminx.core.core_ui.history_objection_status_not_sent
+import taminx.core.core_ui.history_objection_submit
 import taminx.core.core_ui.history_objection_title
 import taminx.core.core_ui.history_objection_workshop_code
 import taminx.core.core_ui.history_objection_workshop_name
@@ -174,9 +177,10 @@ private fun HandleHistoryObjectionEvents(
     events.collectWithLifecycleAware { event ->
         when (event) {
             HistoryObjectionEvent.NavigateToAddNewObjection -> {}
-            // Skeleton only — no edit/delete endpoint exists yet (docs/vault/History-Objection.md).
+            // Skeleton only — no edit/delete/submit endpoint exists yet (docs/vault/History-Objection.md).
             is HistoryObjectionEvent.NavigateToEditNotExistRequest -> {}
             is HistoryObjectionEvent.ConfirmDeleteNotExistRequest -> {}
+            HistoryObjectionEvent.SubmitRequested -> {}
         }
     }
 }
@@ -222,6 +226,11 @@ private fun HistoryObjectionContent(
                             .padding(top = Spacing.lg),
                     )
                 }
+            }
+        },
+        bottomBar = {
+            if (state.notExistRequests.isNotEmpty()) {
+                SubmitButton(onClick = { onIntent(HistoryObjectionIntent.OnSubmitClicked) })
             }
         },
     ) { innerPadding ->
@@ -531,6 +540,29 @@ private fun AdditionalDescriptionField(
                 },
             )
         }
+    }
+}
+
+/** The confirm CTA — fixed outside the scrolling content so it stays visible at the bottom. */
+@Composable
+private fun SubmitButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(colors.bgPage)
+            .padding(Spacing.page)
+            .navigationBarsPadding()
+            .imePadding(),
+    ) {
+        TaminFilledButton(
+            text = stringResource(Res.string.history_objection_submit),
+            onClick = onClick,
+        )
     }
 }
 

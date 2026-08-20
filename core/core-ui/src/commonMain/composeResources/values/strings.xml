@@ -779,5 +779,6 @@
     <string name="history_objection_edit">ویرایش</string>
     <string name="history_objection_description_label">توضیحات تکمیلی (اختیاری)</string>
     <string name="history_objection_description_placeholder">توضیح دربارهٔ سوابق اعلام‌شده...</string>
+    <string name="history_objection_submit">تأیید و ارسال به تأمین اجتماعی</string>
 
 </resources>
