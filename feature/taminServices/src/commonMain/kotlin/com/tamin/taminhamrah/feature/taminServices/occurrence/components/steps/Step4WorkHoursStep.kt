@@ -23,6 +23,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.InputRestriction
@@ -38,6 +39,7 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.WorkHours
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.TaminJalaliTimePickerBottomSheet
+import com.tamin.taminhamrah.ui.components.TaminTextArea
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.ValidationUtils
 import org.jetbrains.compose.resources.stringResource
@@ -230,8 +232,7 @@ internal fun Step4WorkHoursStep(
                 Spacer(modifier = Modifier.height(Spacing.sm))
 
                 val showHomeAddressError = homeAddressTouched && !isHomeAddressValid
-                StyledTextField(
-                    singleLine = false,
+                TaminTextArea(
                     value = step.homeAddress,
                     onValueChange = {
                         onIntent(
@@ -244,11 +245,11 @@ internal fun Step4WorkHoursStep(
                     },
                     label = stringResource(Res.string.occurrence_field_home_address),
                     placeholder = "استان، شهر، خیابان، پلاک",
-                    isValid = if (showHomeAddressError) false else null,
-                    errorText = if (showHomeAddressError) stringResource(Res.string.occurrence_field_home_address_error) else null,
+                    error = showHomeAddressError,
+                    errorMessage = if (showHomeAddressError) stringResource(Res.string.occurrence_field_home_address_error) else null,
                     isRequired = true,
-                    onFocusChanged = { isFocused ->
-                        if (isFocused) {
+                    modifier = Modifier.onFocusChanged { focusState ->
+                        if (focusState.isFocused) {
                             homeAddressHasFocused = true
                         } else if (homeAddressHasFocused) {
                             homeAddressTouched = true

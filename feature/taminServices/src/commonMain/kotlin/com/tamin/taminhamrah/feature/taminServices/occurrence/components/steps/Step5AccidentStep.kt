@@ -35,6 +35,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePickerBottomSheet
 import com.tamin.taminhamrah.ui.components.TaminJalaliTimePickerBottomSheet
+import com.tamin.taminhamrah.ui.components.TaminTextArea
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.PersianDateFormatter
@@ -192,7 +193,7 @@ internal fun Step5AccidentStep(
 
                 Spacer(modifier = Modifier.height(Spacing.sm))
 
-                StyledTextField(
+                TaminTextArea(
                     value = step.exactLocation,
                     onValueChange = {
                         onIntent(
@@ -205,14 +206,17 @@ internal fun Step5AccidentStep(
                     },
                     label = stringResource(Res.string.occurrence_field_exact_location),
                     placeholder = "شهر، خیابان، کوچه",
+                    maxLength = 500,
+                    minLines = 5,
+                    maxLines = 8,
                 )
 
                 Spacer(modifier = Modifier.height(Spacing.sm))
 
-                StyledTextField(
+                TaminTextArea(
                     value = step.description,
                     onValueChange = {
-                        if (it.length <= 500) onIntent(
+                        onIntent(
                             OccurrenceIntent.UpdateAccident(
                                 step.copy(
                                     description = it
@@ -222,7 +226,9 @@ internal fun Step5AccidentStep(
                     },
                     label = stringResource(Res.string.occurrence_field_description),
                     placeholder = "واقعه را بصورت کامل شرح دهید",
-                    singleLine = false,
+                    maxLength = 500,
+                    minLines = 5,
+                    maxLines = 8,
                 )
 
                 if (step.description.isNotEmpty()) {

@@ -39,6 +39,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePickerBottomSheet
+import com.tamin.taminhamrah.ui.components.TaminTextArea
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toGenderLabel
@@ -207,8 +208,7 @@ internal fun Step3JobDetailsStep(
 
                 Spacer(modifier = Modifier.height(Spacing.sm))
 
-                StyledTextField(
-                    singleLine = false,
+                TaminTextArea(
                     value = step.jobTitle,
                     onValueChange = { onIntent(OccurrenceIntent.UpdateJobDetails(step.copy(jobTitle = it))) },
                     label = stringResource(Res.string.occurrence_field_job_title),
@@ -217,8 +217,7 @@ internal fun Step3JobDetailsStep(
 
                 Spacer(modifier = Modifier.height(Spacing.sm))
 
-                StyledTextField(
-                    singleLine = false,
+                TaminTextArea(
                     value = step.workLocation,
                     onValueChange = {
                         onIntent(

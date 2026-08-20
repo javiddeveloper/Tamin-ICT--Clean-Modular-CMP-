@@ -28,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -50,6 +51,7 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.model.WorkshopItem
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.TaminText
+import com.tamin.taminhamrah.ui.components.TaminTextArea
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -262,8 +264,7 @@ internal fun Step2WorkshopStep(
                 Spacer(modifier = Modifier.height(Spacing.sm))
 
                 val showWorkshopAddressError = workshopAddressTouched && !isWorkshopAddressValid
-                StyledTextField(
-                    singleLine = false,
+                TaminTextArea(
                     value = step.workshopAddress,
                     onValueChange = {
                         onIntent(
@@ -276,11 +277,11 @@ internal fun Step2WorkshopStep(
                     },
                     label = stringResource(Res.string.occurrence_field_workshop_address),
                     placeholder = "استان، شهر، خیابان، پلاک",
-                    isValid = if (showWorkshopAddressError) false else null,
-                    errorText = if (showWorkshopAddressError) stringResource(Res.string.occurrence_field_workshop_address_error) else null,
+                    error = showWorkshopAddressError,
+                    errorMessage = if (showWorkshopAddressError) stringResource(Res.string.occurrence_field_workshop_address_error) else null,
                     isRequired = true,
-                    onFocusChanged = { isFocused ->
-                        if (isFocused) {
+                    modifier = Modifier.onFocusChanged { focusState ->
+                        if (focusState.isFocused) {
                             workshopAddressHasFocused = true
                         } else if (workshopAddressHasFocused) {
                             workshopAddressTouched = true
