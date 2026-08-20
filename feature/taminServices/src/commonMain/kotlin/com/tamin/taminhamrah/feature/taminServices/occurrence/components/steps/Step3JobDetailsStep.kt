@@ -29,6 +29,7 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.components.PersonI
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.PersonInfoGridItem
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.Step3JobDetailsShimmerSkeleton
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.StyledTextField
+import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.ErrorSource
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.JobDetailsStepState
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceIntent
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceStep
@@ -116,7 +117,7 @@ internal fun Step3JobDetailsStep(
         OccurrenceErrorWrapper(
             isLoading = uiState.isLoading,
             error = error,
-            onRetry = { onIntent(OccurrenceIntent.LoadInitialData) },
+            onRetry = { onIntent(OccurrenceIntent.RetrySource(ErrorSource.INSURED_RELATION)) },
             modifier = Modifier.padding(padding),
             shimmerContent = { Step3JobDetailsShimmerSkeleton(modifier = Modifier.padding(padding)) },
         ) {

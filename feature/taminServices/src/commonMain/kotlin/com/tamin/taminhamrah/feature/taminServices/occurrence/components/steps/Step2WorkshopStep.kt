@@ -40,6 +40,7 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.components.Occurre
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceTopAppBar
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.Step2WorkshopShimmerSkeleton
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.StyledTextField
+import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.ErrorSource
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceIntent
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceStep
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceUiState
@@ -131,7 +132,7 @@ internal fun Step2WorkshopStep(
         OccurrenceErrorWrapper(
             isLoading = uiState.isLoading,
             error = error,
-            onRetry = { onIntent(OccurrenceIntent.LoadInitialData) },
+            onRetry = { onIntent(OccurrenceIntent.RetrySource(ErrorSource.WORKSHOPS)) },
             modifier = Modifier.padding(padding),
             shimmerContent = { Step2WorkshopShimmerSkeleton(modifier = Modifier.padding(padding)) },
         ) {

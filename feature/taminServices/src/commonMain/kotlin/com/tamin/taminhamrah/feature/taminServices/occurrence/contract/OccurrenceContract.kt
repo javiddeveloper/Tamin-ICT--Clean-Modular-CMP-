@@ -162,6 +162,7 @@ data class OccurrenceUiState(
     sealed interface PartialState {
         data class Loading(val isLoading: Boolean) : PartialState
         data class Submitting(val isSubmitting: Boolean) : PartialState
+        data object ClearAllErrors : PartialState
         data class Error(val message: String, val source: ErrorSource = ErrorSource.GENERAL) : PartialState
         data object GoToNextStep : PartialState
         data object GoToPreviousStep : PartialState
@@ -182,6 +183,9 @@ data class OccurrenceUiState(
 
 sealed interface OccurrenceIntent {
     data object LoadInitialData : OccurrenceIntent
+
+    /** Retries only the single API call behind [source]'s error instead of reloading the whole flow. */
+    data class RetrySource(val source: ErrorSource) : OccurrenceIntent
     data object GoToNextStep : OccurrenceIntent
     data object GoToPreviousStep : OccurrenceIntent
     data class UpdatePersonInfo(val personInfo: PersonInfoStepState) : OccurrenceIntent

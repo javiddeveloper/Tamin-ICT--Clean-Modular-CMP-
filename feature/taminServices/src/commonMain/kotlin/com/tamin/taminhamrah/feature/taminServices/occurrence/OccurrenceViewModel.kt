@@ -23,6 +23,7 @@ import com.tamin.taminhamrah.useCases.occurrence.UploadOccurrenceImageUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onCompletion
@@ -50,6 +51,7 @@ class OccurrenceViewModel(
 
     override fun handleIntent(intent: OccurrenceIntent): Flow<PartialState> = when (intent) {
         is OccurrenceIntent.LoadInitialData -> loadInitialData()
+        is OccurrenceIntent.RetrySource -> retrySource(intent.source)
         is OccurrenceIntent.GoToNextStep -> flow { emit(PartialState.GoToNextStep) }
         is OccurrenceIntent.GoToPreviousStep -> goToPreviousStep()
         is OccurrenceIntent.SelectWorkshop -> selectWorkshop(intent)
@@ -64,26 +66,55 @@ class OccurrenceViewModel(
         is OccurrenceIntent.UpdateDialogs -> flow { emit(PartialState.DialogsUpdated(intent.dialogs)) }
     }
 
+    /**
+     * USER_INFO is a hard prerequisite: WORKSHOPS, DOC_TYPES and INSURED_RELATION are only fetched
+     * once it succeeds, since nationalId (needed by two of them) only exists after this call — and
+     * calling any of them anyway on failure would just surface unrelated/misleading errors. See
+     * [retrySource] for why a USER_INFO retry has to redo this whole gated sequence, not just itself.
+     */
     private fun loadInitialData(): Flow<PartialState> = flow {
-        var nationalId = ""
         try {
             val userInfo = getUserInfosUseCase()
-            nationalId = userInfo.nationalID.orEmpty()
+            val nationalId = userInfo.nationalID.orEmpty()
             emit(PartialState.UserInfoUpdated(userInfo.toPR()))
+            emitAll(
+                merge(
+                    fetchWorkshops(nationalId),
+                    fetchDocTypes(),
+                    fetchInsuredRelation(nationalId),
+                )
+            )
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage(), ErrorSource.USER_INFO))
         }
-        emitAll(
-            merge(
-                fetchWorkshops(nationalId),
-                fetchDocTypes(),
-                fetchInsuredRelation(nationalId),
-            )
-        )
     }.onStart {
+        emit(PartialState.ClearAllErrors)
         emit(PartialState.Loading(true))
     }.onCompletion {
         emit(PartialState.Loading(false))
+    }
+
+    /**
+     * Retries only the single API call behind [source]'s error, instead of reloading the whole flow
+     * like [loadInitialData] does — mirrors HealthProfileViewModel.handleRefreshStep()'s targeted
+     * re-fetch of just the failed source. Reuses whatever nationalId Step1 already loaded.
+     *
+     * USER_INFO is the one exception: WORKSHOPS and INSURED_RELATION never even ran if USER_INFO
+     * failed (see [loadInitialData]), so fixing USER_INFO alone can't unblock them — a USER_INFO
+     * retry falls back to [loadInitialData]'s full gated sequence instead.
+     */
+    private fun retrySource(source: ErrorSource): Flow<PartialState> {
+        if (source == ErrorSource.USER_INFO) return loadInitialData()
+
+        val nationalId = uiState.value.personInfo.userInfo?.nationalID.orEmpty()
+        val retryFlow = when (source) {
+            ErrorSource.WORKSHOPS -> fetchWorkshops(nationalId)
+            ErrorSource.INSURED_RELATION -> fetchInsuredRelation(nationalId)
+            ErrorSource.USER_INFO, ErrorSource.GENERAL -> emptyFlow()
+        }
+        return retryFlow
+            .onStart { emit(PartialState.Loading(true)) }
+            .onCompletion { emit(PartialState.Loading(false)) }
     }
 
     /** Feeds Step2 (workshop list) — a failure blocks that step with a full-screen [OccurrenceErrorWrapper], not a toast. */
@@ -284,12 +315,11 @@ class OccurrenceViewModel(
         partialState: PartialState
     ): OccurrenceUiState =
         when (partialState) {
-            is PartialState.Loading -> currentState.copy(
-                isLoading = partialState.isLoading,
-                // A fresh load/retry cycle re-attempts every source, so drop stale errors up front;
-                // whichever source still fails re-populates its own entry via PartialState.Error.
-                errors = if (partialState.isLoading) emptyMap() else currentState.errors,
-            )
+            is PartialState.Loading -> currentState.copy(isLoading = partialState.isLoading)
+
+            // Only a full reload (loadInitialData) wipes every error up front; a single-source
+            // retry must never clear an error for a source it isn't actually re-fetching.
+            PartialState.ClearAllErrors -> currentState.copy(errors = emptyMap())
 
             is PartialState.Error -> currentState.copy(
                 errors = currentState.errors + (partialState.source to partialState.message)
@@ -312,11 +342,19 @@ class OccurrenceViewModel(
             is PartialState.UserInfoUpdated -> currentState.copy(
                 personInfo = currentState.personInfo.copy(
                     userInfo = partialState.userInfo
-                )
+                ),
+                errors = currentState.errors - ErrorSource.USER_INFO,
             )
 
-            is PartialState.WorkshopUpdated -> currentState.copy(workshop = partialState.workshop)
-            is PartialState.JobDetailsUpdated -> currentState.copy(jobDetails = partialState.jobDetails)
+            is PartialState.WorkshopUpdated -> currentState.copy(
+                workshop = partialState.workshop,
+                errors = currentState.errors - ErrorSource.WORKSHOPS,
+            )
+
+            is PartialState.JobDetailsUpdated -> currentState.copy(
+                jobDetails = partialState.jobDetails,
+                errors = currentState.errors - ErrorSource.INSURED_RELATION,
+            )
             is PartialState.WorkHoursUpdated -> currentState.copy(workHours = partialState.workHours)
             is PartialState.AccidentUpdated -> currentState.copy(accident = partialState.accident)
             is PartialState.DocumentSubmitUpdated -> currentState.copy(documentSubmit = partialState.documentSubmit)
