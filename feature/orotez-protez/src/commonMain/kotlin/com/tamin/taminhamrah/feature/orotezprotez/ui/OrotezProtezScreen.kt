@@ -34,6 +34,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -150,6 +151,7 @@ import taminx.core.core_ui.orotez_protez_step_info_title
 import taminx.core.core_ui.orotez_protez_step_user
 import taminx.core.core_ui.orotez_protez_step_user_description
 import taminx.core.core_ui.orotez_protez_step_user_title
+import taminx.core.core_ui.orotez_protez_bank_account_missing_title
 import taminx.core.core_ui.orotez_protez_submit_request
 import taminx.core.core_ui.orotez_protez_submit_success_confirm
 import taminx.core.core_ui.orotez_protez_submit_success_fallback
@@ -765,6 +767,37 @@ private fun OrotezProtezDocumentsStep(
             onAcknowledged = { onIntent(OrotezProtezIntent.OnSubmitSuccessAcknowledged) },
         )
     }
+
+    state.bankAccountMissingDialogMessage?.let { message ->
+        OrotezProtezBankAccountMissingDialog(
+            message = message,
+            onAcknowledged = { onIntent(OrotezProtezIntent.OnBankAccountMissingDialogDismissed) },
+        )
+    }
+}
+
+@Composable
+private fun OrotezProtezBankAccountMissingDialog(
+    message: String,
+    onAcknowledged: () -> Unit,
+) {
+    val colors = LocalTaminColors.current
+    TaminConfirmationDialog(
+        title = stringResource(Res.string.orotez_protez_bank_account_missing_title),
+        description = message,
+        confirmButton = {
+            TaminFilledButton(
+                text = stringResource(Res.string.orotez_protez_submit_success_confirm),
+                onClick = onAcknowledged,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
+        dismissButton = {},
+        onDismissRequest = onAcknowledged,
+        icon = Icons.Default.Warning,
+        iconTint = colors.dangerText,
+        iconBackground = colors.dangerBg,
+    )
 }
 
 @Composable

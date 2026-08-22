@@ -23,6 +23,7 @@ import com.tamin.taminhamrah.model.orotezProtez.InsuredPersonPR
 import com.tamin.taminhamrah.model.orotezProtez.RequestInsuredMainInfoDN
 import com.tamin.taminhamrah.model.orotezProtez.SaveShortTermOrthosisRequestDN
 import com.tamin.taminhamrah.model.orotezProtez.ShortTermOrthosisRequestFileDN
+import com.tamin.taminhamrah.tools.errorHandling.getTaminApiExceptionSubtitle
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
 import com.tamin.taminhamrah.useCases.orotezProtez.GetInsuredPersonsUseCase
@@ -42,6 +43,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
@@ -128,13 +130,17 @@ class OrotezProtezViewModel(
             sendEvent(OrotezProtezEvent.NavigateBack)
         }
 
+        is OrotezProtezIntent.OnBankAccountMissingDialogDismissed -> flow {
+            emit(PartialState.BankAccountMissingDialogDismissed)
+        }
+
         is OrotezProtezIntent.BackToPreviousStep -> handleBackStep()
     }
     private fun handleDocumentImagePicked(documentId: String, file: PlatformFile): Flow<PartialState> = flow {
         val fileName = file.name
         if (!isJpegFileName(fileName)) {
             deleteFileQuietly(file)
-            emit(PartialState.DocumentPickRejected(getString(Res.string.orotez_protez_document_format_error)))
+            emitDocumentRejection(documentId, getString(Res.string.orotez_protez_document_format_error))
             return@flow
         }
 
@@ -142,20 +148,20 @@ class OrotezProtezViewModel(
             file.readBytes()
         } catch (e: Exception) {
             deleteFileQuietly(file)
-            emit(PartialState.DocumentPickRejected(getString(Res.string.orotez_protez_document_pick_read_error)))
+            emitDocumentRejection(documentId, getString(Res.string.orotez_protez_document_pick_read_error))
             return@flow
         }
 
         if (bytes.size > MAX_DOCUMENT_SIZE_BYTES) {
             deleteFileQuietly(file)
-            emit(PartialState.DocumentPickRejected(getString(Res.string.orotez_protez_document_format_error)))
+            emitDocumentRejection(documentId, getString(Res.string.orotez_protez_document_format_error))
             return@flow
         }
 
         val duplicateOfId = findDuplicateDocumentId(excludeId = documentId, bytes = bytes)
         if (duplicateOfId != null) {
             deleteFileQuietly(file)
-            emit(PartialState.DocumentPickRejected(getString(Res.string.orotez_protez_document_duplicate_error)))
+            emitDocumentRejection(documentId, getString(Res.string.orotez_protez_document_duplicate_error))
             return@flow
         }
 
@@ -169,6 +175,13 @@ class OrotezProtezViewModel(
             val message = e.toSingleLineMessage().ifBlank { getString(Res.string.orotez_protez_document_upload_error) }
             emit(PartialState.DocumentStateChanged(documentId, OrotezProtezDocumentState.Failed(message, file, bytes)))
         }
+    }
+
+    private suspend fun FlowCollector<PartialState>.emitDocumentRejection(
+        documentId: String,
+        message: String,
+    ) {
+        emit(PartialState.DocumentStateChanged(documentId, OrotezProtezDocumentState.Failed(message)))
     }
 
     private fun handleDocumentRemoveClicked(documentId: String): Flow<PartialState> = flow {
@@ -205,7 +218,12 @@ class OrotezProtezViewModel(
             val resultMessage = saveShortTermOrthosisUseCase(request).first()
             emit(PartialState.SubmitSucceeded(resultMessage))
         } catch (e: Exception) {
-            emit(PartialState.SubmitFailed(e.toSingleLineMessage()))
+            val subtitle = e.getTaminApiExceptionSubtitle()
+            if (subtitle != null && subtitle.contains(BANK_ACCOUNT_ERROR_MARKER)) {
+                emit(PartialState.SubmitFailed(bankAccountMissingMessage = subtitle))
+            } else {
+                emit(PartialState.SubmitFailed(message = e.toSingleLineMessage()))
+            }
         }
     }
 
@@ -388,7 +406,12 @@ class OrotezProtezViewModel(
             submittedResultMessage = partialState.resultMessage,
             submitError = null,
         )
-        is PartialState.SubmitFailed -> currentState.copy(isSubmitting = false, submitError = partialState.message)
+        is PartialState.SubmitFailed -> currentState.copy(
+            isSubmitting = false,
+            submitError = partialState.message,
+            bankAccountMissingDialogMessage = partialState.bankAccountMissingMessage,
+        )
+        PartialState.BankAccountMissingDialogDismissed -> currentState.copy(bankAccountMissingDialogMessage = null)
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)
@@ -396,5 +419,6 @@ class OrotezProtezViewModel(
     private companion object {
         const val MIN_REQUIRED_DOCUMENT_COUNT = 2
         const val MAX_DOCUMENT_SIZE_BYTES = 2 * 1024 * 1024
+        const val BANK_ACCOUNT_ERROR_MARKER = "فاقد شماره حساب بانکی"
     }
 }

@@ -748,6 +748,7 @@
     <string name="orotez_protez_submit_success_fallback">درخواست شما با موفقیت ثبت شد.</string>
     <string name="orotez_protez_submit_success_title">درخواست شما با موفقیت ثبت شد</string>
     <string name="orotez_protez_submit_success_confirm">متوجه شدم</string>
+    <string name="orotez_protez_bank_account_missing_title">امکان ثبت درخواست وجود ندارد</string>
     <string name="orotez_protez_document_source_subtitle">منبع تصویر را انتخاب کنید</string>
     <string name="orotez_protez_document_source_camera_title">دوربین</string>
     <string name="orotez_protez_document_source_camera_subtitle">گرفتن عکس جدید</string>

@@ -277,7 +277,7 @@ private fun MyInboxContent(
                                 containerColor = colors.greenBg,
                                 contentColor = colors.greenText,
                                 icon = Icons.Default.FiberManualRecord,
-                                modifier = Modifier.padding(top = 20.dp)
+                                modifier = Modifier.padding(top = 10.dp)
                             )
                         }
                     }
