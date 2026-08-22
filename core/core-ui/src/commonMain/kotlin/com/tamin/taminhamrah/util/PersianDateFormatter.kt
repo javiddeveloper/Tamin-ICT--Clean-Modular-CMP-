@@ -202,7 +202,7 @@ object PersianDateFormatter {
     }
 
     /** Inverse of [gregorianToJalali], using the same day-count arithmetic. */
-    private fun jalaliToGregorian(jy: Int, jm: Int, jd: Int): Triple<Int, Int, Int> {
+    internal fun jalaliToGregorian(jy: Int, jm: Int, jd: Int): Triple<Int, Int, Int> {
         val dayCount = dayNumber(jy, jm, jd)
         // 78 pairs with the 355660 above; the two directions must agree or a picked date comes
         // back a day different from what was tapped.
@@ -243,7 +243,7 @@ object PersianDateFormatter {
         return toString().toPersianDigits()
     }
 
-    private fun gregorianToJalali(gy: Int, gm: Int, gd: Int): Triple<Int, Int, Int> {
+    internal fun gregorianToJalali(gy: Int, gm: Int, gd: Int): Triple<Int, Int, Int> {
         val gDaysInMonth = intArrayOf(0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334)
         val gy2 = if (gm > 2) gy + 1 else gy
         // 355660, not 355666: the larger constant shifted every converted date six days late, so
