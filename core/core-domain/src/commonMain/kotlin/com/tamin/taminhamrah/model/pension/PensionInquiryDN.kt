@@ -13,5 +13,7 @@ data class PensionInquiryDN(
     val branchName: String?,
     val pensionEndDate: String?,
     val nationalId: String?,
-    val paymentAmount: Int?
+    val paymentAmount: Int?,
+    val pensionerId: String? = null,
+    val pensionerTypeDesc: String? = null,
 )
