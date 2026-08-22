@@ -99,7 +99,8 @@ private fun RippleRing(
 @Composable
 fun AnimatedRingHeaderIcon(
     icon: ImageVector,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    tint: Color = LocalTaminColors.current.glassIconTileIconTint
 ) {
     val taminColors = LocalTaminColors.current
     Box(
@@ -120,6 +121,6 @@ fun AnimatedRingHeaderIcon(
             durationMillis = 2200,
             delayMillis = 1650
         )
-        GlassIconTile(icon = icon)
+        GlassIconTile(icon = icon, tint = tint)
     }
 }

@@ -7,16 +7,23 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -27,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -40,22 +48,28 @@ import com.tamin.taminhamrah.feature.historyobjection.ui.stepper.contract.STEP_R
 import com.tamin.taminhamrah.feature.historyobjection.ui.stepper.contract.STEP_WORKSHOP
 import com.tamin.taminhamrah.feature.historyobjection.ui.stepper.contract.HistoryObjectionBottomSheetTarget
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.GlassIconTile
 import com.tamin.taminhamrah.ui.components.LoadingButton
+import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
 import com.tamin.taminhamrah.ui.components.StepIndicator
 import com.tamin.taminhamrah.ui.components.StepIndicatorModel
 import com.tamin.taminhamrah.ui.components.StepState
+import com.tamin.taminhamrah.ui.components.TaminBackStepButton
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetResult
 import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
+import com.tamin.taminhamrah.ui.theme.ButtonDimens
+import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.Thickness
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
@@ -78,6 +92,7 @@ import taminx.core.core_ui.ic_moon
 import taminx.core.core_ui.ic_sun
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_chevron_forward
+import taminx.core.core_ui.orotez_protez_confirm_and_continue
 import taminx.feature.history_objection.generated.resources.Res as FeatureRes
 import taminx.feature.history_objection.generated.resources.ic_history_objection
 
@@ -205,12 +220,11 @@ private fun HistoryObjectionStepperContent(
                         xOffset = 450.dp,
                         yOffset = (-150).dp
                     )
-                    GlassIconTile(
+                    AnimatedRingHeaderIcon(
                         icon = vectorResource(FeatureRes.drawable.ic_history_objection),
                         tint = Color.Unspecified,
                         modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(top = Spacing.lg),
+                            .align(Alignment.Center),
                     )
                 }
             }
@@ -225,19 +239,38 @@ private fun HistoryObjectionStepperContent(
                     .imePadding(),
             ) {
                 if (state.currentStep == STEP_RECORD) {
-                    LoadingButton(
-                        text = stringResource(Res.string.history_objection_confirm),
-                        onClick = { onIntent(HistoryObjectionStepperIntent.OnConfirmClicked) },
-                        enabled = state.canGoNextFromCurrentStep && !state.isSubmitting,
-                        isLoading = state.isSubmitting,
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = Spacing.page, vertical = Spacing.md)
+                            .navigationBarsPadding(),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                    ) {
+                        TaminBackStepButton(onClick =  { onIntent(HistoryObjectionStepperIntent.OnBackClicked) })
+                        LoadingButton(
+                            text = stringResource(Res.string.history_objection_confirm),
+                            onClick = { onIntent(HistoryObjectionStepperIntent.OnConfirmClicked) },
+                            enabled = state.canGoNextFromCurrentStep && !state.isSubmitting,
+                            isLoading = state.isSubmitting,
+                        )
+                    }
                 } else {
-                    TaminFilledButton(
-                        icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
-                        text = stringResource(Res.string.history_objection_next_step),
-                        enabled = state.canGoNextFromCurrentStep,
-                        onClick = { onIntent(HistoryObjectionStepperIntent.OnNextClicked) },
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = Spacing.page, vertical = Spacing.md)
+                            .navigationBarsPadding(),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                    ) {
+                        TaminBackStepButton(onClick =  { onIntent(HistoryObjectionStepperIntent.OnBackClicked) })
+                        TaminFilledButton(
+                            icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
+                            text = stringResource(Res.string.history_objection_next_step),
+                            enabled = state.canGoNextFromCurrentStep,
+                            onClick = { onIntent(HistoryObjectionStepperIntent.OnNextClicked) },
+                            background = colors.buttonGradient
+                        )
+                    }
                 }
             }
         },

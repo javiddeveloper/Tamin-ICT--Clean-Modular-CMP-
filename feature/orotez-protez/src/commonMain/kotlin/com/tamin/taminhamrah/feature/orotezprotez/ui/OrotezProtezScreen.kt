@@ -157,6 +157,7 @@ import taminx.core.core_ui.orotez_protez_submit_success_title
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
+import com.tamin.taminhamrah.ui.components.TaminBackStepButton
 import taminx.core.core_ui.ic_branch
 import taminx.core.core_ui.ic_check
 import taminx.core.core_ui.ic_check_label
@@ -636,6 +637,7 @@ private fun OrotezProtezInsuredInfoStep(
             }
         }
 
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -643,7 +645,7 @@ private fun OrotezProtezInsuredInfoStep(
                 .navigationBarsPadding(),
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            OrotezProtezBackStepButton(onClick = onBack)
+            TaminBackStepButton(onClick = onBack)
             LoadingButton(
                 modifier = Modifier.weight(1f),
                 text = stringResource(Res.string.orotez_protez_confirm_and_continue),
@@ -653,31 +655,6 @@ private fun OrotezProtezInsuredInfoStep(
                 iconPosition = LoadingButtonIconPosition.TRAILING,
             )
         }
-    }
-}
-
-@Composable
-private fun OrotezProtezBackStepButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val colors = LocalTaminColors.current
-    val shape = RoundedCornerShape(CornerRadius.xl)
-
-    Box(
-        modifier = modifier
-            .size(ButtonDimens.height)
-            .clip(shape)
-            .background(colors.bgSurface)
-            .border(Thickness.border, colors.border, shape)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            imageVector = vectorResource(Res.drawable.ic_tamin_chevron_back),
-            contentDescription = null,
-            tint = colors.textPrimary,
-        )
     }
 }
 
@@ -761,7 +738,7 @@ private fun OrotezProtezDocumentsStep(
                 .navigationBarsPadding(),
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            OrotezProtezBackStepButton(onClick = onBack)
+            TaminBackStepButton(onClick = onBack)
             LoadingButton(
                 modifier = Modifier.weight(1f),
                 text = stringResource(Res.string.orotez_protez_submit_request),

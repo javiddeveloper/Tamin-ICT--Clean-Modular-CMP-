@@ -808,7 +808,7 @@
     <string name="history_objection_work_days_label">تعداد روز کارکرد</string>
     <string name="history_objection_work_days_placeholder">مثلاً ۹۰</string>
     <string name="history_objection_next_step">مرحلهٔ بعد</string>
-    <string name="history_objection_confirm">ثبت</string>
+    <string name="history_objection_confirm">ثبت این سابقه</string>
     <string name="history_objection_select_province_first">لطفاً ابتدا استان را انتخاب کنید</string>
     <string name="history_objection_select_city_first">لطفاً ابتدا شهر را انتخاب کنید</string>
     <string name="history_objection_submit_success_title">درخواست شما با موفقیت ثبت شد</string>

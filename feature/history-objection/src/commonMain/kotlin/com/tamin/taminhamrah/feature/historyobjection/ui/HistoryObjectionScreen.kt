@@ -56,6 +56,7 @@ import com.tamin.taminhamrah.model.historyObjection.NotExistRequestPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.ErrorStateView
@@ -107,6 +108,7 @@ import taminx.core.core_ui.history_objection_submit
 import taminx.core.core_ui.history_objection_title
 import taminx.core.core_ui.history_objection_workshop_code
 import taminx.core.core_ui.history_objection_workshop_name
+import taminx.core.core_ui.ic_mobile
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_copy
 import taminx.core.core_ui.ic_tamin_edit
@@ -276,12 +278,11 @@ private fun HistoryObjectionContent(
                         xOffset = (-50).dp,
                         yOffset = (-70).dp,
                     )
-                    GlassIconTile(
+                    AnimatedRingHeaderIcon(
                         icon = vectorResource(FeatureRes.drawable.ic_history_objection),
                         tint = Color.Unspecified,
                         modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(top = Spacing.lg),
+                            .align(Alignment.Center),
                     )
                 }
             }
@@ -445,15 +446,6 @@ private fun NotExistRequestCard(
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
             TaminOutlinedButton(
-                text = stringResource(Res.string.history_objection_delete),
-                onClick = onDeleteClick,
-                icon = vectorResource(Res.drawable.ic_trash),
-                modifier = Modifier.weight(1f),
-                containerColor = colors.dangerBorder,
-                contentColor = colors.dangerText,
-                borderColor = colors.dangerBorder,
-            )
-            TaminOutlinedButton(
                 text = stringResource(Res.string.history_objection_edit),
                 onClick = onEditClick,
                 icon = vectorResource(Res.drawable.ic_tamin_edit),
@@ -461,6 +453,15 @@ private fun NotExistRequestCard(
                 containerColor = colors.blueBg,
                 contentColor = colors.blueText,
                 borderColor = Color.Transparent,
+            )
+            TaminOutlinedButton(
+                text = stringResource(Res.string.history_objection_delete),
+                onClick = onDeleteClick,
+                icon = vectorResource(Res.drawable.ic_trash),
+                modifier = Modifier.weight(1f),
+                containerColor = colors.dangerBorder,
+                contentColor = colors.dangerText,
+                borderColor = colors.dangerBorder,
             )
         }
     }
@@ -622,6 +623,7 @@ private fun SubmitButton(
         TaminFilledButton(
             text = stringResource(Res.string.history_objection_submit),
             onClick = onClick,
+            background = colors.buttonGradient
         )
     }
 }
