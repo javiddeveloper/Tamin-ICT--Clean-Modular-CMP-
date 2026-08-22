@@ -16,6 +16,7 @@ import com.tamin.taminhamrah.model.occurrence.OccurrenceSubmitRequestDN
 import com.tamin.taminhamrah.model.occurrence.OccurrenceUploadedDocDN
 import com.tamin.taminhamrah.model.occurrence.WorkshopItemDTO
 import com.tamin.taminhamrah.model.occurrence.WorkshopItemDN
+import com.tamin.taminhamrah.model.occurrence.WorkshopListItemDTO
 
 fun WorkshopItemDTO.toDomain(): WorkshopItemDN = WorkshopItemDN(
     id = id.orEmpty(),
@@ -29,6 +30,21 @@ fun WorkshopItemDTO.toDomain(): WorkshopItemDN = WorkshopItemDN(
     phone = phone.orEmpty(),
     nationality = nation?.nationDesc.orEmpty(),
     nationalityCode = nation?.nationCode.orEmpty(),
+)
+
+/** [getWorkshopSpec][com.tamin.taminhamrah.dataSource.occurrence.OccurrenceRemoteDataSource.getWorkshopSpec] fills in the rest once a workshop is picked. */
+fun WorkshopListItemDTO.toDomain(): WorkshopItemDN = WorkshopItemDN(
+    id = workshopCode.orEmpty(),
+    workshopCode = workshopCode.orEmpty(),
+    branchCode = branchCode.orEmpty(),
+    name = name.orEmpty(),
+    employerName = "",
+    employerPhone = "",
+    address = "",
+    postalCode = "",
+    phone = "",
+    nationality = "",
+    nationalityCode = "",
 )
 
 fun OccurrencePersonalInfoDTO.toDomain(): OccurrencePersonalInfoDN = OccurrencePersonalInfoDN(

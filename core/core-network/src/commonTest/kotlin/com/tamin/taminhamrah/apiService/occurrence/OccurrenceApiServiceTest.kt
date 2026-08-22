@@ -45,8 +45,8 @@ class OccurrenceApiServiceTest : BaseApiTest() {
         assertEquals(200, response.status)
         val list = assertNotNull(response.data?.list)
         assertEquals(1, list.size)
-        assertEquals("1412345", list.first().getOrNull(0)?.jsonPrimitive?.contentOrNull)
-        assertEquals("014", list.first().getOrNull(2)?.jsonPrimitive?.contentOrNull)
+        assertEquals("1412345", list.first().workshopCode)
+        assertEquals("014", list.first().branchCode)
     }
 
     @Test

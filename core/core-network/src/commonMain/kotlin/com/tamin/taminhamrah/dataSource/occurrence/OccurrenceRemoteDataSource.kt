@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.model.occurrence.OccurrencePersonalInfoDTO
 import com.tamin.taminhamrah.model.occurrence.OccurrenceRequestDTO
 import com.tamin.taminhamrah.model.occurrence.OccurrenceResponseDTO
 import com.tamin.taminhamrah.model.occurrence.WorkshopItemDTO
+import com.tamin.taminhamrah.model.occurrence.WorkshopListItemDTO
 import com.tamin.taminhamrah.model.utils.ListData
 
 interface OccurrenceRemoteDataSource {
@@ -15,7 +16,7 @@ interface OccurrenceRemoteDataSource {
         workshopCode: String,
         branchCode: String,
     ): OccurrencePersonalInfoDTO
-    suspend fun getAllWorkshops(nationalCode: String): ListData<WorkshopItemDTO>
+    suspend fun getAllWorkshops(nationalCode: String): ListData<WorkshopListItemDTO>
     suspend fun getWorkshopSpec(workshopCode: String, branchCode: String): WorkshopItemDTO
     suspend fun getInsuredRelation(nationalCode: String): InsuredRelationDTO
     suspend fun getDocumentTypes(): ListData<OccurrenceDocTypeDTO>

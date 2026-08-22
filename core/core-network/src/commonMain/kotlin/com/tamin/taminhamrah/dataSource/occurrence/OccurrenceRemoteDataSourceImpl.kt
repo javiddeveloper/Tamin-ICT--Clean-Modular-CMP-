@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.model.occurrence.OccurrencePersonalInfoDTO
 import com.tamin.taminhamrah.model.occurrence.OccurrenceRequestDTO
 import com.tamin.taminhamrah.model.occurrence.OccurrenceResponseDTO
 import com.tamin.taminhamrah.model.occurrence.WorkshopItemDTO
+import com.tamin.taminhamrah.model.occurrence.WorkshopListItemDTO
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.FilterOperator
@@ -17,8 +18,6 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
-import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.jsonPrimitive
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.http.ContentType
@@ -72,7 +71,7 @@ internal class OccurrenceRemoteDataSourceImpl(
         }
     }
 
-    override suspend fun getAllWorkshops(nationalCode: String): ListData<WorkshopItemDTO> {
+    override suspend fun getAllWorkshops(nationalCode: String): ListData<WorkshopListItemDTO> {
         return try {
             val queries = queryBuilder.buildQuery(
                 ApiQueryParamDN(
@@ -85,26 +84,11 @@ internal class OccurrenceRemoteDataSourceImpl(
                     )
                 )
             )
-            val response = apiService.getAllWorkshops(queries).extractData()
-            ListData(
-                total = response.total,
-                list = response.list?.map { arr ->
-                    val workshopCode = arr.getOrNull(0)?.jsonPrimitive?.contentOrNull
-                    WorkshopItemDTO(
-                        id = workshopCode,
-                        workshopCode = workshopCode,
-                        branchCode = arr.getOrNull(2)?.jsonPrimitive?.contentOrNull,
-                    )
-                }
-            )
+            apiService.getAllWorkshops(queries).extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
-            println("OccurrenceDataSource.getAllWorkshops: ${e::class.simpleName}: ${e.message}")
-            e.printStackTrace()
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
@@ -136,8 +120,6 @@ internal class OccurrenceRemoteDataSourceImpl(
 
     override suspend fun getInsuredRelation(nationalCode: String): InsuredRelationDTO {
         return try {
-            // occurence/insured-relation's filter key is literally "workshopId" (FilterProperty.PAYMENT_WORKSHOP_ID),
-            // but the value it expects is the requesting person's national code, not an actual workshop id.
             val queries = queryBuilder.buildQuery(
                 ApiQueryParamDN(
                     filters = listOf(

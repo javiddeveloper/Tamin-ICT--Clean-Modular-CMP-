@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.model.occurrence.OccurrenceRequestDTO
 import com.tamin.taminhamrah.model.occurrence.OccurrenceResponseDTO
 import com.tamin.taminhamrah.model.occurrence.OccurrenceUploadImageResponseDTO
 import com.tamin.taminhamrah.model.occurrence.WorkshopItemDTO
+import com.tamin.taminhamrah.model.occurrence.WorkshopListItemDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseDTO
 import de.jensklingenberg.ktorfit.http.Body
@@ -14,7 +15,6 @@ import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.QueryMap
 import io.ktor.client.request.forms.MultiPartFormDataContent
-import kotlinx.serialization.json.JsonElement
 
 interface OccurrenceApiService {
 
@@ -26,7 +26,7 @@ interface OccurrenceApiService {
     @GET("occurence/all-workshop")
     suspend fun getAllWorkshops(
         @QueryMap queries: Map<String, String>,
-    ): BaseDTO<ListData<List<JsonElement?>>>
+    ): BaseDTO<ListData<WorkshopListItemDTO>>
 
     @GET("occurence/workshop-specifications")
     suspend fun getWorkshopSpec(

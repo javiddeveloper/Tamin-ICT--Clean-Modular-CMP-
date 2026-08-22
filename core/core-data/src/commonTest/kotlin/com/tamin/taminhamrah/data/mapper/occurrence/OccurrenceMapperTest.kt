@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.model.occurrence.OccurrenceResponseDTO
 import com.tamin.taminhamrah.model.occurrence.OccurrenceSubmitRequestDN
 import com.tamin.taminhamrah.model.occurrence.OccurrenceUploadedDocDN
 import com.tamin.taminhamrah.model.occurrence.WorkshopItemDTO
+import com.tamin.taminhamrah.model.occurrence.WorkshopListItemDTO
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -51,6 +52,17 @@ class OccurrenceMapperTest {
         assertEquals("", domain.workshopCode)
         assertEquals("", domain.nationality)
         assertEquals("", domain.nationalityCode)
+    }
+
+    @Test
+    fun workshopListItemDto_toDomain_mapsCodeNameAndBranch() {
+        val domain = WorkshopListItemDTO(workshopCode = "1412345", name = "کارگاه تولیدی الف", branchCode = "014").toDomain()
+
+        assertEquals("1412345", domain.id)
+        assertEquals("1412345", domain.workshopCode)
+        assertEquals("014", domain.branchCode)
+        assertEquals("کارگاه تولیدی الف", domain.name)
+        assertEquals("", domain.employerName)
     }
 
     @Test

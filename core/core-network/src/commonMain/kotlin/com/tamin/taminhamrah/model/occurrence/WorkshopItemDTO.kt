@@ -3,6 +3,12 @@ package com.tamin.taminhamrah.model.occurrence
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * occurence/workshop-specifications is a legacy, loosely-typed endpoint — unlike the other
+ * occurrence DTOs, it doesn't reliably send every key (e.g. `id`, `workshopCode`, `employerPhone`,
+ * `address`, `postalCode`, `phone` are routinely absent, not just null), so every field needs a
+ * default here or real responses fail to deserialize with a [kotlinx.serialization.MissingFieldException].
+ */
 @Serializable
 data class WorkshopItemDTO(
     @SerialName("id") val id: String? = null,

@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.model.occurrence.OccurrenceRequestDTO
 import com.tamin.taminhamrah.model.occurrence.OccurrenceResponseDTO
 import com.tamin.taminhamrah.model.occurrence.OccurrenceSubmitRequestDN
 import com.tamin.taminhamrah.model.occurrence.WorkshopItemDTO
+import com.tamin.taminhamrah.model.occurrence.WorkshopListItemDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
@@ -18,7 +19,7 @@ import kotlin.test.assertTrue
 
 class FakeOccurrenceRemoteDataSource : OccurrenceRemoteDataSource {
     var personalInfoResult: OccurrencePersonalInfoDTO = OccurrencePersonalInfoDTO()
-    var allWorkshopsResult: ListData<WorkshopItemDTO> = ListData(list = emptyList())
+    var allWorkshopsResult: ListData<WorkshopListItemDTO> = ListData(list = emptyList())
     var workshopSpecResult: WorkshopItemDTO = WorkshopItemDTO()
     var insuredRelationResult: InsuredRelationDTO = InsuredRelationDTO()
     var documentTypesResult: ListData<OccurrenceDocTypeDTO> = ListData(list = emptyList())
@@ -39,7 +40,7 @@ class FakeOccurrenceRemoteDataSource : OccurrenceRemoteDataSource {
         return personalInfoResult
     }
 
-    override suspend fun getAllWorkshops(nationalCode: String): ListData<WorkshopItemDTO> {
+    override suspend fun getAllWorkshops(nationalCode: String): ListData<WorkshopListItemDTO> {
         shouldThrowError?.let { throw it }
         return allWorkshopsResult
     }
@@ -100,7 +101,7 @@ class OccurrenceRepositoryImplTest {
     @Test
     fun getAllWorkshops_returnsMappedList() = runTest {
         remoteDataSource.allWorkshopsResult = ListData(
-            list = listOf(WorkshopItemDTO(id = "1", workshopCode = "1412345", branchCode = "014"))
+            list = listOf(WorkshopListItemDTO(workshopCode = "1412345", name = "کارگاه تولیدی الف", branchCode = "014"))
         )
 
         val result = repository.getAllWorkshops("0012345678")

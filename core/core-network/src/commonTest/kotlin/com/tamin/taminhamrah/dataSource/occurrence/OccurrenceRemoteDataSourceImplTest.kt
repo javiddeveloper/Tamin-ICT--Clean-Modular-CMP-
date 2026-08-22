@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.model.occurrence.OccurrenceRequestDTO
 import com.tamin.taminhamrah.model.occurrence.OccurrenceResponseDTO
 import com.tamin.taminhamrah.model.occurrence.OccurrenceUploadImageResponseDTO
 import com.tamin.taminhamrah.model.occurrence.WorkshopItemDTO
+import com.tamin.taminhamrah.model.occurrence.WorkshopListItemDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseDTO
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilderImpl
@@ -17,8 +18,6 @@ import com.tamin.taminhamrah.tools.errorHandling.TaminApiException
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -27,7 +26,7 @@ import kotlin.test.assertFailsWith
 class FakeOccurrenceApiService : OccurrenceApiService {
     var personalInfoResult: BaseDTO<OccurrencePersonalInfoDTO> =
         BaseDTO(status = 200, family = "OK", reason = "OK", data = OccurrencePersonalInfoDTO())
-    var allWorkshopsResult: BaseDTO<ListData<List<kotlinx.serialization.json.JsonElement?>>> =
+    var allWorkshopsResult: BaseDTO<ListData<WorkshopListItemDTO>> =
         BaseDTO(status = 200, family = "OK", reason = "OK", data = ListData(list = emptyList()))
     var workshopSpecResult: BaseDTO<WorkshopItemDTO> =
         BaseDTO(status = 200, family = "OK", reason = "OK", data = WorkshopItemDTO())
@@ -55,7 +54,7 @@ class FakeOccurrenceApiService : OccurrenceApiService {
 
     override suspend fun getAllWorkshops(
         queries: Map<String, String>,
-    ): BaseDTO<ListData<List<kotlinx.serialization.json.JsonElement?>>> {
+    ): BaseDTO<ListData<WorkshopListItemDTO>> {
         shouldThrowException?.let { throw it }
         lastGetAllWorkshopsQueries = queries
         return allWorkshopsResult
@@ -119,30 +118,16 @@ class OccurrenceRemoteDataSourceImplTest {
     }
 
     @Test
-    fun getAllWorkshops_success_mapsRawArraysToWorkshopItemDTOs() = runTest {
-        fakeApiService.allWorkshopsResult = BaseDTO(
-            status = 200, family = "OK", reason = "OK",
-            data = ListData(
-                total = 1,
-                list = listOf(
-                    JsonArray(
-                        listOf(
-                            JsonPrimitive("1412345"),
-                            JsonPrimitive("کارگاه تولیدی الف"),
-                            JsonPrimitive("014"),
-                        )
-                    )
-                )
-            )
+    fun getAllWorkshops_success_returnsDataAndBuildsFilterQuery() = runTest {
+        val expected = ListData(
+            total = 1,
+            list = listOf(WorkshopListItemDTO(workshopCode = "1412345", name = "کارگاه تولیدی الف", branchCode = "014")),
         )
+        fakeApiService.allWorkshopsResult = BaseDTO(status = 200, family = "OK", reason = "OK", data = expected)
 
         val result = dataSource.getAllWorkshops("0012345678")
 
-        assertEquals(1, result.total)
-        assertEquals(1, result.list?.size)
-        assertEquals("1412345", result.list?.first()?.id)
-        assertEquals("1412345", result.list?.first()?.workshopCode)
-        assertEquals("014", result.list?.first()?.branchCode)
+        assertEquals(expected, result)
         assertEquals(true, fakeApiService.lastGetAllWorkshopsQueries?.get("filter")?.contains("0012345678"))
     }
 
