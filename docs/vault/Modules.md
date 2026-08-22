@@ -54,6 +54,7 @@ Typography / Persian digits: [[Typography]] — theme `ss01` is visual; `toPersi
 | `:feature:change-mobile` | `feature/change-mobile` | `…feature.changemobile` ⚠️ |
 | `:feature:my-inbox` | `feature/my-inbox` | `…feature.myinbox` ⚠️ |
 | `:feature:addDependent` | `feature/addDependent` | `…feature.addDependent` |
+| `:feature:girlSurvivor` | `feature/girlSurvivor` | `…feature.girlSurvivor` |
 
 ### Layout of a feature module
 

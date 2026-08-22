@@ -38,7 +38,7 @@ Domain: insurance and social security. Maps the Persian term used by the busines
 | گواهی کسر اقساط | deferred installment certificate | `DEFERRED_INSTALLMENT_CERTIFICATE` |
 | گواهی حقوق | wage certificate | `ISSUANCE_WAGE_CERTIFICATE` |
 | مستمری ازکارافتادگی | disability pension | `DISABILITY_PENSION` |
-| دختر بازمانده | surviving daughter | `GIRL_SURVIVOR` |
+| دختر بازمانده / تعهدنامه فرزندان دختر | surviving daughter commitment | `GIRL_SURVIVOR`, `feature:girlSurvivor` |
 | درخواست مستمری بازماندگان | survivor pension request | `REQUEST_PENSION_BY_SURVIVOR_112` |
 | بازمانده / وراث | survivor / beneficiary | `survivor`, `Beneficiary`, `Recipient` |
 | نسخه‌ی الکترونیک | e-prescription | `PRESCRIPTION` |

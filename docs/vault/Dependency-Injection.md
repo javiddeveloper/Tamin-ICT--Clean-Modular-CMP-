@@ -17,7 +17,8 @@ val sharedModules: List<Module> get() = listOf(
     agentModule, profileModule, pensionInquiryModule, treatmentModule, cartableModule,
     historyModule, contractsModule, TaminServicesModule, workshopsModule,
     studentInsuranceContractModule, healthProfileModule, changeMobileModule, myInboxModule,
-    addDependentModule
+    securityModule, addDependentModule, settingsModule, userRequestModule, orotezProtezModule,
+    girlSurvivorModule
 )
 
 fun initKoin(appDeclaration: KoinAppDeclaration = {}) =
