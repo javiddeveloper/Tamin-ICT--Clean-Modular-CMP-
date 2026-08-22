@@ -284,10 +284,10 @@ private fun DateWheels(
         )
 
         Row(modifier = Modifier.fillMaxSize()) {
-            // Day and month are cyclic — the last day rolls into the first, اسفند into فروردین.
-            // Years are a bounded span, so wrapping 1405 back to 1300 would be a trap, not a wheel.
-            WheelColumn(items = days, selectedIndex = dayIndex, onSelected = onDayIndex, circular = true, modifier = Modifier.weight(1f))
-            WheelColumn(items = months, selectedIndex = monthIndex, onSelected = onMonthIndex, circular = true, modifier = Modifier.weight(1f))
+            // Every wheel wraps: the last day rolls into the first, اسفند into فروردین, and the
+            // last year back to 1300.
+            WheelColumn(items = days, selectedIndex = dayIndex, onSelected = onDayIndex, modifier = Modifier.weight(1f))
+            WheelColumn(items = months, selectedIndex = monthIndex, onSelected = onMonthIndex, modifier = Modifier.weight(1f))
             WheelColumn(items = years, selectedIndex = yearIndex, onSelected = onYearIndex, modifier = Modifier.weight(1f))
         }
 
@@ -311,9 +311,11 @@ private fun DateWheels(
 /**
  * One wheel.
  *
- * Half a wheel of padding above and below lets the first and last entries reach the middle. With
- * that padding the centred row is exactly `firstVisibleItemIndex`, so the selection needs no
- * arithmetic over the scroll offset.
+ * The list is repeated so the wheel has no ends — spin past the last row and the first follows.
+ *
+ * Half a wheel of padding above and below lets every entry reach the middle. With that padding the
+ * centred row is exactly `firstVisibleItemIndex`, so the selection needs no arithmetic over the
+ * scroll offset beyond folding that index back onto the list with `mod`.
  */
 @Suppress("FrequentlyChangingValue")
 @Composable
@@ -322,14 +324,12 @@ private fun WheelColumn(
     selectedIndex: Int,
     onSelected: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    /** Repeats the list so the wheel has no ends: spin past the last row and the first follows. */
-    circular: Boolean = false,
 ) {
     val colors = LocalTaminColors.current
     val itemCount = items.size
     // A long stretch of repeats with the opening row in the middle, so the wheel can be spun a
     // long way either direction before it could ever run out.
-    val anchor = if (circular && itemCount > 0) (CIRCULAR_LOOPS / 2) * itemCount else 0
+    val anchor = if (itemCount > 0) (CIRCULAR_LOOPS / 2) * itemCount else 0
     val state = rememberLazyListState(
         initialFirstVisibleItemIndex = (anchor + selectedIndex).coerceAtLeast(0),
     )
@@ -340,12 +340,12 @@ private fun WheelColumn(
     // Reports the row that settled in the middle. Keyed on the state alone rather than on `items`:
     // a month changing length must not restart this and re-report the row already parked in the
     // middle, which under the modulo below would name a different day than the one chosen.
-    LaunchedEffect(state, circular) {
+    LaunchedEffect(state) {
         snapshotFlow { state.firstVisibleItemIndex }
             .distinctUntilChanged()
             .collect { index ->
                 val count = latestCount
-                if (count > 0) latestOnSelected(if (circular) index.mod(count) else index)
+                if (count > 0) latestOnSelected(index.mod(count))
             }
     }
 
@@ -355,10 +355,9 @@ private fun WheelColumn(
     LaunchedEffect(selectedIndex, itemCount) {
         if (itemCount == 0) return@LaunchedEffect
         val wanted = selectedIndex.coerceIn(0, itemCount - 1)
-        val shown =
-            if (circular) state.firstVisibleItemIndex.mod(itemCount) else state.firstVisibleItemIndex
+        val shown = state.firstVisibleItemIndex.mod(itemCount)
         if (!state.isScrollInProgress && shown != wanted) {
-            state.scrollToItem(if (circular) anchor + wanted else wanted)
+            state.scrollToItem(anchor + wanted)
         }
     }
 
@@ -377,11 +376,11 @@ private fun WheelColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         items(
-            count = if (circular && itemCount > 0) itemCount * CIRCULAR_LOOPS else itemCount,
+            count = itemCount * CIRCULAR_LOOPS,
             key = { it },
         ) { index ->
             if (itemCount == 0) return@items
-            val label = items[if (circular) index.mod(itemCount) else index]
+            val label = items[index.mod(itemCount)]
             // Read here rather than in the surrounding wheel: only the rows redraw when the center
             // moves, and only when it crosses a row rather than on every pixel of the drag.
             val isSelected = index == state.firstVisibleItemIndex
