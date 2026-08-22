@@ -14,7 +14,7 @@ Koin `4.1.0`. (`koin-annotations` 2.1.0 is in the catalog, but hand-written DSL 
 val sharedModules: List<Module> get() = listOf(
     platformModule, networkModule, datastoreModule, databaseModule,
     ApiClientsModule, remoteModule, domainModule, dataKoinModule, dataModule, pluginModule,
-    agentModule, profileModule, pensionInquiryModule, treatmentModule, cartableModule,
+    agentModule, profileModule, pensionInquiryModule, pensionStatusInquiryModule, treatmentModule, cartableModule,
     historyModule, contractsModule, TaminServicesModule, workshopsModule,
     studentInsuranceContractModule, healthProfileModule, changeMobileModule, myInboxModule,
     addDependentModule
@@ -25,6 +25,8 @@ fun initKoin(appDeclaration: KoinAppDeclaration = {}) =
 ```
 
 **Adding a feature means adding its Koin module to this list.** Forgetting it produces a runtime failure, not a compile error.
+
+UseCases are not auto-discovered. A new constructor dependency on a ViewModel also needs `factoryOf(::ThatUseCase)` in `domainModule` (`core-domain/.../di/DomainModule.kt`). Missing that yields `InstanceCreationException: Could not create instance for '[Factory: …ViewModel]'`.
 
 ## Where each module lives
 

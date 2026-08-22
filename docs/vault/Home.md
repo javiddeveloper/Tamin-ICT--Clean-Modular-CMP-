@@ -24,6 +24,7 @@ tags: [moc]
 - [[Adding-a-Feature]] — checklist for a new screen or feature module
 - [[Pagination]] — the cross-platform `Paginator` (no AndroidX Paging in this project)
 - [[Typography]] — Vazirmatn, `ss01` Persian digits vs `toPersianDigits()`
+- [[Theme]] — colors, spacing, radius, and string tokens (no hardcoded UI values)
 
 ## Build and release
 

@@ -14,6 +14,7 @@ data class PensionInquiryPR(
     val pensionerBaseDate: String,
     val fullName: String,
     val statusDesc: String,
+    val isActive: Boolean,
     val sexDesc: String,
     val branchName: String,
     val pensionEndDate: String,

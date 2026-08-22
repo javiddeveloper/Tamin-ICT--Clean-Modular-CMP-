@@ -14,7 +14,7 @@ import com.tamin.taminhamrah.feature.pensionInquiry.navigateToEdict
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToGirlSurvivor
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToIssuanceCertificate
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPayRoll
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionInquiry
+import com.tamin.taminhamrah.feature.pensionStatusInquiry.navigateToPensionStatusInquiry
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionSurvivor
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPrescription
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToFreelanceInsuranceContract
@@ -34,7 +34,7 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
         FeatureFlag.FREELANCE_INSURANCE -> navigateToFreelanceInsuranceContract()
         FeatureFlag.OPTIONAL_INSURANCE -> navigateToOptionalInsuranceContract()
         FeatureFlag.HOUSEWIFE_INSURANCE -> navigateToHousewifeInsuranceContract()
-        FeatureFlag.PENSION_INQUIRY -> navigateToPensionInquiry()
+        FeatureFlag.PENSION_INQUIRY -> navigateToPensionStatusInquiry()
         FeatureFlag.CALCULATE_WAGE_PENSION -> navigateToCalculatePension()
         FeatureFlag.PRESCRIPTION -> navigateToPrescription()
         FeatureFlag.DESERVED_TREATMENT_101 -> navigateToDeservedTreatment()
