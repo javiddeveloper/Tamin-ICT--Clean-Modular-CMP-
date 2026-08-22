@@ -815,6 +815,9 @@
     <string name="history_objection_submit_success_message">سابقهٔ ناموجود اعلام‌شدهٔ شما با موفقیت ثبت شد و برای بررسی ارسال گردید.</string>
     <string name="history_objection_submit_success_confirm">متوجه شدم</string>
     <string name="history_objection_submit_missing_data_error">اطلاعات وارد شده ناقص است. لطفاً مراحل را دوباره بررسی کنید.</string>
+    <string name="history_objection_date_range_invalid_error">تاریخ پایان باید حداقل ۱ روز بعد از تاریخ شروع باشد.</string>
+    <string name="history_objection_date_too_recent_error">تاریخ پایان باید حداقل ۲ ماه قبل از امروز باشد.</string>
+    <string name="history_objection_work_days_exceeds_range_error">تعداد روز کارکرد نباید از فاصلهٔ تاریخ شروع تا پایان بیشتر باشد.</string>
     <string name="history_objection_delete_missing_data_error">امکان حذف این مورد وجود ندارد.</string>
     <string name="history_objection_confirm_send_title">تأیید و ارسال درخواست</string>
     <string name="history_objection_confirm_send_message">با ارسال، فهرست سوابق اعلام‌شده جهت بررسی برای تأمین اجتماعی ارسال می‌شود و امکان ویرایش وجود نخواهد داشت.</string>

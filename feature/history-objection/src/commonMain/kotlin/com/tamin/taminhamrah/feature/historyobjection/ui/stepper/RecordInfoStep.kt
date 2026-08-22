@@ -99,8 +99,15 @@ fun RecordInfoStep(
             label = stringResource(Res.string.history_objection_work_days_label),
             value = state.workDays,
             placeholder = stringResource(Res.string.history_objection_work_days_placeholder),
-            onValueChange = { onIntent(HistoryObjectionStepperIntent.OnWorkDaysChanged(it)) },
+            onValueChange = { onIntent(HistoryObjectionStepperIntent.OnWorkDaysChanged(it.toAsciiDigitsOnly())) },
             keyboardType = KeyboardType.Number,
         )
     }
 }
+private fun String.toAsciiDigitsOnly(): String = mapNotNull { char ->
+    when (char) {
+        in '0'..'9' -> char
+        in '۰'..'۹' -> '0' + (char - '۰')
+        else -> null
+    }
+}.joinToString("")

@@ -27,6 +27,7 @@ import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.GetHistoryObjectionNotExistRequestsUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.SaveHistoryObjectionNotExistRequestUseCase
 import com.tamin.taminhamrah.util.PersianDateFormatter
+import com.tamin.taminhamrah.util.currentTimeMillis
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.Flow
@@ -34,16 +35,23 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.bs_branch
 import taminx.core.core_ui.bs_city
 import taminx.core.core_ui.bs_insurance_type
 import taminx.core.core_ui.bs_province
+import taminx.core.core_ui.history_objection_date_range_invalid_error
+import taminx.core.core_ui.history_objection_date_too_recent_error
 import taminx.core.core_ui.history_objection_select_city_first
 import taminx.core.core_ui.history_objection_select_province_first
 import taminx.core.core_ui.history_objection_submit_missing_data_error
+import taminx.core.core_ui.history_objection_work_days_exceeds_range_error
 import taminx.core.core_ui.search_hint
+
+/** The end date must be at least this many days before today — see [dateRangeErrorMessage]. */
+private const val MIN_DAYS_BETWEEN_END_DATE_AND_TODAY = 60
 
 class HistoryObjectionStepperViewModel(
     private val getProvincesUseCase: GetProvincesUseCase,
@@ -283,6 +291,11 @@ class HistoryObjectionStepperViewModel(
             return@flow
         }
 
+        uiState.value.dateRangeErrorMessage()?.let { errorRes ->
+            sendEvent(HistoryObjectionStepperEvent.ShowMessage(getString(errorRes)))
+            return@flow
+        }
+
         emit(PartialState.ErrorDismissed)
         emit(PartialState.Submitting(true))
         try {
@@ -325,6 +338,21 @@ class HistoryObjectionStepperViewModel(
             startDate = start,
             workDays = workDays,
         )
+    }
+
+    private fun HistoryObjectionStepperState.dateRangeErrorMessage(): StringResource? {
+        val start = startDateTimestamp ?: return null
+        val end = endDateTimestamp ?: return null
+
+        val diffDay = PersianDateFormatter.daysBetween(start, end)
+        val diffFromToday = PersianDateFormatter.daysBetween(end, currentTimeMillis())
+
+        return when {
+            diffDay <= 0 -> Res.string.history_objection_date_range_invalid_error
+            diffFromToday < MIN_DAYS_BETWEEN_END_DATE_AND_TODAY -> Res.string.history_objection_date_too_recent_error
+            workDays.toIntOrNull()?.let { diffDay < it } == true -> Res.string.history_objection_work_days_exceeds_range_error
+            else -> null
+        }
     }
 
     private fun loadInitialData(editRequestNumber: String?, editRowIndex: String?): Flow<PartialState> = flow {
