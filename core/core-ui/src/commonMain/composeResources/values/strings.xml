@@ -762,4 +762,22 @@
     <string name="orotez_protez_document_pick_read_error">خطا در خواندن فایل انتخاب‌شده.</string>
     <string name="orotez_protez_document_validation_min_count">حداقل باید ۲ مدرک بارگذاری شود.</string>
     <string name="orotez_protez_document_validation_required">بارگذاری «نسخه تجویز پزشک» و «فاکتور خرید» الزامی است.</string>
+
+    <!-- ===================== Pension Status Inquiry ===================== -->
+    <string name="pension_status_inquiry_title">استعلام وضعیت مستمری</string>
+    <string name="pension_status_pension_number">شماره مستمری</string>
+    <string name="pension_status_insurance_number">شماره بیمه</string>
+    <string name="pension_status_main_insured_number">شماره بیمه‌شده اصلی</string>
+    <string name="pension_status_establishment_date">تاریخ برقراری</string>
+    <string name="pension_status_payment_date">تاریخ پرداخت</string>
+    <string name="pension_status_order_type">نوع حکم</string>
+    <string name="pension_status_type_retirement">بازنشستگی</string>
+    <string name="pension_status_org_unit">واحد سازمانی: %1$s</string>
+    <string name="pension_status_active_header">مستمری بگیر فعال هستید</string>
+    <string name="pension_status_inactive_header">مستمری بگیر نیستید</string>
+    <string name="pension_status_inactive_badge">تأیید نشده</string>
+    <string name="pension_status_empty_title">موردی یافت نشد</string>
+    <string name="pension_status_empty_subtitle">وضعیت مستمری برای این کاربر ثبت نشده است</string>
+    <string name="pension_status_send_success_title">ارسال گواهی</string>
+    <string name="pension_status_send_success_desc">درخواست گواهی با موفقیت ثبت شد و در صندوق شخصی شما قابل مشاهده است.</string>
 </resources>

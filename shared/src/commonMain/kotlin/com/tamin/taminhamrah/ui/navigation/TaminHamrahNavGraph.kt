@@ -90,7 +90,7 @@ import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDisabilityPension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionSurvivor
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPrescription
 import com.tamin.taminhamrah.feature.pensionInquiry.payrollScreen
-import com.tamin.taminhamrah.feature.pensionInquiry.pensionInquiryScreen
+import com.tamin.taminhamrah.feature.pensionStatusInquiry.pensionStatusInquiryGraph
 import com.tamin.taminhamrah.feature.pensionInquiry.pensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.prescriptionScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
@@ -429,7 +429,9 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                     onDone = { navController.popBackStack() }
                 )
 
-                pensionInquiryScreen()
+                pensionStatusInquiryGraph(
+                    onBack = { navController.popBackStack() }
+                )
                 calculatePensionScreen(onBack = { navController.popBackStack() })
                 prescriptionScreen(onBack = { navController.popBackStack() })
                 deservedTreatmentScreen(onBack = { navController.popBackStack() })
