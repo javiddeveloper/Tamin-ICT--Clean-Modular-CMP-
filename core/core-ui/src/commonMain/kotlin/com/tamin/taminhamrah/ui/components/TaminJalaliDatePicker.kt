@@ -417,7 +417,8 @@ private val CANCEL_BUTTON_HEIGHT = 52.dp
 
 /**
  * How far a row shrinks and fades once it reaches the edge of the wheel. Tuned so the row either
- * side of the selection stays comfortably readable and only the outermost pair recedes.
+ * side of the selection is still clearly readable, while the outermost pair recedes close to the
+ * panel and reads as edge rather than content.
  */
-private const val WHEEL_MIN_SCALE = 0.72f
-private const val WHEEL_MIN_ALPHA = 0.30f
+private const val WHEEL_MIN_SCALE = 0.55f
+private const val WHEEL_MIN_ALPHA = 0.12f
