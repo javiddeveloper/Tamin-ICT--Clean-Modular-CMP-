@@ -130,7 +130,7 @@ fun HistoryObjectionScreen(
     viewModel: HistoryObjectionViewModel = koinViewModel(),
     onNavigateBack: () -> Unit,
     onNavigateToAddNew: () -> Unit = {},
-    onNavigateToEdit: (String) -> Unit = {},
+    onNavigateToEdit: (String, String?) -> Unit = { _, _ -> },
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -201,12 +201,12 @@ private fun HandleHistoryObjectionEvents(
     snackbarHostState: SnackbarHostState,
     onNavigateBack: () -> Unit,
     onNavigateToAddNew: () -> Unit,
-    onNavigateToEdit: (String) -> Unit,
+    onNavigateToEdit: (String, String?) -> Unit,
 ) {
     events.collectWithLifecycleAware { event ->
         when (event) {
             HistoryObjectionEvent.NavigateToAddNewObjection -> onNavigateToAddNew()
-            is HistoryObjectionEvent.NavigateToEditNotExistRequest -> onNavigateToEdit(event.requestNumber)
+            is HistoryObjectionEvent.NavigateToEditNotExistRequest -> onNavigateToEdit(event.requestNumber, event.rowIndex)
             // Skeleton only — no submit endpoint exists yet (docs/vault/History-Objection.md).
             HistoryObjectionEvent.SubmitRequested -> {}
         }
@@ -338,7 +338,7 @@ private fun HistoryObjectionContent(
                     NotExistRequestCard(
                         request = request,
                         onEditClick = {
-                            onIntent(HistoryObjectionIntent.OnEditNotExistRequestClicked(request.requestNumber))
+                            onIntent(HistoryObjectionIntent.OnEditNotExistRequestClicked(request.requestNumber, request.rowIndex))
                         },
                         onDeleteClick = {
                             onIntent(

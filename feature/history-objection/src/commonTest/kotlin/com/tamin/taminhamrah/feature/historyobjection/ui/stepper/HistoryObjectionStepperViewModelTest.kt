@@ -218,6 +218,70 @@ class HistoryObjectionStepperViewModelTest {
     }
 
     @Test
+    fun editMode_withSharedRequestNumber_usesRowIndexToPickTheRightRow() = runTest(testDispatcher) {
+        // One submission (requestNumber) can list several missing periods, each a separate row
+        // (rowIndex) — the same composite key `deletenotexist/{requestNumber}/{rowIndex}` already
+        // relies on. Editing must not silently fall back to whichever row comes first in the list.
+        val firstRow = NotExistRequestDN(
+            requestNumber = "1837710",
+            rowIndex = "1",
+            provinceCode = "04",
+            provinceName = "اصفهان",
+            cityCode = "1158",
+            cityName = "اصفهان",
+            branchCode = "111",
+            branchName = "شعبه مرکزی",
+            insuranceType = "01",
+            insuranceTypeDesc = "اجباري",
+            workshopId = "6393610019",
+            workshopName = "کارگاه اول",
+            workshopManager = "علی رضایی",
+            workshopAddress = "تهران، خیابان آزادی",
+            startDate = 1000L,
+            endDate = 2000L,
+            workDays = "90",
+        )
+        val secondRow = NotExistRequestDN(
+            requestNumber = "1837710",
+            rowIndex = "2",
+            provinceCode = "14",
+            provinceName = "شهرستانهاي استان تهران",
+            cityCode = "1306",
+            cityName = "پاکدشت",
+            branchCode = "0950",
+            branchName = "پاکدشت",
+            insuranceType = "02",
+            insuranceTypeDesc = "اختياري",
+            workshopId = "1111111111",
+            workshopName = "کارگاه دوم",
+            workshopManager = "رضا احمدی",
+            workshopAddress = "پاکدشت، خیابان اصلی",
+            startDate = 3000L,
+            endDate = 4000L,
+            workDays = "45",
+        )
+        historyObjectionRepository.notExistRequestsResult = listOf(firstRow, secondRow)
+
+        viewModel.uiState.test {
+            awaitItem()
+            viewModel.sendIntent(HistoryObjectionStepperIntent.Load("1837710", "2"))
+            val loaded = awaitUntil { it.workshopId == "1111111111" }
+
+            assertEquals("2", loaded.editRowIndex)
+            assertEquals("14", loaded.selectedProvince?.provinceCode)
+            assertEquals("1306", loaded.selectedCity?.cityCode)
+            assertEquals("0950", loaded.selectedBranch?.code)
+            assertEquals("02", loaded.selectedInsuranceType?.insuranceTypeCode)
+            assertEquals("کارگاه دوم", loaded.workshopName)
+            assertEquals("رضا احمدی", loaded.employerName)
+            assertEquals("پاکدشت، خیابان اصلی", loaded.workshopAddress)
+            assertEquals(3000L, loaded.startDateTimestamp)
+            assertEquals(4000L, loaded.endDateTimestamp)
+            assertEquals("45", loaded.workDays)
+        }
+    }
+
+    @Test
     fun confirmClicked_withCompleteData_savesRequestAndMarksSubmitted() = runTest(testDispatcher) {
         val existing = NotExistRequestDN(
             requestNumber = "1837710",

@@ -99,6 +99,7 @@ import taminx.feature.history_objection.generated.resources.ic_history_objection
 @Composable
 fun HistoryObjectionStepperScreen(
     requestNumber: String?,
+    rowIndex: String? = null,
     onNavigateBack: () -> Unit,
     onNavigateHome: () -> Unit,
     viewModel: HistoryObjectionStepperViewModel = koinViewModel(),
@@ -106,8 +107,8 @@ fun HistoryObjectionStepperScreen(
     val state by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(requestNumber) {
-        viewModel.sendIntent(HistoryObjectionStepperIntent.Load(requestNumber))
+    LaunchedEffect(requestNumber, rowIndex) {
+        viewModel.sendIntent(HistoryObjectionStepperIntent.Load(requestNumber, rowIndex))
     }
 
     HandleHistoryObjectionStepperEvents(

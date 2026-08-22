@@ -48,7 +48,7 @@ class HistoryObjectionViewModel(
         }
 
         is HistoryObjectionIntent.OnEditNotExistRequestClicked -> {
-            sendEvent(HistoryObjectionEvent.NavigateToEditNotExistRequest(intent.requestNumber))
+            sendEvent(HistoryObjectionEvent.NavigateToEditNotExistRequest(intent.requestNumber, intent.rowIndex))
             emptyFlow()
         }
 

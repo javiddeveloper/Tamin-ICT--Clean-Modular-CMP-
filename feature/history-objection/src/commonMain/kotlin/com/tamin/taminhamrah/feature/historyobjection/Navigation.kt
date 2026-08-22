@@ -11,9 +11,14 @@ import kotlinx.serialization.Serializable
 @Serializable
 data object HistoryObjectionRoute
 
-/** [requestNumber] null means create a new record; non-null means edit an existing draft. */
+/**
+ * [requestNumber] null means create a new record; non-null means edit an existing draft.
+ * [rowIndex] disambiguates which row to edit when several not-exist declarations share the same
+ * [requestNumber] — required for the same reason `deletenotexist` needs both (see
+ * docs/vault/History-Objection.md).
+ */
 @Serializable
-data class HistoryObjectionStepperRoute(val requestNumber: String? = null)
+data class HistoryObjectionStepperRoute(val requestNumber: String? = null, val rowIndex: String? = null)
 
 fun NavGraphBuilder.historyObjectionScreen(
     navController: NavController,
@@ -23,7 +28,9 @@ fun NavGraphBuilder.historyObjectionScreen(
         HistoryObjectionScreen(
             onNavigateBack = onBack,
             onNavigateToAddNew = { navController.navigateToHistoryObjectionStepper() },
-            onNavigateToEdit = { requestNumber -> navController.navigateToHistoryObjectionStepper(requestNumber) },
+            onNavigateToEdit = { requestNumber, rowIndex ->
+                navController.navigateToHistoryObjectionStepper(requestNumber, rowIndex)
+            },
         )
     }
 }
@@ -36,6 +43,7 @@ fun NavGraphBuilder.historyObjectionStepperScreen(
         val route = backStackEntry.toRoute<HistoryObjectionStepperRoute>()
         HistoryObjectionStepperScreen(
             requestNumber = route.requestNumber,
+            rowIndex = route.rowIndex,
             onNavigateBack = onBack,
             onNavigateHome = onNavigateHome,
         )
@@ -46,6 +54,6 @@ fun NavController.navigateToHistoryObjection() {
     navigate(HistoryObjectionRoute)
 }
 
-fun NavController.navigateToHistoryObjectionStepper(requestNumber: String? = null) {
-    navigate(HistoryObjectionStepperRoute(requestNumber))
+fun NavController.navigateToHistoryObjectionStepper(requestNumber: String? = null, rowIndex: String? = null) {
+    navigate(HistoryObjectionStepperRoute(requestNumber, rowIndex))
 }

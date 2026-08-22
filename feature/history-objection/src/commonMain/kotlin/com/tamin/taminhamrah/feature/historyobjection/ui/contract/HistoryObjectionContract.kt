@@ -36,7 +36,7 @@ sealed interface HistoryObjectionIntent {
     data object Load : HistoryObjectionIntent
     data object OnAddNewObjectionClicked : HistoryObjectionIntent
     data object OnActiveRequestDialogDismissed : HistoryObjectionIntent
-    data class OnEditNotExistRequestClicked(val requestNumber: String) : HistoryObjectionIntent
+    data class OnEditNotExistRequestClicked(val requestNumber: String, val rowIndex: String?) : HistoryObjectionIntent
     data class OnDeleteNotExistRequestClicked(val requestNumber: String, val rowIndex: String?) : HistoryObjectionIntent
     data object OnDeleteConfirmationDismissed : HistoryObjectionIntent
     data class OnDeleteConfirmed(val requestNumber: String, val rowIndex: String?) : HistoryObjectionIntent
@@ -47,6 +47,6 @@ sealed interface HistoryObjectionIntent {
 
 sealed interface HistoryObjectionEvent {
     data object NavigateToAddNewObjection : HistoryObjectionEvent
-    data class NavigateToEditNotExistRequest(val requestNumber: String) : HistoryObjectionEvent
+    data class NavigateToEditNotExistRequest(val requestNumber: String, val rowIndex: String?) : HistoryObjectionEvent
     data object SubmitRequested : HistoryObjectionEvent
 }

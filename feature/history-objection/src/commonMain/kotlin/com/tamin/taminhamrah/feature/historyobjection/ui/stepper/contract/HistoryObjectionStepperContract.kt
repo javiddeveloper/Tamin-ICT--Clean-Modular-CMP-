@@ -25,6 +25,7 @@ data class HistoryObjectionStepperState(
     val currentStep: Int = STEP_BRANCH,
     val isEditMode: Boolean = false,
     val editRequestNumber: String? = null,
+    val editRowIndex: String? = null,
     val isLoading: Boolean = false,
     val isSubmitting: Boolean = false,
     val hasSubmitted: Boolean = false,
@@ -68,7 +69,11 @@ data class HistoryObjectionStepperState(
         }
 
     sealed interface PartialState {
-        data class ModeInitialized(val isEditMode: Boolean, val editRequestNumber: String?) : PartialState
+        data class ModeInitialized(
+            val isEditMode: Boolean,
+            val editRequestNumber: String?,
+            val editRowIndex: String?,
+        ) : PartialState
         data class Loading(val isLoading: Boolean) : PartialState
         data class Submitting(val isSubmitting: Boolean) : PartialState
         data object SubmitSucceeded : PartialState
@@ -120,7 +125,7 @@ data class HistoryObjectionStepperState(
 }
 
 sealed interface HistoryObjectionStepperIntent {
-    data class Load(val editRequestNumber: String?) : HistoryObjectionStepperIntent
+    data class Load(val editRequestNumber: String?, val editRowIndex: String? = null) : HistoryObjectionStepperIntent
     data object OnNextClicked : HistoryObjectionStepperIntent
     data object OnBackClicked : HistoryObjectionStepperIntent
     data object OnConfirmClicked : HistoryObjectionStepperIntent

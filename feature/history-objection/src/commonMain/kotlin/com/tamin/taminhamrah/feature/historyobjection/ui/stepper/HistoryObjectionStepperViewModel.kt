@@ -57,7 +57,7 @@ class HistoryObjectionStepperViewModel(
 ) {
 
     override fun handleIntent(intent: HistoryObjectionStepperIntent): Flow<PartialState> = when (intent) {
-        is HistoryObjectionStepperIntent.Load -> loadInitialData(intent.editRequestNumber)
+        is HistoryObjectionStepperIntent.Load -> loadInitialData(intent.editRequestNumber, intent.editRowIndex)
 
         HistoryObjectionStepperIntent.OnNextClicked -> flow {
             val state = uiState.value
@@ -327,13 +327,19 @@ class HistoryObjectionStepperViewModel(
         )
     }
 
-    private fun loadInitialData(editRequestNumber: String?): Flow<PartialState> = flow {
-        emit(PartialState.ModeInitialized(isEditMode = editRequestNumber != null, editRequestNumber = editRequestNumber))
+    private fun loadInitialData(editRequestNumber: String?, editRowIndex: String?): Flow<PartialState> = flow {
+        emit(
+            PartialState.ModeInitialized(
+                isEditMode = editRequestNumber != null,
+                editRequestNumber = editRequestNumber,
+                editRowIndex = editRowIndex,
+            )
+        )
         emit(PartialState.Loading(true))
         try {
             emitAll(merge(loadProvinces(), loadInsuranceTypes()))
             if (editRequestNumber != null) {
-                loadEditModeData(editRequestNumber)?.let { emit(it) }
+                loadEditModeData(editRequestNumber, editRowIndex)?.let { emit(it) }
             }
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
@@ -351,9 +357,15 @@ class HistoryObjectionStepperViewModel(
         emit(PartialState.InsuranceTypesLoaded(insuranceTypes.toPersistentList()))
     }
 
-    private suspend fun loadEditModeData(requestNumber: String): PartialState.EditModeDataLoaded? {
+    // A single requestNumber can cover several not-exist declarations (one submission can list
+    // multiple missing periods), each distinguished only by rowIndex — the same composite key
+    // `deletenotexist/{requestNumber}/{rowIndex}` already relies on. Matching by requestNumber
+    // alone here would silently land on whichever row happens to come first in the list, filling
+    // the stepper with a different row's data than the one the user tapped "ویرایش" on.
+    private suspend fun loadEditModeData(requestNumber: String, rowIndex: String?): PartialState.EditModeDataLoaded? {
         val match = getHistoryObjectionNotExistRequestsUseCase().first()
-            .firstOrNull { it.requestNumber == requestNumber } ?: return null
+            .firstOrNull { it.requestNumber == requestNumber && (rowIndex == null || it.rowIndex == rowIndex) }
+            ?: return null
 
         val branch = match.branchCode?.let { code ->
             BranchDN(
@@ -393,6 +405,7 @@ class HistoryObjectionStepperViewModel(
         is PartialState.ModeInitialized -> currentState.copy(
             isEditMode = partialState.isEditMode,
             editRequestNumber = partialState.editRequestNumber,
+            editRowIndex = partialState.editRowIndex,
         )
         is PartialState.Loading -> currentState.copy(isLoading = partialState.isLoading, error = null)
         is PartialState.Submitting -> currentState.copy(isSubmitting = partialState.isSubmitting)
