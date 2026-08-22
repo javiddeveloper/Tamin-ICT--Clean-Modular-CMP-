@@ -143,10 +143,10 @@ class DeferredInstallmentViewModel(
                 .mapNotNull { it.pensionerId?.takeIf(String::isNotBlank) }
                 .toPersistentList()
             emit(PartialState.PensionerLoaded(ids = ids, selectedId = ids.firstOrNull().orEmpty()))
+            emit(PartialState.Loading(false))
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
         }
-        emit(PartialState.Loading(false))
     }
 
     private fun loadBanks(query: String): Flow<PartialState> = flow {

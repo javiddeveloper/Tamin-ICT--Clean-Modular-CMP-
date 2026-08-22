@@ -77,6 +77,18 @@ class DeferredInstallmentViewModelTest {
     )
 
     @Test
+    fun loadInitialData_whenApiFails_keepsErrorVisible() = runTest(testDispatcher) {
+        pensionRepository.shouldThrowOnGetPensionerId = true
+        viewModel = buildViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertFalse(state.isLoading)
+        assertNotNull(state.error)
+        assertTrue(state.error!!.isNotBlank())
+    }
+
+    @Test
     fun loadInitialData_populatesFirstPensionerId() = runTest(testDispatcher) {
         pensionRepository.pensionIds = listOf(PensionIdDN("1003406938"), PensionIdDN("2000000000"))
         viewModel = buildViewModel()
@@ -256,8 +268,12 @@ class DeferredInstallmentViewModelTest {
 private class FakeDeferredInstallmentPensionRepository : PensionRepository {
     var pensionIds: List<PensionIdDN> = emptyList()
     var lastSubmittedRequest: DeferredInstallmentRequestDN? = null
+    var shouldThrowOnGetPensionerId: Boolean = false
 
     override suspend fun getPensionerId(): Flow<List<PensionIdDN>> = flow {
+        if (shouldThrowOnGetPensionerId) {
+            throw RuntimeException("SSL handshake failed")
+        }
         emit(pensionIds)
     }
 
