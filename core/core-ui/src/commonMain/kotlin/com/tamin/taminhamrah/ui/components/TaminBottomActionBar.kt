@@ -90,6 +90,7 @@ fun TaminBottomActionBar(
                     modifier = Modifier.weight(1f),
                     enabled = primaryEnabled,
                     isLoading = isPrimaryLoading,
+                    iconPosition = LoadingButtonIconPosition.TRAILING,
                     icon = if (showChevron) Icons.AutoMirrored.Filled.KeyboardArrowRight else null,
                 )
             } else {

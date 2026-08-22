@@ -88,6 +88,7 @@ data class DocumentSubmitStepState(
     val isUploadingDoc: Boolean = false,
     val uploadingTypeName: String = "",
     val uploadingFileName: String = "",
+    val uploadingFileBytes: ByteArray? = null,
 )
 
 /**

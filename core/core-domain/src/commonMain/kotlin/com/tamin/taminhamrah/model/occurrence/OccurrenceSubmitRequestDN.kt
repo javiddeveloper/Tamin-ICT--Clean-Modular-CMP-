@@ -44,4 +44,5 @@ data class OccurrenceUploadedDocDN(
     val typeName: String,
     val fileName: String,
     val guid: String,
+    val bytes: ByteArray? = null,
 )

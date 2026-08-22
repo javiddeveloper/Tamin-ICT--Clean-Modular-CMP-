@@ -211,6 +211,7 @@ class OccurrenceViewModel(
                     isUploadingDoc = true,
                     uploadingTypeName = intent.typeName,
                     uploadingFileName = intent.fileName,
+                    uploadingFileBytes = intent.fileBytes,
                 )
             )
         )
@@ -221,6 +222,7 @@ class OccurrenceViewModel(
                 typeName = intent.typeName,
                 fileName = intent.fileName,
                 guid = guid,
+                bytes = intent.fileBytes,
             )
             emit(
                 PartialState.DocumentSubmitUpdated(
@@ -228,6 +230,7 @@ class OccurrenceViewModel(
                         isUploadingDoc = false,
                         uploadingTypeName = "",
                         uploadingFileName = "",
+                        uploadingFileBytes = null,
                         uploadedDocuments = uiState.value.documentSubmit.uploadedDocuments + newDoc,
                     )
                 )
@@ -239,6 +242,7 @@ class OccurrenceViewModel(
                         isUploadingDoc = false,
                         uploadingTypeName = "",
                         uploadingFileName = "",
+                        uploadingFileBytes = null,
                     )
                 )
             )
