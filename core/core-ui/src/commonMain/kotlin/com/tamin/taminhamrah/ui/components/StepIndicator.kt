@@ -1,5 +1,18 @@
     package com.tamin.taminhamrah.ui.components
 
+    import androidx.compose.animation.AnimatedContent
+    import androidx.compose.animation.Crossfade
+    import androidx.compose.animation.animateColorAsState
+    import androidx.compose.animation.core.Animatable
+    import androidx.compose.animation.core.Spring
+    import androidx.compose.animation.core.animateDpAsState
+    import androidx.compose.animation.core.spring
+    import androidx.compose.animation.core.tween
+    import androidx.compose.animation.fadeIn
+    import androidx.compose.animation.fadeOut
+    import androidx.compose.animation.scaleIn
+    import androidx.compose.animation.scaleOut
+    import androidx.compose.animation.togetherWith
     import androidx.compose.foundation.background
     import androidx.compose.foundation.border
     import androidx.compose.foundation.layout.Arrangement
@@ -7,6 +20,7 @@
     import androidx.compose.foundation.layout.Column
     import androidx.compose.foundation.layout.Row
     import androidx.compose.foundation.layout.Spacer
+    import androidx.compose.foundation.layout.fillMaxSize
     import androidx.compose.foundation.layout.fillMaxWidth
     import androidx.compose.foundation.layout.height
     import androidx.compose.foundation.layout.padding
@@ -18,6 +32,8 @@
     import androidx.compose.material3.Text
     import androidx.compose.runtime.Composable
     import androidx.compose.runtime.Immutable
+    import androidx.compose.runtime.LaunchedEffect
+    import androidx.compose.runtime.getValue
     import androidx.compose.runtime.key
     import androidx.compose.runtime.remember
     import androidx.compose.ui.Alignment
@@ -27,6 +43,7 @@
     import androidx.compose.ui.graphics.Brush
     import androidx.compose.ui.graphics.Color
     import androidx.compose.ui.graphics.SolidColor
+    import androidx.compose.ui.graphics.graphicsLayer
     import androidx.compose.ui.text.font.FontWeight
     import androidx.compose.ui.text.style.TextAlign
     import androidx.compose.ui.unit.Dp
@@ -44,6 +61,9 @@
     import org.jetbrains.compose.resources.painterResource
     import taminx.core.core_ui.Res
     import taminx.core.core_ui.ic_tamin_check
+
+    private const val StepAnimationDurationMs = 260
+    private const val StepPopStartScale = 0.85f
 
     sealed interface StepState {
         data object Inactive : StepState
@@ -120,6 +140,11 @@
                 key(step.stepNumber) {
                     val style = remember(step.state, colors) { step.state.toStyle(colors) }
 
+                    val titleColor by animateColorAsState(
+                        targetValue = style.titleColor,
+                        animationSpec = tween(StepAnimationDurationMs)
+                    )
+
                     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
                         StepCircle(number = step.stepNumber, style = style)
                         Spacer(Modifier.height(Spacing.tabSelector))
@@ -130,20 +155,24 @@
                                 fontSize = TextDimens.stepperTitle,
                                 textAlign = TextAlign.Center
                             ),
-                            color = style.titleColor,
+                            color = titleColor,
                             maxLines = 1,
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
 
                     if (index < steps.lastIndex) {
+                        val connectorColor by animateColorAsState(
+                            targetValue = style.connectorColor,
+                            animationSpec = tween(StepAnimationDurationMs)
+                        )
                         Spacer(Modifier.width(Spacing.xs))
                         Box(
                             Modifier
                                 .padding(top = Spacing.smd)
                                 .height(IconSize.stepperConnectorHeight)
                                 .width(IconSize.stepperConnectorWidth)
-                                .background(style.connectorColor, CircleShape)
+                                .background(connectorColor, CircleShape)
                         )
                         Spacer(Modifier.width(Spacing.xs))
                     }
@@ -154,36 +183,79 @@
 
     @Composable
     private fun StepCircle(number: String, style: StepStyle) {
+        val isActive = style.elevation > Elevation.none
+        val scale = remember { Animatable(1f) }
+        LaunchedEffect(isActive) {
+            if (isActive) {
+                scale.snapTo(StepPopStartScale)
+                scale.animateTo(
+                    targetValue = 1f,
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessMedium
+                    )
+                )
+            } else {
+                scale.snapTo(1f)
+            }
+        }
+        val elevation by animateDpAsState(
+            targetValue = style.elevation,
+            animationSpec = tween(StepAnimationDurationMs)
+        )
+        val borderColor by animateColorAsState(
+            targetValue = style.circleBorderColor ?: Color.Transparent,
+            animationSpec = tween(StepAnimationDurationMs)
+        )
+        val numberColor by animateColorAsState(
+            targetValue = style.numberColor,
+            animationSpec = tween(StepAnimationDurationMs)
+        )
+
         Box(
             modifier = Modifier
                 .size(IconSize.stepperCircle)
-                .then(
-                    if (style.elevation > Elevation.none) {
-                        Modifier.shadow(style.elevation, CircleShape)
-                    } else if (style.circleBorderColor != null) {
-                        Modifier.border(Thickness.border, style.circleBorderColor, CircleShape)
-                    } else Modifier
-                )
-                .clip(CircleShape)
-                .background(style.circleBackground),
+                .graphicsLayer {
+                    scaleX = scale.value
+                    scaleY = scale.value
+                }
+                .shadow(elevation, CircleShape, clip = false)
+                .border(Thickness.border, borderColor, CircleShape)
+                .clip(CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            if (style.showCheckIcon) {
-                Icon(
-                    painter = painterResource(Res.drawable.ic_tamin_check),
-                    contentDescription = null,
-                    tint = style.numberColor,
-                    modifier = Modifier.size(IconSize.small)
-                )
-            } else {
-                Text(
-                    text = number,
-                    style = MaterialTheme.typography.titleSmall.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = TextDimens.stepperNumber
-                    ),
-                    color = style.numberColor
-                )
+            Crossfade(
+                targetState = style.circleBackground,
+                animationSpec = tween(StepAnimationDurationMs),
+                modifier = Modifier.fillMaxSize()
+            ) { brush ->
+                Box(Modifier.fillMaxSize().background(brush))
+            }
+
+            AnimatedContent(
+                targetState = style.showCheckIcon,
+                transitionSpec = {
+                    (scaleIn(initialScale = 0.6f) + fadeIn(tween(StepAnimationDurationMs))) togetherWith
+                        (scaleOut(targetScale = 0.6f) + fadeOut(tween(StepAnimationDurationMs)))
+                }
+            ) { showCheck ->
+                if (showCheck) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_tamin_check),
+                        contentDescription = null,
+                        tint = numberColor,
+                        modifier = Modifier.size(IconSize.small)
+                    )
+                } else {
+                    Text(
+                        text = number,
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = TextDimens.stepperNumber
+                        ),
+                        color = numberColor
+                    )
+                }
             }
         }
     }
