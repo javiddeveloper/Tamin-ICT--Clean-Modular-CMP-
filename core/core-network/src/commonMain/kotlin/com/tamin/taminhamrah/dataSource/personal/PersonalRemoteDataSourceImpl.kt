@@ -10,6 +10,7 @@ import com.tamin.taminhamrah.model.personal.disabilityRequest.DisabilityDependen
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDTO
+import com.tamin.taminhamrah.model.personal.girlSurvivor.ConfirmGirlSurvivorRequestDTO
 import com.tamin.taminhamrah.model.personal.submitFinalSurvivorPension.SubmitFinalSurvivorPensionRequest
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoRequest
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
@@ -143,6 +144,54 @@ class PersonalRemoteDataSourceImpl(
                     pdf = response.body()
                 )
             )
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.UNKNOWN)
+            )
+        }
+    }
+
+    override suspend fun getGirlSurvivorReport(
+        address: String,
+        tel: String,
+        postalCode: String,
+        fatherName: String?,
+        birthDate: Long?,
+        insuranceId: String?,
+        parentCode: String,
+        pensionerId: String,
+    ): PdfDownloadDTO {
+        return try {
+            val response = personalApiService.getGirlSurvivorReport(
+                address = address,
+                tel = tel,
+                postalCode = postalCode,
+                fatherName = fatherName,
+                birthDate = birthDate,
+                insuranceId = insuranceId,
+                parentCode = parentCode,
+                pensionerId = pensionerId,
+            )
+            PdfDownloadDTO(
+                pdf = InputStreamDTO(
+                    pdf = response.body()
+                )
+            )
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.UNKNOWN)
+            )
+        }
+    }
+
+    override suspend fun confirmGirlSurvivor(body: ConfirmGirlSurvivorRequestDTO): String? {
+        return try {
+            val response = personalApiService.confirmGirlSurvivor(body)
+            response.extractMessage()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {

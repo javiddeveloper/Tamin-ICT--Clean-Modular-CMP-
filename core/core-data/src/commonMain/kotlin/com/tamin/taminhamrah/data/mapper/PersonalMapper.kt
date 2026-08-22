@@ -36,6 +36,8 @@ import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.PensionDocDN
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoRequest
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.DependencyTypeRequest
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.PensionDocRequest
+import com.tamin.taminhamrah.model.personal.girlSurvivor.ConfirmGirlSurvivorDN
+import com.tamin.taminhamrah.model.personal.girlSurvivor.ConfirmGirlSurvivorRequestDTO
 import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.PersonalDTO as DisabilityPersonalDTO
 import kotlin.jvm.JvmName
 
@@ -50,6 +52,7 @@ fun PersonalInfoDTO.toDomain(): PersonalInfoDN {
 }
 
 fun PersonalDTO.toDomain(): PersonalDN {
+    val firstContact = contacts?.firstOrNull()
     return PersonalDN(
         firstName = firstName,
         lastName = lastName,
@@ -57,7 +60,13 @@ fun PersonalDTO.toDomain(): PersonalDN {
         nationalId = nationalId,
         ssn = ssn,
         genderDesc = gender?.genderDesc,
-        dateOfBirth = dateOfBirth
+        genderCode = gender?.genderCode,
+        dateOfBirth = dateOfBirth,
+        idCardNumber = idCardNumber,
+        dateOfDead = dateOfDead,
+        contactAddress = firstContact?.address,
+        contactZipCode = firstContact?.zipCode,
+        contactPhoneNumber = firstContact?.phoneNumber,
     )
 }
 
@@ -193,6 +202,29 @@ fun PensionDocDN.toDTO(): PensionDocRequest {
     return PensionDocRequest(
         documentType = documentType,
         guid = guid
+    )
+}
+
+fun ConfirmGirlSurvivorDN.toDTO(): ConfirmGirlSurvivorRequestDTO {
+    return ConfirmGirlSurvivorRequestDTO(
+        address = address,
+        age = age,
+        birthDate = birthDate,
+        childInsuranceId = childInsuranceId,
+        childNationalId = childNationalId,
+        deathDate = deathDate,
+        deathType = deathType,
+        dependencyType = dependencyType?.toDTO(),
+        firstName = firstName,
+        gender = gender,
+        idNumber = idNumber,
+        insuranceNumber = insuranceNumber,
+        lastName = lastName,
+        mobileNumber = mobileNumber,
+        nationalCode = nationalCode,
+        pensionId = pensionId,
+        phoneNumber = phoneNumber,
+        status = status,
     )
 }
 
