@@ -352,7 +352,10 @@ class OrotezProtezViewModel(
         currentState: OrotezProtezUiState,
         partialState: PartialState
     ): OrotezProtezUiState = when (partialState) {
-        is PartialState.Loading -> currentState.copy(isLoading = partialState.isLoading, error = null)
+        is PartialState.Loading -> currentState.copy(
+            isLoading = partialState.isLoading,
+            error = if (partialState.isLoading) null else currentState.error,
+        )
         is PartialState.Error -> currentState.copy(isLoading = false, error = partialState.message)
         is PartialState.DataLoaded -> currentState.copy(
             branch = partialState.branch,
