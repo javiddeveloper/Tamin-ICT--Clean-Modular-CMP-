@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,6 +27,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -60,7 +61,7 @@ import kotlin.math.abs
 /** The wheel shows this many rows; the middle one is the selection. Must stay odd. */
 private const val VISIBLE_ROWS = 5
 
-private val ROW_HEIGHT = 44.dp
+private val ROW_HEIGHT = 48.dp
 private val WHEEL_HEIGHT = ROW_HEIGHT * VISIBLE_ROWS
 
 /** Where the top and bottom fades give way to clear glass — one row's worth at each end. */
@@ -283,8 +284,10 @@ private fun DateWheels(
         )
 
         Row(modifier = Modifier.fillMaxSize()) {
-            WheelColumn(items = days, selectedIndex = dayIndex, onSelected = onDayIndex, modifier = Modifier.weight(1f))
-            WheelColumn(items = months, selectedIndex = monthIndex, onSelected = onMonthIndex, modifier = Modifier.weight(1f))
+            // Day and month are cyclic — the last day rolls into the first, اسفند into فروردین.
+            // Years are a bounded span, so wrapping 1405 back to 1300 would be a trap, not a wheel.
+            WheelColumn(items = days, selectedIndex = dayIndex, onSelected = onDayIndex, circular = true, modifier = Modifier.weight(1f))
+            WheelColumn(items = months, selectedIndex = monthIndex, onSelected = onMonthIndex, circular = true, modifier = Modifier.weight(1f))
             WheelColumn(items = years, selectedIndex = yearIndex, onSelected = onYearIndex, modifier = Modifier.weight(1f))
         }
 
@@ -319,23 +322,52 @@ private fun WheelColumn(
     selectedIndex: Int,
     onSelected: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    /** Repeats the list so the wheel has no ends: spin past the last row and the first follows. */
+    circular: Boolean = false,
 ) {
     val colors = LocalTaminColors.current
-    val state = rememberLazyListState(initialFirstVisibleItemIndex = selectedIndex.coerceAtLeast(0))
+    val itemCount = items.size
+    // A long stretch of repeats with the opening row in the middle, so the wheel can be spun a
+    // long way either direction before it could ever run out.
+    val anchor = if (circular && itemCount > 0) (CIRCULAR_LOOPS / 2) * itemCount else 0
+    val state = rememberLazyListState(
+        initialFirstVisibleItemIndex = (anchor + selectedIndex).coerceAtLeast(0),
+    )
 
-    // Reports the row that settled in the middle. Read through a snapshotFlow rather than during
-    // composition, so a spin never recomposes the dialog.
-    LaunchedEffect(state, items) {
-        snapshotFlow { state.firstVisibleItemIndex }.distinctUntilChanged().collect(onSelected)
+    val latestOnSelected by rememberUpdatedState(onSelected)
+    val latestCount by rememberUpdatedState(itemCount)
+
+    // Reports the row that settled in the middle. Keyed on the state alone rather than on `items`:
+    // a month changing length must not restart this and re-report the row already parked in the
+    // middle, which under the modulo below would name a different day than the one chosen.
+    LaunchedEffect(state, circular) {
+        snapshotFlow { state.firstVisibleItemIndex }
+            .distinctUntilChanged()
+            .collect { index ->
+                val count = latestCount
+                if (count > 0) latestOnSelected(if (circular) index.mod(count) else index)
+            }
     }
 
     // Follows the caller when the date moves for a reason other than this wheel — «امروز», or a
-    // day clamped by a shorter month.
-    LaunchedEffect(selectedIndex) {
-        if (!state.isScrollInProgress && state.firstVisibleItemIndex != selectedIndex) {
-            state.scrollToItem(selectedIndex.coerceIn(0, (items.size - 1).coerceAtLeast(0)))
+    // day clamped by a shorter month — and re-anchors after a length change, when the same raw
+    // index no longer names the same row.
+    LaunchedEffect(selectedIndex, itemCount) {
+        if (itemCount == 0) return@LaunchedEffect
+        val wanted = selectedIndex.coerceIn(0, itemCount - 1)
+        val shown =
+            if (circular) state.firstVisibleItemIndex.mod(itemCount) else state.firstVisibleItemIndex
+        if (!state.isScrollInProgress && shown != wanted) {
+            state.scrollToItem(if (circular) anchor + wanted else wanted)
         }
     }
+
+    // Hoisted out of the row loop: building it per row would allocate a TextStyle for every
+    // visible item on every recomposition.
+    val rowStyle = MaterialTheme.typography.titleMedium.copy(
+        fontSize = WHEEL_TEXT_SIZE,
+        lineHeight = WHEEL_TEXT_LINE_HEIGHT,
+    )
 
     LazyColumn(
         state = state,
@@ -344,13 +376,18 @@ private fun WheelColumn(
         flingBehavior = rememberSnapFlingBehavior(state),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        itemsIndexed(items, key = { index, _ -> index }) { index, label ->
+        items(
+            count = if (circular && itemCount > 0) itemCount * CIRCULAR_LOOPS else itemCount,
+            key = { it },
+        ) { index ->
+            if (itemCount == 0) return@items
+            val label = items[if (circular) index.mod(itemCount) else index]
             // Read here rather than in the surrounding wheel: only the rows redraw when the center
             // moves, and only when it crosses a row rather than on every pixel of the drag.
             val isSelected = index == state.firstVisibleItemIndex
             Text(
                 text = label,
-                style = MaterialTheme.typography.titleMedium,
+                style = rowStyle,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                 color = if (isSelected) colors.blueText else colors.textSecondary,
                 textAlign = TextAlign.Center,
@@ -422,3 +459,10 @@ private val CANCEL_BUTTON_HEIGHT = 52.dp
  */
 private const val WHEEL_MIN_SCALE = 0.55f
 private const val WHEEL_MIN_ALPHA = 0.12f
+
+/** How many times the list repeats in a circular wheel. Large enough never to reach an end. */
+private const val CIRCULAR_LOOPS = 401
+
+/** The wheel's own text size, a step up from titleMedium so the date reads at a glance. */
+private val WHEEL_TEXT_SIZE = 19.sp
+private val WHEEL_TEXT_LINE_HEIGHT = 28.sp
