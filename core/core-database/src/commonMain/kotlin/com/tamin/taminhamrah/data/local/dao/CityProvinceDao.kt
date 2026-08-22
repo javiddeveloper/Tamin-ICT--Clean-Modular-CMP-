@@ -20,4 +20,10 @@ interface CityProvinceDao {
 
     @Query("SELECT * FROM provinces WHERE provinceCode = :provinceCode LIMIT 1")
     fun getProvince(provinceCode: String): Flow<ProvinceEntity?>
+
+    @Query("SELECT * FROM provinces ORDER BY provinceName ASC")
+    fun getAllProvinces(): Flow<List<ProvinceEntity>>
+
+    @Query("SELECT * FROM cities WHERE provinceCode = :provinceCode ORDER BY cityName ASC")
+    fun getCitiesByProvinceCode(provinceCode: String): Flow<List<CityEntity>>
 }
