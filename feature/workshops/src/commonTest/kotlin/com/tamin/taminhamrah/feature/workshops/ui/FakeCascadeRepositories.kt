@@ -1,11 +1,7 @@
 package com.tamin.taminhamrah.feature.workshops.ui
 
-import com.tamin.taminhamrah.model.common.BeneficiaryDN
 import com.tamin.taminhamrah.model.common.CityDN
-import com.tamin.taminhamrah.model.common.JobTitleListDN
-import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.common.ProvinceDN
-import com.tamin.taminhamrah.model.common.RoleDN
 import com.tamin.taminhamrah.model.contracts.BranchDN
 import com.tamin.taminhamrah.model.contracts.ContractDN
 import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
@@ -35,7 +31,6 @@ import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderListDN
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListDN
 import com.tamin.taminhamrah.repository.CityProvinceRepository
 import com.tamin.taminhamrah.repository.WorkShopsRepository
-import com.tamin.taminhamrah.repository.common.CommonRepository
 import com.tamin.taminhamrah.repository.contracts.ContractsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -148,14 +143,6 @@ internal class FakeCascadeWorkShopsRepository : WorkShopsRepository {
     override fun getWorkshopStackHolders(
         filters: List<ApiFilterDN>
     ): Flow<WorkshopStackHolderListDN?> = unused()
-}
-
-internal class FakeCascadeCommonRepository : CommonRepository {
-    override fun getRegistrationDeclarationForm(): Flow<ByteArray> = unused()
-    override fun getBeneficiary(filters: List<ApiFilterDN>): Flow<List<BeneficiaryDN>> = unused()
-    override fun getMainMenu(versionCode: String, forceUpdate: Boolean): Flow<List<MainServiceDN>> = unused()
-    override fun getJobTitle(query: ApiQueryParamDN): Flow<JobTitleListDN?> = unused()
-    override fun getRoles(): Flow<List<RoleDN>> = unused()
 }
 
 private fun <T> unused(): Flow<T> =

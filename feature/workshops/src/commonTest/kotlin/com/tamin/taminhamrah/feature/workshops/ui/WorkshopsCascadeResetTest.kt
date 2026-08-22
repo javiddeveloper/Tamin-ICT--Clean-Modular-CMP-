@@ -9,7 +9,6 @@ import com.tamin.taminhamrah.model.common.ProvincePR
 import com.tamin.taminhamrah.model.contracts.BranchPR
 import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
 import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
-import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetAllEmployerAgreementByNationalIdUseCase
 import kotlinx.coroutines.Dispatchers
@@ -50,9 +49,6 @@ class WorkshopsCascadeResetTest {
         viewModel = WorkshopsViewModel(
             getAllEmployerAgreementUseCase = GetAllEmployerAgreementByNationalIdUseCase(
                 FakeCascadeWorkShopsRepository(),
-            ),
-            getRegistrationDeclarationFormUseCase = GetRegistrationDeclarationFormUseCase(
-                FakeCascadeCommonRepository(),
             ),
             getProvincesUseCase = GetProvincesUseCase(cityProvinceRepository),
             getCitiesUseCase = GetCitiesUseCase(cityProvinceRepository),

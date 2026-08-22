@@ -58,8 +58,6 @@ sealed interface WorkshopsIntent {
     data class SelectProvince(val province: ProvincePR) : WorkshopsIntent
     data class SelectCity(val city: CityPR) : WorkshopsIntent
     data class SelectBranch(val branch: BranchPR) : WorkshopsIntent
-
-    data object TestDownloadPdf : WorkshopsIntent
 }
 
 sealed interface WorkshopsEvent {
