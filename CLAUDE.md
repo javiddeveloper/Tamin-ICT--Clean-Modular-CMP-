@@ -15,6 +15,7 @@ Read the relevant page there before searching the codebase:
 | How is a ViewModel written? | `docs/vault/MVI-Pattern.md` |
 | How do I add a screen or feature? | `docs/vault/Adding-a-Feature.md` |
 | Persian digits / typography | `docs/vault/Typography.md` |
+| Theme tokens (color, size, copy) | `docs/vault/Theme.md` |
 | Navigation | `docs/vault/Navigation.md` |
 | DI and Koin | `docs/vault/Dependency-Injection.md` |
 | Networking, tokens, endpoints | `docs/vault/Networking.md` |

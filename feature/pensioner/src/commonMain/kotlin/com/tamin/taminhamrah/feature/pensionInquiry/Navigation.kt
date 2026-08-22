@@ -3,9 +3,7 @@ package com.tamin.taminhamrah.feature.pensionInquiry
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
-import androidx.navigation.NavOptionsBuilder
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
-import com.tamin.taminhamrah.feature.pensionInquiry.ui.pensionInquiry.PensionInquiryScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.calculatePension.CalculatePensionScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.prescription.PrescriptionScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.deservedTreatment.DeservedTreatmentScreen
@@ -16,9 +14,6 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.girlSurvivor.GirlSurvivor
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.pensionSurvivor.PensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.DisabilityPensionScreen
 import kotlinx.serialization.Serializable
-
-@Serializable
-data object PensionInquiryRoute
 
 @Serializable
 data object CalculatePensionRoute
@@ -46,14 +41,6 @@ data object PensionSurvivorRoute
 
 @Serializable
 data object DisabilityPensionRoute
-
-fun NavController.navigateToPensionInquiry(navOptions: NavOptions? = null) {
-    navigate(PensionInquiryRoute, navOptions)
-}
-
-fun NavController.navigateToPensionInquiry(builder: NavOptionsBuilder.() -> Unit) {
-    navigate(PensionInquiryRoute, builder)
-}
 
 fun NavController.navigateToCalculatePension(navOptions: NavOptions? = null) {
     navigate(CalculatePensionRoute, navOptions)
@@ -89,12 +76,6 @@ fun NavController.navigateToPensionSurvivor(navOptions: NavOptions? = null) {
 
 fun NavController.navigateToDisabilityPension(navOptions: NavOptions? = null) {
     navigate(DisabilityPensionRoute, navOptions)
-}
-
-fun NavGraphBuilder.pensionInquiryScreen() {
-    composableWithFadeTransitions<PensionInquiryRoute> {
-        PensionInquiryScreen()
-    }
 }
 
 fun NavGraphBuilder.calculatePensionScreen(onBack: () -> Unit) {

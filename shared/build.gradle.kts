@@ -44,6 +44,7 @@ kotlin {
             api(project(":feature:healthProfile"))
             api(project(":feature:change-mobile"))
             api(project(":feature:addDependent"))
+            api(project(":feature:pensionStatusInquiry"))
             api(project(":feature:userRequest"))
             api(project(":feature:security"))
             api(project(":feature:settings"))
