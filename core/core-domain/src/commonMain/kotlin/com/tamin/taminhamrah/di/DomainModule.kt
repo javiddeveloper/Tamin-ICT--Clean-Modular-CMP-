@@ -26,7 +26,6 @@ import com.tamin.taminhamrah.useCases.pension.GetPensionInquiryUseCase
 import com.tamin.taminhamrah.useCases.pension.SendRequestInquirePensionCertificateUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
 import com.tamin.taminhamrah.useCases.pension.SendRequestDeferredInstallmentCertificateUseCase
-import com.tamin.taminhamrah.useCases.pension.SendRequestInquirePensionCertificateUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerPayRollUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerPayRollPDFUseCase
 import com.tamin.taminhamrah.useCases.pension.GetUserAgeUseCase
