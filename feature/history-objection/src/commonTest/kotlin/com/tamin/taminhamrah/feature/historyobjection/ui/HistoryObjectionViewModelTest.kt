@@ -50,6 +50,7 @@ class HistoryObjectionViewModelTest {
         val viewModel = createViewModel()
 
         viewModel.uiState.test {
+            viewModel.sendIntent(HistoryObjectionIntent.Load)
             val loaded = awaitUntil { !it.isLoading && it.notExistRequests.isNotEmpty() }
             assertEquals(1, loaded.notExistRequests.size)
 
@@ -72,6 +73,7 @@ class HistoryObjectionViewModelTest {
         val viewModel = createViewModel()
 
         viewModel.uiState.test {
+            viewModel.sendIntent(HistoryObjectionIntent.Load)
             awaitUntil { !it.isLoading && it.notExistRequests.isNotEmpty() }
 
             viewModel.sendIntent(HistoryObjectionIntent.OnDeleteConfirmed("1837708", null))
@@ -91,6 +93,7 @@ class HistoryObjectionViewModelTest {
         val viewModel = createViewModel()
 
         viewModel.uiState.test {
+            viewModel.sendIntent(HistoryObjectionIntent.Load)
             awaitUntil { !it.isLoading && it.notExistRequests.isNotEmpty() }
 
             viewModel.sendIntent(HistoryObjectionIntent.OnDeleteConfirmed("1837708", "1"))

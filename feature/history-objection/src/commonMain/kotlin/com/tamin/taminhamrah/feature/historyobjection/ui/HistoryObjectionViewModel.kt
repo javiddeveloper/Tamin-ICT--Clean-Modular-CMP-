@@ -29,10 +29,6 @@ class HistoryObjectionViewModel(
     initialState = HistoryObjectionUiState()
 ) {
 
-    init {
-        sendIntent(HistoryObjectionIntent.Load)
-    }
-
     override fun handleIntent(intent: HistoryObjectionIntent): Flow<PartialState> = when (intent) {
         HistoryObjectionIntent.Load -> loadHistoryObjectionData()
 
