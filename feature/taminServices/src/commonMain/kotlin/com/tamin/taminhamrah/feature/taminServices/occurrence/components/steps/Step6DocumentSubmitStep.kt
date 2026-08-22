@@ -1,10 +1,8 @@
 package com.tamin.taminhamrah.feature.taminServices.occurrence.components.steps
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,16 +11,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Image
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -35,14 +26,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import com.tamin.taminhamrah.util.rememberCameraPermission
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.InfoBanner
-import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceDocumentSourceSheet
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceSelectionBottomSheet
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceSheetOption
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.PersonInfoCard
@@ -60,22 +48,25 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.model.WorkshopItem
 import com.tamin.taminhamrah.model.occurrence.OccurrenceUploadedDocDN
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import com.tamin.taminhamrah.ui.components.LiquidWaveProgressBar
 import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminBottomActionBar
 import com.tamin.taminhamrah.ui.components.TaminDivider
+import com.tamin.taminhamrah.ui.components.TaminImageViewer
 import com.tamin.taminhamrah.ui.components.dashedOutline
+import com.tamin.taminhamrah.ui.components.document.TaminDocumentSourceSheet
+import com.tamin.taminhamrah.ui.components.document.TaminDocumentUploadCard
+import com.tamin.taminhamrah.ui.components.document.TaminDocumentUploadState
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.components.toast.AppToastHost
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.components.topbars.TaminStepTopAppBar
 import com.tamin.taminhamrah.ui.theme.CornerRadius
-import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
+import com.tamin.taminhamrah.util.rememberCameraPermission
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberCameraPickerLauncher
@@ -85,10 +76,8 @@ import io.github.vinceglb.filekit.readBytes
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.error_file_read_fallback
-import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.occurrence_add_document
 import taminx.core.core_ui.occurrence_camera_permission_denied
 import taminx.core.core_ui.occurrence_doc_format_hint
@@ -109,10 +98,6 @@ import taminx.core.core_ui.occurrence_summary_person
 import taminx.core.core_ui.occurrence_summary_section
 import taminx.core.core_ui.occurrence_summary_transport
 import taminx.core.core_ui.occurrence_summary_workshop
-
-import androidx.compose.ui.layout.ContentScale
-import com.tamin.taminhamrah.ui.components.LoadAsyncImage
-import com.tamin.taminhamrah.ui.components.TaminImageViewer
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
@@ -122,7 +107,7 @@ internal fun Step6DocumentSubmitStep(
     uiState: OccurrenceUiState,
     onIntent: (OccurrenceIntent) -> Unit,
     onBack: () -> Unit,
-    onClose:() -> Unit,
+    onClose: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val taminColors = LocalTaminColors.current
@@ -147,11 +132,12 @@ internal fun Step6DocumentSubmitStep(
         }
     }
     val showUploadWave = step.isUploadingDoc || !waveAnimationComplete
-    val newlyUploadedDoc = if (showUploadWave && step.uploadedDocuments.size > uploadedCountBeforeCurrent) {
-        step.uploadedDocuments.last()
-    } else {
-        null
-    }
+    val newlyUploadedDoc =
+        if (showUploadWave && step.uploadedDocuments.size > uploadedCountBeforeCurrent) {
+            step.uploadedDocuments.last()
+        } else {
+            null
+        }
 
     fun handlePicked(file: PlatformFile?) {
         val docType = uiState.dialogs.pendingDocType ?: return
@@ -162,9 +148,20 @@ internal fun Step6DocumentSubmitStep(
         scope.launch {
             try {
                 val bytes = file.readBytes()
-                onIntent(OccurrenceIntent.UploadDocument(typeId = docType.id, typeName = docType.title, fileName = file.name, fileBytes = bytes))
+                onIntent(
+                    OccurrenceIntent.UploadDocument(
+                        typeId = docType.id,
+                        typeName = docType.title,
+                        fileName = file.name,
+                        fileBytes = bytes
+                    )
+                )
             } catch (e: Exception) {
-                val msg = try { getString(Res.string.error_file_read_fallback) } catch (_: Exception) { e.message.orEmpty() }
+                val msg = try {
+                    getString(Res.string.error_file_read_fallback)
+                } catch (_: Exception) {
+                    e.message.orEmpty()
+                }
                 toaster.error(msg)
             } finally {
                 onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(pendingDocType = null)))
@@ -172,7 +169,10 @@ internal fun Step6DocumentSubmitStep(
         }
     }
 
-    val galleryLauncher = rememberFilePickerLauncher(type = FileKitType.Image) { file: PlatformFile? -> handlePicked(file) }
+    val galleryLauncher =
+        rememberFilePickerLauncher(type = FileKitType.Image) { file: PlatformFile? ->
+            handlePicked(file)
+        }
     val cameraLauncher = rememberCameraPickerLauncher { file: PlatformFile? -> handlePicked(file) }
 
     Scaffold(
@@ -227,7 +227,10 @@ internal fun Step6DocumentSubmitStep(
                             color = taminColors.textPrimary,
                         )
                         StatusPill(
-                            text = stringResource(Res.string.occurrence_documents_min_hint, step.uploadedDocuments.size.toString()),
+                            text = stringResource(
+                                Res.string.occurrence_documents_min_hint,
+                                step.uploadedDocuments.size.toString()
+                            ),
                             containerColor = if (uiState.isStep6Valid) taminColors.greenBg else taminColors.orangeBg,
                             contentColor = if (uiState.isStep6Valid) taminColors.greenText else taminColors.orangeText,
                         )
@@ -242,19 +245,34 @@ internal fun Step6DocumentSubmitStep(
                         Spacer(modifier = Modifier.height(Spacing.md))
                         Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                             docsToShowNormally.forEach { doc ->
-                                UploadedDocRow(
-                                    doc = doc,
-                                    onDelete = { onIntent(OccurrenceIntent.RemoveDocument(doc.guid)) },
-                                    onPreview = { previewDoc = it },
+                                val base64 =
+                                    remember(doc.bytes) { doc.bytes?.let { Base64.Default.encode(it) } }
+                                TaminDocumentUploadCard(
+                                    title = doc.typeName,
+                                    state = TaminDocumentUploadState.Uploaded,
+                                    statusText = doc.fileName,
+                                    thumbnailBase64 = base64,
+                                    onPreviewClick = { previewDoc = doc },
+                                    onDeleteClick = { onIntent(OccurrenceIntent.RemoveDocument(doc.guid)) },
                                 )
                             }
                             if (showUploadWave) {
-                                UploadingDocRow(
-                                    typeName = newlyUploadedDoc?.typeName ?: pendingUploadTypeName,
-                                    fileName = newlyUploadedDoc?.fileName ?: pendingUploadFileName,
-                                    fileBytes = newlyUploadedDoc?.bytes ?: pendingUploadFileBytes,
-                                    onFillComplete = { waveAnimationComplete = true },
+                                val typeName = newlyUploadedDoc?.typeName ?: pendingUploadTypeName
+                                val fileName = newlyUploadedDoc?.fileName ?: pendingUploadFileName
+                                val fileBytes = newlyUploadedDoc?.bytes ?: pendingUploadFileBytes
+                                val base64 =
+                                    remember(fileBytes) { fileBytes?.let { Base64.Default.encode(it) } }
+                                TaminDocumentUploadCard(
+                                    title = typeName,
+                                    state = TaminDocumentUploadState.Uploading,
+                                    statusText = fileName,
+                                    thumbnailBase64 = base64,
+                                    onCardClick = null,
                                 )
+                                LaunchedEffect(showUploadWave) {
+                                    kotlinx.coroutines.delay(1600)
+                                    waveAnimationComplete = true
+                                }
                             }
                         }
                     }
@@ -270,7 +288,15 @@ internal fun Step6DocumentSubmitStep(
                             .dashedOutline(taminColors.blueText, CornerRadius.lg, Thickness.border)
                             .clickable(
                                 enabled = !showUploadWave,
-                                onClick = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showDocTypeSheet = true))) }
+                                onClick = {
+                                    onIntent(
+                                        OccurrenceIntent.UpdateDialogs(
+                                            uiState.dialogs.copy(
+                                                showDocTypeSheet = true
+                                            )
+                                        )
+                                    )
+                                }
                             )
                             .padding(vertical = Spacing.md),
                         horizontalArrangement = Arrangement.Center,
@@ -365,7 +391,7 @@ internal fun Step6DocumentSubmitStep(
                     }
                 }
                 Spacer(modifier = Modifier.height(Spacing.md))
-                InfoBanner(message =  stringResource(Res.string.occurrence_submit_disclaimer))
+                InfoBanner(message = stringResource(Res.string.occurrence_submit_disclaimer))
                 Spacer(modifier = Modifier.height(Spacing.lg))
                 Spacer(modifier = Modifier.height(padding.calculateBottomPadding()))
             }
@@ -386,7 +412,12 @@ internal fun Step6DocumentSubmitStep(
     if (uiState.dialogs.showDocTypeSheet) {
         OccurrenceSelectionBottomSheet(
             title = stringResource(Res.string.occurrence_sheet_doc_type_title),
-            options = step.docTypes.map { OccurrenceSheetOption(id = it.id.toString(), title = it.title) },
+            options = step.docTypes.map {
+                OccurrenceSheetOption(
+                    id = it.id.toString(),
+                    title = it.title
+                )
+            },
             selectedId = null,
             onSelect = { option ->
                 val docType = step.docTypes.first { it.id.toString() == option.id }
@@ -400,14 +431,23 @@ internal fun Step6DocumentSubmitStep(
                     )
                 )
             },
-            onDismiss = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showDocTypeSheet = false))) },
+            onDismiss = {
+                onIntent(
+                    OccurrenceIntent.UpdateDialogs(
+                        uiState.dialogs.copy(
+                            showDocTypeSheet = false
+                        )
+                    )
+                )
+            },
         )
     }
 
     val currentPendingDocType = uiState.dialogs.pendingDocType
     if (uiState.dialogs.showDocumentSourceSheet && currentPendingDocType != null) {
-        OccurrenceDocumentSourceSheet(
+        TaminDocumentSourceSheet(
             title = currentPendingDocType.title,
+            showRemoveOption = false,
 
             onSelectCamera = {
                 onIntent(
@@ -471,153 +511,6 @@ internal fun Step6DocumentSubmitStep(
     }
 }
 
-@OptIn(ExperimentalEncodingApi::class)
-@Composable
-private fun UploadedDocRow(
-    doc: OccurrenceUploadedDocDN,
-    onDelete: () -> Unit,
-    onPreview: (OccurrenceUploadedDocDN) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val taminColors = LocalTaminColors.current
-    val base64 = remember(doc.bytes) { doc.bytes?.let { Base64.Default.encode(it) } }
-    val shape = RoundedCornerShape(CornerRadius.lg)
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(shape)
-            .background(taminColors.greenBg)
-            .border(Thickness.border, taminColors.greenBorder, shape)
-            .padding(Spacing.md),
-    ) {
-        Box(
-            modifier = Modifier
-                .size(IconSize.xlarge)
-                .clip(RoundedCornerShape(CornerRadius.iconTile))
-                .background(if (base64 != null) taminColors.blueBg else taminColors.greenText)
-                .then(
-                    if (doc.bytes != null) {
-                        Modifier.clickable { onPreview(doc) }
-                    } else Modifier
-                ),
-            contentAlignment = Alignment.Center,
-        ) {
-            if (base64 != null) {
-                LoadAsyncImage(
-                    model = base64,
-                    contentDescription = doc.typeName,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize(),
-                )
-            } else {
-                Icon(
-                    imageVector = vectorResource(Res.drawable.ic_tamin_check),
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(IconSize.banner),
-                )
-            }
-        }
-        Spacer(modifier = Modifier.width(Spacing.md))
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .then(
-                    if (doc.bytes != null) {
-                        Modifier.clickable { onPreview(doc) }
-                    } else Modifier
-                )
-        ) {
-            Text(text = doc.typeName, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = taminColors.textPrimary)
-            Spacer(modifier = Modifier.height(Spacing.xxs))
-            Text(text = doc.fileName, style = MaterialTheme.typography.bodySmall, color = taminColors.textMuted)
-        }
-        Spacer(modifier = Modifier.width(Spacing.sm))
-        IconButton(
-            onClick = onDelete,
-            modifier = Modifier
-                .size(IconSize.large)
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Delete,
-                contentDescription = null,
-                tint = taminColors.dangerText,
-                modifier = Modifier.size(IconSize.small),
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalEncodingApi::class)
-@Composable
-private fun UploadingDocRow(
-    typeName: String,
-    fileName: String,
-    fileBytes: ByteArray? = null,
-    onFillComplete: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val taminColors = LocalTaminColors.current
-    val shape = RoundedCornerShape(CornerRadius.lg)
-    val base64 = remember(fileBytes) { fileBytes?.let { Base64.Default.encode(it) } }
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(shape),
-    ) {
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .clip(shape)
-                .background(taminColors.bgSurface),
-        )
-        LiquidWaveProgressBar(
-            modifier = Modifier
-                .matchParentSize()
-                .clip(shape),
-            onFillComplete = onFillComplete,
-        )
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(shape)
-                .border(Thickness.border, taminColors.border, shape)
-                .padding(Spacing.md),
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(IconSize.xlarge)
-                    .clip(RoundedCornerShape(CornerRadius.iconTile))
-                    .background(taminColors.blueBg),
-                contentAlignment = Alignment.Center,
-            ) {
-                if (base64 != null) {
-                    LoadAsyncImage(
-                        model = base64,
-                        contentDescription = typeName,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize(),
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Outlined.Image,
-                        contentDescription = null,
-                        tint = taminColors.blueText,
-                        modifier = Modifier.size(IconSize.medium),
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.width(Spacing.md))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = typeName, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = taminColors.textPrimary)
-                Spacer(modifier = Modifier.height(Spacing.xxs))
-                Text(text = fileName, style = MaterialTheme.typography.bodySmall, color = taminColors.textMuted)
-            }
-        }
-    }
-}
 
 @PreviewRtlTheme
 @Preview
@@ -632,7 +525,17 @@ private fun Step6DocumentSubmitStepPreview() {
                         fullName = "علی محمدی",
                     ),
                     workshop = WorkshopStepState(
-                        selectedWorkshop = WorkshopItemPR(id = "1", workshopCode = "1412345", branchCode = "014", name = "کارگاه تولیدی الف", employerName = "شرکت الف", employerPhone = "02112345678", address = "تهران، خیابان ولیعصر", postalCode = "1234567890", phone = "02112345678"),
+                        selectedWorkshop = WorkshopItemPR(
+                            id = "1",
+                            workshopCode = "1412345",
+                            branchCode = "014",
+                            name = "کارگاه تولیدی الف",
+                            employerName = "شرکت الف",
+                            employerPhone = "02112345678",
+                            address = "تهران، خیابان ولیعصر",
+                            postalCode = "1234567890",
+                            phone = "02112345678"
+                        ),
                         employerName = "شرکت الف",
                     ),
                     accident = AccidentStepState(
@@ -645,10 +548,23 @@ private fun Step6DocumentSubmitStepPreview() {
                         transportation = "وسیله نقلیه شخصی",
                     ),
                     documentSubmit = DocumentSubmitStepState(
-                        docTypes = listOf(OccurrenceDocTypePR(id = 1, title = "گزارش حادثه"), OccurrenceDocTypePR(id = 2, title = "مدارک پزشکی")),
+                        docTypes = listOf(
+                            OccurrenceDocTypePR(id = 1, title = "گزارش حادثه"),
+                            OccurrenceDocTypePR(id = 2, title = "مدارک پزشکی")
+                        ),
                         uploadedDocuments = listOf(
-                            OccurrenceUploadedDocDN(guid = "abc-1", typeId = 1, typeName = "گزارش حادثه", fileName = "report.jpg"),
-                            OccurrenceUploadedDocDN(guid = "abc-2", typeId = 2, typeName = "مدارک پزشکی", fileName = "medical.jpg"),
+                            OccurrenceUploadedDocDN(
+                                guid = "abc-1",
+                                typeId = 1,
+                                typeName = "گزارش حادثه",
+                                fileName = "report.jpg"
+                            ),
+                            OccurrenceUploadedDocDN(
+                                guid = "abc-2",
+                                typeId = 2,
+                                typeName = "مدارک پزشکی",
+                                fileName = "medical.jpg"
+                            ),
                         ),
                     ),
                 ),

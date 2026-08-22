@@ -5,6 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class OccurrenceDocTypeDTO(
-    @SerialName("docTypeId") val docTypeId: String? = null,
-    @SerialName("docDesc") val docDesc: String? = null,
+    @SerialName("docTypeId") val docTypeId: String?,
+    @SerialName("docDesc") val docDesc: String?,
 )

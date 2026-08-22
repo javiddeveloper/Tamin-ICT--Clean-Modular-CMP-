@@ -25,6 +25,9 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
+import org.jetbrains.compose.resources.getString
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.orotez_protez_document_duplicate_error
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
@@ -205,6 +208,13 @@ class OccurrenceViewModel(
 
     private fun uploadDocument(intent: OccurrenceIntent.UploadDocument): Flow<PartialState> = flow {
         val current = uiState.value.documentSubmit
+        
+        val isDuplicate = current.uploadedDocuments.any { it.bytes?.contentEquals(intent.fileBytes) == true }
+        if (isDuplicate) {
+            sendEvent(OccurrenceEvent.ShowToast(getString(Res.string.orotez_protez_document_duplicate_error)))
+            return@flow
+        }
+
         emit(
             PartialState.DocumentSubmitUpdated(
                 current.copy(

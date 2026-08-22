@@ -12,6 +12,4 @@ data class WorkshopItemDN(
     val phone: String,
     val nationality: String,
     val nationalityCode: String,
-) {
-    val displayCode: String get() = "$workshopCode - شعبه $branchCode"
-}
+)

@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.taminServices.occurrence.components
+package com.tamin.taminhamrah.ui.components.document
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -31,21 +31,19 @@ import taminx.core.core_ui.occurrence_document_source_camera_subtitle
 import taminx.core.core_ui.occurrence_document_source_camera_title
 import taminx.core.core_ui.occurrence_document_source_gallery_subtitle
 import taminx.core.core_ui.occurrence_document_source_gallery_title
+import taminx.core.core_ui.orotez_protez_document_source_remove
+import taminx.core.core_ui.orotez_protez_document_source_subtitle
 
 private val OptionRowMinHeight = 64.dp
 
-/**
- * Camera-vs-gallery picker shown after a document type has been chosen in Step6's document-type
- * sheet — [title] is the selected document type's own name (e.g. "مدارک درمانی"), matching how the
- * reference design reuses the type as the sheet heading rather than a generic label.
- */
 @Composable
-fun OccurrenceDocumentSourceSheet(
+fun TaminDocumentSourceSheet(
     title: String,
+    showRemoveOption: Boolean = false,
     onSelectCamera: () -> Unit,
     onSelectGallery: () -> Unit,
+    onRemove: (() -> Unit)? = null,
     onDismiss: () -> Unit,
-    modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
     ModalBottomSheet(
@@ -53,7 +51,6 @@ fun OccurrenceDocumentSourceSheet(
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = colors.bgPage,
         shape = RoundedCornerShape(topStart = CornerRadius.sheet, topEnd = CornerRadius.sheet),
-        modifier = modifier,
     ) {
         Column(
             modifier = Modifier
@@ -67,51 +64,72 @@ fun OccurrenceDocumentSourceSheet(
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 color = colors.textPrimary,
             )
+            Spacer(Modifier.height(Spacing.xxs))
+            Text(
+                text = stringResource(Res.string.orotez_protez_document_source_subtitle),
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.textMuted,
+            )
             Spacer(Modifier.height(Spacing.lg))
 
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                OccurrenceDocumentSourceRow(
+                TaminDocumentSourceRow(
                     title = stringResource(Res.string.occurrence_document_source_camera_title),
                     subtitle = stringResource(Res.string.occurrence_document_source_camera_subtitle),
                     onClick = onSelectCamera,
                 )
-                OccurrenceDocumentSourceRow(
+                TaminDocumentSourceRow(
                     title = stringResource(Res.string.occurrence_document_source_gallery_title),
                     subtitle = stringResource(Res.string.occurrence_document_source_gallery_subtitle),
                     onClick = onSelectGallery,
                 )
+                if (showRemoveOption && onRemove != null) {
+                    TaminDocumentSourceRow(
+                        title = stringResource(Res.string.orotez_protez_document_source_remove),
+                        subtitle = null,
+                        isDestructive = true,
+                        onClick = onRemove,
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-private fun OccurrenceDocumentSourceRow(
+private fun TaminDocumentSourceRow(
     title: String,
-    subtitle: String,
+    subtitle: String?,
     onClick: () -> Unit,
+    isDestructive: Boolean = false,
 ) {
     val colors = LocalTaminColors.current
+    val titleColor = if (isDestructive) colors.dangerText else colors.textPrimary
+    val background = if (isDestructive) colors.dangerBg else colors.bgSurface
+    val border = if (isDestructive) colors.dangerBorder else colors.border
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = OptionRowMinHeight)
             .clip(RoundedCornerShape(CornerRadius.lg))
-            .background(colors.bgSurface)
-            .border(Thickness.border, colors.border, RoundedCornerShape(CornerRadius.lg))
+            .background(background)
+            .border(Thickness.border, border, RoundedCornerShape(CornerRadius.lg))
             .clickable(onClick = onClick)
             .padding(horizontal = Spacing.lg, vertical = Spacing.lg),
     ) {
         Text(
             text = title,
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-            color = colors.textPrimary,
+            color = titleColor,
         )
-        Spacer(Modifier.height(Spacing.xxs))
-        Text(
-            text = subtitle,
-            style = MaterialTheme.typography.labelSmall,
-            color = colors.textMuted,
-        )
+        if (subtitle != null) {
+            Spacer(Modifier.height(Spacing.xxs))
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.labelSmall,
+                color = colors.textMuted,
+            )
+        }
     }
 }

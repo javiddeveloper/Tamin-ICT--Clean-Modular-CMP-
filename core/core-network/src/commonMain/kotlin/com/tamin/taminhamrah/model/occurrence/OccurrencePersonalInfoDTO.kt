@@ -5,14 +5,14 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class OccurrencePersonalInfoDTO(
-    @SerialName("nationalCode") val nationalCode: String? = null,
-    @SerialName("firstName") val firstName: String? = null,
-    @SerialName("lastName") val lastName: String? = null,
-    @SerialName("fatherName") val fatherName: String? = null,
-    @SerialName("gender") val gender: String? = null,
-    @SerialName("birthDate") val birthDate: String? = null,
-    @SerialName("insuranceNumber") val insuranceNumber: String? = null,
-    @SerialName("branchCode") val branchCode: String? = null,
-    @SerialName("nationality") val nationality: String? = null,
-    @SerialName("insuranceType") val insuranceType: String? = null,
+    @SerialName("nationalCode") val nationalCode: String?,
+    @SerialName("firstName") val firstName: String?,
+    @SerialName("lastName") val lastName: String?,
+    @SerialName("fatherName") val fatherName: String?,
+    @SerialName("gender") val gender: String?,
+    @SerialName("birthDate") val birthDate: String?,
+    @SerialName("insuranceNumber") val insuranceNumber: String?,
+    @SerialName("branchCode") val branchCode: String?,
+    @SerialName("nationality") val nationality: String?,
+    @SerialName("insuranceType") val insuranceType: String?,
 )

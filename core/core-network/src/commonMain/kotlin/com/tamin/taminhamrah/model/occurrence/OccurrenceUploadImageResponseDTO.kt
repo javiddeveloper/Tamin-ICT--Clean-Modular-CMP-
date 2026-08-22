@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class OccurrenceUploadImageResponseDTO(
-    @SerialName("guid") val guid: String? = null,
+    @SerialName("guid") val guid: String?,
 )

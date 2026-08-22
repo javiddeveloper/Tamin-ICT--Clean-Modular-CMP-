@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class OccurrenceResponseDTO(
-    @SerialName("reportRefrenceNumber") val reportRefrenceNumber: String? = null,
+    @SerialName("reportRefrenceNumber") val reportRefrenceNumber: String?,
 )
