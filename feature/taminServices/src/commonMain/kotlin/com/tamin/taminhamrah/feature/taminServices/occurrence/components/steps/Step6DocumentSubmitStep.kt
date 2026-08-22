@@ -36,6 +36,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
@@ -85,8 +86,10 @@ import io.github.vinceglb.filekit.readBytes
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.error_file_read_fallback
+import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.occurrence_add_document
 import taminx.core.core_ui.occurrence_camera_permission_denied
 import taminx.core.core_ui.occurrence_doc_format_hint
@@ -453,18 +456,21 @@ private fun UploadedDocRow(
 ) {
     val taminColors = LocalTaminColors.current
     val base64 = remember(doc.bytes) { doc.bytes?.let { Base64.Default.encode(it) } }
+    val shape = RoundedCornerShape(CornerRadius.lg)
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .fillMaxWidth()
-            .taminSurface(CornerRadius.lg)
+            .clip(shape)
+            .background(taminColors.greenBg)
+            .border(Thickness.border, taminColors.greenBorder, shape)
             .padding(Spacing.md),
     ) {
         Box(
             modifier = Modifier
                 .size(IconSize.xlarge)
                 .clip(RoundedCornerShape(CornerRadius.iconTile))
-                .background(taminColors.blueBg)
+                .background(if (base64 != null) taminColors.blueBg else taminColors.greenText)
                 .then(
                     if (doc.bytes != null) {
                         Modifier.clickable { onPreview(doc) }
@@ -481,10 +487,10 @@ private fun UploadedDocRow(
                 )
             } else {
                 Icon(
-                    imageVector = Icons.Outlined.Image,
+                    imageVector = vectorResource(Res.drawable.ic_tamin_check),
                     contentDescription = null,
-                    tint = taminColors.blueText,
-                    modifier = Modifier.size(IconSize.medium),
+                    tint = Color.White,
+                    modifier = Modifier.size(IconSize.banner),
                 )
             }
         }
@@ -507,7 +513,6 @@ private fun UploadedDocRow(
             onClick = onDelete,
             modifier = Modifier
                 .size(IconSize.large)
-                .background(taminColors.dangerBg, CircleShape),
         ) {
             Icon(
                 imageVector = Icons.Outlined.Delete,
