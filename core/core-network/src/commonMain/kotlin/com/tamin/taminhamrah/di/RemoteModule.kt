@@ -20,6 +20,8 @@ import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSource
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.historySource.HistoryRemoteDataSource
 import com.tamin.taminhamrah.dataSource.historySource.HistoryRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.calculateWagePension.CalculateWagePensionRemoteDataSource
+import com.tamin.taminhamrah.dataSource.calculateWagePension.CalculateWagePensionRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.pension.PensionRemoteDataSource
 import com.tamin.taminhamrah.dataSource.pension.PensionRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.inbox.PersonalInboxRemoteDataSource
@@ -117,6 +119,13 @@ val remoteModule = module {
         HistoryRemoteDataSourceImpl(
             apiServices = get(),
             queryBuilder = get(),
+            errorParser = get()
+        )
+    }
+
+    single<CalculateWagePensionRemoteDataSource> {
+        CalculateWagePensionRemoteDataSourceImpl(
+            apiService = get(),
             errorParser = get()
         )
     }
