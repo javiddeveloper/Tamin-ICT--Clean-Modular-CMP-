@@ -501,6 +501,9 @@
     <string name="active_relation_header_inactive_count">%1$s ارتباط غیرفعال</string>
     <string name="active_relation_header_check_time">بررسی: امروز %1$s</string>
 
+    <string name="validation_status_badge_valid">معتبر</string>
+    <string name="validation_status_badge_invalid">نامعتبر</string>
+
     <!-- Inbox Item Card -->
     <string name="inbox_action_operations">عملیات</string>
     <string name="inbox_inquiry_password">کد رمز استعلام</string>

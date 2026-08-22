@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileIntent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState.PartialState
 import com.tamin.taminhamrah.feature.profile.ui.model.ProfileMenuItem
+import com.tamin.taminhamrah.mapper.activeRelation.toUiModelList
 import com.tamin.taminhamrah.mapper.identity.toPresentation
 import com.tamin.taminhamrah.mapper.relation.toPresentation
 import com.tamin.taminhamrah.model.DarkThemeConfig
@@ -98,8 +99,19 @@ class ProfileViewModel(
                 emit(PartialState.DependentsCountLoaded(subdominant.list?.size ?: 0))
             }
         }
+        val activeRelationFlow = flow {
+            getRelationTaminAllUseCase.invoke().collect { relations ->
+                val uiItems = relations.toUiModelList()
+                emit(
+                    PartialState.ActiveRelationStatusLoaded(
+                        activeCount = uiItems.count { it.isActive },
+                        inactiveCount = uiItems.count { !it.isActive }
+                    )
+                )
+            }
+        }
 
-        merge(userIdFlow, imageFlow, identityFlow, taminRelationFlow, dependentsCountFlow).collect {
+        merge(userIdFlow, imageFlow, identityFlow, taminRelationFlow, dependentsCountFlow, activeRelationFlow).collect {
             emit(it)
         }
     }
@@ -217,6 +229,12 @@ class ProfileViewModel(
 
         is PartialState.DependentsCountLoaded -> currentState.copy(
             dependentsCount = partialState.count
+        )
+
+        is PartialState.ActiveRelationStatusLoaded -> currentState.copy(
+            activeRelationCount = partialState.activeCount,
+            inactiveRelationCount = partialState.inactiveCount,
+            isActiveRelationLoading = false
         )
 
         is PartialState.ImageRequestLoading -> currentState.copy(
