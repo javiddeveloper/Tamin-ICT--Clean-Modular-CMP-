@@ -665,6 +665,7 @@
     <string name="bs_family_cancer">سابقه ابتلا به سرطان در خانواده</string>
     <string name="bs_province">استان</string>
     <string name="bs_city">شهر</string>
+    <string name="bs_branch">شعبه تأمین اجتماعی</string>
     <string name="bs_blood_group">گروه خونی</string>
     <string name="bs_smoking_addiction">آیا از دخانیات استفاده می‌کنید؟</string>
     <string name="bs_drug_addiction">آیا اعتیاد دارید؟</string>

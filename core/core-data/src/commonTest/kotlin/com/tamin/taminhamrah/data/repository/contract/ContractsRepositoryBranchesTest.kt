@@ -93,6 +93,35 @@ class ContractsRepositoryBranchesTest {
     }
 
     @Test
+    fun `branches survive the server echoing a differently padded city code`() = runTest {
+        // The API is loose about zero-padding. Filing rows under the echoed code meant the
+        // read-back — which queries by the code we asked for — found nothing, and the picker
+        // opened empty.
+        val remote = FakeContractsRemoteDataSource(
+            branches = listOf(tehranBranch.copy(cityCode = "701")),
+        )
+
+        val branches = repository(remote, FakeBranchDao()).getBranches("0701").toList().last()
+
+        assertEquals(listOf("123"), branches.map { it.code })
+    }
+
+    @Test
+    fun `rows without a code are dropped rather than collapsing onto one key`() = runTest {
+        val remote = FakeContractsRemoteDataSource(
+            branches = listOf(
+                tehranBranch,
+                tehranBranch.copy(code = null, name = "بی‌کد ۱"),
+                tehranBranch.copy(code = "", name = "بی‌کد ۲"),
+            ),
+        )
+
+        val branches = repository(remote, FakeBranchDao()).getBranches("0701").toList().last()
+
+        assertEquals(listOf("123"), branches.map { it.code })
+    }
+
+    @Test
     fun `a failed lookup with nothing cached reports the failure`() = runTest {
         val remote = FakeContractsRemoteDataSource(error = IllegalStateException("boom"))
 

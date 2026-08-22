@@ -108,6 +108,7 @@ fun SelectBranchStepContent(
             onSelected = onBranchSelected,
             errorMessage = branchesError,
             onRetry = onRetryBranches,
+            sheetType = TaminBottomSheetType.BRANCH,
         )
     }
 }

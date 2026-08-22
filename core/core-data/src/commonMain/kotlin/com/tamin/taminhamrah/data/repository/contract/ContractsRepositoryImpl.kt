@@ -80,8 +80,11 @@ class ContractsRepositoryImpl(
 
         try {
             val response = contractsRemoteDataSource.getBranches(branchListQuery(cityCode))
-            val remoteBranches = response.list ?: emptyList()
-            branchDao.replaceAllForCity(cityCode, remoteBranches.map { it.toEntity() })
+            val remoteBranches = (response.list ?: emptyList())
+                // `code` is the primary key and is what the picker returns; a row without one
+                // cannot be selected and would collide with every other blank-coded row.
+                .filter { !it.code.isNullOrBlank() }
+            branchDao.replaceAllForCity(cityCode, remoteBranches.map { it.toEntity(cityCode) })
         } catch (e: Exception) {
             if (localBranches.isEmpty()) {
                 throw e
@@ -209,7 +212,8 @@ class ContractsRepositoryImpl(
     )
 
     private fun branchListQuery(cityCode: String): ApiQueryParamDN = ApiQueryParamDN(
-        page = 0,
+        // 1, not 0: every other query in this layer and the old client's pager are 1-indexed.
+        page = 1,
         start = 0,
         limit = 100,
         filters = listOf(

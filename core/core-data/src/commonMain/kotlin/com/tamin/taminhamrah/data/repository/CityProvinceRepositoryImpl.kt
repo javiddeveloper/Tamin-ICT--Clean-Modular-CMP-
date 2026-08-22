@@ -46,7 +46,7 @@ internal class CityProvinceRepositoryImpl(
     }
 
     override fun getCities(cityName: String?, provinceCode: String?): Flow<List<CityDN>> = flow {
-        val response = commonRemoteDataSource.getCityName(CityListQuery.build(cityName))
+        val response = commonRemoteDataSource.getCityName(CityListQuery.build(cityName, provinceCode))
         response.list.forEach { cityDto ->
             cityProvinceDao.upsertCity(cityDto.toEntity())
         }
