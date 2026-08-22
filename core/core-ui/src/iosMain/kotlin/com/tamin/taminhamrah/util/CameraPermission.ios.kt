@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.taminServices.occurrence.camera
+package com.tamin.taminhamrah.util
 
 import androidx.compose.runtime.Composable
 import platform.AVFoundation.AVAuthorizationStatusAuthorized

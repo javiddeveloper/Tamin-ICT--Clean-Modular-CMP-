@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -41,7 +40,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import com.tamin.taminhamrah.feature.taminServices.occurrence.camera.rememberCameraPermission
+import com.tamin.taminhamrah.util.rememberCameraPermission
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.InfoBanner
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceDocumentSourceSheet
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceSelectionBottomSheet
@@ -409,39 +408,65 @@ internal fun Step6DocumentSubmitStep(
     if (uiState.dialogs.showDocumentSourceSheet && currentPendingDocType != null) {
         OccurrenceDocumentSourceSheet(
             title = currentPendingDocType.title,
+
             onSelectCamera = {
-                onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showDocumentSourceSheet = false)))
-                if (cameraPermission.granted) {
-                    cameraLauncher.launch()
-                } else {
-                    cameraPermission.request { granted ->
-                        if (granted) {
-                            cameraLauncher.launch()
-                        } else {
-                            onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(pendingDocType = null)))
-                            scope.launch {
-                                val msg = try {
-                                    getString(Res.string.occurrence_camera_permission_denied)
-                                } catch (_: Exception) {
-                                    ""
-                                }
-                                toaster.error(msg)
+                onIntent(
+                    OccurrenceIntent.UpdateDialogs(
+                        uiState.dialogs.copy(
+                            showDocumentSourceSheet = false
+                        )
+                    )
+                )
+
+                cameraPermission.request { granted ->
+                    if (granted) {
+                        cameraLauncher.launch()
+                    } else {
+                        onIntent(
+                            OccurrenceIntent.UpdateDialogs(
+                                uiState.dialogs.copy(
+                                    pendingDocType = null
+                                )
+                            )
+                        )
+
+                        scope.launch {
+                            val message = try {
+                                getString(
+                                    Res.string.occurrence_camera_permission_denied
+                                )
+                            } catch (_: Exception) {
+                                ""
                             }
+
+                            toaster.error(message)
                         }
                     }
                 }
             },
+
             onSelectGallery = {
-                onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showDocumentSourceSheet = false)))
+                onIntent(
+                    OccurrenceIntent.UpdateDialogs(
+                        uiState.dialogs.copy(
+                            showDocumentSourceSheet = false
+                        )
+                    )
+                )
+
                 galleryLauncher.launch()
             },
+
             onDismiss = {
                 onIntent(
                     OccurrenceIntent.UpdateDialogs(
-                        uiState.dialogs.copy(showDocumentSourceSheet = false, pendingDocType = null)
+                        uiState.dialogs.copy(
+                            showDocumentSourceSheet = false,
+                            pendingDocType = null
+                        )
                     )
                 )
-            },
+            }
         )
     }
 }
