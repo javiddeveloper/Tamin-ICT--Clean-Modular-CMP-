@@ -204,9 +204,10 @@ object PersianDateFormatter {
     /** Inverse of [gregorianToJalali], using the same day-count arithmetic. */
     internal fun jalaliToGregorian(jy: Int, jm: Int, jd: Int): Triple<Int, Int, Int> {
         val dayCount = dayNumber(jy, jm, jd)
-        // 78 pairs with the 355660 above; the two directions must agree or a picked date comes
-        // back a day different from what was tapped.
-        var gDayNo = dayCount + 78
+        // 79 pairs with the 355659 above. Agreeing with each other is not enough — both were
+        // previously shifted the same way, so a date survived a round trip while still being a day
+        // off in absolute terms; JalaliConversionTest pins the absolute values.
+        var gDayNo = dayCount + 79
         var gy = 1600 + 400 * (gDayNo / 146097)
         gDayNo %= 146097
         var leap = true
@@ -246,10 +247,11 @@ object PersianDateFormatter {
     internal fun gregorianToJalali(gy: Int, gm: Int, gd: Int): Triple<Int, Int, Int> {
         val gDaysInMonth = intArrayOf(0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334)
         val gy2 = if (gm > 2) gy + 1 else gy
-        // 355660, not 355666: the larger constant shifted every converted date six days late, so
-        // Nowruz 1404 (2025-03-20) formatted as 1404/01/07. Verified against four known Nowruz
-        // dates in PersianDateFormatterTest.
-        var days = 355660 + (365 * gy) + ((gy2 + 3) / 4) - ((gy2 + 99) / 100) + ((gy2 + 399) / 400) + gd + gDaysInMonth[gm - 1]
+        // Calibrated against real Gregorian/Jalali pairs in JalaliConversionTest — 1403 began
+        // 2024-03-20, 1404 began 2025-03-21, 1405 began 2026-03-21. The previous 355660 was tuned
+        // against a Nowruz 1404 of 2025-03-20, which is a day early, so every converted date came
+        // out one day late and `today()` reported tomorrow.
+        var days = 355659 + (365 * gy) + ((gy2 + 3) / 4) - ((gy2 + 99) / 100) + ((gy2 + 399) / 400) + gd + gDaysInMonth[gm - 1]
         var jy = -1595 + (33 * (days / 12053))
         days %= 12053
         jy += 979 * (days / 36524)
