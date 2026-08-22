@@ -19,6 +19,13 @@ class FakeHistoryObjectionRepository : HistoryObjectionRepository {
     var deleteError: Throwable = RuntimeException("Delete error")
     var lastDeleteRequestNumber: String? = null
     var lastDeleteRowIndex: String? = null
+    var confirmNotExistResult = true
+    var shouldThrowOnConfirm = false
+    var confirmError: Throwable = RuntimeException("Confirm error")
+    var lastConfirmDescription: String? = null
+    var finalConfirmResult = "123456"
+    var shouldThrowOnFinalConfirm = false
+    var finalConfirmError: Throwable = RuntimeException("Final confirm error")
 
     override fun checkStatusNotExist(): Flow<Boolean> = flow { emit(false) }
 
@@ -38,5 +45,16 @@ class FakeHistoryObjectionRepository : HistoryObjectionRepository {
         lastDeleteRowIndex = rowIndex
         if (shouldThrowOnDelete) throw deleteError
         emit(deleteNotExistResult)
+    }
+
+    override fun confirmNotExist(description: String?): Flow<Boolean> = flow {
+        lastConfirmDescription = description
+        if (shouldThrowOnConfirm) throw confirmError
+        emit(confirmNotExistResult)
+    }
+
+    override fun finalConfirmNotExist(): Flow<String> = flow {
+        if (shouldThrowOnFinalConfirm) throw finalConfirmError
+        emit(finalConfirmResult)
     }
 }

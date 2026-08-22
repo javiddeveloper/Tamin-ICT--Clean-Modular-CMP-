@@ -7,7 +7,9 @@ import com.tamin.taminhamrah.feature.historyobjection.ui.contract.HistoryObjecti
 import com.tamin.taminhamrah.feature.historyobjection.ui.contract.HistoryObjectionUiState
 import com.tamin.taminhamrah.model.historyObjection.NotExistRequestDN
 import com.tamin.taminhamrah.useCases.historyObjection.CheckHistoryObjectionStatusNotExistUseCase
+import com.tamin.taminhamrah.useCases.historyObjection.ConfirmHistoryObjectionNotExistUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.DeleteHistoryObjectionNotExistRequestUseCase
+import com.tamin.taminhamrah.useCases.historyObjection.FinalConfirmHistoryObjectionNotExistUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.GetHistoryObjectionNotExistRequestsUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -41,6 +43,8 @@ class HistoryObjectionViewModelTest {
         checkHistoryObjectionStatusNotExistUseCase = CheckHistoryObjectionStatusNotExistUseCase(repository),
         getHistoryObjectionNotExistRequestsUseCase = GetHistoryObjectionNotExistRequestsUseCase(repository),
         deleteHistoryObjectionNotExistRequestUseCase = DeleteHistoryObjectionNotExistRequestUseCase(repository),
+        confirmHistoryObjectionNotExistUseCase = ConfirmHistoryObjectionNotExistUseCase(repository),
+        finalConfirmHistoryObjectionNotExistUseCase = FinalConfirmHistoryObjectionNotExistUseCase(repository),
     )
 
     @Test
@@ -101,6 +105,46 @@ class HistoryObjectionViewModelTest {
 
             assertEquals(false, errored.isDeleting)
             assertEquals(1, errored.notExistRequests.size)
+        }
+    }
+
+    @Test
+    fun submitConfirmed_whenConfirmReturnsTrue_callsFinalConfirmAndShowsTrackingNumber() = runTest(testDispatcher) {
+        repository.confirmNotExistResult = true
+        repository.finalConfirmResult = "61520081914"
+        val viewModel = createViewModel()
+
+        viewModel.uiState.test {
+            viewModel.sendIntent(HistoryObjectionIntent.OnDescriptionChanged("توضیح تست"))
+            awaitUntil { it.description == "توضیح تست" }
+
+            viewModel.sendIntent(HistoryObjectionIntent.OnSubmitClicked)
+            awaitUntil { it.showSubmitConfirmationDialog }
+
+            viewModel.sendIntent(HistoryObjectionIntent.OnSubmitConfirmed)
+            val succeeded = awaitUntil { it.trackingNumber != null }
+
+            assertEquals("توضیح تست", repository.lastConfirmDescription)
+            assertEquals("61520081914", succeeded.trackingNumber)
+            assertEquals(false, succeeded.showSubmitConfirmationDialog)
+            assertEquals(false, succeeded.isSubmitting)
+        }
+    }
+
+    @Test
+    fun submitConfirmed_whenConfirmReturnsFalse_showsErrorAndDoesNotCallFinalConfirm() = runTest(testDispatcher) {
+        repository.confirmNotExistResult = false
+        val viewModel = createViewModel()
+
+        viewModel.uiState.test {
+            viewModel.sendIntent(HistoryObjectionIntent.OnSubmitClicked)
+            awaitUntil { it.showSubmitConfirmationDialog }
+
+            viewModel.sendIntent(HistoryObjectionIntent.OnSubmitConfirmed)
+            val errored = awaitUntil { it.error != null }
+
+            assertNull(errored.trackingNumber)
+            assertEquals(false, errored.isSubmitting)
         }
     }
 

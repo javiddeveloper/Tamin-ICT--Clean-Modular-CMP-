@@ -24,6 +24,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.HorizontalDivider
@@ -92,6 +93,9 @@ import taminx.core.core_ui.action_cancel
 import taminx.core.core_ui.history_objection_active_request_message
 import taminx.core.core_ui.history_objection_active_request_title
 import taminx.core.core_ui.history_objection_add_new
+import taminx.core.core_ui.history_objection_confirm_send_action
+import taminx.core.core_ui.history_objection_confirm_send_message
+import taminx.core.core_ui.history_objection_confirm_send_title
 import taminx.core.core_ui.history_objection_delete
 import taminx.core.core_ui.history_objection_delete_confirm_message
 import taminx.core.core_ui.history_objection_delete_confirm_title
@@ -103,9 +107,12 @@ import taminx.core.core_ui.history_objection_empty_title
 import taminx.core.core_ui.history_objection_end_date
 import taminx.core.core_ui.history_objection_insurance_number
 import taminx.core.core_ui.history_objection_list_title
+import taminx.core.core_ui.history_objection_send_success_tracking_label
+import taminx.core.core_ui.history_objection_send_success_title
 import taminx.core.core_ui.history_objection_start_date
 import taminx.core.core_ui.history_objection_status_not_sent
 import taminx.core.core_ui.history_objection_submit
+import taminx.core.core_ui.history_objection_submit_success_confirm
 import taminx.core.core_ui.history_objection_title
 import taminx.core.core_ui.history_objection_workshop_code
 import taminx.core.core_ui.history_objection_workshop_name
@@ -114,6 +121,7 @@ import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_copy
 import taminx.core.core_ui.ic_tamin_edit
 import taminx.core.core_ui.ic_trash
+import taminx.core.core_ui.ic_warning
 import taminx.core.core_ui.send_history_access_denied_action
 import taminx.feature.history_objection.generated.resources.ic_history_objection
 import taminx.feature.history_objection.generated.resources.Res as FeatureRes
@@ -176,6 +184,21 @@ fun HistoryObjectionScreen(
         )
     }
 
+    if (uiState.showSubmitConfirmationDialog) {
+        SubmitConfirmationDialog(
+            onConfirm = { viewModel.sendIntent(HistoryObjectionIntent.OnSubmitConfirmed) },
+            onDismiss = { viewModel.sendIntent(HistoryObjectionIntent.OnSubmitConfirmationDismissed) },
+        )
+    }
+
+    val trackingNumber = uiState.trackingNumber
+    if (trackingNumber != null) {
+        TrackingNumberDialog(
+            trackingNumber = trackingNumber,
+            onAcknowledge = { viewModel.sendIntent(HistoryObjectionIntent.OnTrackingNumberAcknowledged) },
+        )
+    }
+
     ErrorStateView(
         message = uiState.error,
         onDismiss = { viewModel.sendIntent(HistoryObjectionIntent.OnErrorDismissed) },
@@ -212,8 +235,6 @@ private fun HandleHistoryObjectionEvents(
         when (event) {
             HistoryObjectionEvent.NavigateToAddNewObjection -> onNavigateToAddNew()
             is HistoryObjectionEvent.NavigateToEditNotExistRequest -> onNavigateToEdit(event.requestNumber, event.rowIndex)
-            // Skeleton only — no submit endpoint exists yet (docs/vault/History-Objection.md).
-            HistoryObjectionEvent.SubmitRequested -> {}
         }
     }
 }
@@ -247,6 +268,80 @@ private fun DeleteConfirmationDialog(
         icon = vectorResource(Res.drawable.ic_trash),
         iconTint = colors.dangerText,
         iconBackground = colors.dangerBorder,
+    )
+}
+
+@Composable
+private fun SubmitConfirmationDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val colors = LocalTaminColors.current
+
+    TaminConfirmationDialog(
+        title = stringResource(Res.string.history_objection_confirm_send_title),
+        description = stringResource(Res.string.history_objection_confirm_send_message),
+        confirmButton = {
+            TaminFilledButton(
+                text = stringResource(Res.string.history_objection_confirm_send_action),
+                onClick = onConfirm,
+                modifier = Modifier.fillMaxWidth(),
+                background = colors.buttonGradient,
+            )
+        },
+        dismissButton = {
+            TaminOutlinedButton(
+                text = stringResource(Res.string.action_cancel),
+                onClick = onDismiss,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
+        onDismissRequest = onDismiss,
+        icon = vectorResource(Res.drawable.ic_warning),
+        iconTint = colors.orangeText,
+        iconBackground = colors.orangeBg,
+    )
+}
+
+/** Shown once `finalconfirmnotexist` resolves — the tracking number to keep for follow-up. */
+@Composable
+private fun TrackingNumberDialog(
+    trackingNumber: String,
+    onAcknowledge: () -> Unit,
+) {
+    val colors = LocalTaminColors.current
+
+    TaminConfirmationDialog(
+        title = stringResource(Res.string.history_objection_send_success_title),
+        description = stringResource(Res.string.history_objection_send_success_tracking_label),
+        confirmButton = {
+            TaminFilledButton(
+                text = stringResource(Res.string.history_objection_submit_success_confirm),
+                onClick = onAcknowledge,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
+        dismissButton = {},
+        onDismissRequest = onAcknowledge,
+        icon = Icons.Default.Check,
+        iconTint = colors.greenText,
+        iconBackground = colors.greenBg,
+        content = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(CornerRadius.lg))
+                    .background(colors.blueBg)
+                    .padding(vertical = Spacing.md),
+                contentAlignment = Alignment.Center,
+            ) {
+                NumericText(
+                    text = trackingNumber,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = colors.blueText,
+                )
+            }
+        },
     )
 }
 

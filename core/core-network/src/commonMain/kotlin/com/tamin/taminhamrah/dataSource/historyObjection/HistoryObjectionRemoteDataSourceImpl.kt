@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.dataSource.historyObjection
 
 import com.tamin.taminhamrah.apiService.historyObjection.HistoryObjectionApiService
+import com.tamin.taminhamrah.model.historyObjection.ConfirmNotExistItemDTO
 import com.tamin.taminhamrah.model.historyObjection.NotExistRequestDTO
 import com.tamin.taminhamrah.model.historyObjection.SaveNotExistRequestDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
@@ -32,6 +33,14 @@ class HistoryObjectionRemoteDataSourceImpl(
 
     override suspend fun deleteNotExist(requestNumber: String, rowIndex: String): Boolean {
         return fetchData { historyObjectionApiService.deleteNotExist(requestNumber, rowIndex) }
+    }
+
+    override suspend fun confirmNotExist(description: String?): Boolean {
+        return fetchData { historyObjectionApiService.confirmNotExist(listOf(ConfirmNotExistItemDTO(userDesc = description))) }
+    }
+
+    override suspend fun finalConfirmNotExist(): String {
+        return fetchData { historyObjectionApiService.finalConfirmNotExist() }
     }
 
     private suspend fun <T> fetchData(call: suspend () -> BaseDTO<T>): T {

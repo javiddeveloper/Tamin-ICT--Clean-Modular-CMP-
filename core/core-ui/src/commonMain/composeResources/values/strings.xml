@@ -816,5 +816,11 @@
     <string name="history_objection_submit_success_confirm">متوجه شدم</string>
     <string name="history_objection_submit_missing_data_error">اطلاعات وارد شده ناقص است. لطفاً مراحل را دوباره بررسی کنید.</string>
     <string name="history_objection_delete_missing_data_error">امکان حذف این مورد وجود ندارد.</string>
+    <string name="history_objection_confirm_send_title">تأیید و ارسال درخواست</string>
+    <string name="history_objection_confirm_send_message">با ارسال، فهرست سوابق اعلام‌شده جهت بررسی برای تأمین اجتماعی ارسال می‌شود و امکان ویرایش وجود نخواهد داشت.</string>
+    <string name="history_objection_confirm_send_action">ارسال درخواست</string>
+    <string name="history_objection_confirm_send_rejected_error">امکان ثبت درخواست وجود ندارد. لطفاً بعداً دوباره تلاش کنید.</string>
+    <string name="history_objection_send_success_title">درخواست شما ثبت شد</string>
+    <string name="history_objection_send_success_tracking_label">کد پیگیری درخواست:</string>
 
 </resources>

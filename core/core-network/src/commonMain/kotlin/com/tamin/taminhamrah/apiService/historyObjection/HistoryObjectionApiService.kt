@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.apiService.historyObjection
 
+import com.tamin.taminhamrah.model.historyObjection.ConfirmNotExistItemDTO
 import com.tamin.taminhamrah.model.historyObjection.NotExistRequestDTO
 import com.tamin.taminhamrah.model.historyObjection.SaveNotExistRequestDTO
 import com.tamin.taminhamrah.model.utils.ListData
@@ -31,4 +32,14 @@ interface HistoryObjectionApiService {
         @Path("requestNumber") requestNumber: String,
         @Path("rowIndex") rowIndex: String,
     ): BaseDTO<Boolean>
+
+    @POST("historyprotest-services/confirmnotexist")
+    suspend fun confirmNotExist(
+        @Body items: List<ConfirmNotExistItemDTO>
+    ): BaseDTO<Boolean>
+
+    @POST("historyprotest-services/finalconfirmnotexist")
+    suspend fun finalConfirmNotExist(
+        @Body body: String = ""
+    ): BaseDTO<String>
 }

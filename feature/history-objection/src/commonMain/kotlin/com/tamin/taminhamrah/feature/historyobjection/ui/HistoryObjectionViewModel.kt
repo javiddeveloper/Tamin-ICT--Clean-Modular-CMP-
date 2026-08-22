@@ -8,7 +8,9 @@ import com.tamin.taminhamrah.feature.historyobjection.ui.contract.HistoryObjecti
 import com.tamin.taminhamrah.mapper.historyObjection.toPresentation
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.historyObjection.CheckHistoryObjectionStatusNotExistUseCase
+import com.tamin.taminhamrah.useCases.historyObjection.ConfirmHistoryObjectionNotExistUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.DeleteHistoryObjectionNotExistRequestUseCase
+import com.tamin.taminhamrah.useCases.historyObjection.FinalConfirmHistoryObjectionNotExistUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.GetHistoryObjectionNotExistRequestsUseCase
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.Flow
@@ -19,12 +21,15 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
 import org.jetbrains.compose.resources.getString
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.history_objection_confirm_send_rejected_error
 import taminx.core.core_ui.history_objection_delete_missing_data_error
 
 class HistoryObjectionViewModel(
     private val checkHistoryObjectionStatusNotExistUseCase: CheckHistoryObjectionStatusNotExistUseCase,
     private val getHistoryObjectionNotExistRequestsUseCase: GetHistoryObjectionNotExistRequestsUseCase,
     private val deleteHistoryObjectionNotExistRequestUseCase: DeleteHistoryObjectionNotExistRequestUseCase,
+    private val confirmHistoryObjectionNotExistUseCase: ConfirmHistoryObjectionNotExistUseCase,
+    private val finalConfirmHistoryObjectionNotExistUseCase: FinalConfirmHistoryObjectionNotExistUseCase,
 ) : BaseViewModel<HistoryObjectionUiState, PartialState, HistoryObjectionEvent, HistoryObjectionIntent>(
     initialState = HistoryObjectionUiState()
 ) {
@@ -62,12 +67,19 @@ class HistoryObjectionViewModel(
             emit(PartialState.DescriptionChanged(intent.description))
         }
 
-        // TODO(history-objection): no double-tap guard yet — safe today only because
-        // SubmitRequested is a no-op; add an isSubmitting guard once submit calls a real
-        // endpoint (docs/vault/History-Objection.md notes this was the original intent).
-        HistoryObjectionIntent.OnSubmitClicked -> {
-            sendEvent(HistoryObjectionEvent.SubmitRequested)
-            emptyFlow()
+        HistoryObjectionIntent.OnSubmitClicked -> flow {
+            emit(PartialState.SubmitConfirmationShown)
+        }
+
+        HistoryObjectionIntent.OnSubmitConfirmationDismissed -> flow {
+            emit(PartialState.SubmitConfirmationDismissed)
+        }
+
+        HistoryObjectionIntent.OnSubmitConfirmed -> handleSubmitConfirmed()
+
+        HistoryObjectionIntent.OnTrackingNumberAcknowledged -> flow {
+            emit(PartialState.TrackingNumberDismissed)
+            emitAll(loadHistoryObjectionData())
         }
 
         HistoryObjectionIntent.OnErrorDismissed -> flow {
@@ -121,6 +133,29 @@ class HistoryObjectionViewModel(
         }
     }
 
+    private fun handleSubmitConfirmed(): Flow<PartialState> = flow {
+        // flatMapMerge runs intents concurrently — drop a repeated confirm while the first
+        // confirm/finalConfirm pair is still in flight rather than firing it twice.
+        if (uiState.value.isSubmitting) return@flow
+        emit(PartialState.SubmitConfirmationDismissed)
+
+        emit(PartialState.Submitting(true))
+        try {
+            val description = uiState.value.description.takeIf { it.isNotBlank() }
+            val confirmed = confirmHistoryObjectionNotExistUseCase(description).first()
+            if (confirmed) {
+                val trackingNumber = finalConfirmHistoryObjectionNotExistUseCase().first()
+                emit(PartialState.SubmitSucceeded(trackingNumber))
+            } else {
+                emit(PartialState.Error(getString(Res.string.history_objection_confirm_send_rejected_error)))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.toSingleLineMessage()))
+        } finally {
+            emit(PartialState.Submitting(false))
+        }
+    }
+
     override fun reduceState(
         currentState: HistoryObjectionUiState,
         partialState: PartialState,
@@ -152,6 +187,11 @@ class HistoryObjectionViewModel(
             deleteConfirmationRowIndex = null,
         )
         is PartialState.Deleting -> currentState.copy(isDeleting = partialState.isDeleting)
+        PartialState.SubmitConfirmationShown -> currentState.copy(showSubmitConfirmationDialog = true)
+        PartialState.SubmitConfirmationDismissed -> currentState.copy(showSubmitConfirmationDialog = false)
+        is PartialState.Submitting -> currentState.copy(isSubmitting = partialState.isSubmitting)
+        is PartialState.SubmitSucceeded -> currentState.copy(trackingNumber = partialState.trackingNumber)
+        PartialState.TrackingNumberDismissed -> currentState.copy(trackingNumber = null)
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)

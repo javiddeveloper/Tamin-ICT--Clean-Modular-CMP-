@@ -16,6 +16,9 @@ data class HistoryObjectionUiState(
     val isDeleting: Boolean = false,
     val deleteConfirmationRequestNumber: String? = null,
     val deleteConfirmationRowIndex: String? = null,
+    val showSubmitConfirmationDialog: Boolean = false,
+    val isSubmitting: Boolean = false,
+    val trackingNumber: String? = null,
     ) {
 
     sealed interface PartialState {
@@ -29,6 +32,11 @@ data class HistoryObjectionUiState(
         data class DeleteConfirmationShown(val requestNumber: String, val rowIndex: String?) : PartialState
         data object DeleteConfirmationHidden : PartialState
         data class Deleting(val isDeleting: Boolean) : PartialState
+        data object SubmitConfirmationShown : PartialState
+        data object SubmitConfirmationDismissed : PartialState
+        data class Submitting(val isSubmitting: Boolean) : PartialState
+        data class SubmitSucceeded(val trackingNumber: String) : PartialState
+        data object TrackingNumberDismissed : PartialState
     }
 }
 
@@ -42,11 +50,13 @@ sealed interface HistoryObjectionIntent {
     data class OnDeleteConfirmed(val requestNumber: String, val rowIndex: String?) : HistoryObjectionIntent
     data class OnDescriptionChanged(val description: String) : HistoryObjectionIntent
     data object OnSubmitClicked : HistoryObjectionIntent
+    data object OnSubmitConfirmationDismissed : HistoryObjectionIntent
+    data object OnSubmitConfirmed : HistoryObjectionIntent
+    data object OnTrackingNumberAcknowledged : HistoryObjectionIntent
     data object OnErrorDismissed : HistoryObjectionIntent
 }
 
 sealed interface HistoryObjectionEvent {
     data object NavigateToAddNewObjection : HistoryObjectionEvent
     data class NavigateToEditNotExistRequest(val requestNumber: String, val rowIndex: String?) : HistoryObjectionEvent
-    data object SubmitRequested : HistoryObjectionEvent
 }

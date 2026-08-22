@@ -10,4 +10,6 @@ interface HistoryObjectionRemoteDataSource {
     suspend fun getNotExistRequests(query: ApiQueryParamDN): ListData<NotExistRequestDTO>
     suspend fun saveNotExist(request: SaveNotExistRequestDTO): Boolean
     suspend fun deleteNotExist(requestNumber: String, rowIndex: String): Boolean
+    suspend fun confirmNotExist(description: String?): Boolean
+    suspend fun finalConfirmNotExist(): String
 }
