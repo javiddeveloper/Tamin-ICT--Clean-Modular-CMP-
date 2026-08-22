@@ -80,19 +80,22 @@ class ContractsRepositoryImpl(
 
         try {
             val response = contractsRemoteDataSource.getBranches(branchListQuery(cityCode))
-            val remoteBranches = response.list?:emptyList()
+            val remoteBranches = response.list ?: emptyList()
             branchDao.replaceAllForCity(cityCode, remoteBranches.map { it.toEntity() })
         } catch (e: Exception) {
             if (localBranches.isEmpty()) {
                 throw e
             }
+            // The cached list was already emitted above and is all we can offer.
+            return@flow
         }
 
-        emitAll(
-            branchDao.getBranchesByCityCode(cityCode).map { entities ->
-                entities.map { it.toDomain() }
-            },
-        )
+        // A single read of what was just written, and then the flow **completes**. It used to
+        // `emitAll` the DAO's Flow, which never completes — so a caller that cleared its loading
+        // flag in a `finally` after collecting never cleared it, and the branch picker sat on
+        // "در حال بارگذاری..." forever. Nothing here needs live updates: branches are reference
+        // data fetched once per city.
+        emit(branchDao.getBranchesByCityCode(cityCode).first().map { it.toDomain() })
     }.distinctUntilChanged()
 
     override fun getSpcPremiumRates(): Flow<List<PremiumRateDN>> = flow {
@@ -212,7 +215,9 @@ class ContractsRepositoryImpl(
         filters = listOf(
             ApiFilterDN(
                 property = FilterProperty.CITY_CODE,
-                operator = FilterOperator.EQ,
+                // EQUAL, not EQ: this is the operator `old_android` sends to
+                // special-insured-services/branches, and the old client owns the wire contract.
+                operator = FilterOperator.EQUAL,
                 value = cityCode,
             ),
         ),
