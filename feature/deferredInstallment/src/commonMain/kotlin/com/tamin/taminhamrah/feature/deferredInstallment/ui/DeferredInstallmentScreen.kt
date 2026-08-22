@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.deferredInstallment.ui.components.CalculatedAmountBox
 import com.tamin.taminhamrah.feature.deferredInstallment.ui.components.DeferredInstallmentBankSheet
 import com.tamin.taminhamrah.feature.deferredInstallment.ui.components.DeferredInstallmentOptionSheet
+import com.tamin.taminhamrah.feature.deferredInstallment.ui.components.DeferredInstallmentStepOneShimmer
 import com.tamin.taminhamrah.feature.deferredInstallment.ui.components.DeferredInstallmentTextField
 import com.tamin.taminhamrah.feature.deferredInstallment.ui.components.PensionerNumberCard
 import com.tamin.taminhamrah.feature.deferredInstallment.ui.contract.DeferredInstallmentEvent
@@ -457,6 +458,10 @@ private fun CertificateRequestStep(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = Spacing.page, vertical = Spacing.lg),
     ) {
+        if (state.isLoading && state.pensionerId.isBlank()) {
+            DeferredInstallmentStepOneShimmer()
+            return@Column
+        }
         Text(
             text = stringResource(Res.string.deferred_installment_step_request),
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight(700)),

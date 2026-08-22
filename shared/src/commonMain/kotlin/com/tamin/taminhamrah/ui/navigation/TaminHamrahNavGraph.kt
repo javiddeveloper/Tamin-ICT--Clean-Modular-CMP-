@@ -262,7 +262,15 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
             }
         },
         bottomBar = {
-            if (isBottomBarVisible) {
+            AnimatedVisibility(
+                visible = isBottomBarVisible,
+                enter = fadeIn(
+                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300),
+                ),
+                exit = fadeOut(
+                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300),
+                ),
+            ) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
