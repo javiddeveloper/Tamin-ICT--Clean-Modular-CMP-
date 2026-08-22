@@ -21,6 +21,7 @@ import com.tamin.taminhamrah.model.common.CityPR
 import com.tamin.taminhamrah.model.common.ProvincePR
 import com.tamin.taminhamrah.model.contracts.BranchPR
 import kotlinx.collections.immutable.ImmutableList
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetType
 import kotlinx.collections.immutable.persistentListOf
 
 /**
@@ -49,6 +50,14 @@ fun SelectBranchStepContent(
     // Callers outside the contract flow (e.g. filtering a workshop list) pass an empty list;
     // defaulted so every existing call site keeps its current two notices.
     notices: ImmutableList<String> = ContractBranchNotices,
+    // A lookup that failed reports itself on its own field, so one bad request does not take the
+    // whole step down with it. Null keeps the field in its normal state.
+    provincesError: String? = null,
+    citiesError: String? = null,
+    branchesError: String? = null,
+    onRetryProvinces: (() -> Unit)? = null,
+    onRetryCities: (() -> Unit)? = null,
+    onRetryBranches: (() -> Unit)? = null,
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -67,6 +76,9 @@ fun SelectBranchStepContent(
             optionName = { it.provinceName },
             isLoading = isProvincesLoading,
             onSelected = onProvinceSelected,
+            errorMessage = provincesError,
+            onRetry = onRetryProvinces,
+            sheetType = TaminBottomSheetType.PROVINCE,
         )
 
         SelectableField(
@@ -79,6 +91,9 @@ fun SelectBranchStepContent(
             isLoading = isCitiesLoading,
             enabled = branchSelection.provinceCode.isNotBlank(),
             onSelected = onCitySelected,
+            errorMessage = citiesError,
+            onRetry = onRetryCities,
+            sheetType = TaminBottomSheetType.CITY,
         )
 
         SelectableField(
@@ -91,6 +106,8 @@ fun SelectBranchStepContent(
             isLoading = isBranchesLoading,
             enabled = branchSelection.cityCode.isNotBlank(),
             onSelected = onBranchSelected,
+            errorMessage = branchesError,
+            onRetry = onRetryBranches,
         )
     }
 }

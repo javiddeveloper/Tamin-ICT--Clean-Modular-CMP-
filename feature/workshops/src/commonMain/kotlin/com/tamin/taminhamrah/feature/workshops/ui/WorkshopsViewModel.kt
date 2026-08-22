@@ -21,6 +21,7 @@ import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetAllEmployerAgreementByNationalIdUseCase
 import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 
 class WorkshopsViewModel(
@@ -46,6 +47,8 @@ class WorkshopsViewModel(
                 intent.workshopStatus
             )
             WorkshopsIntent.LoadProvinces -> loadProvinces()
+            WorkshopsIntent.RetryCities -> loadCities(uiState.value.branchSelection.provinceCode)
+            WorkshopsIntent.RetryBranches -> loadBranches(uiState.value.branchSelection.cityCode)
             is WorkshopsIntent.SelectProvince -> handleSelectProvince(intent.province)
             is WorkshopsIntent.SelectCity -> handleSelectCity(intent.city)
             is WorkshopsIntent.SelectBranch -> handleSelectBranch(intent.branch)
@@ -68,14 +71,45 @@ class WorkshopsViewModel(
 
     private fun loadProvinces(): Flow<PartialState> = flow {
         emit(PartialState.ProvincesLoading(true))
+        emit(PartialState.ProvincesError(null))
         try {
             getProvincesUseCase().collect { provinces ->
                 emit(PartialState.ProvincesLoaded(provinces.toProvincePresentation()))
             }
         } catch (e: Exception) {
-            emit(PartialState.Error(e.message))
+            emit(PartialState.ProvincesError(e.message))
         } finally {
             emit(PartialState.ProvincesLoading(false))
+        }
+    }
+
+    private fun loadCities(provinceCode: String): Flow<PartialState> = flow {
+        if (provinceCode.isBlank()) return@flow
+        emit(PartialState.CitiesLoading(true))
+        emit(PartialState.CitiesError(null))
+        try {
+            getCitiesUseCase(provinceCode = provinceCode).collect { cities ->
+                emit(PartialState.CitiesLoaded(cities.toCityPresentation()))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.CitiesError(e.message))
+        } finally {
+            emit(PartialState.CitiesLoading(false))
+        }
+    }
+
+    private fun loadBranches(cityCode: String): Flow<PartialState> = flow {
+        if (cityCode.isBlank()) return@flow
+        emit(PartialState.BranchesLoading(true))
+        emit(PartialState.BranchesError(null))
+        try {
+            getBranchesUseCase(cityCode).collect { branches ->
+                emit(PartialState.BranchesLoaded(branches.toBranchPresentation()))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.BranchesError(e.message))
+        } finally {
+            emit(PartialState.BranchesLoading(false))
         }
     }
 
@@ -98,16 +132,8 @@ class WorkshopsViewModel(
             ),
         )
         emit(PartialState.BranchesLoaded(emptyList()))
-        emit(PartialState.CitiesLoading(true))
-        try {
-            getCitiesUseCase(provinceCode = province.provinceCode).collect { cities ->
-                emit(PartialState.CitiesLoaded(cities.toCityPresentation()))
-            }
-        } catch (e: Exception) {
-            emit(PartialState.Error(e.message))
-        } finally {
-            emit(PartialState.CitiesLoading(false))
-        }
+        emit(PartialState.BranchesError(null))
+        emitAll(loadCities(province.provinceCode))
     }
 
     private fun handleSelectCity(city: CityPR): Flow<PartialState> = flow {
@@ -121,16 +147,7 @@ class WorkshopsViewModel(
                 ),
             ),
         )
-        emit(PartialState.BranchesLoading(true))
-        try {
-            getBranchesUseCase(city.cityCode).collect { branches ->
-                emit(PartialState.BranchesLoaded(branches.toBranchPresentation()))
-            }
-        } catch (e: Exception) {
-            emit(PartialState.Error(e.message))
-        } finally {
-            emit(PartialState.BranchesLoading(false))
-        }
+        emitAll(loadBranches(city.cityCode))
     }
 
     private fun handleSelectBranch(branch: BranchPR): Flow<PartialState> = flow {
@@ -196,6 +213,9 @@ class WorkshopsViewModel(
         is PartialState.BranchesLoaded -> currentState.copy(branches = partialState.list)
         is PartialState.BranchSelectionChanged ->
             currentState.copy(branchSelection = partialState.selection)
+        is PartialState.ProvincesError -> currentState.copy(provincesError = partialState.message)
+        is PartialState.CitiesError -> currentState.copy(citiesError = partialState.message)
+        is PartialState.BranchesError -> currentState.copy(branchesError = partialState.message)
     }
 
     override fun createErrorState(message: String): PartialState =

@@ -72,6 +72,9 @@ fun WorkshopsScreen(
         onProvinceSelected = { viewModel.sendIntent(WorkshopsIntent.SelectProvince(it)) },
         onCitySelected = { viewModel.sendIntent(WorkshopsIntent.SelectCity(it)) },
         onBranchSelected = { viewModel.sendIntent(WorkshopsIntent.SelectBranch(it)) },
+        onRetryProvinces = { viewModel.sendIntent(WorkshopsIntent.LoadProvinces) },
+        onRetryCities = { viewModel.sendIntent(WorkshopsIntent.RetryCities) },
+        onRetryBranches = { viewModel.sendIntent(WorkshopsIntent.RetryBranches) },
         onLoadClick = {
             viewModel.sendIntent(
                 WorkshopsIntent.LoadWorkshops(
@@ -198,6 +201,9 @@ fun WorkshopsContent(
     onProvinceSelected: (ProvincePR) -> Unit,
     onCitySelected: (CityPR) -> Unit,
     onBranchSelected: (BranchPR) -> Unit,
+    onRetryProvinces: () -> Unit,
+    onRetryCities: () -> Unit,
+    onRetryBranches: () -> Unit,
     onLoadClick: () -> Unit,
     onTestDownloadPdfClick: () -> Unit,
     onWorkshopClick: (String, String) -> Unit
@@ -226,6 +232,12 @@ fun WorkshopsContent(
             onCitySelected = onCitySelected,
             onBranchSelected = onBranchSelected,
             notices = persistentListOf(),
+            provincesError = uiState.provincesError,
+            citiesError = uiState.citiesError,
+            branchesError = uiState.branchesError,
+            onRetryProvinces = onRetryProvinces,
+            onRetryCities = onRetryCities,
+            onRetryBranches = onRetryBranches,
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -393,6 +405,9 @@ private fun WorkshopsContentPreview() {
             onProvinceSelected = {},
             onCitySelected = {},
             onBranchSelected = {},
+            onRetryProvinces = {},
+            onRetryCities = {},
+            onRetryBranches = {},
             onLoadClick = {},
             onTestDownloadPdfClick = {},
             onWorkshopClick = { _, _ -> }

@@ -21,6 +21,11 @@ data class WorkshopsUiState(
     val isProvincesLoading: Boolean = false,
     val isCitiesLoading: Boolean = false,
     val isBranchesLoading: Boolean = false,
+    // Kept per picker rather than in `error`: a lookup that fails should mark its own field, not
+    // replace the workshop list that loaded fine.
+    val provincesError: String? = null,
+    val citiesError: String? = null,
+    val branchesError: String? = null,
 ) {
     sealed interface PartialState {
         data class Loading(val isLoading: Boolean) : PartialState
@@ -34,6 +39,9 @@ data class WorkshopsUiState(
         data class BranchesLoading(val isLoading: Boolean) : PartialState
         data class BranchesLoaded(val list: List<BranchPR>) : PartialState
         data class BranchSelectionChanged(val selection: BranchSelectionFormPR) : PartialState
+        data class ProvincesError(val message: String?) : PartialState
+        data class CitiesError(val message: String?) : PartialState
+        data class BranchesError(val message: String?) : PartialState
     }
 }
 
@@ -45,6 +53,8 @@ sealed interface WorkshopsIntent {
     ) : WorkshopsIntent
 
     data object LoadProvinces : WorkshopsIntent
+    data object RetryCities : WorkshopsIntent
+    data object RetryBranches : WorkshopsIntent
     data class SelectProvince(val province: ProvincePR) : WorkshopsIntent
     data class SelectCity(val city: CityPR) : WorkshopsIntent
     data class SelectBranch(val branch: BranchPR) : WorkshopsIntent

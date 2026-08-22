@@ -762,4 +762,7 @@
     <string name="orotez_protez_document_pick_read_error">خطا در خواندن فایل انتخاب‌شده.</string>
     <string name="orotez_protez_document_validation_min_count">حداقل باید ۲ مدرک بارگذاری شود.</string>
     <string name="orotez_protez_document_validation_required">بارگذاری «نسخه تجویز پزشک» و «فاکتور خرید» الزامی است.</string>
+    <string name="picker_loading">در حال بارگذاری...</string>
+    <string name="picker_select_hint">انتخاب کنید</string>
+    <string name="picker_select_previous_first">ابتدا مورد قبلی را انتخاب کنید</string>
 </resources>
