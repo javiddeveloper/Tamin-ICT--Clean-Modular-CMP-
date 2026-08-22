@@ -21,7 +21,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -37,10 +36,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.util.lerp
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -55,6 +55,7 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.action_cancel
 import taminx.core.core_ui.date_picker_confirm
 import taminx.core.core_ui.date_picker_today
+import kotlin.math.abs
 
 /** The wheel shows this many rows; the middle one is the selection. Must stay odd. */
 private const val VISIBLE_ROWS = 5
@@ -83,37 +84,9 @@ private const val YEARS_AHEAD = 5
  * [initial] is the date the wheels open on, defaulting to today. [onConfirm] reports the chosen
  * Jalali year/month/day; use [PersianDateFormatter.toEpochMillis] to send it to an endpoint.
  */
-@Composable
-fun TaminJalaliDatePicker(
-    title: String,
-    onDismiss: () -> Unit,
-    onConfirm: (year: Int, month: Int, day: Int) -> Unit,
-    initial: Triple<Int, Int, Int> = PersianDateFormatter.today(),
-) {
-    val colors = LocalTaminColors.current
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
-            shape = RoundedCornerShape(CornerRadius.sheet),
-            color = colors.bgSurface,
-        ) {
-            JalaliDatePickerContent(
-                title = title,
-                onDismiss = onDismiss,
-                onConfirm = onConfirm,
-                initial = initial,
-            )
-        }
-    }
-}
-
-/**
- * Same wheels as [TaminJalaliDatePicker], surfaced from the bottom of the screen instead of a
- * centered dialog. Use where the picker is one step in a longer flow and should feel anchored to
- * the field that opened it rather than floating above the page.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TaminJalaliDatePickerBottomSheet(
+fun TaminJalaliDatePicker(
     title: String,
     onDismiss: () -> Unit,
     onConfirm: (year: Int, month: Int, day: Int) -> Unit,
@@ -131,20 +104,18 @@ fun TaminJalaliDatePickerBottomSheet(
             onDismiss = onDismiss,
             onConfirm = onConfirm,
             initial = initial,
-            wheelsBackground = colors.bgSurface,
             modifier = Modifier.navigationBarsPadding(),
         )
     }
 }
 
-/** The header, wheels and action row shared by the dialog and bottom-sheet presentations. */
+/** The header, wheels and action row inside the sheet. */
 @Composable
 private fun JalaliDatePickerContent(
     title: String,
     onDismiss: () -> Unit,
     onConfirm: (year: Int, month: Int, day: Int) -> Unit,
     initial: Triple<Int, Int, Int>,
-    wheelsBackground: Color = LocalTaminColors.current.bgPage,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
@@ -196,7 +167,7 @@ private fun JalaliDatePickerContent(
             onDayIndex = { day = it + 1 },
             onMonthIndex = { month = it + 1 },
             onYearIndex = { year = FIRST_YEAR + it },
-            background = wheelsBackground,
+            background = colors.bgSurface,
         )
 
         // انصراف first so that right-to-left puts it on the right and the wide blue
@@ -386,6 +357,26 @@ private fun WheelColumn(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(ROW_HEIGHT)
+                    // Rows shrink and fade the further they sit from the middle, so the column
+                    // reads as a cylinder turning rather than a flat list. The offsets are read
+                    // inside the layer block, which runs at draw time: a spin costs no
+                    // recomposition, and the value updates every pixel of the drag rather than
+                    // only when the center crosses a row.
+                    .graphicsLayer {
+                        val layout = state.layoutInfo
+                        val item = layout.visibleItemsInfo.firstOrNull { it.index == index }
+                            ?: return@graphicsLayer
+                        val viewportCenter =
+                            (layout.viewportStartOffset + layout.viewportEndOffset) / 2f
+                        val itemCenter = item.offset + item.size / 2f
+                        val rowsFromCenter =
+                            abs(itemCenter - viewportCenter) / item.size.coerceAtLeast(1)
+                        // Half the wheel is the furthest a row can be before it leaves the panel.
+                        val distance = (rowsFromCenter / (VISIBLE_ROWS / 2f)).coerceIn(0f, 1f)
+                        scaleX = lerp(1f, WHEEL_MIN_SCALE, distance)
+                        scaleY = scaleX
+                        alpha = lerp(1f, WHEEL_MIN_ALPHA, distance)
+                    }
                     .padding(top = ROW_TEXT_TOP_PADDING),
             )
         }
@@ -423,3 +414,10 @@ private const val SELECTION_BORDER_ALPHA = 0.25f
 /** Nudges the glyph off the row's top edge so it sits optically centred. */
 private val ROW_TEXT_TOP_PADDING = 10.dp
 private val CANCEL_BUTTON_HEIGHT = 52.dp
+
+/**
+ * How far a row shrinks and fades once it reaches the edge of the wheel. Tuned so the row either
+ * side of the selection stays comfortably readable and only the outermost pair recedes.
+ */
+private const val WHEEL_MIN_SCALE = 0.72f
+private const val WHEEL_MIN_ALPHA = 0.30f
