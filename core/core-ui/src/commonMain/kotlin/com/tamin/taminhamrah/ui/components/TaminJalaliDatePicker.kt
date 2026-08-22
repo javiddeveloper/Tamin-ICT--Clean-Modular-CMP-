@@ -75,6 +75,30 @@ private const val EDGE_FADE_STOP = 1f / VISIBLE_ROWS
 private const val FIRST_YEAR = 1300
 
 /**
+ * The last month the month wheel offers for [year]: the whole year for any past year, and only up
+ * to the current month once the year wheel reaches this one.
+ */
+internal fun lastSelectableMonth(
+    year: Int,
+    todayYear: Int,
+    todayMonth: Int,
+    monthsInYear: Int,
+): Int = if (year >= todayYear) todayMonth else monthsInYear
+
+/**
+ * The last day the day wheel offers for [year]/[month]: the month's own length, cut back to today
+ * once the wheels above it sit on the current year and month.
+ */
+internal fun lastSelectableDay(
+    year: Int,
+    month: Int,
+    todayYear: Int,
+    todayMonth: Int,
+    todayDay: Int,
+    daysInMonth: Int,
+): Int = if (year >= todayYear && month >= todayMonth) todayDay else daysInMonth
+
+/**
  * A Jalali date picker: three snapping wheels for day, month and year, read right to left in the
  * order the date is written.
  *
@@ -135,15 +159,26 @@ private fun JalaliDatePickerContent(
     // Each wheel is cut back to today once the wheels above it sit on the current year/month, so a
     // future date cannot be spun to in the first place. Trimming beats validating after the fact:
     // there is nothing to reject and no error to explain.
-    val lastMonth = if (year >= todayYear) todayMonth else PersianDateFormatter.monthNames.size
+    val lastMonth = lastSelectableMonth(
+        year = year,
+        todayYear = todayYear,
+        todayMonth = todayMonth,
+        monthsInYear = PersianDateFormatter.monthNames.size,
+    )
     val clampedMonth = month.coerceAtMost(lastMonth)
     val months = remember(lastMonth) {
         PersianDateFormatter.monthNames.take(lastMonth).toImmutableList()
     }
 
     val daysInMonth = PersianDateFormatter.daysInMonth(year, clampedMonth)
-    val lastDay =
-        if (year >= todayYear && clampedMonth >= todayMonth) todayDay else daysInMonth
+    val lastDay = lastSelectableDay(
+        year = year,
+        month = clampedMonth,
+        todayYear = todayYear,
+        todayMonth = todayMonth,
+        todayDay = todayDay,
+        daysInMonth = daysInMonth,
+    )
 
     // A short month cannot hold the day standing on it. Clamped on the way out rather than written
     // back during composition: the wheel reports the row it lands on and corrects `day` itself, and
