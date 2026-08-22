@@ -23,7 +23,6 @@ import com.tamin.taminhamrah.model.orotezProtez.InsuredPersonPR
 import com.tamin.taminhamrah.model.orotezProtez.RequestInsuredMainInfoDN
 import com.tamin.taminhamrah.model.orotezProtez.SaveShortTermOrthosisRequestDN
 import com.tamin.taminhamrah.model.orotezProtez.ShortTermOrthosisRequestFileDN
-import com.tamin.taminhamrah.tools.errorHandling.getTaminApiExceptionSubtitle
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
 import com.tamin.taminhamrah.useCases.orotezProtez.GetInsuredPersonsUseCase
@@ -130,10 +129,6 @@ class OrotezProtezViewModel(
             sendEvent(OrotezProtezEvent.NavigateBack)
         }
 
-        is OrotezProtezIntent.OnBankAccountMissingDialogDismissed -> flow {
-            emit(PartialState.BankAccountMissingDialogDismissed)
-        }
-
         is OrotezProtezIntent.BackToPreviousStep -> handleBackStep()
     }
     private fun handleDocumentImagePicked(documentId: String, file: PlatformFile): Flow<PartialState> = flow {
@@ -218,12 +213,7 @@ class OrotezProtezViewModel(
             val resultMessage = saveShortTermOrthosisUseCase(request).first()
             emit(PartialState.SubmitSucceeded(resultMessage))
         } catch (e: Exception) {
-            val subtitle = e.getTaminApiExceptionSubtitle()
-            if (subtitle != null && subtitle.contains(BANK_ACCOUNT_ERROR_MARKER)) {
-                emit(PartialState.SubmitFailed(bankAccountMissingMessage = subtitle))
-            } else {
-                emit(PartialState.SubmitFailed(message = e.toSingleLineMessage()))
-            }
+            emit(PartialState.SubmitFailed(e.toSingleLineMessage()))
         }
     }
 
@@ -406,12 +396,7 @@ class OrotezProtezViewModel(
             submittedResultMessage = partialState.resultMessage,
             submitError = null,
         )
-        is PartialState.SubmitFailed -> currentState.copy(
-            isSubmitting = false,
-            submitError = partialState.message,
-            bankAccountMissingDialogMessage = partialState.bankAccountMissingMessage,
-        )
-        PartialState.BankAccountMissingDialogDismissed -> currentState.copy(bankAccountMissingDialogMessage = null)
+        is PartialState.SubmitFailed -> currentState.copy(isSubmitting = false, submitError = partialState.message)
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)
@@ -419,6 +404,5 @@ class OrotezProtezViewModel(
     private companion object {
         const val MIN_REQUIRED_DOCUMENT_COUNT = 2
         const val MAX_DOCUMENT_SIZE_BYTES = 2 * 1024 * 1024
-        const val BANK_ACCOUNT_ERROR_MARKER = "فاقد شماره حساب بانکی"
     }
 }

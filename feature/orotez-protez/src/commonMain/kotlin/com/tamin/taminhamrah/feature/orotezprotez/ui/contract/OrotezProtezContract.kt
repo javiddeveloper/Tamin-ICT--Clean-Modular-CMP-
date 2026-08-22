@@ -29,7 +29,6 @@ data class OrotezProtezUiState(
     val documentValidationError: String? = null,
     val isSubmitting: Boolean = false,
     val submitError: String? = null,
-    val bankAccountMissingDialogMessage: String? = null,
     val hasSubmitted: Boolean = false,
     val submittedResultMessage: String? = null,
 ) {
@@ -73,9 +72,7 @@ data class OrotezProtezUiState(
         data object DocumentsReadyForSubmission : PartialState
         data class Submitting(val isSubmitting: Boolean) : PartialState
         data class SubmitSucceeded(val resultMessage: String?) : PartialState
-        data class SubmitFailed(val message: String? = null, val bankAccountMissingMessage: String? = null) :
-            PartialState
-        data object BankAccountMissingDialogDismissed : PartialState
+        data class SubmitFailed(val message: String) : PartialState
     }
 }
 
@@ -98,7 +95,6 @@ sealed interface OrotezProtezIntent {
     data object OnConfirmInsuredInfoClicked : OrotezProtezIntent
     data object OnSubmitDocumentsClicked : OrotezProtezIntent
     data object OnSubmitSuccessAcknowledged : OrotezProtezIntent
-    data object OnBankAccountMissingDialogDismissed : OrotezProtezIntent
     data object BackToPreviousStep : OrotezProtezIntent
 }
 
