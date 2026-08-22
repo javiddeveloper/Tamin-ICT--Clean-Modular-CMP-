@@ -68,11 +68,11 @@ private val WHEEL_HEIGHT = ROW_HEIGHT * VISIBLE_ROWS
 private const val EDGE_FADE_STOP = 1f / VISIBLE_ROWS
 
 /**
- * The span of years the year wheel offers. 1300 is the conventional floor for Jalali pickers in
- * Iranian apps, and a little headroom past today covers forward-dated entries.
+ * The floor of the year wheel — the conventional start for Jalali pickers in Iranian apps. The
+ * ceiling is today: every date this picker collects (birthdate, prescription date, a record
+ * search range) is a date that has already happened, so a future one is never a valid answer.
  */
 private const val FIRST_YEAR = 1300
-private const val YEARS_AHEAD = 5
 
 /**
  * A Jalali date picker: three snapping wheels for day, month and year, read right to left in the
@@ -120,26 +120,40 @@ private fun JalaliDatePickerContent(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    var year by remember { mutableIntStateOf(initial.first) }
+    val today = remember { PersianDateFormatter.today() }
+    val (todayYear, todayMonth, todayDay) = today
+
+    // A caller that hands in a future date still opens on a selectable one.
+    var year by remember { mutableIntStateOf(initial.first.coerceAtMost(todayYear)) }
     var month by remember { mutableIntStateOf(initial.second) }
     var day by remember { mutableIntStateOf(initial.third) }
 
-    val lastYear = remember { PersianDateFormatter.currentJalaliYear() + YEARS_AHEAD }
-    val years = remember(lastYear) {
-        (FIRST_YEAR..lastYear).map { it.toString().toPersianDigits() }.toImmutableList()
+    val years = remember(todayYear) {
+        (FIRST_YEAR..todayYear).map { it.toString().toPersianDigits() }.toImmutableList()
     }
-    val months = remember { PersianDateFormatter.monthNames.toImmutableList() }
-    // Rebuilt only when the month's length can actually differ, so spinning the day wheel inside
-    // one month never reallocates the list under it.
-    val daysInMonth = PersianDateFormatter.daysInMonth(year, month)
-    val days = remember(daysInMonth) {
-        (1..daysInMonth).map { it.toString().toPersianDigits() }.toImmutableList()
+
+    // Each wheel is cut back to today once the wheels above it sit on the current year/month, so a
+    // future date cannot be spun to in the first place. Trimming beats validating after the fact:
+    // there is nothing to reject and no error to explain.
+    val lastMonth = if (year >= todayYear) todayMonth else PersianDateFormatter.monthNames.size
+    val clampedMonth = month.coerceAtMost(lastMonth)
+    val months = remember(lastMonth) {
+        PersianDateFormatter.monthNames.take(lastMonth).toImmutableList()
     }
+
+    val daysInMonth = PersianDateFormatter.daysInMonth(year, clampedMonth)
+    val lastDay =
+        if (year >= todayYear && clampedMonth >= todayMonth) todayDay else daysInMonth
 
     // A short month cannot hold the day standing on it. Clamped on the way out rather than written
     // back during composition: the wheel reports the row it lands on and corrects `day` itself, and
     // stepping over a short month and back leaves the original day intact.
-    val clampedDay = day.coerceAtMost(daysInMonth)
+    val clampedDay = day.coerceAtMost(lastDay)
+    // Rebuilt only when the month's length can actually differ, so spinning the day wheel inside
+    // one month never reallocates the list under it.
+    val days = remember(lastDay) {
+        (1..lastDay).map { it.toString().toPersianDigits() }.toImmutableList()
+    }
 
     Column(
         modifier = modifier.padding(Spacing.lg),
@@ -148,13 +162,12 @@ private fun JalaliDatePickerContent(
         PickerHeader(
             title = title,
             year = year,
-            month = month,
+            month = clampedMonth,
             day = clampedDay,
             onToday = {
-                val today = PersianDateFormatter.today()
-                year = today.first
-                month = today.second
-                day = today.third
+                year = todayYear
+                month = todayMonth
+                day = todayDay
             },
         )
 
@@ -163,7 +176,7 @@ private fun JalaliDatePickerContent(
             months = months,
             years = years,
             dayIndex = clampedDay - 1,
-            monthIndex = month - 1,
+            monthIndex = clampedMonth - 1,
             yearIndex = year - FIRST_YEAR,
             onDayIndex = { day = it + 1 },
             onMonthIndex = { month = it + 1 },
@@ -176,7 +189,7 @@ private fun JalaliDatePickerContent(
         Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
             TaminPrimaryButton(
                 text = stringResource(Res.string.date_picker_confirm),
-                onClick = { onConfirm(year, month, clampedDay) },
+                onClick = { onConfirm(year, clampedMonth, clampedDay) },
                 // The button's default is the app bar's gradient, which is teal. This
                 // dialog is blue throughout, so it takes the same blue as the wheels.
                 background = SolidColor(colors.blueText),
