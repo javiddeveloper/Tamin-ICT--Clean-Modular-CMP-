@@ -1,243 +1,145 @@
-package com.tamin.taminhamrah.dataSource.personal
-
-import com.tamin.taminhamrah.apiService.personal.PersonalApiService
-import com.tamin.taminhamrah.model.personal.InsuredDocDTO
-import com.tamin.taminhamrah.model.personal.NewInsuredSummaryDTO
-import com.tamin.taminhamrah.model.personal.PersonalInfoDTO
-import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoDTO
-import com.tamin.taminhamrah.model.personal.age.AgeDTO
-import com.tamin.taminhamrah.model.personal.disabilityRequest.DisabilityDependentDTO
-import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
-import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
-import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDTO
-import com.tamin.taminhamrah.model.personal.girlSurvivor.ConfirmGirlSurvivorRequestDTO
-import com.tamin.taminhamrah.model.personal.submitFinalSurvivorPension.SubmitFinalSurvivorPensionRequest
-import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoRequest
-import com.tamin.taminhamrah.model.request.ApiQueryParamDN
-import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
-import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
-import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
-import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
-import com.tamin.taminhamrah.tools.extractData
-import com.tamin.taminhamrah.tools.extractMessage
-import io.ktor.client.statement.bodyAsChannel
-
-class PersonalRemoteDataSourceImpl(
-    private val personalApiService: PersonalApiService,
-    private val queryBuilder: ApiQueryBuilder,
-    private val errorParser: ErrorParser,
-) : PersonalRemoteDataSource {
-
-    override suspend fun getPersonalInfo(): PersonalInfoDTO? {
-        return try {
-            val response = personalApiService.getPersonalInfo()
-            response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
-        }
-    }
-
-    override suspend fun getDeceasedInfo(nationalId: String): DeceasedInfoDTO {
-        return try {
-            val response = personalApiService.getDeceasedInfo(nationalId)
-            val data = response.extractData()
-            if (data.related == "0") {
-                throw TaminErrorUriException(ErrorUri.RESOURCE_NOT_FOUND)
-            }
-            data
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
-        }
-    }
-
-    override suspend fun getAge(birthDate: Long): AgeDTO {
-        return try {
-            val response = personalApiService.getAge(birthDate)
-            response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
-        }
-    }
-
-    override suspend fun getDisabilityDependentInfo(query: ApiQueryParamDN): List<DisabilityDependentDTO> {
-        return try {
-            val response = personalApiService.getDisabilityDependentInfo(
-                queryBuilder.buildQuery(query)
-            )
-            response.extractData().list ?: emptyList()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.UNKNOWN)
-            )
-        }
-    }
-
-    override suspend fun checkGirlSurvivorConditions(
-        nationalCode: String,
-        pensionerId: String
-    ): String? {
-        return try {
-            val response = personalApiService.checkGirlSurvivorConditions(
-                nationalCode = nationalCode,
-                pensionerId = pensionerId
-            )
-            response.extractMessage()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
-        }
-    }
-
-    override suspend fun confirmSurvivorsList(query: ApiQueryParamDN): List<ConfirmSurvivorDTO> {
-        return try {
-            val response = personalApiService.confirmSurvivorsList(
-                queryBuilder.buildQuery(query)
-            )
-            response.extractData().list ?: emptyList()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.UNKNOWN)
-            )
-        }
-    }
-
-    override suspend fun submitFinalSurvivorPension(
-        requestId: Int,
-        body: SubmitFinalSurvivorPensionRequest
-    ): String? {
-        return try {
-            val response = personalApiService.submitFinalSurvivorPension(requestId, body)
-            response.extractMessage()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.UNKNOWN)
-            )
-        }
-    }
-
-    override suspend fun getFinalSurvivorPensionPDF(): PdfDownloadDTO {
-        return try {
-            val response = personalApiService.getFinalSurvivorPensionPDF()
-            PdfDownloadDTO(
-                pdf = InputStreamDTO(
-                    pdf = response.body()
-                )
-            )
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.UNKNOWN)
-            )
-        }
-    }
-
-    override suspend fun getGirlSurvivorReport(
-        address: String,
-        tel: String,
-        postalCode: String,
-        fatherName: String?,
-        birthDate: Long?,
-        insuranceId: String?,
-        parentCode: String,
-        pensionerId: String,
-    ): PdfDownloadDTO {
-        return try {
-            val response = personalApiService.getGirlSurvivorReport(
-                address = address,
-                tel = tel,
-                postalCode = postalCode,
-                fatherName = fatherName,
-                birthDate = birthDate,
-                insuranceId = insuranceId,
-                parentCode = parentCode,
-                pensionerId = pensionerId,
-            )
-            PdfDownloadDTO(
-                pdf = InputStreamDTO(
-                    pdf = response.body()
-                )
-            )
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.UNKNOWN)
-            )
-        }
-    }
-
-    override suspend fun confirmGirlSurvivor(body: ConfirmGirlSurvivorRequestDTO): String? {
-        return try {
-            val response = personalApiService.confirmGirlSurvivor(body)
-            response.extractMessage()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.UNKNOWN)
-            )
-        }
-    }
-
-    override suspend fun saveSurvivorInfo(body: SaveSurvivorInfoRequest): String? {
-        return try {
-            val response = personalApiService.saveSurvivorInfo(body)
-            response.extractMessage()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.UNKNOWN)
-            )
-        }
-    }
-
-    override suspend fun putInsuredRegistrationDocList(
-        personalId: String,
-        body: List<InsuredDocDTO>
-    ): String? {
-        return try {
-            val response = personalApiService.putInsuredRegistrationDocList(personalId, body)
-            response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
-        }
-    }
-
-    override suspend fun getRequestSummary(requestId: String): NewInsuredSummaryDTO? {
-        return try {
-            val response = personalApiService.getRequestSummary(requestId)
-            response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
-        }
-    }
-
-
-}
+package com.tamin.taminhamrah.dataSource.personal
+
+import com.tamin.taminhamrah.apiService.personal.PersonalApiService
+import com.tamin.taminhamrah.model.personal.InsuredDocDTO
+import com.tamin.taminhamrah.model.personal.NewInsuredSummaryDTO
+import com.tamin.taminhamrah.model.personal.PersonalInfoDTO
+import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoDTO
+import com.tamin.taminhamrah.model.personal.age.AgeDTO
+import com.tamin.taminhamrah.model.personal.disabilityRequest.DisabilityDependentDTO
+import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
+import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDTO
+import com.tamin.taminhamrah.model.personal.girlSurvivor.ConfirmGirlSurvivorRequestDTO
+import com.tamin.taminhamrah.model.personal.submitFinalSurvivorPension.SubmitFinalSurvivorPensionRequest
+import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoRequest
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
+import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
+import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
+import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
+import com.tamin.taminhamrah.tools.extractData
+import com.tamin.taminhamrah.tools.extractMessage
+import com.tamin.taminhamrah.tools.readPdfChannel
+import com.tamin.taminhamrah.tools.safeCall
+
+class PersonalRemoteDataSourceImpl(
+    private val personalApiService: PersonalApiService,
+    private val queryBuilder: ApiQueryBuilder,
+    private val errorParser: ErrorParser,
+) : PersonalRemoteDataSource {
+
+    override suspend fun getPersonalInfo(): PersonalInfoDTO? =
+        errorParser.safeCall("getPersonalInfo") {
+            personalApiService.getPersonalInfo().extractData()
+        }
+
+    override suspend fun getDeceasedInfo(nationalId: String): DeceasedInfoDTO =
+        errorParser.safeCall("getDeceasedInfo") {
+            val data = personalApiService.getDeceasedInfo(nationalId).extractData()
+            if (data.related == "0") {
+                throw TaminErrorUriException(ErrorUri.RESOURCE_NOT_FOUND)
+            }
+            data
+        }
+
+    override suspend fun getAge(birthDate: Long): AgeDTO =
+        errorParser.safeCall("getAge") {
+            personalApiService.getAge(birthDate).extractData()
+        }
+
+    override suspend fun getDisabilityDependentInfo(query: ApiQueryParamDN): List<DisabilityDependentDTO> =
+        errorParser.safeCall("getDisabilityDependentInfo") {
+            personalApiService.getDisabilityDependentInfo(
+                queryBuilder.buildQuery(query)
+            ).extractData().list ?: emptyList()
+        }
+
+    override suspend fun checkGirlSurvivorConditions(
+        nationalCode: String,
+        pensionerId: String
+    ): String? =
+        errorParser.safeCall("checkGirlSurvivorConditions") {
+            personalApiService.checkGirlSurvivorConditions(
+                nationalCode = nationalCode,
+                pensionerId = pensionerId
+            ).extractMessage()
+        }
+
+    override suspend fun confirmSurvivorsList(query: ApiQueryParamDN): List<ConfirmSurvivorDTO> =
+        errorParser.safeCall("confirmSurvivorsList") {
+            personalApiService.confirmSurvivorsList(
+                queryBuilder.buildQuery(query)
+            ).extractData().list ?: emptyList()
+        }
+
+    override suspend fun submitFinalSurvivorPension(
+        requestId: Int,
+        body: SubmitFinalSurvivorPensionRequest
+    ): String? =
+        errorParser.safeCall("submitFinalSurvivorPension") {
+            personalApiService.submitFinalSurvivorPension(requestId, body).extractMessage()
+        }
+
+    override suspend fun getFinalSurvivorPensionPDF(): PdfDownloadDTO =
+        errorParser.safeCall("getFinalSurvivorPensionPDF") {
+            val response = personalApiService.getFinalSurvivorPensionPDF()
+            PdfDownloadDTO(
+                pdf = InputStreamDTO(
+                    pdf = response.readPdfChannel()
+                )
+            )
+        }
+
+    override suspend fun getGirlSurvivorReport(
+        address: String,
+        tel: String,
+        postalCode: String,
+        fatherName: String?,
+        birthDate: Long?,
+        insuranceId: String?,
+        parentCode: String,
+        pensionerId: String,
+    ): PdfDownloadDTO =
+        errorParser.safeCall("getGirlSurvivorReport") {
+            val response = personalApiService.getGirlSurvivorReport(
+                address = address,
+                tel = tel,
+                postalCode = postalCode,
+                fatherName = fatherName,
+                birthDate = birthDate,
+                insuranceId = insuranceId,
+                parentCode = parentCode,
+                pensionerId = pensionerId,
+            )
+            PdfDownloadDTO(
+                pdf = InputStreamDTO(
+                    pdf = response.readPdfChannel()
+                )
+            )
+        }
+
+    override suspend fun confirmGirlSurvivor(body: ConfirmGirlSurvivorRequestDTO): String? =
+        errorParser.safeCall("confirmGirlSurvivor") {
+            personalApiService.confirmGirlSurvivor(body).extractMessage()
+        }
+
+    override suspend fun saveSurvivorInfo(body: SaveSurvivorInfoRequest): String? =
+        errorParser.safeCall("saveSurvivorInfo") {
+            personalApiService.saveSurvivorInfo(body).extractMessage()
+        }
+
+    override suspend fun putInsuredRegistrationDocList(
+        personalId: String,
+        body: List<InsuredDocDTO>
+    ): String? =
+        errorParser.safeCall("putInsuredRegistrationDocList") {
+            personalApiService.putInsuredRegistrationDocList(personalId, body).extractData()
+        }
+
+    override suspend fun getRequestSummary(requestId: String): NewInsuredSummaryDTO? =
+        errorParser.safeCall("getRequestSummary") {
+            personalApiService.getRequestSummary(requestId).extractData()
+        }
+}
+

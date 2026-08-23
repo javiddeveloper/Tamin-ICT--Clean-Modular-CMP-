@@ -58,6 +58,26 @@ object PersonalTestData {
 
     val requestSummarySuccess: String
         get() = readResourceFile("mocks/request_summary_success.json")
+
+    /** Legacy-shaped `survivor-request/personal` payload for girl survivor. */
+    val girlSurvivorPersonalSuccess: String
+        get() = readResourceFile("mocks/girl_survivor_personal_success.json")
+
+    val girlSurvivorConditionSuccess: String
+        get() = readResourceFile("mocks/girl_survivor_condition_success.json")
+
+    val girlSurvivorConditionIneligible: String
+        get() = readResourceFile("mocks/girl_survivor_condition_ineligible.json")
+
+    val girlSurvivorConfirmSuccess: String
+        get() = readResourceFile("mocks/girl_survivor_confirm_success.json")
+
+    val girlSurvivorConfirmNullData: String
+        get() = readResourceFile("mocks/girl_survivor_confirm_null_data.json")
+
+    /** Minimal PDF header bytes used for `survivor-request/report` streaming tests. */
+    val girlSurvivorReportPdfBytes: ByteArray =
+        ("%PDF-1.4 girl-survivor-commitment").encodeToByteArray()
 }
 
 object UserRequestTestData {

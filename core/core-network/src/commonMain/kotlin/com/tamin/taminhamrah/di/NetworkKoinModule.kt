@@ -10,6 +10,7 @@ import com.tamin.taminhamrah.repository.authRepository.AuthRepositoryImpl
 import com.tamin.taminhamrah.repository.authRepository.AuthTokenInvalidatorImpl
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
+import com.tamin.taminhamrah.tools.errorHandling.PlainTextErrorResponsePlugin
 import com.tamin.taminhamrah.util.NetworkConstants
 import com.tamin.taminhamrah.util.AppConfig
 import io.ktor.client.HttpClient
@@ -147,6 +148,8 @@ private fun createHttpClient(
             json(json, contentType = ContentType.Any)
         }
 
+        install(PlainTextErrorResponsePlugin)
+
         install(HttpTimeout) {
             requestTimeoutMillis = timeoutMillis
             connectTimeoutMillis = timeoutMillis
@@ -226,6 +229,8 @@ private fun createHealthHttpClient(
             json(json, contentType = ContentType.Any)
         }
 
+        install(PlainTextErrorResponsePlugin)
+
         install(HttpTimeout) {
             requestTimeoutMillis = timeoutMillis
             connectTimeoutMillis = timeoutMillis
@@ -261,6 +266,8 @@ private fun createAuthHttpClient(
         install(ContentNegotiation) {
             json(json, contentType = ContentType.Any)
         }
+
+        install(PlainTextErrorResponsePlugin)
 
         install(HttpTimeout) {
             requestTimeoutMillis = timeoutMillis
