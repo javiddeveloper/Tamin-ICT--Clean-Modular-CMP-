@@ -1,0 +1,35 @@
+package com.tamin.taminhamrah.apiService.inspection
+
+import com.tamin.taminhamrah.model.inspection.BranchDTO
+import com.tamin.taminhamrah.model.inspection.InspectionPerformedDTO
+import com.tamin.taminhamrah.model.inspection.JobDTO
+import com.tamin.taminhamrah.model.inspection.SubmitInspectionRequestDTO
+import com.tamin.taminhamrah.model.inspection.SubmitInspectionRequestModelDTO
+import com.tamin.taminhamrah.tools.BaseDTO
+import com.tamin.taminhamrah.model.utils.ListData
+import de.jensklingenberg.ktorfit.http.Body
+import de.jensklingenberg.ktorfit.http.GET
+import de.jensklingenberg.ktorfit.http.POST
+import de.jensklingenberg.ktorfit.http.QueryMap
+
+internal interface InspectionApiService {
+    @GET("inspection-header/get-all-insurance")
+    suspend fun getAllInsurance(
+        @QueryMap parameters: Map<String, String>
+    ): BaseDTO<ListData<InspectionPerformedDTO>>
+
+    @GET("proxy/models/branch")
+    suspend fun getBranches(
+        @QueryMap parameters: Map<String, String>
+    ): BaseDTO<ListData<BranchDTO>>
+
+    @GET("baseinfo/job")
+    suspend fun getJobs(
+        @QueryMap parameters: Map<String, String>
+    ): BaseDTO<ListData<JobDTO>>
+
+    @POST("inspection-request")
+    suspend fun submitInspectionRequest(
+        @Body request: SubmitInspectionRequestDTO
+    ): BaseDTO<SubmitInspectionRequestModelDTO>
+}

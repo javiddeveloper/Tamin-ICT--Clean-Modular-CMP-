@@ -325,3 +325,18 @@ object HistoryTestData {
     val sendToInstitutionSuccess: String
         get() = readResourceFile("mocks/history/send_to_institution_success.json")
 }
+
+object InspectionTestData {
+    val inspectionPerformedListSuccess: String
+        get() = readResourceFile("mocks/inspection_performed_list_success.json")
+
+    val inspectionBranchesListSuccess: String
+        get() = readResourceFile("mocks/inspection_branches_list_success.json")
+
+    val inspectionJobsListSuccess: String
+        get() = readResourceFile("mocks/inspection_jobs_list_success.json")
+
+    val inspectionSubmitSuccess: String
+        get() = readResourceFile("mocks/inspection_submit_success.json")
+}
+

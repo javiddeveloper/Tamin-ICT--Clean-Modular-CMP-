@@ -44,6 +44,8 @@ import com.tamin.taminhamrah.dataSource.orotezProtez.OrotezProtezRemoteDataSourc
 import com.tamin.taminhamrah.dataSource.orotezProtez.OrotezProtezRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSource
 import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.inspection.InspectionRemoteDataSource
+import com.tamin.taminhamrah.dataSource.inspection.InspectionRemoteDataSourceImpl
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
@@ -204,6 +206,14 @@ val remoteModule = module {
         OrotezProtezRemoteDataSourceImpl(
             orotezProtezApiService = get(),
             apiQueryBuilder = get(),
+            errorParser = get()
+        )
+    }
+
+    single<InspectionRemoteDataSource> {
+        InspectionRemoteDataSourceImpl(
+            apiService = get(),
+            queryBuilder = get(),
             errorParser = get()
         )
     }
