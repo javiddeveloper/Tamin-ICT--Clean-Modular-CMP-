@@ -21,6 +21,7 @@ import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
+import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
 import com.tamin.taminhamrah.tools.safeCall
@@ -84,7 +85,7 @@ class PensionRemoteDataSourceImpl(
 
     override suspend fun pensionerPayRollPDF(
         filter: List<ApiFilterDN>
-    ): PdfDownloadDTO = errorParser.safeCall("pensionerPayRollPDF") {
+    ): PdfDownloadDTO = errorParser.safeCall("pensionerPayRollPDF", ErrorUri.UNKNOWN) {
         val filterJson = apiQueryBuilder.buildFilterJson(filter)
         val response = pensionApiService.pensionerPayRollPDF(mapOf("filter" to filterJson))
         PdfDownloadDTO(
@@ -96,7 +97,7 @@ class PensionRemoteDataSourceImpl(
 
     override suspend fun getEdictReportPDF(
         filter: List<ApiFilterDN>
-    ): PdfDownloadDTO = errorParser.safeCall("getEdictReportPDF") {
+    ): PdfDownloadDTO = errorParser.safeCall("getEdictReportPDF", ErrorUri.UNKNOWN) {
         val filterJson = apiQueryBuilder.buildFilterJson(filter)
         val response = pensionApiService.getEdictReportPDF(mapOf("filter" to filterJson))
         PdfDownloadDTO(

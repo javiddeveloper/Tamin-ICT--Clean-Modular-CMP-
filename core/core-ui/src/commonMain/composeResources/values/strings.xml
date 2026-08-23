@@ -629,6 +629,20 @@
     <string name="girl_survivor_commitment_confirm_label">فایل دانلود شده را مشاهده نمودم و مفاد آن مورد تایید اینجانب است</string>
     <string name="girl_survivor_send_request">ارسال درخواست</string>
     <string name="girl_survivor_relation_daughter">فرزند دختر</string>
+    <string name="girl_survivor_label_full_name">نام و نام خانوادگی</string>
+    <string name="girl_survivor_label_father_name">نام پدر</string>
+    <string name="girl_survivor_label_national_id">کد ملی</string>
+    <string name="girl_survivor_label_insurance_id">شماره بیمه</string>
+    <string name="girl_survivor_label_birth_date">تاریخ تولد</string>
+    <string name="girl_survivor_label_mobile">شماره همراه</string>
+    <string name="girl_survivor_error_enter_address">لطفا آدرس را وارد نمایید</string>
+    <string name="girl_survivor_error_enter_zip_code">لطفا کد پستی را وارد نمایید</string>
+    <string name="girl_survivor_error_not_valid_zip_code">کدپستی معتبر نیست</string>
+    <string name="girl_survivor_error_enter_phone">لطفا شماره تلفن را وارد نمایید</string>
+    <string name="girl_survivor_error_not_valid_phone">شماره تلفن معتبر نیست</string>
+    <string name="girl_survivor_error_not_valid_pension_id">شماره مستمری معتبر نیست</string>
+    <string name="girl_survivor_error_not_valid_national_id">کد ملی معتبر نیست</string>
+    <string name="girl_survivor_error_enter_pension_num">لطفا شماره مستمری را وارد نمایید</string>
     <string name="girl_survivor_success_title">تأیید</string>
     <string name="girl_survivor_success_message">تعهدنامه شما با موفقیت دریافت گردید</string>
 

@@ -13,6 +13,7 @@ enum class GirlSurvivorStep {
 data class GirlSurvivorProfileRowPR(
     val label: String,
     val value: String,
+    val numeric: Boolean = true,
 )
 
 data class GirlSurvivorFieldErrors(
@@ -44,7 +45,6 @@ data class GirlSurvivorUiState(
     val isPdfConfirmed: Boolean = false,
     val showSuccessDialog: Boolean = false,
     val confirmPayload: ConfirmGirlSurvivorDN? = null,
-    val relationLabel: String = "فرزند دختر",
 ) {
     sealed interface PartialState {
         data class Loading(val isLoading: Boolean) : PartialState

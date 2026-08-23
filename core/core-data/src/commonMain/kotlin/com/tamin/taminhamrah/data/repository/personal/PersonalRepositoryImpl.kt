@@ -49,7 +49,7 @@ class PersonalRepositoryImpl(
                 personalDao.upsertPersonalInfo(remoteInfo.toEntity())
             }
         } catch (e: Exception) {
-            if (localInfo == null) {
+            if (localInfo == null || refreshRemote) {
                 throw e
             }
         }

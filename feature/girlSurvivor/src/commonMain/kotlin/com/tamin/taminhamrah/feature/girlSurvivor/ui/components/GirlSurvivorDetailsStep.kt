@@ -154,7 +154,7 @@ private fun GirlSurvivorProfileCard(
             DetailRow(
                 label = row.label,
                 value = row.value,
-                numeric = row.label != "نام و نام خانوادگی" && row.label != "نام پدر",
+                numeric = row.numeric,
             )
             if (index < rows.lastIndex) {
                 HorizontalDivider(color = colors.border.copy(alpha = 0.5f))

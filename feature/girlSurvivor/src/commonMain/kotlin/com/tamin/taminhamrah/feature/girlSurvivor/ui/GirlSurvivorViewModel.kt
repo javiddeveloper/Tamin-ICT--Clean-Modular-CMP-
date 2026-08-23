@@ -20,6 +20,22 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import org.jetbrains.compose.resources.getString
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.girl_survivor_error_enter_address
+import taminx.core.core_ui.girl_survivor_error_enter_pension_num
+import taminx.core.core_ui.girl_survivor_error_enter_phone
+import taminx.core.core_ui.girl_survivor_error_enter_zip_code
+import taminx.core.core_ui.girl_survivor_error_not_valid_national_id
+import taminx.core.core_ui.girl_survivor_error_not_valid_pension_id
+import taminx.core.core_ui.girl_survivor_error_not_valid_phone
+import taminx.core.core_ui.girl_survivor_error_not_valid_zip_code
+import taminx.core.core_ui.girl_survivor_label_birth_date
+import taminx.core.core_ui.girl_survivor_label_father_name
+import taminx.core.core_ui.girl_survivor_label_full_name
+import taminx.core.core_ui.girl_survivor_label_insurance_id
+import taminx.core.core_ui.girl_survivor_label_mobile
+import taminx.core.core_ui.girl_survivor_label_national_id
 
 class GirlSurvivorViewModel(
     private val getPersonalInfoUseCase: GetPersonalInfoUseCase,
@@ -185,13 +201,7 @@ class GirlSurvivorViewModel(
             nationalCode = state.deceasedNationalCode,
             pensionerId = state.deceasedPensionId,
         ).collect {
-            val updatedPayload = state.confirmPayload?.copy(
-                address = state.address,
-                phoneNumber = state.phoneNumber,
-                nationalCode = state.deceasedNationalCode.ifBlank { null },
-                pensionId = state.deceasedPensionId.ifBlank { null },
-            )
-            if (updatedPayload != null) {
+            state.toConfirmPayload()?.let { updatedPayload ->
                 emit(PartialState.ConfirmPayloadUpdated(updatedPayload))
             }
             downloadReportPdf()
@@ -230,12 +240,7 @@ class GirlSurvivorViewModel(
         if (state.isSubmitting || state.isLoading) return
         if (!state.isPdfConfirmed) return
 
-        val payload = state.confirmPayload?.copy(
-            address = state.address,
-            phoneNumber = state.phoneNumber,
-            nationalCode = state.deceasedNationalCode.ifBlank { null },
-            pensionId = state.deceasedPensionId.ifBlank { null },
-        ) ?: return
+        val payload = state.toConfirmPayload() ?: return
 
         emit(PartialState.Submitting(true))
         confirmGirlSurvivorUseCase(payload).collect {
@@ -243,19 +248,19 @@ class GirlSurvivorViewModel(
         }
     }
 
-    private fun buildProfileRows(info: PersonalInfoDN): ImmutableList<GirlSurvivorProfileRowPR> {
+    private suspend fun buildProfileRows(info: PersonalInfoDN): ImmutableList<GirlSurvivorProfileRowPR> {
         val personal = info.personal
         val fullName = listOfNotNull(personal?.firstName, personal?.lastName).joinToString(" ").ifBlank { "-" }
         return persistentListOf(
-            GirlSurvivorProfileRowPR("نام و نام خانوادگی", fullName),
-            GirlSurvivorProfileRowPR("نام پدر", personal?.fatherName ?: "-"),
-            GirlSurvivorProfileRowPR("کد ملی", personal?.nationalId ?: "-"),
-            GirlSurvivorProfileRowPR("شماره بیمه", info.insuranceId ?: "-"),
+            GirlSurvivorProfileRowPR(getString(Res.string.girl_survivor_label_full_name), fullName, numeric = false),
+            GirlSurvivorProfileRowPR(getString(Res.string.girl_survivor_label_father_name), personal?.fatherName ?: "-", numeric = false),
+            GirlSurvivorProfileRowPR(getString(Res.string.girl_survivor_label_national_id), personal?.nationalId ?: "-"),
+            GirlSurvivorProfileRowPR(getString(Res.string.girl_survivor_label_insurance_id), info.insuranceId ?: "-"),
             GirlSurvivorProfileRowPR(
-                "تاریخ تولد",
+                getString(Res.string.girl_survivor_label_birth_date),
                 PersianDateFormatter.formatTimestamp(personal?.dateOfBirth).ifBlank { "-" }
             ),
-            GirlSurvivorProfileRowPR("شماره همراه", info.mobileNumber.orEmpty()),
+            GirlSurvivorProfileRowPR(getString(Res.string.girl_survivor_label_mobile), info.mobileNumber.orEmpty()),
         )
     }
 
@@ -279,37 +284,45 @@ class GirlSurvivorViewModel(
         )
     }
 
-    private fun validateInput(state: GirlSurvivorUiState): GirlSurvivorFieldErrors? {
+    private suspend fun validateInput(state: GirlSurvivorUiState): GirlSurvivorFieldErrors? {
         if (state.address.isBlank()) {
-            return GirlSurvivorFieldErrors(address = ERROR_ENTER_ADDRESS)
+            return GirlSurvivorFieldErrors(address = getString(Res.string.girl_survivor_error_enter_address))
         }
         if (state.zipCode.isBlank()) {
-            return GirlSurvivorFieldErrors(zipCode = ERROR_ENTER_ZIP_CODE)
+            return GirlSurvivorFieldErrors(zipCode = getString(Res.string.girl_survivor_error_enter_zip_code))
         }
         if (state.zipCode.length < 10) {
-            return GirlSurvivorFieldErrors(zipCode = ERROR_NOT_VALID_ZIP_CODE)
+            return GirlSurvivorFieldErrors(zipCode = getString(Res.string.girl_survivor_error_not_valid_zip_code))
         }
         if (state.phoneNumber.isBlank()) {
-            return GirlSurvivorFieldErrors(phoneNumber = ERROR_ENTER_PHONE)
+            return GirlSurvivorFieldErrors(phoneNumber = getString(Res.string.girl_survivor_error_enter_phone))
         }
         if (!state.phoneNumber.startsWith('0') || state.phoneNumber.length > 11) {
-            return GirlSurvivorFieldErrors(phoneNumber = ERROR_NOT_VALID_PHONE)
+            return GirlSurvivorFieldErrors(phoneNumber = getString(Res.string.girl_survivor_error_not_valid_phone))
         }
         if (state.usePensionIdMode) {
             if (state.deceasedPensionId.length < 10) {
                 return GirlSurvivorFieldErrors(
                     deceasedPensionId = if (state.deceasedPensionId.isBlank()) {
-                        ERROR_ENTER_PENSION_NUM
+                        getString(Res.string.girl_survivor_error_enter_pension_num)
                     } else {
-                        ERROR_NOT_VALID_PENSION_ID
+                        getString(Res.string.girl_survivor_error_not_valid_pension_id)
                     }
                 )
             }
         } else if (state.deceasedNationalCode.isBlank()) {
-            return GirlSurvivorFieldErrors(deceasedNationalCode = ERROR_NOT_VALID_NATIONAL_ID)
+            return GirlSurvivorFieldErrors(deceasedNationalCode = getString(Res.string.girl_survivor_error_not_valid_national_id))
         }
         return null
     }
+
+    private fun GirlSurvivorUiState.toConfirmPayload(): ConfirmGirlSurvivorDN? =
+        confirmPayload?.copy(
+            address = address,
+            phoneNumber = phoneNumber,
+            nationalCode = deceasedNationalCode.ifBlank { null },
+            pensionId = deceasedPensionId.ifBlank { null },
+        )
 
     private suspend fun FlowCollector<PartialState>.clearFieldError(
         transform: (GirlSurvivorFieldErrors) -> GirlSurvivorFieldErrors
@@ -321,14 +334,5 @@ class GirlSurvivorViewModel(
         const val HARDCODED_AGE = "33"
         const val HARDCODED_STATUS = "0"
         const val DAUGHTER_DEPENDENCY_CODE = "04"
-
-        const val ERROR_ENTER_ADDRESS = "لطفا آدرس را وارد نمایید"
-        const val ERROR_ENTER_ZIP_CODE = "لطفا کد پستی را وارد نمایید"
-        const val ERROR_NOT_VALID_ZIP_CODE = "کدپستی معتبر نیست"
-        const val ERROR_ENTER_PHONE = "لطفا شماره تلفن را وارد نمایید"
-        const val ERROR_NOT_VALID_PHONE = "شماره تلفن معتبر نیست"
-        const val ERROR_NOT_VALID_PENSION_ID = "شماره مستمری معتبر نیست"
-        const val ERROR_NOT_VALID_NATIONAL_ID = "کد ملی معتبر نیست"
-        const val ERROR_ENTER_PENSION_NUM = "لطفا شماره مستمری را وارد نمایید"
     }
 }

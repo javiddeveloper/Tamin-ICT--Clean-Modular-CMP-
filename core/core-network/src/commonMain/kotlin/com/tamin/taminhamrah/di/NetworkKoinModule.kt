@@ -229,8 +229,6 @@ private fun createHealthHttpClient(
             json(json, contentType = ContentType.Any)
         }
 
-        install(PlainTextErrorResponsePlugin)
-
         install(HttpTimeout) {
             requestTimeoutMillis = timeoutMillis
             connectTimeoutMillis = timeoutMillis
@@ -266,8 +264,6 @@ private fun createAuthHttpClient(
         install(ContentNegotiation) {
             json(json, contentType = ContentType.Any)
         }
-
-        install(PlainTextErrorResponsePlugin)
 
         install(HttpTimeout) {
             requestTimeoutMillis = timeoutMillis

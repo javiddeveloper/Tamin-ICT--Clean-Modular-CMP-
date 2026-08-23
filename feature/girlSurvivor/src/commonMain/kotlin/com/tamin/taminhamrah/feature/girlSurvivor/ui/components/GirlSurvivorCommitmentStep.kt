@@ -118,7 +118,7 @@ fun GirlSurvivorCommitmentStep(
 
             DetailRow(
                 label = stringResource(Res.string.girl_survivor_relation_daughter),
-                value = state.relationLabel,
+                value = stringResource(Res.string.girl_survivor_relation_daughter),
                 numeric = false,
             )
             DetailRow(label = deceasedLabel, value = deceasedIdentifier)
