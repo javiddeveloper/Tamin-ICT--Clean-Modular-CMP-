@@ -10,6 +10,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
+import com.tamin.taminhamrah.tools.errorHandling.PlainTextErrorResponsePlugin
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.http.contentType
 import kotlinx.serialization.json.Json
@@ -23,6 +24,16 @@ abstract class BaseApiTest {
 
     protected fun createMockKtorfit(
         content: String,
+        status: HttpStatusCode = HttpStatusCode.OK,
+        contentType: ContentType = ContentType.Application.Json
+    ): Ktorfit = createMockKtorfit(
+        content = content.encodeToByteArray(),
+        status = status,
+        contentType = contentType,
+    )
+
+    protected fun createMockKtorfit(
+        content: ByteArray,
         status: HttpStatusCode = HttpStatusCode.OK,
         contentType: ContentType = ContentType.Application.Json
     ): Ktorfit {
@@ -42,6 +53,7 @@ abstract class BaseApiTest {
                     explicitNulls = false
                 })
             }
+            install(PlainTextErrorResponsePlugin)
             defaultRequest {
                 header(HttpHeaders.ContentType, ContentType.Application.Json)
             }

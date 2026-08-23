@@ -611,6 +611,41 @@
     <string name="error_load_relationships_failed">خطا در دریافت نسبت‌های خانوادگی</string>
     <string name="error_load_cities_failed">خطا در دریافت لیست شهرها</string>
 
+    <!-- Girl Survivor -->
+    <string name="girl_survivor_title">تعهدنامه فرزندان دختر</string>
+    <string name="girl_survivor_subtitle">ثبت درخواست بازماندگی فرزند دختر</string>
+    <string name="girl_survivor_step_details">مشخصات</string>
+    <string name="girl_survivor_step_commitment">فرم تعهد</string>
+    <string name="girl_survivor_address_label">آدرس</string>
+    <string name="girl_survivor_phone_label">شماره تلفن</string>
+    <string name="girl_survivor_zipcode_label">کد پستی</string>
+    <string name="girl_survivor_use_pension_id">شناسایی متوفی با شماره مستمری</string>
+    <string name="girl_survivor_deceased_national_id_label">کد ملی متوفی</string>
+    <string name="girl_survivor_deceased_pension_id_label">شماره مستمری متوفی</string>
+    <string name="girl_survivor_download_form">دانلود و مشاهده فرم تعهد</string>
+    <string name="girl_survivor_download_file">دانلود فایل</string>
+    <string name="girl_survivor_commitment_title">تعهدنامه فرزند دختر بازمانده</string>
+    <string name="girl_survivor_commitment_body">اینجانب %1$s به کد ملی %2$s متعهد می‌شوم در صورت ازدواج، اشتغال و یا دریافت هرگونه درآمد، مراتب را به سازمان تأمین اجتماعی اطلاع دهم و در صورت عدم اطلاع‌رسانی، وجوه دریافتی را مسترد نمایم.</string>
+    <string name="girl_survivor_commitment_confirm_label">فایل دانلود شده را مشاهده نمودم و مفاد آن مورد تایید اینجانب است</string>
+    <string name="girl_survivor_send_request">ارسال درخواست</string>
+    <string name="girl_survivor_relation_daughter">فرزند دختر</string>
+    <string name="girl_survivor_label_full_name">نام و نام خانوادگی</string>
+    <string name="girl_survivor_label_father_name">نام پدر</string>
+    <string name="girl_survivor_label_national_id">کد ملی</string>
+    <string name="girl_survivor_label_insurance_id">شماره بیمه</string>
+    <string name="girl_survivor_label_birth_date">تاریخ تولد</string>
+    <string name="girl_survivor_label_mobile">شماره همراه</string>
+    <string name="girl_survivor_error_enter_address">لطفا آدرس را وارد نمایید</string>
+    <string name="girl_survivor_error_enter_zip_code">لطفا کد پستی را وارد نمایید</string>
+    <string name="girl_survivor_error_not_valid_zip_code">کدپستی معتبر نیست</string>
+    <string name="girl_survivor_error_enter_phone">لطفا شماره تلفن را وارد نمایید</string>
+    <string name="girl_survivor_error_not_valid_phone">شماره تلفن معتبر نیست</string>
+    <string name="girl_survivor_error_not_valid_pension_id">شماره مستمری معتبر نیست</string>
+    <string name="girl_survivor_error_not_valid_national_id">کد ملی معتبر نیست</string>
+    <string name="girl_survivor_error_enter_pension_num">لطفا شماره مستمری را وارد نمایید</string>
+    <string name="girl_survivor_success_title">تأیید</string>
+    <string name="girl_survivor_success_message">تعهدنامه شما با موفقیت دریافت گردید</string>
+
     <string name="picker_relationship_title">انتخاب نسبت خانوادگی</string>
     <string name="picker_birth_place_title">انتخاب محل تولد</string>
     <string name="picker_issue_place_title">انتخاب محل صدور</string>
