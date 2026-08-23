@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.model.pension.EdictPensionerInboxDN
 import com.tamin.taminhamrah.model.pension.InquirePensionCertificateDN
 import com.tamin.taminhamrah.model.pension.PayRollDN
 import com.tamin.taminhamrah.model.pension.PayRollInboxDN
+import com.tamin.taminhamrah.model.pension.PaymentTypeDN
 import com.tamin.taminhamrah.model.pension.PensionIdDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
 import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDN
@@ -192,6 +193,114 @@ class PayRollViewModelTest {
             while (state.error == null) state = awaitItem()
 
             assertNotNull(state.error)
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        viewModel.events.test {
+            val event = awaitItem()
+            assertIs<PayRollEvent.ShowToast>(event)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenApplySearch_updatesDateAndPaymentTypeAndReloadsPayRoll() = runTest(testDispatcher) {
+        repository.pensionIdResult = listOf(PensionIdDN(pensionerId = "123"))
+        repository.payRollResult = listOf(PayRollDN(id = 1, tprDesc = "حقوق فروردین"))
+        viewModel = buildViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.sendIntent(PayRollIntent.ChangeSearchYear("1401"))
+        viewModel.sendIntent(PayRollIntent.ChangeSearchMonth("03"))
+        viewModel.sendIntent(PayRollIntent.ChangeSearchPaymentType(PaymentTypeDN.BONUS.code))
+
+        viewModel.uiState.test {
+            viewModel.sendIntent(PayRollIntent.ApplySearch)
+            var state = awaitItem()
+            while (state.isLoading || state.startDate != "140103") state = awaitItem()
+
+            assertEquals("140103", state.startDate)
+            assertEquals(PaymentTypeDN.BONUS.code, state.paymentType)
+            assertTrue(state.isDateFilteredBySearch)
+            assertEquals(false, state.showSearchSheet)
+            assertEquals(1, state.payRollList.size)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenClearDateFilter_resetsToDefaultDateAndPaymentType() = runTest(testDispatcher) {
+        repository.pensionIdResult = listOf(PensionIdDN(pensionerId = "123"))
+        repository.payRollResult = listOf(PayRollDN(id = 1))
+        viewModel = buildViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+        val defaultDate = viewModel.uiState.value.startDate
+
+        viewModel.sendIntent(PayRollIntent.ChangeSearchYear("1401"))
+        viewModel.sendIntent(PayRollIntent.ChangeSearchMonth("03"))
+        viewModel.sendIntent(PayRollIntent.ChangeSearchPaymentType(PaymentTypeDN.BONUS.code))
+        viewModel.sendIntent(PayRollIntent.ApplySearch)
+        testDispatcher.scheduler.advanceUntilIdle()
+        assertEquals("140103", viewModel.uiState.value.startDate)
+
+        viewModel.uiState.test {
+            viewModel.sendIntent(PayRollIntent.ClearDateFilter)
+            var state = awaitItem()
+            while (state.isLoading || state.startDate != defaultDate) state = awaitItem()
+
+            assertEquals(defaultDate, state.startDate)
+            assertEquals(PaymentTypeDN.MONTHLY.code, state.paymentType)
+            assertEquals(false, state.isDateFilteredBySearch)
+            assertEquals(false, state.showSearchSheet)
+            assertEquals(PaymentTypeDN.MONTHLY.code, state.searchPaymentType)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenLoadPayRollPDFFails_emitsViewerDownloadFailedAndShowsToast() = runTest(testDispatcher) {
+        repository.pensionIdResult = listOf(PensionIdDN(pensionerId = "123"))
+        repository.payRollResult = listOf(PayRollDN(id = 1))
+        repository.payRollPDFShouldThrow = true
+        repository.payRollPDFError = RuntimeException("خطای دانلود فیش")
+        viewModel = buildViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.uiState.test {
+            viewModel.sendIntent(PayRollIntent.LoadPayRollPDF)
+            var state = awaitItem()
+            while (!state.viewerDownloadFailed) state = awaitItem()
+
+            assertTrue(state.viewerDownloadFailed)
+            assertNotNull(state.error)
+            assertEquals(false, state.isLoading)
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        viewModel.events.test {
+            val event = awaitItem()
+            assertIs<PayRollEvent.ShowToast>(event)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenSendPayRollToInboxFails_emitsErrorStateAndShowsToast() = runTest(testDispatcher) {
+        repository.pensionIdResult = listOf(PensionIdDN(pensionerId = "123"))
+        repository.payRollResult = listOf(PayRollDN(id = 1))
+        repository.sendToInboxShouldThrow = true
+        repository.sendToInboxError = RuntimeException("خطای ارسال به صندوق پیام")
+        viewModel = buildViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.uiState.test {
+            viewModel.sendIntent(PayRollIntent.RequestSendToInbox)
+            var state = awaitItem()
+            while (state.error == null) state = awaitItem()
+
+            assertNotNull(state.error)
+            assertEquals(false, state.isSendingToInbox)
+            assertEquals(false, state.showSendSuccess)
             cancelAndIgnoreRemainingEvents()
         }
 
