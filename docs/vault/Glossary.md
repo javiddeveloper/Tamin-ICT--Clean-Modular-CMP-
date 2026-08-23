@@ -31,7 +31,7 @@ Domain: insurance and social security. Maps the Persian term used by the busines
 | بیمه‌ی اختیاری | optional insurance | `OPTIONAL_INSURANCE` |
 | بیمه‌ی مشاغل آزاد | freelance insurance | `FREELANCE_INSURANCE` |
 | بیمه‌ی زنان خانه‌دار | housewives' insurance | `HOUSEWIFE_INSURANCE` |
-| استعلام مستمری | pension inquiry | `PENSION_INQUIRY`, `feature:pensioner` (package `pensionInquiry`) |
+| استعلام مستمری | pension inquiry | `PENSION_INQUIRY`, `feature:pensionStatusInquiry` |
 | محاسبه‌ی مستمری | pension calculation | `CALCULATE_WAGE_PENSION` |
 | فیش حقوقی | payslip | `PAY_ROLL` |
 | حکم مستمری | pension decree | `EDICT_PENSIONER` |
