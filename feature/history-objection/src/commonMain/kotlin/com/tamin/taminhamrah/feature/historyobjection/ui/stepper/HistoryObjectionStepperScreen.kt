@@ -184,8 +184,6 @@ private fun HistoryObjectionStepperContent(
 ) {
     val colors = LocalTaminColors.current
 
-    // Step 2/3's phone-back and screen-back must go to the previous step, not exit the feature —
-    // this routes both through the same OnBackClicked logic the top bar's chevron uses.
     BackHandler(onBack = { onIntent(HistoryObjectionStepperIntent.OnBackClicked) })
 
     Scaffold(

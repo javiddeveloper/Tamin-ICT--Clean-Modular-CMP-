@@ -495,7 +495,6 @@ private fun NotExistRequestCard(
                     color = colors.textMuted,
                 )
             }
-            // Fixed by design for now — not derived from `confirmed`, see docs/vault/History-Objection.md.
             StatusPill(
                 text = stringResource(Res.string.history_objection_status_not_sent),
                 containerColor = colors.orangeBg,

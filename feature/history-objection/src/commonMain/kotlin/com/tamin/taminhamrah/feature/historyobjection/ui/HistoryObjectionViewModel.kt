@@ -112,8 +112,6 @@ class HistoryObjectionViewModel(
     }
 
     private fun handleDeleteConfirmed(requestNumber: String, rowIndex: String?): Flow<PartialState> = flow {
-        // flatMapMerge runs intents concurrently — drop a repeated confirm while the first
-        // delete is still in flight rather than firing a second deletenotexist request.
         if (uiState.value.isDeleting) return@flow
         emit(PartialState.DeleteConfirmationHidden)
 
@@ -134,8 +132,6 @@ class HistoryObjectionViewModel(
     }
 
     private fun handleSubmitConfirmed(): Flow<PartialState> = flow {
-        // flatMapMerge runs intents concurrently — drop a repeated confirm while the first
-        // confirm/finalConfirm pair is still in flight rather than firing it twice.
         if (uiState.value.isSubmitting) return@flow
         emit(PartialState.SubmitConfirmationDismissed)
 
@@ -172,10 +168,6 @@ class HistoryObjectionViewModel(
         )
         PartialState.ActiveRequestDialogDismissed -> currentState.copy(showActiveRequestDialog = false)
         is PartialState.DescriptionChanged -> currentState.copy(description = partialState.description)
-        // isLoading is left as-is here: checkStatusNotExist()/loadNotExistRequests() run
-        // concurrently via merge() and loadHistoryObjectionData() always emits the authoritative
-        // Loading(false) once both finish — clearing it on the first error would dismiss the
-        // skeleton while the other flow is still in flight.
         is PartialState.Error -> currentState.copy(error = partialState.message)
         PartialState.ErrorDismissed -> currentState.copy(error = null)
         is PartialState.DeleteConfirmationShown -> currentState.copy(

@@ -245,11 +245,6 @@ class HistoryObjectionStepperViewModel(
         }
     }
 
-    // getCitiesByProvinceUseCase/getBranchesUseCase are cache-then-network (like
-    // ContractsRepositoryImpl.getBranches): they emit the local cache first, then the fresh
-    // network result once it lands. `.collect` (matching
-    // StudentInsuranceContractViewModel.loadBranches) forwards every emission — a `.first()`
-    // here would grab only the stale/empty cache snapshot and silently drop the real data.
     private fun handleProvinceSelected(province: ProvincePR): Flow<PartialState> = flow {
         emit(PartialState.ProvinceSelected(province))
         emit(PartialState.BottomSheetStateChanged(config = null, target = null))
@@ -281,8 +276,6 @@ class HistoryObjectionStepperViewModel(
     }
 
     private fun handleConfirmClicked(): Flow<PartialState> = flow {
-        // flatMapMerge runs intents concurrently, so a repeated tap while the first call is
-        // still in flight must be dropped here rather than firing a second saveNotExist request.
         if (uiState.value.isSubmitting) return@flow
 
         val request = uiState.value.toSaveNotExistRequestDN()
@@ -385,11 +378,6 @@ class HistoryObjectionStepperViewModel(
         emit(PartialState.InsuranceTypesLoaded(insuranceTypes.toPersistentList()))
     }
 
-    // A single requestNumber can cover several not-exist declarations (one submission can list
-    // multiple missing periods), each distinguished only by rowIndex — the same composite key
-    // `deletenotexist/{requestNumber}/{rowIndex}` already relies on. Matching by requestNumber
-    // alone here would silently land on whichever row happens to come first in the list, filling
-    // the stepper with a different row's data than the one the user tapped "ویرایش" on.
     private suspend fun loadEditModeData(requestNumber: String, rowIndex: String?): PartialState.EditModeDataLoaded? {
         val match = getHistoryObjectionNotExistRequestsUseCase().first()
             .firstOrNull { it.requestNumber == requestNumber && (rowIndex == null || it.rowIndex == rowIndex) }
