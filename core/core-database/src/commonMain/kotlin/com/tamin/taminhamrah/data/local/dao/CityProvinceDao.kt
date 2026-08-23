@@ -34,6 +34,21 @@ interface CityProvinceDao {
     @Upsert
     suspend fun upsertProvince(province: ProvinceEntity)
 
+    @Upsert
+    suspend fun upsertProvinces(provinces: List<ProvinceEntity>)
+
     @Query("SELECT * FROM provinces WHERE provinceCode = :provinceCode LIMIT 1")
     fun getProvince(provinceCode: String): Flow<ProvinceEntity?>
+
+    @Query("SELECT * FROM provinces ORDER BY provinceName ASC")
+    fun getAllProvinces(): Flow<List<ProvinceEntity>>
+
+    @Query("DELETE FROM provinces")
+    suspend fun clearProvinces()
+
+    @Transaction
+    suspend fun replaceAllProvinces(provinces: List<ProvinceEntity>) {
+        clearProvinces()
+        upsertProvinces(provinces)
+    }
 }

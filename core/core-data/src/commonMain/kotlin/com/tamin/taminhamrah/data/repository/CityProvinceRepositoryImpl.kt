@@ -90,12 +90,22 @@ internal class CityProvinceRepositoryImpl(
     }
 
     override fun getProvinces(): Flow<List<ProvinceDN>> = flow {
-        val response = commonRemoteDataSource.getProvinceName(ProvinceListQuery.build())
-        response.list.forEach { province ->
-            cityProvinceDao.upsertProvince(province.toEntity())
+        val localProvinces = cityProvinceDao.getAllProvinces().first()
+        emit(localProvinces.map { it.toDomain() })
+
+        try {
+            val response = commonRemoteDataSource.getProvinceName(ProvinceListQuery.build())
+            cityProvinceDao.replaceAllProvinces(response.list.map { it.toEntity() })
+        } catch (e: Exception) {
+            if (localProvinces.isEmpty()) throw e
         }
-        emit(response.list.map { it.toDomain() })
-    }
+
+        emitAll(
+            cityProvinceDao.getAllProvinces().map { entities ->
+                entities.map { it.toDomain() }
+            },
+        )
+    }.distinctUntilChanged()
 
     override fun getProvince(provinceId: String): Flow<ProvinceDN> = flow {
 
