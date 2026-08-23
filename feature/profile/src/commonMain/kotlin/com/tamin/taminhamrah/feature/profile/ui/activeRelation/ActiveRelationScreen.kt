@@ -15,16 +15,12 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.profile.ui.activeRelation.components.ActiveRelationHeader
 import com.tamin.taminhamrah.feature.profile.ui.activeRelation.components.ActiveRelationItemCard
@@ -39,10 +35,8 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
-import com.tamin.taminhamrah.ui.components.rememberCollapsingHeaderState
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
-import com.tamin.taminhamrah.ui.components.reservedHeight
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.ToasterState
@@ -50,11 +44,16 @@ import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
+import com.tamin.taminhamrah.ui.toparea.driveTopArea
+import com.tamin.taminhamrah.ui.toparea.rememberTopAreaState
+import com.tamin.taminhamrah.ui.toparea.reportTopAreaHeight
+import com.tamin.taminhamrah.ui.toparea.topAreaContentSpacer
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 
-/** How much drag folds the header from open to collapsed. */
-private val HeaderCollapseDistance = 160.dp
+/** Expanded/collapsed heights of the floating header; the difference is how much drag folds it. */
+private val HeaderExpandedHeight = 224.dp
+private val HeaderCollapsedHeight = 64.dp
 
 @Composable
 internal fun ActiveRelationRoute(
@@ -101,8 +100,8 @@ internal fun ActiveRelationScreen(
 
     // Folds the header from the list's drag, snapping on release. Read only inside the
     // header's layout/draw lambdas, so the fold never recomposes the screen.
-    val collapse = rememberCollapsingHeaderState(HeaderCollapseDistance)
-    var headerHeightPx by remember { mutableIntStateOf(0) }
+    val topArea = rememberTopAreaState(HeaderExpandedHeight, HeaderCollapsedHeight)
+    val listState = rememberLazyListState()
     // Remembers completed entrance animation keys across recompositions so items don't
     // re-play their entrance every time the list is redrawn.
     val staggerState = rememberStaggeredEntranceState(key = uiState.items.size)
@@ -116,12 +115,13 @@ internal fun ActiveRelationScreen(
             .background(taminColors.bgPage)
     ) {
         LazyColumn(
+            state = listState,
             // The drag folds the header first, then scrolls the list, and only what neither
             // wanted reaches the rubber band — so the fold always wins over the bounce.
             overscrollEffect = rememberJellyOverscroll(),
             modifier = Modifier
                 .fillMaxSize()
-                .nestedScroll(collapse.nestedScrollConnection),
+                .driveTopArea(topArea, listState),
             contentPadding = PaddingValues(
                 bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + Spacing.lg
             ),
@@ -129,7 +129,7 @@ internal fun ActiveRelationScreen(
         ) {
             item {
                 // Stands in for the floating header, which is measured rather than fixed.
-                Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
+                Spacer(modifier = Modifier.topAreaContentSpacer(topArea))
             }
 
             itemsIndexed(uiState.items, key = { _, item -> item.id }) { index, item ->
@@ -155,11 +155,11 @@ internal fun ActiveRelationScreen(
             activeCount = uiState.activeCount,
             inactiveCount = uiState.inactiveCount,
             lastCheckTime = uiState.lastCheckTime,
-            collapseProgress = collapse.progressProvider,
+            topAreaState = topArea,
             onBackClicked = { onIntent(ActiveRelationIntent.OnBackClicked) },
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .onSizeChanged { headerHeightPx = it.height }
+                .reportTopAreaHeight(topArea)
         )
 
         if (uiState.isLoading) {
