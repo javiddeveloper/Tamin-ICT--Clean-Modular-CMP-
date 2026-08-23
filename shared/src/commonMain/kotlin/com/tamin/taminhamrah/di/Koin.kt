@@ -18,6 +18,7 @@ import com.tamin.taminhamrah.feature.changemobile.di.changeMobileModule
 import com.tamin.taminhamrah.feature.security.di.securityModule
 import com.tamin.taminhamrah.feature.settings.di.settingsModule
 import com.tamin.taminhamrah.feature.addDependent.di.addDependentModule
+import com.tamin.taminhamrah.feature.pensionStatusInquiry.di.pensionStatusInquiryModule
 import com.tamin.taminhamrah.feature.userRequest.di.userRequestModule
 import com.tamin.taminhamrah.feature.orotezprotez.di.orotezProtezModule
 import com.tamin.taminhamrah.feature.girlSurvivor.di.girlSurvivorModule
@@ -53,6 +54,7 @@ val sharedModules: List<Module>
         myInboxModule,
         securityModule,
         addDependentModule,
+        pensionStatusInquiryModule,
         settingsModule,
         userRequestModule,
         orotezProtezModule,

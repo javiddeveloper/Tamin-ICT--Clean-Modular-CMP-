@@ -26,7 +26,9 @@ fun PensionInquiryDTO.toDomain(): PensionInquiryDN {
         branchName = branchName,
         pensionEndDate = pensionEndDate,
         nationalId = nationalId,
-        paymentAmount = paymentAmount
+        paymentAmount = paymentAmount,
+        pensionerId = pensionerId,
+        pensionerTypeDesc = pensionerTypeDesc,
     )
 }
 

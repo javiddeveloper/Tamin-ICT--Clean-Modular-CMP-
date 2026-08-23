@@ -1,14 +1,21 @@
 package com.tamin.taminhamrah.model.pension
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonNames
 
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class PensionInquiryDTO (
     @SerialName("branchCode") val branchCode: String? = null,
     @SerialName("insuranceNumber") val insuranceNumber: String? = null,
-    @SerialName("pensionerRisuid") val pensionerRisUid: String? = null,
+    @SerialName("pensionerRisuid")
+    @JsonNames("pensionerRisUid")
+    val pensionerRisUid: String? = null,
+    @SerialName("pensionerId") val pensionerId: String? = null,
     @SerialName("pensionerType") val pensionerType: String? = null,
+    @SerialName("pensionerTypeDesc") val pensionerTypeDesc: String? = null,
     @SerialName("paymentDate") val paymentDate: String? = null,
     @SerialName("pensionerBaseDate") val pensionerBaseDate: String? = null,
     @SerialName("fullName") val fullName: String? = null,
