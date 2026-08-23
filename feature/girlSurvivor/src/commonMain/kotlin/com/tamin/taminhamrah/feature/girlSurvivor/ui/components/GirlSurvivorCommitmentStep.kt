@@ -1,5 +1,7 @@
 package com.tamin.taminhamrah.feature.girlSurvivor.ui.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -19,13 +22,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.girlSurvivor.ui.contract.GirlSurvivorIntent
 import com.tamin.taminhamrah.feature.girlSurvivor.ui.contract.GirlSurvivorUiState
 import com.tamin.taminhamrah.ui.components.DetailRow
+import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.ui.components.taminSurface
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
@@ -91,7 +96,9 @@ fun GirlSurvivorCommitmentStep(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .taminSurface(CornerRadius.card)
+                .clip(RoundedCornerShape(CornerRadius.card))
+                .background(colors.bgSurface)
+                .border(1.dp, colors.hawkesBlue, RoundedCornerShape(CornerRadius.card))
                 .padding(Spacing.md),
             verticalArrangement = Arrangement.spacedBy(Spacing.smd),
         ) {

@@ -18,6 +18,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 
 class GirlSurvivorViewModel(
@@ -25,7 +26,7 @@ class GirlSurvivorViewModel(
     private val checkGirlSurvivorConditionsUseCase: CheckGirlSurvivorConditionsUseCase,
     private val getGirlSurvivorReportUseCase: GetGirlSurvivorReportUseCase,
     private val confirmGirlSurvivorUseCase: ConfirmGirlSurvivorUseCase,
-) : BaseViewModel<GirlSurvivorUiState, GirlSurvivorUiState.PartialState, GirlSurvivorEvent, GirlSurvivorIntent>(
+) : BaseViewModel<GirlSurvivorUiState, PartialState, GirlSurvivorEvent, GirlSurvivorIntent>(
     initialState = GirlSurvivorUiState()
 ) {
 
@@ -33,7 +34,13 @@ class GirlSurvivorViewModel(
         sendIntent(GirlSurvivorIntent.Init)
     }
 
-    override fun handleIntent(intent: GirlSurvivorIntent): Flow<GirlSurvivorUiState.PartialState> = flow {
+    override fun handleIntent(intent: GirlSurvivorIntent): Flow<PartialState> =
+        handleIntentInternal(intent).catch { e ->
+            sendEvent(GirlSurvivorEvent.ShowToast(e.toSingleLineMessage()))
+            emit(createErrorState(e.toSingleLineMessage()))
+        }
+
+    private fun handleIntentInternal(intent: GirlSurvivorIntent): Flow<PartialState> = flow {
         when (intent) {
             GirlSurvivorIntent.Init -> loadPersonalInfo()
             is GirlSurvivorIntent.AddressChanged -> {
@@ -91,7 +98,7 @@ class GirlSurvivorViewModel(
 
     override fun reduceState(
         currentState: GirlSurvivorUiState,
-        partialState: GirlSurvivorUiState.PartialState
+        partialState: PartialState
     ): GirlSurvivorUiState = when (partialState) {
         is PartialState.Loading -> currentState.copy(isLoading = partialState.isLoading, viewerDownloadFailed = false)
         is PartialState.ProfileLoading -> currentState.copy(isProfileLoading = partialState.isProfileLoading)
@@ -133,7 +140,7 @@ class GirlSurvivorViewModel(
         )
     }
 
-    override fun createErrorState(message: String): GirlSurvivorUiState.PartialState =
+    override fun createErrorState(message: String): PartialState =
         PartialState.Error(message)
 
     private suspend fun FlowCollector<PartialState>.loadPersonalInfo() {
@@ -174,24 +181,20 @@ class GirlSurvivorViewModel(
         }
 
         emit(PartialState.Loading(true))
-        try {
-            checkGirlSurvivorConditionsUseCase(
-                nationalCode = state.deceasedNationalCode,
-                pensionerId = state.deceasedPensionId,
-            ).collect {
-                val updatedPayload = state.confirmPayload?.copy(
-                    address = state.address,
-                    phoneNumber = state.phoneNumber,
-                    nationalCode = state.deceasedNationalCode.ifBlank { null },
-                    pensionId = state.deceasedPensionId.ifBlank { null },
-                )
-                if (updatedPayload != null) {
-                    emit(PartialState.ConfirmPayloadUpdated(updatedPayload))
-                }
-                downloadReportPdf()
+        checkGirlSurvivorConditionsUseCase(
+            nationalCode = state.deceasedNationalCode,
+            pensionerId = state.deceasedPensionId,
+        ).collect {
+            val updatedPayload = state.confirmPayload?.copy(
+                address = state.address,
+                phoneNumber = state.phoneNumber,
+                nationalCode = state.deceasedNationalCode.ifBlank { null },
+                pensionId = state.deceasedPensionId.ifBlank { null },
+            )
+            if (updatedPayload != null) {
+                emit(PartialState.ConfirmPayloadUpdated(updatedPayload))
             }
-        } catch (_: Exception) {
-            emit(PartialState.Loading(false))
+            downloadReportPdf()
         }
     }
 
@@ -235,12 +238,8 @@ class GirlSurvivorViewModel(
         ) ?: return
 
         emit(PartialState.Submitting(true))
-        try {
-            confirmGirlSurvivorUseCase(payload).collect {
-                emit(PartialState.ShowSuccessDialog(true))
-            }
-        } catch (_: Exception) {
-            emit(PartialState.Submitting(false))
+        confirmGirlSurvivorUseCase(payload).collect {
+            emit(PartialState.ShowSuccessDialog(true))
         }
     }
 

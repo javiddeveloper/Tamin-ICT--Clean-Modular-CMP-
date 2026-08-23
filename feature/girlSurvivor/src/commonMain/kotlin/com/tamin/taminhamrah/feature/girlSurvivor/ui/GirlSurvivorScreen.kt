@@ -31,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.girlSurvivor.ui.components.GirlSurvivorCommitmentStep
@@ -43,6 +44,7 @@ import com.tamin.taminhamrah.feature.girlSurvivor.ui.contract.GirlSurvivorUiStat
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
+import com.tamin.taminhamrah.ui.components.IconBox
 import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
 import com.tamin.taminhamrah.ui.components.StepIndicator
@@ -56,10 +58,13 @@ import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
+import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -72,6 +77,7 @@ import taminx.core.core_ui.girl_survivor_send_request
 import taminx.core.core_ui.girl_survivor_success_message
 import taminx.core.core_ui.girl_survivor_success_title
 import taminx.core.core_ui.girl_survivor_title
+import taminx.core.core_ui.ic_request
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.ic_tamin_cross
@@ -215,7 +221,7 @@ private fun GirlSurvivorContent(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        AnimatedRingHeaderIcon(icon = vectorResource(Res.drawable.ic_tamin_user))
+                        AnimatedRingHeaderIcon(icon = vectorResource(Res.drawable.ic_request))
                         Spacer(modifier = Modifier.height(Spacing.md))
                         Text(
                             text = stringResource(Res.string.girl_survivor_subtitle),

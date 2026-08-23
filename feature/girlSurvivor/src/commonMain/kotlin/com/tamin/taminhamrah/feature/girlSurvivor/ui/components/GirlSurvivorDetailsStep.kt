@@ -1,33 +1,37 @@
 package com.tamin.taminhamrah.feature.girlSurvivor.ui.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.KeyboardType
-import com.tamin.taminhamrah.feature.girlSurvivor.ui.contract.GirlSurvivorFieldErrors
+import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.girlSurvivor.ui.contract.GirlSurvivorIntent
 import com.tamin.taminhamrah.feature.girlSurvivor.ui.contract.GirlSurvivorProfileRowPR
 import com.tamin.taminhamrah.feature.girlSurvivor.ui.contract.GirlSurvivorUiState
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.SegmentedInputField
 import com.tamin.taminhamrah.ui.components.TaminSwitchButton
+import com.tamin.taminhamrah.ui.components.dashedOutline
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.ui.components.taminSurface
 import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -55,63 +59,43 @@ fun GirlSurvivorDetailsStep(
     ) {
         GirlSurvivorProfileCard(rows = state.profileRows)
 
-        OutlinedTextField(
+        GirlSurvivorLabeledField(
+            label = stringResource(Res.string.girl_survivor_address_label),
             value = state.address,
             onValueChange = { onIntent(GirlSurvivorIntent.AddressChanged(it)) },
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text(stringResource(Res.string.girl_survivor_address_label)) },
-            placeholder = { Text(stringResource(Res.string.girl_survivor_address_label)) },
             isError = state.fieldErrors.address != null,
-            supportingText = state.fieldErrors.address?.let { { Text(it) } },
-            minLines = 2,
-            singleLine = false,
+            errorText = state.fieldErrors.address,
+            singleLine = true,
         )
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(Spacing.smd),
         ) {
-            OutlinedTextField(
+            GirlSurvivorLabeledField(
+                label = stringResource(Res.string.girl_survivor_zipcode_label),
                 value = state.zipCode,
                 onValueChange = { onIntent(GirlSurvivorIntent.ZipCodeChanged(it)) },
                 modifier = Modifier.weight(1f),
-                label = { Text(stringResource(Res.string.girl_survivor_zipcode_label)) },
-                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Number),
-                singleLine = true,
+                keyboardType = KeyboardType.Number,
                 isError = state.fieldErrors.zipCode != null,
-                supportingText = state.fieldErrors.zipCode?.let { { Text(it) } },
+                errorText = state.fieldErrors.zipCode,
             )
-            OutlinedTextField(
+            GirlSurvivorLabeledField(
+                label = stringResource(Res.string.girl_survivor_phone_label),
                 value = state.phoneNumber,
                 onValueChange = { onIntent(GirlSurvivorIntent.PhoneNumberChanged(it)) },
                 modifier = Modifier.weight(1f),
-                label = { Text(stringResource(Res.string.girl_survivor_phone_label)) },
-                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Number),
-                singleLine = true,
+                keyboardType = KeyboardType.Number,
                 isError = state.fieldErrors.phoneNumber != null,
-                supportingText = state.fieldErrors.phoneNumber?.let { { Text(it) } },
+                errorText = state.fieldErrors.phoneNumber,
             )
         }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Text(
-                text = stringResource(Res.string.girl_survivor_use_pension_id),
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (state.usePensionIdMode) {
-                    LocalTaminColors.current.blueText
-                } else {
-                    LocalTaminColors.current.textMuted
-                },
-            )
-            TaminSwitchButton(
-                checked = state.usePensionIdMode,
-                onCheckedChange = { onIntent(GirlSurvivorIntent.UsePensionIdModeChanged(it)) },
-            )
-        }
+        GirlSurvivorPensionToggle(
+            checked = state.usePensionIdMode,
+            onCheckedChange = { onIntent(GirlSurvivorIntent.UsePensionIdModeChanged(it)) },
+        )
 
         if (state.usePensionIdMode) {
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
@@ -157,10 +141,13 @@ private fun GirlSurvivorProfileCard(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
+    val shape = RoundedCornerShape(CornerRadius.card)
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .taminSurface(CornerRadius.card)
+            .clip(shape)
+            .background(colors.bgSurface)
+            .border(1.dp, colors.hawkesBlue, shape)
             .padding(Spacing.md),
     ) {
         rows.forEachIndexed { index, row ->
@@ -173,5 +160,75 @@ private fun GirlSurvivorProfileCard(
                 HorizontalDivider(color = colors.border.copy(alpha = 0.5f))
             }
         }
+    }
+}
+
+@Composable
+private fun GirlSurvivorPensionToggle(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .dashedOutline(colors.hawkesBlue, CornerRadius.card, 1.dp)
+            .padding(horizontal = Spacing.md, vertical = Spacing.smd),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(
+            text = stringResource(Res.string.girl_survivor_use_pension_id),
+            style = MaterialTheme.typography.bodyMedium,
+            color = colors.blueText,
+            modifier = Modifier.weight(1f),
+        )
+        TaminSwitchButton(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+        )
+    }
+}
+
+@Composable
+private fun GirlSurvivorLabeledField(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    singleLine: Boolean = true,
+    isError: Boolean = false,
+    errorText: String? = null,
+) {
+    val colors = LocalTaminColors.current
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = colors.textMuted,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = singleLine,
+            isError = isError,
+            supportingText = errorText?.let { { Text(it) } },
+            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+            shape = RoundedCornerShape(CornerRadius.lg),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = colors.blueText,
+                unfocusedBorderColor = colors.border,
+                focusedContainerColor = colors.bgSurface,
+                unfocusedContainerColor = colors.bgSurface,
+                errorBorderColor = colors.dangerText,
+            ),
+        )
     }
 }
