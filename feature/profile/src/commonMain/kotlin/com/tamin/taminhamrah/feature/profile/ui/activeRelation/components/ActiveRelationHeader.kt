@@ -20,10 +20,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
@@ -186,8 +188,28 @@ internal fun ActiveRelationHeader(
                 color = taminColors.txtNatProfile
             )
         }
+
+        // Zero height while expanded, growing to CollapsedBottomSpace as the header folds --
+        // the inverse of topAreaHide above. Gives the collapsed bar breathing room below its
+        // title row without adding to the expanded gap between the title and the ring icon.
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .topAreaReveal(topAreaState, CollapsedBottomSpace)
+        )
     }
 }
+
+private val CollapsedBottomSpace = 20.dp
+
+/** Grows a child from zero up to [height] as [state] folds -- the inverse of [topAreaHide]. */
+private fun Modifier.topAreaReveal(state: TopAreaState, height: androidx.compose.ui.unit.Dp): Modifier =
+    layout { measurable, constraints ->
+        val targetPx = height.roundToPx()
+        val revealedPx = (targetPx * state.progress).roundToInt()
+        val placeable = measurable.measure(constraints.copy(minHeight = 0, maxHeight = revealedPx.coerceAtLeast(0)))
+        layout(placeable.width, revealedPx) { placeable.place(0, 0) }
+    }
 
 @com.tamin.taminhamrah.ui.PreviewRtlTheme
 @Composable
