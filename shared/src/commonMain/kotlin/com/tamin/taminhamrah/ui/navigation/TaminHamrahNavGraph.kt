@@ -82,7 +82,7 @@ import com.tamin.taminhamrah.feature.pensionInquiry.deferredInstallmentScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.deservedTreatmentScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.disabilityPensionScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.edictScreen
-import com.tamin.taminhamrah.feature.pensionInquiry.girlSurvivorScreen
+import com.tamin.taminhamrah.feature.girlSurvivor.girlSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.issuanceCertificateScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeferredInstallment
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeservedTreatment
@@ -90,7 +90,7 @@ import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDisabilityPension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionSurvivor
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPrescription
 import com.tamin.taminhamrah.feature.pensionInquiry.payrollScreen
-import com.tamin.taminhamrah.feature.pensionInquiry.pensionInquiryScreen
+import com.tamin.taminhamrah.feature.pensionStatusInquiry.pensionStatusInquiryGraph
 import com.tamin.taminhamrah.feature.pensionInquiry.pensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.prescriptionScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
@@ -111,6 +111,9 @@ import com.tamin.taminhamrah.feature.security.SecurityRoute
 import com.tamin.taminhamrah.feature.security.securityScreen
 import com.tamin.taminhamrah.feature.settings.SettingsRoute
 import com.tamin.taminhamrah.feature.settings.settingsScreen
+import com.tamin.taminhamrah.feature.userRequest.UserRequestRoute
+import com.tamin.taminhamrah.feature.userRequest.userRequestGraph
+import com.tamin.taminhamrah.feature.orotezprotez.orotezProtezScreen
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
@@ -388,6 +391,10 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                     onNavigateToSettings = {
                         navController.navigate(SettingsRoute)
                     },
+                    onNavigateToUserRequests = {
+                        navController.navigate(UserRequestRoute.List)
+                    },
+
                     onOpenUrl = { url -> openUrl(url) },
                     onBack = { navController.popBackStack() }
                 )
@@ -422,7 +429,9 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                     onDone = { navController.popBackStack() }
                 )
 
-                pensionInquiryScreen()
+                pensionStatusInquiryGraph(
+                    onBack = { navController.popBackStack() }
+                )
                 calculatePensionScreen(onBack = { navController.popBackStack() })
                 prescriptionScreen(onBack = { navController.popBackStack() })
                 deservedTreatmentScreen(onBack = { navController.popBackStack() })
@@ -451,6 +460,8 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
 
                 settingsScreen(onNavigateBack = { navController.popBackStack() })
 
+                userRequestGraph(navController = navController)
+
                 studentInsuranceContractScreen(onBack = { navController.popBackStack() })
 
                 // Maps the assistant's destination ids to real routes. Ids come from
@@ -474,6 +485,8 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                 )
 
                 securityScreen(onNavigateBack = { navController.popBackStack() })
+
+                orotezProtezScreen(onBack = { navController.popBackStack() })
 
                 healthProfileScreen(onBack = { navController.popBackStack() })
             }

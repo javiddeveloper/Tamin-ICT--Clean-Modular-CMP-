@@ -34,6 +34,8 @@ Search `core-ui/ui/components/` before building any new component — the odds a
 
 Typography / Persian digits: [[Typography]] — theme `ss01` is visual; `toPersianDigits()` changes the string.
 
+Colors, spacing, radius: [[Theme]] — never hardcode `Color`, `.dp`, or UI copy in features.
+
 ## feature
 
 ⚠️ Folder names do not match package names. Translation table:
@@ -54,6 +56,8 @@ Typography / Persian digits: [[Typography]] — theme `ss01` is visual; `toPersi
 | `:feature:change-mobile` | `feature/change-mobile` | `…feature.changemobile` ⚠️ |
 | `:feature:my-inbox` | `feature/my-inbox` | `…feature.myinbox` ⚠️ |
 | `:feature:addDependent` | `feature/addDependent` | `…feature.addDependent` |
+| `:feature:pensionStatusInquiry` | `feature/pensionStatusInquiry` | `…feature.pensionStatusInquiry` |
+| `:feature:girlSurvivor` | `feature/girlSurvivor` | `…feature.girlSurvivor` |
 
 ### Layout of a feature module
 

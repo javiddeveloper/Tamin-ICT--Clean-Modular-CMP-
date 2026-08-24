@@ -122,6 +122,13 @@ object Thickness {
     val medium = 2.dp
 }
 
+/** Decorative wash behind [com.tamin.taminhamrah.ui.components.TaminTopAppBar] hero content. */
+object HeaderDecoration {
+    val circleSize = 190.dp
+    val circleXOffset = 450.dp
+    val circleYOffset = (-150).dp
+}
+
 /**
  * Placeholder sizes for a value that has not arrived, so a shimmering figure occupies roughly what
  * the real one will and nothing resizes when it lands.

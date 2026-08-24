@@ -58,6 +58,26 @@ object PersonalTestData {
 
     val requestSummarySuccess: String
         get() = readResourceFile("mocks/request_summary_success.json")
+
+    /** Legacy-shaped `survivor-request/personal` payload for girl survivor. */
+    val girlSurvivorPersonalSuccess: String
+        get() = readResourceFile("mocks/girl_survivor_personal_success.json")
+
+    val girlSurvivorConditionSuccess: String
+        get() = readResourceFile("mocks/girl_survivor_condition_success.json")
+
+    val girlSurvivorConditionIneligible: String
+        get() = readResourceFile("mocks/girl_survivor_condition_ineligible.json")
+
+    val girlSurvivorConfirmSuccess: String
+        get() = readResourceFile("mocks/girl_survivor_confirm_success.json")
+
+    val girlSurvivorConfirmNullData: String
+        get() = readResourceFile("mocks/girl_survivor_confirm_null_data.json")
+
+    /** Minimal PDF header bytes used for `survivor-request/report` streaming tests. */
+    val girlSurvivorReportPdfBytes: ByteArray =
+        ("%PDF-1.4 girl-survivor-commitment").encodeToByteArray()
 }
 
 object UserRequestTestData {
@@ -66,7 +86,93 @@ object UserRequestTestData {
 
     val requestTypesSuccess: String
         get() = readResourceFile("mocks/request_types_success.json")
+
+    val requestErrorsSuccess: String
+        get() = """
+            {
+                "total": 1,
+                "list": [
+                    {
+                        "id": 101,
+                        "errorMassage": "نقص مدارک شناسایی",
+                        "errorType": "VALIDATION",
+                        "errorStatus": "FAILED",
+                        "creationTime": 1700000000000
+                    }
+                ]
+            }
+        """.trimIndent()
+
+    val smartGuideSuccess: String
+        get() = """
+            {
+                "total": 1,
+                "list": [
+                    {
+                        "id": 201,
+                        "question": "شرایط ثبت درخواست چیست؟",
+                        "reply": "برای ثبت درخواست داشتن سابقه بیمه حداقل یک سال الزامی است.",
+                        "requestCode": "0018",
+                        "requestDesc": "درخواست راهنما",
+                        "isPublic": true,
+                        "title": "راهنمای هوشمند",
+                        "description": "توضیحات تکمیلی"
+                    }
+                ]
+            }
+        """.trimIndent()
+
+    val salaryDeductionCertificateSuccess: String
+        get() = """
+            {
+                "status": 200,
+                "family": "SUCCESSFUL",
+                "reason": "OK",
+                "traceId": "a57c8114-781e-4b42-9731-950960a5bf9c",
+                "data": {
+                    "list": [
+                        {
+                            "id": 491371155,
+                            "operation": null,
+                            "createdBy": "6319889391",
+                            "creationTime": 1785215695428,
+                            "lastModifiedBy": null,
+                            "lastModificationTime": 1785215798065,
+                            "refCode": "1075558440",
+                            "userName": "6319889391",
+                            "status": {
+                                "operation": null,
+                                "requestCode": "0018",
+                                "requestDesc": "مختومه-تاييد نهايي"
+                            },
+                            "title": "درخواست گواهي کسر از حقوق",
+                            "comment": null,
+                            "template": null,
+                            "requestType": {
+                                "operation": null,
+                                "createdBy": null,
+                                "creationTime": null,
+                                "lastModifiedBy": null,
+                                "lastModificationTime": null,
+                                "id": 22,
+                                "title": "درخواست گواهي کسر از حقوق",
+                                "description": "درخواست گواهي کسر از حقوق"
+                            },
+                            "deliverCode": null,
+                            "refrenceid": null,
+                            "requestDetails": null,
+                            "requestChid": null,
+                            "fullName": null,
+                            "createByName": "سيدرحمت اله ميرفضلي"
+                        }
+                    ],
+                    "total": 1
+                }
+            }
+        """.trimIndent()
 }
+
+
 
 object PersonalInboxTestData {
     val inboxItemsSuccess: String

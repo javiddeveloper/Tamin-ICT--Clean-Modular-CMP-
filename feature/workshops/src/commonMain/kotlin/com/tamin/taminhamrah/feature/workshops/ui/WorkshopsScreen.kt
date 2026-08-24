@@ -13,6 +13,7 @@ import androidx.compose.material.icons.outlined.Business
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -26,17 +27,24 @@ import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopListScaffol
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopSearchPanel
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopSectionHeader
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopStatsCard
+import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopStats
+import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsEvent
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsIntent
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState
+import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
 import com.tamin.taminhamrah.feature.workshops.ui.sheets.WorkshopActionsSheet
 import com.tamin.taminhamrah.feature.workshops.ui.sheets.WorkshopFilterSheet
+import com.tamin.taminhamrah.model.workshop.WorkshopPR
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.rideUpIntoHeader
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
@@ -46,9 +54,6 @@ import taminx.core.core_ui.workshops_title
 
 /**
  * کارگاه‌های کارفرما — the launcher for every workshop service.
- *
- * The route collects state and turns events into navigation; [WorkshopsScreen] is stateless, so a
- * preview can exercise every state without a ViewModel.
  */
 @Composable
 fun WorkshopsRoute(
@@ -58,7 +63,10 @@ fun WorkshopsRoute(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    HandleWorkshopsEvents(events = viewModel.events, onOpenAction = onOpenAction)
+    HandleWorkshopsEvents(
+        events = viewModel.events,
+        onOpenAction = onOpenAction,
+    )
 
     WorkshopsScreen(
         state = state,
@@ -75,13 +83,10 @@ fun WorkshopsScreen(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    // Built once, not per recomposition: a Brush created at the call site is a fresh instance
-    // every time and would defeat skipping on the bar below.
     val headerGradient = remember(colors.profileGradientStops) {
         Brush.horizontalGradient(colors.profileGradientStops)
     }
-    // Hoisted out of the item lambdas below: reading these from `state` inside a row would capture
-    // the whole state, and every workshop would recompose whenever any unrelated field changed.
+
     val workshops = state.workshops
     val stats = state.stats
     val isSearchOpen = state.isSearchOpen
@@ -108,7 +113,9 @@ fun WorkshopsScreen(
             bottomPadding = HeaderBottomPadding,
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth().padding(top = Spacing.lg),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = Spacing.lg),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(Spacing.md),
             ) {
@@ -133,9 +140,6 @@ fun WorkshopsScreen(
             key = { it.workshopId + it.branchCode },
             header = {
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.lg)) {
-                    // Climbs into the gradient above it, the way the design overlaps the two.
-                    // A negative padding throws; this borrows the space during layout instead, and
-                    // gives back exactly as much below as it takes above.
                     WorkshopStatsCard(
                         stats = stats,
                         modifier = Modifier.rideUpIntoHeader(
@@ -186,8 +190,57 @@ fun WorkshopsScreen(
     }
 }
 
-/** How far the stats card climbs into the gradient header. */
-private val StatsCardOverlap = 40.dp
+@Composable
+private fun HandleWorkshopsEvents(
+    events: Flow<WorkshopsEvent>,
+    onOpenAction: (WorkshopAction, String, String, String) -> Unit,
+) {
+    LaunchedEffect(events) {
+        events.collect { event ->
+            when (event) {
+                is WorkshopsEvent.Navigate -> {
+                    onOpenAction(
+                        event.action,
+                        event.workshopId,
+                        event.branchCode,
+                        event.workshopName,
+                    )
+                }
+                is WorkshopsEvent.ShowMessage -> {
+                    // Handled by snackbar or UI notification host if configured
+                }
+                is WorkshopsEvent.ShowToast -> {
+                    // Toast event presentation
+                }
+            }
+        }
+    }
+}
 
-/** Deep enough for the ring icon, the subtitle, and the card that overlaps them. */
+private val StatsCardOverlap = 40.dp
 private val HeaderBottomPadding = 64.dp
+
+@PreviewRtlTheme
+@Composable
+private fun WorkshopsScreenPreview() {
+    PreviewRtlThemeContent {
+        WorkshopsScreen(
+            state = WorkshopsUiState(
+                list = PagedListState(
+                    items = listOf(
+                        WorkshopPR(
+                            workshopId = "9900020917749",
+                            branchCode = "123",
+                            workshopName = "کارگاه کامپیوتر توکلی",
+                            employerName = "علی توکلی",
+                            branchTitle = "شعبه ۱ تهران",
+                        )
+                    )
+                ),
+                stats = WorkshopStats(total = 5, active = 4),
+            ),
+            onIntent = {},
+            onBack = {},
+        )
+    }
+}

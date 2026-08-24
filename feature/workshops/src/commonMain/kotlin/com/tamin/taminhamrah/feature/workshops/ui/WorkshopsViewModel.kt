@@ -9,12 +9,21 @@ import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsIntent
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState.PartialState
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
+import com.tamin.taminhamrah.mapper.common.toCityPresentation
+import com.tamin.taminhamrah.mapper.common.toProvincePresentation
+import com.tamin.taminhamrah.mapper.contracts.toBranchPresentation
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
+import com.tamin.taminhamrah.model.common.CityPR
+import com.tamin.taminhamrah.model.common.ProvincePR
+import com.tamin.taminhamrah.model.contracts.BranchPR
 import com.tamin.taminhamrah.model.workshop.Article16DebtQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopActivityStatus
 import com.tamin.taminhamrah.model.workshop.WorkshopListQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
+import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
+import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
+import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetArticle16DebtsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetEmployerAgreementsUseCase
 import kotlinx.coroutines.flow.Flow
@@ -25,24 +34,19 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.workshop_error_receive_data
 import taminx.core.core_ui.workshop_no_debt_found
 
-/**
- * The کارگاه‌های کارفرما list.
- *
- * Three things here are deliberately unlike the screen this replaces. Search and status filter are
- * one query applied together, instead of each call carrying only what it was just handed. The
- * action sheet is gated on the workshop actually having both identity halves, decided once, rather
- * than on a card happening to be expanded. And ماده ۱۶ asks whether the workshop has any debts
- * before navigating, so a workshop with none is told so instead of shown an empty screen.
- */
 class WorkshopsViewModel(
     private val getEmployerAgreements: GetEmployerAgreementsUseCase,
     private val getArticle16Debts: GetArticle16DebtsUseCase,
+    private val getProvincesUseCase: GetProvincesUseCase,
+    private val getCitiesUseCase: GetCitiesUseCase,
+    private val getBranchesUseCase: GetBranchesUseCase,
 ) : BaseViewModel<WorkshopsUiState, PartialState, WorkshopsEvent, WorkshopsIntent>(
     initialState = WorkshopsUiState()
 ) {
 
     init {
         sendIntent(WorkshopsIntent.Load)
+        sendIntent(WorkshopsIntent.LoadProvinces)
     }
 
     override fun handleIntent(intent: WorkshopsIntent): Flow<PartialState> = when (intent) {
@@ -66,9 +70,15 @@ class WorkshopsViewModel(
         is WorkshopsIntent.ActionsRequested -> openActions(intent.workshop)
         WorkshopsIntent.ActionsDismissed -> flow { emit(PartialState.ActionsForChanged(null)) }
         is WorkshopsIntent.ActionSelected -> selectAction(intent.action, intent.workshop)
+
+        WorkshopsIntent.LoadProvinces -> loadProvinces()
+        WorkshopsIntent.RetryCities -> loadCities(uiState.value.branchSelection.provinceCode)
+        WorkshopsIntent.RetryBranches -> loadBranches(uiState.value.branchSelection.cityCode)
+        is WorkshopsIntent.SelectProvince -> handleSelectProvince(intent.province)
+        is WorkshopsIntent.SelectCity -> handleSelectCity(intent.city)
+        is WorkshopsIntent.SelectBranch -> handleSelectBranch(intent.branch)
     }
 
-    /** Page 0 replaces what is on screen; later pages append, so the end never flickers back. */
     private fun loadPage(
         page: Int,
         search: WorkshopSearch = uiState.value.appliedSearch,
@@ -76,10 +86,11 @@ class WorkshopsViewModel(
     ): Flow<PartialState> = flow {
         emit(if (page == 0) PartialState.Loading else PartialState.LoadingMore)
 
+        val resolvedBranchCode = search.branchCode.ifBlank { uiState.value.branchSelection.branchCode }
         val result = getEmployerAgreements(
             WorkshopListQuery(
                 workshopId = search.workshopId.takeIf { it.isNotBlank() },
-                branchCode = search.branchCode.takeIf { it.isNotBlank() },
+                branchCode = resolvedBranchCode.takeIf { it.isNotBlank() },
                 status = status,
                 page = page,
             )
@@ -90,21 +101,11 @@ class WorkshopsViewModel(
             )
         )
 
-        // The header figures describe every workshop the user has, not the filtered view, so they
-        // are counted once, on the first unfiltered page, and left alone afterwards.
         if (page == 0 && !search.isNotEmpty && status == null && uiState.value.stats == null) {
             emitAll(countStats(result.total))
         }
     }.catch { emit(PartialState.Error(it.toSingleLineMessage())) }
 
-    /**
-     * One extra call, for one figure.
-     *
-     * The unfiltered total came with the page just loaded; only the active count needs asking for,
-     * and asking for a single row is enough — it is the envelope's `total` that is read, not the
-     * row. Everything not active is the third figure, by subtraction. A failure here leaves the
-     * card with the total it already has rather than taking the list down with it.
-     */
     private fun countStats(total: Int): Flow<PartialState> = flow {
         val active = getEmployerAgreements(
             WorkshopListQuery(
@@ -132,7 +133,6 @@ class WorkshopsViewModel(
         emitAll(loadPage(page = 0, search = search, status = state.statusFilter))
     }
 
-    /** همه موارد empties the fields as well as the query — the old screen left the text behind. */
     private fun clearSearch(): Flow<PartialState> = flow {
         val status = uiState.value.statusFilter
         emit(PartialState.SearchInputChanged(workshopId = "", branchCode = ""))
@@ -147,7 +147,93 @@ class WorkshopsViewModel(
         emitAll(loadPage(page = 0, search = search, status = status))
     }
 
-    /** A workshop missing either identity half cannot be acted on, so the sheet never opens. */
+    private fun loadProvinces(): Flow<PartialState> = flow {
+        emit(PartialState.ProvincesLoading(true))
+        emit(PartialState.ProvincesError(null))
+        try {
+            getProvincesUseCase().collect { provinces ->
+                emit(PartialState.ProvincesLoaded(provinces.toProvincePresentation()))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.ProvincesError(e.toSingleLineMessage()))
+        } finally {
+            emit(PartialState.ProvincesLoading(false))
+        }
+    }
+
+    private fun loadCities(provinceCode: String): Flow<PartialState> = flow {
+        if (provinceCode.isBlank()) return@flow
+        emit(PartialState.CitiesLoading(true))
+        emit(PartialState.CitiesError(null))
+        try {
+            getCitiesUseCase(provinceCode = provinceCode).collect { cities ->
+                emit(PartialState.CitiesLoaded(cities.toCityPresentation()))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.CitiesError(e.toSingleLineMessage()))
+        } finally {
+            emit(PartialState.CitiesLoading(false))
+        }
+    }
+
+    private fun loadBranches(cityCode: String): Flow<PartialState> = flow {
+        if (cityCode.isBlank()) return@flow
+        emit(PartialState.BranchesLoading(true))
+        emit(PartialState.BranchesError(null))
+        try {
+            getBranchesUseCase(cityCode).collect { branches ->
+                emit(PartialState.BranchesLoaded(branches.toBranchPresentation()))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.BranchesError(e.toSingleLineMessage()))
+        } finally {
+            emit(PartialState.BranchesLoading(false))
+        }
+    }
+
+    private fun handleSelectProvince(province: ProvincePR): Flow<PartialState> = flow {
+        emit(
+            PartialState.BranchSelectionChanged(
+                uiState.value.branchSelection.copy(
+                    provinceCode = province.provinceCode,
+                    provinceName = province.provinceName,
+                    cityCode = "",
+                    cityName = "",
+                    branchCode = "",
+                    branchName = "",
+                ),
+            ),
+        )
+        emit(PartialState.BranchesLoaded(emptyList()))
+        emit(PartialState.BranchesError(null))
+        emitAll(loadCities(province.provinceCode))
+    }
+
+    private fun handleSelectCity(city: CityPR): Flow<PartialState> = flow {
+        emit(
+            PartialState.BranchSelectionChanged(
+                uiState.value.branchSelection.copy(
+                    cityCode = city.cityCode,
+                    cityName = city.cityName,
+                    branchCode = "",
+                    branchName = "",
+                ),
+            ),
+        )
+        emitAll(loadBranches(city.cityCode))
+    }
+
+    private fun handleSelectBranch(branch: BranchPR): Flow<PartialState> = flow {
+        emit(
+            PartialState.BranchSelectionChanged(
+                uiState.value.branchSelection.copy(
+                    branchCode = branch.code,
+                    branchName = branch.name,
+                ),
+            ),
+        )
+    }
+
     private fun openActions(workshop: WorkshopPR): Flow<PartialState> = flow {
         if (!workshop.hasIdentity) {
             sendEvent(WorkshopsEvent.ShowMessage(Res.string.workshop_error_receive_data))
@@ -156,10 +242,6 @@ class WorkshopsViewModel(
         emit(PartialState.ActionsForChanged(workshop))
     }
 
-    /**
-     * ماده ۱۶ asks the service for this workshop's debts before navigating; every other action
-     * opens directly.
-     */
     private fun selectAction(
         action: WorkshopAction,
         workshop: WorkshopPR,
@@ -213,6 +295,17 @@ class WorkshopsViewModel(
 
         is PartialState.StatsLoaded -> currentState.copy(stats = partialState.stats)
         is PartialState.ActionsForChanged -> currentState.copy(actionsFor = partialState.workshop)
+
+        is PartialState.ProvincesLoading -> currentState.copy(isProvincesLoading = partialState.isLoading)
+        is PartialState.ProvincesLoaded -> currentState.copy(provinces = partialState.list)
+        is PartialState.CitiesLoading -> currentState.copy(isCitiesLoading = partialState.isLoading)
+        is PartialState.CitiesLoaded -> currentState.copy(cities = partialState.list)
+        is PartialState.BranchesLoading -> currentState.copy(isBranchesLoading = partialState.isLoading)
+        is PartialState.BranchesLoaded -> currentState.copy(branches = partialState.list)
+        is PartialState.BranchSelectionChanged -> currentState.copy(branchSelection = partialState.selection)
+        is PartialState.ProvincesError -> currentState.copy(provincesError = partialState.message)
+        is PartialState.CitiesError -> currentState.copy(citiesError = partialState.message)
+        is PartialState.BranchesError -> currentState.copy(branchesError = partialState.message)
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)

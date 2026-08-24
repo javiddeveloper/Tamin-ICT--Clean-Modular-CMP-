@@ -22,6 +22,8 @@ import com.tamin.taminhamrah.apiService.health.HealthApiService
 import com.tamin.taminhamrah.apiService.health.createHealthApiService
 import com.tamin.taminhamrah.apiService.inbox.PersonalInboxApiService
 import com.tamin.taminhamrah.apiService.inbox.createPersonalInboxApiService
+import com.tamin.taminhamrah.apiService.orotezProtez.OrotezProtezApiService
+import com.tamin.taminhamrah.apiService.orotezProtez.createOrotezProtezApiService
 import com.tamin.taminhamrah.apiService.pension.PensionApiService
 import com.tamin.taminhamrah.apiService.pension.createPensionApiService
 import com.tamin.taminhamrah.apiService.personal.PersonalApiService
@@ -32,6 +34,8 @@ import com.tamin.taminhamrah.apiService.treatment.createTreatmentApiService
 import com.tamin.taminhamrah.apiService.userRequest.UserRequestApiService
 import com.tamin.taminhamrah.apiService.addDependent.AddDependentApiService
 import com.tamin.taminhamrah.apiService.addDependent.createAddDependentApiService
+import com.tamin.taminhamrah.apiService.calculateWagePension.CalculateWagePensionApiService
+import com.tamin.taminhamrah.apiService.calculateWagePension.createCalculateWagePensionApiService
 import com.tamin.taminhamrah.util.NetworkConstants
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
@@ -104,6 +108,11 @@ val ApiClientsModule = module {
         ktorfit.createHistoryApiServices()
     }
 
+    single<CalculateWagePensionApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createCalculateWagePensionApiService()
+    }
+
     single<WorkShopsApiService> {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.createWorkShopsApiService()
@@ -136,4 +145,10 @@ val ApiClientsModule = module {
         val ktorfit: Ktorfit = get(named("aiKtorfit"))
         ktorfit.createAgentApiService()
     }
+
+    single<OrotezProtezApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createOrotezProtezApiService()
+    }
+
 }

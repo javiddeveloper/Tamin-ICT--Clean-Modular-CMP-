@@ -3,9 +3,7 @@ package com.tamin.taminhamrah.feature.pensionInquiry
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
-import androidx.navigation.NavOptionsBuilder
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
-import com.tamin.taminhamrah.feature.pensionInquiry.ui.pensionInquiry.PensionInquiryScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.calculatePension.CalculatePensionScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.prescription.PrescriptionScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.deservedTreatment.DeservedTreatmentScreen
@@ -13,13 +11,9 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll.PayRollScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.EdictScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.issuanceCertificate.IssuanceCertificateScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.deferredInstallment.DeferredInstallmentScreen
-import com.tamin.taminhamrah.feature.pensionInquiry.ui.girlSurvivor.GirlSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.pensionSurvivor.PensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.DisabilityPensionScreen
 import kotlinx.serialization.Serializable
-
-@Serializable
-data object PensionInquiryRoute
 
 @Serializable
 data object CalculatePensionRoute
@@ -43,21 +37,10 @@ data object IssuanceCertificateRoute
 data object DeferredInstallmentRoute
 
 @Serializable
-data object GirlSurvivorRoute
-
-@Serializable
 data object PensionSurvivorRoute
 
 @Serializable
 data object DisabilityPensionRoute
-
-fun NavController.navigateToPensionInquiry(navOptions: NavOptions? = null) {
-    navigate(PensionInquiryRoute, navOptions)
-}
-
-fun NavController.navigateToPensionInquiry(builder: NavOptionsBuilder.() -> Unit) {
-    navigate(PensionInquiryRoute, builder)
-}
 
 fun NavController.navigateToCalculatePension(navOptions: NavOptions? = null) {
     navigate(CalculatePensionRoute, navOptions)
@@ -87,22 +70,12 @@ fun NavController.navigateToDeferredInstallment(navOptions: NavOptions? = null) 
     navigate(DeferredInstallmentRoute, navOptions)
 }
 
-fun NavController.navigateToGirlSurvivor(navOptions: NavOptions? = null) {
-    navigate(GirlSurvivorRoute, navOptions)
-}
-
 fun NavController.navigateToPensionSurvivor(navOptions: NavOptions? = null) {
     navigate(PensionSurvivorRoute, navOptions)
 }
 
 fun NavController.navigateToDisabilityPension(navOptions: NavOptions? = null) {
     navigate(DisabilityPensionRoute, navOptions)
-}
-
-fun NavGraphBuilder.pensionInquiryScreen() {
-    composableWithFadeTransitions<PensionInquiryRoute> {
-        PensionInquiryScreen()
-    }
 }
 
 fun NavGraphBuilder.calculatePensionScreen(onBack: () -> Unit) {
@@ -144,12 +117,6 @@ fun NavGraphBuilder.issuanceCertificateScreen(onBack: () -> Unit) {
 fun NavGraphBuilder.deferredInstallmentScreen(onBack: () -> Unit) {
     composableWithFadeTransitions<DeferredInstallmentRoute> {
         DeferredInstallmentScreen(onBack = onBack)
-    }
-}
-
-fun NavGraphBuilder.girlSurvivorScreen(onBack: () -> Unit) {
-    composableWithFadeTransitions<GirlSurvivorRoute> {
-        GirlSurvivorScreen(onBack = onBack)
     }
 }
 

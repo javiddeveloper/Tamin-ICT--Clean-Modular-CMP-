@@ -3,82 +3,95 @@ package com.tamin.taminhamrah.feature.workshops.ui.contract
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
+import com.tamin.taminhamrah.model.common.CityPR
+import com.tamin.taminhamrah.model.common.ProvincePR
+import com.tamin.taminhamrah.model.contracts.BranchPR
+import com.tamin.taminhamrah.model.studentContract.BranchSelectionFormPR
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementPR
 import com.tamin.taminhamrah.model.workshop.WorkshopActivityStatus
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
 import org.jetbrains.compose.resources.StringResource
 
 /**
  * State of the کارگاه‌های کارفرما list.
- *
- * Search text and the status filter live here together and are sent together, so choosing a status
- * no longer throws away a code the user typed. [appliedSearch] is what the visible page was
- * actually fetched with — kept apart from the editable fields so the screen can show which filter
- * is in force even after the panel is closed.
  */
 @Immutable
 data class WorkshopsUiState(
+    // Workshop List & Pagination
     val list: PagedListState<WorkshopPR> = PagedListState(),
+    val stats: WorkshopStats? = null,
+    val actionsFor: WorkshopPR? = null,
+
+    // Search & Status Filters
     val workshopIdInput: String = "",
     val branchCodeInput: String = "",
     val appliedSearch: WorkshopSearch = WorkshopSearch(),
     val statusFilter: WorkshopActivityStatus? = null,
     val isSearchOpen: Boolean = false,
     val isFilterSheetOpen: Boolean = false,
-    /** The three figures the header card shows. Null until they have been counted. */
-    val stats: WorkshopStats? = null,
-    /** The workshop whose جزئیات و عملیات sheet is open, or null while it is closed. */
-    val actionsFor: WorkshopPR? = null,
-) {
-    /** Whether anything narrows the list right now — what the filter chip reflects. */
-    val hasActiveFilter: Boolean get() = statusFilter != null || appliedSearch.isNotEmpty
 
-    /** Convenience for the screen, which shows the loaded rows and nothing else. */
+    // Cascading Branch Selection (استان → شهر → شعبه)
+    val branchSelection: BranchSelectionFormPR = BranchSelectionFormPR(),
+    val provinces: List<ProvincePR> = emptyList(),
+    val cities: List<CityPR> = emptyList(),
+    val branches: List<BranchPR> = emptyList(),
+    val isProvincesLoading: Boolean = false,
+    val isCitiesLoading: Boolean = false,
+    val isBranchesLoading: Boolean = false,
+    val provincesError: String? = null,
+    val citiesError: String? = null,
+    val branchesError: String? = null,
+) {
+    val hasActiveFilter: Boolean
+        get() = statusFilter != null || appliedSearch.isNotEmpty || branchSelection.branch != null
+
     val workshops get() = list.items
 
     sealed interface PartialState {
+        // Workshops Paging & Status
         data object Loading : PartialState
         data object LoadingMore : PartialState
         data class Error(val message: String?) : PartialState
         data class Loaded(val list: PagedListState<WorkshopPR>) : PartialState
+        data class StatsLoaded(val stats: WorkshopStats) : PartialState
+        data class ActionsForChanged(val workshop: WorkshopPR?) : PartialState
+
+        // Search & Filters
         data class SearchInputChanged(
             val workshopId: String? = null,
             val branchCode: String? = null,
         ) : PartialState
-
         data class QueryApplied(
             val search: WorkshopSearch,
             val status: WorkshopActivityStatus?,
         ) : PartialState
-
         data class SearchOpenChanged(val isOpen: Boolean) : PartialState
         data class FilterSheetOpenChanged(val isOpen: Boolean) : PartialState
-        data class StatsLoaded(val stats: WorkshopStats) : PartialState
-        data class ActionsForChanged(val workshop: WorkshopPR?) : PartialState
+
+        // Cascading Branch Selection
+        data class ProvincesLoading(val isLoading: Boolean) : PartialState
+        data class ProvincesLoaded(val list: List<ProvincePR>) : PartialState
+        data class CitiesLoading(val isLoading: Boolean) : PartialState
+        data class CitiesLoaded(val list: List<CityPR>) : PartialState
+        data class BranchesLoading(val isLoading: Boolean) : PartialState
+        data class BranchesLoaded(val list: List<BranchPR>) : PartialState
+        data class BranchSelectionChanged(val selection: BranchSelectionFormPR) : PartialState
+        data class ProvincesError(val message: String?) : PartialState
+        data class CitiesError(val message: String?) : PartialState
+        data class BranchesError(val message: String?) : PartialState
     }
 }
 
-/**
- * Counting rows needs no rows: the status counts are read off the envelope's `total`, so the
- * request asks for the smallest page the service will give.
- */
 const val WORKSHOP_STATS_PAGE_SIZE = 1
 
-/**
- * The figures over the list: how many workshops the user has, and how many are active.
- *
- * Counted from the service's own totals rather than from the rows on screen — the list is paged,
- * so counting what happens to be loaded would report a smaller number the further you scroll.
- */
 @Immutable
 data class WorkshopStats(
     val total: Int = 0,
     val active: Int = 0,
 ) {
-    /** The design shows نیمه فعال and غیر فعال as one figure, so it is derived, never counted twice. */
     val inactive: Int get() = (total - active).coerceAtLeast(0)
 }
 
-/** The two code fields the search panel submits. Blank means "not part of the query". */
 @Immutable
 data class WorkshopSearch(
     val workshopId: String = "",
@@ -88,33 +101,34 @@ data class WorkshopSearch(
 }
 
 sealed interface WorkshopsIntent {
-    /** First load, and the retry after a failure. */
+    // Workshops Loading & Pagination
     data object Load : WorkshopsIntent
-
     data object LoadMore : WorkshopsIntent
 
+    // Search & Filter Panel
     data class WorkshopIdChanged(val value: String) : WorkshopsIntent
     data class BranchCodeChanged(val value: String) : WorkshopsIntent
     data class SearchOpenChanged(val isOpen: Boolean) : WorkshopsIntent
-
-    /** Submit whatever the two code fields hold, keeping the status filter. */
     data object ApplySearch : WorkshopsIntent
-
-    /** همه موارد — clears the code fields *and* the query, so the two cannot disagree. */
     data object ClearSearch : WorkshopsIntent
-
     data class FilterSheetOpenChanged(val isOpen: Boolean) : WorkshopsIntent
-
-    /** Null clears the status filter while leaving any code search in place. */
     data class StatusFilterChanged(val status: WorkshopActivityStatus?) : WorkshopsIntent
 
+    // Cascading Dropdown Selectors
+    data object LoadProvinces : WorkshopsIntent
+    data object RetryCities : WorkshopsIntent
+    data object RetryBranches : WorkshopsIntent
+    data class SelectProvince(val province: ProvincePR) : WorkshopsIntent
+    data class SelectCity(val city: CityPR) : WorkshopsIntent
+    data class SelectBranch(val branch: BranchPR) : WorkshopsIntent
+
+    // Workshop Actions Sheet
     data class ActionsRequested(val workshop: WorkshopPR) : WorkshopsIntent
     data object ActionsDismissed : WorkshopsIntent
     data class ActionSelected(val action: WorkshopAction, val workshop: WorkshopPR) : WorkshopsIntent
 }
 
 sealed interface WorkshopsEvent {
-    /** The picked action can be opened; the route navigates. */
     data class Navigate(
         val action: WorkshopAction,
         val workshopId: String,
@@ -122,6 +136,6 @@ sealed interface WorkshopsEvent {
         val workshopName: String,
     ) : WorkshopsEvent
 
-    /** Something the user must read before anything else happens. */
     data class ShowMessage(val message: StringResource) : WorkshopsEvent
+    data class ShowToast(val message: String) : WorkshopsEvent
 }

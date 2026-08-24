@@ -15,6 +15,7 @@ import com.tamin.taminhamrah.useCases.bankAccount.RegisterBankAccountUseCase
 import com.tamin.taminhamrah.useCases.common.GetRecipientListUseCase
 import com.tamin.taminhamrah.useCases.common.GetBeneficiaryUseCase
 import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
+import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
 import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
 import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
 import com.tamin.taminhamrah.useCases.file.DownloadDocumentUseCase
@@ -23,6 +24,7 @@ import com.tamin.taminhamrah.useCases.pension.GetEdictPensionerUseCase
 import com.tamin.taminhamrah.useCases.pension.GetEdictReportPDFUseCase
 import com.tamin.taminhamrah.useCases.pension.SendEdictPensionerToMyInboxUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionInquiryUseCase
+import com.tamin.taminhamrah.useCases.pension.SendRequestInquirePensionCertificateUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerPayRollUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerPayRollPDFUseCase
@@ -35,14 +37,24 @@ import com.tamin.taminhamrah.useCases.personalInbox.InboxInquiryLicenseUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxItemsUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxSizeUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetMyRequestPdfUseCase
+import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestErrorsUseCase
+import com.tamin.taminhamrah.useCases.userRequest.GetSmartGuideListUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestTypesUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestsUseCase
+import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestDetailUseCase
+import com.tamin.taminhamrah.useCases.userRequest.GetShowRequestInfoUseCase
+import com.tamin.taminhamrah.useCases.userRequest.DownloadUserRequestDocumentUseCase
 import com.tamin.taminhamrah.useCases.personal.GetDeceasedInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetAgeUseCase
 import com.tamin.taminhamrah.useCases.personal.GetPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetDisabilityDependentInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetConfirmSurvivorsListUseCase
 import com.tamin.taminhamrah.useCases.personal.CheckGirlSurvivorConditionsUseCase
+import com.tamin.taminhamrah.useCases.personal.ConfirmGirlSurvivorUseCase
+import com.tamin.taminhamrah.useCases.personal.GetGirlSurvivorReportUseCase
+import com.tamin.taminhamrah.useCases.orotezProtez.GetInsuredPersonsUseCase
+import com.tamin.taminhamrah.useCases.orotezProtez.GetRequestInsuredMainInfoUseCase
+import com.tamin.taminhamrah.useCases.orotezProtez.SaveShortTermOrthosisUseCase
 import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
 import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.GetStatusCertificateReportUseCase
@@ -75,6 +87,10 @@ import com.tamin.taminhamrah.useCases.contracts.SaveContactUseCase
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetHistoryJobInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
+import com.tamin.taminhamrah.useCases.calculateWagePension.CalculateMultipleWorkshopsPensionUseCase
+import com.tamin.taminhamrah.useCases.calculateWagePension.CalculateWagePensionUseCase
+import com.tamin.taminhamrah.useCases.calculateWagePension.CheckMultipleWorkshopsUseCase
+import com.tamin.taminhamrah.useCases.calculateWagePension.GetMultipleWorkshopPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.GetDisabilityPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetRequestSummaryUseCase
 import com.tamin.taminhamrah.useCases.personal.PutInsuredRegistrationDocListUseCase
@@ -189,6 +205,7 @@ val domainModule = module {
     factoryOf(::TaminRelationUseCase)
     factoryOf(::IdentityInfoUseCase)
     factoryOf(::GetPensionInquiryUseCase)
+    factoryOf(::SendRequestInquirePensionCertificateUseCase)
     factoryOf(::GetPensionerIdUseCase)
     factoryOf(::GetPensionerPayRollUseCase)
     factoryOf(::GetPensionerPayRollPDFUseCase)
@@ -216,20 +233,36 @@ val domainModule = module {
     factoryOf(::GetDeceasedInfoUseCase)
     factoryOf(::GetDisabilityDependentInfoUseCase)
     factoryOf(::CheckGirlSurvivorConditionsUseCase)
+    factoryOf(::GetGirlSurvivorReportUseCase)
+    factoryOf(::ConfirmGirlSurvivorUseCase)
     factoryOf(::GetConfirmSurvivorsListUseCase)
     factoryOf(::GetAgeUseCase)
     factoryOf(::GetCitiesUseCase)
+    factoryOf(::GetProvincesUseCase)
     factoryOf(::ChangeMobileUseCase)
     factoryOf(::VerifyChangeMobileUseCase)
     factoryOf(::GetBeneficiaryUseCase)
     factoryOf(::GetMainMenuUseCase)
     factoryOf(::GetUserRequestsUseCase)
     factoryOf(::GetUserRequestTypesUseCase)
+    factoryOf(::GetUserRequestErrorsUseCase)
+    factoryOf(::GetSmartGuideListUseCase)
+    factoryOf(::GetUserRequestDetailUseCase)
+    factoryOf(::GetShowRequestInfoUseCase)
+    factoryOf(::DownloadUserRequestDocumentUseCase)
+
     factoryOf(::GetTalfighInfosUseCase)
     factoryOf(::GetDastmozdInfosUseCase)
     factoryOf(::GetHistoryJobInfosUseCase)
+    factoryOf(::GetMultipleWorkshopPersonalInfoUseCase)
+    factoryOf(::CheckMultipleWorkshopsUseCase)
+    factoryOf(::CalculateMultipleWorkshopsPensionUseCase)
+    factoryOf(::CalculateWagePensionUseCase)
     factoryOf(::GetPersonalInboxItemsUseCase)
     factoryOf(::GetPersonalInboxSizeUseCase)
+    factoryOf(::GetRequestInsuredMainInfoUseCase)
+    factoryOf(::GetInsuredPersonsUseCase)
+    factoryOf(::SaveShortTermOrthosisUseCase)
     factoryOf(::GetMyRequestPdfUseCase)
     factoryOf(::DeleteMyRequestUseCase)
     factoryOf(::InboxInquiryLicenseUseCase)

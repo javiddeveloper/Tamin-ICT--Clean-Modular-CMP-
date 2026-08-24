@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 class GetPersonalInfoUseCase(
     private val personalRepository: PersonalRepository
 ) {
-    operator fun invoke(): Flow<PersonalInfoDN?> {
-        return personalRepository.getPersonalInfo()
+    operator fun invoke(refreshRemote: Boolean = false): Flow<PersonalInfoDN?> {
+        return personalRepository.getPersonalInfo(refreshRemote)
     }
 }

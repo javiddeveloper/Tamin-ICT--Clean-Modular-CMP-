@@ -10,6 +10,7 @@ import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoReq
 import com.tamin.taminhamrah.model.personal.submitFinalSurvivorPension.SubmitFinalSurvivorPensionRequest
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDTO
 import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoDTO
+import com.tamin.taminhamrah.model.personal.girlSurvivor.ConfirmGirlSurvivorRequestDTO
 import com.tamin.taminhamrah.tools.BaseDTO
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.GET
@@ -72,6 +73,24 @@ interface PersonalApiService {
     @GET("survivor-request/final-report")
     suspend fun getFinalSurvivorPensionPDF(
     ): HttpStatement
+
+    @Streaming
+    @GET("survivor-request/report")
+    suspend fun getGirlSurvivorReport(
+        @Query("address") address: String,
+        @Query("tel") tel: String,
+        @Query("postalCode") postalCode: String,
+        @Query("fatherName") fatherName: String?,
+        @Query("birthDate") birthDate: Long?,
+        @Query("insuranceId") insuranceId: String?,
+        @Query("parentCode") parentCode: String,
+        @Query("pensionerId") pensionerId: String,
+    ): HttpStatement
+
+    @POST("female-request")
+    suspend fun confirmGirlSurvivor(
+        @Body body: ConfirmGirlSurvivorRequestDTO,
+    ): BaseDTO<JsonElement?>
 
     @PUT("documents/{personalId}")
     suspend fun putInsuredRegistrationDocList(

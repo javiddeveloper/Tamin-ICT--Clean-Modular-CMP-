@@ -47,6 +47,9 @@ enum class FilterProperty(val key: String) {
     @SerialName("cityCode") CITY_CODE("cityCode"),
     @SerialName("cityName") CITY_NAME("cityName"),
     @SerialName("provinceCode") PROVINCE_CODE("provinceCode"),
+    // Lower-case 'c' on purpose: proxy/models/city names the field `provincecode`, which is also
+    // why CityDto's @SerialName is spelled that way. Correcting it stops the filter working.
+    @SerialName("provincecode") PROVINCE_CODE_CITY("provincecode"),
     @SerialName("pensionerId") PENSIONER_ID("pensionerId"),
     @SerialName("startDate") START_DATE("startDate"),
     @SerialName("operation") OPERATION("operation"),
@@ -73,6 +76,10 @@ enum class FilterProperty(val key: String) {
     @SerialName("branchName") BRANCH_NAME("branchName"),
     @SerialName("target") TARGET("target"),
     @SerialName("statusCode") STATUS_CODE("statusCode"),
+    @SerialName("request.id") REQUEST_ID("request.id"),
+    @SerialName("requestType") REQUEST_TYPE("requestType"),
+    @SerialName("requestStatus") REQUEST_STATUS("requestStatus"),
+    @SerialName("isPublic") IS_PUBLIC("isPublic"),
     @SerialName("dependencyDesc") DEPENDENCY_DESC("dependencyDesc"),
 
     // Workshop member / stakeholder / absentee-registration lists. Each list addresses the same
@@ -90,6 +97,7 @@ enum class FilterProperty(val key: String) {
     @SerialName("debitNumber") DEBIT_NUMBER("debitNumber"),
     @SerialName("peymanSequence") PEYMAN_SEQUENCE("peymanSequence"),
 }
+
 
 @Serializable
 data class ApiFilterDN(

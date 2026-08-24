@@ -20,6 +20,8 @@ import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSource
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.historySource.HistoryRemoteDataSource
 import com.tamin.taminhamrah.dataSource.historySource.HistoryRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.calculateWagePension.CalculateWagePensionRemoteDataSource
+import com.tamin.taminhamrah.dataSource.calculateWagePension.CalculateWagePensionRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.pension.PensionRemoteDataSource
 import com.tamin.taminhamrah.dataSource.pension.PensionRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.inbox.PersonalInboxRemoteDataSource
@@ -38,6 +40,8 @@ import com.tamin.taminhamrah.dataSource.contactUs.ContactUsRemoteDataSource
 import com.tamin.taminhamrah.dataSource.contactUs.ContactUsRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSource
 import com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.orotezProtez.OrotezProtezRemoteDataSource
+import com.tamin.taminhamrah.dataSource.orotezProtez.OrotezProtezRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSource
 import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSourceImpl
 import org.koin.core.module.dsl.bind
@@ -117,6 +121,13 @@ val remoteModule = module {
         )
     }
 
+    single<CalculateWagePensionRemoteDataSource> {
+        CalculateWagePensionRemoteDataSourceImpl(
+            apiService = get(),
+            errorParser = get()
+        )
+    }
+
     single<UserRequestRemoteDataSource> {
         UserRequestRemoteDataSourceImpl(
             requestApiService = get(named("requestApiService")),
@@ -186,6 +197,14 @@ val remoteModule = module {
     single<AgentRepository> {
         AgentRepositoryImpl(
             remoteDataSource = get()
+        )
+    }
+
+    single<OrotezProtezRemoteDataSource> {
+        OrotezProtezRemoteDataSourceImpl(
+            orotezProtezApiService = get(),
+            apiQueryBuilder = get(),
+            errorParser = get()
         )
     }
 }
