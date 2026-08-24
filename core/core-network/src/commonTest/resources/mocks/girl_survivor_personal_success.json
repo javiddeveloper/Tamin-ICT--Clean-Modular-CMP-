@@ -1,0 +1,28 @@
+{
+  "insuranceId": "0071234567",
+  "mobileNumber": "09121234567",
+  "provinceName": "تهران",
+  "branch": "0010",
+  "organizationId": "0010",
+  "personal": {
+    "firstName": "زهرا",
+    "lastName": "محمدی",
+    "fatherName": "علی",
+    "nationalId": "0012345678",
+    "ssn": "12345",
+    "idCardNumber": "456789",
+    "dateOfBirth": 631152000000,
+    "dateOfDead": null,
+    "gender": {
+      "genderCode": "02",
+      "genderDesc": "زن"
+    },
+    "contacts": [
+      {
+        "address": "تهران، خیابان آزادی، پلاک ۱۲",
+        "zipCode": "1234567890",
+        "phoneNumber": "02166778899"
+      }
+    ]
+  }
+}

@@ -613,6 +613,41 @@
     <string name="error_load_relationships_failed">خطا در دریافت نسبت‌های خانوادگی</string>
     <string name="error_load_cities_failed">خطا در دریافت لیست شهرها</string>
 
+    <!-- Girl Survivor -->
+    <string name="girl_survivor_title">تعهدنامه فرزندان دختر</string>
+    <string name="girl_survivor_subtitle">ثبت درخواست بازماندگی فرزند دختر</string>
+    <string name="girl_survivor_step_details">مشخصات</string>
+    <string name="girl_survivor_step_commitment">فرم تعهد</string>
+    <string name="girl_survivor_address_label">آدرس</string>
+    <string name="girl_survivor_phone_label">شماره تلفن</string>
+    <string name="girl_survivor_zipcode_label">کد پستی</string>
+    <string name="girl_survivor_use_pension_id">شناسایی متوفی با شماره مستمری</string>
+    <string name="girl_survivor_deceased_national_id_label">کد ملی متوفی</string>
+    <string name="girl_survivor_deceased_pension_id_label">شماره مستمری متوفی</string>
+    <string name="girl_survivor_download_form">دانلود و مشاهده فرم تعهد</string>
+    <string name="girl_survivor_download_file">دانلود فایل</string>
+    <string name="girl_survivor_commitment_title">تعهدنامه فرزند دختر بازمانده</string>
+    <string name="girl_survivor_commitment_body">اینجانب %1$s به کد ملی %2$s متعهد می‌شوم در صورت ازدواج، اشتغال و یا دریافت هرگونه درآمد، مراتب را به سازمان تأمین اجتماعی اطلاع دهم و در صورت عدم اطلاع‌رسانی، وجوه دریافتی را مسترد نمایم.</string>
+    <string name="girl_survivor_commitment_confirm_label">فایل دانلود شده را مشاهده نمودم و مفاد آن مورد تایید اینجانب است</string>
+    <string name="girl_survivor_send_request">ارسال درخواست</string>
+    <string name="girl_survivor_relation_daughter">فرزند دختر</string>
+    <string name="girl_survivor_label_full_name">نام و نام خانوادگی</string>
+    <string name="girl_survivor_label_father_name">نام پدر</string>
+    <string name="girl_survivor_label_national_id">کد ملی</string>
+    <string name="girl_survivor_label_insurance_id">شماره بیمه</string>
+    <string name="girl_survivor_label_birth_date">تاریخ تولد</string>
+    <string name="girl_survivor_label_mobile">شماره همراه</string>
+    <string name="girl_survivor_error_enter_address">لطفا آدرس را وارد نمایید</string>
+    <string name="girl_survivor_error_enter_zip_code">لطفا کد پستی را وارد نمایید</string>
+    <string name="girl_survivor_error_not_valid_zip_code">کدپستی معتبر نیست</string>
+    <string name="girl_survivor_error_enter_phone">لطفا شماره تلفن را وارد نمایید</string>
+    <string name="girl_survivor_error_not_valid_phone">شماره تلفن معتبر نیست</string>
+    <string name="girl_survivor_error_not_valid_pension_id">شماره مستمری معتبر نیست</string>
+    <string name="girl_survivor_error_not_valid_national_id">کد ملی معتبر نیست</string>
+    <string name="girl_survivor_error_enter_pension_num">لطفا شماره مستمری را وارد نمایید</string>
+    <string name="girl_survivor_success_title">تأیید</string>
+    <string name="girl_survivor_success_message">تعهدنامه شما با موفقیت دریافت گردید</string>
+
     <string name="picker_relationship_title">انتخاب نسبت خانوادگی</string>
     <string name="picker_birth_place_title">انتخاب محل تولد</string>
     <string name="picker_issue_place_title">انتخاب محل صدور</string>
@@ -667,6 +702,7 @@
     <string name="bs_family_cancer">سابقه ابتلا به سرطان در خانواده</string>
     <string name="bs_province">استان</string>
     <string name="bs_city">شهر</string>
+    <string name="bs_branch">شعبه تأمین اجتماعی</string>
     <string name="bs_blood_group">گروه خونی</string>
     <string name="bs_smoking_addiction">آیا از دخانیات استفاده می‌کنید؟</string>
     <string name="bs_drug_addiction">آیا اعتیاد دارید؟</string>
@@ -764,6 +800,9 @@
     <string name="orotez_protez_document_pick_read_error">خطا در خواندن فایل انتخاب‌شده.</string>
     <string name="orotez_protez_document_validation_min_count">حداقل باید ۲ مدرک بارگذاری شود.</string>
     <string name="orotez_protez_document_validation_required">بارگذاری «نسخه تجویز پزشک» و «فاکتور خرید» الزامی است.</string>
+    <string name="picker_loading">در حال بارگذاری...</string>
+    <string name="picker_select_hint">انتخاب کنید</string>
+    <string name="picker_select_previous_first">ابتدا مورد قبلی را انتخاب کنید</string>
 
     <!-- ===================== Pension Status Inquiry ===================== -->
     <string name="pension_status_inquiry_title">استعلام وضعیت مستمری</string>
@@ -782,6 +821,30 @@
     <string name="pension_status_empty_subtitle">وضعیت مستمری برای این کاربر ثبت نشده است</string>
     <string name="pension_status_send_success_title">ارسال گواهی</string>
     <string name="pension_status_send_success_desc">درخواست گواهی با موفقیت ثبت شد و در صندوق شخصی شما قابل مشاهده است.</string>
+    <!-- کارگاه‌های کارفرما -->
+    <string name="workshops_title">کارگاه‌های کارفرما</string>
+    <string name="workshops_filter_workshop_id">کد کارگاه</string>
+    <string name="workshops_filter_status">وضعیت کارگاه</string>
+    <string name="workshops_search_action">جستجوی کارگاه‌ها</string>
+    <string name="workshops_empty_title">هیچ کارگاهی یافت نشد</string>
+    <string name="workshops_empty_subtitle">فیلترها را تغییر دهید و دوباره جستجو کنید.</string>
+    <string name="workshops_value_unknown">نامشخص</string>
+    <string name="workshops_card_employer">کارفرما</string>
+    <string name="workshops_card_branch">شعبه</string>
+    <string name="workshops_actions_title">جزئیات و عملیات</string>
+    <string name="workshops_action_payment_sheets">لیست برگ پرداخت</string>
+    <string name="workshops_action_debit_list">لیست بدهی کارگاه</string>
+    <string name="workshops_action_debt_inquiry">استعلام بدهی کارگاه</string>
+    <string name="workshops_action_objection">اعتراض به بدهی</string>
+    <string name="workshops_action_insured_registration">نام نویسی غیرحضوری بیمه شده</string>
+    <string name="workshops_action_article16">رسیدگی به بدهی ماده ۱۶</string>
+    <string name="workshops_action_members">کارکنان</string>
+    <string name="workshops_action_stakeholders">ذینفعان</string>
+    <string name="workshops_status_active">فعال</string>
+    <string name="workshops_status_semi_active">نیمه فعال</string>
+    <string name="workshops_status_inactive">غیرفعال</string>
+    <string name="workshops_status_any">همه وضعیت‌ها</string>
+    <string name="bs_workshop_status">وضعیت کارگاه</string>
 
     <!-- Occurrence / Accident Report -->
     <string name="occurrence_title">گزارش حادثه ناشی از کار</string>
