@@ -33,6 +33,7 @@ import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.Insp
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionHeader
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionItemCard
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionListSkeleton
+import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionSearchEmptyState
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionSearchSheet
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.contract.InspectionEvent
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.contract.InspectionIntent
@@ -64,8 +65,6 @@ import taminx.core.core_ui.inspection_coming_soon_toast
 import taminx.core.core_ui.inspection_empty_subtitle
 import taminx.core.core_ui.inspection_empty_title
 import taminx.core.core_ui.inspection_report_filename_format
-import taminx.core.core_ui.inspection_search_empty_subtitle
-import taminx.core.core_ui.inspection_search_empty_title
 
 private val HeaderCollapseDistance = 160.dp
 
@@ -117,6 +116,9 @@ internal fun InspectionScreen(
     uiState: InspectionUiState,
     onIntent: (InspectionIntent) -> Unit,
     onBackClicked: () -> Unit,
+    // Only ever non-default from a preview, to render the "no results for this filter" branch
+    // without exercising the search sheet.
+    initialSearchCriteria: InspectionSearchCriteria = InspectionSearchCriteria(),
 ) {
     val taminColors = LocalTaminColors.current
     val toaster = LocalToaster.current
@@ -126,7 +128,7 @@ internal fun InspectionScreen(
     var headerHeightPx by remember { mutableIntStateOf(0) }
     var viewingInspectionNo by remember { mutableStateOf<String?>(null) }
     var showSearchSheet by remember { mutableStateOf(false) }
-    var searchCriteria by remember { mutableStateOf(InspectionSearchCriteria()) }
+    var searchCriteria by remember { mutableStateOf(initialSearchCriteria) }
 
     // Purely local filtering over whatever the API last returned — clearing the criteria (via the
     // filter chip's close button or the sheet's own clear button) falls straight back to
@@ -190,15 +192,8 @@ internal fun InspectionScreen(
 
                 if (visibleInspections.isEmpty()) {
                     item {
-                        EmptyStateMessage(
-                            icon = Icons.Outlined.Assignment,
-                            title = stringResource(Res.string.inspection_search_empty_title),
-                            subtitle = stringResource(Res.string.inspection_search_empty_subtitle),
-                            showIconTile = true,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(320.dp)
-                                .padding(horizontal = Spacing.xlg),
+                        InspectionSearchEmptyState(
+                            modifier = Modifier.padding(horizontal = Spacing.lg),
                         )
                     }
                 }
@@ -313,6 +308,38 @@ private fun PreviewInspectionScreenEmpty() {
         }
     }
 }
+
+@PreviewRtlTheme
+@Composable
+private fun PreviewInspectionScreenSearchEmptyLight() {
+    PreviewRtlThemeContent {
+        AppToastHost {
+            InspectionScreen(
+                uiState = InspectionUiState(inspections = PreviewMockInspections),
+                onIntent = {},
+                onBackClicked = {},
+                initialSearchCriteria = PreviewNoMatchSearchCriteria,
+            )
+        }
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PreviewInspectionScreenSearchEmptyDark() {
+    PreviewRtlThemeContent(darkTheme = true) {
+        AppToastHost {
+            InspectionScreen(
+                uiState = InspectionUiState(inspections = PreviewMockInspections),
+                onIntent = {},
+                onBackClicked = {},
+                initialSearchCriteria = PreviewNoMatchSearchCriteria,
+            )
+        }
+    }
+}
+
+private val PreviewNoMatchSearchCriteria = InspectionSearchCriteria(inspectionNo = "00000000000")
 
 private val PreviewMockInspections = listOf(
     InspectionPerformedPR(
