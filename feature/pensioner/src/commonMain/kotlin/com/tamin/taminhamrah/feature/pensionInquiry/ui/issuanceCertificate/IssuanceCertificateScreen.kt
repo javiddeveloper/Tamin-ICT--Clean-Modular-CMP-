@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Badge
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -61,6 +62,7 @@ import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminTextField
 import com.tamin.taminhamrah.ui.components.rememberCopyAction
 import com.tamin.taminhamrah.ui.components.taminSurface
+import com.tamin.taminhamrah.ui.theme.ButtonDimens
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -72,13 +74,19 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.ic_tamin_copy
 import taminx.core.core_ui.issuance_certificate_branch_name_placeholder
-import taminx.core.core_ui.issuance_certificate_confirm_description
+import taminx.core.core_ui.issuance_certificate_certificate_type_value
+import taminx.core.core_ui.issuance_certificate_confirm_disclaimer
 import taminx.core.core_ui.issuance_certificate_confirm_title
 import taminx.core.core_ui.issuance_certificate_copy
+import taminx.core.core_ui.issuance_certificate_destination_value
 import taminx.core.core_ui.issuance_certificate_detail_branch
+import taminx.core.core_ui.issuance_certificate_detail_certificate_type
+import taminx.core.core_ui.issuance_certificate_detail_destination
+import taminx.core.core_ui.issuance_certificate_detail_full_name
 import taminx.core.core_ui.issuance_certificate_detail_pensioner_number
 import taminx.core.core_ui.issuance_certificate_detail_recipient
 import taminx.core.core_ui.issuance_certificate_disclaimer
@@ -136,7 +144,7 @@ fun IssuanceCertificateScreen(
         TaminConfirmationDialog(
             title = stringResource(Res.string.issuance_certificate_success_title),
             description = stringResource(Res.string.issuance_certificate_success_desc),
-            icon = Icons.Filled.Badge,
+            icon = Icons.Default.Check,
             iconTint = colors.greenText,
             iconBackground = colors.greenBg,
             onDismissRequest = { viewModel.sendIntent(IssuanceCertificateIntent.DismissSuccessDialog) },
@@ -444,12 +452,6 @@ private fun IssuanceCertificateConfirmStep(
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight(700)),
                 color = colors.textPrimary,
             )
-            Spacer(Modifier.height(Spacing.xs))
-            Text(
-                text = stringResource(Res.string.issuance_certificate_confirm_description),
-                style = MaterialTheme.typography.bodySmall,
-                color = colors.textMuted,
-            )
 
             Spacer(Modifier.height(Spacing.lg))
 
@@ -460,8 +462,20 @@ private fun IssuanceCertificateConfirmStep(
                     .padding(horizontal = Spacing.lg, vertical = Spacing.lg),
             ) {
                 DetailRow(
+                    label = stringResource(Res.string.issuance_certificate_detail_full_name),
+                    value = state.fullName,
+                    numeric = false,
+                )
+                TaminDivider(modifier = Modifier.padding(vertical = Spacing.sm))
+                DetailRow(
                     label = stringResource(Res.string.issuance_certificate_detail_pensioner_number),
                     value = state.selectedPensionerId.orEmpty(),
+                )
+                TaminDivider(modifier = Modifier.padding(vertical = Spacing.sm))
+                DetailRow(
+                    label = stringResource(Res.string.issuance_certificate_detail_certificate_type),
+                    value = stringResource(Res.string.issuance_certificate_certificate_type_value),
+                    numeric = false,
                 )
                 TaminDivider(modifier = Modifier.padding(vertical = Spacing.sm))
                 DetailRow(
@@ -475,7 +489,21 @@ private fun IssuanceCertificateConfirmStep(
                     value = state.branchName,
                     numeric = false,
                 )
+                TaminDivider(modifier = Modifier.padding(vertical = Spacing.sm))
+                DetailRow(
+                    label = stringResource(Res.string.issuance_certificate_detail_destination),
+                    value = stringResource(Res.string.issuance_certificate_destination_value),
+                    numeric = false,
+                )
             }
+
+            Spacer(Modifier.height(Spacing.lg))
+
+            Text(
+                text = stringResource(Res.string.issuance_certificate_confirm_disclaimer),
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.textMuted,
+            )
         }
 
         Row(
@@ -483,7 +511,9 @@ private fun IssuanceCertificateConfirmStep(
                 .fillMaxWidth()
                 .padding(horizontal = Spacing.page, vertical = Spacing.md)
                 .navigationBarsPadding(),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
+            IssuanceCertificateBackStepButton(onClick = onBack)
             LoadingButton(
                 modifier = Modifier.weight(1f),
                 text = stringResource(Res.string.issuance_certificate_submit_and_send),
@@ -491,6 +521,31 @@ private fun IssuanceCertificateConfirmStep(
                 isLoading = state.isSubmitting,
             )
         }
+    }
+}
+
+@Composable
+private fun IssuanceCertificateBackStepButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+    val shape = RoundedCornerShape(CornerRadius.xl)
+
+    Box(
+        modifier = modifier
+            .size(ButtonDimens.height)
+            .clip(shape)
+            .background(colors.bgSurface)
+            .border(1.dp, colors.border, shape)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = vectorResource(Res.drawable.ic_tamin_chevron_back),
+            contentDescription = null,
+            tint = colors.textPrimary,
+        )
     }
 }
 
@@ -519,6 +574,7 @@ private fun PreviewIssuanceCertificateConfirmStepLight() {
 }
 
 private val PreviewInfoState = IssuanceCertificateUiState(
+    fullName = "سیدرحمت اله میرفضلی",
     selectedPensionerId = "1003406938",
     branchName = "",
 )

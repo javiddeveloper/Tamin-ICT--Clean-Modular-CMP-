@@ -36,6 +36,7 @@ import com.tamin.taminhamrah.model.user.UserProfileDN
 import com.tamin.taminhamrah.repository.UserRepository
 import com.tamin.taminhamrah.repository.pension.PensionRepository
 import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
+import com.tamin.taminhamrah.useCases.user.GetIdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.user.GetRecipientsUseCase
 import com.tamin.taminhamrah.useCases.user.GetWageCertificateReportUseCase
 import kotlinx.coroutines.Dispatchers
@@ -79,6 +80,7 @@ class IssuanceCertificateViewModelTest {
         getPensionerIdUseCase = GetPensionerIdUseCase(pensionRepository),
         getRecipientsUseCase = GetRecipientsUseCase(userRepository),
         getWageCertificateReportUseCase = GetWageCertificateReportUseCase(userRepository),
+        getIdentityInfoUseCase = GetIdentityInfoUseCase(userRepository),
     )
 
     @Test
@@ -91,6 +93,7 @@ class IssuanceCertificateViewModelTest {
             val state = expectMostRecentItem()
             assertEquals(2, state.pensionerIds.size)
             assertEquals("111", state.selectedPensionerId)
+            assertEquals("سیدرحمت اله میرفضلی", state.fullName)
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -299,6 +302,22 @@ private class FakeIssuanceCertificateUserRepository : UserRepository {
     var wageCertificateReportResult: String = ""
     var wageCertificateShouldThrow: Boolean = false
     var wageCertificateError: Throwable = RuntimeException("fake error")
+    var identityResult: IdentityInfoDN = IdentityInfoDN(
+        cityOfBirthId = null,
+        cityOfIssueId = null,
+        countryId = null,
+        dateOfBirth = null,
+        fatherName = null,
+        firstName = "سیدرحمت اله",
+        gender = null,
+        id = null,
+        idCardNumber = null,
+        idCardSerial1 = null,
+        idCardSerial2 = null,
+        lastName = "میرفضلی",
+        nationalId = null,
+        ssn = null,
+    )
 
     override suspend fun getRecipients(filters: List<ApiFilterDN>): Flow<List<RecipientDN>> = flow {
         emit(recipientsResult)
@@ -309,8 +328,9 @@ private class FakeIssuanceCertificateUserRepository : UserRepository {
         emit(wageCertificateReportResult)
     }
 
-    override fun getIdentityInfo(): Flow<IdentityInfoDN> =
-        error("not used in IssuanceCertificateViewModel")
+    override fun getIdentityInfo(): Flow<IdentityInfoDN> = flow {
+        emit(identityResult)
+    }
     override suspend fun getUserProfileImage(): Flow<String> =
         error("not used in IssuanceCertificateViewModel")
     override suspend fun fetchTaminRelation(): Flow<TaminRelationDN> =

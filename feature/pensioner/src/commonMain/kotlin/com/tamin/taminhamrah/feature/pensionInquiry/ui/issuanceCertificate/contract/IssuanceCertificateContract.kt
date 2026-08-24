@@ -19,6 +19,8 @@ data class IssuanceCertificateUiState(
 
     val currentStep: IssuanceCertificateStep = IssuanceCertificateStep.Info,
 
+    val fullName: String = "",
+
     val pensionerIds: ImmutableList<PensionIdPR> = persistentListOf(),
     val selectedPensionerId: String? = null,
     val pensionerIdError: String? = null,
@@ -43,6 +45,7 @@ data class IssuanceCertificateUiState(
         data class Error(val message: String?) : PartialState
 
         data class GoToStep(val step: IssuanceCertificateStep) : PartialState
+        data class FullNameLoaded(val fullName: String) : PartialState
 
         data class PensionerIdsLoaded(val list: ImmutableList<PensionIdPR>) : PartialState
         data class SelectedPensionerIdChanged(val id: String?) : PartialState

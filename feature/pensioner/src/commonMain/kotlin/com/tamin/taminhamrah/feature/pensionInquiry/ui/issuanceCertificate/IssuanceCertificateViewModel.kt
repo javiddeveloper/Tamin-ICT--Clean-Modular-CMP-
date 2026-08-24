@@ -11,6 +11,7 @@ import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
+import com.tamin.taminhamrah.useCases.user.GetIdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.user.GetRecipientsUseCase
 import com.tamin.taminhamrah.useCases.user.GetWageCertificateReportUseCase
 import kotlinx.collections.immutable.toImmutableList
@@ -22,6 +23,7 @@ class IssuanceCertificateViewModel(
     private val getPensionerIdUseCase: GetPensionerIdUseCase,
     private val getRecipientsUseCase: GetRecipientsUseCase,
     private val getWageCertificateReportUseCase: GetWageCertificateReportUseCase,
+    private val getIdentityInfoUseCase: GetIdentityInfoUseCase,
 ) : BaseViewModel<IssuanceCertificateUiState, PartialState, IssuanceCertificateEvent, IssuanceCertificateIntent>(
     initialState = IssuanceCertificateUiState()
 ) {
@@ -60,6 +62,13 @@ class IssuanceCertificateViewModel(
 
     private fun handleInit(): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
+        getIdentityInfoUseCase()
+            .catch { }
+            .collect { identity ->
+                val fullName = listOfNotNull(identity.firstName, identity.lastName)
+                    .joinToString(" ")
+                emit(PartialState.FullNameLoaded(fullName))
+            }
         getPensionerIdUseCase()
             .catch {
                 sendEvent(IssuanceCertificateEvent.ShowToast(it.toSingleLineMessage()))
@@ -153,6 +162,7 @@ class IssuanceCertificateViewModel(
         is PartialState.Error -> currentState.copy(isLoading = false, error = partialState.message)
 
         is PartialState.GoToStep -> currentState.copy(currentStep = partialState.step)
+        is PartialState.FullNameLoaded -> currentState.copy(fullName = partialState.fullName)
 
         is PartialState.PensionerIdsLoaded -> currentState.copy(pensionerIds = partialState.list)
         is PartialState.SelectedPensionerIdChanged -> currentState.copy(
