@@ -61,18 +61,23 @@ import kotlin.math.abs
 /** The wheel shows this many rows; the middle one is the selection. Must stay odd. */
 private const val VISIBLE_ROWS = 5
 
-private val ROW_HEIGHT = 48.dp
-private val WHEEL_HEIGHT = ROW_HEIGHT * VISIBLE_ROWS
+internal val ROW_HEIGHT = 48.dp
+internal val WHEEL_HEIGHT = ROW_HEIGHT * VISIBLE_ROWS
 
-/** Where the top and bottom fades give way to clear glass — one row's worth at each end. */
-private const val EDGE_FADE_STOP = 1f / VISIBLE_ROWS
+/**
+ * Where the top and bottom fades give way to clear glass — one row's worth at each end.
+ * Shared with [TaminJalaliMonthYearPickerBottomSheet], which draws the same fade over its own
+ * (shorter) wheel panel.
+ */
+internal const val EDGE_FADE_STOP = 1f / VISIBLE_ROWS
 
 /**
  * The floor of the year wheel — the conventional start for Jalali pickers in Iranian apps. The
  * ceiling is today: every date this picker collects (birthdate, prescription date, a record
  * search range) is a date that has already happened, so a future one is never a valid answer.
+ * Shared with [TaminJalaliMonthYearPickerBottomSheet]'s year wheel.
  */
-private const val FIRST_YEAR = 1300
+internal const val FIRST_YEAR = 1300
 
 /**
  * The last month the month wheel offers for [year]: the whole year for any past year, and only up
@@ -367,7 +372,7 @@ private fun DateWheels(
  */
 @Suppress("FrequentlyChangingValue")
 @Composable
-private fun WheelColumn(
+internal fun WheelColumn(
     items: ImmutableList<String>,
     selectedIndex: Int,
     onSelected: (Int) -> Unit,
@@ -467,9 +472,9 @@ private fun WheelColumn(
     }
 }
 
-/** The bordered outline beside the primary action. */
+/** The bordered outline beside the primary action. Shared with [TaminJalaliMonthYearPickerBottomSheet]. */
 @Composable
-private fun CancelButton(
+internal fun CancelButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -492,8 +497,11 @@ private fun CancelButton(
 }
 
 
-/** Just enough edge to separate the band from the panel; the fill carries the selection. */
-private const val SELECTION_BORDER_ALPHA = 0.25f
+/**
+ * Just enough edge to separate the band from the panel; the fill carries the selection. Shared
+ * with [TaminJalaliMonthYearPickerBottomSheet]'s selection band.
+ */
+internal const val SELECTION_BORDER_ALPHA = 0.25f
 
 /** Nudges the glyph off the row's top edge so it sits optically centred. */
 private val ROW_TEXT_TOP_PADDING = 10.dp

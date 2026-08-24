@@ -22,6 +22,7 @@ import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
+import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
 import com.tamin.taminhamrah.tools.safeCall
@@ -151,14 +152,6 @@ class PensionRemoteDataSourceImpl(
         response.extractMessage()
     }
 
-    override suspend fun sendRequestInquirePensionCertificate(
-        filter: List<ApiFilterDN>
-    ): String? = errorParser.safeCall("sendRequestInquirePensionCertificate") {
-        val filterJson = apiQueryBuilder.buildFilterJson(filter)
-        val response = pensionApiService.sendRequestInquirePensionCertificate(
-            mapOf("filter" to filterJson)
-        )
-        response.extractMessage()
     override suspend fun sendPayRollToInbox(filter: List<ApiFilterDN>): String? {
         return try {
             val filterJson = apiQueryBuilder.buildFilterJson(filter)

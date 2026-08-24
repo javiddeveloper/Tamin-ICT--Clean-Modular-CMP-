@@ -67,6 +67,8 @@ import taminx.core.core_ui.payroll_deduction_legend
 import taminx.core.core_ui.payroll_deductions_section_title
 import taminx.core.core_ui.payroll_empty_desc
 import taminx.core.core_ui.payroll_empty_title
+import taminx.core.core_ui.payroll_loan_legend
+import taminx.core.core_ui.payroll_loan_section_title
 import taminx.core.core_ui.payroll_net_amount_label
 import taminx.core.core_ui.payroll_net_label_template
 import taminx.core.core_ui.payroll_paid_legend
@@ -76,6 +78,7 @@ import kotlin.math.abs
 
 private const val CLP_TYPE_PAYMENT = "1"
 private const val CLP_TYPE_DEDUCTION = "2"
+private const val CLP_TYPE_LOAN = "3"
 
 /** How much the net-amount headline shrinks once the card is fully collapsed. */
 private const val AMOUNT_COLLAPSED_SCALE = 0.72f
@@ -111,7 +114,8 @@ fun PayRollMainCard(
     val items = state.payRollList
     val paidTotal = items.filter { it.clpType == CLP_TYPE_PAYMENT }.sumOf { it.sumAmount }
     val deductionTotal = items.filter { it.clpType == CLP_TYPE_DEDUCTION }.sumOf { it.sumAmount }
-    val netTotal = paidTotal + deductionTotal
+    val loanTotal = items.filter { it.clpType == CLP_TYPE_LOAN }.sumOf { it.sumAmount }
+    val netTotal = paidTotal + deductionTotal + loanTotal
     val rial = stringResource(Res.string.unit_rial)
     val dateLabelText =
         if (state.startDate.isNotEmpty()) formatPayRollDateLabel(state.startDate) else ""
@@ -174,9 +178,10 @@ fun PayRollMainCard(
                 PayRollProgressBar(
                     paidTotal = paidTotal,
                     deductionTotal = deductionTotal,
+                    loanTotal = loanTotal,
                     modifier = Modifier.layoutId(PayRollCardSlot.ProgressBar).fillMaxWidth(),
                 )
-                // Legend: paid/deduction totals – vanishes on collapse
+                // Legend: paid/deduction/loan totals – vanishes on collapse
                 Column(
                     modifier = Modifier
                         .layoutId(PayRollCardSlot.Legend)
@@ -195,6 +200,14 @@ fun PayRollMainCard(
                         color = taminColors.dangerText,
                         rial = rial,
                     )
+                    if (loanTotal != 0L) {
+                        PayRollLegendItem(
+                            label = stringResource(Res.string.payroll_loan_legend),
+                            amount = loanTotal,
+                            color = taminColors.orangeText,
+                            rial = rial,
+                        )
+                    }
                 }
             },
         ) { measurables, constraints ->
@@ -266,10 +279,11 @@ fun PayRollMainCard(
 private fun PayRollProgressBar(
     paidTotal: Long,
     deductionTotal: Long,
+    loanTotal: Long = 0L,
     modifier: Modifier = Modifier
 ) {
     val taminColors = LocalTaminColors.current
-    val total = paidTotal + abs(deductionTotal)
+    val total = paidTotal + abs(deductionTotal) + abs(loanTotal)
 
     Row(
         modifier = modifier.height(8.dp),
@@ -292,6 +306,15 @@ private fun PayRollProgressBar(
                         .fillMaxHeight()
                         .clip(CircleShape)
                         .background(taminColors.dangerText),
+                )
+            }
+            if (loanTotal != 0L) {
+                Box(
+                    modifier = Modifier
+                        .weight(abs(loanTotal).toFloat() / total)
+                        .fillMaxHeight()
+                        .clip(CircleShape)
+                        .background(taminColors.orangeText),
                 )
             }
         }
@@ -328,6 +351,7 @@ private fun PayRollLegendItem(label: String, amount: Long, color: Color, rial: S
 fun PayRollBreakdownSections(items: List<PayRollPR>, modifier: Modifier = Modifier) {
     val payments = items.filter { it.clpType == CLP_TYPE_PAYMENT }
     val deductions = items.filter { it.clpType == CLP_TYPE_DEDUCTION }
+    val loans = items.filter { it.clpType == CLP_TYPE_LOAN }
     val taminColors = LocalTaminColors.current
     val rial = stringResource(Res.string.unit_rial)
 
@@ -349,6 +373,16 @@ fun PayRollBreakdownSections(items: List<PayRollPR>, modifier: Modifier = Modifi
                 containerColor = taminColors.dangerBorder,
                 total = deductions.sumOf { it.sumAmount },
                 items = deductions,
+                rial = rial,
+            )
+        }
+        if (loans.isNotEmpty()) {
+            PayRollSectionCard(
+                title = stringResource(Res.string.payroll_loan_section_title),
+                totalLabelColor = taminColors.orangeText,
+                containerColor = taminColors.orangeBg,
+                total = loans.sumOf { it.sumAmount },
+                items = loans,
                 rial = rial,
             )
         }
@@ -571,6 +605,7 @@ private val PreviewCardItems = listOf(
         tprDesc = "بیمه درمان تکمیلی",
         sumAmount = -584000
     ),
+    PayRollPR(id = 6, clpType = CLP_TYPE_LOAN, tprDesc = "قسط وام ضروری", sumAmount = -1200000),
 )
 
 private val PreviewCardState = PayRollUiState(

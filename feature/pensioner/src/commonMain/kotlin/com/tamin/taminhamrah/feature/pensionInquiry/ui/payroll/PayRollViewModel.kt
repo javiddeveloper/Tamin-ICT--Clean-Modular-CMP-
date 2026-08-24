@@ -17,6 +17,10 @@ import com.tamin.taminhamrah.useCases.pension.GetPensionerPayRollPDFUseCase
 import com.tamin.taminhamrah.useCases.pension.SendPayRollToInboxUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import org.jetbrains.compose.resources.getString
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.edict_no_pensioner_desc
+import taminx.core.core_ui.error_empty_pensioner_id
 
 class PayRollViewModel(
     private val getPensionerPayRollUseCase: GetPensionerPayRollUseCase,
@@ -82,7 +86,7 @@ class PayRollViewModel(
                 val state = uiState.value
                 val pensionerId = state.selectedPensionerId
                 if (pensionerId.isNullOrEmpty()) {
-                    emit(PartialState.Error("شناسه مستمری‌بگیر یافت نشد"))
+                    emit(PartialState.Error(getString(Res.string.error_empty_pensioner_id)))
                     return@flow
                 }
                 emit(PartialState.Loading(true))
@@ -122,7 +126,7 @@ class PayRollViewModel(
                 val state = uiState.value
                 val pensionerId = state.selectedPensionerId
                 if (pensionerId.isNullOrEmpty()) {
-                    emit(PartialState.Error("شناسه مستمری‌بگیر یافت نشد"))
+                    emit(PartialState.Error(getString(Res.string.error_empty_pensioner_id)))
                     return@flow
                 }
                 emit(PartialState.Loading(true))

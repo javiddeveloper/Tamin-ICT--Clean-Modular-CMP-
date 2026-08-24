@@ -21,10 +21,12 @@
     <string name="payroll_payment_type_arrears">تفاوت افزایش معوقه</string>
     <string name="payroll_payments_section_title">پرداخت‌های انجام شده</string>
     <string name="payroll_deductions_section_title">کسر پرداخت</string>
+    <string name="payroll_loan_section_title">اقساط وام</string>
     <string name="payroll_net_amount_label">خالص پرداختی</string>
     <string name="payroll_net_label_template">خالص %1$s</string>
     <string name="payroll_paid_legend">جمع پرداخت‌ها</string>
     <string name="payroll_deduction_legend">جمع کسورات</string>
+    <string name="payroll_loan_legend">جمع اقساط</string>
     <string name="payroll_send_success_title">ارسال به صندوق شخصی</string>
     <string name="payroll_send_success_desc">صدور گواهی فیش حقوقی با موفقیت انجام شد و در صندوق شخصی شما قابل مشاهده است.</string>
     <string name="payroll_empty_title">فیشی برای این بازه یافت نشد</string>
