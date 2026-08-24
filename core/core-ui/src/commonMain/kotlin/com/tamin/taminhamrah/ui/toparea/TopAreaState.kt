@@ -13,6 +13,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.unit.Velocity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 /**
  * Single source of truth for a screen's scroll-driven top area: how far it has folded, and its
@@ -41,6 +44,9 @@ class TopAreaState internal constructor(
     /** The top area's last-measured height, kept live by [reportTopAreaHeight]. */
     var measuredHeightPx: Int by mutableIntStateOf(initialMeasuredHeightPx)
         internal set
+
+    /** The in-flight release-to-edge snap, if any -- cancelled the moment a new drag arrives. */
+    private var settleJob: Job? = null
 
     /** Folds the top area by [amount] (>= 0) px, clamped to [maxOffsetPx]. Returns the px actually applied. */
     private fun collapseBy(amount: Float): Float {
@@ -76,13 +82,17 @@ class TopAreaState internal constructor(
      * keeps the top area fully expanded when the content can't scroll at all, with no separate
      * "not scrollable" special case needed anywhere else.
      */
-    internal fun connection(contentCanScrollForward: () -> Boolean): NestedScrollConnection =
+    internal fun connection(
+        scope: CoroutineScope,
+        contentCanScrollForward: () -> Boolean,
+    ): NestedScrollConnection =
         object : NestedScrollConnection {
 
             // available.y < 0: content scrolling toward later content -- fold.
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 val dy = available.y
                 if (dy >= 0f || !contentCanScrollForward()) return Offset.Zero
+                settleJob?.cancel()
                 return Offset(0f, -collapseBy(-dy))
             }
 
@@ -94,10 +104,18 @@ class TopAreaState internal constructor(
                 source: NestedScrollSource,
             ): Offset {
                 val dy = available.y
-                return if (dy > 0f) Offset(0f, expandBy(dy)) else Offset.Zero
+                if (dy <= 0f) return Offset.Zero
+                settleJob?.cancel()
+                return Offset(0f, expandBy(dy))
             }
 
-            // On release mid-fold, spring to whichever end the gesture was heading for.
+            // On release mid-fold, spring to whichever end the gesture was heading for. This is
+            // fired into `scope` rather than suspended on directly: `onPreFling` runs on the same
+            // coroutine as the driven scrollable's own fling dispatch, so awaiting a multi-hundred-
+            // millisecond spring here would hold that scrollable's mutex the whole time -- and a
+            // fast follow-up touch arriving in that window can end up silently dropped instead of
+            // starting its own gesture. Returning immediately keeps the scrollable free the instant
+            // the finger lifts, while the header still snaps to its edge on its own.
             override suspend fun onPreFling(available: Velocity): Velocity {
                 if (rawOffsetPx <= 0f || rawOffsetPx >= maxOffsetPx) return Velocity.Zero
                 val target = when {
@@ -106,11 +124,14 @@ class TopAreaState internal constructor(
                     rawOffsetPx >= maxOffsetPx / 2f -> maxOffsetPx
                     else -> 0f
                 }
-                animate(
-                    initialValue = rawOffsetPx,
-                    targetValue = target,
-                    animationSpec = SnapSpec,
-                ) { value, _ -> rawOffsetPx = value }
+                settleJob?.cancel()
+                settleJob = scope.launch {
+                    animate(
+                        initialValue = rawOffsetPx,
+                        targetValue = target,
+                        animationSpec = SnapSpec,
+                    ) { value, _ -> rawOffsetPx = value }
+                }
                 return available
             }
         }

@@ -5,7 +5,9 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
@@ -31,19 +33,25 @@ fun rememberTopAreaState(expandedHeight: Dp, collapsedHeight: Dp): TopAreaState 
  * Drives [state] from a [LazyColumn][androidx.compose.foundation.lazy.LazyColumn]'s own drag.
  * Apply to the `LazyColumn` itself, alongside its `state = listState`.
  */
-fun Modifier.driveTopArea(state: TopAreaState, listState: LazyListState): Modifier =
-    nestedScroll(state.connection { listState.canScrollForward })
+fun Modifier.driveTopArea(state: TopAreaState, listState: LazyListState): Modifier = composed {
+    val scope = rememberCoroutineScope()
+    nestedScroll(state.connection(scope) { listState.canScrollForward })
+}
 
 /**
  * Drives [state] from a [LazyVerticalGrid][androidx.compose.foundation.lazy.grid.LazyVerticalGrid]'s
  * own drag. Apply to the grid itself, alongside its `state = gridState`.
  */
-fun Modifier.driveTopArea(state: TopAreaState, gridState: LazyGridState): Modifier =
-    nestedScroll(state.connection { gridState.canScrollForward })
+fun Modifier.driveTopArea(state: TopAreaState, gridState: LazyGridState): Modifier = composed {
+    val scope = rememberCoroutineScope()
+    nestedScroll(state.connection(scope) { gridState.canScrollForward })
+}
 
 /**
  * Drives [state] from a `Column(Modifier.verticalScroll(scrollState))`'s own drag. Apply to that
  * `Column`.
  */
-fun Modifier.driveTopArea(state: TopAreaState, scrollState: ScrollState): Modifier =
-    nestedScroll(state.connection { scrollState.canScrollForward })
+fun Modifier.driveTopArea(state: TopAreaState, scrollState: ScrollState): Modifier = composed {
+    val scope = rememberCoroutineScope()
+    nestedScroll(state.connection(scope) { scrollState.canScrollForward })
+}
