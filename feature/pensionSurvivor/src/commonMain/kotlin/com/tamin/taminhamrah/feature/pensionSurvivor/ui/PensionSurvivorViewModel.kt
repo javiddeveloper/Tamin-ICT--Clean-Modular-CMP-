@@ -20,12 +20,14 @@ import com.tamin.taminhamrah.useCases.personal.GetSurvivorListUseCase
 import com.tamin.taminhamrah.useCases.personal.SubmitFinalSurvivorPensionUseCase
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import org.jetbrains.compose.resources.getString
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.pension_survivor_final_multiple_requests_latest_selected
 import taminx.core.core_ui.pension_survivor_final_request_unavailable
 
 class PensionSurvivorViewModel(
@@ -79,9 +81,13 @@ class PensionSurvivorViewModel(
                         PensionSurvivorEvent.NavigateToSurvivorInfo(
                             survivor = intent.item,
                             deceasedNationalId = uiState.value.deceasedNationalId,
+                            draft = uiState.value.survivorContactDrafts[intent.item.nationalId],
                         ),
                     )
                 }
+            }
+            is PensionSurvivorIntent.SurvivorContactSaved -> {
+                emit(PartialState.SurvivorContactSaved(intent.nationalId, intent.draft))
             }
             PensionSurvivorIntent.RefreshSurvivors -> loadSurvivors()
             PensionSurvivorIntent.DownloadFinalPdf -> downloadFinalPdf()
@@ -129,8 +135,10 @@ class PensionSurvivorViewModel(
             survivors = persistentListOf(),
             requestId = null,
             viewerPdf = null,
+            viewerDownloadFailed = false,
             isPdfConfirmed = false,
             showSuccessDialog = false,
+            finalPdfRevision = currentState.finalPdfRevision + 1,
         )
         is PartialState.DeceasedLoaded -> currentState.copy(
             deceasedInfo = partialState.info,
@@ -139,6 +147,18 @@ class PensionSurvivorViewModel(
         is PartialState.SurvivorsLoaded -> currentState.copy(
             survivors = partialState.items,
             isLoading = false,
+            requestId = null,
+            viewerPdf = null,
+            viewerDownloadFailed = false,
+            isPdfConfirmed = false,
+            showSuccessDialog = false,
+            finalPdfRevision = currentState.finalPdfRevision + 1,
+        )
+        is PartialState.SurvivorContactSaved -> currentState.copy(
+            survivorContactDrafts = currentState.survivorContactDrafts.toPersistentMap().put(
+                partialState.nationalId,
+                partialState.draft,
+            ),
         )
         is PartialState.RequestIdLoaded -> currentState.copy(
             requestId = partialState.requestId,
@@ -244,13 +264,23 @@ class PensionSurvivorViewModel(
         if (uiState.value.isLoading) return
 
         emit(PartialState.Loading(true))
+        // Legacy uses emptyList() here to keep confirmSurvivorsList pagination defaults; if
+        // multiple rows still arrive, submit against the latest available max request id.
         getConfirmSurvivorsListUseCase(emptyList()).collect { confirmedItems ->
-            val requestId = confirmedItems.firstNotNullOfOrNull { item -> item.request?.id }
+            val requestIds = confirmedItems.mapNotNull { item -> item.request?.id }
+            val requestId = requestIds.maxOrNull()
             emit(
                 PartialState.RequestIdLoaded(
                     requestId = requestId,
                 ),
             )
+            if (requestIds.size > 1) {
+                sendEvent(
+                    PensionSurvivorEvent.ShowToast(
+                        getString(Res.string.pension_survivor_final_multiple_requests_latest_selected),
+                    ),
+                )
+            }
             if (requestId == null) {
                 sendEvent(
                     PensionSurvivorEvent.ShowToast(

@@ -25,6 +25,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,6 +44,7 @@ import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.PensionSurvivor
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.PensionSurvivorIntent
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.PensionSurvivorStep
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.PensionSurvivorUiState
+import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.SurvivorContactDraft
 import com.tamin.taminhamrah.model.personal.survivorDependent.SurvivorDependentPR
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
@@ -89,7 +91,10 @@ import taminx.core.core_ui.upload_submit_final
 @Composable
 fun PensionSurvivorScreen(
     onBack: () -> Unit,
-    onNavigateToSurvivorInfo: (SurvivorDependentPR, String) -> Unit,
+    onNavigateToSurvivorInfo: (SurvivorDependentPR, String, SurvivorContactDraft?) -> Unit,
+    savedDraftNationalId: String? = null,
+    savedDraft: SurvivorContactDraft? = null,
+    onSavedDraftConsumed: () -> Unit = {},
     viewModel: PensionSurvivorViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -116,13 +121,25 @@ fun PensionSurvivorScreen(
         }
     }
 
+    LaunchedEffect(savedDraftNationalId, savedDraft) {
+        if (!savedDraftNationalId.isNullOrBlank() && savedDraft != null) {
+            viewModel.sendIntent(
+                PensionSurvivorIntent.SurvivorContactSaved(
+                    nationalId = savedDraftNationalId,
+                    draft = savedDraft,
+                ),
+            )
+            onSavedDraftConsumed()
+        }
+    }
+
     HandlePensionSurvivorEvents(
         events = viewModel.events,
         onShowToast = { toaster.error(it) },
         onNavigateBack = onBack,
-        onNavigateToSurvivorInfo = { survivor, deceasedNationalId ->
+        onNavigateToSurvivorInfo = { survivor, deceasedNationalId, draft ->
             refreshSurvivorsOnResume = true
-            onNavigateToSurvivorInfo(survivor, deceasedNationalId)
+            onNavigateToSurvivorInfo(survivor, deceasedNationalId, draft)
         },
         onOpenRulesDocument = {
             // TODO(rules-url): replace this toast with the legacy rules document URL/PDF when found.
@@ -143,7 +160,7 @@ fun PensionSurvivorScreen(
 
     if (showPdfViewer) {
         TaminPdfViewer(
-            fileName = "pension_survivor_final_${state.requestId ?: state.applicantNationalId}.pdf",
+            fileName = "pension_survivor_final_${state.requestId ?: state.applicantNationalId}_r${state.finalPdfRevision}.pdf",
             pdf = state.viewerPdf,
             downloadFailed = state.viewerDownloadFailed,
             onRequestDownload = { viewModel.sendIntent(PensionSurvivorIntent.RetryPdfDownload) },
@@ -167,7 +184,7 @@ private fun HandlePensionSurvivorEvents(
     events: Flow<PensionSurvivorEvent>,
     onShowToast: (String) -> Unit,
     onNavigateBack: () -> Unit,
-    onNavigateToSurvivorInfo: (SurvivorDependentPR, String) -> Unit,
+    onNavigateToSurvivorInfo: (SurvivorDependentPR, String, SurvivorContactDraft?) -> Unit,
     onOpenRulesDocument: () -> Unit,
     onOpenPdfViewer: () -> Unit,
 ) {
@@ -178,7 +195,7 @@ private fun HandlePensionSurvivorEvents(
             PensionSurvivorEvent.OpenRulesDocument -> onOpenRulesDocument()
             PensionSurvivorEvent.OpenPdfViewer -> onOpenPdfViewer()
             is PensionSurvivorEvent.NavigateToSurvivorInfo -> {
-                onNavigateToSurvivorInfo(event.survivor, event.deceasedNationalId)
+                onNavigateToSurvivorInfo(event.survivor, event.deceasedNationalId, event.draft)
             }
         }
     }

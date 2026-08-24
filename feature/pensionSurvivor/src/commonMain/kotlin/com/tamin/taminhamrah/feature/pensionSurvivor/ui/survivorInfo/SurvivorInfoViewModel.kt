@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.pensionSurvivor.ui.survivorInfo
 
 import com.tamin.taminhamrah.base.BaseViewModel
+import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.SurvivorContactDraft
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.survivorInfo.contract.SurvivorInfoEvent
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.survivorInfo.contract.SurvivorInfoIntent
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.survivorInfo.contract.SurvivorInfoUiState
@@ -37,6 +38,9 @@ class SurvivorInfoViewModel(
                         PartialState.Initialized(
                             survivor = intent.survivor,
                             deceasedNationalId = intent.deceasedNationalId,
+                            address = intent.address,
+                            phoneNumber = intent.phoneNumber,
+                            mobileNumber = intent.mobileNumber,
                         ),
                     )
                 }
@@ -67,6 +71,9 @@ class SurvivorInfoViewModel(
         is PartialState.Initialized -> currentState.copy(
             survivor = partialState.survivor,
             deceasedNationalId = partialState.deceasedNationalId,
+            address = partialState.address,
+            phoneNumber = partialState.phoneNumber,
+            mobileNumber = partialState.mobileNumber,
         )
         is PartialState.AddressChanged -> currentState.copy(address = partialState.value)
         is PartialState.PhoneNumberChanged -> currentState.copy(phoneNumber = partialState.value)
@@ -106,6 +113,16 @@ class SurvivorInfoViewModel(
             ),
         ).collect { message ->
             emit(PartialState.Loading(false))
+            sendEvent(
+                SurvivorInfoEvent.Saved(
+                    nationalId = survivor.nationalId,
+                    draft = SurvivorContactDraft(
+                        address = state.address,
+                        phoneNumber = state.phoneNumber,
+                        mobileNumber = state.mobileNumber,
+                    ),
+                ),
+            )
             sendEvent(
                 SurvivorInfoEvent.ShowSuccess(
                     message = message?.takeIf(String::isNotBlank)

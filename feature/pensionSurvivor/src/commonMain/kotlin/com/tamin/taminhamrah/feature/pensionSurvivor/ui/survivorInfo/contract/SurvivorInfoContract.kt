@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.pensionSurvivor.ui.survivorInfo.contract
 
 import androidx.compose.runtime.Immutable
+import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.SurvivorContactDraft
 import com.tamin.taminhamrah.model.personal.survivorDependent.SurvivorDependentPR
 
 @Immutable
@@ -17,6 +18,9 @@ data class SurvivorInfoUiState(
         data class Initialized(
             val survivor: SurvivorDependentPR,
             val deceasedNationalId: String,
+            val address: String,
+            val phoneNumber: String,
+            val mobileNumber: String,
         ) : PartialState
         data class AddressChanged(val value: String) : PartialState
         data class PhoneNumberChanged(val value: String) : PartialState
@@ -29,6 +33,9 @@ sealed interface SurvivorInfoIntent {
     data class Init(
         val survivor: SurvivorDependentPR,
         val deceasedNationalId: String,
+        val address: String = "",
+        val phoneNumber: String = "",
+        val mobileNumber: String = "",
     ) : SurvivorInfoIntent
 
     data class AddressChanged(val value: String) : SurvivorInfoIntent
@@ -41,5 +48,9 @@ sealed interface SurvivorInfoIntent {
 sealed interface SurvivorInfoEvent {
     data class ShowError(val message: String) : SurvivorInfoEvent
     data class ShowSuccess(val message: String) : SurvivorInfoEvent
+    data class Saved(
+        val nationalId: String,
+        val draft: SurvivorContactDraft,
+    ) : SurvivorInfoEvent
     data object NavigateBack : SurvivorInfoEvent
 }

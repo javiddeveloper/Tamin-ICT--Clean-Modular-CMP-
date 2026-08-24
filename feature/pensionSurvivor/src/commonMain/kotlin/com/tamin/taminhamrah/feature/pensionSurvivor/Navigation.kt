@@ -1,10 +1,13 @@
 package com.tamin.taminhamrah.feature.pensionSurvivor
 
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.toRoute
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.PensionSurvivorScreen
+import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.SurvivorContactDraft
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.survivorInfo.SurvivorInfoScreen
 import com.tamin.taminhamrah.model.personal.survivorDependent.SurvivorDependentPR
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
@@ -27,6 +30,9 @@ data class SurvivorInfoRoute(
     val insuranceId: String,
     val tendencyCode: String,
     val deceasedNationalId: String,
+    val address: String = "",
+    val phoneNumber: String = "",
+    val mobileNumber: String = "",
 )
 
 fun NavController.navigateToPensionSurvivor(navOptions: NavOptions? = null) {
@@ -37,10 +43,23 @@ fun NavGraphBuilder.pensionSurvivorScreen(
     navController: NavController,
     onBack: () -> Unit,
 ) {
-    composableWithFadeTransitions<PensionSurvivorRoute> {
+    composableWithFadeTransitions<PensionSurvivorRoute> { backStackEntry ->
+        val savedNationalId by backStackEntry.savedStateHandle
+            .getStateFlow(PENSION_SURVIVOR_RESULT_NATIONAL_ID_KEY, "")
+            .collectAsStateWithLifecycle()
+        val savedAddress by backStackEntry.savedStateHandle
+            .getStateFlow(PENSION_SURVIVOR_RESULT_ADDRESS_KEY, "")
+            .collectAsStateWithLifecycle()
+        val savedPhoneNumber by backStackEntry.savedStateHandle
+            .getStateFlow(PENSION_SURVIVOR_RESULT_PHONE_KEY, "")
+            .collectAsStateWithLifecycle()
+        val savedMobileNumber by backStackEntry.savedStateHandle
+            .getStateFlow(PENSION_SURVIVOR_RESULT_MOBILE_KEY, "")
+            .collectAsStateWithLifecycle()
+
         PensionSurvivorScreen(
             onBack = onBack,
-            onNavigateToSurvivorInfo = { survivor, deceasedNationalId ->
+            onNavigateToSurvivorInfo = { survivor, deceasedNationalId, draft ->
                 navController.navigate(
                     SurvivorInfoRoute(
                         firstName = survivor.firstName,
@@ -55,8 +74,25 @@ fun NavGraphBuilder.pensionSurvivorScreen(
                         insuranceId = survivor.insuranceId,
                         tendencyCode = survivor.tendencyCode,
                         deceasedNationalId = deceasedNationalId,
+                        address = draft?.address.orEmpty(),
+                        phoneNumber = draft?.phoneNumber.orEmpty(),
+                        mobileNumber = draft?.mobileNumber.orEmpty(),
                     ),
                 )
+            },
+            savedDraftNationalId = savedNationalId.takeIf(String::isNotBlank),
+            savedDraft = savedNationalId.takeIf(String::isNotBlank)?.let {
+                SurvivorContactDraft(
+                    address = savedAddress,
+                    phoneNumber = savedPhoneNumber,
+                    mobileNumber = savedMobileNumber,
+                )
+            },
+            onSavedDraftConsumed = {
+                backStackEntry.savedStateHandle[PENSION_SURVIVOR_RESULT_NATIONAL_ID_KEY] = ""
+                backStackEntry.savedStateHandle[PENSION_SURVIVOR_RESULT_ADDRESS_KEY] = ""
+                backStackEntry.savedStateHandle[PENSION_SURVIVOR_RESULT_PHONE_KEY] = ""
+                backStackEntry.savedStateHandle[PENSION_SURVIVOR_RESULT_MOBILE_KEY] = ""
             },
         )
     }
@@ -66,6 +102,18 @@ fun NavGraphBuilder.pensionSurvivorScreen(
         SurvivorInfoScreen(
             survivor = route.toSurvivor(),
             deceasedNationalId = route.deceasedNationalId,
+            address = route.address,
+            phoneNumber = route.phoneNumber,
+            mobileNumber = route.mobileNumber,
+            onSaved = { nationalId, draft ->
+                navController.previousBackStackEntry
+                    ?.let { entry ->
+                        entry.savedStateHandle[PENSION_SURVIVOR_RESULT_NATIONAL_ID_KEY] = nationalId
+                        entry.savedStateHandle[PENSION_SURVIVOR_RESULT_ADDRESS_KEY] = draft.address
+                        entry.savedStateHandle[PENSION_SURVIVOR_RESULT_PHONE_KEY] = draft.phoneNumber
+                        entry.savedStateHandle[PENSION_SURVIVOR_RESULT_MOBILE_KEY] = draft.mobileNumber
+                    }
+            },
             onBack = { navController.popBackStack() },
         )
     }
@@ -86,3 +134,8 @@ private fun SurvivorInfoRoute.toSurvivor(): SurvivorDependentPR {
         tendencyCode = tendencyCode,
     )
 }
+
+private const val PENSION_SURVIVOR_RESULT_NATIONAL_ID_KEY = "pensionSurvivorSavedNationalId"
+private const val PENSION_SURVIVOR_RESULT_ADDRESS_KEY = "pensionSurvivorSavedAddress"
+private const val PENSION_SURVIVOR_RESULT_PHONE_KEY = "pensionSurvivorSavedPhone"
+private const val PENSION_SURVIVOR_RESULT_MOBILE_KEY = "pensionSurvivorSavedMobile"

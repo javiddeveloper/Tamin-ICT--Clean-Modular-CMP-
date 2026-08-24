@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.SurvivorContactDraft
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.survivorInfo.contract.SurvivorInfoEvent
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.survivorInfo.contract.SurvivorInfoIntent
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.survivorInfo.contract.SurvivorInfoUiState
@@ -79,17 +80,24 @@ import taminx.core.core_ui.verify_label_national_id
 fun SurvivorInfoScreen(
     survivor: SurvivorDependentPR,
     deceasedNationalId: String,
+    address: String = "",
+    phoneNumber: String = "",
+    mobileNumber: String = "",
+    onSaved: (String, SurvivorContactDraft) -> Unit = { _, _ -> },
     onBack: () -> Unit,
     viewModel: SurvivorInfoViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val toaster = LocalToaster.current
 
-    LaunchedEffect(survivor.nationalId, deceasedNationalId) {
+    LaunchedEffect(survivor.nationalId, deceasedNationalId, address, phoneNumber, mobileNumber) {
         viewModel.sendIntent(
             SurvivorInfoIntent.Init(
                 survivor = survivor,
                 deceasedNationalId = deceasedNationalId,
+                address = address,
+                phoneNumber = phoneNumber,
+                mobileNumber = mobileNumber,
             ),
         )
     }
@@ -99,6 +107,7 @@ fun SurvivorInfoScreen(
         onNavigateBack = onBack,
         onShowError = { toaster.error(it) },
         onShowSuccess = { toaster.success(it) },
+        onSaved = onSaved,
     )
 
     SurvivorInfoContent(
@@ -114,11 +123,13 @@ private fun HandleSurvivorInfoEvents(
     onNavigateBack: () -> Unit,
     onShowError: (String) -> Unit,
     onShowSuccess: (String) -> Unit,
+    onSaved: (String, SurvivorContactDraft) -> Unit,
 ) {
     events.collectWithLifecycleAware { event ->
         when (event) {
             SurvivorInfoEvent.NavigateBack -> onNavigateBack()
             is SurvivorInfoEvent.ShowError -> onShowError(event.message)
+            is SurvivorInfoEvent.Saved -> onSaved(event.nationalId, event.draft)
             is SurvivorInfoEvent.ShowSuccess -> onShowSuccess(event.message)
         }
     }
