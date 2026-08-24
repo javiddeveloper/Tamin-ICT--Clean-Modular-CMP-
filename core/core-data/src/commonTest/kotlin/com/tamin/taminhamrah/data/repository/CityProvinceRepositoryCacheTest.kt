@@ -15,6 +15,7 @@ import com.tamin.taminhamrah.model.common.MainServiceDto
 import com.tamin.taminhamrah.model.common.RecipientDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
+import app.cash.turbine.test
 import io.ktor.client.statement.HttpStatement
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,9 +52,11 @@ class CityProvinceRepositoryCacheTest {
         )
         val remote = FakeCommonRemoteDataSource(error = IllegalStateException("503"))
 
-        val provinces = repository(remote, dao).getProvinces().toList().last()
-
-        assertEquals(listOf("07"), provinces.map { it.provinceCode })
+        repository(remote, dao).getProvinces().test {
+            val provinces = awaitItem()
+            assertEquals(listOf("07"), provinces.map { it.provinceCode })
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
@@ -72,11 +75,12 @@ class CityProvinceRepositoryCacheTest {
         )
         val remote = FakeCommonRemoteDataSource(provinces = listOf(tehranProvince))
 
-        val emissions = repository(remote, dao).getProvinces().toList()
-
-        // Cache first so the picker fills immediately, then the server's answer.
-        assertEquals(listOf("99"), emissions.first().map { it.provinceCode })
-        assertEquals(listOf("07"), emissions.last().map { it.provinceCode })
+        repository(remote, dao).getProvinces().test {
+            // Cache first so the picker fills immediately, then the server's answer.
+            assertEquals(listOf("99"), awaitItem().map { it.provinceCode })
+            assertEquals(listOf("07"), awaitItem().map { it.provinceCode })
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test

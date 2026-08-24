@@ -64,6 +64,7 @@ internal class FakeCascadeCityProvinceRepository : CityProvinceRepository {
 
     override fun getCity(cityId: String): Flow<CityDN> = flowOf()
     override fun getProvince(provinceId: String): Flow<ProvinceDN> = flowOf()
+    override fun getCitiesByProvince(provinceCode: String): Flow<List<CityDN>> = unused()
 }
 
 internal class FakeCascadeContractsRepository : ContractsRepository {
