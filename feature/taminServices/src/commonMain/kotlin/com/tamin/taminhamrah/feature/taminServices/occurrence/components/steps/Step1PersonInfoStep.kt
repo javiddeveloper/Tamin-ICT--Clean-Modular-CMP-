@@ -67,6 +67,8 @@ import taminx.core.core_ui.identity_field_birth_date
 import taminx.core.core_ui.identity_field_father_name
 import taminx.core.core_ui.identity_field_first_name
 import taminx.core.core_ui.identity_field_last_name
+import taminx.core.core_ui.injured_person_birthdate
+import taminx.core.core_ui.inquiry_date_picker_title
 import taminx.core.core_ui.occurrence_field_birth_date
 import taminx.core.core_ui.occurrence_field_gender
 import taminx.core.core_ui.occurrence_field_handling_branch
@@ -175,8 +177,8 @@ internal fun Step1PersonInfoStep(
                 TaminStyledTextField(
                     value = step.birthDate,
                     onValueChange = {},
-                    label = "تاریخ تولد فرد حادثه دیده",
-                    placeholder = "انتخاب تاریخ تولد",
+                    label = stringResource(Res.string.injured_person_birthdate),
+                    placeholder = stringResource(Res.string.inquiry_date_picker_title),
                     trailingIcon = vectorResource(Res.drawable.ic_tamin_calendar),
                     readOnly = true,
                     onClick = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showBirthDatePicker = true))) },
@@ -283,8 +285,7 @@ private fun PersonInfoCard(
                 )
                 PersonInfoGridItem(
                     label = stringResource(Res.string.occurrence_field_gender),
-                    value = Gender.fromCode(info.genderCode)?.displayName?:""
-//                    value = info.genderCode
+                    value = Gender.fromCode(info.genderCode)?.displayNameRes?.let { stringResource(it) }.orEmpty()
                 )
 
                 PersonInfoGridItem(

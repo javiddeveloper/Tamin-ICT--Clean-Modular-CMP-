@@ -62,10 +62,13 @@ import taminx.core.core_ui.occurrence_field_employer_name
 import taminx.core.core_ui.occurrence_field_employer_name_error
 import taminx.core.core_ui.occurrence_field_employer_phone
 import taminx.core.core_ui.occurrence_field_employer_phone_error
+import taminx.core.core_ui.occurrence_field_employer_phone_hint
 import taminx.core.core_ui.occurrence_field_phone
 import taminx.core.core_ui.occurrence_field_phone_error
+import taminx.core.core_ui.occurrence_field_phone_hint
 import taminx.core.core_ui.occurrence_field_postal_code
 import taminx.core.core_ui.occurrence_field_postal_code_error
+import taminx.core.core_ui.occurrence_field_postal_code_hint
 import taminx.core.core_ui.occurrence_field_workshop_address
 import taminx.core.core_ui.occurrence_field_workshop_address_error
 import taminx.core.core_ui.occurrence_field_workshop_code
@@ -75,6 +78,8 @@ import taminx.core.core_ui.occurrence_next_step
 import taminx.core.core_ui.occurrence_prev_step
 import taminx.core.core_ui.occurrence_sheet_select_workshop
 import taminx.core.core_ui.occurrence_step2_title
+import taminx.core.core_ui.occurrence_workshop_display_code
+import taminx.core.core_ui.province_city_address_hint
 
 @Composable
 internal fun Step2WorkshopStep(
@@ -149,7 +154,9 @@ internal fun Step2WorkshopStep(
                 Spacer(modifier = Modifier.height(Spacing.md))
 
                 TaminStyledTextField(
-                    value = step.selectedWorkshop?.displayCode ?: "",
+                    value = step.selectedWorkshop?.let {
+                        stringResource(Res.string.occurrence_workshop_display_code, it.workshopCode, it.branchCode)
+                    } ?: "",
                     label = stringResource(Res.string.occurrence_field_workshop_code),
                     placeholder = stringResource(Res.string.occurrence_field_workshop_code_hint),
                     onClick = {
@@ -246,7 +253,7 @@ internal fun Step2WorkshopStep(
                         )
                     },
                     label = stringResource(Res.string.occurrence_field_employer_phone),
-                    placeholder = "09121111111",
+                    placeholder = stringResource(Res.string.occurrence_field_employer_phone_hint),
                     inputRestriction = InputRestriction.DigitsOnly,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     isValid = if (showEmployerPhoneError) false else null,
@@ -276,7 +283,7 @@ internal fun Step2WorkshopStep(
                         )
                     },
                     label = stringResource(Res.string.occurrence_field_workshop_address),
-                    placeholder = "استان، شهر، خیابان، پلاک",
+                    placeholder = stringResource(Res.string.province_city_address_hint),
                     error = showWorkshopAddressError,
                     errorMessage = if (showWorkshopAddressError) stringResource(Res.string.occurrence_field_workshop_address_error) else null,
                     isRequired = true,
@@ -312,7 +319,7 @@ internal fun Step2WorkshopStep(
                             )
                         },
                         label = stringResource(Res.string.occurrence_field_phone),
-                        placeholder = "09121234567",
+                        placeholder = stringResource(Res.string.occurrence_field_phone_hint),
                         inputRestriction = InputRestriction.DigitsOnly,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                         isValid = if (showWorkshopPhoneError) false else null,
@@ -341,7 +348,7 @@ internal fun Step2WorkshopStep(
                             )
                         },
                         label = stringResource(Res.string.occurrence_field_postal_code),
-                        placeholder = "کد پستی 10 رقمی",
+                        placeholder = stringResource(Res.string.occurrence_field_postal_code_hint),
                         inputRestriction = InputRestriction.DigitsOnly,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         isValid = if (showWorkshopPostalCodeError) false else null,
@@ -367,7 +374,10 @@ internal fun Step2WorkshopStep(
         OccurrenceSelectionBottomSheet(
             title = stringResource(Res.string.occurrence_sheet_select_workshop),
             options = step.workshops.map { workshop ->
-                OccurrenceSheetOption(id = workshop.id, title = workshop.displayCode)
+                OccurrenceSheetOption(
+                    id = workshop.id,
+                    title = stringResource(Res.string.occurrence_workshop_display_code, workshop.workshopCode, workshop.branchCode)
+                )
             },
             selectedId = step.selectedWorkshop?.id,
             onSelect = { option ->

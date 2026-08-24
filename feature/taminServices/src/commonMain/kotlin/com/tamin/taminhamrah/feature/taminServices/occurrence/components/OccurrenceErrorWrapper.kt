@@ -45,7 +45,7 @@ fun OccurrenceErrorView(
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = onRetry) {
-            TaminText("تلاش مجدد")
+            TaminText(stringResource(Res.string.action_retry))
         }
     }
 }

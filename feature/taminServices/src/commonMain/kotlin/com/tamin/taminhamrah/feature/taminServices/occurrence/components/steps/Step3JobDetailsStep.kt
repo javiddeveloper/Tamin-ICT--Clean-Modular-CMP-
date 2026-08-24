@@ -58,6 +58,7 @@ import taminx.core.core_ui.occurrence_field_nationality
 import taminx.core.core_ui.occurrence_field_work_location
 import taminx.core.core_ui.occurrence_next_step
 import taminx.core.core_ui.occurrence_prev_step
+import taminx.core.core_ui.occurrence_select_date_hint
 import taminx.core.core_ui.occurrence_select_marital
 import taminx.core.core_ui.occurrence_sheet_marital_title
 import taminx.core.core_ui.occurrence_step3_readonly_hint
@@ -186,7 +187,7 @@ internal fun Step3JobDetailsStep(
                     TaminStyledTextField(
                         leadingIcon = Icons.Default.KeyboardArrowDown,
                         modifier = Modifier.weight(1f),
-                        value = MaritalStatus.fromCode(step.maritalStatus)?.displayName.orEmpty(),
+                        value = MaritalStatus.fromCode(step.maritalStatus)?.displayNameRes?.let { stringResource(it) }.orEmpty(),
                         onValueChange = {},
                         label = stringResource(Res.string.occurrence_field_marital_status),
                         placeholder = stringResource(Res.string.occurrence_select_marital),
@@ -199,7 +200,7 @@ internal fun Step3JobDetailsStep(
                         value = step.employmentDate,
                         onValueChange = {},
                         label = stringResource(Res.string.occurrence_field_employment_date),
-                        placeholder = "انتخاب تاریخ",
+                        placeholder = stringResource(Res.string.occurrence_select_date_hint),
                         trailingIcon = vectorResource(Res.drawable.ic_tamin_calendar),
                         readOnly = true,
                         onClick = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showEmploymentDatePicker = true))) },
@@ -241,7 +242,7 @@ internal fun Step3JobDetailsStep(
     if (uiState.dialogs.showMaritalSheet) {
         OccurrenceSelectionBottomSheet(
             title = stringResource(Res.string.occurrence_sheet_marital_title),
-            options = MaritalStatus.entries.map { OccurrenceSheetOption(id = it.code, title = it.displayName) },
+            options = MaritalStatus.entries.map { OccurrenceSheetOption(id = it.code, title = stringResource(it.displayNameRes)) },
             selectedId = step.maritalStatus,
             onSelect = { option ->
                 onIntent(OccurrenceIntent.UpdateJobDetails(step.copy(maritalStatus = option.id)))

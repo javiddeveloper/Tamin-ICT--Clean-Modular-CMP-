@@ -45,10 +45,14 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_calendar
 import taminx.core.core_ui.occurrence_description_counter
 import taminx.core.core_ui.occurrence_field_accident_date
+import taminx.core.core_ui.occurrence_field_accident_date_hint
 import taminx.core.core_ui.occurrence_field_accident_outcome
 import taminx.core.core_ui.occurrence_field_accident_time
+import taminx.core.core_ui.occurrence_field_accident_time_hint
 import taminx.core.core_ui.occurrence_field_description
+import taminx.core.core_ui.occurrence_field_description_hint
 import taminx.core.core_ui.occurrence_field_exact_location
+import taminx.core.core_ui.occurrence_field_exact_location_hint
 import taminx.core.core_ui.occurrence_next_step
 import taminx.core.core_ui.occurrence_outcome_death
 import taminx.core.core_ui.occurrence_outcome_medical_compensation
@@ -156,7 +160,7 @@ internal fun Step5AccidentStep(
                     value = step.accidentDate,
                     onValueChange = {},
                     label = stringResource(Res.string.occurrence_field_accident_date),
-                    placeholder = "انتخاب کنید",
+                    placeholder = stringResource(Res.string.occurrence_field_accident_date_hint),
                     trailingIcon = vectorResource(Res.drawable.ic_tamin_calendar),
                     readOnly = true,
                     onClick = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showAccidentDatePicker = true))) },
@@ -174,7 +178,7 @@ internal fun Step5AccidentStep(
                         value = step.accidentTime,
                         onValueChange = {},
                         label = stringResource(Res.string.occurrence_field_accident_time),
-                        placeholder = "14:30",
+                        placeholder = stringResource(Res.string.occurrence_field_accident_time_hint),
                         trailingIcon = Icons.Default.AccessTime,
                         readOnly = true,
                         onClick = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showAccidentTimePicker = true))) },
@@ -205,7 +209,7 @@ internal fun Step5AccidentStep(
                         )
                     },
                     label = stringResource(Res.string.occurrence_field_exact_location),
-                    placeholder = "شهر، خیابان، کوچه",
+                    placeholder = stringResource(Res.string.occurrence_field_exact_location_hint),
                     maxLength = 500,
                     minLines = 5,
                     maxLines = 8,
@@ -225,7 +229,7 @@ internal fun Step5AccidentStep(
                         )
                     },
                     label = stringResource(Res.string.occurrence_field_description),
-                    placeholder = "واقعه را بصورت کامل شرح دهید",
+                    placeholder = stringResource(Res.string.occurrence_field_description_hint),
                     maxLength = 500,
                     minLines = 5,
                     maxLines = 8,

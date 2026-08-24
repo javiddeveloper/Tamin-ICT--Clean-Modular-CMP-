@@ -48,17 +48,23 @@ import taminx.core.core_ui.occurrence_field_home_address
 import taminx.core.core_ui.occurrence_field_home_address_error
 import taminx.core.core_ui.occurrence_field_home_phone
 import taminx.core.core_ui.occurrence_field_home_phone_error
+import taminx.core.core_ui.occurrence_field_home_phone_hint
 import taminx.core.core_ui.occurrence_field_home_postal_code
 import taminx.core.core_ui.occurrence_field_home_postal_code_error
+import taminx.core.core_ui.occurrence_field_home_postal_code_hint
 import taminx.core.core_ui.occurrence_field_transportation
 import taminx.core.core_ui.occurrence_field_transportation_error
+import taminx.core.core_ui.occurrence_field_transportation_hint
 import taminx.core.core_ui.occurrence_field_work_end_time
 import taminx.core.core_ui.occurrence_field_work_end_time_error
+import taminx.core.core_ui.occurrence_field_work_end_time_hint
 import taminx.core.core_ui.occurrence_field_work_start_time
 import taminx.core.core_ui.occurrence_field_work_start_time_error
+import taminx.core.core_ui.occurrence_field_work_start_time_hint
 import taminx.core.core_ui.occurrence_next_step
 import taminx.core.core_ui.occurrence_prev_step
 import taminx.core.core_ui.occurrence_step4_title
+import taminx.core.core_ui.province_city_address_hint
 
 @Composable
 internal fun Step4WorkHoursStep(
@@ -170,7 +176,7 @@ internal fun Step4WorkHoursStep(
                         )
                     },
                     label = stringResource(Res.string.occurrence_field_transportation),
-                    placeholder = "پیاده، خودروی شخصی، سرویس کارگاه، ...",
+                    placeholder = stringResource(Res.string.occurrence_field_transportation_hint),
                     isValid = if (showTransportationError) false else null,
                     errorText = if (showTransportationError) stringResource(Res.string.occurrence_field_transportation_error) else null,
                     isRequired = true,
@@ -196,7 +202,7 @@ internal fun Step4WorkHoursStep(
                         value = step.workStartTime,
                         onValueChange = {},
                         label = stringResource(Res.string.occurrence_field_work_start_time),
-                        placeholder = "08:00",
+                        placeholder = stringResource(Res.string.occurrence_field_work_start_time_hint),
                         trailingIcon = Icons.Default.AccessTime,
                         isValid = if (showWorkStartTimeError) false else null,
                         errorText = if (showWorkStartTimeError) stringResource(Res.string.occurrence_field_work_start_time_error) else null,
@@ -216,7 +222,7 @@ internal fun Step4WorkHoursStep(
                         value = step.workEndTime,
                         onValueChange = {},
                         label = stringResource(Res.string.occurrence_field_work_end_time),
-                        placeholder = "17:00",
+                        placeholder = stringResource(Res.string.occurrence_field_work_end_time_hint),
                         trailingIcon = Icons.Default.AccessTime,
                         isValid = if (showWorkEndTimeError) false else null,
                         errorText = if (showWorkEndTimeError) stringResource(Res.string.occurrence_field_work_end_time_error) else null,
@@ -244,7 +250,7 @@ internal fun Step4WorkHoursStep(
                         )
                     },
                     label = stringResource(Res.string.occurrence_field_home_address),
-                    placeholder = "استان، شهر، خیابان، پلاک",
+                    placeholder = stringResource(Res.string.province_city_address_hint),
                     error = showHomeAddressError,
                     errorMessage = if (showHomeAddressError) stringResource(Res.string.occurrence_field_home_address_error) else null,
                     isRequired = true,
@@ -274,7 +280,7 @@ internal fun Step4WorkHoursStep(
                             onIntent(OccurrenceIntent.UpdateWorkHours(step.copy(homePhone = filtered)))
                         },
                         label = stringResource(Res.string.occurrence_field_home_phone),
-                        placeholder = "شماره تلفن",
+                        placeholder = stringResource(Res.string.occurrence_field_home_phone_hint),
                         inputRestriction = InputRestriction.DigitsOnly,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                         isValid = if (showHomePhoneError) false else null,
@@ -300,7 +306,7 @@ internal fun Step4WorkHoursStep(
                             onIntent(OccurrenceIntent.UpdateWorkHours(step.copy(homePostalCode = filtered)))
                         },
                         label = stringResource(Res.string.occurrence_field_home_postal_code),
-                        placeholder = "کد پستی 10 رقمی",
+                        placeholder = stringResource(Res.string.occurrence_field_home_postal_code_hint),
                         inputRestriction = InputRestriction.DigitsOnly,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         isValid = if (showHomePostalCodeError) false else null,

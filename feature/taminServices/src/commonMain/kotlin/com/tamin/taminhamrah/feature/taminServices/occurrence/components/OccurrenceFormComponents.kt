@@ -21,6 +21,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.lock_content_description
 
 @Composable
 fun InfoBanner(
@@ -40,7 +43,7 @@ fun InfoBanner(
     ) {
         Icon(
             imageVector = Icons.Default.Lock,
-            contentDescription = "قفل",
+            contentDescription = stringResource(Res.string.lock_content_description),
             tint = taminColors.blueText,
             modifier = Modifier
                 .size(18.dp)

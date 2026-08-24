@@ -11,6 +11,4 @@ data class WorkshopItemPR(
     val postalCode: String = "",
     val phone: String = "",
     val nationality: String = "",
-) {
-    val displayCode: String get() = "$workshopCode - شعبه $branchCode"
-}
+)

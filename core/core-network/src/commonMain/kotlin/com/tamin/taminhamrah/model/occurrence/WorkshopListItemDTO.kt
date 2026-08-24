@@ -7,6 +7,7 @@ import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.descriptors.element
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonArray
@@ -37,13 +38,19 @@ object WorkshopListItemDTOSerializer : KSerializer<WorkshopListItemDTO> {
             ?: error("WorkshopListItemDTO can only be deserialized from JSON")
         val row = jsonDecoder.decodeJsonElement().jsonArray
         return WorkshopListItemDTO(
-            workshopCode = row.getOrNull(0)?.jsonPrimitive?.contentOrNull,
-            name = row.getOrNull(1)?.jsonPrimitive?.contentOrNull,
-            branchCode = row.getOrNull(2)?.jsonPrimitive?.contentOrNull,
+            workshopCode = row.contentOrNullAt(0),
+            name = row.contentOrNullAt(1),
+            branchCode = row.contentOrNullAt(2),
         )
     }
 
     override fun serialize(encoder: Encoder, value: WorkshopListItemDTO) {
         error("WorkshopListItemDTO is response-only and does not support serialization")
+    }
+
+    private fun JsonArray.contentOrNullAt(index: Int): String? = try {
+        getOrNull(index)?.jsonPrimitive?.contentOrNull
+    } catch (e: Exception) {
+        null
     }
 }
