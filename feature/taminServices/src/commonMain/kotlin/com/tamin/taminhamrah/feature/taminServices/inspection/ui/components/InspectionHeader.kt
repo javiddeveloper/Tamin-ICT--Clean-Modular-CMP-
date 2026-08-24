@@ -45,6 +45,7 @@ internal fun InspectionHeader(
     onIntent: (InspectionIntent) -> Unit,
     modifier: Modifier = Modifier,
     collapseProgress: () -> Float = { 0f },
+    onSearchClicked: () -> Unit = {},
 ) {
     val taminColors = LocalTaminColors.current
     val gradient = remember(taminColors.profileGradientStops) {
@@ -72,7 +73,7 @@ internal fun InspectionHeader(
                 TaminTopAppBarButton(
                     icon = vectorResource(Res.drawable.ic_tamin_search),
                     contentDescription = stringResource(Res.string.edict_search_title),
-                    onClick = { /*onIntent(InspectionIntent.ShowSearchSheet)*/ },
+                    onClick = onSearchClicked,
                 )
             }
         ) {

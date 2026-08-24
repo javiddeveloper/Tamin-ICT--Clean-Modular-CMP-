@@ -802,4 +802,12 @@
     <string name="inspection_download_report">دریافت فایل گزارش بازرسی</string>
     <string name="inspection_download_report_short">دریافت گزارش</string>
     <string name="inspection_report_filename_format">inspection_report_%1$s.pdf</string>
+    <string name="inspection_search_sheet_title">جستجو در بازرسی‌ها</string>
+    <string name="inspection_search_field_optional_hint">اختیاری</string>
+    <string name="inspection_search_clear_button">حذف فیلتر</string>
+    <string name="inspection_search_button">جستجو</string>
+    <string name="inspection_filter_label">فیلتر</string>
+    <string name="inspection_filter_clear_chip">حذف</string>
+    <string name="inspection_search_empty_title">بازرسی‌ای با این مشخصات یافت نشد</string>
+    <string name="inspection_search_empty_subtitle">فیلتر را حذف کنید یا درخواست بازرسی ثبت کنید.</string>
 </resources>

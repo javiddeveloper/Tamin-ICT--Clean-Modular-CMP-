@@ -29,13 +29,16 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionFilterChipRow
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionHeader
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionItemCard
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionListSkeleton
+import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionSearchSheet
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.contract.InspectionEvent
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.contract.InspectionIntent
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.contract.InspectionUiState
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.model.InspectionPerformedPR
+import com.tamin.taminhamrah.feature.taminServices.inspection.ui.model.InspectionSearchCriteria
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
@@ -61,6 +64,8 @@ import taminx.core.core_ui.inspection_coming_soon_toast
 import taminx.core.core_ui.inspection_empty_subtitle
 import taminx.core.core_ui.inspection_empty_title
 import taminx.core.core_ui.inspection_report_filename_format
+import taminx.core.core_ui.inspection_search_empty_subtitle
+import taminx.core.core_ui.inspection_search_empty_title
 
 private val HeaderCollapseDistance = 160.dp
 
@@ -119,8 +124,21 @@ internal fun InspectionScreen(
 
     val collapse = rememberCollapsingHeaderState(HeaderCollapseDistance)
     var headerHeightPx by remember { mutableIntStateOf(0) }
-    val staggerState = rememberStaggeredEntranceState(key = uiState.inspections.size)
     var viewingInspectionNo by remember { mutableStateOf<String?>(null) }
+    var showSearchSheet by remember { mutableStateOf(false) }
+    var searchCriteria by remember { mutableStateOf(InspectionSearchCriteria()) }
+
+    // Purely local filtering over whatever the API last returned — clearing the criteria (via the
+    // filter chip's close button or the sheet's own clear button) falls straight back to
+    // uiState.inspections without any re-fetch.
+    val visibleInspections = remember(uiState.inspections, searchCriteria) {
+        if (searchCriteria.isEmpty) {
+            uiState.inspections
+        } else {
+            uiState.inspections.filter { searchCriteria.matches(it) }
+        }
+    }
+    val staggerState = rememberStaggeredEntranceState(key = visibleInspections.size)
 
     Box(
         modifier = Modifier
@@ -160,8 +178,33 @@ internal fun InspectionScreen(
                     )
                 }
             } else {
+                if (!searchCriteria.isEmpty) {
+                    item {
+                        InspectionFilterChipRow(
+                            criteria = searchCriteria,
+                            onClear = { searchCriteria = InspectionSearchCriteria() },
+                            modifier = Modifier.padding(horizontal = Spacing.lg),
+                        )
+                    }
+                }
+
+                if (visibleInspections.isEmpty()) {
+                    item {
+                        EmptyStateMessage(
+                            icon = Icons.Outlined.Assignment,
+                            title = stringResource(Res.string.inspection_search_empty_title),
+                            subtitle = stringResource(Res.string.inspection_search_empty_subtitle),
+                            showIconTile = true,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(320.dp)
+                                .padding(horizontal = Spacing.xlg),
+                        )
+                    }
+                }
+
                 itemsIndexed(
-                    uiState.inspections,
+                    visibleInspections,
                     key = { _, item -> item.inspectionNo }) { index, item ->
                     InspectionItemCard(
                         item = item,
@@ -191,6 +234,7 @@ internal fun InspectionScreen(
                 .align(Alignment.TopCenter)
                 .onSizeChanged { headerHeightPx = it.height },
             onIntent = {},
+            onSearchClicked = { showSearchSheet = true },
         )
 
         if (uiState.isLoading && uiState.inspections.isNotEmpty()) {
@@ -208,6 +252,21 @@ internal fun InspectionScreen(
             onDismiss = {
                 viewingInspectionNo = null
                 onIntent(InspectionIntent.DismissPdfViewer)
+            },
+        )
+    }
+
+    if (showSearchSheet) {
+        InspectionSearchSheet(
+            initial = searchCriteria,
+            onDismiss = { showSearchSheet = false },
+            onApply = { criteria ->
+                searchCriteria = criteria
+                showSearchSheet = false
+            },
+            onClear = {
+                searchCriteria = InspectionSearchCriteria()
+                showSearchSheet = false
             },
         )
     }
