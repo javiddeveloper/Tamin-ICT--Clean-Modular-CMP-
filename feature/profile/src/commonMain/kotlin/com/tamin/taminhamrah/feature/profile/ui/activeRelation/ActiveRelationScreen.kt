@@ -7,7 +7,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -47,7 +46,7 @@ import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
 import com.tamin.taminhamrah.ui.toparea.driveTopArea
 import com.tamin.taminhamrah.ui.toparea.rememberTopAreaState
 import com.tamin.taminhamrah.ui.toparea.reportTopAreaHeight
-import com.tamin.taminhamrah.ui.toparea.topAreaContentSpacer
+import com.tamin.taminhamrah.ui.toparea.topAreaContentPadding
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 
@@ -122,16 +121,14 @@ internal fun ActiveRelationScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .driveTopArea(topArea, listState),
-            contentPadding = PaddingValues(
-                bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + Spacing.lg
+            contentPadding = topAreaContentPadding(
+                state = topArea,
+                rest = PaddingValues(
+                    bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + Spacing.lg
+                )
             ),
             verticalArrangement = Arrangement.spacedBy(Spacing.lg)
         ) {
-            item {
-                // Stands in for the floating header, which is measured rather than fixed.
-                Spacer(modifier = Modifier.topAreaContentSpacer(topArea))
-            }
-
             itemsIndexed(uiState.items, key = { _, item -> item.id }) { index, item ->
                 ActiveRelationItemCard(
                     item = item,

@@ -1,12 +1,17 @@
 package com.tamin.taminhamrah.ui.toparea
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.util.lerp
 import kotlin.math.roundToInt
 
@@ -92,4 +97,33 @@ fun Modifier.topAreaContentSpacer(state: TopAreaState): Modifier = layout { meas
         Constraints.fixed(constraints.maxWidth, state.measuredHeightPx.coerceAtLeast(0)),
     )
     layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+}
+
+/**
+ * Alternative to [topAreaContentSpacer] for callers that would rather reserve the top area's
+ * height via `contentPadding` than via a leading spacer item -- avoids a spacer participating in
+ * a `LazyColumn`'s `verticalArrangement.spacedBy`, which would otherwise add one extra gap between
+ * the spacer and the first real item on top of the reserved height.
+ *
+ * The returned [PaddingValues]' top inset is read from [state] at layout time (same mechanism as
+ * [topAreaContentSpacer]), so it re-measures as the top area folds without recomposing the caller.
+ * [rest] supplies every other edge (e.g. bottom inset for the navigation bar).
+ */
+@Composable
+fun topAreaContentPadding(state: TopAreaState, rest: PaddingValues = PaddingValues()): PaddingValues {
+    val density = LocalDensity.current
+    return remember(state, density, rest) {
+        object : PaddingValues {
+            override fun calculateLeftPadding(layoutDirection: LayoutDirection): Dp =
+                rest.calculateLeftPadding(layoutDirection)
+
+            override fun calculateTopPadding(): Dp =
+                with(density) { state.measuredHeightPx.coerceAtLeast(0).toDp() }
+
+            override fun calculateRightPadding(layoutDirection: LayoutDirection): Dp =
+                rest.calculateRightPadding(layoutDirection)
+
+            override fun calculateBottomPadding(): Dp = rest.calculateBottomPadding()
+        }
+    }
 }
