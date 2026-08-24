@@ -116,14 +116,26 @@ class IssuanceCertificateViewModel(
         val recipientError = if (state.selectedRecipient == null) {
             "گیرنده را انتخاب کنید"
         } else null
-        val branchNameError = if (state.branchName.isBlank()) {
-            "نام شعبه را وارد کنید"
-        } else null
+        val branchNameError = when {
+            state.branchName.isBlank() -> "نام شعبه را وارد کنید"
+            INVALID_BRANCH_NAME_CHARS_REGEX.containsMatchIn(state.branchName) ->
+                "نام شعبه شامل کاراکتر غیر مجاز است"
+            state.branchName.length < 2 && !NUMERIC_REGEX.matches(state.branchName) ->
+                "نام شعبه نمی‌تواند کمتر از دو کاراکتر باشد"
+            else -> null
+        }
 
         return if (pensionerIdError != null || recipientError != null || branchNameError != null) {
             PartialState.ValidationFailed(pensionerIdError, recipientError, branchNameError)
         } else null
     }
+
+    private fun formatBranchName(rawBranchName: String): String =
+        if (rawBranchName.isNotBlank() && !rawBranchName.contains("شعبه")) {
+            " شعبه $rawBranchName"
+        } else {
+            rawBranchName
+        }
 
     private fun handleSubmitRequest(): Flow<PartialState> = flow {
         val fieldErrors = validateFields()
@@ -138,7 +150,7 @@ class IssuanceCertificateViewModel(
             ApiFilterDN(FilterProperty.PENSIONER_ID, state.selectedPensionerId!!, FilterOperator.EQUAL),
             ApiFilterDN(FilterProperty.RECIPIENT, state.selectedRecipient!!.code, FilterOperator.EQUAL),
             ApiFilterDN(FilterProperty.TARGET, "", FilterOperator.EQUAL),
-            ApiFilterDN(FilterProperty.BRANCH_NAME, state.branchName, FilterOperator.EQUAL),
+            ApiFilterDN(FilterProperty.BRANCH_NAME, formatBranchName(state.branchName), FilterOperator.EQUAL),
         )
 
         emit(PartialState.Submitting(true))
@@ -217,4 +229,9 @@ class IssuanceCertificateViewModel(
 
     override fun createErrorState(message: String): PartialState =
         PartialState.Error(message)
+
+    private companion object {
+        val INVALID_BRANCH_NAME_CHARS_REGEX = Regex("[a-zA-Z$&+،,:;=\\\\?@#|/'<>.^*()%!-]")
+        val NUMERIC_REGEX = Regex("[0-9]+")
+    }
 }

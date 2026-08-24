@@ -16,6 +16,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
+import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.GlassIconTile
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
@@ -28,6 +31,7 @@ import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.issuance_certificate_subtitle
 import taminx.core.core_ui.issuance_certificate_title
 import org.jetbrains.compose.resources.vectorResource
+import taminx.core.core_ui.ic_mobile
 
 @Composable
 internal fun IssuanceCertificateHeader(
@@ -58,9 +62,13 @@ internal fun IssuanceCertificateHeader(
                 )
             },
         )
-
+        DecorativeBackgroundCircle(
+            size = 190.dp,
+            xOffset = 260.dp,
+            yOffset = (-150).dp
+        )
         Spacer(Modifier.height(Spacing.smPlus))
-        GlassIconTile(icon = Icons.Filled.Payments)
+        AnimatedRingHeaderIcon(icon = Icons.Filled.Payments)
         Spacer(Modifier.height(Spacing.sm))
         Text(
             text = stringResource(Res.string.issuance_certificate_subtitle),

@@ -28,6 +28,7 @@ import com.tamin.taminhamrah.model.personal.DisabilityPersonalInfoDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
 import com.tamin.taminhamrah.model.user.EditMobileResponseDN
@@ -160,6 +161,100 @@ class IssuanceCertificateViewModelTest {
             assertNull(state.branchNameError)
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    @Test
+    fun whenBranchNameContainsInvalidCharacters_showsValidationError() = runTest(testDispatcher) {
+        pensionRepository.pensionIdResult = listOf(PensionIdDN("111"))
+        userRepository.recipientsResult = listOf(
+            RecipientDN(recipientCode = "001", recipientName = "بانک رفاه")
+        )
+        viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        viewModel.sendIntent(IssuanceCertificateIntent.ShowRecipientsSheet)
+        viewModel.sendIntent(
+            IssuanceCertificateIntent.SelectRecipient(RecipientPR(code = "001", name = "بانک رفاه"))
+        )
+        viewModel.sendIntent(IssuanceCertificateIntent.ChangeBranchName("Central#1"))
+        viewModel.sendIntent(IssuanceCertificateIntent.SubmitRequest)
+
+        viewModel.uiState.test {
+            val state = expectMostRecentItem()
+            assertEquals(IssuanceCertificateStep.Info, state.currentStep)
+            assertEquals("نام شعبه شامل کاراکتر غیر مجاز است", state.branchNameError)
+            assertEquals(false, state.showSuccessDialog)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenBranchNameIsTooShortAndNonNumeric_showsValidationError() = runTest(testDispatcher) {
+        pensionRepository.pensionIdResult = listOf(PensionIdDN("111"))
+        userRepository.recipientsResult = listOf(
+            RecipientDN(recipientCode = "001", recipientName = "بانک رفاه")
+        )
+        viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        viewModel.sendIntent(IssuanceCertificateIntent.ShowRecipientsSheet)
+        viewModel.sendIntent(
+            IssuanceCertificateIntent.SelectRecipient(RecipientPR(code = "001", name = "بانک رفاه"))
+        )
+        viewModel.sendIntent(IssuanceCertificateIntent.ChangeBranchName("م"))
+        viewModel.sendIntent(IssuanceCertificateIntent.SubmitRequest)
+
+        viewModel.uiState.test {
+            val state = expectMostRecentItem()
+            assertEquals("نام شعبه نمی‌تواند کمتر از دو کاراکتر باشد", state.branchNameError)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenSubmitSucceeds_sendsBranchNameWithShoabehPrefix() = runTest(testDispatcher) {
+        pensionRepository.pensionIdResult = listOf(PensionIdDN("111"))
+        userRepository.recipientsResult = listOf(
+            RecipientDN(recipientCode = "001", recipientName = "بانک رفاه")
+        )
+        userRepository.wageCertificateReportResult = "OK"
+        viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        viewModel.sendIntent(IssuanceCertificateIntent.ShowRecipientsSheet)
+        viewModel.sendIntent(
+            IssuanceCertificateIntent.SelectRecipient(RecipientPR(code = "001", name = "بانک رفاه"))
+        )
+        viewModel.sendIntent(IssuanceCertificateIntent.ChangeBranchName("مرکزی"))
+        viewModel.sendIntent(IssuanceCertificateIntent.SubmitRequest)
+        advanceUntilIdle()
+
+        val branchNameFilter = userRepository.lastWageCertificateFilters
+            .first { it.property == FilterProperty.BRANCH_NAME }
+        assertEquals(" شعبه مرکزی", branchNameFilter.value)
+    }
+
+    @Test
+    fun whenBranchNameAlreadyContainsShoabeh_doesNotDuplicatePrefix() = runTest(testDispatcher) {
+        pensionRepository.pensionIdResult = listOf(PensionIdDN("111"))
+        userRepository.recipientsResult = listOf(
+            RecipientDN(recipientCode = "001", recipientName = "بانک رفاه")
+        )
+        userRepository.wageCertificateReportResult = "OK"
+        viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        viewModel.sendIntent(IssuanceCertificateIntent.ShowRecipientsSheet)
+        viewModel.sendIntent(
+            IssuanceCertificateIntent.SelectRecipient(RecipientPR(code = "001", name = "بانک رفاه"))
+        )
+        viewModel.sendIntent(IssuanceCertificateIntent.ChangeBranchName("شعبه مرکزی"))
+        viewModel.sendIntent(IssuanceCertificateIntent.SubmitRequest)
+        advanceUntilIdle()
+
+        val branchNameFilter = userRepository.lastWageCertificateFilters
+            .first { it.property == FilterProperty.BRANCH_NAME }
+        assertEquals("شعبه مرکزی", branchNameFilter.value)
     }
 
     @Test
@@ -302,6 +397,7 @@ private class FakeIssuanceCertificateUserRepository : UserRepository {
     var wageCertificateReportResult: String = ""
     var wageCertificateShouldThrow: Boolean = false
     var wageCertificateError: Throwable = RuntimeException("fake error")
+    var lastWageCertificateFilters: List<ApiFilterDN> = emptyList()
     var identityResult: IdentityInfoDN = IdentityInfoDN(
         cityOfBirthId = null,
         cityOfIssueId = null,
@@ -324,6 +420,7 @@ private class FakeIssuanceCertificateUserRepository : UserRepository {
     }
 
     override suspend fun getWageCertificateReport(filters: List<ApiFilterDN>): Flow<String> = flow {
+        lastWageCertificateFilters = filters
         if (wageCertificateShouldThrow) throw wageCertificateError
         emit(wageCertificateReportResult)
     }

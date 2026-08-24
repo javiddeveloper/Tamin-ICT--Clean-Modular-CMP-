@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.pensionInquiry.ui.issuanceCertificate
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -32,8 +34,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -67,9 +73,11 @@ import com.tamin.taminhamrah.ui.theme.ButtonDimens
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -102,6 +110,9 @@ import taminx.core.core_ui.issuance_certificate_submit_and_send
 import taminx.core.core_ui.issuance_certificate_success_confirm
 import taminx.core.core_ui.issuance_certificate_success_desc
 import taminx.core.core_ui.issuance_certificate_success_title
+
+/** How long the copy button shows the green check before reverting to the copy icon. */
+private const val COPY_FEEDBACK_DURATION_MS = 2000L
 
 @Composable
 fun IssuanceCertificateScreen(
@@ -275,10 +286,11 @@ private fun IssuanceCertificateInfoStep(
             modifier = Modifier
                 .weight(1f)
                 .verticalScroll(rememberScrollState())
+                .imePadding()
                 .fillMaxWidth()
                 .padding(horizontal = Spacing.page),
         ) {
-            Spacer(Modifier.height(Spacing.xl))
+            Spacer(Modifier.height(Spacing.smPlus))
             Text(
                 text = stringResource(Res.string.issuance_certificate_info_title),
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
@@ -287,11 +299,15 @@ private fun IssuanceCertificateInfoStep(
 
             Spacer(Modifier.height(Spacing.lg))
 
-            PensionerNumberCard(
-                pensionerId = state.selectedPensionerId,
-                canSwitch = state.pensionerIds.size > 1,
-                onSwitchClicked = { onIntent(IssuanceCertificateIntent.ShowPensionerSheet) },
-            )
+            if (state.isLoading) {
+                PensionerNumberCardSkeleton()
+            } else {
+                PensionerNumberCard(
+                    pensionerId = state.selectedPensionerId,
+                    canSwitch = state.pensionerIds.size > 1,
+                    onSwitchClicked = { onIntent(IssuanceCertificateIntent.ShowPensionerSheet) },
+                )
+            }
             if (state.pensionerIdError != null) {
                 FieldErrorText(state.pensionerIdError)
             }
@@ -369,6 +385,14 @@ private fun PensionerNumberCard(
     val colors = LocalTaminColors.current
     val displayValue = pensionerId.orEmpty().toPersianDigits()
     val copyAction = pensionerId?.let { rememberCopyAction(it) }
+    var isCopied by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isCopied) {
+        if (isCopied) {
+            delay(COPY_FEEDBACK_DURATION_MS)
+            isCopied = false
+        }
+    }
 
     Row(
         modifier = Modifier
@@ -417,21 +441,27 @@ private fun PensionerNumberCard(
         }
 
         if (copyAction != null) {
+            val feedbackColor = if (isCopied) colors.greenText else colors.textMuted
             Row(
                 modifier = Modifier
                     .clip(RoundedCornerShape(CornerRadius.max))
                     .border(1.dp, colors.border, RoundedCornerShape(CornerRadius.max))
-                    .clickable(onClick = copyAction)
+                    .clickable {
+                        copyAction()
+                        isCopied = true
+                    }
                     .padding(horizontal = Spacing.md, vertical = Spacing.sm),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
             ) {
-                Icon(
-                    imageVector = vectorResource(Res.drawable.ic_tamin_copy),
-                    contentDescription = null,
-                    tint = colors.textMuted,
-                    modifier = Modifier.size(IconSize.small),
-                )
+                Crossfade(targetState = isCopied, label = "pensionerNumberCopyIcon") { copied ->
+                    Icon(
+                        imageVector = if (copied) Icons.Filled.Check else vectorResource(Res.drawable.ic_tamin_copy),
+                        contentDescription = null,
+                        tint = feedbackColor,
+                        modifier = Modifier.size(IconSize.small),
+                    )
+                }
                 Text(
                     text = stringResource(Res.string.issuance_certificate_copy),
                     style = MaterialTheme.typography.labelMedium,
@@ -439,6 +469,36 @@ private fun PensionerNumberCard(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun PensionerNumberCardSkeleton() {
+    val colors = LocalTaminColors.current
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .taminSurface()
+            .padding(Spacing.lg),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+            ShimmerBlock(
+                modifier = Modifier.size(IconSize.xlarge),
+                cornerRadius = CornerRadius.iconTile,
+            )
+            Column(horizontalAlignment = Alignment.Start) {
+                ShimmerBlock(modifier = Modifier.width(70.dp).height(12.dp))
+                Spacer(Modifier.height(Spacing.xxs))
+                ShimmerBlock(modifier = Modifier.width(110.dp).height(18.dp))
+            }
+        }
+        ShimmerBlock(
+            modifier = Modifier.width(64.dp).height(34.dp),
+            cornerRadius = CornerRadius.max,
+        )
     }
 }
 
@@ -458,7 +518,7 @@ private fun IssuanceCertificateConfirmStep(
                 .fillMaxWidth()
                 .padding(horizontal = Spacing.page),
         ) {
-            Spacer(Modifier.height(Spacing.xl))
+            Spacer(Modifier.height(Spacing.smPlus))
             Text(
                 text = stringResource(Res.string.issuance_certificate_confirm_title),
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
