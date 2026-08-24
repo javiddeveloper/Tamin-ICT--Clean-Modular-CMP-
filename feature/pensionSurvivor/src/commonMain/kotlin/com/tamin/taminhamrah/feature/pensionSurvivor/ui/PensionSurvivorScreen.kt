@@ -22,17 +22,25 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.components.DeceasedStep
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.components.RulesStep
+import com.tamin.taminhamrah.feature.pensionSurvivor.ui.components.SurvivorsStep
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.PensionSurvivorEvent
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.PensionSurvivorIntent
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.PensionSurvivorStep
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.PensionSurvivorUiState
+import com.tamin.taminhamrah.model.personal.survivorDependent.SurvivorDependentPR
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
@@ -73,16 +81,40 @@ import taminx.core.core_ui.pension_survivor_todo_step
 @Composable
 fun PensionSurvivorScreen(
     onBack: () -> Unit,
+    onNavigateToSurvivorInfo: (SurvivorDependentPR, String) -> Unit,
     viewModel: PensionSurvivorViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val toaster = LocalToaster.current
     val rulesUnavailableMessage = stringResource(Res.string.pension_survivor_rules_unavailable)
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var refreshSurvivorsOnResume by remember { mutableStateOf(false) }
+
+    DisposableEffect(lifecycleOwner, state.currentStep, refreshSurvivorsOnResume) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (
+                event == Lifecycle.Event.ON_RESUME &&
+                refreshSurvivorsOnResume &&
+                state.currentStep == PensionSurvivorStep.Survivors
+            ) {
+                refreshSurvivorsOnResume = false
+                viewModel.sendIntent(PensionSurvivorIntent.RefreshSurvivors)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     HandlePensionSurvivorEvents(
         events = viewModel.events,
         onShowToast = { toaster.error(it) },
         onNavigateBack = onBack,
+        onNavigateToSurvivorInfo = { survivor, deceasedNationalId ->
+            refreshSurvivorsOnResume = true
+            onNavigateToSurvivorInfo(survivor, deceasedNationalId)
+        },
         onOpenRulesDocument = {
             // TODO(rules-url): replace this toast with the legacy rules document URL/PDF when found.
             toaster.error(rulesUnavailableMessage)
@@ -104,6 +136,7 @@ private fun HandlePensionSurvivorEvents(
     events: Flow<PensionSurvivorEvent>,
     onShowToast: (String) -> Unit,
     onNavigateBack: () -> Unit,
+    onNavigateToSurvivorInfo: (SurvivorDependentPR, String) -> Unit,
     onOpenRulesDocument: () -> Unit,
 ) {
     events.collectWithLifecycleAware { event ->
@@ -112,7 +145,9 @@ private fun HandlePensionSurvivorEvents(
             PensionSurvivorEvent.NavigateBack -> onNavigateBack()
             PensionSurvivorEvent.OpenRulesDocument -> onOpenRulesDocument()
             PensionSurvivorEvent.OpenPdfViewer -> Unit
-            is PensionSurvivorEvent.NavigateToSurvivorInfo -> Unit
+            is PensionSurvivorEvent.NavigateToSurvivorInfo -> {
+                onNavigateToSurvivorInfo(event.survivor, event.deceasedNationalId)
+            }
         }
     }
 }
@@ -273,7 +308,10 @@ private fun PensionSurvivorContent(
                         state = state,
                         onIntent = onIntent,
                     )
-                    PensionSurvivorStep.Survivors -> StepPlaceholder(stepTitle = step3Title)
+                    PensionSurvivorStep.Survivors -> SurvivorsStep(
+                        state = state,
+                        onIntent = onIntent,
+                    )
                     PensionSurvivorStep.Final -> StepPlaceholder(stepTitle = step4Title)
                 }
             }

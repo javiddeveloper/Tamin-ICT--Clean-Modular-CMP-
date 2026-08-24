@@ -72,7 +72,12 @@ class PensionSurvivorViewModel(
             PensionSurvivorIntent.SearchDeceased -> searchDeceased()
             is PensionSurvivorIntent.OpenSurvivor -> {
                 if (intent.item.nationalId.isNotBlank()) {
-                    sendEvent(PensionSurvivorEvent.NavigateToSurvivorInfo(intent.item.nationalId))
+                    sendEvent(
+                        PensionSurvivorEvent.NavigateToSurvivorInfo(
+                            survivor = intent.item,
+                            deceasedNationalId = uiState.value.deceasedNationalId,
+                        ),
+                    )
                 }
             }
             PensionSurvivorIntent.RefreshSurvivors -> loadSurvivors()

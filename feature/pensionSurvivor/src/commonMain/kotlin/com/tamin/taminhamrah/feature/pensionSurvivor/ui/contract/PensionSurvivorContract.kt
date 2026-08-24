@@ -69,7 +69,10 @@ sealed interface PensionSurvivorIntent {
 sealed interface PensionSurvivorEvent {
     data class ShowToast(val message: String) : PensionSurvivorEvent
     data object NavigateBack : PensionSurvivorEvent
-    data class NavigateToSurvivorInfo(val nationalId: String) : PensionSurvivorEvent
+    data class NavigateToSurvivorInfo(
+        val survivor: SurvivorDependentPR,
+        val deceasedNationalId: String,
+    ) : PensionSurvivorEvent
     data object OpenPdfViewer : PensionSurvivorEvent
     data object OpenRulesDocument : PensionSurvivorEvent
 }

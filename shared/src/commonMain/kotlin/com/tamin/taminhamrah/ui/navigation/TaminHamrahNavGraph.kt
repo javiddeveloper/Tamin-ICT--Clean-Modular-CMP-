@@ -440,7 +440,10 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                 issuanceCertificateScreen(onBack = { navController.popBackStack() })
                 deferredInstallmentScreen(onBack = { navController.popBackStack() })
                 girlSurvivorScreen(onBack = { navController.popBackStack() })
-                pensionSurvivorScreen(onBack = { navController.popBackStack() })
+                pensionSurvivorScreen(
+                    navController = navController,
+                    onBack = { navController.popBackStack() },
+                )
                 disabilityPensionScreen(onBack = { navController.popBackStack() })
 
                 historyScreen()

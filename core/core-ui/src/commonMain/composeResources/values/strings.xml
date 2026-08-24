@@ -665,6 +665,8 @@
     <string name="pension_survivor_deceased_death_certificate">گواهی فوت</string>
     <string name="pension_survivor_deceased_id_pages">صفحات شناسنامه</string>
     <string name="pension_survivor_soon">به‌زودی</string>
+    <string name="pension_survivor_survivors_empty">بازمانده‌ای برای این متوفی یافت نشد.</string>
+    <string name="pension_survivor_survivor_info_save_success">اطلاعات بازمانده با موفقیت ثبت شد.</string>
 
     <string name="picker_relationship_title">انتخاب نسبت خانوادگی</string>
     <string name="picker_birth_place_title">انتخاب محل تولد</string>
