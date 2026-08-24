@@ -20,7 +20,6 @@ import com.tamin.taminhamrah.useCases.occurrence.GetOccurrencePersonalInfoUseCas
 import com.tamin.taminhamrah.useCases.occurrence.GetWorkshopSpecUseCase
 import com.tamin.taminhamrah.useCases.occurrence.SubmitOccurrenceUseCase
 import com.tamin.taminhamrah.useCases.occurrence.UploadOccurrenceImageUseCase
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -28,7 +27,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.getString
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.orotez_protez_document_duplicate_error
@@ -228,9 +226,11 @@ class OccurrenceViewModel(
     private fun uploadDocument(intent: OccurrenceIntent.UploadDocument): Flow<PartialState> = flow {
         val current = uiState.value.documentSubmit
 
-        val isDuplicate = withContext(Dispatchers.Default) {
-            current.uploadedDocuments.any { it.bytes?.contentEquals(intent.fileBytes) == true }
-        }
+        // Unwrapped scan over a handful of already-uploaded documents, matching
+        // OrotezProtezViewModel.findDuplicateDocumentId's precedent — cheap enough that moving it
+        // off-thread only adds a dispatcher hop, and it must stay on the calling dispatcher so
+        // uiState reflects the result synchronously within this flow collection.
+        val isDuplicate = current.uploadedDocuments.any { it.bytes?.contentEquals(intent.fileBytes) == true }
         if (isDuplicate) {
             sendEvent(OccurrenceEvent.ShowToast(getString(Res.string.orotez_protez_document_duplicate_error)))
             return@flow
