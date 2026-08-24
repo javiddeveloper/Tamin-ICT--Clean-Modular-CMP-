@@ -646,6 +646,20 @@
     <string name="girl_survivor_success_title">تأیید</string>
     <string name="girl_survivor_success_message">تعهدنامه شما با موفقیت دریافت گردید</string>
 
+    <string name="pension_survivor_title">برقراری مستمری توسط بازماندگان</string>
+    <string name="pension_survivor_step_rules">مقررات و ضوابط</string>
+    <string name="pension_survivor_step_deceased">مشخصات متوفی</string>
+    <string name="pension_survivor_step_survivors">اطلاعات بازماندگان</string>
+    <string name="pension_survivor_step_final">ثبت نهایی درخواست</string>
+    <string name="pension_survivor_rules_banner">تایید این مرحله به منزله مطالعه و پذیرش مقررات و ضوابط خدمت برقراری مستمری توسط بازماندگان است.</string>
+    <string name="pension_survivor_view_rules">مشاهده ضوابط و مقررات</string>
+    <string name="pension_survivor_commitment_title">تعهدنامه</string>
+    <string name="pension_survivor_commitment_body">اینجانب %1$s مطالعه ضوابط و مقررات خدمت برقراری مستمری توسط بازماندگان را تأیید می‌کنم.</string>
+    <string name="pension_survivor_commitment_confirm_label">مطالعه ضوابط و مقررات و پذیرش مفاد آن مورد تأیید اینجانب است.</string>
+    <string name="pension_survivor_next_step">مرحله بعد</string>
+    <string name="pension_survivor_todo_step">TODO step: %1$s</string>
+    <string name="pension_survivor_rules_unavailable">فایل ضوابط و مقررات هنوز در این نسخه متصل نشده است.</string>
+
     <string name="picker_relationship_title">انتخاب نسبت خانوادگی</string>
     <string name="picker_birth_place_title">انتخاب محل تولد</string>
     <string name="picker_issue_place_title">انتخاب محل صدور</string>
