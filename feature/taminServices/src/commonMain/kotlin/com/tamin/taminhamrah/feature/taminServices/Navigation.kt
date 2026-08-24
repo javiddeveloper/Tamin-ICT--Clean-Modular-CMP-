@@ -4,6 +4,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
+import com.tamin.taminhamrah.feature.taminServices.inspection.ui.InspectionRoute
+import com.tamin.taminhamrah.feature.taminServices.inspection.ui.InspectionViewModel
 import com.tamin.taminhamrah.feature.taminServices.sendHistoryToInstitutions.SendHistoryToInstitutionsScreen
 import com.tamin.taminhamrah.feature.taminServices.ui.TaminServicesRoute
 import com.tamin.taminhamrah.feature.taminServices.ui.TamminServicesViewModel
@@ -16,6 +18,9 @@ data object TaminServicesRoute
 
 @Serializable
 data object SendInsuranceHistoryToInstitutionsRoute
+
+@Serializable
+data object InspectionRoute
 
 fun NavController.navigateToTaminServices(builder: NavOptionsBuilder.() -> Unit = {}) {
     navigate(TaminServicesRoute, builder)
@@ -49,6 +54,20 @@ fun NavGraphBuilder.sendInsuranceHistoryToInstitutionsScreen(
         SendHistoryToInstitutionsScreen(
             onBack = onBack,
             onDone = onDone
+        )
+    }
+}
+
+fun NavController.navigateToInspection(builder: NavOptionsBuilder.() -> Unit = {}) {
+    navigate(InspectionRoute, builder)
+}
+
+fun NavGraphBuilder.inspectionScreen(onBack: () -> Unit) {
+    composableWithFadeTransitions<InspectionRoute> {
+        val viewModel: InspectionViewModel = koinViewModel()
+        InspectionRoute(
+            viewModel = viewModel,
+            onBackClicked = onBack
         )
     }
 }

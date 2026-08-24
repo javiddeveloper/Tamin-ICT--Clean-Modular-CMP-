@@ -780,4 +780,26 @@
     <string name="pension_status_empty_subtitle">وضعیت مستمری برای این کاربر ثبت نشده است</string>
     <string name="pension_status_send_success_title">ارسال گواهی</string>
     <string name="pension_status_send_success_desc">درخواست گواهی با موفقیت ثبت شد و در صندوق شخصی شما قابل مشاهده است.</string>
+
+    <!-- ===================== Inspection Screen ===================== -->
+    <string name="inspection_title">بازرسی‌ها</string>
+    <string name="inspection_subtitle">بازرسی‌های انجام‌شده توسط سازمان</string>
+    <string name="inspection_count_format">%1$s بازرسی</string>
+    <string name="inspection_request_button">درخواست بازرسی</string>
+    <string name="inspection_coming_soon_toast">این امکان به‌زودی فعال می‌شود</string>
+    <string name="inspection_empty_title">بازرسی‌ای یافت نشد</string>
+    <string name="inspection_empty_subtitle">تاکنون بازرسی‌ای برای شما ثبت نشده است</string>
+    <string name="inspection_status_objectable">قابل اعتراض</string>
+    <string name="inspection_status_objection_expired">مهلت اعتراض گذشته</string>
+    <string name="inspection_submit_objection">ثبت اعتراض</string>
+    <string name="inspection_branch">شعبه</string>
+    <string name="inspection_workshop_code">کد کارگاه</string>
+    <string name="inspection_id">شناسهٔ بازرسی</string>
+    <string name="inspection_date">تاریخ بازرسی</string>
+    <string name="inspection_insurance_no">شمارهٔ بیمه</string>
+    <string name="inspection_relation_type">نوع ارتباط با کارگاه</string>
+    <string name="inspection_activity_type">نوع فعالیت کارگاه</string>
+    <string name="inspection_download_report">دریافت فایل گزارش بازرسی</string>
+    <string name="inspection_download_report_short">دریافت گزارش</string>
+    <string name="inspection_report_filename_format">inspection_report_%1$s.pdf</string>
 </resources>
