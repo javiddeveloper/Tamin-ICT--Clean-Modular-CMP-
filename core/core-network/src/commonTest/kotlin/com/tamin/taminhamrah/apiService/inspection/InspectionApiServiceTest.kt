@@ -78,5 +78,15 @@ class InspectionApiServiceTest : BaseApiTest() {
         assertNotNull(response.data)
         assertEquals(12345L, response.data?.request?.id)
     }
+
+    @Test
+    fun getInspectionReportPDF_returnsHttpResponse() = runTest {
+        val ktorfit: Ktorfit = createMockKtorfit("")
+        val apiService = ktorfit.createInspectionApiService()
+
+        val response = apiService.getInspectionReportPDF("0130980012641")
+
+        assertEquals(200, response.execute().status.value)
+    }
 }
 

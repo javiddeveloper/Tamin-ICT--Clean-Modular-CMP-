@@ -9,6 +9,8 @@ import com.tamin.taminhamrah.model.inspection.SubmitInspectionRequestDN
 import com.tamin.taminhamrah.model.inspection.SubmitInspectionRequestDTO
 import com.tamin.taminhamrah.model.inspection.SubmitInspectionRequestModelDTO
 import com.tamin.taminhamrah.model.inspection.RequestSubmitInspectionDTO
+import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import kotlinx.coroutines.test.runTest
@@ -22,12 +24,14 @@ class FakeInspectionRemoteDataSource : InspectionRemoteDataSource {
     var branchesResult: ListData<BranchDTO> = ListData(total = 0, list = emptyList())
     var jobsResult: ListData<JobDTO> = ListData(total = 0, list = emptyList())
     var submitResult: SubmitInspectionRequestModelDTO = SubmitInspectionRequestModelDTO()
+    var reportPdfResult: PdfDownloadDTO = PdfDownloadDTO(pdf = InputStreamDTO(pdf = null))
 
     var shouldThrowError: Exception? = null
     var lastAllInsuranceQuery: ApiQueryParamDN? = null
     var lastBranchesQuery: ApiQueryParamDN? = null
     var lastJobsQuery: ApiQueryParamDN? = null
     var lastSubmitRequest: SubmitInspectionRequestDTO? = null
+    var lastReportPdfInspectionNo: String? = null
 
     override suspend fun getAllInsurance(query: ApiQueryParamDN): ListData<InspectionPerformedDTO> {
         shouldThrowError?.let { throw it }
@@ -51,6 +55,12 @@ class FakeInspectionRemoteDataSource : InspectionRemoteDataSource {
         shouldThrowError?.let { throw it }
         lastSubmitRequest = request
         return submitResult
+    }
+
+    override suspend fun getInspectionReportPDF(inspectionNo: String): PdfDownloadDTO {
+        shouldThrowError?.let { throw it }
+        lastReportPdfInspectionNo = inspectionNo
+        return reportPdfResult
     }
 }
 
@@ -77,7 +87,7 @@ class InspectionRepositoryImplTest {
         assertEquals(1, result.total)
         assertEquals(1, result.list.size)
         assertEquals("فعالیت تست", result.list.first().activityDesc)
-        assertEquals(10, remoteDataSource.lastAllInsuranceQuery?.limit)
+        assertEquals(100, remoteDataSource.lastAllInsuranceQuery?.limit)
     }
 
     @Test
@@ -137,6 +147,16 @@ class InspectionRepositoryImplTest {
 
         assertEquals(12345L, result.id)
         assertEquals("0010", remoteDataSource.lastSubmitRequest?.brchCode)
+    }
+
+    @Test
+    fun getInspectionReportPDF_success_emitsMappedPdfDownloadDN() = runTest {
+        remoteDataSource.reportPdfResult = PdfDownloadDTO(pdf = InputStreamDTO(pdf = null))
+
+        val result = repository.getInspectionReportPDF("0130980012641")
+
+        assertEquals(null, result.pdf?.pdf)
+        assertEquals("0130980012641", remoteDataSource.lastReportPdfInspectionNo)
     }
 
     @Test

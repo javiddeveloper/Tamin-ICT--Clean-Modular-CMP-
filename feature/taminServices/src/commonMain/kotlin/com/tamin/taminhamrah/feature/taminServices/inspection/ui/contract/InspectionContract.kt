@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.feature.taminServices.inspection.ui.model.BranchPR
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.model.InspectionPerformedPR
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.model.JobPR
 import com.tamin.taminhamrah.model.inspection.SubmitInspectionRequestDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
@@ -15,7 +16,9 @@ data class InspectionUiState(
     val inspections: List<InspectionPerformedPR> = emptyList(),
     val branches: List<BranchPR> = emptyList(),
     val jobs: List<JobPR> = emptyList(),
-    val isSubmitted: Boolean = false
+    val isSubmitted: Boolean = false,
+    val viewerPdf: PdfDownloadPR? = null,
+    val viewerDownloadFailed: Boolean = false,
 ) {
     sealed interface PartialState {
         data class Loading(val isLoading: Boolean) : PartialState
@@ -23,6 +26,8 @@ data class InspectionUiState(
         data class BranchesLoaded(val list: List<BranchPR>) : PartialState
         data class JobsLoaded(val list: List<JobPR>) : PartialState
         data object SubmitSuccess : PartialState
+        data class ViewerPdfChanged(val pdf: PdfDownloadPR?) : PartialState
+        data object ViewerDownloadFailed : PartialState
     }
 }
 
@@ -47,6 +52,9 @@ sealed interface InspectionIntent {
     data class SubmitRequest(
         val request: SubmitInspectionRequestDN
     ) : InspectionIntent
+
+    data class DownloadReportPdf(val inspectionNo: String) : InspectionIntent
+    data object DismissPdfViewer : InspectionIntent
 }
 
 sealed interface InspectionEvent {

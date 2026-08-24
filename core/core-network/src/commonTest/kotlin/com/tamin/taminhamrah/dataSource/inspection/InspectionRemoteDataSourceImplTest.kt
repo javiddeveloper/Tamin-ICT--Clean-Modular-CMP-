@@ -14,6 +14,7 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminApiException
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
+import io.ktor.client.statement.HttpStatement
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -52,6 +53,11 @@ class FakeInspectionApiService : InspectionApiService {
     override suspend fun submitInspectionRequest(request: SubmitInspectionRequestDTO): BaseDTO<SubmitInspectionRequestModelDTO> {
         shouldThrowException?.let { throw it }
         return submitResult
+    }
+
+    override suspend fun getInspectionReportPDF(inspectionNo: String): HttpStatement {
+        shouldThrowException?.let { throw it }
+        error("not exercised in this test class — see InspectionApiServiceTest for the streaming response")
     }
 }
 

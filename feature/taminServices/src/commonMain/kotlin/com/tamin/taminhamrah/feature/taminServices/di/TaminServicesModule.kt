@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.useCases.history.SendToInstitutionUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
 import com.tamin.taminhamrah.useCases.inspection.GetInspectionListUseCase
 import com.tamin.taminhamrah.useCases.inspection.GetBranchListUseCase
+import com.tamin.taminhamrah.useCases.inspection.GetInspectionReportPDFUseCase
 import com.tamin.taminhamrah.useCases.inspection.GetJobListUseCase
 import com.tamin.taminhamrah.useCases.inspection.SubmitInspectionUseCase
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.InspectionViewModel
@@ -24,6 +25,7 @@ val TaminServicesModule = module {
     factoryOf(::GetBranchListUseCase)
     factoryOf(::GetJobListUseCase)
     factoryOf(::SubmitInspectionUseCase)
+    factoryOf(::GetInspectionReportPDFUseCase)
     viewModelOf(::InspectionViewModel)
 }
 

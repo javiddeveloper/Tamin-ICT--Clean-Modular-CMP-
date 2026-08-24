@@ -6,8 +6,10 @@ import com.tamin.taminhamrah.feature.taminServices.inspection.ui.contract.Inspec
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.contract.InspectionUiState
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.contract.InspectionUiState.PartialState
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.mapper.toPR
+import com.tamin.taminhamrah.mapper.personal.toPresentation
 import com.tamin.taminhamrah.useCases.inspection.GetInspectionListUseCase
 import com.tamin.taminhamrah.useCases.inspection.GetBranchListUseCase
+import com.tamin.taminhamrah.useCases.inspection.GetInspectionReportPDFUseCase
 import com.tamin.taminhamrah.useCases.inspection.GetJobListUseCase
 import com.tamin.taminhamrah.useCases.inspection.SubmitInspectionUseCase
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
@@ -18,7 +20,8 @@ class InspectionViewModel(
     private val getInspectionListUseCase: GetInspectionListUseCase,
     private val getBranchListUseCase: GetBranchListUseCase,
     private val getJobListUseCase: GetJobListUseCase,
-    private val submitInspectionUseCase: SubmitInspectionUseCase
+    private val submitInspectionUseCase: SubmitInspectionUseCase,
+    private val getInspectionReportPDFUseCase: GetInspectionReportPDFUseCase
 ) : BaseViewModel<InspectionUiState, PartialState, InspectionEvent, InspectionIntent>(
     initialState = InspectionUiState()
 ) {
@@ -29,6 +32,8 @@ class InspectionViewModel(
             is InspectionIntent.LoadBranches -> handleLoadBranches(intent)
             is InspectionIntent.LoadJobs -> handleLoadJobs(intent)
             is InspectionIntent.SubmitRequest -> handleSubmitRequest(intent)
+            is InspectionIntent.DownloadReportPdf -> handleDownloadReportPdf(intent)
+            is InspectionIntent.DismissPdfViewer -> flow { emit(PartialState.ViewerPdfChanged(null)) }
         }
     }
 
@@ -76,6 +81,19 @@ class InspectionViewModel(
         }
     }
 
+    private fun handleDownloadReportPdf(intent: InspectionIntent.DownloadReportPdf): Flow<PartialState> = flow {
+        emit(PartialState.Loading(true))
+        emit(PartialState.ViewerPdfChanged(null))
+        try {
+            val pdf = getInspectionReportPDFUseCase(intent.inspectionNo)
+            emit(PartialState.ViewerPdfChanged(pdf.toPresentation()))
+        } catch (e: Exception) {
+            emit(PartialState.Loading(false))
+            emit(PartialState.ViewerDownloadFailed)
+            sendEvent(InspectionEvent.ShowToast(e.toSingleLineMessage()))
+        }
+    }
+
     override fun reduceState(
         currentState: InspectionUiState,
         partialState: PartialState
@@ -85,6 +103,15 @@ class InspectionViewModel(
         is PartialState.BranchesLoaded -> currentState.copy(isLoading = false, branches = partialState.list)
         is PartialState.JobsLoaded -> currentState.copy(isLoading = false, jobs = partialState.list)
         is PartialState.SubmitSuccess -> currentState.copy(isLoading = false, isSubmitted = true)
+        is PartialState.ViewerPdfChanged -> currentState.copy(
+            isLoading = false,
+            viewerPdf = partialState.pdf,
+            viewerDownloadFailed = false,
+        )
+        is PartialState.ViewerDownloadFailed -> currentState.copy(
+            isLoading = false,
+            viewerDownloadFailed = true,
+        )
     }
 
     override fun createErrorState(message: String): PartialState {

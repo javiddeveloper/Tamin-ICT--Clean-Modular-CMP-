@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.model.inspection.InspectionPerformedListDN
 import com.tamin.taminhamrah.model.inspection.JobListDN
 import com.tamin.taminhamrah.model.inspection.SubmitInspectionRequestDN
 import com.tamin.taminhamrah.model.inspection.SubmitInspectionRequestResultDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.repository.inspection.InspectionRepository
 
@@ -13,12 +14,14 @@ class FakeInspectionRepository : InspectionRepository {
     var branchesResult: BranchListDN = BranchListDN(total = 0, list = emptyList())
     var jobsResult: JobListDN = JobListDN(total = 0, list = emptyList())
     var submitResult: SubmitInspectionRequestResultDN = SubmitInspectionRequestResultDN(id = null)
+    var reportPdfResult: PdfDownloadDN = PdfDownloadDN(pdf = null)
 
     var shouldThrowError = false
     var lastAllInsuranceFilters: List<ApiFilterDN>? = null
     var lastBranchesFilters: List<ApiFilterDN>? = null
     var lastJobsFilters: List<ApiFilterDN>? = null
     var lastSubmitRequest: SubmitInspectionRequestDN? = null
+    var lastReportPdfInspectionNo: String? = null
 
     override suspend fun getAllInsurance(filters: List<ApiFilterDN>): InspectionPerformedListDN {
         if (shouldThrowError) throw RuntimeException("Error")
@@ -42,5 +45,11 @@ class FakeInspectionRepository : InspectionRepository {
         if (shouldThrowError) throw RuntimeException("Error")
         lastSubmitRequest = request
         return submitResult
+    }
+
+    override suspend fun getInspectionReportPDF(inspectionNo: String): PdfDownloadDN {
+        if (shouldThrowError) throw RuntimeException("Error")
+        lastReportPdfInspectionNo = inspectionNo
+        return reportPdfResult
     }
 }

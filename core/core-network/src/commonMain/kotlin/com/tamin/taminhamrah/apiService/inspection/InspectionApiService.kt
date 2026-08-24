@@ -10,7 +10,10 @@ import com.tamin.taminhamrah.model.utils.ListData
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.POST
+import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.QueryMap
+import de.jensklingenberg.ktorfit.http.Streaming
+import io.ktor.client.statement.HttpStatement
 
 internal interface InspectionApiService {
     @GET("inspection-header/get-all-insurance")
@@ -32,4 +35,10 @@ internal interface InspectionApiService {
     suspend fun submitInspectionRequest(
         @Body request: SubmitInspectionRequestDTO
     ): BaseDTO<SubmitInspectionRequestModelDTO>
+
+    @Streaming
+    @GET("inspection-report/{inspectionNo}")
+    suspend fun getInspectionReportPDF(
+        @Path("inspectionNo") inspectionNo: String
+    ): HttpStatement
 }

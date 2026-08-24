@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.model.inspection.InspectionPerformedDTO
 import com.tamin.taminhamrah.model.inspection.JobDTO
 import com.tamin.taminhamrah.model.inspection.SubmitInspectionRequestDTO
 import com.tamin.taminhamrah.model.inspection.SubmitInspectionRequestModelDTO
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 
@@ -24,4 +25,8 @@ interface InspectionRemoteDataSource {
     suspend fun submitInspectionRequest(
         request: SubmitInspectionRequestDTO
     ): SubmitInspectionRequestModelDTO
+
+    suspend fun getInspectionReportPDF(
+        inspectionNo: String
+    ): PdfDownloadDTO
 }

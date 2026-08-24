@@ -12,9 +12,10 @@ import com.tamin.taminhamrah.model.inspection.JobDN
 import com.tamin.taminhamrah.model.inspection.JobListDN
 import com.tamin.taminhamrah.model.inspection.SubmitInspectionRequestDN
 import com.tamin.taminhamrah.model.inspection.SubmitInspectionRequestResultDN
-import com.tamin.taminhamrah.feature.taminServices.inspection.FakeInspectionRepository
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.useCases.inspection.GetBranchListUseCase
 import com.tamin.taminhamrah.useCases.inspection.GetInspectionListUseCase
+import com.tamin.taminhamrah.useCases.inspection.GetInspectionReportPDFUseCase
 import com.tamin.taminhamrah.useCases.inspection.GetJobListUseCase
 import com.tamin.taminhamrah.useCases.inspection.SubmitInspectionUseCase
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +29,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -54,7 +56,8 @@ class InspectionViewModelTest {
         getInspectionListUseCase = GetInspectionListUseCase(repository),
         getBranchListUseCase = GetBranchListUseCase(repository),
         getJobListUseCase = GetJobListUseCase(repository),
-        submitInspectionUseCase = SubmitInspectionUseCase(repository)
+        submitInspectionUseCase = SubmitInspectionUseCase(repository),
+        getInspectionReportPDFUseCase = GetInspectionReportPDFUseCase(repository)
     )
 
     @Test
@@ -178,6 +181,60 @@ class InspectionViewModelTest {
             }
 
             assertTrue(state.isSubmitted)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun DownloadReportPdf_success_updatesUiStateWithViewerPdf() = runTest(testDispatcher) {
+        val expected = PdfDownloadDN(pdf = null)
+        repository.reportPdfResult = expected
+
+        viewModel.uiState.test {
+            awaitItem() // initial
+            viewModel.sendIntent(InspectionIntent.DownloadReportPdf("0130980012641"))
+
+            var state = awaitItem()
+            while (state.isLoading) {
+                state = awaitItem()
+            }
+
+            assertNotNull(state.viewerPdf)
+            assertEquals(false, state.viewerDownloadFailed)
+            assertEquals("0130980012641", repository.lastReportPdfInspectionNo)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun DownloadReportPdf_error_marksViewerDownloadFailedAndSendsShowToastEvent() = runTest(testDispatcher) {
+        repository.shouldThrowError = true
+
+        viewModel.events.test {
+            viewModel.sendIntent(InspectionIntent.DownloadReportPdf("0130980012641"))
+            assertIs<InspectionEvent.ShowToast>(awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun DismissPdfViewer_clearsViewerPdf() = runTest(testDispatcher) {
+        repository.reportPdfResult = PdfDownloadDN(pdf = null)
+
+        viewModel.uiState.test {
+            awaitItem() // initial
+            viewModel.sendIntent(InspectionIntent.DownloadReportPdf("0130980012641"))
+
+            var state = awaitItem()
+            while (state.isLoading) {
+                state = awaitItem()
+            }
+            assertNotNull(state.viewerPdf)
+
+            viewModel.sendIntent(InspectionIntent.DismissPdfViewer)
+            state = awaitItem()
+
+            assertEquals(null, state.viewerPdf)
             cancelAndIgnoreRemainingEvents()
         }
     }

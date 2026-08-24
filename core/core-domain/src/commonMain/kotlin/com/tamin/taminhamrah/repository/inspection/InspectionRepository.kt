@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.model.inspection.InspectionPerformedListDN
 import com.tamin.taminhamrah.model.inspection.JobListDN
 import com.tamin.taminhamrah.model.inspection.SubmitInspectionRequestDN
 import com.tamin.taminhamrah.model.inspection.SubmitInspectionRequestResultDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 
 interface InspectionRepository {
@@ -23,4 +24,8 @@ interface InspectionRepository {
     suspend fun submitInspectionRequest(
         request: SubmitInspectionRequestDN
     ): SubmitInspectionRequestResultDN
+
+    suspend fun getInspectionReportPDF(
+        inspectionNo: String
+    ): PdfDownloadDN
 }
