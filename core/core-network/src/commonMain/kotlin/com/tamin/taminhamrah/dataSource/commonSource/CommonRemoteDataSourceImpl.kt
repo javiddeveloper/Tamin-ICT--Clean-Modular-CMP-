@@ -7,7 +7,7 @@
 package com.tamin.taminhamrah.dataSource.commonSource
 
 import com.tamin.core.network.model.common.CityNameDto
-import com.tamin.taminhamrah.model.common.InsuranceTypeDto
+import com.tamin.taminhamrah.model.common.InsuranceTypeDTO
 import com.tamin.taminhamrah.model.common.MainServiceDto
 import com.tamin.core.network.model.common.ProvinceNameDto
 import com.tamin.taminhamrah.model.common.RecipientDTO
@@ -65,7 +65,7 @@ internal class CommonRemoteDataSourceImpl(
         }
     }
 
-    override suspend fun getInsuranceTypes(query: ApiQueryParamDN): ListData<InsuranceTypeDto>? {
+    override suspend fun getInsuranceTypes(query: ApiQueryParamDN): ListData<InsuranceTypeDTO>? {
         return try {
             val response = commonApiService.getInsuranceTypes(
                 queryBuilder.buildQuery(query)

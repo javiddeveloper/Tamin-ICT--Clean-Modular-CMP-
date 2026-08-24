@@ -58,7 +58,6 @@ import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
 import com.tamin.taminhamrah.ui.components.StepIndicator
 import com.tamin.taminhamrah.ui.components.StepIndicatorModel
 import com.tamin.taminhamrah.ui.components.StepState
-import com.tamin.taminhamrah.ui.components.TaminBackStepButton
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
@@ -93,6 +92,9 @@ import taminx.core.core_ui.ic_sun
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.orotez_protez_confirm_and_continue
+import taminx.core.core_ui.step_number_1
+import taminx.core.core_ui.step_number_2
+import taminx.core.core_ui.step_number_3
 import taminx.feature.history_objection.generated.resources.Res as FeatureRes
 import taminx.feature.history_objection.generated.resources.ic_history_objection
 
@@ -245,7 +247,15 @@ private fun HistoryObjectionStepperContent(
                             .navigationBarsPadding(),
                         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                     ) {
-                        TaminBackStepButton(onClick =  { onIntent(HistoryObjectionStepperIntent.OnBackClicked) })
+                        TaminTopAppBarButton(
+                            icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                            contentDescription = null,
+                            onClick = { onIntent(HistoryObjectionStepperIntent.OnBackClicked) },
+                            bordered = true,
+                            containerColor = LocalTaminColors.current.bgSurface,
+                            contentColor = LocalTaminColors.current.textPrimary,
+                            borderColor = LocalTaminColors.current.border,
+                        )
                         LoadingButton(
                             text = stringResource(Res.string.history_objection_confirm),
                             onClick = { onIntent(HistoryObjectionStepperIntent.OnConfirmClicked) },
@@ -261,7 +271,15 @@ private fun HistoryObjectionStepperContent(
                             .navigationBarsPadding(),
                         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                     ) {
-                        TaminBackStepButton(onClick =  { onIntent(HistoryObjectionStepperIntent.OnBackClicked) })
+                        TaminTopAppBarButton(
+                            icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                            contentDescription = null,
+                            onClick = { onIntent(HistoryObjectionStepperIntent.OnBackClicked) },
+                            bordered = true,
+                            containerColor = LocalTaminColors.current.bgSurface,
+                            contentColor = LocalTaminColors.current.textPrimary,
+                            borderColor = LocalTaminColors.current.border,
+                        )
                         TaminFilledButton(
                             icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
                             text = stringResource(Res.string.history_objection_next_step),
@@ -349,16 +367,19 @@ private fun rememberHistoryObjectionSteps(currentStep: Int): ImmutableList<StepI
     val branchTitle = stringResource(Res.string.history_objection_step_branch_title)
     val workshopTitle = stringResource(Res.string.history_objection_step_workshop_title)
     val recordTitle = stringResource(Res.string.history_objection_step_record_title)
+    val step1Num = stringResource(Res.string.step_number_1)
+    val step2Num = stringResource(Res.string.step_number_2)
+    val step3Num = stringResource(Res.string.step_number_3)
 
     return persistentListOf(
         StepIndicatorModel(
             title = branchTitle,
-            stepNumber = "۱",
+            stepNumber = step1Num,
             state = if (currentStep <= STEP_BRANCH) StepState.Active else StepState.Completed,
         ),
         StepIndicatorModel(
             title = workshopTitle,
-            stepNumber = "۲",
+            stepNumber = step2Num,
             state = when {
                 currentStep == STEP_WORKSHOP -> StepState.Active
                 currentStep > STEP_WORKSHOP -> StepState.Completed
@@ -367,7 +388,7 @@ private fun rememberHistoryObjectionSteps(currentStep: Int): ImmutableList<StepI
         ),
         StepIndicatorModel(
             title = recordTitle,
-            stepNumber = "۳",
+            stepNumber = step3Num,
             state = if (currentStep == STEP_RECORD) StepState.Active else StepState.Inactive,
         ),
     )

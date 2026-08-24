@@ -146,12 +146,16 @@ class MyInboxViewModel(
     )
 
     private fun observePaging(): Flow<PartialState> = paginator.state.map { paging ->
+        val errorMessage = paging.error?.toSingleLineMessage()
+        if (errorMessage != null && paging.items.isEmpty()) {
+            sendEvent(ShowError(errorMessage))
+        }
         PartialState.PagingChanged(
             items = paging.items.toPresentation().toImmutableList(),
             isLoadingFirstPage = paging.isLoadingFirstPage,
             isLoadingNextPage = paging.isLoadingNextPage,
             endReached = paging.endReached,
-            error = paging.error?.toSingleLineMessage(),
+            error = errorMessage,
         )
     }
 

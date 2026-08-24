@@ -9,7 +9,7 @@ import com.tamin.taminhamrah.data.local.entity.CityEntity
 import com.tamin.taminhamrah.data.local.entity.ProvinceEntity
 import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSource
 import com.tamin.taminhamrah.model.common.BeneficiaryDTO
-import com.tamin.taminhamrah.model.common.InsuranceTypeDto
+import com.tamin.taminhamrah.model.common.InsuranceTypeDTO
 import com.tamin.taminhamrah.model.common.JobTitleDTO
 import com.tamin.taminhamrah.model.common.MainServiceDto
 import com.tamin.taminhamrah.model.common.RecipientDTO
@@ -123,7 +123,7 @@ class CityProvinceRepositoryImplTest {
         override suspend fun getCitiesByProvince(query: ApiQueryParamDN): CityNameDto =
             throw NotImplementedError("not used by these tests")
 
-        override suspend fun getInsuranceTypes(query: ApiQueryParamDN): ListData<InsuranceTypeDto>? =
+        override suspend fun getInsuranceTypes(query: ApiQueryParamDN): ListData<InsuranceTypeDTO>? =
             throw NotImplementedError("not used by these tests")
 
         override suspend fun getMainMenu(versionCode: String, forceUpdate: Boolean): List<MainServiceDto> =

@@ -1,9 +1,9 @@
 package com.tamin.taminhamrah.data.mapper
 
 import com.tamin.taminhamrah.model.common.InsuranceTypeDN
-import com.tamin.taminhamrah.model.common.InsuranceTypeDto
+import com.tamin.taminhamrah.model.common.InsuranceTypeDTO
 
-internal fun InsuranceTypeDto.toDomain(): InsuranceTypeDN = InsuranceTypeDN(
+internal fun InsuranceTypeDTO.toDomain(): InsuranceTypeDN = InsuranceTypeDN(
     insuranceTypeCode = insuranceTypeCode,
     insuranceTypeDesc = insuranceTypeDesc,
     status = status,

@@ -31,7 +31,6 @@ data class HistoryObjectionStepperState(
     val hasSubmitted: Boolean = false,
     val error: String? = null,
 
-    // Step 1 — اطلاعات شعبه
     val provinces: ImmutableList<ProvincePR> = persistentListOf(),
     val cities: ImmutableList<CityPR> = persistentListOf(),
     val branches: ImmutableList<BranchDN> = persistentListOf(),
@@ -45,13 +44,11 @@ data class HistoryObjectionStepperState(
     val bottomSheetConfig: TaminBottomSheetConfig? = null,
     val bottomSheetTarget: HistoryObjectionBottomSheetTarget? = null,
 
-    // Step 2 — اطلاعات کارگاه
     val workshopId: String = "",
     val workshopName: String = "",
     val employerName: String = "",
     val workshopAddress: String = "",
 
-    // Step 3 — اطلاعات کارکرد
     val startDateLabel: String = "",
     val startDateTimestamp: Long? = null,
     val endDateLabel: String = "",

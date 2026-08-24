@@ -157,7 +157,7 @@ import taminx.core.core_ui.orotez_protez_submit_success_title
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
-import com.tamin.taminhamrah.ui.components.TaminBackStepButton
+import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import taminx.core.core_ui.ic_branch
 import taminx.core.core_ui.ic_check
 import taminx.core.core_ui.ic_check_label
@@ -645,7 +645,15 @@ private fun OrotezProtezInsuredInfoStep(
                 .navigationBarsPadding(),
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            TaminBackStepButton(onClick = onBack)
+            TaminTopAppBarButton(
+                icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                contentDescription = null,
+                onClick = onBack,
+                bordered = true,
+                containerColor = colors.bgSurface,
+                contentColor = colors.textPrimary,
+                borderColor = colors.border,
+            )
             LoadingButton(
                 modifier = Modifier.weight(1f),
                 text = stringResource(Res.string.orotez_protez_confirm_and_continue),
@@ -738,7 +746,15 @@ private fun OrotezProtezDocumentsStep(
                 .navigationBarsPadding(),
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            TaminBackStepButton(onClick = onBack)
+            TaminTopAppBarButton(
+                icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                contentDescription = null,
+                onClick = onBack,
+                bordered = true,
+                containerColor = colors.bgSurface,
+                contentColor = colors.textPrimary,
+                borderColor = colors.border,
+            )
             LoadingButton(
                 modifier = Modifier.weight(1f),
                 text = stringResource(Res.string.orotez_protez_submit_request),

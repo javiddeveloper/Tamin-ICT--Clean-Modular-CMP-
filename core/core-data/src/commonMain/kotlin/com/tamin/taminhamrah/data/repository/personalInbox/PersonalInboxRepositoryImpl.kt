@@ -66,7 +66,7 @@ internal class PersonalInboxRepositoryImpl(
         } catch (e: Exception) {
             val cached = if (isFirstPage) personalInboxDao.getInboxItems().first() else emptyList()
             if (cached.isEmpty()) throw e
-            PageDN(items = cached.map { it.toDomain() }, total = cached.size)
+            PageDN(items = cached.map { it.toDomain() }, total = null)
         }
         emit(page)
     }

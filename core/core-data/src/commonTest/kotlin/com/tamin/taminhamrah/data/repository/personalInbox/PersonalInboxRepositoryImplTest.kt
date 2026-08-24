@@ -21,6 +21,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNull
 
 class PersonalInboxRepositoryImplTest {
 
@@ -158,7 +159,7 @@ class PersonalInboxRepositoryImplTest {
         repository.getInboxItemsPage(ApiQueryParamDN(page = 1, start = 0, limit = 10)).test {
             val page = awaitItem()
             assertEquals(listOf(1L), page.items.map { it.id })
-            assertEquals(1, page.total)
+            assertNull(page.total)
             awaitComplete()
         }
     }

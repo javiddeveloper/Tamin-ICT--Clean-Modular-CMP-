@@ -360,7 +360,10 @@ class HistoryObjectionStepperViewModel(
         try {
             emitAll(merge(loadProvinces(), loadInsuranceTypes()))
             if (editRequestNumber != null) {
-                loadEditModeData(editRequestNumber, editRowIndex)?.let { emit(it) }
+                loadEditModeData(editRequestNumber, editRowIndex)?.let { editData ->
+                    emit(editData)
+                    emitAll(loadEditModeCitiesAndBranches(editData.provinceCode, editData.cityCode))
+                }
             }
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
@@ -376,6 +379,33 @@ class HistoryObjectionStepperViewModel(
     private fun loadInsuranceTypes(): Flow<PartialState> = flow {
         val insuranceTypes = getInsuranceTypesUseCase().first().toInsuranceTypePresentation()
         emit(PartialState.InsuranceTypesLoaded(insuranceTypes.toPersistentList()))
+    }
+
+    private fun loadEditModeCitiesAndBranches(provinceCode: String?, cityCode: String?): Flow<PartialState> = flow {
+        if (provinceCode != null) {
+            emit(PartialState.CitiesLoading(true))
+            try {
+                getCitiesByProvinceUseCase(provinceCode).collect { cities ->
+                    emit(PartialState.CitiesLoaded(cities.toCityPresentation().toPersistentList()))
+                }
+            } catch (e: Exception) {
+                emit(PartialState.Error(e.toSingleLineMessage()))
+            } finally {
+                emit(PartialState.CitiesLoading(false))
+            }
+        }
+        if (cityCode != null) {
+            emit(PartialState.BranchesLoading(true))
+            try {
+                getBranchesUseCase(cityCode).collect { branches ->
+                    emit(PartialState.BranchesLoaded(branches.toPersistentList()))
+                }
+            } catch (e: Exception) {
+                emit(PartialState.Error(e.toSingleLineMessage()))
+            } finally {
+                emit(PartialState.BranchesLoading(false))
+            }
+        }
     }
 
     private suspend fun loadEditModeData(requestNumber: String, rowIndex: String?): PartialState.EditModeDataLoaded? {
