@@ -56,7 +56,7 @@ class IssuanceCertificateViewModel(
             is IssuanceCertificateIntent.SubmitRequest -> handleSubmitRequest()
             is IssuanceCertificateIntent.DismissSuccessDialog -> flow {
                 emit(PartialState.ShowSuccessDialog(false))
-                sendEvent(IssuanceCertificateEvent.NavigateBack)
+                sendEvent(IssuanceCertificateEvent.NavigateHome)
             }
         }
 

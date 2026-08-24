@@ -88,5 +88,5 @@ sealed interface IssuanceCertificateIntent {
 
 sealed interface IssuanceCertificateEvent {
     data class ShowToast(val message: String) : IssuanceCertificateEvent
-    data object NavigateBack : IssuanceCertificateEvent
+    data object NavigateHome : IssuanceCertificateEvent
 }

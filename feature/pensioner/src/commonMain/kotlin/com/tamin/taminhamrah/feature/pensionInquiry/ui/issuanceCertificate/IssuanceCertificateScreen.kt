@@ -106,13 +106,14 @@ import taminx.core.core_ui.issuance_certificate_success_title
 @Composable
 fun IssuanceCertificateScreen(
     onBack: () -> Unit,
+    onGoHome: () -> Unit,
     viewModel: IssuanceCertificateViewModel = koinViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
 
     HandleIssuanceCertificateEvents(
         events = viewModel.events,
-        onNavigateBack = onBack,
+        onNavigateHome = onGoHome,
     )
 
     IssuanceCertificateContent(
@@ -165,11 +166,11 @@ fun IssuanceCertificateScreen(
 @Composable
 private fun HandleIssuanceCertificateEvents(
     events: Flow<IssuanceCertificateEvent>,
-    onNavigateBack: () -> Unit,
+    onNavigateHome: () -> Unit,
 ) {
     events.collectWithLifecycleAware { event ->
         when (event) {
-            is IssuanceCertificateEvent.NavigateBack -> onNavigateBack()
+            is IssuanceCertificateEvent.NavigateHome -> onNavigateHome()
             is IssuanceCertificateEvent.ShowToast -> Unit
         }
     }
