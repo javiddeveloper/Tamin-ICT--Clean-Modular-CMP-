@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
@@ -62,6 +63,12 @@ internal fun ActiveRelationHeader(
     val topBarGradient =
         remember(isDark) { Brush.horizontalGradient(taminColors.profileGradientStops) }
 
+    // Trims the font's built-in leading above/below each line so the status badge and the
+    // stats line beneath it sit close together instead of the extra line-height padding.
+    val trimmedLineHeight = remember {
+        LineHeightStyle(alignment = LineHeightStyle.Alignment.Center, trim = LineHeightStyle.Trim.Both)
+    }
+
     // Title fades out and the status text fades in over the same title-row spot, so
     // scrolling reads as the status taking over the title's place rather than two
     // unrelated labels swapping. Sequential (not overlapping) so the RTL glyphs never
@@ -76,8 +83,8 @@ internal fun ActiveRelationHeader(
             .fillMaxWidth()
             .clip(
                 RoundedCornerShape(
-                    bottomEnd = CornerRadius.chip,
-                    bottomStart = CornerRadius.chip
+                    bottomEnd = 40.dp,
+                    bottomStart = 40.dp
                 )
             )
             .background(taminTopAppBarGradient(taminColors.profileGradientStops)),
@@ -87,6 +94,7 @@ internal fun ActiveRelationHeader(
             title = title,
             centerTitle = true,
             background = topBarGradient,
+            bottomPadding = Spacing.none,
             titleContent = {
                 Box(modifier = Modifier.fillMaxWidth()) {
                     Text(
@@ -112,6 +120,7 @@ internal fun ActiveRelationHeader(
             },
             navigationIcon = {
                 TaminTopAppBarButton(
+                    bordered = true,
                     icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                     contentDescription = null,
                     onClick = onBackClicked,
@@ -143,16 +152,10 @@ internal fun ActiveRelationHeader(
                 .padding(bottom = Spacing.xl),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(Spacing.md))
-
             AnimatedRingHeaderIcon(
                 icon = vectorResource(Res.drawable.ic_communication)
             )
-
-            Spacer(modifier = Modifier.height(Spacing.sm))
-
             Row(
-                modifier = Modifier.padding(bottom = Spacing.xs),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
@@ -166,7 +169,7 @@ internal fun ActiveRelationHeader(
                 Spacer(Modifier.width(4.dp))
                 Text(
                     text = statusText,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleMedium.copy(lineHeightStyle = trimmedLineHeight),
                     fontWeight = FontWeight.Bold,
                     color = statusColor
                 )
@@ -175,10 +178,11 @@ internal fun ActiveRelationHeader(
             val activeText = stringResource(Res.string.active_relation_header_active_count, activeCount.toString().toPersianDigits())
             val inactiveText = stringResource(Res.string.active_relation_header_inactive_count, inactiveCount.toString().toPersianDigits())
             val checkTimeText = stringResource(Res.string.active_relation_header_check_time, lastCheckTime)
+            Spacer(modifier = Modifier.height(Spacing.sm))
 
             Text(
                 text = "$activeText · $inactiveText · $checkTimeText",
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodySmall.copy(lineHeightStyle = trimmedLineHeight),
                 color = taminColors.txtNatProfile
             )
         }
