@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.data.local.entity.CityEntity
 import com.tamin.taminhamrah.data.local.entity.ProvinceEntity
 import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSource
 import com.tamin.taminhamrah.model.common.BeneficiaryDTO
+import com.tamin.taminhamrah.model.common.InsuranceTypeDTO
 import com.tamin.taminhamrah.model.common.JobTitleDTO
 import com.tamin.taminhamrah.model.common.MainServiceDto
 import com.tamin.taminhamrah.model.common.RecipientDTO
@@ -117,6 +118,22 @@ private class FakeCityProvinceDao(
 
     override fun getCitiesByProvinceCode(provinceCode: String): Flow<List<CityEntity>> =
         cityRows.map { all -> all.filter { it.provinceCode == provinceCode } }
+
+    override suspend fun upsertCities(cities: List<CityEntity>) {
+        cities.forEach { upsertCity(it) }
+    }
+
+    override suspend fun clearCitiesByProvinceCode(provinceCode: String) {
+        cityRows.value = cityRows.value.filterNot { it.provinceCode == provinceCode }
+    }
+
+    override suspend fun upsertProvinces(provinces: List<ProvinceEntity>) {
+        provinces.forEach { upsertProvince(it) }
+    }
+
+    override suspend fun clearProvinces() {
+        provinceRows.value = emptyList()
+    }
 }
 
 private class FakeCommonRemoteDataSource(
@@ -134,6 +151,13 @@ private class FakeCommonRemoteDataSource(
         error?.let { throw it }
         return CityNameDto(list = cities, total = cities.size)
     }
+
+    override suspend fun getCitiesByProvince(query: ApiQueryParamDN): CityNameDto {
+        error?.let { throw it }
+        return CityNameDto(list = cities, total = cities.size)
+    }
+
+    override suspend fun getInsuranceTypes(query: ApiQueryParamDN): ListData<InsuranceTypeDTO>? = unused()
 
     override suspend fun getMainMenu(versionCode: String, forceUpdate: Boolean): List<MainServiceDto> = unused()
     override suspend fun getBeneficiary(query: ApiQueryParamDN): ListData<BeneficiaryDTO> = unused()
