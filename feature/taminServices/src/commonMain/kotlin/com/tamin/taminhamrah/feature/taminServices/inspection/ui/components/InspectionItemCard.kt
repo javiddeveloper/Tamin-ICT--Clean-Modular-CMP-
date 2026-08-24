@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.taminServices.inspection.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -29,6 +30,7 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.model.InspectionPerformedPR
 import com.tamin.taminhamrah.ui.components.CopyIconButton
@@ -42,6 +44,7 @@ import com.tamin.taminhamrah.ui.components.rememberCopyAction
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.CustomChip
 import com.tamin.taminhamrah.ui.components.toast.AppToastHost
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -114,16 +117,18 @@ internal fun InspectionItemCard(
                 modifier = Modifier.weight(1f),
             )
             if (item.isObjectable) {
-                StatusPill(
+                CustomChip(
                     text = stringResource(Res.string.inspection_status_objectable),
                     containerColor = colors.greenBg,
-                    contentColor = colors.greenText,
+                    textColor = colors.greenText,
+                    border = BorderStroke(width = 1.dp, color = colors.border)
                 )
             } else {
-                StatusPill(
+                CustomChip(
                     text = stringResource(Res.string.inspection_status_objection_expired),
-                    containerColor = colors.chipBg,
-                    contentColor = colors.textMuted,
+                    containerColor = colors.bgPage,
+                    textColor = colors.textMuted,
+                    border = BorderStroke(width = 1.dp, color = colors.border)
                 )
             }
         }
@@ -218,7 +223,7 @@ internal fun InspectionItemCard(
                 iconModifier = Modifier.graphicsLayer { rotationZ = rotation.value },
                 containerColor = colors.bgPage,
                 borderColor = Color.Transparent,
-                contentColor = colors.teal,
+                contentColor = colors.blueText,
                 iconPosition = IconPosition.Start,
                 modifier = Modifier.weight(1f),
             )
@@ -234,10 +239,12 @@ internal fun InspectionItemCard(
                 )
             } else {
                 TaminOutlinedButton(
+                    textStyle = MaterialTheme.typography.titleSmall,
+                    contentColor = colors.textMuted,
                     text = stringResource(Res.string.inspection_download_report_short),
                     onClick = { onDownloadReportClicked(item.inspectionNo) },
                     icon = vectorResource(Res.drawable.ic_tamin_download),
-                    iconPosition = IconPosition.Start,
+                    iconPosition = IconPosition.End,
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -276,13 +283,13 @@ private fun InfoBox(
             if (numeric) {
                 NumericText(
                     text = value,
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
                     color = colors.textPrimary,
                 )
             } else {
                 Text(
                     text = value,
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
                     color = colors.textPrimary,
                 )
             }
@@ -302,9 +309,9 @@ private fun InfoBox(
 private fun DashedDivider(
     color: Color,
     modifier: Modifier = Modifier,
-    thickness: androidx.compose.ui.unit.Dp = 1.dp,
-    dashLength: androidx.compose.ui.unit.Dp = 5.dp,
-    gapLength: androidx.compose.ui.unit.Dp = 5.dp,
+    thickness: Dp = 1.dp,
+    dashLength: Dp = 5.dp,
+    gapLength: Dp = 5.dp,
 ) {
     Canvas(modifier = modifier.fillMaxWidth().height(thickness)) {
         val dashPx = dashLength.toPx()
