@@ -12,7 +12,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import org.koin.compose.viewmodel.koinViewModel
-import com.tamin.taminhamrah.feature.pensionInquiry.ui.issuanceCertificate.contract.IssuanceCertificateIntent
 
 @Composable
 fun IssuanceCertificateScreen(

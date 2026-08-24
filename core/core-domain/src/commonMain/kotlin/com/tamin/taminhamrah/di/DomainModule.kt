@@ -58,6 +58,7 @@ import com.tamin.taminhamrah.useCases.orotezProtez.SaveShortTermOrthosisUseCase
 import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
 import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.GetStatusCertificateReportUseCase
+import com.tamin.taminhamrah.useCases.user.GetWageCertificateReportUseCase
 import com.tamin.taminhamrah.useCases.user.GetRecipientsUseCase
 import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
@@ -212,6 +213,7 @@ val domainModule = module {
     factoryOf(::GetInsuredActiveBranchUseCase)
     factoryOf(::GetRelationTaminAllUseCase)
     factoryOf(::GetStatusCertificateReportUseCase)
+    factoryOf(::GetWageCertificateReportUseCase)
     factoryOf(::GetRecipientsUseCase)
     factoryOf(::GetElectronicFileUseCase)
     factoryOf(::DownloadDocumentUseCase)
