@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.ui.toparea
 
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.spring
 import androidx.compose.runtime.Stable
@@ -118,6 +119,6 @@ class TopAreaState internal constructor(
         /** Below this fling velocity, a release reads as "let go", not as a flick either way. */
         const val FlingThreshold = 200f
 
-        val SnapSpec = spring<Float>(dampingRatio = 0.6f, stiffness = 320f)
+        val SnapSpec = spring<Float>(stiffness = Spring.StiffnessLow)
     }
 }
