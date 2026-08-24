@@ -19,7 +19,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.tamin.taminhamrah.feature.historyobjection.ui.stepper.contract.HistoryObjectionStepperIntent
 import com.tamin.taminhamrah.feature.historyobjection.ui.stepper.contract.HistoryObjectionStepperState
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
-import com.tamin.taminhamrah.ui.components.TaminJalaliDatePickerBottomSheet
 import com.tamin.taminhamrah.ui.theme.Spacing
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -43,7 +42,7 @@ fun RecordInfoStep(
     val datePlaceholder = stringResource(Res.string.history_objection_date_placeholder)
 
     if (showStartDatePicker) {
-        TaminJalaliDatePickerBottomSheet(
+        TaminJalaliDatePicker(
             title = stringResource(Res.string.history_objection_work_start_date_label),
             onDismiss = { showStartDatePicker = false },
             onConfirm = { year, month, day ->
@@ -53,7 +52,7 @@ fun RecordInfoStep(
         )
     }
     if (showEndDatePicker) {
-        TaminJalaliDatePickerBottomSheet(
+        TaminJalaliDatePicker(
             title = stringResource(Res.string.history_objection_work_end_date_label),
             onDismiss = { showEndDatePicker = false },
             onConfirm = { year, month, day ->

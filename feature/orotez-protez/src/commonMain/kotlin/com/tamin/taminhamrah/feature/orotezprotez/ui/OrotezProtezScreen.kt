@@ -72,13 +72,11 @@ import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezOption
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezPicker
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezUiState
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.bytesOrNull
-import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.LoadingButton
-import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
 import com.tamin.taminhamrah.ui.components.PickerRow
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.StepIndicator

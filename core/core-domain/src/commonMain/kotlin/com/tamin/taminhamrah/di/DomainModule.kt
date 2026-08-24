@@ -17,7 +17,6 @@ import com.tamin.taminhamrah.useCases.common.GetBeneficiaryUseCase
 import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
 import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
 import com.tamin.taminhamrah.useCases.common.GetCitiesByProvinceUseCase
-import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
 import com.tamin.taminhamrah.useCases.common.GetInsuranceTypesUseCase
 import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
 import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase

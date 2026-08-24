@@ -12,7 +12,7 @@ internal object CityByProvinceQuery {
         limit = 200,
         filters = listOf(
             ApiFilterDN(
-                property = FilterProperty.CITY_LIST_PROVINCE_CODE,
+                property = FilterProperty.PROVINCE_CODE_CITY,
                 operator = FilterOperator.EQ,
                 value = provinceCode,
             ),
