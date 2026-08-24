@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tamin.taminhamrah.feature.pensionSurvivor.ui.components.DeceasedStep
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.components.RulesStep
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.PensionSurvivorEvent
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.PensionSurvivorIntent
@@ -268,7 +269,10 @@ private fun PensionSurvivorContent(
                         state = state,
                         onIntent = onIntent,
                     )
-                    PensionSurvivorStep.Deceased -> StepPlaceholder(stepTitle = step2Title)
+                    PensionSurvivorStep.Deceased -> DeceasedStep(
+                        state = state,
+                        onIntent = onIntent,
+                    )
                     PensionSurvivorStep.Survivors -> StepPlaceholder(stepTitle = step3Title)
                     PensionSurvivorStep.Final -> StepPlaceholder(stepTitle = step4Title)
                 }

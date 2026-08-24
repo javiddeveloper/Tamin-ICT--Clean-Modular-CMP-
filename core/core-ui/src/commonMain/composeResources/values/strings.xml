@@ -659,6 +659,12 @@
     <string name="pension_survivor_next_step">مرحله بعد</string>
     <string name="pension_survivor_todo_step">TODO step: %1$s</string>
     <string name="pension_survivor_rules_unavailable">فایل ضوابط و مقررات هنوز در این نسخه متصل نشده است.</string>
+    <string name="pension_survivor_deceased_death_date">تاریخ فوت</string>
+    <string name="pension_survivor_deceased_branch">شعبه</string>
+    <string name="pension_survivor_deceased_documents_title">مدارک متوفی</string>
+    <string name="pension_survivor_deceased_death_certificate">گواهی فوت</string>
+    <string name="pension_survivor_deceased_id_pages">صفحات شناسنامه</string>
+    <string name="pension_survivor_soon">به‌زودی</string>
 
     <string name="picker_relationship_title">انتخاب نسبت خانوادگی</string>
     <string name="picker_birth_place_title">انتخاب محل تولد</string>
