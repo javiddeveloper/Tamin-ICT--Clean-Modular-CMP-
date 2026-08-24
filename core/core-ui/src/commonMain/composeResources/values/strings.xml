@@ -700,6 +700,7 @@
     <string name="bs_family_cancer">سابقه ابتلا به سرطان در خانواده</string>
     <string name="bs_province">استان</string>
     <string name="bs_city">شهر</string>
+    <string name="bs_branch">شعبه تأمین اجتماعی</string>
     <string name="bs_blood_group">گروه خونی</string>
     <string name="bs_smoking_addiction">آیا از دخانیات استفاده می‌کنید؟</string>
     <string name="bs_drug_addiction">آیا اعتیاد دارید؟</string>
@@ -797,6 +798,9 @@
     <string name="orotez_protez_document_pick_read_error">خطا در خواندن فایل انتخاب‌شده.</string>
     <string name="orotez_protez_document_validation_min_count">حداقل باید ۲ مدرک بارگذاری شود.</string>
     <string name="orotez_protez_document_validation_required">بارگذاری «نسخه تجویز پزشک» و «فاکتور خرید» الزامی است.</string>
+    <string name="picker_loading">در حال بارگذاری...</string>
+    <string name="picker_select_hint">انتخاب کنید</string>
+    <string name="picker_select_previous_first">ابتدا مورد قبلی را انتخاب کنید</string>
 
     <!-- ===================== Pension Status Inquiry ===================== -->
     <string name="pension_status_inquiry_title">استعلام وضعیت مستمری</string>
@@ -815,4 +819,28 @@
     <string name="pension_status_empty_subtitle">وضعیت مستمری برای این کاربر ثبت نشده است</string>
     <string name="pension_status_send_success_title">ارسال گواهی</string>
     <string name="pension_status_send_success_desc">درخواست گواهی با موفقیت ثبت شد و در صندوق شخصی شما قابل مشاهده است.</string>
+    <!-- کارگاه‌های کارفرما -->
+    <string name="workshops_title">کارگاه‌های کارفرما</string>
+    <string name="workshops_filter_workshop_id">کد کارگاه</string>
+    <string name="workshops_filter_status">وضعیت کارگاه</string>
+    <string name="workshops_search_action">جستجوی کارگاه‌ها</string>
+    <string name="workshops_empty_title">هیچ کارگاهی یافت نشد</string>
+    <string name="workshops_empty_subtitle">فیلترها را تغییر دهید و دوباره جستجو کنید.</string>
+    <string name="workshops_value_unknown">نامشخص</string>
+    <string name="workshops_card_employer">کارفرما</string>
+    <string name="workshops_card_branch">شعبه</string>
+    <string name="workshops_actions_title">جزئیات و عملیات</string>
+    <string name="workshops_action_payment_sheets">لیست برگ پرداخت</string>
+    <string name="workshops_action_debit_list">لیست بدهی کارگاه</string>
+    <string name="workshops_action_debt_inquiry">استعلام بدهی کارگاه</string>
+    <string name="workshops_action_objection">اعتراض به بدهی</string>
+    <string name="workshops_action_insured_registration">نام نویسی غیرحضوری بیمه شده</string>
+    <string name="workshops_action_article16">رسیدگی به بدهی ماده ۱۶</string>
+    <string name="workshops_action_members">کارکنان</string>
+    <string name="workshops_action_stakeholders">ذینفعان</string>
+    <string name="workshops_status_active">فعال</string>
+    <string name="workshops_status_semi_active">نیمه فعال</string>
+    <string name="workshops_status_inactive">غیرفعال</string>
+    <string name="workshops_status_any">همه وضعیت‌ها</string>
+    <string name="bs_workshop_status">وضعیت کارگاه</string>
 </resources>
