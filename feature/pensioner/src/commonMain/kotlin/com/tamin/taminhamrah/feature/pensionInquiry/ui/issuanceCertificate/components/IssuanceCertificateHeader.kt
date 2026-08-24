@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Payments
@@ -67,14 +68,16 @@ internal fun IssuanceCertificateHeader(
             xOffset = 260.dp,
             yOffset = (-150).dp
         )
-        Spacer(Modifier.height(Spacing.smPlus))
-        AnimatedRingHeaderIcon(icon = Icons.Filled.Payments)
-        Spacer(Modifier.height(Spacing.sm))
-        Text(
-            text = stringResource(Res.string.issuance_certificate_subtitle),
-            style = MaterialTheme.typography.labelLarge,
-            color = taminColors.textHeaderSubtitle,
-        )
-        Spacer(Modifier.height(Spacing.lg))
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.offset(y = (-28).dp),
+        ) {
+            AnimatedRingHeaderIcon(icon = Icons.Filled.Payments)
+            Text(
+                text = stringResource(Res.string.issuance_certificate_subtitle),
+                style = MaterialTheme.typography.labelLarge,
+                color = taminColors.textHeaderSubtitle,
+            )
+        }
     }
 }
