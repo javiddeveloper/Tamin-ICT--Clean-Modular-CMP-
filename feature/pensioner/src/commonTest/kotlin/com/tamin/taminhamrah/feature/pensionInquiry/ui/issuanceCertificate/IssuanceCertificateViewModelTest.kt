@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.feature.pensionInquiry.ui.issuanceCertificate
 import app.cash.turbine.test
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.issuanceCertificate.contract.IssuanceCertificateEvent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.issuanceCertificate.contract.IssuanceCertificateIntent
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.issuanceCertificate.contract.IssuanceCertificateStep
 import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDN
 import com.tamin.taminhamrah.model.bankAccount.BankAccountDN
 import com.tamin.taminhamrah.model.certificate.RecipientDN
@@ -42,6 +43,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -83,6 +85,7 @@ class IssuanceCertificateViewModelTest {
     fun whenInit_loadsAndSelectsFirstPensionerId() = runTest(testDispatcher) {
         pensionRepository.pensionIdResult = listOf(PensionIdDN("111"), PensionIdDN("222"))
         viewModel = buildViewModel()
+        advanceUntilIdle()
 
         viewModel.uiState.test {
             val state = expectMostRecentItem()
@@ -99,6 +102,7 @@ class IssuanceCertificateViewModelTest {
             RecipientDN(recipientCode = "001", recipientName = "بانک رفاه")
         )
         viewModel = buildViewModel()
+        advanceUntilIdle()
 
         viewModel.sendIntent(IssuanceCertificateIntent.ShowRecipientsSheet)
 
@@ -115,6 +119,7 @@ class IssuanceCertificateViewModelTest {
     fun whenSubmitWithoutRequiredFields_showsValidationErrors() = runTest(testDispatcher) {
         pensionRepository.pensionIdResult = emptyList()
         viewModel = buildViewModel()
+        advanceUntilIdle()
 
         viewModel.sendIntent(IssuanceCertificateIntent.SubmitRequest)
 
@@ -135,6 +140,7 @@ class IssuanceCertificateViewModelTest {
         )
         userRepository.wageCertificateReportResult = "OK"
         viewModel = buildViewModel()
+        advanceUntilIdle()
 
         viewModel.sendIntent(IssuanceCertificateIntent.ShowRecipientsSheet)
         viewModel.sendIntent(
@@ -162,6 +168,7 @@ class IssuanceCertificateViewModelTest {
         userRepository.wageCertificateShouldThrow = true
         userRepository.wageCertificateError = RuntimeException("failed")
         viewModel = buildViewModel()
+        advanceUntilIdle()
 
         viewModel.sendIntent(IssuanceCertificateIntent.ShowRecipientsSheet)
         viewModel.sendIntent(
@@ -176,6 +183,73 @@ class IssuanceCertificateViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
         assertEquals(false, viewModel.uiState.value.showSuccessDialog)
+    }
+
+    @Test
+    fun whenGoToNextStepWithMissingFields_staysOnInfoStepWithErrors() = runTest(testDispatcher) {
+        pensionRepository.pensionIdResult = emptyList()
+        viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        viewModel.sendIntent(IssuanceCertificateIntent.GoToNextStep)
+
+        viewModel.uiState.test {
+            val state = expectMostRecentItem()
+            assertEquals(IssuanceCertificateStep.Info, state.currentStep)
+            assertEquals("شماره مستمری را انتخاب کنید", state.pensionerIdError)
+            assertEquals("گیرنده را انتخاب کنید", state.recipientError)
+            assertEquals("نام شعبه را وارد کنید", state.branchNameError)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenGoToNextStepWithValidFields_advancesToConfirmStep() = runTest(testDispatcher) {
+        pensionRepository.pensionIdResult = listOf(PensionIdDN("111"))
+        userRepository.recipientsResult = listOf(
+            RecipientDN(recipientCode = "001", recipientName = "بانک رفاه")
+        )
+        viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        viewModel.sendIntent(IssuanceCertificateIntent.ShowRecipientsSheet)
+        viewModel.sendIntent(
+            IssuanceCertificateIntent.SelectRecipient(RecipientPR(code = "001", name = "بانک رفاه"))
+        )
+        viewModel.sendIntent(IssuanceCertificateIntent.ChangeBranchName("مرکزی"))
+        viewModel.sendIntent(IssuanceCertificateIntent.GoToNextStep)
+
+        viewModel.uiState.test {
+            val state = expectMostRecentItem()
+            assertEquals(IssuanceCertificateStep.Confirm, state.currentStep)
+            assertEquals(false, state.showSuccessDialog)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenGoToPreviousStep_returnsToInfoStep() = runTest(testDispatcher) {
+        pensionRepository.pensionIdResult = listOf(PensionIdDN("111"))
+        userRepository.recipientsResult = listOf(
+            RecipientDN(recipientCode = "001", recipientName = "بانک رفاه")
+        )
+        viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        viewModel.sendIntent(IssuanceCertificateIntent.ShowRecipientsSheet)
+        viewModel.sendIntent(
+            IssuanceCertificateIntent.SelectRecipient(RecipientPR(code = "001", name = "بانک رفاه"))
+        )
+        viewModel.sendIntent(IssuanceCertificateIntent.ChangeBranchName("مرکزی"))
+        viewModel.sendIntent(IssuanceCertificateIntent.GoToNextStep)
+        advanceUntilIdle()
+        viewModel.sendIntent(IssuanceCertificateIntent.GoToPreviousStep)
+
+        viewModel.uiState.test {
+            val state = expectMostRecentItem()
+            assertEquals(IssuanceCertificateStep.Info, state.currentStep)
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 }
 

@@ -47,6 +47,10 @@ class IssuanceCertificateViewModel(
             }
             is IssuanceCertificateIntent.SearchRecipients -> flow { emit(PartialState.SearchQueryChanged(intent.query)) }
             is IssuanceCertificateIntent.ChangeBranchName -> flow { emit(PartialState.BranchNameChanged(intent.name)) }
+            is IssuanceCertificateIntent.GoToNextStep -> handleGoToNextStep()
+            is IssuanceCertificateIntent.GoToPreviousStep -> flow {
+                emit(PartialState.GoToStep(IssuanceCertificateStep.Info))
+            }
             is IssuanceCertificateIntent.SubmitRequest -> handleSubmitRequest()
             is IssuanceCertificateIntent.DismissSuccessDialog -> flow {
                 emit(PartialState.ShowSuccessDialog(false))
@@ -85,30 +89,50 @@ class IssuanceCertificateViewModel(
         }
     }
 
-    private fun handleSubmitRequest(): Flow<PartialState> = flow {
-        val state = uiState.value
-        val pensionerId = state.selectedPensionerId
-        val recipient = state.selectedRecipient
-        val branchName = state.branchName
-
-        val pensionerIdError = if (pensionerId.isNullOrBlank()) "شماره مستمری را انتخاب کنید" else null
-        val recipientError = if (recipient == null) "گیرنده را انتخاب کنید" else null
-        val branchNameError = if (branchName.isBlank()) "نام شعبه را وارد کنید" else null
-
-        if (pensionerIdError != null || recipientError != null || branchNameError != null) {
-            emit(PartialState.ValidationFailed(pensionerIdError, recipientError, branchNameError))
+    private fun handleGoToNextStep(): Flow<PartialState> = flow {
+        val fieldErrors = validateFields()
+        if (fieldErrors != null) {
+            emit(fieldErrors)
             return@flow
         }
         emit(PartialState.ClearFieldErrors)
+        emit(PartialState.GoToStep(IssuanceCertificateStep.Confirm))
+    }
 
-        emit(PartialState.Submitting(true))
+    private fun validateFields(): PartialState.ValidationFailed? {
+        val state = uiState.value
+        val pensionerIdError = if (state.selectedPensionerId.isNullOrBlank()) {
+            "شماره مستمری را انتخاب کنید"
+        } else null
+        val recipientError = if (state.selectedRecipient == null) {
+            "گیرنده را انتخاب کنید"
+        } else null
+        val branchNameError = if (state.branchName.isBlank()) {
+            "نام شعبه را وارد کنید"
+        } else null
+
+        return if (pensionerIdError != null || recipientError != null || branchNameError != null) {
+            PartialState.ValidationFailed(pensionerIdError, recipientError, branchNameError)
+        } else null
+    }
+
+    private fun handleSubmitRequest(): Flow<PartialState> = flow {
+        val fieldErrors = validateFields()
+        if (fieldErrors != null) {
+            emit(fieldErrors)
+            emit(PartialState.GoToStep(IssuanceCertificateStep.Info))
+            return@flow
+        }
+
+        val state = uiState.value
         val filters = listOf(
-            ApiFilterDN(FilterProperty.PENSIONER_ID, pensionerId!!, FilterOperator.EQUAL),
-            ApiFilterDN(FilterProperty.RECIPIENT, recipient!!.code, FilterOperator.EQUAL),
+            ApiFilterDN(FilterProperty.PENSIONER_ID, state.selectedPensionerId!!, FilterOperator.EQUAL),
+            ApiFilterDN(FilterProperty.RECIPIENT, state.selectedRecipient!!.code, FilterOperator.EQUAL),
             ApiFilterDN(FilterProperty.TARGET, "", FilterOperator.EQUAL),
-            ApiFilterDN(FilterProperty.BRANCH_NAME, branchName, FilterOperator.EQUAL),
+            ApiFilterDN(FilterProperty.BRANCH_NAME, state.branchName, FilterOperator.EQUAL),
         )
 
+        emit(PartialState.Submitting(true))
         getWageCertificateReportUseCase(filters)
             .catch {
                 sendEvent(IssuanceCertificateEvent.ShowToast(it.toSingleLineMessage()))
@@ -127,6 +151,8 @@ class IssuanceCertificateViewModel(
         is PartialState.Loading -> currentState.copy(isLoading = partialState.isLoading)
         is PartialState.Submitting -> currentState.copy(isSubmitting = partialState.isSubmitting)
         is PartialState.Error -> currentState.copy(isLoading = false, error = partialState.message)
+
+        is PartialState.GoToStep -> currentState.copy(currentStep = partialState.step)
 
         is PartialState.PensionerIdsLoaded -> currentState.copy(pensionerIds = partialState.list)
         is PartialState.SelectedPensionerIdChanged -> currentState.copy(

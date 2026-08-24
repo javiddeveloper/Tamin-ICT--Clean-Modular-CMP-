@@ -819,6 +819,34 @@
     <string name="pension_status_empty_subtitle">وضعیت مستمری برای این کاربر ثبت نشده است</string>
     <string name="pension_status_send_success_title">ارسال گواهی</string>
     <string name="pension_status_send_success_desc">درخواست گواهی با موفقیت ثبت شد و در صندوق شخصی شما قابل مشاهده است.</string>
+    <!-- ===================== Issuance Wage Certificate ===================== -->
+    <string name="issuance_certificate_title">صدور گواهی حقوق</string>
+    <string name="issuance_certificate_subtitle">گواهی رسمی حقوق مستمری‌بگیران</string>
+    <string name="issuance_certificate_step_info">اطلاعات گواهی</string>
+    <string name="issuance_certificate_step_confirm">تأیید و ارسال</string>
+    <string name="issuance_certificate_info_title">اطلاعات گواهی</string>
+    <string name="issuance_certificate_pensioner_number_label">شماره مستمری</string>
+    <string name="issuance_certificate_recipient_placeholder">جهت ارائه به (دریافت‌کنندهٔ گواهی)</string>
+    <string name="issuance_certificate_branch_name_placeholder">نام شعبهٔ دریافت‌کنندهٔ گواهی</string>
+    <string name="issuance_certificate_disclaimer">گواهی حقوق با مهر سازمان تأمین اجتماعی صادر و در صندوق شخصی شما ذخیره می‌شود؛ نام نهاد دریافت‌کننده روی گواهی درج می‌گردد.</string>
+    <string name="issuance_certificate_next_step">مرحلهٔ بعد</string>
+    <string name="issuance_certificate_copy">کپی</string>
+    <string name="issuance_certificate_select_recipient_title">لطفاً نهاد دریافت‌کننده را انتخاب نمایید</string>
+    <string name="issuance_certificate_search_placeholder">جستجو</string>
+    <string name="issuance_certificate_recipients_empty">نتیجه‌ای یافت نشد</string>
+    <string name="issuance_certificate_confirm_title">تأیید اطلاعات گواهی</string>
+    <string name="issuance_certificate_confirm_description">اطلاعات زیر را بررسی و تأیید کنید.</string>
+    <string name="issuance_certificate_detail_pensioner_number">شماره مستمری</string>
+    <string name="issuance_certificate_detail_recipient">دریافت‌کننده</string>
+    <string name="issuance_certificate_detail_branch">نام شعبه</string>
+    <string name="issuance_certificate_submit_and_send">تأیید و ارسال</string>
+    <string name="issuance_certificate_success_title">ارسال موفق</string>
+    <string name="issuance_certificate_success_desc">گواهی حقوق با موفقیت صادر و به صندوق شخصی شما ارسال شد.</string>
+    <string name="issuance_certificate_success_confirm">متوجه شدم</string>
+    <string name="issuance_certificate_error_select_pensioner">شماره مستمری را انتخاب کنید</string>
+    <string name="issuance_certificate_error_select_recipient">گیرنده را انتخاب کنید</string>
+    <string name="issuance_certificate_error_enter_branch_name">نام شعبه را وارد کنید</string>
+
     <!-- کارگاه‌های کارفرما -->
     <string name="workshops_title">کارگاه‌های کارفرما</string>
     <string name="workshops_filter_workshop_id">کد کارگاه</string>

@@ -6,11 +6,18 @@ import com.tamin.taminhamrah.model.pension.PensionIdPR
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
+enum class IssuanceCertificateStep {
+    Info,
+    Confirm,
+}
+
 @Immutable
 data class IssuanceCertificateUiState(
     val isLoading: Boolean = false,
     val isSubmitting: Boolean = false,
     val error: String? = null,
+
+    val currentStep: IssuanceCertificateStep = IssuanceCertificateStep.Info,
 
     val pensionerIds: ImmutableList<PensionIdPR> = persistentListOf(),
     val selectedPensionerId: String? = null,
@@ -34,6 +41,8 @@ data class IssuanceCertificateUiState(
         data class Loading(val isLoading: Boolean) : PartialState
         data class Submitting(val isSubmitting: Boolean) : PartialState
         data class Error(val message: String?) : PartialState
+
+        data class GoToStep(val step: IssuanceCertificateStep) : PartialState
 
         data class PensionerIdsLoaded(val list: ImmutableList<PensionIdPR>) : PartialState
         data class SelectedPensionerIdChanged(val id: String?) : PartialState
@@ -68,6 +77,8 @@ sealed interface IssuanceCertificateIntent {
     data class SelectRecipient(val recipient: RecipientPR) : IssuanceCertificateIntent
     data class SearchRecipients(val query: String) : IssuanceCertificateIntent
     data class ChangeBranchName(val name: String) : IssuanceCertificateIntent
+    data object GoToNextStep : IssuanceCertificateIntent
+    data object GoToPreviousStep : IssuanceCertificateIntent
     data object SubmitRequest : IssuanceCertificateIntent
     data object DismissSuccessDialog : IssuanceCertificateIntent
 }
