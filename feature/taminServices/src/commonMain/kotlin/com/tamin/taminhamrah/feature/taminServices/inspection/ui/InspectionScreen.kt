@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionHeader
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionItemCard
+import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionListSkeleton
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.contract.InspectionEvent
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.contract.InspectionIntent
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.contract.InspectionUiState
@@ -141,7 +142,11 @@ internal fun InspectionScreen(
                 Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
             }
 
-            if (!uiState.isLoading && uiState.inspections.isEmpty()) {
+            if (uiState.isLoading && uiState.inspections.isEmpty()) {
+                item {
+                    InspectionListSkeleton()
+                }
+            } else if (uiState.inspections.isEmpty()) {
                 item {
                     EmptyStateMessage(
                         icon = Icons.Outlined.Assignment,
@@ -188,7 +193,7 @@ internal fun InspectionScreen(
             onIntent = {},
         )
 
-        if (uiState.isLoading) {
+        if (uiState.isLoading && uiState.inspections.isNotEmpty()) {
             LoadingStateOverlay()
         }
     }
