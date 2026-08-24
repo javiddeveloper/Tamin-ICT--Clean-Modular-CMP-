@@ -65,9 +65,13 @@ fun Modifier.topAreaScale(
 }
 
 /**
- * Fades a child out and shrinks it to zero size together as [state] folds, so it also stops
- * occupying layout space and can't be tapped once invisible -- for pieces that only belong to the
- * expanded top area (a summary card, a subtitle row).
+ * Fades a child out and shrinks its height to zero as [state] folds, so it also stops occupying
+ * layout space and can't be tapped once invisible -- for pieces that only belong to the expanded
+ * top area (a summary card, a subtitle row).
+ *
+ * Width is left untouched (unlike height) so a centered child doesn't get horizontally
+ * re-centered into a shrinking box as it folds -- that read as the child sliding sideways instead
+ * of fading in place.
  */
 fun Modifier.topAreaHide(
     state: TopAreaState,
@@ -76,7 +80,7 @@ fun Modifier.topAreaHide(
 ): Modifier = layout { measurable, constraints ->
     val placeable = measurable.measure(constraints)
     val visible = 1f - localProgress(state.progress, startProgress, endProgress)
-    layout((placeable.width * visible).roundToInt(), (placeable.height * visible).roundToInt()) {
+    layout(placeable.width, (placeable.height * visible).roundToInt()) {
         placeable.placeRelativeWithLayer(0, 0) { alpha = visible }
     }
 }
