@@ -3,7 +3,6 @@ package com.tamin.taminhamrah.feature.taminServices.occurrence.components.steps
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -14,28 +13,29 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.tooling.preview.Preview
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceErrorWrapper
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceSelectionBottomSheet
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceSheetOption
+import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceStepScaffold
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.Step5AccidentShimmerSkeleton
+import com.tamin.taminhamrah.feature.taminServices.occurrence.components.rememberFieldTouchState
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.AccidentStepState
+import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.MIN_DESCRIPTION_LENGTH
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceIntent
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceStep
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceUiState
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import com.tamin.taminhamrah.ui.components.TaminBottomActionBar
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.components.TaminJalaliTimePickerBottomSheet
 import com.tamin.taminhamrah.ui.components.TaminStyledTextField
 import com.tamin.taminhamrah.ui.components.TaminTextArea
-import com.tamin.taminhamrah.ui.components.topbars.TaminStepTopAppBar
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.PersianDateFormatter
@@ -51,6 +51,7 @@ import taminx.core.core_ui.occurrence_field_accident_time
 import taminx.core.core_ui.occurrence_field_accident_time_hint
 import taminx.core.core_ui.occurrence_field_description
 import taminx.core.core_ui.occurrence_field_description_hint
+import taminx.core.core_ui.occurrence_field_description_min_length_error
 import taminx.core.core_ui.occurrence_field_exact_location
 import taminx.core.core_ui.occurrence_field_exact_location_hint
 import taminx.core.core_ui.occurrence_next_step
@@ -76,6 +77,9 @@ internal fun Step5AccidentStep(
 ) {
     val taminColors = LocalTaminColors.current
     val step = uiState.accident
+
+    val descriptionTouch = rememberFieldTouchState()
+    val isDescriptionValid = step.description.trim().length >= MIN_DESCRIPTION_LENGTH
 
     if (uiState.dialogs.showAccidentDatePicker) {
         TaminJalaliDatePicker(
@@ -118,27 +122,18 @@ internal fun Step5AccidentStep(
         "6" to stringResource(Res.string.occurrence_outcome_none),
     )
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            TaminStepTopAppBar(
-                title = stringResource(Res.string.occurrence_step5_title),
-                onBackClicked = onBack,
-                onCloseClicked = onClose,
-                currentStep = uiState.stepNumber,
-                totalSteps = OccurrenceStep.entries.size,
-            )
-        },
-        bottomBar = {
-            TaminBottomActionBar(
-                primaryText = stringResource(Res.string.occurrence_next_step),
-                primaryEnabled = uiState.isStep5Valid && !uiState.isLoading && !uiState.isSubmitting,
-                onPrimaryClick = { onIntent(OccurrenceIntent.GoToNextStep) },
-                secondaryText = stringResource(Res.string.occurrence_prev_step),
-                onSecondaryClick = onBack,
-            )
-        },
-        contentWindowInsets = WindowInsets(0),
+    OccurrenceStepScaffold(
+        modifier = modifier,
+        title = stringResource(Res.string.occurrence_step5_title),
+        stepNumber = uiState.stepNumber,
+        totalSteps = OccurrenceStep.entries.size,
+        onBackClicked = onBack,
+        onCloseClicked = onClose,
+        primaryText = stringResource(Res.string.occurrence_next_step),
+        primaryEnabled = uiState.isStep5Valid && !uiState.isLoading && !uiState.isSubmitting,
+        onPrimaryClick = { onIntent(OccurrenceIntent.GoToNextStep) },
+        secondaryText = stringResource(Res.string.occurrence_prev_step),
+        onSecondaryClick = onBack,
     ) { padding ->
         OccurrenceErrorWrapper(
             isLoading = uiState.isLoading,
@@ -217,6 +212,7 @@ internal fun Step5AccidentStep(
 
                 Spacer(modifier = Modifier.height(Spacing.sm))
 
+                val showDescriptionError = descriptionTouch.touched && !isDescriptionValid
                 TaminTextArea(
                     value = step.description,
                     onValueChange = {
@@ -230,9 +226,14 @@ internal fun Step5AccidentStep(
                     },
                     label = stringResource(Res.string.occurrence_field_description),
                     placeholder = stringResource(Res.string.occurrence_field_description_hint),
+                    error = showDescriptionError,
+                    errorMessage = if (showDescriptionError) stringResource(Res.string.occurrence_field_description_min_length_error) else null,
                     maxLength = 500,
                     minLines = 5,
                     maxLines = 8,
+                    modifier = Modifier.onFocusChanged { focusState ->
+                        descriptionTouch.onFocusChanged(focusState.isFocused)
+                    },
                 )
 
                 if (step.description.isNotEmpty()) {

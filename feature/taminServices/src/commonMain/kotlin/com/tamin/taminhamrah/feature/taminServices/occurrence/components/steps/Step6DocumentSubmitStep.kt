@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,12 +14,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -33,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.InfoBanner
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceSelectionBottomSheet
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceSheetOption
+import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceStepScaffold
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.PersonInfoCard
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.PersonInfoGridItem
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.AccidentStepState
@@ -50,7 +50,6 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.StatusPill
-import com.tamin.taminhamrah.ui.components.TaminBottomActionBar
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminImageViewer
 import com.tamin.taminhamrah.ui.components.dashedOutline
@@ -61,7 +60,6 @@ import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.components.toast.AppToastHost
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
-import com.tamin.taminhamrah.ui.components.topbars.TaminStepTopAppBar
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -80,6 +78,7 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.error_file_read_fallback
 import taminx.core.core_ui.occurrence_add_document
 import taminx.core.core_ui.occurrence_camera_permission_denied
+import taminx.core.core_ui.occurrence_doc_format_error
 import taminx.core.core_ui.occurrence_doc_format_hint
 import taminx.core.core_ui.occurrence_doc_required_hint
 import taminx.core.core_ui.occurrence_documents_min_hint
@@ -98,8 +97,33 @@ import taminx.core.core_ui.occurrence_summary_person
 import taminx.core.core_ui.occurrence_summary_section
 import taminx.core.core_ui.occurrence_summary_transport
 import taminx.core.core_ui.occurrence_summary_workshop
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
+
+/** Matches OrotezProtezViewModel's document constraints — kept in sync since occurrence has no equivalent ViewModel-side check (see [handlePicked] doc). */
+private const val MAX_DOCUMENT_SIZE_BYTES = 2 * 1024 * 1024
+
+private fun isJpegFileName(fileName: String): Boolean {
+    val lower = fileName.lowercase()
+    return lower.endsWith(".jpg") || lower.endsWith(".jpeg")
+}
+
+/**
+ * Encodes off the composition/main thread instead of inline in a `remember` block — a multi-MB
+ * camera photo blocked the main thread the first time each card composed, most visibly right as
+ * the upload-success wave animation should play. Returns null (card shows its loading state)
+ * until the encode finishes.
+ */
+@OptIn(ExperimentalEncodingApi::class)
+@Composable
+private fun rememberBase64Thumbnail(bytes: ByteArray?): String? {
+    val state = produceState<String?>(initialValue = null, bytes) {
+        value = bytes?.let { withContext(Dispatchers.Default) { Base64.Default.encode(it) } }
+    }
+    return state.value
+}
 
 @OptIn(ExperimentalEncodingApi::class)
 @Composable
@@ -145,9 +169,20 @@ internal fun Step6DocumentSubmitStep(
             onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(pendingDocType = null)))
             return
         }
+        if (!isJpegFileName(file.name)) {
+            onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(pendingDocType = null)))
+            scope.launch {
+                toaster.error(getString(Res.string.occurrence_doc_format_error))
+            }
+            return
+        }
         scope.launch {
             try {
                 val bytes = file.readBytes()
+                if (bytes.size > MAX_DOCUMENT_SIZE_BYTES) {
+                    toaster.error(getString(Res.string.occurrence_doc_format_error))
+                    return@launch
+                }
                 onIntent(
                     OccurrenceIntent.UploadDocument(
                         typeId = docType.id,
@@ -175,28 +210,19 @@ internal fun Step6DocumentSubmitStep(
         }
     val cameraLauncher = rememberCameraPickerLauncher { file: PlatformFile? -> handlePicked(file) }
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            TaminStepTopAppBar(
-                title = stringResource(Res.string.occurrence_step6_title),
-                onBackClicked = onBack,
-                onCloseClicked = onClose,
-                currentStep = uiState.stepNumber,
-                totalSteps = OccurrenceStep.entries.size,
-            )
-        },
-        bottomBar = {
-            TaminBottomActionBar(
-                primaryText = stringResource(Res.string.occurrence_submit),
-                primaryEnabled = uiState.isStep6Valid && !uiState.isLoading && !uiState.isSubmitting,
-                isPrimaryLoading = uiState.isSubmitting,
-                onPrimaryClick = { onIntent(OccurrenceIntent.SubmitOccurrence) },
-                secondaryText = stringResource(Res.string.occurrence_prev_step),
-                onSecondaryClick = onBack,
-            )
-        },
-        contentWindowInsets = WindowInsets(0),
+    OccurrenceStepScaffold(
+        modifier = modifier,
+        title = stringResource(Res.string.occurrence_step6_title),
+        stepNumber = uiState.stepNumber,
+        totalSteps = OccurrenceStep.entries.size,
+        onBackClicked = onBack,
+        onCloseClicked = onClose,
+        primaryText = stringResource(Res.string.occurrence_submit),
+        primaryEnabled = uiState.isStep6Valid && !uiState.isLoading && !uiState.isSubmitting,
+        isPrimaryLoading = uiState.isSubmitting,
+        onPrimaryClick = { onIntent(OccurrenceIntent.SubmitOccurrence) },
+        secondaryText = stringResource(Res.string.occurrence_prev_step),
+        onSecondaryClick = onBack,
     ) { padding ->
         if (uiState.isLoading) {
             LoadingStateOverlay(modifier = Modifier.padding(padding))
@@ -245,8 +271,7 @@ internal fun Step6DocumentSubmitStep(
                         Spacer(modifier = Modifier.height(Spacing.md))
                         Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                             docsToShowNormally.forEach { doc ->
-                                val base64 =
-                                    remember(doc.bytes) { doc.bytes?.let { Base64.Default.encode(it) } }
+                                val base64 = rememberBase64Thumbnail(doc.bytes)
                                 TaminDocumentUploadCard(
                                     title = doc.typeName,
                                     state = TaminDocumentUploadState.Uploaded,
@@ -260,8 +285,7 @@ internal fun Step6DocumentSubmitStep(
                                 val typeName = newlyUploadedDoc?.typeName ?: pendingUploadTypeName
                                 val fileName = newlyUploadedDoc?.fileName ?: pendingUploadFileName
                                 val fileBytes = newlyUploadedDoc?.bytes ?: pendingUploadFileBytes
-                                val base64 =
-                                    remember(fileBytes) { fileBytes?.let { Base64.Default.encode(it) } }
+                                val base64 = rememberBase64Thumbnail(fileBytes)
                                 TaminDocumentUploadCard(
                                     title = typeName,
                                     state = TaminDocumentUploadState.Uploading,
@@ -399,12 +423,11 @@ internal fun Step6DocumentSubmitStep(
     }
 
     val targetPreviewDoc = previewDoc
-    val targetPreviewBytes = targetPreviewDoc?.bytes
-    if (targetPreviewDoc != null && targetPreviewBytes != null) {
-        val base64 = remember(targetPreviewBytes) { Base64.Default.encode(targetPreviewBytes) }
+    val targetPreviewBase64 = rememberBase64Thumbnail(targetPreviewDoc?.bytes)
+    if (targetPreviewDoc != null && targetPreviewBase64 != null) {
         TaminImageViewer(
             title = targetPreviewDoc.typeName,
-            url = base64,
+            url = targetPreviewBase64,
             onDismiss = { previewDoc = null },
         )
     }

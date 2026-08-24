@@ -5,7 +5,7 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.identity_gender_female
 import taminx.core.core_ui.identity_gender_male
 
-enum class Gender(
+enum class GenderPR(
     val code: String,
     val displayNameRes: StringResource,
     /** The legacy "occurence" submit endpoint's own gender scale (1 = male, 2 = female). */
@@ -15,7 +15,7 @@ enum class Gender(
     FEMALE("02", Res.string.identity_gender_female, 2);
 
     companion object {
-        fun fromCode(code: String?): Gender? =
+        fun fromCode(code: String?): GenderPR? =
             entries.find { it.code == code }
     }
 }

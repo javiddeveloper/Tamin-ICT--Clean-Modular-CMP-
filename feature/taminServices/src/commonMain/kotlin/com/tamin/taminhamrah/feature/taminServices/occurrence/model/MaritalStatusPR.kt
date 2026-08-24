@@ -5,7 +5,7 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.occurrence_field_marital_married
 import taminx.core.core_ui.occurrence_field_marital_single
 
-enum class MaritalStatus(
+enum class MaritalStatusPR(
     val code: String,
     val displayNameRes: StringResource
 ) {
@@ -13,7 +13,7 @@ enum class MaritalStatus(
     MARRIED("1", Res.string.occurrence_field_marital_married);
 
     companion object {
-        fun fromCode(code: String?): MaritalStatus? =
+        fun fromCode(code: String?): MaritalStatusPR? =
             entries.find { it.code == code }
     }
 }

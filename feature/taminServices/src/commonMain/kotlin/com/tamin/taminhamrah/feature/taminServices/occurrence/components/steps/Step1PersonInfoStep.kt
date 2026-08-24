@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,7 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -32,25 +30,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.InfoBanner
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceErrorWrapper
+import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceStepScaffold
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.Step1PersonInfoShimmerSkeleton
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.ErrorSource
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceIntent
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceStep
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceUiState
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.PersonInfoStepState
-import com.tamin.taminhamrah.feature.taminServices.occurrence.model.Gender
+import com.tamin.taminhamrah.feature.taminServices.occurrence.model.GenderPR
 import com.tamin.taminhamrah.feature.taminServices.occurrence.model.OccurrencePersonalInfoPR
 import com.tamin.taminhamrah.feature.taminServices.occurrence.model.UserInfoPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.NumericText
-import com.tamin.taminhamrah.ui.components.TaminBottomActionBar
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.components.TaminStyledTextField
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.taminSurface
-import com.tamin.taminhamrah.ui.components.topbars.TaminStepTopAppBar
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -107,26 +104,17 @@ internal fun Step1PersonInfoStep(
         )
     }
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            TaminStepTopAppBar(
-                title = stringResource(Res.string.occurrence_step1_title),
-                onBackClicked = onBack,
-                currentStep = uiState.stepNumber,
-                totalSteps = OccurrenceStep.entries.size,
-            )
-        },
-        bottomBar = {
-            TaminBottomActionBar(
-                primaryText = stringResource(Res.string.occurrence_next_step),
-                primaryEnabled = uiState.isStep1Valid && !uiState.isLoading && !uiState.isSubmitting,
-                onPrimaryClick = { onIntent(OccurrenceIntent.GoToNextStep) },
-                secondaryText = stringResource(Res.string.occurrence_prev_step),
-                onSecondaryClick = onBack,
-            )
-        },
-        contentWindowInsets = WindowInsets(0),
+    OccurrenceStepScaffold(
+        modifier = modifier,
+        title = stringResource(Res.string.occurrence_step1_title),
+        stepNumber = uiState.stepNumber,
+        totalSteps = OccurrenceStep.entries.size,
+        onBackClicked = onBack,
+        primaryText = stringResource(Res.string.occurrence_next_step),
+        primaryEnabled = uiState.isStep1Valid && !uiState.isLoading && !uiState.isSubmitting,
+        onPrimaryClick = { onIntent(OccurrenceIntent.GoToNextStep) },
+        secondaryText = stringResource(Res.string.occurrence_prev_step),
+        onSecondaryClick = onBack,
     ) { padding ->
         OccurrenceErrorWrapper(
             isLoading = uiState.isLoading,
@@ -283,7 +271,7 @@ private fun PersonInfoCard(
                 )
                 PersonInfoGridItem(
                     label = stringResource(Res.string.occurrence_field_gender),
-                    value = Gender.fromCode(info.genderCode)?.displayNameRes?.let { stringResource(it) }.orEmpty()
+                    value = GenderPR.fromCode(info.genderCode)?.displayNameRes?.let { stringResource(it) }.orEmpty()
                 )
 
                 PersonInfoGridItem(

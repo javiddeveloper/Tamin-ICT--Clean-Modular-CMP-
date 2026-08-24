@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -14,7 +13,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,6 +21,7 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.components.InfoBan
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceErrorWrapper
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceSelectionBottomSheet
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceSheetOption
+import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceStepScaffold
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.PersonInfoCard
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.PersonInfoGridItem
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.Step3JobDetailsShimmerSkeleton
@@ -31,15 +30,13 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.JobDetail
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceIntent
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceStep
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceUiState
-import com.tamin.taminhamrah.feature.taminServices.occurrence.model.MaritalStatus
+import com.tamin.taminhamrah.feature.taminServices.occurrence.model.MaritalStatusPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import com.tamin.taminhamrah.ui.components.TaminBottomActionBar
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.components.TaminStyledTextField
 import com.tamin.taminhamrah.ui.components.TaminTextArea
-import com.tamin.taminhamrah.ui.components.topbars.TaminStepTopAppBar
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toGenderLabel
@@ -94,27 +91,18 @@ internal fun Step3JobDetailsStep(
         )
     }
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            TaminStepTopAppBar(
-                title = stringResource(Res.string.occurrence_step3_title),
-                onBackClicked = onBack,
-                onCloseClicked = onClose,
-                currentStep = uiState.stepNumber,
-                totalSteps = OccurrenceStep.entries.size,
-            )
-        },
-        bottomBar = {
-            TaminBottomActionBar(
-                primaryText = stringResource(Res.string.occurrence_next_step),
-                primaryEnabled = uiState.isStep3Valid && !uiState.isLoading && !uiState.isSubmitting,
-                onPrimaryClick = { onIntent(OccurrenceIntent.GoToNextStep) },
-                secondaryText = stringResource(Res.string.occurrence_prev_step),
-                onSecondaryClick = onBack,
-            )
-        },
-        contentWindowInsets = WindowInsets(0),
+    OccurrenceStepScaffold(
+        modifier = modifier,
+        title = stringResource(Res.string.occurrence_step3_title),
+        stepNumber = uiState.stepNumber,
+        totalSteps = OccurrenceStep.entries.size,
+        onBackClicked = onBack,
+        onCloseClicked = onClose,
+        primaryText = stringResource(Res.string.occurrence_next_step),
+        primaryEnabled = uiState.isStep3Valid && !uiState.isLoading && !uiState.isSubmitting,
+        onPrimaryClick = { onIntent(OccurrenceIntent.GoToNextStep) },
+        secondaryText = stringResource(Res.string.occurrence_prev_step),
+        onSecondaryClick = onBack,
     ) { padding ->
         OccurrenceErrorWrapper(
             isLoading = uiState.isLoading,
@@ -187,7 +175,7 @@ internal fun Step3JobDetailsStep(
                     TaminStyledTextField(
                         leadingIcon = Icons.Default.KeyboardArrowDown,
                         modifier = Modifier.weight(1f),
-                        value = MaritalStatus.fromCode(step.maritalStatus)?.displayNameRes?.let { stringResource(it) }.orEmpty(),
+                        value = MaritalStatusPR.fromCode(step.maritalStatus)?.displayNameRes?.let { stringResource(it) }.orEmpty(),
                         onValueChange = {},
                         label = stringResource(Res.string.occurrence_field_marital_status),
                         placeholder = stringResource(Res.string.occurrence_select_marital),
@@ -242,7 +230,7 @@ internal fun Step3JobDetailsStep(
     if (uiState.dialogs.showMaritalSheet) {
         OccurrenceSelectionBottomSheet(
             title = stringResource(Res.string.occurrence_sheet_marital_title),
-            options = MaritalStatus.entries.map { OccurrenceSheetOption(id = it.code, title = stringResource(it.displayNameRes)) },
+            options = MaritalStatusPR.entries.map { OccurrenceSheetOption(id = it.code, title = stringResource(it.displayNameRes)) },
             selectedId = step.maritalStatus,
             onSelect = { option ->
                 onIntent(OccurrenceIntent.UpdateJobDetails(step.copy(maritalStatus = option.id)))
@@ -267,7 +255,7 @@ private fun Step3JobDetailsStepPreview() {
                     gender = "01",
                     insuranceType = "اجباری",
                     employmentDate = "1395/06/01",
-                    maritalStatus = MaritalStatus.MARRIED.code,
+                    maritalStatus = MaritalStatusPR.MARRIED.code,
                     jobTitle = "مهندس نرم‌افزار",
                     workLocation = "تهران، خیابان ولیعصر",
                 ),

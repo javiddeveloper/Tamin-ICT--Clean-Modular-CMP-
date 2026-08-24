@@ -45,6 +45,10 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.applicationFont
+import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.error_content_description
+import taminx.core.core_ui.valid_content_description
 
 /**
  * Restricts what characters [TaminStyledTextField] accepts as the user types.
@@ -172,7 +176,7 @@ fun TaminStyledTextField(
 
                 if (isValid == true) {
                     Spacer(modifier = Modifier.width(8.dp))
-                    Icon(imageVector = Icons.Default.CheckCircle, contentDescription = "معتبر", tint = taminColors.greenText, modifier = Modifier.size(19.dp))
+                    Icon(imageVector = Icons.Default.CheckCircle, contentDescription = stringResource(Res.string.valid_content_description), tint = taminColors.greenText, modifier = Modifier.size(19.dp))
                 } else if (trailingIconPainter != null) {
                     Spacer(modifier = Modifier.width(8.dp))
                     Icon(painter = trailingIconPainter, contentDescription = null, tint = trailingIconColor, modifier = Modifier.size(20.dp))
@@ -184,7 +188,7 @@ fun TaminStyledTextField(
 
             if (isValid == false && !errorText.isNullOrEmpty()) {
                 Row(modifier = Modifier.padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(imageVector = Icons.Default.Error, contentDescription = "خطا", tint = taminColors.dangerText, modifier = Modifier.size(14.dp))
+                    Icon(imageVector = Icons.Default.Error, contentDescription = stringResource(Res.string.error_content_description), tint = taminColors.dangerText, modifier = Modifier.size(14.dp))
                     Spacer(modifier = Modifier.width(6.dp))
                     TaminText(text = errorText, fontSize = 11.5.sp, fontWeight = FontWeight.Bold, color = taminColors.dangerText)
                 }

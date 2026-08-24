@@ -7,7 +7,7 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.Occurrenc
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceStep
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceUiState
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceUiState.PartialState
-import com.tamin.taminhamrah.feature.taminServices.occurrence.model.Gender
+import com.tamin.taminhamrah.feature.taminServices.occurrence.model.GenderPR
 import com.tamin.taminhamrah.feature.taminServices.occurrence.model.toPR
 import com.tamin.taminhamrah.model.occurrence.OccurrenceSubmitRequestDN
 import com.tamin.taminhamrah.model.occurrence.OccurrenceUploadedDocDN
@@ -20,11 +20,15 @@ import com.tamin.taminhamrah.useCases.occurrence.GetOccurrencePersonalInfoUseCas
 import com.tamin.taminhamrah.useCases.occurrence.GetWorkshopSpecUseCase
 import com.tamin.taminhamrah.useCases.occurrence.SubmitOccurrenceUseCase
 import com.tamin.taminhamrah.useCases.occurrence.UploadOccurrenceImageUseCase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.getString
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.orotez_protez_document_duplicate_error
@@ -32,8 +36,10 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 
-/** The legacy "occurence" submit endpoint's reporterType for a self-filed report — this flow has no reporter-type picker. */
-private const val REPORTER_TYPE_SELF = "1"
+/** Matches legacy `OccurrenceReportFragment.kt` (`nation.nationCode == "01"` -> reporterType "1", else "2"). */
+private const val IRANIAN_NATION_CODE = "01"
+private const val REPORTER_TYPE_IRANIAN = "1"
+private const val REPORTER_TYPE_FOREIGN = "2"
 
 class OccurrenceViewModel(
     private val getPersonalInfoUseCase: GetOccurrencePersonalInfoUseCase,
@@ -165,41 +171,54 @@ class OccurrenceViewModel(
             )
         )
         try {
-            val spec = getWorkshopSpecUseCase(intent.workshop.workshopCode, intent.workshop.branchCode)
-            val current = uiState.value.workshop
-            emit(
-                PartialState.WorkshopUpdated(
-                    current.copy(
-                        selectedWorkshop = intent.workshop.copy(name = spec.name),
-                        // Prefill only what the user hasn't already typed — selecting/reselecting a
-                        // workshop code must never clobber edits made before or after the pick.
-                        employerName = current.employerName.ifBlank { spec.employerName },
-                        employerPhone = current.employerPhone.ifBlank { spec.employerPhone },
-                        workshopAddress = current.workshopAddress.ifBlank { spec.address },
-                        workshopPostalCode = current.workshopPostalCode.ifBlank { spec.postalCode },
-                        workshopPhone = current.workshopPhone.ifBlank { spec.phone },
-                        isWorkshopSpecLoading = false,
-                    )
-                )
-            )
+            // Neither call depends on the other's result (spec needs only the workshop code/branch;
+            // personal info needs only userInfo, already loaded) — run them concurrently instead of
+            // paying the sum of both round-trips, and only commit prefills once both succeed so a
+            // mid-chain failure never leaves half the form silently filled in.
             val userInfo = uiState.value.personInfo.userInfo
-            val personalInfo = getPersonalInfoUseCase(
-                nationalCode = userInfo?.nationalID.orEmpty(),
-                birthDate = userInfo?.birthDateTimestamp?.toString().orEmpty(),
-                workshopCode = intent.workshop.workshopCode,
-                branchCode = intent.workshop.branchCode,
-            )
-            emit(PartialState.PersonInfoUpdated(uiState.value.personInfo.copy(personalInfo = personalInfo.toPR())))
-            emit(
-                PartialState.JobDetailsUpdated(
-                    uiState.value.jobDetails.copy(
-                        fullName = personalInfo.fullName,
-                        nationality = spec.nationality,
-                        nationalityCode = spec.nationalityCode,
-                        gender = personalInfo.gender,
+            coroutineScope {
+                val specDeferred = async {
+                    getWorkshopSpecUseCase(intent.workshop.workshopCode, intent.workshop.branchCode)
+                }
+                val personalInfoDeferred = async {
+                    getPersonalInfoUseCase(
+                        nationalCode = userInfo?.nationalID.orEmpty(),
+                        birthDate = userInfo?.birthDateTimestamp?.toString().orEmpty(),
+                        workshopCode = intent.workshop.workshopCode,
+                        branchCode = intent.workshop.branchCode,
+                    )
+                }
+                val spec = specDeferred.await()
+                val personalInfo = personalInfoDeferred.await()
+
+                val current = uiState.value.workshop
+                emit(
+                    PartialState.WorkshopUpdated(
+                        current.copy(
+                            selectedWorkshop = intent.workshop.copy(name = spec.name),
+                            // Prefill only what the user hasn't already typed — selecting/reselecting a
+                            // workshop code must never clobber edits made before or after the pick.
+                            employerName = current.employerName.ifBlank { spec.employerName },
+                            employerPhone = current.employerPhone.ifBlank { spec.employerPhone },
+                            workshopAddress = current.workshopAddress.ifBlank { spec.address },
+                            workshopPostalCode = current.workshopPostalCode.ifBlank { spec.postalCode },
+                            workshopPhone = current.workshopPhone.ifBlank { spec.phone },
+                            isWorkshopSpecLoading = false,
+                        )
                     )
                 )
-            )
+                emit(PartialState.PersonInfoUpdated(uiState.value.personInfo.copy(personalInfo = personalInfo.toPR())))
+                emit(
+                    PartialState.JobDetailsUpdated(
+                        uiState.value.jobDetails.copy(
+                            fullName = personalInfo.fullName,
+                            nationality = spec.nationality,
+                            nationalityCode = spec.nationalityCode,
+                            gender = personalInfo.gender,
+                        )
+                    )
+                )
+            }
         } catch (e: Exception) {
             emit(PartialState.WorkshopUpdated(uiState.value.workshop.copy(isWorkshopSpecLoading = false)))
             sendEvent(OccurrenceEvent.ShowToast(e.toSingleLineMessage()))
@@ -208,8 +227,10 @@ class OccurrenceViewModel(
 
     private fun uploadDocument(intent: OccurrenceIntent.UploadDocument): Flow<PartialState> = flow {
         val current = uiState.value.documentSubmit
-        
-        val isDuplicate = current.uploadedDocuments.any { it.bytes?.contentEquals(intent.fileBytes) == true }
+
+        val isDuplicate = withContext(Dispatchers.Default) {
+            current.uploadedDocuments.any { it.bytes?.contentEquals(intent.fileBytes) == true }
+        }
         if (isDuplicate) {
             sendEvent(OccurrenceEvent.ShowToast(getString(Res.string.orotez_protez_document_duplicate_error)))
             return@flow
@@ -280,7 +301,7 @@ class OccurrenceViewModel(
                     ?: personalInfo?.nationalCode.orEmpty(),
                 firstName = personalInfo?.firstName.orEmpty(),
                 lastName = personalInfo?.lastName.orEmpty(),
-                gender = Gender.fromCode(personalInfo?.gender)?.legacyCode ?: 0,
+                gender = GenderPR.fromCode(personalInfo?.gender)?.legacyCode ?: 0,
                 nationalityCode = state.jobDetails.nationalityCode.toIntOrNull() ?: 0,
                 insuranceType = state.jobDetails.insuranceType,
                 insuranceTypeCode = state.jobDetails.insuranceTypeCode,
@@ -289,7 +310,7 @@ class OccurrenceViewModel(
                 branchCode = state.jobDetails.branchCode,
                 branchName = state.jobDetails.branchName,
                 birthDate = state.personInfo.birthDateTimestamp ?: 0L,
-                workshopId = state.workshop.selectedWorkshop?.id.orEmpty(),
+                workshopId = state.workshop.selectedWorkshop?.workshopCode.orEmpty(),
                 workshopBranchCode = state.workshop.selectedWorkshop?.branchCode.orEmpty(),
                 workshopName = state.workshop.selectedWorkshop?.name.orEmpty(),
                 employerName = state.workshop.employerName,
@@ -312,7 +333,11 @@ class OccurrenceViewModel(
                 accidentOutcomeId = state.accident.accidentOutcomeId.toIntOrNull() ?: 0,
                 exactLocation = state.accident.exactLocation,
                 description = state.accident.description,
-                reporterType = REPORTER_TYPE_SELF,
+                reporterType = if (state.jobDetails.nationalityCode == IRANIAN_NATION_CODE) {
+                    REPORTER_TYPE_IRANIAN
+                } else {
+                    REPORTER_TYPE_FOREIGN
+                },
                 documents = state.documentSubmit.uploadedDocuments,
             )
             val result = submitOccurrenceUseCase(request)

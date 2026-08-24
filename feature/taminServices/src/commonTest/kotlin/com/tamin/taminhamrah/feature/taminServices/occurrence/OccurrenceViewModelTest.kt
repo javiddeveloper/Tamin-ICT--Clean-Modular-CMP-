@@ -290,11 +290,33 @@ class OccurrenceViewModelTest {
 
         val request: OccurrenceSubmitRequestDN = requireNotNull(occurrenceRepository.lastSubmitRequest)
         assertEquals("0012345678", request.nationalCode)
-        assertEquals(1, request.gender) // Gender.MALE.legacyCode
-        // workshopId is the selected WorkshopItemPR's id (not its workshopCode) — see
-        // OccurrenceViewModel.submitOccurrence()'s `workshopId = selectedWorkshop?.id`.
-        assertEquals("1", request.workshopId)
+        assertEquals(1, request.gender) // GenderPR.MALE.legacyCode
+        // workshopId is the selected WorkshopItemPR's workshopCode, not its (list-selection-only,
+        // possibly composite) id — see OccurrenceViewModel.submitOccurrence()'s
+        // `workshopId = selectedWorkshop?.workshopCode`.
+        assertEquals("1412345", request.workshopId)
         assertEquals("014", request.workshopBranchCode)
+        // Iranian nationality (nationCode "01" from the workshop spec) -> reporterType "1".
+        assertEquals("1", request.reporterType)
+    }
+
+    @Test
+    fun `SubmitOccurrence maps a non-Iranian nationality to reporterType 2`() = runTest(testDispatcher) {
+        occurrenceRepository.workshopSpecResult = sampleWorkshopDN().copy(nationalityCode = "02")
+        occurrenceRepository.personalInfoResult = OccurrencePersonalInfoDN(
+            nationalCode = "0012345678", firstName = "علی", lastName = "رضایی", fatherName = "",
+            gender = "01", birthDate = "", insuranceNumber = "1234567", branchCode = "10",
+            nationality = "غیر ایرانی", insuranceType = "اصلی",
+        )
+        occurrenceRepository.submitResult = OccurrenceResultDN(trackingCode = "TRACK-9")
+        viewModel.sendIntent(OccurrenceIntent.SelectWorkshop(sampleWorkshopPR()))
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.sendIntent(OccurrenceIntent.SubmitOccurrence)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        val request: OccurrenceSubmitRequestDN = requireNotNull(occurrenceRepository.lastSubmitRequest)
+        assertEquals("2", request.reporterType)
     }
 
     @Test
@@ -317,7 +339,7 @@ class OccurrenceViewModelTest {
     private fun sampleWorkshopDN() = WorkshopItemDN(
         id = "1", workshopCode = "1412345", branchCode = "014", name = "کارگاه تولیدی الف",
         employerName = "شرکت الف", employerPhone = "02112345678", address = "تهران",
-        postalCode = "1234567890", phone = "02112345678", nationality = "ایرانی", nationalityCode = "1",
+        postalCode = "1234567890", phone = "02112345678", nationality = "ایرانی", nationalityCode = "01",
     )
 
     private fun sampleWorkshopPR() = WorkshopItemPR(id = "1", workshopCode = "1412345", branchCode = "014")

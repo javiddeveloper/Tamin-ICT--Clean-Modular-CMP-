@@ -715,6 +715,10 @@
     <string name="description_label">توضیحات</string>
     <string name="close_content_description">بستن</string>
     <string name="lock_content_description">قفل</string>
+    <string name="back_content_description">بازگشت</string>
+    <string name="valid_content_description">معتبر</string>
+    <string name="error_content_description">خطا</string>
+    <string name="step_of_total_label">مرحله %1$s از %2$s</string>
 
     <!-- Send History To Institutions -->
     <string name="send_history_title">اعلام سابقه</string>
@@ -893,7 +897,7 @@
     <string name="occurrence_field_employer_name">نام و نام خانوادگی کارفرما</string>
     <string name="occurrence_field_employer_name_error">نام و نام خانوادگی کارفرما الزامی است</string>
     <string name="occurrence_field_employer_phone">شماره همراه کارفرما</string>
-    <string name="occurrence_field_employer_phone_error">شماره همراه کارفرما باید ۱۱ رقم باشد</string>
+    <string name="occurrence_field_employer_phone_error">شماره همراه کارفرما باید ۱۱ رقم باشد و با 09 شروع شود</string>
     <string name="occurrence_field_workshop_address">نشانی کارگاه</string>
     <string name="occurrence_field_workshop_address_error">نشانی کارگاه الزامی است</string>
     <string name="occurrence_field_employer_phone_hint">09121111111</string>
@@ -935,6 +939,7 @@
     <string name="occurrence_field_work_start_time_error">ساعت شروع کار الزامی است</string>
     <string name="occurrence_field_work_start_time_hint">08:00</string>
     <string name="occurrence_field_work_end_time">ساعت پایان کار</string>
+    <string name="occurrence_field_work_end_time_order_error">ساعت پایان کار باید بعد از ساعت شروع کار باشد</string>
     <string name="occurrence_field_work_end_time_error">ساعت پایان کار الزامی است</string>
     <string name="occurrence_field_work_end_time_hint">17:00</string>
     <string name="occurrence_field_home_address">آدرس منزل</string>
@@ -957,6 +962,7 @@
     <string name="occurrence_field_exact_location">محل دقیق حادثه</string>
     <string name="occurrence_field_exact_location_hint">شهر، خیابان، کوچه</string>
     <string name="occurrence_field_description">شرح واقعه</string>
+    <string name="occurrence_field_description_min_length_error">شرح حادثه باید حداقل ۲۰ کاراکتر باشد</string>
     <string name="occurrence_field_description_hint">واقعه را بصورت کامل شرح دهید</string>
     <string name="occurrence_description_counter">%1$s/۵۰۰</string>
     <string name="occurrence_sheet_outcome_title">نتیجه حادثه</string>
@@ -975,6 +981,7 @@
     <string name="occurrence_add_document">افزودن مدارک</string>
     <string name="occurrence_doc_required_hint">بارگذاری حداقل دو تصویر الزامی است.</string>
     <string name="occurrence_doc_format_hint">تصویر می‌بایست در قالب (jpeg) بوده و اندازه آن حداکثر ۲ مگابایت باشد</string>
+    <string name="occurrence_doc_format_error">فقط تصاویر با فرمت jpeg و حداکثر ۲ مگابایت مجاز است.</string>
     <string name="occurrence_summary_section">خلاصه اطلاعات</string>
     <string name="occurrence_summary_person">فرد حادثه‌دیده</string>
     <string name="occurrence_summary_workshop">کارگاه</string>

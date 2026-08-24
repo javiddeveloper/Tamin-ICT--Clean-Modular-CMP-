@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,13 +17,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,7 +30,9 @@ import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceErrorWrapper
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceSelectionBottomSheet
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceSheetOption
+import com.tamin.taminhamrah.feature.taminServices.occurrence.components.OccurrenceStepScaffold
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.Step2WorkshopShimmerSkeleton
+import com.tamin.taminhamrah.feature.taminServices.occurrence.components.rememberFieldTouchState
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.ErrorSource
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceIntent
 import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.OccurrenceStep
@@ -47,11 +42,9 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.model.WorkshopItem
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.InputRestriction
-import com.tamin.taminhamrah.ui.components.TaminBottomActionBar
 import com.tamin.taminhamrah.ui.components.TaminStyledTextField
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.TaminTextArea
-import com.tamin.taminhamrah.ui.components.topbars.TaminStepTopAppBar
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -93,49 +86,31 @@ internal fun Step2WorkshopStep(
     val taminColors = LocalTaminColors.current
     val step = uiState.workshop
 
-    var employerNameHasFocused by rememberSaveable { mutableStateOf(false) }
-    var employerNameTouched by rememberSaveable { mutableStateOf(false) }
-
-    var employerPhoneHasFocused by rememberSaveable { mutableStateOf(false) }
-    var employerPhoneTouched by rememberSaveable { mutableStateOf(false) }
-
-    var workshopAddressHasFocused by rememberSaveable { mutableStateOf(false) }
-    var workshopAddressTouched by rememberSaveable { mutableStateOf(false) }
-
-    var workshopPhoneHasFocused by rememberSaveable { mutableStateOf(false) }
-    var workshopPhoneTouched by rememberSaveable { mutableStateOf(false) }
-
-    var workshopPostalCodeHasFocused by rememberSaveable { mutableStateOf(false) }
-    var workshopPostalCodeTouched by rememberSaveable { mutableStateOf(false) }
+    val employerNameTouch = rememberFieldTouchState()
+    val employerPhoneTouch = rememberFieldTouchState()
+    val workshopAddressTouch = rememberFieldTouchState()
+    val workshopPhoneTouch = rememberFieldTouchState()
+    val workshopPostalCodeTouch = rememberFieldTouchState()
 
     val isEmployerNameValid = step.employerName.isNotBlank()
-    val isEmployerPhoneValid = ValidationUtils.isPhoneNumberValid(step.employerPhone)
+    val isEmployerPhoneValid = ValidationUtils.isMobileNumberValid(step.employerPhone)
     val isWorkshopAddressValid = step.workshopAddress.isNotBlank()
-    val isWorkshopPhoneValid = ValidationUtils.isPhoneNumberValid(step.workshopPhone)
+    val isWorkshopPhoneValid = ValidationUtils.isLandlineValid(step.workshopPhone)
     val isWorkshopPostalCodeValid = step.workshopPostalCode.isNotBlank() &&
         ValidationUtils.isPostcodeValid(step.workshopPostalCode)
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            TaminStepTopAppBar(
-                title = stringResource(Res.string.occurrence_step2_title),
-                onBackClicked = onBack,
-                currentStep = uiState.stepNumber,
-                totalSteps = OccurrenceStep.entries.size,
-                onCloseClicked = onClose
-            )
-        },
-        bottomBar = {
-            TaminBottomActionBar(
-                primaryText = stringResource(Res.string.occurrence_next_step),
-                primaryEnabled = uiState.isStep2Valid && !uiState.isLoading && !uiState.isSubmitting,
-                onPrimaryClick = { onIntent(OccurrenceIntent.GoToNextStep) },
-                secondaryText = stringResource(Res.string.occurrence_prev_step),
-                onSecondaryClick = onBack,
-            )
-        },
-        contentWindowInsets = WindowInsets(0),
+    OccurrenceStepScaffold(
+        modifier = modifier,
+        title = stringResource(Res.string.occurrence_step2_title),
+        stepNumber = uiState.stepNumber,
+        totalSteps = OccurrenceStep.entries.size,
+        onBackClicked = onBack,
+        onCloseClicked = onClose,
+        primaryText = stringResource(Res.string.occurrence_next_step),
+        primaryEnabled = uiState.isStep2Valid && !uiState.isLoading && !uiState.isSubmitting,
+        onPrimaryClick = { onIntent(OccurrenceIntent.GoToNextStep) },
+        secondaryText = stringResource(Res.string.occurrence_prev_step),
+        onSecondaryClick = onBack,
     ) { padding ->
         OccurrenceErrorWrapper(
             isLoading = uiState.isLoading,
@@ -211,7 +186,7 @@ internal fun Step2WorkshopStep(
                     Spacer(modifier = Modifier.height(Spacing.sm))
                 }
 
-                val showEmployerNameError = employerNameTouched && !isEmployerNameValid
+                val showEmployerNameError = employerNameTouch.touched && !isEmployerNameValid
                 TaminStyledTextField(
                     value = step.employerName,
                     onValueChange = {
@@ -228,22 +203,16 @@ internal fun Step2WorkshopStep(
                     isValid = if (showEmployerNameError) false else null,
                     errorText = if (showEmployerNameError) stringResource(Res.string.occurrence_field_employer_name_error) else null,
                     isRequired = true,
-                    onFocusChanged = { isFocused ->
-                        if (isFocused) {
-                            employerNameHasFocused = true
-                        } else if (employerNameHasFocused) {
-                            employerNameTouched = true
-                        }
-                    },
+                    onFocusChanged = employerNameTouch.onFocusChanged,
                 )
 
                 Spacer(modifier = Modifier.height(Spacing.sm))
 
-                val showEmployerPhoneError = employerPhoneTouched && !isEmployerPhoneValid
+                val showEmployerPhoneError = employerPhoneTouch.touched && !isEmployerPhoneValid
                 TaminStyledTextField(
                     value = step.employerPhone,
                     onValueChange = {
-                        val filtered = ValidationUtils.validatePhoneNumber(it)
+                        val filtered = ValidationUtils.validateMobileNumber(it)
                         onIntent(
                             OccurrenceIntent.UpdateWorkshop(
                                 step.copy(
@@ -259,18 +228,12 @@ internal fun Step2WorkshopStep(
                     isValid = if (showEmployerPhoneError) false else null,
                     errorText = if (showEmployerPhoneError) stringResource(Res.string.occurrence_field_employer_phone_error) else null,
                     isRequired = true,
-                    onFocusChanged = { isFocused ->
-                        if (isFocused) {
-                            employerPhoneHasFocused = true
-                        } else if (employerPhoneHasFocused) {
-                            employerPhoneTouched = true
-                        }
-                    },
+                    onFocusChanged = employerPhoneTouch.onFocusChanged,
                 )
 
                 Spacer(modifier = Modifier.height(Spacing.sm))
 
-                val showWorkshopAddressError = workshopAddressTouched && !isWorkshopAddressValid
+                val showWorkshopAddressError = workshopAddressTouch.touched && !isWorkshopAddressValid
                 TaminTextArea(
                     value = step.workshopAddress,
                     onValueChange = {
@@ -288,19 +251,15 @@ internal fun Step2WorkshopStep(
                     errorMessage = if (showWorkshopAddressError) stringResource(Res.string.occurrence_field_workshop_address_error) else null,
                     isRequired = true,
                     modifier = Modifier.onFocusChanged { focusState ->
-                        if (focusState.isFocused) {
-                            workshopAddressHasFocused = true
-                        } else if (workshopAddressHasFocused) {
-                            workshopAddressTouched = true
-                        }
+                        workshopAddressTouch.onFocusChanged(focusState.isFocused)
                     },
                 )
 
                 Spacer(modifier = Modifier.height(Spacing.sm))
 
-                val showWorkshopPhoneError = workshopPhoneTouched && !isWorkshopPhoneValid
+                val showWorkshopPhoneError = workshopPhoneTouch.touched && !isWorkshopPhoneValid
                 val showWorkshopPostalCodeError =
-                    workshopPostalCodeTouched && !isWorkshopPostalCodeValid
+                    workshopPostalCodeTouch.touched && !isWorkshopPostalCodeValid
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.Top
@@ -324,14 +283,8 @@ internal fun Step2WorkshopStep(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                         isValid = if (showWorkshopPhoneError) false else null,
                         errorText = if (showWorkshopPhoneError) stringResource(Res.string.occurrence_field_phone_error) else null,
-                        isRequired = true,
-                        onFocusChanged = { isFocused ->
-                            if (isFocused) {
-                                workshopPhoneHasFocused = true
-                            } else if (workshopPhoneHasFocused) {
-                                workshopPhoneTouched = true
-                            }
-                        },
+                        isRequired = false,
+                        onFocusChanged = workshopPhoneTouch.onFocusChanged,
                     )
                     Spacer(modifier = Modifier.width(Spacing.sm))
                     TaminStyledTextField(
@@ -354,13 +307,7 @@ internal fun Step2WorkshopStep(
                         isValid = if (showWorkshopPostalCodeError) false else null,
                         errorText = if (showWorkshopPostalCodeError) stringResource(Res.string.occurrence_field_postal_code_error) else null,
                         isRequired = true,
-                        onFocusChanged = { isFocused ->
-                            if (isFocused) {
-                                workshopPostalCodeHasFocused = true
-                            } else if (workshopPostalCodeHasFocused) {
-                                workshopPostalCodeTouched = true
-                            }
-                        },
+                        onFocusChanged = workshopPostalCodeTouch.onFocusChanged,
                     )
                 }
 

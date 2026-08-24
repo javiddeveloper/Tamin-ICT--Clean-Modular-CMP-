@@ -11,6 +11,7 @@ import com.tamin.taminhamrah.model.occurrence.WorkshopItemDTO
 import com.tamin.taminhamrah.model.occurrence.WorkshopListItemDTO
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class OccurrenceMapperTest {
 
@@ -58,11 +59,21 @@ class OccurrenceMapperTest {
     fun workshopListItemDto_toDomain_mapsCodeNameAndBranch() {
         val domain = WorkshopListItemDTO(workshopCode = "1412345", name = "کارگاه تولیدی الف", branchCode = "014").toDomain()
 
-        assertEquals("1412345", domain.id)
+        // id is a workshopCode|branchCode composite (unique per registration), not the bare
+        // workshopCode — two branches of the same employer can share a workshopCode.
+        assertEquals("1412345|014", domain.id)
         assertEquals("1412345", domain.workshopCode)
         assertEquals("014", domain.branchCode)
         assertEquals("کارگاه تولیدی الف", domain.name)
         assertEquals("", domain.employerName)
+    }
+
+    @Test
+    fun workshopListItemDto_toDomain_givesDistinctIdsForSameCodeDifferentBranch() {
+        val branchOne = WorkshopListItemDTO(workshopCode = "1412345", name = "شعبه ۱", branchCode = "014").toDomain()
+        val branchTwo = WorkshopListItemDTO(workshopCode = "1412345", name = "شعبه ۲", branchCode = "022").toDomain()
+
+        assertTrue(branchOne.id != branchTwo.id)
     }
 
     @Test

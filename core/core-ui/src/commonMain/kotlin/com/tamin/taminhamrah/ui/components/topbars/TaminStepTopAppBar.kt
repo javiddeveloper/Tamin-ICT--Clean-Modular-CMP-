@@ -25,9 +25,13 @@ import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.toPersianDigits
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.back_content_description
+import taminx.core.core_ui.close_content_description
 import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.step_of_total_label
 
 /**
  * A [TaminTopAppBar] for multi-step forms: title/back/close bar plus an optional
@@ -35,6 +39,11 @@ import taminx.core.core_ui.ic_tamin_chevron_back
  * self-declaration, whose per-feature icon assets and step-label text differ — pass
  * [navigationIcon]/[closeIcon]/[stepLabel] to keep those differences without duplicating
  * the bar itself (see `.claude/rules/architecture.md`).
+ *
+ * [TaminStepProgressBar]'s compact segmented bar (rather than reusing [StepIndicator]) is
+ * intentional here, not an oversight: occurrence reporting has 6 steps, more than double
+ * [StepIndicator]'s current 3-step callers (change-mobile, addDependent, …), and that
+ * component's per-step title-text layout wouldn't stay legible at that count.
  */
 @Composable
 fun TaminStepTopAppBar(
@@ -49,7 +58,7 @@ fun TaminStepTopAppBar(
         val taminColors = LocalTaminColors.current
         Icon(
             imageVector = vectorResource(Res.drawable.ic_tamin_chevron_back),
-            contentDescription = "بازگشت",
+            contentDescription = stringResource(Res.string.back_content_description),
             tint = taminColors.textPrimary,
             modifier = Modifier.size(24.dp)
         )
@@ -57,13 +66,17 @@ fun TaminStepTopAppBar(
     closeIcon: @Composable () -> Unit = {
         Icon(
             imageVector = Icons.Default.Close,
-            contentDescription = "بستن",
+            contentDescription = stringResource(Res.string.close_content_description),
             tint = LocalTaminColors.current.textPrimary,
             modifier = Modifier.size(22.dp)
         )
     },
     stepLabel: @Composable (current: Int, total: Int) -> String = { current, total ->
-        "مرحله ${current.toString().toPersianDigits()} از ${total.toString().toPersianDigits()}"
+        stringResource(
+            Res.string.step_of_total_label,
+            current.toString().toPersianDigits(),
+            total.toString().toPersianDigits(),
+        )
     },
 ) {
     val taminColors = LocalTaminColors.current
@@ -114,7 +127,11 @@ fun TaminStepProgressBar(
     modifier: Modifier = Modifier,
     showStepText: Boolean = true,
     stepLabel: @Composable (current: Int, total: Int) -> String = { current, total ->
-        "مرحله ${current.toString().toPersianDigits()} از ${total.toString().toPersianDigits()}"
+        stringResource(
+            Res.string.step_of_total_label,
+            current.toString().toPersianDigits(),
+            total.toString().toPersianDigits(),
+        )
     },
 ) {
     val taminColors = LocalTaminColors.current

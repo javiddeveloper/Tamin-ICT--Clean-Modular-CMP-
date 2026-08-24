@@ -32,9 +32,19 @@ fun WorkshopItemDTO.toDomain(): WorkshopItemDN = WorkshopItemDN(
     nationalityCode = nation?.nationCode.orEmpty(),
 )
 
-/** [getWorkshopSpec][com.tamin.taminhamrah.dataSource.occurrence.OccurrenceRemoteDataSource.getWorkshopSpec] fills in the rest once a workshop is picked. */
+/**
+ * [getWorkshopSpec][com.tamin.taminhamrah.dataSource.occurrence.OccurrenceRemoteDataSource.getWorkshopSpec]
+ * fills in the rest once a workshop is picked.
+ *
+ * [id] is a `workshopCode|branchCode` composite: the list endpoint has no separate real id of its
+ * own, and a bare [workshopCode] is not guaranteed unique — the same employer can be registered
+ * through more than one branch, which previously made two list entries collide on id and let the
+ * wrong one get silently selected. This [id] is only for UI list-selection uniqueness; the actual
+ * backend workshop code submitted on the report comes from [WorkshopItemDN.workshopCode] directly
+ * (see `OccurrenceViewModel.submitOccurrence()`), not from [id].
+ */
 fun WorkshopListItemDTO.toDomain(): WorkshopItemDN = WorkshopItemDN(
-    id = workshopCode.orEmpty(),
+    id = "${workshopCode.orEmpty()}|${branchCode.orEmpty()}",
     workshopCode = workshopCode.orEmpty(),
     branchCode = branchCode.orEmpty(),
     name = name.orEmpty(),

@@ -8,6 +8,24 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.model.WorkshopItem
 import com.tamin.taminhamrah.model.occurrence.OccurrenceUploadedDocDN
 import com.tamin.taminhamrah.util.ValidationUtils
 
+/** Not old_android-sourced (no such rule exists in the legacy reference) — confirm with product/QA. */
+internal const val MIN_DESCRIPTION_LENGTH = 20
+
+/** Parses "HH:mm"; returns true (never blocks the step) if either value isn't in that shape. */
+internal fun isWorkEndAfterWorkStart(startTime: String, endTime: String): Boolean {
+    fun toMinutesOrNull(time: String): Int? {
+        val parts = time.split(":")
+        if (parts.size != 2) return null
+        val hours = parts[0].toIntOrNull() ?: return null
+        val minutes = parts[1].toIntOrNull() ?: return null
+        return hours * 60 + minutes
+    }
+
+    val startMinutes = toMinutesOrNull(startTime) ?: return true
+    val endMinutes = toMinutesOrNull(endTime) ?: return true
+    return endMinutes > startMinutes
+}
+
 enum class OccurrenceStep {
     PERSON_INFO,
     WORKSHOP_INFO,
@@ -136,9 +154,9 @@ data class OccurrenceUiState(
     val isStep2Valid: Boolean
         get() = workshop.selectedWorkshop != null &&
             workshop.employerName.isNotBlank() &&
-            ValidationUtils.isPhoneNumberValid(workshop.employerPhone) &&
+            ValidationUtils.isMobileNumberValid(workshop.employerPhone) &&
             workshop.workshopAddress.isNotBlank() &&
-            ValidationUtils.isPhoneNumberValid(workshop.workshopPhone) &&
+            ValidationUtils.isLandlineValid(workshop.workshopPhone) &&
             workshop.workshopPostalCode.isNotBlank() &&
             ValidationUtils.isPostcodeValid(workshop.workshopPostalCode)
     val isStep3Valid: Boolean
@@ -148,6 +166,7 @@ data class OccurrenceUiState(
         get() = workHours.transportation.isNotBlank() &&
             workHours.workStartTime.isNotBlank() &&
             workHours.workEndTime.isNotBlank() &&
+            isWorkEndAfterWorkStart(workHours.workStartTime, workHours.workEndTime) &&
             workHours.homeAddress.isNotBlank() &&
             ValidationUtils.isPhoneNumberValid(workHours.homePhone) &&
             workHours.homePostalCode.isNotBlank() &&
@@ -155,7 +174,7 @@ data class OccurrenceUiState(
     val isStep5Valid: Boolean
         get() = accident.accidentDate.isNotBlank() && accident.accidentTime.isNotBlank() &&
             accident.accidentOutcomeId.isNotBlank() && accident.exactLocation.isNotBlank() &&
-            accident.description.isNotBlank()
+            accident.description.trim().length >= MIN_DESCRIPTION_LENGTH
     val isStep6Valid: Boolean get() = documentSubmit.uploadedDocuments.size >= 2
 
     val stepNumber: Int get() = currentStep.ordinal + 1
