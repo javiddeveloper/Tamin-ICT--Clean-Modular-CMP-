@@ -195,45 +195,25 @@ object PersianDateFormatter {
 
     /** Days elapsed since the Jalali epoch, the quantity [jalaliToGregorian] is built on. */
     private fun dayNumber(jy: Int, jm: Int, jd: Int): Int {
-        val jy1 = jy - 979
-        val jm1 = jm - 1
-        return 365 * jy1 + (jy1 / 33) * 8 + ((jy1 % 33) + 3) / 4 +
-            (if (jm1 < 6) 31 * jm1 else 186 + 30 * (jm1 - 6)) + (jd - 1)
+        val monthIndex = jm - 1
+        return yearStartDayNumber(jy - JALALI_EPOCH_YEAR) +
+            (if (monthIndex < 6) 31 * monthIndex else FIRST_HALF_DAYS + 30 * (monthIndex - 6)) +
+            (jd - 1)
     }
 
-    /** Inverse of [gregorianToJalali], using the same day-count arithmetic. */
+    /**
+     * Both directions run through [dayNumber], so they are inverses by construction.
+     *
+     * They used to be two independent pieces of arithmetic with two different leap rules, which
+     * disagreed around 1403's Nowruz — one placed 2024-03-20 in 1403, the other in 1402. The
+     * Gregorian side is now `kotlinx.datetime`'s proleptic calendar rather than hand-rolled
+     * 146097/36524/1461 cycle stepping, leaving exactly one leap rule in this file: [dayNumber]'s.
+     */
     internal fun jalaliToGregorian(jy: Int, jm: Int, jd: Int): Triple<Int, Int, Int> {
-        val dayCount = dayNumber(jy, jm, jd)
-        // 79 pairs with the 355659 above. Agreeing with each other is not enough — both were
-        // previously shifted the same way, so a date survived a round trip while still being a day
-        // off in absolute terms; JalaliConversionTest pins the absolute values.
-        var gDayNo = dayCount + 79
-        var gy = 1600 + 400 * (gDayNo / 146097)
-        gDayNo %= 146097
-        var leap = true
-        if (gDayNo >= 36525) {
-            gDayNo--
-            gy += 100 * (gDayNo / 36524)
-            gDayNo %= 36524
-            if (gDayNo >= 365) gDayNo++ else leap = false
-        }
-        gy += 4 * (gDayNo / 1461)
-        gDayNo %= 1461
-        if (gDayNo >= 366) {
-            leap = false
-            gDayNo--
-            gy += gDayNo / 365
-            gDayNo %= 365
-        }
-        val monthLengths = intArrayOf(
-            31, if (leap) 29 else 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31,
+        val date = LocalDate.fromEpochDays(
+            GREGORIAN_ANCHOR_EPOCH_DAYS + dayNumber(jy, jm, jd) + JALALI_GREGORIAN_DAY_OFFSET,
         )
-        var gm = 0
-        while (gm < 12 && gDayNo >= monthLengths[gm]) {
-            gDayNo -= monthLengths[gm]
-            gm++
-        }
-        return Triple(gy, gm + 1, gDayNo + 1)
+        return Triple(date.year, date.monthNumber, date.dayOfMonth)
     }
 
     private fun Int.toTwoDigitPersian(): String {
@@ -244,26 +224,45 @@ object PersianDateFormatter {
         return toString().toPersianDigits()
     }
 
+    /** The exact inverse of [jalaliToGregorian]. */
     internal fun gregorianToJalali(gy: Int, gm: Int, gd: Int): Triple<Int, Int, Int> {
-        val gDaysInMonth = intArrayOf(0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334)
-        val gy2 = if (gm > 2) gy + 1 else gy
-        // Calibrated against real Gregorian/Jalali pairs in JalaliConversionTest — 1403 began
-        // 2024-03-20, 1404 began 2025-03-21, 1405 began 2026-03-21. The previous 355660 was tuned
-        // against a Nowruz 1404 of 2025-03-20, which is a day early, so every converted date came
-        // out one day late and `today()` reported tomorrow.
-        var days = 355659 + (365 * gy) + ((gy2 + 3) / 4) - ((gy2 + 99) / 100) + ((gy2 + 399) / 400) + gd + gDaysInMonth[gm - 1]
-        var jy = -1595 + (33 * (days / 12053))
-        days %= 12053
-        jy += 979 * (days / 36524)
-        days %= 36524
-        if (days >= 365) {
-            jy += (days - 1) / 365
-            days = (days - 1) % 365
-        }
-        val jm = if (days < 186) 1 + days / 31 else 7 + (days - 186) / 30
-        val jd = 1 + if (days < 186) days % 31 else (days - 186) % 30
-        return Triple(jy, jm, jd)
+        val dayCount = LocalDate(gy, gm, gd).toEpochDays() -
+            GREGORIAN_ANCHOR_EPOCH_DAYS - JALALI_GREGORIAN_DAY_OFFSET
+        return fromDayNumber(dayCount)
     }
+
+    /** Inverse of [dayNumber]: which Jalali date sits [dayCount] days after 979/01/01. */
+    private fun fromDayNumber(dayCount: Int): Triple<Int, Int, Int> {
+        // Years are 365 or 366 days, so dividing by 366 never overshoots; step up from there.
+        var yearsSinceEpoch = dayCount / 366
+        while (yearStartDayNumber(yearsSinceEpoch + 1) <= dayCount) yearsSinceEpoch++
+
+        val dayOfYear = dayCount - yearStartDayNumber(yearsSinceEpoch)
+        val month =
+            if (dayOfYear < FIRST_HALF_DAYS) 1 + dayOfYear / 31
+            else 7 + (dayOfYear - FIRST_HALF_DAYS) / 30
+        val day =
+            1 + if (dayOfYear < FIRST_HALF_DAYS) dayOfYear % 31
+            else (dayOfYear - FIRST_HALF_DAYS) % 30
+        return Triple(yearsSinceEpoch + JALALI_EPOCH_YEAR, month, day)
+    }
+
+    /** Days from 979/01/01 to the first of فروردین [yearsSinceEpoch] years later. */
+    private fun yearStartDayNumber(yearsSinceEpoch: Int): Int =
+        365 * yearsSinceEpoch + (yearsSinceEpoch / 33) * 8 + ((yearsSinceEpoch % 33) + 3) / 4
+
+    /** فروردین through شهریور, the six 31-day months the month arithmetic splits on. */
+    private const val FIRST_HALF_DAYS = 186
+
+    /** [dayNumber] counts from the first of فروردین 979. */
+    private const val JALALI_EPOCH_YEAR = 979
+
+    /**
+     * Where the two calendars are pinned to each other. Verified against real Nowruz dates in
+     * JalaliConversionTest — retuning this shifts every converted date, in both directions.
+     */
+    private const val JALALI_GREGORIAN_DAY_OFFSET = 79
+    private val GREGORIAN_ANCHOR_EPOCH_DAYS = LocalDate(1600, 1, 1).toEpochDays()
 
     private const val DAYS_IN_LEAP_YEAR = 366
 }

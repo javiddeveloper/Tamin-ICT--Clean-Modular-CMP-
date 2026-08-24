@@ -42,6 +42,8 @@ enum class TaminBottomSheetType(
     PROVINCE(groupId = 9, titleRes = Res.string.bs_province, isSingleSelect = true, showSearch = true),
     CITY(groupId = 8, titleRes = Res.string.bs_city, isSingleSelect = true, showSearch = true),
     BRANCH(groupId = 13, titleRes = Res.string.bs_branch, isSingleSelect = true, showSearch = true),
+    // A short, fixed list — chips read better than a searchable column.
+    WORKSHOP_STATUS(groupId = 14, titleRes = Res.string.bs_workshop_status, isSingleSelect = true),
     BLOOD_GROUP(groupId = 101, titleRes = Res.string.bs_blood_group, isSingleSelect = true),
     SMOKING_ADDICTION(groupId = 201, titleRes = Res.string.bs_smoking_addiction, isSingleSelect = false),
     DRUG_ADDICTION(groupId = 202, titleRes = Res.string.bs_drug_addiction, isSingleSelect = false),

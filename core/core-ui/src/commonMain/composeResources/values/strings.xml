@@ -803,4 +803,9 @@
     <string name="workshops_action_article16">رسیدگی به بدهی ماده ۱۶</string>
     <string name="workshops_action_members">کارکنان</string>
     <string name="workshops_action_stakeholders">ذینفعان</string>
+    <string name="workshops_status_active">فعال</string>
+    <string name="workshops_status_semi_active">نیمه فعال</string>
+    <string name="workshops_status_inactive">غیرفعال</string>
+    <string name="workshops_status_any">همه وضعیت‌ها</string>
+    <string name="bs_workshop_status">وضعیت کارگاه</string>
 </resources>

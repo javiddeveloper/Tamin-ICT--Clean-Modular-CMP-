@@ -16,8 +16,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsIntent
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState
@@ -35,6 +34,7 @@ import com.tamin.taminhamrah.model.common.ProvincePR
 import com.tamin.taminhamrah.model.contracts.BranchPR
 import com.tamin.taminhamrah.model.studentContract.BranchSelectionFormPR
 import com.tamin.taminhamrah.model.studentContract.SelectBranchStepContent
+import com.tamin.taminhamrah.model.studentContract.SelectableField
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementPR
 import com.tamin.taminhamrah.model.workshop.EmployerWorkshopPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -43,7 +43,9 @@ import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.components.TaminText
+import com.tamin.taminhamrah.ui.components.TaminTextField
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetType
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -68,6 +70,10 @@ import taminx.core.core_ui.workshops_card_employer
 import taminx.core.core_ui.workshops_empty_subtitle
 import taminx.core.core_ui.workshops_empty_title
 import taminx.core.core_ui.workshops_filter_status
+import taminx.core.core_ui.workshops_status_active
+import taminx.core.core_ui.workshops_status_any
+import taminx.core.core_ui.workshops_status_inactive
+import taminx.core.core_ui.workshops_status_semi_active
 import taminx.core.core_ui.workshops_filter_workshop_id
 import taminx.core.core_ui.workshops_search_action
 import taminx.core.core_ui.workshops_title
@@ -247,10 +253,11 @@ fun WorkshopsContent(
                 .padding(horizontal = Spacing.lg),
             verticalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
-            WorkshopFilterField(
+            TaminTextField(
                 value = workshopId,
                 onValueChange = onWorkshopIdChange,
                 label = stringResource(Res.string.workshops_filter_workshop_id),
+                keyboardType = KeyboardType.Number,
             )
 
             // The branch is chosen through استان → شهر → شعبه rather than typed: only its
@@ -275,10 +282,21 @@ fun WorkshopsContent(
                 onRetryBranches = onRetryBranches,
             )
 
-            WorkshopFilterField(
-                value = workshopStatus,
-                onValueChange = onWorkshopStatusChange,
-                label = stringResource(Res.string.workshops_filter_status),
+            // وضعیت کارگاه is a code on the wire ("01" فعال, "02" نیمه فعال, "03" غیرفعال), not
+            // free text — typing it was an invitation to send something the endpoint ignores.
+            val statusLabel = stringResource(Res.string.workshops_filter_status)
+            val statusOptions = workshopStatusOptions()
+            SelectableField(
+                label = statusLabel,
+                options = statusOptions,
+                selectedCode = workshopStatus,
+                selectedName = statusOptions.firstOrNull { it.code == workshopStatus }?.label
+                    .orEmpty(),
+                optionCode = { it.code },
+                optionName = { it.label },
+                isLoading = false,
+                onSelected = { onWorkshopStatusChange(it.code) },
+                sheetType = TaminBottomSheetType.WORKSHOP_STATUS,
             )
 
             TaminPrimaryButton(
@@ -325,33 +343,28 @@ fun WorkshopsContent(
     }
 }
 
+/** One row of the وضعیت کارگاه picker: the code the endpoint filters on, and its label. */
+private data class WorkshopStatusOption(val code: String, val label: String)
+
 /**
- * The two free-text filters. `core-ui` has no general labelled text field — `SegmentedInputField`
- * is a fixed-slot input — so this wraps Material's, dressed in the theme's own tokens rather than
- * the default palette.
+ * The statuses the workshops endpoint understands, taken from `old_android`'s
+ * `FilterWorkshopEnumClass`. The blank code is "no filter" — the old client spelled it `"00"`, but
+ * that is a sentinel it never sends, so omitting the filter says the same thing more honestly.
  */
 @Composable
-private fun WorkshopFilterField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-) {
-    val colors = LocalTaminColors.current
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        label = { TaminText(text = label, color = colors.textSecondary) },
-        singleLine = true,
-        shape = RoundedCornerShape(CornerRadius.lg),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = colors.blueText,
-            unfocusedBorderColor = colors.border,
-            focusedTextColor = colors.textPrimary,
-            unfocusedTextColor = colors.textPrimary,
-            cursorColor = colors.blueText,
-        ),
-        modifier = Modifier.fillMaxWidth(),
-    )
+private fun workshopStatusOptions(): List<WorkshopStatusOption> {
+    val any = stringResource(Res.string.workshops_status_any)
+    val active = stringResource(Res.string.workshops_status_active)
+    val semiActive = stringResource(Res.string.workshops_status_semi_active)
+    val inactive = stringResource(Res.string.workshops_status_inactive)
+    return remember(any, active, semiActive, inactive) {
+        listOf(
+            WorkshopStatusOption(code = "", label = any),
+            WorkshopStatusOption(code = "01", label = active),
+            WorkshopStatusOption(code = "02", label = semiActive),
+            WorkshopStatusOption(code = "03", label = inactive),
+        )
+    }
 }
 
 @Composable

@@ -101,7 +101,8 @@ fun <T> SelectableField(
             config = TaminBottomSheetConfig(
                 title = label,
                 type = sheetType,
-                showSearchInput = true,
+                // Only the long, searchable lists get a search box.
+                showSearchInput = sheetType.showSearch,
                 searchInputHint = label,
                 singleSelection = true,
                 isLoading = isLoading,
