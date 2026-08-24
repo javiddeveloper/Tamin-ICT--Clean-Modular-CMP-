@@ -51,7 +51,23 @@ internal class CityProvinceRepositoryImpl(
     }
 
     override fun getCities(cityName: String?, provinceCode: String?): Flow<List<CityDN>> = flow {
-        val response = commonRemoteDataSource.getCityName(CityListQuery.build(cityName))
+        // Same reasoning as getProvinces: show what was cached for this province while the
+        // request is in flight, and keep it if the request fails.
+        val cached = if (provinceCode.isNullOrBlank()) {
+            emptyList()
+        } else {
+            cityProvinceDao.getCitiesByProvinceCode(provinceCode).firstOrNull().orEmpty()
+        }
+        if (cached.isNotEmpty()) {
+            emit(cached.map { it.toDomain() })
+        }
+
+        val response = try {
+            commonRemoteDataSource.getCityName(CityListQuery.build(cityName, provinceCode))
+        } catch (e: Exception) {
+            if (cached.isEmpty()) throw e
+            return@flow
+        }
         response.list.forEach { cityDto ->
             cityProvinceDao.upsertCity(cityDto.toEntity())
         }
@@ -89,6 +105,13 @@ internal class CityProvinceRepositoryImpl(
         return cityProvinceCode.trimStart('0') == selectedProvinceCode.trimStart('0')
     }
 
+    /**
+     * Cached provinces first, then whatever the server has.
+     *
+     * `proxy/models/province` is not always up — it answered 503 during testing while other
+     * endpoints were fine. Provinces barely change, so a stale list beats an empty picker, and the
+     * failure is only raised when there is nothing cached to fall back on.
+     */
     override fun getProvinces(): Flow<List<ProvinceDN>> = flow {
         val localProvinces = cityProvinceDao.getAllProvinces().first()
         emit(localProvinces.map { it.toDomain() })

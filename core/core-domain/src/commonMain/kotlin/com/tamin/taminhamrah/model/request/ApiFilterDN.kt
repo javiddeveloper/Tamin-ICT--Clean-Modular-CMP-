@@ -47,6 +47,9 @@ enum class FilterProperty(val key: String) {
     @SerialName("cityCode") CITY_CODE("cityCode"),
     @SerialName("cityName") CITY_NAME("cityName"),
     @SerialName("provinceCode") PROVINCE_CODE("provinceCode"),
+    // Lower-case 'c' on purpose: proxy/models/city names the field `provincecode`, which is also
+    // why CityDto's @SerialName is spelled that way. Correcting it stops the filter working.
+    @SerialName("provincecode") PROVINCE_CODE_CITY("provincecode"),
     @SerialName("pensionerId") PENSIONER_ID("pensionerId"),
     @SerialName("startDate") START_DATE("startDate"),
     @SerialName("operation") OPERATION("operation"),

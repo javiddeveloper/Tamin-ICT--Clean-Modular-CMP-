@@ -15,6 +15,7 @@ import com.tamin.taminhamrah.useCases.bankAccount.RegisterBankAccountUseCase
 import com.tamin.taminhamrah.useCases.common.GetRecipientListUseCase
 import com.tamin.taminhamrah.useCases.common.GetBeneficiaryUseCase
 import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
+import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
 import com.tamin.taminhamrah.useCases.common.GetCitiesByProvinceUseCase
 import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
 import com.tamin.taminhamrah.useCases.common.GetInsuranceTypesUseCase
