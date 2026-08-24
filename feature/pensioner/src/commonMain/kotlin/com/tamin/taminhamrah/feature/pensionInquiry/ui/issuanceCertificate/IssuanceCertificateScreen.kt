@@ -25,8 +25,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.outlined.Badge
+import androidx.compose.material.icons.outlined.Ballot
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -74,6 +75,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_branch
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.ic_tamin_copy
@@ -275,9 +277,10 @@ private fun IssuanceCertificateInfoStep(
                 .fillMaxWidth()
                 .padding(horizontal = Spacing.page),
         ) {
+            Spacer(Modifier.height(Spacing.xl))
             Text(
                 text = stringResource(Res.string.issuance_certificate_info_title),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight(700)),
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 color = colors.textPrimary,
             )
 
@@ -299,7 +302,9 @@ private fun IssuanceCertificateInfoStep(
                     ?: stringResource(Res.string.issuance_certificate_recipient_placeholder),
                 isPlaceholder = state.selectedRecipient == null,
                 isError = state.recipientError != null,
-                showChevron = false,
+                icon = vectorResource(Res.drawable.ic_branch),
+                iconTint = colors.blueText,
+                showChevron = true,
                 onClick = { onIntent(IssuanceCertificateIntent.ShowRecipientsSheet) },
             )
             if (state.recipientError != null) {
@@ -314,6 +319,7 @@ private fun IssuanceCertificateInfoStep(
                 placeholder = stringResource(Res.string.issuance_certificate_branch_name_placeholder),
                 isError = state.branchNameError != null,
                 errorMessage = state.branchNameError,
+                textStyle = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
             )
 
             Spacer(Modifier.height(Spacing.lg))
@@ -371,38 +377,42 @@ private fun PensionerNumberCard(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(horizontalAlignment = Alignment.End) {
-            Text(
-                text = stringResource(Res.string.issuance_certificate_pensioner_number_label),
-                style = MaterialTheme.typography.labelSmall,
-                color = colors.textMuted,
-            )
-            Spacer(Modifier.height(Spacing.xxs))
-            Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+
+            Box(
+                modifier = Modifier
+                    .size(IconSize.xlarge)
+                    .clip(RoundedCornerShape(CornerRadius.iconTile))
+                    .background(colors.bgSurface)
+                    .border(1.dp, colors.border, RoundedCornerShape(CornerRadius.iconTile))
+                    .then(
+                        if (canSwitch) Modifier.clickable(onClick = onSwitchClicked) else Modifier
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Ballot,
+                    contentDescription = stringResource(Res.string.issuance_certificate_pensioner_number_label),
+                    tint = colors.blueText,
+                    modifier = Modifier.size(IconSize.medium),
+                )
+            }
+
+            Column(horizontalAlignment = Alignment.Start) {
+                Text(
+                    text = stringResource(Res.string.issuance_certificate_pensioner_number_label),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = colors.textMuted,
+                )
+                Spacer(Modifier.height(Spacing.xxs))
                 NumericText(
                     text = displayValue,
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                     color = colors.textPrimary,
                 )
-                if (canSwitch) {
-                    Spacer(Modifier.width(Spacing.sm))
-                    Box(
-                        modifier = Modifier
-                            .size(IconSize.textFieldIconContainer)
-                            .clip(RoundedCornerShape(CornerRadius.md))
-                            .background(colors.blueBg)
-                            .clickable(onClick = onSwitchClicked),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Badge,
-                            contentDescription = stringResource(Res.string.issuance_certificate_pensioner_number_label),
-                            tint = colors.blueText,
-                            modifier = Modifier.size(IconSize.small),
-                        )
-                    }
-                }
             }
+
+
         }
 
         if (copyAction != null) {
@@ -447,9 +457,10 @@ private fun IssuanceCertificateConfirmStep(
                 .fillMaxWidth()
                 .padding(horizontal = Spacing.page),
         ) {
+            Spacer(Modifier.height(Spacing.xl))
             Text(
                 text = stringResource(Res.string.issuance_certificate_confirm_title),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight(700)),
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 color = colors.textPrimary,
             )
 

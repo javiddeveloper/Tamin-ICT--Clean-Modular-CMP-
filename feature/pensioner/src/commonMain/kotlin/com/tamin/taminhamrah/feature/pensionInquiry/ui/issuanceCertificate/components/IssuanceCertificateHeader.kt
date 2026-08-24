@@ -11,13 +11,14 @@ import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import com.tamin.taminhamrah.ui.components.GlassIconTile
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -34,7 +35,9 @@ internal fun IssuanceCertificateHeader(
     modifier: Modifier = Modifier,
 ) {
     val taminColors = LocalTaminColors.current
-    val gradient = taminTopAppBarGradient()
+    val gradient = remember(taminColors.profileGradientStops) {
+        Brush.horizontalGradient(taminColors.profileGradientStops)
+    }
 
     Column(
         modifier = modifier
