@@ -31,7 +31,7 @@ import com.tamin.taminhamrah.feature.taminServices.occurrence.contract.Occurrenc
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.TaminBottomActionBar
-import com.tamin.taminhamrah.ui.components.TaminJalaliDatePickerBottomSheet
+import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.components.TaminJalaliTimePickerBottomSheet
 import com.tamin.taminhamrah.ui.components.TaminStyledTextField
 import com.tamin.taminhamrah.ui.components.TaminTextArea
@@ -78,7 +78,7 @@ internal fun Step5AccidentStep(
     val step = uiState.accident
 
     if (uiState.dialogs.showAccidentDatePicker) {
-        TaminJalaliDatePickerBottomSheet(
+        TaminJalaliDatePicker(
             title = stringResource(Res.string.occurrence_field_accident_date),
             onDismiss = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showAccidentDatePicker = false))) },
             onConfirm = { year, month, day ->

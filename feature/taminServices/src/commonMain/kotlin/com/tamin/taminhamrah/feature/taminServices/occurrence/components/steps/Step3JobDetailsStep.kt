@@ -36,7 +36,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.TaminBottomActionBar
 import com.tamin.taminhamrah.ui.components.TaminDivider
-import com.tamin.taminhamrah.ui.components.TaminJalaliDatePickerBottomSheet
+import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.components.TaminStyledTextField
 import com.tamin.taminhamrah.ui.components.TaminTextArea
 import com.tamin.taminhamrah.ui.components.topbars.TaminStepTopAppBar
@@ -77,7 +77,7 @@ internal fun Step3JobDetailsStep(
     val step = uiState.jobDetails
 
     if (uiState.dialogs.showEmploymentDatePicker) {
-        TaminJalaliDatePickerBottomSheet(
+        TaminJalaliDatePicker(
             title = stringResource(Res.string.occurrence_field_employment_date),
             onDismiss = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showEmploymentDatePicker = false))) },
             onConfirm = { year, month, day ->

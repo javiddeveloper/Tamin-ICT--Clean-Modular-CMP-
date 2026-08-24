@@ -47,7 +47,6 @@ import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminBottomActionBar
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
-import com.tamin.taminhamrah.ui.components.TaminJalaliDatePickerBottomSheet
 import com.tamin.taminhamrah.ui.components.TaminStyledTextField
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.taminSurface
@@ -60,7 +59,6 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.edict_insurance_id
-import taminx.core.core_ui.ic_privacy
 import taminx.core.core_ui.ic_tamin_calendar
 import taminx.core.core_ui.ic_tamin_user
 import taminx.core.core_ui.identity_field_birth_date
@@ -92,7 +90,7 @@ internal fun Step1PersonInfoStep(
         ?: step.personalInfo?.nationalCode.orEmpty()
 
     if (uiState.dialogs.showBirthDatePicker) {
-        TaminJalaliDatePickerBottomSheet(
+        TaminJalaliDatePicker(
             title = stringResource(Res.string.occurrence_field_birth_date),
             onDismiss = { onIntent(OccurrenceIntent.UpdateDialogs(uiState.dialogs.copy(showBirthDatePicker = false))) },
             onConfirm = { year, month, day ->
