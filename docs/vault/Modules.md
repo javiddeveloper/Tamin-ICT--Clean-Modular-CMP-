@@ -57,6 +57,7 @@ Colors, spacing, radius: [[Theme]] — never hardcode `Color`, `.dp`, or UI copy
 | `:feature:my-inbox` | `feature/my-inbox` | `…feature.myinbox` ⚠️ |
 | `:feature:addDependent` | `feature/addDependent` | `…feature.addDependent` |
 | `:feature:pensionStatusInquiry` | `feature/pensionStatusInquiry` | `…feature.pensionStatusInquiry` |
+| `:feature:girlSurvivor` | `feature/girlSurvivor` | `…feature.girlSurvivor` |
 
 ### Layout of a feature module
 

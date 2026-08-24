@@ -22,248 +22,142 @@ import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
-import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
-import io.ktor.client.statement.bodyAsChannel
+import com.tamin.taminhamrah.tools.safeCall
 
 class PensionRemoteDataSourceImpl(
     private val pensionApiService: PensionApiService,
     private val apiQueryBuilder: ApiQueryBuilder,
     private val errorParser: ErrorParser
 ) : PensionRemoteDataSource {
-    override suspend fun getPensionInquiry(query: ApiQueryParamDN): ListData<PensionInquiryDTO> {
-        return try {
-            val response =
-                pensionApiService.getPensionInquiry(apiQueryBuilder.buildQuery(query))
-            response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
-        }
+
+    override suspend fun getPensionInquiry(
+        query: ApiQueryParamDN
+    ): ListData<PensionInquiryDTO> = errorParser.safeCall("getPensionInquiry") {
+        val response = pensionApiService.getPensionInquiry(apiQueryBuilder.buildQuery(query))
+        response.extractData()
     }
 
-    override suspend fun getPensionerId(): ListData<PensionIdDTO> {
-        return try {
+    override suspend fun getPensionerId(): ListData<PensionIdDTO> =
+        errorParser.safeCall("getPensionerId") {
             val response = pensionApiService.getPensionerId()
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
+
+    override suspend fun getEdictPensioner(
+        query: ApiQueryParamDN
+    ): EdictPensionerDTO? = errorParser.safeCall("getEdictPensioner") {
+        val filterJson = apiQueryBuilder.buildFilterJson(query.filters)
+        val response = pensionApiService.getEdictPensioner(mapOf("filter" to filterJson))
+        response?.extractData()
     }
 
-    override suspend fun getEdictPensioner(query: ApiQueryParamDN): EdictPensionerDTO? {
-        return try {
-            val filterJson = apiQueryBuilder.buildFilterJson(query.filters)
-            val response =
-                pensionApiService.getEdictPensioner(mapOf("filter" to filterJson))
-            response?.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
-        }
-    }
-
-    override suspend fun sendRequestDeferredInstallmentCertificate(request: DeferredInstallmentRequest): DeferredInstallmentCertificateDTO {
-        return try {
+    override suspend fun sendRequestDeferredInstallmentCertificate(
+        request: DeferredInstallmentRequest
+    ): DeferredInstallmentCertificateDTO =
+        errorParser.safeCall("sendRequestDeferredInstallmentCertificate") {
             val response = pensionApiService.sendRequestDeferredInstallmentCertificate(request)
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
-    }
 
     override suspend fun getPensionerPayRoll(
         filter: List<ApiFilterDN>
-    ): ListData<PayRollDTO> {
-        return try {
-            val response =
-                pensionApiService.getPensionerPayRoll(apiQueryBuilder.buildFilterJson(filter))
-            response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
-        }
+    ): ListData<PayRollDTO> = errorParser.safeCall("getPensionerPayRoll") {
+        val response =
+            pensionApiService.getPensionerPayRoll(apiQueryBuilder.buildFilterJson(filter))
+        response.extractData()
     }
 
-    override suspend fun getDisabilityPersonalInfo(): DisabilityPersonalInfoDTO {
-        return try {
+    override suspend fun getDisabilityPersonalInfo(): DisabilityPersonalInfoDTO =
+        errorParser.safeCall("getDisabilityPersonalInfo") {
             val response = pensionApiService.getDisabilityPersonalInfo()
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
+
+    override suspend fun getUserAge(
+        filter: List<ApiFilterDN>
+    ): AgeDTO = errorParser.safeCall("getUserAge") {
+        val filterJson = apiQueryBuilder.buildFilterJson(filter)
+        val response = pensionApiService.getUserAge(mapOf("birthDate" to filterJson))
+        response.extractData()
     }
 
-    override suspend fun getUserAge(filter: List<ApiFilterDN>): AgeDTO {
-        return try {
-            val filterJson = apiQueryBuilder.buildFilterJson(filter)
-            val response =
-                pensionApiService.getUserAge(mapOf("birthDate" to filterJson))
-            response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+    override suspend fun pensionerPayRollPDF(
+        filter: List<ApiFilterDN>
+    ): PdfDownloadDTO = errorParser.safeCall("pensionerPayRollPDF", ErrorUri.UNKNOWN) {
+        val filterJson = apiQueryBuilder.buildFilterJson(filter)
+        val response = pensionApiService.pensionerPayRollPDF(mapOf("filter" to filterJson))
+        PdfDownloadDTO(
+            pdf = InputStreamDTO(
+                pdf = response.body()
             )
-        }
+        )
     }
 
-    override suspend fun pensionerPayRollPDF(filter: List<ApiFilterDN>): PdfDownloadDTO {
-        return try {
-            val filterJson = apiQueryBuilder.buildFilterJson(filter)
-            val response = pensionApiService.pensionerPayRollPDF(mapOf("filter" to filterJson))
-            PdfDownloadDTO(
-                pdf = InputStreamDTO(
-                    pdf = response.body()
-                )
+    override suspend fun getEdictReportPDF(
+        filter: List<ApiFilterDN>
+    ): PdfDownloadDTO = errorParser.safeCall("getEdictReportPDF", ErrorUri.UNKNOWN) {
+        val filterJson = apiQueryBuilder.buildFilterJson(filter)
+        val response = pensionApiService.getEdictReportPDF(mapOf("filter" to filterJson))
+        PdfDownloadDTO(
+            pdf = InputStreamDTO(
+                pdf = response.body()
             )
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.UNKNOWN)
-            )
-        }
+        )
     }
 
-    override suspend fun getEdictReportPDF(filter: List<ApiFilterDN>): PdfDownloadDTO {
-        return try {
-            val filterJson = apiQueryBuilder.buildFilterJson(filter)
-            val response = pensionApiService.getEdictReportPDF(mapOf("filter" to filterJson))
-            PdfDownloadDTO(
-                pdf = InputStreamDTO(
-                    pdf = response.body()
-                )
-            )
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.UNKNOWN)
-            )
-        }
+    override suspend fun getRetirementRequestInfo(
+        filter: List<ApiFilterDN>
+    ): ListData<RetirementRequestDTO> = errorParser.safeCall("getRetirementRequestInfo") {
+        val filterJson = apiQueryBuilder.buildFilterJson(filter)
+        val response = pensionApiService.getRetirementRequestInfo(mapOf("filter" to filterJson))
+        response.extractData()
     }
 
-
-    override suspend fun getRetirementRequestInfo(filter: List<ApiFilterDN>): ListData<RetirementRequestDTO> {
-        return try {
-            val filterJson = apiQueryBuilder.buildFilterJson(filter)
-            val response =
-                pensionApiService.getRetirementRequestInfo(mapOf("filter" to filterJson))
-            response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
-        }
-    }
-
-    override suspend fun checkRetirementStatus(): RetirementStatusDTO {
-        return try {
+    override suspend fun checkRetirementStatus(): RetirementStatusDTO =
+        errorParser.safeCall("checkRetirementStatus") {
             val response = pensionApiService.checkRetirementStatus()
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
-    }
-    override suspend fun authenticationAndGetPersonalInfo(authenticationsCode: Long): RetirementPersonalDTO {
-        return try {
-            val response = pensionApiService.authenticationAndGetPersonalInfo(authenticationsCode)
-            response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
-        }
+
+    override suspend fun authenticationAndGetPersonalInfo(
+        authenticationsCode: Long
+    ): RetirementPersonalDTO = errorParser.safeCall("authenticationAndGetPersonalInfo") {
+        val response = pensionApiService.authenticationAndGetPersonalInfo(authenticationsCode)
+        response.extractData()
     }
 
     override suspend fun sendRetirementDocument(
         requestId: String,
         request: RetirementSaveDocumentRequest
-    ): String? {
-        return try {
-            val response = pensionApiService.sendRetirementDocument(requestId, request)
-            response?.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
-        }
+    ): String? = errorParser.safeCall("sendRetirementDocument") {
+        val response = pensionApiService.sendRetirementDocument(requestId, request)
+        response?.extractData()
     }
-    override suspend fun getAuthenticationCode(): AuthenticationTicketDTO {
-        return try {
+
+    override suspend fun getAuthenticationCode(): AuthenticationTicketDTO =
+        errorParser.safeCall("getAuthenticationCode") {
             val response = pensionApiService.getAuthenticationCode()
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
+
+    override suspend fun sendEdictPensionerToMyInbox(
+        filter: List<ApiFilterDN>
+    ): String? = errorParser.safeCall("sendEdictPensionerToMyInbox") {
+        val filterJson = apiQueryBuilder.buildFilterJson(filter)
+        val response =
+            pensionApiService.sendEdictPensionerToMyInbox(mapOf("filter" to filterJson))
+        response.extractMessage()
     }
 
-    override suspend fun sendEdictPensionerToMyInbox(filter: List<ApiFilterDN>): String? {
-        return try {
-            val filterJson = apiQueryBuilder.buildFilterJson(filter)
-            val response =
-                pensionApiService.sendEdictPensionerToMyInbox(mapOf("filter" to filterJson))
-            response.extractMessage()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
-        }
-    }
-    override suspend fun sendRequestInquirePensionCertificate(filter: List<ApiFilterDN>) :String? {
-        return try {
-            val filterJson = apiQueryBuilder.buildFilterJson(filter)
-
-            val response = pensionApiService.sendRequestInquirePensionCertificate(
-                mapOf("filter" to filterJson)
-            )
-            response.extractMessage()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
-        }
+    override suspend fun sendRequestInquirePensionCertificate(
+        filter: List<ApiFilterDN>
+    ): String? = errorParser.safeCall("sendRequestInquirePensionCertificate") {
+        val filterJson = apiQueryBuilder.buildFilterJson(filter)
+        val response = pensionApiService.sendRequestInquirePensionCertificate(
+            mapOf("filter" to filterJson)
+        )
+        response.extractMessage()
     }
 }

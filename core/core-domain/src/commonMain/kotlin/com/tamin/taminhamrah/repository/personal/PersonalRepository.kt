@@ -12,10 +12,12 @@ import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionDN
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoDN
+import com.tamin.taminhamrah.model.personal.girlSurvivor.ConfirmGirlSurvivorDN
+import com.tamin.taminhamrah.model.personal.girlSurvivor.GirlSurvivorReportParamsDN
 import kotlinx.coroutines.flow.Flow
 
 interface PersonalRepository {
-    fun getPersonalInfo(): Flow<PersonalInfoDN?>
+    fun getPersonalInfo(refreshRemote: Boolean = false): Flow<PersonalInfoDN?>
     fun getDeceasedInfo(nationalId: String): Flow<DeceasedInfoDN>
     fun getAge(birthDate: Long): Flow<AgeDN>
     fun getDisabilityDependentInfo(filters: List<ApiFilterDN>): Flow<List<DisabilityDependentDN>>
@@ -24,6 +26,8 @@ interface PersonalRepository {
     fun submitFinalSurvivorPension(requestId: Int, body: SubmitFinalSurvivorPensionDN): Flow<String?>
     fun saveSurvivorInfo(body: SaveSurvivorInfoDN): Flow<String?>
     fun getFinalSurvivorPensionPDF(): Flow<PdfDownloadDN>
+    fun getGirlSurvivorReport(params: GirlSurvivorReportParamsDN): Flow<PdfDownloadDN>
+    fun confirmGirlSurvivor(body: ConfirmGirlSurvivorDN): Flow<String?>
     fun putInsuredRegistrationDocList(personalId: String, docs: List<InsuredDocDN>): Flow<String?>
     fun getRequestSummary(requestId: String): Flow<NewInsuredSummaryDN?>
 }
