@@ -6,6 +6,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,6 +36,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.components.DeceasedStep
+import com.tamin.taminhamrah.feature.pensionSurvivor.ui.components.FinalStep
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.components.RulesStep
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.components.SurvivorsStep
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.PensionSurvivorEvent
@@ -50,7 +53,9 @@ import com.tamin.taminhamrah.ui.components.StepIndicator
 import com.tamin.taminhamrah.ui.components.StepIndicatorModel
 import com.tamin.taminhamrah.ui.components.StepState
 import com.tamin.taminhamrah.ui.components.TaminBottomBar
-import com.tamin.taminhamrah.ui.components.TaminEmptyState
+import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
+import com.tamin.taminhamrah.ui.components.TaminFilledButton
+import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
@@ -70,13 +75,16 @@ import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.ic_tamin_cross
 import taminx.core.core_ui.pension_survivor_next_step
+import taminx.core.core_ui.pension_survivor_final_submit_success_message
+import taminx.core.core_ui.pension_survivor_final_submit_success_title
 import taminx.core.core_ui.pension_survivor_rules_unavailable
 import taminx.core.core_ui.pension_survivor_step_deceased
 import taminx.core.core_ui.pension_survivor_step_final
 import taminx.core.core_ui.pension_survivor_step_rules
 import taminx.core.core_ui.pension_survivor_step_survivors
 import taminx.core.core_ui.pension_survivor_title
-import taminx.core.core_ui.pension_survivor_todo_step
+import taminx.core.core_ui.action_confirm
+import taminx.core.core_ui.upload_submit_final
 
 @Composable
 fun PensionSurvivorScreen(
@@ -89,6 +97,7 @@ fun PensionSurvivorScreen(
     val rulesUnavailableMessage = stringResource(Res.string.pension_survivor_rules_unavailable)
     val lifecycleOwner = LocalLifecycleOwner.current
     var refreshSurvivorsOnResume by remember { mutableStateOf(false) }
+    var showPdfViewer by remember { mutableStateOf(false) }
 
     DisposableEffect(lifecycleOwner, state.currentStep, refreshSurvivorsOnResume) {
         val observer = LifecycleEventObserver { _, event ->
@@ -119,6 +128,7 @@ fun PensionSurvivorScreen(
             // TODO(rules-url): replace this toast with the legacy rules document URL/PDF when found.
             toaster.error(rulesUnavailableMessage)
         },
+        onOpenPdfViewer = { showPdfViewer = true },
     )
 
     PensionSurvivorContent(
@@ -128,7 +138,28 @@ fun PensionSurvivorScreen(
             else viewModel.sendIntent(PensionSurvivorIntent.PreviousStep)
         },
         onIntent = viewModel::sendIntent,
+        onOpenFinalPdf = { showPdfViewer = true },
     )
+
+    if (showPdfViewer) {
+        TaminPdfViewer(
+            fileName = "pension_survivor_final_${state.requestId ?: state.applicantNationalId}.pdf",
+            pdf = state.viewerPdf,
+            downloadFailed = state.viewerDownloadFailed,
+            onRequestDownload = { viewModel.sendIntent(PensionSurvivorIntent.RetryPdfDownload) },
+            onDismiss = {
+                showPdfViewer = false
+                viewModel.sendIntent(PensionSurvivorIntent.DismissPdfViewer)
+            },
+            title = stringResource(Res.string.pension_survivor_title),
+        )
+    }
+
+    if (state.showSuccessDialog) {
+        PensionSurvivorSuccessDialog(
+            onConfirm = { viewModel.sendIntent(PensionSurvivorIntent.DismissSuccessDialog) },
+        )
+    }
 }
 
 @Composable
@@ -138,13 +169,14 @@ private fun HandlePensionSurvivorEvents(
     onNavigateBack: () -> Unit,
     onNavigateToSurvivorInfo: (SurvivorDependentPR, String) -> Unit,
     onOpenRulesDocument: () -> Unit,
+    onOpenPdfViewer: () -> Unit,
 ) {
     events.collectWithLifecycleAware { event ->
         when (event) {
             is PensionSurvivorEvent.ShowToast -> onShowToast(event.message)
             PensionSurvivorEvent.NavigateBack -> onNavigateBack()
             PensionSurvivorEvent.OpenRulesDocument -> onOpenRulesDocument()
-            PensionSurvivorEvent.OpenPdfViewer -> Unit
+            PensionSurvivorEvent.OpenPdfViewer -> onOpenPdfViewer()
             is PensionSurvivorEvent.NavigateToSurvivorInfo -> {
                 onNavigateToSurvivorInfo(event.survivor, event.deceasedNationalId)
             }
@@ -157,6 +189,7 @@ private fun PensionSurvivorContent(
     state: PensionSurvivorUiState,
     onBack: () -> Unit,
     onIntent: (PensionSurvivorIntent) -> Unit,
+    onOpenFinalPdf: () -> Unit,
 ) {
     val taminColors = LocalTaminColors.current
     val step1Title = stringResource(Res.string.pension_survivor_step_rules)
@@ -312,7 +345,11 @@ private fun PensionSurvivorContent(
                         state = state,
                         onIntent = onIntent,
                     )
-                    PensionSurvivorStep.Final -> StepPlaceholder(stepTitle = step4Title)
+                    PensionSurvivorStep.Final -> FinalStep(
+                        state = state,
+                        onIntent = onIntent,
+                        onDownloadPdf = onOpenFinalPdf,
+                    )
                 }
             }
         }
@@ -328,7 +365,7 @@ private fun PensionSurvivorBottomBar(
         PensionSurvivorStep.Rules -> state.commitmentAccepted && !state.isProfileLoading
         PensionSurvivorStep.Deceased -> state.deceasedInfo != null && !state.isLoading
         PensionSurvivorStep.Survivors -> !state.isLoading
-        PensionSurvivorStep.Final -> false
+        PensionSurvivorStep.Final -> state.isPdfConfirmed && state.requestId != null && !state.isLoading
     }
 
     TaminBottomBar(
@@ -355,8 +392,20 @@ private fun PensionSurvivorBottomBar(
                     horizontalArrangement = Arrangement.spacedBy(Spacing.smd),
                 ) {
                     LoadingButton(
-                        text = stringResource(Res.string.pension_survivor_next_step),
-                        onClick = { onIntent(PensionSurvivorIntent.NextStep) },
+                        text = if (state.currentStep == PensionSurvivorStep.Final) {
+                            stringResource(Res.string.upload_submit_final)
+                        } else {
+                            stringResource(Res.string.pension_survivor_next_step)
+                        },
+                        onClick = {
+                            onIntent(
+                                if (state.currentStep == PensionSurvivorStep.Final) {
+                                    PensionSurvivorIntent.SubmitFinal
+                                } else {
+                                    PensionSurvivorIntent.NextStep
+                                },
+                            )
+                        },
                         enabled = nextEnabled,
                         isLoading = state.isLoading,
                         modifier = Modifier.weight(1f),
@@ -376,9 +425,22 @@ private fun PensionSurvivorBottomBar(
 }
 
 @Composable
-private fun StepPlaceholder(stepTitle: String) {
-    TaminEmptyState(
-        message = stringResource(Res.string.pension_survivor_todo_step, stepTitle),
-        modifier = Modifier.fillMaxSize(),
+private fun PensionSurvivorSuccessDialog(onConfirm: () -> Unit) {
+    val colors = LocalTaminColors.current
+    TaminConfirmationDialog(
+        title = stringResource(Res.string.pension_survivor_final_submit_success_title),
+        description = stringResource(Res.string.pension_survivor_final_submit_success_message),
+        confirmButton = {
+            TaminFilledButton(
+                text = stringResource(Res.string.action_confirm),
+                onClick = onConfirm,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
+        dismissButton = {},
+        onDismissRequest = onConfirm,
+        icon = Icons.Default.Check,
+        iconTint = colors.greenText,
+        iconBackground = colors.greenBg,
     )
 }

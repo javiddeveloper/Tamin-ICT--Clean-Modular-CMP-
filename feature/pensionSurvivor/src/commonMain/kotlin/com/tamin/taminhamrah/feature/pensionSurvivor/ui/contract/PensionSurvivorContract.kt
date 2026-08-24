@@ -25,6 +25,7 @@ data class PensionSurvivorUiState(
     val survivors: ImmutableList<SurvivorDependentPR> = persistentListOf(),
     val requestId: Int? = null,
     val viewerPdf: PdfDownloadPR? = null,
+    val viewerDownloadFailed: Boolean = false,
     val isPdfConfirmed: Boolean = false,
     val showSuccessDialog: Boolean = false,
 ) {
@@ -42,6 +43,7 @@ data class PensionSurvivorUiState(
         data class SurvivorsLoaded(val items: ImmutableList<SurvivorDependentPR>) : PartialState
         data class RequestIdLoaded(val requestId: Int?) : PartialState
         data class ViewerPdfChanged(val pdf: PdfDownloadPR?) : PartialState
+        data object ViewerDownloadFailed : PartialState
         data class PdfConfirmedChanged(val confirmed: Boolean) : PartialState
         data class ShowSuccessDialog(val show: Boolean) : PartialState
         data class Error(val message: String?) : PartialState
@@ -59,6 +61,7 @@ sealed interface PensionSurvivorIntent {
     data class OpenSurvivor(val item: SurvivorDependentPR) : PensionSurvivorIntent
     data object RefreshSurvivors : PensionSurvivorIntent
     data object DownloadFinalPdf : PensionSurvivorIntent
+    data object RetryPdfDownload : PensionSurvivorIntent
     data object DismissPdfViewer : PensionSurvivorIntent
     data class PdfConfirmedChanged(val confirmed: Boolean) : PensionSurvivorIntent
     data object SubmitFinal : PensionSurvivorIntent

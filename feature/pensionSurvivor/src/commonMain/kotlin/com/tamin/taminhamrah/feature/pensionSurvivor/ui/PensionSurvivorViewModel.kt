@@ -24,6 +24,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import org.jetbrains.compose.resources.getString
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.pension_survivor_final_request_unavailable
 
 class PensionSurvivorViewModel(
     private val getPersonalInfoUseCase: GetPersonalInfoUseCase,
@@ -82,6 +85,7 @@ class PensionSurvivorViewModel(
             }
             PensionSurvivorIntent.RefreshSurvivors -> loadSurvivors()
             PensionSurvivorIntent.DownloadFinalPdf -> downloadFinalPdf()
+            PensionSurvivorIntent.RetryPdfDownload -> downloadFinalPdf()
             PensionSurvivorIntent.DismissPdfViewer -> {
                 emit(PartialState.ViewerPdfChanged(null))
             }
@@ -103,7 +107,10 @@ class PensionSurvivorViewModel(
         currentState: PensionSurvivorUiState,
         partialState: PartialState,
     ): PensionSurvivorUiState = when (partialState) {
-        is PartialState.Loading -> currentState.copy(isLoading = partialState.isLoading)
+        is PartialState.Loading -> currentState.copy(
+            isLoading = partialState.isLoading,
+            viewerDownloadFailed = false,
+        )
         is PartialState.ProfileLoading -> currentState.copy(isProfileLoading = partialState.isProfileLoading)
         is PartialState.ApplicantLoaded -> currentState.copy(
             applicantFullName = partialState.fullName,
@@ -140,7 +147,12 @@ class PensionSurvivorViewModel(
         is PartialState.ViewerPdfChanged -> currentState.copy(
             viewerPdf = partialState.pdf,
             isLoading = false,
+            viewerDownloadFailed = false,
             isPdfConfirmed = if (partialState.pdf != null) false else currentState.isPdfConfirmed,
+        )
+        PartialState.ViewerDownloadFailed -> currentState.copy(
+            isLoading = false,
+            viewerDownloadFailed = true,
         )
         is PartialState.PdfConfirmedChanged -> currentState.copy(isPdfConfirmed = partialState.confirmed)
         is PartialState.ShowSuccessDialog -> currentState.copy(
@@ -233,11 +245,19 @@ class PensionSurvivorViewModel(
 
         emit(PartialState.Loading(true))
         getConfirmSurvivorsListUseCase(emptyList()).collect { confirmedItems ->
+            val requestId = confirmedItems.firstNotNullOfOrNull { item -> item.request?.id }
             emit(
                 PartialState.RequestIdLoaded(
-                    confirmedItems.firstNotNullOfOrNull { item -> item.request?.id },
+                    requestId = requestId,
                 ),
             )
+            if (requestId == null) {
+                sendEvent(
+                    PensionSurvivorEvent.ShowToast(
+                        getString(Res.string.pension_survivor_final_request_unavailable),
+                    ),
+                )
+            }
         }
     }
 
@@ -246,9 +266,14 @@ class PensionSurvivorViewModel(
 
         emit(PartialState.Loading(true))
         emit(PartialState.ViewerPdfChanged(null))
-        getFinalSurvivorPensionPDFUseCase().collect { pdf ->
-            emit(PartialState.ViewerPdfChanged(pdf.toPresentation()))
-            sendEvent(PensionSurvivorEvent.OpenPdfViewer)
+        try {
+            getFinalSurvivorPensionPDFUseCase().collect { pdf ->
+                emit(PartialState.ViewerPdfChanged(pdf.toPresentation()))
+                sendEvent(PensionSurvivorEvent.OpenPdfViewer)
+            }
+        } catch (e: Exception) {
+            emit(PartialState.ViewerDownloadFailed)
+            sendEvent(PensionSurvivorEvent.ShowToast(e.toSingleLineMessage()))
         }
     }
 

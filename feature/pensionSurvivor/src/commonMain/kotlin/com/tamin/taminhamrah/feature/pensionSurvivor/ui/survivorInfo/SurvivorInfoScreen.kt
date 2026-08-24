@@ -242,6 +242,7 @@ private fun SurvivorInfoContent(
                 color = colors.textPrimary,
             )
 
+            // TODO(upload-component): wire shared image upload component from other branch (death cert / ID pages).
             PlaceholderUploadCard(
                 title = stringResource(Res.string.pension_survivor_deceased_documents_title),
                 caption = stringResource(Res.string.pension_survivor_soon),
