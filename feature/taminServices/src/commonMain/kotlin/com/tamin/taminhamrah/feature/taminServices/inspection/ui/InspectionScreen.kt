@@ -114,10 +114,6 @@ fun InspectionRoute(
         onNavigateBack = onBackClicked,
     )
 
-   /* LaunchedEffect(Unit) {
-        viewModel.sendIntent(InspectionIntent.LoadInspections())
-    }*/
-
      if (uiState.showRequestFlow) {
          val onExitRequested = remember(uiState.requestStep) {
              {

@@ -178,7 +178,7 @@
     <string name="action_copy">کپی</string>
     <string name="action_copied">در حافظه کپی شد</string>
     <string name="action_show_details">نمایش جزئیات</string>
-    <string name="action_hide_details">مخفی کردن جزئیات</string>
+    <string name="action_hide_details">بستن</string>
     <string name="unit_rial">ریال</string>
     <string name="share_insured">سهم بیمه‌شده</string>
     <string name="share_organization">سهم سازمان</string>

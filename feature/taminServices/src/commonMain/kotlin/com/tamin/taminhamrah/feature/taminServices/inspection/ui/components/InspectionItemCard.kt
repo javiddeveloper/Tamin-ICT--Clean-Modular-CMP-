@@ -5,6 +5,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
@@ -52,6 +55,7 @@ import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.PersianDateFormatter
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
@@ -88,12 +92,17 @@ internal fun InspectionItemCard(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    var expanded by remember(item.inspectionNo) { mutableStateOf(false) }
+    var expanded by remember(item.inspectionNo) { mutableStateOf(true) }
 
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .coloredShadow(color = colors.shadowSubtle, borderRadius = CornerRadius.card, blurRadius = 26.dp, offsetY = 10.dp)
+            .coloredShadow(
+                color = colors.shadowSubtle,
+                borderRadius = CornerRadius.card,
+                blurRadius = 26.dp,
+                offsetY = 10.dp
+            )
             .taminSurface(),
     ) {
         Row(
@@ -181,16 +190,36 @@ internal fun InspectionItemCard(
                     )
 
                     if (item.isObjectable) {
-                        TaminOutlinedButton(
-                            text = stringResource(Res.string.inspection_download_report),
-                            onClick = { onDownloadReportClicked(item.inspectionNo) },
-                            icon = vectorResource(Res.drawable.ic_tamin_download),
-                            containerColor = colors.bgPage,
-                            borderColor = colors.divider,
-                            contentColor = colors.textSecondary,
-                            iconPosition = IconPosition.Start,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(
+                                    color = colors.chipBg,
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                .border(
+                                    width = 1.dp,
+                                    color = colors.blueText.copy(alpha = 0.5f),
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                .clickable {
+                                    onDownloadReportClicked(item.inspectionNo)
+                                }
+                                .padding(vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_tamin_download),
+                                tint = colors.blueText,
+                                contentDescription = "download_icon"
+                            )
+                            Text(
+                                text = stringResource(Res.string.inspection_download_report),
+                                style = MaterialTheme.typography.titleSmall.copy(color = colors.blueText)
+                            )
+                        }
                     }
                 }
             }
@@ -233,17 +262,6 @@ internal fun InspectionItemCard(
                     modifier = Modifier
                         .weight(1f)
                         .height(48.dp),
-                )
-            } else {
-                TaminOutlinedButton(
-                    height = 48.dp,
-                    textStyle = MaterialTheme.typography.titleSmall,
-                    contentColor = colors.textMuted,
-                    text = stringResource(Res.string.inspection_download_report_short),
-                    onClick = { onDownloadReportClicked(item.inspectionNo) },
-                    icon = vectorResource(Res.drawable.ic_tamin_download),
-                    iconPosition = IconPosition.End,
-                    modifier = Modifier.weight(1f),
                 )
             }
         }
