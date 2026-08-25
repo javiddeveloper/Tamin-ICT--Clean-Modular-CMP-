@@ -9,20 +9,15 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -30,12 +25,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.tamin.taminhamrah.feature.pensionSurvivor.NavigateToSurvivorInfoArgs
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.components.DeceasedStep
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.components.FinalStep
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.components.RulesStep
@@ -45,10 +40,7 @@ import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.PensionSurvivor
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.PensionSurvivorStep
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.PensionSurvivorUiState
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.SurvivorContactDraft
-import com.tamin.taminhamrah.model.personal.survivorDependent.SurvivorDependentPR
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
-import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
-import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
 import com.tamin.taminhamrah.ui.components.StepIndicator
@@ -64,7 +56,6 @@ import com.tamin.taminhamrah.ui.components.buttons.SquareIconButton
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.theme.CornerRadius
-import com.tamin.taminhamrah.ui.theme.HeaderDecoration
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.persistentListOf
@@ -73,7 +64,6 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.ic_request
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.ic_tamin_cross
@@ -95,7 +85,7 @@ import taminx.core.core_ui.upload_submit_final
 @Composable
 fun PensionSurvivorScreen(
     onBack: () -> Unit,
-    onNavigateToSurvivorInfo: (SurvivorDependentPR, String, SurvivorContactDraft?) -> Unit,
+    onNavigateToSurvivorInfo: (NavigateToSurvivorInfoArgs) -> Unit,
     savedDraftNationalId: String? = null,
     savedDraft: SurvivorContactDraft? = null,
     onSavedDraftConsumed: () -> Unit = {},
@@ -141,9 +131,9 @@ fun PensionSurvivorScreen(
         events = viewModel.events,
         onShowToast = { toaster.error(it) },
         onNavigateBack = onBack,
-        onNavigateToSurvivorInfo = { survivor, deceasedNationalId, draft ->
+        onNavigateToSurvivorInfo = { args ->
             refreshSurvivorsOnResume = true
-            onNavigateToSurvivorInfo(survivor, deceasedNationalId, draft)
+            onNavigateToSurvivorInfo(args)
         },
         onOpenRulesDocument = {
             // TODO(rules-url): replace this toast with the legacy rules document URL/PDF when found.
@@ -188,7 +178,7 @@ private fun HandlePensionSurvivorEvents(
     events: Flow<PensionSurvivorEvent>,
     onShowToast: (String) -> Unit,
     onNavigateBack: () -> Unit,
-    onNavigateToSurvivorInfo: (SurvivorDependentPR, String, SurvivorContactDraft?) -> Unit,
+    onNavigateToSurvivorInfo: (NavigateToSurvivorInfoArgs) -> Unit,
     onOpenRulesDocument: () -> Unit,
     onOpenPdfViewer: () -> Unit,
 ) {
@@ -199,7 +189,16 @@ private fun HandlePensionSurvivorEvents(
             PensionSurvivorEvent.OpenRulesDocument -> onOpenRulesDocument()
             PensionSurvivorEvent.OpenPdfViewer -> onOpenPdfViewer()
             is PensionSurvivorEvent.NavigateToSurvivorInfo -> {
-                onNavigateToSurvivorInfo(event.survivor, event.deceasedNationalId, event.draft)
+                onNavigateToSurvivorInfo(
+                    NavigateToSurvivorInfoArgs(
+                        survivor = event.survivor,
+                        deceasedNationalId = event.deceasedNationalId,
+                        draft = event.draft,
+                        branchCode = event.branchCode,
+                        deceasedInsuranceId = event.deceasedInsuranceId,
+                        sharedDeceasedDocuments = event.sharedDeceasedDocuments,
+                    ),
+                )
             }
         }
     }
@@ -293,25 +292,6 @@ private fun PensionSurvivorContent(
                     )
                 },
             ) {
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    DecorativeBackgroundCircle(
-                        size = HeaderDecoration.circleSize,
-                        xOffset = HeaderDecoration.circleXOffset,
-                        yOffset = HeaderDecoration.circleYOffset,
-                    )
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        AnimatedRingHeaderIcon(icon = vectorResource(Res.drawable.ic_request))
-                        Spacer(modifier = Modifier.height(Spacing.md))
-                        Text(
-                            text = currentStepTitle,
-                            style = MaterialTheme.typography.labelLarge,
-                            color = taminColors.textHeaderSubtitle,
-                        )
-                    }
-                }
             }
         },
         bottomBar = {
@@ -385,6 +365,7 @@ private fun PensionSurvivorBottomBar(
     val nextEnabled = when (state.currentStep) {
         PensionSurvivorStep.Rules -> state.commitmentAccepted && !state.isProfileLoading
         PensionSurvivorStep.Deceased -> state.deceasedInfo != null &&
+            state.isDeceasedHistoryConfirmed &&
             state.areDeceasedDocumentsComplete &&
             !state.isLoading &&
             !state.isDeceasedDocumentUploading

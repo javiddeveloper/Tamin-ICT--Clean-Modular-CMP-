@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.PensionSurvivor
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.PensionSurvivorStep
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.PensionSurvivorUiState
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.PensionSurvivorUiState.PartialState
+import com.tamin.taminhamrah.feature.pensionSurvivor.ui.relation.SharedDeceasedDocument
 import com.tamin.taminhamrah.mapper.personal.toPresentation
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
 import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionDN
@@ -84,6 +85,9 @@ class PensionSurvivorViewModel(
                 )
             }
             PensionSurvivorIntent.SearchDeceased -> searchDeceased()
+            is PensionSurvivorIntent.DeceasedHistoryConfirmedChanged -> {
+                emit(PartialState.DeceasedHistoryConfirmedChanged(intent.confirmed))
+            }
             is PensionSurvivorIntent.DeceasedDocumentClicked -> {
                 emit(PartialState.DeceasedDocumentSourceRequested(intent.type))
             }
@@ -96,11 +100,28 @@ class PensionSurvivorViewModel(
             }
             is PensionSurvivorIntent.OpenSurvivor -> {
                 if (intent.item.nationalId.isNotBlank()) {
+                    val state = uiState.value
+                    val sharedDeceasedDocuments =
+                        if (state.applicantNationalId.isNotBlank() &&
+                            state.applicantNationalId == intent.item.nationalId
+                        ) {
+                            state.deceasedDocuments.values.map { doc ->
+                                SharedDeceasedDocument(
+                                    documentTypeCode = doc.type.code,
+                                    guid = doc.guid,
+                                )
+                            }.toImmutableList()
+                        } else {
+                            persistentListOf()
+                        }
                     sendEvent(
                         PensionSurvivorEvent.NavigateToSurvivorInfo(
                             survivor = intent.item,
-                            deceasedNationalId = uiState.value.deceasedNationalId,
-                            draft = uiState.value.survivorContactDrafts[intent.item.nationalId],
+                            deceasedNationalId = state.deceasedNationalId,
+                            draft = state.survivorContactDrafts[intent.item.nationalId],
+                            branchCode = state.deceasedInfo?.branchCode.orEmpty(),
+                            deceasedInsuranceId = state.deceasedInfo?.insuranceId.orEmpty(),
+                            sharedDeceasedDocuments = sharedDeceasedDocuments,
                         ),
                     )
                 }
@@ -151,6 +172,7 @@ class PensionSurvivorViewModel(
         is PartialState.DeceasedNationalIdChanged -> currentState.copy(
             deceasedNationalId = partialState.value,
             deceasedInfo = null,
+            isDeceasedHistoryConfirmed = false,
             deceasedDocuments = persistentMapOf(),
             uploadingDeceasedDocument = null,
             failedDeceasedDocument = null,
@@ -166,7 +188,11 @@ class PensionSurvivorViewModel(
         )
         is PartialState.DeceasedLoaded -> currentState.copy(
             deceasedInfo = partialState.info,
+            isDeceasedHistoryConfirmed = false,
             isLoading = false,
+        )
+        is PartialState.DeceasedHistoryConfirmedChanged -> currentState.copy(
+            isDeceasedHistoryConfirmed = partialState.confirmed,
         )
         PartialState.DeceasedDocumentsCleared -> currentState.copy(
             deceasedDocuments = persistentMapOf(),
@@ -283,6 +309,7 @@ class PensionSurvivorViewModel(
 
             PensionSurvivorStep.Deceased -> {
                 if (state.deceasedInfo == null) return
+                if (!state.isDeceasedHistoryConfirmed) return
                 if (!state.areDeceasedDocumentsComplete) {
                     sendEvent(PensionSurvivorEvent.ShowToast(getString(Res.string.error_upload_all_docs)))
                     return

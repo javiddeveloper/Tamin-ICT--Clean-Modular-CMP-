@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract
 
 import androidx.compose.runtime.Immutable
+import com.tamin.taminhamrah.feature.pensionSurvivor.ui.relation.SharedDeceasedDocument
 import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoPR
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
 import com.tamin.taminhamrah.model.personal.survivorDependent.SurvivorDependentPR
@@ -62,6 +63,7 @@ data class PensionSurvivorUiState(
     val commitmentAccepted: Boolean = false,
     val deceasedNationalId: String = "",
     val deceasedInfo: DeceasedInfoPR? = null,
+    val isDeceasedHistoryConfirmed: Boolean = false,
     val deceasedDocuments: ImmutableMap<DeceasedDocumentType, DeceasedUploadedDocument> = persistentMapOf(),
     val uploadingDeceasedDocument: DeceasedDocumentType? = null,
     val failedDeceasedDocument: DeceasedDocumentType? = null,
@@ -96,6 +98,7 @@ data class PensionSurvivorUiState(
         data class CommitmentChanged(val accepted: Boolean) : PartialState
         data class DeceasedNationalIdChanged(val value: String) : PartialState
         data class DeceasedLoaded(val info: DeceasedInfoPR?) : PartialState
+        data class DeceasedHistoryConfirmedChanged(val confirmed: Boolean) : PartialState
         data object DeceasedDocumentsCleared : PartialState
         data class DeceasedDocumentSourceRequested(val type: DeceasedDocumentType) : PartialState
         data object DeceasedDocumentSourceDismissed : PartialState
@@ -128,6 +131,7 @@ sealed interface PensionSurvivorIntent {
     data object PreviousStep : PensionSurvivorIntent
     data class DeceasedNationalIdChanged(val value: String) : PensionSurvivorIntent
     data object SearchDeceased : PensionSurvivorIntent
+    data class DeceasedHistoryConfirmedChanged(val confirmed: Boolean) : PensionSurvivorIntent
     data class DeceasedDocumentClicked(val type: DeceasedDocumentType) : PensionSurvivorIntent
     data class DeceasedDocumentImagePicked(
         val type: DeceasedDocumentType,
@@ -158,6 +162,9 @@ sealed interface PensionSurvivorEvent {
         val survivor: SurvivorDependentPR,
         val deceasedNationalId: String,
         val draft: SurvivorContactDraft?,
+        val branchCode: String,
+        val deceasedInsuranceId: String,
+        val sharedDeceasedDocuments: ImmutableList<SharedDeceasedDocument>,
     ) : PensionSurvivorEvent
     data object OpenPdfViewer : PensionSurvivorEvent
     data object OpenRulesDocument : PensionSurvivorEvent

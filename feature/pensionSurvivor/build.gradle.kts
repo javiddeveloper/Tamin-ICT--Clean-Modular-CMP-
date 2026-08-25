@@ -65,6 +65,7 @@ kotlin {
                 implementation(libs.kotlinx.collections.immutable)
                 implementation(libs.filekit.core)
                 implementation(libs.filekit.dialog.compose)
+                implementation(libs.kotlinx.datetime)
                 if (localMocksDir.exists()) {
                     implementation(libs.ktor.client.core)
                 }

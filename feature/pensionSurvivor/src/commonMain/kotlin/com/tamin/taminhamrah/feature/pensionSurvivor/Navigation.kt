@@ -8,9 +8,11 @@ import androidx.navigation.NavOptions
 import androidx.navigation.toRoute
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.PensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.SurvivorContactDraft
+import com.tamin.taminhamrah.feature.pensionSurvivor.ui.relation.SharedDeceasedDocument
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.survivorInfo.SurvivorInfoScreen
 import com.tamin.taminhamrah.model.personal.survivorDependent.SurvivorDependentPR
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -30,6 +32,9 @@ data class SurvivorInfoRoute(
     val insuranceId: String,
     val tendencyCode: String,
     val deceasedNationalId: String,
+    val branchCode: String = "",
+    val deceasedInsuranceId: String = "",
+    val sharedDeceasedDocsPayload: String = "",
     val address: String = "",
     val phoneNumber: String = "",
     val mobileNumber: String = "",
@@ -59,24 +64,27 @@ fun NavGraphBuilder.pensionSurvivorScreen(
 
         PensionSurvivorScreen(
             onBack = onBack,
-            onNavigateToSurvivorInfo = { survivor, deceasedNationalId, draft ->
+            onNavigateToSurvivorInfo = { args ->
                 navController.navigate(
                     SurvivorInfoRoute(
-                        firstName = survivor.firstName,
-                        lastName = survivor.lastName,
-                        nationalId = survivor.nationalId,
-                        fatherName = survivor.fatherName,
-                        idCardNumber = survivor.idCardNumber,
-                        cityOfIssue = survivor.cityOfIssue,
-                        genderCode = survivor.genderCode,
-                        genderDesc = survivor.genderDesc,
-                        dateOfBirth = survivor.dateOfBirth,
-                        insuranceId = survivor.insuranceId,
-                        tendencyCode = survivor.tendencyCode,
-                        deceasedNationalId = deceasedNationalId,
-                        address = draft?.address.orEmpty(),
-                        phoneNumber = draft?.phoneNumber.orEmpty(),
-                        mobileNumber = draft?.mobileNumber.orEmpty(),
+                        firstName = args.survivor.firstName,
+                        lastName = args.survivor.lastName,
+                        nationalId = args.survivor.nationalId,
+                        fatherName = args.survivor.fatherName,
+                        idCardNumber = args.survivor.idCardNumber,
+                        cityOfIssue = args.survivor.cityOfIssue,
+                        genderCode = args.survivor.genderCode,
+                        genderDesc = args.survivor.genderDesc,
+                        dateOfBirth = args.survivor.dateOfBirth,
+                        insuranceId = args.survivor.insuranceId,
+                        tendencyCode = args.survivor.tendencyCode,
+                        deceasedNationalId = args.deceasedNationalId,
+                        branchCode = args.branchCode,
+                        deceasedInsuranceId = args.deceasedInsuranceId,
+                        sharedDeceasedDocsPayload = encodeSharedDeceasedDocs(args.sharedDeceasedDocuments),
+                        address = args.draft?.address.orEmpty(),
+                        phoneNumber = args.draft?.phoneNumber.orEmpty(),
+                        mobileNumber = args.draft?.mobileNumber.orEmpty(),
                     ),
                 )
             },
@@ -102,6 +110,9 @@ fun NavGraphBuilder.pensionSurvivorScreen(
         SurvivorInfoScreen(
             survivor = route.toSurvivor(),
             deceasedNationalId = route.deceasedNationalId,
+            branchCode = route.branchCode,
+            deceasedInsuranceId = route.deceasedInsuranceId,
+            sharedDeceasedDocuments = decodeSharedDeceasedDocs(route.sharedDeceasedDocsPayload),
             address = route.address,
             phoneNumber = route.phoneNumber,
             mobileNumber = route.mobileNumber,
@@ -116,6 +127,31 @@ fun NavGraphBuilder.pensionSurvivorScreen(
             },
             onBack = { navController.popBackStack() },
         )
+    }
+}
+
+data class NavigateToSurvivorInfoArgs(
+    val survivor: SurvivorDependentPR,
+    val deceasedNationalId: String,
+    val draft: SurvivorContactDraft?,
+    val branchCode: String,
+    val deceasedInsuranceId: String,
+    val sharedDeceasedDocuments: ImmutableList<SharedDeceasedDocument>,
+)
+
+internal fun encodeSharedDeceasedDocs(docs: List<SharedDeceasedDocument>): String {
+    if (docs.isEmpty()) return ""
+    return docs.joinToString(DOC_ENTRY_SEPARATOR) { "${it.documentTypeCode}$DOC_FIELD_SEPARATOR${it.guid}" }
+}
+
+internal fun decodeSharedDeceasedDocs(payload: String): List<SharedDeceasedDocument> {
+    if (payload.isBlank()) return emptyList()
+    return payload.split(DOC_ENTRY_SEPARATOR).mapNotNull { entry ->
+        val parts = entry.split(DOC_FIELD_SEPARATOR, limit = 2)
+        if (parts.size != 2) return@mapNotNull null
+        val type = parts[0].takeIf(String::isNotBlank) ?: return@mapNotNull null
+        val guid = parts[1].takeIf(String::isNotBlank) ?: return@mapNotNull null
+        SharedDeceasedDocument(documentTypeCode = type, guid = guid)
     }
 }
 
@@ -139,3 +175,5 @@ private const val PENSION_SURVIVOR_RESULT_NATIONAL_ID_KEY = "pensionSurvivorSave
 private const val PENSION_SURVIVOR_RESULT_ADDRESS_KEY = "pensionSurvivorSavedAddress"
 private const val PENSION_SURVIVOR_RESULT_PHONE_KEY = "pensionSurvivorSavedPhone"
 private const val PENSION_SURVIVOR_RESULT_MOBILE_KEY = "pensionSurvivorSavedMobile"
+private const val DOC_ENTRY_SEPARATOR = ";"
+private const val DOC_FIELD_SEPARATOR = "|"
