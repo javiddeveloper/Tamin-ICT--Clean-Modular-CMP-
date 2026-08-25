@@ -367,7 +367,7 @@ private fun DateWheels(
  */
 @Suppress("FrequentlyChangingValue")
 @Composable
-private fun WheelColumn(
+internal fun WheelColumn(
     items: ImmutableList<String>,
     selectedIndex: Int,
     onSelected: (Int) -> Unit,
@@ -467,9 +467,9 @@ private fun WheelColumn(
     }
 }
 
-/** The bordered outline beside the primary action. */
+/** The bordered outline beside the primary action. Shared with [TaminJalaliTimePicker]. */
 @Composable
-private fun CancelButton(
+internal fun CancelButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
