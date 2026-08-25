@@ -38,6 +38,10 @@ class InspectionViewModel(
     initialState = InspectionUiState()
 ) {
 
+    init {
+        sendIntent(InspectionIntent.LoadInspections())
+    }
+
     override fun handleIntent(intent: InspectionIntent): Flow<PartialState> {
         return when (intent) {
             is InspectionIntent.LoadInspections -> handleLoadInspections(intent)
