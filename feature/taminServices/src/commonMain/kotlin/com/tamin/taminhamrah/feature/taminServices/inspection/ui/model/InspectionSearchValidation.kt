@@ -1,7 +1,7 @@
 package com.tamin.taminhamrah.feature.taminServices.inspection.ui.model
 
 /** Local, client-side filter over the already-loaded inspection list — never sent to the API. */
-data class InspectionSearchCriteria(
+data class InspectionSearchValidation(
     val workshopNo: String = "",
     val inspectionNo: String = "",
 ) {

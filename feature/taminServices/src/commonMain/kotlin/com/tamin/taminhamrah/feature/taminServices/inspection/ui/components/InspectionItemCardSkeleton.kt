@@ -22,12 +22,6 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 
 private const val PLACEHOLDER_CARDS = 3
 
-/**
- * Placeholder list shown while inspections are loading, in place of [InspectionItemCard].
- *
- * Shaped like the real card on purpose (same header/chip row, two detail rows, footer buttons) so
- * nothing jumps in size once the real cards land.
- */
 @Composable
 internal fun InspectionListSkeleton(modifier: Modifier = Modifier) {
     Column(

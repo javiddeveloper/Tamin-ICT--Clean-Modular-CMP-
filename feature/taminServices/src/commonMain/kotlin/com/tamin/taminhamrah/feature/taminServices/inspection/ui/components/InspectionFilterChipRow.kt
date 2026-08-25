@@ -21,7 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.feature.taminServices.inspection.ui.model.InspectionSearchCriteria
+import com.tamin.taminhamrah.feature.taminServices.inspection.ui.model.InspectionSearchValidation
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -35,14 +35,9 @@ import taminx.core.core_ui.inspection_filter_label
 import taminx.core.core_ui.inspection_id
 import taminx.core.core_ui.inspection_workshop_code
 
-/**
- * Summarizes the active local search [criteria] as a single chip, with a "حذف" chip that clears
- * it back to the full API-loaded list — the same reset [InspectionSearchSheet]'s own clear
- * button performs.
- */
 @Composable
 internal fun InspectionFilterChipRow(
-    criteria: InspectionSearchCriteria,
+    criteria: InspectionSearchValidation,
     onClear: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -60,7 +55,6 @@ internal fun InspectionFilterChipRow(
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm, alignment = Alignment.CenterHorizontally),
-//        horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
@@ -112,7 +106,7 @@ internal fun InspectionFilterChipRow(
 private fun InspectionFilterChipRowPreviewLight() {
     PreviewRtlThemeContent {
         InspectionFilterChipRow(
-            criteria = InspectionSearchCriteria(workshopNo = "0546654564", inspectionNo = "6556456456"),
+            criteria = InspectionSearchValidation(workshopNo = "0546654564", inspectionNo = "6556456456"),
             onClear = {},
             modifier = Modifier.padding(Spacing.lg),
         )
@@ -124,7 +118,7 @@ private fun InspectionFilterChipRowPreviewLight() {
 private fun InspectionFilterChipRowPreviewDark() {
     PreviewRtlThemeContent(darkTheme = true) {
         InspectionFilterChipRow(
-            criteria = InspectionSearchCriteria(workshopNo = "0546654564", inspectionNo = "6556456456"),
+            criteria = InspectionSearchValidation(workshopNo = "0546654564", inspectionNo = "6556456456"),
             onClear = {},
             modifier = Modifier.padding(Spacing.lg),
         )

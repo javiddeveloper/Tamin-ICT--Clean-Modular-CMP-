@@ -26,11 +26,6 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.inspection_search_empty_subtitle
 import taminx.core.core_ui.inspection_search_empty_title
 
-/**
- * Shown when the API list has inspections but the local search criteria matches none of them —
- * a dashed-outline card rather than [com.tamin.taminhamrah.ui.components.EmptyStateMessage]'s
- * icon-tile treatment, distinguishing "no results for this filter" from "no inspections at all".
- */
 @Composable
 internal fun InspectionSearchEmptyState(
     modifier: Modifier = Modifier,

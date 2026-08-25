@@ -19,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.feature.taminServices.inspection.ui.contract.InspectionIntent
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
@@ -42,7 +41,6 @@ import taminx.core.core_ui.inspection_title
 @Composable
 internal fun InspectionHeader(
     onBackClicked: () -> Unit,
-    onIntent: (InspectionIntent) -> Unit,
     modifier: Modifier = Modifier,
     collapseProgress: () -> Float = { 0f },
     onSearchClicked: () -> Unit = {},
@@ -97,23 +95,6 @@ internal fun InspectionHeader(
                         style = MaterialTheme.typography.labelLarge,
                         color = taminColors.textHeaderSubtitle,
                     )
-                    /*
-                                Spacer(Modifier.height(Spacing.sm))
-
-                                CustomChip(
-                                    text = stringResource(Res.string.inspection_count_format, count.toString().toPersianDigits()),
-                                    containerColor = taminColors.chipBg,
-                                    textColor = taminColors.textPrimary,
-                                    border = BorderStroke(width = 1.dp, color = taminColors.hawkesBlue),
-                                )
-
-                                Spacer(Modifier.height(Spacing.lg))
-
-                                TaminPrimaryButton(
-                                    text = stringResource(Res.string.inspection_request_button),
-                                    onClick = onRequestInspectionClicked,
-                                    background = taminTopAppBarGradient(),
-                                )*/
                 }
             }
         }
@@ -127,7 +108,6 @@ private fun InspectionHeaderPreviewLight() {
     PreviewRtlThemeContent {
         InspectionHeader(
             onBackClicked = {},
-            onIntent = {},
         )
     }
 }
@@ -138,7 +118,6 @@ private fun InspectionHeaderPreviewDark() {
     PreviewRtlThemeContent(darkTheme = true) {
         InspectionHeader(
             onBackClicked = {},
-            onIntent = {},
         )
     }
 }

@@ -1,9 +1,12 @@
 package com.tamin.taminhamrah.feature.taminServices.inspection.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -12,10 +15,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Assignment
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -25,9 +33,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionFilterChipRow
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionHeader
@@ -39,32 +51,40 @@ import com.tamin.taminhamrah.feature.taminServices.inspection.ui.contract.Inspec
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.contract.InspectionIntent
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.contract.InspectionUiState
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.model.InspectionPerformedPR
-import com.tamin.taminhamrah.feature.taminServices.inspection.ui.model.InspectionSearchCriteria
+import com.tamin.taminhamrah.feature.taminServices.inspection.ui.model.InspectionSearchValidation
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
+import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
+import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.rememberCollapsingHeaderState
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
-import com.tamin.taminhamrah.ui.components.reservedHeight
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
+import com.tamin.taminhamrah.ui.components.reservedHeight
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
 import com.tamin.taminhamrah.ui.components.toast.AppToastHost
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.Toast
 import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.components.toast.info
+import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.TaminNavy300
+import com.tamin.taminhamrah.ui.theme.TaminNavy900
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.inspection_coming_soon_toast
+import taminx.core.core_ui.inspection_count_format
 import taminx.core.core_ui.inspection_empty_subtitle
 import taminx.core.core_ui.inspection_empty_title
 import taminx.core.core_ui.inspection_report_filename_format
+import taminx.core.core_ui.inspection_request_button
 
 private val HeaderCollapseDistance = 160.dp
 
@@ -116,9 +136,7 @@ internal fun InspectionScreen(
     uiState: InspectionUiState,
     onIntent: (InspectionIntent) -> Unit,
     onBackClicked: () -> Unit,
-    // Only ever non-default from a preview, to render the "no results for this filter" branch
-    // without exercising the search sheet.
-    initialSearchCriteria: InspectionSearchCriteria = InspectionSearchCriteria(),
+    initialSearchCriteria: InspectionSearchValidation = InspectionSearchValidation(),
 ) {
     val taminColors = LocalTaminColors.current
     val toaster = LocalToaster.current
@@ -130,9 +148,6 @@ internal fun InspectionScreen(
     var showSearchSheet by remember { mutableStateOf(false) }
     var searchCriteria by remember { mutableStateOf(initialSearchCriteria) }
 
-    // Purely local filtering over whatever the API last returned — clearing the criteria (via the
-    // filter chip's close button or the sheet's own clear button) falls straight back to
-    // uiState.inspections without any re-fetch.
     val visibleInspections = remember(uiState.inspections, searchCriteria) {
         if (searchCriteria.isEmpty) {
             uiState.inspections
@@ -162,6 +177,72 @@ internal fun InspectionScreen(
                 Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
             }
 
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Button(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(
+                                brush = Brush.linearGradient(
+                                    colors = listOf(
+                                        TaminNavy300,
+                                        TaminNavy900
+                                    )
+                                )
+                            )
+                            .padding(vertical = 2.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent
+                        ),
+                        onClick = {  },
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            TaminText(text = "+", color = Color.White)
+                            Spacer(Modifier.width(4.dp))
+                            TaminText(
+                                text = stringResource(Res.string.inspection_request_button),
+                                color = Color.White
+                            )
+                        }
+
+                    }
+                    Spacer(Modifier.width(Spacing.sm))
+                    Column(
+                        verticalArrangement = Arrangement.Top,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(
+                                color = taminColors.bgSurface,
+                                shape = RoundedCornerShape(16.dp)
+                            )
+                            .border(
+                                width = 1.dp,
+                                color = taminColors.border,
+                                shape = RoundedCornerShape(16.dp)
+                            )
+                            .padding(horizontal = 12.dp)
+                    ) {
+                        TaminText(
+                            text = uiState.inspections?.size?.toString() ?: "0",
+                            color = taminColors.textPrimary
+                        )
+                        TaminText(
+                            text = stringResource(Res.string.inspection_count_format),
+                            color = taminColors.textMuted,
+                            fontSize = 12.sp
+                        )
+                    }
+                }
+            }
+
             if (uiState.isLoading && uiState.inspections.isEmpty()) {
                 item {
                     InspectionListSkeleton()
@@ -184,7 +265,7 @@ internal fun InspectionScreen(
                     item {
                         InspectionFilterChipRow(
                             criteria = searchCriteria,
-                            onClear = { searchCriteria = InspectionSearchCriteria() },
+                            onClear = { searchCriteria = InspectionSearchValidation() },
                             modifier = Modifier.padding(horizontal = Spacing.lg),
                         )
                     }
@@ -221,14 +302,11 @@ internal fun InspectionScreen(
         }
 
         InspectionHeader(
-//            count = uiState.inspections.size,
             collapseProgress = collapse.progressProvider,
             onBackClicked = onBackClicked,
-//            onRequestInspectionClicked = { toaster.info(comingSoonMessage) },
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .onSizeChanged { headerHeightPx = it.height },
-            onIntent = {},
             onSearchClicked = { showSearchSheet = true },
         )
 
@@ -260,7 +338,7 @@ internal fun InspectionScreen(
                 showSearchSheet = false
             },
             onClear = {
-                searchCriteria = InspectionSearchCriteria()
+                searchCriteria = InspectionSearchValidation()
                 showSearchSheet = false
             },
         )
@@ -339,7 +417,7 @@ private fun PreviewInspectionScreenSearchEmptyDark() {
     }
 }
 
-private val PreviewNoMatchSearchCriteria = InspectionSearchCriteria(inspectionNo = "00000000000")
+private val PreviewNoMatchSearchCriteria = InspectionSearchValidation(inspectionNo = "00000000000")
 
 private val PreviewMockInspections = listOf(
     InspectionPerformedPR(

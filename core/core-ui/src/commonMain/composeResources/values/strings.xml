@@ -784,7 +784,7 @@
     <!-- ===================== Inspection Screen ===================== -->
     <string name="inspection_title">بازرسی‌ها</string>
     <string name="inspection_subtitle">بازرسی‌های انجام‌شده توسط سازمان</string>
-    <string name="inspection_count_format">%1$s بازرسی</string>
+    <string name="inspection_count_format">بازرسی</string>
     <string name="inspection_request_button">درخواست بازرسی</string>
     <string name="inspection_coming_soon_toast">این امکان به‌زودی فعال می‌شود</string>
     <string name="inspection_empty_title">بازرسی‌ای یافت نشد</string>

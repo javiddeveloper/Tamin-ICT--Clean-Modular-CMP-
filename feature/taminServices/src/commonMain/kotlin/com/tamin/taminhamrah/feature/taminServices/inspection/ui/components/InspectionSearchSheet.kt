@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -31,12 +29,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.feature.taminServices.inspection.ui.model.InspectionSearchCriteria
+import com.tamin.taminhamrah.feature.taminServices.inspection.ui.model.InspectionSearchValidation
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
-import com.tamin.taminhamrah.ui.components.IconPosition
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -46,7 +42,6 @@ import com.tamin.taminhamrah.ui.theme.TaminNavy900
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.bank_account_add
 import taminx.core.core_ui.ic_tamin_search
 import taminx.core.core_ui.inspection_id
 import taminx.core.core_ui.inspection_search_button
@@ -56,18 +51,12 @@ import taminx.core.core_ui.inspection_search_sheet_title
 import taminx.core.core_ui.inspection_workshop_code
 
 private val SearchFieldHeight = 48.dp
-
-/**
- * Local, offline search over inspections already loaded on screen — never re-hits the API.
- * The caller owns [InspectionSearchCriteria]; this sheet only edits a working copy until the
- * user taps search or clear.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InspectionSearchSheet(
-    initial: InspectionSearchCriteria,
+    initial: InspectionSearchValidation,
     onDismiss: () -> Unit,
-    onApply: (InspectionSearchCriteria) -> Unit,
+    onApply: (InspectionSearchValidation) -> Unit,
     onClear: () -> Unit,
 ) {
     val colors = LocalTaminColors.current
@@ -136,7 +125,7 @@ fun InspectionSearchSheet(
                     containerColor = colors.bgSurface,
                     text = stringResource(Res.string.inspection_search_clear_button),
                     onClick = {
-                        criteria = InspectionSearchCriteria()
+                        criteria = InspectionSearchValidation()
                         onClear()
                     },
                     modifier = Modifier.weight(0.3f),
@@ -221,7 +210,7 @@ private fun LabeledSearchField(
 private fun InspectionSearchSheetPreviewLight() {
     PreviewRtlThemeContent {
         InspectionSearchSheet(
-            initial = InspectionSearchCriteria(),
+            initial = InspectionSearchValidation(),
             onDismiss = {},
             onApply = {},
             onClear = {},
@@ -234,7 +223,7 @@ private fun InspectionSearchSheetPreviewLight() {
 private fun InspectionSearchSheetPreviewDark() {
     PreviewRtlThemeContent(darkTheme = true) {
         InspectionSearchSheet(
-            initial = InspectionSearchCriteria(
+            initial = InspectionSearchValidation(
                 workshopNo = "0117742260",
                 inspectionNo = "01631894"
             ),

@@ -78,11 +78,6 @@ private val InspectionPerformedPR.isObjectable: Boolean get() = objectable == "1
 private const val CHEVRON_OPEN_DEGREES = -90f
 private const val CHEVRON_CLOSED_DEGREES = 90f
 
-/**
- * One inspection record: a summary row, a two-column detail grid behind a "نمایش جزئیات"
- * disclosure — the expandable box with animation — and a footer whose action button depends on
- * whether the inspection is still objectable.
- */
 @Composable
 internal fun InspectionItemCard(
     item: InspectionPerformedPR,
@@ -139,7 +134,6 @@ internal fun InspectionItemCard(
                 .padding(horizontal = Spacing.xlg),
             verticalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
-            // Row 1 (Always visible)
             DetailGridRow(
                 labelStart = stringResource(Res.string.inspection_workshop_code),
                 valueStart = item.workshopNo,
@@ -149,7 +143,6 @@ internal fun InspectionItemCard(
                 numericEnd = false,
             )
 
-            // Row 2 (Always visible)
             DetailGridRow(
                 labelStart = stringResource(Res.string.inspection_date),
                 valueStart = PersianDateFormatter.formatTimestamp(item.inspectionDate),
@@ -170,7 +163,6 @@ internal fun InspectionItemCard(
                             .padding(vertical = Spacing.xs),
                     )
 
-                    // Row 3
                     DetailGridRow(
                         labelStart = stringResource(Res.string.inspection_insurance_no),
                         valueStart = item.insuranceNo,
@@ -179,7 +171,6 @@ internal fun InspectionItemCard(
                         numericEnd = false,
                     )
 
-                    // Row 4 (Full-width Activity Description)
                     InfoBox(
                         label = stringResource(Res.string.inspection_activity_type),
                         value = item.activityDesc,
@@ -187,7 +178,6 @@ internal fun InspectionItemCard(
                         modifier = Modifier.fillMaxWidth(),
                     )
 
-                    // Full-width Download Button (inside expanded area, objectable mode only)
                     if (item.isObjectable) {
                         TaminOutlinedButton(
                             text = stringResource(Res.string.inspection_download_report),
