@@ -79,6 +79,7 @@ import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.ic_tamin_cross
 import taminx.core.core_ui.ic_tamin_search
 import taminx.core.core_ui.inquiry_submit_button
+import taminx.core.core_ui.orotez_protez_confirm_and_continue
 import taminx.core.core_ui.pension_survivor_next_step
 import taminx.core.core_ui.pension_survivor_final_submit_success_message
 import taminx.core.core_ui.pension_survivor_final_submit_success_title
@@ -383,7 +384,10 @@ private fun PensionSurvivorBottomBar(
 ) {
     val nextEnabled = when (state.currentStep) {
         PensionSurvivorStep.Rules -> state.commitmentAccepted && !state.isProfileLoading
-        PensionSurvivorStep.Deceased -> state.deceasedInfo != null && !state.isLoading
+        PensionSurvivorStep.Deceased -> state.deceasedInfo != null &&
+            state.areDeceasedDocumentsComplete &&
+            !state.isLoading &&
+            !state.isDeceasedDocumentUploading
         PensionSurvivorStep.Survivors -> !state.isLoading
         PensionSurvivorStep.Final -> state.isPdfConfirmed && state.requestId != null && !state.isLoading
     }
@@ -433,6 +437,8 @@ private fun PensionSurvivorBottomBar(
                             LoadingButton(
                                 text = if (state.currentStep == PensionSurvivorStep.Final) {
                                     stringResource(Res.string.upload_submit_final)
+                                } else if (state.currentStep == PensionSurvivorStep.Deceased) {
+                                    stringResource(Res.string.orotez_protez_confirm_and_continue)
                                 } else {
                                     stringResource(Res.string.pension_survivor_next_step)
                                 },

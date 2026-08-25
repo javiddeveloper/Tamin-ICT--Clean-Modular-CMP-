@@ -1,7 +1,9 @@
 package com.tamin.taminhamrah.feature.pensionSurvivor.ui
 
 import app.cash.turbine.test
+import com.tamin.taminhamrah.feature.pensionSurvivor.fake.FakeContractsRepository
 import com.tamin.taminhamrah.feature.pensionSurvivor.fake.FakePensionSurvivorPersonalRepository
+import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.DeceasedDocumentChecklist
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.PensionSurvivorEvent
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.PensionSurvivorIntent
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.PensionSurvivorStep
@@ -16,6 +18,7 @@ import com.tamin.taminhamrah.model.personal.survivorDependent.SurvivorDependentD
 import com.tamin.taminhamrah.model.personal.survivorDependent.SurvivorDependentPR
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
 import com.tamin.taminhamrah.model.personal.survivorList.RequestModelDN
+import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
 import com.tamin.taminhamrah.useCases.personal.GetAgeUseCase
 import com.tamin.taminhamrah.useCases.personal.GetConfirmSurvivorsListUseCase
 import com.tamin.taminhamrah.useCases.personal.GetDeceasedInfoUseCase
@@ -44,6 +47,8 @@ class PensionSurvivorViewModelTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private lateinit var repository: FakePensionSurvivorPersonalRepository
+    private lateinit var contractsRepository: FakeContractsRepository
+    private lateinit var uploadImageUseCase: UploadImageUseCase
     private lateinit var viewModel: PensionSurvivorViewModel
 
     @BeforeTest
@@ -67,6 +72,8 @@ class PensionSurvivorViewModelTest {
             )
             deceasedInfoResult = sampleDeceasedInfo()
         }
+        contractsRepository = FakeContractsRepository()
+        uploadImageUseCase = UploadImageUseCase(contractsRepository)
         viewModel = buildViewModel()
         testDispatcher.scheduler.advanceUntilIdle()
     }
@@ -142,6 +149,7 @@ class PensionSurvivorViewModelTest {
         viewModel.sendIntent(PensionSurvivorIntent.DeceasedNationalIdChanged("1234567890"))
         viewModel.sendIntent(PensionSurvivorIntent.SearchDeceased)
         testDispatcher.scheduler.advanceUntilIdle()
+        uploadAllDeceasedDocuments()
 
         viewModel.sendIntent(PensionSurvivorIntent.NextStep)
         testDispatcher.scheduler.advanceUntilIdle()
@@ -155,14 +163,34 @@ class PensionSurvivorViewModelTest {
     }
 
     private fun moveToFinalStep() {
+        moveToDeceasedStepWithDocuments()
+        viewModel.sendIntent(PensionSurvivorIntent.NextStep)
+        testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.sendIntent(PensionSurvivorIntent.NextStep)
+        testDispatcher.scheduler.advanceUntilIdle()
+    }
+
+    private fun moveToDeceasedStepWithDocuments() {
         viewModel.sendIntent(PensionSurvivorIntent.CommitmentChanged(true))
         viewModel.sendIntent(PensionSurvivorIntent.NextStep)
         viewModel.sendIntent(PensionSurvivorIntent.DeceasedNationalIdChanged("1234567890"))
         viewModel.sendIntent(PensionSurvivorIntent.SearchDeceased)
         testDispatcher.scheduler.advanceUntilIdle()
+        uploadAllDeceasedDocuments()
         viewModel.sendIntent(PensionSurvivorIntent.NextStep)
         testDispatcher.scheduler.advanceUntilIdle()
-        viewModel.sendIntent(PensionSurvivorIntent.NextStep)
+    }
+
+    private fun uploadAllDeceasedDocuments() {
+        DeceasedDocumentChecklist.forEach { type ->
+            viewModel.sendIntent(
+                PensionSurvivorIntent.DeceasedDocumentImagePicked(
+                    type = type,
+                    fileName = "${type.name}.jpg",
+                    bytes = byteArrayOf(type.ordinal.toByte()),
+                ),
+            )
+        }
         testDispatcher.scheduler.advanceUntilIdle()
     }
 
@@ -175,6 +203,7 @@ class PensionSurvivorViewModelTest {
             getConfirmSurvivorsListUseCase = GetConfirmSurvivorsListUseCase(repository),
             getFinalSurvivorPensionPDFUseCase = GetFinalSurvivorPensionPDFUseCase(repository),
             submitFinalSurvivorPensionUseCase = SubmitFinalSurvivorPensionUseCase(repository),
+            uploadImageUseCase = uploadImageUseCase,
         )
     }
 
