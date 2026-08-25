@@ -53,6 +53,26 @@ import taminx.core.core_ui.date_picker_today
  * wheel-panel constants from the day picker so both spin and settle identically; only the day
  * wheel and its clamping are dropped.
  */
+
+/** The wheel shows this many rows; the middle one is the selection. Must stay odd. */
+private const val VISIBLE_ROWS = 5
+
+private val ROW_HEIGHT = 48.dp
+private val WHEEL_HEIGHT = ROW_HEIGHT * VISIBLE_ROWS
+
+/** Where the top and bottom fades give way to clear glass — one row's worth at each end. */
+private const val EDGE_FADE_STOP = 1f / VISIBLE_ROWS
+
+/**
+ * The floor of the year wheel — the conventional start for Jalali pickers in Iranian apps. The
+ * ceiling is today: every date this picker collects (birthdate, prescription date, a record
+ * search range) is a date that has already happened, so a future one is never a valid answer.
+ */
+private const val FIRST_YEAR = 1300
+
+private const val SELECTION_BORDER_ALPHA = 0.25f
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaminJalaliMonthYearPickerBottomSheet(
