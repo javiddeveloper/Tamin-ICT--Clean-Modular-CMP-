@@ -11,7 +11,6 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll.PayRollScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.EdictScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.issuanceCertificate.IssuanceCertificateScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.deferredInstallment.DeferredInstallmentScreen
-import com.tamin.taminhamrah.feature.pensionInquiry.ui.girlSurvivor.GirlSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.pensionSurvivor.PensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.DisabilityPensionScreen
 import kotlinx.serialization.Serializable
@@ -36,9 +35,6 @@ data object IssuanceCertificateRoute
 
 @Serializable
 data object DeferredInstallmentRoute
-
-@Serializable
-data object GirlSurvivorRoute
 
 @Serializable
 data object PensionSurvivorRoute
@@ -72,10 +68,6 @@ fun NavController.navigateToIssuanceCertificate(navOptions: NavOptions? = null) 
 
 fun NavController.navigateToDeferredInstallment(navOptions: NavOptions? = null) {
     navigate(DeferredInstallmentRoute, navOptions)
-}
-
-fun NavController.navigateToGirlSurvivor(navOptions: NavOptions? = null) {
-    navigate(GirlSurvivorRoute, navOptions)
 }
 
 fun NavController.navigateToPensionSurvivor(navOptions: NavOptions? = null) {
@@ -125,12 +117,6 @@ fun NavGraphBuilder.issuanceCertificateScreen(onBack: () -> Unit) {
 fun NavGraphBuilder.deferredInstallmentScreen(onBack: () -> Unit) {
     composableWithFadeTransitions<DeferredInstallmentRoute> {
         DeferredInstallmentScreen(onBack = onBack)
-    }
-}
-
-fun NavGraphBuilder.girlSurvivorScreen(onBack: () -> Unit) {
-    composableWithFadeTransitions<GirlSurvivorRoute> {
-        GirlSurvivorScreen(onBack = onBack)
     }
 }
 

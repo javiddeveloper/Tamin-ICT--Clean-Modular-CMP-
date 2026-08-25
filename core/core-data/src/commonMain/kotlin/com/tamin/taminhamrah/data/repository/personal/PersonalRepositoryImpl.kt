@@ -18,6 +18,8 @@ import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
 import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoDN
+import com.tamin.taminhamrah.model.personal.girlSurvivor.ConfirmGirlSurvivorDN
+import com.tamin.taminhamrah.model.personal.girlSurvivor.GirlSurvivorReportParamsDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.personal.PersonalRepository
@@ -33,9 +35,11 @@ class PersonalRepositoryImpl(
     private val personalRemoteDataSource: PersonalRemoteDataSource,
     private val personalDao: PersonalDao
 ) : PersonalRepository {
-    override fun getPersonalInfo(): Flow<PersonalInfoDN?> = flow {
+    override fun getPersonalInfo(refreshRemote: Boolean): Flow<PersonalInfoDN?> = flow {
         val localInfo = personalDao.getPersonalInfo().first()
-        emit(localInfo?.toDomain())
+        if (!refreshRemote) {
+            emit(localInfo?.toDomain())
+        }
 
         try {
             val response = personalRemoteDataSource.getPersonalInfo()
@@ -45,7 +49,7 @@ class PersonalRepositoryImpl(
                 personalDao.upsertPersonalInfo(remoteInfo.toEntity())
             }
         } catch (e: Exception) {
-            if (localInfo == null) {
+            if (localInfo == null || refreshRemote) {
                 throw e
             }
         }
@@ -102,6 +106,25 @@ class PersonalRepositoryImpl(
 
     override fun getFinalSurvivorPensionPDF(): Flow<PdfDownloadDN> = flow {
         emit(personalRemoteDataSource.getFinalSurvivorPensionPDF().toDomain())
+    }
+
+    override fun getGirlSurvivorReport(params: GirlSurvivorReportParamsDN): Flow<PdfDownloadDN> = flow {
+        emit(
+            personalRemoteDataSource.getGirlSurvivorReport(
+                address = params.address,
+                tel = params.tel,
+                postalCode = params.postalCode,
+                fatherName = params.fatherName,
+                birthDate = params.birthDate,
+                insuranceId = params.insuranceId,
+                parentCode = params.parentCode,
+                pensionerId = params.pensionerId,
+            ).toDomain()
+        )
+    }
+
+    override fun confirmGirlSurvivor(body: ConfirmGirlSurvivorDN): Flow<String?> = flow {
+        emit(personalRemoteDataSource.confirmGirlSurvivor(body.toDTO()))
     }
 
     override fun saveSurvivorInfo(body: SaveSurvivorInfoDN): Flow<String?> = flow {

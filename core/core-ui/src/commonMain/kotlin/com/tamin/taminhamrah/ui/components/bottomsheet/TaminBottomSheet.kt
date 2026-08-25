@@ -237,7 +237,22 @@ fun TaminBottomSheet(
                         }
                     }
                 }
-            } else if (config.items.isNotEmpty()) {
+            } else if (config.items.isEmpty()) {
+                // Without this the sheet drew nothing at all — no rows, no explanation — which is
+                // indistinguishable from a broken screen.
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    TaminText(
+                        text = stringResource(Res.string.no_items_found),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = LocalTaminColors.current.textTertiary
+                    )
+                }
+            } else {
                 val options = filteredItems.map { it.title }
                 val selectedIndices = filteredItems
                     .mapIndexedNotNull { index, item -> if (selectedIds.contains(item.id)) index else null }

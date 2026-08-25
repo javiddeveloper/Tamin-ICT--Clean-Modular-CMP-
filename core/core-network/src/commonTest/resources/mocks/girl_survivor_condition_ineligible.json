@@ -1,0 +1,14 @@
+{
+  "status": 400,
+  "family": "CLIENT_ERROR",
+  "reason": "شرایط احراز نشده است",
+  "traceId": "girl-survivor-condition-fail",
+  "data": null,
+  "hasError": true,
+  "problems": [
+    {
+      "error_Code": 9001,
+      "error_Msg": "فرد مشمول تعهدنامه فرزندان دختر نیست"
+    }
+  ]
+}
