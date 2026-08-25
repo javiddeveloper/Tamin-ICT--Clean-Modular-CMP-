@@ -298,12 +298,10 @@ private fun PregnancyPayContent(
                 modifier = Modifier.weight(1f),
             ) { step ->
                 when (step) {
-                    PregnancyPayStep.Landing -> Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                        if (state.isLoading) {
-                            PregnancyPayLandingShimmer()
-                        } else {
-                            PregnancyPayLandingStep(state = state, onIntent = onIntent)
-                        }
+                    PregnancyPayStep.Landing -> if (state.isLoading) {
+                        PregnancyPayLandingShimmer()
+                    } else {
+                        PregnancyPayLandingStep(state = state, onIntent = onIntent)
                     }
 
                     PregnancyPayStep.BranchAndRest -> PregnancyPayBranchAndRestStep(state = state, onIntent = onIntent)
