@@ -366,7 +366,8 @@ private fun PensionSurvivorBottomBar(
         PensionSurvivorStep.Rules -> state.commitmentAccepted && !state.isProfileLoading
         PensionSurvivorStep.Deceased -> state.deceasedInfo != null &&
             state.isDeceasedHistoryConfirmed &&
-            state.areDeceasedDocumentsComplete &&
+            //todo un commit this part before merge
+//            state.areDeceasedDocumentsComplete &&
             !state.isLoading &&
             !state.isDeceasedDocumentUploading
         PensionSurvivorStep.Survivors -> !state.isLoading
