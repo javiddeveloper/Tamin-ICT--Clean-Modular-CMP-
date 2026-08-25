@@ -13,6 +13,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -25,11 +26,14 @@ import com.tamin.taminhamrah.feature.taminServices.inspection.contract.Inspectio
 import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionUiState
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.CustomChip
 import com.tamin.taminhamrah.ui.components.InputRestriction
 import com.tamin.taminhamrah.ui.components.TaminStyledTextField
 import com.tamin.taminhamrah.ui.components.TaminText
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.ValidationUtils
+import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.inspection_request_field_email_error
@@ -43,7 +47,9 @@ import taminx.core.core_ui.inspection_request_field_full_name
 import taminx.core.core_ui.inspection_request_field_placeholder
 import taminx.core.core_ui.inspection_request_next_step
 import taminx.core.core_ui.inspection_request_prev_step
+import taminx.core.core_ui.inspection_request_source_chip_format
 import taminx.core.core_ui.inspection_request_step1_section_title
+import taminx.core.core_ui.inspection_request_step2_section_title
 
 @Composable
 internal fun IdentityContactStep(
@@ -55,6 +61,7 @@ internal fun IdentityContactStep(
 ) {
     val step = uiState.identityContact
     val placeholder = stringResource(Res.string.inspection_request_field_placeholder)
+    val colors = LocalTaminColors.current
 
     InspectionRequestStepScaffold(
         modifier = modifier,
@@ -80,10 +87,26 @@ internal fun IdentityContactStep(
             ) {
                 Spacer(Modifier.height(Spacing.md))
 
-                TaminText(
-                    text = stringResource(Res.string.inspection_request_step1_section_title),
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    TaminText(
+                        text = stringResource(Res.string.inspection_request_step1_section_title),
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    )
+                    if (uiState.isObjectionRequest && !uiState.requestInspectionNo.isNullOrBlank()) {
+                        CustomChip(
+                            text = stringResource(
+                                Res.string.inspection_request_source_chip_format,
+                                uiState.requestInspectionNo.orEmpty().toPersianDigits(),
+                            ),
+                            containerColor = colors.blueBg,
+                            textColor = colors.blueText,
+                        )
+                    }
+                }
 
                 Spacer(Modifier.height(Spacing.lg))
 

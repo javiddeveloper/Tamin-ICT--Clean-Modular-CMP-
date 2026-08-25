@@ -92,7 +92,7 @@ internal fun InspectionItemCard(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    var expanded by remember(item.inspectionNo) { mutableStateOf(true) }
+    var expanded by remember(item.inspectionNo) { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -189,7 +189,6 @@ internal fun InspectionItemCard(
                         modifier = Modifier.fillMaxWidth(),
                     )
 
-                    if (item.isObjectable) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -220,7 +219,6 @@ internal fun InspectionItemCard(
                                 style = MaterialTheme.typography.titleSmall.copy(color = colors.blueText)
                             )
                         }
-                    }
                 }
             }
         }

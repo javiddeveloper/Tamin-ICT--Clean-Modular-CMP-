@@ -1042,6 +1042,7 @@
     <string name="inspection_search_empty_subtitle">فیلتر را حذف کنید یا درخواست بازرسی ثبت کنید.</string>
 
     <!-- Inspection Request Wizard -->
+    <string name="inspection_request_source_chip_format">بازرسی %1$s</string>
     <string name="inspection_request_step1_label">هویت و تماس</string>
     <string name="inspection_request_step2_label">اطلاعات کارگاه</string>
     <string name="inspection_request_step3_label">شرح درخواست</string>
