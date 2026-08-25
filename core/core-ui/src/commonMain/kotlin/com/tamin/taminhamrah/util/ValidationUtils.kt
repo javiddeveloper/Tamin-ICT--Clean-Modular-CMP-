@@ -13,6 +13,16 @@ object ValidationUtils {
     }
 
     /**
+     * Filters input to only digit characters and caps length to 11 digits. Does not force a
+     * `09` prefix while typing — [isMobileNumberValid] is what flags an incomplete/wrong-prefix
+     * number, so the field can show a normal validation error instead of silently rewriting
+     * whatever the user typed.
+     */
+    fun validateMobileNumber(input: String): String {
+        return input.filter { it.isDigit() }.take(11)
+    }
+
+    /**
      * Filters input to only digit characters and caps length to 11 digits.
      */
     fun validateLandline(input: String): String {
@@ -38,6 +48,13 @@ object ValidationUtils {
      */
     fun isLandlineValid(landline: String): Boolean {
         return landline.isEmpty() || landline.length == 11
+    }
+
+    /**
+     * Returns true if the phone matches an Iranian mobile number (`09` + 9 digits).
+     */
+    fun isMobileNumberValid(phone: String): Boolean {
+        return Regex("^09\\d{9}$").matches(phone)
     }
 
     /**
