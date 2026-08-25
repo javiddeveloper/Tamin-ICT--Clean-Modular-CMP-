@@ -76,7 +76,8 @@ val TaminLightIconTintSubtle = Color(0xFF5E7392)
 // Icon-tile tints the کارگاه action list draws, taken from the design's own values.
 val TaminLightMint = Color(0xFF3DA35D)
 val TaminLightMintBg = Color(0xFFE9F7EE)
-val TaminLightTealBg = Color(0xFFE3F6F5)
+val TaminLightTealBg = Color(0xFFEAF7F7)
+val TaminLightBlueBorder = Color(0xFFD7E6FF)
 val TaminLightPurpleBg = Color(0xFFF1EAFB)
 
 // Dark mode collapses every screen's hero onto one teal-to-blue wash.
@@ -108,7 +109,8 @@ val TaminDarkGreenBg = Color(0x2910B981)     // rgba(16,185,129,.16)
 // which is how every other tinted fill in this palette is built.
 val TaminDarkMint = Color(0xFF6FCB8C)
 val TaminDarkMintBg = Color(0x293DA35D)
-val TaminDarkTealBg = Color(0x292FB9BC)
+val TaminDarkTealBg = Color(0x245BD8D4)      // rgba(91,216,212,.14)
+val TaminDarkBlueBorder = Color(0x476396FF)  // rgba(99,150,255,.28)
 val TaminDarkPurpleBg = Color(0x297C4BC0)
 
 val Primary50 = Color(0xFFEFF4FF)
@@ -158,6 +160,12 @@ val CoreDivider = Color(0xFFF2F4F8)
 
 // Profile Icon Gradients
 val IconGradientBlueStart = Color(0xFF3B6FD4)
+
+// The two card-button gradients the کارگاه screens use beside the blue one.
+val GradientGreenStart = Color(0xFF22A06B)
+val GradientGreenEnd = Color(0xFF03794A)
+val GradientOrangeStart = Color(0xFFF0A83C)
+val GradientOrangeEnd = Color(0xFFC97E0A)
 val IconGradientBlueEnd = Color(0xFF173D7E)
 
 val IconGradientPurpleStart = Color(0xFF8B7CE8)
@@ -296,7 +304,7 @@ val TaminCostsOperationsInk = Color(0xFFFFFFFF)
  * Ink and translucency layers on the insured-person card.
  *
  * Fixed rather than theme-varying: the card carries its own dark teal gradient in both themes, so
- * everything on it is a wash of white at a set strength rather than a surface colour.
+ * everything on it is a wash of white at a set strength rather than a surface color.
  */
 val TaminInsuranceCardInk = Color(0xFFFFFFFF)
 val TaminInsuranceCardInkMuted = TaminInsuranceCardInk.copy(alpha = 0.75f)
@@ -312,7 +320,7 @@ val TaminInsuranceCardTrackBg = TaminInsuranceCardInk.copy(alpha = 0.08f)
  * header, the costs hero, timeline actions.
  *
  * Named rather than `Color.White.copy(alpha = …)` at each call site so the set is countable: every
- * value here is one the design actually specifies, and a new one has to be added deliberately.
+ * value here is one of the design actually specifies, and a new one has to be added deliberately.
  */
 val TaminOnAccentInk = Color(0xFFFFFFFF)
 val TaminOnAccentInkSoft = TaminOnAccentInk.copy(alpha = 0.90f)

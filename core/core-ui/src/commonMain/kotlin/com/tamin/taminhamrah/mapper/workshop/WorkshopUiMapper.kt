@@ -168,6 +168,7 @@ fun WorkshopMemberDN.toPresentation(): WorkshopMemberPR = WorkshopMemberPR(
     relationType = relationTypeDescription.orDash(),
     leavingWorkStatus = leavingWorkStatus.orDash(),
     leavingWorkDate = leavingWorkDate.orDashDate(),
+    isEmployed = leavingWorkDate == null,
 )
 
 fun WorkshopStackHolderDN.toPresentation(): WorkshopStackHolderPR = WorkshopStackHolderPR(

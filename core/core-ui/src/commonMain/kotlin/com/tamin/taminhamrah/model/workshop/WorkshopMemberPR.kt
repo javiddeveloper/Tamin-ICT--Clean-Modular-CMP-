@@ -14,4 +14,11 @@ data class WorkshopMemberPR(
     val relationType: String = "",
     val leavingWorkStatus: String = "",
     val leavingWorkDate: String = "",
+    /**
+     * Whether this person is still on the workshop's books.
+     *
+     * Decided from the leaving date rather than by matching the status wording, which is free
+     * text the service composes and can reword without notice.
+     */
+    val isEmployed: Boolean = false,
 )

@@ -17,13 +17,12 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.feature.workshops.ui.WorkshopConstants
 import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
+import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -38,7 +37,7 @@ import taminx.core.core_ui.workshop_empty_list
 /**
  * The list every screen under کارگاه‌های کارفرما draws.
  *
- * All eight page, shimmer and end the same way, so the behaviour lives here once: a skeleton until
+ * All eight page, shimmer and end the same way, so the behavior lives here once: a skeleton until
  * the first page lands, an empty state when the service answers with nothing, the rubber-band
  * overscroll the rest of the app uses, and a request for the next page raised from the scroll
  * position rather than from a button.
@@ -52,7 +51,7 @@ fun <T> WorkshopListScaffold(
     onLoadMore: () -> Unit,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
-    contentPadding: PaddingValues = PaddingValues(Spacing.page),
+    contentPadding: PaddingValues = WorkshopDimens.listContentPadding,
     emptyMessage: String = stringResource(Res.string.workshop_empty_list),
     key: ((T) -> Any)? = null,
     header: (@Composable () -> Unit)? = null,
@@ -88,7 +87,7 @@ fun <T> WorkshopListScaffold(
         if (!canLoadMore) return@LaunchedEffect
         snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0 }
             .distinctUntilChanged()
-            .filter { it >= state.items.lastIndex - LOAD_MORE_THRESHOLD }
+            .filter { it >= state.items.lastIndex - WorkshopConstants.LOAD_MORE_THRESHOLD }
             .collect { onLoadMore() }
     }
 
@@ -99,7 +98,7 @@ fun <T> WorkshopListScaffold(
         verticalArrangement = Arrangement.spacedBy(Spacing.md),
         overscrollEffect = rememberJellyOverscroll(),
     ) {
-        header?.let { item(key = HEADER_KEY) { it() } }
+        header?.let { item(key = WorkshopConstants.HEADER_KEY) { it() } }
 
         itemsIndexed(
             items = state.items,
@@ -113,12 +112,12 @@ fun <T> WorkshopListScaffold(
         ) { _, item -> row(item) }
 
         if (state.isLoadingMore) {
-            item(key = FOOTER_KEY) {
+            item(key = WorkshopConstants.FOOTER_KEY) {
                 Box(
                     modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.md),
                     contentAlignment = Alignment.Center,
                 ) {
-                    CircularProgressIndicator(modifier = Modifier.height(FooterSpinnerSize))
+                    CircularProgressIndicator(modifier = Modifier.height(WorkshopDimens.footerSpinnerSize))
                 }
             }
         }
@@ -133,8 +132,8 @@ fun <T> WorkshopListScaffold(
 @Composable
 fun WorkshopListSkeleton(
     modifier: Modifier = Modifier,
-    rowCount: Int = SKELETON_ROWS,
-    contentPadding: PaddingValues = PaddingValues(Spacing.page),
+    rowCount: Int = WorkshopConstants.SKELETON_ROWS,
+    contentPadding: PaddingValues = WorkshopDimens.listContentPadding,
     header: (@Composable () -> Unit)? = null,
 ) {
     Column(
@@ -144,16 +143,10 @@ fun WorkshopListSkeleton(
         header?.invoke()
         repeat(rowCount) {
             ShimmerBlock(
-                modifier = Modifier.fillMaxWidth().height(SkeletonRowHeight),
+                modifier = Modifier.fillMaxWidth().height(WorkshopDimens.skeletonRowHeight),
                 cornerRadius = CornerRadius.lg,
             )
         }
     }
 }
 
-private const val HEADER_KEY = "workshop-list-header"
-private const val FOOTER_KEY = "workshop-list-footer"
-private const val SKELETON_ROWS = 4
-private const val LOAD_MORE_THRESHOLD = 2
-private val SkeletonRowHeight = 132.dp
-private val FooterSpinnerSize = 28.dp

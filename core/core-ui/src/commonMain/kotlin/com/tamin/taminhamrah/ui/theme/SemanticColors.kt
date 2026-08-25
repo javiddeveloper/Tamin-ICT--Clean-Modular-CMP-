@@ -64,6 +64,14 @@ data class TaminColors(
     val teal: Color,
     /** The fill [teal] sits on when it tints an icon tile. */
     val tealBg: Color,
+    /**
+     * The hairline a blue-on-white control is outlined with — a dashed code chip, a quiet
+     * card action, a filter chip.
+     *
+     * Distinct from [hawkesBlue], which several features already use as a fixed light blue and
+     * which goes grey in dark theme; this one stays blue in both, as the design has it.
+     */
+    val blueBorder: Color,
 
     // Shadows
     val shadowPrimary: Color,
@@ -108,6 +116,10 @@ data class TaminColors(
     val aiAssistantTint: Color,
     val verifiedBadgeBg: Color,
     val buttonGradient: Brush,
+    /** Confirming fill — «تأیید و ارسال». */
+    val successGradient: Brush,
+    /** A time-limited action that must be noticed — «اعتراض به بدهی برآوردی». */
+    val alertGradient: Brush,
     val buttonDisabledGradient: Brush,
 
     // Verified Status Tokens
@@ -146,6 +158,7 @@ val LightTaminColors = TaminColors(
     dangerText = TaminLightError,
     teal = Secondary700,
     tealBg = TaminLightTealBg,
+    blueBorder = TaminLightBlueBorder,
     bgIconProfile = TaminLightSurface,
     iconGradientPrimary = Brush.verticalGradient(
         listOf(
@@ -227,6 +240,8 @@ val LightTaminColors = TaminColors(
     springGreenText = TaminSpringGreen,
     verifiedBadgeBg = TaminLightSurface,
     buttonGradient = Brush.horizontalGradient(listOf(IconGradientBlueStart, IconGradientBlueEnd)),
+    successGradient = Brush.linearGradient(listOf(GradientGreenStart, GradientGreenEnd)),
+    alertGradient = Brush.linearGradient(listOf(GradientOrangeStart, GradientOrangeEnd)),
     buttonDisabledGradient = Brush.horizontalGradient(
         listOf(
             TaminLightTextMuted.copy(alpha = 0.4f),
@@ -268,6 +283,7 @@ val DarkTaminColors = TaminColors(
     dangerText = TaminDarkError,
     teal = Secondary500,
     tealBg = TaminDarkTealBg,
+    blueBorder = TaminDarkBlueBorder,
     bgIconProfile = TaminLightSurface,
     iconGradientPrimary = Brush.verticalGradient(
         listOf(
@@ -355,6 +371,8 @@ val DarkTaminColors = TaminColors(
     springGreenText = TaminDarkSuccess,
     verifiedBadgeBg = TaminDarkGreenBg,
     buttonGradient = Brush.horizontalGradient(listOf(IconGradientBlueStart, IconGradientBlueEnd)),
+    successGradient = Brush.linearGradient(listOf(GradientGreenStart, GradientGreenEnd)),
+    alertGradient = Brush.linearGradient(listOf(GradientOrangeStart, GradientOrangeEnd)),
     buttonDisabledGradient = Brush.horizontalGradient(
         listOf(
             TaminDarkTextMuted.copy(alpha = 0.4f),

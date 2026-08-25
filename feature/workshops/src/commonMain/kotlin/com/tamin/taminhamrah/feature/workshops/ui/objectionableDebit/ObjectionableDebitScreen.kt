@@ -1,24 +1,30 @@
 package com.tamin.taminhamrah.feature.workshops.ui.objectionableDebit
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButton
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButtonTone
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopListScaffold
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopRecordCard
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopScreenShell
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopSectionHeader
+import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
+import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.model.workshop.ObjectionKind
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtPR
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.DetailRow
-import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
-import com.tamin.taminhamrah.ui.components.taminSurface
-import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
-import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.util.toPersianDigits
+import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
@@ -29,21 +35,27 @@ import taminx.core.core_ui.payment_sheet_agreement_row
 import taminx.core.core_ui.payment_sheet_debit_number
 import taminx.core.core_ui.workshop_action_objection
 import taminx.core.core_ui.workshop_debt_amount
+import taminx.core.core_ui.workshop_debt_customer_code
 import taminx.core.core_ui.workshop_debt_from_date
 import taminx.core.core_ui.workshop_debt_notify_date
+import taminx.core.core_ui.workshop_debt_remaining
 import taminx.core.core_ui.workshop_debt_to_date
 
 /**
  * اعتراض به بدهی.
  *
- * Each row carries one action, and the debt itself decides which: the button is labelled from
- * the objection kind rather than from anything the screen keeps.
+ * Each row carries one action, and the debt itself decides which: the button is labeled from the
+ * objection kind rather than from anything the screen keeps. An already-filed objection is offered
+ * for viewing and so reads as a quiet outline; one still to be filed is the design's amber, which
+ * is how it marks an action with a deadline on it.
  */
 @Composable
 fun ObjectionableDebitScreen(
     workshopId: String,
     branchCode: String,
     onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+    workshopName: String = "",
     viewModel: ObjectionableDebitViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -52,18 +64,44 @@ fun ObjectionableDebitScreen(
         viewModel.sendIntent(ObjectionableDebitIntent.Open(workshopId, branchCode))
     }
 
+    ObjectionableDebitContent(
+        state = state,
+        workshopName = workshopName,
+        onIntent = viewModel::sendIntent,
+        onBack = onBack,
+        modifier = modifier,
+    )
+}
+
+@Composable
+fun ObjectionableDebitContent(
+    state: ObjectionableDebitUiState,
+    workshopName: String,
+    onIntent: (ObjectionableDebitIntent) -> Unit,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     WorkshopScreenShell(
         title = stringResource(Res.string.workshop_action_objection),
         onBack = onBack,
+        workshopName = workshopName.takeIf { it.isNotBlank() },
+        workshopCode = state.workshopId.takeIf { it.isNotBlank() }?.toPersianDigits(),
+        modifier = modifier,
     ) {
         WorkshopListScaffold(
             state = state.list,
-            onLoadMore = { viewModel.sendIntent(ObjectionableDebitIntent.LoadMore) },
+            onLoadMore = { onIntent(ObjectionableDebitIntent.LoadMore) },
             key = { it.debitNumber },
+            header = {
+                WorkshopSectionHeader(
+                    title = stringResource(Res.string.workshop_action_objection),
+                    count = state.list.items.size,
+                )
+            },
         ) { debt ->
             ObjectionableDebtCard(
                 debt = debt,
-                onAction = { viewModel.sendIntent(ObjectionableDebitIntent.RowAction(debt)) },
+                onAction = { onIntent(ObjectionableDebitIntent.RowAction(debt)) },
             )
         }
     }
@@ -76,28 +114,76 @@ private fun ObjectionableDebtCard(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .taminSurface(CornerRadius.lg)
-            .padding(Spacing.lg),
-        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+    var isExpanded by rememberSaveable(debt.debitNumber) { mutableStateOf(false) }
+    val kind = debt.objectionKind
+
+    WorkshopRecordCard(
+        modifier = modifier,
+        isExpanded = isExpanded,
+        onToggle = { isExpanded = !isExpanded },
+        buttons = {
+            WorkshopCardButton(
+                text = stringResource(kind.label),
+                tone = if (kind == ObjectionKind.FILED) {
+                    WorkshopCardButtonTone.OUTLINE
+                } else {
+                    WorkshopCardButtonTone.ALERT
+                },
+                onClick = onAction,
+            )
+        },
     ) {
-        DetailRow(stringResource(Res.string.payment_sheet_debit_number), debt.debitNumberLabel)
-        DetailRow(stringResource(Res.string.workshop_debt_notify_date), debt.notifyDate)
+        DetailRow(
+            label = stringResource(Res.string.payment_sheet_debit_number),
+            value = debt.debitNumberLabel,
+            verticalPadding = WorkshopDimens.cellVerticalPadding,
+        )
+        TaminDivider()
+        DetailRow(
+            label = stringResource(Res.string.workshop_debt_notify_date),
+            value = debt.notifyDate,
+            verticalPadding = WorkshopDimens.cellVerticalPadding,
+        )
+        TaminDivider()
+        DetailRow(
+            label = stringResource(Res.string.workshop_debt_customer_code),
+            value = debt.customerCode,
+            verticalPadding = WorkshopDimens.cellVerticalPadding,
+        )
+        TaminDivider()
         DetailRow(
             label = stringResource(Res.string.workshop_debt_amount),
             value = debt.amount,
             valueColor = colors.orangeText,
+            verticalPadding = WorkshopDimens.cellVerticalPadding,
         )
-        DetailRow(stringResource(Res.string.workshop_debt_from_date), debt.fromDate)
-        DetailRow(stringResource(Res.string.workshop_debt_to_date), debt.toDate)
-        DetailRow(stringResource(Res.string.payment_sheet_agreement_row), debt.agreementRow)
 
-        TaminPrimaryButton(
-            text = stringResource(debt.objectionKind.label),
-            onClick = onAction,
-        )
+        if (isExpanded) {
+            TaminDivider()
+            DetailRow(
+                label = stringResource(Res.string.workshop_debt_remaining),
+                value = debt.remainingAmount,
+                verticalPadding = WorkshopDimens.cellVerticalPadding,
+            )
+            TaminDivider()
+            DetailRow(
+                label = stringResource(Res.string.workshop_debt_from_date),
+                value = debt.fromDate,
+                verticalPadding = WorkshopDimens.cellVerticalPadding,
+            )
+            TaminDivider()
+            DetailRow(
+                label = stringResource(Res.string.workshop_debt_to_date),
+                value = debt.toDate,
+                verticalPadding = WorkshopDimens.cellVerticalPadding,
+            )
+            TaminDivider()
+            DetailRow(
+                label = stringResource(Res.string.payment_sheet_agreement_row),
+                value = debt.agreementRow,
+                verticalPadding = WorkshopDimens.cellVerticalPadding,
+            )
+        }
     }
 }
 
@@ -108,3 +194,34 @@ private val ObjectionKind.label
         ObjectionKind.PRIMARY_VOTE -> Res.string.objection_primary_vote
         ObjectionKind.FILED -> Res.string.objection_view
     }
+
+@PreviewRtlTheme
+@Composable
+private fun ObjectionableDebitScreenPreview() {
+    PreviewRtlThemeContent {
+        ObjectionableDebitContent(
+            state = ObjectionableDebitUiState(
+                workshopId = "0968210170",
+                list = PagedListState(
+                    items = persistentListOf(
+                        WorkShopDebtPR(
+                            debitNumber = "0960961008971",
+                            debitNumberLabel = "۰۹۶۰۹۶۱۰۰۸۹۷۱",
+                            notifyDate = "۱۴۰۵/۰۵/۲۵",
+                            customerCode = "۰۹۶۰۰۰۰۲",
+                            amount = "۱۴٬۲۰۳٬۳۱۱",
+                            remainingAmount = "۱۴٬۲۰۳٬۳۱۱",
+                            fromDate = "۱۳۹۶/۰۷/۰۱",
+                            toDate = "۱۳۹۷/۰۶/۳۱",
+                            agreementRow = "۰۹۶۰۰۰۰۲",
+                            objectionKind = ObjectionKind.ESTIMATE,
+                        ),
+                    ),
+                ),
+            ),
+            workshopName = "آموزشگاه کامپیوتر توکلی-ایمیل",
+            onIntent = {},
+            onBack = {},
+        )
+    }
+}

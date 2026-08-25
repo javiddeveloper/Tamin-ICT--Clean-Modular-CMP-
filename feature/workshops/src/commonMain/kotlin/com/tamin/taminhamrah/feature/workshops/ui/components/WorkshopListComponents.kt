@@ -1,9 +1,9 @@
 package com.tamin.taminhamrah.feature.workshops.ui.components
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,45 +16,62 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopStats
+import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
 import com.tamin.taminhamrah.ui.components.DetailRow
-import com.tamin.taminhamrah.ui.components.dashedOutline
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
+import com.tamin.taminhamrah.ui.components.dashedOutline
+import com.tamin.taminhamrah.ui.components.rememberCopyAction
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.util.toPersianDigits
+import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_tamin_check
+import taminx.core.core_ui.ic_tamin_chevron_down
+import taminx.core.core_ui.ic_tamin_copy
+import taminx.core.core_ui.workshop_card_collapse
+import taminx.core.core_ui.workshop_card_expand
 import taminx.core.core_ui.workshop_code
 import taminx.core.core_ui.workshop_copy_code
 import taminx.core.core_ui.workshop_details_and_actions
 import taminx.core.core_ui.workshop_employer_type
 import taminx.core.core_ui.workshop_filter
 import taminx.core.core_ui.workshop_list_title
+import taminx.core.core_ui.workshop_start_activity_date
 import taminx.core.core_ui.workshop_stat_active
 import taminx.core.core_ui.workshop_stat_inactive
 import taminx.core.core_ui.workshop_stat_total
-import taminx.core.core_ui.workshop_start_activity_date
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * The three figures over the list, riding up into the gradient header.
@@ -71,8 +88,8 @@ fun WorkshopStatsCard(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .taminSurface(StatsCardCorner)
-            .padding(vertical = StatsCardVerticalPadding, horizontal = StatsCardHorizontalPadding),
+            .taminSurface(WorkshopDimens.statsCardCorner)
+            .padding(vertical = WorkshopDimens.statsCardVerticalPadding, horizontal = WorkshopDimens.statsCardHorizontalPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // Three equal columns, no rules between them, and every figure in the same blue — the
@@ -111,7 +128,7 @@ private fun StatColumn(
         verticalArrangement = Arrangement.spacedBy(Spacing.xs),
     ) {
         if (value == null) {
-            ShimmerBlock(modifier = Modifier.width(StatShimmerWidth).height(StatShimmerHeight))
+            ShimmerBlock(modifier = Modifier.width(WorkshopDimens.statShimmerWidth).height(WorkshopDimens.statShimmerHeight))
         } else {
             NumericText(
                 text = value.toString().toPersianDigits(),
@@ -164,7 +181,7 @@ fun WorkshopSectionHeader(
                     color = colors.blueText,
                     modifier = Modifier
                         .background(colors.blueBg, CircleShape)
-                        .padding(horizontal = Spacing.sm, vertical = CountBadgePadding),
+                        .padding(horizontal = Spacing.sm, vertical = WorkshopDimens.countBadgeVerticalPadding),
                 )
             }
         }
@@ -269,11 +286,11 @@ internal fun WorkshopCardHeader(
             containerColor = pillBackground,
             contentColor = pillForeground,
             icon = Icons.Default.Circle,
-            // The design outlines each pill in a paler shade of its own text colour
+            // The design outlines each pill in a paler shade of its own text color
             // (#BFE6CF on green, #F0DCA8 on orange, #F3C9C4 on red). Deriving it from the
-            // content colour reproduces those without three more palette entries, and keeps
+            // content color reproduces those without three more palette entries, and keeps
             // working in dark theme where fixed pastels would not.
-            borderColor = pillForeground.copy(alpha = StatusPillBorderAlpha),
+            borderColor = pillForeground.copy(alpha = WorkshopDimens.statusPillBorderAlpha),
         )
     }
 }
@@ -290,8 +307,19 @@ internal fun WorkshopCodeRow(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    val clipboard = LocalClipboardManager.current
     val code = workshop.workshopId
+    // The raw ASCII code, not the Persian-digit label: it is pasted into forms and searches,
+    // where Persian digits match nothing.
+    // announce = false: the chip's own tick is the confirmation the design draws, and a toast on
+    // top of it would say the same thing twice. It also keeps this row off LocalToaster, which has
+    // no default, so the card still composes in a preview with no AppToastHost above it.
+    val copy = rememberCopyAction(code, announce = false)
+    var isCopied by remember { mutableStateOf(false) }
+    LaunchedEffect(isCopied) {
+        if (!isCopied) return@LaunchedEffect
+        delay(WorkshopDimens.copiedFeedbackMillis.milliseconds)
+        isCopied = false
+    }
 
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -305,17 +333,18 @@ internal fun WorkshopCodeRow(
         )
         Row(
             modifier = Modifier
-                .clip(RoundedCornerShape(CodeChipCorner))
+                .clip(RoundedCornerShape(WorkshopDimens.codeChipCorner))
                 .clickable(enabled = code.isNotBlank()) {
-                    clipboard.setText(AnnotatedString(code))
+                    copy()
+                    isCopied = true
                 }
                 .background(colors.blueBg)
                 // The design pins the code behind a dashed outline, which is what marks it
                 // as something to lift rather than a plain tinted label.
-                .dashedOutline(colors.hawkesBlue, CodeChipCorner, CodeChipBorderWidth)
+                .dashedOutline(colors.hawkesBlue, WorkshopDimens.codeChipCorner, WorkshopDimens.codeChipBorderWidth)
                 .padding(
-                    horizontal = CodeChipHorizontalPadding,
-                    vertical = CodeChipVerticalPadding,
+                    horizontal = WorkshopDimens.codeChipHorizontalPadding,
+                    vertical = WorkshopDimens.codeChipVerticalPadding,
                 ),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
@@ -327,40 +356,74 @@ internal fun WorkshopCodeRow(
                 style = MaterialTheme.typography.labelMedium,
                 color = colors.blueText,
             )
+            // The design answers a copy by turning the glyph into a green tick for a beat,
+            // then back.
             Icon(
-                imageVector = Icons.Outlined.ContentCopy,
+                imageVector = vectorResource(
+                    if (isCopied) Res.drawable.ic_tamin_check else Res.drawable.ic_tamin_copy,
+                ),
                 contentDescription = stringResource(Res.string.workshop_copy_code),
-                tint = colors.blueText,
-                modifier = Modifier.height(IconSize.small),
+                tint = if (isCopied) colors.greenText else colors.blueText,
+                modifier = Modifier.size(WorkshopDimens.codeChipGlyphSize),
             )
         }
     }
 }
 
-/** The design marks a status with a dot, which is smaller than any icon in the scale. */
-private val StatusDotSize = 6.dp
-
-/** The code chip, as the design draws it: `padding:4px 9px; radius:11px; 1.4px dashed`. */
-private val CodeChipCorner = 11.dp
-private val CodeChipBorderWidth = 1.4.dp
-private val CodeChipHorizontalPadding = 9.dp
-private val CodeChipVerticalPadding = 4.dp
 /**
  * How strongly the pill's outline shows through.
  *
  * Tuned so the derived border lands on the design's own values — #03794A at this alpha over the
  * green fill reads as #BFE6CF, which is what the design draws.
  */
-/** The stats strip's own geometry: `border-radius:18px; padding:13px 6px` in the design. */
-private val StatsCardCorner = 18.dp
-private val StatsCardVerticalPadding = 13.dp
-private val StatsCardHorizontalPadding = 6.dp
 
-private const val StatusPillBorderAlpha = 0.20f
+/** «جزئیات بیشتر» / «بستن» — a dashed rule, a label, and a rotating chevron. */
+@Composable
+fun CardExpandToggle(
+    isExpanded: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier,
+    expandLabel: StringResource = Res.string.workshop_card_expand,
+    collapseLabel: StringResource = Res.string.workshop_card_collapse,
+) {
+    val colors = LocalTaminColors.current
+    val rotation by animateFloatAsState(if (isExpanded) WorkshopDimens.toggleHalfTurn else 0f, label = "chevron")
 
-private val StatusPillVerticalPadding = 5.dp
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = WorkshopDimens.toggleTopMargin)
+            .drawBehind {
+                drawLine(
+                    color = colors.divider,
+                    start = Offset(0f, 0f),
+                    end = Offset(size.width, 0f),
+                    strokeWidth = Thickness.border.toPx(),
+                    pathEffect = PathEffect.dashPathEffect(
+                        floatArrayOf(WorkshopDimens.toggleDashOn.toPx(), WorkshopDimens.toggleDashOff.toPx()),
+                    ),
+                )
+            }
+            .clickable(onClick = onToggle)
+            .padding(top = WorkshopDimens.toggleTopPadding),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = stringResource(if (isExpanded) collapseLabel else expandLabel),
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
+            color = colors.blueText,
+        )
+        Icon(
+            imageVector = vectorResource(Res.drawable.ic_tamin_chevron_down),
+            contentDescription = null,
+            tint = colors.blueText,
+            modifier = Modifier
+                .padding(start = Spacing.tabSelector)
+                .size(WorkshopDimens.toggleChevronSize)
+                .graphicsLayer { rotationZ = rotation },
+        )
+    }
+}
 
-private val StatShimmerWidth = 28.dp
-private val StatShimmerHeight = 20.dp
-private val StatDividerHeight = 32.dp
-private val CountBadgePadding = 2.dp

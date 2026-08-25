@@ -2,7 +2,6 @@ package com.tamin.taminhamrah.feature.workshops.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -15,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCard
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopListScaffold
@@ -29,6 +27,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.detail.WorkshopDetailScreen
 import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
 import com.tamin.taminhamrah.feature.workshops.ui.sheets.WorkshopFilterSheet
+import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
@@ -123,7 +122,7 @@ fun WorkshopsScreen(
                 )
             },
             background = headerGradient,
-            bottomPadding = HeaderBottomPadding,
+            bottomPadding = WorkshopDimens.headerBottomPadding,
         ) {
             Column(
                 modifier = Modifier
@@ -142,25 +141,26 @@ fun WorkshopsScreen(
             }
         }
 
+        // The strip rides 42dp up into the navy, which means drawing outside the list's bounds —
+        // and a scrollable container clips to those. So it sits here, a sibling of the bar in a
+        // Column that does not clip, and the list starts below it.
+        WorkshopStatsCard(
+            stats = stats,
+            modifier = Modifier
+                .padding(horizontal = Spacing.page)
+                .rideUpIntoHeader(
+                    progress = { 0f },
+                    expandedOverlap = WorkshopDimens.statsCardOverlap,
+                    collapsedOverlap = WorkshopDimens.statsCardOverlap,
+                ),
+        )
+
         WorkshopListScaffold(
             state = state.list,
             onLoadMore = { onIntent(WorkshopsIntent.LoadMore) },
-            contentPadding = PaddingValues(
-                start = Spacing.page,
-                end = Spacing.page,
-                bottom = Spacing.page,
-            ),
             key = { it.workshopId + it.branchCode },
             header = {
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.lg)) {
-                    WorkshopStatsCard(
-                        stats = stats,
-                        modifier = Modifier.rideUpIntoHeader(
-                            progress = { 0f },
-                            expandedOverlap = StatsCardOverlap,
-                            collapsedOverlap = StatsCardOverlap,
-                        ),
-                    )
                     if (isSearchOpen) {
                         WorkshopSearchPanel(
                             workshopId = state.workshopIdInput,
@@ -194,10 +194,6 @@ fun WorkshopsScreen(
         )
     }
 }
-
-/** The design lifts the stats card 42px into the header (`margin:-42px 0 15px`). */
-private val StatsCardOverlap = 42.dp
-private val HeaderBottomPadding = 64.dp
 
 @PreviewRtlTheme
 @Composable

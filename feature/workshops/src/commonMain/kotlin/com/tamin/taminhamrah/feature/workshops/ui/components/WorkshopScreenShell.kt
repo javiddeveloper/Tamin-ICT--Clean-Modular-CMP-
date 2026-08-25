@@ -22,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
@@ -109,7 +109,7 @@ private fun WorkshopIdentityCard(
     ) {
         Box(
             modifier = Modifier
-                .size(IconTileSize)
+                .size(WorkshopDimens.identityIconTile)
                 .clip(RoundedCornerShape(CornerRadius.lg))
                 .background(colors.glassIconTileBg),
             contentAlignment = Alignment.Center,
@@ -149,5 +149,3 @@ private fun WorkshopIdentityCard(
     }
 }
 
-/** `width:36px; height:36px` on the design's identity panel. */
-private val IconTileSize = 36.dp

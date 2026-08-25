@@ -1,28 +1,34 @@
 package com.tamin.taminhamrah.feature.workshops.ui.workshopDebit
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButton
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButtonTone
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopListScaffold
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopRecordCard
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopScreenShell
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopSectionHeader
+import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
+import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtPR
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.DetailRow
-import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
-import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
-import com.tamin.taminhamrah.ui.components.taminSurface
-import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
-import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.util.toPersianDigits
+import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.payment_sheet_agreement_row
+import taminx.core.core_ui.payment_sheet_debit_number
 import taminx.core.core_ui.workshop_action_debit_turnover
 import taminx.core.core_ui.workshop_debt_amount
 import taminx.core.core_ui.workshop_debt_customer_code
@@ -34,22 +40,23 @@ import taminx.core.core_ui.workshop_debt_primary_vote_date
 import taminx.core.core_ui.workshop_debt_primary_vote_number
 import taminx.core.core_ui.workshop_debt_remaining
 import taminx.core.core_ui.workshop_debt_to_date
-import taminx.core.core_ui.payment_sheet_agreement_row
-import taminx.core.core_ui.payment_sheet_debit_number
 
 /**
- * جزئیات محاسبه گردش حساب بدهی — the debts of one workshop.
+ * گردش حساب بدهی — every debt raised against one workshop.
  *
- * Two things leave this screen: the documents behind a debt, and the payment page, which opens
- * outside the app.
+ * Four cells identify a debt and the amount owed; the dates and the agreement row are behind
+ * «جزئیات بیشتر». Both actions stay visible either way, because they are the reason the row is
+ * being read.
  */
 @Composable
 fun WorkshopDebitScreen(
     workshopId: String,
     branchCode: String,
     onBack: () -> Unit,
-    onOpenDocuments: (debitNumber: String, branchCode: String) -> Unit,
+    onOpenDocuments: (String, String) -> Unit,
     onOpenUrl: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    workshopName: String = "",
     viewModel: WorkshopDebitViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -60,19 +67,47 @@ fun WorkshopDebitScreen(
 
     HandleWorkshopDebitEvents(events = viewModel.events, onOpenUrl = onOpenUrl)
 
+    WorkshopDebitContent(
+        state = state,
+        workshopName = workshopName,
+        onIntent = viewModel::sendIntent,
+        onBack = onBack,
+        onOpenDocuments = { debitNumber -> onOpenDocuments(debitNumber, branchCode) },
+        modifier = modifier,
+    )
+}
+
+@Composable
+fun WorkshopDebitContent(
+    state: WorkshopDebitUiState,
+    workshopName: String,
+    onIntent: (WorkshopDebitIntent) -> Unit,
+    onBack: () -> Unit,
+    onOpenDocuments: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     WorkshopScreenShell(
         title = stringResource(Res.string.workshop_action_debit_turnover),
         onBack = onBack,
+        workshopName = workshopName.takeIf { it.isNotBlank() },
+        workshopCode = state.workshopId.takeIf { it.isNotBlank() }?.toPersianDigits(),
+        modifier = modifier,
     ) {
         WorkshopListScaffold(
             state = state.list,
-            onLoadMore = { viewModel.sendIntent(WorkshopDebitIntent.LoadMore) },
+            onLoadMore = { onIntent(WorkshopDebitIntent.LoadMore) },
             key = { it.debitNumber },
+            header = {
+                WorkshopSectionHeader(
+                    title = stringResource(Res.string.workshop_action_debit_turnover),
+                    count = state.list.items.size,
+                )
+            },
         ) { debt ->
             WorkshopDebtCard(
                 debt = debt,
-                onDocuments = { onOpenDocuments(debt.debitNumber, branchCode) },
-                onPay = { viewModel.sendIntent(WorkshopDebitIntent.PayDebit(debt)) },
+                onDocuments = { onOpenDocuments(debt.debitNumber) },
+                onPay = { onIntent(WorkshopDebitIntent.PayDebit(debt)) },
             )
         }
     }
@@ -86,49 +121,122 @@ private fun WorkshopDebtCard(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .taminSurface(CornerRadius.lg)
-            .padding(Spacing.lg),
-        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+    var isExpanded by rememberSaveable(debt.debitNumber) { mutableStateOf(false) }
+
+    WorkshopRecordCard(
+        modifier = modifier,
+        isExpanded = isExpanded,
+        onToggle = { isExpanded = !isExpanded },
+        buttons = {
+            WorkshopCardButton(
+                text = stringResource(Res.string.workshop_debt_documents),
+                tone = WorkshopCardButtonTone.OUTLINE,
+                onClick = onDocuments,
+            )
+            WorkshopCardButton(
+                text = stringResource(Res.string.workshop_debt_pay),
+                tone = WorkshopCardButtonTone.PRIMARY,
+                onClick = onPay,
+            )
+        },
     ) {
-        DetailRow(stringResource(Res.string.payment_sheet_debit_number), debt.debitNumberLabel)
-        DetailRow(stringResource(Res.string.workshop_debt_notify_date), debt.notifyDate)
-        DetailRow(stringResource(Res.string.workshop_debt_customer_code), debt.customerCode)
+        DetailRow(
+            label = stringResource(Res.string.payment_sheet_debit_number),
+            value = debt.debitNumberLabel,
+            verticalPadding = WorkshopDimens.cellVerticalPadding,
+        )
+        TaminDivider()
+        DetailRow(
+            label = stringResource(Res.string.workshop_debt_notify_date),
+            value = debt.notifyDate,
+            verticalPadding = WorkshopDimens.cellVerticalPadding,
+        )
+        TaminDivider()
+        DetailRow(
+            label = stringResource(Res.string.workshop_debt_customer_code),
+            value = debt.customerCode,
+            verticalPadding = WorkshopDimens.cellVerticalPadding,
+        )
+        TaminDivider()
         DetailRow(
             label = stringResource(Res.string.workshop_debt_amount),
             value = debt.amount,
             valueColor = colors.orangeText,
+            verticalPadding = WorkshopDimens.cellVerticalPadding,
         )
-        DetailRow(stringResource(Res.string.workshop_debt_remaining), debt.remainingAmount)
-        DetailRow(stringResource(Res.string.workshop_debt_from_date), debt.fromDate)
-        DetailRow(stringResource(Res.string.workshop_debt_to_date), debt.toDate)
-        DetailRow(stringResource(Res.string.payment_sheet_agreement_row), debt.agreementRow)
 
-        // The بدوی vote block is part of the row only when the service actually sent one.
-        if (debt.hasPrimaryVote) {
+        if (isExpanded) {
+            TaminDivider()
             DetailRow(
-                stringResource(Res.string.workshop_debt_primary_vote_number),
-                debt.primaryVoteNumber,
+                label = stringResource(Res.string.workshop_debt_remaining),
+                value = debt.remainingAmount,
+                verticalPadding = WorkshopDimens.cellVerticalPadding,
             )
+            TaminDivider()
             DetailRow(
-                stringResource(Res.string.workshop_debt_primary_vote_date),
-                debt.primaryVoteDate,
+                label = stringResource(Res.string.workshop_debt_from_date),
+                value = debt.fromDate,
+                verticalPadding = WorkshopDimens.cellVerticalPadding,
             )
-        }
+            TaminDivider()
+            DetailRow(
+                label = stringResource(Res.string.workshop_debt_to_date),
+                value = debt.toDate,
+                verticalPadding = WorkshopDimens.cellVerticalPadding,
+            )
+            TaminDivider()
+            DetailRow(
+                label = stringResource(Res.string.payment_sheet_agreement_row),
+                value = debt.agreementRow,
+                verticalPadding = WorkshopDimens.cellVerticalPadding,
+            )
 
-        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
-            TaminOutlinedButton(
-                text = stringResource(Res.string.workshop_debt_documents),
-                onClick = onDocuments,
-                modifier = Modifier.weight(1f),
-            )
-            TaminPrimaryButton(
-                text = stringResource(Res.string.workshop_debt_pay),
-                onClick = onPay,
-                modifier = Modifier.weight(1f),
-            )
+            // The بدوی vote block is part of the row only when the service actually sent one.
+            if (debt.hasPrimaryVote) {
+                TaminDivider()
+                DetailRow(
+                    label = stringResource(Res.string.workshop_debt_primary_vote_number),
+                    value = debt.primaryVoteNumber,
+                    verticalPadding = WorkshopDimens.cellVerticalPadding,
+                )
+                TaminDivider()
+                DetailRow(
+                    label = stringResource(Res.string.workshop_debt_primary_vote_date),
+                    value = debt.primaryVoteDate,
+                    verticalPadding = WorkshopDimens.cellVerticalPadding,
+                )
+            }
         }
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun WorkshopDebitScreenPreview() {
+    PreviewRtlThemeContent {
+        WorkshopDebitContent(
+            state = WorkshopDebitUiState(
+                workshopId = "0968210170",
+                list = PagedListState(
+                    items = persistentListOf(
+                        WorkShopDebtPR(
+                            debitNumber = "0960961008971",
+                            debitNumberLabel = "۰۹۶۰۹۶۱۰۰۸۹۷۱",
+                            notifyDate = "۱۴۰۵/۰۵/۲۵",
+                            customerCode = "۰۹۶۰۰۰۰۲",
+                            amount = "۱۴٬۲۰۳٬۳۱۱",
+                            remainingAmount = "۱۴٬۲۰۳٬۳۱۱",
+                            fromDate = "۱۳۹۶/۰۷/۰۱",
+                            toDate = "۱۳۹۷/۰۶/۳۱",
+                            agreementRow = "۰۹۶۰۰۰۰۲",
+                        ),
+                    ),
+                ),
+            ),
+            workshopName = "آموزشگاه کامپیوتر توکلی-ایمیل",
+            onIntent = {},
+            onBack = {},
+            onOpenDocuments = {},
+        )
     }
 }

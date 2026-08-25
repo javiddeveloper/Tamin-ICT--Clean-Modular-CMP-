@@ -1086,8 +1086,8 @@
     <string name="workshop_name">نام کارگاه</string>
     <string name="workshop_branch_code">کد شعبه</string>
     <string name="workshop_branch_name">نام شعبه</string>
-    <string name="workshop_search">جستجو</string>
-    <string name="workshop_all_items">همه موارد</string>
+    <string name="workshop_search">جست‌وجو</string>
+    <string name="workshop_all_items">همهٔ موارد</string>
     <string name="workshop_show_detail">نمایش جزئیات</string>
     <string name="workshop_hide_detail">مخفی کردن جزئیات</string>
     <string name="workshop_actions">عملیات این کارگاه</string>
@@ -1098,7 +1098,12 @@
     <string name="workshop_approve_date">تاریخ تأیید کارگاه</string>
     <string name="workshop_status_label">وضعیت: %1$s</string>
     <string name="workshop_filter_title">فیلتر براساس فعالیت کارگاه</string>
-    <string name="workshop_select">انتخاب نمایید</string>
+    <string name="workshop_select">انتخاب کنید</string>
+    <string name="workshop_select_date">انتخاب تاریخ</string>
+    <string name="workshop_ten_digits">۱۰ رقم</string>
+    <string name="new_member_add">افزودن پرسنل جدید</string>
+    <string name="workshop_docs_debit_heading">شماره بدهی: %1$s</string>
+    <string name="workshop_inquiry_heading">وضعیت بدهی کارگاه</string>
     <string name="workshop_filter_clear">حذف فیلتر</string>
     <string name="workshop_status_active">فعال</string>
     <string name="workshop_status_semi_active">نیمه فعال</string>
@@ -1133,13 +1138,16 @@
     <string name="workshop_detail_info">اطلاعات کارگاه</string>
     <string name="workshop_detail_expand">مشاهدهٔ همهٔ جزئیات کارگاه</string>
     <string name="workshop_detail_collapse">بستن</string>
+    <string name="workshop_card_expand">جزئیات بیشتر</string>
+    <string name="workshop_card_collapse">بستن</string>
+    <string name="payment_sheet_amount_rial">مبلغ (ریال)</string>
 
     <!-- برگ پرداخت‌ها -->
     <string name="payment_sheet_debit_number">شماره بدهی</string>
     <string name="payment_sheet_collect_date">تاریخ وصولی</string>
     <string name="payment_sheet_amount">مبلغ</string>
     <string name="payment_sheet_agreement_row">ردیف پیمان</string>
-    <string name="payment_sheet_status">وضعیت</string>
+    <string name="payment_sheet_status">وضعیت برگ پرداخت</string>
     <string name="payment_sheet_issue_date">تاریخ صدور</string>
     <string name="payment_sheet_pay_kind">نحوه پرداخت</string>
     <string name="payment_sheet_debit_reason">علت ایجاد بدهی</string>
@@ -1156,8 +1164,8 @@
     <!-- بدهی کارگاه -->
     <string name="workshop_debt_notify_date">تاریخ ابلاغ</string>
     <string name="workshop_debt_customer_code">کد طرف حساب</string>
-    <string name="workshop_debt_amount">مبلغ بدهی</string>
-    <string name="workshop_debt_remaining">مبلغ مانده بدهی</string>
+    <string name="workshop_debt_amount">مبلغ بدهی (ریال)</string>
+    <string name="workshop_debt_remaining">ماندهٔ بدهی (ریال)</string>
     <string name="workshop_debt_from_date">از تاریخ</string>
     <string name="workshop_debt_to_date">تا تاریخ</string>
     <string name="workshop_debt_primary_vote_number">شماره رای هیات بدوی</string>
@@ -1165,7 +1173,7 @@
     <string name="workshop_debt_documents">مشاهده اسناد مطالبه</string>
     <string name="workshop_debt_pay">پرداخت بدهی</string>
     <string name="workshop_debt_payment_refused">پرداخت غیرحضوری این بدهی امکان‌پذیر نیست.</string>
-    <string name="workshop_demand_doc_number">شماره سند</string>
+    <string name="workshop_demand_doc_number">شمارهٔ سند</string>
     <string name="workshop_demand_doc_date">تاریخ</string>
     <string name="workshop_demand_doc_type">شرح نوع سند</string>
     <string name="workshop_demand_doc_step">مرحله</string>
@@ -1174,10 +1182,10 @@
 
     <!-- استعلام بدهی -->
     <string name="workshop_inquiry_result">وضعیت بدهی</string>
-    <string name="workshop_inquiry_date">تاریخ</string>
-    <string name="workshop_inquiry_definitive">بدهی قطعی</string>
-    <string name="workshop_inquiry_divisible">قابل تقسیط</string>
-    <string name="workshop_inquiry_indivisible">غیر قابل تقسیط</string>
+    <string name="workshop_inquiry_date">تاریخ استعلام</string>
+    <string name="workshop_inquiry_definitive">بدهی قطعی (ریال)</string>
+    <string name="workshop_inquiry_divisible">قابل تقسیط (ریال)</string>
+    <string name="workshop_inquiry_indivisible">غیر قابل تقسیط (ریال)</string>
 
     <!-- اعتراض به بدهی -->
     <string name="objection_estimate">اعتراض به بدهی برآوردی</string>
@@ -1186,23 +1194,23 @@
     <string name="objection_expired">مهلت اعتراض به این بدهی به پایان رسیده است.</string>
 
     <!-- نام نویسی غیر حضوری -->
-    <string name="new_member_national_id">شماره ملی</string>
+    <string name="new_member_national_id">کد ملی</string>
     <string name="new_member_full_name">نام و نام خانوادگی</string>
     <string name="new_member_birth_date">تاریخ تولد</string>
     <string name="new_member_insurance_number">شماره بیمه</string>
     <string name="new_member_register_date">تاریخ ثبت</string>
-    <string name="new_member_status">وضعیت نام نویسی</string>
-    <string name="new_member_confirm">تایید</string>
-    <string name="new_member_edit">مشاهده و ویرایش</string>
+    <string name="new_member_status">وضعیت نام‌نویسی</string>
+    <string name="new_member_confirm">تأیید و ارسال</string>
+    <string name="new_member_edit">ویرایش</string>
     <string name="new_member_delete">حذف</string>
-    <string name="new_member_follow">پیگیری</string>
+    <string name="new_member_follow">پیگیری درخواست</string>
     <string name="new_member_cannot_edit">این درخواست ثبت شده است و قابل تغییر نیست.</string>
     <string name="new_member_confirmed">درخواست با کد رهگیری %1$s ثبت شد.</string>
 
     <!-- ماده ۱۶ -->
     <string name="article16_account_code">کد حساب</string>
     <string name="article16_debt_amount">مبلغ بدهی (ریال)</string>
-    <string name="article16_debt_remaining">مانده بدهی (ریال)</string>
+    <string name="article16_debt_remaining">ماندهٔ بدهی (ریال)</string>
     <string name="article16_executive_notify_date">تاریخ ابلاغ اجراییه</string>
     <string name="article16_request_status">وضعیت درخواست</string>
     <string name="article16_status_submitted">ثبت درخواست</string>
@@ -1210,6 +1218,7 @@
     <string name="article16_status_rejected">رد درخواست</string>
     <string name="article16_status_approved">تایید درخواست</string>
     <string name="article16_status_unknown">نامشخص</string>
+    <string name="article16_status_none">بدون درخواست</string>
     <string name="article16_action_request">درخواست رسیدگی به بدهی</string>
     <string name="article16_action_view_request">مشاهده درخواست</string>
     <string name="article16_action_expert_message">پیام کارشناس</string>
@@ -1219,7 +1228,7 @@
     <!-- کارکنان / ذینفعان -->
     <string name="member_insurance_number">شماره بیمه</string>
     <string name="member_full_name">نام و نام خانوادگی</string>
-    <string name="member_national_id">شماره ملی</string>
+    <string name="member_national_id">کد ملی</string>
     <string name="member_id_card_number">شماره شناسنامه</string>
     <string name="member_father_name">نام پدر</string>
     <string name="member_nationality">ملیت</string>

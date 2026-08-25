@@ -27,19 +27,35 @@ data object WorkshopsListRoute
  * silently never loaded. A typed route makes that particular failure impossible.
  */
 @Serializable
-data class PaymentSheetsRoute(val workshopId: String, val branchCode: String)
+data class PaymentSheetsRoute(val workshopId: String, val branchCode: String, val workshopName: String = "")
 
 @Serializable
-data class WorkshopDebitRoute(val workshopId: String, val branchCode: String)
+data class WorkshopDebitRoute(
+    val workshopId: String,
+    val branchCode: String,
+    val workshopName: String = "",
+)
 
 @Serializable
-data class DemandDocumentsRoute(val debitNumber: String, val branchCode: String)
+data class DemandDocumentsRoute(
+    val debitNumber: String,
+    val branchCode: String,
+    val workshopName: String = "",
+)
 
 @Serializable
-data class WorkshopDebtInquiryRoute(val workshopId: String, val branchCode: String)
+data class WorkshopDebtInquiryRoute(
+    val workshopId: String,
+    val branchCode: String,
+    val workshopName: String = "",
+)
 
 @Serializable
-data class ObjectionableDebitRoute(val workshopId: String, val branchCode: String)
+data class ObjectionableDebitRoute(
+    val workshopId: String,
+    val branchCode: String,
+    val workshopName: String = "",
+)
 
 @Serializable
 data class ManagementDebitRoute(
@@ -49,13 +65,25 @@ data class ManagementDebitRoute(
 )
 
 @Serializable
-data class WorkshopMembersRoute(val workshopId: String, val branchCode: String)
+data class WorkshopMembersRoute(
+    val workshopId: String,
+    val branchCode: String,
+    val workshopName: String = "",
+)
 
 @Serializable
-data class WorkshopStackholdersRoute(val workshopId: String, val branchCode: String)
+data class WorkshopStackholdersRoute(
+    val workshopId: String,
+    val branchCode: String,
+    val workshopName: String = "",
+)
 
 @Serializable
-data class WorkshopRecentlyAddedMembersRoute(val workshopId: String, val branchCode: String)
+data class WorkshopRecentlyAddedMembersRoute(
+    val workshopId: String,
+    val branchCode: String,
+    val workshopName: String = "",
+)
 
 fun NavController.navigateToWorkshops() {
     navigate(WorkshopsListRoute)
@@ -82,6 +110,7 @@ fun NavGraphBuilder.workshopsScreen(
         PaymentSheetsScreen(
             workshopId = route.workshopId,
             branchCode = route.branchCode,
+            workshopName = route.workshopName,
             onBack = { navController.popBackStack() },
         )
     }
@@ -91,9 +120,12 @@ fun NavGraphBuilder.workshopsScreen(
         WorkshopDebitScreen(
             workshopId = route.workshopId,
             branchCode = route.branchCode,
+            workshopName = route.workshopName,
             onBack = { navController.popBackStack() },
             onOpenDocuments = { debitNumber, branchCode ->
-                navController.navigate(DemandDocumentsRoute(debitNumber, branchCode))
+                navController.navigate(
+                    DemandDocumentsRoute(debitNumber, branchCode, route.workshopName),
+                )
             },
             onOpenUrl = onOpenUrl,
         )
@@ -104,6 +136,7 @@ fun NavGraphBuilder.workshopsScreen(
         DemandDocumentsScreen(
             debitNumber = route.debitNumber,
             branchCode = route.branchCode,
+            workshopName = route.workshopName,
             onBack = { navController.popBackStack() },
         )
     }
@@ -113,6 +146,7 @@ fun NavGraphBuilder.workshopsScreen(
         WorkshopDebtInquiryScreen(
             workshopId = route.workshopId,
             branchCode = route.branchCode,
+            workshopName = route.workshopName,
             onBack = { navController.popBackStack() },
         )
     }
@@ -122,6 +156,7 @@ fun NavGraphBuilder.workshopsScreen(
         ObjectionableDebitScreen(
             workshopId = route.workshopId,
             branchCode = route.branchCode,
+            workshopName = route.workshopName,
             onBack = { navController.popBackStack() },
         )
     }
@@ -141,6 +176,7 @@ fun NavGraphBuilder.workshopsScreen(
         WorkshopMembersScreen(
             workshopId = route.workshopId,
             branchCode = route.branchCode,
+            workshopName = route.workshopName,
             onBack = { navController.popBackStack() },
         )
     }
@@ -150,6 +186,7 @@ fun NavGraphBuilder.workshopsScreen(
         WorkshopStackholdersScreen(
             workshopId = route.workshopId,
             branchCode = route.branchCode,
+            workshopName = route.workshopName,
             onBack = { navController.popBackStack() },
         )
     }
@@ -159,6 +196,7 @@ fun NavGraphBuilder.workshopsScreen(
         WorkshopRecentlyAddedMembersScreen(
             workshopId = route.workshopId,
             branchCode = route.branchCode,
+            workshopName = route.workshopName,
             onBack = { navController.popBackStack() },
         )
     }
@@ -175,12 +213,19 @@ private fun WorkshopAction.route(
     branchCode: String,
     workshopName: String,
 ): Any = when (this) {
-    WorkshopAction.PAYMENT_SHEETS -> PaymentSheetsRoute(workshopId, branchCode)
-    WorkshopAction.DEBIT_TURNOVER -> WorkshopDebitRoute(workshopId, branchCode)
-    WorkshopAction.DEBT_INQUIRY -> WorkshopDebtInquiryRoute(workshopId, branchCode)
-    WorkshopAction.OBJECTION -> ObjectionableDebitRoute(workshopId, branchCode)
-    WorkshopAction.NEW_MEMBER -> WorkshopRecentlyAddedMembersRoute(workshopId, branchCode)
+    WorkshopAction.PAYMENT_SHEETS -> PaymentSheetsRoute(workshopId, branchCode, workshopName)
+    WorkshopAction.DEBIT_TURNOVER -> WorkshopDebitRoute(workshopId, branchCode, workshopName)
+    WorkshopAction.DEBT_INQUIRY ->
+        WorkshopDebtInquiryRoute(workshopId, branchCode, workshopName)
+
+    WorkshopAction.OBJECTION ->
+        ObjectionableDebitRoute(workshopId, branchCode, workshopName)
+
+    WorkshopAction.NEW_MEMBER ->
+        WorkshopRecentlyAddedMembersRoute(workshopId, branchCode, workshopName)
+
     WorkshopAction.ARTICLE16 -> ManagementDebitRoute(workshopId, branchCode, workshopName)
-    WorkshopAction.MEMBERS -> WorkshopMembersRoute(workshopId, branchCode)
-    WorkshopAction.STACKHOLDERS -> WorkshopStackholdersRoute(workshopId, branchCode)
+    WorkshopAction.MEMBERS -> WorkshopMembersRoute(workshopId, branchCode, workshopName)
+    WorkshopAction.STACKHOLDERS ->
+        WorkshopStackholdersRoute(workshopId, branchCode, workshopName)
 }

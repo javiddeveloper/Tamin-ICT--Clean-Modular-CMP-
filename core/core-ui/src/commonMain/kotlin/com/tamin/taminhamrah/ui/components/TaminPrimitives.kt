@@ -436,6 +436,10 @@ fun TaminPrimaryButton(
      * right in a right-to-left layout. Defaults to the trailing position every existing caller has.
      */
     iconAtStart: Boolean = false,
+    /** Shorter than the page-level default for a button that sits inside a card. */
+    height: Dp = PRIMARY_BUTTON_HEIGHT,
+    shape: Shape = RoundedCornerShape(CornerRadius.iconTile),
+    textStyle: TextStyle = MaterialTheme.typography.titleMedium,
 ) {
     val iconContent: @Composable () -> Unit = {
         if (icon != null) {
@@ -451,15 +455,15 @@ fun TaminPrimaryButton(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(PRIMARY_BUTTON_HEIGHT)
-            .clip(RoundedCornerShape(CornerRadius.iconTile))
+            .height(height)
+            .clip(shape)
             .background(background)
             .clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm, Alignment.CenterHorizontally),
     ) {
         if (iconAtStart) iconContent()
-        Text(text = text, style = MaterialTheme.typography.titleMedium, color = Color.White)
+        Text(text = text, style = textStyle, color = Color.White)
         if (!iconAtStart) iconContent()
     }
 }

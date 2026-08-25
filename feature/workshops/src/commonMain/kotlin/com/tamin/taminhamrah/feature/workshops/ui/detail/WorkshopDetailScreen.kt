@@ -1,6 +1,5 @@
 package com.tamin.taminhamrah.feature.workshops.ui.detail
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,18 +24,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardHeader
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCodeRow
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopRecordCard
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopScreenShell
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopSectionHeader
 import com.tamin.taminhamrah.feature.workshops.ui.components.colors
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
+import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.model.workshop.WorkshopActivityStatus
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -48,14 +44,12 @@ import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.ui.theme.Thickness
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.ic_tamin_chevron_down
 import taminx.core.core_ui.ic_tamin_chevron_forward
-import taminx.core.core_ui.workshop_activity_type
 import taminx.core.core_ui.workshop_actions
+import taminx.core.core_ui.workshop_activity_type
 import taminx.core.core_ui.workshop_approve_date
 import taminx.core.core_ui.workshop_branch_code
 import taminx.core.core_ui.workshop_branch_name
@@ -114,23 +108,19 @@ private fun WorkshopDetailCard(
     val colors = LocalTaminColors.current
     var isExpanded by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .taminSurface(CardCorner)
-            .padding(
-                start = CardHorizontalPadding,
-                end = CardHorizontalPadding,
-                top = CardTopPadding,
-                bottom = CardBottomPadding,
-            ),
+    WorkshopRecordCard(
+        modifier = modifier,
+        isExpanded = isExpanded,
+        onToggle = { isExpanded = !isExpanded },
+        expandLabel = Res.string.workshop_detail_expand,
+        collapseLabel = Res.string.workshop_detail_collapse,
     ) {
         WorkshopCardHeader(workshop = workshop)
         Box(modifier = Modifier.padding(top = Spacing.sm)) {
             WorkshopCodeRow(workshop = workshop)
         }
 
-        Column(modifier = Modifier.padding(top = CellsTopMargin)) {
+        Column(modifier = Modifier.padding(top = WorkshopDimens.cardCellsTopMargin)) {
             // The first two are what the list card already showed; the rest are what «مشاهدهٔ
             // همهٔ جزئیات» is for.
             DetailRow(
@@ -138,14 +128,14 @@ private fun WorkshopDetailCard(
                 value = workshop.employerType,
                 valueColor = colors.springGreenText,
                 numeric = false,
-                verticalPadding = CellVerticalPadding,
+                verticalPadding = WorkshopDimens.cellVerticalPadding,
             )
             TaminDivider()
             DetailRow(
                 label = stringResource(Res.string.workshop_branch_name),
                 value = workshop.branchOfficeName,
                 numeric = false,
-                verticalPadding = CellVerticalPadding,
+                verticalPadding = WorkshopDimens.cellVerticalPadding,
             )
 
             if (isExpanded) {
@@ -154,94 +144,36 @@ private fun WorkshopDetailCard(
                     label = stringResource(Res.string.workshop_start_activity_date),
                     value = workshop.startDate,
                     valueColor = colors.blueText,
-                    verticalPadding = CellVerticalPadding,
+                    verticalPadding = WorkshopDimens.cellVerticalPadding,
                 )
                 TaminDivider()
                 DetailRow(
                     label = stringResource(Res.string.workshop_activity_type),
                     value = workshop.activityType,
                     numeric = false,
-                    verticalPadding = CellVerticalPadding,
+                    verticalPadding = WorkshopDimens.cellVerticalPadding,
                     valueBoxed = true,
                 )
                 TaminDivider()
                 DetailRow(
                     label = stringResource(Res.string.workshop_branch_code),
                     value = workshop.branchOfficeCode,
-                    verticalPadding = CellVerticalPadding,
+                    verticalPadding = WorkshopDimens.cellVerticalPadding,
                 )
                 TaminDivider()
                 DetailRow(
                     label = stringResource(Res.string.workshop_register_date),
                     value = workshop.registerDate,
-                    verticalPadding = CellVerticalPadding,
+                    verticalPadding = WorkshopDimens.cellVerticalPadding,
                 )
                 TaminDivider()
                 DetailRow(
                     label = stringResource(Res.string.workshop_approve_date),
                     value = workshop.approveDate,
-                    verticalPadding = CellVerticalPadding,
+                    verticalPadding = WorkshopDimens.cellVerticalPadding,
                 )
             }
         }
-
-        ExpandToggle(
-            isExpanded = isExpanded,
-            onToggle = { isExpanded = !isExpanded },
-        )
-    }
-}
-
-/** «مشاهدهٔ همهٔ جزئیات کارگاه» — a dashed rule, a label, and a chevron that turns over. */
-@Composable
-private fun ExpandToggle(
-    isExpanded: Boolean,
-    onToggle: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val colors = LocalTaminColors.current
-    val rotation by animateFloatAsState(if (isExpanded) HalfTurn else 0f, label = "chevron")
-
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(top = ToggleTopMargin)
-            .drawBehind {
-                drawLine(
-                    color = colors.divider,
-                    start = Offset(0f, 0f),
-                    end = Offset(size.width, 0f),
-                    strokeWidth = Thickness.border.toPx(),
-                    pathEffect = PathEffect.dashPathEffect(
-                        floatArrayOf(ToggleDashOn.toPx(), ToggleDashOff.toPx()),
-                    ),
-                )
-            }
-            .clickable(onClick = onToggle)
-            .padding(top = ToggleTopPadding),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = stringResource(
-                if (isExpanded) Res.string.workshop_detail_collapse
-                else Res.string.workshop_detail_expand,
-            ),
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.Bold,
-            color = colors.blueText,
-        )
-        Icon(
-            imageVector = vectorResource(Res.drawable.ic_tamin_chevron_down),
-            contentDescription = null,
-            tint = colors.blueText,
-            // Read the animated value in the layer, not in composition: a turning chevron must
-            // not recompose the card it sits in.
-            modifier = Modifier
-                .padding(start = Spacing.tabSelector)
-                .size(ToggleChevronSize)
-                .graphicsLayer { rotationZ = rotation },
-        )
     }
 }
 
@@ -254,7 +186,7 @@ private fun WorkshopActionList(
     val colors = LocalTaminColors.current
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(ActionGap),
+        verticalArrangement = Arrangement.spacedBy(WorkshopDimens.serviceRowGap),
     ) {
         Text(
             text = stringResource(Res.string.workshop_actions),
@@ -284,7 +216,7 @@ private fun WorkshopActionRow(
             .fillMaxWidth()
             .taminSurface(CornerRadius.xl)
             .clickable(onClick = onClick)
-            .padding(horizontal = ActionHorizontalPadding, vertical = ActionVerticalPadding),
+            .padding(horizontal = WorkshopDimens.serviceRowHorizontalPadding, vertical = WorkshopDimens.serviceRowVerticalPadding),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.cardGap),
     ) {
@@ -326,33 +258,10 @@ private fun WorkshopActionRow(
             imageVector = vectorResource(Res.drawable.ic_tamin_chevron_forward),
             contentDescription = null,
             tint = colors.chevron,
-            modifier = Modifier.size(ActionChevronSize),
+            modifier = Modifier.size(WorkshopDimens.serviceRowChevronSize),
         )
     }
 }
-
-/** `border-radius:18px; padding:13px 14px 12px` on the design's card. */
-private val CardCorner = 18.dp
-private val CardHorizontalPadding = 14.dp
-private val CardTopPadding = 13.dp
-private val CardBottomPadding = 12.dp
-private val CellsTopMargin = 10.dp
-
-/** `padding:8px 0` per cell, i.e. 8 above and below the value. */
-private val CellVerticalPadding = 8.dp
-
-private val ToggleTopMargin = 10.dp
-private val ToggleTopPadding = 9.dp
-private val ToggleDashOn = 3.dp
-private val ToggleDashOff = 3.dp
-private val ToggleChevronSize = 14.dp
-private const val HalfTurn = 180f
-
-/** `gap:9px` between action cards, `padding:11px 13px` inside one, `15px` chevron. */
-private val ActionGap = 9.dp
-private val ActionHorizontalPadding = 13.dp
-private val ActionVerticalPadding = 11.dp
-private val ActionChevronSize = 15.dp
 
 @PreviewRtlTheme
 @Composable
