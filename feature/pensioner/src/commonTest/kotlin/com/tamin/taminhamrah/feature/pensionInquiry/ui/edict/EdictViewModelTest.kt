@@ -10,6 +10,7 @@ import com.tamin.taminhamrah.model.pension.InquirePensionCertificateDN
 import com.tamin.taminhamrah.model.pension.PensionIdDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
 import com.tamin.taminhamrah.model.pension.PayRollDN
+import com.tamin.taminhamrah.model.pension.PayRollInboxDN
 import com.tamin.taminhamrah.model.pension.SurvivorInfoDN
 import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDN
 import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDN
@@ -270,6 +271,8 @@ private class FakeEdictPensionRepository : PensionRepository {
     override suspend fun sendRetirementDocument(requestId: String, request: RetirementSaveDocumentDN): Flow<String?> =
         error("not used in EdictViewModel")
     override suspend fun authenticationAndGetPersonalInfo(authenticationsCode: Long): Flow<RetirementPersonalDN> =
+        error("not used in EdictViewModel")
+    override suspend fun sendPayRollToInbox(filters: List<ApiFilterDN>): Flow<PayRollInboxDN> =
         error("not used in EdictViewModel")
     override suspend fun getAuthenticationCode(): Flow<AuthenticationTicketDN> =
         error("not used in EdictViewModel")

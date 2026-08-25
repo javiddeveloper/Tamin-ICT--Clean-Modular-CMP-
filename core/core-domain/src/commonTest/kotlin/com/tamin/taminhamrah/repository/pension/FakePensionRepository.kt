@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.model.pension.EdictPensionerDN
 import com.tamin.taminhamrah.model.pension.EdictPensionerInboxDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
 import com.tamin.taminhamrah.model.pension.PayRollDN
+import com.tamin.taminhamrah.model.pension.PayRollInboxDN
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDN
 import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDN
@@ -37,6 +38,7 @@ class FakePensionRepository : PensionRepository {
     var sendRetirementDocumentResult: String? = null
     var authenticationTicketResult: AuthenticationTicketDN? = null
     var sendEdictPensionerToMyInboxResult: EdictPensionerInboxDN = EdictPensionerInboxDN(null)
+    var sendPayRollToInboxResult: PayRollInboxDN = PayRollInboxDN(null)
     var inquirePensionCertificateResult: InquirePensionCertificateDN? = null
     var shouldThrowError: Boolean = false
     var error: Throwable? = null
@@ -155,6 +157,14 @@ class FakePensionRepository : PensionRepository {
             }
             emit(sendEdictPensionerToMyInboxResult)
         }
+    override suspend fun sendPayRollToInbox(filters: List<ApiFilterDN>): Flow<PayRollInboxDN> =
+        flow {
+            if (shouldThrowError) {
+                throw error!!
+            }
+            emit(sendPayRollToInboxResult)
+        }
+
     override suspend fun sendRequestInquirePensionCertificate(filters: List<ApiFilterDN>): Flow<InquirePensionCertificateDN> =
         flow {
             if (shouldThrowError) {
