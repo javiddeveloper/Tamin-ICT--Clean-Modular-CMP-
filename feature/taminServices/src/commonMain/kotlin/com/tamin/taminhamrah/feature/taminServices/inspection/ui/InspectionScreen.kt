@@ -22,7 +22,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Assignment
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,15 +40,16 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tamin.taminhamrah.feature.taminServices.inspection.ui.steps.InspectionRequestScreen
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionFilterChipRow
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionHeader
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionItemCard
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionListSkeleton
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionSearchEmptyState
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionSearchSheet
-import com.tamin.taminhamrah.feature.taminServices.inspection.ui.contract.InspectionEvent
-import com.tamin.taminhamrah.feature.taminServices.inspection.ui.contract.InspectionIntent
-import com.tamin.taminhamrah.feature.taminServices.inspection.ui.contract.InspectionUiState
+import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionEvent
+import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionIntent
+import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionUiState
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.model.InspectionPerformedPR
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.model.InspectionSearchValidation
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -57,7 +57,6 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
-import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.rememberCollapsingHeaderState
@@ -69,9 +68,6 @@ import com.tamin.taminhamrah.ui.components.toast.AppToastHost
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.Toast
 import com.tamin.taminhamrah.ui.components.toast.error
-import com.tamin.taminhamrah.ui.components.toast.info
-import com.tamin.taminhamrah.ui.theme.CornerRadius
-import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminNavy300
@@ -79,7 +75,6 @@ import com.tamin.taminhamrah.ui.theme.TaminNavy900
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.inspection_coming_soon_toast
 import taminx.core.core_ui.inspection_count_format
 import taminx.core.core_ui.inspection_empty_subtitle
 import taminx.core.core_ui.inspection_empty_title
@@ -110,11 +105,19 @@ fun InspectionRoute(
         viewModel.sendIntent(InspectionIntent.LoadInspections())
     }
 
-    InspectionScreen(
-        uiState = uiState,
-        onIntent = viewModel::sendIntent,
-        onBackClicked = onBackClicked,
-    )
+     if (uiState.showRequestFlow) {
+         InspectionRequestScreen(
+             uiState = uiState,
+             onIntent = viewModel::sendIntent,
+             onClose = { viewModel.sendIntent(InspectionIntent.CloseRequestFlow) },
+         )
+     } else {
+        InspectionScreen(
+            uiState = uiState,
+            onIntent = viewModel::sendIntent,
+            onBackClicked = onBackClicked,
+        )
+     }
 }
 
 @Composable
@@ -139,8 +142,6 @@ internal fun InspectionScreen(
     initialSearchCriteria: InspectionSearchValidation = InspectionSearchValidation(),
 ) {
     val taminColors = LocalTaminColors.current
-    val toaster = LocalToaster.current
-    val comingSoonMessage = stringResource(Res.string.inspection_coming_soon_toast)
 
     val collapse = rememberCollapsingHeaderState(HeaderCollapseDistance)
     var headerHeightPx by remember { mutableIntStateOf(0) }
@@ -201,7 +202,7 @@ internal fun InspectionScreen(
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.Transparent
                         ),
-                        onClick = {  },
+                        onClick = { onIntent(InspectionIntent.OpenRequestFlow()) },
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             TaminText(text = "+", color = Color.White)
@@ -284,7 +285,9 @@ internal fun InspectionScreen(
                     key = { _, item -> item.inspectionNo }) { index, item ->
                     InspectionItemCard(
                         item = item,
-                        onSubmitObjectionClicked = { toaster.info(comingSoonMessage) },
+                        onSubmitObjectionClicked = {
+                            onIntent(InspectionIntent.OpenRequestFlow(item = item))
+                        },
                         onDownloadReportClicked = { inspectionNo ->
                             viewingInspectionNo = inspectionNo
                             onIntent(InspectionIntent.DownloadReportPdf(inspectionNo))

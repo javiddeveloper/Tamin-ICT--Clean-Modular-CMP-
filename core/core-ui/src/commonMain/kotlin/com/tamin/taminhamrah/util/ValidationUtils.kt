@@ -74,6 +74,17 @@ object ValidationUtils {
     }
 
     /**
+     * Returns true if [endTimestamp] (epoch millis) is strictly after [startTimestamp] — the
+     * general "end date must be after start date" range check shared across date-range form
+     * fields (e.g. inspection request's employment period). Either side being unset (`null`,
+     * not yet picked) is treated as valid so the error only appears once both dates are chosen.
+     */
+    fun isDateRangeValid(startTimestamp: Long?, endTimestamp: Long?): Boolean {
+        if (startTimestamp == null || endTimestamp == null) return true
+        return endTimestamp > startTimestamp
+    }
+
+    /**
      * Validates Iranian National ID using 10-digit checksum algorithm.
      */
     fun isNationalIdValid(nationalId: String): Boolean {

@@ -2,8 +2,8 @@ package com.tamin.taminhamrah.feature.taminServices.inspection
 
 import app.cash.turbine.test
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.InspectionViewModel
-import com.tamin.taminhamrah.feature.taminServices.inspection.ui.contract.InspectionEvent
-import com.tamin.taminhamrah.feature.taminServices.inspection.ui.contract.InspectionIntent
+import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionEvent
+import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionIntent
 import com.tamin.taminhamrah.model.inspection.BranchDN
 import com.tamin.taminhamrah.model.inspection.BranchListDN
 import com.tamin.taminhamrah.model.inspection.InspectionPerformedDN
@@ -18,6 +18,7 @@ import com.tamin.taminhamrah.useCases.inspection.GetInspectionListUseCase
 import com.tamin.taminhamrah.useCases.inspection.GetInspectionReportPDFUseCase
 import com.tamin.taminhamrah.useCases.inspection.GetJobListUseCase
 import com.tamin.taminhamrah.useCases.inspection.SubmitInspectionUseCase
+import com.tamin.taminhamrah.useCases.user.GetUserProfileUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -38,12 +39,14 @@ class InspectionViewModelTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private lateinit var repository: FakeInspectionRepository
+    private lateinit var userRepository: FakeUserRepository
     private lateinit var viewModel: InspectionViewModel
 
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         repository = FakeInspectionRepository()
+        userRepository = FakeUserRepository()
         viewModel = buildViewModel()
     }
 
@@ -57,11 +60,12 @@ class InspectionViewModelTest {
         getBranchListUseCase = GetBranchListUseCase(repository),
         getJobListUseCase = GetJobListUseCase(repository),
         submitInspectionUseCase = SubmitInspectionUseCase(repository),
-        getInspectionReportPDFUseCase = GetInspectionReportPDFUseCase(repository)
+        getInspectionReportPDFUseCase = GetInspectionReportPDFUseCase(repository),
+        getUserProfileUseCase = GetUserProfileUseCase(userRepository),
     )
 
     @Test
-    fun LoadInspections_success_updatesUiStateWithList() = runTest(testDispatcher) {
+    fun loadInspections_success_updatesUiStateWithList() = runTest(testDispatcher) {
         val expected = InspectionPerformedListDN(
             total = 1,
             list = listOf(
@@ -91,7 +95,7 @@ class InspectionViewModelTest {
     }
 
     @Test
-    fun LoadInspections_error_sendsShowToastEvent() = runTest(testDispatcher) {
+    fun loadInspections_error_sendsShowToastEvent() = runTest(testDispatcher) {
         repository.shouldThrowError = true
 
         viewModel.events.test {
@@ -102,7 +106,7 @@ class InspectionViewModelTest {
     }
 
     @Test
-    fun LoadBranches_success_updatesUiStateWithList() = runTest(testDispatcher) {
+    fun loadBranches_success_updatesUiStateWithList() = runTest(testDispatcher) {
         val expected = BranchListDN(
             total = 1,
             list = listOf(
@@ -131,7 +135,7 @@ class InspectionViewModelTest {
     }
 
     @Test
-    fun LoadJobs_success_updatesUiStateWithList() = runTest(testDispatcher) {
+    fun loadJobs_success_updatesUiStateWithList() = runTest(testDispatcher) {
         val expected = JobListDN(
             total = 1,
             list = listOf(
@@ -159,7 +163,7 @@ class InspectionViewModelTest {
     }
 
     @Test
-    fun SubmitRequest_success_updatesUiStateIsSubmitted() = runTest(testDispatcher) {
+    fun submitRequest_success_updatesUiStateIsSubmitted() = runTest(testDispatcher) {
         repository.submitResult = SubmitInspectionRequestResultDN(id = 123L)
 
         viewModel.uiState.test {
@@ -186,7 +190,7 @@ class InspectionViewModelTest {
     }
 
     @Test
-    fun DownloadReportPdf_success_updatesUiStateWithViewerPdf() = runTest(testDispatcher) {
+    fun downloadReportPdf_success_updatesUiStateWithViewerPdf() = runTest(testDispatcher) {
         val expected = PdfDownloadDN(pdf = null)
         repository.reportPdfResult = expected
 
@@ -207,7 +211,7 @@ class InspectionViewModelTest {
     }
 
     @Test
-    fun DownloadReportPdf_error_marksViewerDownloadFailedAndSendsShowToastEvent() = runTest(testDispatcher) {
+    fun downloadReportPdf_error_marksViewerDownloadFailedAndSendsShowToastEvent() = runTest(testDispatcher) {
         repository.shouldThrowError = true
 
         viewModel.events.test {
@@ -218,7 +222,7 @@ class InspectionViewModelTest {
     }
 
     @Test
-    fun DismissPdfViewer_clearsViewerPdf() = runTest(testDispatcher) {
+    fun dismissPdfViewer_clearsViewerPdf() = runTest(testDispatcher) {
         repository.reportPdfResult = PdfDownloadDN(pdf = null)
 
         viewModel.uiState.test {

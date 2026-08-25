@@ -1,20 +1,15 @@
 package com.tamin.taminhamrah.feature.taminServices.inspection.ui.components
 
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -24,16 +19,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.model.InspectionSearchValidation
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
+import com.tamin.taminhamrah.ui.components.TaminStyledTextField
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -50,7 +43,6 @@ import taminx.core.core_ui.inspection_search_field_optional_hint
 import taminx.core.core_ui.inspection_search_sheet_title
 import taminx.core.core_ui.inspection_workshop_code
 
-private val SearchFieldHeight = 48.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InspectionSearchSheet(
@@ -92,17 +84,17 @@ fun InspectionSearchSheet(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             ) {
-                LabeledSearchField(
-                    label = stringResource(Res.string.inspection_id),
+                TaminStyledTextField(
                     value = criteria.inspectionNo,
                     onValueChange = { criteria = criteria.copy(inspectionNo = it) },
+                    label = stringResource(Res.string.inspection_id),
                     placeholder = optionalHint,
                     modifier = Modifier.weight(1f),
                 )
-                LabeledSearchField(
-                    label = stringResource(Res.string.inspection_workshop_code),
+                TaminStyledTextField(
                     value = criteria.workshopNo,
                     onValueChange = { criteria = criteria.copy(workshopNo = it) },
+                    label = stringResource(Res.string.inspection_workshop_code),
                     placeholder = optionalHint,
                     modifier = Modifier.weight(1f),
                 )
@@ -132,76 +124,6 @@ fun InspectionSearchSheet(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun LabeledSearchField(
-    label: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeholder: String,
-    modifier: Modifier = Modifier,
-) {
-    val colors = LocalTaminColors.current
-    val interactionSource = remember { MutableInteractionSource() }
-    val shape = RoundedCornerShape(CornerRadius.lg)
-    val fieldColors = OutlinedTextFieldDefaults.colors(
-        focusedBorderColor = colors.blueText,
-        unfocusedBorderColor = colors.border,
-        focusedContainerColor = colors.bgSurface,
-        unfocusedContainerColor = colors.bgSurface,
-        focusedTextColor = colors.textPrimary,
-        unfocusedTextColor = colors.textPrimary,
-    )
-
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(Spacing.xs),
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = colors.textSecondary,
-        )
-        BasicTextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = Modifier.fillMaxWidth().height(SearchFieldHeight),
-            textStyle = MaterialTheme.typography.bodyMedium.copy(color = colors.textPrimary),
-            singleLine = true,
-            cursorBrush = SolidColor(colors.blueText),
-            interactionSource = interactionSource,
-            decorationBox = { innerTextField ->
-                OutlinedTextFieldDefaults.DecorationBox(
-                    value = value,
-                    innerTextField = innerTextField,
-                    enabled = true,
-                    singleLine = true,
-                    visualTransformation = VisualTransformation.None,
-                    interactionSource = interactionSource,
-                    isError = false,
-                    placeholder = {
-                        Text(
-                            text = placeholder,
-                            color = colors.textMuted,
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    },
-                    colors = fieldColors,
-                    contentPadding = PaddingValues(horizontal = Spacing.md),
-                    container = {
-                        OutlinedTextFieldDefaults.Container(
-                            enabled = true,
-                            isError = false,
-                            interactionSource = interactionSource,
-                            colors = fieldColors,
-                            shape = shape,
-                        )
-                    },
-                )
-            },
-        )
     }
 }
 
