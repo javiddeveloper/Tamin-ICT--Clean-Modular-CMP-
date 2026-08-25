@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.history.navigateToHistory
 import com.tamin.taminhamrah.feature.history.navigateToHistoryJobInfo
 import com.tamin.taminhamrah.feature.orotezprotez.navigateToOrotezProtez
+import com.tamin.taminhamrah.feature.pregnancyPay.navigateToPregnancyPay
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToCalculatePension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeferredInstallment
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeservedTreatment
@@ -47,6 +48,7 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
         FeatureFlag.VIEW_TITLE_JOB -> navigateToHistoryJobInfo()
         FeatureFlag.SEND_INSURANCE_HISTORY_TO_INSTITUTION -> navigateToSendInsuranceHistoryToInstitutions()
         FeatureFlag.OROTEZ_PROTEZ -> navigateToOrotezProtez()
+        FeatureFlag.REQUEST_FOR_PREGNANCY_PAY -> navigateToPregnancyPay()
         else -> Unit
     }
 }

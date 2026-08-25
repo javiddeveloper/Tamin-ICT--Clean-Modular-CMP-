@@ -55,6 +55,10 @@ import com.tamin.taminhamrah.useCases.personal.GetGirlSurvivorReportUseCase
 import com.tamin.taminhamrah.useCases.orotezProtez.GetInsuredPersonsUseCase
 import com.tamin.taminhamrah.useCases.orotezProtez.GetRequestInsuredMainInfoUseCase
 import com.tamin.taminhamrah.useCases.orotezProtez.SaveShortTermOrthosisUseCase
+import com.tamin.taminhamrah.useCases.pregnancyPay.GetPregnancyMainInfoUseCase
+import com.tamin.taminhamrah.useCases.pregnancyPay.GetPregnancyStatusListUseCase
+import com.tamin.taminhamrah.useCases.pregnancyPay.GetPregnancyTypeListUseCase
+import com.tamin.taminhamrah.useCases.pregnancyPay.SendPregnancyPayRequestUseCase
 import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
 import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.GetStatusCertificateReportUseCase
@@ -250,6 +254,10 @@ val domainModule = module {
     factoryOf(::GetRequestInsuredMainInfoUseCase)
     factoryOf(::GetInsuredPersonsUseCase)
     factoryOf(::SaveShortTermOrthosisUseCase)
+    factoryOf(::GetPregnancyMainInfoUseCase)
+    factoryOf(::GetPregnancyStatusListUseCase)
+    factoryOf(::GetPregnancyTypeListUseCase)
+    factoryOf(::SendPregnancyPayRequestUseCase)
     factoryOf(::GetMyRequestPdfUseCase)
     factoryOf(::DeleteMyRequestUseCase)
     factoryOf(::InboxInquiryLicenseUseCase)
