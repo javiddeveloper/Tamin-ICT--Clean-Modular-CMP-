@@ -151,6 +151,7 @@ class PensionSurvivorViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
         uploadAllDeceasedDocuments()
 
+        viewModel.sendIntent(PensionSurvivorIntent.DeceasedHistoryConfirmedChanged(true))
         viewModel.sendIntent(PensionSurvivorIntent.NextStep)
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -177,6 +178,7 @@ class PensionSurvivorViewModelTest {
         viewModel.sendIntent(PensionSurvivorIntent.SearchDeceased)
         testDispatcher.scheduler.advanceUntilIdle()
         uploadAllDeceasedDocuments()
+        viewModel.sendIntent(PensionSurvivorIntent.DeceasedHistoryConfirmedChanged(true))
         viewModel.sendIntent(PensionSurvivorIntent.NextStep)
         testDispatcher.scheduler.advanceUntilIdle()
     }

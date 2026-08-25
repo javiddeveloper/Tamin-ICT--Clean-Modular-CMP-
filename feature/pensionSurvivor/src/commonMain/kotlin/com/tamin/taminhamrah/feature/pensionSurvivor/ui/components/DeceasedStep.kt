@@ -2,6 +2,10 @@ package com.tamin.taminhamrah.feature.pensionSurvivor.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,6 +22,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -39,7 +46,6 @@ import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.DeceasedUploade
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.PensionSurvivorIntent
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.PensionSurvivorUiState
 import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoPR
-import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.SegmentedInputField
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminDivider
@@ -55,7 +61,9 @@ import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
+import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.rememberCameraPermission
+import com.tamin.taminhamrah.util.toJalaliDateLabel
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberCameraPickerLauncher
@@ -70,32 +78,35 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.amount_unknown
+import taminx.core.core_ui.btn_close
 import taminx.core.core_ui.error_file_read_fallback
+import taminx.core.core_ui.girl_survivor_label_birth_date
 import taminx.core.core_ui.girl_survivor_label_father_name
-import taminx.core.core_ui.girl_survivor_label_full_name
 import taminx.core.core_ui.girl_survivor_label_insurance_id
 import taminx.core.core_ui.ic_number
-import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.ic_tamin_user
+import taminx.core.core_ui.identity_field_id_number
 import taminx.core.core_ui.inquiry_national_id_label
 import taminx.core.core_ui.occurrence_camera_permission_denied
-import taminx.core.core_ui.occurrence_doc_format_error
 import taminx.core.core_ui.orotez_protez_document_pick_placeholder
 import taminx.core.core_ui.orotez_protez_document_status_error_tap_to_retry
 import taminx.core.core_ui.orotez_protez_document_status_uploaded
 import taminx.core.core_ui.pension_survivor_deceased_age_full
-import taminx.core.core_ui.pension_survivor_deceased_branch
+import taminx.core.core_ui.pension_survivor_deceased_branch_code
+import taminx.core.core_ui.pension_survivor_deceased_branch_name
 import taminx.core.core_ui.pension_survivor_deceased_death_certificate
-import taminx.core.core_ui.pension_survivor_deceased_death_date
+import taminx.core.core_ui.pension_survivor_deceased_death_date_value
 import taminx.core.core_ui.pension_survivor_deceased_documents_count
 import taminx.core.core_ui.pension_survivor_deceased_documents_upload_hint
 import taminx.core.core_ui.pension_survivor_deceased_documents_upload_title
+import taminx.core.core_ui.pension_survivor_deceased_history_confirm_label
 import taminx.core.core_ui.pension_survivor_deceased_id_children_page
 import taminx.core.core_ui.pension_survivor_deceased_id_first_page
 import taminx.core.core_ui.pension_survivor_deceased_more_details
+import taminx.core.core_ui.pension_survivor_deceased_previous_pension
+import taminx.core.core_ui.verify_issue_place_label
 import taminx.core.core_ui.verify_label_age
-import taminx.core.core_ui.verify_label_national_id
-import taminx.core.core_ui.verify_label_relation
+import taminx.core.core_ui.verify_label_gender
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
@@ -119,6 +130,12 @@ fun DeceasedStep(
             )
         } else {
             DeceasedSummaryCard(info = state.deceasedInfo)
+            DeceasedHistoryConfirmCard(
+                confirmed = state.isDeceasedHistoryConfirmed,
+                onConfirmedChange = {
+                    onIntent(PensionSurvivorIntent.DeceasedHistoryConfirmedChanged(it))
+                },
+            )
             DeceasedDocumentsSection(
                 state = state,
                 onIntent = onIntent,
@@ -156,11 +173,17 @@ private fun DeceasedSummaryCard(
 ) {
     val colors = LocalTaminColors.current
     var expanded by remember(info.personal?.nationalId) { mutableStateOf(false) }
-    val chevronRotation by animateFloatAsState(if (expanded) 90f else 0f)
+    val chevronRotation by animateFloatAsState(if (expanded) 180f else 0f)
     val fullName = listOfNotNull(
         info.personal?.firstName?.takeIf(String::isNotBlank),
         info.personal?.lastName?.takeIf(String::isNotBlank),
     ).joinToString(" ").ifBlank { stringResource(Res.string.amount_unknown) }
+    val deathDateLabel = stringResource(
+        Res.string.pension_survivor_deceased_death_date_value,
+        info.deadDate?.takeIf(String::isNotBlank)?.toJalaliDateLabel()
+            ?: stringResource(Res.string.amount_unknown),
+    )
+    val ageValue = formatDeceasedAge(info)
 
     Column(
         modifier = modifier
@@ -176,15 +199,15 @@ private fun DeceasedSummaryCard(
         ) {
             Box(
                 modifier = Modifier
-                    .size(IconSize.tile)
-                    .background(colors.blueBg, CircleShape),
+                    .size(IconSize.xlarge)
+                    .border(Thickness.medium, colors.blueText, CircleShape),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     imageVector = vectorResource(Res.drawable.ic_tamin_user),
                     contentDescription = null,
                     tint = colors.blueText,
-                    modifier = Modifier.size(IconSize.tileInner),
+                    modifier = Modifier.size(IconSize.medium),
                 )
             }
 
@@ -196,37 +219,85 @@ private fun DeceasedSummaryCard(
                 )
                 Spacer(modifier = Modifier.height(Spacing.xxs))
                 Text(
-                    text = info.deadDate.orUnknown(),
+                    text = deathDateLabel,
                     style = MaterialTheme.typography.bodySmall,
                     color = colors.textMuted,
                 )
             }
         }
 
-        TaminDivider()
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+            DeceasedFieldRow(
+                left = DeceasedField(
+                    label = stringResource(Res.string.girl_survivor_label_insurance_id),
+                    value = info.insuranceId.orUnknown(),
+                ),
+                right = DeceasedField(
+                    label = stringResource(Res.string.girl_survivor_label_father_name),
+                    value = info.personal?.fatherName.orUnknown(),
+                ),
+            )
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
-        ) {
-            DeceasedSummaryGridItem(
-                modifier = Modifier.weight(1f),
-                label = stringResource(Res.string.girl_survivor_label_father_name),
-                value = info.personal?.fatherName.orUnknown(),
-                numeric = false,
-            )
-            DeceasedSummaryGridItem(
-                modifier = Modifier.weight(1f),
-                label = stringResource(Res.string.girl_survivor_label_insurance_id),
-                value = info.insuranceId.orUnknown(),
-            )
-            DeceasedSummaryGridItem(
-                modifier = Modifier.weight(1f),
+            AnimatedVisibility(
+                visible = expanded,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut(),
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                    DeceasedFieldRow(
+                        left = DeceasedField(
+                            label = stringResource(Res.string.verify_label_gender),
+                            value = info.personal?.gender.orUnknown(),
+                        ),
+                        right = DeceasedField(
+                            label = stringResource(Res.string.identity_field_id_number),
+                            value = info.personal?.idCardNumber.orUnknown(),
+                        ),
+                    )
+                    DeceasedFieldRow(
+                        left = DeceasedField(
+                            label = stringResource(Res.string.verify_issue_place_label),
+                            value = info.personal?.cityOfIssueDesc.orUnknown(),
+                        ),
+                        right = DeceasedField(
+                            label = stringResource(Res.string.girl_survivor_label_birth_date),
+                            value = PersianDateFormatter.formatTimestamp(info.personal?.dateOfBirth)
+                                .ifBlank { stringResource(Res.string.amount_unknown) },
+                        ),
+                    )
+                    DeceasedFieldRow(
+                        left = DeceasedField(
+                            label = stringResource(Res.string.pension_survivor_deceased_branch_name),
+                            value = info.branchName.orUnknown(),
+                        ),
+                        right = DeceasedField(
+                            label = stringResource(Res.string.pension_survivor_deceased_branch_code),
+                            value = info.branchCode.orUnknown(),
+                        ),
+                    )
+                }
+            }
+
+            DeceasedFieldTile(
+                modifier = Modifier.fillMaxWidth(),
                 label = stringResource(Res.string.verify_label_age),
-                value = formatDeceasedAge(info),
-                numeric = false,
+                value = ageValue,
             )
+
+            AnimatedVisibility(
+                visible = expanded,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut(),
+            ) {
+                DeceasedFieldTile(
+                    modifier = Modifier.fillMaxWidth(),
+                    label = stringResource(Res.string.pension_survivor_deceased_previous_pension),
+                    value = info.pensionerId.orUnknown(),
+                )
+            }
         }
+
+        TaminDivider()
 
         Row(
             modifier = Modifier
@@ -238,50 +309,62 @@ private fun DeceasedSummaryCard(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = stringResource(Res.string.pension_survivor_deceased_more_details),
-                style = MaterialTheme.typography.bodyMedium,
+                text = stringResource(
+                    if (expanded) Res.string.btn_close
+                    else Res.string.pension_survivor_deceased_more_details,
+                ),
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                 color = colors.blueText,
             )
             Icon(
-                imageVector = vectorResource(Res.drawable.ic_tamin_chevron_forward),
+                imageVector = Icons.Default.KeyboardArrowDown,
                 contentDescription = null,
                 tint = colors.blueText,
                 modifier = Modifier
-                    .size(IconSize.small)
+                    .size(IconSize.medium)
                     .rotate(chevronRotation),
             )
-        }
-
-        AnimatedVisibility(visible = expanded) {
-            val detailRows = deceasedDetailRows(info)
-            Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-                detailRows.forEachIndexed { index, row ->
-                    DetailRow(
-                        label = row.label,
-                        value = row.value,
-                        numeric = row.numeric,
-                    )
-                    if (index < detailRows.lastIndex) {
-                        TaminDivider()
-                    }
-                }
-            }
         }
     }
 }
 
 @Composable
-private fun DeceasedSummaryGridItem(
+private fun DeceasedFieldRow(
+    left: DeceasedField,
+    right: DeceasedField,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        DeceasedFieldTile(
+            modifier = Modifier.weight(1f),
+            label = right.label,
+            value = right.value,
+        )
+        DeceasedFieldTile(
+            modifier = Modifier.weight(1f),
+            label = left.label,
+            value = left.value,
+        )
+    }
+}
+
+@Composable
+private fun DeceasedFieldTile(
     label: String,
     value: String,
     modifier: Modifier = Modifier,
-    numeric: Boolean = true,
 ) {
     val colors = LocalTaminColors.current
 
     Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
+        modifier = modifier
+            .background(colors.bgPage, RoundedCornerShape(CornerRadius.lg))
+            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
+        verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+        horizontalAlignment = Alignment.Start,
     ) {
         Text(
             text = label,
@@ -290,8 +373,42 @@ private fun DeceasedSummaryGridItem(
         )
         Text(
             text = value,
-            style = MaterialTheme.typography.titleSmall,
+            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
             color = colors.textPrimary,
+        )
+    }
+}
+
+private data class DeceasedField(
+    val label: String,
+    val value: String,
+)
+
+@Composable
+private fun DeceasedHistoryConfirmCard(
+    confirmed: Boolean,
+    onConfirmedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .taminSurface(CornerRadius.card)
+            .clickable { onConfirmedChange(!confirmed) }
+            .padding(Spacing.smd),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Checkbox(
+            checked = confirmed,
+            onCheckedChange = onConfirmedChange,
+        )
+        Text(
+            text = stringResource(Res.string.pension_survivor_deceased_history_confirm_label),
+            style = MaterialTheme.typography.bodyMedium,
+            color = colors.textPrimary,
+            modifier = Modifier.weight(1f),
         )
     }
 }
@@ -477,52 +594,6 @@ private fun formatDeceasedAge(info: DeceasedInfoPR): String {
     }
 }
 
-@Composable
-private fun deceasedDetailRows(info: DeceasedInfoPR): List<DeceasedInfoRow> {
-    val fullName = listOfNotNull(
-        info.personal?.firstName?.takeIf(String::isNotBlank),
-        info.personal?.lastName?.takeIf(String::isNotBlank),
-    ).joinToString(" ")
-
-    return listOf(
-        DeceasedInfoRow(
-            label = stringResource(Res.string.girl_survivor_label_full_name),
-            value = fullName.ifBlank { stringResource(Res.string.amount_unknown) },
-            numeric = false,
-        ),
-        DeceasedInfoRow(
-            label = stringResource(Res.string.verify_label_national_id),
-            value = info.personal?.nationalId.orUnknown(),
-            numeric = true,
-        ),
-        DeceasedInfoRow(
-            label = stringResource(Res.string.girl_survivor_label_insurance_id),
-            value = info.insuranceId.orUnknown(),
-            numeric = true,
-        ),
-        DeceasedInfoRow(
-            label = stringResource(Res.string.pension_survivor_deceased_death_date),
-            value = info.deadDate.orUnknown(),
-            numeric = false,
-        ),
-        DeceasedInfoRow(
-            label = stringResource(Res.string.verify_label_age),
-            value = formatDeceasedAge(info),
-            numeric = false,
-        ),
-        DeceasedInfoRow(
-            label = stringResource(Res.string.pension_survivor_deceased_branch),
-            value = info.branchName.orUnknown(),
-            numeric = false,
-        ),
-        DeceasedInfoRow(
-            label = stringResource(Res.string.verify_label_relation),
-            value = info.related.orUnknown(),
-            numeric = false,
-        ),
-    )
-}
-
 @OptIn(ExperimentalEncodingApi::class)
 @Composable
 private fun rememberBase64Thumbnail(bytes: ByteArray?): String? {
@@ -536,11 +607,5 @@ private fun rememberBase64Thumbnail(bytes: ByteArray?): String? {
 private fun String?.orUnknown(): String {
     return this?.takeIf { it.isNotBlank() } ?: stringResource(Res.string.amount_unknown)
 }
-
-private data class DeceasedInfoRow(
-    val label: String,
-    val value: String,
-    val numeric: Boolean,
-)
 
 private const val NATIONAL_ID_LENGTH = 10
