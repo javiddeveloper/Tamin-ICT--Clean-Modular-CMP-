@@ -10,8 +10,6 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.deservedTreatment.Deserve
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll.PayRollScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.EdictScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.issuanceCertificate.IssuanceCertificateScreen
-import com.tamin.taminhamrah.feature.pensionInquiry.ui.deferredInstallment.DeferredInstallmentScreen
-import com.tamin.taminhamrah.feature.pensionInquiry.ui.girlSurvivor.GirlSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.pensionSurvivor.PensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.DisabilityPensionScreen
 import kotlinx.serialization.Serializable
@@ -119,18 +117,6 @@ fun NavGraphBuilder.edictScreen(onBack: () -> Unit) {
 fun NavGraphBuilder.issuanceCertificateScreen(onBack: () -> Unit) {
     composableWithFadeTransitions<IssuanceCertificateRoute> {
         IssuanceCertificateScreen(onBack = onBack)
-    }
-}
-
-fun NavGraphBuilder.deferredInstallmentScreen(onBack: () -> Unit) {
-    composableWithFadeTransitions<DeferredInstallmentRoute> {
-        DeferredInstallmentScreen(onBack = onBack)
-    }
-}
-
-fun NavGraphBuilder.girlSurvivorScreen(onBack: () -> Unit) {
-    composableWithFadeTransitions<GirlSurvivorRoute> {
-        GirlSurvivorScreen(onBack = onBack)
     }
 }
 
