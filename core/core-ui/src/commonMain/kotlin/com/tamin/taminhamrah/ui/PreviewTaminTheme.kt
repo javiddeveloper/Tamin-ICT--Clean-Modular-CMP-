@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import com.tamin.taminhamrah.ui.components.toast.AppToastHost
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
 
 @Target(AnnotationTarget.FUNCTION)
@@ -15,6 +16,8 @@ fun PreviewRtlThemeContent(
     content: @Composable () -> Unit
 ) {
     TaminHamrahTheme(darkTheme = darkTheme) {
-        content()
+        AppToastHost {
+            content()
+        }
     }
 }

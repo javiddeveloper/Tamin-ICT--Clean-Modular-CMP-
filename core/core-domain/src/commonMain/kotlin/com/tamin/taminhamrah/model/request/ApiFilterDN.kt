@@ -84,6 +84,7 @@ enum class FilterProperty(val key: String) {
     @SerialName("requestStatus") REQUEST_STATUS("requestStatus"),
     @SerialName("isPublic") IS_PUBLIC("isPublic"),
     @SerialName("dependencyDesc") DEPENDENCY_DESC("dependencyDesc"),
+    @SerialName("bankName") BANK_NAME("bankName"),
 
     // Workshop member / stakeholder / absentee-registration lists. Each list addresses the same
     // two people-columns under a different prefix, which is why there is one entry per list
