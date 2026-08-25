@@ -82,7 +82,7 @@ fun WorkshopsScreen(
     modifier: Modifier = Modifier,
 ) {
     // جزئیات کارگاه is the same destination in the design's own model: picking a workshop
-    // swaps the page, and back returns to the list. Everything it draws already travelled
+    // swaps the page, and back returns to the list. Everything it draws already traveled
     // with the workshop, so it costs no request and needs no route of its own.
     state.detailFor?.let { workshop ->
         BackHandler { onIntent(WorkshopsIntent.DetailDismissed) }
