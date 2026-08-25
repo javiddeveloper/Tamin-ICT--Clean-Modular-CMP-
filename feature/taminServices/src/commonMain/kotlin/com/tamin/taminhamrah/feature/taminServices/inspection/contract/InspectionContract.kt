@@ -17,9 +17,16 @@ enum class InspectionRequestStep {
     REQUEST_DESCRIPTION,
 }
 
-/** Tags a fatal load failure inside the request wizard to the step it blocks. */
+/**
+ * Tags a fatal load failure inside the request wizard to the specific call that produced it, so
+ * retry only re-issues that one call — not every call feeding the step. [BRANCHES] and [JOBS] both
+ * block Step 2 (Workshop Info) since it needs both, but are tracked separately since they load
+ * concurrently and independently.
+ */
 enum class InspectionRequestErrorSource {
     USER_INFO,
+    BRANCHES,
+    JOBS,
 }
 
 data class IdentityContactStepState(
@@ -67,6 +74,7 @@ data class InspectionUiState(
     val requestDescription: String = "",
     val submittedTrackingId: Long? = null,
     val requestErrors: Map<InspectionRequestErrorSource, String> = emptyMap(),
+    val showExitConfirmation: Boolean = false,
 ) {
     val isRequestStep1Valid: Boolean
         get() = ValidationUtils.isPhoneNumberValid(identityContact.mobile) &&
@@ -111,6 +119,8 @@ data class InspectionUiState(
         data class RequestDescriptionUpdated(val description: String) : PartialState
         data object GoToNextRequestStep : PartialState
         data object GoToPreviousRequestStep : PartialState
+        data class ExitConfirmationChanged(val show: Boolean) : PartialState
+        data class RequestErrorCleared(val source: InspectionRequestErrorSource) : PartialState
     }
 }
 
@@ -148,12 +158,17 @@ sealed interface InspectionIntent {
         val item: InspectionPerformedPR? = null,
     ) : InspectionIntent
     data object CloseRequestFlow : InspectionIntent
-    data object RetryUserInfo : InspectionIntent
+
+    /** Retries only the single API call behind [source]'s error instead of reloading the whole wizard. */
+    data class RetrySource(val source: InspectionRequestErrorSource) : InspectionIntent
     data class UpdateIdentityContact(val identityContact: IdentityContactStepState) : InspectionIntent
     data class UpdateWorkshopInfo(val workshopInfo: WorkshopInfoStepState) : InspectionIntent
     data class UpdateRequestDescription(val description: String) : InspectionIntent
     data object GoToNextRequestStep : InspectionIntent
     data object GoToPreviousRequestStep : InspectionIntent
+
+    /** Toggles the "leave form?" confirmation shown when closing the wizard from a step with unsaved input. */
+    data class SetExitConfirmationVisible(val visible: Boolean) : InspectionIntent
 }
 
 sealed interface InspectionEvent {

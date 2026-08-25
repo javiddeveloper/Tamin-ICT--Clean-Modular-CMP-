@@ -20,6 +20,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.HelpOutline
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.Assignment
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -49,14 +51,19 @@ import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.Insp
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionSearchSheet
 import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionEvent
 import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionIntent
+import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionRequestStep
 import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionUiState
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.model.InspectionPerformedPR
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.model.InspectionSearchValidation
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
+import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
+import com.tamin.taminhamrah.ui.components.TaminFilledButton
+import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.rememberCollapsingHeaderState
@@ -80,8 +87,18 @@ import taminx.core.core_ui.inspection_empty_subtitle
 import taminx.core.core_ui.inspection_empty_title
 import taminx.core.core_ui.inspection_report_filename_format
 import taminx.core.core_ui.inspection_request_button
+import taminx.core.core_ui.occurrence_exit_confirmation_confirm
+import taminx.core.core_ui.occurrence_exit_confirmation_desc
+import taminx.core.core_ui.occurrence_exit_confirmation_dismiss
+import taminx.core.core_ui.occurrence_exit_confirmation_title
 
 private val HeaderCollapseDistance = 160.dp
+
+/** Steps with unsaved input that warrant an "are you sure?" before closing the wizard — mirrors occurrence's set (everything but the first step). */
+private val STEPS_REQUIRING_EXIT_CONFIRMATION = setOf(
+    InspectionRequestStep.WORKSHOP_INFO,
+    InspectionRequestStep.REQUEST_DESCRIPTION,
+)
 
 @Composable
 fun InspectionRoute(
@@ -97,19 +114,61 @@ fun InspectionRoute(
         onNavigateBack = onBackClicked,
     )
 
-    viewModel.events.collectWithLifecycleAware { event ->
-
-    }
-
     LaunchedEffect(Unit) {
         viewModel.sendIntent(InspectionIntent.LoadInspections())
     }
 
      if (uiState.showRequestFlow) {
+         val onExitRequested = remember(uiState.requestStep) {
+             {
+                 if (uiState.requestStep in STEPS_REQUIRING_EXIT_CONFIRMATION) {
+                     viewModel.sendIntent(InspectionIntent.SetExitConfirmationVisible(true))
+                 } else {
+                     viewModel.sendIntent(InspectionIntent.CloseRequestFlow)
+                 }
+             }
+         }
+
+         BackHandler(onBack = { viewModel.sendIntent(InspectionIntent.GoToPreviousRequestStep) })
+
+         if (uiState.showExitConfirmation) {
+             val taminColors = LocalTaminColors.current
+             TaminConfirmationDialog(
+                 title = stringResource(Res.string.occurrence_exit_confirmation_title),
+                 description = stringResource(Res.string.occurrence_exit_confirmation_desc),
+                 confirmButton = {
+                     TaminFilledButton(
+                         text = stringResource(Res.string.occurrence_exit_confirmation_confirm),
+                         onClick = { viewModel.sendIntent(InspectionIntent.SetExitConfirmationVisible(false)) },
+                         modifier = Modifier.fillMaxWidth(),
+                         height = 50.dp,
+                         shape = RoundedCornerShape(14.dp),
+                         icon = Icons.Default.Check,
+                     )
+                 },
+                 dismissButton = {
+                     TaminOutlinedButton(
+                         text = stringResource(Res.string.occurrence_exit_confirmation_dismiss),
+                         onClick = {
+                             viewModel.sendIntent(InspectionIntent.SetExitConfirmationVisible(false))
+                             viewModel.sendIntent(InspectionIntent.CloseRequestFlow)
+                         },
+                         modifier = Modifier.fillMaxWidth(),
+                         height = 50.dp,
+                         shape = RoundedCornerShape(14.dp),
+                         borderWidth = 0.dp,
+                         contentColor = taminColors.textSecondary,
+                     )
+                 },
+                 onDismissRequest = { viewModel.sendIntent(InspectionIntent.SetExitConfirmationVisible(false)) },
+                 icon = Icons.AutoMirrored.Outlined.HelpOutline,
+             )
+         }
+
          InspectionRequestScreen(
              uiState = uiState,
              onIntent = viewModel::sendIntent,
-             onClose = { viewModel.sendIntent(InspectionIntent.CloseRequestFlow) },
+             onClose = onExitRequested,
          )
      } else {
         InspectionScreen(

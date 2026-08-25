@@ -48,7 +48,7 @@ class InspectionViewModel(
             is InspectionIntent.DismissPdfViewer -> flow { emit(PartialState.ViewerPdfChanged(null)) }
             is InspectionIntent.OpenRequestFlow -> handleOpenRequestFlow(intent)
             is InspectionIntent.CloseRequestFlow -> flow { emit(PartialState.RequestFlowClosed) }
-            is InspectionIntent.RetryUserInfo -> fetchUserProfileForRequest()
+            is InspectionIntent.RetrySource -> handleRetrySource(intent.source)
                 .onStart { emit(PartialState.Loading(true)) }
                 .onCompletion { emit(PartialState.Loading(false)) }
             is InspectionIntent.UpdateIdentityContact ->
@@ -59,15 +59,19 @@ class InspectionViewModel(
                 flow { emit(PartialState.RequestDescriptionUpdated(intent.description)) }
             is InspectionIntent.GoToNextRequestStep -> flow { emit(PartialState.GoToNextRequestStep) }
             is InspectionIntent.GoToPreviousRequestStep -> handleGoToPreviousRequestStep()
+            is InspectionIntent.SetExitConfirmationVisible ->
+                flow { emit(PartialState.ExitConfirmationChanged(intent.visible)) }
         }
     }
 
     /**
-     * Fires current-user (Step1), branch (Step2) and job (Step3) requests together on entry, per
-     * product decision to prefetch the whole wizard's data up front rather than per-step. Only the
-     * current-user failure blocks Step1 with a fatal, retryable error — a branch/job load failure
-     * instead falls back to [handleLoadBranches]/[handleLoadJobs]'s own toast-on-error behavior,
-     * leaving Step2's pickers empty (its selection sheet shows "no items" rather than a hard error).
+     * Fires current-user (Step1) and branch+job (Step2) requests together on entry, per product
+     * decision to prefetch the whole wizard's data up front rather than per-step. Each call's
+     * failure blocks only the step it feeds with a fatal, retryable error tagged to that specific
+     * call (mirrors the occurrence wizard's per-[InspectionRequestErrorSource] error map) — Step1
+     * via [InspectionRequestErrorSource.USER_INFO], Step2's branch/job pickers via
+     * [InspectionRequestErrorSource.BRANCHES]/[InspectionRequestErrorSource.JOBS] independently, so
+     * retrying one never re-triggers the other if it already succeeded.
      */
     private fun handleOpenRequestFlow(intent: InspectionIntent.OpenRequestFlow): Flow<PartialState> = merge(
         flow { emit(PartialState.RequestFlowOpened(intent.item)) },
@@ -79,6 +83,16 @@ class InspectionViewModel(
         emit(PartialState.Loading(true))
     }.onCompletion {
         emit(PartialState.Loading(false))
+    }
+
+    private fun handleRetrySource(source: InspectionRequestErrorSource): Flow<PartialState> = when (source) {
+        InspectionRequestErrorSource.USER_INFO -> fetchUserProfileForRequest()
+        InspectionRequestErrorSource.BRANCHES -> handleLoadBranches(InspectionIntent.LoadBranches())
+        InspectionRequestErrorSource.JOBS -> handleLoadJobs(InspectionIntent.LoadJobs())
+    }.onStart {
+        // Optimistic clear here rather than in the success reducer: branches and jobs load
+        // independently, so only the call actually being retried should have its error cleared.
+        emit(PartialState.RequestErrorCleared(source))
     }
 
     private fun fetchUserProfileForRequest(): Flow<PartialState> = flow {
@@ -94,7 +108,7 @@ class InspectionViewModel(
                 ) as PartialState
             }
         )
-    }.catch { e -> emit(PartialState.RequestError(e.toSingleLineMessage())) }
+    }.catch { e -> emit(PartialState.RequestError(e.toSingleLineMessage(), InspectionRequestErrorSource.USER_INFO)) }
 
     private fun handleGoToPreviousRequestStep(): Flow<PartialState> = flow {
         if (uiState.value.requestStep == InspectionRequestStep.IDENTITY_CONTACT) {
@@ -122,7 +136,7 @@ class InspectionViewModel(
             emit(PartialState.BranchesLoaded(result.list.map { it.toPR() }))
         } catch (e: Exception) {
             emit(PartialState.Loading(false))
-            sendEvent(InspectionEvent.ShowToast(e.toSingleLineMessage()))
+            emit(PartialState.RequestError(e.toSingleLineMessage(), InspectionRequestErrorSource.BRANCHES))
         }
     }
 
@@ -133,7 +147,7 @@ class InspectionViewModel(
             emit(PartialState.JobsLoaded(result.list.map { it.toPR() }))
         } catch (e: Exception) {
             emit(PartialState.Loading(false))
-            sendEvent(InspectionEvent.ShowToast(e.toSingleLineMessage()))
+            emit(PartialState.RequestError(e.toSingleLineMessage(), InspectionRequestErrorSource.JOBS))
         }
     }
 
@@ -203,11 +217,13 @@ class InspectionViewModel(
                 isSubmitted = false,
                 submittedTrackingId = null,
                 requestErrors = emptyMap(),
+                showExitConfirmation = false,
             )
         }
         is PartialState.RequestFlowClosed -> currentState.copy(
             showRequestFlow = false,
             requestStep = InspectionRequestStep.IDENTITY_CONTACT,
+            showExitConfirmation = false,
         )
         is PartialState.ClearRequestErrors -> currentState.copy(requestErrors = emptyMap())
         is PartialState.RequestError -> currentState.copy(
@@ -229,6 +245,8 @@ class InspectionViewModel(
                 .getOrElse(currentState.requestStep.ordinal - 1) { currentState.requestStep }
             currentState.copy(requestStep = previous)
         }
+        is PartialState.ExitConfirmationChanged -> currentState.copy(showExitConfirmation = partialState.show)
+        is PartialState.RequestErrorCleared -> currentState.copy(requestErrors = currentState.requestErrors - partialState.source)
     }
 
     override fun createErrorState(message: String): PartialState {

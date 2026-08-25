@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionIntent
+import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionRequestErrorSource
 import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionUiState
 import com.tamin.taminhamrah.feature.taminServices.inspection.contract.WorkshopInfoStepState
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionRequestErrorWrapper
@@ -65,6 +66,7 @@ import taminx.core.core_ui.inspection_request_field_workshop_phone_error
 import taminx.core.core_ui.inspection_request_field_workshop_phone_optional
 import taminx.core.core_ui.inspection_request_field_workshop_phone_placeholder
 import taminx.core.core_ui.inspection_request_next_step
+import taminx.core.core_ui.inspection_request_prev_step
 import taminx.core.core_ui.inspection_request_step2_section_title
 import taminx.core.core_ui.search_hint
 
@@ -72,7 +74,9 @@ import taminx.core.core_ui.search_hint
 internal fun WorkshopInfoStep(
     uiState: InspectionUiState,
     onIntent: (InspectionIntent) -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    error: String? = null,
 ) {
     val step = uiState.workshopInfo
 
@@ -94,11 +98,22 @@ internal fun WorkshopInfoStep(
         primaryText = stringResource(Res.string.inspection_request_next_step),
         primaryEnabled = uiState.isRequestStep2Valid && !uiState.isLoading,
         onPrimaryClick = { onIntent(InspectionIntent.GoToNextRequestStep) },
+        secondaryText = stringResource(Res.string.inspection_request_prev_step),
+        onSecondaryClick = onBack,
     ) { padding ->
         InspectionRequestErrorWrapper(
             isLoading = uiState.isLoading,
-            error = null,
-            onRetry = {},
+            error = error,
+            onRetry = {
+                // Re-issue only the call(s) that actually failed, not both — branches and jobs load
+                // independently, so a branches-only failure must not also re-trigger a healthy jobs call.
+                if (uiState.requestErrors.containsKey(InspectionRequestErrorSource.BRANCHES)) {
+                    onIntent(InspectionIntent.RetrySource(InspectionRequestErrorSource.BRANCHES))
+                }
+                if (uiState.requestErrors.containsKey(InspectionRequestErrorSource.JOBS)) {
+                    onIntent(InspectionIntent.RetrySource(InspectionRequestErrorSource.JOBS))
+                }
+            },
             modifier = Modifier.padding(padding),
             shimmerContent = { WorkshopInfoShimmerSkeleton(modifier = Modifier.padding(padding)) },
         ) {
@@ -339,6 +354,7 @@ private fun WorkshopInfoStepPreview() {
                 ),
             ),
             onIntent = {},
+            onBack = {},
         )
     }
 }
@@ -347,6 +363,6 @@ private fun WorkshopInfoStepPreview() {
 @Composable
 private fun WorkshopInfoStepEmptyPreview() {
     PreviewRtlThemeContent {
-        WorkshopInfoStep(uiState = InspectionUiState(), onIntent = {})
+        WorkshopInfoStep(uiState = InspectionUiState(), onIntent = {}, onBack = {})
     }
 }

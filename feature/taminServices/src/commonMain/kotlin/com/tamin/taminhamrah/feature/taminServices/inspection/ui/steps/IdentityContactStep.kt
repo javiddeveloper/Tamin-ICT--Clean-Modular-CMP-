@@ -42,13 +42,16 @@ import taminx.core.core_ui.inspection_request_field_national_code
 import taminx.core.core_ui.inspection_request_field_full_name
 import taminx.core.core_ui.inspection_request_field_placeholder
 import taminx.core.core_ui.inspection_request_next_step
+import taminx.core.core_ui.inspection_request_prev_step
 import taminx.core.core_ui.inspection_request_step1_section_title
 
 @Composable
 internal fun IdentityContactStep(
     uiState: InspectionUiState,
     onIntent: (InspectionIntent) -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    error: String? = null,
 ) {
     val step = uiState.identityContact
     val placeholder = stringResource(Res.string.inspection_request_field_placeholder)
@@ -58,11 +61,13 @@ internal fun IdentityContactStep(
         primaryText = stringResource(Res.string.inspection_request_next_step),
         primaryEnabled = uiState.isRequestStep1Valid && !uiState.isLoading,
         onPrimaryClick = { onIntent(InspectionIntent.GoToNextRequestStep) },
+        secondaryText = stringResource(Res.string.inspection_request_prev_step),
+        onSecondaryClick = onBack,
     ) { padding ->
         InspectionRequestErrorWrapper(
             isLoading = uiState.isLoading,
-            error = uiState.requestErrors[InspectionRequestErrorSource.USER_INFO],
-            onRetry = { onIntent(InspectionIntent.RetryUserInfo) },
+            error = error,
+            onRetry = { onIntent(InspectionIntent.RetrySource(InspectionRequestErrorSource.USER_INFO)) },
             modifier = Modifier.padding(padding),
             shimmerContent = { IdentityContactShimmerSkeleton(modifier = Modifier.padding(padding)) },
         ) {
@@ -169,6 +174,7 @@ private fun IdentityContactStepPreview() {
                 ),
             ),
             onIntent = {},
+            onBack = {},
         )
     }
 }
@@ -177,6 +183,6 @@ private fun IdentityContactStepPreview() {
 @Composable
 private fun IdentityContactStepEmptyPreview() {
     PreviewRtlThemeContent {
-        IdentityContactStep(uiState = InspectionUiState(), onIntent = {})
+        IdentityContactStep(uiState = InspectionUiState(), onIntent = {}, onBack = {})
     }
 }

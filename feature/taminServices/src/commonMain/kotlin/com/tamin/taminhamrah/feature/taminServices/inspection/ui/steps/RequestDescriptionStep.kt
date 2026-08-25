@@ -41,6 +41,7 @@ private const val MAX_DESCRIPTION_LENGTH = 600
 internal fun RequestDescriptionStep(
     uiState: InspectionUiState,
     onIntent: (InspectionIntent) -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val description = uiState.requestDescription
@@ -73,7 +74,7 @@ internal fun RequestDescriptionStep(
             onIntent(InspectionIntent.SubmitRequest(request))
         },
         secondaryText = prevStepText,
-        onSecondaryClick = { onIntent(InspectionIntent.GoToPreviousRequestStep) },
+        onSecondaryClick = onBack,
     ) { padding ->
         Column(
             modifier = Modifier
@@ -132,6 +133,7 @@ private fun RequestDescriptionStepPreview() {
         RequestDescriptionStep(
             uiState = InspectionUiState(isObjectionRequest = true),
             onIntent = {},
+            onBack = {},
         )
     }
 }
@@ -140,6 +142,6 @@ private fun RequestDescriptionStepPreview() {
 @Composable
 private fun RequestDescriptionStepEmptyPreview() {
     PreviewRtlThemeContent {
-        RequestDescriptionStep(uiState = InspectionUiState(), onIntent = {})
+        RequestDescriptionStep(uiState = InspectionUiState(), onIntent = {}, onBack = {})
     }
 }

@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionRequestSuccessDialog
 import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionIntent
+import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionRequestErrorSource
 import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionRequestStep
 import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionUiState
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -54,6 +55,11 @@ import taminx.core.core_ui.inspection_title
  * [InspectionUiState]/[InspectionIntent] — this is a screen, not a separate ViewModel/nav
  * destination, so it and [com.tamin.taminhamrah.feature.taminServices.inspection.ui.InspectionScreen]
  * always agree on one source of truth (see `InspectionViewModel.handleOpenRequestFlow`).
+ *
+ * Top bar and step indicator are intentionally NOT mirrored from occurrence's per-step
+ * `OccurrenceStepScaffold` — this wizard keeps its own single shared [TaminTopAppBar] + [StepIndicator]
+ * here, with only the bottom action bar owned per-step (see [IdentityContactStep]/[WorkshopInfoStep]/
+ * [RequestDescriptionStep] and [com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionRequestStepScaffold]).
  */
 @Composable
 internal fun InspectionRequestScreen(
@@ -68,6 +74,7 @@ internal fun InspectionRequestScreen(
     val title = stringResource(
         if (uiState.isObjectionRequest) Res.string.inspection_request_objection_title else Res.string.inspection_title
     )
+    val onBack = { onIntent(InspectionIntent.GoToPreviousRequestStep) }
 
     val steps = remember(uiState.requestStep) {
         persistentListOf(
@@ -114,7 +121,7 @@ internal fun InspectionRequestScreen(
                             modifier = Modifier.size(24.dp),
                         )
                     },
-                    onNavigationClick = { onIntent(InspectionIntent.GoToPreviousRequestStep) },
+                    onNavigationClick = onBack,
                     actionIcon = {
                         Icon(
                             imageVector = Icons.Default.Close,
@@ -154,9 +161,26 @@ internal fun InspectionRequestScreen(
             modifier = Modifier.weight(1f),
         ) { step ->
             when (step) {
-                InspectionRequestStep.IDENTITY_CONTACT -> IdentityContactStep(uiState = uiState, onIntent = onIntent)
-                InspectionRequestStep.WORKSHOP_INFO -> WorkshopInfoStep(uiState = uiState, onIntent = onIntent)
-                InspectionRequestStep.REQUEST_DESCRIPTION -> RequestDescriptionStep(uiState = uiState, onIntent = onIntent)
+                InspectionRequestStep.IDENTITY_CONTACT -> IdentityContactStep(
+                    uiState = uiState,
+                    onIntent = onIntent,
+                    onBack = onBack,
+                    error = uiState.requestErrors[InspectionRequestErrorSource.USER_INFO],
+                )
+                InspectionRequestStep.WORKSHOP_INFO -> WorkshopInfoStep(
+                    uiState = uiState,
+                    onIntent = onIntent,
+                    onBack = onBack,
+                    // Branches and jobs fail independently — show whichever error is present; retry
+                    // (wired inside WorkshopInfoStep) re-issues only the call(s) that actually failed.
+                    error = uiState.requestErrors[InspectionRequestErrorSource.BRANCHES]
+                        ?: uiState.requestErrors[InspectionRequestErrorSource.JOBS],
+                )
+                InspectionRequestStep.REQUEST_DESCRIPTION -> RequestDescriptionStep(
+                    uiState = uiState,
+                    onIntent = onIntent,
+                    onBack = onBack,
+                )
             }
         }
     }
