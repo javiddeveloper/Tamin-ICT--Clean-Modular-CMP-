@@ -1,6 +1,12 @@
 package com.tamin.taminhamrah.feature.workshops.ui.objectionableDebit
 
 import androidx.compose.runtime.Composable
+import taminx.core.core_ui.obj_form_done_body
+import org.jetbrains.compose.resources.getString
+import kotlinx.coroutines.flow.Flow
+import com.tamin.taminhamrah.ui.components.toast.success
+import com.tamin.taminhamrah.ui.components.toast.error
+import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -64,6 +70,8 @@ fun ObjectionableDebitScreen(
     LaunchedEffect(workshopId, branchCode) {
         viewModel.sendIntent(ObjectionableDebitIntent.Open(workshopId, branchCode))
     }
+
+    HandleObjectionableDebitEvents(viewModel.events)
 
     ObjectionableDebitContent(
         state = state,
@@ -239,5 +247,28 @@ private fun ObjectionableDebitScreenPreview() {
             onIntent = {},
             onBack = {},
         )
+    }
+}
+
+/**
+ * What the screen says back.
+ *
+ * Through the app's toast host rather than a snackbar of its own: a `SnackbarHostState` created
+ * here and never hosted anywhere swallows every message, which is what used to happen.
+ */
+@Composable
+private fun HandleObjectionableDebitEvents(events: Flow<ObjectionableDebitEvent>) {
+    val toaster = LocalToaster.current
+    LaunchedEffect(events, toaster) {
+        events.collect { event ->
+            when (event) {
+                is ObjectionableDebitEvent.ShowMessage ->
+                    toaster.error(getString(event.message))
+
+                is ObjectionableDebitEvent.ObjectionFiled -> toaster.success(
+                    getString(Res.string.obj_form_done_body, event.referenceCode),
+                )
+            }
+        }
     }
 }

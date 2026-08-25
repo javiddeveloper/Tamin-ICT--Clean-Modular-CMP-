@@ -5,6 +5,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import taminx.core.core_ui.a16_form_done_body
+import org.jetbrains.compose.resources.getString
+import kotlinx.coroutines.flow.Flow
+import com.tamin.taminhamrah.ui.components.toast.success
+import com.tamin.taminhamrah.ui.components.toast.error
+import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -80,6 +86,8 @@ fun ManagementDebitScreen(
     LaunchedEffect(workshopId, branchCode) {
         viewModel.sendIntent(ManagementDebitIntent.Open(workshopId, branchCode, workshopName))
     }
+
+    HandleManagementDebitEvents(viewModel.events)
 
     ManagementDebitContent(
         state = state,
@@ -318,5 +326,21 @@ private fun ManagementDebitScreenPreview() {
             onIntent = {},
             onBack = {},
         )
+    }
+}
+
+/** What the screen says back, through the app's toast host. */
+@Composable
+private fun HandleManagementDebitEvents(events: Flow<ManagementDebitEvent>) {
+    val toaster = LocalToaster.current
+    LaunchedEffect(events, toaster) {
+        events.collect { event ->
+            when (event) {
+                is ManagementDebitEvent.ShowMessage -> toaster.error(getString(event.message))
+                is ManagementDebitEvent.Article16Filed -> toaster.success(
+                    getString(Res.string.a16_form_done_body, event.referenceCode),
+                )
+            }
+        }
     }
 }

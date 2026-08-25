@@ -1206,6 +1206,7 @@
     <string name="new_member_follow">پیگیری درخواست</string>
     <string name="new_member_cannot_edit">این درخواست ثبت شده است و قابل تغییر نیست.</string>
     <string name="new_member_confirmed">درخواست با کد رهگیری %1$s ثبت شد.</string>
+    <string name="new_member_follow_body">درخواست با کد پیگیری %1$s در حال بررسی است. نتیجه از طریق پیامک اطلاع داده می‌شود.</string>
 
     <!-- ماده ۱۶ -->
     <string name="article16_account_code">کد حساب</string>

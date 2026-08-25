@@ -6,6 +6,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
+import taminx.core.core_ui.new_member_follow_body
+import taminx.core.core_ui.new_member_confirmed
+import org.jetbrains.compose.resources.getString
+import kotlinx.coroutines.flow.Flow
+import com.tamin.taminhamrah.ui.components.toast.success
+import com.tamin.taminhamrah.ui.components.toast.info
+import com.tamin.taminhamrah.ui.components.toast.error
+import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -73,6 +81,8 @@ fun WorkshopRecentlyAddedMembersScreen(
     LaunchedEffect(workshopId, branchCode) {
         viewModel.sendIntent(WorkshopRecentlyAddedMembersIntent.Open(workshopId, branchCode))
     }
+
+    HandleRecentlyAddedMembersEvents(viewModel.events)
 
     WorkshopRecentlyAddedMembersContent(
         state = state,
@@ -287,5 +297,34 @@ private fun WorkshopRecentlyAddedMembersScreenPreview() {
             onIntent = {},
             onBack = {},
         )
+    }
+}
+
+/**
+ * What the screen says back, through the app's toast host.
+ *
+ * «پیگیری درخواست» answers here rather than navigating: the tracking code is the whole answer,
+ * and the کارتابل it would otherwise open is a different feature's list.
+ */
+@Composable
+private fun HandleRecentlyAddedMembersEvents(events: Flow<WorkshopRecentlyAddedMembersEvent>) {
+    val toaster = LocalToaster.current
+    LaunchedEffect(events, toaster) {
+        events.collect { event ->
+            when (event) {
+                is WorkshopRecentlyAddedMembersEvent.ShowMessage ->
+                    toaster.error(getString(event.message))
+
+                is WorkshopRecentlyAddedMembersEvent.Confirmed -> toaster.success(
+                    getString(Res.string.new_member_confirmed, event.referenceCode),
+                )
+
+                is WorkshopRecentlyAddedMembersEvent.OpenCartable -> toaster.info(
+                    getString(Res.string.new_member_follow_body, event.referenceCode),
+                )
+
+                is WorkshopRecentlyAddedMembersEvent.OpenMemberForm -> Unit
+            }
+        }
     }
 }
