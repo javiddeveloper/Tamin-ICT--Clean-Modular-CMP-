@@ -29,6 +29,7 @@ import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
 import com.tamin.taminhamrah.useCases.pension.SendRequestDeferredInstallmentCertificateUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerPayRollUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerPayRollPDFUseCase
+import com.tamin.taminhamrah.useCases.pension.SendPayRollToInboxUseCase
 import com.tamin.taminhamrah.useCases.pension.GetUserAgeUseCase
 import com.tamin.taminhamrah.useCases.pension.GetRetirementRequestInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.CheckRetirementStatusUseCase
@@ -199,6 +200,7 @@ val domainModule = module {
     factoryOf(::SendRequestDeferredInstallmentCertificateUseCase)
     factoryOf(::GetPensionerPayRollUseCase)
     factoryOf(::GetPensionerPayRollPDFUseCase)
+    factoryOf(::SendPayRollToInboxUseCase)
     factoryOf(::GetUserAgeUseCase)
     factoryOf(::GetRetirementRequestInfoUseCase)
     factoryOf(::CheckRetirementStatusUseCase)

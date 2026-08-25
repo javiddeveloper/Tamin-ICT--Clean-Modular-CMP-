@@ -62,6 +62,8 @@ fun Modifier.shimmer(
 fun ShimmerBlock(
     modifier: Modifier = Modifier,
     cornerRadius: Dp = CornerRadius.sm,
+    colorBase: Color = Color.Unspecified,
+    colorHighlight: Color = Color.Unspecified,
 ) {
-    Box(modifier.clip(RoundedCornerShape(cornerRadius)).shimmer())
+    Box(modifier.clip(RoundedCornerShape(cornerRadius)).shimmer(colorBase, colorHighlight))
 }
