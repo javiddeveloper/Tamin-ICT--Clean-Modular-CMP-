@@ -35,7 +35,6 @@ import taminx.core.core_ui.girl_survivor_label_insurance_id
 import taminx.core.core_ui.ic_number
 import taminx.core.core_ui.ic_tamin_search
 import taminx.core.core_ui.inquiry_national_id_label
-import taminx.core.core_ui.inquiry_submit_button
 import taminx.core.core_ui.pension_survivor_deceased_branch
 import taminx.core.core_ui.pension_survivor_deceased_death_certificate
 import taminx.core.core_ui.pension_survivor_deceased_death_date
@@ -54,7 +53,6 @@ fun DeceasedStep(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    val canSearch = state.deceasedNationalId.length == NATIONAL_ID_LENGTH && !state.isLoading
 
     Column(
         modifier = modifier
@@ -75,15 +73,6 @@ fun DeceasedStep(
             slotCount = NATIONAL_ID_LENGTH,
             leadingIcon = vectorResource(Res.drawable.ic_number),
             showClearButton = true,
-        )
-
-        LoadingButton(
-            text = stringResource(Res.string.inquiry_submit_button),
-            onClick = { onIntent(PensionSurvivorIntent.SearchDeceased) },
-            enabled = canSearch,
-            isLoading = state.isLoading,
-            icon = vectorResource(Res.drawable.ic_tamin_search),
-            iconPosition = LoadingButtonIconPosition.TRAILING,
         )
 
         state.deceasedInfo?.let { deceasedInfo ->

@@ -77,6 +77,8 @@ import taminx.core.core_ui.ic_request
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.ic_tamin_cross
+import taminx.core.core_ui.ic_tamin_search
+import taminx.core.core_ui.inquiry_submit_button
 import taminx.core.core_ui.pension_survivor_next_step
 import taminx.core.core_ui.pension_survivor_final_submit_success_message
 import taminx.core.core_ui.pension_survivor_final_submit_success_title
@@ -385,6 +387,7 @@ private fun PensionSurvivorBottomBar(
         PensionSurvivorStep.Survivors -> !state.isLoading
         PensionSurvivorStep.Final -> state.isPdfConfirmed && state.requestId != null && !state.isLoading
     }
+    val canSearchDeceased = state.deceasedNationalId.length == DECEASED_NATIONAL_ID_LENGTH && !state.isLoading
 
     TaminBottomBar(
         modifier = Modifier
@@ -413,29 +416,43 @@ private fun PensionSurvivorBottomBar(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                         onClick = { onIntent(PensionSurvivorIntent.PreviousStep) },
                     )
-                    LoadingButton(
-                        text = if (state.currentStep == PensionSurvivorStep.Final) {
-                            stringResource(Res.string.upload_submit_final)
-                        } else {
-                            stringResource(Res.string.pension_survivor_next_step)
-                        },
-                        onClick = {
-                            onIntent(
-                                if (state.currentStep == PensionSurvivorStep.Final) {
-                                    PensionSurvivorIntent.SubmitFinal
-                                } else {
-                                    PensionSurvivorIntent.NextStep
-                                },
+                    when {
+                        state.currentStep == PensionSurvivorStep.Deceased && state.deceasedInfo == null -> {
+                            LoadingButton(
+                                text = stringResource(Res.string.inquiry_submit_button),
+                                onClick = { onIntent(PensionSurvivorIntent.SearchDeceased) },
+                                enabled = canSearchDeceased,
+                                isLoading = state.isLoading,
+                                modifier = Modifier.weight(1f),
+                                icon = vectorResource(Res.drawable.ic_tamin_search),
+                                iconPosition = LoadingButtonIconPosition.TRAILING,
                             )
-                        },
-                        enabled = nextEnabled,
-                        isLoading = state.isLoading,
-                        modifier = Modifier.weight(1f),
-                        icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
-                        iconPosition = LoadingButtonIconPosition.TRAILING,
-                    )
+                        }
 
-
+                        else -> {
+                            LoadingButton(
+                                text = if (state.currentStep == PensionSurvivorStep.Final) {
+                                    stringResource(Res.string.upload_submit_final)
+                                } else {
+                                    stringResource(Res.string.pension_survivor_next_step)
+                                },
+                                onClick = {
+                                    onIntent(
+                                        if (state.currentStep == PensionSurvivorStep.Final) {
+                                            PensionSurvivorIntent.SubmitFinal
+                                        } else {
+                                            PensionSurvivorIntent.NextStep
+                                        },
+                                    )
+                                },
+                                enabled = nextEnabled,
+                                isLoading = state.isLoading,
+                                modifier = Modifier.weight(1f),
+                                icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
+                                iconPosition = LoadingButtonIconPosition.TRAILING,
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -462,3 +479,5 @@ private fun PensionSurvivorSuccessDialog(onConfirm: () -> Unit) {
         iconBackground = colors.greenBg,
     )
 }
+
+private const val DECEASED_NATIONAL_ID_LENGTH = 10
