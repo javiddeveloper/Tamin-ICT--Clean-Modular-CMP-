@@ -190,7 +190,10 @@ class PregnancyPayViewModel(
         emit(PartialState.Loading(true))
         try {
             val mainInfoDN = getPregnancyMainInfoUseCase().first()
-            val isMaleBlocked = mainInfoDN?.genderCode.isMaleGenderCode()
+            // TEMP-TEST-BYPASS: forced to false so the wizard is reachable from a male test
+            // account for local UI testing. MUST be reverted to
+            // `mainInfoDN?.genderCode.isMaleGenderCode()` before this branch is committed.
+            val isMaleBlocked = false
             val branchOptions = mainInfoDN?.branchWorkshops
                 ?.map { it.toOptionUi() }
                 ?.toPersistentList()

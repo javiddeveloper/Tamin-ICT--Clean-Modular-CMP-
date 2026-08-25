@@ -26,6 +26,17 @@ const val REQUEST_TYPE_SIX_MONTHS = "1"
 const val REQUEST_TYPE_SIX_TO_NINE_MONTHS = "2"
 const val REQUEST_TYPE_UP_TO_ONE_YEAR = "3"
 
+const val CHILD_NATIONAL_CODE_LENGTH = 10
+const val DOCTOR_CODE_LENGTH = 5
+
+/**
+ * Shown next to the rest-day count on the branch-and-rest step, before the request type (which
+ * carries the real cap) is even chosen — the six-month cap is the common case, so it is used as an
+ * early, informational reference rather than a hard limit. The actual cap enforced at submission
+ * time depends on the selected request type; see `PregnancyPayViewModel.validateCrossFieldRules`.
+ */
+const val REST_DAYS_REFERENCE_CAP_DAYS = 186
+
 @Immutable
 data class PregnancyPayOptionUi(
     val id: String,

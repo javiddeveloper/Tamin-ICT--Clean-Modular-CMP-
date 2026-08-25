@@ -73,9 +73,9 @@ data class PregnancyPayUiState(
 
     private val hasAllChildNationalCodes: Boolean
         get() {
-            if (childNationalCode.isBlank()) return false
-            if (requiredChildNationalCodeCount >= 2 && childNationalCode2.isBlank()) return false
-            if (requiredChildNationalCodeCount >= 3 && childNationalCode3.isBlank()) return false
+            if (childNationalCode.length != CHILD_NATIONAL_CODE_LENGTH) return false
+            if (requiredChildNationalCodeCount >= 2 && childNationalCode2.length != CHILD_NATIONAL_CODE_LENGTH) return false
+            if (requiredChildNationalCodeCount >= 3 && childNationalCode3.length != CHILD_NATIONAL_CODE_LENGTH) return false
             return true
         }
 
@@ -97,7 +97,7 @@ data class PregnancyPayUiState(
             !hasDuplicateChildNationalCode
 
     val canGoNextFromDoctorAndRequest: Boolean
-        get() = requestType != null && doctorName.isNotBlank() && doctorCode.isNotBlank()
+        get() = requestType != null && doctorName.isNotBlank() && doctorCode.length == DOCTOR_CODE_LENGTH
 
     val babyBirthToRestStartDiffDays: Long?
         get() {

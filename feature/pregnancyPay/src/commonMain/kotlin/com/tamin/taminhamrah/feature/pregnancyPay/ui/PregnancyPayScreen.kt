@@ -21,13 +21,14 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -43,16 +44,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.pregnancyPay.camera.CameraPermission
 import com.tamin.taminhamrah.feature.pregnancyPay.camera.rememberCameraPermission
-import com.tamin.taminhamrah.feature.pregnancyPay.ui.components.PregnancyPayDocumentSourceSheet
 import com.tamin.taminhamrah.feature.pregnancyPay.ui.components.PregnancyPayHeader
 import com.tamin.taminhamrah.feature.pregnancyPay.ui.components.PregnancyPayOptionSheet
+import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.CHILD_NATIONAL_CODE_LENGTH
+import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.DOCTOR_CODE_LENGTH
 import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.PregnancyPayDocumentChecklist
 import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.PregnancyPayDocumentState
-import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.PregnancyPayDocumentUi
 import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.PregnancyPayEvent
 import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.PregnancyPayImageSource
 import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.PregnancyPayIntent
@@ -60,6 +60,7 @@ import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.PregnancyPayMainIn
 import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.PregnancyPayPicker
 import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.PregnancyPayRequiredDocumentIds
 import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.PregnancyPayUiState
+import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.REST_DAYS_REFERENCE_CAP_DAYS
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
@@ -67,6 +68,7 @@ import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.PickerRow
+import com.tamin.taminhamrah.ui.components.SegmentedInputField
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.StepIndicator
 import com.tamin.taminhamrah.ui.components.StepIndicatorModel
@@ -76,6 +78,9 @@ import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.components.TaminTextField
+import com.tamin.taminhamrah.ui.components.document.TaminDocumentSourceSheet
+import com.tamin.taminhamrah.ui.components.document.TaminDocumentUploadCard
+import com.tamin.taminhamrah.ui.components.document.TaminDocumentUploadState
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
@@ -96,14 +101,18 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_branch
 import taminx.core.core_ui.ic_info
+import taminx.core.core_ui.ic_request
+import taminx.core.core_ui.ic_tamin_calendar
 import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.ic_tamin_chevron_forward
+import taminx.core.core_ui.ic_tamin_health_profile
+import taminx.core.core_ui.ic_tamin_medical_records
 import taminx.core.core_ui.pregnancy_pay_documents_description
 import taminx.core.core_ui.pregnancy_pay_documents_title
 import taminx.core.core_ui.pregnancy_pay_document_camera_permission_error
-import taminx.core.core_ui.pregnancy_pay_document_optional
 import taminx.core.core_ui.pregnancy_pay_document_pick_placeholder
-import taminx.core.core_ui.pregnancy_pay_document_required
 import taminx.core.core_ui.pregnancy_pay_document_required_counter
 import taminx.core.core_ui.pregnancy_pay_document_status_error_tap_to_retry
 import taminx.core.core_ui.pregnancy_pay_document_status_uploaded
@@ -113,7 +122,6 @@ import taminx.core.core_ui.pregnancy_pay_field_branch_placeholder
 import taminx.core.core_ui.pregnancy_pay_field_child_national_code
 import taminx.core.core_ui.pregnancy_pay_field_child_national_code_2
 import taminx.core.core_ui.pregnancy_pay_field_child_national_code_3
-import taminx.core.core_ui.pregnancy_pay_field_child_national_code_hint
 import taminx.core.core_ui.pregnancy_pay_field_doctor_code
 import taminx.core.core_ui.pregnancy_pay_field_doctor_name
 import taminx.core.core_ui.pregnancy_pay_field_pregnancy_status
@@ -404,14 +412,22 @@ private fun PregnancyPayContent(
                 val hasFile = state.documents[activeDocument.id]?.let {
                     it !is PregnancyPayDocumentState.Empty
                 } == true
-                PregnancyPayDocumentSourceSheet(
+                TaminDocumentSourceSheet(
                     title = stringResource(activeDocument.titleRes),
                     showRemoveOption = hasFile,
-                    onSelect = {
+                    onSelectCamera = {
                         onIntent(
                             PregnancyPayIntent.OnDocumentSourceSelected(
                                 documentId = activeDocument.id,
-                                source = it,
+                                source = PregnancyPayImageSource.CAMERA,
+                            )
+                        )
+                    },
+                    onSelectGallery = {
+                        onIntent(
+                            PregnancyPayIntent.OnDocumentSourceSelected(
+                                documentId = activeDocument.id,
+                                source = PregnancyPayImageSource.GALLERY,
                             )
                         )
                     },
@@ -504,8 +520,11 @@ private fun PregnancyPayLandingStep(
     val colors = LocalTaminColors.current
     val info = state.mainInfo
 
+    Column(modifier = Modifier.fillMaxSize()) {
     Column(
         modifier = Modifier
+            .weight(1f)
+            .verticalScroll(rememberScrollState())
             .fillMaxWidth()
             .padding(horizontal = Spacing.page, vertical = Spacing.lg),
         verticalArrangement = Arrangement.spacedBy(Spacing.lg),
@@ -580,12 +599,20 @@ private fun PregnancyPayLandingStep(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            Icon(
-                imageVector = vectorResource(Res.drawable.ic_info),
-                contentDescription = null,
-                tint = colors.blueText,
-                modifier = Modifier.size(IconSize.small),
-            )
+            Box(
+                modifier = Modifier
+                    .size(IconSize.large)
+                    .clip(CircleShape)
+                    .background(colors.bgSurface),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = vectorResource(Res.drawable.ic_info),
+                    contentDescription = null,
+                    tint = colors.blueText,
+                    modifier = Modifier.size(IconSize.small),
+                )
+            }
             Text(
                 text = stringResource(Res.string.pregnancy_pay_landing_calculate_estimate),
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
@@ -593,18 +620,27 @@ private fun PregnancyPayLandingStep(
                 modifier = Modifier.weight(1f),
             )
             Icon(
-                imageVector = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                imageVector = vectorResource(Res.drawable.ic_tamin_chevron_forward),
                 contentDescription = null,
                 tint = colors.blueText,
                 modifier = Modifier.size(IconSize.small),
             )
         }
+    }
 
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.page, vertical = Spacing.md)
+            .navigationBarsPadding(),
+    ) {
         LoadingButton(
+            modifier = Modifier.weight(1f),
             text = stringResource(Res.string.pregnancy_pay_landing_start),
             onClick = { onIntent(PregnancyPayIntent.OnLandingStartClicked) },
             icon = Icons.Filled.Add,
         )
+    }
     }
 }
 
@@ -649,67 +685,87 @@ private fun PregnancyPayBranchAndRestStep(
 ) {
     val colors = LocalTaminColors.current
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = Spacing.page, vertical = Spacing.lg),
-    ) {
-        Text(
-            text = stringResource(Res.string.pregnancy_pay_step_branch_and_rest_title),
-            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight(700)),
-            color = colors.textPrimary,
-        )
-        Spacer(Modifier.height(Spacing.xs))
-        Text(
-            text = stringResource(Res.string.pregnancy_pay_step_branch_and_rest_description),
-            style = MaterialTheme.typography.bodySmall,
-            color = colors.textMuted,
-        )
-        Spacer(Modifier.height(Spacing.lg))
-
-        PickerRow(
-            text = state.branch?.label ?: stringResource(Res.string.pregnancy_pay_field_branch_placeholder),
-            isPlaceholder = state.branch == null,
-            showChevron = true,
-            onClick = { onIntent(PregnancyPayIntent.OnPickerRequested(PregnancyPayPicker.BRANCH)) },
-        )
-        Spacer(Modifier.height(Spacing.sm))
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-            modifier = Modifier.fillMaxWidth(),
+    Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.page, vertical = Spacing.lg),
         ) {
-            PickerRow(
-                modifier = Modifier.weight(1f),
-                text = state.restStartDateLabel ?: stringResource(Res.string.pregnancy_pay_field_rest_start_date),
-                isPlaceholder = state.restStartDateLabel == null,
-                onClick = { onIntent(PregnancyPayIntent.OnPickerRequested(PregnancyPayPicker.REST_START_DATE)) },
+            Text(
+                text = stringResource(Res.string.pregnancy_pay_step_branch_and_rest_title),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight(700)),
+                color = colors.textPrimary,
             )
-            PickerRow(
-                modifier = Modifier.weight(1f),
-                text = state.restEndDateLabel ?: stringResource(Res.string.pregnancy_pay_field_rest_end_date),
-                isPlaceholder = state.restEndDateLabel == null,
-                onClick = { onIntent(PregnancyPayIntent.OnPickerRequested(PregnancyPayPicker.REST_END_DATE)) },
-            )
-        }
-
-        state.restDaysCount?.let { days ->
             Spacer(Modifier.height(Spacing.xs))
             Text(
-                text = stringResource(Res.string.pregnancy_pay_rest_days_label, days.toString()),
-                style = MaterialTheme.typography.labelSmall,
+                text = stringResource(Res.string.pregnancy_pay_step_branch_and_rest_description),
+                style = MaterialTheme.typography.bodySmall,
                 color = colors.textMuted,
             )
+            Spacer(Modifier.height(Spacing.lg))
+
+            PickerRow(
+                text = state.branch?.label ?: stringResource(Res.string.pregnancy_pay_field_branch_placeholder),
+                isPlaceholder = state.branch == null,
+                icon = vectorResource(Res.drawable.ic_branch),
+                iconTint = colors.blueText,
+                showChevron = true,
+                onClick = { onIntent(PregnancyPayIntent.OnPickerRequested(PregnancyPayPicker.BRANCH)) },
+            )
+            Spacer(Modifier.height(Spacing.sm))
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                PickerRow(
+                    modifier = Modifier.weight(1f),
+                    text = state.restStartDateLabel ?: stringResource(Res.string.pregnancy_pay_field_rest_start_date),
+                    isPlaceholder = state.restStartDateLabel == null,
+                    icon = vectorResource(Res.drawable.ic_tamin_calendar),
+                    iconTint = colors.blueText,
+                    onClick = { onIntent(PregnancyPayIntent.OnPickerRequested(PregnancyPayPicker.REST_START_DATE)) },
+                )
+                PickerRow(
+                    modifier = Modifier.weight(1f),
+                    text = state.restEndDateLabel ?: stringResource(Res.string.pregnancy_pay_field_rest_end_date),
+                    isPlaceholder = state.restEndDateLabel == null,
+                    icon = vectorResource(Res.drawable.ic_tamin_calendar),
+                    iconTint = colors.blueText,
+                    onClick = { onIntent(PregnancyPayIntent.OnPickerRequested(PregnancyPayPicker.REST_END_DATE)) },
+                )
+            }
+
+            state.restDaysCount?.let { days ->
+                Spacer(Modifier.height(Spacing.sm))
+                StatusPill(
+                    text = stringResource(
+                        Res.string.pregnancy_pay_rest_days_label,
+                        days.toString(),
+                        REST_DAYS_REFERENCE_CAP_DAYS.toString(),
+                    ),
+                    icon = Icons.Filled.DateRange,
+                    containerColor = colors.blueBg,
+                    contentColor = colors.blueText,
+                )
+            }
         }
 
-        Spacer(Modifier.height(Spacing.xl))
-
-        LoadingButton(
-            text = stringResource(Res.string.pregnancy_pay_next_step),
-            onClick = { onIntent(PregnancyPayIntent.OnNextFromBranchAndRestClicked) },
-            enabled = state.canGoNextFromBranchAndRest,
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.page, vertical = Spacing.md)
+                .navigationBarsPadding(),
+        ) {
+            LoadingButton(
+                modifier = Modifier.weight(1f),
+                text = stringResource(Res.string.pregnancy_pay_next_step),
+                onClick = { onIntent(PregnancyPayIntent.OnNextFromBranchAndRestClicked) },
+                enabled = state.canGoNextFromBranchAndRest,
+            )
+        }
     }
 }
 
@@ -745,6 +801,8 @@ private fun PregnancyPayPregnancyAndNewbornStep(
             PickerRow(
                 text = state.babyBirthDateLabel ?: stringResource(Res.string.pregnancy_pay_field_baby_birth_date),
                 isPlaceholder = state.babyBirthDateLabel == null,
+                icon = vectorResource(Res.drawable.ic_tamin_calendar),
+                iconTint = colors.blueText,
                 onClick = { onIntent(PregnancyPayIntent.OnPickerRequested(PregnancyPayPicker.BABY_BIRTH_DATE)) },
             )
             Spacer(Modifier.height(Spacing.sm))
@@ -752,6 +810,8 @@ private fun PregnancyPayPregnancyAndNewbornStep(
             PickerRow(
                 text = state.pregnancyStatus?.label ?: stringResource(Res.string.pregnancy_pay_field_pregnancy_status),
                 isPlaceholder = state.pregnancyStatus == null,
+                icon = vectorResource(Res.drawable.ic_tamin_health_profile),
+                iconTint = colors.blueText,
                 showChevron = true,
                 onClick = { onIntent(PregnancyPayIntent.OnPickerRequested(PregnancyPayPicker.PREGNANCY_STATUS)) },
             )
@@ -760,38 +820,37 @@ private fun PregnancyPayPregnancyAndNewbornStep(
             PickerRow(
                 text = state.pregnancyType?.label ?: stringResource(Res.string.pregnancy_pay_field_pregnancy_type),
                 isPlaceholder = state.pregnancyType == null,
+                icon = vectorResource(Res.drawable.ic_tamin_medical_records),
+                iconTint = colors.blueText,
                 showChevron = true,
                 onClick = { onIntent(PregnancyPayIntent.OnPickerRequested(PregnancyPayPicker.PREGNANCY_TYPE)) },
             )
             Spacer(Modifier.height(Spacing.sm))
 
-            TaminTextField(
+            PregnancyPaySegmentedField(
+                label = stringResource(Res.string.pregnancy_pay_field_child_national_code),
                 value = state.childNationalCode,
                 onValueChange = { onIntent(PregnancyPayIntent.OnChildNationalCodeChanged(1, it)) },
-                label = stringResource(Res.string.pregnancy_pay_field_child_national_code),
-                placeholder = stringResource(Res.string.pregnancy_pay_field_child_national_code_hint),
-                keyboardType = KeyboardType.Number,
+                slotCount = CHILD_NATIONAL_CODE_LENGTH,
             )
 
             if (state.requiredChildNationalCodeCount >= 2) {
                 Spacer(Modifier.height(Spacing.sm))
-                TaminTextField(
+                PregnancyPaySegmentedField(
+                    label = stringResource(Res.string.pregnancy_pay_field_child_national_code_2),
                     value = state.childNationalCode2,
                     onValueChange = { onIntent(PregnancyPayIntent.OnChildNationalCodeChanged(2, it)) },
-                    label = stringResource(Res.string.pregnancy_pay_field_child_national_code_2),
-                    placeholder = stringResource(Res.string.pregnancy_pay_field_child_national_code_hint),
-                    keyboardType = KeyboardType.Number,
+                    slotCount = CHILD_NATIONAL_CODE_LENGTH,
                 )
             }
 
             if (state.requiredChildNationalCodeCount >= 3) {
                 Spacer(Modifier.height(Spacing.sm))
-                TaminTextField(
+                PregnancyPaySegmentedField(
+                    label = stringResource(Res.string.pregnancy_pay_field_child_national_code_3),
                     value = state.childNationalCode3,
                     onValueChange = { onIntent(PregnancyPayIntent.OnChildNationalCodeChanged(3, it)) },
-                    label = stringResource(Res.string.pregnancy_pay_field_child_national_code_3),
-                    placeholder = stringResource(Res.string.pregnancy_pay_field_child_national_code_hint),
-                    keyboardType = KeyboardType.Number,
+                    slotCount = CHILD_NATIONAL_CODE_LENGTH,
                 )
             }
         }
@@ -811,6 +870,30 @@ private fun PregnancyPayPregnancyAndNewbornStep(
                 enabled = state.canGoNextFromPregnancyAndNewborn,
             )
         }
+    }
+}
+
+@Composable
+private fun PregnancyPaySegmentedField(
+    label: String,
+    value: String,
+    slotCount: Int,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+    Column(modifier = modifier.fillMaxWidth()) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.textSecondary,
+        )
+        Spacer(Modifier.height(Spacing.xs))
+        SegmentedInputField(
+            value = value,
+            onValueChange = onValueChange,
+            slotCount = slotCount,
+        )
     }
 }
 
@@ -846,6 +929,8 @@ private fun PregnancyPayDoctorAndRequestStep(
             PickerRow(
                 text = state.requestType?.label ?: stringResource(Res.string.pregnancy_pay_field_request_type),
                 isPlaceholder = state.requestType == null,
+                icon = vectorResource(Res.drawable.ic_request),
+                iconTint = colors.blueText,
                 showChevron = true,
                 onClick = { onIntent(PregnancyPayIntent.OnPickerRequested(PregnancyPayPicker.REQUEST_TYPE)) },
             )
@@ -855,15 +940,15 @@ private fun PregnancyPayDoctorAndRequestStep(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                TaminTextField(
-                    modifier = Modifier.weight(1f),
+                PregnancyPaySegmentedField(
+                    modifier = Modifier.weight(0.4f),
+                    label = stringResource(Res.string.pregnancy_pay_field_doctor_code),
                     value = state.doctorCode,
                     onValueChange = { onIntent(PregnancyPayIntent.OnDoctorCodeChanged(it)) },
-                    label = stringResource(Res.string.pregnancy_pay_field_doctor_code),
-                    keyboardType = KeyboardType.Number,
+                    slotCount = DOCTOR_CODE_LENGTH,
                 )
                 TaminTextField(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(0.6f),
                     value = state.doctorName,
                     onValueChange = { onIntent(PregnancyPayIntent.OnDoctorNameChanged(it)) },
                     label = stringResource(Res.string.pregnancy_pay_field_doctor_name),
@@ -960,16 +1045,23 @@ private fun PregnancyPayDocumentsStep(
                     state.requiredDocumentsUploadedCount.toString(),
                     PregnancyPayRequiredDocumentIds.size.toString(),
                 ),
-                containerColor = colors.bgSurface,
-                contentColor = colors.textMuted,
+                containerColor = colors.orangeBg,
+                contentColor = colors.orangeText,
             )
             Spacer(Modifier.height(Spacing.md))
 
             PregnancyPayDocumentChecklist.forEachIndexed { index, document ->
-                PregnancyPayDocumentCard(
-                    document = document,
-                    documentState = state.documents[document.id] ?: PregnancyPayDocumentState.Empty,
-                    onClick = { onIntent(PregnancyPayIntent.OnDocumentCardClicked(document.id)) },
+                val documentState = state.documents[document.id] ?: PregnancyPayDocumentState.Empty
+                TaminDocumentUploadCard(
+                    title = stringResource(document.titleRes),
+                    state = documentState.toUploadState(),
+                    statusText = document.subtitleRes?.let { stringResource(it) } ?: documentState.statusText(),
+                    isRequired = document.isRequired,
+                    onCardClick = if (documentState is PregnancyPayDocumentState.Uploading) {
+                        null
+                    } else {
+                        { onIntent(PregnancyPayIntent.OnDocumentCardClicked(document.id)) }
+                    },
                 )
                 if (index != PregnancyPayDocumentChecklist.lastIndex) {
                     Spacer(Modifier.height(Spacing.md))
@@ -1040,117 +1132,11 @@ private fun PregnancyPaySubmitSuccessDialog(
     )
 }
 
-@Composable
-private fun PregnancyPayDocumentCard(
-    document: PregnancyPayDocumentUi,
-    documentState: PregnancyPayDocumentState,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val colors = LocalTaminColors.current
-    val shape = RoundedCornerShape(CornerRadius.card)
-
-    val (background, border) = when (documentState) {
-        is PregnancyPayDocumentState.Uploaded -> colors.greenBg to colors.greenBorder
-        is PregnancyPayDocumentState.Failed -> colors.dangerBg to colors.dangerBorder
-        else -> colors.bgSurface to colors.border
-    }
-
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(shape)
-            .background(background)
-            .border(Thickness.border, border, shape)
-            .clickable(enabled = documentState !is PregnancyPayDocumentState.Uploading, onClick = onClick)
-            .padding(Spacing.lg),
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.weight(1f),
-        ) {
-            PregnancyPayDocumentIconTile(documentState)
-
-            Column {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = stringResource(document.titleRes),
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = colors.textPrimary,
-                    )
-                    StatusPill(
-                        text = stringResource(
-                            if (document.isRequired) {
-                                Res.string.pregnancy_pay_document_required
-                            } else {
-                                Res.string.pregnancy_pay_document_optional
-                            },
-                        ),
-                        containerColor = if (document.isRequired) colors.blueBg else colors.bgPage,
-                        contentColor = if (document.isRequired) colors.blueText else colors.textMuted,
-                    )
-                }
-
-                Spacer(Modifier.height(Spacing.xxs))
-
-                Text(
-                    text = document.subtitleRes?.let { stringResource(it) } ?: documentState.statusText(),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (documentState is PregnancyPayDocumentState.Failed) {
-                        colors.dangerText
-                    } else {
-                        colors.textMuted
-                    },
-                )
-            }
-        }
-
-        if (documentState is PregnancyPayDocumentState.Uploading) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(IconSize.small),
-                color = colors.blueText,
-                strokeWidth = Thickness.medium,
-            )
-        }
-    }
-}
-
-@Composable
-private fun PregnancyPayDocumentIconTile(documentState: PregnancyPayDocumentState) {
-    val colors = LocalTaminColors.current
-    val tileColor = when (documentState) {
-        is PregnancyPayDocumentState.Uploaded -> colors.greenText
-        is PregnancyPayDocumentState.Failed -> colors.dangerText
-        else -> colors.chipBg
-    }
-
-    Box(
-        modifier = Modifier
-            .size(IconSize.xlarge)
-            .clip(RoundedCornerShape(CornerRadius.iconTile))
-            .background(tileColor),
-        contentAlignment = Alignment.Center,
-    ) {
-        when (documentState) {
-            is PregnancyPayDocumentState.Uploaded -> Icon(
-                imageVector = Icons.Filled.Check,
-                contentDescription = null,
-                tint = Color.White,
-            )
-            is PregnancyPayDocumentState.Failed -> Icon(
-                imageVector = Icons.Filled.Warning,
-                contentDescription = null,
-                tint = Color.White,
-            )
-            else -> Unit
-        }
-    }
+private fun PregnancyPayDocumentState.toUploadState(): TaminDocumentUploadState = when (this) {
+    PregnancyPayDocumentState.Empty -> TaminDocumentUploadState.Empty
+    is PregnancyPayDocumentState.Uploading -> TaminDocumentUploadState.Uploading
+    is PregnancyPayDocumentState.Uploaded -> TaminDocumentUploadState.Uploaded
+    is PregnancyPayDocumentState.Failed -> TaminDocumentUploadState.Failed
 }
 
 @Composable

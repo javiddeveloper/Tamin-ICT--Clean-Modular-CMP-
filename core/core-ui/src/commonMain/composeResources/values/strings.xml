@@ -902,10 +902,9 @@
     <string name="pregnancy_pay_field_doctor_name">نام پزشک معالج</string>
     <string name="pregnancy_pay_field_doctor_code">کد نظام پزشکی</string>
     <string name="pregnancy_pay_field_child_national_code">کد ملی نوزاد</string>
-    <string name="pregnancy_pay_field_child_national_code_hint">۱۰ رقم</string>
     <string name="pregnancy_pay_field_child_national_code_2">کد ملی نوزاد دوم</string>
     <string name="pregnancy_pay_field_child_national_code_3">کد ملی نوزاد سوم</string>
-    <string name="pregnancy_pay_rest_days_label">مدت استراحت: %1$s روز</string>
+    <string name="pregnancy_pay_rest_days_label">%1$s روز استراحت از سقف %2$s روز</string>
     <string name="pregnancy_pay_error_rest_days_over_6_months">بازهٔ استراحت برای این نوع درخواست نباید بیش از ۶ ماه باشد.</string>
     <string name="pregnancy_pay_error_rest_days_over_9_months">بازهٔ استراحت برای این نوع درخواست نباید بیش از ۹ ماه باشد.</string>
     <string name="pregnancy_pay_error_rest_days_over_12_months">بازهٔ استراحت نباید بیش از یک سال باشد.</string>
@@ -918,9 +917,7 @@
     <string name="pregnancy_pay_document_mother_id_page2">تصویر صفحهٔ دوم شناسنامهٔ مادر</string>
     <string name="pregnancy_pay_document_employment_order">تصویر حکم استخدامی</string>
     <string name="pregnancy_pay_document_employment_order_subtitle">کارکنان دستگاه‌های دولتی</string>
-    <string name="pregnancy_pay_document_required">الزامی</string>
-    <string name="pregnancy_pay_document_optional">اختیاری</string>
-    <string name="pregnancy_pay_document_required_counter">%1$s از %2$s مدرک الزامی</string>
+    <string name="pregnancy_pay_document_required_counter">%1$s از %2$s تصویر الزامی</string>
     <string name="pregnancy_pay_document_pick_placeholder">انتخاب از دوربین یا گالری</string>
     <string name="pregnancy_pay_document_status_uploading">در حال بارگذاری...</string>
     <string name="pregnancy_pay_document_status_uploaded">بارگذاری شد • برای تغییر یا حذف ضربه بزنید</string>
