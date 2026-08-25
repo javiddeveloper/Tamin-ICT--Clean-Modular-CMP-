@@ -129,6 +129,13 @@ class TopAreaState internal constructor(
                     animate(
                         initialValue = rawOffsetPx,
                         targetValue = target,
+                        // The fling's own velocity, carried into the spring instead of starting
+                        // from rest -- without this a hard, fast flick and a gentle release land
+                        // on the same fixed-duration settle, so a fast flick visibly lags behind
+                        // the speed the gesture implied. Negated because `available.y`'s sign is
+                        // scroll-delta convention (see the class doc), the opposite of
+                        // rawOffsetPx's own increasing-while-folding direction.
+                        initialVelocity = -available.y,
                         animationSpec = SnapSpec,
                     ) { value, _ -> rawOffsetPx = value }
                 }
