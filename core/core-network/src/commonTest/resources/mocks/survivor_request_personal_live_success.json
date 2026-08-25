@@ -1,0 +1,118 @@
+{
+  "status": 200,
+  "family": "SUCCESSFUL",
+  "reason": "OK",
+  "traceId": "45648e16-e303-4bc2-bf29-a5d0551605b2",
+  "data": {
+    "request": {
+      "deadDate": null,
+      "ssn": "2564359218",
+      "personal": 2,
+      "dateOfBirth": 984614400000,
+      "deleted": false,
+      "nationalId": "6360110032",
+      "createdBy": "SYS0000010",
+      "id": 12064878734,
+      "requestType": {
+        "requestTypeDesc": "تغيير ارتباط با تامين",
+        "requestTypeId": 4,
+        "requestTypeCode": "04"
+      }
+    },
+    "creationTime": 1773498832078,
+    "endDate": null,
+    "lastModificationTime": 1773548934771,
+    "confirmed": true,
+    "branch": "0010",
+    "organizationId": "0010",
+    "insuranceId": "0012886024",
+    "id": 12064878735,
+    "dateOfStart": 1768941000000,
+    "newInsuranceId": false,
+    "edited": false,
+    "is_first": false,
+    "lastModifiedBy": "0946101825",
+    "mobileNumber": "09120000000",
+    "provinceName": "آذربايجان شرقي",
+    "personal": {
+      "lastName": "عيسي زاده",
+      "fatherName": "عزيز",
+      "firstName": "علي",
+      "nationalId": "6360110032",
+      "ssn": "2564359218",
+      "idCardNumber": "6360110032",
+      "dateOfBirth": 984614400000,
+      "confirmed": false,
+      "id": 11594877388,
+      "gender": {
+        "genderCode": "01",
+        "genderDesc": "مرد",
+        "statusDate": null,
+        "status": null
+      },
+      "nation": {
+        "statusDate": "19970321",
+        "nationDesc": "ايراني",
+        "nationCode": "01",
+        "status": "1"
+      },
+      "cityOfIssue": {
+        "parent": {
+          "code": "01",
+          "description": "آذربايجان شرقي",
+          "id": 124,
+          "title": "آذربايجان شرقي"
+        },
+        "code": "1797",
+        "description": "هشترود",
+        "id": 2038,
+        "title": "هشترود"
+      },
+      "contacts": [
+        {
+          "zipCode": "1234567890",
+          "address": "هشترود",
+          "phoneNumber": "04133333333",
+          "personal": 2,
+          "confirmed": true,
+          "id": 1
+        }
+      ],
+      "relationWithTamins": [
+        {
+          "request": {
+            "deadDate": null,
+            "personal": 2,
+            "nationalId": "6360110032",
+            "id": 11773194907
+          },
+          "confirmed": true,
+          "organizationId": "0250",
+          "insuranceId": "0012886024",
+          "id": 11773194908,
+          "personal": 2,
+          "relationWithTamin": {
+            "relationDescription": "اصلي - بيمه پرداز",
+            "id": 1,
+            "baseTendency": {
+              "id": "1",
+              "tendencyCode": "01",
+              "tendencyDescription": "اجباري"
+            }
+          }
+        }
+      ]
+    },
+    "relationWithTamin": {
+      "id": 1,
+      "relationDescription": "اصلي - بيمه پرداز",
+      "status": "1",
+      "baseTendency": {
+        "id": "1",
+        "tendencyCode": "01",
+        "tendencyDescription": "اجباري - مستند به ليست",
+        "status": "1"
+      }
+    }
+  }
+}
