@@ -75,7 +75,7 @@ import com.tamin.taminhamrah.ui.components.StepIndicatorModel
 import com.tamin.taminhamrah.ui.components.StepState
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
-import com.tamin.taminhamrah.ui.components.TaminJalaliDatePickerBottomSheet
+import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
@@ -343,7 +343,7 @@ private fun DeferredInstallmentContent(
             onDismiss = { onIntent(DeferredInstallmentIntent.OnPickerDismissed) },
         )
 
-        DeferredInstallmentPicker.BIRTH_DATE -> TaminJalaliDatePickerBottomSheet(
+        DeferredInstallmentPicker.BIRTH_DATE -> TaminJalaliDatePicker(
             title = stringResource(Res.string.deferred_installment_birth_date),
             initial = PersianDateFormatter.today(),
             onDismiss = { onIntent(DeferredInstallmentIntent.OnPickerDismissed) },
