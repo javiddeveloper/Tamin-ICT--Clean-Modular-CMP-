@@ -136,6 +136,13 @@ object PersianDateFormatter {
         return gregorianToJalali(dateTime.year, dateTime.monthNumber, dateTime.dayOfMonth)
     }
 
+    /** The current wall-clock time as hour/minute, for time pickers' default selection. */
+    fun now(): Pair<Int, Int> {
+        val dateTime = Instant.fromEpochMilliseconds(currentTimeMillis())
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+        return dateTime.hour to dateTime.minute
+    }
+
     /** Days in a Jalali month: 31 for the first six, 30 for the next five, 29/30 for اسفند. */
     fun daysInMonth(jy: Int, jm: Int): Int = when {
         jm <= 6 -> 31

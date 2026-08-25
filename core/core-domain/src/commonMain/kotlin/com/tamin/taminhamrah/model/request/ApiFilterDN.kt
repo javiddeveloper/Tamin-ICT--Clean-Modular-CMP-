@@ -65,6 +65,9 @@ enum class FilterProperty(val key: String) {
     @SerialName("workshop.workshopStatus.workshopStatusCode") WORKSHOP_STATUS_CODE("workshop.workshopStatus.workshopStatusCode"),
     @SerialName("workshopId") PAYMENT_WORKSHOP_ID("workshopId"),
     @SerialName("branchCode") PAYMENT_BRANCH_CODE("branchCode"),
+    @SerialName("workshopCode") WORKSHOP_CODE("workshopCode"),
+    @SerialName("nationalCode") NATIONAL_CODE("nationalCode"),
+    @SerialName("birthDate") BIRTH_DATE("birthDate"),
     @SerialName("payIdFrom") PAY_ID_FROM("payIdFrom"),
     @SerialName("payIdTo") PAY_ID_TO("payIdTo"),
     @SerialName("docDateFrom") DOC_DATE_FROM("docDateFrom"),
@@ -84,6 +87,7 @@ enum class FilterProperty(val key: String) {
     @SerialName("requestStatus") REQUEST_STATUS("requestStatus"),
     @SerialName("isPublic") IS_PUBLIC("isPublic"),
     @SerialName("dependencyDesc") DEPENDENCY_DESC("dependencyDesc"),
+    @SerialName("bankName") BANK_NAME("bankName"),
     @SerialName("insuranceTypeDesc") INSURANCE_TYPE_DESC("insuranceTypeDesc"),
 }
 

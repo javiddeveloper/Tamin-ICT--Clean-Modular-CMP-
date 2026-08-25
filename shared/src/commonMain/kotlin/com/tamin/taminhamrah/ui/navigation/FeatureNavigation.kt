@@ -5,9 +5,9 @@ import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.history.navigateToHistory
 import com.tamin.taminhamrah.feature.history.navigateToHistoryJobInfo
 import com.tamin.taminhamrah.feature.historyobjection.navigateToHistoryObjection
+import com.tamin.taminhamrah.feature.deferredInstallment.navigateToDeferredInstallment
 import com.tamin.taminhamrah.feature.orotezprotez.navigateToOrotezProtez
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToCalculatePension
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeferredInstallment
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeservedTreatment
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDisabilityPension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToEdict
@@ -21,6 +21,7 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToFreelanc
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToHousewifeInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToOptionalInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToStudentInsuranceContract
+import com.tamin.taminhamrah.feature.taminServices.navigateToOccurrence
 import com.tamin.taminhamrah.feature.taminServices.navigateToSendInsuranceHistoryToInstitutions
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.model.common.FeatureFlag
@@ -48,6 +49,7 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
         FeatureFlag.VIEW_TITLE_JOB -> navigateToHistoryJobInfo()
         FeatureFlag.SEND_INSURANCE_HISTORY_TO_INSTITUTION -> navigateToSendInsuranceHistoryToInstitutions()
         FeatureFlag.OROTEZ_PROTEZ -> navigateToOrotezProtez()
+        FeatureFlag.OCCURRENCE -> navigateToOccurrence()
         FeatureFlag.OBJECTION_NON_EXISTENT_HISTORY -> navigateToHistoryObjection()
         else -> Unit
     }
