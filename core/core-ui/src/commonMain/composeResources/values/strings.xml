@@ -171,6 +171,8 @@
     <string name="action_cancel">انصراف</string>
     <string name="date_picker_today">امروز</string>
     <string name="date_picker_confirm">تأیید تاریخ</string>
+    <string name="time_picker_now">اکنون</string>
+    <string name="time_picker_confirm">تأیید ساعت</string>
     <string name="action_back">بازگشت</string>
     <string name="action_call">تماس</string>
     <string name="action_copy">کپی</string>
@@ -738,6 +740,11 @@
     <string name="search_hint">جستجو...</string>
     <string name="description_label">توضیحات</string>
     <string name="close_content_description">بستن</string>
+    <string name="lock_content_description">قفل</string>
+    <string name="back_content_description">بازگشت</string>
+    <string name="valid_content_description">معتبر</string>
+    <string name="error_content_description">خطا</string>
+    <string name="step_of_total_label">مرحله %1$s از %2$s</string>
 
     <!-- Send History To Institutions -->
     <string name="send_history_title">اعلام سابقه</string>
@@ -869,4 +876,164 @@
     <string name="workshops_status_inactive">غیرفعال</string>
     <string name="workshops_status_any">همه وضعیت‌ها</string>
     <string name="bs_workshop_status">وضعیت کارگاه</string>
+
+    <!-- Occurrence / Accident Report -->
+    <string name="occurrence_title">گزارش حادثه ناشی از کار</string>
+    <string name="occurrence_subtitle">ثبت حادثه ناشی از کار</string>
+    <string name="occurrence_step_of">مرحله %1$s از ۶</string>
+    <string name="occurrence_next_step">مرحله‌ بعدی</string>
+    <string name="occurrence_prev_step">مرحله‌ قبلی</string>
+    <string name="occurrence_submit">ارسال درخواست</string>
+    <string name="injured_person_birthdate">تاریخ تولد فرد حادثه دیده</string>
+    <string name="province_city_address_hint">استان، شهر، خیابان، پلاک</string>
+
+    <!-- Warning bottom sheet -->
+    <string name="occurrence_warning_title">بیمه‌شده گرامی</string>
+    <string name="occurrence_warning_subtitle">پیش از ثبت درخواست، سه مادهٔ قانونی زیر را مطالعه کنید</string>
+    <string name="occurrence_warning_confirm">تأیید و ادامه</string>
+    <string name="occurrence_warning_cancel">انصراف</string>
+    <string name="occurrence_warning_article_60_chip">ماده ۶۰</string>
+    <string name="occurrence_warning_article_60_title">تعریف حادثهٔ ناشی از کار</string>
+    <string name="occurrence_warning_article_60_desc">مطابق ماده ۶۰ قانون تامین اجتماعی، حوادث ناشی از کار حوادثی است که در حین انجام وظیفه و به سبب آن برای بیمه شده اتفاق می افتد. مقصود از حین انجام وظیفه تمامی اوقاتی است که بیمه شده در کارگاه یا موسسات وابسته یا ساختمانها و محوطه آن مشغول کار باشد و یا به دستور کارفرما در خارج از محوطه کارگاه عهده دار انجام ماموریتی باشد. اوقات مراجعه به درمانگاه و یا بیمارستان و یا برای معالجات درمانی و توانبخشی و اوقات رفت و برگشت بیمه شده از منزل به کارگاه جزو اوقات انجام وظیفه محسوب می گردد. مشروط به اینکه حادثه در زمان عادی رفت و برگشت به کارگاه اتفاق افتاده باشد. حوادثی که برای بیمه شده حین اقدام برای نجات سایر بیمه شدگان و مساعدت به آنان اتفاق می افتد حادثه ناشی از کار محسوب میشود.</string>
+
+    <string name="occurrence_warning_article_65_chip">ماده ۶۵</string>
+    <string name="occurrence_warning_article_65_title">مهلت سه روز کاری</string>
+    <string name="occurrence_warning_article_65_desc">به استناد ماده ۶۵ قانون تامین اجتماعی؛ کارفرمایان مکلفند اقدامات اولیه را برای جلوگیری از تشدید عوارض حادثه به عمل آورند و گزارش حادثه را ظرف ۳ روز کاری به صورت کتبی به اطلاع شعبه تامین اجتماعی ذیربط برسانند. (با توجه به غیر حضوری شدن فرآیند مورد بحث، ثبت درخواست در این سامانه از سوی متقاضی و اخذ کد رهگیری به منزله ارائه درخواست به شعبه ذیربط می باشد)</string>
+
+    <string name="occurrence_warning_article_66_chip">ماده ۶۶</string>
+    <string name="occurrence_warning_article_66_title">تعهدات سازمان و مسئولیت کارفرما</string>
+    <string name="occurrence_warning_article_66_desc">به استناد ماده ۶۶ قانون تامین اجتماعی؛ در صورتیکه ثابت شود وقوع حادثه به دلیل عدم رعایت مقررات حفاظت فنی یا عدم رعایت احتیاط از طرف کارفرما یا نمایندگان وی بوده، سازمان تامین اجتماعی تعهدات خود را در قبال بیمه شده انجام می دهد اما هزینه های مربوط را از کارفرما مطالبه و وصول می نماید. در صورت وقوع حادثه ناشی از کار و تاثیر آن، فرد حادثه دیده شده یا خانواده وی از تمامی تعهدات قانونی شامل خدمات درمانی، معالجه شخص بیمه شده، تحویل پروتز و اروتز، غرامت دستمزد ایام بیماری، نقص عضو، مستمری از کار افتادگی جزئی، کلی و فوت) حسب مورد بهره مند می شوند.</string>
+
+    <!-- Step 1: Person Info -->
+    <string name="occurrence_step1_title">اطلاعات فرد حادثه‌دیده</string>
+    <string name="occurrence_step1_readonly_hint">کد ملی از پروندهٔ شما خوانده شده و قابل ویرایش نیست. برای شروع، تاریخ تولد فرد حادثه‌دیده را وارد کنید.</string>
+    <string name="occurrence_field_national_code">کد ملی حادثه‌دیده</string>
+    <string name="occurrence_field_name">نام و نام خانوادگی</string>
+    <string name="occurrence_field_birth_date">تاریخ تولد فرد حادثه‌دیده</string>
+    <string name="occurrence_field_insurance_number">شماره بیمه</string>
+    <string name="occurrence_field_branch">شعبه</string>
+    <string name="occurrence_field_handling_branch">شعبه رسیدگی</string>
+
+    <!-- Step 2: Workshop -->
+    <string name="occurrence_step2_title">کارگاه محل حادثه</string>
+    <string name="occurrence_field_workshop_code">کد کارگاه</string>
+    <string name="occurrence_field_workshop_code_hint">انتخاب کد کارگاه</string>
+    <string name="occurrence_workshop_display_code">%1$s - شعبه %2$s</string>
+    <string name="occurrence_field_workshop_name">نام کارگاه</string>
+    <string name="occurrence_field_employer_name">نام و نام خانوادگی کارفرما</string>
+    <string name="occurrence_field_employer_name_error">نام و نام خانوادگی کارفرما الزامی است</string>
+    <string name="occurrence_field_employer_phone">شماره همراه کارفرما</string>
+    <string name="occurrence_field_employer_phone_error">شماره همراه کارفرما باید ۱۱ رقم باشد و با 09 شروع شود</string>
+    <string name="occurrence_field_workshop_address">نشانی کارگاه</string>
+    <string name="occurrence_field_workshop_address_error">نشانی کارگاه الزامی است</string>
+    <string name="occurrence_field_employer_phone_hint">09121111111</string>
+    <string name="occurrence_field_postal_code">کد پستی</string>
+    <string name="occurrence_field_postal_code_error">کد پستی باید ۱۰ رقم باشد</string>
+    <string name="occurrence_field_postal_code_hint">کد پستی ۱۰ رقمی</string>
+    <string name="occurrence_field_phone">شماره تلفن</string>
+    <string name="occurrence_field_phone_error">شماره تلفن باید ۱۱ رقم باشد</string>
+    <string name="occurrence_field_phone_hint">09121234567</string>
+    <string name="occurrence_sheet_select_workshop">انتخاب کد کارگاه</string>
+
+    <!-- Step 3: Job Details -->
+    <string name="occurrence_step3_title">مشخصات شغلی</string>
+    <string name="occurrence_step3_readonly_hint">این اطلاعات از پروندهٔ بیمه‌ای شما خوانده شده و قابل ویرایش نیست.</string>
+    <string name="occurrence_field_nationality">ملیت</string>
+    <string name="occurrence_field_gender">جنسیت</string>
+    <string name="occurrence_field_insurance_type">نوع بیمه‌پذیری</string>
+    <string name="occurrence_field_employment_date">تاریخ استخدام</string>
+    <string name="occurrence_select_date_hint">انتخاب تاریخ</string>
+    <string name="occurrence_field_marital_status">وضعیت تأهل</string>
+    <string name="occurrence_field_marital_single">مجرد</string>
+    <string name="occurrence_field_marital_married">متأهل</string>
+    <string name="occurrence_field_job_title">کاری که موظف به انجام آن بودید</string>
+    <string name="occurrence_field_work_location">محل کار بیمه‌شده در کارگاه</string>
+    <string name="occurrence_select_marital">انتخاب کنید</string>
+    <string name="occurrence_sheet_marital_title">وضعیت تأهل</string>
+
+    <!-- Step 4: Work Hours -->
+    <string name="occurrence_step4_title">ساعت کار و نشانی</string>
+    <string name="occurrence_field_transportation">وسیله ایاب و ذهاب به کارگاه</string>
+    <string name="occurrence_field_transportation_error">وسیله ایاب و ذهاب الزامی است</string>
+    <string name="occurrence_field_transportation_hint">پیاده، خودروی شخصی، سرویس کارگاه، ...</string>
+    <string name="occurrence_transport_walk">پیاده</string>
+    <string name="occurrence_transport_personal_car">خودروی شخصی</string>
+    <string name="occurrence_transport_workshop_service">سرویس کارگاه</string>
+    <string name="occurrence_transport_motorcycle">موتورسیکلت</string>
+    <string name="occurrence_transport_public">حمل‌ونقل عمومی</string>
+    <string name="occurrence_field_work_start_time">ساعت شروع کار</string>
+    <string name="occurrence_field_work_start_time_error">ساعت شروع کار الزامی است</string>
+    <string name="occurrence_field_work_start_time_hint">08:00</string>
+    <string name="occurrence_field_work_end_time">ساعت پایان کار</string>
+    <string name="occurrence_field_work_end_time_order_error">ساعت پایان کار باید بعد از ساعت شروع کار باشد</string>
+    <string name="occurrence_field_work_end_time_error">ساعت پایان کار الزامی است</string>
+    <string name="occurrence_field_work_end_time_hint">17:00</string>
+    <string name="occurrence_field_home_address">آدرس منزل</string>
+    <string name="occurrence_field_home_address_error">آدرس منزل الزامی است</string>
+    <string name="occurrence_field_home_phone">شماره تلفن</string>
+    <string name="occurrence_field_home_phone_error">شماره تلفن باید ۱۱ رقم باشد</string>
+    <string name="occurrence_field_home_phone_hint">شماره تلفن</string>
+    <string name="occurrence_field_home_postal_code">کد پستی</string>
+    <string name="occurrence_field_home_postal_code_error">کد پستی باید ۱۰ رقم باشد</string>
+    <string name="occurrence_field_home_postal_code_hint">کد پستی ۱۰ رقمی</string>
+
+    <!-- Step 5: Accident Details -->
+    <string name="occurrence_step5_title">چگونگی وقوع حادثه</string>
+    <string name="occurrence_field_accident_date">تاریخ وقوع حادثه</string>
+    <string name="occurrence_field_accident_date_hint">انتخاب کنید</string>
+    <string name="occurrence_field_accident_time">زمان حادثه</string>
+    <string name="occurrence_field_accident_time_hint">14:30</string>
+    <string name="occurrence_field_accident_outcome">نتیجه حادثه</string>
+    <string name="occurrence_select_outcome_hint">انتخاب نتیجهٔ حادثه</string>
+    <string name="occurrence_field_exact_location">محل دقیق حادثه</string>
+    <string name="occurrence_field_exact_location_hint">شهر، خیابان، کوچه</string>
+    <string name="occurrence_field_description">شرح واقعه</string>
+    <string name="occurrence_field_description_min_length_error">شرح حادثه باید حداقل ۲۰ کاراکتر باشد</string>
+    <string name="occurrence_field_description_hint">واقعه را بصورت کامل شرح دهید</string>
+    <string name="occurrence_description_counter">%1$s/۵۰۰</string>
+    <string name="occurrence_sheet_outcome_title">نتیجه حادثه</string>
+    <string name="occurrence_outcome_death">فوت</string>
+    <string name="occurrence_outcome_total_disability">از کار افتادگی کلی</string>
+    <string name="occurrence_outcome_partial_disability">از کار افتادگی جزئی (درصد کاهش توانایی بین ۳۳٪ تا ۶۶٪)</string>
+    <string name="occurrence_outcome_organ_defect">نقص عضو (درصد کاهش توانایی کمتر از ۳۳٪)</string>
+    <string name="occurrence_outcome_medical_rest">درحال استراحت پزشکی</string>
+    <string name="occurrence_outcome_medical_compensation">دریافت غرامت پزشکی و بهبودی</string>
+    <string name="occurrence_outcome_none">هیچکدام</string>
+
+    <!-- Step 6: Documents -->
+    <string name="occurrence_step6_title">مدارک و ارسال</string>
+    <string name="occurrence_documents_section_title">مدارک پیوست</string>
+    <string name="occurrence_documents_min_hint">%1$s از حداقل ۲</string>
+    <string name="occurrence_add_document">افزودن مدارک</string>
+    <string name="occurrence_doc_required_hint">بارگذاری حداقل دو تصویر الزامی است.</string>
+    <string name="occurrence_doc_format_hint">تصویر می‌بایست در قالب (jpeg) بوده و اندازه آن حداکثر ۲ مگابایت باشد</string>
+    <string name="occurrence_doc_format_error">فقط تصاویر با فرمت jpeg و حداکثر ۲ مگابایت مجاز است.</string>
+    <string name="occurrence_summary_section">خلاصه اطلاعات</string>
+    <string name="occurrence_summary_person">فرد حادثه‌دیده</string>
+    <string name="occurrence_summary_workshop">کارگاه</string>
+    <string name="occurrence_summary_employer">کارفرما</string>
+    <string name="occurrence_summary_accident_date">تاریخ حادثه</string>
+    <string name="occurrence_summary_accident_time">ساعت حادثه</string>
+    <string name="occurrence_summary_outcome">نتیجه حادثه</string>
+    <string name="occurrence_summary_transport">ایاب و ذهاب</string>
+    <string name="occurrence_summary_exact_location">محل دقیق</string>
+    <string name="occurrence_submit_disclaimer">با ارسال این فرم، صحت اطلاعات واردشده را تأیید می‌کنید. پس از ارسال، امکان ویرایش وجود ندارد.</string>
+    <string name="occurrence_sheet_doc_type_title">نوع مدرک</string>
+    <string name="occurrence_document_source_camera_title">دوربین</string>
+    <string name="occurrence_document_source_camera_subtitle">گرفتن عکس جدید</string>
+    <string name="occurrence_document_source_gallery_title">گالری تصاویر</string>
+    <string name="occurrence_document_source_gallery_subtitle">انتخاب از فایل‌های دستگاه</string>
+    <string name="occurrence_camera_permission_denied">برای استفاده از دوربین، دسترسی لازم را در تنظیمات فعال کنید.</string>
+
+    <!-- Success modal -->
+    <string name="occurrence_success_title">گزارش حادثه ثبت شد</string>
+    <string name="occurrence_success_desc">درخواست شما به شعبه ذیربط ارسال شد. نتیجه از طریق صندوق شخصی اطلاع‌رسانی می‌شود.</string>
+    <string name="occurrence_success_tracking_label">کد رهگیری</string>
+    <string name="occurrence_success_action">بازگشت به خدمات</string>
+
+    <!-- Exit confirmation -->
+    <string name="occurrence_exit_confirmation_title">فرم را رها می‌کنید؟</string>
+    <string name="occurrence_exit_confirmation_desc">اطلاعات واردشده ذخیره نشده و در صورت خروج از بین می‌رود.</string>
+    <string name="occurrence_exit_confirmation_confirm">ادامه تکمیل فرم</string>
+    <string name="occurrence_exit_confirmation_dismiss">بی‌خیال، خروج از فرم</string>
 </resources>

@@ -1,0 +1,28 @@
+package com.tamin.taminhamrah.feature.taminServices.occurrence.model
+
+data class UserInfoPR(
+    val serial1: String = "",
+    val militaryServiceCode: String = "",
+    val fatherName: String = "",
+    val lastName: String = "",
+    val serial2: String = "",
+    val creationTime: Long = 0L,
+    val lastModificationTime: Long = 0L,
+    val cityCode: String = "",
+    val socialSecurityNumber: String = "",
+    val lastModifiedBy: String = "",
+    val issueplaceName: String = "",
+    val birthDate: String = "",
+    val firstName: String = "",
+    val insuranceNumber: String = "",
+    val genderCode: String = "",
+    val nationalID: String = "",
+    val marriageCode: String = "",
+    val createdBy: String = "",
+    val identityNumber: String = "",
+    val countryCode: String = "",
+    val id: String = "",
+    val birthDateTimestamp: Long = 0L,
+    val issueplace: String = "",
+    val nationCode: String = "",
+)
