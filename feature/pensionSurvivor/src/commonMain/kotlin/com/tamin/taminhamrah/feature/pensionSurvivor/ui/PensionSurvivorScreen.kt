@@ -60,6 +60,7 @@ import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.buttons.SquareIconButton
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -408,6 +409,10 @@ private fun PensionSurvivorBottomBar(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(Spacing.smd),
                 ) {
+                    SquareIconButton(
+                        icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                        onClick = { onIntent(PensionSurvivorIntent.PreviousStep) },
+                    )
                     LoadingButton(
                         text = if (state.currentStep == PensionSurvivorStep.Final) {
                             stringResource(Res.string.upload_submit_final)
@@ -429,12 +434,8 @@ private fun PensionSurvivorBottomBar(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
                         iconPosition = LoadingButtonIconPosition.TRAILING,
                     )
-                    TaminTopAppBarButton(
-                        icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                        contentDescription = null,
-                        onClick = { onIntent(PensionSurvivorIntent.PreviousStep) },
-                        bordered = true,
-                    )
+
+
                 }
             }
         }
