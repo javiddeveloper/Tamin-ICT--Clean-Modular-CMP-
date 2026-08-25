@@ -20,6 +20,7 @@ import com.tamin.taminhamrah.model.workshop.ObjectionKind
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -81,6 +82,21 @@ fun ObjectionableDebitContent(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // ثبت اعتراض is a page of this screen, not a route: only this ViewModel holds the domain row
+    // the objection is filed against.
+    state.form?.let { form ->
+        BackHandler { onIntent(ObjectionableDebitIntent.FormDismissed) }
+        ObjectionFormPage(
+            form = form,
+            workshopName = workshopName,
+            workshopCode = state.workshopId.takeIf { it.isNotBlank() }?.toPersianDigits(),
+            onIntent = onIntent,
+            onBack = { onIntent(ObjectionableDebitIntent.FormDismissed) },
+            modifier = modifier,
+        )
+        return
+    }
+
     WorkshopScreenShell(
         title = stringResource(Res.string.workshop_action_objection),
         onBack = onBack,

@@ -69,7 +69,7 @@ data class TaminColors(
      * action, a filter chip, a selected option.
      *
      * Was two tokens: this one and `hawkesBlue`, a fixed light blue seven features already used.
-     * They were the same colour under two names, except that the older one went grey in dark
+     * They were the same color under two names, except that the older one went gray in dark
      * theme; folded into this one, which the design themes properly in both.
      */
     val blueBorder: Color,

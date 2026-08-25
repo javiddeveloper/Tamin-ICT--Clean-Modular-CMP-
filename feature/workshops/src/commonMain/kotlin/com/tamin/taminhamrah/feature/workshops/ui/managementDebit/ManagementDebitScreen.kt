@@ -29,6 +29,7 @@ import com.tamin.taminhamrah.model.workshop.Article16DebtPR
 import com.tamin.taminhamrah.model.workshop.Article16RequestStatus
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.digitsOnly
@@ -97,6 +98,21 @@ fun ManagementDebitContent(
 ) {
     val isSearchOpen = state.isSearchOpen
     val draft = state.draft
+
+    // درخواست رسیدگی is a page of this screen, not a route: only this ViewModel holds the domain
+    // row the request is filed against.
+    state.form?.let { form ->
+        BackHandler { onIntent(ManagementDebitIntent.FormDismissed) }
+        Article16FormPage(
+            form = form,
+            workshopName = state.workshopName,
+            workshopCode = state.workshopId.takeIf { it.isNotBlank() }?.toPersianDigits(),
+            onIntent = onIntent,
+            onBack = { onIntent(ManagementDebitIntent.FormDismissed) },
+            modifier = modifier,
+        )
+        return
+    }
 
     WorkshopScreenShell(
         title = stringResource(Res.string.workshop_action_article16),

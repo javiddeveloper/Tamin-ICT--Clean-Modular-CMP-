@@ -1237,4 +1237,86 @@
     <string name="member_leaving_date">تاریخ ترک کار</string>
     <string name="stackholder_type">نوع ذینفع</string>
     <string name="stackholder_birth_date">تاریخ تولد</string>
+
+    <!-- ===================== فرم‌های کارگاه (shared form vocabulary) ===================== -->
+    <string name="ws_form_prev">مرحلهٔ قبل</string>
+    <string name="ws_form_next">مرحلهٔ بعد</string>
+    <string name="ws_form_docs_title">مدارک بارگذاری‌شده</string>
+    <string name="ws_form_docs_count">%1$s از %2$s</string>
+    <string name="ws_form_add_doc">افزودن مدرک</string>
+    <string name="ws_form_remove_doc">حذف مدرک</string>
+    <string name="ws_form_file_size">%1$s کیلوبایت</string>
+    <string name="ws_form_edit_info">ویرایش اطلاعات</string>
+    <string name="ws_form_group_count">%1$s مورد</string>
+    <string name="ws_form_doc_type_title">نوع مدرک را انتخاب کنید</string>
+    <string name="ws_form_err_docs">بارگذاری حداقل یک مدرک الزامی است.</string>
+    <string name="ws_form_err_agree">لطفاً تعهدنامه را تأیید کنید.</string>
+
+    <!-- ثبت اعتراض به بدهی -->
+    <string name="obj_form_title">ثبت اعتراض به بدهی</string>
+    <string name="obj_form_desc_estimate">اعتراض به بدهی برآوردی برای بدهی زیر ثبت می‌شود.</string>
+    <string name="obj_form_desc_primary_vote">اعتراض به رای هیئت بدوی برای بدهی زیر ثبت می‌شود.</string>
+    <string name="obj_form_group_debt">بدهی مورد اعتراض</string>
+    <string name="obj_form_period_from">دورهٔ بدهی از</string>
+    <string name="obj_form_period_to">دورهٔ بدهی تا</string>
+    <string name="obj_form_area_label">شرح اعتراض</string>
+    <string name="obj_form_area_hint">دلایل اعتراض خود را بنویسید…</string>
+    <string name="obj_form_check_deposit">مبلغ بدهی را به‌صورت سپردهٔ بانکی پرداخت کرده‌ام.</string>
+    <string name="obj_form_check_confirm">صحت اطلاعات و مدارک ارسالی را تأیید می‌کنم.</string>
+    <string name="obj_form_submit">ثبت اعتراض</string>
+    <string name="obj_form_done_title">اعتراض ثبت شد</string>
+    <string name="obj_form_done_body">اعتراض شما با شمارهٔ پیگیری %1$s ثبت شد و به هیئت رسیدگی ارجاع گردید.</string>
+
+    <!-- درخواست رسیدگی به بدهی ماده ۱۶ -->
+    <string name="a16_form_title">درخواست رسیدگی به بدهی</string>
+    <string name="a16_form_step_review">بازبینی اطلاعات</string>
+    <string name="a16_form_step_docs">مدارک و ثبت</string>
+    <string name="a16_form_review_title">بازبینی اطلاعات درخواست</string>
+    <string name="a16_form_review_desc">جزئیات بدهی و اطلاعات کارگاه را بررسی کنید، سپس مدارک را بارگذاری کنید.</string>
+    <string name="a16_form_docs_title">مدارک و ثبت درخواست</string>
+    <string name="a16_form_docs_desc">حداکثر ۱۰ تصویر برای این درخواست قابل بارگذاری است.</string>
+    <string name="a16_form_group_debt">جزئیات بدهی</string>
+    <string name="a16_form_group_workshop">اطلاعات کارگاه و کارفرما</string>
+    <string name="a16_form_account_code">کد حساب</string>
+    <string name="a16_form_employer_name">نام کارفرما</string>
+    <string name="a16_form_workshop_name">نام کارگاه</string>
+    <string name="a16_form_address">نشانی</string>
+    <string name="a16_form_note_window">رسیدگی به بدهی موضوع ماده ۱۶ آیین‌نامهٔ هیئت‌ها تنها برای بدهی‌هایی امکان‌پذیر است که از تاریخ ابلاغ اجراییه بیش از یک روز نگذشته باشد.</string>
+    <string name="a16_form_note_result">در صورت تأیید، نتیجه از طریق کارتابل درخواست‌ها و پیامک اطلاع داده می‌شود.</string>
+    <string name="a16_form_check">مفاد فوق را مطالعه کردم و صحت مدارک ارسالی را تأیید می‌کنم.</string>
+    <string name="a16_form_submit">ثبت درخواست</string>
+    <string name="a16_form_done_title">درخواست شما ثبت شد</string>
+    <string name="a16_form_done_body">درخواست رسیدگی به بدهی ماده ۱۶ با کد پیگیری %1$s ثبت شد.</string>
+
+    <!-- انواع مدرک اعتراض — codes are the service's own, mirrored from the old app's asset -->
+    <string name="ws_obj_doc_1">مدارک رسمی دال بر کارفرمایی کارگاه</string>
+    <string name="ws_obj_doc_2">کارکنان غیرمشمول قانون تأمین اجتماعی</string>
+    <string name="ws_obj_doc_3">گواهی خدمت سربازی یا کارت پایان خدمت</string>
+    <string name="ws_obj_doc_4">گواهی فوت و گواهی انحصار وراثت</string>
+    <string name="ws_obj_doc_5">تغییر نام کارگران با ارائه صفحات شناسنامه</string>
+    <string name="ws_obj_doc_6">شراکت‌نامه رسمی و محضری</string>
+    <string name="ws_obj_doc_7">ارائه لیست و پرداخت حق بیمه کارکنان شاغل در کارگاه</string>
+    <string name="ws_obj_doc_8">مدارک مستند دال بر ارسال صورت مزد کارگران شاغل</string>
+    <string name="ws_obj_doc_9">مدارک رسمی دال بر خروج از کشور</string>
+    <string name="ws_obj_doc_10">ترک کار کارگرانی که در سیستم ثبت نگردیده</string>
+    <string name="ws_obj_doc_11">گواهی مراجع قضایی در خصوص بازداشت و زندان</string>
+    <string name="ws_obj_doc_12">احکام مراجع و هیئت‌های حل اختلاف و تشخیص وزارت کار</string>
+    <string name="ws_obj_doc_13">شناسنامه همسر و والدین ادعای دریافت دستمزد ندارند</string>
+    <string name="ws_obj_doc_14">تصویر شناسنامه و گواهی عدم دریافت مزد توسط فرزند</string>
+    <string name="ws_obj_doc_15">مکاتبات اداره کل وصول حق بیمه در خصوص کارگاه</string>
+    <string name="ws_obj_doc_16">استراحت پزشکی منجر به دریافت غرامت دستمزد</string>
+    <string name="ws_obj_doc_17">کد موقت که پس از اقدامات قانونی شماره اصلی شده</string>
+    <string name="ws_obj_doc_18">سایر موارد</string>
+
+    <!-- انواع رسیدگی ماده ۱۶ — the same asset's investigationItems -->
+    <string name="ws_a16_doc_1">مفاصا حساب ماده (۳۸) قانون مرتبط با موضوع بدهی قطعی</string>
+    <string name="ws_a16_doc_2">مفاصا حساب ماده (۳۸) قانون جهت آن بخش از کارکرد قرارداد اصلی که توسط مقاطعه‌کاران فرعی انجام گردیده است</string>
+    <string name="ws_a16_doc_3">ارائه اسناد و مدارک متقن و مبین فسخ قرارداد</string>
+    <string name="ws_a16_doc_4">ارائه مدارک و مستندات قانونی بیانگر خاتمه قرارداد</string>
+    <string name="ws_a16_doc_5">پرداخت حق بیمه کارکنان از طریق همان کارفرما و مطالبه مضاعف بدهی</string>
+    <string name="ws_a16_doc_6">پرداخت حق بیمه کارکنان با شماره بیمه اصلی و مطالبه بدهی با شماره بیمه فرعی یا دیگر بیمه‌شده</string>
+    <string name="ws_a16_doc_7">مطالبه حق بیمه پس از تاریخ ترک کار لیست و تایید عدم اشتغال وی در گزارش بازرسی بعد از آن</string>
+    <string name="ws_a16_doc_8">مطالبه حق بیمه در دوره خدمت سربازی بیمه‌شده و یا مشمولین سایر صندوق‌ها</string>
+    <string name="ws_a16_doc_9">مطالبه حق بیمه فوت از تاریخ درخواست</string>
+    <string name="ws_a16_doc_10">مطالبه حق بیمه در زمان بیماری، ایام بارداری، دریافت مقرری بیکاری و … بیمه‌شده/بیمه‌شدگان</string>
 </resources>
