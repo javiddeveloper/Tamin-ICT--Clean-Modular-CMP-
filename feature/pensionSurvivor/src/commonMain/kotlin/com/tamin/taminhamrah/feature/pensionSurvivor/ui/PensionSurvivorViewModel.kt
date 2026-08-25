@@ -310,11 +310,10 @@ class PensionSurvivorViewModel(
             PensionSurvivorStep.Deceased -> {
                 if (state.deceasedInfo == null) return
                 if (!state.isDeceasedHistoryConfirmed) return
-                //todo un commit this part before merge
-//                if (!state.areDeceasedDocumentsComplete) {
-//                    sendEvent(PensionSurvivorEvent.ShowToast(getString(Res.string.error_upload_all_docs)))
-//                    return
-//                }
+                if (!state.areDeceasedDocumentsComplete) {
+                    sendEvent(PensionSurvivorEvent.ShowToast(getString(Res.string.error_upload_all_docs)))
+                    return
+                }
                 emit(PartialState.StepChanged(PensionSurvivorStep.Survivors))
                 loadSurvivors()
             }

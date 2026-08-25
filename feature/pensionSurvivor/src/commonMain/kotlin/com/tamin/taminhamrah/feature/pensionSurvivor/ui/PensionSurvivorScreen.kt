@@ -24,6 +24,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
@@ -40,6 +41,8 @@ import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.PensionSurvivor
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.PensionSurvivorStep
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.PensionSurvivorUiState
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.contract.SurvivorContactDraft
+import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamPR
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
@@ -58,8 +61,11 @@ import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import io.ktor.utils.io.ByteReadChannel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -94,9 +100,14 @@ fun PensionSurvivorScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val toaster = LocalToaster.current
     val rulesUnavailableMessage = stringResource(Res.string.pension_survivor_rules_unavailable)
+    val rulesTitle = stringResource(Res.string.pension_survivor_step_rules)
+    val scope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
     var refreshSurvivorsOnResume by remember { mutableStateOf(false) }
     var showPdfViewer by remember { mutableStateOf(false) }
+    var showRulesPdfViewer by remember { mutableStateOf(false) }
+    var rulesPdf by remember { mutableStateOf<PdfDownloadPR?>(null) }
+    var rulesPdfLoadFailed by remember { mutableStateOf(false) }
 
     DisposableEffect(lifecycleOwner, state.currentStep, refreshSurvivorsOnResume) {
         val observer = LifecycleEventObserver { _, event ->
@@ -136,8 +147,19 @@ fun PensionSurvivorScreen(
             onNavigateToSurvivorInfo(args)
         },
         onOpenRulesDocument = {
-            // TODO(rules-url): replace this toast with the legacy rules document URL/PDF when found.
-            toaster.error(rulesUnavailableMessage)
+            scope.launch {
+                @OptIn(ExperimentalResourceApi::class)
+                try {
+                    val bytes = Res.readBytes(RULES_PDF_RESOURCE_PATH)
+                    rulesPdf = PdfDownloadPR(InputStreamPR(ByteReadChannel(bytes)))
+                    rulesPdfLoadFailed = false
+                    showRulesPdfViewer = true
+                } catch (_: Exception) {
+                    rulesPdf = null
+                    rulesPdfLoadFailed = true
+                    toaster.error(rulesUnavailableMessage)
+                }
+            }
         },
         onOpenPdfViewer = { showPdfViewer = true },
     )
@@ -151,6 +173,21 @@ fun PensionSurvivorScreen(
         onIntent = viewModel::sendIntent,
         onOpenFinalPdf = { showPdfViewer = true },
     )
+
+    if (showRulesPdfViewer) {
+        TaminPdfViewer(
+            fileName = RULES_PDF_FILE_NAME,
+            pdf = rulesPdf,
+            downloadFailed = rulesPdfLoadFailed,
+            onRequestDownload = {},
+            onDismiss = {
+                showRulesPdfViewer = false
+                rulesPdf = null
+                rulesPdfLoadFailed = false
+            },
+            title = rulesTitle,
+        )
+    }
 
     if (showPdfViewer) {
         TaminPdfViewer(
@@ -366,8 +403,7 @@ private fun PensionSurvivorBottomBar(
         PensionSurvivorStep.Rules -> state.commitmentAccepted && !state.isProfileLoading
         PensionSurvivorStep.Deceased -> state.deceasedInfo != null &&
             state.isDeceasedHistoryConfirmed &&
-            //todo un commit this part before merge
-//            state.areDeceasedDocumentsComplete &&
+            state.areDeceasedDocumentsComplete &&
             !state.isLoading &&
             !state.isDeceasedDocumentUploading
         PensionSurvivorStep.Survivors -> !state.isLoading
@@ -469,3 +505,7 @@ private fun PensionSurvivorSuccessDialog(onConfirm: () -> Unit) {
 }
 
 private const val DECEASED_NATIONAL_ID_LENGTH = 10
+
+/** Legacy asset: rulesAndRegulationsHtmlFile/rule_pension_survivor.pdf */
+private const val RULES_PDF_RESOURCE_PATH = "files/rule_pension_survivor.pdf"
+private const val RULES_PDF_FILE_NAME = "rule_pension_survivor.pdf"
