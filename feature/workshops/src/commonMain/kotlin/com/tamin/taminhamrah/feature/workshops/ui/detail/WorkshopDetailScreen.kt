@@ -52,7 +52,7 @@ import com.tamin.taminhamrah.ui.theme.Thickness
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.ic_arrow_down
+import taminx.core.core_ui.ic_tamin_chevron_down
 import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.workshop_activity_type
 import taminx.core.core_ui.workshop_actions
@@ -70,7 +70,7 @@ import taminx.core.core_ui.workshop_start_activity_date
 /**
  * جزئیات کارگاه — the workshop the list picked, and the eight services it can be taken to.
  *
- * Everything drawn here already travelled with the workshop, so opening it costs no request. The
+ * Everything drawn here already traveled with the workshop, so opening it costs no request. The
  * card starts on the two fields the list card showed and unfolds the rest, which is the design's
  * way of keeping the services above the fold rather than below seven rows of dates.
  */
@@ -232,7 +232,7 @@ private fun ExpandToggle(
             color = colors.blueText,
         )
         Icon(
-            imageVector = vectorResource(Res.drawable.ic_arrow_down),
+            imageVector = vectorResource(Res.drawable.ic_tamin_chevron_down),
             contentDescription = null,
             tint = colors.blueText,
             // Read the animated value in the layer, not in composition: a turning chevron must
