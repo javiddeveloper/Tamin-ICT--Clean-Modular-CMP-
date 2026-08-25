@@ -22,6 +22,9 @@ tags: [convention, howto]
 5. **Register the Koin module in `sharedModules` in `shared/.../di/Koin.kt`** — miss this and you get a runtime failure, not a compile error ([[Dependency-Injection]])
 6. Attach the graph in `shared/.../ui/navigation/TaminHamrahNavGraph.kt`
 7. If it opens from the server menu: add a case in `FeatureNavigation.kt` and the matching `FeatureFlag` value ([[Feature-Flags]])
+
+Reference: girl survivor (`:feature:girlSurvivor`, `FeatureFlag.GIRL_SURVIVOR`) — standalone module, not under `:feature:pensioner` despite sharing `survivor-request/*` APIs in `PersonalApiService`.
+
 8. Add the dependency from `:shared` in `shared/build.gradle.kts`
 
 ## When adding a model or endpoint

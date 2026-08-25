@@ -21,6 +21,7 @@ import com.tamin.taminhamrah.feature.addDependent.di.addDependentModule
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.di.pensionStatusInquiryModule
 import com.tamin.taminhamrah.feature.userRequest.di.userRequestModule
 import com.tamin.taminhamrah.feature.orotezprotez.di.orotezProtezModule
+import com.tamin.taminhamrah.feature.girlSurvivor.di.girlSurvivorModule
 import com.tamin.taminhamrah.feature.deferredInstallment.di.deferredInstallmentModule
 import com.tamin.taminhamrah.plugin.di.pluginModule
 import org.koin.core.context.startKoin
@@ -58,6 +59,7 @@ val sharedModules: List<Module>
         settingsModule,
         userRequestModule,
         orotezProtezModule,
+        girlSurvivorModule,
         deferredInstallmentModule,
     )
 

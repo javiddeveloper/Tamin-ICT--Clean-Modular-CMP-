@@ -59,6 +59,7 @@ Colors, spacing, radius: [[Theme]] — never hardcode `Color`, `.dp`, or UI copy
 | `:feature:orotez-protez` | `feature/orotez-protez` | `…feature.orotezprotez` |
 | `:feature:deferredInstallment` | `feature/deferredInstallment` | `…feature.deferredInstallment` |
 | `:feature:pensionStatusInquiry` | `feature/pensionStatusInquiry` | `…feature.pensionStatusInquiry` |
+| `:feature:girlSurvivor` | `feature/girlSurvivor` | `…feature.girlSurvivor` |
 
 ### Layout of a feature module
 

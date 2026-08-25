@@ -15,6 +15,7 @@ import com.tamin.taminhamrah.useCases.bankAccount.RegisterBankAccountUseCase
 import com.tamin.taminhamrah.useCases.common.GetRecipientListUseCase
 import com.tamin.taminhamrah.useCases.common.GetBeneficiaryUseCase
 import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
+import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
 import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
 import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
 import com.tamin.taminhamrah.useCases.file.DownloadDocumentUseCase
@@ -50,6 +51,8 @@ import com.tamin.taminhamrah.useCases.personal.GetPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetDisabilityDependentInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetConfirmSurvivorsListUseCase
 import com.tamin.taminhamrah.useCases.personal.CheckGirlSurvivorConditionsUseCase
+import com.tamin.taminhamrah.useCases.personal.ConfirmGirlSurvivorUseCase
+import com.tamin.taminhamrah.useCases.personal.GetGirlSurvivorReportUseCase
 import com.tamin.taminhamrah.useCases.orotezProtez.GetInsuredPersonsUseCase
 import com.tamin.taminhamrah.useCases.orotezProtez.GetRequestInsuredMainInfoUseCase
 import com.tamin.taminhamrah.useCases.orotezProtez.SaveShortTermOrthosisUseCase
@@ -220,9 +223,12 @@ val domainModule = module {
     factoryOf(::GetDeceasedInfoUseCase)
     factoryOf(::GetDisabilityDependentInfoUseCase)
     factoryOf(::CheckGirlSurvivorConditionsUseCase)
+    factoryOf(::GetGirlSurvivorReportUseCase)
+    factoryOf(::ConfirmGirlSurvivorUseCase)
     factoryOf(::GetConfirmSurvivorsListUseCase)
     factoryOf(::GetAgeUseCase)
     factoryOf(::GetCitiesUseCase)
+    factoryOf(::GetProvincesUseCase)
     factoryOf(::ChangeMobileUseCase)
     factoryOf(::VerifyChangeMobileUseCase)
     factoryOf(::GetBeneficiaryUseCase)

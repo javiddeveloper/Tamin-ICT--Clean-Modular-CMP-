@@ -10,7 +10,7 @@ import com.tamin.taminhamrah.feature.pensionInquiry.navigateToCalculatePension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeservedTreatment
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDisabilityPension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToEdict
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToGirlSurvivor
+import com.tamin.taminhamrah.feature.girlSurvivor.navigateToGirlSurvivor
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToIssuanceCertificate
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPayRoll
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.navigateToPensionStatusInquiry

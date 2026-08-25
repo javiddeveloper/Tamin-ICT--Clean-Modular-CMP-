@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.deservedTreatment.Deserve
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll.PayRollViewModel
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.EdictViewModel
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.issuanceCertificate.IssuanceCertificateViewModel
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.deferredInstallment.DeferredInstallmentViewModel
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.girlSurvivor.GirlSurvivorViewModel
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.pensionSurvivor.PensionSurvivorViewModel
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.DisabilityPensionViewModel
@@ -19,6 +20,7 @@ val pensionInquiryModule = module {
     viewModelOf(::PayRollViewModel)
     viewModelOf(::EdictViewModel)
     viewModelOf(::IssuanceCertificateViewModel)
+    viewModelOf(::DeferredInstallmentViewModel)
     viewModelOf(::GirlSurvivorViewModel)
     viewModelOf(::PensionSurvivorViewModel)
     viewModelOf(::DisabilityPensionViewModel)
