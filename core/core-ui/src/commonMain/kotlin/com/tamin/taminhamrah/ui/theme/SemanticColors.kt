@@ -65,11 +65,12 @@ data class TaminColors(
     /** The fill [teal] sits on when it tints an icon tile. */
     val tealBg: Color,
     /**
-     * The hairline a blue-on-white control is outlined with — a dashed code chip, a quiet
-     * card action, a filter chip.
+     * The hairline a blue-on-white control is outlined with — a dashed code chip, a quiet card
+     * action, a filter chip, a selected option.
      *
-     * Distinct from [hawkesBlue], which several features already use as a fixed light blue and
-     * which goes grey in dark theme; this one stays blue in both, as the design has it.
+     * Was two tokens: this one and `hawkesBlue`, a fixed light blue seven features already used.
+     * They were the same colour under two names, except that the older one went grey in dark
+     * theme; folded into this one, which the design themes properly in both.
      */
     val blueBorder: Color,
 
@@ -105,7 +106,6 @@ data class TaminColors(
     val aiAssistantGradient: Brush,
     val grey900 : Color,
 
-    val hawkesBlue : Color,
     val chipBg: Color,
     val warning: Color,
     val fuchsiaBlue: Color ,
@@ -231,7 +231,6 @@ val LightTaminColors = TaminColors(
     txtNameProfile = TaminLightSurface,
     txtNatProfile = TaminLightTextSubProfile,
     shadowAvatarProfile = Color.Black,
-    hawkesBlue = Color(0xFFDCE7FB),
     chipBg = Color(0xFFEFF6FF),
     grey900 = Color(0xFFE2E8F0),
     warning = Color(0xFFC97E0A),
@@ -356,7 +355,6 @@ val DarkTaminColors = TaminColors(
         listOf(TaminPurple900, TaminPurple700, Color(0xFF3F5BD9), TaminNavy700)
     ),
 
-    hawkesBlue = TaminDarkOuterBorder,
     chipBg = Color(0x293B82F6),
     shadowPrimary = Color.Black.copy(alpha = 0.4f),
     shadowSubtle = Color.Black.copy(alpha = 0.3f),

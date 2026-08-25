@@ -91,7 +91,7 @@ import kotlinx.coroutines.IO
         VersionHistoryEntity::class,
         HistoryJobInfoEntity::class,
     ],
-    version = 2,
+    version = 5,
 )
 @ConstructedBy(TaminXDatabaseConstructor::class)
 @TypeConverters(TaminHamrahConverters::class)

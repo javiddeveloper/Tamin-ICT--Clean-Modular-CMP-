@@ -341,7 +341,7 @@ internal fun WorkshopCodeRow(
                 .background(colors.blueBg)
                 // The design pins the code behind a dashed outline, which is what marks it
                 // as something to lift rather than a plain tinted label.
-                .dashedOutline(colors.hawkesBlue, WorkshopDimens.codeChipCorner, WorkshopDimens.codeChipBorderWidth)
+                .dashedOutline(colors.blueBorder, WorkshopDimens.codeChipCorner, WorkshopDimens.codeChipBorderWidth)
                 .padding(
                     horizontal = WorkshopDimens.codeChipHorizontalPadding,
                     vertical = WorkshopDimens.codeChipVerticalPadding,
