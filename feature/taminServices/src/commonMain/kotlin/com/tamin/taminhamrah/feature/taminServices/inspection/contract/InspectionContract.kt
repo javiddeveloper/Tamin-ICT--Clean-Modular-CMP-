@@ -10,6 +10,13 @@ import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.util.ValidationUtils
+import com.tamin.taminhamrah.util.ValidationUtils.isPhoneNumberValid
+
+private const val MIN_REQUEST_DESCRIPTION_LENGTH = 10
+
+private fun isPhoneNumberAcceptable(phone: String): Boolean {
+    return phone.isEmpty() || isPhoneNumberValid(phone)
+}
 
 enum class InspectionRequestStep {
     IDENTITY_CONTACT,
@@ -77,9 +84,10 @@ data class InspectionUiState(
     val showExitConfirmation: Boolean = false,
 ) {
     val isRequestStep1Valid: Boolean
-        get() = ValidationUtils.isPhoneNumberValid(identityContact.mobile) &&
+        get() = isPhoneNumberAcceptable(identityContact.mobile) &&
             ValidationUtils.isLandlineValid(identityContact.landline) &&
             ValidationUtils.isEmailValid(identityContact.email)
+
 
     val isRequestStep2Valid: Boolean
         get() = workshopInfo.workshopName.isNotBlank() &&
@@ -93,7 +101,7 @@ data class InspectionUiState(
             ValidationUtils.isDateRangeValid(workshopInfo.startDateTimestamp, workshopInfo.endDateTimestamp) &&
             workshopInfo.workshopAddress.isNotBlank()
 
-    val isRequestStep3Valid: Boolean get() = requestDescription.isNotBlank()
+    val isRequestStep3Valid: Boolean get() = requestDescription.length > MIN_REQUEST_DESCRIPTION_LENGTH
 
     val requestStepNumber: Int get() = requestStep.ordinal + 1
     val requestTotalSteps: Int get() = InspectionRequestStep.entries.size

@@ -40,8 +40,8 @@ import taminx.core.core_ui.inspection_request_field_email_error
 import taminx.core.core_ui.inspection_request_field_email_optional
 import taminx.core.core_ui.inspection_request_field_landline_error
 import taminx.core.core_ui.inspection_request_field_landline_optional
-import taminx.core.core_ui.inspection_request_field_mobile
 import taminx.core.core_ui.inspection_request_field_mobile_error
+import taminx.core.core_ui.inspection_request_field_mobile_optional
 import taminx.core.core_ui.inspection_request_field_national_code
 import taminx.core.core_ui.inspection_request_field_full_name
 import taminx.core.core_ui.inspection_request_field_placeholder
@@ -49,7 +49,6 @@ import taminx.core.core_ui.inspection_request_next_step
 import taminx.core.core_ui.inspection_request_prev_step
 import taminx.core.core_ui.inspection_request_source_chip_format
 import taminx.core.core_ui.inspection_request_step1_section_title
-import taminx.core.core_ui.inspection_request_step2_section_title
 
 @Composable
 internal fun IdentityContactStep(
@@ -137,9 +136,8 @@ internal fun IdentityContactStep(
                 TaminStyledTextField(
                     value = step.mobile,
                     onValueChange = { onIntent(InspectionIntent.UpdateIdentityContact(step.copy(mobile = it))) },
-                    label = stringResource(Res.string.inspection_request_field_mobile),
+                    label = stringResource(Res.string.inspection_request_field_mobile_optional),
                     placeholder = placeholder,
-                    isRequired = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     inputRestriction = InputRestriction.DigitsOnly,
                     maxLength = 11,

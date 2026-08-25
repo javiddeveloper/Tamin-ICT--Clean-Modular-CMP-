@@ -74,14 +74,15 @@ object ValidationUtils {
     }
 
     /**
-     * Returns true if [endTimestamp] (epoch millis) is strictly after [startTimestamp] — the
-     * general "end date must be after start date" range check shared across date-range form
-     * fields (e.g. inspection request's employment period). Either side being unset (`null`,
-     * not yet picked) is treated as valid so the error only appears once both dates are chosen.
+     * Returns true if [endTimestamp] (epoch millis) is on or after [startTimestamp] — the
+     * general "end date must not be before start date" range check shared across date-range form
+     * fields (e.g. inspection request's employment period). A same-day range is valid (e.g. a
+     * single-day inspection period). Either side being unset (`null`, not yet picked) is treated
+     * as valid so the error only appears once both dates are chosen.
      */
     fun isDateRangeValid(startTimestamp: Long?, endTimestamp: Long?): Boolean {
         if (startTimestamp == null || endTimestamp == null) return true
-        return endTimestamp > startTimestamp
+        return endTimestamp >= startTimestamp
     }
 
     /**
