@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -24,24 +23,23 @@ import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopSearchPanel
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopSectionHeader
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopStatsCard
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopStats
-import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsEvent
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsIntent
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState
+import com.tamin.taminhamrah.feature.workshops.ui.detail.WorkshopDetailScreen
 import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
-import com.tamin.taminhamrah.feature.workshops.ui.sheets.WorkshopActionsSheet
 import com.tamin.taminhamrah.feature.workshops.ui.sheets.WorkshopFilterSheet
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
+import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.rideUpIntoHeader
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -83,6 +81,20 @@ fun WorkshopsScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // جزئیات کارگاه is the same destination in the design's own model: picking a workshop
+    // swaps the page, and back returns to the list. Everything it draws already travelled
+    // with the workshop, so it costs no request and needs no route of its own.
+    state.detailFor?.let { workshop ->
+        BackHandler { onIntent(WorkshopsIntent.DetailDismissed) }
+        WorkshopDetailScreen(
+            workshop = workshop,
+            onBack = { onIntent(WorkshopsIntent.DetailDismissed) },
+            onAction = { action -> onIntent(WorkshopsIntent.ActionSelected(action, workshop)) },
+            modifier = modifier,
+        )
+        return
+    }
+
     val colors = LocalTaminColors.current
     val headerGradient = remember(colors.profileGradientStops) {
         Brush.horizontalGradient(colors.profileGradientStops)
@@ -169,17 +181,9 @@ fun WorkshopsScreen(
         ) { workshop ->
             WorkshopCard(
                 workshop = workshop,
-                onOpenDetails = { onIntent(WorkshopsIntent.ActionsRequested(workshop)) },
+                onOpenDetails = { onIntent(WorkshopsIntent.DetailRequested(workshop)) },
             )
         }
-    }
-
-    state.actionsFor?.let { workshop ->
-        WorkshopActionsSheet(
-            workshop = workshop,
-            onDismiss = { onIntent(WorkshopsIntent.ActionsDismissed) },
-            onAction = { action -> onIntent(WorkshopsIntent.ActionSelected(action, workshop)) },
-        )
     }
 
     if (state.isFilterSheetOpen) {
@@ -188,33 +192,6 @@ fun WorkshopsScreen(
             onDismiss = { onIntent(WorkshopsIntent.FilterSheetOpenChanged(false)) },
             onSelect = { status -> onIntent(WorkshopsIntent.StatusFilterChanged(status)) },
         )
-    }
-}
-
-@Composable
-private fun HandleWorkshopsEvents(
-    events: Flow<WorkshopsEvent>,
-    onOpenAction: (WorkshopAction, String, String, String) -> Unit,
-) {
-    LaunchedEffect(events) {
-        events.collect { event ->
-            when (event) {
-                is WorkshopsEvent.Navigate -> {
-                    onOpenAction(
-                        event.action,
-                        event.workshopId,
-                        event.branchCode,
-                        event.workshopName,
-                    )
-                }
-                is WorkshopsEvent.ShowMessage -> {
-                    // Handled by snackbar or UI notification host if configured
-                }
-                is WorkshopsEvent.ShowToast -> {
-                    // Toast event presentation
-                }
-            }
-        }
     }
 }
 

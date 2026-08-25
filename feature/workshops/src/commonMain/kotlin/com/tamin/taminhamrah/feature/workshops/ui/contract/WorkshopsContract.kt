@@ -15,7 +15,8 @@ data class WorkshopsUiState(
     // Workshop List & Pagination
     val list: PagedListState<WorkshopPR> = PagedListState(),
     val stats: WorkshopStats? = null,
-    val actionsFor: WorkshopPR? = null,
+    /** The workshop جزئیات کارگاه is showing, or null while the list is up. */
+    val detailFor: WorkshopPR? = null,
 
     // Search & Status Filters
     val workshopIdInput: String = "",
@@ -39,7 +40,7 @@ data class WorkshopsUiState(
         data class Error(val message: String?) : PartialState
         data class Loaded(val list: PagedListState<WorkshopPR>) : PartialState
         data class StatsLoaded(val stats: WorkshopStats) : PartialState
-        data class ActionsForChanged(val workshop: WorkshopPR?) : PartialState
+        data class DetailForChanged(val workshop: WorkshopPR?) : PartialState
 
         // Search & Filters
         data class SearchInputChanged(
@@ -91,9 +92,9 @@ sealed interface WorkshopsIntent {
 
     // Cascading Dropdown Selectors
 
-    // Workshop Actions Sheet
-    data class ActionsRequested(val workshop: WorkshopPR) : WorkshopsIntent
-    data object ActionsDismissed : WorkshopsIntent
+    // جزئیات کارگاه
+    data class DetailRequested(val workshop: WorkshopPR) : WorkshopsIntent
+    data object DetailDismissed : WorkshopsIntent
     data class ActionSelected(val action: WorkshopAction, val workshop: WorkshopPR) : WorkshopsIntent
 }
 

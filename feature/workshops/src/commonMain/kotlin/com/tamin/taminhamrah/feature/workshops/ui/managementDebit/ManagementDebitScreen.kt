@@ -63,7 +63,7 @@ fun ManagementDebitScreen(
 
     WorkshopScreenShell(
         title = stringResource(Res.string.workshop_action_article16),
-        subtitle = state.workshopName.takeIf { it.isNotBlank() },
+        workshopName = state.workshopName.takeIf { it.isNotBlank() },
         onBack = onBack,
     ) {
         WorkshopListScaffold(

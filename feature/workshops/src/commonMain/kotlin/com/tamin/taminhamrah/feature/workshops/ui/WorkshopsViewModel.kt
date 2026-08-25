@@ -54,8 +54,8 @@ class WorkshopsViewModel(
             flow { emit(PartialState.FilterSheetOpenChanged(intent.isOpen)) }
 
         is WorkshopsIntent.StatusFilterChanged -> applyStatusFilter(intent.status)
-        is WorkshopsIntent.ActionsRequested -> openActions(intent.workshop)
-        WorkshopsIntent.ActionsDismissed -> flow { emit(PartialState.ActionsForChanged(null)) }
+        is WorkshopsIntent.DetailRequested -> openDetail(intent.workshop)
+        WorkshopsIntent.DetailDismissed -> flow { emit(PartialState.DetailForChanged(null)) }
         is WorkshopsIntent.ActionSelected -> selectAction(intent.action, intent.workshop)
     }
 
@@ -126,19 +126,18 @@ class WorkshopsViewModel(
         emitAll(loadPage(page = 0, search = search, status = status))
     }
 
-    private fun openActions(workshop: WorkshopPR): Flow<PartialState> = flow {
+    private fun openDetail(workshop: WorkshopPR): Flow<PartialState> = flow {
         if (!workshop.hasIdentity) {
             sendEvent(WorkshopsEvent.ShowMessage(Res.string.workshop_error_receive_data))
             return@flow
         }
-        emit(PartialState.ActionsForChanged(workshop))
+        emit(PartialState.DetailForChanged(workshop))
     }
 
     private fun selectAction(
         action: WorkshopAction,
         workshop: WorkshopPR,
     ): Flow<PartialState> = flow {
-        emit(PartialState.ActionsForChanged(null))
         if (action != WorkshopAction.ARTICLE16) {
             sendEvent(workshop.navigationEvent(action))
             return@flow
@@ -186,7 +185,7 @@ class WorkshopsViewModel(
             currentState.copy(isFilterSheetOpen = partialState.isOpen)
 
         is PartialState.StatsLoaded -> currentState.copy(stats = partialState.stats)
-        is PartialState.ActionsForChanged -> currentState.copy(actionsFor = partialState.workshop)
+        is PartialState.DetailForChanged -> currentState.copy(detailFor = partialState.workshop)
 
     }
 

@@ -54,6 +54,9 @@ import com.tamin.taminhamrah.ui.theme.Thickness
 
 private val PRIMARY_BUTTON_HEIGHT = 52.dp
 
+/** The design boxes a classified value with `padding:4px 10px`. */
+private val ValueBoxHorizontalPadding = 10.dp
+
 /** The navy cast under the primary button. Public so a caller can tint its own shadow to match. */
 val PrimaryButtonShadow = Color(0x47173D7E)
 
@@ -339,8 +342,15 @@ fun DetailRow(
      * The whole row is the target, not the glyph — the glyph is 16dp and a poor thing to aim at.
      */
     copyValue: String? = null,
+    /**
+     * Draws the value inside the design's bordered box — how it marks out a value that is a
+     * classification rather than a plain reading («نوع فعالیت» on جزئیات کارگاه).
+     */
+    valueBoxed: Boolean = false,
 ) {
     val copy = copyValue?.let { rememberCopyAction(it) }
+    val colors = LocalTaminColors.current
+    val boxShape = RoundedCornerShape(CornerRadius.md)
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -364,10 +374,19 @@ fun DetailRow(
             if (copyValue != null) {
                 CopyIconButton(value = copyValue, label = label, interactive = false)
             }
+            val valueModifier = if (valueBoxed) {
+                Modifier
+                    .background(colors.bgPage, boxShape)
+                    .border(Thickness.border, colors.border, boxShape)
+                    .padding(horizontal = ValueBoxHorizontalPadding, vertical = Spacing.xs)
+            } else {
+                Modifier
+            }
             when {
                 // Number and unit are separate children so the unit stays physically left of the
                 // digits: in the RTL row the number is the right child, the unit the left one.
                 unit != null -> Row(
+                    modifier = valueModifier,
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(Spacing.xxs),
                 ) {
@@ -375,8 +394,19 @@ fun DetailRow(
                     Text(text = unit, style = valueStyle, color = valueColor)
                 }
 
-                numeric -> NumericText(text = value, style = valueStyle, color = valueColor)
-                else -> Text(text = value, style = valueStyle, color = valueColor)
+                numeric -> NumericText(
+                    text = value,
+                    style = valueStyle,
+                    color = valueColor,
+                    modifier = valueModifier,
+                )
+
+                else -> Text(
+                    text = value,
+                    style = valueStyle,
+                    color = valueColor,
+                    modifier = valueModifier,
+                )
             }
         }
     }
