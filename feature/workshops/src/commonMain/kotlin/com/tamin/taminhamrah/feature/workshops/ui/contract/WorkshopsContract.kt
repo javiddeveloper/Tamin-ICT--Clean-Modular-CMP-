@@ -3,11 +3,6 @@ package com.tamin.taminhamrah.feature.workshops.ui.contract
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
-import com.tamin.taminhamrah.model.common.CityPR
-import com.tamin.taminhamrah.model.common.ProvincePR
-import com.tamin.taminhamrah.model.contracts.BranchPR
-import com.tamin.taminhamrah.model.studentContract.BranchSelectionFormPR
-import com.tamin.taminhamrah.model.workshop.EmployerAgreementPR
 import com.tamin.taminhamrah.model.workshop.WorkshopActivityStatus
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
 import org.jetbrains.compose.resources.StringResource
@@ -31,19 +26,9 @@ data class WorkshopsUiState(
     val isFilterSheetOpen: Boolean = false,
 
     // Cascading Branch Selection (استان → شهر → شعبه)
-    val branchSelection: BranchSelectionFormPR = BranchSelectionFormPR(),
-    val provinces: List<ProvincePR> = emptyList(),
-    val cities: List<CityPR> = emptyList(),
-    val branches: List<BranchPR> = emptyList(),
-    val isProvincesLoading: Boolean = false,
-    val isCitiesLoading: Boolean = false,
-    val isBranchesLoading: Boolean = false,
-    val provincesError: String? = null,
-    val citiesError: String? = null,
-    val branchesError: String? = null,
 ) {
     val hasActiveFilter: Boolean
-        get() = statusFilter != null || appliedSearch.isNotEmpty || branchSelection.branch != null
+        get() = statusFilter != null || appliedSearch.isNotEmpty
 
     val workshops get() = list.items
 
@@ -69,16 +54,6 @@ data class WorkshopsUiState(
         data class FilterSheetOpenChanged(val isOpen: Boolean) : PartialState
 
         // Cascading Branch Selection
-        data class ProvincesLoading(val isLoading: Boolean) : PartialState
-        data class ProvincesLoaded(val list: List<ProvincePR>) : PartialState
-        data class CitiesLoading(val isLoading: Boolean) : PartialState
-        data class CitiesLoaded(val list: List<CityPR>) : PartialState
-        data class BranchesLoading(val isLoading: Boolean) : PartialState
-        data class BranchesLoaded(val list: List<BranchPR>) : PartialState
-        data class BranchSelectionChanged(val selection: BranchSelectionFormPR) : PartialState
-        data class ProvincesError(val message: String?) : PartialState
-        data class CitiesError(val message: String?) : PartialState
-        data class BranchesError(val message: String?) : PartialState
     }
 }
 
@@ -115,12 +90,6 @@ sealed interface WorkshopsIntent {
     data class StatusFilterChanged(val status: WorkshopActivityStatus?) : WorkshopsIntent
 
     // Cascading Dropdown Selectors
-    data object LoadProvinces : WorkshopsIntent
-    data object RetryCities : WorkshopsIntent
-    data object RetryBranches : WorkshopsIntent
-    data class SelectProvince(val province: ProvincePR) : WorkshopsIntent
-    data class SelectCity(val city: CityPR) : WorkshopsIntent
-    data class SelectBranch(val branch: BranchPR) : WorkshopsIntent
 
     // Workshop Actions Sheet
     data class ActionsRequested(val workshop: WorkshopPR) : WorkshopsIntent

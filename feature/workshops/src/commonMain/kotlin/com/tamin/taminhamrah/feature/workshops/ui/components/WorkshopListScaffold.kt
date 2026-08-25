@@ -103,7 +103,13 @@ fun <T> WorkshopListScaffold(
 
         itemsIndexed(
             items = state.items,
-            key = key?.let { keyOf -> { _, item -> keyOf(item) } },
+            // The position is part of the key, because none of these lists has a field guaranteed
+            // to be unique: an employer can hold two agreements for one workshop, and
+            // `workshopId + branchCode` then repeats — which Compose treats as a fatal
+            // "Key was already used" rather than a display glitch. Prefixing the index keeps the
+            // caller's key meaningful while making a collision impossible, and these lists only
+            // ever grow at the end, so an item's index — and therefore its identity — is stable.
+            key = key?.let { keyOf -> { index, item -> "$index:${keyOf(item)}" } },
         ) { _, item -> row(item) }
 
         if (state.isLoadingMore) {

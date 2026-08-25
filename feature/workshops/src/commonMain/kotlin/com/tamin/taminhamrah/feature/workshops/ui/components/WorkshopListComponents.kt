@@ -70,26 +70,28 @@ fun WorkshopStatsCard(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .taminSurface(CornerRadius.lg)
-            .padding(vertical = Spacing.lg),
+            .taminSurface(StatsCardCorner)
+            .padding(vertical = StatsCardVerticalPadding, horizontal = StatsCardHorizontalPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        // Three equal columns, no rules between them, and every figure in the same blue — the
+        // design does not single out the active count.
         StatColumn(
             label = stringResource(Res.string.workshop_stat_total),
             value = stats?.total,
+            valueColor = colors.blueText,
             modifier = Modifier.weight(1f),
         )
-        StatDivider()
         StatColumn(
             label = stringResource(Res.string.workshop_stat_active),
             value = stats?.active,
-            valueColor = colors.greenText,
+            valueColor = colors.blueText,
             modifier = Modifier.weight(1f),
         )
-        StatDivider()
         StatColumn(
             label = stringResource(Res.string.workshop_stat_inactive),
             value = stats?.inactive,
+            valueColor = colors.blueText,
             modifier = Modifier.weight(1f),
         )
     }
@@ -122,16 +124,6 @@ private fun StatColumn(
             color = LocalTaminColors.current.textSecondary,
         )
     }
-}
-
-@Composable
-private fun StatDivider() {
-    Box(
-        modifier = Modifier
-            .width(1.dp)
-            .height(StatDividerHeight)
-            .background(LocalTaminColors.current.divider),
-    )
 }
 
 /** «لیست کارگاه‌ها» with its count, and the filter chip that opens the status sheet. */
@@ -230,7 +222,12 @@ fun WorkshopCard(
                 text = workshop.statusLabel,
                 containerColor = pillBackground,
                 contentColor = pillForeground,
-                icon = Icons.Default.Circle
+                icon = Icons.Default.Circle,
+                // The design outlines each pill in a paler shade of its own text colour
+                // (#BFE6CF on green, #F0DCA8 on orange, #F3C9C4 on red). Deriving it from the
+                // content colour reproduces those without three more palette entries, and keeps
+                // working in dark theme where fixed pastels would not.
+                borderColor = pillForeground.copy(alpha = StatusPillBorderAlpha),
             )
         }
 
@@ -239,7 +236,9 @@ fun WorkshopCard(
         DetailRow(
             label = stringResource(Res.string.workshop_employer_type),
             value = workshop.employerType,
-            valueColor = colors.greenText,
+            // The design draws this in its darker green (--tm-green-strong), not the lighter
+            // success green the status word uses.
+            valueColor = colors.springGreenText,
             numeric = false,
         )
         DetailRow(
@@ -250,40 +249,7 @@ fun WorkshopCard(
         TaminPrimaryButton(
             text = stringResource(Res.string.workshop_details_and_actions),
             onClick = onOpenDetails,
-        )
-    }
-}
-
-/**
- * A status word behind a dot, the way the design marks a workshop.
- *
- * Its own composable rather than a parameter on the shared `StatusPill`: the dot is six points
- * across, smaller than anything in the icon scale, and that is a detail of this design rather than
- * something every pill in the app should grow a knob for.
- */
-@Composable
-private fun WorkshopStatusPill(
-    label: String,
-    containerColor: Color,
-    contentColor: Color,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier
-            .background(containerColor, CircleShape)
-            .padding(horizontal = Spacing.md, vertical = StatusPillVerticalPadding),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
-    ) {
-        Box(
-            modifier = Modifier
-                .size(StatusDotSize)
-                .background(contentColor, CircleShape),
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
-            color = contentColor,
+            background = colors.buttonGradient,
         )
     }
 }
@@ -324,16 +290,18 @@ private fun WorkshopCodeRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
         ) {
+            // Code first so that right-to-left puts it on the right and the copy glyph on the
+            // left, which is where the design draws it.
+            NumericText(
+                text = workshop.codeLabel,
+                style = MaterialTheme.typography.labelMedium,
+                color = colors.blueText,
+            )
             Icon(
                 imageVector = Icons.Outlined.ContentCopy,
                 contentDescription = stringResource(Res.string.workshop_copy_code),
                 tint = colors.blueText,
                 modifier = Modifier.height(IconSize.small),
-            )
-            NumericText(
-                text = workshop.codeLabel,
-                style = MaterialTheme.typography.labelMedium,
-                color = colors.blueText,
             )
         }
     }
@@ -341,6 +309,19 @@ private fun WorkshopCodeRow(
 
 /** The design marks a status with a dot, which is smaller than any icon in the scale. */
 private val StatusDotSize = 6.dp
+/**
+ * How strongly the pill's outline shows through.
+ *
+ * Tuned so the derived border lands on the design's own values — #03794A at this alpha over the
+ * green fill reads as #BFE6CF, which is what the design draws.
+ */
+/** The stats strip's own geometry: `border-radius:18px; padding:13px 6px` in the design. */
+private val StatsCardCorner = 18.dp
+private val StatsCardVerticalPadding = 13.dp
+private val StatsCardHorizontalPadding = 6.dp
+
+private const val StatusPillBorderAlpha = 0.20f
+
 private val StatusPillVerticalPadding = 5.dp
 
 private val StatShimmerWidth = 28.dp

@@ -32,6 +32,7 @@ import de.jensklingenberg.ktorfit.http.Query
 import de.jensklingenberg.ktorfit.http.QueryMap
 import de.jensklingenberg.ktorfit.http.Url
 
+import com.tamin.taminhamrah.model.user.CurrentUserDto
 import com.tamin.taminhamrah.model.user.UserProfileDto
 import com.tamin.taminhamrah.model.bankAccount.BankAccountCreatedDTO
 import com.tamin.taminhamrah.model.bankAccount.BankAccountRequestDTO
@@ -139,6 +140,15 @@ internal interface UserApiService {
 
     @GET("users/current-user")
     suspend fun getUserProfile(): BaseDTO<UserProfileDto>
+
+    /**
+     * The same endpoint as [getUserProfile], read in full.
+     *
+     * The کارفرما flows need the roles and organization the narrower model leaves out; everything
+     * [getUserProfile] returns is a subset of this.
+     */
+    @GET("users/current-user")
+    suspend fun getCurrentUser(): BaseDTO<CurrentUserDto>
 
     @GET("relation-tamins/isnew/{nationalId}")
     suspend fun checkUserIsNew(

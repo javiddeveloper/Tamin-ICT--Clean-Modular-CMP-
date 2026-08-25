@@ -13,6 +13,7 @@ import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
 import com.tamin.taminhamrah.model.user.EditMobileResponseDN
 import com.tamin.taminhamrah.model.user.TaminRelationDN
+import com.tamin.taminhamrah.model.user.CurrentUserDN
 import com.tamin.taminhamrah.model.user.UserProfileDN
 import com.tamin.taminhamrah.repository.CityProvinceRepository
 import com.tamin.taminhamrah.repository.UserRepository
@@ -56,6 +57,8 @@ class FakeUserRepository : UserRepository {
     override suspend fun getInsuredActiveBranch(): Flow<List<InsuredActiveBranchDN>> = flowOf(emptyList())
     override suspend fun getRelationTaminAll(filters: List<ApiFilterDN>): Flow<List<ActiveRelationDN>> = flowOf(emptyList())
     override fun getElectronicFile(filters: List<ApiFilterDN>): Flow<List<ElectronicFileDN>> = flowOf(emptyList())
+    override suspend fun getCurrentUser(): Flow<CurrentUserDN> = flowOf(CurrentUserDN())
+
     override suspend fun getUserProfile(): Flow<UserProfileDN> = flowOf(
         UserProfileDN(
             entityId = null,

@@ -34,6 +34,8 @@ fun HandleWorkshopsEvents(
 
                 is WorkshopsEvent.ShowMessage ->
                     snackbarHostState.showSnackbar(getString(event.message))
+
+                is WorkshopsEvent.ShowToast -> {}
             }
         }
     }

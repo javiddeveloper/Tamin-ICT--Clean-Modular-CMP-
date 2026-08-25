@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
+import com.tamin.taminhamrah.model.user.CurrentUserDN
 import com.tamin.taminhamrah.model.user.UserProfileDN
 import com.tamin.taminhamrah.model.user.EditMobileResponseDN
 import com.tamin.taminhamrah.model.certificate.RecipientDN
@@ -102,6 +103,12 @@ class FakeUserRepository : UserRepository {
     override suspend fun verifyChangeMobileCode(mobile: String, otp: String, otpHashCode: String): Flow<String> = flow {
         if (shouldThrowError) throw error
         emit(verifyChangeMobileResult)
+    }
+
+    var currentUserResult: CurrentUserDN = CurrentUserDN()
+
+    override suspend fun getCurrentUser(): Flow<CurrentUserDN> = flow {
+        emit(currentUserResult)
     }
 
     override suspend fun getUserProfile(): Flow<UserProfileDN> = flow {

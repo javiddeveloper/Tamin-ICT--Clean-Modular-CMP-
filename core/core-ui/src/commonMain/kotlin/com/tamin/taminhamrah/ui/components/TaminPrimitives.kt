@@ -45,6 +45,7 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.Thickness
 
 /**
  * Design-system building blocks shared across the app. Everything here takes primitives
@@ -100,10 +101,19 @@ fun StatusPill(
     icon: ImageVector? = null,
     fontWeight: FontWeight = FontWeight.Medium,
     verticalPadding: Dp = 5.dp,
+    /** Outlines the pill. Null — the default — leaves it as a plain fill, as before. */
+    borderColor: Color? = null,
 ) {
     Row(
         modifier = modifier
             .background(containerColor, CircleShape)
+            .then(
+                if (borderColor != null) {
+                    Modifier.border(Thickness.border, borderColor, CircleShape)
+                } else {
+                    Modifier
+                },
+            )
             .padding(horizontal = Spacing.md, vertical = verticalPadding),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.xs),

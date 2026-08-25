@@ -6,10 +6,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.Business
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -44,10 +40,15 @@ import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.rideUpIntoHeader
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.ic_tamin_search
+import taminx.core.core_ui.ic_tamin_workshop
 import taminx.core.core_ui.workshop_search
 import taminx.core.core_ui.workshops_header_subtitle
 import taminx.core.core_ui.workshops_title
@@ -97,14 +98,14 @@ fun WorkshopsScreen(
             title = stringResource(Res.string.workshops_title),
             navigationIcon = {
                 TaminTopAppBarButton(
-                    icon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                     contentDescription = null,
                     onClick = onBack,
                 )
             },
             action = {
                 TaminTopAppBarButton(
-                    icon = Icons.Default.Search,
+                    icon = vectorResource(Res.drawable.ic_tamin_search),
                     contentDescription = stringResource(Res.string.workshop_search),
                     onClick = { onIntent(WorkshopsIntent.SearchOpenChanged(!isSearchOpen)) },
                 )
@@ -119,7 +120,7 @@ fun WorkshopsScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(Spacing.md),
             ) {
-                AnimatedRingHeaderIcon(icon = Icons.Outlined.Business)
+                AnimatedRingHeaderIcon(icon = vectorResource(Res.drawable.ic_tamin_workshop))
                 Text(
                     text = stringResource(Res.string.workshops_header_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
@@ -217,7 +218,8 @@ private fun HandleWorkshopsEvents(
     }
 }
 
-private val StatsCardOverlap = 40.dp
+/** The design lifts the stats card 42px into the header (`margin:-42px 0 15px`). */
+private val StatsCardOverlap = 42.dp
 private val HeaderBottomPadding = 64.dp
 
 @PreviewRtlTheme
@@ -227,13 +229,12 @@ private fun WorkshopsScreenPreview() {
         WorkshopsScreen(
             state = WorkshopsUiState(
                 list = PagedListState(
-                    items = listOf(
+                    items = persistentListOf(
                         WorkshopPR(
                             workshopId = "9900020917749",
                             branchCode = "123",
-                            workshopName = "کارگاه کامپیوتر توکلی",
-                            employerName = "علی توکلی",
-                            branchTitle = "شعبه ۱ تهران",
+                            name = "کارگاه کامپیوتر توکلی",
+                            branchOfficeName = "شعبه ۱ تهران",
                         )
                     )
                 ),

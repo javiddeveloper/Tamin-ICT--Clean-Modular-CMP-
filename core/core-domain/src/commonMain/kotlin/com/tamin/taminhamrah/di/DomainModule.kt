@@ -107,6 +107,7 @@ import com.tamin.taminhamrah.useCases.treatment.GetElectronicPrescriptionPriceUs
 import com.tamin.taminhamrah.useCases.treatment.GetDependantUnderEighteenUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetPrescriptionPdfFileUseCase
 import com.tamin.taminhamrah.useCases.treatment.DownloadLabResultPdfUseCase
+import com.tamin.taminhamrah.useCases.user.GetCurrentUserUseCase
 import com.tamin.taminhamrah.useCases.user.GetUserProfileUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientGeneralUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientSelfDeclarativeUseCase
@@ -312,6 +313,7 @@ val domainModule = module {
     factoryOf(::GetPrescriptionPdfFileUseCase)
     factoryOf(::DownloadLabResultPdfUseCase)
     factoryOf(::GetUserProfileUseCase)
+    factoryOf(::GetCurrentUserUseCase)
     factoryOf(::GetJobTitleUseCase)
     factoryOf(::GetRegistrationDeclarationFormUseCase)
     factoryOf(::GetRequestSummaryUseCase)

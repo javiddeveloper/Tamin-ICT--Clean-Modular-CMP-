@@ -28,7 +28,7 @@ inline fun <T> ErrorParser.safeCall(
     } catch (e: TaminErrorUriException) {
         throw parseGeneralError(e)
     } catch (e: Exception) {
-        Logger.e(tag) { "API call failed: ${e::class.simpleName} - ${e.message}" }
+        Logger.e(tag = tag) { "API call failed: ${e::class.simpleName} - ${e.message}" }
         throw parseGeneralError(TaminErrorUriException(fallbackUri))
     }
 }

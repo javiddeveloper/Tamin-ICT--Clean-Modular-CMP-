@@ -820,7 +820,6 @@
     <string name="pension_status_send_success_title">ارسال گواهی</string>
     <string name="pension_status_send_success_desc">درخواست گواهی با موفقیت ثبت شد و در صندوق شخصی شما قابل مشاهده است.</string>
     <!-- کارگاه‌های کارفرما -->
-    <string name="workshops_title">کارگاه‌های کارفرما</string>
     <string name="workshops_filter_workshop_id">کد کارگاه</string>
     <string name="workshops_filter_status">وضعیت کارگاه</string>
     <string name="workshops_search_action">جستجوی کارگاه‌ها</string>
@@ -854,7 +853,7 @@
     <string name="workshop_filter">فیلتر</string>
     <string name="workshop_copy_code">کپی کد کارگاه</string>
     <string name="workshop_code_copied">کد کارگاه کپی شد</string>
-    <string name="workshop_list_title">لیست کارگاه ها</string>
+    <string name="workshop_list_title">لیست کارگاه‌ها</string>
     <string name="workshop_search_title">جستجوی کارگاه</string>
     <string name="workshop_code">کد کارگاه</string>
     <string name="workshop_name">نام کارگاه</string>
