@@ -44,6 +44,8 @@ import com.tamin.taminhamrah.dataSource.orotezProtez.OrotezProtezRemoteDataSourc
 import com.tamin.taminhamrah.dataSource.orotezProtez.OrotezProtezRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSource
 import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.occurrence.OccurrenceRemoteDataSource
+import com.tamin.taminhamrah.dataSource.occurrence.OccurrenceRemoteDataSourceImpl
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
@@ -169,6 +171,14 @@ val remoteModule = module {
 
     single<ContactUsRemoteDataSource> {
         ContactUsRemoteDataSourceImpl()
+    }
+
+    single<OccurrenceRemoteDataSource> {
+        OccurrenceRemoteDataSourceImpl(
+            apiService = get(),
+            queryBuilder = get(),
+            errorParser = get()
+        )
     }
 
     single<AgentRemoteDataSource> {
