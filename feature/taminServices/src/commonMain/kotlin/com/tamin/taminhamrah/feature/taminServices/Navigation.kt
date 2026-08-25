@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.feature.taminServices
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
+import com.tamin.taminhamrah.feature.taminServices.occurrence.OccurrenceScreen
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.InspectionRoute
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.InspectionViewModel
@@ -22,12 +23,19 @@ data object SendInsuranceHistoryToInstitutionsRoute
 @Serializable
 data object InspectionRoute
 
+@Serializable
+data object OccurrenceRoute
+
 fun NavController.navigateToTaminServices(builder: NavOptionsBuilder.() -> Unit = {}) {
     navigate(TaminServicesRoute, builder)
 }
 
 fun NavController.navigateToSendInsuranceHistoryToInstitutions(builder: NavOptionsBuilder.() -> Unit = {}) {
     navigate(SendInsuranceHistoryToInstitutionsRoute, builder)
+}
+
+fun NavController.navigateToOccurrence(builder: NavOptionsBuilder.() -> Unit = {}) {
+    navigate(OccurrenceRoute, builder)
 }
 
 fun NavGraphBuilder.taminServicesScreen(
@@ -68,6 +76,18 @@ fun NavGraphBuilder.inspectionScreen(onBack: () -> Unit) {
         InspectionRoute(
             viewModel = viewModel,
             onBackClicked = onBack
+        )
+    }
+}
+
+fun NavGraphBuilder.occurrenceScreen(
+    onBack: () -> Unit,
+    onDone: () -> Unit,
+) {
+    composableWithFadeTransitions<OccurrenceRoute> {
+        OccurrenceScreen(
+            onBack = onBack,
+            onDone = onDone,
         )
     }
 }

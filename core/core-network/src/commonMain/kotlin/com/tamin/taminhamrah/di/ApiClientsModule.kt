@@ -38,6 +38,8 @@ import com.tamin.taminhamrah.apiService.calculateWagePension.CalculateWagePensio
 import com.tamin.taminhamrah.apiService.calculateWagePension.createCalculateWagePensionApiService
 import com.tamin.taminhamrah.apiService.inspection.InspectionApiService
 import com.tamin.taminhamrah.apiService.inspection.createInspectionApiService
+import com.tamin.taminhamrah.apiService.occurrence.OccurrenceApiService
+import com.tamin.taminhamrah.apiService.occurrence.createOccurrenceApiService
 import com.tamin.taminhamrah.util.NetworkConstants
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
@@ -153,6 +155,11 @@ val ApiClientsModule = module {
         ktorfit.createOrotezProtezApiService()
     }
 
+
+    single<OccurrenceApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createOccurrenceApiService()
+    }
     single<InspectionApiService> {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.createInspectionApiService()
