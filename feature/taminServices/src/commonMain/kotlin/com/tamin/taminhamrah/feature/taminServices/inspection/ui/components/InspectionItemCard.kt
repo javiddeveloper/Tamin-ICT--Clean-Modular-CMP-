@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +46,7 @@ import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.CustomChip
+import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.toast.AppToastHost
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -207,28 +209,34 @@ internal fun InspectionItemCard(
                 label = "inspection-card-chevron",
             )
             TaminOutlinedButton(
+                height = 48.dp,
+                textStyle = MaterialTheme.typography.titleSmall,
                 text = stringResource(if (expanded) Res.string.action_hide_details else Res.string.action_show_details),
                 onClick = { expanded = !expanded },
                 icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                iconModifier = Modifier.graphicsLayer { rotationZ = rotation.value },
+                iconModifier = Modifier.size(5.dp).graphicsLayer { rotationZ = rotation.value },
                 containerColor = colors.bgPage,
                 borderColor = Color.Transparent,
                 contentColor = colors.blueText,
-                iconPosition = IconPosition.Start,
+                iconPosition = IconPosition.End,
                 modifier = Modifier.weight(1f),
             )
 
             if (item.isObjectable) {
-                TaminPrimaryButton(
+                TaminFilledButton(
                     text = stringResource(Res.string.inspection_submit_objection),
+                    textStyle = MaterialTheme.typography.titleSmall,
                     onClick = onSubmitObjectionClicked,
                     background = colors.iconGradientSuccess,
                     icon = vectorResource(Res.drawable.ic_warning),
-                    iconAtStart = true,
-                    modifier = Modifier.weight(1f),
+                    iconPosition = IconPosition.End,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
                 )
             } else {
                 TaminOutlinedButton(
+                    height = 48.dp,
                     textStyle = MaterialTheme.typography.titleSmall,
                     contentColor = colors.textMuted,
                     text = stringResource(Res.string.inspection_download_report_short),
