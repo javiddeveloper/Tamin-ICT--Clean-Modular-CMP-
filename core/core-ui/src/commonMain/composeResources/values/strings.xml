@@ -863,12 +863,12 @@
     <string name="workshop_all_items">همه موارد</string>
     <string name="workshop_show_detail">نمایش جزئیات</string>
     <string name="workshop_hide_detail">مخفی کردن جزئیات</string>
-    <string name="workshop_actions">عملیات</string>
+    <string name="workshop_actions">عملیات این کارگاه</string>
     <string name="workshop_employer_type">نوع کارفرما</string>
     <string name="workshop_start_activity_date">تاریخ شروع فعالیت</string>
     <string name="workshop_activity_type">نوع فعالیت</string>
     <string name="workshop_register_date">تاریخ ثبت کارگاه</string>
-    <string name="workshop_approve_date">تاریخ تایید کارگاه</string>
+    <string name="workshop_approve_date">تاریخ تأیید کارگاه</string>
     <string name="workshop_status_label">وضعیت: %1$s</string>
     <string name="workshop_filter_title">فیلتر براساس فعالیت کارگاه</string>
     <string name="workshop_select">انتخاب نمایید</string>
@@ -883,13 +883,29 @@
 
     <!-- Action menu -->
     <string name="workshop_action_payment_sheets">برگ پرداخت‌ها</string>
-    <string name="workshop_action_debit_turnover">جزئیات محاسبه گردش حساب بدهی</string>
+    <string name="workshop_action_debit_turnover">جزئیات محاسبهٔ گردش حساب بدهی</string>
     <string name="workshop_action_debt_inquiry">استعلام بدهی کارگاه</string>
     <string name="workshop_action_objection">اعتراض به بدهی</string>
-    <string name="workshop_action_new_member">نام نویسی غیر حضوری بیمه شده</string>
+    <string name="workshop_action_new_member">نام‌نویسی غیرحضوری بیمه‌شده</string>
     <string name="workshop_action_article16">رسیدگی به بدهی ماده ۱۶</string>
     <string name="workshop_action_members">کارکنان</string>
     <string name="workshop_action_stackholders">ذینفعان</string>
+
+    <!-- What each action does, as the design's list subtitles read -->
+    <string name="workshop_action_payment_sheets_desc">رسیدهای پرداخت حق بیمه</string>
+    <string name="workshop_action_debit_turnover_desc">فهرست بدهی‌ها، اسناد و پرداخت</string>
+    <string name="workshop_action_debt_inquiry_desc">وضعیت بدهی قطعی و قابل تقسیط</string>
+    <string name="workshop_action_objection_desc">ثبت اعتراض برآوردی و هیئت بدوی</string>
+    <string name="workshop_action_new_member_desc">افزودن پرسنل جدید و پیگیری</string>
+    <string name="workshop_action_article16_desc">درخواست رسیدگی هیئت‌ها</string>
+    <string name="workshop_action_members_desc">بیمه‌شدگان شاغل در کارگاه</string>
+    <string name="workshop_action_stackholders_desc">کارفرما، شرکا و نمایندگان</string>
+
+    <!-- جزئیات کارگاه -->
+    <string name="workshop_detail_title">جزئیات کارگاه</string>
+    <string name="workshop_detail_info">اطلاعات کارگاه</string>
+    <string name="workshop_detail_expand">مشاهدهٔ همهٔ جزئیات کارگاه</string>
+    <string name="workshop_detail_collapse">بستن</string>
 
     <!-- برگ پرداخت‌ها -->
     <string name="payment_sheet_debit_number">شماره بدهی</string>

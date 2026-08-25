@@ -49,6 +49,12 @@ data class TaminColors(
     val iconTintSubtle: Color,
     val orangeBg: Color,
     val orangeText: Color,
+    /**
+     * The design's muted green — `#3DA35D` on `#E9F7EE`. Distinct from [greenText]/[greenBg],
+     * which are the brighter success pair a status pill wears; this one only tints an icon.
+     */
+    val mintText: Color,
+    val mintBg: Color,
     val dangerBg: Color,
     val dangerBorder: Color,
     val dangerText: Color,
@@ -56,6 +62,8 @@ data class TaminColors(
 
     // Medical / Teal
     val teal: Color,
+    /** The fill [teal] sits on when it tints an icon tile. */
+    val tealBg: Color,
 
     // Shadows
     val shadowPrimary: Color,
@@ -93,6 +101,8 @@ data class TaminColors(
     val chipBg: Color,
     val warning: Color,
     val fuchsiaBlue: Color ,
+    /** The fill [fuchsiaBlue] sits on when it tints an icon tile. */
+    val fuchsiaBlueBg: Color,
     // Solid tint derived from the AI-assistant gradient family — used for blur tints
     // and fallbacks where a single color (not a Brush) is required.
     val aiAssistantTint: Color,
@@ -129,10 +139,13 @@ val LightTaminColors = TaminColors(
     iconTintSubtle = TaminLightIconTintSubtle,
     orangeBg = TaminLightOrangeBg,
     orangeText = TaminLightWarning,
+    mintText = TaminLightMint,
+    mintBg = TaminLightMintBg,
     dangerBg = TaminLightSurface,
     dangerBorder = TaminLightDangerBorder,
     dangerText = TaminLightError,
     teal = Secondary700,
+    tealBg = TaminLightTealBg,
     bgIconProfile = TaminLightSurface,
     iconGradientPrimary = Brush.verticalGradient(
         listOf(
@@ -210,6 +223,7 @@ val LightTaminColors = TaminColors(
     grey900 = Color(0xFFE2E8F0),
     warning = Color(0xFFC97E0A),
     fuchsiaBlue = Color(0xFF7C4BC0),
+    fuchsiaBlueBg = TaminLightPurpleBg,
     springGreenText = TaminSpringGreen,
     verifiedBadgeBg = TaminLightSurface,
     buttonGradient = Brush.horizontalGradient(listOf(IconGradientBlueStart, IconGradientBlueEnd)),
@@ -247,10 +261,13 @@ val DarkTaminColors = TaminColors(
     iconTintSubtle = TaminDarkTextDefault,
     orangeBg = TaminDarkOrangeBg,
     orangeText = TaminDarkWarning,
+    mintText = TaminDarkMint,
+    mintBg = TaminDarkMintBg,
     dangerBg = TaminDarkSurface,
     dangerBorder = TaminDarkDangerBorder,
     dangerText = TaminDarkError,
     teal = Secondary500,
+    tealBg = TaminDarkTealBg,
     bgIconProfile = TaminLightSurface,
     iconGradientPrimary = Brush.verticalGradient(
         listOf(
@@ -334,6 +351,7 @@ val DarkTaminColors = TaminColors(
     grey900 = Color(0xFFE2E8F0),
     warning = Color(0xFFFBBF24),
     fuchsiaBlue = Color(0xFFB79AEE),
+    fuchsiaBlueBg = TaminDarkPurpleBg,
     springGreenText = TaminDarkSuccess,
     verifiedBadgeBg = TaminDarkGreenBg,
     buttonGradient = Brush.horizontalGradient(listOf(IconGradientBlueStart, IconGradientBlueEnd)),

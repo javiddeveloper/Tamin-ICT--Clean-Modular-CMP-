@@ -73,6 +73,12 @@ val TaminLightDangerBorder = Color(0xFFFDECEC)
 val TaminLightIconBgSubtle = Color(0xFFEEF2FB)
 val TaminLightIconTintSubtle = Color(0xFF5E7392)
 
+// Icon-tile tints the کارگاه action list draws, taken from the design's own values.
+val TaminLightMint = Color(0xFF3DA35D)
+val TaminLightMintBg = Color(0xFFE9F7EE)
+val TaminLightTealBg = Color(0xFFE3F6F5)
+val TaminLightPurpleBg = Color(0xFFF1EAFB)
+
 // Dark mode collapses every screen's hero onto one teal-to-blue wash.
 val TaminDarkHeroStart = Color(0xFF10AEB9)
 val TaminDarkHeroEnd = Color(0xFF1E6FD0)
@@ -97,6 +103,13 @@ val TaminDarkOrangeText = Color(0xFFFBBF24)
 val TaminDarkDangerBorder = Color(0x38F87171) // rgba(248,113,113,.22)
 val TaminDarkDangerText = Color(0xFFF87171)
 val TaminDarkGreenBg = Color(0x2910B981)     // rgba(16,185,129,.16)
+
+// Dark counterparts of the کارگاه action tints: the same hue laid over the dark surface at .16,
+// which is how every other tinted fill in this palette is built.
+val TaminDarkMint = Color(0xFF6FCB8C)
+val TaminDarkMintBg = Color(0x293DA35D)
+val TaminDarkTealBg = Color(0x292FB9BC)
+val TaminDarkPurpleBg = Color(0x297C4BC0)
 
 val Primary50 = Color(0xFFEFF4FF)
 val Primary100 = Color(0xFFD8E4FA)

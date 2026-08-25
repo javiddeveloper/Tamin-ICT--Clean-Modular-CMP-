@@ -9,14 +9,14 @@ import com.tamin.taminhamrah.model.workshop.WorkshopActivityStatus
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 
 /**
- * Which of the theme's status colour pairs a workshop status is drawn in.
+ * Which of the theme's colour pairs a workshop status — or an action's icon tile — is drawn in.
  *
  * The buckets are named by meaning, not by colour, so the palette can move without every screen
  * that spelled "green" having to move with it. The status *word* always comes from the service —
  * only the tint is decided here.
  */
 @Immutable
-enum class StatusTint { POSITIVE, WARNING, NEGATIVE, INFO, NEUTRAL }
+enum class StatusTint { POSITIVE, WARNING, NEGATIVE, INFO, NEUTRAL, TEAL, MINT, PURPLE }
 
 /** The container/content pair this tint draws with, resolved from the theme. */
 @Composable
@@ -28,6 +28,9 @@ fun StatusTint.colors(): Pair<Color, Color> {
         StatusTint.NEGATIVE -> palette.dangerBg to palette.dangerText
         StatusTint.INFO -> palette.blueBg to palette.blueText
         StatusTint.NEUTRAL -> palette.chipBg to palette.textSecondary
+        StatusTint.TEAL -> palette.tealBg to palette.teal
+        StatusTint.MINT -> palette.mintBg to palette.mintText
+        StatusTint.PURPLE -> palette.fuchsiaBlueBg to palette.fuchsiaBlue
     }
 }
 

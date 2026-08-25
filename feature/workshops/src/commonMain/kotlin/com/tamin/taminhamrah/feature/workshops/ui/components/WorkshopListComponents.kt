@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopStats
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
 import com.tamin.taminhamrah.ui.components.DetailRow
+import com.tamin.taminhamrah.ui.components.dashedOutline
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
@@ -126,13 +127,19 @@ private fun StatColumn(
     }
 }
 
-/** «لیست کارگاه‌ها» with its count, and the filter chip that opens the status sheet. */
+/**
+ * The line above a card list: its heading, the count beside it, and the filter chip.
+ *
+ * [count] and [onFilterClick] are both optional because the design drops them per screen —
+ * جزئیات کارگاه heads its card with «اطلاعات کارگاه» and neither a count nor a filter.
+ */
 @Composable
 fun WorkshopSectionHeader(
-    count: Int,
-    isFilterActive: Boolean,
-    onFilterClick: () -> Unit,
     modifier: Modifier = Modifier,
+    title: String = stringResource(Res.string.workshop_list_title),
+    count: Int? = null,
+    isFilterActive: Boolean = false,
+    onFilterClick: (() -> Unit)? = null,
 ) {
     val colors = LocalTaminColors.current
     Row(
@@ -145,20 +152,24 @@ fun WorkshopSectionHeader(
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
             Text(
-                text = stringResource(Res.string.workshop_list_title),
+                text = title,
                 style = MaterialTheme.typography.titleSmall,
                 color = colors.textPrimary,
                 fontWeight = FontWeight.Bold,
             )
-            NumericText(
-                text = count.toString().toPersianDigits(),
-                style = MaterialTheme.typography.labelMedium,
-                color = colors.blueText,
-                modifier = Modifier
-                    .background(colors.blueBg, CircleShape)
-                    .padding(horizontal = Spacing.sm, vertical = CountBadgePadding),
-            )
+            if (count != null) {
+                NumericText(
+                    text = count.toString().toPersianDigits(),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = colors.blueText,
+                    modifier = Modifier
+                        .background(colors.blueBg, CircleShape)
+                        .padding(horizontal = Spacing.sm, vertical = CountBadgePadding),
+                )
+            }
         }
+
+        if (onFilterClick == null) return@Row
 
         Row(
             modifier = Modifier
@@ -197,7 +208,6 @@ fun WorkshopCard(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    val (pillBackground, pillForeground) = workshop.status.tint.colors()
 
     Column(
         modifier = modifier
@@ -206,30 +216,7 @@ fun WorkshopCard(
             .padding(Spacing.lg),
         verticalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = workshop.name,
-                style = MaterialTheme.typography.titleSmall,
-                color = colors.textPrimary,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.weight(1f, fill = false),
-            )
-            StatusPill(
-                text = workshop.statusLabel,
-                containerColor = pillBackground,
-                contentColor = pillForeground,
-                icon = Icons.Default.Circle,
-                // The design outlines each pill in a paler shade of its own text colour
-                // (#BFE6CF on green, #F0DCA8 on orange, #F3C9C4 on red). Deriving it from the
-                // content colour reproduces those without three more palette entries, and keeps
-                // working in dark theme where fixed pastels would not.
-                borderColor = pillForeground.copy(alpha = StatusPillBorderAlpha),
-            )
-        }
+        WorkshopCardHeader(workshop = workshop)
 
         WorkshopCodeRow(workshop = workshop)
 
@@ -255,13 +242,50 @@ fun WorkshopCard(
 }
 
 /**
+ * A workshop's name with its activity status beside it — the head of both the list card and
+ * the جزئیات کارگاه card, which the design draws identically.
+ */
+@Composable
+internal fun WorkshopCardHeader(
+    workshop: WorkshopPR,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+    val (pillBackground, pillForeground) = workshop.status.tint.colors()
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = workshop.name,
+            style = MaterialTheme.typography.titleSmall,
+            color = colors.textPrimary,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.weight(1f, fill = false),
+        )
+        StatusPill(
+            text = workshop.statusLabel,
+            containerColor = pillBackground,
+            contentColor = pillForeground,
+            icon = Icons.Default.Circle,
+            // The design outlines each pill in a paler shade of its own text colour
+            // (#BFE6CF on green, #F0DCA8 on orange, #F3C9C4 on red). Deriving it from the
+            // content colour reproduces those without three more palette entries, and keeps
+            // working in dark theme where fixed pastels would not.
+            borderColor = pillForeground.copy(alpha = StatusPillBorderAlpha),
+        )
+    }
+}
+
+/**
  * The workshop code, on a tinted chip with a copy control.
  *
  * What lands on the clipboard is the raw ASCII code, not the Persian-digit label: it is pasted
  * into forms and searches, where Persian digits would not match.
  */
 @Composable
-private fun WorkshopCodeRow(
+internal fun WorkshopCodeRow(
     workshop: WorkshopPR,
     modifier: Modifier = Modifier,
 ) {
@@ -281,12 +305,18 @@ private fun WorkshopCodeRow(
         )
         Row(
             modifier = Modifier
-                .clip(RoundedCornerShape(CornerRadius.chip))
+                .clip(RoundedCornerShape(CodeChipCorner))
                 .clickable(enabled = code.isNotBlank()) {
                     clipboard.setText(AnnotatedString(code))
                 }
                 .background(colors.blueBg)
-                .padding(horizontal = Spacing.md, vertical = Spacing.sm),
+                // The design pins the code behind a dashed outline, which is what marks it
+                // as something to lift rather than a plain tinted label.
+                .dashedOutline(colors.hawkesBlue, CodeChipCorner, CodeChipBorderWidth)
+                .padding(
+                    horizontal = CodeChipHorizontalPadding,
+                    vertical = CodeChipVerticalPadding,
+                ),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
         ) {
@@ -309,6 +339,12 @@ private fun WorkshopCodeRow(
 
 /** The design marks a status with a dot, which is smaller than any icon in the scale. */
 private val StatusDotSize = 6.dp
+
+/** The code chip, as the design draws it: `padding:4px 9px; radius:11px; 1.4px dashed`. */
+private val CodeChipCorner = 11.dp
+private val CodeChipBorderWidth = 1.4.dp
+private val CodeChipHorizontalPadding = 9.dp
+private val CodeChipVerticalPadding = 4.dp
 /**
  * How strongly the pill's outline shows through.
  *
