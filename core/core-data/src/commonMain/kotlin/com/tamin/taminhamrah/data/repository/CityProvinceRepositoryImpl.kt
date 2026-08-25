@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.data.repository
 
 import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSource
 import com.tamin.taminhamrah.model.common.CityDN
+import com.tamin.taminhamrah.model.common.CityListResultDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.FilterOperator
@@ -81,20 +82,22 @@ internal class CityProvinceRepositoryImpl(
         )
     }
 
-    override fun getCitiesByProvince(provinceCode: String): Flow<List<CityDN>> = flow {
+    override fun getCitiesByProvince(provinceCode: String): Flow<CityListResultDN> = flow {
         val localCities = cityProvinceDao.getCitiesByProvinceCode(provinceCode).first()
-        emit(localCities.map { it.toDomain() })
+        emit(CityListResultDN(localCities.map { it.toDomain() }))
 
+        var isStale = false
         try {
             val response = commonRemoteDataSource.getCitiesByProvince(CityByProvinceQuery.build(provinceCode))
             cityProvinceDao.replaceCitiesForProvince(provinceCode, response.list.map { it.toEntity() })
         } catch (e: Exception) {
             if (localCities.isEmpty()) throw e
+            isStale = true
         }
 
         emitAll(
             cityProvinceDao.getCitiesByProvinceCode(provinceCode).map { entities ->
-                entities.map { it.toDomain() }
+                CityListResultDN(entities.map { it.toDomain() }, isStale = isStale)
             },
         )
     }.distinctUntilChanged()

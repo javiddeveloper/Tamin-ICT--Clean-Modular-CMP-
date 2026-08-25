@@ -28,7 +28,7 @@ class GetCitiesByProvinceUseCaseTest : BaseUseCaseTest() {
         repository.citiesByProvinceResult = expectedCities
 
         useCase("04").test {
-            assertEquals(expectedCities, awaitItem())
+            assertEquals(expectedCities, awaitItem().cities)
             awaitComplete()
         }
 

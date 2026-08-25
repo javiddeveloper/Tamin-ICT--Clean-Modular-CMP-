@@ -106,6 +106,23 @@ fun HistoryObjectionPickerBottomSheet(
                 )
             }
 
+            val warningText = config.warningText
+            if (config.showWarning && warningText != null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(CornerRadius.lg))
+                        .background(colors.orangeBg)
+                        .padding(Spacing.md),
+                ) {
+                    TaminText(
+                        text = warningText,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colors.orangeText,
+                    )
+                }
+            }
+
             CustomSearchBar(
                 query = inputText,
                 onQueryChange = { inputText = it },

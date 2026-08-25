@@ -40,6 +40,7 @@ data class HistoryObjectionStepperState(
     val selectedBranch: BranchDN? = null,
     val selectedInsuranceType: InsuranceTypePR? = null,
     val isCitiesLoading: Boolean = false,
+    val isCitiesStale: Boolean = false,
     val isBranchesLoading: Boolean = false,
     val bottomSheetConfig: TaminBottomSheetConfig? = null,
     val bottomSheetTarget: HistoryObjectionBottomSheetTarget? = null,
@@ -95,7 +96,7 @@ data class HistoryObjectionStepperState(
 
         data class ProvincesLoaded(val provinces: ImmutableList<ProvincePR>) : PartialState
         data class CitiesLoading(val isLoading: Boolean) : PartialState
-        data class CitiesLoaded(val cities: ImmutableList<CityPR>) : PartialState
+        data class CitiesLoaded(val cities: ImmutableList<CityPR>, val isStale: Boolean = false) : PartialState
         data class BranchesLoading(val isLoading: Boolean) : PartialState
         data class BranchesLoaded(val branches: ImmutableList<BranchDN>) : PartialState
         data class InsuranceTypesLoaded(val insuranceTypes: ImmutableList<InsuranceTypePR>) : PartialState

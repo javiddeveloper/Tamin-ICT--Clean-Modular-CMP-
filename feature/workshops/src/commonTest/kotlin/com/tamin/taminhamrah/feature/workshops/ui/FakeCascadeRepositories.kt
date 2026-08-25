@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.workshops.ui
 
 import com.tamin.taminhamrah.model.common.CityDN
+import com.tamin.taminhamrah.model.common.CityListResultDN
 import com.tamin.taminhamrah.model.common.ProvinceDN
 import com.tamin.taminhamrah.model.contracts.BranchDN
 import com.tamin.taminhamrah.model.contracts.ContractDN
@@ -64,7 +65,7 @@ internal class FakeCascadeCityProvinceRepository : CityProvinceRepository {
 
     override fun getCity(cityId: String): Flow<CityDN> = flowOf()
     override fun getProvince(provinceId: String): Flow<ProvinceDN> = flowOf()
-    override fun getCitiesByProvince(provinceCode: String): Flow<List<CityDN>> = unused()
+    override fun getCitiesByProvince(provinceCode: String): Flow<CityListResultDN> = unused()
 }
 
 internal class FakeCascadeContractsRepository : ContractsRepository {

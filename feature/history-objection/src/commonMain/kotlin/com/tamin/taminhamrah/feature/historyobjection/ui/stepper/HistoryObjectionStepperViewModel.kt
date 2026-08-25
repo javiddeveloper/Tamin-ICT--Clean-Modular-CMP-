@@ -42,6 +42,7 @@ import taminx.core.core_ui.bs_branch
 import taminx.core.core_ui.bs_city
 import taminx.core.core_ui.bs_insurance_type
 import taminx.core.core_ui.bs_province
+import taminx.core.core_ui.history_objection_cities_stale_warning
 import taminx.core.core_ui.history_objection_date_range_invalid_error
 import taminx.core.core_ui.history_objection_date_too_recent_error
 import taminx.core.core_ui.history_objection_select_city_first
@@ -136,6 +137,8 @@ class HistoryObjectionStepperViewModel(
                         singleSelection = true,
                         showSearchInput = true,
                         searchInputHint = getString(Res.string.search_hint),
+                        showWarning = state.isCitiesStale,
+                        warningText = if (state.isCitiesStale) getString(Res.string.history_objection_cities_stale_warning) else null,
                     ),
                     target = HistoryObjectionBottomSheetTarget.CITY,
                 )
@@ -250,8 +253,8 @@ class HistoryObjectionStepperViewModel(
         emit(PartialState.BottomSheetStateChanged(config = null, target = null))
         emit(PartialState.CitiesLoading(true))
         try {
-            getCitiesByProvinceUseCase(province.provinceCode).collect { cities ->
-                emit(PartialState.CitiesLoaded(cities.toCityPresentation().toPersistentList()))
+            getCitiesByProvinceUseCase(province.provinceCode).collect { result ->
+                emit(PartialState.CitiesLoaded(result.cities.toCityPresentation().toPersistentList(), isStale = result.isStale))
             }
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
@@ -385,8 +388,8 @@ class HistoryObjectionStepperViewModel(
         if (provinceCode != null) {
             emit(PartialState.CitiesLoading(true))
             try {
-                getCitiesByProvinceUseCase(provinceCode).collect { cities ->
-                    emit(PartialState.CitiesLoaded(cities.toCityPresentation().toPersistentList()))
+                getCitiesByProvinceUseCase(provinceCode).collect { result ->
+                    emit(PartialState.CitiesLoaded(result.cities.toCityPresentation().toPersistentList(), isStale = result.isStale))
                 }
             } catch (e: Exception) {
                 emit(PartialState.Error(e.toSingleLineMessage()))
@@ -462,7 +465,7 @@ class HistoryObjectionStepperViewModel(
 
         is PartialState.ProvincesLoaded -> currentState.copy(provinces = partialState.provinces)
         is PartialState.CitiesLoading -> currentState.copy(isCitiesLoading = partialState.isLoading)
-        is PartialState.CitiesLoaded -> currentState.copy(cities = partialState.cities)
+        is PartialState.CitiesLoaded -> currentState.copy(cities = partialState.cities, isCitiesStale = partialState.isStale)
         is PartialState.BranchesLoading -> currentState.copy(isBranchesLoading = partialState.isLoading)
         is PartialState.BranchesLoaded -> currentState.copy(branches = partialState.branches)
         is PartialState.InsuranceTypesLoaded -> currentState.copy(insuranceTypes = partialState.insuranceTypes)
@@ -472,6 +475,7 @@ class HistoryObjectionStepperViewModel(
             selectedCity = null,
             selectedBranch = null,
             cities = persistentListOf(),
+            isCitiesStale = false,
             branches = persistentListOf(),
         )
         is PartialState.CitySelected -> currentState.copy(

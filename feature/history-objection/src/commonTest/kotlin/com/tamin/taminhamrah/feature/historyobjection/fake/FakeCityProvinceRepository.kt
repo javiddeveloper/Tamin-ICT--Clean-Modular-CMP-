@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.historyobjection.fake
 
 import com.tamin.taminhamrah.model.common.CityDN
+import com.tamin.taminhamrah.model.common.CityListResultDN
 import com.tamin.taminhamrah.model.common.ProvinceDN
 import com.tamin.taminhamrah.repository.CityProvinceRepository
 import kotlinx.coroutines.flow.Flow
@@ -26,10 +27,10 @@ class FakeCityProvinceRepository : CityProvinceRepository {
 
     override fun getCities(cityName: String?, provinceCode: String?): Flow<List<CityDN>> = flow { emit(emptyList()) }
 
-    override fun getCitiesByProvince(provinceCode: String): Flow<List<CityDN>> = flow {
+    override fun getCitiesByProvince(provinceCode: String): Flow<CityListResultDN> = flow {
         lastCitiesByProvinceCode = provinceCode
-        staleCitiesByProvinceResult?.let { emit(it) }
+        staleCitiesByProvinceResult?.let { emit(CityListResultDN(it)) }
         if (shouldThrowError) throw error
-        emit(citiesByProvinceResult)
+        emit(CityListResultDN(citiesByProvinceResult))
     }
 }

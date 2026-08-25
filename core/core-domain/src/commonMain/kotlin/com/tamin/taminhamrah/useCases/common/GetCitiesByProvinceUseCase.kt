@@ -1,6 +1,6 @@
 package com.tamin.taminhamrah.useCases.common
 
-import com.tamin.taminhamrah.model.common.CityDN
+import com.tamin.taminhamrah.model.common.CityListResultDN
 import com.tamin.taminhamrah.repository.CityProvinceRepository
 import kotlinx.coroutines.flow.Flow
 
@@ -8,6 +8,6 @@ import kotlinx.coroutines.flow.Flow
 class GetCitiesByProvinceUseCase(
     private val repository: CityProvinceRepository
 ) {
-    operator fun invoke(provinceCode: String): Flow<List<CityDN>> =
+    operator fun invoke(provinceCode: String): Flow<CityListResultDN> =
         repository.getCitiesByProvince(provinceCode)
 }

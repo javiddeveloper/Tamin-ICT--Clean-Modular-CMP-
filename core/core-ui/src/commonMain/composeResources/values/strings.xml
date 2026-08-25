@@ -1122,6 +1122,7 @@
     <string name="history_objection_confirm">ثبت این سابقه</string>
     <string name="history_objection_select_province_first">لطفاً ابتدا استان را انتخاب کنید</string>
     <string name="history_objection_select_city_first">لطفاً ابتدا شهر را انتخاب کنید</string>
+    <string name="history_objection_cities_stale_warning">دریافت فهرست به‌روز شهرها با خطا مواجه شد؛ فهرست نمایش‌داده‌شده ممکن است قدیمی باشد.</string>
     <string name="history_objection_submit_success_title">درخواست شما با موفقیت ثبت شد</string>
     <string name="history_objection_submit_success_message">سابقهٔ ناموجود اعلام‌شدهٔ شما با موفقیت ثبت شد و برای بررسی ارسال گردید.</string>
     <string name="history_objection_submit_success_confirm">متوجه شدم</string>
