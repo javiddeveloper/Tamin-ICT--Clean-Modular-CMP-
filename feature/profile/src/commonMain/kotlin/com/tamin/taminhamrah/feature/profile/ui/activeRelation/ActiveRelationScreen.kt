@@ -20,7 +20,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.profile.ui.activeRelation.components.ActiveRelationHeader
 import com.tamin.taminhamrah.feature.profile.ui.activeRelation.components.ActiveRelationItemCard
 import com.tamin.taminhamrah.feature.profile.ui.activeRelation.components.CertificateBottomSheet
@@ -44,15 +43,11 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
 import com.tamin.taminhamrah.ui.toparea.driveTopArea
-import com.tamin.taminhamrah.ui.toparea.rememberTopAreaState
+import com.tamin.taminhamrah.ui.toparea.rememberMeasuredTopAreaState
 import com.tamin.taminhamrah.ui.toparea.reportTopAreaHeight
 import com.tamin.taminhamrah.ui.toparea.topAreaContentPadding
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
-
-/** Expanded/collapsed heights of the floating header; the difference is how much drag folds it. */
-private val HeaderExpandedHeight = 224.dp
-private val HeaderCollapsedHeight = 64.dp
 
 @Composable
 internal fun ActiveRelationRoute(
@@ -98,8 +93,18 @@ internal fun ActiveRelationScreen(
     val taminColors = LocalTaminColors.current
 
     // Folds the header from the list's drag, snapping on release. Read only inside the
-    // header's layout/draw lambdas, so the fold never recomposes the screen.
-    val topArea = rememberTopAreaState(HeaderExpandedHeight, HeaderCollapsedHeight)
+    // header's layout/draw lambdas, so the fold never recomposes the screen. The drag budget
+    // itself is measured from the real header below (expanded vs. collapsed height), not
+    // guessed -- so it can't drift out of sync with a copy/font change to that header.
+    val topArea = rememberMeasuredTopAreaState { state ->
+        ActiveRelationHeader(
+            activeCount = uiState.activeCount,
+            inactiveCount = uiState.inactiveCount,
+            lastCheckTime = uiState.lastCheckTime,
+            topAreaState = state,
+            onBackClicked = {},
+        )
+    }
     val listState = rememberLazyListState()
     // Remembers completed entrance animation keys across recompositions so items don't
     // re-play their entrance every time the list is redrawn.

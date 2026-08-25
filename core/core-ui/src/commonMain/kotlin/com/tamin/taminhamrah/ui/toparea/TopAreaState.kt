@@ -30,6 +30,7 @@ import kotlinx.coroutines.launch
 class TopAreaState internal constructor(
     private val maxOffsetPx: Float,
     initialMeasuredHeightPx: Int,
+    private val scope: CoroutineScope,
 ) {
     var rawOffsetPx: Float by mutableFloatStateOf(0f)
         private set
@@ -83,7 +84,6 @@ class TopAreaState internal constructor(
      * "not scrollable" special case needed anywhere else.
      */
     internal fun connection(
-        scope: CoroutineScope,
         contentCanScrollForward: () -> Boolean,
     ): NestedScrollConnection =
         object : NestedScrollConnection {
@@ -136,10 +136,21 @@ class TopAreaState internal constructor(
             }
         }
 
-    private companion object {
+    companion object {
         /** Below this fling velocity, a release reads as "let go", not as a flick either way. */
-        const val FlingThreshold = 200f
+        private const val FlingThreshold = 200f
 
-        val SnapSpec = spring<Float>(stiffness = Spring.StiffnessLow)
+        private val SnapSpec = spring<Float>(stiffness = Spring.StiffnessLow)
+
+        /**
+         * A non-interactive [TopAreaState] frozen at [progress] (0f fully expanded, 1f fully
+         * collapsed) -- used only to measure a header's real height at its two extremes, for
+         * [rememberMeasuredTopAreaState]. Never wired to a live drag: `maxOffsetPx` is fixed at
+         * 1f purely so [progress] reads back exactly the value it was frozen at.
+         */
+        internal fun probe(progress: Float, scope: CoroutineScope): TopAreaState =
+            TopAreaState(maxOffsetPx = 1f, initialMeasuredHeightPx = 0, scope = scope).also {
+                it.rawOffsetPx = progress.coerceIn(0f, 1f)
+            }
     }
 }
