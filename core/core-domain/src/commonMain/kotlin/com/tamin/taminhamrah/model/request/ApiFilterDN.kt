@@ -87,6 +87,7 @@ enum class FilterProperty(val key: String) {
     @SerialName("type") TYPE("type"),
     @SerialName("status") STATUS("status"),
     @SerialName("jobDescription") JOB_DESCRIPTION("jobDescription"),
+    @SerialName("bankName") BANK_NAME("bankName"),
 }
 
 

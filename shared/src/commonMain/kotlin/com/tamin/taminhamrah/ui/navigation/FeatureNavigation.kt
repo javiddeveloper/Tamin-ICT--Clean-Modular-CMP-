@@ -4,9 +4,9 @@ import androidx.navigation.NavController
 import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.history.navigateToHistory
 import com.tamin.taminhamrah.feature.history.navigateToHistoryJobInfo
+import com.tamin.taminhamrah.feature.deferredInstallment.navigateToDeferredInstallment
 import com.tamin.taminhamrah.feature.orotezprotez.navigateToOrotezProtez
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToCalculatePension
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeferredInstallment
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeservedTreatment
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDisabilityPension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToEdict
