@@ -13,6 +13,7 @@ import kotlinx.collections.immutable.persistentMapOf
 enum class PensionSurvivorStep {
     Rules,
     Deceased,
+    DeceasedDocuments,
     Survivors,
     Final,
 }

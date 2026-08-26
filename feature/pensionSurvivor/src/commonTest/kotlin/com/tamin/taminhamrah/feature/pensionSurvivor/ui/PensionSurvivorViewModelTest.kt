@@ -149,13 +149,15 @@ class PensionSurvivorViewModelTest {
         viewModel.sendIntent(PensionSurvivorIntent.DeceasedNationalIdChanged("1234567890"))
         viewModel.sendIntent(PensionSurvivorIntent.SearchDeceased)
         testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.sendIntent(PensionSurvivorIntent.NextStep) // Deceased -> DeceasedDocuments
+        testDispatcher.scheduler.advanceUntilIdle()
         uploadAllDeceasedDocuments()
 
         viewModel.sendIntent(PensionSurvivorIntent.DeceasedHistoryConfirmedChanged(true))
-        viewModel.sendIntent(PensionSurvivorIntent.NextStep)
+        viewModel.sendIntent(PensionSurvivorIntent.NextStep) // DeceasedDocuments -> Survivors
         testDispatcher.scheduler.advanceUntilIdle()
 
-        viewModel.sendIntent(PensionSurvivorIntent.NextStep)
+        viewModel.sendIntent(PensionSurvivorIntent.NextStep) // Survivors -> Final
         testDispatcher.scheduler.advanceUntilIdle()
 
         assertEquals(PensionSurvivorStep.Final, viewModel.uiState.value.currentStep)
@@ -177,9 +179,11 @@ class PensionSurvivorViewModelTest {
         viewModel.sendIntent(PensionSurvivorIntent.DeceasedNationalIdChanged("1234567890"))
         viewModel.sendIntent(PensionSurvivorIntent.SearchDeceased)
         testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.sendIntent(PensionSurvivorIntent.NextStep) // Deceased -> DeceasedDocuments
+        testDispatcher.scheduler.advanceUntilIdle()
         uploadAllDeceasedDocuments()
         viewModel.sendIntent(PensionSurvivorIntent.DeceasedHistoryConfirmedChanged(true))
-        viewModel.sendIntent(PensionSurvivorIntent.NextStep)
+        viewModel.sendIntent(PensionSurvivorIntent.NextStep) // DeceasedDocuments -> Survivors
         testDispatcher.scheduler.advanceUntilIdle()
     }
 

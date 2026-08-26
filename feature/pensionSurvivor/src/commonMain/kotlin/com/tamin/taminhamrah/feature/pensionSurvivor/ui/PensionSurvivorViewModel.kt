@@ -309,6 +309,10 @@ class PensionSurvivorViewModel(
 
             PensionSurvivorStep.Deceased -> {
                 if (state.deceasedInfo == null) return
+                emit(PartialState.StepChanged(PensionSurvivorStep.DeceasedDocuments))
+            }
+
+            PensionSurvivorStep.DeceasedDocuments -> {
                 if (!state.isDeceasedHistoryConfirmed) return
                 if (!state.areDeceasedDocumentsComplete) {
                     sendEvent(PensionSurvivorEvent.ShowToast(getString(Res.string.error_upload_all_docs)))
@@ -331,7 +335,8 @@ class PensionSurvivorViewModel(
         when (uiState.value.currentStep) {
             PensionSurvivorStep.Rules -> Unit
             PensionSurvivorStep.Deceased -> emit(PartialState.StepChanged(PensionSurvivorStep.Rules))
-            PensionSurvivorStep.Survivors -> emit(PartialState.StepChanged(PensionSurvivorStep.Deceased))
+            PensionSurvivorStep.DeceasedDocuments -> emit(PartialState.StepChanged(PensionSurvivorStep.Deceased))
+            PensionSurvivorStep.Survivors -> emit(PartialState.StepChanged(PensionSurvivorStep.DeceasedDocuments))
             PensionSurvivorStep.Final -> emit(PartialState.StepChanged(PensionSurvivorStep.Survivors))
         }
     }

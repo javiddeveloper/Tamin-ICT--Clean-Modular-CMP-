@@ -9,7 +9,6 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,11 +26,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.tamin.taminhamrah.feature.pensionSurvivor.NavigateToSurvivorInfoArgs
+import com.tamin.taminhamrah.feature.pensionSurvivor.ui.components.DeceasedDocumentsStep
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.components.DeceasedStep
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.components.FinalStep
 import com.tamin.taminhamrah.feature.pensionSurvivor.ui.components.RulesStep
@@ -46,12 +47,10 @@ import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
-import com.tamin.taminhamrah.ui.components.StepIndicator
-import com.tamin.taminhamrah.ui.components.StepIndicatorModel
-import com.tamin.taminhamrah.ui.components.StepState
 import com.tamin.taminhamrah.ui.components.TaminBottomBar
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
+import com.tamin.taminhamrah.ui.components.TaminHeroStepProgress
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
@@ -62,7 +61,6 @@ import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import io.ktor.utils.io.ByteReadChannel
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.ExperimentalResourceApi
@@ -81,6 +79,7 @@ import taminx.core.core_ui.pension_survivor_final_submit_success_message
 import taminx.core.core_ui.pension_survivor_final_submit_success_title
 import taminx.core.core_ui.pension_survivor_rules_unavailable
 import taminx.core.core_ui.pension_survivor_step_deceased
+import taminx.core.core_ui.pension_survivor_step_deceased_documents
 import taminx.core.core_ui.pension_survivor_step_final
 import taminx.core.core_ui.pension_survivor_step_rules
 import taminx.core.core_ui.pension_survivor_step_survivors
@@ -248,58 +247,18 @@ private fun PensionSurvivorContent(
     onIntent: (PensionSurvivorIntent) -> Unit,
     onOpenFinalPdf: () -> Unit,
 ) {
-    val taminColors = LocalTaminColors.current
     val step1Title = stringResource(Res.string.pension_survivor_step_rules)
     val step2Title = stringResource(Res.string.pension_survivor_step_deceased)
-    val step3Title = stringResource(Res.string.pension_survivor_step_survivors)
-    val step4Title = stringResource(Res.string.pension_survivor_step_final)
+    val step3Title = stringResource(Res.string.pension_survivor_step_deceased_documents)
+    val step4Title = stringResource(Res.string.pension_survivor_step_survivors)
+    val step5Title = stringResource(Res.string.pension_survivor_step_final)
+    val currentStepIndex = state.currentStep.ordinal + 1
     val currentStepTitle = when (state.currentStep) {
         PensionSurvivorStep.Rules -> step1Title
         PensionSurvivorStep.Deceased -> step2Title
-        PensionSurvivorStep.Survivors -> step3Title
-        PensionSurvivorStep.Final -> step4Title
-    }
-    val steps = remember(state.currentStep, step1Title, step2Title, step3Title, step4Title) {
-        persistentListOf(
-            StepIndicatorModel(
-                title = step1Title,
-                stepNumber = "۱",
-                state = when (state.currentStep) {
-                    PensionSurvivorStep.Rules -> StepState.Active
-                    PensionSurvivorStep.Deceased,
-                    PensionSurvivorStep.Survivors,
-                    PensionSurvivorStep.Final -> StepState.Completed
-                },
-            ),
-            StepIndicatorModel(
-                title = step2Title,
-                stepNumber = "۲",
-                state = when (state.currentStep) {
-                    PensionSurvivorStep.Rules -> StepState.Inactive
-                    PensionSurvivorStep.Deceased -> StepState.Active
-                    PensionSurvivorStep.Survivors,
-                    PensionSurvivorStep.Final -> StepState.Completed
-                },
-            ),
-            StepIndicatorModel(
-                title = step3Title,
-                stepNumber = "۳",
-                state = when (state.currentStep) {
-                    PensionSurvivorStep.Rules,
-                    PensionSurvivorStep.Deceased -> StepState.Inactive
-                    PensionSurvivorStep.Survivors -> StepState.Active
-                    PensionSurvivorStep.Final -> StepState.Completed
-                },
-            ),
-            StepIndicatorModel(
-                title = step4Title,
-                stepNumber = "۴",
-                state = when (state.currentStep) {
-                    PensionSurvivorStep.Final -> StepState.Active
-                    else -> StepState.Inactive
-                },
-            ),
-        )
+        PensionSurvivorStep.DeceasedDocuments -> step3Title
+        PensionSurvivorStep.Survivors -> step4Title
+        PensionSurvivorStep.Final -> step5Title
     }
 
     Scaffold(
@@ -329,6 +288,12 @@ private fun PensionSurvivorContent(
                     )
                 },
             ) {
+                TaminHeroStepProgress(
+                    stepTitle = currentStepTitle,
+                    currentStep = currentStepIndex,
+                    totalSteps = PENSION_SURVIVOR_TOTAL_STEPS,
+                    modifier = Modifier.padding(top = Spacing.md),
+                )
             }
         },
         bottomBar = {
@@ -340,55 +305,45 @@ private fun PensionSurvivorContent(
             }
         },
     ) { padding ->
-        Column(
+        AnimatedContent(
+            targetState = state.currentStep,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
-        ) {
-            StepIndicator(
-                steps = steps,
-                modifier = Modifier.padding(
-                    start = Spacing.lg,
-                    end = Spacing.lg,
-                    top = Spacing.md,
-                    bottom = Spacing.md,
-                ),
-            )
-
-            AnimatedContent(
-                targetState = state.currentStep,
-                modifier = Modifier.weight(1f),
-                transitionSpec = {
-                    val forward = targetState.ordinal > initialState.ordinal
-                    if (forward) {
-                        slideInHorizontally { -it } + fadeIn() togetherWith
-                            slideOutHorizontally { it } + fadeOut()
-                    } else {
-                        slideInHorizontally { it } + fadeIn() togetherWith
-                            slideOutHorizontally { -it } + fadeOut()
-                    }
-                },
-                label = "pensionSurvivorStep",
-            ) { step ->
-                when (step) {
-                    PensionSurvivorStep.Rules -> RulesStep(
-                        state = state,
-                        onIntent = onIntent,
-                    )
-                    PensionSurvivorStep.Deceased -> DeceasedStep(
-                        state = state,
-                        onIntent = onIntent,
-                    )
-                    PensionSurvivorStep.Survivors -> SurvivorsStep(
-                        state = state,
-                        onIntent = onIntent,
-                    )
-                    PensionSurvivorStep.Final -> FinalStep(
-                        state = state,
-                        onIntent = onIntent,
-                        onDownloadPdf = onOpenFinalPdf,
-                    )
+                .padding(padding).padding(top = Spacing.sm),
+            transitionSpec = {
+                val forward = targetState.ordinal > initialState.ordinal
+                if (forward) {
+                    slideInHorizontally { -it } + fadeIn() togetherWith
+                        slideOutHorizontally { it } + fadeOut()
+                } else {
+                    slideInHorizontally { it } + fadeIn() togetherWith
+                        slideOutHorizontally { -it } + fadeOut()
                 }
+            },
+            label = "pensionSurvivorStep",
+        ) { step ->
+            when (step) {
+                PensionSurvivorStep.Rules -> RulesStep(
+                    state = state,
+                    onIntent = onIntent,
+                )
+                PensionSurvivorStep.Deceased -> DeceasedStep(
+                    state = state,
+                    onIntent = onIntent,
+                )
+                PensionSurvivorStep.DeceasedDocuments -> DeceasedDocumentsStep(
+                    state = state,
+                    onIntent = onIntent,
+                )
+                PensionSurvivorStep.Survivors -> SurvivorsStep(
+                    state = state,
+                    onIntent = onIntent,
+                )
+                PensionSurvivorStep.Final -> FinalStep(
+                    state = state,
+                    onIntent = onIntent,
+                    onDownloadPdf = onOpenFinalPdf,
+                )
             }
         }
     }
@@ -401,8 +356,8 @@ private fun PensionSurvivorBottomBar(
 ) {
     val nextEnabled = when (state.currentStep) {
         PensionSurvivorStep.Rules -> state.commitmentAccepted && !state.isProfileLoading
-        PensionSurvivorStep.Deceased -> state.deceasedInfo != null &&
-            state.isDeceasedHistoryConfirmed &&
+        PensionSurvivorStep.Deceased -> state.deceasedInfo != null && !state.isLoading
+        PensionSurvivorStep.DeceasedDocuments -> state.isDeceasedHistoryConfirmed &&
             state.areDeceasedDocumentsComplete &&
             !state.isLoading &&
             !state.isDeceasedDocumentUploading
@@ -453,12 +408,12 @@ private fun PensionSurvivorBottomBar(
 
                         else -> {
                             LoadingButton(
-                                text = if (state.currentStep == PensionSurvivorStep.Final) {
-                                    stringResource(Res.string.upload_submit_final)
-                                } else if (state.currentStep == PensionSurvivorStep.Deceased) {
-                                    stringResource(Res.string.orotez_protez_confirm_and_continue)
-                                } else {
-                                    stringResource(Res.string.pension_survivor_next_step)
+                                text = when (state.currentStep) {
+                                    PensionSurvivorStep.Final ->
+                                        stringResource(Res.string.upload_submit_final)
+                                    PensionSurvivorStep.Deceased ->
+                                        stringResource(Res.string.orotez_protez_confirm_and_continue)
+                                    else -> stringResource(Res.string.pension_survivor_next_step)
                                 },
                                 onClick = {
                                     onIntent(
@@ -505,6 +460,7 @@ private fun PensionSurvivorSuccessDialog(onConfirm: () -> Unit) {
 }
 
 private const val DECEASED_NATIONAL_ID_LENGTH = 10
+private const val PENSION_SURVIVOR_TOTAL_STEPS = 5
 
 /** Legacy asset: rulesAndRegulationsHtmlFile/rule_pension_survivor.pdf */
 private const val RULES_PDF_RESOURCE_PATH = "files/rule_pension_survivor.pdf"

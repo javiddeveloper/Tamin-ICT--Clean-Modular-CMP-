@@ -650,7 +650,8 @@
 
     <string name="pension_survivor_title">برقراری مستمری توسط بازماندگان</string>
     <string name="pension_survivor_step_rules">مقررات و ضوابط</string>
-    <string name="pension_survivor_step_deceased">مشخصات متوفی</string>
+    <string name="pension_survivor_step_deceased">استعلام متوفی</string>
+    <string name="pension_survivor_step_deceased_documents">مدارک متوفی</string>
     <string name="pension_survivor_step_survivors">اطلاعات بازماندگان</string>
     <string name="pension_survivor_step_final">ثبت نهایی درخواست</string>
     <string name="pension_survivor_rules_banner">تایید این مرحله به منزله مطالعه و پذیرش مقررات و ضوابط خدمت برقراری مستمری توسط بازماندگان است.</string>
