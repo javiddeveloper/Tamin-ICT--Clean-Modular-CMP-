@@ -36,6 +36,8 @@ import com.tamin.taminhamrah.apiService.addDependent.AddDependentApiService
 import com.tamin.taminhamrah.apiService.addDependent.createAddDependentApiService
 import com.tamin.taminhamrah.apiService.calculateWagePension.CalculateWagePensionApiService
 import com.tamin.taminhamrah.apiService.calculateWagePension.createCalculateWagePensionApiService
+import com.tamin.taminhamrah.apiService.inspection.InspectionApiService
+import com.tamin.taminhamrah.apiService.inspection.createInspectionApiService
 import com.tamin.taminhamrah.apiService.occurrence.OccurrenceApiService
 import com.tamin.taminhamrah.apiService.occurrence.createOccurrenceApiService
 import com.tamin.taminhamrah.util.NetworkConstants
@@ -158,4 +160,9 @@ val ApiClientsModule = module {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.createOccurrenceApiService()
     }
+    single<InspectionApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createInspectionApiService()
+    }
 }
+
