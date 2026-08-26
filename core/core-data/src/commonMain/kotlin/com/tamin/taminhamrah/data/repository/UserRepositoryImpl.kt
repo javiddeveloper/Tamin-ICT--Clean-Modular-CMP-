@@ -166,6 +166,12 @@ internal class UserRepositoryImpl(
             emit(remoteData ?: "")
         }
 
+    override suspend fun getWageCertificateReport(filters: List<ApiFilterDN>): Flow<String> =
+        flow {
+            val remoteData = userRemoteDataSource.getWageCertificateReport(filters)
+            emit(remoteData ?: "")
+        }
+
     override suspend fun getRecipients(filters: List<ApiFilterDN>): Flow<List<RecipientDN>> = flow {
         val remoteData = userRemoteDataSource.getRecipients(ApiQueryParamDN(filters = filters))
         emit(remoteData?.list?.map { it.toDomain() } ?: emptyList())
