@@ -138,10 +138,10 @@ import com.tamin.taminhamrah.useCases.workshops.CheckNewMemberIsNewUseCase
 import com.tamin.taminhamrah.useCases.workshops.CreateNewMemberRegistrationUseCase
 import com.tamin.taminhamrah.useCases.workshops.ConfirmRecentlyAddedMemberUseCase
 import com.tamin.taminhamrah.useCases.workshops.DeleteRecentlyAddedMemberUseCase
-import com.tamin.taminhamrah.useCases.workshops.GetArticle16DebtsUseCase
-import com.tamin.taminhamrah.useCases.workshops.GetArticle16ReportPdfUseCase
-import com.tamin.taminhamrah.useCases.workshops.GetArticle16RequestInfoUseCase
-import com.tamin.taminhamrah.useCases.workshops.GetArticle16WorkshopInfoUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenDebtsUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenReportPdfUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenRequestInfoUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenWorkshopInfoUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetDebitObjectionPdfUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetDebitReasonsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetDebitTurnoverPdfUseCase
@@ -153,7 +153,7 @@ import com.tamin.taminhamrah.useCases.workshops.GetRecentlyAddedMembersUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebitsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebtInquiryUseCase
 import com.tamin.taminhamrah.useCases.workshops.PayWorkshopDebitUseCase
-import com.tamin.taminhamrah.useCases.workshops.SaveArticle16RequestUseCase
+import com.tamin.taminhamrah.useCases.workshops.SaveArticleSixteenRequestUseCase
 import com.tamin.taminhamrah.useCases.workshops.SaveDebitObjectionUseCase
 import com.tamin.taminhamrah.useCases.agent.SendAgentPromptUseCase
 import com.tamin.taminhamrah.useCases.agent.CheckChatAllowedUseCase
@@ -344,11 +344,11 @@ val domainModule = module {
     factoryOf(::DeleteRecentlyAddedMemberUseCase)
     factoryOf(::CheckNewMemberIsNewUseCase)
     factoryOf(::CreateNewMemberRegistrationUseCase)
-    factoryOf(::GetArticle16DebtsUseCase)
-    factoryOf(::GetArticle16WorkshopInfoUseCase)
-    factoryOf(::GetArticle16RequestInfoUseCase)
-    factoryOf(::SaveArticle16RequestUseCase)
-    factoryOf(::GetArticle16ReportPdfUseCase)
+    factoryOf(::GetArticleSixteenDebtsUseCase)
+    factoryOf(::GetArticleSixteenWorkshopInfoUseCase)
+    factoryOf(::GetArticleSixteenRequestInfoUseCase)
+    factoryOf(::SaveArticleSixteenRequestUseCase)
+    factoryOf(::GetArticleSixteenReportPdfUseCase)
     factoryOf(::GetWorkshopMembersUseCase)
     factoryOf(::GetWorkshopStackHoldersUseCase)
     factoryOf(::GetTreatmentCostsUseCase)

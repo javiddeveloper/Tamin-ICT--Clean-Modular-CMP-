@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
  *
  * Amounts are read as `Long`: the old app modelled them as `Int`, which overflows on a workshop
  * debt above ~۲۱۴ کرور ریال. Every one of them is echoed back verbatim when the request is
- * submitted, so the same width is used in [Article16SaveRequestDTO].
+ * submitted, so the same width is used in [ArticleSixteenSaveRequestDTO].
  */
 @Serializable
 data class WorkshopsDebtListModelDTO(

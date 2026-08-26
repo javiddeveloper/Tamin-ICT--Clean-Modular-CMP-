@@ -30,12 +30,14 @@ fun WorkshopSearchPanel(
         WorkshopTextField(
             label = stringResource(Res.string.workshop_code),
             value = workshopId,
-            onValueChange = { onWorkshopIdChange(it.digitsOnly().take(WorkshopConstants.WORKSHOP_CODE_MAX_LENGTH)) },
+            onValueChange = { onWorkshopIdChange(it.digitsOnly()) },
+            maxLength = WorkshopConstants.WORKSHOP_CODE_MAX_LENGTH,
         )
         WorkshopTextField(
             label = stringResource(Res.string.workshop_branch_code),
             value = branchCode,
-            onValueChange = { onBranchCodeChange(it.digitsOnly().take(WorkshopConstants.WORKSHOP_CODE_MAX_LENGTH)) },
+            onValueChange = { onBranchCodeChange(it.digitsOnly()) },
+            maxLength = WorkshopConstants.WORKSHOP_CODE_MAX_LENGTH,
         )
     }
 }

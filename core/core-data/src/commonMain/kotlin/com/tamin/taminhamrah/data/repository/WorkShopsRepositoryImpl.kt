@@ -10,11 +10,11 @@ import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.model.util.PagedListDN
-import com.tamin.taminhamrah.model.workshop.Article16DebtQuery
-import com.tamin.taminhamrah.model.workshop.Article16RequestInfoDN
-import com.tamin.taminhamrah.model.workshop.Article16SaveRequestDN
-import com.tamin.taminhamrah.model.workshop.Article16SaveResultDN
-import com.tamin.taminhamrah.model.workshop.Article16WorkshopInfoDN
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtQuery
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestInfoDN
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveRequestDN
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveResultDN
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoDN
 import com.tamin.taminhamrah.model.workshop.DebitObjectionRequestDN
 import com.tamin.taminhamrah.model.workshop.DebitObjectionResultDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentDN
@@ -184,8 +184,8 @@ class WorkShopsRepositoryImpl(
 
     // ------------------------------------------------------------------------- ماده ۱۶
 
-    override suspend fun getArticle16Debts(
-        query: Article16DebtQuery,
+    override suspend fun getArticleSixteenDebts(
+        query: ArticleSixteenDebtQuery,
     ): PagedListDN<WorkshopsDebtListModelDN> {
         val filters = buildFilters {
             add(FilterProperty.DEBIT_NUMBER, query.debitNumber)
@@ -200,21 +200,21 @@ class WorkShopsRepositoryImpl(
             .toDomainPage { it.toDomain() }
     }
 
-    override suspend fun getArticle16WorkshopInfo(
+    override suspend fun getArticleSixteenWorkshopInfo(
         workshopId: String,
         branchCode: String,
-    ): Article16WorkshopInfoDN =
-        remoteDataSource.getArticle16WorkshopInfo(workshopId, branchCode).toDomain()
+    ): ArticleSixteenWorkshopInfoDN =
+        remoteDataSource.getArticleSixteenWorkshopInfo(workshopId, branchCode).toDomain()
 
-    override suspend fun getArticle16RequestInfo(objectionNumber: Long): Article16RequestInfoDN =
-        remoteDataSource.getArticle16RequestInfo(objectionNumber).toDomain()
+    override suspend fun getArticleSixteenRequestInfo(objectionNumber: Long): ArticleSixteenRequestInfoDN =
+        remoteDataSource.getArticleSixteenRequestInfo(objectionNumber).toDomain()
 
-    override suspend fun saveArticle16Request(
-        request: Article16SaveRequestDN,
-    ): Article16SaveResultDN = remoteDataSource.saveArticle16Request(request.toDto()).toDomain()
+    override suspend fun saveArticleSixteenRequest(
+        request: ArticleSixteenSaveRequestDN,
+    ): ArticleSixteenSaveResultDN = remoteDataSource.saveArticleSixteenRequest(request.toDto()).toDomain()
 
-    override suspend fun getArticle16ReportPdf(seqNo: Long): PdfDownloadDN =
-        remoteDataSource.getArticle16ReportPdf(seqNo).toDomain()
+    override suspend fun getArticleSixteenReportPdf(seqNo: Long): PdfDownloadDN =
+        remoteDataSource.getArticleSixteenReportPdf(seqNo).toDomain()
 
     // ------------------------------------------------------------- کارکنان / ذینفعان
 

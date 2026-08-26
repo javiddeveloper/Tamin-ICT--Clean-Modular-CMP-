@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -13,10 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,13 +21,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopConstants
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.feature.workshops.ui.workshopMembers.PersonSearch
+import com.tamin.taminhamrah.ui.components.InputRestriction
+import com.tamin.taminhamrah.ui.components.TaminStyledTextField
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
@@ -136,7 +134,13 @@ fun WorkshopFieldSlot(
     }
 }
 
-/** A number a search is narrowed by — «از شماره», «تا شماره». Digits only, held as ASCII. */
+/**
+ * A typed field on a workshop panel or form.
+ *
+ * A thin adapter over [TaminStyledTextField] rather than a field of its own: that one already
+ * carries the label, the placeholder, the character restriction, the length cap and the inline
+ * error state, and every other form in the app is drawn with it.
+ */
 @Composable
 fun WorkshopTextField(
     label: String,
@@ -145,33 +149,25 @@ fun WorkshopTextField(
     modifier: Modifier = Modifier,
     placeholder: String = "",
     keyboardType: KeyboardType = KeyboardType.Number,
+    inputRestriction: InputRestriction = InputRestriction.DigitsOnly,
+    maxLength: Int? = null,
+    isRequired: Boolean = false,
+    isValid: Boolean? = null,
+    errorText: String? = null,
 ) {
-    val colors = LocalTaminColors.current
-    val textStyle = MaterialTheme.typography.bodySmall.copy(color = colors.textPrimary)
-
-    WorkshopFieldSlot(label = label, modifier = modifier) {
-        BasicTextField(
-            value = value,
-            onValueChange = onValueChange,
-            singleLine = true,
-            textStyle = textStyle,
-            cursorBrush = remember(colors.blueText) { SolidColor(colors.blueText) },
-            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-            modifier = Modifier.fillMaxWidth().fieldBox(),
-            decorationBox = { field ->
-                Box(contentAlignment = Alignment.CenterStart) {
-                    if (value.isEmpty() && placeholder.isNotEmpty()) {
-                        Text(
-                            text = placeholder,
-                            style = LocalTextStyle.current.merge(textStyle),
-                            color = colors.textMuted,
-                        )
-                    }
-                    field()
-                }
-            },
-        )
-    }
+    TaminStyledTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = label,
+        placeholder = placeholder,
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+        inputRestriction = inputRestriction,
+        maxLength = maxLength,
+        isRequired = isRequired,
+        isValid = isValid,
+        errorText = errorText,
+        modifier = modifier,
+    )
 }
 
 /**
@@ -309,19 +305,21 @@ fun PersonSearchPanel(
             label = stringResource(Res.string.member_national_id),
             value = search.nationalId,
             onValueChange = {
-                onSearchChange(search.copy(nationalId = it.digitsOnly().take(WorkshopConstants.NATIONAL_ID_LENGTH)))
+                onSearchChange(search.copy(nationalId = it.digitsOnly()))
             },
             placeholder = tenDigits,
+            maxLength = WorkshopConstants.NATIONAL_ID_LENGTH,
         )
         WorkshopTextField(
             label = stringResource(Res.string.member_insurance_number),
             value = search.insuranceNumber,
             onValueChange = {
                 onSearchChange(
-                    search.copy(insuranceNumber = it.digitsOnly().take(WorkshopConstants.INSURANCE_NUMBER_LENGTH)),
+                    search.copy(insuranceNumber = it.digitsOnly()),
                 )
             },
             placeholder = tenDigits,
+            maxLength = WorkshopConstants.INSURANCE_NUMBER_LENGTH,
         )
     }
 }

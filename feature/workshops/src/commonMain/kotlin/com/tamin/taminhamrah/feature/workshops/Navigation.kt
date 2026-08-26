@@ -224,7 +224,7 @@ private fun WorkshopAction.route(
     WorkshopAction.NEW_MEMBER ->
         WorkshopRecentlyAddedMembersRoute(workshopId, branchCode, workshopName)
 
-    WorkshopAction.ARTICLE16 -> ManagementDebitRoute(workshopId, branchCode, workshopName)
+    WorkshopAction.ARTICLE_SIXTEEN -> ManagementDebitRoute(workshopId, branchCode, workshopName)
     WorkshopAction.MEMBERS -> WorkshopMembersRoute(workshopId, branchCode, workshopName)
     WorkshopAction.STACKHOLDERS ->
         WorkshopStackholdersRoute(workshopId, branchCode, workshopName)

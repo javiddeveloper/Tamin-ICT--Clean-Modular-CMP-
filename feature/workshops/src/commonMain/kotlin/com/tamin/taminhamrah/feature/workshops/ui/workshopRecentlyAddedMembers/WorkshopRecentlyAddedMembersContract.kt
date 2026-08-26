@@ -49,6 +49,8 @@ data class WorkshopRecentlyAddedMembersUiState(
         data class FormChanged(val form: RegistrationFormState?) : PartialState
         data class FormEdited(val edit: RegistrationFormState.() -> RegistrationFormState) :
             PartialState
+
+        data class DeclarationDownloaded(val bytes: ByteArray) : PartialState
     }
 }
 
@@ -85,6 +87,9 @@ data class RegistrationFormState(
     val hasTriedNext: Boolean = false,
     val isUploading: Boolean = false,
     val isSubmitting: Boolean = false,
+    val isDownloadingDeclaration: Boolean = false,
+    /** Set when a draft was re-opened, so the create updates that person. */
+    val personalId: Long? = null,
     /** Which lookup sheet is open, and what it has to offer. */
     val picker: RegistrationPicker? = null,
     val pickerQuery: String = "",
@@ -200,6 +205,9 @@ sealed interface WorkshopRecentlyAddedMembersIntent {
 
     data class FormPickerQueryChanged(val query: String) : WorkshopRecentlyAddedMembersIntent
 
+    /** «دریافت فرم اظهارنامهٔ نام‌نویسی» — the blank declaration the person fills in. */
+    data object FormDownloadDeclaration : WorkshopRecentlyAddedMembersIntent
+
     /** A picked image, with the type the user filed it under. */
     class FormAddDocument(
         val fileName: String,
@@ -217,6 +225,9 @@ sealed interface WorkshopRecentlyAddedMembersEvent {
     data class ShowMessage(val message: StringResource) : WorkshopRecentlyAddedMembersEvent
 
     /** The member form opens on this registration; a new one is [personalRequestId] `0`. */
+    /** The blank declaration form, ready to be written to the device. */
+    data class SaveDeclarationForm(val bytes: ByteArray) : WorkshopRecentlyAddedMembersEvent
+
     /** Filed, with the tracking code the service returned. */
     data class RegistrationFiled(val referenceCode: String) : WorkshopRecentlyAddedMembersEvent
 

@@ -13,16 +13,16 @@ import taminx.core.core_ui.abs_doc_05
 import taminx.core.core_ui.abs_doc_06
 import taminx.core.core_ui.abs_doc_07
 import taminx.core.core_ui.abs_doc_08
-import taminx.core.core_ui.ws_a16_doc_1
-import taminx.core.core_ui.ws_a16_doc_10
-import taminx.core.core_ui.ws_a16_doc_2
-import taminx.core.core_ui.ws_a16_doc_3
-import taminx.core.core_ui.ws_a16_doc_4
-import taminx.core.core_ui.ws_a16_doc_5
-import taminx.core.core_ui.ws_a16_doc_6
-import taminx.core.core_ui.ws_a16_doc_7
-import taminx.core.core_ui.ws_a16_doc_8
-import taminx.core.core_ui.ws_a16_doc_9
+import taminx.core.core_ui.ws_article_sixteen_doc_1
+import taminx.core.core_ui.ws_article_sixteen_doc_10
+import taminx.core.core_ui.ws_article_sixteen_doc_2
+import taminx.core.core_ui.ws_article_sixteen_doc_3
+import taminx.core.core_ui.ws_article_sixteen_doc_4
+import taminx.core.core_ui.ws_article_sixteen_doc_5
+import taminx.core.core_ui.ws_article_sixteen_doc_6
+import taminx.core.core_ui.ws_article_sixteen_doc_7
+import taminx.core.core_ui.ws_article_sixteen_doc_8
+import taminx.core.core_ui.ws_article_sixteen_doc_9
 import taminx.core.core_ui.ws_obj_doc_1
 import taminx.core.core_ui.ws_obj_doc_10
 import taminx.core.core_ui.ws_obj_doc_11
@@ -86,17 +86,17 @@ val ObjectionDocumentTypes: ImmutableList<WorkshopDocumentType> = persistentList
  * The same asset's `investigationItems`: the grounds a ماده ۱۶ review can be asked for, which is
  * what the old app files this request's documents under.
  */
-val Article16DocumentTypes: ImmutableList<WorkshopDocumentType> = persistentListOf(
-    WorkshopDocumentType("1", Res.string.ws_a16_doc_1),
-    WorkshopDocumentType("2", Res.string.ws_a16_doc_2),
-    WorkshopDocumentType("3", Res.string.ws_a16_doc_3),
-    WorkshopDocumentType("4", Res.string.ws_a16_doc_4),
-    WorkshopDocumentType("5", Res.string.ws_a16_doc_5),
-    WorkshopDocumentType("6", Res.string.ws_a16_doc_6),
-    WorkshopDocumentType("7", Res.string.ws_a16_doc_7),
-    WorkshopDocumentType("8", Res.string.ws_a16_doc_8),
-    WorkshopDocumentType("9", Res.string.ws_a16_doc_9),
-    WorkshopDocumentType("10", Res.string.ws_a16_doc_10),
+val ArticleSixteenDocumentTypes: ImmutableList<WorkshopDocumentType> = persistentListOf(
+    WorkshopDocumentType("1", Res.string.ws_article_sixteen_doc_1),
+    WorkshopDocumentType("2", Res.string.ws_article_sixteen_doc_2),
+    WorkshopDocumentType("3", Res.string.ws_article_sixteen_doc_3),
+    WorkshopDocumentType("4", Res.string.ws_article_sixteen_doc_4),
+    WorkshopDocumentType("5", Res.string.ws_article_sixteen_doc_5),
+    WorkshopDocumentType("6", Res.string.ws_article_sixteen_doc_6),
+    WorkshopDocumentType("7", Res.string.ws_article_sixteen_doc_7),
+    WorkshopDocumentType("8", Res.string.ws_article_sixteen_doc_8),
+    WorkshopDocumentType("9", Res.string.ws_article_sixteen_doc_9),
+    WorkshopDocumentType("10", Res.string.ws_article_sixteen_doc_10),
 )
 
 /** The upload ceiling each form enforces — the add control disappears at this many files. */

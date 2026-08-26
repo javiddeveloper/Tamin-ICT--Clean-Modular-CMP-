@@ -10,16 +10,16 @@ import com.tamin.taminhamrah.model.workshop.NewMemberIsNewDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberIsNewDN
 import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.model.utils.ListData
-import com.tamin.taminhamrah.model.workshop.Article16PhotoDTO
-import com.tamin.taminhamrah.model.workshop.Article16RequestInfoDN
-import com.tamin.taminhamrah.model.workshop.Article16RequestInfoDTO
-import com.tamin.taminhamrah.model.workshop.Article16RequestStatus
-import com.tamin.taminhamrah.model.workshop.Article16SaveRequestDN
-import com.tamin.taminhamrah.model.workshop.Article16SaveRequestDTO
-import com.tamin.taminhamrah.model.workshop.Article16SaveResultDN
-import com.tamin.taminhamrah.model.workshop.Article16SaveResultDTO
-import com.tamin.taminhamrah.model.workshop.Article16WorkshopInfoDN
-import com.tamin.taminhamrah.model.workshop.Article16WorkshopInfoDTO
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenPhotoDTO
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestInfoDN
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestInfoDTO
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestStatus
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveRequestDN
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveRequestDTO
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveResultDN
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveResultDTO
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoDN
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoDTO
 import com.tamin.taminhamrah.model.workshop.DebitObjectionRequestDN
 import com.tamin.taminhamrah.model.workshop.DebitObjectionResultDN
 import com.tamin.taminhamrah.model.workshop.DebitObjectionSaveRequestDTO
@@ -213,7 +213,7 @@ private fun ObjectionKind.wireLabel(): String = when (this) {
 }
 
 /** `objectionType` on the ماده ۱۶ request is fixed at `3`, as the e-services site sends it. */
-private const val ARTICLE16_OBJECTION_TYPE = "3"
+private const val ARTICLE_SIXTEEN_OBJECTION_TYPE = "3"
 
 /**
  * The objection body.
@@ -256,6 +256,8 @@ fun WorkshopNewMemberDTO.toDomain(): WorkshopNewMemberDN = WorkshopNewMemberDN(
     firstName = personal?.firstName.orEmpty(),
     lastName = personal?.lastName.orEmpty(),
     birthDate = personal?.dateOfBirth,
+    cityOfBirthId = personal?.cityOfBirthId,
+    cityOfIssueId = personal?.cityOfIssueId,
     startDate = startDate,
     job = job.orEmpty(),
     request = personal?.request?.toDomain(),
@@ -291,10 +293,10 @@ fun WorkshopsDebtListModelDTO.toDomain(): WorkshopsDebtListModelDN = WorkshopsDe
     primaryVoteNumber = primaryVoteNumber.orEmpty(),
     primaryVoteDate = primaryVoteDate.orEmpty(),
     seqNo = seqNo,
-    status = Article16RequestStatus.fromCode(status),
+    status = ArticleSixteenRequestStatus.fromCode(status),
 )
 
-fun Article16WorkshopInfoDTO.toDomain(): Article16WorkshopInfoDN = Article16WorkshopInfoDN(
+fun ArticleSixteenWorkshopInfoDTO.toDomain(): ArticleSixteenWorkshopInfoDN = ArticleSixteenWorkshopInfoDN(
     workshopId = workshopId.orEmpty(),
     workshopName = workshopName.orEmpty(),
     branchCode = branchCode.orEmpty(),
@@ -303,17 +305,17 @@ fun Article16WorkshopInfoDTO.toDomain(): Article16WorkshopInfoDN = Article16Work
     address = lastAddress.orEmpty(),
 )
 
-fun Article16RequestInfoDTO.toDomain(): Article16RequestInfoDN = Article16RequestInfoDN(
+fun ArticleSixteenRequestInfoDTO.toDomain(): ArticleSixteenRequestInfoDN = ArticleSixteenRequestInfoDN(
     defectDescription = defectDescription.orEmpty(),
     documents = objectionPhotos.mapNotNull { it.toDomainOrNull() },
 )
 
 /** A document with no guid cannot be addressed, so it is dropped rather than carried as blank. */
-private fun Article16PhotoDTO.toDomainOrNull(): ObjectionDocumentDN? =
+private fun ArticleSixteenPhotoDTO.toDomainOrNull(): ObjectionDocumentDN? =
     guid?.takeIf { it.isNotBlank() }?.let { ObjectionDocumentDN(guid = it, typeCode = type.orEmpty()) }
 
-fun Article16SaveRequestDN.toDto(): Article16SaveRequestDTO =
-    Article16SaveRequestDTO(
+fun ArticleSixteenSaveRequestDN.toDto(): ArticleSixteenSaveRequestDTO =
+    ArticleSixteenSaveRequestDTO(
         workshopId = workshopId,
         branchCode = branchCode,
         debitNumber = debt.debitNumber,
@@ -330,11 +332,11 @@ fun Article16SaveRequestDN.toDto(): Article16SaveRequestDTO =
         orderNumber = debt.executiveNumber,
         orderDate = debt.executiveDate,
         executiveNotifyDate = debt.executiveNotifyDate,
-        objectionType = ARTICLE16_OBJECTION_TYPE,
+        objectionType = ARTICLE_SIXTEEN_OBJECTION_TYPE,
         objectionPhotos = documents.map { ObjectionPhotoDTO(guid = it.guid, type = it.typeCode) },
     )
 
-fun Article16SaveResultDTO.toDomain(): Article16SaveResultDN = Article16SaveResultDN(
+fun ArticleSixteenSaveResultDTO.toDomain(): ArticleSixteenSaveResultDN = ArticleSixteenSaveResultDN(
     referenceCode = refId.orEmpty(),
 )
 

@@ -14,6 +14,9 @@ data class WorkshopNewMemberDN(
     val firstName: String = "",
     val lastName: String = "",
     val birthDate: Long? = null,
+    /** Carried so a draft can be re-opened with the cities it was filed under. */
+    val cityOfBirthId: String? = null,
+    val cityOfIssueId: String? = null,
     val startDate: Long? = null,
     val job: String = "",
     val request: NewMemberRequestDN? = null,

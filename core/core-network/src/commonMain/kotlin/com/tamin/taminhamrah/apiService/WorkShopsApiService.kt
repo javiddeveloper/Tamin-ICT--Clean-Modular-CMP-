@@ -7,10 +7,10 @@
 package com.tamin.taminhamrah.apiService
 
 import com.tamin.taminhamrah.model.utils.ListData
-import com.tamin.taminhamrah.model.workshop.Article16RequestInfoDTO
-import com.tamin.taminhamrah.model.workshop.Article16SaveRequestDTO
-import com.tamin.taminhamrah.model.workshop.Article16SaveResultDTO
-import com.tamin.taminhamrah.model.workshop.Article16WorkshopInfoDTO
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestInfoDTO
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveRequestDTO
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveResultDTO
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoDTO
 import com.tamin.taminhamrah.model.workshop.DebitObjectionSaveRequestDTO
 import com.tamin.taminhamrah.model.workshop.DebitObjectionSaveResultDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentDTO
@@ -180,24 +180,24 @@ internal interface WorkShopsApiService {
     ): BaseDTO<ListData<WorkshopsDebtListModelDTO>>
 
     @GET("workshop-services/get-workshops-info/{workshopId}/{branchCode}")
-    suspend fun getArticle16WorkshopInfo(
+    suspend fun getArticleSixteenWorkshopInfo(
         @Path("workshopId") workshopId: String,
         @Path("branchCode") branchCode: String,
-    ): BaseDTO<Article16WorkshopInfoDTO>
+    ): BaseDTO<ArticleSixteenWorkshopInfoDTO>
 
     @GET("debit-objection/objection-request/{objectionNumber}")
-    suspend fun getArticle16RequestInfo(
+    suspend fun getArticleSixteenRequestInfo(
         @Path("objectionNumber") objectionNumber: Long,
-    ): BaseDTO<Article16RequestInfoDTO>
+    ): BaseDTO<ArticleSixteenRequestInfoDTO>
 
     @POST("debit-objection/debit-comitte-save")
-    suspend fun saveArticle16Request(
-        @Body request: Article16SaveRequestDTO,
-    ): BaseDTO<Article16SaveResultDTO>
+    suspend fun saveArticleSixteenRequest(
+        @Body request: ArticleSixteenSaveRequestDTO,
+    ): BaseDTO<ArticleSixteenSaveResultDTO>
 
     /** The filed ماده ۱۶ request, as a PDF byte stream. */
     @GET("debit-objection-reports/comitte/{seqNumber}")
-    suspend fun getArticle16ReportPdf(
+    suspend fun getArticleSixteenReportPdf(
         @Path("seqNumber") seqNumber: Long,
     ): HttpStatement
 

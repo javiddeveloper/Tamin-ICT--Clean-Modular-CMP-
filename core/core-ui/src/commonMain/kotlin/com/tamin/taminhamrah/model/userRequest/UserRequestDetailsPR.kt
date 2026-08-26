@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 data class UserRequestDetailsPR(
     val deferredInstallment: DeferredInstallmentDetailPR? = null,
     val illDay: IllDayDetailPR? = null,
-    val article16: Article16DetailPR? = null,
+    val articleSixteen: ArticleSixteenDetailPR? = null,
     val followUpObjection: FollowUpObjectionDetailPR? = null,
     val pregnancy: PregnancyDetailPR? = null,
     val rejectReason: String? = null,
@@ -76,7 +76,7 @@ data class IllDayDetailPR(
 
 @Immutable
 @Serializable
-data class Article16DetailPR(
+data class ArticleSixteenDetailPR(
     val meetingDate: String? = null,
     val result: String? = null,
     val defectDesc: String? = null,

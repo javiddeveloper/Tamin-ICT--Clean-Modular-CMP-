@@ -3,23 +3,23 @@ package com.tamin.taminhamrah.feature.workshops.ui.managementDebit
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormDocument
 import com.tamin.taminhamrah.feature.workshops.ui.managementDebit.ManagementDebitUiState.PartialState
-import com.tamin.taminhamrah.feature.workshops.ui.model.Article16DocumentTypes
+import com.tamin.taminhamrah.feature.workshops.ui.model.ArticleSixteenDocumentTypes
 import com.tamin.taminhamrah.mapper.personal.toPresentation
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
-import com.tamin.taminhamrah.model.workshop.ARTICLE16_FILING_WINDOW_DAYS
-import com.tamin.taminhamrah.model.workshop.Article16DebtPR
-import com.tamin.taminhamrah.model.workshop.Article16DebtQuery
-import com.tamin.taminhamrah.model.workshop.Article16SaveRequestDN
+import com.tamin.taminhamrah.model.workshop.ARTICLE_SIXTEEN_FILING_WINDOW_DAYS
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtPR
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtQuery
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveRequestDN
 import com.tamin.taminhamrah.model.workshop.ObjectionDocumentDN
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
-import com.tamin.taminhamrah.useCases.workshops.GetArticle16DebtsUseCase
-import com.tamin.taminhamrah.useCases.workshops.GetArticle16ReportPdfUseCase
-import com.tamin.taminhamrah.useCases.workshops.GetArticle16RequestInfoUseCase
-import com.tamin.taminhamrah.useCases.workshops.GetArticle16WorkshopInfoUseCase
-import com.tamin.taminhamrah.useCases.workshops.SaveArticle16RequestUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenDebtsUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenReportPdfUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenRequestInfoUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenWorkshopInfoUseCase
+import com.tamin.taminhamrah.useCases.workshops.SaveArticleSixteenRequestUseCase
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.coroutines.flow.Flow
@@ -28,17 +28,17 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.article16_deadline_passed
+import taminx.core.core_ui.article_sixteen_deadline_passed
 import taminx.core.core_ui.workshop_error_receive_data
 
 /** رسیدگی به بدهی ماده ۱۶ — the debt list and the actions each row offers. */
 class ManagementDebitViewModel(
-    private val getArticle16Debts: GetArticle16DebtsUseCase,
-    private val getArticle16RequestInfo: GetArticle16RequestInfoUseCase,
-    private val getArticle16ReportPdf: GetArticle16ReportPdfUseCase,
-    private val getArticle16WorkshopInfo: GetArticle16WorkshopInfoUseCase,
+    private val getArticleSixteenDebts: GetArticleSixteenDebtsUseCase,
+    private val getArticleSixteenRequestInfo: GetArticleSixteenRequestInfoUseCase,
+    private val getArticleSixteenReportPdf: GetArticleSixteenReportPdfUseCase,
+    private val getArticleSixteenWorkshopInfo: GetArticleSixteenWorkshopInfoUseCase,
     private val uploadImage: UploadImageUseCase,
-    private val saveArticle16Request: SaveArticle16RequestUseCase,
+    private val saveArticleSixteenRequest: SaveArticleSixteenRequestUseCase,
 ) : BaseViewModel<
     ManagementDebitUiState,
     PartialState,
@@ -61,7 +61,7 @@ class ManagementDebitViewModel(
 
         is ManagementDebitIntent.DraftChanged -> flow { emit(PartialState.DraftChanged(intent.draft)) }
         ManagementDebitIntent.ApplySearch -> applySearch(uiState.value.draft)
-        ManagementDebitIntent.ClearSearch -> applySearch(Article16Search())
+        ManagementDebitIntent.ClearSearch -> applySearch(ArticleSixteenSearch())
         is ManagementDebitIntent.StatusFilterChanged ->
             flow { emit(PartialState.StatusFilterChanged(intent.status)) }
 
@@ -107,7 +107,7 @@ class ManagementDebitViewModel(
 
     private fun loadPage(
         page: Int,
-        search: Article16Search = uiState.value.applied,
+        search: ArticleSixteenSearch = uiState.value.applied,
         identity: Pair<String, String> = uiState.value.workshopId to uiState.value.branchCode,
     ): Flow<PartialState> = flow {
         val (workshopId, branchCode) = identity
@@ -116,8 +116,8 @@ class ManagementDebitViewModel(
             return@flow
         }
         emit(if (page == 0) PartialState.Loading else PartialState.LoadingMore)
-        val result = getArticle16Debts(
-            Article16DebtQuery(
+        val result = getArticleSixteenDebts(
+            ArticleSixteenDebtQuery(
                 workshopId = workshopId,
                 branchCode = branchCode,
                 debitNumber = search.debitNumber.takeIf { it.isNotBlank() },
@@ -140,7 +140,7 @@ class ManagementDebitViewModel(
         return loadPage(page = list.nextPage)
     }
 
-    private fun applySearch(search: Article16Search): Flow<PartialState> = flow {
+    private fun applySearch(search: ArticleSixteenSearch): Flow<PartialState> = flow {
         emit(PartialState.DraftChanged(search))
         emit(PartialState.Applied(search))
         emit(PartialState.SearchOpenChanged(false))
@@ -154,22 +154,22 @@ class ManagementDebitViewModel(
      * row whose date the service did not send cannot be checked, and is refused rather than let
      * through — the deadline is the service's rule, not a formality.
      */
-    private fun requestReview(debt: Article16DebtPR): Flow<PartialState> = flow {
+    private fun requestReview(debt: ArticleSixteenDebtPR): Flow<PartialState> = flow {
         emit(PartialState.ActionsForChanged(null))
         val elapsed = PersianDateFormatter.daysSince(debt.executiveNotifyDate)
-        if (elapsed == null || elapsed > ARTICLE16_FILING_WINDOW_DAYS) {
-            sendEvent(ManagementDebitEvent.ShowMessage(Res.string.article16_deadline_passed))
+        if (elapsed == null || elapsed > ARTICLE_SIXTEEN_FILING_WINDOW_DAYS) {
+            sendEvent(ManagementDebitEvent.ShowMessage(Res.string.article_sixteen_deadline_passed))
             return@flow
         }
         emitAll(openForm(debt))
     }
 
-    private fun fixRequest(debt: Article16DebtPR): Flow<PartialState> = flow {
+    private fun fixRequest(debt: ArticleSixteenDebtPR): Flow<PartialState> = flow {
         emit(PartialState.ActionsForChanged(null))
         emitAll(openForm(debt))
     }
 
-    private fun showRequestPdf(debt: Article16DebtPR): Flow<PartialState> = flow {
+    private fun showRequestPdf(debt: ArticleSixteenDebtPR): Flow<PartialState> = flow {
         emit(PartialState.ActionsForChanged(null))
         val seqNo = debt.seqNo
         if (seqNo == null) {
@@ -177,13 +177,13 @@ class ManagementDebitViewModel(
             return@flow
         }
         emit(PartialState.Busy(true))
-        emit(PartialState.ViewerPdfChanged(getArticle16ReportPdf(seqNo).toPresentation()))
+        emit(PartialState.ViewerPdfChanged(getArticleSixteenReportPdf(seqNo).toPresentation()))
     }.catch {
         emit(PartialState.Busy(false))
         emit(PartialState.Error(it.toSingleLineMessage()))
     }
 
-    private fun showExpertMessage(debt: Article16DebtPR): Flow<PartialState> = flow {
+    private fun showExpertMessage(debt: ArticleSixteenDebtPR): Flow<PartialState> = flow {
         emit(PartialState.ActionsForChanged(null))
         val seqNo = debt.seqNo
         if (seqNo == null) {
@@ -191,7 +191,7 @@ class ManagementDebitViewModel(
             return@flow
         }
         emit(PartialState.Busy(true))
-        val info = getArticle16RequestInfo(seqNo)
+        val info = getArticleSixteenRequestInfo(seqNo)
         emit(PartialState.Busy(false))
         emit(PartialState.ExpertMessageChanged(info.defectDescription))
     }.catch {
@@ -200,7 +200,7 @@ class ManagementDebitViewModel(
     }
 
     /** One-line edits of the open form, which is most of what it does. */
-    private fun editForm(edit: Article16FormState.() -> Article16FormState) =
+    private fun editForm(edit: ArticleSixteenFormState.() -> ArticleSixteenFormState) =
         flow { emit(PartialState.FormEdited(edit)) }
 
     /**
@@ -209,16 +209,16 @@ class ManagementDebitViewModel(
      * The workshop lookup is allowed to fail quietly: it fills a review panel, and losing it is
      * not a reason to refuse a request the deadline check has already allowed.
      */
-    private fun openForm(debt: Article16DebtPR): Flow<PartialState> = flow {
+    private fun openForm(debt: ArticleSixteenDebtPR): Flow<PartialState> = flow {
         val state = uiState.value
-        emit(PartialState.FormChanged(Article16FormState(debt = debt)))
+        emit(PartialState.FormChanged(ArticleSixteenFormState(debt = debt)))
         val info = runCatching {
-            getArticle16WorkshopInfo(state.workshopId, state.branchCode)
+            getArticleSixteenWorkshopInfo(state.workshopId, state.branchCode)
         }.getOrNull() ?: return@flow
         emit(
             PartialState.FormEdited {
                 copy(
-                    workshopInfo = Article16WorkshopInfoPR(
+                    workshopInfo = ArticleSixteenWorkshopInfoPR(
                         workshopName = info.workshopName,
                         workshopCode = info.workshopId.toPersianDigits(),
                         branchCode = info.branchCode.toPersianDigits(),
@@ -250,7 +250,7 @@ class ManagementDebitViewModel(
         val guid = uploadImage(
             UploadImageRequestDN(fileName = intent.fileName, bytes = intent.bytes),
         ).first()
-        val type = Article16DocumentTypes.first { it.code == intent.typeCode }
+        val type = ArticleSixteenDocumentTypes.first { it.code == intent.typeCode }
         emit(
             PartialState.FormEdited {
                 copy(
@@ -263,7 +263,7 @@ class ManagementDebitViewModel(
                             size = intent.bytes.size.asKilobytes(),
                         ),
                     ),
-                    uploaded = uploaded.add(UploadedArticle16Document(guid, intent.typeCode)),
+                    uploaded = uploaded.add(UploadedArticleSixteenDocument(guid, intent.typeCode)),
                 )
             },
         )
@@ -292,8 +292,8 @@ class ManagementDebitViewModel(
         }
 
         emit(PartialState.FormEdited { copy(isSubmitting = true) })
-        val result = saveArticle16Request(
-            Article16SaveRequestDN(
+        val result = saveArticleSixteenRequest(
+            ArticleSixteenSaveRequestDN(
                 workshopId = state.workshopId,
                 branchCode = state.branchCode,
                 debt = domainDebt,
@@ -301,7 +301,7 @@ class ManagementDebitViewModel(
             ),
         )
         emit(PartialState.FormChanged(null))
-        sendEvent(ManagementDebitEvent.Article16Filed(result.referenceCode))
+        sendEvent(ManagementDebitEvent.ArticleSixteenFiled(result.referenceCode))
         emitAll(loadPage(page = 0))
     }.catch {
         emit(PartialState.FormEdited { copy(isSubmitting = false) })

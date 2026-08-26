@@ -34,6 +34,18 @@ import com.tamin.taminhamrah.feature.workshops.ui.model.RegistrationDocumentType
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.feature.workshops.ui.WorkshopConstants
+import com.tamin.taminhamrah.ui.components.InputRestriction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.shape.RoundedCornerShape
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormBanner
+import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
+import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import org.jetbrains.compose.resources.vectorResource
+import taminx.core.core_ui.abs_form_banner
+import taminx.core.core_ui.abs_form_download
+import taminx.core.core_ui.ic_tamin_download
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.digitsOnly
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -49,6 +61,7 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.abs_form_birth_city
 import taminx.core.core_ui.abs_form_birth_date
 import taminx.core.core_ui.abs_form_check
+import taminx.core.core_ui.abs_form_err_national_id
 import taminx.core.core_ui.abs_form_docs_desc
 import taminx.core.core_ui.abs_form_docs_title
 import taminx.core.core_ui.abs_form_first_name
@@ -165,7 +178,11 @@ fun RegistrationFormPage(
                     )
                 }
 
-                form.error?.let { WorkshopFormError(text = stringResource(it)) }
+                // The national id states its own verdict on the field; anything else the step
+                // is missing is said once, here.
+                form.error
+                    ?.takeIf { it != Res.string.abs_form_err_national_id }
+                    ?.let { WorkshopFormError(text = stringResource(it)) }
             }
         }
 
@@ -242,13 +259,40 @@ fun RegistrationFormPage(
 /** Which of the two dates a picker was opened for. */
 private enum class DateField { BIRTH, START }
 
-/** Step one: who the person is, exactly as their documents spell it. */
+/**
+ * Step one: who the person is, exactly as their documents spell it.
+ *
+ * The two names take letters only and the code digits only, so a wrong keyboard is refused as it
+ * is typed rather than at submit. The code's own verdict shows on the field, which is where the
+ * user is looking when they mistype it.
+ */
 @Composable
 private fun IdentityStep(
     form: RegistrationFormState,
     onIntent: (WorkshopRecentlyAddedMembersIntent) -> Unit,
     onPickDate: () -> Unit,
 ) {
+    // Only judged once there are ten digits to judge — a half-typed code is not yet wrong.
+    val isNationalIdValid = when {
+        form.nationalId.length < WorkshopConstants.NATIONAL_ID_LENGTH -> null
+        else -> isValidIranianNationalId(form.nationalId)
+    }
+
+    // The design opens step one with why the declaration is needed, and the form itself.
+    WorkshopFormBanner(text = stringResource(Res.string.abs_form_banner))
+    TaminOutlinedButton(
+        text = stringResource(Res.string.abs_form_download),
+        onClick = { onIntent(WorkshopRecentlyAddedMembersIntent.FormDownloadDeclaration) },
+        icon = vectorResource(Res.drawable.ic_tamin_download),
+        enabled = !form.isDownloadingDeclaration,
+        shape = RoundedCornerShape(CornerRadius.chip),
+        height = WorkshopDimens.panelButtonHeight,
+        borderWidth = WorkshopDimens.panelButtonBorderWidth,
+        borderColor = LocalTaminColors.current.blueBorder,
+        containerColor = LocalTaminColors.current.bgSurface,
+        contentColor = LocalTaminColors.current.blueText,
+    )
+
     WorkshopFormSection(
         title = stringResource(Res.string.abs_form_identity_title),
         description = stringResource(Res.string.abs_form_identity_desc),
@@ -265,7 +309,9 @@ private fun IdentityStep(
                     WorkshopRecentlyAddedMembersIntent.FormFieldChanged { copy(firstName = value) },
                 )
             },
-            keyboardType = androidx.compose.ui.text.input.KeyboardType.Text,
+            keyboardType = KeyboardType.Text,
+            inputRestriction = InputRestriction.LettersOnly,
+            isRequired = true,
             modifier = Modifier.weight(1f),
         )
         WorkshopTextField(
@@ -276,7 +322,9 @@ private fun IdentityStep(
                     WorkshopRecentlyAddedMembersIntent.FormFieldChanged { copy(lastName = value) },
                 )
             },
-            keyboardType = androidx.compose.ui.text.input.KeyboardType.Text,
+            keyboardType = KeyboardType.Text,
+            inputRestriction = InputRestriction.LettersOnly,
+            isRequired = true,
             modifier = Modifier.weight(1f),
         )
     }
@@ -286,11 +334,16 @@ private fun IdentityStep(
         onValueChange = { value ->
             onIntent(
                 WorkshopRecentlyAddedMembersIntent.FormFieldChanged {
-                    copy(nationalId = value.digitsOnly().take(NationalIdLength))
+                    copy(nationalId = value.digitsOnly())
                 },
             )
         },
         placeholder = stringResource(Res.string.workshop_ten_digits),
+        maxLength = WorkshopConstants.NATIONAL_ID_LENGTH,
+        isRequired = true,
+        isValid = isNationalIdValid,
+        errorText = stringResource(Res.string.abs_form_err_national_id)
+            .takeIf { isNationalIdValid == false },
     )
     WorkshopPickerField(
         label = stringResource(Res.string.abs_form_birth_date),
@@ -427,9 +480,6 @@ private fun DocumentsStep(
         },
     )
 }
-
-/** The national id is ten digits, and the field refuses to hold more. */
-private const val NationalIdLength = 10
 
 @PreviewRtlTheme
 @Composable

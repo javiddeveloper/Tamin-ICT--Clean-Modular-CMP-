@@ -23,4 +23,17 @@ data class WorkshopNewMemberPR(
     val statusLabel: String = "",
     val isDraft: Boolean = true,
     val canConfirm: Boolean = false,
+    /**
+     * What re-opening this draft needs, kept raw.
+     *
+     * The names are held apart because the form edits them apart, and the two city codes and the
+     * job code are what the pickers are re-seeded from — [fullName] and the formatted dates are
+     * for reading, not for filling a form back in.
+     */
+    val firstName: String = "",
+    val lastName: String = "",
+    val cityOfBirthId: String = "",
+    val cityOfIssueId: String = "",
+    val jobCode: String = "",
+    val startDate: String = "",
 )

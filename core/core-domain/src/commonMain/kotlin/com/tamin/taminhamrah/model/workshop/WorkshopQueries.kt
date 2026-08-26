@@ -75,7 +75,7 @@ data class WorkshopNewMemberQuery(
 )
 
 /** Filters of the ماده ۱۶ debt list search panel. */
-data class Article16DebtQuery(
+data class ArticleSixteenDebtQuery(
     val workshopId: String,
     val branchCode: String,
     val debitNumber: String? = null,

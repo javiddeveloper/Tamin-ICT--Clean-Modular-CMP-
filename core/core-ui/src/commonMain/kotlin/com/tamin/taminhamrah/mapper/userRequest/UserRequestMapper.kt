@@ -1,7 +1,7 @@
 package com.tamin.taminhamrah.mapper.userRequest
 
-import com.tamin.taminhamrah.model.userRequest.Article16DetailDN
-import com.tamin.taminhamrah.model.userRequest.Article16DetailPR
+import com.tamin.taminhamrah.model.userRequest.ArticleSixteenDetailDN
+import com.tamin.taminhamrah.model.userRequest.ArticleSixteenDetailPR
 import com.tamin.taminhamrah.model.userRequest.DeferredInstallmentDetailDN
 import com.tamin.taminhamrah.model.userRequest.DeferredInstallmentDetailPR
 import com.tamin.taminhamrah.model.userRequest.FollowUpObjectionDetailDN
@@ -58,7 +58,7 @@ fun UserRequestDetailsDN.toPresentation(): UserRequestDetailsPR {
     return UserRequestDetailsPR(
         deferredInstallment = deferredInstallment?.toPresentation(),
         illDay = illDay?.toPresentation(),
-        article16 = article16?.toPresentation(),
+        articleSixteen = articleSixteen?.toPresentation(),
         followUpObjection = followUpObjection?.toPresentation(),
         pregnancy = pregnancy?.toPresentation(),
         rejectReason = rejectReason,
@@ -116,7 +116,7 @@ fun IllDayDetailDN.toPresentation(): IllDayDetailPR = IllDayDetailPR(
     expirationDate = expirationDate,
 )
 
-fun Article16DetailDN.toPresentation(): Article16DetailPR = Article16DetailPR(
+fun ArticleSixteenDetailDN.toPresentation(): ArticleSixteenDetailPR = ArticleSixteenDetailPR(
     meetingDate = meetingDate,
     result = result,
     defectDesc = defectDesc,

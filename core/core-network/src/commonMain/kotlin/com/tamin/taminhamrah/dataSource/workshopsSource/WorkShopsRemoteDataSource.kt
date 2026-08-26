@@ -3,10 +3,10 @@ package com.tamin.taminhamrah.dataSource.workshopsSource
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
-import com.tamin.taminhamrah.model.workshop.Article16RequestInfoDTO
-import com.tamin.taminhamrah.model.workshop.Article16SaveRequestDTO
-import com.tamin.taminhamrah.model.workshop.Article16SaveResultDTO
-import com.tamin.taminhamrah.model.workshop.Article16WorkshopInfoDTO
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestInfoDTO
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveRequestDTO
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveResultDTO
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoDTO
 import com.tamin.taminhamrah.model.workshop.DebitObjectionSaveRequestDTO
 import com.tamin.taminhamrah.model.workshop.DebitObjectionSaveResultDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentDTO
@@ -104,16 +104,16 @@ interface WorkShopsRemoteDataSource {
         query: ApiQueryParamDN
     ): ListData<WorkshopsDebtListModelDTO>
 
-    suspend fun getArticle16WorkshopInfo(
+    suspend fun getArticleSixteenWorkshopInfo(
         workshopId: String,
         branchCode: String
-    ): Article16WorkshopInfoDTO
+    ): ArticleSixteenWorkshopInfoDTO
 
-    suspend fun getArticle16RequestInfo(objectionNumber: Long): Article16RequestInfoDTO
+    suspend fun getArticleSixteenRequestInfo(objectionNumber: Long): ArticleSixteenRequestInfoDTO
 
-    suspend fun saveArticle16Request(request: Article16SaveRequestDTO): Article16SaveResultDTO
+    suspend fun saveArticleSixteenRequest(request: ArticleSixteenSaveRequestDTO): ArticleSixteenSaveResultDTO
 
-    suspend fun getArticle16ReportPdf(seqNumber: Long): PdfDownloadDTO
+    suspend fun getArticleSixteenReportPdf(seqNumber: Long): PdfDownloadDTO
 
     suspend fun getWorkshopMembers(
         query: ApiQueryParamDN

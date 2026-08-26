@@ -5,10 +5,10 @@ import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
-import com.tamin.taminhamrah.model.workshop.Article16RequestInfoDTO
-import com.tamin.taminhamrah.model.workshop.Article16SaveRequestDTO
-import com.tamin.taminhamrah.model.workshop.Article16SaveResultDTO
-import com.tamin.taminhamrah.model.workshop.Article16WorkshopInfoDTO
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestInfoDTO
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveRequestDTO
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveResultDTO
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoDTO
 import com.tamin.taminhamrah.model.workshop.DebitObjectionSaveRequestDTO
 import com.tamin.taminhamrah.model.workshop.DebitObjectionSaveResultDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentDTO
@@ -177,28 +177,28 @@ internal class WorkShopsRemoteDataSourceImpl(
         apiService.getWorkshopsDebtsList(workshopId, branchId, query.toQueries()).extractData()
     }
 
-    override suspend fun getArticle16WorkshopInfo(
+    override suspend fun getArticleSixteenWorkshopInfo(
         workshopId: String,
         branchCode: String
-    ): Article16WorkshopInfoDTO = call {
-        apiService.getArticle16WorkshopInfo(workshopId, branchCode).extractData()
+    ): ArticleSixteenWorkshopInfoDTO = call {
+        apiService.getArticleSixteenWorkshopInfo(workshopId, branchCode).extractData()
     }
 
-    override suspend fun getArticle16RequestInfo(
+    override suspend fun getArticleSixteenRequestInfo(
         objectionNumber: Long
-    ): Article16RequestInfoDTO = call {
-        apiService.getArticle16RequestInfo(objectionNumber).extractData()
+    ): ArticleSixteenRequestInfoDTO = call {
+        apiService.getArticleSixteenRequestInfo(objectionNumber).extractData()
     }
 
-    override suspend fun saveArticle16Request(
-        request: Article16SaveRequestDTO
-    ): Article16SaveResultDTO = call {
-        apiService.saveArticle16Request(request).extractData()
+    override suspend fun saveArticleSixteenRequest(
+        request: ArticleSixteenSaveRequestDTO
+    ): ArticleSixteenSaveResultDTO = call {
+        apiService.saveArticleSixteenRequest(request).extractData()
     }
 
-    override suspend fun getArticle16ReportPdf(seqNumber: Long): PdfDownloadDTO = call {
+    override suspend fun getArticleSixteenReportPdf(seqNumber: Long): PdfDownloadDTO = call {
         PdfDownloadDTO(
-            pdf = InputStreamDTO(pdf = apiService.getArticle16ReportPdf(seqNumber).readPdfChannel())
+            pdf = InputStreamDTO(pdf = apiService.getArticleSixteenReportPdf(seqNumber).readPdfChannel())
         )
     }
 

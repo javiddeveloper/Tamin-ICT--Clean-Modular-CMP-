@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopDocumentType
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
+import com.tamin.taminhamrah.ui.components.InputRestriction
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
@@ -868,6 +869,7 @@ fun <T> WorkshopLookupSheet(
                 value = query,
                 onValueChange = onQueryChange,
                 keyboardType = KeyboardType.Text,
+                inputRestriction = InputRestriction.None,
             )
             if (isLoading) {
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -891,5 +893,34 @@ fun <T> WorkshopLookupSheet(
                 }
             }
         }
+    }
+}
+
+/** Something the user needs to know before starting, in the design's blue. */
+@Composable
+fun WorkshopFormBanner(text: String, modifier: Modifier = Modifier) {
+    val colors = LocalTaminColors.current
+    val shape = remember { RoundedCornerShape(CornerRadius.chip) }
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(colors.blueBg)
+            .border(Thickness.border, colors.blueBorder, shape)
+            .padding(horizontal = NoteHorizontalPadding, vertical = NoteVerticalPadding),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        Icon(
+            imageVector = vectorResource(Res.drawable.ic_info),
+            contentDescription = null,
+            tint = colors.blueText,
+            modifier = Modifier.size(IconSize.small),
+        )
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelSmall,
+            color = colors.textSecondary,
+            lineHeight = NoteLineHeight,
+        )
     }
 }

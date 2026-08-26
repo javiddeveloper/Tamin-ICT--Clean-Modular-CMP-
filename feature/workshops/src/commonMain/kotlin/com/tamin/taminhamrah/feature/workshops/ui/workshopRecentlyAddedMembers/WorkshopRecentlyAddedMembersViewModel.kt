@@ -1,6 +1,8 @@
 package com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers
 
 import com.tamin.taminhamrah.base.BaseViewModel
+import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
+import com.tamin.taminhamrah.ui.digitsOnly
 import com.tamin.taminhamrah.useCases.common.GetJobTitleUseCase
 import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
 import com.tamin.taminhamrah.util.toPersianDigits
@@ -43,6 +45,7 @@ class WorkshopRecentlyAddedMembersViewModel(
     private val putRegistrationDocuments: PutInsuredRegistrationDocListUseCase,
     private val getCities: GetCitiesUseCase,
     private val getJobTitle: GetJobTitleUseCase,
+    private val getRegistrationDeclarationForm: GetRegistrationDeclarationFormUseCase,
 ) : BaseViewModel<
     WorkshopRecentlyAddedMembersUiState,
     PartialState,
@@ -79,6 +82,7 @@ class WorkshopRecentlyAddedMembersViewModel(
 
         is WorkshopRecentlyAddedMembersIntent.FormPickerOpened -> openPicker(intent.picker)
         is WorkshopRecentlyAddedMembersIntent.FormPickerQueryChanged -> searchPicker(intent.query)
+        WorkshopRecentlyAddedMembersIntent.FormDownloadDeclaration -> downloadDeclaration()
         is WorkshopRecentlyAddedMembersIntent.FormOptionPicked -> editForm {
             when (intent.picker) {
                 RegistrationPicker.BIRTH_CITY -> copy(birthCity = intent.option)
@@ -190,7 +194,44 @@ class WorkshopRecentlyAddedMembersViewModel(
             sendEvent(WorkshopRecentlyAddedMembersEvent.ShowMessage(Res.string.new_member_cannot_edit))
             return@flow
         }
-        emit(PartialState.FormChanged(RegistrationFormState()))
+        emit(PartialState.FormChanged(member.asFormState()))
+    }
+
+    /**
+     * A draft re-opened as the form that produced it.
+     *
+     * Everything comes off the list row, which already carries the codes — `relation-tamins`
+     * returns the person's cities and job on the row itself, so re-opening costs no request. The
+     * two city pickers show their code until the lookup is opened and a name chosen; the row does
+     * not carry the names, only what the service files.
+     */
+    private fun WorkshopNewMemberPR.asFormState(): RegistrationFormState = RegistrationFormState(
+        firstName = firstName,
+        lastName = lastName,
+        nationalId = nationalId.digitsOnly(),
+        birthDate = birthDate,
+        birthCity = cityOfBirthId.takeIf { it.isNotBlank() }?.let { PickedOption(it, it) },
+        issueCity = cityOfIssueId.takeIf { it.isNotBlank() }?.let { PickedOption(it, it) },
+        job = jobCode.takeIf { it.isNotBlank() }?.let { PickedOption(it, it) },
+        startDate = startDate,
+        personalId = personalId,
+    )
+
+    /**
+     * The blank declaration form.
+     *
+     * A static PDF rather than a generated one, so it is fetched and handed straight to the
+     * device's own saver; the screen writes it, because only the UI layer knows where downloads
+     * belong on each platform.
+     */
+    private fun downloadDeclaration(): Flow<PartialState> = flow<PartialState> {
+        emit(PartialState.FormEdited { copy(isDownloadingDeclaration = true) })
+        val bytes = getRegistrationDeclarationForm().first()
+        emit(PartialState.FormEdited { copy(isDownloadingDeclaration = false) })
+        sendEvent(WorkshopRecentlyAddedMembersEvent.SaveDeclarationForm(bytes))
+    }.catch {
+        emit(PartialState.FormEdited { copy(isDownloadingDeclaration = false) })
+        emit(PartialState.Error(it.toSingleLineMessage()))
     }
 
     /** One-line edits of the open form, which is most of what it does. */
@@ -313,11 +354,12 @@ class WorkshopRecentlyAddedMembersViewModel(
                 startDate = form.startDate,
                 workshopId = state.workshopId,
                 branchCode = state.branchCode,
-                personalId = existing.personalId,
+                // A re-opened draft already names its person; otherwise the service says.
+                personalId = form.personalId ?: existing.personalId,
             ),
         )
 
-        val personalId = result.personalId ?: existing.personalId
+        val personalId = result.personalId ?: form.personalId ?: existing.personalId
         if (personalId != null) {
             putRegistrationDocuments(
                 personalId.toString(),
@@ -372,6 +414,8 @@ class WorkshopRecentlyAddedMembersViewModel(
         is PartialState.FormEdited -> currentState.copy(
             form = currentState.form?.let(partialState.edit),
         )
+
+        is PartialState.DeclarationDownloaded -> currentState
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)

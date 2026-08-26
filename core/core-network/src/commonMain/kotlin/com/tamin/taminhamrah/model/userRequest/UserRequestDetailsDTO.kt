@@ -29,7 +29,7 @@ data class IllDayDetailDTO(
 )
 
 @Serializable
-data class Article16DetailDTO(
+data class ArticleSixteenDetailDTO(
     @SerialName("meetingDate") val meetingDate: String? = null,
     @SerialName("result") val result: String? = null,
 )

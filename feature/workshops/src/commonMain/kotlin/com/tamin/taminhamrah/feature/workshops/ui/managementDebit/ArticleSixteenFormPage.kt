@@ -25,8 +25,8 @@ import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopReviewGroup
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopReviewRow
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopScreenShell
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopStepper
-import com.tamin.taminhamrah.feature.workshops.ui.model.Article16DocumentTypes
-import com.tamin.taminhamrah.model.workshop.ARTICLE16_MAX_DOCUMENTS
+import com.tamin.taminhamrah.feature.workshops.ui.model.ArticleSixteenDocumentTypes
+import com.tamin.taminhamrah.model.workshop.ARTICLE_SIXTEEN_MAX_DOCUMENTS
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -38,24 +38,24 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.a16_form_account_code
-import taminx.core.core_ui.a16_form_address
-import taminx.core.core_ui.a16_form_check
-import taminx.core.core_ui.a16_form_docs_desc
-import taminx.core.core_ui.a16_form_docs_title
-import taminx.core.core_ui.a16_form_employer_name
-import taminx.core.core_ui.a16_form_group_debt
-import taminx.core.core_ui.a16_form_group_workshop
-import taminx.core.core_ui.a16_form_note_result
-import taminx.core.core_ui.a16_form_note_window
-import taminx.core.core_ui.a16_form_review_desc
-import taminx.core.core_ui.a16_form_review_title
-import taminx.core.core_ui.a16_form_step_docs
-import taminx.core.core_ui.a16_form_step_review
-import taminx.core.core_ui.a16_form_submit
-import taminx.core.core_ui.a16_form_title
-import taminx.core.core_ui.a16_form_workshop_name
-import taminx.core.core_ui.article16_executive_notify_date
+import taminx.core.core_ui.article_sixteen_form_account_code
+import taminx.core.core_ui.article_sixteen_form_address
+import taminx.core.core_ui.article_sixteen_form_check
+import taminx.core.core_ui.article_sixteen_form_docs_desc
+import taminx.core.core_ui.article_sixteen_form_docs_title
+import taminx.core.core_ui.article_sixteen_form_employer_name
+import taminx.core.core_ui.article_sixteen_form_group_debt
+import taminx.core.core_ui.article_sixteen_form_group_workshop
+import taminx.core.core_ui.article_sixteen_form_note_result
+import taminx.core.core_ui.article_sixteen_form_note_window
+import taminx.core.core_ui.article_sixteen_form_review_desc
+import taminx.core.core_ui.article_sixteen_form_review_title
+import taminx.core.core_ui.article_sixteen_form_step_docs
+import taminx.core.core_ui.article_sixteen_form_step_review
+import taminx.core.core_ui.article_sixteen_form_submit
+import taminx.core.core_ui.article_sixteen_form_title
+import taminx.core.core_ui.article_sixteen_form_workshop_name
+import taminx.core.core_ui.article_sixteen_executive_notify_date
 import taminx.core.core_ui.obj_form_period_from
 import taminx.core.core_ui.obj_form_period_to
 import taminx.core.core_ui.payment_sheet_agreement_row
@@ -71,8 +71,8 @@ import taminx.core.core_ui.ws_form_next
  * to carry the domain debt row that only that screen's ViewModel holds.
  */
 @Composable
-fun Article16FormPage(
-    form: Article16FormState,
+fun ArticleSixteenFormPage(
+    form: ArticleSixteenFormState,
     workshopName: String,
     workshopCode: String?,
     onIntent: (ManagementDebitIntent) -> Unit,
@@ -98,8 +98,8 @@ fun Article16FormPage(
         }
     }
 
-    val reviewLabel = stringResource(Res.string.a16_form_step_review)
-    val docsLabel = stringResource(Res.string.a16_form_step_docs)
+    val reviewLabel = stringResource(Res.string.article_sixteen_form_step_review)
+    val docsLabel = stringResource(Res.string.article_sixteen_form_step_docs)
     val steps = remember(form.step, reviewLabel) {
         persistentListOf(
             WorkshopFormStep(reviewLabel, isDone = form.step > 1, isCurrent = form.step == 1),
@@ -108,7 +108,7 @@ fun Article16FormPage(
     }
 
     WorkshopScreenShell(
-        title = stringResource(Res.string.a16_form_title),
+        title = stringResource(Res.string.article_sixteen_form_title),
         onBack = onBack,
         workshopName = workshopName.takeIf { it.isNotBlank() },
         workshopCode = workshopCode,
@@ -143,7 +143,7 @@ fun Article16FormPage(
 
         WorkshopFormFooter(
             nextLabel = stringResource(
-                if (form.isLastStep) Res.string.a16_form_submit else Res.string.ws_form_next,
+                if (form.isLastStep) Res.string.article_sixteen_form_submit else Res.string.ws_form_next,
             ),
             onNext = { onIntent(ManagementDebitIntent.FormNext) },
             onPrev = if (form.step > 1) {
@@ -156,7 +156,7 @@ fun Article16FormPage(
 
     if (isTypeSheetOpen) {
         WorkshopDocumentTypeSheet(
-            types = Article16DocumentTypes,
+            types = ArticleSixteenDocumentTypes,
             onDismiss = { isTypeSheetOpen = false },
             onSelect = { type ->
                 isTypeSheetOpen = false
@@ -170,18 +170,18 @@ fun Article16FormPage(
 /** Step one: the debt, and the workshop it belongs to. */
 @Composable
 private fun ReviewStep(
-    form: Article16FormState,
+    form: ArticleSixteenFormState,
     onIntent: (ManagementDebitIntent) -> Unit,
 ) {
     val debt = form.debt
     val info = form.workshopInfo
 
-    val accountCodeLabel = stringResource(Res.string.a16_form_account_code)
+    val accountCodeLabel = stringResource(Res.string.article_sixteen_form_account_code)
     val agreementRowLabel = stringResource(Res.string.payment_sheet_agreement_row)
     val periodFromLabel = stringResource(Res.string.obj_form_period_from)
     val periodToLabel = stringResource(Res.string.obj_form_period_to)
     val amountLabel = stringResource(Res.string.workshop_debt_amount)
-    val notifyLabel = stringResource(Res.string.article16_executive_notify_date)
+    val notifyLabel = stringResource(Res.string.article_sixteen_executive_notify_date)
     val debtRows = remember(debt, accountCodeLabel) {
         persistentListOf(
             WorkshopReviewRow(accountCodeLabel, debt.debitNumberLabel),
@@ -193,11 +193,11 @@ private fun ReviewStep(
         )
     }
 
-    val employerLabel = stringResource(Res.string.a16_form_employer_name)
-    val nameLabel = stringResource(Res.string.a16_form_workshop_name)
+    val employerLabel = stringResource(Res.string.article_sixteen_form_employer_name)
+    val nameLabel = stringResource(Res.string.article_sixteen_form_workshop_name)
     val codeLabel = stringResource(Res.string.workshop_code)
     val branchLabel = stringResource(Res.string.workshop_branch_code)
-    val addressLabel = stringResource(Res.string.a16_form_address)
+    val addressLabel = stringResource(Res.string.article_sixteen_form_address)
     val workshopRows = remember(info, employerLabel) {
         persistentListOf(
             WorkshopReviewRow(employerLabel, info.employerName, isNumeric = false),
@@ -209,17 +209,17 @@ private fun ReviewStep(
     }
 
     WorkshopFormSection(
-        title = stringResource(Res.string.a16_form_review_title),
-        description = stringResource(Res.string.a16_form_review_desc),
+        title = stringResource(Res.string.article_sixteen_form_review_title),
+        description = stringResource(Res.string.article_sixteen_form_review_desc),
     )
     WorkshopReviewGroup(
-        title = stringResource(Res.string.a16_form_group_debt),
+        title = stringResource(Res.string.article_sixteen_form_group_debt),
         rows = debtRows,
         isOpen = form.isDebtOpen,
         onToggle = { onIntent(ManagementDebitIntent.FormDebtOpenChanged(!form.isDebtOpen)) },
     )
     WorkshopReviewGroup(
-        title = stringResource(Res.string.a16_form_group_workshop),
+        title = stringResource(Res.string.article_sixteen_form_group_workshop),
         rows = workshopRows,
         isOpen = form.isWorkshopOpen,
         onToggle = {
@@ -231,24 +231,24 @@ private fun ReviewStep(
 /** Step two: the evidence, the rules that govern it, and the declaration. */
 @Composable
 private fun DocumentsStep(
-    form: Article16FormState,
+    form: ArticleSixteenFormState,
     onAdd: () -> Unit,
     onIntent: (ManagementDebitIntent) -> Unit,
 ) {
     WorkshopFormSection(
-        title = stringResource(Res.string.a16_form_docs_title),
-        description = stringResource(Res.string.a16_form_docs_desc),
+        title = stringResource(Res.string.article_sixteen_form_docs_title),
+        description = stringResource(Res.string.article_sixteen_form_docs_desc),
     )
     WorkshopDocumentBox(
         documents = form.documents,
-        capacity = ARTICLE16_MAX_DOCUMENTS,
+        capacity = ARTICLE_SIXTEEN_MAX_DOCUMENTS,
         onAdd = onAdd,
         onRemove = { index -> onIntent(ManagementDebitIntent.FormRemoveDocument(index)) },
     )
-    WorkshopFormNote(text = stringResource(Res.string.a16_form_note_window))
-    WorkshopFormNote(text = stringResource(Res.string.a16_form_note_result))
+    WorkshopFormNote(text = stringResource(Res.string.article_sixteen_form_note_window))
+    WorkshopFormNote(text = stringResource(Res.string.article_sixteen_form_note_result))
     WorkshopFormCheck(
-        label = stringResource(Res.string.a16_form_check),
+        label = stringResource(Res.string.article_sixteen_form_check),
         isChecked = form.isConfirmed,
         onToggle = { onIntent(ManagementDebitIntent.FormConfirmedChanged(!form.isConfirmed)) },
     )
@@ -257,10 +257,10 @@ private fun DocumentsStep(
 
 @PreviewRtlTheme
 @Composable
-private fun Article16FormReviewPreview() {
+private fun ArticleSixteenFormReviewPreview() {
     PreviewRtlThemeContent {
-        Article16FormPage(
-            form = Article16FormState(debt = PreviewDebt, workshopInfo = PreviewInfo),
+        ArticleSixteenFormPage(
+            form = ArticleSixteenFormState(debt = PreviewDebt, workshopInfo = PreviewInfo),
             workshopName = "آموزشگاه کامپیوتر توکلی-ایمیل",
             workshopCode = "۰۹۶۸۲۱۰۱۷۰",
             onIntent = {},
@@ -271,10 +271,10 @@ private fun Article16FormReviewPreview() {
 
 @PreviewRtlTheme
 @Composable
-private fun Article16FormDocumentsPreview() {
+private fun ArticleSixteenFormDocumentsPreview() {
     PreviewRtlThemeContent {
-        Article16FormPage(
-            form = Article16FormState(
+        ArticleSixteenFormPage(
+            form = ArticleSixteenFormState(
                 debt = PreviewDebt,
                 workshopInfo = PreviewInfo,
                 step = 2,
@@ -287,7 +287,7 @@ private fun Article16FormDocumentsPreview() {
     }
 }
 
-private val PreviewDebt = com.tamin.taminhamrah.model.workshop.Article16DebtPR(
+private val PreviewDebt = com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtPR(
     debitNumber = "0960961008971",
     debitNumberLabel = "۰۹۶۰۹۶۱۰۰۸۹۷۱",
     executiveNotifyDateLabel = "۱۴۰۵/۰۵/۲۵",
@@ -297,7 +297,7 @@ private val PreviewDebt = com.tamin.taminhamrah.model.workshop.Article16DebtPR(
     agreementRow = "۰۹۶۰۰۰۰۲",
 )
 
-private val PreviewInfo = Article16WorkshopInfoPR(
+private val PreviewInfo = ArticleSixteenWorkshopInfoPR(
     workshopName = "آموزشگاه کامپیوتر توکلی-ایمیل",
     workshopCode = "۰۹۶۸۲۱۰۱۷۰",
     branchCode = "۰۰۱۰",

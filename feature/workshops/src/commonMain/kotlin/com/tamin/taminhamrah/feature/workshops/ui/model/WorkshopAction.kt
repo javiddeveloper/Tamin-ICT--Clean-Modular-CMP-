@@ -4,7 +4,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.components.StatusTint
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.ic_tamin_workshop_article16
+import taminx.core.core_ui.ic_tamin_workshop_article_sixteen
 import taminx.core.core_ui.ic_tamin_workshop_inquiry
 import taminx.core.core_ui.ic_tamin_workshop_members
 import taminx.core.core_ui.ic_tamin_workshop_new_member
@@ -12,8 +12,8 @@ import taminx.core.core_ui.ic_tamin_workshop_objection
 import taminx.core.core_ui.ic_tamin_workshop_payment
 import taminx.core.core_ui.ic_tamin_workshop_stackholders
 import taminx.core.core_ui.ic_tamin_workshop_turnover
-import taminx.core.core_ui.workshop_action_article16
-import taminx.core.core_ui.workshop_action_article16_desc
+import taminx.core.core_ui.workshop_action_article_sixteen
+import taminx.core.core_ui.workshop_action_article_sixteen_desc
 import taminx.core.core_ui.workshop_action_debit_turnover
 import taminx.core.core_ui.workshop_action_debit_turnover_desc
 import taminx.core.core_ui.workshop_action_debt_inquiry
@@ -78,10 +78,10 @@ enum class WorkshopAction(
      * The one action that is not a plain navigation: the debts are fetched first, and a workshop
      * with none is told so instead of being taken to an empty screen.
      */
-    ARTICLE16(
-        label = Res.string.workshop_action_article16,
-        description = Res.string.workshop_action_article16_desc,
-        icon = Res.drawable.ic_tamin_workshop_article16,
+    ARTICLE_SIXTEEN(
+        label = Res.string.workshop_action_article_sixteen,
+        description = Res.string.workshop_action_article_sixteen_desc,
+        icon = Res.drawable.ic_tamin_workshop_article_sixteen,
         tint = StatusTint.PURPLE,
     ),
     MEMBERS(

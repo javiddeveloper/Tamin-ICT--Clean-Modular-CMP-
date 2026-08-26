@@ -1,8 +1,8 @@
 package com.tamin.taminhamrah.mapper.workshop
 
-import com.tamin.taminhamrah.model.workshop.Article16DebtPR
-import com.tamin.taminhamrah.model.workshop.Article16WorkshopInfoDN
-import com.tamin.taminhamrah.model.workshop.Article16WorkshopInfoPR
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtPR
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoDN
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoPR
 import com.tamin.taminhamrah.model.workshop.DebitReasonDN
 import com.tamin.taminhamrah.model.workshop.DebitReasonPR
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
@@ -130,11 +130,19 @@ fun WorkshopNewMemberDN.toPresentation(): WorkshopNewMemberPR = WorkshopNewMembe
     statusLabel = request?.statusDescription.orDash(),
     isDraft = isDraft,
     canConfirm = canConfirm,
+    // Raw, for re-opening the draft: the form edits the names apart and re-seeds its pickers from
+    // the codes, none of which survives formatting for display.
+    firstName = firstName,
+    lastName = lastName,
+    cityOfBirthId = cityOfBirthId.orEmpty(),
+    cityOfIssueId = cityOfIssueId.orEmpty(),
+    jobCode = job,
+    startDate = startDate.orDashTimestamp(),
 )
 
 // ------------------------------------------------------------------- ماده ۱۶
 
-fun WorkshopsDebtListModelDN.toPresentation(): Article16DebtPR = Article16DebtPR(
+fun WorkshopsDebtListModelDN.toPresentation(): ArticleSixteenDebtPR = ArticleSixteenDebtPR(
     debitNumber = debitNumber,
     debitNumberLabel = debitNumber.orDashDigits(),
     amount = debitAmount.orDashAmount(),
@@ -148,7 +156,7 @@ fun WorkshopsDebtListModelDN.toPresentation(): Article16DebtPR = Article16DebtPR
     seqNo = seqNo,
 )
 
-fun Article16WorkshopInfoDN.toPresentation(): Article16WorkshopInfoPR = Article16WorkshopInfoPR(
+fun ArticleSixteenWorkshopInfoDN.toPresentation(): ArticleSixteenWorkshopInfoPR = ArticleSixteenWorkshopInfoPR(
     workshopId = workshopId.orDashDigits(),
     workshopName = workshopName.orDash(),
     employerName = employerName.orDash(),

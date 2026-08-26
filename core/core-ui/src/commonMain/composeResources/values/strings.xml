@@ -910,7 +910,7 @@
     <string name="workshops_action_debt_inquiry">استعلام بدهی کارگاه</string>
     <string name="workshops_action_objection">اعتراض به بدهی</string>
     <string name="workshops_action_insured_registration">نام نویسی غیرحضوری بیمه شده</string>
-    <string name="workshops_action_article16">رسیدگی به بدهی ماده ۱۶</string>
+    <string name="workshops_action_article_sixteen">رسیدگی به بدهی ماده ۱۶</string>
     <string name="workshops_action_members">کارکنان</string>
     <string name="workshops_action_stakeholders">ذینفعان</string>
     <string name="workshops_status_active">فعال</string>
@@ -1128,7 +1128,7 @@
     <string name="workshop_action_debt_inquiry">استعلام بدهی کارگاه</string>
     <string name="workshop_action_objection">اعتراض به بدهی</string>
     <string name="workshop_action_new_member">نام‌نویسی غیرحضوری بیمه‌شده</string>
-    <string name="workshop_action_article16">رسیدگی به بدهی ماده ۱۶</string>
+    <string name="workshop_action_article_sixteen">رسیدگی به بدهی ماده ۱۶</string>
     <string name="workshop_action_members">کارکنان</string>
     <string name="workshop_action_stackholders">ذینفعان</string>
 
@@ -1138,7 +1138,7 @@
     <string name="workshop_action_debt_inquiry_desc">وضعیت بدهی قطعی و قابل تقسیط</string>
     <string name="workshop_action_objection_desc">ثبت اعتراض برآوردی و هیئت بدوی</string>
     <string name="workshop_action_new_member_desc">افزودن پرسنل جدید و پیگیری</string>
-    <string name="workshop_action_article16_desc">درخواست رسیدگی هیئت‌ها</string>
+    <string name="workshop_action_article_sixteen_desc">درخواست رسیدگی هیئت‌ها</string>
     <string name="workshop_action_members_desc">بیمه‌شدگان شاغل در کارگاه</string>
     <string name="workshop_action_stackholders_desc">کارفرما، شرکا و نمایندگان</string>
 
@@ -1218,22 +1218,22 @@
     <string name="new_member_follow_body">درخواست با کد پیگیری %1$s در حال بررسی است. نتیجه از طریق پیامک اطلاع داده می‌شود.</string>
 
     <!-- ماده ۱۶ -->
-    <string name="article16_account_code">کد حساب</string>
-    <string name="article16_debt_amount">مبلغ بدهی (ریال)</string>
-    <string name="article16_debt_remaining">ماندهٔ بدهی (ریال)</string>
-    <string name="article16_executive_notify_date">تاریخ ابلاغ اجراییه</string>
-    <string name="article16_request_status">وضعیت درخواست</string>
-    <string name="article16_status_submitted">ثبت درخواست</string>
-    <string name="article16_status_document_defect">نقص مدارک</string>
-    <string name="article16_status_rejected">رد درخواست</string>
-    <string name="article16_status_approved">تایید درخواست</string>
-    <string name="article16_status_unknown">نامشخص</string>
-    <string name="article16_status_none">بدون درخواست</string>
-    <string name="article16_action_request">درخواست رسیدگی به بدهی</string>
-    <string name="article16_action_view_request">مشاهده درخواست</string>
-    <string name="article16_action_expert_message">پیام کارشناس</string>
-    <string name="article16_action_fix_request">اصلاح درخواست</string>
-    <string name="article16_deadline_passed">مهلت ثبت درخواست برای این بدهی به پایان رسیده است.</string>
+    <string name="article_sixteen_account_code">کد حساب</string>
+    <string name="article_sixteen_debt_amount">مبلغ بدهی (ریال)</string>
+    <string name="article_sixteen_debt_remaining">ماندهٔ بدهی (ریال)</string>
+    <string name="article_sixteen_executive_notify_date">تاریخ ابلاغ اجراییه</string>
+    <string name="article_sixteen_request_status">وضعیت درخواست</string>
+    <string name="article_sixteen_status_submitted">ثبت درخواست</string>
+    <string name="article_sixteen_status_document_defect">نقص مدارک</string>
+    <string name="article_sixteen_status_rejected">رد درخواست</string>
+    <string name="article_sixteen_status_approved">تایید درخواست</string>
+    <string name="article_sixteen_status_unknown">نامشخص</string>
+    <string name="article_sixteen_status_none">بدون درخواست</string>
+    <string name="article_sixteen_action_request">درخواست رسیدگی به بدهی</string>
+    <string name="article_sixteen_action_view_request">مشاهده درخواست</string>
+    <string name="article_sixteen_action_expert_message">پیام کارشناس</string>
+    <string name="article_sixteen_action_fix_request">اصلاح درخواست</string>
+    <string name="article_sixteen_deadline_passed">مهلت ثبت درخواست برای این بدهی به پایان رسیده است.</string>
 
     <!-- کارکنان / ذینفعان -->
     <string name="member_insurance_number">شماره بیمه</string>
@@ -1278,25 +1278,25 @@
     <string name="obj_form_done_body">اعتراض شما با شمارهٔ پیگیری %1$s ثبت شد و به هیئت رسیدگی ارجاع گردید.</string>
 
     <!-- درخواست رسیدگی به بدهی ماده ۱۶ -->
-    <string name="a16_form_title">درخواست رسیدگی به بدهی</string>
-    <string name="a16_form_step_review">بازبینی اطلاعات</string>
-    <string name="a16_form_step_docs">مدارک و ثبت</string>
-    <string name="a16_form_review_title">بازبینی اطلاعات درخواست</string>
-    <string name="a16_form_review_desc">جزئیات بدهی و اطلاعات کارگاه را بررسی کنید، سپس مدارک را بارگذاری کنید.</string>
-    <string name="a16_form_docs_title">مدارک و ثبت درخواست</string>
-    <string name="a16_form_docs_desc">حداکثر ۱۰ تصویر برای این درخواست قابل بارگذاری است.</string>
-    <string name="a16_form_group_debt">جزئیات بدهی</string>
-    <string name="a16_form_group_workshop">اطلاعات کارگاه و کارفرما</string>
-    <string name="a16_form_account_code">کد حساب</string>
-    <string name="a16_form_employer_name">نام کارفرما</string>
-    <string name="a16_form_workshop_name">نام کارگاه</string>
-    <string name="a16_form_address">نشانی</string>
-    <string name="a16_form_note_window">رسیدگی به بدهی موضوع ماده ۱۶ آیین‌نامهٔ هیئت‌ها تنها برای بدهی‌هایی امکان‌پذیر است که از تاریخ ابلاغ اجراییه بیش از یک روز نگذشته باشد.</string>
-    <string name="a16_form_note_result">در صورت تأیید، نتیجه از طریق کارتابل درخواست‌ها و پیامک اطلاع داده می‌شود.</string>
-    <string name="a16_form_check">مفاد فوق را مطالعه کردم و صحت مدارک ارسالی را تأیید می‌کنم.</string>
-    <string name="a16_form_submit">ثبت درخواست</string>
-    <string name="a16_form_done_title">درخواست شما ثبت شد</string>
-    <string name="a16_form_done_body">درخواست رسیدگی به بدهی ماده ۱۶ با کد پیگیری %1$s ثبت شد.</string>
+    <string name="article_sixteen_form_title">درخواست رسیدگی به بدهی</string>
+    <string name="article_sixteen_form_step_review">بازبینی اطلاعات</string>
+    <string name="article_sixteen_form_step_docs">مدارک و ثبت</string>
+    <string name="article_sixteen_form_review_title">بازبینی اطلاعات درخواست</string>
+    <string name="article_sixteen_form_review_desc">جزئیات بدهی و اطلاعات کارگاه را بررسی کنید، سپس مدارک را بارگذاری کنید.</string>
+    <string name="article_sixteen_form_docs_title">مدارک و ثبت درخواست</string>
+    <string name="article_sixteen_form_docs_desc">حداکثر ۱۰ تصویر برای این درخواست قابل بارگذاری است.</string>
+    <string name="article_sixteen_form_group_debt">جزئیات بدهی</string>
+    <string name="article_sixteen_form_group_workshop">اطلاعات کارگاه و کارفرما</string>
+    <string name="article_sixteen_form_account_code">کد حساب</string>
+    <string name="article_sixteen_form_employer_name">نام کارفرما</string>
+    <string name="article_sixteen_form_workshop_name">نام کارگاه</string>
+    <string name="article_sixteen_form_address">نشانی</string>
+    <string name="article_sixteen_form_note_window">رسیدگی به بدهی موضوع ماده ۱۶ آیین‌نامهٔ هیئت‌ها تنها برای بدهی‌هایی امکان‌پذیر است که از تاریخ ابلاغ اجراییه بیش از یک روز نگذشته باشد.</string>
+    <string name="article_sixteen_form_note_result">در صورت تأیید، نتیجه از طریق کارتابل درخواست‌ها و پیامک اطلاع داده می‌شود.</string>
+    <string name="article_sixteen_form_check">مفاد فوق را مطالعه کردم و صحت مدارک ارسالی را تأیید می‌کنم.</string>
+    <string name="article_sixteen_form_submit">ثبت درخواست</string>
+    <string name="article_sixteen_form_done_title">درخواست شما ثبت شد</string>
+    <string name="article_sixteen_form_done_body">درخواست رسیدگی به بدهی ماده ۱۶ با کد پیگیری %1$s ثبت شد.</string>
 
     <!-- انواع مدرک اعتراض — codes are the service's own, mirrored from the old app's asset -->
     <string name="ws_obj_doc_1">مدارک رسمی دال بر کارفرمایی کارگاه</string>
@@ -1319,16 +1319,16 @@
     <string name="ws_obj_doc_18">سایر موارد</string>
 
     <!-- انواع رسیدگی ماده ۱۶ — the same asset's investigationItems -->
-    <string name="ws_a16_doc_1">مفاصا حساب ماده (۳۸) قانون مرتبط با موضوع بدهی قطعی</string>
-    <string name="ws_a16_doc_2">مفاصا حساب ماده (۳۸) قانون جهت آن بخش از کارکرد قرارداد اصلی که توسط مقاطعه‌کاران فرعی انجام گردیده است</string>
-    <string name="ws_a16_doc_3">ارائه اسناد و مدارک متقن و مبین فسخ قرارداد</string>
-    <string name="ws_a16_doc_4">ارائه مدارک و مستندات قانونی بیانگر خاتمه قرارداد</string>
-    <string name="ws_a16_doc_5">پرداخت حق بیمه کارکنان از طریق همان کارفرما و مطالبه مضاعف بدهی</string>
-    <string name="ws_a16_doc_6">پرداخت حق بیمه کارکنان با شماره بیمه اصلی و مطالبه بدهی با شماره بیمه فرعی یا دیگر بیمه‌شده</string>
-    <string name="ws_a16_doc_7">مطالبه حق بیمه پس از تاریخ ترک کار لیست و تایید عدم اشتغال وی در گزارش بازرسی بعد از آن</string>
-    <string name="ws_a16_doc_8">مطالبه حق بیمه در دوره خدمت سربازی بیمه‌شده و یا مشمولین سایر صندوق‌ها</string>
-    <string name="ws_a16_doc_9">مطالبه حق بیمه فوت از تاریخ درخواست</string>
-    <string name="ws_a16_doc_10">مطالبه حق بیمه در زمان بیماری، ایام بارداری، دریافت مقرری بیکاری و … بیمه‌شده/بیمه‌شدگان</string>
+    <string name="ws_article_sixteen_doc_1">مفاصا حساب ماده (۳۸) قانون مرتبط با موضوع بدهی قطعی</string>
+    <string name="ws_article_sixteen_doc_2">مفاصا حساب ماده (۳۸) قانون جهت آن بخش از کارکرد قرارداد اصلی که توسط مقاطعه‌کاران فرعی انجام گردیده است</string>
+    <string name="ws_article_sixteen_doc_3">ارائه اسناد و مدارک متقن و مبین فسخ قرارداد</string>
+    <string name="ws_article_sixteen_doc_4">ارائه مدارک و مستندات قانونی بیانگر خاتمه قرارداد</string>
+    <string name="ws_article_sixteen_doc_5">پرداخت حق بیمه کارکنان از طریق همان کارفرما و مطالبه مضاعف بدهی</string>
+    <string name="ws_article_sixteen_doc_6">پرداخت حق بیمه کارکنان با شماره بیمه اصلی و مطالبه بدهی با شماره بیمه فرعی یا دیگر بیمه‌شده</string>
+    <string name="ws_article_sixteen_doc_7">مطالبه حق بیمه پس از تاریخ ترک کار لیست و تایید عدم اشتغال وی در گزارش بازرسی بعد از آن</string>
+    <string name="ws_article_sixteen_doc_8">مطالبه حق بیمه در دوره خدمت سربازی بیمه‌شده و یا مشمولین سایر صندوق‌ها</string>
+    <string name="ws_article_sixteen_doc_9">مطالبه حق بیمه فوت از تاریخ درخواست</string>
+    <string name="ws_article_sixteen_doc_10">مطالبه حق بیمه در زمان بیماری، ایام بارداری، دریافت مقرری بیکاری و … بیمه‌شده/بیمه‌شدگان</string>
 
     <!-- ===================== نام‌نویسی غیرحضوری — the three-step form ===================== -->
     <string name="abs_form_title">افزودن پرسنل جدید</string>
@@ -1362,6 +1362,7 @@
 
     <string name="abs_form_banner">جهت نام‌نویسی افراد فاقد شماره بیمه، لازم است فرم اظهارنامه تکمیل و به همراه تصویر کارت ملی، شناسنامه و یک قطعه عکس بیمه‌شده در مرحلهٔ بعد بارگذاری شود.</string>
     <string name="abs_form_download">دریافت فرم اظهارنامهٔ نام‌نویسی</string>
+    <string name="abs_form_declaration_file">فرم-اظهارنامه-نام‌نویسی.pdf</string>
 
     <string name="abs_form_err_incomplete">لطفاً همهٔ فیلدهای این مرحله را تکمیل کنید.</string>
     <string name="abs_form_err_national_id">کد ملی واردشده معتبر نیست.</string>

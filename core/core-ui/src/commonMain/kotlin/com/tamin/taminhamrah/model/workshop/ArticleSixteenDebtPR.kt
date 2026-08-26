@@ -9,7 +9,7 @@ import androidx.compose.runtime.Immutable
  * one-day filing deadline is measured from — kept raw as well as formatted for that reason.
  */
 @Immutable
-data class Article16DebtPR(
+data class ArticleSixteenDebtPR(
     val debitNumber: String = "",
     val debitNumberLabel: String = "",
     val amount: String = "",
@@ -19,14 +19,14 @@ data class Article16DebtPR(
     val agreementRow: String = "",
     val executiveNotifyDate: String = "",
     val executiveNotifyDateLabel: String = "",
-    val status: Article16RequestStatus = Article16RequestStatus.NONE,
+    val status: ArticleSixteenRequestStatus = ArticleSixteenRequestStatus.NONE,
     /** Addresses the filed request's PDF and the کارشناس message; null while none was filed. */
     val seqNo: Long? = null,
 )
 
 /** The read-only workshop panel on step 1 of the ماده ۱۶ request. */
 @Immutable
-data class Article16WorkshopInfoPR(
+data class ArticleSixteenWorkshopInfoPR(
     val workshopId: String = "",
     val workshopName: String = "",
     val employerName: String = "",

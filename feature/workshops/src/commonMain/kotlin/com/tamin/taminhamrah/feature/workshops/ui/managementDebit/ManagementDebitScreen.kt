@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import taminx.core.core_ui.a16_form_done_body
+import taminx.core.core_ui.article_sixteen_form_done_body
 import org.jetbrains.compose.resources.getString
 import kotlinx.coroutines.flow.Flow
 import com.tamin.taminhamrah.ui.components.toast.success
@@ -31,8 +31,8 @@ import com.tamin.taminhamrah.feature.workshops.ui.components.colors
 import com.tamin.taminhamrah.feature.workshops.ui.components.tint
 import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
-import com.tamin.taminhamrah.model.workshop.Article16DebtPR
-import com.tamin.taminhamrah.model.workshop.Article16RequestStatus
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtPR
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestStatus
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.BackHandler
@@ -46,22 +46,22 @@ import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.article16_action_expert_message
-import taminx.core.core_ui.article16_action_fix_request
-import taminx.core.core_ui.article16_action_request
-import taminx.core.core_ui.article16_debt_amount
-import taminx.core.core_ui.article16_debt_remaining
-import taminx.core.core_ui.article16_executive_notify_date
-import taminx.core.core_ui.article16_request_status
-import taminx.core.core_ui.article16_status_approved
-import taminx.core.core_ui.article16_status_document_defect
-import taminx.core.core_ui.article16_status_none
-import taminx.core.core_ui.article16_status_rejected
-import taminx.core.core_ui.article16_status_submitted
-import taminx.core.core_ui.article16_status_unknown
+import taminx.core.core_ui.article_sixteen_action_expert_message
+import taminx.core.core_ui.article_sixteen_action_fix_request
+import taminx.core.core_ui.article_sixteen_action_request
+import taminx.core.core_ui.article_sixteen_debt_amount
+import taminx.core.core_ui.article_sixteen_debt_remaining
+import taminx.core.core_ui.article_sixteen_executive_notify_date
+import taminx.core.core_ui.article_sixteen_request_status
+import taminx.core.core_ui.article_sixteen_status_approved
+import taminx.core.core_ui.article_sixteen_status_document_defect
+import taminx.core.core_ui.article_sixteen_status_none
+import taminx.core.core_ui.article_sixteen_status_rejected
+import taminx.core.core_ui.article_sixteen_status_submitted
+import taminx.core.core_ui.article_sixteen_status_unknown
 import taminx.core.core_ui.payment_sheet_agreement_row
 import taminx.core.core_ui.payment_sheet_debit_number
-import taminx.core.core_ui.workshop_action_article16
+import taminx.core.core_ui.workshop_action_article_sixteen
 import taminx.core.core_ui.workshop_debt_from_date
 import taminx.core.core_ui.workshop_debt_to_date
 
@@ -111,7 +111,7 @@ fun ManagementDebitContent(
     // row the request is filed against.
     state.form?.let { form ->
         BackHandler { onIntent(ManagementDebitIntent.FormDismissed) }
-        Article16FormPage(
+        ArticleSixteenFormPage(
             form = form,
             workshopName = state.workshopName,
             workshopCode = state.workshopId.takeIf { it.isNotBlank() }?.toPersianDigits(),
@@ -123,7 +123,7 @@ fun ManagementDebitContent(
     }
 
     WorkshopScreenShell(
-        title = stringResource(Res.string.workshop_action_article16),
+        title = stringResource(Res.string.workshop_action_article_sixteen),
         onBack = onBack,
         workshopName = state.workshopName.takeIf { it.isNotBlank() },
         workshopCode = state.workshopId.takeIf { it.isNotBlank() }?.toPersianDigits(),
@@ -177,13 +177,13 @@ fun ManagementDebitContent(
                         }
                     }
                     WorkshopSectionHeader(
-                        title = stringResource(Res.string.workshop_action_article16),
+                        title = stringResource(Res.string.workshop_action_article_sixteen),
                         count = state.visibleDebts.size,
                     )
                 }
             },
         ) { debt ->
-            Article16DebtCard(
+            ArticleSixteenDebtCard(
                 debt = debt,
                 onRequest = { onIntent(ManagementDebitIntent.RequestReview(debt)) },
                 onFix = { onIntent(ManagementDebitIntent.FixRequest(debt)) },
@@ -194,8 +194,8 @@ fun ManagementDebitContent(
 }
 
 @Composable
-private fun Article16DebtCard(
-    debt: Article16DebtPR,
+private fun ArticleSixteenDebtCard(
+    debt: ArticleSixteenDebtPR,
     onRequest: () -> Unit,
     onFix: () -> Unit,
     onExpertMessage: () -> Unit,
@@ -203,7 +203,7 @@ private fun Article16DebtCard(
 ) {
     val colors = LocalTaminColors.current
     var isExpanded by rememberSaveable(debt.debitNumber) { mutableStateOf(false) }
-    val hasRequest = debt.status != Article16RequestStatus.NONE
+    val hasRequest = debt.status != ArticleSixteenRequestStatus.NONE
     val (_, statusColor) = debt.status.tint.colors()
 
     WorkshopRecordCard(
@@ -213,18 +213,18 @@ private fun Article16DebtCard(
         buttons = {
             if (hasRequest) {
                 WorkshopCardButton(
-                    text = stringResource(Res.string.article16_action_expert_message),
+                    text = stringResource(Res.string.article_sixteen_action_expert_message),
                     tone = WorkshopCardButtonTone.NOTICE,
                     onClick = onExpertMessage,
                 )
                 WorkshopCardButton(
-                    text = stringResource(Res.string.article16_action_fix_request),
+                    text = stringResource(Res.string.article_sixteen_action_fix_request),
                     tone = WorkshopCardButtonTone.PRIMARY,
                     onClick = onFix,
                 )
             } else {
                 WorkshopCardButton(
-                    text = stringResource(Res.string.article16_action_request),
+                    text = stringResource(Res.string.article_sixteen_action_request),
                     tone = WorkshopCardButtonTone.PRIMARY,
                     onClick = onRequest,
                 )
@@ -238,13 +238,13 @@ private fun Article16DebtCard(
         )
         TaminDivider()
         DetailRow(
-            label = stringResource(Res.string.article16_executive_notify_date),
+            label = stringResource(Res.string.article_sixteen_executive_notify_date),
             value = debt.executiveNotifyDateLabel,
             verticalPadding = WorkshopDimens.cellVerticalPadding,
         )
         TaminDivider()
         DetailRow(
-            label = stringResource(Res.string.article16_request_status),
+            label = stringResource(Res.string.article_sixteen_request_status),
             value = stringResource(debt.status.label),
             valueColor = statusColor,
             numeric = false,
@@ -254,14 +254,14 @@ private fun Article16DebtCard(
         if (isExpanded) {
             TaminDivider()
             DetailRow(
-                label = stringResource(Res.string.article16_debt_amount),
+                label = stringResource(Res.string.article_sixteen_debt_amount),
                 value = debt.amount,
                 valueColor = colors.blueText,
                 verticalPadding = WorkshopDimens.cellVerticalPadding,
             )
             TaminDivider()
             DetailRow(
-                label = stringResource(Res.string.article16_debt_remaining),
+                label = stringResource(Res.string.article_sixteen_debt_remaining),
                 value = debt.remainingAmount,
                 valueColor = colors.orangeText,
                 verticalPadding = WorkshopDimens.cellVerticalPadding,
@@ -289,14 +289,14 @@ private fun Article16DebtCard(
 }
 
 /** The wording each request state is listed under. */
-private val Article16RequestStatus.label
+private val ArticleSixteenRequestStatus.label
     get() = when (this) {
-        Article16RequestStatus.SUBMITTED -> Res.string.article16_status_submitted
-        Article16RequestStatus.DOCUMENT_DEFECT -> Res.string.article16_status_document_defect
-        Article16RequestStatus.REJECTED -> Res.string.article16_status_rejected
-        Article16RequestStatus.APPROVED -> Res.string.article16_status_approved
-        Article16RequestStatus.NONE -> Res.string.article16_status_none
-        Article16RequestStatus.UNKNOWN -> Res.string.article16_status_unknown
+        ArticleSixteenRequestStatus.SUBMITTED -> Res.string.article_sixteen_status_submitted
+        ArticleSixteenRequestStatus.DOCUMENT_DEFECT -> Res.string.article_sixteen_status_document_defect
+        ArticleSixteenRequestStatus.REJECTED -> Res.string.article_sixteen_status_rejected
+        ArticleSixteenRequestStatus.APPROVED -> Res.string.article_sixteen_status_approved
+        ArticleSixteenRequestStatus.NONE -> Res.string.article_sixteen_status_none
+        ArticleSixteenRequestStatus.UNKNOWN -> Res.string.article_sixteen_status_unknown
     }
 
 @PreviewRtlTheme
@@ -309,7 +309,7 @@ private fun ManagementDebitScreenPreview() {
                 workshopName = "آموزشگاه کامپیوتر توکلی-ایمیل",
                 list = PagedListState(
                     items = persistentListOf(
-                        Article16DebtPR(
+                        ArticleSixteenDebtPR(
                             debitNumber = "0960961008971",
                             debitNumberLabel = "۰۹۶۰۹۶۱۰۰۸۹۷۱",
                             executiveNotifyDateLabel = "۱۴۰۵/۰۵/۲۵",
@@ -318,7 +318,7 @@ private fun ManagementDebitScreenPreview() {
                             fromDate = "۱۳۹۶/۰۷/۰۱",
                             toDate = "۱۳۹۷/۰۶/۳۱",
                             agreementRow = "۰۹۶۰۰۰۰۲",
-                            status = Article16RequestStatus.NONE,
+                            status = ArticleSixteenRequestStatus.NONE,
                         ),
                     ),
                 ),
@@ -337,8 +337,8 @@ private fun HandleManagementDebitEvents(events: Flow<ManagementDebitEvent>) {
         events.collect { event ->
             when (event) {
                 is ManagementDebitEvent.ShowMessage -> toaster.error(getString(event.message))
-                is ManagementDebitEvent.Article16Filed -> toaster.success(
-                    getString(Res.string.a16_form_done_body, event.referenceCode),
+                is ManagementDebitEvent.ArticleSixteenFiled -> toaster.success(
+                    getString(Res.string.article_sixteen_form_done_body, event.referenceCode),
                 )
             }
         }

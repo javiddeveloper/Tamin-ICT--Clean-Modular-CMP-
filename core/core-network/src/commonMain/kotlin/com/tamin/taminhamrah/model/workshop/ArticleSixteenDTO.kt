@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
  * on step 1 of the ماده ۱۶ request.
  */
 @Serializable
-data class Article16WorkshopInfoDTO(
+data class ArticleSixteenWorkshopInfoDTO(
     @SerialName("workshopId") val workshopId: String? = null,
     @SerialName("workshopName") val workshopName: String? = null,
     @SerialName("branchCode") val branchCode: String? = null,
@@ -22,13 +22,13 @@ data class Article16WorkshopInfoDTO(
  * نقص مدارک request, plus the documents already on file.
  */
 @Serializable
-data class Article16RequestInfoDTO(
+data class ArticleSixteenRequestInfoDTO(
     @SerialName("defectDesc") val defectDescription: String? = null,
-    @SerialName("objectionPhotos") val objectionPhotos: List<Article16PhotoDTO> = emptyList(),
+    @SerialName("objectionPhotos") val objectionPhotos: List<ArticleSixteenPhotoDTO> = emptyList(),
 )
 
 @Serializable
-data class Article16PhotoDTO(
+data class ArticleSixteenPhotoDTO(
     @SerialName("guid") val guid: String? = null,
     @SerialName("seqNo") val seqNo: Int? = null,
     @SerialName("type") val type: String? = null,
@@ -41,7 +41,7 @@ data class Article16PhotoDTO(
  * match [WorkshopsDebtListModelDTO] so nothing is narrowed on the way out.
  */
 @Serializable
-data class Article16SaveRequestDTO(
+data class ArticleSixteenSaveRequestDTO(
     @SerialName("workshopId") val workshopId: String? = null,
     @SerialName("branchCode") val branchCode: String? = null,
     @SerialName("debitNumber") val debitNumber: String? = null,
@@ -65,6 +65,6 @@ data class Article16SaveRequestDTO(
 
 /** Result of `debit-comitte-save`; [refId] is the tracking code the success message quotes. */
 @Serializable
-data class Article16SaveResultDTO(
+data class ArticleSixteenSaveResultDTO(
     @SerialName("refId") val refId: String? = null,
 )

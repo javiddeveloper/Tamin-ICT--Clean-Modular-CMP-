@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
  *
  * The row splits in two: the relation-with-Tamin columns are flat on the row, while the person and
  * their registration request arrive nested under `personal`. `personal.request` being null is the
- * draft state — that is what decides which row actions are offered, so it is modelled as nullable
+ * draft state — that is what decides which row actions are offered, so it is modeled as nullable
  * all the way through rather than defaulted away.
  */
 @Serializable
@@ -23,19 +23,12 @@ data class WorkshopNewMemberDTO(
 )
 
 @Serializable
-data class NewMemberPersonDTO(
-    @SerialName("id") val id: Long? = null,
-    @SerialName("nationalId") val nationalId: String? = null,
-    @SerialName("firstName") val firstName: String? = null,
-    @SerialName("lastName") val lastName: String? = null,
-    @SerialName("dateOfBirth") val dateOfBirth: Long? = null,
-    /**
+data class NewMemberPersonDTO(@SerialName("id") val id: Long? = null, @SerialName("nationalId") val nationalId: String? = null, @SerialName("firstName") val firstName: String? = null, @SerialName("lastName") val lastName: String? = null, @SerialName("dateOfBirth") val dateOfBirth: Long? = null, /** Carried so a draft can be re-opened with the cities it was filed under. */
+    @SerialName("cityOfBirthId") val cityOfBirthId: String? = null, @SerialName("cityOfIssueId") val cityOfIssueId: String? = null, /**
      * The server misspells this as `refrenceCode`. Leave it — a linter "correcting" it to
-     * `referenceCode` silently stops the field deserialising.
+     * `referenceCode` silently stops the field deserializing.
      */
-    @SerialName("refrenceCode") val refrenceCode: String? = null,
-    @SerialName("request") val request: NewMemberRequestDTO? = null,
-)
+    @SerialName("refrenceCode") val refrenceCode: String? = null, @SerialName("request") val request: NewMemberRequestDTO? = null,)
 
 @Serializable
 data class NewMemberRequestDTO(

@@ -3,7 +3,7 @@ package com.tamin.taminhamrah.feature.workshops.ui.components
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
-import com.tamin.taminhamrah.model.workshop.Article16RequestStatus
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestStatus
 import com.tamin.taminhamrah.model.workshop.PaymentSheetStatus
 import com.tamin.taminhamrah.model.workshop.WorkshopActivityStatus
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -50,11 +50,11 @@ val PaymentSheetStatus.tint: StatusTint
         PaymentSheetStatus.UNKNOWN -> StatusTint.NEUTRAL
     }
 
-val Article16RequestStatus.tint: StatusTint
+val ArticleSixteenRequestStatus.tint: StatusTint
     get() = when (this) {
-        Article16RequestStatus.APPROVED -> StatusTint.POSITIVE
-        Article16RequestStatus.DOCUMENT_DEFECT -> StatusTint.WARNING
-        Article16RequestStatus.REJECTED -> StatusTint.NEGATIVE
-        Article16RequestStatus.SUBMITTED -> StatusTint.INFO
-        Article16RequestStatus.NONE, Article16RequestStatus.UNKNOWN -> StatusTint.NEUTRAL
+        ArticleSixteenRequestStatus.APPROVED -> StatusTint.POSITIVE
+        ArticleSixteenRequestStatus.DOCUMENT_DEFECT -> StatusTint.WARNING
+        ArticleSixteenRequestStatus.REJECTED -> StatusTint.NEGATIVE
+        ArticleSixteenRequestStatus.SUBMITTED -> StatusTint.INFO
+        ArticleSixteenRequestStatus.NONE, ArticleSixteenRequestStatus.UNKNOWN -> StatusTint.NEUTRAL
     }

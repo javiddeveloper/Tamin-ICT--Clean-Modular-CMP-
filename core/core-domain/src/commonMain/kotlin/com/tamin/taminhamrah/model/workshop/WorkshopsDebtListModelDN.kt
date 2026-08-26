@@ -28,7 +28,7 @@ data class WorkshopsDebtListModelDN(
     val primaryVoteNumber: String = "",
     val primaryVoteDate: String = "",
     val seqNo: Long? = null,
-    val status: Article16RequestStatus = Article16RequestStatus.NONE,
+    val status: ArticleSixteenRequestStatus = ArticleSixteenRequestStatus.NONE,
 )
 
 /**
@@ -37,7 +37,7 @@ data class WorkshopsDebtListModelDN(
  * [NONE] is the row with no request yet — the only state that offers filing one. The service sends
  * no code at all in that case, so it is not given one here either.
  */
-enum class Article16RequestStatus(val code: String?) {
+enum class ArticleSixteenRequestStatus(val code: String?) {
     NONE(null),
 
     /** ثبت درخواست */
@@ -57,7 +57,7 @@ enum class Article16RequestStatus(val code: String?) {
     ;
 
     companion object {
-        fun fromCode(code: String?): Article16RequestStatus = when {
+        fun fromCode(code: String?): ArticleSixteenRequestStatus = when {
             code.isNullOrBlank() || code == "0" -> NONE
             else -> entries.firstOrNull { it.code == code } ?: UNKNOWN
         }

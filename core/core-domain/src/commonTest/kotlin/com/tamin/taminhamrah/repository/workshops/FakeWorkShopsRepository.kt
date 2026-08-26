@@ -5,11 +5,11 @@ import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
 import com.tamin.taminhamrah.model.workshop.NewMemberIsNewDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.util.PagedListDN
-import com.tamin.taminhamrah.model.workshop.Article16DebtQuery
-import com.tamin.taminhamrah.model.workshop.Article16RequestInfoDN
-import com.tamin.taminhamrah.model.workshop.Article16SaveRequestDN
-import com.tamin.taminhamrah.model.workshop.Article16SaveResultDN
-import com.tamin.taminhamrah.model.workshop.Article16WorkshopInfoDN
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtQuery
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestInfoDN
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveRequestDN
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveResultDN
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoDN
 import com.tamin.taminhamrah.model.workshop.DebitObjectionRequestDN
 import com.tamin.taminhamrah.model.workshop.DebitObjectionResultDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentDN
@@ -47,7 +47,7 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     var workshopDebits: PagedListDN<WorkShopDebtDN> = PagedListDN()
     var demandDocuments: PagedListDN<WorkshopDemandDocDN> = PagedListDN()
     var objectionableDebits: PagedListDN<WorkShopDebtDN> = PagedListDN()
-    var article16Debts: PagedListDN<WorkshopsDebtListModelDN> = PagedListDN()
+    var articleSixteenDebts: PagedListDN<WorkshopsDebtListModelDN> = PagedListDN()
     var members: PagedListDN<WorkshopMemberDN> = PagedListDN()
     var stackHolders: PagedListDN<WorkshopStackHolderDN> = PagedListDN()
     var recentlyAddedMembers: PagedListDN<WorkshopNewMemberDN> = PagedListDN()
@@ -57,9 +57,9 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     var paymentResult: DebitPaymentDN = DebitPaymentDN()
     var objectionElapsedDays: Int = 0
     var objectionResult: DebitObjectionResultDN = DebitObjectionResultDN()
-    var article16WorkshopInfo: Article16WorkshopInfoDN = Article16WorkshopInfoDN()
-    var article16RequestInfo: Article16RequestInfoDN = Article16RequestInfoDN()
-    var article16SaveResult: Article16SaveResultDN = Article16SaveResultDN()
+    var articleSixteenWorkshopInfo: ArticleSixteenWorkshopInfoDN = ArticleSixteenWorkshopInfoDN()
+    var articleSixteenRequestInfo: ArticleSixteenRequestInfoDN = ArticleSixteenRequestInfoDN()
+    var articleSixteenSaveResult: ArticleSixteenSaveResultDN = ArticleSixteenSaveResultDN()
     var pdf: PdfDownloadDN = PdfDownloadDN()
     var confirmReferenceCode: String = ""
 
@@ -76,7 +76,7 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         private set
     var lastNewMemberQuery: WorkshopNewMemberQuery? = null
         private set
-    var lastArticle16Query: Article16DebtQuery? = null
+    var lastArticleSixteenQuery: ArticleSixteenDebtQuery? = null
         private set
     var lastPaymentRequest: DebitPaymentRequestDN? = null
         private set
@@ -167,26 +167,26 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     ): NewMemberRegistrationResultDN = NewMemberRegistrationResultDN()
     }
 
-    override suspend fun getArticle16Debts(
-        query: Article16DebtQuery,
+    override suspend fun getArticleSixteenDebts(
+        query: ArticleSixteenDebtQuery,
     ): PagedListDN<WorkshopsDebtListModelDN> = answer {
-        lastArticle16Query = query
-        article16Debts
+        lastArticleSixteenQuery = query
+        articleSixteenDebts
     }
 
-    override suspend fun getArticle16WorkshopInfo(
+    override suspend fun getArticleSixteenWorkshopInfo(
         workshopId: String,
         branchCode: String,
-    ): Article16WorkshopInfoDN = answer { article16WorkshopInfo }
+    ): ArticleSixteenWorkshopInfoDN = answer { articleSixteenWorkshopInfo }
 
-    override suspend fun getArticle16RequestInfo(objectionNumber: Long): Article16RequestInfoDN =
-        answer { article16RequestInfo }
+    override suspend fun getArticleSixteenRequestInfo(objectionNumber: Long): ArticleSixteenRequestInfoDN =
+        answer { articleSixteenRequestInfo }
 
-    override suspend fun saveArticle16Request(
-        request: Article16SaveRequestDN,
-    ): Article16SaveResultDN = answer { article16SaveResult }
+    override suspend fun saveArticleSixteenRequest(
+        request: ArticleSixteenSaveRequestDN,
+    ): ArticleSixteenSaveResultDN = answer { articleSixteenSaveResult }
 
-    override suspend fun getArticle16ReportPdf(seqNo: Long): PdfDownloadDN = answer { pdf }
+    override suspend fun getArticleSixteenReportPdf(seqNo: Long): PdfDownloadDN = answer { pdf }
 
     override suspend fun getWorkshopMembers(
         query: WorkshopMemberQuery,

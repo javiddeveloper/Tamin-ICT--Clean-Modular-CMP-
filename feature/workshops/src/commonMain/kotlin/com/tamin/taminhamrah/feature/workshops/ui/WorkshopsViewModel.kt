@@ -10,12 +10,12 @@ import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState.PartialState
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
-import com.tamin.taminhamrah.model.workshop.Article16DebtQuery
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopActivityStatus
 import com.tamin.taminhamrah.model.workshop.WorkshopListQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
-import com.tamin.taminhamrah.useCases.workshops.GetArticle16DebtsUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenDebtsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetEmployerAgreementsUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -27,7 +27,7 @@ import taminx.core.core_ui.workshop_no_debt_found
 
 class WorkshopsViewModel(
     private val getEmployerAgreements: GetEmployerAgreementsUseCase,
-    private val getArticle16Debts: GetArticle16DebtsUseCase,
+    private val getArticleSixteenDebts: GetArticleSixteenDebtsUseCase,
 ) : BaseViewModel<WorkshopsUiState, PartialState, WorkshopsEvent, WorkshopsIntent>(
     initialState = WorkshopsUiState()
 ) {
@@ -138,14 +138,14 @@ class WorkshopsViewModel(
         action: WorkshopAction,
         workshop: WorkshopPR,
     ): Flow<PartialState> = flow {
-        if (action != WorkshopAction.ARTICLE16) {
+        if (action != WorkshopAction.ARTICLE_SIXTEEN) {
             sendEvent(workshop.navigationEvent(action))
             return@flow
         }
 
         emit(PartialState.Loading)
-        val debts = getArticle16Debts(
-            Article16DebtQuery(workshopId = workshop.workshopId, branchCode = workshop.branchCode)
+        val debts = getArticleSixteenDebts(
+            ArticleSixteenDebtQuery(workshopId = workshop.workshopId, branchCode = workshop.branchCode)
         )
         emit(PartialState.Loaded(uiState.value.list))
         if (debts.items.isEmpty()) {

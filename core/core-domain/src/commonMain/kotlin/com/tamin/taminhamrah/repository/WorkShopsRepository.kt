@@ -2,11 +2,11 @@ package com.tamin.taminhamrah.repository
 
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.util.PagedListDN
-import com.tamin.taminhamrah.model.workshop.Article16DebtQuery
-import com.tamin.taminhamrah.model.workshop.Article16RequestInfoDN
-import com.tamin.taminhamrah.model.workshop.Article16SaveRequestDN
-import com.tamin.taminhamrah.model.workshop.Article16SaveResultDN
-import com.tamin.taminhamrah.model.workshop.Article16WorkshopInfoDN
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtQuery
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestInfoDN
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveRequestDN
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveResultDN
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoDN
 import com.tamin.taminhamrah.model.workshop.DebitObjectionRequestDN
 import com.tamin.taminhamrah.model.workshop.DebitObjectionResultDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentDN
@@ -106,18 +106,18 @@ interface WorkShopsRepository {
 
     // ---------------------------------------------------------------------- رسیدگی به بدهی ماده ۱۶
 
-    suspend fun getArticle16Debts(query: Article16DebtQuery): PagedListDN<WorkshopsDebtListModelDN>
+    suspend fun getArticleSixteenDebts(query: ArticleSixteenDebtQuery): PagedListDN<WorkshopsDebtListModelDN>
 
-    suspend fun getArticle16WorkshopInfo(
+    suspend fun getArticleSixteenWorkshopInfo(
         workshopId: String,
         branchCode: String,
-    ): Article16WorkshopInfoDN
+    ): ArticleSixteenWorkshopInfoDN
 
-    suspend fun getArticle16RequestInfo(objectionNumber: Long): Article16RequestInfoDN
+    suspend fun getArticleSixteenRequestInfo(objectionNumber: Long): ArticleSixteenRequestInfoDN
 
-    suspend fun saveArticle16Request(request: Article16SaveRequestDN): Article16SaveResultDN
+    suspend fun saveArticleSixteenRequest(request: ArticleSixteenSaveRequestDN): ArticleSixteenSaveResultDN
 
-    suspend fun getArticle16ReportPdf(seqNo: Long): PdfDownloadDN
+    suspend fun getArticleSixteenReportPdf(seqNo: Long): PdfDownloadDN
 
     // ------------------------------------------------------------------------ کارکنان / ذینفعان
 
