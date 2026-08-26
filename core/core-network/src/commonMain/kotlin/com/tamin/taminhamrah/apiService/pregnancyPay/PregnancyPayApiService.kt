@@ -19,7 +19,7 @@ interface PregnancyPayApiService {
     suspend fun calculateEstimate(
         @Path("startDateTimeStamp") startDateTimeStamp: String,
         @Path("endDateTimeStamp") endDateTimeStamp: String,
-    ): BaseDTO<List<String>?>
+    ): BaseDTO<List<String?>?>
 
     @GET("StpBaseinfo/ShorttermBarTypes")
     suspend fun getPregnancyStatusList(): BaseDTO<PregnancyOptionListDTO>

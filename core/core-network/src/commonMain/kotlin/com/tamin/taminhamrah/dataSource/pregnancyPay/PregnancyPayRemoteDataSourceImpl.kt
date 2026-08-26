@@ -72,7 +72,7 @@ class PregnancyPayRemoteDataSourceImpl(
     override suspend fun calculateEstimate(
         startDateTimeStamp: String,
         endDateTimeStamp: String,
-    ): List<String>? {
+    ): List<String?>? {
         return try {
             val response = pregnancyPayApiService.calculateEstimate(startDateTimeStamp, endDateTimeStamp)
             val result = response.extractData()

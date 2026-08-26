@@ -82,9 +82,9 @@ fun PregnancyRequestFileDN.toDTO(): PregnancyRequestFileDTO {
     )
 }
 
-fun List<String>.toPregnancyPayEstimateDomain(): PregnancyPayEstimateDN {
+fun List<String?>.toPregnancyPayEstimateDomain(): PregnancyPayEstimateDN {
     return PregnancyPayEstimateDN(
-        averageSalaryLast90Days = this[0],
-        amountPayable = this[1],
+        averageSalaryLast90Days = getOrNull(0).orEmpty(),
+        amountPayable = getOrNull(1).orEmpty(),
     )
 }

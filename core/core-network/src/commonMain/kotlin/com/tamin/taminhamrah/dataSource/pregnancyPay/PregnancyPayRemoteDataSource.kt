@@ -10,5 +10,5 @@ interface PregnancyPayRemoteDataSource {
     suspend fun getPregnancyStatusList(): PregnancyOptionListDTO?
     suspend fun getPregnancyTypeList(): PregnancyOptionListDTO?
     suspend fun sendPregnancyPayRequest(request: SendPregnancyPayRequestDTO): SendPregnancyPayResponseDTO?
-    suspend fun calculateEstimate(startDateTimeStamp: String, endDateTimeStamp: String): List<String>?
+    suspend fun calculateEstimate(startDateTimeStamp: String, endDateTimeStamp: String): List<String?>?
 }
