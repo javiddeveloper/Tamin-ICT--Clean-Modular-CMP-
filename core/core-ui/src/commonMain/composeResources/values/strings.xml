@@ -927,6 +927,8 @@
     <string name="issuance_certificate_error_select_pensioner">شماره مستمری را انتخاب کنید</string>
     <string name="issuance_certificate_error_select_recipient">گیرنده را انتخاب کنید</string>
     <string name="issuance_certificate_error_enter_branch_name">نام شعبه را وارد کنید</string>
+    <string name="issuance_certificate_error_invalid_branch_name_chars">نام شعبه شامل کاراکتر غیر مجاز است</string>
+    <string name="issuance_certificate_error_branch_name_too_short">نام شعبه نمی‌تواند کمتر از دو کاراکتر باشد</string>
 
     <!-- کارگاه‌های کارفرما -->
     <string name="workshops_title">کارگاه‌های کارفرما</string>

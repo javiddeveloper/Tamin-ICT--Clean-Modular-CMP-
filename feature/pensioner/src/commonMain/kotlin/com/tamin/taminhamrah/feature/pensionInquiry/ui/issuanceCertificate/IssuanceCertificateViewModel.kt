@@ -63,7 +63,7 @@ class IssuanceCertificateViewModel(
     private fun handleInit(): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
         getIdentityInfoUseCase()
-            .catch { }
+            .catch { sendEvent(IssuanceCertificateEvent.ShowToast(it.toSingleLineMessage())) }
             .collect { identity ->
                 val fullName = listOfNotNull(identity.firstName, identity.lastName)
                     .joinToString(" ")

@@ -16,6 +16,7 @@ import com.tamin.taminhamrah.model.pension.InquirePensionCertificateDN
 import com.tamin.taminhamrah.model.pension.PensionIdDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
 import com.tamin.taminhamrah.model.pension.PayRollDN
+import com.tamin.taminhamrah.model.pension.PayRollInboxDN
 import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDN
 import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDN
@@ -95,6 +96,22 @@ class IssuanceCertificateViewModelTest {
             assertEquals(2, state.pensionerIds.size)
             assertEquals("111", state.selectedPensionerId)
             assertEquals("سیدرحمت اله میرفضلی", state.fullName)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenIdentityInfoFetchFails_pensionerIdsStillLoad() = runTest(testDispatcher) {
+        pensionRepository.pensionIdResult = listOf(PensionIdDN("111"), PensionIdDN("222"))
+        userRepository.identityShouldThrow = true
+        viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        viewModel.uiState.test {
+            val state = expectMostRecentItem()
+            assertEquals("", state.fullName)
+            assertEquals(2, state.pensionerIds.size)
+            assertEquals("111", state.selectedPensionerId)
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -387,6 +404,8 @@ private class FakeIssuanceCertificatePensionRepository : PensionRepository {
         error("not used in IssuanceCertificateViewModel")
     override suspend fun sendEdictPensionerToMyInbox(filters: List<ApiFilterDN>): Flow<EdictPensionerInboxDN> =
         error("not used in IssuanceCertificateViewModel")
+    override suspend fun sendPayRollToInbox(filters: List<ApiFilterDN>): Flow<PayRollInboxDN> =
+        error("not used in IssuanceCertificateViewModel")
     override suspend fun sendRequestInquirePensionCertificate(filters: List<ApiFilterDN>): Flow<InquirePensionCertificateDN> =
         error("not used in IssuanceCertificateViewModel")
 }
@@ -398,6 +417,7 @@ private class FakeIssuanceCertificateUserRepository : UserRepository {
     var wageCertificateShouldThrow: Boolean = false
     var wageCertificateError: Throwable = RuntimeException("fake error")
     var lastWageCertificateFilters: List<ApiFilterDN> = emptyList()
+    var identityShouldThrow: Boolean = false
     var identityResult: IdentityInfoDN = IdentityInfoDN(
         cityOfBirthId = null,
         cityOfIssueId = null,
@@ -426,6 +446,7 @@ private class FakeIssuanceCertificateUserRepository : UserRepository {
     }
 
     override fun getIdentityInfo(): Flow<IdentityInfoDN> = flow {
+        if (identityShouldThrow) throw RuntimeException("fake identity error")
         emit(identityResult)
     }
     override suspend fun getUserProfileImage(): Flow<String> =
