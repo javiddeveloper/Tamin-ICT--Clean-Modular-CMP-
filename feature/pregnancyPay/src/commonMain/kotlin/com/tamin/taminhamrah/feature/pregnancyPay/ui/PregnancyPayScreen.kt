@@ -27,6 +27,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Warning
@@ -38,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -63,6 +65,7 @@ import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.PregnancyPayPicker
 import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.PregnancyPayRequiredDocumentIds
 import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.PregnancyPayUiState
 import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.REST_DAYS_REFERENCE_CAP_DAYS
+import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.bytesOrNull
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
@@ -78,6 +81,7 @@ import com.tamin.taminhamrah.ui.components.StepState
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
+import com.tamin.taminhamrah.ui.components.TaminImageViewer
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.components.TaminStyledTextField
 import com.tamin.taminhamrah.ui.components.TaminText
@@ -100,9 +104,11 @@ import io.github.vinceglb.filekit.dialogs.compose.rememberCameraPickerLauncher
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable.isActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -171,6 +177,8 @@ import taminx.core.core_ui.pregnancy_pay_submit_request
 import taminx.core.core_ui.pregnancy_pay_submit_success_confirm
 import taminx.core.core_ui.pregnancy_pay_submit_success_fallback
 import taminx.core.core_ui.pregnancy_pay_submit_success_title
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 @Composable
 fun PregnancyPayScreen(
@@ -413,12 +421,9 @@ private fun PregnancyPayContent(
         PregnancyPayPicker.DOCUMENT_SOURCE -> {
             val activeDocument = PregnancyPayDocumentChecklist.find { it.id == state.activeDocumentId }
             if (activeDocument != null) {
-                val hasFile = state.documents[activeDocument.id]?.let {
-                    it !is PregnancyPayDocumentState.Empty
-                } == true
                 TaminDocumentSourceSheet(
                     title = stringResource(activeDocument.titleRes),
-                    showRemoveOption = hasFile,
+                    showRemoveOption = false,
                     onSelectCamera = {
                         onIntent(
                             PregnancyPayIntent.OnDocumentSourceSelected(
@@ -435,7 +440,6 @@ private fun PregnancyPayContent(
                             )
                         )
                     },
-                    onRemove = { onIntent(PregnancyPayIntent.OnDocumentRemoveClicked(activeDocument.id)) },
                     onDismiss = { onIntent(PregnancyPayIntent.OnPickerDismissed) },
                 )
             }
@@ -611,7 +615,7 @@ private fun PregnancyPayLandingStep(
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
-                    imageVector = vectorResource(Res.drawable.ic_info),
+                    imageVector = Icons.Filled.Calculate,
                     contentDescription = null,
                     tint = colors.blueText,
                     modifier = Modifier.size(IconSize.small),
@@ -1017,6 +1021,20 @@ private fun PregnancyPayBackStepButton(
     }
 }
 
+/**
+ * Encodes off the composition/main thread — a multi-MB camera photo would otherwise block the
+ * main thread while the card is composing. Returns null (card shows its non-thumbnail state)
+ * until the encode finishes.
+ */
+@OptIn(ExperimentalEncodingApi::class)
+@Composable
+private fun rememberBase64Thumbnail(bytes: ByteArray?): String? {
+    val state = produceState<String?>(initialValue = null, bytes) {
+        value = bytes?.let { withContext(Dispatchers.Default) { Base64.Default.encode(it) } }
+    }
+    return state.value
+}
+
 @Composable
 private fun PregnancyPayDocumentsStep(
     state: PregnancyPayUiState,
@@ -1024,6 +1042,7 @@ private fun PregnancyPayDocumentsStep(
     onBack: () -> Unit,
 ) {
     val colors = LocalTaminColors.current
+    var previewDocumentId by remember { mutableStateOf<String?>(null) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -1067,15 +1086,28 @@ private fun PregnancyPayDocumentsStep(
 
             PregnancyPayDocumentChecklist.forEachIndexed { index, document ->
                 val documentState = state.documents[document.id] ?: PregnancyPayDocumentState.Empty
+                val isUploaded = documentState is PregnancyPayDocumentState.Uploaded
+                val thumbnailBase64 = rememberBase64Thumbnail(documentState.bytesOrNull())
                 TaminDocumentUploadCard(
                     title = stringResource(document.titleRes),
                     state = documentState.toUploadState(),
                     statusText = document.subtitleRes?.let { stringResource(it) } ?: documentState.statusText(),
                     isRequired = document.isRequired,
-                    onCardClick = if (documentState is PregnancyPayDocumentState.Uploading) {
+                    thumbnailBase64 = thumbnailBase64,
+                    onCardClick = if (documentState is PregnancyPayDocumentState.Uploading || isUploaded) {
                         null
                     } else {
                         { onIntent(PregnancyPayIntent.OnDocumentCardClicked(document.id)) }
+                    },
+                    onPreviewClick = if (isUploaded) {
+                        { previewDocumentId = document.id }
+                    } else {
+                        null
+                    },
+                    onDeleteClick = if (isUploaded) {
+                        { onIntent(PregnancyPayIntent.OnDocumentRemoveClicked(document.id)) }
+                    } else {
+                        null
                     },
                 )
                 if (index != PregnancyPayDocumentChecklist.lastIndex) {
@@ -1119,6 +1151,17 @@ private fun PregnancyPayDocumentsStep(
         PregnancyPaySubmitSuccessDialog(
             message = state.submittedResultMessage,
             onAcknowledged = { onIntent(PregnancyPayIntent.OnSubmitSuccessAcknowledged) },
+        )
+    }
+
+    val previewDocument = previewDocumentId?.let { id -> PregnancyPayDocumentChecklist.find { it.id == id } }
+    val previewState = previewDocumentId?.let { state.documents[it] } as? PregnancyPayDocumentState.Uploaded
+    val previewBase64 = rememberBase64Thumbnail(previewState?.bytes)
+    if (previewDocument != null && previewState != null && previewBase64 != null) {
+        TaminImageViewer(
+            title = stringResource(previewDocument.titleRes),
+            url = previewBase64,
+            onDismiss = { previewDocumentId = null },
         )
     }
 }
