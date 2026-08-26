@@ -192,7 +192,7 @@ fun RegistrationFormPage(
                 if (form.isLastStep) Res.string.abs_form_submit else Res.string.ws_form_next,
             ),
             isBusy = form.isBusy,
-        onNext = { onIntent(WorkshopRecentlyAddedMembersIntent.FormNext) },
+            onNext = { onIntent(WorkshopRecentlyAddedMembersIntent.FormNext) },
             onPrev = if (form.step > 1) {
                 { onIntent(WorkshopRecentlyAddedMembersIntent.FormPrev) }
             } else {

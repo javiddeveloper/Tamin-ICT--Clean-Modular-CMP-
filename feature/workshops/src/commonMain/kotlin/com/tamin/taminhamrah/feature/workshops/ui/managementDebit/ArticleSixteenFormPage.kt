@@ -146,7 +146,7 @@ fun ArticleSixteenFormPage(
                 if (form.isLastStep) Res.string.article_sixteen_form_submit else Res.string.ws_form_next,
             ),
             isBusy = form.isBusy,
-        onNext = { onIntent(ManagementDebitIntent.FormNext) },
+            onNext = { onIntent(ManagementDebitIntent.FormNext) },
             onPrev = if (form.step > 1) {
                 { onIntent(ManagementDebitIntent.FormPrev) }
             } else {

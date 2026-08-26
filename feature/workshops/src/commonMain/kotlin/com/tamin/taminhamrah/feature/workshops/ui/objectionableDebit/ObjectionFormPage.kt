@@ -149,7 +149,7 @@ fun ObjectionFormPage(
                 capacity = OBJECTION_MAX_DOCUMENTS,
                 onAdd = { isTypeSheetOpen = true },
                 isUploading = form.isUploading,
-        onRemove = { index ->
+                onRemove = { index ->
                     onIntent(ObjectionableDebitIntent.FormRemoveDocument(index))
                 },
             )
@@ -184,7 +184,7 @@ fun ObjectionFormPage(
         WorkshopFormFooter(
             nextLabel = stringResource(Res.string.obj_form_submit),
             isBusy = form.isBusy,
-        onNext = { onIntent(ObjectionableDebitIntent.FormSubmit) },
+            onNext = { onIntent(ObjectionableDebitIntent.FormSubmit) },
         )
     }
 
