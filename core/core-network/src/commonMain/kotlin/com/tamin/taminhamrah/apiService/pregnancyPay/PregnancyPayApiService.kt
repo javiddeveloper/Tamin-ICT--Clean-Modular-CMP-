@@ -8,11 +8,18 @@ import com.tamin.taminhamrah.tools.BaseDTO
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.POST
+import de.jensklingenberg.ktorfit.http.Path
 
 interface PregnancyPayApiService {
 
     @GET("shortterm-request/getRequestInsuredMainInfo")
     suspend fun getMainInfo(): BaseDTO<PregnancyMainInfoDTO>
+
+    @GET("shortterm-request/calcPregnancy/{startDateTimeStamp}/{endDateTimeStamp}")
+    suspend fun calculateEstimate(
+        @Path("startDateTimeStamp") startDateTimeStamp: String,
+        @Path("endDateTimeStamp") endDateTimeStamp: String,
+    ): BaseDTO<List<String>?>
 
     @GET("StpBaseinfo/ShorttermBarTypes")
     suspend fun getPregnancyStatusList(): BaseDTO<PregnancyOptionListDTO>

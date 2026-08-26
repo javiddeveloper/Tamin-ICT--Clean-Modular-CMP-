@@ -6,4 +6,5 @@ enum class PregnancyPayStep(val index: Int) {
     PregnancyAndNewborn(1),
     DoctorAndRequest(2),
     Documents(3),
+    CalculateEstimate(10),
 }

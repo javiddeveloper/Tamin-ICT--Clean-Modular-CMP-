@@ -6,7 +6,9 @@ import com.tamin.taminhamrah.feature.pregnancyPay.fake.FakePregnancyPayRepositor
 import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.PregnancyPayEvent
 import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.PregnancyPayIntent
 import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.PregnancyPayOptionUi
+import com.tamin.taminhamrah.model.pregnancyPay.PregnancyPayEstimateDN
 import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
+import com.tamin.taminhamrah.useCases.pregnancyPay.CalculatePregnancyPayEstimateUseCase
 import com.tamin.taminhamrah.useCases.pregnancyPay.GetPregnancyMainInfoUseCase
 import com.tamin.taminhamrah.useCases.pregnancyPay.GetPregnancyStatusListUseCase
 import com.tamin.taminhamrah.useCases.pregnancyPay.GetPregnancyTypeListUseCase
@@ -23,6 +25,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -51,6 +54,7 @@ class PregnancyPayViewModelTest {
         getPregnancyTypeListUseCase = GetPregnancyTypeListUseCase(pregnancyPayRepository),
         uploadImageUseCase = UploadImageUseCase(FakeContractsRepository()),
         sendPregnancyPayRequestUseCase = SendPregnancyPayRequestUseCase(pregnancyPayRepository),
+        calculatePregnancyPayEstimateUseCase = CalculatePregnancyPayEstimateUseCase(pregnancyPayRepository),
     )
 
     /** Advances a fresh [viewModel] all the way to [PregnancyPayStep.DoctorAndRequest] with the minimal valid data each earlier step's gate requires. */
@@ -217,5 +221,68 @@ class PregnancyPayViewModelTest {
 
         viewModel.sendIntent(PregnancyPayIntent.BackToPreviousStep)
         assertEquals(PregnancyPayStep.Landing, viewModel.uiState.value.currentStep)
+    }
+
+    @Test
+    fun calculateEstimateClicked_advancesToCalculateEstimateStep() = runTest(testDispatcher) {
+        val viewModel = createViewModel()
+
+        viewModel.sendIntent(PregnancyPayIntent.OnCalculateEstimateClicked)
+
+        assertEquals(PregnancyPayStep.CalculateEstimate, viewModel.uiState.value.currentStep)
+    }
+
+    @Test
+    fun backToPreviousStep_fromCalculateEstimateStep_returnsToLanding() = runTest(testDispatcher) {
+        val viewModel = createViewModel()
+        viewModel.sendIntent(PregnancyPayIntent.OnCalculateEstimateClicked)
+
+        viewModel.sendIntent(PregnancyPayIntent.BackToPreviousStep)
+
+        assertEquals(PregnancyPayStep.Landing, viewModel.uiState.value.currentStep)
+    }
+
+    @Test
+    fun calculateEstimateSubmit_withoutBothDates_doesNothing() = runTest(testDispatcher) {
+        val viewModel = createViewModel()
+        viewModel.sendIntent(PregnancyPayIntent.OnCalculateEstimateClicked)
+        viewModel.sendIntent(PregnancyPayIntent.OnEstimateRestStartDatePicked(millis = 0L, label = "۱۴۰۵/۰۱/۰۱"))
+
+        viewModel.sendIntent(PregnancyPayIntent.OnCalculateEstimateSubmitClicked)
+
+        assertNull(viewModel.uiState.value.estimateResult)
+    }
+
+    @Test
+    fun calculateEstimateSubmit_success_populatesResult() = runTest(testDispatcher) {
+        pregnancyPayRepository.estimateResult = PregnancyPayEstimateDN(
+            averageSalaryLast90Days = "2850000",
+            amountPayable = "91200000",
+        )
+        val viewModel = createViewModel()
+        viewModel.sendIntent(PregnancyPayIntent.OnCalculateEstimateClicked)
+        viewModel.sendIntent(PregnancyPayIntent.OnEstimateRestStartDatePicked(millis = 0L, label = "۱۴۰۵/۰۱/۰۱"))
+        viewModel.sendIntent(PregnancyPayIntent.OnEstimateRestEndDatePicked(millis = 10_000_000L, label = "۱۴۰۵/۰۲/۰۱"))
+
+        viewModel.sendIntent(PregnancyPayIntent.OnCalculateEstimateSubmitClicked)
+
+        val result = viewModel.uiState.value.estimateResult
+        assertNotNull(result)
+        assertEquals("91200000", result.amountPayable)
+        assertNull(viewModel.uiState.value.estimateError)
+    }
+
+    @Test
+    fun calculateEstimateSubmit_failure_setsEstimateError() = runTest(testDispatcher) {
+        pregnancyPayRepository.shouldThrowOnCalculateEstimate = true
+        val viewModel = createViewModel()
+        viewModel.sendIntent(PregnancyPayIntent.OnCalculateEstimateClicked)
+        viewModel.sendIntent(PregnancyPayIntent.OnEstimateRestStartDatePicked(millis = 0L, label = "۱۴۰۵/۰۱/۰۱"))
+        viewModel.sendIntent(PregnancyPayIntent.OnEstimateRestEndDatePicked(millis = 10_000_000L, label = "۱۴۰۵/۰۲/۰۱"))
+
+        viewModel.sendIntent(PregnancyPayIntent.OnCalculateEstimateSubmitClicked)
+
+        assertNotNull(viewModel.uiState.value.estimateError)
+        assertNull(viewModel.uiState.value.estimateResult)
     }
 }

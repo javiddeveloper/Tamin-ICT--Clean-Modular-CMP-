@@ -948,6 +948,17 @@
     <string name="pregnancy_pay_landing_label_account">شمارهٔ حساب</string>
     <string name="pregnancy_pay_landing_calculate_estimate">محاسبهٔ تخمینی مبلغ کمک هزینه</string>
     <string name="pregnancy_pay_landing_start">شروع ثبت کمک هزینهٔ بارداری</string>
+    <string name="pregnancy_pay_estimate_card_title">مشخصات ایام بارداری</string>
+    <string name="pregnancy_pay_estimate_field_start_date">تاریخ شروع استراحت</string>
+    <string name="pregnancy_pay_estimate_field_end_date">تاریخ پایان استراحت</string>
+    <string name="pregnancy_pay_estimate_rest_days_label">%1$s روز استراحت</string>
+    <string name="pregnancy_pay_estimate_submit">محاسبهٔ مبلغ غرامت دستمزد ایام بارداری</string>
+    <string name="pregnancy_pay_estimate_result_rest_days">مدت استراحت</string>
+    <string name="pregnancy_pay_estimate_result_average_salary">میانگین دستمزد ۹۰ روز آخر</string>
+    <string name="pregnancy_pay_estimate_result_amount_payable">مبلغ قابل پرداخت (برآوردی)</string>
+    <string name="pregnancy_pay_estimate_result_disclaimer">این مبلغ برآوردی است و مبلغ قطعی پس از بررسی سابقه و مدارک در شعبه تعیین می‌شود.</string>
+    <string name="pregnancy_pay_estimate_days_unit">روز</string>
+    <string name="pregnancy_pay_estimate_result_rial_unit">ریال</string>
     <string name="picker_loading">در حال بارگذاری...</string>
     <string name="picker_select_hint">انتخاب کنید</string>
     <string name="picker_select_previous_first">ابتدا مورد قبلی را انتخاب کنید</string>

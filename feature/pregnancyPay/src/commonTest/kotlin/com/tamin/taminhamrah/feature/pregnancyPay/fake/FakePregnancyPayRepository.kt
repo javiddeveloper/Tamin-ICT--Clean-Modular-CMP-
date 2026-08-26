@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.pregnancyPay.fake
 
 import com.tamin.taminhamrah.model.pregnancyPay.PregnancyMainInfoDN
 import com.tamin.taminhamrah.model.pregnancyPay.PregnancyOptionDN
+import com.tamin.taminhamrah.model.pregnancyPay.PregnancyPayEstimateDN
 import com.tamin.taminhamrah.model.pregnancyPay.SendPregnancyPayRequestDN
 import com.tamin.taminhamrah.repository.pregnancyPay.PregnancyPayRepository
 import kotlinx.coroutines.flow.Flow
@@ -16,6 +17,14 @@ class FakePregnancyPayRepository : PregnancyPayRepository {
     var shouldThrowOnSend = false
     var sendError: Throwable = RuntimeException("send failed")
     var lastSendRequest: SendPregnancyPayRequestDN? = null
+
+    var estimateResult: PregnancyPayEstimateDN = PregnancyPayEstimateDN(
+        averageSalaryLast90Days = "2850000",
+        amountPayable = "91200000",
+    )
+    var shouldThrowOnCalculateEstimate = false
+    var calculateEstimateError: Throwable = RuntimeException("calculate estimate failed")
+    var lastCalculateEstimateRange: Pair<Long, Long>? = null
 
     override fun getMainInfo(): Flow<PregnancyMainInfoDN?> = flow {
         emit(mainInfoResult)
@@ -33,5 +42,11 @@ class FakePregnancyPayRepository : PregnancyPayRepository {
         lastSendRequest = request
         if (shouldThrowOnSend) throw sendError
         emit(sendResult)
+    }
+
+    override fun calculateEstimate(startDateTimeStamp: Long, endDateTimeStamp: Long): Flow<PregnancyPayEstimateDN> = flow {
+        lastCalculateEstimateRange = startDateTimeStamp to endDateTimeStamp
+        if (shouldThrowOnCalculateEstimate) throw calculateEstimateError
+        emit(estimateResult)
     }
 }

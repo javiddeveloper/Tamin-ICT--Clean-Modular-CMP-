@@ -52,6 +52,14 @@ data class PregnancyPayUiState(
     val submitError: String? = null,
     val hasSubmitted: Boolean = false,
     val submittedResultMessage: String? = null,
+
+    val estimateRestStartDateLabel: String? = null,
+    val estimateRestStartDateTimeStamp: Long? = null,
+    val estimateRestEndDateLabel: String? = null,
+    val estimateRestEndDateTimeStamp: Long? = null,
+    val estimateResult: PregnancyPayEstimateResultUi? = null,
+    val isCalculatingEstimate: Boolean = false,
+    val estimateError: String? = null,
 ) {
     val restDaysCount: Long?
         get() {
@@ -63,6 +71,17 @@ data class PregnancyPayUiState(
 
     val canGoNextFromBranchAndRest: Boolean
         get() = branch != null && restDaysCount != null
+
+    val estimateRestDaysCount: Long?
+        get() {
+            val start = estimateRestStartDateTimeStamp ?: return null
+            val end = estimateRestEndDateTimeStamp ?: return null
+            if (end <= start) return null
+            return (end - start) / MILLIS_PER_DAY
+        }
+
+    val canCalculateEstimate: Boolean
+        get() = estimateRestDaysCount != null && !isCalculatingEstimate
 
     val requiredChildNationalCodeCount: Int
         get() = when (pregnancyType?.id) {
@@ -164,6 +183,11 @@ data class PregnancyPayUiState(
         data class Submitting(val isSubmitting: Boolean) : PartialState
         data class SubmitSucceeded(val resultMessage: String?) : PartialState
         data class SubmitFailed(val message: String) : PartialState
+        data class EstimateRestStartDateSelected(val millis: Long, val label: String) : PartialState
+        data class EstimateRestEndDateSelected(val millis: Long, val label: String) : PartialState
+        data class EstimateCalculating(val isCalculating: Boolean) : PartialState
+        data class EstimateCalculated(val result: PregnancyPayEstimateResultUi) : PartialState
+        data class EstimateFailed(val message: String) : PartialState
     }
 }
 
@@ -197,6 +221,9 @@ sealed interface PregnancyPayIntent {
     data class OnDocumentImagePickFailed(val message: String) : PregnancyPayIntent
     data object OnSubmitDocumentsClicked : PregnancyPayIntent
     data object OnSubmitSuccessAcknowledged : PregnancyPayIntent
+    data class OnEstimateRestStartDatePicked(val millis: Long, val label: String) : PregnancyPayIntent
+    data class OnEstimateRestEndDatePicked(val millis: Long, val label: String) : PregnancyPayIntent
+    data object OnCalculateEstimateSubmitClicked : PregnancyPayIntent
     data object BackToPreviousStep : PregnancyPayIntent
 }
 

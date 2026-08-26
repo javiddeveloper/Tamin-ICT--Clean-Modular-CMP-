@@ -53,6 +53,8 @@ enum class PregnancyPayPicker {
     REST_END_DATE,
     BABY_BIRTH_DATE,
     DOCUMENT_SOURCE,
+    ESTIMATE_REST_START_DATE,
+    ESTIMATE_REST_END_DATE,
 }
 
 enum class PregnancyPayImageSource { CAMERA, GALLERY }
@@ -150,4 +152,11 @@ fun PregnancyPayDocumentState.bytesOrNull(): ByteArray? = when (this) {
 data class PregnancyPayDocumentSubmissionUi(
     val documentFile: String,
     val documentType: String,
+)
+
+@Immutable
+data class PregnancyPayEstimateResultUi(
+    val restDaysCount: Long,
+    val averageSalaryLast90Days: String,
+    val amountPayable: String,
 )

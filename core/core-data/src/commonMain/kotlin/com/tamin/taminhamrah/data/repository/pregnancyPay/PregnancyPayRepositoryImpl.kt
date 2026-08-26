@@ -2,9 +2,11 @@ package com.tamin.taminhamrah.data.repository.pregnancyPay
 
 import com.tamin.taminhamrah.data.mapper.toDTO
 import com.tamin.taminhamrah.data.mapper.toDomain
+import com.tamin.taminhamrah.data.mapper.toPregnancyPayEstimateDomain
 import com.tamin.taminhamrah.dataSource.pregnancyPay.PregnancyPayRemoteDataSource
 import com.tamin.taminhamrah.model.pregnancyPay.PregnancyMainInfoDN
 import com.tamin.taminhamrah.model.pregnancyPay.PregnancyOptionDN
+import com.tamin.taminhamrah.model.pregnancyPay.PregnancyPayEstimateDN
 import com.tamin.taminhamrah.model.pregnancyPay.SendPregnancyPayRequestDN
 import com.tamin.taminhamrah.repository.pregnancyPay.PregnancyPayRepository
 import kotlinx.coroutines.flow.Flow
@@ -30,5 +32,13 @@ class PregnancyPayRepositoryImpl(
 
     override fun sendPregnancyPayRequest(request: SendPregnancyPayRequestDN): Flow<String?> = flow {
         emit(pregnancyPayRemoteDataSource.sendPregnancyPayRequest(request.toDTO())?.shorttermRequest?.resultMessage)
+    }
+
+    override fun calculateEstimate(startDateTimeStamp: Long, endDateTimeStamp: Long): Flow<PregnancyPayEstimateDN> = flow {
+        val result = pregnancyPayRemoteDataSource.calculateEstimate(
+            startDateTimeStamp.toString(),
+            endDateTimeStamp.toString(),
+        )
+        emit(result.orEmpty().toPregnancyPayEstimateDomain())
     }
 }

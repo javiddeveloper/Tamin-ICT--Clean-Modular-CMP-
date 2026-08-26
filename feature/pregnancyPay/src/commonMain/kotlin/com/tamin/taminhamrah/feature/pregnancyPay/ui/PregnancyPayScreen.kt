@@ -69,6 +69,8 @@ import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.bytesOrNull
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.toLongStringOrZero
+import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.LoadingButton
@@ -129,6 +131,17 @@ import taminx.core.core_ui.pregnancy_pay_document_required_counter
 import taminx.core.core_ui.pregnancy_pay_document_status_error_tap_to_retry
 import taminx.core.core_ui.pregnancy_pay_document_status_uploaded
 import taminx.core.core_ui.pregnancy_pay_document_status_uploading
+import taminx.core.core_ui.pregnancy_pay_estimate_card_title
+import taminx.core.core_ui.pregnancy_pay_estimate_days_unit
+import taminx.core.core_ui.pregnancy_pay_estimate_field_end_date
+import taminx.core.core_ui.pregnancy_pay_estimate_field_start_date
+import taminx.core.core_ui.pregnancy_pay_estimate_rest_days_label
+import taminx.core.core_ui.pregnancy_pay_estimate_result_amount_payable
+import taminx.core.core_ui.pregnancy_pay_estimate_result_average_salary
+import taminx.core.core_ui.pregnancy_pay_estimate_result_disclaimer
+import taminx.core.core_ui.pregnancy_pay_estimate_result_rest_days
+import taminx.core.core_ui.pregnancy_pay_estimate_result_rial_unit
+import taminx.core.core_ui.pregnancy_pay_estimate_submit
 import taminx.core.core_ui.pregnancy_pay_field_baby_birth_date
 import taminx.core.core_ui.pregnancy_pay_field_branch_placeholder
 import taminx.core.core_ui.pregnancy_pay_field_child_national_code
@@ -290,7 +303,7 @@ private fun PregnancyPayContent(
         Column(modifier = Modifier.fillMaxSize()) {
             PregnancyPayHeader(onBackClicked = onBackClicked)
 
-            if (state.currentStep != PregnancyPayStep.Landing) {
+            if (state.currentStep.index in 0..3) {
                 PregnancyPayStepIndicator(
                     currentStep = state.currentStep,
                     modifier = Modifier.padding(horizontal = Spacing.page, vertical = Spacing.lg),
@@ -333,6 +346,12 @@ private fun PregnancyPayContent(
                     )
 
                     PregnancyPayStep.Documents -> PregnancyPayDocumentsStep(
+                        state = state,
+                        onIntent = onIntent,
+                        onBack = onBackClicked,
+                    )
+
+                    PregnancyPayStep.CalculateEstimate -> PregnancyPayCalculateEstimateStep(
                         state = state,
                         onIntent = onIntent,
                         onBack = onBackClicked,
@@ -411,6 +430,32 @@ private fun PregnancyPayContent(
             onConfirm = { year, month, day ->
                 onIntent(
                     PregnancyPayIntent.OnBabyBirthDatePicked(
+                        millis = PersianDateFormatter.toEpochMillis(year, month, day),
+                        label = PersianDateFormatter.format(year, month, day),
+                    )
+                )
+            },
+        )
+
+        PregnancyPayPicker.ESTIMATE_REST_START_DATE -> TaminJalaliDatePicker(
+            title = stringResource(Res.string.pregnancy_pay_estimate_field_start_date),
+            onDismiss = { onIntent(PregnancyPayIntent.OnPickerDismissed) },
+            onConfirm = { year, month, day ->
+                onIntent(
+                    PregnancyPayIntent.OnEstimateRestStartDatePicked(
+                        millis = PersianDateFormatter.toEpochMillis(year, month, day),
+                        label = PersianDateFormatter.format(year, month, day),
+                    )
+                )
+            },
+        )
+
+        PregnancyPayPicker.ESTIMATE_REST_END_DATE -> TaminJalaliDatePicker(
+            title = stringResource(Res.string.pregnancy_pay_estimate_field_end_date),
+            onDismiss = { onIntent(PregnancyPayIntent.OnPickerDismissed) },
+            onConfirm = { year, month, day ->
+                onIntent(
+                    PregnancyPayIntent.OnEstimateRestEndDatePicked(
                         millis = PersianDateFormatter.toEpochMillis(year, month, day),
                         label = PersianDateFormatter.format(year, month, day),
                     )
@@ -990,6 +1035,129 @@ private fun PregnancyPayDoctorAndRequestStep(
                 onClick = { onIntent(PregnancyPayIntent.OnNextFromDoctorAndRequestClicked) },
                 enabled = state.canGoNextFromDoctorAndRequest,
             )
+        }
+    }
+}
+
+@Composable
+private fun PregnancyPayCalculateEstimateStep(
+    state: PregnancyPayUiState,
+    onIntent: (PregnancyPayIntent) -> Unit,
+    onBack: () -> Unit,
+) {
+    val colors = LocalTaminColors.current
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.page, vertical = Spacing.lg),
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .taminSurface()
+                    .padding(horizontal = Spacing.lg, vertical = Spacing.lg),
+            ) {
+                Text(
+                    text = stringResource(Res.string.pregnancy_pay_estimate_card_title),
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                    color = colors.textPrimary,
+                )
+                Spacer(Modifier.height(Spacing.sm))
+
+                PickerRow(
+                    text = state.estimateRestStartDateLabel
+                        ?: stringResource(Res.string.pregnancy_pay_estimate_field_start_date),
+                    isPlaceholder = state.estimateRestStartDateLabel == null,
+                    icon = vectorResource(Res.drawable.ic_tamin_calendar),
+                    iconTint = colors.blueText,
+                    onClick = { onIntent(PregnancyPayIntent.OnPickerRequested(PregnancyPayPicker.ESTIMATE_REST_START_DATE)) },
+                )
+                Spacer(Modifier.height(Spacing.sm))
+
+                PickerRow(
+                    text = state.estimateRestEndDateLabel
+                        ?: stringResource(Res.string.pregnancy_pay_estimate_field_end_date),
+                    isPlaceholder = state.estimateRestEndDateLabel == null,
+                    icon = vectorResource(Res.drawable.ic_tamin_calendar),
+                    iconTint = colors.blueText,
+                    onClick = { onIntent(PregnancyPayIntent.OnPickerRequested(PregnancyPayPicker.ESTIMATE_REST_END_DATE)) },
+                )
+
+                state.estimateRestDaysCount?.let { days ->
+                    Spacer(Modifier.height(Spacing.sm))
+                    StatusPill(
+                        text = stringResource(Res.string.pregnancy_pay_estimate_rest_days_label, days.toString()),
+                        icon = Icons.Filled.AccessTime,
+                        containerColor = colors.blueBg,
+                        contentColor = colors.blueText,
+                    )
+                }
+
+                state.estimateError?.let { message ->
+                    Spacer(Modifier.height(Spacing.sm))
+                    Text(
+                        text = message,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colors.dangerText,
+                    )
+                }
+
+                Spacer(Modifier.height(Spacing.lg))
+                LoadingButton(
+                    text = stringResource(Res.string.pregnancy_pay_estimate_submit),
+                    onClick = { onIntent(PregnancyPayIntent.OnCalculateEstimateSubmitClicked) },
+                    enabled = state.canCalculateEstimate,
+                    isLoading = state.isCalculatingEstimate,
+                )
+            }
+
+            state.estimateResult?.let { result ->
+                Spacer(Modifier.height(Spacing.lg))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .taminSurface()
+                        .padding(horizontal = Spacing.lg, vertical = Spacing.lg),
+                ) {
+                    DetailRow(
+                        label = stringResource(Res.string.pregnancy_pay_estimate_result_rest_days),
+                        value = result.restDaysCount.toString(),
+                        unit = stringResource(Res.string.pregnancy_pay_estimate_days_unit),
+                    )
+                    TaminDivider(modifier = Modifier.padding(vertical = Spacing.xs))
+                    DetailRow(
+                        label = stringResource(Res.string.pregnancy_pay_estimate_result_average_salary),
+                        value = result.averageSalaryLast90Days.toLongStringOrZero().toPriceFormat(),
+                        unit = stringResource(Res.string.pregnancy_pay_estimate_result_rial_unit),
+                    )
+                    TaminDivider(modifier = Modifier.padding(vertical = Spacing.xs))
+                    DetailRow(
+                        label = stringResource(Res.string.pregnancy_pay_estimate_result_amount_payable),
+                        value = result.amountPayable.toLongStringOrZero().toPriceFormat(),
+                        unit = stringResource(Res.string.pregnancy_pay_estimate_result_rial_unit),
+                        valueColor = colors.greenText,
+                    )
+                    Spacer(Modifier.height(Spacing.sm))
+                    Text(
+                        text = stringResource(Res.string.pregnancy_pay_estimate_result_disclaimer),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colors.textMuted,
+                    )
+                }
+            }
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.page, vertical = Spacing.md)
+                .navigationBarsPadding(),
+        ) {
+            PregnancyPayBackStepButton(onClick = onBack)
         }
     }
 }

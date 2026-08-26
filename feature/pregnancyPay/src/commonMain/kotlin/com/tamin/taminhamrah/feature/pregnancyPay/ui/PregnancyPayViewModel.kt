@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.feature.pregnancyPay.ui
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.PREGNANCY_TYPE_TRIPLET_OR_MORE
 import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.PregnancyPayDocumentState
+import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.PregnancyPayEstimateResultUi
 import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.PregnancyPayEvent
 import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.PregnancyPayImageSource
 import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.PregnancyPayIntent
@@ -25,6 +26,7 @@ import com.tamin.taminhamrah.model.pregnancyPay.PregnancyRequestFileDN
 import com.tamin.taminhamrah.model.pregnancyPay.SendPregnancyPayRequestDN
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
+import com.tamin.taminhamrah.useCases.pregnancyPay.CalculatePregnancyPayEstimateUseCase
 import com.tamin.taminhamrah.useCases.pregnancyPay.GetPregnancyMainInfoUseCase
 import com.tamin.taminhamrah.useCases.pregnancyPay.GetPregnancyStatusListUseCase
 import com.tamin.taminhamrah.useCases.pregnancyPay.GetPregnancyTypeListUseCase
@@ -40,7 +42,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
@@ -67,6 +68,7 @@ class PregnancyPayViewModel(
     private val getPregnancyTypeListUseCase: GetPregnancyTypeListUseCase,
     private val uploadImageUseCase: UploadImageUseCase,
     private val sendPregnancyPayRequestUseCase: SendPregnancyPayRequestUseCase,
+    private val calculatePregnancyPayEstimateUseCase: CalculatePregnancyPayEstimateUseCase,
 ) : BaseViewModel<PregnancyPayUiState, PartialState, PregnancyPayEvent, PregnancyPayIntent>(
     initialState = PregnancyPayUiState()
 ) {
@@ -86,10 +88,9 @@ class PregnancyPayViewModel(
             emit(PartialState.StepChanged(PregnancyPayStep.BranchAndRest))
         }
 
-        // The "estimated allowance" calculator is a separate, not-yet-built feature
-        // (FeatureFlag.CALCULATE_WAGE_PREGNANCY) — this row is wired up visually and dispatches an
-        // intent already so the screen doesn't need to change again once that screen exists.
-        is PregnancyPayIntent.OnCalculateEstimateClicked -> emptyFlow()
+        is PregnancyPayIntent.OnCalculateEstimateClicked -> flow {
+            emit(PartialState.StepChanged(PregnancyPayStep.CalculateEstimate))
+        }
 
         is PregnancyPayIntent.OnPickerRequested -> flow {
             emit(PartialState.PickerChanged(intent.picker))
@@ -182,6 +183,18 @@ class PregnancyPayViewModel(
         is PregnancyPayIntent.OnSubmitSuccessAcknowledged -> flow {
             sendEvent(PregnancyPayEvent.NavigateBack)
         }
+
+        is PregnancyPayIntent.OnEstimateRestStartDatePicked -> flow {
+            emit(PartialState.EstimateRestStartDateSelected(intent.millis, intent.label))
+            emit(PartialState.PickerChanged(PregnancyPayPicker.NONE))
+        }
+
+        is PregnancyPayIntent.OnEstimateRestEndDatePicked -> flow {
+            emit(PartialState.EstimateRestEndDateSelected(intent.millis, intent.label))
+            emit(PartialState.PickerChanged(PregnancyPayPicker.NONE))
+        }
+
+        is PregnancyPayIntent.OnCalculateEstimateSubmitClicked -> handleCalculateEstimateClicked()
 
         is PregnancyPayIntent.BackToPreviousStep -> handleBackStep()
     }
@@ -362,6 +375,30 @@ class PregnancyPayViewModel(
         }
     }
 
+    private fun handleCalculateEstimateClicked(): Flow<PartialState> = flow {
+        val state = uiState.value
+        val start = state.estimateRestStartDateTimeStamp
+        val end = state.estimateRestEndDateTimeStamp
+        val restDays = state.estimateRestDaysCount
+        if (!state.canCalculateEstimate || start == null || end == null || restDays == null) return@flow
+
+        emit(PartialState.EstimateCalculating(true))
+        try {
+            val estimateDN = calculatePregnancyPayEstimateUseCase(start, end).first()
+            emit(
+                PartialState.EstimateCalculated(
+                    PregnancyPayEstimateResultUi(
+                        restDaysCount = restDays,
+                        averageSalaryLast90Days = estimateDN.averageSalaryLast90Days,
+                        amountPayable = estimateDN.amountPayable,
+                    )
+                )
+            )
+        } catch (e: Exception) {
+            emit(PartialState.EstimateFailed(e.toSingleLineMessage()))
+        }
+    }
+
     private fun PregnancyPayUiState.toSendPregnancyPayRequestDN(): SendPregnancyPayRequestDN? {
         val info = mainInfo ?: return null
         val branch = branch ?: return null
@@ -434,6 +471,7 @@ class PregnancyPayViewModel(
             PregnancyPayStep.DoctorAndRequest -> emit(PartialState.StepChanged(PregnancyPayStep.PregnancyAndNewborn))
             PregnancyPayStep.PregnancyAndNewborn -> emit(PartialState.StepChanged(PregnancyPayStep.BranchAndRest))
             PregnancyPayStep.BranchAndRest -> emit(PartialState.StepChanged(PregnancyPayStep.Landing))
+            PregnancyPayStep.CalculateEstimate -> emit(PartialState.StepChanged(PregnancyPayStep.Landing))
             PregnancyPayStep.Landing -> sendEvent(PregnancyPayEvent.NavigateBack)
         }
     }
@@ -538,6 +576,31 @@ class PregnancyPayViewModel(
             submitError = null,
         )
         is PartialState.SubmitFailed -> currentState.copy(isSubmitting = false, submitError = partialState.message)
+        is PartialState.EstimateRestStartDateSelected -> currentState.copy(
+            estimateRestStartDateTimeStamp = partialState.millis,
+            estimateRestStartDateLabel = partialState.label,
+            estimateResult = null,
+            estimateError = null,
+        )
+        is PartialState.EstimateRestEndDateSelected -> currentState.copy(
+            estimateRestEndDateTimeStamp = partialState.millis,
+            estimateRestEndDateLabel = partialState.label,
+            estimateResult = null,
+            estimateError = null,
+        )
+        is PartialState.EstimateCalculating -> currentState.copy(
+            isCalculatingEstimate = partialState.isCalculating,
+            estimateError = null,
+        )
+        is PartialState.EstimateCalculated -> currentState.copy(
+            isCalculatingEstimate = false,
+            estimateResult = partialState.result,
+            estimateError = null,
+        )
+        is PartialState.EstimateFailed -> currentState.copy(
+            isCalculatingEstimate = false,
+            estimateError = partialState.message,
+        )
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)

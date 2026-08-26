@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.model.pregnancyPay.PregnancyMainInfoDN
 import com.tamin.taminhamrah.model.pregnancyPay.PregnancyMainInfoDTO
 import com.tamin.taminhamrah.model.pregnancyPay.PregnancyOptionDN
 import com.tamin.taminhamrah.model.pregnancyPay.PregnancyOptionDTO
+import com.tamin.taminhamrah.model.pregnancyPay.PregnancyPayEstimateDN
 import com.tamin.taminhamrah.model.pregnancyPay.PregnancyRequestFileDN
 import com.tamin.taminhamrah.model.pregnancyPay.PregnancyRequestFileDTO
 import com.tamin.taminhamrah.model.pregnancyPay.PregnancyShorttermRequestDTO
@@ -78,5 +79,12 @@ fun PregnancyRequestFileDN.toDTO(): PregnancyRequestFileDTO {
     return PregnancyRequestFileDTO(
         documentFile = documentFile,
         documentType = documentType,
+    )
+}
+
+fun List<String>.toPregnancyPayEstimateDomain(): PregnancyPayEstimateDN {
+    return PregnancyPayEstimateDN(
+        averageSalaryLast90Days = this[0],
+        amountPayable = this[1],
     )
 }

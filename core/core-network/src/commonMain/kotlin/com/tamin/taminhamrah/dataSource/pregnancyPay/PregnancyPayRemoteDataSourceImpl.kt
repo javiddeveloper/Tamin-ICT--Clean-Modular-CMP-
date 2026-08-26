@@ -68,4 +68,27 @@ class PregnancyPayRemoteDataSourceImpl(
             )
         }
     }
+
+    override suspend fun calculateEstimate(
+        startDateTimeStamp: String,
+        endDateTimeStamp: String,
+    ): List<String>? {
+        return try {
+            val response = pregnancyPayApiService.calculateEstimate(startDateTimeStamp, endDateTimeStamp)
+            val result = response.extractData()
+            if (result?.getOrNull(1).isNullOrBlank()) {
+                throw TaminErrorUriException(
+                    uri = ErrorUri.SERVER_PROBLEM,
+                    serverMessage = result?.getOrNull(0),
+                )
+            }
+            result
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
 }
