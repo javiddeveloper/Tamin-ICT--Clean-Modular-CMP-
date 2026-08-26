@@ -19,6 +19,7 @@ import androidx.compose.material.icons.outlined.Verified
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -33,6 +34,7 @@ import com.tamin.taminhamrah.feature.taminServices.workersPayment.contract.Worke
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.contract.WorkersPaymentUiState
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.model.WorkersPaymentInfoPR
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.ui.components.WorkersPaymentHeader
+import com.tamin.taminhamrah.feature.taminServices.workersPayment.ui.components.WorkersPaymentInfoBottomSheet
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.ui.components.WorkersPaymentListSkeleton
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.ui.components.WorkersPaymentMonthCard
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -116,6 +118,7 @@ internal fun WorkersPaymentListScreen(
     val taminColors = LocalTaminColors.current
     val collapse = rememberCollapsingHeaderState(HeaderCollapseDistance)
     var headerHeightPx by remember { mutableIntStateOf(0) }
+    var showInfoSheet by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -169,6 +172,7 @@ internal fun WorkersPaymentListScreen(
             state = uiState,
             onBack = onBack,
             collapseProgress = collapse.progressProvider,
+            onInfoClicked = { showInfoSheet = true },
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .onSizeChanged { headerHeightPx = it.height },
@@ -177,6 +181,10 @@ internal fun WorkersPaymentListScreen(
         if (uiState.isLoading && uiState.items.isNotEmpty()) {
             LoadingStateOverlay()
         }
+    }
+
+    if (showInfoSheet) {
+        WorkersPaymentInfoBottomSheet(onDismiss = { showInfoSheet = false })
     }
 }
 

@@ -1224,4 +1224,7 @@
     <string name="workers_payment_pay_action">پرداخت</string>
     <string name="workers_payment_empty_title">بدهی‌ای برای پرداخت نیست</string>
     <string name="workers_payment_empty_subtitle">در حال حاضر قلم حق بیمه‌ای برای پرداخت وجود ندارد.</string>
+    <string name="workers_payment_info_sheet_title">دربارهٔ این سرویس</string>
+    <string name="workers_payment_info_sheet_body">اقلام ماهانهٔ حق بیمهٔ کارگران ساختمانی بر پایهٔ روزهای اشتغال و دستمزد مبنای کسر بیمه محاسبه می‌شود. پرداخت هر ماه تا پایان ماه بعد بدون جریمه امکان‌پذیر است؛ پس از آن جریمهٔ تأخیر به مبلغ افزوده می‌شود. ماه‌هایی که مهلت آن‌ها گذشته باشد فقط با مراجعه به شعبه قابل تسویه‌اند.</string>
+    <string name="workers_payment_info_sheet_dismiss">متوجه شدم</string>
 </resources>

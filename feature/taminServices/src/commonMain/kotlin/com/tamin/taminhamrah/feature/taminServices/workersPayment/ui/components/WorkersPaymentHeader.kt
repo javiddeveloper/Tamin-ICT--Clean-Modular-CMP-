@@ -7,14 +7,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.Assignment
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -35,12 +38,14 @@ import com.tamin.taminhamrah.feature.taminServices.workersPayment.contract.Worke
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.model.WorkersPaymentInfoPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.CustomChip
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.IconBox
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.collapseAway
 import com.tamin.taminhamrah.ui.components.rideUpIntoHeader
 import com.tamin.taminhamrah.ui.components.shrinkOnCollapse
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -51,9 +56,16 @@ import com.tamin.taminhamrah.ui.toPriceFormat
 import kotlinx.collections.immutable.toImmutableList
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.action_back
+import taminx.core.core_ui.edict_search_title
+import taminx.core.core_ui.ic_inbox
+import taminx.core.core_ui.ic_info
+import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.ic_tamin_search
 import taminx.core.core_ui.ic_tamin_shield_check
+import taminx.core.core_ui.inspection_subtitle
 import taminx.core.core_ui.unit_rial
 import taminx.core.core_ui.workers_payment_debt_label
 import taminx.core.core_ui.workers_payment_month_count
@@ -75,6 +87,7 @@ fun WorkersPaymentHeader(
     state: WorkersPaymentUiState,
     onBack: () -> Unit,
     collapseProgress: () -> Float = { 0f },
+    onInfoClicked: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val taminColors = LocalTaminColors.current
@@ -89,32 +102,37 @@ fun WorkersPaymentHeader(
             bottomPadding = HEADER_OVERLAP,
             navigationIcon = {
                 TaminTopAppBarButton(
-                    icon = Icons.AutoMirrored.Filled.ArrowBack,
+                    icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                     contentDescription = stringResource(Res.string.action_back),
                     onClick = onBack,
                 )
             },
+            action = {
+                TaminTopAppBarButton(
+                    icon = vectorResource(Res.drawable.ic_info),
+                    contentDescription = stringResource(Res.string.edict_search_title),
+                    onClick = onInfoClicked,
+                )
+            }
         ) {
             Box(modifier = Modifier.fillMaxWidth()) {
-                DecorativeBackgroundCircle(size = 190.dp, xOffset = 450.dp, yOffset = (-150).dp)
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = Spacing.md, bottom = Spacing.lg),
+                        .padding(horizontal = Spacing.page, vertical = Spacing.smPlus),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(Spacing.sm),
                 ) {
-                    IconBox(
-                        painter = painterResource(Res.drawable.ic_tamin_shield_check),
-                        size = 56.dp,
-                        cornerRadius = CornerRadius.card,
-                        backgroundColor = Color.White.copy(alpha = 0.12f),
-                        colorFilter = ColorFilter.tint(Color.White),
+                    DecorativeBackgroundCircle(
+                        size = 190.dp,
+                        xOffset = 450.dp,
+                        yOffset = (-150).dp
                     )
-                    TaminText(
+                    AnimatedRingHeaderIcon(icon = Icons.Outlined.Assignment)
+                    Spacer(Modifier.height(Spacing.sm))
+                    Text(
                         text = stringResource(Res.string.workers_payment_subtitle),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.White.copy(alpha = 0.85f),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = taminColors.textHeaderSubtitle,
                     )
                 }
             }
@@ -193,7 +211,10 @@ private fun WorkersPaymentSummaryCard(
                     )
                 }
                 CustomChip(
-                    text = stringResource(Res.string.workers_payment_month_count, monthCount.toString()),
+                    text = stringResource(
+                        Res.string.workers_payment_month_count,
+                        monthCount.toString()
+                    ),
                     modifier = Modifier.layoutId(SummarySlot.Chip),
                     containerColor = taminColors.chipBg,
                     textColor = taminColors.blueText,
@@ -247,21 +268,55 @@ private fun WorkersPaymentSummaryCard(
 
 private val PreviewItems = listOf(
     WorkersPaymentInfoPR(
-        pay = false, payable = true, month = "07", monthTitle = "حق بیمه مهر", year = "1405",
-        professionalTitle = "استاد لوله‌کش و نصاب وسایل بهداشتی", professional = "041597", rate = "1.9",
-        days = "30", fromDatePersian = "14050701", toDatePersian = "14050730",
-        amount = 22111981, amountFines = 0, totalPayable = 22111981, salary = 10529515, payDay = 5541850,
-        payableDes = "هست", paymentDate = null, fishStatus = "دارد", maharatStatus = "دارد",
-        bazresiStatus = "دارد", kargarStatus = "فعال می‌باشد.", type = "Premium",
+        pay = false,
+        payable = true,
+        month = "07",
+        monthTitle = "حق بیمه مهر",
+        year = "1405",
+        professionalTitle = "استاد لوله‌کش و نصاب وسایل بهداشتی",
+        professional = "041597",
+        rate = "1.9",
+        days = "30",
+        fromDatePersian = "14050701",
+        toDatePersian = "14050730",
+        amount = 22111981,
+        amountFines = 0,
+        totalPayable = 22111981,
+        salary = 10529515,
+        payDay = 5541850,
+        payableDes = "هست",
+        paymentDate = null,
+        fishStatus = "دارد",
+        maharatStatus = "دارد",
+        bazresiStatus = "دارد",
+        kargarStatus = "فعال می‌باشد.",
+        type = "Premium",
         fromDateToDate = "1405070114050730",
     ),
     WorkersPaymentInfoPR(
-        pay = false, payable = true, month = "08", monthTitle = "حق بیمه آبان", year = "1405",
-        professionalTitle = "استاد لوله‌کش و نصاب وسایل بهداشتی", professional = "041597", rate = "1.9",
-        days = "30", fromDatePersian = "14050801", toDatePersian = "14050830",
-        amount = 22111981, amountFines = 1341000, totalPayable = 23452981, salary = 10529515, payDay = 5541850,
-        payableDes = "هست", paymentDate = null, fishStatus = "دارد", maharatStatus = "دارد",
-        bazresiStatus = "دارد", kargarStatus = "فعال می‌باشد.", type = "Premium",
+        pay = false,
+        payable = true,
+        month = "08",
+        monthTitle = "حق بیمه آبان",
+        year = "1405",
+        professionalTitle = "استاد لوله‌کش و نصاب وسایل بهداشتی",
+        professional = "041597",
+        rate = "1.9",
+        days = "30",
+        fromDatePersian = "14050801",
+        toDatePersian = "14050830",
+        amount = 22111981,
+        amountFines = 1341000,
+        totalPayable = 23452981,
+        salary = 10529515,
+        payDay = 5541850,
+        payableDes = "هست",
+        paymentDate = null,
+        fishStatus = "دارد",
+        maharatStatus = "دارد",
+        bazresiStatus = "دارد",
+        kargarStatus = "فعال می‌باشد.",
+        type = "Premium",
         fromDateToDate = "1405080114050830",
     ),
 )
@@ -275,7 +330,7 @@ private val PreviewState = WorkersPaymentUiState(
 @Composable
 private fun WorkersPaymentHeaderExpandedPreview() {
     PreviewRtlThemeContent {
-        WorkersPaymentHeader(state = PreviewState, onBack = {})
+        WorkersPaymentHeader(state = PreviewState, onBack = {}, onInfoClicked = {})
     }
 }
 
@@ -283,7 +338,11 @@ private fun WorkersPaymentHeaderExpandedPreview() {
 @Composable
 private fun WorkersPaymentHeaderCollapsedPreview() {
     PreviewRtlThemeContent {
-        WorkersPaymentHeader(state = PreviewState, onBack = {}, collapseProgress = { 1f })
+        WorkersPaymentHeader(
+            state = PreviewState,
+            onBack = {},
+            collapseProgress = { 1f },
+            onInfoClicked = {})
     }
 }
 
@@ -291,6 +350,6 @@ private fun WorkersPaymentHeaderCollapsedPreview() {
 @Composable
 private fun WorkersPaymentHeaderDarkPreview() {
     PreviewRtlThemeContent(darkTheme = true) {
-        WorkersPaymentHeader(state = PreviewState, onBack = {})
+        WorkersPaymentHeader(state = PreviewState, onBack = {}, onInfoClicked = {})
     }
 }
