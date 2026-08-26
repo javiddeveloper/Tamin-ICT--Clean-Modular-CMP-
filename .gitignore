@@ -34,6 +34,13 @@ Thumbs.db
 ## AI Tools
 .claude/settings.local.json
 
+## Local agent / WIP artifacts (keep on disk, never commit)
+.cursor/skills/jira-time-log/
+.cursor/skills/tamin-legacy-feature-port/
+.superpowers/
+docs/superpowers/
+feature/pensionSurvivor/
+
 ## Signing
 *.jks
 *.keystore
