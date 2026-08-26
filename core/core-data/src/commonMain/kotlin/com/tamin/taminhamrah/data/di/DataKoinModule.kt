@@ -42,6 +42,8 @@ import com.tamin.taminhamrah.data.repository.WorkShopsRepositoryImpl
 import com.tamin.taminhamrah.repository.WorkShopsRepository
 import com.tamin.taminhamrah.data.repository.occurrence.OccurrenceRepositoryImpl
 import com.tamin.taminhamrah.repository.occurrence.OccurrenceRepository
+import com.tamin.taminhamrah.data.repository.workersPayment.WorkersPaymentRepositoryImpl
+import com.tamin.taminhamrah.repository.workersPayment.WorkersPaymentRepository
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
@@ -69,4 +71,5 @@ val dataKoinModule = module {
     singleOf(::ContactUsRepositoryImpl) { bind<ContactUsRepository>() }
     singleOf(::OrotezProtezRepositoryImpl) { bind<OrotezProtezRepository>() }
     singleOf(::OccurrenceRepositoryImpl) { bind<OccurrenceRepository>() }
+    singleOf(::WorkersPaymentRepositoryImpl) { bind<WorkersPaymentRepository>() }
 }

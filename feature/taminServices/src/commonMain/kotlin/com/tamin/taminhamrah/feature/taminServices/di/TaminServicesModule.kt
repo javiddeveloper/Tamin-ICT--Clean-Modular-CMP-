@@ -3,6 +3,10 @@ package com.tamin.taminhamrah.feature.taminServices.di
 import com.tamin.taminhamrah.feature.taminServices.occurrence.OccurrenceViewModel
 import com.tamin.taminhamrah.feature.taminServices.sendHistoryToInstitutions.SendHistoryToInstitutionsViewModel
 import com.tamin.taminhamrah.feature.taminServices.ui.TamminServicesViewModel
+import com.tamin.taminhamrah.feature.taminServices.workersPayment.WorkersPaymentViewModel
+import com.tamin.taminhamrah.useCases.workersPayment.GetWorkersPaymentInfoUseCase
+import com.tamin.taminhamrah.useCases.workersPayment.InspectWorkersPaymentTicketUseCase
+import com.tamin.taminhamrah.useCases.workersPayment.PayWorkersDebitUseCase
 import com.tamin.taminhamrah.useCases.history.GetUserInfosUseCase
 import com.tamin.taminhamrah.useCases.history.SendToInstitutionUseCase
 import com.tamin.taminhamrah.useCases.occurrence.GetAllWorkshopsUseCase
@@ -32,5 +36,10 @@ val TaminServicesModule = module {
     factoryOf(::GetOccurrenceDocTypesUseCase)
     factoryOf(::UploadOccurrenceImageUseCase)
     factoryOf(::SubmitOccurrenceUseCase)
+
+    viewModelOf(::WorkersPaymentViewModel)
+    factoryOf(::GetWorkersPaymentInfoUseCase)
+    factoryOf(::PayWorkersDebitUseCase)
+    factoryOf(::InspectWorkersPaymentTicketUseCase)
 }
 

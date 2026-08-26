@@ -46,6 +46,8 @@ import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSourc
 import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.occurrence.OccurrenceRemoteDataSource
 import com.tamin.taminhamrah.dataSource.occurrence.OccurrenceRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.workersPayment.WorkersPaymentRemoteDataSource
+import com.tamin.taminhamrah.dataSource.workersPayment.WorkersPaymentRemoteDataSourceImpl
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
@@ -214,6 +216,13 @@ val remoteModule = module {
         OrotezProtezRemoteDataSourceImpl(
             orotezProtezApiService = get(),
             apiQueryBuilder = get(),
+            errorParser = get()
+        )
+    }
+
+    single<WorkersPaymentRemoteDataSource> {
+        WorkersPaymentRemoteDataSourceImpl(
+            apiService = get(),
             errorParser = get()
         )
     }
