@@ -134,6 +134,8 @@ import com.tamin.taminhamrah.useCases.health.SyncIllnessSelfDeclarativesUseCase
 import com.tamin.taminhamrah.useCases.health.SyncDrugAllergiesUseCase
 import com.tamin.taminhamrah.useCases.health.GetActFrequenciesUseCase
 import com.tamin.taminhamrah.useCases.workshops.CheckObjectionDeadlineUseCase
+import com.tamin.taminhamrah.useCases.workshops.CheckNewMemberIsNewUseCase
+import com.tamin.taminhamrah.useCases.workshops.CreateNewMemberRegistrationUseCase
 import com.tamin.taminhamrah.useCases.workshops.ConfirmRecentlyAddedMemberUseCase
 import com.tamin.taminhamrah.useCases.workshops.DeleteRecentlyAddedMemberUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetArticle16DebtsUseCase
@@ -340,6 +342,8 @@ val domainModule = module {
     factoryOf(::GetRecentlyAddedMembersUseCase)
     factoryOf(::ConfirmRecentlyAddedMemberUseCase)
     factoryOf(::DeleteRecentlyAddedMemberUseCase)
+    factoryOf(::CheckNewMemberIsNewUseCase)
+    factoryOf(::CreateNewMemberRegistrationUseCase)
     factoryOf(::GetArticle16DebtsUseCase)
     factoryOf(::GetArticle16WorkshopInfoUseCase)
     factoryOf(::GetArticle16RequestInfoUseCase)

@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import taminx.core.core_ui.new_member_follow_body
+import taminx.core.core_ui.abs_form_done_body
 import taminx.core.core_ui.new_member_confirmed
 import org.jetbrains.compose.resources.getString
 import kotlinx.coroutines.flow.Flow
@@ -36,6 +37,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
@@ -104,6 +106,21 @@ fun WorkshopRecentlyAddedMembersContent(
     val colors = LocalTaminColors.current
     val isSearchOpen = state.isSearchOpen
     val draft = state.draft
+
+    // The registration is a page of this screen, not a route: it is created against the workshop
+    // this list is already showing.
+    state.form?.let { form ->
+        BackHandler { onIntent(WorkshopRecentlyAddedMembersIntent.FormDismissed) }
+        RegistrationFormPage(
+            form = form,
+            workshopName = workshopName,
+            workshopCode = state.workshopId.takeIf { it.isNotBlank() }?.toPersianDigits(),
+            onIntent = onIntent,
+            onBack = { onIntent(WorkshopRecentlyAddedMembersIntent.FormDismissed) },
+            modifier = modifier,
+        )
+        return
+    }
 
     WorkshopScreenShell(
         title = stringResource(Res.string.workshop_action_new_member),
@@ -323,7 +340,9 @@ private fun HandleRecentlyAddedMembersEvents(events: Flow<WorkshopRecentlyAddedM
                     getString(Res.string.new_member_follow_body, event.referenceCode),
                 )
 
-                is WorkshopRecentlyAddedMembersEvent.OpenMemberForm -> Unit
+                is WorkshopRecentlyAddedMembersEvent.RegistrationFiled -> toaster.success(
+                    getString(Res.string.abs_form_done_body, event.referenceCode),
+                )
             }
         }
     }

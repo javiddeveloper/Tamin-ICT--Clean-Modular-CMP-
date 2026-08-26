@@ -1,5 +1,13 @@
 package com.tamin.taminhamrah.data.mapper
 
+import com.tamin.taminhamrah.model.workshop.RelationWithTaminDTO
+import com.tamin.taminhamrah.model.workshop.PersonalRegistrationDTO
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
+import com.tamin.taminhamrah.model.workshop.NewMemberIsNewDTO
+import com.tamin.taminhamrah.model.workshop.NewMemberIsNewDN
 import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.workshop.Article16PhotoDTO
@@ -354,3 +362,35 @@ fun WorkshopStackHolderDTO.toDomain(): WorkshopStackHolderDN = WorkshopStackHold
     birthDate = birthDate ?: person?.dateOfBirth,
     stackType = stackType.orEmpty(),
 )
+
+// ------------------------------------------------ نام نویسی غیر حضوری — ثبت درخواست
+
+/**
+ * The registration as `POST employers` accepts it.
+ *
+ * `nation` and `countryId` keep the DTO's own defaults: the service requires them and this flow
+ * only ever registers Iranians, which is what the old app sends too.
+ */
+fun NewMemberRegistrationDN.toDto(): NewMemberRegistrationDTO = NewMemberRegistrationDTO(
+    personal = PersonalRegistrationDTO(
+        cityOfBirthId = cityOfBirthId,
+        cityOfIssueId = cityOfIssueId,
+        dateOfBirth = dateOfBirth,
+        firstName = firstName,
+        lastName = lastName,
+        nationalId = nationalId,
+        id = personalId,
+    ),
+    relationWithTamin = RelationWithTaminDTO(
+        organizationId = branchCode,
+        workshopId = workshopId,
+        dateOfStart = startDate,
+        job = jobCode,
+    ),
+)
+
+fun NewMemberRegistrationResultDTO.toDomain(): NewMemberRegistrationResultDN =
+    NewMemberRegistrationResultDN(requestId = id, personalId = personal?.id)
+
+fun NewMemberIsNewDTO.toDomain(): NewMemberIsNewDN =
+    NewMemberIsNewDN(isNew = isNew ?: true, personalId = personalId)

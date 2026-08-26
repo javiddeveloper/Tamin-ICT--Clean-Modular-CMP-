@@ -20,6 +20,9 @@ import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDTO
+import com.tamin.taminhamrah.model.workshop.NewMemberIsNewDTO
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDTO
@@ -88,6 +91,12 @@ interface WorkShopsRemoteDataSource {
     suspend fun confirmRecentlyAddedMember(requestId: Long): NewMemberConfirmResultDTO
 
     suspend fun deleteRecentlyAddedMember(personalId: Long)
+
+    suspend fun checkNewMemberIsNew(nationalId: String): NewMemberIsNewDTO
+
+    suspend fun createNewMemberRegistration(
+        request: NewMemberRegistrationDTO,
+    ): NewMemberRegistrationResultDTO
 
     suspend fun getWorkshopsDebtsList(
         workshopId: String,

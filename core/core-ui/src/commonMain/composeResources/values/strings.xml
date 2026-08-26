@@ -1329,4 +1329,50 @@
     <string name="ws_a16_doc_8">مطالبه حق بیمه در دوره خدمت سربازی بیمه‌شده و یا مشمولین سایر صندوق‌ها</string>
     <string name="ws_a16_doc_9">مطالبه حق بیمه فوت از تاریخ درخواست</string>
     <string name="ws_a16_doc_10">مطالبه حق بیمه در زمان بیماری، ایام بارداری، دریافت مقرری بیکاری و … بیمه‌شده/بیمه‌شدگان</string>
+
+    <!-- ===================== نام‌نویسی غیرحضوری — the three-step form ===================== -->
+    <string name="abs_form_title">افزودن پرسنل جدید</string>
+    <string name="abs_form_step_identity">هویت</string>
+    <string name="abs_form_step_place">محل و شغل</string>
+    <string name="abs_form_step_docs">مدارک</string>
+
+    <string name="abs_form_identity_title">اطلاعات هویتی</string>
+    <string name="abs_form_identity_desc">نام، نام خانوادگی، کد ملی و تاریخ تولد را طبق شناسنامه و کارت ملی وارد کنید.</string>
+    <string name="abs_form_first_name">نام</string>
+    <string name="abs_form_last_name">نام خانوادگی</string>
+    <string name="abs_form_birth_date">تاریخ تولد</string>
+
+    <string name="abs_form_place_title">محل صدور و شغل</string>
+    <string name="abs_form_place_desc">شهر محل تولد و صدور شناسنامه، شغل و تاریخ شروع به کار در کارگاه را مشخص کنید.</string>
+    <string name="abs_form_birth_city">شهر محل تولد</string>
+    <string name="abs_form_issue_city">شهر محل صدور</string>
+    <string name="abs_form_job">شغل</string>
+    <string name="abs_form_start_date">تاریخ شروع به کار</string>
+
+    <string name="abs_form_docs_title">مدارک و ارسال درخواست</string>
+    <string name="abs_form_docs_desc">برای هر نوع مدرک یک تصویر بارگذاری کنید. تصویر باید در قالب jpeg و حداکثر ۲ مگابایت باشد.</string>
+    <string name="abs_form_summary">اطلاعات ثبت‌شدهٔ شخص</string>
+    <string name="abs_form_full_name">نام و نام خانوادگی</string>
+    <string name="abs_form_workshop">کارگاه</string>
+    <string name="abs_form_note_dependants">اگر افراد تحت پوشش خود را ثبت کرده‌اید، تصویر صفحهٔ دوم شناسنامه را نیز بارگذاری کنید.</string>
+    <string name="abs_form_note_changes">اگر مشخصات شما تغییر کرده و در شناسنامه توضیحات مربوط به آن ذکر شده است، صفحهٔ دوم را نیز بارگذاری کنید.</string>
+    <string name="abs_form_check">صحت اطلاعات و مدارک بارگذاری‌شده را تأیید می‌کنم و مسئولیت آن را می‌پذیرم.</string>
+    <string name="abs_form_submit">ثبت درخواست</string>
+    <string name="abs_form_done_body">نام‌نویسی غیرحضوری با کد پیگیری %1$s ثبت شد. نتیجهٔ بررسی از طریق پیامک اطلاع داده می‌شود.</string>
+
+    <string name="abs_form_banner">جهت نام‌نویسی افراد فاقد شماره بیمه، لازم است فرم اظهارنامه تکمیل و به همراه تصویر کارت ملی، شناسنامه و یک قطعه عکس بیمه‌شده در مرحلهٔ بعد بارگذاری شود.</string>
+    <string name="abs_form_download">دریافت فرم اظهارنامهٔ نام‌نویسی</string>
+
+    <string name="abs_form_err_incomplete">لطفاً همهٔ فیلدهای این مرحله را تکمیل کنید.</string>
+    <string name="abs_form_err_national_id">کد ملی واردشده معتبر نیست.</string>
+
+    <!-- انواع تصویر نام‌نویسی — codes are the service's own, from the old app's title list -->
+    <string name="abs_doc_01">تصویر پرسنلی</string>
+    <string name="abs_doc_02">تصویر اول اظهارنامه</string>
+    <string name="abs_doc_08">تصویر دوم اظهارنامه</string>
+    <string name="abs_doc_03">تصویر صفحهٔ اول شناسنامه</string>
+    <string name="abs_doc_04">تصویر صفحهٔ دوم شناسنامه</string>
+    <string name="abs_doc_07">تصویر توضیحات شناسنامه</string>
+    <string name="abs_doc_05">تصویر روی کارت ملی</string>
+    <string name="abs_doc_06">تصویر پشت کارت ملی</string>
 </resources>

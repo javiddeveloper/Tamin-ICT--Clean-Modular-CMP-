@@ -22,6 +22,9 @@ import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDN
 import com.tamin.taminhamrah.model.workshop.WorkshopListQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDN
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberQuery
+import com.tamin.taminhamrah.model.workshop.NewMemberIsNewDN
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDN
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDN
@@ -93,6 +96,13 @@ interface WorkShopsRepository {
     suspend fun confirmRecentlyAddedMember(requestId: Long): String
 
     suspend fun deleteRecentlyAddedMember(personalId: Long)
+
+    /** Asked before a create: an existing person is edited rather than added again. */
+    suspend fun checkNewMemberIsNew(nationalId: String): NewMemberIsNewDN
+
+    suspend fun createNewMemberRegistration(
+        request: NewMemberRegistrationDN,
+    ): NewMemberRegistrationResultDN
 
     // ---------------------------------------------------------------------- رسیدگی به بدهی ماده ۱۶
 

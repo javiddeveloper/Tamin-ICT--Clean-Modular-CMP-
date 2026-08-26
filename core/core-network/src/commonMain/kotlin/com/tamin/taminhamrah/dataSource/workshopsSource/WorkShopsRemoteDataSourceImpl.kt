@@ -22,6 +22,9 @@ import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDTO
+import com.tamin.taminhamrah.model.workshop.NewMemberIsNewDTO
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDTO
@@ -152,6 +155,16 @@ internal class WorkShopsRemoteDataSourceImpl(
 
     override suspend fun deleteRecentlyAddedMember(personalId: Long) {
         call { apiService.deleteRecentlyAddedMember(personalId) }
+    }
+
+    override suspend fun checkNewMemberIsNew(nationalId: String): NewMemberIsNewDTO = call {
+        apiService.checkNewMemberIsNew(nationalId).extractData()
+    }
+
+    override suspend fun createNewMemberRegistration(
+        request: NewMemberRegistrationDTO,
+    ): NewMemberRegistrationResultDTO = call {
+        apiService.createNewMemberRegistration(request).extractData()
     }
 
     // ---------------------------------------------------------------------- رسیدگی به بدهی ماده ۱۶

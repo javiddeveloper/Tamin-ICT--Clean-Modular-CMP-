@@ -23,6 +23,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +45,7 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -66,6 +70,7 @@ import taminx.core.core_ui.ic_info
 import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_chevron_down
+import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.ic_tamin_cross
 import taminx.core.core_ui.ws_form_add_doc
 import taminx.core.core_ui.ws_form_doc_type_title
@@ -464,6 +469,8 @@ fun WorkshopDocumentBox(
             TaminPrimaryButton(
                 text = stringResource(Res.string.ws_form_add_doc),
                 onClick = onAdd,
+                icon = Icons.Default.Add,
+                iconAtStart = true,
                 background = colors.successGradient,
                 height = WorkshopDimens.panelButtonHeight,
                 shape = RoundedCornerShape(CornerRadius.chip),
@@ -681,6 +688,8 @@ fun ColumnScope.WorkshopFormFooter(
         TaminPrimaryButton(
             text = nextLabel,
             onClick = onNext,
+            // Points the way on: autoMirrored, so under RTL it draws "‹" as the design has it.
+            icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
             background = colors.buttonGradient,
             height = FooterButtonHeight,
             shape = RoundedCornerShape(FooterButtonCorner),
@@ -807,6 +816,79 @@ fun WorkshopDocumentTypeSheet(
                         .background(colors.chipBg)
                         .padding(horizontal = Spacing.lg, vertical = Spacing.md),
                 )
+            }
+        }
+    }
+}
+
+/**
+ * A searchable list of values a field is chosen from — a city, a job.
+ *
+ * Searched rather than scrolled: both lookups run to thousands of rows, and the service is asked
+ * again as the query changes rather than every row being pulled down once.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun <T> WorkshopLookupSheet(
+    title: String,
+    query: String,
+    onQueryChange: (String) -> Unit,
+    options: ImmutableList<T>,
+    isLoading: Boolean,
+    onDismiss: () -> Unit,
+    onSelect: (T) -> Unit,
+    modifier: Modifier = Modifier,
+    label: (T) -> String = { it.toString() },
+) {
+    val colors = LocalTaminColors.current
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = colors.bgSurface,
+        modifier = modifier,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.page)
+                .padding(
+                    bottom = WindowInsets.navigationBars.asPaddingValues()
+                        .calculateBottomPadding() + Spacing.lg,
+                ),
+            verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = colors.textPrimary,
+            )
+            WorkshopTextField(
+                label = title,
+                value = query,
+                onValueChange = onQueryChange,
+                keyboardType = KeyboardType.Text,
+            )
+            if (isLoading) {
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(modifier = Modifier.size(IconSize.medium))
+                }
+            }
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                items(options.size) { index ->
+                    val option = options[index]
+                    Text(
+                        text = label(option),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = colors.textPrimary,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(CornerRadius.md))
+                            .clickable { onSelect(option) }
+                            .background(colors.chipBg)
+                            .padding(horizontal = Spacing.lg, vertical = Spacing.md),
+                    )
+                }
             }
         }
     }

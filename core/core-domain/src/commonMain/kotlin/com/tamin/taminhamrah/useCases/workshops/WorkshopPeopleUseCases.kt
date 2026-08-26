@@ -1,5 +1,8 @@
 package com.tamin.taminhamrah.useCases.workshops
 
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
+import com.tamin.taminhamrah.model.workshop.NewMemberIsNewDN
 import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDN
@@ -47,4 +50,22 @@ class ConfirmRecentlyAddedMemberUseCase(private val repository: WorkShopsReposit
 
 class DeleteRecentlyAddedMemberUseCase(private val repository: WorkShopsRepository) {
     suspend operator fun invoke(personalId: Long) = repository.deleteRecentlyAddedMember(personalId)
+}
+
+/**
+ * Whether this national id is someone the organisation has never registered.
+ *
+ * Asked before a create so an existing person is edited rather than added a second time — the
+ * service answers with their `personalId` when it already knows them.
+ */
+class CheckNewMemberIsNewUseCase(private val repository: WorkShopsRepository) {
+    suspend operator fun invoke(nationalId: String): NewMemberIsNewDN =
+        repository.checkNewMemberIsNew(nationalId)
+}
+
+/** ثبت نام‌نویسی غیرحضوری — creates the registration the three-step form filled in. */
+class CreateNewMemberRegistrationUseCase(private val repository: WorkShopsRepository) {
+    suspend operator fun invoke(
+        request: NewMemberRegistrationDN,
+    ): NewMemberRegistrationResultDN = repository.createNewMemberRegistration(request)
 }

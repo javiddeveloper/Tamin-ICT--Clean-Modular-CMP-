@@ -24,6 +24,9 @@ import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDTO
+import com.tamin.taminhamrah.model.workshop.NewMemberIsNewDTO
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDTO
@@ -149,6 +152,23 @@ internal interface WorkShopsApiService {
     suspend fun deleteRecentlyAddedMember(
         @Path("personalId") personalId: Long,
     ): BaseDTO<JsonElement?>
+
+    /**
+     * Whether this national id is someone the organisation has never registered.
+     *
+     * `relation-tamins/isnew` — the registration asks before it creates, because an existing
+     * person is edited rather than added again.
+     */
+    @GET("relation-tamins/isnew/{nationalId}")
+    suspend fun checkNewMemberIsNew(
+        @Path("nationalId") nationalId: String,
+    ): BaseDTO<NewMemberIsNewDTO>
+
+    /** Creates the registration. `employers`, as the old app posts it. */
+    @POST("employers")
+    suspend fun createNewMemberRegistration(
+        @Body request: NewMemberRegistrationDTO,
+    ): BaseDTO<NewMemberRegistrationResultDTO>
 
     // ---------------------------------------------------------------------- رسیدگی به بدهی ماده ۱۶
 

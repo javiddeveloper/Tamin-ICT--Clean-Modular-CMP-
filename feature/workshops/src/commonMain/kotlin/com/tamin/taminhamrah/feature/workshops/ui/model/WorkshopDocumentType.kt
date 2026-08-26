@@ -5,6 +5,14 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.StringResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.abs_doc_01
+import taminx.core.core_ui.abs_doc_02
+import taminx.core.core_ui.abs_doc_03
+import taminx.core.core_ui.abs_doc_04
+import taminx.core.core_ui.abs_doc_05
+import taminx.core.core_ui.abs_doc_06
+import taminx.core.core_ui.abs_doc_07
+import taminx.core.core_ui.abs_doc_08
 import taminx.core.core_ui.ws_a16_doc_1
 import taminx.core.core_ui.ws_a16_doc_10
 import taminx.core.core_ui.ws_a16_doc_2
@@ -93,3 +101,24 @@ val Article16DocumentTypes: ImmutableList<WorkshopDocumentType> = persistentList
 
 /** The upload ceiling each form enforces — the add control disappears at this many files. */
 const val OBJECTION_MAX_DOCUMENTS = 5
+
+/**
+ * انواع تصویر نام‌نویسی — what a نام‌نویسی غیرحضوری registration attaches.
+ *
+ * The order is the design's and the old app's; the codes are the service's, and the two do not
+ * agree — «تصویر دوم اظهارنامه» is third in the list but code `08`. Listing them as one table
+ * keeps that mismatch stated rather than re-derived, which is how it survives an edit.
+ */
+val RegistrationDocumentTypes: ImmutableList<WorkshopDocumentType> = persistentListOf(
+    WorkshopDocumentType("01", Res.string.abs_doc_01),
+    WorkshopDocumentType("02", Res.string.abs_doc_02),
+    WorkshopDocumentType("08", Res.string.abs_doc_08),
+    WorkshopDocumentType("03", Res.string.abs_doc_03),
+    WorkshopDocumentType("04", Res.string.abs_doc_04),
+    WorkshopDocumentType("07", Res.string.abs_doc_07),
+    WorkshopDocumentType("05", Res.string.abs_doc_05),
+    WorkshopDocumentType("06", Res.string.abs_doc_06),
+)
+
+/** The upload ceiling نام‌نویسی enforces — one image per type. */
+const val REGISTRATION_MAX_DOCUMENTS = 8

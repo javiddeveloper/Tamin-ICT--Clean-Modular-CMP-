@@ -31,6 +31,9 @@ import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDN
 import com.tamin.taminhamrah.model.workshop.WorkshopListQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDN
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberQuery
+import com.tamin.taminhamrah.model.workshop.NewMemberIsNewDN
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDN
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDN
@@ -170,6 +173,14 @@ class WorkShopsRepositoryImpl(
 
     override suspend fun deleteRecentlyAddedMember(personalId: Long) =
         remoteDataSource.deleteRecentlyAddedMember(personalId)
+
+    override suspend fun checkNewMemberIsNew(nationalId: String): NewMemberIsNewDN =
+        remoteDataSource.checkNewMemberIsNew(nationalId).toDomain()
+
+    override suspend fun createNewMemberRegistration(
+        request: NewMemberRegistrationDN,
+    ): NewMemberRegistrationResultDN =
+        remoteDataSource.createNewMemberRegistration(request.toDto()).toDomain()
 
     // ------------------------------------------------------------------------- ماده ۱۶
 

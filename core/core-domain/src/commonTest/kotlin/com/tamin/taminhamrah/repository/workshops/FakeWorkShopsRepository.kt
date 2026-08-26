@@ -1,5 +1,8 @@
 package com.tamin.taminhamrah.repository.workshops
 
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
+import com.tamin.taminhamrah.model.workshop.NewMemberIsNewDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.model.workshop.Article16DebtQuery
@@ -155,6 +158,13 @@ class FakeWorkShopsRepository : WorkShopsRepository {
 
     override suspend fun deleteRecentlyAddedMember(personalId: Long) {
         answer { deletedPersonalId = personalId }
+
+    override suspend fun checkNewMemberIsNew(nationalId: String): NewMemberIsNewDN =
+        NewMemberIsNewDN()
+
+    override suspend fun createNewMemberRegistration(
+        request: NewMemberRegistrationDN,
+    ): NewMemberRegistrationResultDN = NewMemberRegistrationResultDN()
     }
 
     override suspend fun getArticle16Debts(
