@@ -51,4 +51,8 @@ interface PensionRemoteDataSource {
     suspend fun sendEdictPensionerToMyInbox(
         filter: List<ApiFilterDN>
     ): String?
+
+    suspend fun sendPayRollToInbox(
+        filter: List<ApiFilterDN>
+    ): String?
 }
