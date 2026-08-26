@@ -8,6 +8,15 @@ enum class IllDaysMaritalStatus(val apiValue: String) {
 }
 
 @Immutable
+data class IllDaysCalcResultUi(
+    val averageWageLabel: String,
+    val payableAmountLabel: String,
+    val restDaysLabel: String,
+    val rateTitle: String,
+    val rateCaption: String,
+)
+
+@Immutable
 data class IllDaysCalculateUiState(
     val startDateLabel: String = "",
     val startDateMillis: Long? = null,
@@ -15,21 +24,31 @@ data class IllDaysCalculateUiState(
     val endDateMillis: Long? = null,
     val maritalStatus: IllDaysMaritalStatus? = null,
     val activeDatePicker: IllDaysDatePicker = IllDaysDatePicker.None,
+    val dayCount: Int? = null,
     val isCalculating: Boolean = false,
-    val resultLines: List<String> = emptyList(),
-    val showResultDialog: Boolean = false,
+    val result: IllDaysCalcResultUi? = null,
 ) {
     val canCalculate: Boolean
         get() = startDateMillis != null && endDateMillis != null && maritalStatus != null
 
     sealed interface PartialState {
-        data class StartDateSelected(val millis: Long, val label: String) : PartialState
-        data class EndDateSelected(val millis: Long, val label: String) : PartialState
+        data class StartDateSelected(
+            val millis: Long,
+            val label: String,
+            val dayCount: Int?,
+        ) : PartialState
+
+        data class EndDateSelected(
+            val millis: Long,
+            val label: String,
+            val dayCount: Int?,
+        ) : PartialState
+
         data class MaritalSelected(val status: IllDaysMaritalStatus) : PartialState
         data class DatePickerChanged(val picker: IllDaysDatePicker) : PartialState
         data class Calculating(val isCalculating: Boolean) : PartialState
-        data class ResultLoaded(val lines: List<String>) : PartialState
-        data object DismissResult : PartialState
+        data class ResultLoaded(val result: IllDaysCalcResultUi) : PartialState
+        data object ClearResult : PartialState
         data class Error(val message: String?) : PartialState
     }
 }
@@ -48,7 +67,6 @@ sealed interface IllDaysCalculateIntent {
     data class EndDatePicked(val millis: Long, val label: String) : IllDaysCalculateIntent
     data class SelectMarital(val status: IllDaysMaritalStatus) : IllDaysCalculateIntent
     data object Calculate : IllDaysCalculateIntent
-    data object DismissResult : IllDaysCalculateIntent
     data object Back : IllDaysCalculateIntent
 }
 

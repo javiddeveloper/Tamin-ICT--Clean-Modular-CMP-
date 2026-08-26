@@ -1100,9 +1100,14 @@
     <string name="ill_days_calc_marital_married">متأهل</string>
     <string name="ill_days_calc_marital_married_caption">۷۵٪ دستمزد روزانه</string>
     <string name="ill_days_calc_submit_btn">محاسبه مبلغ غرامت دستمزد</string>
-    <string name="ill_days_calc_result_title">نتیجه محاسبه</string>
-    <string name="ill_days_calc_result_empty">مبلغی برای نمایش وجود ندارد.</string>
-    <string name="ill_days_calc_result_confirm">متوجه شدم</string>
+    <string name="ill_days_calc_rest_duration">مدت استراحت</string>
+    <string name="ill_days_calc_rest_days_value">%1$s روز</string>
+    <string name="ill_days_calc_avg_wage">متوسط دستمزد ۹۰ روز آخر</string>
+    <string name="ill_days_calc_rate_title_single">نرخ غرامت (مجرد)</string>
+    <string name="ill_days_calc_rate_title_married">نرخ غرامت (متأهل)</string>
+    <string name="ill_days_calc_payable_label">مبلغ قابل پرداخت (برآوردی)</string>
+    <string name="ill_days_calc_payable_disclaimer">این مبلغ برآوردی است؛ مبلغ قطعی پس از بررسی سابقه و تأیید استراحت پزشکی در شعبه تعیین می‌شود.</string>
+    <string name="ill_days_calc_error_no_amount">مبلغ قابل پرداخت یافت نشد.</string>
     <string name="ill_days_wizard_step_branch_city">شعبه و شهر</string>
     <string name="ill_days_wizard_step_rest_days">ایام استراحت</string>
     <string name="ill_days_wizard_step_doctor">پزشک معالج</string>
