@@ -78,6 +78,7 @@ class FakeUserRepository : UserRepository {
     override suspend fun downloadDocument(url: String): PdfDownloadDN =
         PdfDownloadDN()
     override suspend fun getStatusCertificateReport(filters: List<ApiFilterDN>): Flow<String> = flowOf("")
+    override suspend fun getWageCertificateReport(filters: List<ApiFilterDN>): Flow<String> = flowOf("")
     override suspend fun getRecipients(filters: List<ApiFilterDN>): Flow<List<RecipientDN>> = flowOf(emptyList())
 
 }

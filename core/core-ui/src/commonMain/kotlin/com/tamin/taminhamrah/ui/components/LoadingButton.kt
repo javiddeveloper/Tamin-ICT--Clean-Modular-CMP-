@@ -113,12 +113,16 @@ fun LoadingButton(
                     }
                 }
             }
+            // Reserving the indicator's slot when there's nothing to show in it (no icon, not
+            // loading) pushes the label off-center — the whole point of centering the button's
+            // text. Only give it space once there's actually an icon or spinner to draw.
+            val showIndicator = isLoading || icon != null
             if (iconPosition == LoadingButtonIconPosition.LEADING) {
-                indicator()
+                if (showIndicator) indicator()
                 label()
             } else {
                 label()
-                indicator()
+                if (showIndicator) indicator()
             }
         }
     }

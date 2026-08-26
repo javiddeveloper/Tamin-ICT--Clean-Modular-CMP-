@@ -69,19 +69,29 @@ private fun RippleRing(
     borderColor: Color,
     maxScale: Float,
     durationMillis: Int,
-    delayMillis: Int
+    delayMillis: Int,
+    animated: Boolean
 ) {
-    val transition = rememberInfiniteTransition()
-    val progress by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = durationMillis, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart,
-            initialStartOffset = StartOffset(delayMillis)
-        ),
-        label = "rippleProgress"
-    )
+    // Skips rememberInfiniteTransition entirely when not animated -- this runs inside
+    // rememberMeasuredTopAreaState's off-screen measure probe, which composes this twice on every
+    // (re)probe and never places or draws it, so a running infinite animation there would just be
+    // wasted animation-clock work with nothing ever visible.
+    val progress = if (animated) {
+        val transition = rememberInfiniteTransition()
+        val animatedProgress by transition.animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = durationMillis, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart,
+                initialStartOffset = StartOffset(delayMillis)
+            ),
+            label = "rippleProgress"
+        )
+        animatedProgress
+    } else {
+        0f
+    }
 
     Box(
         modifier = Modifier
@@ -99,8 +109,12 @@ private fun RippleRing(
 @Composable
 fun AnimatedRingHeaderIcon(
     icon: ImageVector,
+    tint: Color = LocalTaminColors.current.glassIconTileIconTint,
     modifier: Modifier = Modifier,
-    tint: Color = LocalTaminColors.current.glassIconTileIconTint
+    // False inside rememberMeasuredTopAreaState's measurement probe (see TopAreaState.isMeasureProbe)
+    // -- the probe's layout size doesn't depend on the rings' animation state, only on this Box's
+    // fixed IconSize.headerIconOuter, so pausing the animation there is free.
+    animated: Boolean = true
 ) {
     val taminColors = LocalTaminColors.current
     Box(
@@ -112,14 +126,16 @@ fun AnimatedRingHeaderIcon(
             borderColor = taminColors.glassIconRipple1,
             maxScale = 1.25f,
             durationMillis = 2200,
-            delayMillis = 0
+            delayMillis = 0,
+            animated = animated
         )
         RippleRing(
             baseSize = IconSize.headerIconInner,
             borderColor = taminColors.glassIconRipple2,
             maxScale = 1.2f,
             durationMillis = 2200,
-            delayMillis = 1650
+            delayMillis = 1650,
+            animated = animated
         )
         GlassIconTile(icon = icon, tint = tint)
     }
