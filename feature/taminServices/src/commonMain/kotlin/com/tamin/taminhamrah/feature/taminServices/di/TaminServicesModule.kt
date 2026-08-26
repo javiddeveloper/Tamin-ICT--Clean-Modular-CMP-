@@ -17,6 +17,12 @@ import com.tamin.taminhamrah.useCases.occurrence.GetWorkshopSpecUseCase
 import com.tamin.taminhamrah.useCases.occurrence.SubmitOccurrenceUseCase
 import com.tamin.taminhamrah.useCases.occurrence.UploadOccurrenceImageUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
+import com.tamin.taminhamrah.useCases.inspection.GetInspectionListUseCase
+import com.tamin.taminhamrah.useCases.inspection.GetBranchListUseCase
+import com.tamin.taminhamrah.useCases.inspection.GetInspectionReportPDFUseCase
+import com.tamin.taminhamrah.useCases.inspection.GetJobListUseCase
+import com.tamin.taminhamrah.useCases.inspection.SubmitInspectionUseCase
+import com.tamin.taminhamrah.feature.taminServices.inspection.ui.InspectionViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
@@ -41,5 +47,11 @@ val TaminServicesModule = module {
     factoryOf(::GetWorkersPaymentInfoUseCase)
     factoryOf(::PayWorkersDebitUseCase)
     factoryOf(::InspectWorkersPaymentTicketUseCase)
+    factoryOf(::GetInspectionListUseCase)
+    factoryOf(::GetBranchListUseCase)
+    factoryOf(::GetJobListUseCase)
+    factoryOf(::SubmitInspectionUseCase)
+    factoryOf(::GetInspectionReportPDFUseCase)
+    viewModelOf(::InspectionViewModel)
 }
 

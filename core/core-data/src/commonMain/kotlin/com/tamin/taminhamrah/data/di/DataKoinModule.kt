@@ -40,6 +40,8 @@ import com.tamin.taminhamrah.data.repository.health.HealthRepositoryImpl
 import com.tamin.taminhamrah.data.repository.addDependent.AddDependentRepositoryImpl
 import com.tamin.taminhamrah.data.repository.WorkShopsRepositoryImpl
 import com.tamin.taminhamrah.repository.WorkShopsRepository
+import com.tamin.taminhamrah.data.repository.InspectionRepositoryImpl
+import com.tamin.taminhamrah.repository.inspection.InspectionRepository
 import com.tamin.taminhamrah.data.repository.occurrence.OccurrenceRepositoryImpl
 import com.tamin.taminhamrah.repository.occurrence.OccurrenceRepository
 import com.tamin.taminhamrah.data.repository.workersPayment.WorkersPaymentRepositoryImpl
@@ -71,5 +73,6 @@ val dataKoinModule = module {
     singleOf(::ContactUsRepositoryImpl) { bind<ContactUsRepository>() }
     singleOf(::OrotezProtezRepositoryImpl) { bind<OrotezProtezRepository>() }
     singleOf(::OccurrenceRepositoryImpl) { bind<OccurrenceRepository>() }
+    singleOf(::InspectionRepositoryImpl) { bind<InspectionRepository>() }
     singleOf(::WorkersPaymentRepositoryImpl) { bind<WorkersPaymentRepository>() }
 }
