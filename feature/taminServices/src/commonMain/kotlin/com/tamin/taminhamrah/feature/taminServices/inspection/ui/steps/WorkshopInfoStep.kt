@@ -175,13 +175,11 @@ internal fun WorkshopInfoStep(
                     onValueChange = { value -> update { it.copy(workshopCode = value) } },
                     label = stringResource(Res.string.inspection_request_field_workshop_code),
                     placeholder = stringResource(Res.string.inspection_request_field_workshop_code_placeholder),
-                    isRequired = true,
+                    isRequired = false,
                     readOnly = isPrefillLocked,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     inputRestriction = InputRestriction.DigitsOnly,
                     maxLength = 10,
-                    isValid = step.workshopCode.takeIf { it.isNotBlank() }?.let { it.length == 10 },
-                    errorText = stringResource(Res.string.inspection_request_field_workshop_code_error),
                     modifier = Modifier.weight(1f),
                 )
                 TaminStyledTextField(

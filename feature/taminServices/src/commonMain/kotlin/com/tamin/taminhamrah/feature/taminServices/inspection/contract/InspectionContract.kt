@@ -91,7 +91,6 @@ data class InspectionUiState(
 
     val isRequestStep2Valid: Boolean
         get() = workshopInfo.workshopName.isNotBlank() &&
-            workshopInfo.workshopCode.length == 10 &&
             ValidationUtils.isLandlineValid(workshopInfo.workshopPhone) &&
             workshopInfo.employerName.isNotBlank() &&
             workshopInfo.branchCode.isNotBlank() &&
