@@ -28,6 +28,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.WorkshopConstants
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.feature.workshops.ui.workshopMembers.PersonSearch
 import com.tamin.taminhamrah.ui.components.InputRestriction
+import com.tamin.taminhamrah.ui.components.animatedErrorBorder
 import com.tamin.taminhamrah.ui.components.TaminStyledTextField
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
@@ -121,11 +122,16 @@ fun WorkshopSearchCard(
 fun WorkshopFieldSlot(
     label: String,
     modifier: Modifier = Modifier,
+    isRequired: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(WorkshopDimens.fieldLabelGap)) {
+    val caption = if (isRequired) "$label *" else label
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(WorkshopDimens.fieldLabelGap),
+    ) {
         Text(
-            text = label,
+            text = caption,
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.SemiBold,
             color = LocalTaminColors.current.textSecondary,
@@ -185,14 +191,17 @@ fun WorkshopPickerField(
     placeholder: String = stringResource(Res.string.workshop_select),
     isDate: Boolean = false,
     icon: DrawableResource? = if (isDate) Res.drawable.ic_tamin_calendar else null,
+    isRequired: Boolean = false,
+    /** False draws the same animated error border a text field gets; null leaves it neutral. */
+    isValid: Boolean? = null,
 ) {
     val colors = LocalTaminColors.current
 
-    WorkshopFieldSlot(label = label, modifier = modifier) {
+    WorkshopFieldSlot(label = label, modifier = modifier, isRequired = isRequired) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .fieldBox()
+                .fieldBox(isError = isValid == false)
                 .clickable(onClick = onClick),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
@@ -327,14 +336,25 @@ fun PersonSearchPanel(
 
 /** `min-height:44px; padding:0 12px; border-radius:13px; border:1px; background:bg-page`. */
 @Composable
-private fun Modifier.fieldBox(): Modifier {
+private fun Modifier.fieldBox(isError: Boolean = false): Modifier {
     val colors = LocalTaminColors.current
     val shape = RoundedCornerShape(CornerRadius.listRow)
     return this
         .defaultMinSize(minHeight = WorkshopDimens.fieldHeight)
         .clip(shape)
         .background(colors.bgPage)
-        .border(Thickness.border, colors.border, shape)
-        .padding(horizontal = WorkshopDimens.fieldHorizontalPadding, vertical = WorkshopDimens.fieldVerticalPadding)
+        // core-ui's own border animation — the one TaminStyledTextField draws — so a picker that
+        // is wrong flashes exactly like a text field that is.
+        .animatedErrorBorder(
+            isError = isError,
+            errorColor = colors.dangerText,
+            normalColor = colors.border,
+            borderWidth = Thickness.border,
+            cornerRadius = CornerRadius.listRow,
+        )
+        .padding(
+            horizontal = WorkshopDimens.fieldHorizontalPadding,
+            vertical = WorkshopDimens.fieldVerticalPadding,
+        )
 }
 

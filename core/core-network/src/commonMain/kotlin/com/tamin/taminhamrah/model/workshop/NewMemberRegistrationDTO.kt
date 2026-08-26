@@ -38,19 +38,16 @@ data class RelationWithTaminDTO(
     @SerialName("job") val job: String? = null,
 )
 
-/** What the service answers a create with. */
+/**
+ * What the service answers a create with: the person record it wrote, flat.
+ *
+ * Only [id] is read — it is the `personalId` the documents are then filed against. The reply
+ * repeats the identity fields that were just sent, and carries no request id; that arrives on the
+ * list row once the registration appears there.
+ */
 @Serializable
 data class NewMemberRegistrationResultDTO(
     @SerialName("id") val id: Long? = null,
-    @SerialName("personal") val personal: PersonalRegistrationDTO? = null,
-)
-
-/** Whether a national id is someone the organisation has never seen. */
-@Serializable
-data class NewMemberIsNewDTO(
-    @SerialName("isNew") val isNew: Boolean? = null,
-    /** Present when the person already exists — the registration then edits rather than creates. */
-    @SerialName("personalId") val personalId: Long? = null,
 )
 
 private const val IRANIAN_NATION_CODE = "01"

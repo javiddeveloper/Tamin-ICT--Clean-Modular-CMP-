@@ -2,7 +2,6 @@ package com.tamin.taminhamrah.useCases.workshops
 
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
-import com.tamin.taminhamrah.model.workshop.NewMemberIsNewDN
 import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDN
@@ -59,7 +58,7 @@ class DeleteRecentlyAddedMemberUseCase(private val repository: WorkShopsReposito
  * service answers with their `personalId` when it already knows them.
  */
 class CheckNewMemberIsNewUseCase(private val repository: WorkShopsRepository) {
-    suspend operator fun invoke(nationalId: String): NewMemberIsNewDN =
+    suspend operator fun invoke(nationalId: String): Boolean =
         repository.checkNewMemberIsNew(nationalId)
 }
 

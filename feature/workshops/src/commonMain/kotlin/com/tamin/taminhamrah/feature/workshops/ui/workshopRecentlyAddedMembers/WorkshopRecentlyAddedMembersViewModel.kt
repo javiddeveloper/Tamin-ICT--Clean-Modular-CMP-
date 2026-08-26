@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.abs_form_err_already_known
 import taminx.core.core_ui.new_member_cannot_edit
 
 /** نام نویسی غیر حضوری بیمه شده. */
@@ -169,7 +170,7 @@ class WorkshopRecentlyAddedMembersViewModel(
         emitAll(loadPage(page = 0))
     }.catch {
         emit(PartialState.Busy(null))
-        emit(PartialState.Error(it.toSingleLineMessage()))
+        emit(reportFailure(it))
     }
 
     private fun delete(member: WorkshopNewMemberPR): Flow<PartialState> = flow {
@@ -184,7 +185,7 @@ class WorkshopRecentlyAddedMembersViewModel(
         emitAll(loadPage(page = 0))
     }.catch {
         emit(PartialState.Busy(null))
-        emit(PartialState.Error(it.toSingleLineMessage()))
+        emit(reportFailure(it))
     }
 
     /**
@@ -270,7 +271,7 @@ class WorkshopRecentlyAddedMembersViewModel(
         emit(PartialState.DeclarationPdfChanged(bytes.asPdfDownload()))
     }.catch {
         emit(PartialState.FormDeclarationDownloading(false))
-        emit(PartialState.Error(it.toSingleLineMessage()))
+        emit(reportFailure(it))
     }
 
     private fun just(partialState: PartialState): Flow<PartialState> =
@@ -329,7 +330,7 @@ class WorkshopRecentlyAddedMembersViewModel(
         emit(PartialState.FormPickerOptionsLoaded(options.toPersistentList()))
     }.catch {
         emit(PartialState.FormPickerLoading(false))
-        emit(PartialState.Error(it.toSingleLineMessage()))
+        emit(reportFailure(it))
     }
 
     /** Sends the picked image up and keeps only the guid that comes back. */
@@ -346,7 +347,7 @@ class WorkshopRecentlyAddedMembersViewModel(
         emit(PartialState.FormAttachmentAdded(attachment))
     }.catch {
         emit(PartialState.FormUploadingChanged(false))
-        emit(PartialState.Error(it.toSingleLineMessage()))
+        emit(reportFailure(it))
     }
 
     /**
@@ -361,7 +362,17 @@ class WorkshopRecentlyAddedMembersViewModel(
         val form = state.form ?: return@flow
         emit(PartialState.FormSubmittingChanged(true))
 
-        val existing = checkNewMemberIsNew(form.nationalId)
+        // `relation-tamins/isnew` answers a bare boolean and carries no id, so it is a gate, not
+        // a lookup: a person the organisation already knows cannot be registered again here.
+        val isNew = checkNewMemberIsNew(form.nationalId)
+        if (!isNew && form.personalId == null) {
+            emit(PartialState.FormSubmittingChanged(false))
+            sendEvent(
+                WorkshopRecentlyAddedMembersEvent.ShowMessage(Res.string.abs_form_err_already_known),
+            )
+            return@flow
+        }
+
         val result = createNewMemberRegistration(
             NewMemberRegistrationDN(
                 firstName = form.firstName,
@@ -375,11 +386,11 @@ class WorkshopRecentlyAddedMembersViewModel(
                 workshopId = state.workshopId,
                 branchCode = state.branchCode,
                 // A re-opened draft already names its person; otherwise the service says.
-                personalId = form.personalId ?: existing.personalId,
+                personalId = form.personalId,
             ),
         )
 
-        val personalId = result.personalId ?: form.personalId ?: existing.personalId
+        val personalId = result.personalId ?: form.personalId
         if (personalId != null) {
             putRegistrationDocuments(
                 personalId.toString(),
@@ -398,15 +409,13 @@ class WorkshopRecentlyAddedMembersViewModel(
         }
 
         emit(PartialState.FormChanged(null))
-        sendEvent(
-            WorkshopRecentlyAddedMembersEvent.RegistrationFiled(
-                result.requestId?.toString().orEmpty(),
-            ),
-        )
+        // The create returns the person, not a tracking code — the row that appears in the list
+        // carries it, so the message says the registration was filed and no more.
+        sendEvent(WorkshopRecentlyAddedMembersEvent.RegistrationFiled)
         emitAll(loadPage(page = 0))
     }.catch {
         emit(PartialState.FormSubmittingChanged(false))
-        emit(PartialState.Error(it.toSingleLineMessage()))
+        emit(reportFailure(it))
     }
 
     override fun reduceState(
@@ -504,6 +513,20 @@ class WorkshopRecentlyAddedMembersViewModel(
         is PartialState.FormPickerOptionsLoaded -> currentState.editForm {
             copy(isPickerLoading = false, pickerOptions = partialState.options)
         }
+    }
+
+    /**
+     * A failure the user must see now.
+     *
+     * With a form open the list is not on screen, so its error state is not either; the
+     * message is raised as an event instead and the toast host shows it.
+     */
+    private fun reportFailure(throwable: Throwable): PartialState {
+        val message = throwable.toSingleLineMessage()
+        if (uiState.value.form != null) {
+            sendEvent(WorkshopRecentlyAddedMembersEvent.ShowServerMessage(message))
+        }
+        return PartialState.Error(message)
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)

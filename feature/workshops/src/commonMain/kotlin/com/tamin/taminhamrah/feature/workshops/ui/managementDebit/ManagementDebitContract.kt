@@ -190,6 +190,15 @@ sealed interface ManagementDebitIntent {
 
 sealed interface ManagementDebitEvent {
 
+    /**
+     * Something the service refused, in its own words.
+     *
+     * Raised rather than folded into the list's error state, because a form covers the
+     * list — a 403 on an upload used to update a screen nobody could see.
+     */
+    data class ShowServerMessage(val message: String) : ManagementDebitEvent
+
+
     data class ShowMessage(val message: StringResource) : ManagementDebitEvent
 
     /** Filed, with the tracking code the service returned. */

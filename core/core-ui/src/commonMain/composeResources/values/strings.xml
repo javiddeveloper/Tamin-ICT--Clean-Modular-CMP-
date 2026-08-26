@@ -1382,6 +1382,8 @@
 
     <string name="abs_form_err_incomplete">لطفاً همهٔ فیلدهای این مرحله را تکمیل کنید.</string>
     <string name="abs_form_err_national_id">کد ملی واردشده معتبر نیست.</string>
+    <string name="abs_form_err_required">این فیلد الزامی است.</string>
+    <string name="abs_form_err_already_known">این کد ملی قبلاً نام‌نویسی شده است.</string>
 
     <!-- انواع تصویر نام‌نویسی — codes are the service's own, from the old app's title list -->
     <string name="abs_doc_01">تصویر پرسنلی</string>

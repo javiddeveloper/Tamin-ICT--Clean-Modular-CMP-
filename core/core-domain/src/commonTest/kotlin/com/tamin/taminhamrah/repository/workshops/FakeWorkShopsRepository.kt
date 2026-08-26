@@ -2,7 +2,6 @@ package com.tamin.taminhamrah.repository.workshops
 
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
-import com.tamin.taminhamrah.model.workshop.NewMemberIsNewDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtQuery
@@ -81,7 +80,7 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     var lastPaymentRequest: DebitPaymentRequestDN? = null
         private set
     var deletedPersonalId: Long? = null
-    var newMemberIsNew: NewMemberIsNewDN = NewMemberIsNewDN()
+    var newMemberIsNew: Boolean = true
     var registrationResult: NewMemberRegistrationResultDN = NewMemberRegistrationResultDN()
     var lastRegistrationRequest: NewMemberRegistrationDN? = null
         private set
@@ -163,7 +162,7 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         answer { deletedPersonalId = personalId }
     }
 
-    override suspend fun checkNewMemberIsNew(nationalId: String): NewMemberIsNewDN =
+    override suspend fun checkNewMemberIsNew(nationalId: String): Boolean =
         answer { newMemberIsNew }
 
     override suspend fun createNewMemberRegistration(

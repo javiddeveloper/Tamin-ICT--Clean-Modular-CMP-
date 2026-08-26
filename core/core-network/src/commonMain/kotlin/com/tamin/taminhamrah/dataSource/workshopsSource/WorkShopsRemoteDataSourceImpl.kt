@@ -22,7 +22,6 @@ import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDTO
-import com.tamin.taminhamrah.model.workshop.NewMemberIsNewDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDTO
@@ -157,7 +156,7 @@ internal class WorkShopsRemoteDataSourceImpl(
         call { apiService.deleteRecentlyAddedMember(personalId) }
     }
 
-    override suspend fun checkNewMemberIsNew(nationalId: String): NewMemberIsNewDTO = call {
+    override suspend fun checkNewMemberIsNew(nationalId: String): Boolean = call {
         apiService.checkNewMemberIsNew(nationalId).extractData()
     }
 

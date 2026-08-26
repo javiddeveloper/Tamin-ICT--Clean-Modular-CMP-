@@ -18,18 +18,10 @@ data class NewMemberRegistrationDN(
     val startDate: String,
     val workshopId: String,
     val branchCode: String,
-    /** Set when the person already exists, so the service updates rather than duplicates. */
+    /** Set when a saved draft is being edited, so the service updates that person. */
     val personalId: Long? = null,
 )
 
 /** What the service answers a create with; [personalId] is what documents are filed against. */
-data class NewMemberRegistrationResultDN(
-    val requestId: Long? = null,
-    val personalId: Long? = null,
-)
+data class NewMemberRegistrationResultDN(val personalId: Long? = null)
 
-/** Whether a national id is someone the organisation has never registered. */
-data class NewMemberIsNewDN(
-    val isNew: Boolean = true,
-    val personalId: Long? = null,
-)

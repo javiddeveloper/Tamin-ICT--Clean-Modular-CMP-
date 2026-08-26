@@ -6,8 +6,6 @@ import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
-import com.tamin.taminhamrah.model.workshop.NewMemberIsNewDTO
-import com.tamin.taminhamrah.model.workshop.NewMemberIsNewDN
 import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenPhotoDTO
@@ -392,7 +390,5 @@ fun NewMemberRegistrationDN.toDto(): NewMemberRegistrationDTO = NewMemberRegistr
 )
 
 fun NewMemberRegistrationResultDTO.toDomain(): NewMemberRegistrationResultDN =
-    NewMemberRegistrationResultDN(requestId = id, personalId = personal?.id)
+    NewMemberRegistrationResultDN(personalId = id)
 
-fun NewMemberIsNewDTO.toDomain(): NewMemberIsNewDN =
-    NewMemberIsNewDN(isNew = isNew ?: true, personalId = personalId)

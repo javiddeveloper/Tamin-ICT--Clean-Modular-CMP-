@@ -1,5 +1,10 @@
 package com.tamin.taminhamrah.feature.workshops.ui.workshopStackholders
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
@@ -99,7 +104,11 @@ fun WorkshopStackholdersContent(
             key = { it.nationalId },
             header = {
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.cardGap)) {
-                    if (isSearchOpen) {
+                    AnimatedVisibility(
+                        visible = isSearchOpen,
+                        enter = expandVertically() + fadeIn(),
+                        exit = shrinkVertically() + fadeOut(),
+                    ) {
                         PersonSearchPanel(
                             search = draft,
                             onSearchChange = {

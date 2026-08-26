@@ -1,5 +1,10 @@
 package com.tamin.taminhamrah.feature.workshops.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -161,7 +166,11 @@ fun WorkshopsScreen(
             key = { it.workshopId + it.branchCode },
             header = {
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.lg)) {
-                    if (isSearchOpen) {
+                    AnimatedVisibility(
+                        visible = isSearchOpen,
+                        enter = expandVertically() + fadeIn(),
+                        exit = shrinkVertically() + fadeOut(),
+                    ) {
                         WorkshopSearchPanel(
                             workshopId = state.workshopIdInput,
                             branchCode = state.branchCodeInput,

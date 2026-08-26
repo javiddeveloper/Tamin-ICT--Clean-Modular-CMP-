@@ -227,14 +227,23 @@ sealed interface WorkshopRecentlyAddedMembersIntent {
 }
 
 sealed interface WorkshopRecentlyAddedMembersEvent {
+
+    /**
+     * Something the service refused, in its own words.
+     *
+     * Raised rather than folded into the list's error state, because a form covers the
+     * list — a 403 on an upload used to update a screen nobody could see.
+     */
+    data class ShowServerMessage(val message: String) : WorkshopRecentlyAddedMembersEvent
+
     /** Confirmed, with the tracking code the service returned. A success, shown as one. */
     data class Confirmed(val referenceCode: String) : WorkshopRecentlyAddedMembersEvent
 
     data class ShowMessage(val message: StringResource) : WorkshopRecentlyAddedMembersEvent
 
     /** The member form opens on this registration; a new one is [personalRequestId] `0`. */
-    /** Filed, with the tracking code the service returned. */
-    data class RegistrationFiled(val referenceCode: String) : WorkshopRecentlyAddedMembersEvent
+    /** The registration was filed; the list row carries its tracking code. */
+    data object RegistrationFiled : WorkshopRecentlyAddedMembersEvent
 
     /** پیگیری — the request cartable, opened on this registration rather than on nothing. */
     data class OpenCartable(val referenceCode: String) : WorkshopRecentlyAddedMembersEvent

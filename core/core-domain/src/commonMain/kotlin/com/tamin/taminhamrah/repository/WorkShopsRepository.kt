@@ -22,7 +22,6 @@ import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDN
 import com.tamin.taminhamrah.model.workshop.WorkshopListQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDN
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberQuery
-import com.tamin.taminhamrah.model.workshop.NewMemberIsNewDN
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDN
@@ -97,8 +96,13 @@ interface WorkShopsRepository {
 
     suspend fun deleteRecentlyAddedMember(personalId: Long)
 
-    /** Asked before a create: an existing person is edited rather than added again. */
-    suspend fun checkNewMemberIsNew(nationalId: String): NewMemberIsNewDN
+    /**
+     * Whether the organisation has never registered this national id.
+     *
+     * `relation-tamins/isnew` answers a bare boolean — there is no id in the reply, so a
+     * person it already knows is reported, not silently reused.
+     */
+    suspend fun checkNewMemberIsNew(nationalId: String): Boolean
 
     suspend fun createNewMemberRegistration(
         request: NewMemberRegistrationDN,

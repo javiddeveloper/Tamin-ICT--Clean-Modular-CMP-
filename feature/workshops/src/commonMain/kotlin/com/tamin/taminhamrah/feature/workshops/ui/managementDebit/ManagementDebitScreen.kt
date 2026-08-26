@@ -1,5 +1,10 @@
 package com.tamin.taminhamrah.feature.workshops.ui.managementDebit
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -153,7 +158,11 @@ fun ManagementDebitContent(
             key = { it.debitNumber },
             header = {
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.cardGap)) {
-                    if (isSearchOpen) {
+                    AnimatedVisibility(
+                        visible = isSearchOpen,
+                        enter = expandVertically() + fadeIn(),
+                        exit = shrinkVertically() + fadeOut(),
+                    ) {
                         WorkshopSearchCard(
                             onSearch = { onIntent(ManagementDebitIntent.ApplySearch) },
                             onClear = { onIntent(ManagementDebitIntent.ClearSearch) },
@@ -349,6 +358,8 @@ private fun HandleManagementDebitEvents(events: Flow<ManagementDebitEvent>) {
     LaunchedEffect(events, toaster) {
         events.collect { event ->
             when (event) {
+                is ManagementDebitEvent.ShowServerMessage -> toaster.error(event.message)
+
                 is ManagementDebitEvent.ShowMessage -> toaster.error(getString(event.message))
                 is ManagementDebitEvent.ArticleSixteenFiled -> toaster.success(
                     getString(Res.string.article_sixteen_form_done_body, event.referenceCode),

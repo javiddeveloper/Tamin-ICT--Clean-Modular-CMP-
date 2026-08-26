@@ -37,8 +37,10 @@ import com.tamin.taminhamrah.model.common.isValidIranianNationalId
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopConstants
 import com.tamin.taminhamrah.ui.components.InputRestriction
+import com.tamin.taminhamrah.ui.components.SegmentedInputField
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFieldSlot
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormBanner
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -47,6 +49,7 @@ import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.abs_form_banner
 import taminx.core.core_ui.abs_form_download
 import taminx.core.core_ui.ic_tamin_download
+import taminx.core.core_ui.ic_number
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.digitsOnly
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -63,6 +66,7 @@ import taminx.core.core_ui.abs_form_birth_city
 import taminx.core.core_ui.abs_form_birth_date
 import taminx.core.core_ui.abs_form_check
 import taminx.core.core_ui.abs_form_err_national_id
+import taminx.core.core_ui.abs_form_err_required
 import taminx.core.core_ui.abs_form_docs_desc
 import taminx.core.core_ui.abs_form_docs_title
 import taminx.core.core_ui.abs_form_first_name
@@ -86,7 +90,6 @@ import taminx.core.core_ui.abs_form_title
 import taminx.core.core_ui.abs_form_workshop
 import taminx.core.core_ui.member_national_id
 import taminx.core.core_ui.workshop_select_date
-import taminx.core.core_ui.workshop_ten_digits
 import taminx.core.core_ui.ws_form_next
 
 /**
@@ -179,10 +182,10 @@ fun RegistrationFormPage(
                     )
                 }
 
-                // The national id states its own verdict on the field; anything else the step
-                // is missing is said once, here.
+                // Steps one and two mark their own fields, so only what no field owns — a
+                // missing document, an unticked declaration — is said here.
                 form.error
-                    ?.takeIf { it != Res.string.abs_form_err_national_id }
+                    ?.takeIf { form.step == REGISTRATION_FORM_STEPS }
                     ?.let { WorkshopFormError(text = stringResource(it)) }
             }
         }
@@ -191,13 +194,13 @@ fun RegistrationFormPage(
             nextLabel = stringResource(
                 if (form.isLastStep) Res.string.abs_form_submit else Res.string.ws_form_next,
             ),
-            isBusy = form.isBusy,
             onNext = { onIntent(WorkshopRecentlyAddedMembersIntent.FormNext) },
             onPrev = if (form.step > 1) {
                 { onIntent(WorkshopRecentlyAddedMembersIntent.FormPrev) }
             } else {
                 null
             },
+            isBusy = form.isBusy,
         )
     }
 
@@ -269,9 +272,9 @@ private enum class DateField { BIRTH, START }
 /**
  * Step one: who the person is, exactly as their documents spell it.
  *
- * The two names take letters only and the code digits only, so a wrong keyboard is refused as it
- * is typed rather than at submit. The code's own verdict shows on the field, which is where the
- * user is looking when they mistype it.
+ * Each field states its own verdict, so the red border animates on the field that is actually
+ * wrong rather than a single line under the step saying something is. The two names take letters
+ * only and the code digits only, so a wrong keyboard is refused as it is typed.
  */
 @Composable
 private fun IdentityStep(
@@ -279,13 +282,22 @@ private fun IdentityStep(
     onIntent: (WorkshopRecentlyAddedMembersIntent) -> Unit,
     onPickDate: () -> Unit,
 ) {
-    // Only judged once there are ten digits to judge — a half-typed code is not yet wrong.
-    val isNationalIdValid = when {
-        form.nationalId.length < WorkshopConstants.NATIONAL_ID_LENGTH -> null
-        else -> isValidIranianNationalId(form.nationalId)
+    // Nothing is marked wrong until «مرحلهٔ بعد» has been pressed — telling someone a field is
+    // empty before they have reached it is noise.
+    val tried = form.hasTriedNext
+    val required = stringResource(Res.string.abs_form_err_required)
+
+    // A half-typed code is not yet wrong; a complete one is judged.
+    val nationalIdValid = when {
+        // Incomplete is not the same as wrong: nothing is said until the tenth digit lands, or
+        // until «مرحلهٔ بعد» asks for a code that is not there.
+        form.nationalId.length == WorkshopConstants.NATIONAL_ID_LENGTH ->
+            isValidIranianNationalId(form.nationalId)
+
+        tried -> false
+        else -> null
     }
 
-    // The design opens step one with why the declaration is needed, and the form itself.
     WorkshopFormBanner(text = stringResource(Res.string.abs_form_banner))
     TaminOutlinedButton(
         text = stringResource(Res.string.abs_form_download),
@@ -322,6 +334,8 @@ private fun IdentityStep(
             keyboardType = KeyboardType.Text,
             inputRestriction = InputRestriction.LettersOnly,
             isRequired = true,
+            isValid = validWhenFilled(tried, form.firstName),
+            errorText = required.takeIf { tried && form.firstName.isBlank() },
             modifier = Modifier.weight(1f),
         )
         WorkshopTextField(
@@ -338,35 +352,52 @@ private fun IdentityStep(
             keyboardType = KeyboardType.Text,
             inputRestriction = InputRestriction.LettersOnly,
             isRequired = true,
+            isValid = validWhenFilled(tried, form.lastName),
+            errorText = required.takeIf { tried && form.lastName.isBlank() },
             modifier = Modifier.weight(1f),
         )
     }
-    WorkshopTextField(
+    // The same ten-slot field addDependent and girlSurvivor collect a national code with — its
+    // own animated border is what marks it wrong, so nothing here draws one.
+    WorkshopFieldSlot(
         label = stringResource(Res.string.member_national_id),
-        value = form.nationalId,
-        onValueChange = { value ->
-            onIntent(
-                WorkshopRecentlyAddedMembersIntent.FormFieldChanged(
-                    RegistrationField.NATIONAL_ID,
-                    value.digitsOnly(),
-                ),
-            )
-        },
-        placeholder = stringResource(Res.string.workshop_ten_digits),
-        maxLength = WorkshopConstants.NATIONAL_ID_LENGTH,
         isRequired = true,
-        isValid = isNationalIdValid,
-        errorText = stringResource(Res.string.abs_form_err_national_id)
-            .takeIf { isNationalIdValid == false },
-    )
+    ) {
+        SegmentedInputField(
+            value = form.nationalId,
+            onValueChange = { value ->
+                onIntent(
+                    WorkshopRecentlyAddedMembersIntent.FormFieldChanged(
+                        RegistrationField.NATIONAL_ID,
+                        value.digitsOnly(),
+                    ),
+                )
+            },
+            slotCount = WorkshopConstants.NATIONAL_ID_LENGTH,
+            error = nationalIdValid == false,
+            errorMessage = when {
+                nationalIdValid != false -> null
+                form.nationalId.isBlank() -> required
+                else -> stringResource(Res.string.abs_form_err_national_id)
+            },
+            leadingIcon = vectorResource(Res.drawable.ic_number),
+            keyboardType = KeyboardType.Number,
+        )
+    }
     WorkshopPickerField(
         label = stringResource(Res.string.abs_form_birth_date),
         value = form.birthDate.takeIf { it.isNotBlank() },
         onClick = onPickDate,
         placeholder = stringResource(Res.string.workshop_select_date),
         isDate = true,
+        isRequired = true,
+        isValid = validWhenFilled(tried, form.birthDate),
     )
 }
+
+/** Marks a required field wrong only once the step has been attempted and it is still empty. */
+private fun validWhenFilled(tried: Boolean, value: String): Boolean? =
+    if (tried && value.isBlank()) false else null
 
 /** Step two: where the person is from, and what they will do here. */
 @Composable
@@ -375,6 +406,7 @@ private fun PlaceStep(
     onIntent: (WorkshopRecentlyAddedMembersIntent) -> Unit,
     onPickDate: () -> Unit,
 ) {
+    val tried = form.hasTriedNext
     WorkshopFormSection(
         title = stringResource(Res.string.abs_form_place_title),
         description = stringResource(Res.string.abs_form_place_desc),
@@ -386,6 +418,8 @@ private fun PlaceStep(
         WorkshopPickerField(
             label = stringResource(Res.string.abs_form_birth_city),
             value = form.birthCity?.label,
+            isRequired = true,
+            isValid = validWhenFilled(tried, form.birthCity?.label.orEmpty()),
             onClick = {
                 onIntent(
                     WorkshopRecentlyAddedMembersIntent.FormPickerOpened(
@@ -398,6 +432,8 @@ private fun PlaceStep(
         WorkshopPickerField(
             label = stringResource(Res.string.abs_form_issue_city),
             value = form.issueCity?.label,
+            isRequired = true,
+            isValid = validWhenFilled(tried, form.issueCity?.label.orEmpty()),
             onClick = {
                 onIntent(
                     WorkshopRecentlyAddedMembersIntent.FormPickerOpened(
@@ -411,6 +447,8 @@ private fun PlaceStep(
     WorkshopPickerField(
         label = stringResource(Res.string.abs_form_job),
         value = form.job?.label,
+        isRequired = true,
+        isValid = validWhenFilled(tried, form.job?.label.orEmpty()),
         onClick = {
             onIntent(WorkshopRecentlyAddedMembersIntent.FormPickerOpened(RegistrationPicker.JOB))
         },
@@ -421,6 +459,8 @@ private fun PlaceStep(
         onClick = onPickDate,
         placeholder = stringResource(Res.string.workshop_select_date),
         isDate = true,
+        isRequired = true,
+        isValid = validWhenFilled(tried, form.startDate),
     )
 }
 

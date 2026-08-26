@@ -1,7 +1,6 @@
 package com.tamin.taminhamrah.feature.workshops.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,11 +13,9 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopConstants
 import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
@@ -113,12 +110,12 @@ fun <T> WorkshopListScaffold(
 
         if (state.isLoadingMore) {
             item(key = WorkshopConstants.FOOTER_KEY) {
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.md),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator(modifier = Modifier.height(WorkshopDimens.footerSpinnerSize))
-                }
+                ShimmerBlock(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(WorkshopDimens.skeletonRowHeight),
+                    cornerRadius = CornerRadius.lg,
+                )
             }
         }
     }

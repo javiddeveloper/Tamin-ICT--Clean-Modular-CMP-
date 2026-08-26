@@ -1,5 +1,10 @@
 package com.tamin.taminhamrah.feature.workshops.ui.paymentSheets
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -154,7 +159,11 @@ fun PaymentSheetsContent(
             key = { it.debitNumber + it.agreementRow },
             header = {
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
-                    if (state.isSearchOpen) {
+                    AnimatedVisibility(
+                        visible = state.isSearchOpen,
+                        enter = expandVertically() + fadeIn(),
+                        exit = shrinkVertically() + fadeOut(),
+                    ) {
                         PaymentSheetsSearchPanel(
                             filters = state.draft,
                             onFiltersChange = {

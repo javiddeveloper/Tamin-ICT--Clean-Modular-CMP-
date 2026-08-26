@@ -7,7 +7,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -25,7 +24,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -62,6 +60,7 @@ import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.util.toPersianDigits
@@ -636,7 +635,7 @@ fun WorkshopFormTextArea(
  * going on is what the user is here to do.
  */
 @Composable
-fun ColumnScope.WorkshopFormFooter(
+fun WorkshopFormFooter(
     nextLabel: String,
     onNext: () -> Unit,
     modifier: Modifier = Modifier,
@@ -869,8 +868,13 @@ fun <T> WorkshopLookupSheet(
                 inputRestriction = InputRestriction.None,
             )
             if (isLoading) {
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(modifier = Modifier.size(IconSize.medium))
+                // Row-shaped blocks rather than a spinner, so the sheet does not jump when the
+                // real options replace them — the same wait every other list in the app draws.
+                repeat(LookupShimmerRows) {
+                    ShimmerBlock(
+                        modifier = Modifier.fillMaxWidth().height(LookupShimmerRowHeight),
+                        cornerRadius = CornerRadius.md,
+                    )
                 }
             }
             LazyColumn(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
@@ -921,3 +925,7 @@ fun WorkshopFormBanner(text: String, modifier: Modifier = Modifier) {
         )
     }
 }
+
+/** A lookup waits as four row-shaped blocks — about a sheet's worth before it scrolls. */
+private const val LookupShimmerRows = 4
+private val LookupShimmerRowHeight = 44.dp

@@ -10,12 +10,10 @@ import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState.PartialState
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
-import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopActivityStatus
 import com.tamin.taminhamrah.model.workshop.WorkshopListQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
-import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenDebtsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetEmployerAgreementsUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -23,11 +21,9 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.workshop_error_receive_data
-import taminx.core.core_ui.workshop_no_debt_found
 
 class WorkshopsViewModel(
     private val getEmployerAgreements: GetEmployerAgreementsUseCase,
-    private val getArticleSixteenDebts: GetArticleSixteenDebtsUseCase,
 ) : BaseViewModel<WorkshopsUiState, PartialState, WorkshopsEvent, WorkshopsIntent>(
     initialState = WorkshopsUiState()
 ) {
@@ -134,26 +130,20 @@ class WorkshopsViewModel(
         emit(PartialState.DetailForChanged(workshop))
     }
 
+    /**
+     * Opens the service the menu picked.
+     *
+     * Every action navigates, including رسیدگی به بدهی ماده ۱۶. That one used to fetch its debts
+     * first and refuse with a message when there were none — which cost a request on every tap and
+     * made it the one row in the list that answers with a toast instead of a screen. Its own list
+     * shows the same «نتیجه‌ای یافت نشد» empty state every other workshop screen does.
+     */
     private fun selectAction(
         action: WorkshopAction,
         workshop: WorkshopPR,
     ): Flow<PartialState> = flow {
-        if (action != WorkshopAction.ARTICLE_SIXTEEN) {
-            sendEvent(workshop.navigationEvent(action))
-            return@flow
-        }
-
-        emit(PartialState.Loading)
-        val debts = getArticleSixteenDebts(
-            ArticleSixteenDebtQuery(workshopId = workshop.workshopId, branchCode = workshop.branchCode)
-        )
-        emit(PartialState.Loaded(uiState.value.list))
-        if (debts.items.isEmpty()) {
-            sendEvent(WorkshopsEvent.ShowMessage(Res.string.workshop_no_debt_found))
-        } else {
-            sendEvent(workshop.navigationEvent(action))
-        }
-    }.catch { emit(PartialState.Error(it.toSingleLineMessage())) }
+        sendEvent(workshop.navigationEvent(action))
+    }
 
     private fun WorkshopPR.navigationEvent(action: WorkshopAction) = WorkshopsEvent.Navigate(
         action = action,

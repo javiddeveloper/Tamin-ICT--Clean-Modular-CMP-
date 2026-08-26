@@ -277,6 +277,8 @@ private fun HandleObjectionableDebitEvents(events: Flow<ObjectionableDebitEvent>
     LaunchedEffect(events, toaster) {
         events.collect { event ->
             when (event) {
+                is ObjectionableDebitEvent.ShowServerMessage -> toaster.error(event.message)
+
                 is ObjectionableDebitEvent.ShowMessage ->
                     toaster.error(getString(event.message))
 

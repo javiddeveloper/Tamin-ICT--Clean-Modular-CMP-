@@ -1,5 +1,10 @@
 package com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -7,7 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import taminx.core.core_ui.new_member_follow_body
-import taminx.core.core_ui.abs_form_done_body
+import taminx.core.core_ui.abs_form_done_title
 import taminx.core.core_ui.new_member_confirmed
 import org.jetbrains.compose.resources.getString
 import kotlinx.coroutines.flow.Flow
@@ -162,7 +167,11 @@ fun WorkshopRecentlyAddedMembersContent(
             key = { it.nationalId },
             header = {
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.cardGap)) {
-                    if (isSearchOpen) {
+                    AnimatedVisibility(
+                        visible = isSearchOpen,
+                        enter = expandVertically() + fadeIn(),
+                        exit = shrinkVertically() + fadeOut(),
+                    ) {
                         WorkshopSearchCard(
                             onSearch = {
                                 onIntent(WorkshopRecentlyAddedMembersIntent.ApplySearch)
@@ -349,6 +358,8 @@ private fun HandleRecentlyAddedMembersEvents(events: Flow<WorkshopRecentlyAddedM
     LaunchedEffect(events, toaster) {
         events.collect { event ->
             when (event) {
+                is WorkshopRecentlyAddedMembersEvent.ShowServerMessage -> toaster.error(event.message)
+
                 is WorkshopRecentlyAddedMembersEvent.ShowMessage ->
                     toaster.error(getString(event.message))
 
@@ -360,9 +371,8 @@ private fun HandleRecentlyAddedMembersEvents(events: Flow<WorkshopRecentlyAddedM
                     getString(Res.string.new_member_follow_body, event.referenceCode),
                 )
 
-                is WorkshopRecentlyAddedMembersEvent.RegistrationFiled -> toaster.success(
-                    getString(Res.string.abs_form_done_body, event.referenceCode),
-                )
+                WorkshopRecentlyAddedMembersEvent.RegistrationFiled ->
+                    toaster.success(getString(Res.string.abs_form_done_title))
             }
         }
     }

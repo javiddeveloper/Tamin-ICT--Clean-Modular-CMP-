@@ -24,7 +24,6 @@ import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDTO
-import com.tamin.taminhamrah.model.workshop.NewMemberIsNewDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDTO
@@ -162,7 +161,7 @@ internal interface WorkShopsApiService {
     @GET("relation-tamins/isnew/{nationalId}")
     suspend fun checkNewMemberIsNew(
         @Path("nationalId") nationalId: String,
-    ): BaseDTO<NewMemberIsNewDTO>
+    ): BaseDTO<Boolean>
 
     /** Creates the registration. `employers`, as the old app posts it. */
     @POST("employers")

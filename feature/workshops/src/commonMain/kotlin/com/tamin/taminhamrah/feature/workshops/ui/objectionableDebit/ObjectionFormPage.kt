@@ -183,8 +183,8 @@ fun ObjectionFormPage(
 
         WorkshopFormFooter(
             nextLabel = stringResource(Res.string.obj_form_submit),
-            isBusy = form.isBusy,
             onNext = { onIntent(ObjectionableDebitIntent.FormSubmit) },
+            isBusy = form.isBusy,
         )
     }
 

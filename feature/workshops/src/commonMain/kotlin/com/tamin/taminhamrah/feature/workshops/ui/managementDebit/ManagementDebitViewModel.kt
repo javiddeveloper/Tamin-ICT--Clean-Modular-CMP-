@@ -176,7 +176,7 @@ class ManagementDebitViewModel(
         emit(PartialState.ViewerPdfChanged(getArticleSixteenReportPdf(seqNo).toPresentation()))
     }.catch {
         emit(PartialState.Busy(false))
-        emit(PartialState.Error(it.toSingleLineMessage()))
+        emit(reportFailure(it))
     }
 
     private fun showExpertMessage(debt: ArticleSixteenDebtPR): Flow<PartialState> = flow {
@@ -192,7 +192,7 @@ class ManagementDebitViewModel(
         emit(PartialState.ExpertMessageChanged(info.defectDescription))
     }.catch {
         emit(PartialState.Busy(false))
-        emit(PartialState.Error(it.toSingleLineMessage()))
+        emit(reportFailure(it))
     }
 
     /** One-line edits of the open form, which is most of what it does. */
@@ -253,7 +253,7 @@ class ManagementDebitViewModel(
         emit(PartialState.FormAttachmentAdded(attachment))
     }.catch {
         emit(PartialState.FormUploadingChanged(false))
-        emit(PartialState.Error(it.toSingleLineMessage()))
+        emit(reportFailure(it))
     }
 
     /**
@@ -291,7 +291,7 @@ class ManagementDebitViewModel(
         emitAll(loadPage(page = 0))
     }.catch {
         emit(PartialState.FormSubmittingChanged(false))
-        emit(PartialState.Error(it.toSingleLineMessage()))
+        emit(reportFailure(it))
     }
 
     override fun reduceState(
@@ -368,6 +368,20 @@ class ManagementDebitViewModel(
             isBusy = false,
             expertMessage = partialState.message,
         )
+    }
+
+    /**
+     * A failure the user must see now.
+     *
+     * With a form open the list is not on screen, so its error state is not either; the
+     * message is raised as an event instead and the toast host shows it.
+     */
+    private fun reportFailure(throwable: Throwable): PartialState {
+        val message = throwable.toSingleLineMessage()
+        if (uiState.value.form != null) {
+            sendEvent(ManagementDebitEvent.ShowServerMessage(message))
+        }
+        return PartialState.Error(message)
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)
