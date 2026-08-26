@@ -31,6 +31,13 @@ class TopAreaState internal constructor(
     private val maxOffsetPx: Float,
     initialMeasuredHeightPx: Int,
     private val scope: CoroutineScope,
+    /**
+     * True only for the frozen, off-screen instances [rememberMeasuredTopAreaState] hands its
+     * `header` lambda to measure natural height. A header must treat this as "don't run anything
+     * that keeps requesting animation frames" -- e.g. an infinitely-repeating ring/shimmer -- since
+     * two of these are composed on every probe and never actually placed or drawn.
+     */
+    val isMeasureProbe: Boolean = false,
 ) {
     var rawOffsetPx: Float by mutableFloatStateOf(0f)
         private set
@@ -156,7 +163,7 @@ class TopAreaState internal constructor(
          * 1f purely so [progress] reads back exactly the value it was frozen at.
          */
         internal fun probe(progress: Float, scope: CoroutineScope): TopAreaState =
-            TopAreaState(maxOffsetPx = 1f, initialMeasuredHeightPx = 0, scope = scope).also {
+            TopAreaState(maxOffsetPx = 1f, initialMeasuredHeightPx = 0, scope = scope, isMeasureProbe = true).also {
                 it.rawOffsetPx = progress.coerceIn(0f, 1f)
             }
     }

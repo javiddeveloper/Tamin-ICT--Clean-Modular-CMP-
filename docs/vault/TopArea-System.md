@@ -164,5 +164,16 @@ inset handling and push the header down.
   `TopAreaState.kt`'s class doc rather than guessing.
 - `TopAreaState` is only ever constructed via the two `remember*` factories (its constructor is
   `internal`) — don't try to instantiate it directly outside tests.
+- **A header passed to `rememberMeasuredTopAreaState` must not contain anything that keeps
+  requesting animation frames on its own** — most commonly an infinite-repeat animation
+  (`rememberInfiniteTransition`/`infiniteRepeatable`), but a `LaunchedEffect` tied to first
+  composition or a live video/Lottie player is the same problem. The probe composes `header` twice,
+  off-screen and unplaced, every time it re-measures — that content is never drawn, so a running
+  infinite animation there is pure wasted work for as long as Compose keeps the probe slot
+  composed. `ActiveRelationHeader`'s `AnimatedRingHeaderIcon` hit exactly this on the system's first
+  real use; the fix was a `TopAreaState.isMeasureProbe` flag (`TopAreaState.kt`) threaded down to an
+  `animated: Boolean` parameter on `AnimatedRingHeaderIcon`/`RippleRing` (`GlassIconTile.kt`) so the
+  probe instances render statically instead. If a future header adopts another infinitely-animating
+  child, gate it the same way rather than assuming "side-effect-free" alone will catch it.
 
 Related: [[Overview]] · [[MVI-Pattern]] · [[Adding-a-Feature]]

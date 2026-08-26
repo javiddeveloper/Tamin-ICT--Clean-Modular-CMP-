@@ -155,7 +155,8 @@ internal fun ActiveRelationHeader(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             AnimatedRingHeaderIcon(
-                icon = vectorResource(Res.drawable.ic_communication)
+                icon = vectorResource(Res.drawable.ic_communication),
+                animated = !topAreaState.isMeasureProbe
             )
             Row(
                 verticalAlignment = Alignment.CenterVertically
