@@ -24,6 +24,8 @@ import com.tamin.taminhamrah.apiService.inbox.PersonalInboxApiService
 import com.tamin.taminhamrah.apiService.inbox.createPersonalInboxApiService
 import com.tamin.taminhamrah.apiService.orotezProtez.OrotezProtezApiService
 import com.tamin.taminhamrah.apiService.orotezProtez.createOrotezProtezApiService
+import com.tamin.taminhamrah.apiService.requestPaymentForIllDays.RequestPaymentForIllDaysApiService
+import com.tamin.taminhamrah.apiService.requestPaymentForIllDays.createRequestPaymentForIllDaysApiService
 import com.tamin.taminhamrah.apiService.pension.PensionApiService
 import com.tamin.taminhamrah.apiService.pension.createPensionApiService
 import com.tamin.taminhamrah.apiService.personal.PersonalApiService
@@ -153,6 +155,10 @@ val ApiClientsModule = module {
         ktorfit.createOrotezProtezApiService()
     }
 
+    single<RequestPaymentForIllDaysApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createRequestPaymentForIllDaysApiService()
+    }
 
     single<OccurrenceApiService> {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))

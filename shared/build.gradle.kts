@@ -51,6 +51,7 @@ kotlin {
             api(project(":feature:orotez-protez"))
             api(project(":feature:girlSurvivor"))
             api(project(":feature:deferredInstallment"))
+            api(project(":feature:requestPaymentForIllDays"))
             api(libs.androidx.lifecycle.viewmodel)
             implementation(libs.ktor.client.core)
             implementation(libs.kotlinx.serialization.json)

@@ -42,6 +42,8 @@ import com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSourc
 import com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.orotezProtez.OrotezProtezRemoteDataSource
 import com.tamin.taminhamrah.dataSource.orotezProtez.OrotezProtezRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.requestPaymentForIllDays.RequestPaymentForIllDaysRemoteDataSource
+import com.tamin.taminhamrah.dataSource.requestPaymentForIllDays.RequestPaymentForIllDaysRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSource
 import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.occurrence.OccurrenceRemoteDataSource
@@ -214,6 +216,13 @@ val remoteModule = module {
         OrotezProtezRemoteDataSourceImpl(
             orotezProtezApiService = get(),
             apiQueryBuilder = get(),
+            errorParser = get()
+        )
+    }
+
+    single<RequestPaymentForIllDaysRemoteDataSource> {
+        RequestPaymentForIllDaysRemoteDataSourceImpl(
+            apiService = get(),
             errorParser = get()
         )
     }
