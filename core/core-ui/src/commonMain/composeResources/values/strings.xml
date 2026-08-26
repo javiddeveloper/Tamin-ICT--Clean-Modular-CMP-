@@ -1122,6 +1122,7 @@
     <string name="ill_days_wizard_pick_branch_subtitle">شعبه آخرین بیمه‌پردازی را انتخاب کنید</string>
     <string name="ill_days_wizard_pick_city_title">انتخاب شهر</string>
     <string name="ill_days_wizard_pick_city_subtitle">شهر محل استراحت را انتخاب کنید</string>
+    <string name="ill_days_wizard_city_search">جستجوی نام شهر</string>
     <string name="ill_days_wizard_step2_title">ایام استراحت پزشکی</string>
     <string name="ill_days_wizard_step2_description">اگر مبتلا به کرونا بوده‌اید تاریخ‌ها از وزارت بهداشت خوانده می‌شود؛ در غیر این صورت بازه استراحت را وارد کنید.</string>
     <string name="ill_days_covid_toggle_label">مبتلا به بیماری کرونا بوده‌ام</string>

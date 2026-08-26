@@ -30,10 +30,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -43,8 +41,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.tamin.taminhamrah.model.common.CityPR
-import com.tamin.taminhamrah.model.requestPaymentForIllDays.IllDaysBranchWorkshopPR
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.LoadingButton
@@ -58,6 +54,8 @@ import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.components.TaminSwitchButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminOptionSheetItem
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminSearchableOptionSheet
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.components.taminSurface
@@ -68,7 +66,6 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.toPersianDigits
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
@@ -79,7 +76,6 @@ import taminx.core.core_ui.ic_branch
 import taminx.core.core_ui.ic_calculator
 import taminx.core.core_ui.ic_place
 import taminx.core.core_ui.ic_tamin_calendar
-import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.ill_days_cd_back
@@ -99,6 +95,7 @@ import taminx.core.core_ui.ill_days_wizard_branch_label
 import taminx.core.core_ui.ill_days_wizard_branch_placeholder
 import taminx.core.core_ui.ill_days_wizard_city_label
 import taminx.core.core_ui.ill_days_wizard_city_placeholder
+import taminx.core.core_ui.ill_days_wizard_city_search
 import taminx.core.core_ui.ill_days_wizard_pick_branch_subtitle
 import taminx.core.core_ui.ill_days_wizard_pick_branch_title
 import taminx.core.core_ui.ill_days_wizard_pick_city_subtitle
@@ -610,26 +607,42 @@ private fun IllDaysWizardPickers(
     onIntent: (IllDaysWizardIntent) -> Unit,
 ) {
     when (state.picker) {
-        IllDaysWizardPicker.Branch -> OptionSheet(
-            title = stringResource(Res.string.ill_days_wizard_pick_branch_title),
-            subtitle = stringResource(Res.string.ill_days_wizard_pick_branch_subtitle),
-            onDismiss = { onIntent(IllDaysWizardIntent.DismissPicker) },
-        ) {
-            BranchOptions(
-                options = state.branchOptions,
+        IllDaysWizardPicker.Branch -> {
+            val branchById = remember(state.branchOptions) {
+                state.branchOptions.associateBy { it.id }
+            }
+            TaminSearchableOptionSheet(
+                title = stringResource(Res.string.ill_days_wizard_pick_branch_title),
+                subtitle = stringResource(Res.string.ill_days_wizard_pick_branch_subtitle),
+                items = remember(state.branchOptions) {
+                    state.branchOptions.map { TaminOptionSheetItem(id = it.id, label = it.label) }
+                },
                 selectedId = state.selectedBranch?.id,
-                onSelect = { onIntent(IllDaysWizardIntent.BranchPicked(it)) },
+                showSearch = false,
+                onSelect = { item ->
+                    branchById[item.id]?.let { onIntent(IllDaysWizardIntent.BranchPicked(it)) }
+                },
+                onDismiss = { onIntent(IllDaysWizardIntent.DismissPicker) },
             )
         }
-        IllDaysWizardPicker.City -> OptionSheet(
-            title = stringResource(Res.string.ill_days_wizard_pick_city_title),
-            subtitle = stringResource(Res.string.ill_days_wizard_pick_city_subtitle),
-            onDismiss = { onIntent(IllDaysWizardIntent.DismissPicker) },
-        ) {
-            CityOptions(
-                options = state.cityOptions,
-                selectedCode = state.selectedCity?.cityCode,
-                onSelect = { onIntent(IllDaysWizardIntent.CityPicked(it)) },
+        IllDaysWizardPicker.City -> {
+            val cityByCode = remember(state.cityOptions) {
+                state.cityOptions.associateBy { it.cityCode }
+            }
+            TaminSearchableOptionSheet(
+                title = stringResource(Res.string.ill_days_wizard_pick_city_title),
+                subtitle = stringResource(Res.string.ill_days_wizard_pick_city_subtitle),
+                items = remember(state.cityOptions) {
+                    state.cityOptions.map {
+                        TaminOptionSheetItem(id = it.cityCode, label = it.cityName)
+                    }
+                },
+                selectedId = state.selectedCity?.cityCode,
+                searchPlaceholder = stringResource(Res.string.ill_days_wizard_city_search),
+                onSelect = { item ->
+                    cityByCode[item.id]?.let { onIntent(IllDaysWizardIntent.CityPicked(it)) }
+                },
+                onDismiss = { onIntent(IllDaysWizardIntent.DismissPicker) },
             )
         }
         IllDaysWizardPicker.StartDate -> TaminJalaliDatePicker(
@@ -660,129 +673,3 @@ private fun IllDaysWizardPickers(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun OptionSheet(
-    title: String,
-    subtitle: String,
-    onDismiss: () -> Unit,
-    content: @Composable () -> Unit,
-) {
-    val colors = LocalTaminColors.current
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = colors.bgPage,
-        shape = RoundedCornerShape(topStart = CornerRadius.sheet, topEnd = CornerRadius.sheet),
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(horizontal = Spacing.page)
-                .padding(bottom = Spacing.md),
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = colors.textPrimary,
-            )
-            Spacer(modifier = Modifier.height(Spacing.xxs))
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = colors.textMuted,
-            )
-            Spacer(modifier = Modifier.height(Spacing.lg))
-            content()
-        }
-    }
-}
-
-@Composable
-private fun BranchOptions(
-    options: ImmutableList<IllDaysBranchWorkshopPR>,
-    selectedId: String?,
-    onSelect: (IllDaysBranchWorkshopPR) -> Unit,
-) {
-    val colors = LocalTaminColors.current
-    Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-        options.forEach { option ->
-            val selected = option.id == selectedId
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(CornerRadius.lg))
-                    .background(if (selected) colors.blueBg else colors.bgSurface)
-                    .border(
-                        width = Thickness.border,
-                        color = if (selected) colors.blueText else colors.border,
-                        shape = RoundedCornerShape(CornerRadius.lg),
-                    )
-                    .clickable(onClick = { onSelect(option) })
-                    .padding(Spacing.lg),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(
-                    text = option.label,
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = colors.textPrimary,
-                    modifier = Modifier.weight(1f),
-                )
-                if (selected) {
-                    Icon(
-                        imageVector = vectorResource(Res.drawable.ic_tamin_check),
-                        contentDescription = null,
-                        tint = colors.blueText,
-                        modifier = Modifier.size(IconSize.small),
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun CityOptions(
-    options: ImmutableList<CityPR>,
-    selectedCode: String?,
-    onSelect: (CityPR) -> Unit,
-) {
-    val colors = LocalTaminColors.current
-    Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-        options.forEach { option ->
-            val selected = option.cityCode == selectedCode
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(CornerRadius.lg))
-                    .background(if (selected) colors.blueBg else colors.bgSurface)
-                    .border(
-                        width = Thickness.border,
-                        color = if (selected) colors.blueText else colors.border,
-                        shape = RoundedCornerShape(CornerRadius.lg),
-                    )
-                    .clickable(onClick = { onSelect(option) })
-                    .padding(Spacing.lg),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(
-                    text = option.cityName,
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = colors.textPrimary,
-                    modifier = Modifier.weight(1f),
-                )
-                if (selected) {
-                    Icon(
-                        imageVector = vectorResource(Res.drawable.ic_tamin_check),
-                        contentDescription = null,
-                        tint = colors.blueText,
-                        modifier = Modifier.size(IconSize.small),
-                    )
-                }
-            }
-        }
-    }
-}

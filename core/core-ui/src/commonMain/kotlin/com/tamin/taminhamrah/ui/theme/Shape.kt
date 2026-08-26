@@ -137,3 +137,8 @@ object ShimmerSize {
     val valueWidth = 56.dp
     val valueHeight = 14.dp
 }
+
+/** Scrollable list area inside modal option sheets (city / branch pickers). */
+object SheetDimens {
+    val listMaxHeight = 300.dp
+}
