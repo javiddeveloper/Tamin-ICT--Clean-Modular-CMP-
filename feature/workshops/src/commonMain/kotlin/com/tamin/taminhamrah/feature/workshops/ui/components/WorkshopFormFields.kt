@@ -28,11 +28,11 @@ import com.tamin.taminhamrah.feature.workshops.ui.WorkshopConstants
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.feature.workshops.ui.workshopMembers.PersonSearch
 import com.tamin.taminhamrah.ui.components.InputRestriction
-import com.tamin.taminhamrah.ui.components.animatedErrorBorder
-import com.tamin.taminhamrah.ui.components.TaminStyledTextField
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
+import com.tamin.taminhamrah.ui.components.TaminStyledTextField
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.animatedErrorBorder
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.digitsOnly
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -45,6 +45,8 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.abs_form_err_required
+import taminx.core.core_ui.ic_info
 import taminx.core.core_ui.ic_tamin_calendar
 import taminx.core.core_ui.ic_tamin_chevron_down
 import taminx.core.core_ui.ic_tamin_cross
@@ -118,11 +120,42 @@ fun WorkshopSearchCard(
  * The label is its own row above the control rather than a floating Material label, because the
  * design's fields are a flat 44dp box with the caption outside them.
  */
+
+/**
+ * Why a control with the error border is wrong, printed under it.
+ *
+ * The same line [SegmentedInputField] and [TaminTextArea] draw — info glyph, then the reason — so
+ * a form built from typed fields, a ten-slot code and a picker reports all three identically.
+ */
+@Composable
+fun WorkshopFieldError(text: String, modifier: Modifier = Modifier) {
+    val colors = LocalTaminColors.current
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+    ) {
+        Icon(
+            imageVector = vectorResource(Res.drawable.ic_info),
+            contentDescription = null,
+            tint = colors.dangerText,
+            modifier = Modifier.size(IconSize.small),
+        )
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelSmall,
+            color = colors.dangerText,
+        )
+    }
+}
+
 @Composable
 fun WorkshopFieldSlot(
     label: String,
     modifier: Modifier = Modifier,
     isRequired: Boolean = false,
+    /** Printed under the control. Null while there is nothing wrong. */
+    errorText: String? = null,
     content: @Composable () -> Unit,
 ) {
     val caption = if (isRequired) "$label *" else label
@@ -137,6 +170,7 @@ fun WorkshopFieldSlot(
             color = LocalTaminColors.current.textSecondary,
         )
         content()
+        errorText?.let { WorkshopFieldError(text = it) }
     }
 }
 
@@ -194,10 +228,21 @@ fun WorkshopPickerField(
     isRequired: Boolean = false,
     /** False draws the same animated error border a text field gets; null leaves it neutral. */
     isValid: Boolean? = null,
+    /**
+     * Why the selection is wrong. Defaulted, because the only way to get a picker wrong is to
+     * leave it alone — a caller with a second reason passes its own wording.
+     */
+    errorText: String? = null,
 ) {
     val colors = LocalTaminColors.current
+    val requiredText = stringResource(Res.string.abs_form_err_required)
 
-    WorkshopFieldSlot(label = label, modifier = modifier, isRequired = isRequired) {
+    WorkshopFieldSlot(
+        label = label,
+        modifier = modifier,
+        isRequired = isRequired,
+        errorText = (errorText ?: requiredText).takeIf { isValid == false },
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()

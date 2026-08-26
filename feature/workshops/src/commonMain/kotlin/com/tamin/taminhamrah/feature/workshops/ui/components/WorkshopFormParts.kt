@@ -91,9 +91,11 @@ import taminx.core.core_ui.ws_form_doc_type_title
 import taminx.core.core_ui.ws_form_docs_count
 import taminx.core.core_ui.ws_form_docs_title
 import taminx.core.core_ui.ws_form_edit_info
+import taminx.core.core_ui.ws_form_err_docs
 import taminx.core.core_ui.ws_form_file_size
 import taminx.core.core_ui.ws_form_group_count
 import taminx.core.core_ui.ws_form_prev
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * The parts every کارگاه form is assembled from.
@@ -379,15 +381,16 @@ fun WorkshopDocumentsPanel(
     /**
      * Traces the error border round the whole panel.
      *
-     * «بارگذاری حداقل یک مدرک» is a fact about the box, not about any one field in it, so it
-     * is drawn where the fields draw theirs rather than as a line underneath.
+     * «بارگذاری حداقل یک مدرک» is answered by pressing افزودن مدرک, so the border traces that
+     * button rather than the whole panel — it points at what to do, the way a field's border
+     * points at the field to fill in.
      */
     isError: Boolean = false,
 ) {
     val colors = LocalTaminColors.current
     val scope = rememberCoroutineScope()
     var isTypeSheetOpen by remember { mutableStateOf(false) }
-    // Never cleared: a cancelled pick hands back a null file, which is what the callback tests.
+    // Never cleared: a canceled pick hands back a null file, which is what the callback tests.
     var pendingType by remember { mutableStateOf<WorkshopDocumentType?>(null) }
 
     // The wave outlives the upload by [WAVE_TAIL_MILLIS], the way step 6 of the occurrence report
@@ -399,7 +402,7 @@ fun WorkshopDocumentsPanel(
             countAtUploadStart = attachments.size
             isWaving = true
         } else {
-            delay(WAVE_TAIL_MILLIS)
+            delay(WAVE_TAIL_MILLIS.milliseconds)
             isWaving = false
         }
     }
@@ -420,13 +423,6 @@ fun WorkshopDocumentsPanel(
         modifier = modifier
             .fillMaxWidth()
             .taminSurface(WorkshopDimens.cardCorner)
-            .animatedErrorBorder(
-                isError = isError,
-                errorColor = colors.dangerText,
-                normalColor = Color.Transparent,
-                borderWidth = Thickness.border,
-                cornerRadius = WorkshopDimens.cardCorner,
-            )
             .padding(WorkshopDimens.panelPadding),
     ) {
         Row(
@@ -490,8 +486,22 @@ fun WorkshopDocumentsPanel(
                 shape = RoundedCornerShape(CornerRadius.chip),
                 textStyle = MaterialTheme.typography.labelLarge
                     .copy(fontWeight = FontWeight.ExtraBold),
-                modifier = Modifier.padding(top = Spacing.cardGap),
+                modifier = Modifier
+                    .padding(top = Spacing.cardGap)
+                    .animatedErrorBorder(
+                        isError = isError,
+                        errorColor = colors.dangerText,
+                        normalColor = Color.Transparent,
+                        borderWidth = Thickness.border,
+                        cornerRadius = CornerRadius.chip,
+                    ),
             )
+            if (isError) {
+                WorkshopFieldError(
+                    text = stringResource(Res.string.ws_form_err_docs),
+                    modifier = Modifier.padding(top = Spacing.xs),
+                )
+            }
         }
     }
 
@@ -734,7 +744,7 @@ fun WorkshopFormFooter(
 }
 
 /** The dashed rule the design puts above a card's footer control. */
-private fun Modifier.dashedTopRule(color: androidx.compose.ui.graphics.Color): Modifier =
+private fun Modifier.dashedTopRule(color: Color): Modifier =
     drawBehind {
         drawLine(
             color = color,
