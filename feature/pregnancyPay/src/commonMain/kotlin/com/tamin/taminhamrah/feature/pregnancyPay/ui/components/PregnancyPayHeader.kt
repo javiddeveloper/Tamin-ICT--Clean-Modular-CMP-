@@ -1,13 +1,10 @@
 package com.tamin.taminhamrah.feature.pregnancyPay.ui.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -15,10 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
-import com.tamin.taminhamrah.ui.components.GlassIconTile
+import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -41,34 +38,35 @@ internal fun PregnancyPayHeader(
         Brush.horizontalGradient(taminColors.profileGradientStops)
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(bottomStart = CornerRadius.x3l, bottomEnd = CornerRadius.x3l))
-            .background(gradient)
-            .padding(bottom = Spacing.xl),
-        horizontalAlignment = Alignment.CenterHorizontally,
+    TaminTopAppBar(
+        title = stringResource(Res.string.pregnancy_pay_title),
+        modifier = modifier,
+        background = gradient,
+        shape = RoundedCornerShape(bottomStart = CornerRadius.x3l, bottomEnd = CornerRadius.x3l),
+        bottomPadding = Spacing.smPlus,
+        navigationIcon = {
+            TaminTopAppBarButton(
+                icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                contentDescription = null,
+                onClick = onBackClicked,
+                bordered = true,
+            )
+        },
     ) {
-        TaminTopAppBar(
-            title = stringResource(Res.string.pregnancy_pay_title),
-            background = gradient,
-            navigationIcon = {
-                TaminTopAppBarButton(
-                    icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                    contentDescription = null,
-                    onClick = onBackClicked,
-                    bordered = true,
-                )
-            },
+        DecorativeBackgroundCircle(
+            size = 190.dp,
+            xOffset = 450.dp,
+            yOffset = (-150).dp
         )
-
-        Spacer(Modifier.height(Spacing.smPlus))
-        AnimatedRingHeaderIcon(icon = Icons.Filled.Favorite)
-        Spacer(Modifier.height(Spacing.sm))
+        AnimatedRingHeaderIcon(
+            icon = Icons.Filled.Favorite,
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+        )
         Text(
             text = stringResource(Res.string.pregnancy_pay_subtitle),
             style = MaterialTheme.typography.labelLarge,
             color = taminColors.textHeaderSubtitle,
+            modifier = Modifier.align(Alignment.CenterHorizontally),
         )
     }
 }

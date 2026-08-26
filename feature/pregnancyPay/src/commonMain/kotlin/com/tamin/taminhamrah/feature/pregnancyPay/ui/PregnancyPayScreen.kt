@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DateRange
@@ -47,6 +48,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.pregnancyPay.ui.components.PregnancyPayHeader
 import com.tamin.taminhamrah.feature.pregnancyPay.ui.components.PregnancyPayOptionSheet
 import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.CHILD_NATIONAL_CODE_LENGTH
@@ -78,6 +80,7 @@ import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.components.TaminStyledTextField
+import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.document.TaminDocumentSourceSheet
 import com.tamin.taminhamrah.ui.components.document.TaminDocumentUploadCard
 import com.tamin.taminhamrah.ui.components.document.TaminDocumentUploadState
@@ -748,7 +751,7 @@ private fun PregnancyPayBranchAndRestStep(
                         days.toString(),
                         REST_DAYS_REFERENCE_CAP_DAYS.toString(),
                     ),
-                    icon = if (exceedsCap) Icons.Filled.Warning else Icons.Filled.DateRange,
+                    icon = Icons.Filled.AccessTime,
                     containerColor = if (exceedsCap) colors.dangerBorder else colors.blueBg,
                     contentColor = if (exceedsCap) colors.dangerText else colors.blueText,
                 )
@@ -885,12 +888,13 @@ private fun PregnancyPaySegmentedField(
 ) {
     val colors = LocalTaminColors.current
     Column(modifier = modifier.fillMaxWidth()) {
-        Text(
+        TaminText(
             text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = colors.textSecondary,
+            fontSize = 12.5.sp,
+            fontWeight = FontWeight.Bold,
+            color = colors.textTertiary,
+            modifier = Modifier.padding(bottom = 6.dp),
         )
-        Spacer(Modifier.height(Spacing.xs))
         SegmentedInputField(
             value = value,
             onValueChange = onValueChange,
