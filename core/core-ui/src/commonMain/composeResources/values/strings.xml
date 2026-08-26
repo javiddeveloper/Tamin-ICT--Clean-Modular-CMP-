@@ -1227,4 +1227,14 @@
     <string name="workers_payment_info_sheet_title">دربارهٔ این سرویس</string>
     <string name="workers_payment_info_sheet_body">اقلام ماهانهٔ حق بیمهٔ کارگران ساختمانی بر پایهٔ روزهای اشتغال و دستمزد مبنای کسر بیمه محاسبه می‌شود. پرداخت هر ماه تا پایان ماه بعد بدون جریمه امکان‌پذیر است؛ پس از آن جریمهٔ تأخیر به مبلغ افزوده می‌شود. ماه‌هایی که مهلت آن‌ها گذشته باشد فقط با مراجعه به شعبه قابل تسویه‌اند.</string>
     <string name="workers_payment_info_sheet_dismiss">متوجه شدم</string>
+    <string name="workers_payment_detail_title">پرداخت حق بیمه</string>
+    <string name="workers_payment_date_range_to">%1$s تا %2$s</string>
+    <string name="workers_payment_statement_title">صورت‌حساب</string>
+    <string name="workers_payment_total_payable">مبلغ قابل پرداخت</string>
+    <string name="workers_payment_gateway_notice">با زدن دکمهٔ پرداخت به درگاه بانکی سازمان تأمین اجتماعی منتقل می‌شوید. پس از پرداخت، رسید از همین صفحه نمایش داده می‌شود.</string>
+    <string name="workers_payment_gateway_action">انتقال به درگاه پرداخت</string>
+    <string name="workers_payment_success_title">پرداخت با موفقیت انجام شد</string>
+    <string name="workers_payment_success_subtitle">حق بیمهٔ %1$s به مبلغ %2$s ریال پرداخت شد.</string>
+    <string name="workers_payment_success_tracking_label">شمارهٔ پیگیری تراکنش</string>
+    <string name="workers_payment_success_dismiss">متوجه شدم</string>
 </resources>

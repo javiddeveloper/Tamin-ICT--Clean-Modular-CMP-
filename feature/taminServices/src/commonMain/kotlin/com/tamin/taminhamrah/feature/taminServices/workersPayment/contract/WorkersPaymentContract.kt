@@ -19,6 +19,8 @@ data class WorkersPaymentUiState(
     /** Ticket + paymentInfo from the last `payDebit`, awaiting the gateway callback. */
     val pendingTicket: String? = null,
     val pendingPaymentInfo: String? = null,
+    /** Non-null once `inspectTicket` confirms a payment — screen 2 shows the success dialog. */
+    val paymentReceipt: PaymentReceipt? = null,
     val errorMessage: String? = null,
 ) {
     val hasItems: Boolean get() = items.isNotEmpty()
@@ -31,6 +33,14 @@ data class WorkersPaymentUiState(
 
     /** Sum actually owed right now (premium + penalty of every still-payable card). */
     val payableTotal: Long get() = payableItems.sumOf { it.totalPayable }
+
+    /** Everything screen 2's success dialog needs, captured at verify-time. */
+    @Immutable
+    data class PaymentReceipt(
+        val item: WorkersPaymentInfoPR,
+        val trackingCode: String,
+        val message: String,
+    )
 
     sealed interface PartialState {
         data class Loading(val isLoading: Boolean) : PartialState
@@ -45,7 +55,8 @@ data class WorkersPaymentUiState(
         data class ProcessingPayment(val inProgress: Boolean) : PartialState
         data class PaymentTicketReady(val ticket: String?, val paymentInfo: String?) : PartialState
         data class Verifying(val inProgress: Boolean) : PartialState
-        data object PaymentVerified : PartialState
+        data class PaymentVerified(val receipt: PaymentReceipt) : PartialState
+        data object ReceiptDismissed : PartialState
         data class PaymentScreenOpened(val item: WorkersPaymentInfoPR) : PartialState
         data object PaymentScreenClosed : PartialState
         data class Error(val message: String) : PartialState
@@ -65,11 +76,13 @@ sealed interface WorkersPaymentIntent {
 
     /** Fired when the app is resumed via the payment deep-link callback. */
     data object VerifyPendingPayment : WorkersPaymentIntent
+
+    /** Success-dialog "متوجه شدم" tap — clears the receipt, returns to the list and refreshes it. */
+    data object DismissReceipt : WorkersPaymentIntent
 }
 
 sealed interface WorkersPaymentEvent {
     data class OpenPaymentUrl(val url: String) : WorkersPaymentEvent
     data class ShowToast(val message: String) : WorkersPaymentEvent
-    data class PaymentVerified(val message: String) : WorkersPaymentEvent
     data object NavigateBack : WorkersPaymentEvent
 }

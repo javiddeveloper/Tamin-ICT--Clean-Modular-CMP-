@@ -443,6 +443,7 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                 )
                 workersPaymentInfoScreen(
                     onBack = { navController.popBackStack() },
+                    onOpenUrl = { url -> openUrl(url) },
                 )
 
                 calculatePensionScreen(onBack = { navController.popBackStack() })

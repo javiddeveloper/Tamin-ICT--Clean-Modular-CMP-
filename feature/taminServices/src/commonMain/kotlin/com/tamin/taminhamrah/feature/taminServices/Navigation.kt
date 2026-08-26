@@ -101,12 +101,16 @@ fun NavGraphBuilder.occurrenceScreen(
     }
 }
 
-fun NavGraphBuilder.workersPaymentInfoScreen(onBack: () -> Unit) {
+fun NavGraphBuilder.workersPaymentInfoScreen(
+    onBack: () -> Unit,
+    onOpenUrl: (String) -> Unit,
+) {
     composableWithFadeTransitions<WorkersPaymentInfoRoute> {
         val viewModel: WorkersPaymentViewModel = koinViewModel()
         WorkersPaymentRoute(
             viewModel = viewModel,
             onBackClicked = onBack,
+            onOpenUrl = onOpenUrl,
         )
     }
 }

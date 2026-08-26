@@ -103,10 +103,15 @@ internal fun WorkersPaymentMonthCard(
     val rial = stringResource(Res.string.unit_rial)
     var expanded by remember(item.fromDateToDate) { mutableStateOf(false) }
     val months = stringArrayResource(Res.array.jalali_months)
-    val monthName = item.month.toIntOrNull()
-        ?.minus(1)
-        ?.let { months.getOrNull(it) }
-        ?: item.monthTitle
+    val monthName = try {
+        item.month
+            .toInt()
+            .minus(1)
+            .let { months.getOrNull(it) }
+            ?: item.monthTitle
+    } catch (e: Exception) {
+        item.monthTitle
+    }
     val price: (Long) -> String = { "${it.toPriceFormat()} $rial" }
     val hasFine = item.amountFines > 0L
 

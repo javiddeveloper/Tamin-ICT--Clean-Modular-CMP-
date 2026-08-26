@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.outlined.Assignment
+import androidx.compose.material.icons.outlined.Engineering
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -127,7 +127,7 @@ fun WorkersPaymentHeader(
                         xOffset = 450.dp,
                         yOffset = (-150).dp
                     )
-                    AnimatedRingHeaderIcon(icon = Icons.Outlined.Assignment)
+                    AnimatedRingHeaderIcon(icon = Icons.Outlined.Engineering)
                     Spacer(Modifier.height(Spacing.sm))
                     Text(
                         text = stringResource(Res.string.workers_payment_subtitle),

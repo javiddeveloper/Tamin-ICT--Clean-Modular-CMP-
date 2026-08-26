@@ -15,6 +15,7 @@ import com.tamin.taminhamrah.useCases.workersPayment.PayWorkersDebitUseCase
 import com.tamin.taminhamrah.util.NetworkConstants
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
@@ -38,6 +39,12 @@ class WorkersPaymentViewModel(
         is WorkersPaymentIntent.ClosePaymentScreen -> flow { emit(PartialState.PaymentScreenClosed) }
         is WorkersPaymentIntent.PayItem -> payItem(intent.item)
         is WorkersPaymentIntent.VerifyPendingPayment -> verifyPendingPayment()
+        is WorkersPaymentIntent.DismissReceipt -> dismissReceipt()
+    }
+
+    private fun dismissReceipt(): Flow<PartialState> = flow {
+        emit(PartialState.ReceiptDismissed)
+        emitAll(loadPaymentInfo())
     }
 
     private fun loadPaymentInfo(): Flow<PartialState> = flow {
@@ -90,13 +97,21 @@ class WorkersPaymentViewModel(
 
     private fun verifyPendingPayment(): Flow<PartialState> = flow {
         val state = uiState.value
-        if (state.pendingTicket == null) return@flow
+        val ticket = state.pendingTicket ?: return@flow
+        val paidItem = state.selectedPaymentItem ?: return@flow
         emit(PartialState.Verifying(true))
         try {
-            val message = inspectWorkersPaymentTicketUseCase(state.pendingTicket, state.pendingPaymentInfo)
-            emit(PartialState.PaymentVerified)
+            val message = inspectWorkersPaymentTicketUseCase(ticket, state.pendingPaymentInfo)
+            emit(
+                PartialState.PaymentVerified(
+                    WorkersPaymentUiState.PaymentReceipt(
+                        item = paidItem,
+                        trackingCode = ticket,
+                        message = message,
+                    ),
+                ),
+            )
             emit(PartialState.Verifying(false))
-            sendEvent(WorkersPaymentEvent.PaymentVerified(message))
         } catch (e: Exception) {
             emit(PartialState.Verifying(false))
             sendEvent(WorkersPaymentEvent.ShowToast(e.toSingleLineMessage()))
@@ -128,6 +143,12 @@ class WorkersPaymentViewModel(
         is PartialState.PaymentVerified -> currentState.copy(
             pendingTicket = null,
             pendingPaymentInfo = null,
+            paymentReceipt = partialState.receipt,
+        )
+
+        is PartialState.ReceiptDismissed -> currentState.copy(
+            paymentReceipt = null,
+            selectedPaymentItem = null,
         )
 
         is PartialState.PaymentScreenOpened -> currentState.copy(selectedPaymentItem = partialState.item)
