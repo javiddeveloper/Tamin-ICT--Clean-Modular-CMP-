@@ -57,6 +57,8 @@ import com.tamin.taminhamrah.useCases.personal.GetGirlSurvivorReportUseCase
 import com.tamin.taminhamrah.useCases.orotezProtez.GetInsuredPersonsUseCase
 import com.tamin.taminhamrah.useCases.orotezProtez.GetRequestInsuredMainInfoUseCase
 import com.tamin.taminhamrah.useCases.orotezProtez.SaveShortTermOrthosisUseCase
+import com.tamin.taminhamrah.useCases.inquiryEducation.GetDataForEducationUseCase
+import com.tamin.taminhamrah.useCases.inquiryEducation.InquiryEducationCertificateUseCase
 import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
 import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.GetStatusCertificateReportUseCase
@@ -255,6 +257,8 @@ val domainModule = module {
     factoryOf(::GetRequestInsuredMainInfoUseCase)
     factoryOf(::GetInsuredPersonsUseCase)
     factoryOf(::SaveShortTermOrthosisUseCase)
+    factoryOf(::GetDataForEducationUseCase)
+    factoryOf(::InquiryEducationCertificateUseCase)
     factoryOf(::GetMyRequestPdfUseCase)
     factoryOf(::DeleteMyRequestUseCase)
     factoryOf(::InboxInquiryLicenseUseCase)

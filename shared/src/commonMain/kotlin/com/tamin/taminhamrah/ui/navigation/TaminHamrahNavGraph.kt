@@ -83,6 +83,7 @@ import com.tamin.taminhamrah.feature.pensionInquiry.deservedTreatmentScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.disabilityPensionScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.edictScreen
 import com.tamin.taminhamrah.feature.girlSurvivor.girlSurvivorScreen
+import com.tamin.taminhamrah.feature.inquiryEducation.inquiryEducationScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.issuanceCertificateScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeservedTreatment
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDisabilityPension
@@ -444,6 +445,7 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                 issuanceCertificateScreen(onBack = { navController.popBackStack() })
                 deferredInstallmentScreen(onBack = { navController.popBackStack() })
                 girlSurvivorScreen(onBack = { navController.popBackStack() })
+                inquiryEducationScreen(onBack = { navController.popBackStack() })
                 pensionSurvivorScreen(onBack = { navController.popBackStack() })
                 disabilityPensionScreen(onBack = { navController.popBackStack() })
 
