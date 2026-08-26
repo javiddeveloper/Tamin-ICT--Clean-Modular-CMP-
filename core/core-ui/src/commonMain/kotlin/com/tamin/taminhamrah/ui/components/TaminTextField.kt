@@ -6,11 +6,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
@@ -41,6 +43,8 @@ fun TaminTextField(
     isError: Boolean = false,
     errorMessage: String? = null,
     keyboardType: KeyboardType = KeyboardType.Text,
+    /** Overrides the typed text's and placeholder's style — e.g. to match a `PickerRow` beside it. */
+    textStyle: TextStyle = LocalTextStyle.current,
 ) {
     val colors = LocalTaminColors.current
     val showError = isError || errorMessage != null
@@ -57,8 +61,9 @@ fun TaminTextField(
             isError = showError,
             shape = RoundedCornerShape(CornerRadius.lg),
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+            textStyle = textStyle,
             label = label?.let { { TaminText(text = it, color = colors.textSecondary) } },
-            placeholder = placeholder?.let { { TaminText(text = it, color = colors.textMuted) } },
+            placeholder = placeholder?.let { { TaminText(text = it, color = colors.textMuted, style = textStyle) } },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = colors.blueText,
                 unfocusedBorderColor = colors.border,

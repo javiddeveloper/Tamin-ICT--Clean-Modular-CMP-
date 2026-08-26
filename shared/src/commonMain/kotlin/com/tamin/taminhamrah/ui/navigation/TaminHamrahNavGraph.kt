@@ -441,7 +441,15 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                 deservedTreatmentScreen(onBack = { navController.popBackStack() })
                 payrollScreen(onBack = { navController.popBackStack() })
                 edictScreen(onBack = { navController.popBackStack() })
-                issuanceCertificateScreen(onBack = { navController.popBackStack() })
+                issuanceCertificateScreen(
+                    onBack = { navController.popBackStack() },
+                    onGoHome = {
+                        navController.navigate(Route.Home) {
+                            popUpTo(navController.graph.findStartDestination().id) { inclusive = false }
+                            launchSingleTop = true
+                        }
+                    }
+                )
                 deferredInstallmentScreen(onBack = { navController.popBackStack() })
                 girlSurvivorScreen(onBack = { navController.popBackStack() })
                 pensionSurvivorScreen(onBack = { navController.popBackStack() })

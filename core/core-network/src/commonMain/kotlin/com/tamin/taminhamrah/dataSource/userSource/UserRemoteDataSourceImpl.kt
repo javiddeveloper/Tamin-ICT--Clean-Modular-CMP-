@@ -268,6 +268,17 @@ internal class UserRemoteDataSourceImpl(
         }
     }
 
+    override suspend fun getWageCertificateReport(filter: List<ApiFilterDN>): String? {
+        return try {
+            val response = userApiService.getWageCertificateReport(queryBuilder.buildFilterJson(filter))
+            response.extractMessage()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
     override suspend fun getRecipients(query: ApiQueryParamDN): ListData<RecipientDTO>? {
         return try {
             val response = userApiService.getRecipients(queryBuilder.buildQuery(query.copy(limit = 1000)))
