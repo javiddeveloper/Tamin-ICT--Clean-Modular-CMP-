@@ -1079,4 +1079,29 @@
     <string name="occurrence_exit_confirmation_desc">اطلاعات واردشده ذخیره نشده و در صورت خروج از بین می‌رود.</string>
     <string name="occurrence_exit_confirmation_confirm">ادامه تکمیل فرم</string>
     <string name="occurrence_exit_confirmation_dismiss">بی‌خیال، خروج از فرم</string>
+
+    <!-- ═══ Construction-worker premium payment (حق بیمهٔ کارگران ساختمانی) ═══ -->
+    <string name="workers_payment_title">حق بیمهٔ کارگران ساختمانی</string>
+    <string name="workers_payment_subtitle">پرداخت اقلام ماهانهٔ حق بیمه</string>
+    <string name="workers_payment_debt_label">بدهی قابل پرداخت</string>
+    <string name="workers_payment_month_count">%1$s ماه</string>
+    <string name="workers_payment_status_paid">پرداخت‌شده</string>
+    <string name="workers_payment_status_payable">قابل پرداخت</string>
+    <string name="workers_payment_status_overdue">مهلت گذشته</string>
+    <string name="workers_payment_total_amount">مبلغ کل</string>
+    <string name="workers_payment_insurance_days">روزهای بیمه</string>
+    <string name="workers_payment_days_format">تعداد روز %1$s</string>
+    <string name="workers_payment_date_range">بازهٔ زمانی</string>
+    <string name="workers_payment_date_range_value">%1$s — %2$s</string>
+    <string name="workers_payment_job_title">عنوان شغل</string>
+    <string name="workers_payment_job_code">کد شغل</string>
+    <string name="workers_payment_daily_wage">دستمزد روزانه</string>
+    <string name="workers_payment_job_coefficient">ضریب شغلی</string>
+    <string name="workers_payment_premium">حق بیمه</string>
+    <string name="workers_payment_penalty">جریمهٔ تأخیر</string>
+    <string name="workers_payment_no_penalty">—</string>
+    <string name="workers_payment_paid_on">پرداخت‌شده در %1$s</string>
+    <string name="workers_payment_pay_action">پرداخت</string>
+    <string name="workers_payment_empty_title">بدهی‌ای برای پرداخت نیست</string>
+    <string name="workers_payment_empty_subtitle">در حال حاضر قلم حق بیمه‌ای برای پرداخت وجود ندارد.</string>
 </resources>

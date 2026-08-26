@@ -3,7 +3,9 @@ package com.tamin.taminhamrah.feature.taminServices.workersPayment.model
 import com.tamin.taminhamrah.model.workersPayment.WorkersPaymentInfoDN
 
 fun WorkersPaymentInfoDN.toPR(): WorkersPaymentInfoPR = WorkersPaymentInfoPR(
+    pay = pay,
     payable = payable,
+    month = month,
     monthTitle = monthTitle,
     year = year,
     professionalTitle = professionalTitle,
@@ -15,8 +17,10 @@ fun WorkersPaymentInfoDN.toPR(): WorkersPaymentInfoPR = WorkersPaymentInfoPR(
     amount = amount,
     amountFines = amountFines ?: 0L,
     totalPayable = totalPayable,
+    salary = salary,
     payDay = payDay,
     payableDes = payableDes,
+    paymentDate = paymentDate,
     fishStatus = fishStatus,
     maharatStatus = maharatStatus,
     bazresiStatus = bazresiStatus,

@@ -100,6 +100,7 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceCo
 import com.tamin.taminhamrah.feature.taminServices.TaminServicesRoute
 import com.tamin.taminhamrah.feature.taminServices.occurrenceScreen
 import com.tamin.taminhamrah.feature.taminServices.sendInsuranceHistoryToInstitutionsScreen
+import com.tamin.taminhamrah.feature.taminServices.workersPaymentInfoScreen
 import com.tamin.taminhamrah.feature.taminServices.taminServicesScreen
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
 import com.tamin.taminhamrah.feature.treatment.treatmentGraph
@@ -434,6 +435,9 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                 occurrenceScreen(
                     onBack = { navController.popBackStack() },
                     onDone = { navController.popBackStack() },
+                )
+                workersPaymentInfoScreen(
+                    onBack = { navController.popBackStack() },
                 )
 
                 calculatePensionScreen(onBack = { navController.popBackStack() })

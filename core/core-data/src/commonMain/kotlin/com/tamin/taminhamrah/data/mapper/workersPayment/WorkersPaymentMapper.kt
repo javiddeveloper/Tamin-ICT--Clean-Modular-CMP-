@@ -29,6 +29,7 @@ internal fun WorkersPaymentInfoDTO.toDomain(): WorkersPaymentInfoDN = WorkersPay
     salary = salary ?: 0L,
     payDay = payDay ?: 0L,
     paymentStatus = paymentStatus.orEmpty(),
+    paymentDate = paymentDate?.trim()?.takeIf { it.isNotEmpty() },
     payableDes = payableDes.orEmpty(),
     fishStatus = fishStatus.orEmpty(),
     maharatStatus = maharatStatus.orEmpty(),

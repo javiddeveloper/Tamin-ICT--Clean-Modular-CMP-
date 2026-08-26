@@ -22,6 +22,7 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToOptional
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToStudentInsuranceContract
 import com.tamin.taminhamrah.feature.taminServices.navigateToOccurrence
 import com.tamin.taminhamrah.feature.taminServices.navigateToSendInsuranceHistoryToInstitutions
+import com.tamin.taminhamrah.feature.taminServices.navigateToWorkersPaymentInfo
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.model.common.FeatureFlag
 
@@ -49,6 +50,7 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
         FeatureFlag.SEND_INSURANCE_HISTORY_TO_INSTITUTION -> navigateToSendInsuranceHistoryToInstitutions()
         FeatureFlag.OROTEZ_PROTEZ -> navigateToOrotezProtez()
         FeatureFlag.OCCURRENCE -> navigateToOccurrence()
+        FeatureFlag.WORKERS_PAYMENT_INFO -> navigateToWorkersPaymentInfo()
         else -> Unit
     }
 }

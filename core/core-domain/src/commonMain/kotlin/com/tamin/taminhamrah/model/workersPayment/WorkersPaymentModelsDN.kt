@@ -21,6 +21,7 @@ data class WorkersPaymentInfoDN(
     val salary: Long,                 // dastMoazd
     val payDay: Long,
     val paymentStatus: String,
+    val paymentDate: String?,          // "YYYYMMDD", set once the item is paid
     val payableDes: String,
     val fishStatus: String,
     val maharatStatus: String,

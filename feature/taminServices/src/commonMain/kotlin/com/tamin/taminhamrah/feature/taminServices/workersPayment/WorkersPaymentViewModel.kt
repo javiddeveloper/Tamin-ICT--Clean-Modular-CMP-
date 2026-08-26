@@ -34,6 +34,8 @@ class WorkersPaymentViewModel(
     override fun handleIntent(intent: WorkersPaymentIntent): Flow<PartialState> = when (intent) {
         is WorkersPaymentIntent.LoadPaymentInfo -> loadPaymentInfo()
         is WorkersPaymentIntent.Retry -> loadPaymentInfo()
+        is WorkersPaymentIntent.OpenPaymentScreen -> flow { emit(PartialState.PaymentScreenOpened(intent.item)) }
+        is WorkersPaymentIntent.ClosePaymentScreen -> flow { emit(PartialState.PaymentScreenClosed) }
         is WorkersPaymentIntent.PayItem -> payItem(intent.item)
         is WorkersPaymentIntent.VerifyPendingPayment -> verifyPendingPayment()
     }
@@ -127,6 +129,9 @@ class WorkersPaymentViewModel(
             pendingTicket = null,
             pendingPaymentInfo = null,
         )
+
+        is PartialState.PaymentScreenOpened -> currentState.copy(selectedPaymentItem = partialState.item)
+        is PartialState.PaymentScreenClosed -> currentState.copy(selectedPaymentItem = null)
 
         is PartialState.Error -> currentState.copy(
             isLoading = false,
