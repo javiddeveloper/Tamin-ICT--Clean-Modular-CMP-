@@ -1150,15 +1150,6 @@ private fun PregnancyPayCalculateEstimateStep(
                 }
             }
         }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = Spacing.page, vertical = Spacing.md)
-                .navigationBarsPadding(),
-        ) {
-            PregnancyPayBackStepButton(onClick = onBack)
-        }
     }
 }
 
