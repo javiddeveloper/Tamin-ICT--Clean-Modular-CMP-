@@ -1100,7 +1100,7 @@
     <string name="workers_payment_premium">حق بیمه</string>
     <string name="workers_payment_penalty">جریمهٔ تأخیر</string>
     <string name="workers_payment_no_penalty">—</string>
-    <string name="workers_payment_paid_on">پرداخت‌شده در %1$s</string>
+    <string name="workers_payment_paid_on">پرداخت‌شده در</string>
     <string name="workers_payment_pay_action">پرداخت</string>
     <string name="workers_payment_empty_title">بدهی‌ای برای پرداخت نیست</string>
     <string name="workers_payment_empty_subtitle">در حال حاضر قلم حق بیمه‌ای برای پرداخت وجود ندارد.</string>
