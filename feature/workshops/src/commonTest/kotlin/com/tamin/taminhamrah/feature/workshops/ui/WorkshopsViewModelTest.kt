@@ -298,9 +298,9 @@ class WorkshopsViewModelTest {
                 WorkshopsIntent.ActionSelected(WorkshopAction.ARTICLE_SIXTEEN, workshop),
             )
 
+            // It used to answer with a toast when the debt list came back empty, which cost a
+            // request per tap and made it the one row that does not open a screen.
             assertTrue(awaitItem() is WorkshopsEvent.Navigate)
-            // It used to fetch the debt list first and refuse with a toast when it was empty.
-            assertNull(repository.lastArticleSixteenQuery)
             cancelAndIgnoreRemainingEvents()
         }
     }

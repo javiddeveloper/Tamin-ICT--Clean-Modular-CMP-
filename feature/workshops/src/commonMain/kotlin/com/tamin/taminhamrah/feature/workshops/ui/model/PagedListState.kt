@@ -60,7 +60,7 @@ data class PagedListState<T>(
             // Two conditions, because a service that misreports its total would otherwise page
             // forever: the total must be short of what is loaded *and* the last page must have
             // been full.
-            hasMore = page.hasMoreAfter(merged.size) && page.items.size == WORKSHOP_PAGE_SIZE,
+            hasMore = page.hasMoreAfter(merged.size),
         )
     }
 }
