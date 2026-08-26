@@ -8,11 +8,13 @@ android {
 }
 
 val localMocksDir = file("src/localMocks/kotlin")
+
+val mockData = false
 val mockGateDir = layout.buildDirectory.dir("generated/pensionSurvivorMockGate")
 
 val generatePensionSurvivorMockGate = tasks.register("generatePensionSurvivorMockGate") {
     description = "Selects real or gitignored local-mock Koin modules for pensionSurvivor"
-    val mocksPresent = localMocksDir.exists() &&
+    val mocksPresent = mockData && localMocksDir.exists() &&
         localMocksDir.walkTopDown().any { it.isFile && it.extension == "kt" }
     if (localMocksDir.exists()) {
         inputs.dir(localMocksDir)
