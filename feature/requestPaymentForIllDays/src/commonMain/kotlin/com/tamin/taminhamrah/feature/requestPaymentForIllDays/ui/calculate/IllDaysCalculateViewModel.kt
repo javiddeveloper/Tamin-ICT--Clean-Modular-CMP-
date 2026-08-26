@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.ui.toRialAmount
 import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.CalcIllnessAmountUseCase
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import org.jetbrains.compose.resources.getString
@@ -67,7 +68,7 @@ class IllDaysCalculateViewModel(
         emit(createErrorState(error.toSingleLineMessage()))
     }
 
-    private suspend fun kotlinx.coroutines.flow.FlowCollector<PartialState>.calculate() {
+    private suspend fun FlowCollector<PartialState>.calculate() {
         val state = uiState.value
         val start = state.startDateMillis
         val end = state.endDateMillis

@@ -11,9 +11,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AccessTime
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -23,14 +28,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.PickerRow
 import com.tamin.taminhamrah.ui.components.TaminBottomBar
-import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
-import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
@@ -38,10 +43,12 @@ import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.util.PersianDateFormatter
+import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -49,19 +56,21 @@ import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_calendar
 import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.ill_days_calc_avg_wage
 import taminx.core.core_ui.ill_days_calc_end_date
 import taminx.core.core_ui.ill_days_calc_marital_married
 import taminx.core.core_ui.ill_days_calc_marital_married_caption
 import taminx.core.core_ui.ill_days_calc_marital_single
 import taminx.core.core_ui.ill_days_calc_marital_single_caption
-import taminx.core.core_ui.ill_days_calc_result_confirm
-import taminx.core.core_ui.ill_days_calc_result_empty
-import taminx.core.core_ui.ill_days_calc_result_title
+import taminx.core.core_ui.ill_days_calc_payable_disclaimer
+import taminx.core.core_ui.ill_days_calc_payable_label
+import taminx.core.core_ui.ill_days_calc_rest_duration
 import taminx.core.core_ui.ill_days_calc_section_title
 import taminx.core.core_ui.ill_days_calc_start_date
 import taminx.core.core_ui.ill_days_calc_submit_btn
 import taminx.core.core_ui.ill_days_calc_title
 import taminx.core.core_ui.ill_days_cd_back
+import taminx.core.core_ui.ill_days_day_count_badge
 
 @Composable
 fun IllDaysCalculateScreen(
@@ -148,65 +157,12 @@ private fun IllDaysCalculateContent(
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = Spacing.page, vertical = Spacing.lg),
+            verticalArrangement = Arrangement.spacedBy(Spacing.lg),
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .taminSurface(cornerRadius = CornerRadius.cardCompact)
-                    .padding(Spacing.lg),
-                verticalArrangement = Arrangement.spacedBy(Spacing.lg),
-            ) {
-                Text(
-                    text = stringResource(Res.string.ill_days_calc_section_title),
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = colors.textPrimary,
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-                ) {
-                    PickerRow(
-                        text = state.startDateLabel.ifBlank {
-                            stringResource(Res.string.ill_days_calc_start_date)
-                        },
-                        onClick = { onIntent(IllDaysCalculateIntent.OpenStartDatePicker) },
-                        isPlaceholder = state.startDateLabel.isBlank(),
-                        icon = vectorResource(Res.drawable.ic_tamin_calendar),
-                        modifier = Modifier.weight(1f),
-                    )
-                    PickerRow(
-                        text = state.endDateLabel.ifBlank {
-                            stringResource(Res.string.ill_days_calc_end_date)
-                        },
-                        onClick = { onIntent(IllDaysCalculateIntent.OpenEndDatePicker) },
-                        isPlaceholder = state.endDateLabel.isBlank(),
-                        icon = vectorResource(Res.drawable.ic_tamin_calendar),
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-                ) {
-                    MaritalOptionCard(
-                        title = stringResource(Res.string.ill_days_calc_marital_single),
-                        caption = stringResource(Res.string.ill_days_calc_marital_single_caption),
-                        selected = state.maritalStatus == IllDaysMaritalStatus.Single,
-                        onClick = {
-                            onIntent(IllDaysCalculateIntent.SelectMarital(IllDaysMaritalStatus.Single))
-                        },
-                        modifier = Modifier.weight(1f),
-                    )
-                    MaritalOptionCard(
-                        title = stringResource(Res.string.ill_days_calc_marital_married),
-                        caption = stringResource(Res.string.ill_days_calc_marital_married_caption),
-                        selected = state.maritalStatus == IllDaysMaritalStatus.Married,
-                        onClick = {
-                            onIntent(IllDaysCalculateIntent.SelectMarital(IllDaysMaritalStatus.Married))
-                        },
-                        modifier = Modifier.weight(1f),
-                    )
-                }
+            IllnessDetailsCard(state = state, onIntent = onIntent)
+            state.result?.let { result ->
+                CalculationBreakdownCard(result = result)
+                PayableResultCard(result = result)
             }
         }
     }
@@ -238,24 +194,158 @@ private fun IllDaysCalculateContent(
         )
         IllDaysDatePicker.None -> Unit
     }
+}
 
-    if (state.showResultDialog) {
-        val description = state.resultLines
-            .filter { it.isNotBlank() }
-            .joinToString("\n")
-            .ifBlank { stringResource(Res.string.ill_days_calc_result_empty) }
-        TaminConfirmationDialog(
-            title = stringResource(Res.string.ill_days_calc_result_title),
-            description = description,
-            onDismissRequest = { onIntent(IllDaysCalculateIntent.DismissResult) },
-            confirmButton = {
-                TaminFilledButton(
-                    text = stringResource(Res.string.ill_days_calc_result_confirm),
-                    onClick = { onIntent(IllDaysCalculateIntent.DismissResult) },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            },
-            dismissButton = {},
+@Composable
+private fun IllnessDetailsCard(
+    state: IllDaysCalculateUiState,
+    onIntent: (IllDaysCalculateIntent) -> Unit,
+) {
+    val colors = LocalTaminColors.current
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .taminSurface(cornerRadius = CornerRadius.cardCompact)
+            .padding(Spacing.lg),
+        verticalArrangement = Arrangement.spacedBy(Spacing.lg),
+    ) {
+        Text(
+            text = stringResource(Res.string.ill_days_calc_section_title),
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+            color = colors.textPrimary,
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        ) {
+            PickerRow(
+                text = state.startDateLabel.ifBlank {
+                    stringResource(Res.string.ill_days_calc_start_date)
+                },
+                onClick = { onIntent(IllDaysCalculateIntent.OpenStartDatePicker) },
+                isPlaceholder = state.startDateLabel.isBlank(),
+                icon = vectorResource(Res.drawable.ic_tamin_calendar),
+                modifier = Modifier.weight(1f),
+            )
+            PickerRow(
+                text = state.endDateLabel.ifBlank {
+                    stringResource(Res.string.ill_days_calc_end_date)
+                },
+                onClick = { onIntent(IllDaysCalculateIntent.OpenEndDatePicker) },
+                isPlaceholder = state.endDateLabel.isBlank(),
+                icon = vectorResource(Res.drawable.ic_tamin_calendar),
+                modifier = Modifier.weight(1f),
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        ) {
+            MaritalOptionCard(
+                title = stringResource(Res.string.ill_days_calc_marital_single),
+                caption = stringResource(Res.string.ill_days_calc_marital_single_caption),
+                selected = state.maritalStatus == IllDaysMaritalStatus.Single,
+                onClick = {
+                    onIntent(IllDaysCalculateIntent.SelectMarital(IllDaysMaritalStatus.Single))
+                },
+                modifier = Modifier.weight(1f),
+            )
+            MaritalOptionCard(
+                title = stringResource(Res.string.ill_days_calc_marital_married),
+                caption = stringResource(Res.string.ill_days_calc_marital_married_caption),
+                selected = state.maritalStatus == IllDaysMaritalStatus.Married,
+                onClick = {
+                    onIntent(IllDaysCalculateIntent.SelectMarital(IllDaysMaritalStatus.Married))
+                },
+                modifier = Modifier.weight(1f),
+            )
+        }
+        state.dayCount?.let { DayCountBadge(dayCount = it) }
+    }
+}
+
+@Composable
+private fun CalculationBreakdownCard(result: IllDaysCalcResultUi) {
+    val colors = LocalTaminColors.current
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .taminSurface(cornerRadius = CornerRadius.cardCompact)
+            .padding(horizontal = Spacing.lg, vertical = Spacing.md),
+    ) {
+        DetailRow(
+            label = stringResource(Res.string.ill_days_calc_rest_duration),
+            value = result.restDaysLabel,
+            numeric = false,
+        )
+        HorizontalDivider(color = colors.divider, thickness = Thickness.border)
+        DetailRow(
+            label = stringResource(Res.string.ill_days_calc_avg_wage),
+            value = result.averageWageLabel,
+            numeric = false,
+        )
+        HorizontalDivider(color = colors.divider, thickness = Thickness.border)
+        DetailRow(
+            label = result.rateTitle,
+            value = result.rateCaption,
+            numeric = false,
+        )
+    }
+}
+
+@Composable
+private fun PayableResultCard(result: IllDaysCalcResultUi) {
+    val colors = LocalTaminColors.current
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(CornerRadius.cardCompact))
+            .background(colors.buttonGradient)
+            .padding(Spacing.lg),
+        verticalArrangement = Arrangement.spacedBy(Spacing.md),
+    ) {
+        Text(
+            text = stringResource(Res.string.ill_days_calc_payable_label),
+            style = MaterialTheme.typography.labelLarge,
+            color = colors.hawkesBlue,
+        )
+        Text(
+            text = result.payableAmountLabel,
+            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+            color = Color.White,
+        )
+        Text(
+            text = stringResource(Res.string.ill_days_calc_payable_disclaimer),
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.White.copy(alpha = 0.9f),
+        )
+    }
+}
+
+@Composable
+private fun DayCountBadge(dayCount: Int) {
+    val colors = LocalTaminColors.current
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(CornerRadius.full))
+            .background(colors.blueBg)
+            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.AccessTime,
+            contentDescription = null,
+            tint = colors.blueText,
+            modifier = Modifier.size(IconSize.small),
+        )
+        Text(
+            text = stringResource(
+                Res.string.ill_days_day_count_badge,
+                dayCount.toString().toPersianDigits(),
+            ),
+            style = MaterialTheme.typography.labelMedium,
+            color = colors.blueText,
         )
     }
 }
@@ -271,6 +361,7 @@ private fun MaritalOptionCard(
     val colors = LocalTaminColors.current
     val borderColor = if (selected) colors.blueText else colors.border
     val background = if (selected) colors.blueBg else colors.bgSurface
+    val titleColor = if (selected) colors.blueText else colors.textPrimary
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(CornerRadius.lg))
@@ -288,12 +379,12 @@ private fun MaritalOptionCard(
         Text(
             text = title,
             style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-            color = colors.textPrimary,
+            color = titleColor,
         )
         Text(
             text = caption,
             style = MaterialTheme.typography.labelSmall,
-            color = colors.textMuted,
+            color = if (selected) colors.blueText else colors.textMuted,
         )
     }
 }
