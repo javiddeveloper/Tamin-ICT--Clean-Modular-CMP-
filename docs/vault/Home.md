@@ -14,6 +14,7 @@ tags: [moc]
 - [[Modules]] — every module and what it owns
 - [[MVI-Pattern]] — `BaseViewModel` and the State/Intent/Event contract
 - [[Navigation]] — Compose Navigation graphs and the `xxxGraph` pattern
+- [[TopArea-System]] — scroll-driven collapsing headers (nested scroll fold/unfold + snap)
 - [[Dependency-Injection]] — Koin modules and registration order
 - [[Networking]] — Ktor, the five HTTP clients, auth and token refresh
 - [[Database]] — Room KMP, DAOs, schemas
