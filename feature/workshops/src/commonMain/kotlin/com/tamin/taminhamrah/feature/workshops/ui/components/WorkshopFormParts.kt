@@ -32,19 +32,23 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachment
@@ -56,6 +60,9 @@ import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
+import com.tamin.taminhamrah.ui.components.animatedErrorBorder
+import com.tamin.taminhamrah.ui.components.document.TaminDocumentUploadCard
+import com.tamin.taminhamrah.ui.components.document.TaminDocumentUploadState
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
@@ -64,7 +71,13 @@ import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.util.toPersianDigits
+import io.github.vinceglb.filekit.dialogs.FileKitType
+import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
+import io.github.vinceglb.filekit.name
+import io.github.vinceglb.filekit.readBytes
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
@@ -73,15 +86,14 @@ import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_chevron_down
 import taminx.core.core_ui.ic_tamin_chevron_forward
-import taminx.core.core_ui.ic_tamin_cross
 import taminx.core.core_ui.ws_form_add_doc
 import taminx.core.core_ui.ws_form_doc_type_title
 import taminx.core.core_ui.ws_form_docs_count
 import taminx.core.core_ui.ws_form_docs_title
 import taminx.core.core_ui.ws_form_edit_info
+import taminx.core.core_ui.ws_form_file_size
 import taminx.core.core_ui.ws_form_group_count
 import taminx.core.core_ui.ws_form_prev
-import taminx.core.core_ui.ws_form_remove_doc
 
 /**
  * The parts every کارگاه form is assembled from.
@@ -340,26 +352,81 @@ fun WorkshopReviewGroup(
 }
 
 /**
- * The files attached so far, and the control that adds another.
+ * The files attached so far, the control that adds another, and the sheet that names its type.
+ *
+ * The rows are core-ui's [TaminDocumentUploadCard] — the same card the occurrence report uses —
+ * so an attached file looks and behaves the same everywhere in the app, wave animation and
+ * thumbnail included. Only what the design draws around it is this feature's own: the titled
+ * surface, the «۲ از ۵» badge, and the green add button.
+ *
+ * The type sheet and the picker live here too, because all three کارگاه forms drove them
+ * identically — three copies of the same two pieces of state was three places to get the
+ * pending type wrong.
  *
  * The add control disappears at the cap rather than failing on tap, which is how the design says
  * "that is all this request may carry".
  */
 @Composable
-fun WorkshopDocumentBox(
+fun WorkshopDocumentsPanel(
     attachments: ImmutableList<WorkshopAttachment>,
+    types: ImmutableList<WorkshopDocumentType>,
     capacity: Int,
-    onAdd: () -> Unit,
+    onAdd: (fileName: String, bytes: ByteArray, typeCode: String) -> Unit,
     onRemove: (Int) -> Unit,
     modifier: Modifier = Modifier,
     /** While true the add control is inert — one upload at a time. */
     isUploading: Boolean = false,
+    /**
+     * Traces the error border round the whole panel.
+     *
+     * «بارگذاری حداقل یک مدرک» is a fact about the box, not about any one field in it, so it
+     * is drawn where the fields draw theirs rather than as a line underneath.
+     */
+    isError: Boolean = false,
 ) {
     val colors = LocalTaminColors.current
+    val scope = rememberCoroutineScope()
+    var isTypeSheetOpen by remember { mutableStateOf(false) }
+    // Never cleared: a cancelled pick hands back a null file, which is what the callback tests.
+    var pendingType by remember { mutableStateOf<WorkshopDocumentType?>(null) }
+
+    // The wave outlives the upload by [WAVE_TAIL_MILLIS], the way step 6 of the occurrence report
+    // does it — a fast upload otherwise flashes the card and is gone before it reads as progress.
+    var isWaving by remember { mutableStateOf(false) }
+    var countAtUploadStart by remember { mutableStateOf(attachments.size) }
+    LaunchedEffect(isUploading) {
+        if (isUploading) {
+            countAtUploadStart = attachments.size
+            isWaving = true
+        } else {
+            delay(WAVE_TAIL_MILLIS)
+            isWaving = false
+        }
+    }
+    // While the wave plays out on the newest file, that file is not also listed as settled. A
+    // failed upload adds nothing, so the count decides rather than the wave alone.
+    val hasLanded = isWaving && !isUploading && attachments.size > countAtUploadStart
+    val settled = remember(attachments, hasLanded) {
+        if (hasLanded) attachments.dropLast(1) else attachments
+    }
+
+    val filePicker = rememberFilePickerLauncher(type = FileKitType.Image) { file ->
+        val type = pendingType
+        if (file == null || type == null) return@rememberFilePickerLauncher
+        scope.launch { onAdd(file.name, file.readBytes(), type.code) }
+    }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
             .taminSurface(WorkshopDimens.cardCorner)
+            .animatedErrorBorder(
+                isError = isError,
+                errorColor = colors.dangerText,
+                normalColor = Color.Transparent,
+                borderWidth = Thickness.border,
+                cornerRadius = WorkshopDimens.cardCorner,
+            )
             .padding(WorkshopDimens.panelPadding),
     ) {
         Row(
@@ -393,73 +460,29 @@ fun WorkshopDocumentBox(
             )
         }
 
-        attachments.forEachIndexed { index, attachment ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = Spacing.cardGap)
-                    .clip(RoundedCornerShape(CornerRadius.chip))
-                    .background(colors.bgPage)
-                    .border(
-                        Thickness.border,
-                        colors.divider,
-                        RoundedCornerShape(CornerRadius.chip),
-                    )
-                    .padding(horizontal = DocRowHorizontalPadding, vertical = DocRowVerticalPadding),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(Spacing.smPlus),
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(DocIconTile)
-                        .clip(RoundedCornerShape(DocIconCorner))
-                        .background(colors.greenBg),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        imageVector = vectorResource(Res.drawable.ic_tamin_check),
-                        contentDescription = null,
-                        tint = colors.springGreenText,
-                        modifier = Modifier.size(IconSize.small),
-                    )
-                }
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = stringResource(attachment.type.label),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = colors.textPrimary,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Text(
-                        text = attachment.size,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = colors.textMuted,
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .size(DocRemoveTile)
-                        .clip(RoundedCornerShape(DocIconCorner))
-                        .background(colors.dangerBg)
-                        .clickable { onRemove(index) },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        imageVector = vectorResource(Res.drawable.ic_tamin_cross),
-                        contentDescription = stringResource(Res.string.ws_form_remove_doc),
-                        tint = colors.dangerText,
-                        modifier = Modifier.size(WorkshopDimens.chipCrossSize),
-                    )
-                }
-            }
+        settled.forEachIndexed { index, attachment ->
+            TaminDocumentUploadCard(
+                title = stringResource(attachment.type.label),
+                state = TaminDocumentUploadState.Uploaded,
+                statusText = stringResource(Res.string.ws_form_file_size, attachment.size),
+                onDeleteClick = { onRemove(index) },
+                modifier = Modifier.padding(top = Spacing.cardGap),
+            )
         }
 
-        if (attachments.size < capacity) {
+        if (isWaving) {
+            val waving = attachments.lastOrNull()?.type?.takeIf { hasLanded } ?: pendingType
+            TaminDocumentUploadCard(
+                title = waving?.label?.let { stringResource(it) }.orEmpty(),
+                state = TaminDocumentUploadState.Uploading,
+                modifier = Modifier.padding(top = Spacing.cardGap),
+            )
+        }
+
+        if (attachments.size < capacity && !isWaving) {
             TaminPrimaryButton(
                 text = stringResource(Res.string.ws_form_add_doc),
-                onClick = { if (!isUploading) onAdd() },
+                onClick = { isTypeSheetOpen = true },
                 icon = Icons.Default.Add,
                 iconAtStart = true,
                 background = colors.successGradient,
@@ -471,7 +494,22 @@ fun WorkshopDocumentBox(
             )
         }
     }
+
+    if (isTypeSheetOpen) {
+        WorkshopDocumentTypeSheet(
+            types = types,
+            onDismiss = { isTypeSheetOpen = false },
+            onSelect = { type ->
+                isTypeSheetOpen = false
+                pendingType = type
+                filePicker.launch()
+            },
+        )
+    }
 }
+
+/** How long the upload wave keeps playing after the file has actually landed. */
+private const val WAVE_TAIL_MILLIS = 1600L
 
 /** A rule the user must know before submitting, in the design's amber. */
 @Composable
@@ -727,11 +765,6 @@ private val ReviewRowPadding = 10.dp
 
 // ------------------------------------------------------------- documents
 private val DocCountHorizontalPadding = 9.dp
-private val DocRowHorizontalPadding = 11.dp
-private val DocRowVerticalPadding = 9.dp
-private val DocIconTile = 34.dp
-private val DocIconCorner = 11.dp
-private val DocRemoveTile = 32.dp
 
 // ----------------------------------------------------------------- notes
 private val NoteHorizontalPadding = 12.dp

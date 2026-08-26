@@ -89,6 +89,14 @@ data class ObjectionFormState(
             !isConfirmed -> Res.string.ws_form_err_agree
             else -> null
         }
+
+    /**
+     * Whether the missing-document rule is the one stopping this form.
+     *
+     * The panel draws that one itself, as a border; the error line prints whatever is left.
+     */
+    val isDocumentsError: Boolean
+        get() = error == Res.string.ws_form_err_docs
 }
 
 sealed interface ObjectionableDebitIntent {

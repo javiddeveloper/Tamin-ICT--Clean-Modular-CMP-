@@ -7,14 +7,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopDocumentBox
-import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopDocumentTypeSheet
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopDocumentsPanel
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormCheck
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormError
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormFooter
@@ -29,12 +24,7 @@ import com.tamin.taminhamrah.model.workshop.ObjectionKind
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.theme.Spacing
-import io.github.vinceglb.filekit.dialogs.FileKitType
-import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
-import io.github.vinceglb.filekit.name
-import io.github.vinceglb.filekit.readBytes
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.obj_form_area_hint
@@ -70,25 +60,6 @@ fun ObjectionFormPage(
     modifier: Modifier = Modifier,
 ) {
     val debt = form.debt
-    var isTypeSheetOpen by remember { mutableStateOf(false) }
-    var pendingTypeCode by remember { mutableStateOf<String?>(null) }
-    val scope = rememberCoroutineScope()
-
-    val filePicker = rememberFilePickerLauncher(type = FileKitType.Image) { file ->
-        val typeCode = pendingTypeCode
-        pendingTypeCode = null
-        if (file == null || typeCode == null) return@rememberFilePickerLauncher
-        scope.launch {
-            onIntent(
-                ObjectionableDebitIntent.FormAddDocument(
-                    fileName = file.name,
-                    bytes = file.readBytes(),
-                    typeCode = typeCode,
-                ),
-            )
-        }
-    }
-
     // The six columns the design lists, in its order. Resolved first, then remembered on the
     // debt, so typing in the description does not rebuild them.
     val debtNumberLabel = stringResource(Res.string.payment_sheet_debit_number)
@@ -144,14 +115,20 @@ fun ObjectionFormPage(
                 },
             )
 
-            WorkshopDocumentBox(
+            WorkshopDocumentsPanel(
                 attachments = form.attachments,
+                types = ObjectionDocumentTypes,
                 capacity = OBJECTION_MAX_DOCUMENTS,
-                onAdd = { isTypeSheetOpen = true },
-                isUploading = form.isUploading,
+                onAdd = { fileName, bytes, typeCode ->
+                    onIntent(
+                        ObjectionableDebitIntent.FormAddDocument(fileName, bytes, typeCode),
+                    )
+                },
                 onRemove = { index ->
                     onIntent(ObjectionableDebitIntent.FormRemoveDocument(index))
                 },
+                isUploading = form.isUploading,
+                isError = form.isDocumentsError,
             )
 
             WorkshopFormTextArea(
@@ -178,25 +155,16 @@ fun ObjectionFormPage(
                 },
             )
 
-            form.error?.let { WorkshopFormError(text = stringResource(it)) }
+            // The missing-document rule is drawn round the panel; this is what is left.
+            form.error
+                ?.takeUnless { form.isDocumentsError }
+                ?.let { WorkshopFormError(text = stringResource(it)) }
         }
 
         WorkshopFormFooter(
             nextLabel = stringResource(Res.string.obj_form_submit),
             onNext = { onIntent(ObjectionableDebitIntent.FormSubmit) },
             isBusy = form.isBusy,
-        )
-    }
-
-    if (isTypeSheetOpen) {
-        WorkshopDocumentTypeSheet(
-            types = ObjectionDocumentTypes,
-            onDismiss = { isTypeSheetOpen = false },
-            onSelect = { type ->
-                isTypeSheetOpen = false
-                pendingTypeCode = type.code
-                filePicker.launch()
-            },
         )
     }
 }

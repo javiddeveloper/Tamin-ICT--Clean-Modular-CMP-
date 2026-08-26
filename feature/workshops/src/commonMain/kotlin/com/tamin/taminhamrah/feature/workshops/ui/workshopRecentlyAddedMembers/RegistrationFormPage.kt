@@ -6,16 +6,19 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopDocumentBox
-import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopDocumentTypeSheet
+import androidx.compose.ui.text.input.KeyboardType
+import com.tamin.taminhamrah.feature.workshops.ui.WorkshopConstants
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopDocumentsPanel
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFieldSlot
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormBanner
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormCheck
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormError
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormFooter
@@ -32,43 +35,31 @@ import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopTextField
 import com.tamin.taminhamrah.feature.workshops.ui.model.REGISTRATION_MAX_DOCUMENTS
 import com.tamin.taminhamrah.feature.workshops.ui.model.RegistrationDocumentTypes
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
-import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.model.common.isValidIranianNationalId
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import com.tamin.taminhamrah.feature.workshops.ui.WorkshopConstants
 import com.tamin.taminhamrah.ui.components.InputRestriction
 import com.tamin.taminhamrah.ui.components.SegmentedInputField
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.foundation.shape.RoundedCornerShape
-import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFieldSlot
-import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormBanner
+import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
+import com.tamin.taminhamrah.ui.digitsOnly
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
-import org.jetbrains.compose.resources.vectorResource
-import taminx.core.core_ui.abs_form_banner
-import taminx.core.core_ui.abs_form_download
-import taminx.core.core_ui.ic_tamin_download
-import taminx.core.core_ui.ic_number
-import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
-import com.tamin.taminhamrah.ui.digitsOnly
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.PersianDateFormatter
-import io.github.vinceglb.filekit.dialogs.FileKitType
-import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
-import io.github.vinceglb.filekit.name
-import io.github.vinceglb.filekit.readBytes
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.abs_form_banner
 import taminx.core.core_ui.abs_form_birth_city
 import taminx.core.core_ui.abs_form_birth_date
 import taminx.core.core_ui.abs_form_check
-import taminx.core.core_ui.abs_form_err_national_id
-import taminx.core.core_ui.abs_form_err_required
 import taminx.core.core_ui.abs_form_docs_desc
 import taminx.core.core_ui.abs_form_docs_title
+import taminx.core.core_ui.abs_form_download
+import taminx.core.core_ui.abs_form_err_national_id
+import taminx.core.core_ui.abs_form_err_required
 import taminx.core.core_ui.abs_form_first_name
 import taminx.core.core_ui.abs_form_full_name
 import taminx.core.core_ui.abs_form_identity_desc
@@ -88,6 +79,8 @@ import taminx.core.core_ui.abs_form_submit
 import taminx.core.core_ui.abs_form_summary
 import taminx.core.core_ui.abs_form_title
 import taminx.core.core_ui.abs_form_workshop
+import taminx.core.core_ui.ic_number
+import taminx.core.core_ui.ic_tamin_download
 import taminx.core.core_ui.member_national_id
 import taminx.core.core_ui.workshop_select_date
 import taminx.core.core_ui.ws_form_next
@@ -108,26 +101,7 @@ fun RegistrationFormPage(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var isTypeSheetOpen by remember { mutableStateOf(false) }
-    var pendingTypeCode by remember { mutableStateOf<String?>(null) }
     var openDatePicker by remember { mutableStateOf<DateField?>(null) }
-    val scope = rememberCoroutineScope()
-
-    val filePicker = rememberFilePickerLauncher(type = FileKitType.Image) { file ->
-        val typeCode = pendingTypeCode
-        pendingTypeCode = null
-        if (file == null || typeCode == null) return@rememberFilePickerLauncher
-        scope.launch {
-            onIntent(
-                WorkshopRecentlyAddedMembersIntent.FormAddDocument(
-                    fileName = file.name,
-                    bytes = file.readBytes(),
-                    typeCode = typeCode,
-                ),
-            )
-        }
-    }
-
     val identityLabel = stringResource(Res.string.abs_form_step_identity)
     val placeLabel = stringResource(Res.string.abs_form_step_place)
     val docsLabel = stringResource(Res.string.abs_form_step_docs)
@@ -177,7 +151,6 @@ fun RegistrationFormPage(
                     else -> DocumentsStep(
                         form = form,
                         workshopName = workshopName,
-                        onAdd = { isTypeSheetOpen = true },
                         onIntent = onIntent,
                     )
                 }
@@ -186,6 +159,7 @@ fun RegistrationFormPage(
                 // missing document, an unticked declaration — is said here.
                 form.error
                     ?.takeIf { form.step == REGISTRATION_FORM_STEPS }
+                    ?.takeUnless { form.isDocumentsError }
                     ?.let { WorkshopFormError(text = stringResource(it)) }
             }
         }
@@ -201,18 +175,6 @@ fun RegistrationFormPage(
                 null
             },
             isBusy = form.isBusy,
-        )
-    }
-
-    if (isTypeSheetOpen) {
-        WorkshopDocumentTypeSheet(
-            types = RegistrationDocumentTypes,
-            onDismiss = { isTypeSheetOpen = false },
-            onSelect = { type ->
-                isTypeSheetOpen = false
-                pendingTypeCode = type.code
-                filePicker.launch()
-            },
         )
     }
 
@@ -469,7 +431,6 @@ private fun PlaceStep(
 private fun DocumentsStep(
     form: RegistrationFormState,
     workshopName: String,
-    onAdd: () -> Unit,
     onIntent: (WorkshopRecentlyAddedMembersIntent) -> Unit,
 ) {
     val fullNameLabel = stringResource(Res.string.abs_form_full_name)
@@ -510,14 +471,20 @@ private fun DocumentsStep(
             onIntent(WorkshopRecentlyAddedMembersIntent.FormStepRequested(FirstStep))
         },
     )
-    WorkshopDocumentBox(
+    WorkshopDocumentsPanel(
         attachments = form.attachments,
+        types = RegistrationDocumentTypes,
         capacity = REGISTRATION_MAX_DOCUMENTS,
-        onAdd = onAdd,
-        isUploading = form.isUploading,
+        onAdd = { fileName, bytes, typeCode ->
+            onIntent(
+                WorkshopRecentlyAddedMembersIntent.FormAddDocument(fileName, bytes, typeCode),
+            )
+        },
         onRemove = { index ->
             onIntent(WorkshopRecentlyAddedMembersIntent.FormRemoveDocument(index))
         },
+        isUploading = form.isUploading,
+        isError = form.isDocumentsError,
     )
     WorkshopFormNote(text = stringResource(Res.string.abs_form_note_dependants))
     WorkshopFormNote(text = stringResource(Res.string.abs_form_note_changes))

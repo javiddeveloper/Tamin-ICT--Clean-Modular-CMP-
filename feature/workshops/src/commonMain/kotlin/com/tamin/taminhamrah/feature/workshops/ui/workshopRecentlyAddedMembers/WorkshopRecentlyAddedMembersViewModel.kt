@@ -363,7 +363,7 @@ class WorkshopRecentlyAddedMembersViewModel(
         emit(PartialState.FormSubmittingChanged(true))
 
         // `relation-tamins/isnew` answers a bare boolean and carries no id, so it is a gate, not
-        // a lookup: a person the organisation already knows cannot be registered again here.
+        // a lookup: a person the organization already knows cannot be registered again here.
         val isNew = checkNewMemberIsNew(form.nationalId)
         if (!isNew && form.personalId == null) {
             emit(PartialState.FormSubmittingChanged(false))
@@ -409,7 +409,7 @@ class WorkshopRecentlyAddedMembersViewModel(
         }
 
         emit(PartialState.FormChanged(null))
-        // The create returns the person, not a tracking code — the row that appears in the list
+        // The creation returns the person, not a tracking code — the row that appears in the list
         // carries it, so the message says the registration was filed and no more.
         sendEvent(WorkshopRecentlyAddedMembersEvent.RegistrationFiled)
         emitAll(loadPage(page = 0))

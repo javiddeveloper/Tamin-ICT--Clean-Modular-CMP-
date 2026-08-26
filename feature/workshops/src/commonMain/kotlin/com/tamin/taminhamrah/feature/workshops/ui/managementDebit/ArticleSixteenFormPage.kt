@@ -7,14 +7,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopDocumentBox
-import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopDocumentTypeSheet
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopDocumentsPanel
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormCheck
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormError
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormFooter
@@ -30,14 +25,10 @@ import com.tamin.taminhamrah.model.workshop.ARTICLE_SIXTEEN_MAX_DOCUMENTS
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.theme.Spacing
-import io.github.vinceglb.filekit.dialogs.FileKitType
-import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
-import io.github.vinceglb.filekit.name
-import io.github.vinceglb.filekit.readBytes
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.article_sixteen_executive_notify_date
 import taminx.core.core_ui.article_sixteen_form_account_code
 import taminx.core.core_ui.article_sixteen_form_address
 import taminx.core.core_ui.article_sixteen_form_check
@@ -55,7 +46,6 @@ import taminx.core.core_ui.article_sixteen_form_step_review
 import taminx.core.core_ui.article_sixteen_form_submit
 import taminx.core.core_ui.article_sixteen_form_title
 import taminx.core.core_ui.article_sixteen_form_workshop_name
-import taminx.core.core_ui.article_sixteen_executive_notify_date
 import taminx.core.core_ui.obj_form_period_from
 import taminx.core.core_ui.obj_form_period_to
 import taminx.core.core_ui.payment_sheet_agreement_row
@@ -79,25 +69,6 @@ fun ArticleSixteenFormPage(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var isTypeSheetOpen by remember { mutableStateOf(false) }
-    var pendingTypeCode by remember { mutableStateOf<String?>(null) }
-    val scope = rememberCoroutineScope()
-
-    val filePicker = rememberFilePickerLauncher(type = FileKitType.Image) { file ->
-        val typeCode = pendingTypeCode
-        pendingTypeCode = null
-        if (file == null || typeCode == null) return@rememberFilePickerLauncher
-        scope.launch {
-            onIntent(
-                ManagementDebitIntent.FormAddDocument(
-                    fileName = file.name,
-                    bytes = file.readBytes(),
-                    typeCode = typeCode,
-                ),
-            )
-        }
-    }
-
     val reviewLabel = stringResource(Res.string.article_sixteen_form_step_review)
     val docsLabel = stringResource(Res.string.article_sixteen_form_step_docs)
     val steps = remember(form.step, reviewLabel) {
@@ -132,11 +103,7 @@ fun ArticleSixteenFormPage(
                 if (form.step == 1) {
                     ReviewStep(form = form, onIntent = onIntent)
                 } else {
-                    DocumentsStep(
-                        form = form,
-                        onAdd = { isTypeSheetOpen = true },
-                        onIntent = onIntent,
-                    )
+                    DocumentsStep(form = form, onIntent = onIntent)
                 }
             }
         }
@@ -152,18 +119,6 @@ fun ArticleSixteenFormPage(
                 null
             },
             isBusy = form.isBusy,
-        )
-    }
-
-    if (isTypeSheetOpen) {
-        WorkshopDocumentTypeSheet(
-            types = ArticleSixteenDocumentTypes,
-            onDismiss = { isTypeSheetOpen = false },
-            onSelect = { type ->
-                isTypeSheetOpen = false
-                pendingTypeCode = type.code
-                filePicker.launch()
-            },
         )
     }
 }
@@ -233,19 +188,22 @@ private fun ReviewStep(
 @Composable
 private fun DocumentsStep(
     form: ArticleSixteenFormState,
-    onAdd: () -> Unit,
     onIntent: (ManagementDebitIntent) -> Unit,
 ) {
     WorkshopFormSection(
         title = stringResource(Res.string.article_sixteen_form_docs_title),
         description = stringResource(Res.string.article_sixteen_form_docs_desc),
     )
-    WorkshopDocumentBox(
+    WorkshopDocumentsPanel(
         attachments = form.attachments,
+        types = ArticleSixteenDocumentTypes,
         capacity = ARTICLE_SIXTEEN_MAX_DOCUMENTS,
-        onAdd = onAdd,
-        isUploading = form.isUploading,
+        onAdd = { fileName, bytes, typeCode ->
+            onIntent(ManagementDebitIntent.FormAddDocument(fileName, bytes, typeCode))
+        },
         onRemove = { index -> onIntent(ManagementDebitIntent.FormRemoveDocument(index)) },
+        isUploading = form.isUploading,
+        isError = form.isDocumentsError,
     )
     WorkshopFormNote(text = stringResource(Res.string.article_sixteen_form_note_window))
     WorkshopFormNote(text = stringResource(Res.string.article_sixteen_form_note_result))
@@ -254,7 +212,10 @@ private fun DocumentsStep(
         isChecked = form.isConfirmed,
         onToggle = { onIntent(ManagementDebitIntent.FormConfirmedChanged(!form.isConfirmed)) },
     )
-    form.error?.let { WorkshopFormError(text = stringResource(it)) }
+    // The missing-document rule is drawn round the panel; this is what is left.
+    form.error
+        ?.takeUnless { form.isDocumentsError }
+        ?.let { WorkshopFormError(text = stringResource(it)) }
 }
 
 @PreviewRtlTheme
