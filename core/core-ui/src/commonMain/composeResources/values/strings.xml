@@ -1187,24 +1187,18 @@
     <string name="workshop_details_and_actions">جزئیات و عملیات</string>
     <string name="workshop_filter">فیلتر</string>
     <string name="workshop_copy_code">کپی کد کارگاه</string>
-    <string name="workshop_code_copied">کد کارگاه کپی شد</string>
     <string name="workshop_list_title">لیست کارگاه‌ها</string>
-    <string name="workshop_search_title">جستجوی کارگاه</string>
     <string name="workshop_code">کد کارگاه</string>
-    <string name="workshop_name">نام کارگاه</string>
     <string name="workshop_branch_code">کد شعبه</string>
     <string name="workshop_branch_name">نام شعبه</string>
     <string name="workshop_search">جست‌وجو</string>
     <string name="workshop_all_items">همهٔ موارد</string>
-    <string name="workshop_show_detail">نمایش جزئیات</string>
-    <string name="workshop_hide_detail">مخفی کردن جزئیات</string>
     <string name="workshop_actions">عملیات این کارگاه</string>
     <string name="workshop_employer_type">نوع کارفرما</string>
     <string name="workshop_start_activity_date">تاریخ شروع فعالیت</string>
     <string name="workshop_activity_type">نوع فعالیت</string>
     <string name="workshop_register_date">تاریخ ثبت کارگاه</string>
     <string name="workshop_approve_date">تاریخ تأیید کارگاه</string>
-    <string name="workshop_status_label">وضعیت: %1$s</string>
     <string name="workshop_filter_title">فیلتر براساس فعالیت کارگاه</string>
     <string name="workshop_select">انتخاب کنید</string>
     <string name="workshop_select_date">انتخاب تاریخ</string>
@@ -1218,8 +1212,6 @@
     <string name="workshop_status_inactive">غیر فعال</string>
     <string name="workshop_empty_list">نتیجه‌ای یافت نشد</string>
     <string name="workshop_error_receive_data">خطا در دریافت اطلاعات</string>
-    <string name="workshop_error_receive_file">خطا در دریافت فایل</string>
-    <string name="workshop_no_debt_found">لیست بدهی برای این کارگاه یافت نشد.</string>
 
     <!-- Action menu -->
     <string name="workshop_action_payment_sheets">برگ پرداخت‌ها</string>
@@ -1317,7 +1309,6 @@
     <string name="new_member_follow_body">درخواست با کد پیگیری %1$s در حال بررسی است. نتیجه از طریق پیامک اطلاع داده می‌شود.</string>
 
     <!-- ماده ۱۶ -->
-    <string name="article_sixteen_account_code">کد حساب</string>
     <string name="article_sixteen_debt_amount">مبلغ بدهی (ریال)</string>
     <string name="article_sixteen_debt_remaining">ماندهٔ بدهی (ریال)</string>
     <string name="article_sixteen_executive_notify_date">تاریخ ابلاغ اجراییه</string>
@@ -1329,7 +1320,6 @@
     <string name="article_sixteen_status_unknown">نامشخص</string>
     <string name="article_sixteen_status_none">بدون درخواست</string>
     <string name="article_sixteen_action_request">درخواست رسیدگی به بدهی</string>
-    <string name="article_sixteen_action_view_request">مشاهده درخواست</string>
     <string name="article_sixteen_action_expert_message">پیام کارشناس</string>
     <string name="article_sixteen_action_fix_request">اصلاح درخواست</string>
     <string name="article_sixteen_deadline_passed">مهلت ثبت درخواست برای این بدهی به پایان رسیده است.</string>
@@ -1341,7 +1331,6 @@
     <string name="member_id_card_number">شماره شناسنامه</string>
     <string name="member_father_name">نام پدر</string>
     <string name="member_nationality">ملیت</string>
-    <string name="member_relation_type">نوع ارتباط</string>
     <string name="member_leaving_status">وضعیت ترک کار</string>
     <string name="member_leaving_date">تاریخ ترک کار</string>
     <string name="stackholder_type">نوع ذینفع</string>
@@ -1353,7 +1342,6 @@
     <string name="ws_form_docs_title">مدارک بارگذاری‌شده</string>
     <string name="ws_form_docs_count">%1$s از %2$s</string>
     <string name="ws_form_add_doc">افزودن مدرک</string>
-    <string name="ws_form_remove_doc">حذف مدرک</string>
     <string name="ws_form_file_size">%1$s کیلوبایت</string>
     <string name="ws_form_edit_info">ویرایش اطلاعات</string>
     <string name="ws_form_group_count">%1$s مورد</string>
@@ -1373,7 +1361,6 @@
     <string name="obj_form_check_deposit">مبلغ بدهی را به‌صورت سپردهٔ بانکی پرداخت کرده‌ام.</string>
     <string name="obj_form_check_confirm">صحت اطلاعات و مدارک ارسالی را تأیید می‌کنم.</string>
     <string name="obj_form_submit">ثبت اعتراض</string>
-    <string name="obj_form_done_title">اعتراض ثبت شد</string>
     <string name="obj_form_done_body">اعتراض شما با شمارهٔ پیگیری %1$s ثبت شد و به هیئت رسیدگی ارجاع گردید.</string>
 
     <!-- درخواست رسیدگی به بدهی ماده ۱۶ -->
@@ -1394,7 +1381,6 @@
     <string name="article_sixteen_form_note_result">در صورت تأیید، نتیجه از طریق کارتابل درخواست‌ها و پیامک اطلاع داده می‌شود.</string>
     <string name="article_sixteen_form_check">مفاد فوق را مطالعه کردم و صحت مدارک ارسالی را تأیید می‌کنم.</string>
     <string name="article_sixteen_form_submit">ثبت درخواست</string>
-    <string name="article_sixteen_form_done_title">درخواست شما ثبت شد</string>
     <string name="article_sixteen_form_done_body">درخواست رسیدگی به بدهی ماده ۱۶ با کد پیگیری %1$s ثبت شد.</string>
 
     <!-- انواع مدرک اعتراض — codes are the service's own, mirrored from the old app's asset -->
