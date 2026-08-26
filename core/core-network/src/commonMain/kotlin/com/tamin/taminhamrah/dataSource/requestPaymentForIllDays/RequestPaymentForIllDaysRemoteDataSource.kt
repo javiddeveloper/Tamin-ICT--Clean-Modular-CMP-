@@ -8,6 +8,11 @@ import com.tamin.taminhamrah.model.requestPaymentForIllDays.SaveShortTermIllness
 interface RequestPaymentForIllDaysRemoteDataSource {
     suspend fun getLatestInsuranceInfo(): IllDaysInsuredMainInfoDTO?
     suspend fun getCovidResult(): CovidResultListDTO?
+    suspend fun calcIllness(
+        startDateTimeStamp: String,
+        endDateTimeStamp: String,
+        maritalStatus: String,
+    ): List<String>?
     suspend fun sendRequestForIllDay(
         request: SaveShortTermIllnessRequestDTO
     ): SaveShortTermIllnessResponseDTO?

@@ -87,6 +87,15 @@ private class FakeRequestPaymentForIllDaysApiService(
         return success(CovidResultListDTO(list = listOf("1700000000", "1700086400")))
     }
 
+    override suspend fun calcIllness(
+        startDateTimeStamp: String,
+        endDateTimeStamp: String,
+        maritalStatus: String,
+    ): BaseDTO<List<String>?> {
+        if (shouldThrow) throw IllegalStateException("network")
+        return success(listOf("1000000"))
+    }
+
     override suspend fun sendRequestForIllDay(
         request: SaveShortTermIllnessRequestDTO
     ): BaseDTO<SaveShortTermIllnessResponseDTO> {

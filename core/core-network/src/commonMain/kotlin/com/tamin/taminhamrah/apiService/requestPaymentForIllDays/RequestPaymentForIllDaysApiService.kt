@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.tools.BaseDTO
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.POST
+import de.jensklingenberg.ktorfit.http.Path
 
 interface RequestPaymentForIllDaysApiService {
 
@@ -16,6 +17,13 @@ interface RequestPaymentForIllDaysApiService {
 
     @GET("shortterm-request/getCovidResult")
     suspend fun getCovidResult(): BaseDTO<CovidResultListDTO>
+
+    @GET("shortterm-request/calcIllness/{StartDateTimeStamp}/{EndDateTimeStamp}/{marital_status}")
+    suspend fun calcIllness(
+        @Path("StartDateTimeStamp") startDateTimeStamp: String,
+        @Path("EndDateTimeStamp") endDateTimeStamp: String,
+        @Path("marital_status") maritalStatus: String,
+    ): BaseDTO<List<String>?>
 
     @POST("stp/saveShorttremIllness")
     suspend fun sendRequestForIllDay(

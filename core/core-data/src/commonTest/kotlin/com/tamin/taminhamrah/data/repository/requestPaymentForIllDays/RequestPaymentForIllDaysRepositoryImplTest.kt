@@ -90,6 +90,12 @@ private class FakeRequestPaymentForIllDaysRemoteDataSource(
         return CovidResultListDTO(list = listOf("1700000000", "1700086400"))
     }
 
+    override suspend fun calcIllness(
+        startDateTimeStamp: String,
+        endDateTimeStamp: String,
+        maritalStatus: String,
+    ): List<String>? = listOf("1000000")
+
     override suspend fun sendRequestForIllDay(
         request: SaveShortTermIllnessRequestDTO
     ): SaveShortTermIllnessResponseDTO? {

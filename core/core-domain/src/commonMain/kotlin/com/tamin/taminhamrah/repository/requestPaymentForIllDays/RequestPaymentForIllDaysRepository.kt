@@ -8,5 +8,10 @@ import kotlinx.coroutines.flow.Flow
 interface RequestPaymentForIllDaysRepository {
     fun getLatestInsuranceInfo(): Flow<IllDaysInsuredMainInfoDN?>
     fun getCovidResult(): Flow<CovidResultDN>
+    fun calcIllness(
+        startDateTimeStamp: String,
+        endDateTimeStamp: String,
+        maritalStatus: String,
+    ): Flow<List<String>>
     fun sendRequestForIllDay(request: SaveShortTermIllnessRequestDN): Flow<String?>
 }

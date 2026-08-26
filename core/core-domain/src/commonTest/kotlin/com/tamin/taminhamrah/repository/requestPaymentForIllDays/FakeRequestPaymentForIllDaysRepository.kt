@@ -44,6 +44,15 @@ class FakeRequestPaymentForIllDaysRepository : RequestPaymentForIllDaysRepositor
         )
     }
 
+    override fun calcIllness(
+        startDateTimeStamp: String,
+        endDateTimeStamp: String,
+        maritalStatus: String,
+    ): Flow<List<String>> = flow {
+        if (shouldThrowError) throw error
+        emit(listOf("1000000"))
+    }
+
     override fun sendRequestForIllDay(
         request: SaveShortTermIllnessRequestDN
     ): Flow<String?> = flow {

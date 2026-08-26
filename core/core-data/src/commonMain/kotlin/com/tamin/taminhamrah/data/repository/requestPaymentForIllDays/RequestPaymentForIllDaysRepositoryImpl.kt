@@ -28,6 +28,20 @@ class RequestPaymentForIllDaysRepositoryImpl(
         emit(result)
     }
 
+    override fun calcIllness(
+        startDateTimeStamp: String,
+        endDateTimeStamp: String,
+        maritalStatus: String,
+    ): Flow<List<String>> = flow {
+        emit(
+            remoteDataSource.calcIllness(
+                startDateTimeStamp = startDateTimeStamp,
+                endDateTimeStamp = endDateTimeStamp,
+                maritalStatus = maritalStatus,
+            ).orEmpty()
+        )
+    }
+
     override fun sendRequestForIllDay(
         request: SaveShortTermIllnessRequestDN
     ): Flow<String?> = flow {

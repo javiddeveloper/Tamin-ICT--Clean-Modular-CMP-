@@ -39,6 +39,26 @@ class RequestPaymentForIllDaysRemoteDataSourceImpl(
         }
     }
 
+    override suspend fun calcIllness(
+        startDateTimeStamp: String,
+        endDateTimeStamp: String,
+        maritalStatus: String,
+    ): List<String>? {
+        return try {
+            apiService.calcIllness(
+                startDateTimeStamp = startDateTimeStamp,
+                endDateTimeStamp = endDateTimeStamp,
+                maritalStatus = maritalStatus,
+            ).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
     override suspend fun sendRequestForIllDay(
         request: SaveShortTermIllnessRequestDTO
     ): SaveShortTermIllnessResponseDTO? {
