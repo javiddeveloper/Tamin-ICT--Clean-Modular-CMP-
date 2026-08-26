@@ -1,9 +1,12 @@
 package com.tamin.taminhamrah.repository.common
 
 import com.tamin.taminhamrah.model.common.BeneficiaryDN
+import com.tamin.taminhamrah.model.common.InsuranceTypeDN
 import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.common.RoleDN
 import com.tamin.taminhamrah.model.common.JobTitleListDN
+import com.tamin.taminhamrah.model.common.UserType
+import com.tamin.taminhamrah.model.common.UserTypeInfoDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import kotlinx.coroutines.flow.Flow
@@ -21,6 +24,11 @@ class FakeCommonRepository : CommonRepository {
     var jobTitleResult: JobTitleListDN? = null
     var registrationDeclarationFormResult: ByteArray = byteArrayOf()
     var registrationDeclarationFormError: Throwable = RuntimeException("PDF Error")
+    var insuranceTypesResult: List<InsuranceTypeDN> = emptyList()
+    var getInsuranceTypesError: Throwable = RuntimeException("Insurance Type Error")
+    var lastInsuranceTypeSearch: String? = null
+    var userTypeResult: UserTypeInfoDN = UserTypeInfoDN(userType = UserType.INSURED)
+    var getUserTypeError: Throwable = RuntimeException("User Type Error")
 
 
     override fun getBeneficiary(filters: List<ApiFilterDN>): Flow<List<BeneficiaryDN>> = flow {
@@ -55,5 +63,16 @@ class FakeCommonRepository : CommonRepository {
             throw getRolesError
         }
         emit(rolesResult)
+    }
+
+    override fun getInsuranceTypes(searchText: String?): Flow<List<InsuranceTypeDN>> = flow {
+        lastInsuranceTypeSearch = searchText
+        if (shouldThrowError) throw getInsuranceTypesError
+        emit(insuranceTypesResult)
+    }
+
+    override fun checkUserType(): Flow<UserTypeInfoDN> = flow {
+        if (shouldThrowError) throw getUserTypeError
+        emit(userTypeResult)
     }
 }

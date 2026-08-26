@@ -15,6 +15,9 @@ data class MyInboxUiState(
     val items: ImmutableList<PersonalInboxItemPR> = persistentListOf(),
     val size: PersonalInboxSizePR? = null,
     val error: String? = null,
+    val isLoadingNextPage: Boolean = false,
+    val endReached: Boolean = false,
+    val paginationError: String? = null,
     val showInquiryPermitSheet: Boolean = false,
     val selectedItemIdForPermit: Long? = null,
     val permitDurations: ImmutableList<PermitDurationPR> = persistentListOf(),
@@ -30,7 +33,13 @@ data class MyInboxUiState(
     sealed interface PartialState {
         data class Loading(val isLoading: Boolean) : PartialState
         data class Error(val message: String) : PartialState
-        data class ItemsLoaded(val items: ImmutableList<PersonalInboxItemPR>) : PartialState
+        data class PagingChanged(
+            val items: ImmutableList<PersonalInboxItemPR>,
+            val isLoadingFirstPage: Boolean,
+            val isLoadingNextPage: Boolean,
+            val endReached: Boolean,
+            val error: String?,
+        ) : PartialState
         data class SizeLoaded(val size: PersonalInboxSizePR) : PartialState
         data class ShowInquiryPermitSheet(val itemId: Long) : PartialState
         data object HideInquiryPermitSheet : PartialState
@@ -48,6 +57,9 @@ data class MyInboxUiState(
 
 sealed interface MyInboxIntent {
     data object LoadInbox : MyInboxIntent
+    data object LoadNextPage : MyInboxIntent
+    data object RetryNextPage : MyInboxIntent
+    data object RefreshInbox : MyInboxIntent
     data object LoadDurations : MyInboxIntent
     data object OnBackClicked : MyInboxIntent
     data class OnCopyClicked(val id: Long) : MyInboxIntent

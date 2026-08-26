@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.model.orotezProtez
 
+import com.tamin.taminhamrah.tools.ErrorCarrier
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
@@ -41,7 +42,9 @@ data class RequestInsuredMainInfoDTO(
     @SerialName("partnerNationalId") val partnerNationalId: String? = null,
     @SerialName("weddingTimestamp") val weddingTimestamp: Long? = null,
     @SerialName("consequential") val consequential: String? = null,
-)
+    @SerialName("message") override val message: String? = null,
+    @SerialName("cause") override val cause: String? = null,
+) : ErrorCarrier
 
 @Serializable
 data class RequestInsuredMainInfoRequestDTO(

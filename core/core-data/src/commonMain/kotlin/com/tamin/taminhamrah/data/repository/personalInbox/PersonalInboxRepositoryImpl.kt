@@ -6,9 +6,11 @@ import com.tamin.taminhamrah.data.mapper.toEntity
 import com.tamin.taminhamrah.dataSource.inbox.PersonalInboxRemoteDataSource
 import com.tamin.taminhamrah.model.inbox.PersonalInboxItemDN
 import com.tamin.taminhamrah.model.inbox.PersonalInboxSizeDN
+import com.tamin.taminhamrah.model.paging.PageDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.personalInbox.PersonalInboxRepository
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
@@ -44,6 +46,30 @@ internal class PersonalInboxRepositoryImpl(
             }
         )
     }.distinctUntilChanged()
+
+    override fun getInboxItemsPage(
+        query: ApiQueryParamDN,
+    ): Flow<PageDN<PersonalInboxItemDN>> = flow {
+        val isFirstPage = query.start == 0
+        val page = try {
+            val response = personalInboxRemoteDataSource.getInboxItems(query)
+            val remoteItems = response.list.orEmpty()
+            if (isFirstPage) {
+                personalInboxDao.replaceAllInboxItems(remoteItems.map { it.toEntity() })
+            }
+            PageDN(
+                items = remoteItems.map { it.toDomain() },
+                total = response.total?.toIntOrNull(),
+            )
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            val cached = if (isFirstPage) personalInboxDao.getInboxItems().first() else emptyList()
+            if (cached.isEmpty()) throw e
+            PageDN(items = cached.map { it.toDomain() }, total = null)
+        }
+        emit(page)
+    }
 
     override fun getInboxSize(): Flow<PersonalInboxSizeDN> = flow {
         val cached = personalInboxDao.getInboxSize().firstOrNull()?.toDomain()

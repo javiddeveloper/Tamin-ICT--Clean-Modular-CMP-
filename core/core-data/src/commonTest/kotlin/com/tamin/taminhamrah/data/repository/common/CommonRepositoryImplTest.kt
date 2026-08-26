@@ -1,0 +1,144 @@
+package com.tamin.taminhamrah.data.repository.common
+
+import app.cash.turbine.test
+import com.tamin.core.network.model.common.CityNameDto
+import com.tamin.core.network.model.common.ProvinceNameDto
+import com.tamin.taminhamrah.data.local.dao.MenuDao
+import com.tamin.taminhamrah.data.local.entity.MenuEntity
+import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSource
+import com.tamin.taminhamrah.model.common.BeneficiaryDTO
+import com.tamin.taminhamrah.model.common.InsuranceTypeDTO
+import com.tamin.taminhamrah.model.common.JobTitleDTO
+import com.tamin.taminhamrah.model.common.MainServiceDto
+import com.tamin.taminhamrah.model.common.RecipientDTO
+import com.tamin.taminhamrah.model.common.UserInsuredInfoDTO
+import com.tamin.taminhamrah.model.common.UserType
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.utils.ListData
+import com.tamin.taminhamrah.repository.TokenStoreManager
+import io.ktor.client.statement.HttpStatement
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.test.runTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+
+class CommonRepositoryImplTest {
+
+    private lateinit var remoteDataSource: FakeRemoteDataSource
+    private lateinit var tokenStoreManager: FakeTokenStoreManager
+    private lateinit var repository: CommonRepositoryImpl
+
+    @BeforeTest
+    fun setup() {
+        remoteDataSource = FakeRemoteDataSource()
+        tokenStoreManager = FakeTokenStoreManager()
+        repository = CommonRepositoryImpl(remoteDataSource, FakeMenuDao(), tokenStoreManager)
+    }
+
+    @Test
+    fun `checkUserType uses the cached value and skips the network when a non-anonymous type is cached`() = runTest {
+        tokenStoreManager.storedUserType = UserType.PENSIONER.name
+
+        repository.checkUserType().test {
+            assertEquals(UserType.PENSIONER, awaitItem().userType)
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        assertEquals(0, remoteDataSource.checkInsuredInfoCallCount)
+    }
+
+    @Test
+    fun `checkUserType fetches and persists when nothing is cached`() = runTest {
+        remoteDataSource.checkInsuredInfoResult = UserInsuredInfoDTO(list = emptyList())
+
+        repository.checkUserType().test {
+            assertEquals(UserType.INSURED, awaitItem().userType)
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        assertEquals(1, remoteDataSource.checkInsuredInfoCallCount)
+        assertEquals(UserType.INSURED.name, tokenStoreManager.storedUserType)
+    }
+
+    @Test
+    fun `checkUserType re-fetches when the cached value is ANONYMOUS`() = runTest {
+        tokenStoreManager.storedUserType = UserType.ANONYMOUS.name
+        remoteDataSource.checkInsuredInfoResult = UserInsuredInfoDTO(list = listOf("05"))
+
+        repository.checkUserType().test {
+            assertEquals(UserType.PENSIONER, awaitItem().userType)
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        assertEquals(1, remoteDataSource.checkInsuredInfoCallCount)
+        assertEquals(UserType.PENSIONER.name, tokenStoreManager.storedUserType)
+    }
+
+    // Fakes
+    private class FakeRemoteDataSource : CommonRemoteDataSource {
+        var checkInsuredInfoResult = UserInsuredInfoDTO()
+        var checkInsuredInfoCallCount = 0
+
+        override suspend fun checkInsuredInfo(): UserInsuredInfoDTO {
+            checkInsuredInfoCallCount++
+            return checkInsuredInfoResult
+        }
+
+        override suspend fun getCityName(cityNameRequest: ApiQueryParamDN): CityNameDto =
+            throw NotImplementedError("not used by these tests")
+
+        override suspend fun getProvinceName(provinceNameRequest: ApiQueryParamDN): ProvinceNameDto =
+            throw NotImplementedError("not used by these tests")
+
+        override suspend fun getCitiesByProvince(query: ApiQueryParamDN): CityNameDto =
+            throw NotImplementedError("not used by these tests")
+
+        override suspend fun getInsuranceTypes(query: ApiQueryParamDN): ListData<InsuranceTypeDTO>? =
+            throw NotImplementedError("not used by these tests")
+
+        override suspend fun getMainMenu(versionCode: String, forceUpdate: Boolean): List<MainServiceDto> =
+            throw NotImplementedError("not used by these tests")
+
+        override suspend fun getBeneficiary(query: ApiQueryParamDN): ListData<BeneficiaryDTO> =
+            throw NotImplementedError("not used by these tests")
+
+        override suspend fun getRecipientList(query: ApiQueryParamDN): ListData<RecipientDTO> =
+            throw NotImplementedError("not used by these tests")
+
+        override suspend fun getRegistrationDeclarationForm(): HttpStatement =
+            throw NotImplementedError("not used by these tests")
+
+        override suspend fun getJobTitle(query: ApiQueryParamDN): ListData<JobTitleDTO>? =
+            throw NotImplementedError("not used by these tests")
+    }
+
+    private class FakeMenuDao : MenuDao {
+        override fun getMenuItems(): Flow<List<MenuEntity>> = MutableStateFlow(emptyList())
+        override suspend fun insertMenuItems(menuItems: List<MenuEntity>) = Unit
+        override suspend fun clearMenu() = Unit
+    }
+
+    private class FakeTokenStoreManager : TokenStoreManager {
+        var storedUserType: String? = null
+        private val tokenValid = MutableStateFlow(false)
+        private val authProcessing = MutableStateFlow(false)
+
+        override fun saveToken(token: String?) = Unit
+        override fun getToken(): String? = null
+        override fun saveRefreshToken(refreshToken: String?) = Unit
+        override fun getRefreshToken(): String? = null
+        override fun saveUserId(userId: String?) = Unit
+        override fun getUserId(): String? = null
+        override fun saveUserType(userType: String?) { storedUserType = userType }
+        override fun getUserType(): String? = storedUserType
+        override fun saveCodeVerifier(codeVerifier: String?) = Unit
+        override fun getCodeVerifier(): String? = null
+        override fun tokenValidFlow(): Flow<Boolean> = tokenValid.asStateFlow()
+        override suspend fun setTokenValid(isValid: Boolean) { tokenValid.value = isValid }
+        override fun isAuthProcessingFlow(): Flow<Boolean> = authProcessing.asStateFlow()
+        override fun setAuthProcessing(isProcessing: Boolean) { authProcessing.value = isProcessing }
+    }
+}

@@ -39,17 +39,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.ActionMenuItem
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.RecordActionMenu
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.action_hide_details
 import taminx.core.core_ui.action_show_details
+import taminx.core.core_ui.ic_email
 import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.ic_tamin_eye
+import taminx.core.core_ui.ic_tamin_medical_records
+import taminx.core.core_ui.ic_tamin_misc_claims
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Settings
 
@@ -121,17 +128,14 @@ fun <T> RecordCard(
     onExpandedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     actionsEnabled: Boolean = true,
+    toggleButtonContentColor: Color = LocalTaminColors.current.teal,
     details: @Composable ColumnScope.() -> Unit,
 ) {
     val colors = LocalTaminColors.current
     var menuOpen by remember { mutableStateOf(false) }
 
     // Keyed on what it is built from. Keyed on anything else it would survive a theme change.
-    val topWash = remember(colors.teal) {
-        Brush.verticalGradient(
-            listOf(colors.teal.copy(alpha = TOP_WASH_ALPHA), Color.Transparent),
-        )
-    }
+
 
     Column(
         modifier = modifier
@@ -146,7 +150,6 @@ fun <T> RecordCard(
             .background(colors.bgSurface)
             .border(Thickness.border, colors.border, RoundedCornerShape(CardCorner))
             .drawBehind {
-                drawRect(brush = topWash, size = Size(size.width, TopWashHeight.toPx()))
                 val rail = RailWidth.toPx()
                 drawRect(
                     brush = railBrush,
@@ -276,7 +279,7 @@ fun <T> RecordCard(
                 height = FooterButtonHeight,
                 borderColor = Color.Transparent,
                 containerColor = colors.bgPage,
-                contentColor = colors.teal,
+                contentColor = toggleButtonContentColor,
                 textStyle = MaterialTheme.typography.labelMedium.copy(
                     fontWeight = FontWeight.SemiBold,
                 ),
@@ -310,6 +313,89 @@ fun <T> RecordCard(
                     },
                 )
             }
+        }
+    }
+}
+
+// ─── Preview ──────────────────────────────────────────────────────────────────
+
+private enum class RecordCardPreviewAction { VIEW, SEND }
+
+/** One card, so the two previews below can only differ by [toggleButtonContentColor]. */
+@Composable
+private fun RecordCardPreviewSample(
+    toggleButtonContentColor: Color = LocalTaminColors.current.teal,
+) {
+    val colors = LocalTaminColors.current
+    var expanded by remember { mutableStateOf(false) }
+    val actions = remember {
+        persistentListOf(
+            ActionMenuItem(RecordCardPreviewAction.VIEW, "مشاهده", Res.drawable.ic_tamin_eye),
+            ActionMenuItem(RecordCardPreviewAction.SEND, "ارسال", Res.drawable.ic_email),
+        )
+    }
+    val rail = remember { Brush.verticalGradient(listOf(colors.teal, colors.blueText)) }
+
+    RecordCard(
+        chipLabel = "پرونده پزشکی",
+        chipIcon = vectorResource(Res.drawable.ic_tamin_medical_records),
+        chipContainerColor = colors.greenBg,
+        chipContentColor = colors.teal,
+        date = "۱۴۰۴/۰۵/۲۷",
+        title = "بیمارستان امام رضا",
+        stampLabel = "پرداخت شده",
+        stampColor = colors.greenText,
+        codeLabel = "کد پیگیری",
+        code = "۱۲۳۴۵۶۷۸",
+        codeIcon = vectorResource(Res.drawable.ic_tamin_misc_claims),
+        onCopyCode = {},
+        actionsLabel = "عملیات",
+        actions = actions,
+        onActionSelect = {},
+        railBrush = rail,
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+        toggleButtonContentColor = toggleButtonContentColor,
+        details = {
+            DetailRow(label = "کد ملی", value = "۰۰۱۲۳۴۵۶۷۸")
+            DetailRow(label = "مبلغ سهم شما", value = "۲۵۰,۰۰۰ ریال")
+        },
+    )
+}
+
+@PreviewRtlTheme
+@Composable
+private fun RecordCardPreview() {
+    PreviewRtlThemeContent {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(LocalTaminColors.current.bgPage)
+                .padding(Spacing.page),
+            verticalArrangement = Arrangement.spacedBy(Spacing.lg),
+        ) {
+            // Default: every existing caller (treatment costs, personal inbox) keeps this.
+            RecordCardPreviewSample()
+            // Same card, only the toggle recolored — proves the override stays local to
+            // whichever screen passes it.
+            RecordCardPreviewSample(toggleButtonContentColor = LocalTaminColors.current.orangeText)
+        }
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun RecordCardPreviewDark() {
+    PreviewRtlThemeContent(darkTheme = true) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(LocalTaminColors.current.bgPage)
+                .padding(Spacing.page),
+            verticalArrangement = Arrangement.spacedBy(Spacing.lg),
+        ) {
+            RecordCardPreviewSample()
+            RecordCardPreviewSample(toggleButtonContentColor = LocalTaminColors.current.orangeText)
         }
     }
 }
