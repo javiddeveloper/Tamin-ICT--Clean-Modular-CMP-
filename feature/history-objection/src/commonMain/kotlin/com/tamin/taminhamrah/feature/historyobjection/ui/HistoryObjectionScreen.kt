@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -93,6 +94,8 @@ import taminx.core.core_ui.action_cancel
 import taminx.core.core_ui.history_objection_active_request_message
 import taminx.core.core_ui.history_objection_active_request_title
 import taminx.core.core_ui.history_objection_add_new
+import taminx.core.core_ui.history_objection_denied_anonymous_message
+import taminx.core.core_ui.history_objection_denied_pensioner_message
 import taminx.core.core_ui.history_objection_confirm_send_action
 import taminx.core.core_ui.history_objection_confirm_send_message
 import taminx.core.core_ui.history_objection_confirm_send_title
@@ -123,6 +126,7 @@ import taminx.core.core_ui.ic_tamin_edit
 import taminx.core.core_ui.ic_trash
 import taminx.core.core_ui.ic_warning
 import taminx.core.core_ui.send_history_access_denied_action
+import taminx.core.core_ui.send_history_access_denied_title
 import taminx.feature.history_objection.generated.resources.ic_history_objection
 import taminx.feature.history_objection.generated.resources.Res as FeatureRes
 
@@ -169,6 +173,19 @@ fun HistoryObjectionScreen(
                 viewModel.sendIntent(HistoryObjectionIntent.OnActiveRequestDialogDismissed)
                 onNavigateBack()
             },
+        )
+    }
+
+    val accessDeniedReason = uiState.accessDeniedReason
+    if (accessDeniedReason != null) {
+        AccessDeniedDialog(
+            message = when (accessDeniedReason) {
+                HistoryObjectionUiState.AccessDeniedReason.Anonymous ->
+                    stringResource(Res.string.history_objection_denied_anonymous_message)
+                is HistoryObjectionUiState.AccessDeniedReason.Pensioner ->
+                    accessDeniedReason.serverMessage ?: stringResource(Res.string.history_objection_denied_pensioner_message)
+            },
+            onDismiss = onNavigateBack,
         )
     }
 
@@ -220,6 +237,24 @@ private fun ActiveRequestDialog(onDismiss: () -> Unit) {
         dismissButton = {},
         onDismissRequest = onDismiss,
         icon = Icons.Default.Info,
+    )
+}
+
+@Composable
+private fun AccessDeniedDialog(message: String, onDismiss: () -> Unit) {
+    TaminConfirmationDialog(
+        title = stringResource(Res.string.send_history_access_denied_title),
+        description = message,
+        confirmButton = {
+            TaminFilledButton(
+                text = stringResource(Res.string.send_history_access_denied_action),
+                onClick = onDismiss,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
+        dismissButton = {},
+        onDismissRequest = onDismiss,
+        icon = Icons.Outlined.Lock,
     )
 }
 

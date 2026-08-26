@@ -13,6 +13,7 @@ import com.tamin.taminhamrah.model.common.InsuranceTypeDTO
 import com.tamin.taminhamrah.model.common.JobTitleDTO
 import com.tamin.taminhamrah.model.common.MainServiceDto
 import com.tamin.taminhamrah.model.common.RecipientDTO
+import com.tamin.taminhamrah.model.common.UserInsuredInfoDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.repository.CityProvinceRepository
@@ -139,6 +140,9 @@ class CityProvinceRepositoryImplTest {
             throw NotImplementedError("not used by these tests")
 
         override suspend fun getJobTitle(query: ApiQueryParamDN): ListData<JobTitleDTO>? =
+            throw NotImplementedError("not used by these tests")
+
+        override suspend fun checkInsuredInfo(): UserInsuredInfoDTO =
             throw NotImplementedError("not used by these tests")
     }
 

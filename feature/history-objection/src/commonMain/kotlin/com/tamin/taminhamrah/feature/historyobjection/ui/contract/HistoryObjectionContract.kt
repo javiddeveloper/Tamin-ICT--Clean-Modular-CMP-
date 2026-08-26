@@ -19,13 +19,21 @@ data class HistoryObjectionUiState(
     val showSubmitConfirmationDialog: Boolean = false,
     val isSubmitting: Boolean = false,
     val trackingNumber: String? = null,
+    val accessDeniedReason: AccessDeniedReason? = null,
     ) {
+
+    /** Which denial dialog to show — resolved to text in the Composable via [org.jetbrains.compose.resources.stringResource]. */
+    sealed interface AccessDeniedReason {
+        data object Anonymous : AccessDeniedReason
+        data class Pensioner(val serverMessage: String?) : AccessDeniedReason
+    }
 
     sealed interface PartialState {
         data class Loading(val isLoading: Boolean) : PartialState
         data class StatusChecked(val hasActiveRequest: Boolean) : PartialState
         data class RequestsLoaded(val requests: ImmutableList<NotExistRequestPR>) : PartialState
         data object ActiveRequestDialogDismissed : PartialState
+        data class AccessDenied(val reason: AccessDeniedReason) : PartialState
         data class DescriptionChanged(val description: String) : PartialState
         data class Error(val message: String) : PartialState
         data object ErrorDismissed : PartialState

@@ -6,6 +6,8 @@ import com.tamin.taminhamrah.model.common.JobTitleListDN
 import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.model.common.RoleDN
+import com.tamin.taminhamrah.model.common.UserType
+import com.tamin.taminhamrah.model.common.UserTypeInfoDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.common.CommonRepository
 import kotlinx.coroutines.flow.Flow
@@ -41,6 +43,10 @@ class FakeRepositoryForFeatureManager : CommonRepository {
 
     override fun getInsuranceTypes(searchText: String?): Flow<List<com.tamin.taminhamrah.model.common.InsuranceTypeDN>> = flow {
         emit(emptyList())
+    }
+
+    override fun checkUserType(): Flow<UserTypeInfoDN> = flow {
+        emit(UserTypeInfoDN(userType = UserType.INSURED))
     }
 }
 

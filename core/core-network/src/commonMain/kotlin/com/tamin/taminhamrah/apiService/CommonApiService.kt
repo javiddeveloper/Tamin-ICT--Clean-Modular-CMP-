@@ -14,6 +14,7 @@ import com.tamin.taminhamrah.model.common.RecipientDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.common.BeneficiaryDTO
 import com.tamin.taminhamrah.model.common.JobTitleDTO
+import com.tamin.taminhamrah.model.common.UserInsuredInfoDTO
 import com.tamin.taminhamrah.tools.BaseDTO
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.QueryMap
@@ -68,4 +69,7 @@ internal interface CommonApiService {
     suspend fun getJobTitle(
         @QueryMap queries: Map<String, String>
     ): BaseDTO<ListData<JobTitleDTO>>
+
+    @GET("login-services/logininfo")
+    suspend fun checkInsuredInfo(): BaseDTO<UserInsuredInfoDTO>
 }

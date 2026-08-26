@@ -6,7 +6,9 @@ import com.tamin.taminhamrah.feature.historyobjection.ui.contract.HistoryObjecti
 import com.tamin.taminhamrah.feature.historyobjection.ui.contract.HistoryObjectionUiState
 import com.tamin.taminhamrah.feature.historyobjection.ui.contract.HistoryObjectionUiState.PartialState
 import com.tamin.taminhamrah.mapper.historyObjection.toPresentation
+import com.tamin.taminhamrah.model.common.UserType
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
+import com.tamin.taminhamrah.useCases.common.CheckUserTypeUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.CheckHistoryObjectionStatusNotExistUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.ConfirmHistoryObjectionNotExistUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.DeleteHistoryObjectionNotExistRequestUseCase
@@ -25,6 +27,7 @@ import taminx.core.core_ui.history_objection_confirm_send_rejected_error
 import taminx.core.core_ui.history_objection_delete_missing_data_error
 
 class HistoryObjectionViewModel(
+    private val checkUserTypeUseCase: CheckUserTypeUseCase,
     private val checkHistoryObjectionStatusNotExistUseCase: CheckHistoryObjectionStatusNotExistUseCase,
     private val getHistoryObjectionNotExistRequestsUseCase: GetHistoryObjectionNotExistRequestsUseCase,
     private val deleteHistoryObjectionNotExistRequestUseCase: DeleteHistoryObjectionNotExistRequestUseCase,
@@ -89,7 +92,22 @@ class HistoryObjectionViewModel(
 
     private fun loadHistoryObjectionData(): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
-        emitAll(merge(checkStatusNotExist(), loadNotExistRequests()))
+        try {
+            val userTypeInfo = checkUserTypeUseCase().first()
+            when (userTypeInfo.userType) {
+                UserType.ANONYMOUS -> emit(
+                    PartialState.AccessDenied(HistoryObjectionUiState.AccessDeniedReason.Anonymous)
+                )
+                UserType.PENSIONER -> emit(
+                    PartialState.AccessDenied(
+                        HistoryObjectionUiState.AccessDeniedReason.Pensioner(userTypeInfo.message)
+                    )
+                )
+                UserType.INSURED, UserType.TEMPORARY -> emitAll(merge(checkStatusNotExist(), loadNotExistRequests()))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.toSingleLineMessage()))
+        }
         emit(PartialState.Loading(false))
     }
 
@@ -167,6 +185,7 @@ class HistoryObjectionViewModel(
             error = null,
         )
         PartialState.ActiveRequestDialogDismissed -> currentState.copy(showActiveRequestDialog = false)
+        is PartialState.AccessDenied -> currentState.copy(accessDeniedReason = partialState.reason)
         is PartialState.DescriptionChanged -> currentState.copy(description = partialState.description)
         is PartialState.Error -> currentState.copy(error = partialState.message)
         PartialState.ErrorDismissed -> currentState.copy(error = null)

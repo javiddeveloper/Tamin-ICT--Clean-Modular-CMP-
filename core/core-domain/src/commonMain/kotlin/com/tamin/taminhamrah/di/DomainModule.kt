@@ -18,6 +18,7 @@ import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
 import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
 import com.tamin.taminhamrah.useCases.common.GetCitiesByProvinceUseCase
 import com.tamin.taminhamrah.useCases.common.GetInsuranceTypesUseCase
+import com.tamin.taminhamrah.useCases.common.CheckUserTypeUseCase
 import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
 import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
 import com.tamin.taminhamrah.useCases.file.DownloadDocumentUseCase
@@ -246,6 +247,7 @@ val domainModule = module {
     factoryOf(::GetProvincesUseCase)
     factoryOf(::GetCitiesByProvinceUseCase)
     factoryOf(::GetInsuranceTypesUseCase)
+    factoryOf(::CheckUserTypeUseCase)
     factoryOf(::ChangeMobileUseCase)
     factoryOf(::VerifyChangeMobileUseCase)
     factoryOf(::GetBeneficiaryUseCase)

@@ -1210,6 +1210,8 @@
     <string name="history_objection_add_new">ثبت سابقهٔ ناموجود جدید</string>
     <string name="history_objection_active_request_title">درخواست در حال بررسی</string>
     <string name="history_objection_active_request_message">کاربر گرامی، در حال حاضر دارای یک درخواست در حال بررسی می‌باشید و امکان ثبت مجدد درخواست وجود ندارد.</string>
+    <string name="history_objection_denied_anonymous_message">امکان استفاده از این سرویس برای کاربران مهمان وجود ندارد.</string>
+    <string name="history_objection_denied_pensioner_message">این سرویس برای مستمری‌بگیران فعال نیست.</string>
     <string name="history_objection_list_title">سوابق ناموجود ثبت‌شده</string>
     <string name="history_objection_status_not_sent">ارسال نشده</string>
     <string name="history_objection_workshop_name">نام کارگاه</string>

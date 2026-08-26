@@ -2,10 +2,14 @@ package com.tamin.taminhamrah.feature.historyobjection.ui
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
+import com.tamin.taminhamrah.feature.historyobjection.fake.FakeCommonRepository
 import com.tamin.taminhamrah.feature.historyobjection.fake.FakeHistoryObjectionRepository
 import com.tamin.taminhamrah.feature.historyobjection.ui.contract.HistoryObjectionIntent
 import com.tamin.taminhamrah.feature.historyobjection.ui.contract.HistoryObjectionUiState
+import com.tamin.taminhamrah.model.common.UserType
+import com.tamin.taminhamrah.model.common.UserTypeInfoDN
 import com.tamin.taminhamrah.model.historyObjection.NotExistRequestDN
+import com.tamin.taminhamrah.useCases.common.CheckUserTypeUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.CheckHistoryObjectionStatusNotExistUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.ConfirmHistoryObjectionNotExistUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.DeleteHistoryObjectionNotExistRequestUseCase
@@ -29,17 +33,20 @@ class HistoryObjectionViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var repository: FakeHistoryObjectionRepository
+    private lateinit var commonRepository: FakeCommonRepository
 
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         repository = FakeHistoryObjectionRepository()
+        commonRepository = FakeCommonRepository()
     }
 
     @AfterTest
     fun tearDown() = Dispatchers.resetMain()
 
     private fun createViewModel(): HistoryObjectionViewModel = HistoryObjectionViewModel(
+        checkUserTypeUseCase = CheckUserTypeUseCase(commonRepository),
         checkHistoryObjectionStatusNotExistUseCase = CheckHistoryObjectionStatusNotExistUseCase(repository),
         getHistoryObjectionNotExistRequestsUseCase = GetHistoryObjectionNotExistRequestsUseCase(repository),
         deleteHistoryObjectionNotExistRequestUseCase = DeleteHistoryObjectionNotExistRequestUseCase(repository),
@@ -145,6 +152,55 @@ class HistoryObjectionViewModelTest {
 
             assertNull(errored.trackingNumber)
             assertEquals(false, errored.isSubmitting)
+        }
+    }
+
+    @Test
+    fun load_withAnonymousUser_showsAccessDeniedAndSkipsListLoad() = runTest(testDispatcher) {
+        commonRepository.userTypeResult = UserTypeInfoDN(userType = UserType.ANONYMOUS)
+        repository.notExistRequestsResult = listOf(
+            NotExistRequestDN(requestNumber = "1837708", rowIndex = "1", branchName = "پاکدشت")
+        )
+        val viewModel = createViewModel()
+
+        viewModel.uiState.test {
+            viewModel.sendIntent(HistoryObjectionIntent.Load)
+            val denied = awaitUntil { it.accessDeniedReason != null }
+
+            assertEquals(HistoryObjectionUiState.AccessDeniedReason.Anonymous, denied.accessDeniedReason)
+            assertTrue(denied.notExistRequests.isEmpty())
+        }
+    }
+
+    @Test
+    fun load_withPensionerUser_showsAccessDeniedWithServerMessage() = runTest(testDispatcher) {
+        commonRepository.userTypeResult = UserTypeInfoDN(userType = UserType.PENSIONER, message = "پیام سرور")
+        val viewModel = createViewModel()
+
+        viewModel.uiState.test {
+            viewModel.sendIntent(HistoryObjectionIntent.Load)
+            val denied = awaitUntil { it.accessDeniedReason != null }
+
+            assertEquals(
+                HistoryObjectionUiState.AccessDeniedReason.Pensioner("پیام سرور"),
+                denied.accessDeniedReason,
+            )
+        }
+    }
+
+    @Test
+    fun load_withInsuredUser_proceedsToLoadList() = runTest(testDispatcher) {
+        commonRepository.userTypeResult = UserTypeInfoDN(userType = UserType.INSURED)
+        val existing = NotExistRequestDN(requestNumber = "1837708", rowIndex = "1", branchName = "پاکدشت")
+        repository.notExistRequestsResult = listOf(existing)
+        val viewModel = createViewModel()
+
+        viewModel.uiState.test {
+            viewModel.sendIntent(HistoryObjectionIntent.Load)
+            val loaded = awaitUntil { !it.isLoading && it.notExistRequests.isNotEmpty() }
+
+            assertNull(loaded.accessDeniedReason)
+            assertEquals(1, loaded.notExistRequests.size)
         }
     }
 

@@ -13,6 +13,7 @@ import com.tamin.core.network.model.common.ProvinceNameDto
 import com.tamin.taminhamrah.model.common.RecipientDTO
 import com.tamin.taminhamrah.model.common.BeneficiaryDTO
 import com.tamin.taminhamrah.model.common.JobTitleDTO
+import com.tamin.taminhamrah.model.common.UserInsuredInfoDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
 import io.ktor.client.statement.HttpStatement
@@ -27,4 +28,5 @@ interface CommonRemoteDataSource {
     suspend fun getRecipientList(query: ApiQueryParamDN): ListData<RecipientDTO>
     suspend fun getRegistrationDeclarationForm(): HttpStatement
     suspend fun getJobTitle(query: ApiQueryParamDN): ListData<JobTitleDTO>?
+    suspend fun checkInsuredInfo(): UserInsuredInfoDTO
 }

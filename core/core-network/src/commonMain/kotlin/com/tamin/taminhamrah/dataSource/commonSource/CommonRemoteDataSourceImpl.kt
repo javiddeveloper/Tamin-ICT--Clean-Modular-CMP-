@@ -20,6 +20,7 @@ import io.ktor.client.statement.HttpStatement
 import com.tamin.taminhamrah.apiService.CommonApiService
 import com.tamin.taminhamrah.model.common.BeneficiaryDTO
 import com.tamin.taminhamrah.model.common.JobTitleDTO
+import com.tamin.taminhamrah.model.common.UserInsuredInfoDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
 import io.ktor.client.statement.HttpResponse
@@ -141,6 +142,17 @@ internal class CommonRemoteDataSourceImpl(
         val queries = queryBuilder.buildQuery(query)
         return try {
             val response = commonApiService.getJobTitle(queries)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun checkInsuredInfo(): UserInsuredInfoDTO {
+        return try {
+            val response = commonApiService.checkInsuredInfo()
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)

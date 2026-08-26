@@ -11,6 +11,7 @@ import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSource
 import com.tamin.taminhamrah.model.common.BeneficiaryDTO
 import com.tamin.taminhamrah.model.common.InsuranceTypeDTO
 import com.tamin.taminhamrah.model.common.JobTitleDTO
+import com.tamin.taminhamrah.model.common.UserInsuredInfoDTO
 import com.tamin.taminhamrah.model.common.MainServiceDto
 import com.tamin.taminhamrah.model.common.RecipientDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
@@ -168,6 +169,7 @@ private class FakeCommonRemoteDataSource(
     override suspend fun getRecipientList(query: ApiQueryParamDN): ListData<RecipientDTO> = unused()
     override suspend fun getRegistrationDeclarationForm(): HttpStatement = unused()
     override suspend fun getJobTitle(query: ApiQueryParamDN): ListData<JobTitleDTO>? = unused()
+    override suspend fun checkInsuredInfo(): UserInsuredInfoDTO = unused()
 }
 
 private fun <T> unused(): T = error("not part of the city/province cache path under test")

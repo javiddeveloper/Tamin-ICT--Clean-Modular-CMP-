@@ -5,18 +5,21 @@ import com.tamin.taminhamrah.model.common.InsuranceTypeDN
 import com.tamin.taminhamrah.model.common.JobTitleListDN
 import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.common.RoleDN
+import com.tamin.taminhamrah.model.common.UserType
+import com.tamin.taminhamrah.model.common.UserTypeInfoDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.common.CommonRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
-/** Only [getInsuranceTypes] is exercised by the stepper — the rest is stubbed to satisfy the interface. */
+/** Only [getInsuranceTypes] and [checkUserType] are exercised by tests — the rest is stubbed to satisfy the interface. */
 class FakeCommonRepository : CommonRepository {
     var insuranceTypesResult: List<InsuranceTypeDN> = emptyList()
     var lastInsuranceTypeSearch: String? = null
     var shouldThrowError = false
     var error: Throwable = RuntimeException("Error")
+    var userTypeResult: UserTypeInfoDN = UserTypeInfoDN(userType = UserType.INSURED)
 
     override fun getInsuranceTypes(searchText: String?): Flow<List<InsuranceTypeDN>> = flow {
         lastInsuranceTypeSearch = searchText
@@ -29,4 +32,5 @@ class FakeCommonRepository : CommonRepository {
     override fun getRegistrationDeclarationForm(): Flow<ByteArray> = flow { emit(byteArrayOf()) }
     override fun getJobTitle(query: ApiQueryParamDN): Flow<JobTitleListDN?> = flow { emit(null) }
     override fun getRoles(): Flow<List<RoleDN>> = flow { emit(emptyList()) }
+    override fun checkUserType(): Flow<UserTypeInfoDN> = flow { emit(userTypeResult) }
 }
