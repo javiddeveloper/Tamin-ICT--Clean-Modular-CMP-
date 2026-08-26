@@ -36,6 +36,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -158,33 +159,35 @@ class OrotezProtezDocumentUploadTest {
     }
 
     @Test
-    fun documentPicked_withNonJpegExtension_isRejectedAndStaysEmpty() = runTest(testDispatcher) {
+    fun documentPicked_withNonJpegExtension_isRejectedUnderItsOwnDocumentCard() = runTest(testDispatcher) {
         awaitState { it.branchOptions.isNotEmpty() }
 
         viewModel.sendIntent(
             OrotezProtezIntent.OnDocumentImagePicked(prescriptionId, tempFile(".png", sizeBytes = 100)),
         )
-        val state = awaitState { it.documentPickError != null }
+        val state = awaitState { it.documents[prescriptionId] is OrotezProtezDocumentState.Failed }
 
-        assertNotNull(state.documentPickError)
-        assertTrue(state.documents[prescriptionId] !is OrotezProtezDocumentState.Uploaded)
+        val failed = state.documents[prescriptionId] as OrotezProtezDocumentState.Failed
+        assertTrue(failed.message.isNotBlank())
+        assertNull(state.documentPickError)
     }
 
     @Test
-    fun documentPicked_exceedingMaxSize_isRejectedAndStaysEmpty() = runTest(testDispatcher) {
+    fun documentPicked_exceedingMaxSize_isRejectedUnderItsOwnDocumentCard() = runTest(testDispatcher) {
         awaitState { it.branchOptions.isNotEmpty() }
 
         viewModel.sendIntent(
             OrotezProtezIntent.OnDocumentImagePicked(prescriptionId, tempFile(".jpg", sizeBytes = 2 * 1024 * 1024 + 1)),
         )
-        val state = awaitState { it.documentPickError != null }
+        val state = awaitState { it.documents[prescriptionId] is OrotezProtezDocumentState.Failed }
 
-        assertNotNull(state.documentPickError)
-        assertTrue(state.documents[prescriptionId] !is OrotezProtezDocumentState.Uploaded)
+        val failed = state.documents[prescriptionId] as OrotezProtezDocumentState.Failed
+        assertTrue(failed.message.isNotBlank())
+        assertNull(state.documentPickError)
     }
 
     @Test
-    fun documentPicked_duplicateOfAnotherDocument_isRejected() = runTest(testDispatcher) {
+    fun documentPicked_duplicateOfAnotherDocument_isRejectedUnderItsOwnDocumentCard() = runTest(testDispatcher) {
         awaitState { it.branchOptions.isNotEmpty() }
         val sharedBytes = byteArrayOf(1, 2, 3, 4, 5)
 
@@ -192,10 +195,11 @@ class OrotezProtezDocumentUploadTest {
         awaitState { it.documents[prescriptionId] is OrotezProtezDocumentState.Uploaded }
 
         viewModel.sendIntent(OrotezProtezIntent.OnDocumentImagePicked(invoiceId, jpegFile(sharedBytes)))
-        val state = awaitState { it.documentPickError != null }
+        val state = awaitState { it.documents[invoiceId] is OrotezProtezDocumentState.Failed }
 
-        assertNotNull(state.documentPickError)
-        assertTrue(state.documents[invoiceId] !is OrotezProtezDocumentState.Uploaded)
+        val failed = state.documents[invoiceId] as OrotezProtezDocumentState.Failed
+        assertTrue(failed.message.isNotBlank())
+        assertNull(state.documentPickError)
     }
 
     @Test

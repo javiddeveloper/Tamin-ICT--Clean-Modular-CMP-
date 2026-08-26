@@ -15,6 +15,8 @@ interface TokenStoreManager {
     fun getRefreshToken(): String?
     fun saveUserId(userId: String?)
     fun getUserId(): String?
+    fun saveUserType(userType: String?)
+    fun getUserType(): String?
     fun saveCodeVerifier(codeVerifier: String?)
     fun getCodeVerifier(): String?
     fun tokenValidFlow(): Flow<Boolean>
