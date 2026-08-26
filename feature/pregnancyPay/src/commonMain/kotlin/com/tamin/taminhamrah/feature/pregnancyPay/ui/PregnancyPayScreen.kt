@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -41,12 +42,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.feature.pregnancyPay.camera.CameraPermission
-import com.tamin.taminhamrah.feature.pregnancyPay.camera.rememberCameraPermission
 import com.tamin.taminhamrah.feature.pregnancyPay.ui.components.PregnancyPayHeader
 import com.tamin.taminhamrah.feature.pregnancyPay.ui.components.PregnancyPayOptionSheet
 import com.tamin.taminhamrah.feature.pregnancyPay.ui.contract.CHILD_NATIONAL_CODE_LENGTH
@@ -77,7 +77,7 @@ import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
-import com.tamin.taminhamrah.ui.components.TaminTextField
+import com.tamin.taminhamrah.ui.components.TaminStyledTextField
 import com.tamin.taminhamrah.ui.components.document.TaminDocumentSourceSheet
 import com.tamin.taminhamrah.ui.components.document.TaminDocumentUploadCard
 import com.tamin.taminhamrah.ui.components.document.TaminDocumentUploadState
@@ -88,13 +88,16 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.ui.theme.shimmer
+import com.tamin.taminhamrah.util.CameraPermission
 import com.tamin.taminhamrah.util.PersianDateFormatter
+import com.tamin.taminhamrah.util.rememberCameraPermission
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberCameraPickerLauncher
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.NonCancellable.isActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -737,6 +740,7 @@ private fun PregnancyPayBranchAndRestStep(
             }
 
             state.restDaysCount?.let { days ->
+                val exceedsCap = days > REST_DAYS_REFERENCE_CAP_DAYS
                 Spacer(Modifier.height(Spacing.sm))
                 StatusPill(
                     text = stringResource(
@@ -744,9 +748,9 @@ private fun PregnancyPayBranchAndRestStep(
                         days.toString(),
                         REST_DAYS_REFERENCE_CAP_DAYS.toString(),
                     ),
-                    icon = Icons.Filled.DateRange,
-                    containerColor = colors.blueBg,
-                    contentColor = colors.blueText,
+                    icon = if (exceedsCap) Icons.Filled.Warning else Icons.Filled.DateRange,
+                    containerColor = if (exceedsCap) colors.dangerBorder else colors.blueBg,
+                    contentColor = if (exceedsCap) colors.dangerText else colors.blueText,
                 )
             }
         }
@@ -938,18 +942,19 @@ private fun PregnancyPayDoctorAndRequestStep(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 modifier = Modifier.fillMaxWidth(),
             ) {
+                TaminStyledTextField(
+                    modifier = Modifier.weight(0.6f),
+                    value = state.doctorName,
+                    onValueChange = { onIntent(PregnancyPayIntent.OnDoctorNameChanged(it)) },
+                    label = stringResource(Res.string.pregnancy_pay_field_doctor_name),
+                    placeholder = stringResource(Res.string.pregnancy_pay_landing_label_full_name),
+                )
                 PregnancyPaySegmentedField(
                     modifier = Modifier.weight(0.4f),
                     label = stringResource(Res.string.pregnancy_pay_field_doctor_code),
                     value = state.doctorCode,
                     onValueChange = { onIntent(PregnancyPayIntent.OnDoctorCodeChanged(it)) },
                     slotCount = DOCTOR_CODE_LENGTH,
-                )
-                TaminTextField(
-                    modifier = Modifier.weight(0.6f),
-                    value = state.doctorName,
-                    onValueChange = { onIntent(PregnancyPayIntent.OnDoctorNameChanged(it)) },
-                    label = stringResource(Res.string.pregnancy_pay_field_doctor_name),
                 )
             }
 
@@ -1036,16 +1041,24 @@ private fun PregnancyPayDocumentsStep(
                 color = colors.textMuted,
             )
             Spacer(Modifier.height(Spacing.md))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.End,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ){
+                StatusPill(
+                    text = stringResource(
+                        Res.string.pregnancy_pay_document_required_counter,
+                        state.requiredDocumentsUploadedCount.toString(),
+                        PregnancyPayRequiredDocumentIds.size.toString(),
+                    ),
+                    containerColor = colors.orangeBg,
+                    contentColor = colors.orangeText,
+                )
 
-            StatusPill(
-                text = stringResource(
-                    Res.string.pregnancy_pay_document_required_counter,
-                    state.requiredDocumentsUploadedCount.toString(),
-                    PregnancyPayRequiredDocumentIds.size.toString(),
-                ),
-                containerColor = colors.orangeBg,
-                contentColor = colors.orangeText,
-            )
+            }
+
             Spacer(Modifier.height(Spacing.md))
 
             PregnancyPayDocumentChecklist.forEachIndexed { index, document ->

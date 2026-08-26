@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.GlassIconTile
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
@@ -62,7 +63,7 @@ internal fun PregnancyPayHeader(
         )
 
         Spacer(Modifier.height(Spacing.smPlus))
-        GlassIconTile(icon = Icons.Filled.Favorite)
+        AnimatedRingHeaderIcon(icon = Icons.Filled.Favorite)
         Spacer(Modifier.height(Spacing.sm))
         Text(
             text = stringResource(Res.string.pregnancy_pay_subtitle),

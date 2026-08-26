@@ -29,6 +29,7 @@
     import androidx.compose.ui.graphics.SolidColor
     import androidx.compose.ui.text.font.FontWeight
     import androidx.compose.ui.text.style.TextAlign
+    import androidx.compose.ui.text.style.TextOverflow
     import androidx.compose.ui.unit.Dp
     import com.tamin.taminhamrah.ui.PreviewRtlTheme
     import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
@@ -131,7 +132,8 @@
                                 textAlign = TextAlign.Center
                             ),
                             color = style.titleColor,
-                            maxLines = 1,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
