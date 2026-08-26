@@ -7,22 +7,18 @@ import com.tamin.taminhamrah.mapper.workshop.toPresentation
 import com.tamin.taminhamrah.model.workshop.ObjectionKind
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtPR
-import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormDocument
 import com.tamin.taminhamrah.feature.workshops.ui.model.ObjectionDocumentTypes
-import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
+import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachmentUploader
 import com.tamin.taminhamrah.model.workshop.DebitObjectionRequestDN
 import com.tamin.taminhamrah.model.workshop.ObjectionDocumentDN
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
-import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
 import com.tamin.taminhamrah.useCases.workshops.SaveDebitObjectionUseCase
 import com.tamin.taminhamrah.useCases.workshops.CheckObjectionDeadlineUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetDebitObjectionPdfUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetObjectionableDebitsUseCase
-import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.objection_expired
@@ -33,7 +29,7 @@ class ObjectionableDebitViewModel(
     private val getObjectionableDebits: GetObjectionableDebitsUseCase,
     private val checkObjectionDeadline: CheckObjectionDeadlineUseCase,
     private val getDebitObjectionPdf: GetDebitObjectionPdfUseCase,
-    private val uploadImage: UploadImageUseCase,
+    private val uploadAttachment: WorkshopAttachmentUploader,
     private val saveDebitObjection: SaveDebitObjectionUseCase,
 ) : BaseViewModel<
     ObjectionableDebitUiState,
@@ -57,31 +53,25 @@ class ObjectionableDebitViewModel(
 
         ObjectionableDebitIntent.FormDismissed -> flow { emit(PartialState.FormChanged(null)) }
         is ObjectionableDebitIntent.FormDebtOpenChanged ->
-            editForm { copy(isDebtOpen = intent.isOpen) }
+            just(PartialState.FormDebtOpenChanged(intent.isOpen))
 
         is ObjectionableDebitIntent.FormDescriptionChanged ->
-            editForm { copy(description = intent.text) }
+            just(PartialState.FormDescriptionChanged(intent.text))
 
         is ObjectionableDebitIntent.FormDepositChanged ->
-            editForm { copy(isDeposit = intent.isDeposit) }
+            just(PartialState.FormDepositChanged(intent.isDeposit))
 
         is ObjectionableDebitIntent.FormConfirmedChanged ->
-            editForm { copy(isConfirmed = intent.isConfirmed, hasTriedSubmit = false) }
+            just(PartialState.FormConfirmedChanged(intent.isConfirmed))
 
-        is ObjectionableDebitIntent.FormAddDocument -> addDocument(intent)
-        is ObjectionableDebitIntent.FormRemoveDocument -> editForm {
-            copy(
-                documents = documents.removeAt(intent.index),
-                uploaded = uploaded.removeAt(intent.index),
-            )
-        }
+        is ObjectionableDebitIntent.FormAddDocument -> addAttachment(intent)
+        is ObjectionableDebitIntent.FormRemoveDocument ->
+            just(PartialState.FormAttachmentRemoved(intent.index))
 
         ObjectionableDebitIntent.FormSubmit -> submitObjection()
     }
 
-    /** One-line edits of the open form, which is most of what it does. */
-    private fun editForm(edit: ObjectionFormState.() -> ObjectionFormState) =
-        flow { emit(PartialState.FormEdited(edit)) }
+    private fun just(partialState: PartialState): Flow<PartialState> = flow { emit(partialState) }
 
     private fun open(intent: ObjectionableDebitIntent.Open): Flow<PartialState> = flow {
         val state = uiState.value
@@ -163,32 +153,19 @@ class ObjectionableDebitViewModel(
      * The upload is what takes the time, so the box shows a spinner for it alone — the file only
      * joins the list once the service has actually taken it.
      */
-    private fun addDocument(
+    private fun addAttachment(
         intent: ObjectionableDebitIntent.FormAddDocument,
     ): Flow<PartialState> = flow<PartialState> {
-        emit(PartialState.FormEdited { copy(isUploading = true) })
-        val guid = uploadImage(
-            UploadImageRequestDN(fileName = intent.fileName, bytes = intent.bytes),
-        ).first()
-        val type = ObjectionDocumentTypes.first { it.code == intent.typeCode }
-        emit(
-            PartialState.FormEdited {
-                copy(
-                    isUploading = false,
-                    hasTriedSubmit = false,
-                    documents = documents.add(
-                        WorkshopFormDocument(
-                            typeCode = type.code,
-                            typeLabel = type.label,
-                            size = intent.bytes.size.asKilobytes(),
-                        ),
-                    ),
-                    uploaded = uploaded.add(UploadedDocument(guid, intent.typeCode)),
-                )
-            },
+        emit(PartialState.FormUploadingChanged(true))
+        val attachment = uploadAttachment(
+            fileName = intent.fileName,
+            bytes = intent.bytes,
+            typeCode = intent.typeCode,
+            types = ObjectionDocumentTypes,
         )
+        emit(PartialState.FormAttachmentAdded(attachment))
     }.catch {
-        emit(PartialState.FormEdited { copy(isUploading = false) })
+        emit(PartialState.FormUploadingChanged(false))
         emit(PartialState.Error(it.toSingleLineMessage()))
     }
 
@@ -201,8 +178,8 @@ class ObjectionableDebitViewModel(
     private fun submitObjection(): Flow<PartialState> = flow {
         val state = uiState.value
         val form = state.form ?: return@flow
-        if (form.documents.isEmpty() || !form.isConfirmed) {
-            emit(PartialState.FormEdited { copy(hasTriedSubmit = true) })
+        if (form.attachments.isEmpty() || !form.isConfirmed) {
+            emit(PartialState.FormSubmitRejected)
             return@flow
         }
         val domainDebt = debtsByNumber[form.debt.debitNumber]
@@ -211,14 +188,16 @@ class ObjectionableDebitViewModel(
             return@flow
         }
 
-        emit(PartialState.FormEdited { copy(isSubmitting = true) })
+        emit(PartialState.FormSubmittingChanged(true))
         val result = saveDebitObjection(
             DebitObjectionRequestDN(
                 workshopId = state.workshopId,
                 branchCode = state.branchCode,
                 debt = domainDebt,
                 description = form.description,
-                documents = form.uploaded.map { ObjectionDocumentDN(it.guid, it.typeCode) },
+                documents = form.attachments.map {
+                    ObjectionDocumentDN(it.guid, it.type.code)
+                },
                 deposit = form.isDeposit,
             ),
         )
@@ -226,7 +205,7 @@ class ObjectionableDebitViewModel(
         sendEvent(ObjectionableDebitEvent.ObjectionFiled(result.referenceCode))
         emitAll(loadPage(page = 0))
     }.catch {
-        emit(PartialState.FormEdited { copy(isSubmitting = false) })
+        emit(PartialState.FormSubmittingChanged(false))
         emit(PartialState.Error(it.toSingleLineMessage()))
     }
 
@@ -255,20 +234,48 @@ class ObjectionableDebitViewModel(
         )
 
         is PartialState.FormChanged -> currentState.copy(form = partialState.form)
-        is PartialState.FormEdited -> currentState.copy(
-            form = currentState.form?.let(partialState.edit),
-        )
+        is PartialState.FormDebtOpenChanged -> currentState.editForm {
+            copy(isDebtOpen = partialState.isOpen)
+        }
+
+        is PartialState.FormDescriptionChanged -> currentState.editForm {
+            copy(description = partialState.text)
+        }
+
+        is PartialState.FormDepositChanged -> currentState.editForm {
+            copy(isDeposit = partialState.isDeposit)
+        }
+
+        is PartialState.FormConfirmedChanged -> currentState.editForm {
+            copy(isConfirmed = partialState.isConfirmed, hasTriedSubmit = false)
+        }
+
+        is PartialState.FormAttachmentAdded -> currentState.editForm {
+            copy(
+                isUploading = false,
+                hasTriedSubmit = false,
+                attachments = attachments.add(partialState.attachment),
+            )
+        }
+
+        is PartialState.FormAttachmentRemoved -> currentState.editForm {
+            copy(attachments = attachments.removeAt(partialState.index))
+        }
+
+        PartialState.FormSubmitRejected -> currentState.editForm { copy(hasTriedSubmit = true) }
+        is PartialState.FormUploadingChanged -> currentState.editForm {
+            copy(isUploading = partialState.isUploading)
+        }
+
+        is PartialState.FormSubmittingChanged -> currentState.editForm {
+            copy(isSubmitting = partialState.isSubmitting)
+        }
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)
 }
 
-/**
- * A byte count as the whole kilobytes the upload box prints.
- *
- * Rounded up, so a file that is genuinely there never reads as «۰ کیلوبایت».
- */
-private fun Int.asKilobytes(): String =
-    ((this + BYTES_PER_KB - 1) / BYTES_PER_KB).toString().toPersianDigits()
-
-private const val BYTES_PER_KB = 1024
+/** Applies [edit] to the open form, or does nothing when no form is open. */
+private inline fun ObjectionableDebitUiState.editForm(
+    edit: ObjectionFormState.() -> ObjectionFormState,
+): ObjectionableDebitUiState = copy(form = form?.edit())

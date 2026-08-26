@@ -240,7 +240,7 @@ private fun DocumentsStep(
         description = stringResource(Res.string.article_sixteen_form_docs_desc),
     )
     WorkshopDocumentBox(
-        documents = form.documents,
+        attachments = form.attachments,
         capacity = ARTICLE_SIXTEEN_MAX_DOCUMENTS,
         onAdd = onAdd,
         onRemove = { index -> onIntent(ManagementDebitIntent.FormRemoveDocument(index)) },

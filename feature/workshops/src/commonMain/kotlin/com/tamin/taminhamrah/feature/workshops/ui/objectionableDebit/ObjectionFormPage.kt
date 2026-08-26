@@ -146,7 +146,7 @@ fun ObjectionFormPage(
             )
 
             WorkshopDocumentBox(
-                documents = form.documents,
+                attachments = form.attachments,
                 capacity = OBJECTION_MAX_DOCUMENTS,
                 onAdd = { isTypeSheetOpen = true },
                 onRemove = { index ->

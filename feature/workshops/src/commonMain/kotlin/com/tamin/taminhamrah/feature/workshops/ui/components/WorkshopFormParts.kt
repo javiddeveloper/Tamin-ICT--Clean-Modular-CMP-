@@ -49,6 +49,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachment
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopDocumentType
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.ui.components.InputRestriction
@@ -63,7 +64,6 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.ImmutableList
-import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
@@ -97,19 +97,6 @@ data class WorkshopFormStep(val label: String, val isDone: Boolean, val isCurren
 /** A label/value line inside a review group. */
 @Immutable
 data class WorkshopReviewRow(val label: String, val value: String, val isNumeric: Boolean = true)
-
-/**
- * A file the user has attached, named by the type they filed it under.
- *
- * The label travels as a resource rather than as text: it is chosen in a ViewModel, and
- * resolving a string there hangs under test.
- */
-@Immutable
-data class WorkshopFormDocument(
-    val typeCode: String,
-    val typeLabel: StringResource,
-    val size: String,
-)
 
 /**
  * «هویت — محل و شغل — مدارک», with the finished rungs ticked.
@@ -359,7 +346,7 @@ fun WorkshopReviewGroup(
  */
 @Composable
 fun WorkshopDocumentBox(
-    documents: ImmutableList<WorkshopFormDocument>,
+    attachments: ImmutableList<WorkshopAttachment>,
     capacity: Int,
     onAdd: () -> Unit,
     onRemove: (Int) -> Unit,
@@ -387,7 +374,7 @@ fun WorkshopDocumentBox(
             NumericText(
                 text = stringResource(
                     Res.string.ws_form_docs_count,
-                    documents.size.toString().toPersianDigits(),
+                    attachments.size.toString().toPersianDigits(),
                     capacity.toString().toPersianDigits(),
                 ),
                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
@@ -403,7 +390,7 @@ fun WorkshopDocumentBox(
             )
         }
 
-        documents.forEachIndexed { index, document ->
+        attachments.forEachIndexed { index, attachment ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -435,7 +422,7 @@ fun WorkshopDocumentBox(
                 }
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = stringResource(document.typeLabel),
+                        text = stringResource(attachment.type.label),
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
                         color = colors.textPrimary,
@@ -443,7 +430,7 @@ fun WorkshopDocumentBox(
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
-                        text = document.size,
+                        text = attachment.size,
                         style = MaterialTheme.typography.labelSmall,
                         color = colors.textMuted,
                     )
@@ -466,7 +453,7 @@ fun WorkshopDocumentBox(
             }
         }
 
-        if (documents.size < capacity) {
+        if (attachments.size < capacity) {
             TaminPrimaryButton(
                 text = stringResource(Res.string.ws_form_add_doc),
                 onClick = onAdd,

@@ -1,7 +1,7 @@
 package com.tamin.taminhamrah.feature.workshops.ui.objectionableDebit
 
 import androidx.compose.runtime.Immutable
-import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormDocument
+import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachment
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
@@ -43,8 +43,15 @@ data class ObjectionableDebitUiState(
 
         // ---------------------------------------------------- ثبت اعتراض به بدهی
         data class FormChanged(val form: ObjectionFormState?) : PartialState
-        data class FormEdited(val edit: ObjectionFormState.() -> ObjectionFormState) :
-            PartialState
+        data class FormDebtOpenChanged(val isOpen: Boolean) : PartialState
+        data class FormDescriptionChanged(val text: String) : PartialState
+        data class FormDepositChanged(val isDeposit: Boolean) : PartialState
+        data class FormConfirmedChanged(val isConfirmed: Boolean) : PartialState
+        data class FormAttachmentAdded(val attachment: WorkshopAttachment) : PartialState
+        data class FormAttachmentRemoved(val index: Int) : PartialState
+        data object FormSubmitRejected : PartialState
+        data class FormUploadingChanged(val isUploading: Boolean) : PartialState
+        data class FormSubmittingChanged(val isSubmitting: Boolean) : PartialState
     }
 }
 
@@ -59,8 +66,7 @@ data class ObjectionFormState(
     val debt: WorkShopDebtPR,
     val isDebtOpen: Boolean = true,
     val description: String = "",
-    val documents: PersistentList<WorkshopFormDocument> = persistentListOf(),
-    val uploaded: PersistentList<UploadedDocument> = persistentListOf(),
+    val attachments: PersistentList<WorkshopAttachment> = persistentListOf(),
     val isDeposit: Boolean = false,
     val isConfirmed: Boolean = false,
     /**
@@ -79,15 +85,11 @@ data class ObjectionFormState(
     val error: StringResource?
         get() = when {
             !hasTriedSubmit -> null
-            documents.isEmpty() -> Res.string.ws_form_err_docs
+            attachments.isEmpty() -> Res.string.ws_form_err_docs
             !isConfirmed -> Res.string.ws_form_err_agree
             else -> null
         }
 }
-
-/** An attachment the service has accepted: its guid, under the type it was filed as. */
-@Immutable
-data class UploadedDocument(val guid: String, val typeCode: String)
 
 sealed interface ObjectionableDebitIntent {
     data class Open(val workshopId: String, val branchCode: String) : ObjectionableDebitIntent

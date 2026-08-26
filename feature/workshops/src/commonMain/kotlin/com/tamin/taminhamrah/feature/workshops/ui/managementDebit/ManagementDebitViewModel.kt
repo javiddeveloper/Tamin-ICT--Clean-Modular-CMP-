@@ -1,12 +1,11 @@
 package com.tamin.taminhamrah.feature.workshops.ui.managementDebit
 
 import com.tamin.taminhamrah.base.BaseViewModel
-import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormDocument
 import com.tamin.taminhamrah.feature.workshops.ui.managementDebit.ManagementDebitUiState.PartialState
 import com.tamin.taminhamrah.feature.workshops.ui.model.ArticleSixteenDocumentTypes
+import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachmentUploader
 import com.tamin.taminhamrah.mapper.personal.toPresentation
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
-import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
 import com.tamin.taminhamrah.model.workshop.ARTICLE_SIXTEEN_FILING_WINDOW_DAYS
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtPR
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtQuery
@@ -14,7 +13,6 @@ import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveRequestDN
 import com.tamin.taminhamrah.model.workshop.ObjectionDocumentDN
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
-import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenDebtsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenReportPdfUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenRequestInfoUseCase
@@ -25,7 +23,6 @@ import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.article_sixteen_deadline_passed
@@ -37,7 +34,7 @@ class ManagementDebitViewModel(
     private val getArticleSixteenRequestInfo: GetArticleSixteenRequestInfoUseCase,
     private val getArticleSixteenReportPdf: GetArticleSixteenReportPdfUseCase,
     private val getArticleSixteenWorkshopInfo: GetArticleSixteenWorkshopInfoUseCase,
-    private val uploadImage: UploadImageUseCase,
+    private val uploadAttachment: WorkshopAttachmentUploader,
     private val saveArticleSixteenRequest: SaveArticleSixteenRequestUseCase,
 ) : BaseViewModel<
     ManagementDebitUiState,
@@ -76,23 +73,22 @@ class ManagementDebitViewModel(
         ManagementDebitIntent.DismissViewer -> flow { emit(PartialState.ViewerPdfChanged(null)) }
         ManagementDebitIntent.FormDismissed -> flow { emit(PartialState.FormChanged(null)) }
         ManagementDebitIntent.FormNext -> formNext()
-        ManagementDebitIntent.FormPrev -> editForm { copy(step = (step - 1).coerceAtLeast(1)) }
+        ManagementDebitIntent.FormPrev -> just(
+            PartialState.FormStepChanged((currentStep() - 1).coerceAtLeast(FIRST_STEP)),
+        )
+
         is ManagementDebitIntent.FormDebtOpenChanged ->
-            editForm { copy(isDebtOpen = intent.isOpen) }
+            just(PartialState.FormDebtOpenChanged(intent.isOpen))
 
         is ManagementDebitIntent.FormWorkshopOpenChanged ->
-            editForm { copy(isWorkshopOpen = intent.isOpen) }
+            just(PartialState.FormWorkshopOpenChanged(intent.isOpen))
 
         is ManagementDebitIntent.FormConfirmedChanged ->
-            editForm { copy(isConfirmed = intent.isConfirmed, hasTriedSubmit = false) }
+            just(PartialState.FormConfirmedChanged(intent.isConfirmed))
 
-        is ManagementDebitIntent.FormAddDocument -> addDocument(intent)
-        is ManagementDebitIntent.FormRemoveDocument -> editForm {
-            copy(
-                documents = documents.removeAt(intent.index),
-                uploaded = uploaded.removeAt(intent.index),
-            )
-        }
+        is ManagementDebitIntent.FormAddDocument -> addAttachment(intent)
+        is ManagementDebitIntent.FormRemoveDocument ->
+            just(PartialState.FormAttachmentRemoved(intent.index))
 
         ManagementDebitIntent.DismissExpertMessage ->
             flow { emit(PartialState.ExpertMessageChanged(null)) }
@@ -200,8 +196,11 @@ class ManagementDebitViewModel(
     }
 
     /** One-line edits of the open form, which is most of what it does. */
-    private fun editForm(edit: ArticleSixteenFormState.() -> ArticleSixteenFormState) =
-        flow { emit(PartialState.FormEdited(edit)) }
+    private fun just(partialState: PartialState): Flow<PartialState> =
+        flow { emit(partialState) }
+
+    /** The step the open form is on, or the first when none is open. */
+    private fun currentStep(): Int = uiState.value.form?.step ?: FIRST_STEP
 
     /**
      * Opens the request on a debt, with the workshop block its first step reviews.
@@ -216,24 +215,22 @@ class ManagementDebitViewModel(
             getArticleSixteenWorkshopInfo(state.workshopId, state.branchCode)
         }.getOrNull() ?: return@flow
         emit(
-            PartialState.FormEdited {
-                copy(
-                    workshopInfo = ArticleSixteenWorkshopInfoPR(
-                        workshopName = info.workshopName,
-                        workshopCode = info.workshopId.toPersianDigits(),
-                        branchCode = info.branchCode.toPersianDigits(),
-                        employerName = info.employerName,
-                        address = info.address,
-                    ),
-                )
-            },
+            PartialState.FormWorkshopInfoLoaded(
+                ArticleSixteenWorkshopInfoPR(
+                    workshopName = info.workshopName,
+                    workshopCode = info.workshopId.toPersianDigits(),
+                    branchCode = info.branchCode.toPersianDigits(),
+                    employerName = info.employerName,
+                    address = info.address,
+                ),
+            ),
         )
     }
 
     /** «مرحلهٔ بعد» on step one, and the submission on the last. */
     private fun formNext(): Flow<PartialState> {
         val form = uiState.value.form ?: return flow { }
-        if (!form.isLastStep) return editForm { copy(step = step + 1) }
+        if (!form.isLastStep) return just(PartialState.FormStepChanged(form.step + 1))
         return submitRequest()
     }
 
@@ -243,32 +240,19 @@ class ManagementDebitViewModel(
      * The file joins the list once the service has taken it, not when it was chosen — otherwise a
      * failed upload leaves a row that stands for nothing.
      */
-    private fun addDocument(
+    private fun addAttachment(
         intent: ManagementDebitIntent.FormAddDocument,
-    ): Flow<PartialState> = flow<PartialState> {
-        emit(PartialState.FormEdited { copy(isUploading = true) })
-        val guid = uploadImage(
-            UploadImageRequestDN(fileName = intent.fileName, bytes = intent.bytes),
-        ).first()
-        val type = ArticleSixteenDocumentTypes.first { it.code == intent.typeCode }
-        emit(
-            PartialState.FormEdited {
-                copy(
-                    isUploading = false,
-                    hasTriedSubmit = false,
-                    documents = documents.add(
-                        WorkshopFormDocument(
-                            typeCode = type.code,
-                            typeLabel = type.label,
-                            size = intent.bytes.size.asKilobytes(),
-                        ),
-                    ),
-                    uploaded = uploaded.add(UploadedArticleSixteenDocument(guid, intent.typeCode)),
-                )
-            },
+    ): Flow<PartialState> = flow {
+        emit(PartialState.FormUploadingChanged(true))
+        val attachment = uploadAttachment(
+            fileName = intent.fileName,
+            bytes = intent.bytes,
+            typeCode = intent.typeCode,
+            types = ArticleSixteenDocumentTypes,
         )
+        emit(PartialState.FormAttachmentAdded(attachment))
     }.catch {
-        emit(PartialState.FormEdited { copy(isUploading = false) })
+        emit(PartialState.FormUploadingChanged(false))
         emit(PartialState.Error(it.toSingleLineMessage()))
     }
 
@@ -281,8 +265,8 @@ class ManagementDebitViewModel(
     private fun submitRequest(): Flow<PartialState> = flow {
         val state = uiState.value
         val form = state.form ?: return@flow
-        if (form.documents.isEmpty() || !form.isConfirmed) {
-            emit(PartialState.FormEdited { copy(hasTriedSubmit = true) })
+        if (form.attachments.isEmpty() || !form.isConfirmed) {
+            emit(PartialState.FormSubmitRejected)
             return@flow
         }
         val domainDebt = debtsByNumber[form.debt.debitNumber]
@@ -291,20 +275,22 @@ class ManagementDebitViewModel(
             return@flow
         }
 
-        emit(PartialState.FormEdited { copy(isSubmitting = true) })
+        emit(PartialState.FormSubmittingChanged(true))
         val result = saveArticleSixteenRequest(
             ArticleSixteenSaveRequestDN(
                 workshopId = state.workshopId,
                 branchCode = state.branchCode,
                 debt = domainDebt,
-                documents = form.uploaded.map { ObjectionDocumentDN(it.guid, it.typeCode) },
+                documents = form.attachments.map {
+                    ObjectionDocumentDN(it.guid, it.type.code)
+                },
             ),
         )
         emit(PartialState.FormChanged(null))
         sendEvent(ManagementDebitEvent.ArticleSixteenFiled(result.referenceCode))
         emitAll(loadPage(page = 0))
     }.catch {
-        emit(PartialState.FormEdited { copy(isSubmitting = false) })
+        emit(PartialState.FormSubmittingChanged(false))
         emit(PartialState.Error(it.toSingleLineMessage()))
     }
 
@@ -333,9 +319,45 @@ class ManagementDebitViewModel(
         is PartialState.ActionsForChanged -> currentState.copy(actionsFor = partialState.debt)
         is PartialState.Busy -> currentState.copy(isBusy = partialState.isBusy)
         is PartialState.FormChanged -> currentState.copy(form = partialState.form)
-        is PartialState.FormEdited -> currentState.copy(
-            form = currentState.form?.let(partialState.edit),
-        )
+        is PartialState.FormStepChanged -> currentState.editForm {
+            copy(step = partialState.step, hasTriedSubmit = false)
+        }
+
+        is PartialState.FormDebtOpenChanged -> currentState.editForm {
+            copy(isDebtOpen = partialState.isOpen)
+        }
+
+        is PartialState.FormWorkshopOpenChanged -> currentState.editForm {
+            copy(isWorkshopOpen = partialState.isOpen)
+        }
+
+        is PartialState.FormWorkshopInfoLoaded -> currentState.editForm {
+            copy(workshopInfo = partialState.info)
+        }
+        is PartialState.FormConfirmedChanged -> currentState.editForm {
+            copy(isConfirmed = partialState.isConfirmed, hasTriedSubmit = false)
+        }
+
+        is PartialState.FormAttachmentAdded -> currentState.editForm {
+            copy(
+                isUploading = false,
+                hasTriedSubmit = false,
+                attachments = attachments.add(partialState.attachment),
+            )
+        }
+
+        is PartialState.FormAttachmentRemoved -> currentState.editForm {
+            copy(attachments = attachments.removeAt(partialState.index))
+        }
+
+        PartialState.FormSubmitRejected -> currentState.editForm { copy(hasTriedSubmit = true) }
+        is PartialState.FormUploadingChanged -> currentState.editForm {
+            copy(isUploading = partialState.isUploading)
+        }
+
+        is PartialState.FormSubmittingChanged -> currentState.editForm {
+            copy(isSubmitting = partialState.isSubmitting)
+        }
 
         is PartialState.ViewerPdfChanged -> currentState.copy(
             isBusy = false,
@@ -351,12 +373,10 @@ class ManagementDebitViewModel(
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)
 }
 
-/**
- * A byte count as the whole kilobytes the upload box prints.
- *
- * Rounded up, so a file that is genuinely there never reads as «۰ کیلوبایت».
- */
-private fun Int.asKilobytes(): String =
-    ((this + BYTES_PER_KB - 1) / BYTES_PER_KB).toString().toPersianDigits()
+/** Applies [edit] to the open form, or does nothing when no form is open. */
+private inline fun ManagementDebitUiState.editForm(
+    edit: ArticleSixteenFormState.() -> ArticleSixteenFormState,
+): ManagementDebitUiState = copy(form = form?.edit())
 
-private const val BYTES_PER_KB = 1024
+/** Forms count their steps from one. */
+private const val FIRST_STEP = 1

@@ -10,10 +10,15 @@ import com.tamin.taminhamrah.feature.workshops.ui.workshopDebtInquiry.WorkshopDe
 import com.tamin.taminhamrah.feature.workshops.ui.workshopMembers.WorkshopMembersViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.workshopStackholders.WorkshopStackholdersViewModel
+import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachmentUploader
+import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 val workshopsModule = module {
+    // Shared by the three forms that attach evidence.
+    factoryOf(::WorkshopAttachmentUploader)
+
     viewModelOf(::WorkshopsViewModel)
     viewModelOf(::PaymentSheetsViewModel)
     viewModelOf(::WorkshopDebitViewModel)

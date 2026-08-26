@@ -33,6 +33,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.model.REGISTRATION_MAX_DOCUMEN
 import com.tamin.taminhamrah.feature.workshops.ui.model.RegistrationDocumentTypes
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.model.common.isValidIranianNationalId
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopConstants
 import com.tamin.taminhamrah.ui.components.InputRestriction
@@ -246,9 +247,14 @@ fun RegistrationFormPage(
             onConfirm = { year, month, day ->
                 val date = PersianDateFormatter.format(year, month, day)
                 onIntent(
-                    WorkshopRecentlyAddedMembersIntent.FormFieldChanged {
-                        if (field == DateField.BIRTH) copy(birthDate = date) else copy(startDate = date)
-                    },
+                    WorkshopRecentlyAddedMembersIntent.FormFieldChanged(
+                        if (field == DateField.BIRTH) {
+                            RegistrationField.BIRTH_DATE
+                        } else {
+                            RegistrationField.START_DATE
+                        },
+                        date,
+                    ),
                 )
                 openDatePicker = null
             },
@@ -306,7 +312,10 @@ private fun IdentityStep(
             value = form.firstName,
             onValueChange = { value ->
                 onIntent(
-                    WorkshopRecentlyAddedMembersIntent.FormFieldChanged { copy(firstName = value) },
+                    WorkshopRecentlyAddedMembersIntent.FormFieldChanged(
+                        RegistrationField.FIRST_NAME,
+                        value,
+                    ),
                 )
             },
             keyboardType = KeyboardType.Text,
@@ -319,7 +328,10 @@ private fun IdentityStep(
             value = form.lastName,
             onValueChange = { value ->
                 onIntent(
-                    WorkshopRecentlyAddedMembersIntent.FormFieldChanged { copy(lastName = value) },
+                    WorkshopRecentlyAddedMembersIntent.FormFieldChanged(
+                        RegistrationField.LAST_NAME,
+                        value,
+                    ),
                 )
             },
             keyboardType = KeyboardType.Text,
@@ -333,9 +345,10 @@ private fun IdentityStep(
         value = form.nationalId,
         onValueChange = { value ->
             onIntent(
-                WorkshopRecentlyAddedMembersIntent.FormFieldChanged {
-                    copy(nationalId = value.digitsOnly())
-                },
+                WorkshopRecentlyAddedMembersIntent.FormFieldChanged(
+                    RegistrationField.NATIONAL_ID,
+                    value.digitsOnly(),
+                ),
             )
         },
         placeholder = stringResource(Res.string.workshop_ten_digits),
@@ -449,17 +462,15 @@ private fun DocumentsStep(
         isOpen = form.isSummaryOpen,
         onToggle = {
             onIntent(
-                WorkshopRecentlyAddedMembersIntent.FormFieldChanged {
-                    copy(isSummaryOpen = !isSummaryOpen)
-                },
+                WorkshopRecentlyAddedMembersIntent.FormSummaryToggled(!form.isSummaryOpen),
             )
         },
         onEdit = {
-            onIntent(WorkshopRecentlyAddedMembersIntent.FormFieldChanged { copy(step = 1) })
+            onIntent(WorkshopRecentlyAddedMembersIntent.FormStepRequested(FirstStep))
         },
     )
     WorkshopDocumentBox(
-        documents = form.documents,
+        attachments = form.attachments,
         capacity = REGISTRATION_MAX_DOCUMENTS,
         onAdd = onAdd,
         onRemove = { index ->
@@ -473,9 +484,7 @@ private fun DocumentsStep(
         isChecked = form.isConfirmed,
         onToggle = {
             onIntent(
-                WorkshopRecentlyAddedMembersIntent.FormFieldChanged {
-                    copy(isConfirmed = !isConfirmed)
-                },
+                WorkshopRecentlyAddedMembersIntent.FormConfirmedChanged(!form.isConfirmed),
             )
         },
     )
@@ -515,3 +524,6 @@ private fun RegistrationFormDocumentsPreview() {
         )
     }
 }
+
+/** The step «ویرایش اطلاعات» jumps back to. */
+private const val FirstStep = 1

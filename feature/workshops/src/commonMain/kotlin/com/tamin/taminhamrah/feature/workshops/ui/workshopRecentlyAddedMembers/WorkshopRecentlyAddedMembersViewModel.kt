@@ -1,29 +1,28 @@
 package com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers
 
 import com.tamin.taminhamrah.base.BaseViewModel
-import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
-import com.tamin.taminhamrah.ui.digitsOnly
-import com.tamin.taminhamrah.useCases.common.GetJobTitleUseCase
-import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
-import com.tamin.taminhamrah.util.toPersianDigits
-import com.tamin.taminhamrah.useCases.workshops.CreateNewMemberRegistrationUseCase
-import com.tamin.taminhamrah.useCases.workshops.CheckNewMemberIsNewUseCase
-import com.tamin.taminhamrah.useCases.personal.PutInsuredRegistrationDocListUseCase
-import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
-import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
-import com.tamin.taminhamrah.model.personal.InsuredDocDN
-import com.tamin.taminhamrah.model.personal.DocumentFileDN
-import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
 import com.tamin.taminhamrah.feature.workshops.ui.model.RegistrationDocumentTypes
-import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormDocument
+import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachmentUploader
 import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersUiState.PartialState
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
+import com.tamin.taminhamrah.model.common.isValidIranianNationalId
+import com.tamin.taminhamrah.model.personal.DocumentFileDN
+import com.tamin.taminhamrah.model.personal.InsuredDocDN
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberPR
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberQuery
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
+import com.tamin.taminhamrah.ui.digitsOnly
+import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
+import com.tamin.taminhamrah.useCases.common.GetJobTitleUseCase
+import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
+import com.tamin.taminhamrah.useCases.personal.PutInsuredRegistrationDocListUseCase
+import com.tamin.taminhamrah.useCases.workshops.CheckNewMemberIsNewUseCase
 import com.tamin.taminhamrah.useCases.workshops.ConfirmRecentlyAddedMemberUseCase
+import com.tamin.taminhamrah.useCases.workshops.CreateNewMemberRegistrationUseCase
 import com.tamin.taminhamrah.useCases.workshops.DeleteRecentlyAddedMemberUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetRecentlyAddedMembersUseCase
+import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.Flow
@@ -41,7 +40,7 @@ class WorkshopRecentlyAddedMembersViewModel(
     private val deleteRecentlyAddedMember: DeleteRecentlyAddedMemberUseCase,
     private val checkNewMemberIsNew: CheckNewMemberIsNewUseCase,
     private val createNewMemberRegistration: CreateNewMemberRegistrationUseCase,
-    private val uploadImage: UploadImageUseCase,
+    private val uploadAttachment: WorkshopAttachmentUploader,
     private val putRegistrationDocuments: PutInsuredRegistrationDocListUseCase,
     private val getCities: GetCitiesUseCase,
     private val getJobTitle: GetJobTitleUseCase,
@@ -75,29 +74,29 @@ class WorkshopRecentlyAddedMembersViewModel(
 
         WorkshopRecentlyAddedMembersIntent.FormNext -> formNext()
         WorkshopRecentlyAddedMembersIntent.FormPrev ->
-            editForm { copy(step = (step - 1).coerceAtLeast(1), hasTriedNext = false) }
+            just(PartialState.FormStepChanged((currentStep() - 1).coerceAtLeast(FIRST_STEP)))
 
         is WorkshopRecentlyAddedMembersIntent.FormFieldChanged ->
-            editForm { intent.edit(this).copy(hasTriedNext = false) }
+            just(PartialState.FormFieldChanged(intent.field, intent.value))
+
+        is WorkshopRecentlyAddedMembersIntent.FormSummaryToggled ->
+            just(PartialState.FormSummaryToggled(intent.isOpen))
+
+        is WorkshopRecentlyAddedMembersIntent.FormConfirmedChanged ->
+            just(PartialState.FormConfirmedChanged(intent.isConfirmed))
+
+        is WorkshopRecentlyAddedMembersIntent.FormStepRequested ->
+            just(PartialState.FormStepChanged(intent.step))
 
         is WorkshopRecentlyAddedMembersIntent.FormPickerOpened -> openPicker(intent.picker)
         is WorkshopRecentlyAddedMembersIntent.FormPickerQueryChanged -> searchPicker(intent.query)
         WorkshopRecentlyAddedMembersIntent.FormDownloadDeclaration -> downloadDeclaration()
-        is WorkshopRecentlyAddedMembersIntent.FormOptionPicked -> editForm {
-            when (intent.picker) {
-                RegistrationPicker.BIRTH_CITY -> copy(birthCity = intent.option)
-                RegistrationPicker.ISSUE_CITY -> copy(issueCity = intent.option)
-                RegistrationPicker.JOB -> copy(job = intent.option)
-            }.copy(hasTriedNext = false, picker = null)
-        }
+        is WorkshopRecentlyAddedMembersIntent.FormOptionPicked ->
+            just(PartialState.FormOptionPicked(intent.picker, intent.option))
 
-        is WorkshopRecentlyAddedMembersIntent.FormAddDocument -> addDocument(intent)
-        is WorkshopRecentlyAddedMembersIntent.FormRemoveDocument -> editForm {
-            copy(
-                documents = documents.removeAt(intent.index),
-                uploaded = uploaded.removeAt(intent.index),
-            )
-        }
+        is WorkshopRecentlyAddedMembersIntent.FormAddDocument -> addAttachment(intent)
+        is WorkshopRecentlyAddedMembersIntent.FormRemoveDocument ->
+            just(PartialState.FormAttachmentRemoved(intent.index))
 
         is WorkshopRecentlyAddedMembersIntent.Follow -> flow {
             sendEvent(WorkshopRecentlyAddedMembersEvent.OpenCartable(intent.member.referenceCode))
@@ -152,7 +151,7 @@ class WorkshopRecentlyAddedMembersViewModel(
     }
 
     /** Confirming reloads the list, because the row's own state changes with it. */
-    private fun confirm(member: WorkshopNewMemberPR): Flow<PartialState> = flow<PartialState> {
+    private fun confirm(member: WorkshopNewMemberPR): Flow<PartialState> = flow {
         val requestId = member.requestId
         if (!member.canConfirm || requestId == null) {
             sendEvent(WorkshopRecentlyAddedMembersEvent.ShowMessage(Res.string.new_member_cannot_edit))
@@ -168,7 +167,7 @@ class WorkshopRecentlyAddedMembersViewModel(
         emit(PartialState.Error(it.toSingleLineMessage()))
     }
 
-    private fun delete(member: WorkshopNewMemberPR): Flow<PartialState> = flow<PartialState> {
+    private fun delete(member: WorkshopNewMemberPR): Flow<PartialState> = flow {
         val personalId = member.personalId
         if (!member.isDraft || personalId == null) {
             sendEvent(WorkshopRecentlyAddedMembersEvent.ShowMessage(Res.string.new_member_cannot_edit))
@@ -225,18 +224,20 @@ class WorkshopRecentlyAddedMembersViewModel(
      * belong on each platform.
      */
     private fun downloadDeclaration(): Flow<PartialState> = flow<PartialState> {
-        emit(PartialState.FormEdited { copy(isDownloadingDeclaration = true) })
+        emit(PartialState.FormDeclarationDownloading(true))
         val bytes = getRegistrationDeclarationForm().first()
-        emit(PartialState.FormEdited { copy(isDownloadingDeclaration = false) })
+        emit(PartialState.FormDeclarationDownloading(false))
         sendEvent(WorkshopRecentlyAddedMembersEvent.SaveDeclarationForm(bytes))
     }.catch {
-        emit(PartialState.FormEdited { copy(isDownloadingDeclaration = false) })
+        emit(PartialState.FormDeclarationDownloading(false))
         emit(PartialState.Error(it.toSingleLineMessage()))
     }
 
-    /** One-line edits of the open form, which is most of what it does. */
-    private fun editForm(edit: RegistrationFormState.() -> RegistrationFormState) =
-        flow { emit(PartialState.FormEdited(edit)) }
+    private fun just(partialState: PartialState): Flow<PartialState> =
+        flow { emit(partialState) }
+
+    /** The step the open form is on, or the first when none is open. */
+    private fun currentStep(): Int = uiState.value.form?.step ?: FIRST_STEP
 
     /**
      * «مرحلهٔ بعد» on the first two steps, and the submission on the last.
@@ -248,8 +249,8 @@ class WorkshopRecentlyAddedMembersViewModel(
         val form = uiState.value.form ?: return flow { }
         val isStepValid = form.isStepComplete &&
             (form.step != 1 || isValidIranianNationalId(form.nationalId))
-        if (!isStepValid) return editForm { copy(hasTriedNext = true) }
-        if (!form.isLastStep) return editForm { copy(step = step + 1, hasTriedNext = false) }
+        if (!isStepValid) return just(PartialState.FormNextRejected)
+        if (!form.isLastStep) return just(PartialState.FormStepChanged(form.step + 1))
         return submitRegistration()
     }
 
@@ -260,25 +261,21 @@ class WorkshopRecentlyAddedMembersViewModel(
      * is typed rather than pulling every row down once.
      */
     private fun openPicker(picker: RegistrationPicker?): Flow<PartialState> = flow {
-        emit(
-            PartialState.FormEdited {
-                copy(picker = picker, pickerQuery = "", pickerOptions = persistentListOf())
-            },
-        )
+        emit(PartialState.FormPickerOpened(picker))
         if (picker != null) emitAll(loadPickerOptions(picker, query = ""))
     }
 
     private fun searchPicker(query: String): Flow<PartialState> = flow {
         val picker = uiState.value.form?.picker ?: return@flow
-        emit(PartialState.FormEdited { copy(pickerQuery = query) })
+        emit(PartialState.FormPickerQueryChanged(query))
         emitAll(loadPickerOptions(picker, query))
     }
 
     private fun loadPickerOptions(
         picker: RegistrationPicker,
         query: String,
-    ): Flow<PartialState> = flow<PartialState> {
-        emit(PartialState.FormEdited { copy(isPickerLoading = true) })
+    ): Flow<PartialState> = flow {
+        emit(PartialState.FormPickerLoading(true))
         val options = when (picker) {
             // The job list has no server-side name filter — there is no such property on the
             // wire — so it is fetched once and narrowed here.
@@ -289,43 +286,26 @@ class WorkshopRecentlyAddedMembersViewModel(
             else -> getCities(cityName = query.takeIf { it.isNotBlank() }).first()
                 .map { PickedOption(it.cityCode, it.cityName.orEmpty()) }
         }
-        emit(
-            PartialState.FormEdited {
-                copy(isPickerLoading = false, pickerOptions = options.toPersistentList())
-            },
-        )
+        emit(PartialState.FormPickerOptionsLoaded(options.toPersistentList()))
     }.catch {
-        emit(PartialState.FormEdited { copy(isPickerLoading = false) })
+        emit(PartialState.FormPickerLoading(false))
         emit(PartialState.Error(it.toSingleLineMessage()))
     }
 
     /** Sends the picked image up and keeps only the guid that comes back. */
-    private fun addDocument(
+    private fun addAttachment(
         intent: WorkshopRecentlyAddedMembersIntent.FormAddDocument,
-    ): Flow<PartialState> = flow<PartialState> {
-        emit(PartialState.FormEdited { copy(isUploading = true) })
-        val guid = uploadImage(
-            UploadImageRequestDN(fileName = intent.fileName, bytes = intent.bytes),
-        ).first()
-        val type = RegistrationDocumentTypes.first { it.code == intent.typeCode }
-        emit(
-            PartialState.FormEdited {
-                copy(
-                    isUploading = false,
-                    hasTriedNext = false,
-                    documents = documents.add(
-                        WorkshopFormDocument(
-                            typeCode = type.code,
-                            typeLabel = type.label,
-                            size = intent.bytes.size.asKilobytes(),
-                        ),
-                    ),
-                    uploaded = uploaded.add(UploadedRegistrationDocument(guid, intent.typeCode)),
-                )
-            },
+    ): Flow<PartialState> = flow {
+        emit(PartialState.FormUploadingChanged(true))
+        val attachment = uploadAttachment(
+            fileName = intent.fileName,
+            bytes = intent.bytes,
+            typeCode = intent.typeCode,
+            types = RegistrationDocumentTypes,
         )
+        emit(PartialState.FormAttachmentAdded(attachment))
     }.catch {
-        emit(PartialState.FormEdited { copy(isUploading = false) })
+        emit(PartialState.FormUploadingChanged(false))
         emit(PartialState.Error(it.toSingleLineMessage()))
     }
 
@@ -336,10 +316,10 @@ class WorkshopRecentlyAddedMembersViewModel(
      * known so an existing person is updated rather than duplicated, create, then attach. The
      * documents go last because they are filed against the `personalId` the create returns.
      */
-    private fun submitRegistration(): Flow<PartialState> = flow<PartialState> {
+    private fun submitRegistration(): Flow<PartialState> = flow {
         val state = uiState.value
         val form = state.form ?: return@flow
-        emit(PartialState.FormEdited { copy(isSubmitting = true) })
+        emit(PartialState.FormSubmittingChanged(true))
 
         val existing = checkNewMemberIsNew(form.nationalId)
         val result = createNewMemberRegistration(
@@ -363,9 +343,9 @@ class WorkshopRecentlyAddedMembersViewModel(
         if (personalId != null) {
             putRegistrationDocuments(
                 personalId.toString(),
-                form.uploaded.map { document ->
+                form.attachments.map { document ->
                     InsuredDocDN(
-                        documentType = document.typeCode,
+                        documentType = document.type.code,
                         id = 0,
                         documentFile = DocumentFileDN(
                             createdBy = "",
@@ -385,7 +365,7 @@ class WorkshopRecentlyAddedMembersViewModel(
         )
         emitAll(loadPage(page = 0))
     }.catch {
-        emit(PartialState.FormEdited { copy(isSubmitting = false) })
+        emit(PartialState.FormSubmittingChanged(false))
         emit(PartialState.Error(it.toSingleLineMessage()))
     }
 
@@ -411,11 +391,76 @@ class WorkshopRecentlyAddedMembersViewModel(
         is PartialState.SearchOpenChanged -> currentState.copy(isSearchOpen = partialState.isOpen)
         is PartialState.Busy -> currentState.copy(busyPersonalId = partialState.personalId)
         is PartialState.FormChanged -> currentState.copy(form = partialState.form)
-        is PartialState.FormEdited -> currentState.copy(
-            form = currentState.form?.let(partialState.edit),
-        )
+        is PartialState.FormStepChanged -> currentState.editForm {
+            copy(step = partialState.step, hasTriedNext = false)
+        }
 
-        is PartialState.DeclarationDownloaded -> currentState
+        is PartialState.FormFieldChanged -> currentState.editForm {
+            when (partialState.field) {
+                RegistrationField.FIRST_NAME -> copy(firstName = partialState.value)
+                RegistrationField.LAST_NAME -> copy(lastName = partialState.value)
+                RegistrationField.NATIONAL_ID -> copy(nationalId = partialState.value)
+                RegistrationField.BIRTH_DATE -> copy(birthDate = partialState.value)
+                RegistrationField.START_DATE -> copy(startDate = partialState.value)
+            }.copy(hasTriedNext = false)
+        }
+
+        is PartialState.FormOptionPicked -> currentState.editForm {
+            when (partialState.picker) {
+                RegistrationPicker.BIRTH_CITY -> copy(birthCity = partialState.option)
+                RegistrationPicker.ISSUE_CITY -> copy(issueCity = partialState.option)
+                RegistrationPicker.JOB -> copy(job = partialState.option)
+            }.copy(hasTriedNext = false, picker = null)
+        }
+
+        is PartialState.FormSummaryToggled -> currentState.editForm {
+            copy(isSummaryOpen = partialState.isOpen)
+        }
+
+        is PartialState.FormConfirmedChanged -> currentState.editForm {
+            copy(isConfirmed = partialState.isConfirmed, hasTriedNext = false)
+        }
+
+        is PartialState.FormAttachmentAdded -> currentState.editForm {
+            copy(
+                isUploading = false,
+                hasTriedNext = false,
+                attachments = attachments.add(partialState.attachment),
+            )
+        }
+
+        is PartialState.FormAttachmentRemoved -> currentState.editForm {
+            copy(attachments = attachments.removeAt(partialState.index))
+        }
+
+        PartialState.FormNextRejected -> currentState.editForm { copy(hasTriedNext = true) }
+        is PartialState.FormUploadingChanged -> currentState.editForm {
+            copy(isUploading = partialState.isUploading)
+        }
+
+        is PartialState.FormSubmittingChanged -> currentState.editForm {
+            copy(isSubmitting = partialState.isSubmitting)
+        }
+
+        is PartialState.FormDeclarationDownloading -> currentState.editForm {
+            copy(isDownloadingDeclaration = partialState.isDownloading)
+        }
+
+        is PartialState.FormPickerOpened -> currentState.editForm {
+            copy(picker = partialState.picker, pickerQuery = "", pickerOptions = persistentListOf())
+        }
+
+        is PartialState.FormPickerQueryChanged -> currentState.editForm {
+            copy(pickerQuery = partialState.query)
+        }
+
+        is PartialState.FormPickerLoading -> currentState.editForm {
+            copy(isPickerLoading = partialState.isLoading)
+        }
+
+        is PartialState.FormPickerOptionsLoaded -> currentState.editForm {
+            copy(isPickerLoading = false, pickerOptions = partialState.options)
+        }
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)
@@ -430,3 +475,11 @@ private fun Int.asKilobytes(): String =
     ((this + BYTES_PER_KB - 1) / BYTES_PER_KB).toString().toPersianDigits()
 
 private const val BYTES_PER_KB = 1024
+
+/** Applies [edit] to the open form, or does nothing when no form is open. */
+private inline fun WorkshopRecentlyAddedMembersUiState.editForm(
+    edit: RegistrationFormState.() -> RegistrationFormState,
+): WorkshopRecentlyAddedMembersUiState = copy(form = form?.edit())
+
+/** Forms count their steps from one. */
+private const val FIRST_STEP = 1

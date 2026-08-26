@@ -6,7 +6,7 @@ import taminx.core.core_ui.ws_form_err_agree
 import taminx.core.core_ui.Res
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.PersistentList
-import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormDocument
+import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachment
 import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtPR
@@ -68,8 +68,17 @@ data class ManagementDebitUiState(
 
         // -------------------------------------------- درخواست رسیدگی به بدهی
         data class FormChanged(val form: ArticleSixteenFormState?) : PartialState
-        data class FormEdited(val edit: ArticleSixteenFormState.() -> ArticleSixteenFormState) :
+        data class FormStepChanged(val step: Int) : PartialState
+        data class FormDebtOpenChanged(val isOpen: Boolean) : PartialState
+        data class FormWorkshopOpenChanged(val isOpen: Boolean) : PartialState
+        data class FormWorkshopInfoLoaded(val info: ArticleSixteenWorkshopInfoPR) :
             PartialState
+        data class FormConfirmedChanged(val isConfirmed: Boolean) : PartialState
+        data class FormAttachmentAdded(val attachment: WorkshopAttachment) : PartialState
+        data class FormAttachmentRemoved(val index: Int) : PartialState
+        data object FormSubmitRejected : PartialState
+        data class FormUploadingChanged(val isUploading: Boolean) : PartialState
+        data class FormSubmittingChanged(val isSubmitting: Boolean) : PartialState
         data class ExpertMessageChanged(val message: String?) : PartialState
     }
 }
@@ -96,8 +105,7 @@ data class ArticleSixteenFormState(
     val step: Int = 1,
     val isDebtOpen: Boolean = true,
     val isWorkshopOpen: Boolean = false,
-    val documents: PersistentList<WorkshopFormDocument> = persistentListOf(),
-    val uploaded: PersistentList<UploadedArticleSixteenDocument> = persistentListOf(),
+    val attachments: PersistentList<WorkshopAttachment> = persistentListOf(),
     val isConfirmed: Boolean = false,
     val hasTriedSubmit: Boolean = false,
     val isUploading: Boolean = false,
@@ -110,15 +118,11 @@ data class ArticleSixteenFormState(
     val error: StringResource?
         get() = when {
             !hasTriedSubmit || !isLastStep -> null
-            documents.isEmpty() -> Res.string.ws_form_err_docs
+            attachments.isEmpty() -> Res.string.ws_form_err_docs
             !isConfirmed -> Res.string.ws_form_err_agree
             else -> null
         }
 }
-
-/** An attachment the service has accepted: its guid, under the ground it was filed as. */
-@Immutable
-data class UploadedArticleSixteenDocument(val guid: String, val typeCode: String)
 
 /** The workshop and employer the request is about, as its first step prints them. */
 @Immutable
