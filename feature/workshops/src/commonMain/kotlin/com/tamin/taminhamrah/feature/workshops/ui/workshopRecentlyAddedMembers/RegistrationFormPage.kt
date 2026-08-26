@@ -191,7 +191,8 @@ fun RegistrationFormPage(
             nextLabel = stringResource(
                 if (form.isLastStep) Res.string.abs_form_submit else Res.string.ws_form_next,
             ),
-            onNext = { onIntent(WorkshopRecentlyAddedMembersIntent.FormNext) },
+            isBusy = form.isBusy,
+        onNext = { onIntent(WorkshopRecentlyAddedMembersIntent.FormNext) },
             onPrev = if (form.step > 1) {
                 { onIntent(WorkshopRecentlyAddedMembersIntent.FormPrev) }
             } else {
@@ -473,6 +474,7 @@ private fun DocumentsStep(
         attachments = form.attachments,
         capacity = REGISTRATION_MAX_DOCUMENTS,
         onAdd = onAdd,
+        isUploading = form.isUploading,
         onRemove = { index ->
             onIntent(WorkshopRecentlyAddedMembersIntent.FormRemoveDocument(index))
         },

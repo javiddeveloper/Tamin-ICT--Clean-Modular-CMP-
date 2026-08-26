@@ -2,7 +2,6 @@ package com.tamin.taminhamrah.feature.workshops.ui.objectionableDebit
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -149,7 +148,8 @@ fun ObjectionFormPage(
                 attachments = form.attachments,
                 capacity = OBJECTION_MAX_DOCUMENTS,
                 onAdd = { isTypeSheetOpen = true },
-                onRemove = { index ->
+                isUploading = form.isUploading,
+        onRemove = { index ->
                     onIntent(ObjectionableDebitIntent.FormRemoveDocument(index))
                 },
             )
@@ -183,7 +183,8 @@ fun ObjectionFormPage(
 
         WorkshopFormFooter(
             nextLabel = stringResource(Res.string.obj_form_submit),
-            onNext = { onIntent(ObjectionableDebitIntent.FormSubmit) },
+            isBusy = form.isBusy,
+        onNext = { onIntent(ObjectionableDebitIntent.FormSubmit) },
         )
     }
 

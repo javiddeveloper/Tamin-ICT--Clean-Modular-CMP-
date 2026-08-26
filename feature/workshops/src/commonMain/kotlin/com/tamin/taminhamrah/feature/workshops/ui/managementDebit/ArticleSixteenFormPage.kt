@@ -145,7 +145,8 @@ fun ArticleSixteenFormPage(
             nextLabel = stringResource(
                 if (form.isLastStep) Res.string.article_sixteen_form_submit else Res.string.ws_form_next,
             ),
-            onNext = { onIntent(ManagementDebitIntent.FormNext) },
+            isBusy = form.isBusy,
+        onNext = { onIntent(ManagementDebitIntent.FormNext) },
             onPrev = if (form.step > 1) {
                 { onIntent(ManagementDebitIntent.FormPrev) }
             } else {
@@ -243,6 +244,7 @@ private fun DocumentsStep(
         attachments = form.attachments,
         capacity = ARTICLE_SIXTEEN_MAX_DOCUMENTS,
         onAdd = onAdd,
+        isUploading = form.isUploading,
         onRemove = { index -> onIntent(ManagementDebitIntent.FormRemoveDocument(index)) },
     )
     WorkshopFormNote(text = stringResource(Res.string.article_sixteen_form_note_window))

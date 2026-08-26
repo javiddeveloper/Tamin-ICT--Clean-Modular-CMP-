@@ -53,6 +53,8 @@ import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachment
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopDocumentType
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.ui.components.InputRestriction
+import com.tamin.taminhamrah.ui.components.LoadingButton
+import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
@@ -351,6 +353,8 @@ fun WorkshopDocumentBox(
     onAdd: () -> Unit,
     onRemove: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    /** While true the add control is inert — one upload at a time. */
+    isUploading: Boolean = false,
 ) {
     val colors = LocalTaminColors.current
     Column(
@@ -456,7 +460,7 @@ fun WorkshopDocumentBox(
         if (attachments.size < capacity) {
             TaminPrimaryButton(
                 text = stringResource(Res.string.ws_form_add_doc),
-                onClick = onAdd,
+                onClick = { if (!isUploading) onAdd() },
                 icon = Icons.Default.Add,
                 iconAtStart = true,
                 background = colors.successGradient,
@@ -637,6 +641,8 @@ fun ColumnScope.WorkshopFormFooter(
     onNext: () -> Unit,
     modifier: Modifier = Modifier,
     onPrev: (() -> Unit)? = null,
+    /** While true the forward action shows the app's spinner and refuses further taps. */
+    isBusy: Boolean = false,
 ) {
     val colors = LocalTaminColors.current
     Row(
@@ -673,12 +679,16 @@ fun ColumnScope.WorkshopFormFooter(
                 modifier = Modifier.weight(PrevButtonWeight),
             )
         }
-        TaminPrimaryButton(
+        // The app's own submit button, so an upload or a submission in flight shows the same
+        // spinner here as everywhere else — and a second tap cannot start a second request.
+        LoadingButton(
             text = nextLabel,
             onClick = onNext,
+            isLoading = isBusy,
+            enabled = !isBusy,
             // Points the way on: autoMirrored, so under RTL it draws "‹" as the design has it.
             icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
-            background = colors.buttonGradient,
+            iconPosition = LoadingButtonIconPosition.TRAILING,
             height = FooterButtonHeight,
             shape = RoundedCornerShape(FooterButtonCorner),
             modifier = Modifier.weight(NextButtonWeight),
