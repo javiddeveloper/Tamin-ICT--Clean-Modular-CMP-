@@ -25,6 +25,8 @@ import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.model.workshop.ObjectionKind
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import taminx.core.core_ui.objection_pdf_file
+import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.DetailRow
@@ -92,6 +94,19 @@ fun ObjectionableDebitContent(
 ) {
     // ثبت اعتراض is a page of this screen, not a route: only this ViewModel holds the domain row
     // the objection is filed against.
+    // The already-filed objection, rendered by the app's own viewer rather than dropped into
+    // Downloads unseen — it saves a copy itself.
+    state.viewerPdf?.let { pdf ->
+        TaminPdfViewer(
+            fileName = stringResource(Res.string.objection_pdf_file, state.workshopId),
+            pdf = pdf,
+            downloadFailed = false,
+            onRequestDownload = {},
+            onDismiss = { onIntent(ObjectionableDebitIntent.DismissViewer) },
+            title = stringResource(Res.string.workshop_action_objection),
+        )
+    }
+
     state.form?.let { form ->
         BackHandler { onIntent(ObjectionableDebitIntent.FormDismissed) }
         ObjectionFormPage(

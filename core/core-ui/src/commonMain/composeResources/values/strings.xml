@@ -931,27 +931,6 @@
     <string name="issuance_certificate_error_branch_name_too_short">نام شعبه نمی‌تواند کمتر از دو کاراکتر باشد</string>
 
     <!-- کارگاه‌های کارفرما -->
-    <string name="workshops_filter_workshop_id">کد کارگاه</string>
-    <string name="workshops_filter_status">وضعیت کارگاه</string>
-    <string name="workshops_search_action">جستجوی کارگاه‌ها</string>
-    <string name="workshops_empty_title">هیچ کارگاهی یافت نشد</string>
-    <string name="workshops_empty_subtitle">فیلترها را تغییر دهید و دوباره جستجو کنید.</string>
-    <string name="workshops_value_unknown">نامشخص</string>
-    <string name="workshops_card_employer">کارفرما</string>
-    <string name="workshops_card_branch">شعبه</string>
-    <string name="workshops_actions_title">جزئیات و عملیات</string>
-    <string name="workshops_action_payment_sheets">لیست برگ پرداخت</string>
-    <string name="workshops_action_debit_list">لیست بدهی کارگاه</string>
-    <string name="workshops_action_debt_inquiry">استعلام بدهی کارگاه</string>
-    <string name="workshops_action_objection">اعتراض به بدهی</string>
-    <string name="workshops_action_insured_registration">نام نویسی غیرحضوری بیمه شده</string>
-    <string name="workshops_action_article_sixteen">رسیدگی به بدهی ماده ۱۶</string>
-    <string name="workshops_action_members">کارکنان</string>
-    <string name="workshops_action_stakeholders">ذینفعان</string>
-    <string name="workshops_status_active">فعال</string>
-    <string name="workshops_status_semi_active">نیمه فعال</string>
-    <string name="workshops_status_inactive">غیرفعال</string>
-    <string name="workshops_status_any">همه وضعیت‌ها</string>
     <string name="bs_workshop_status">وضعیت کارگاه</string>
 
     <!-- Occurrence / Accident Report -->
@@ -1398,6 +1377,8 @@
     <string name="abs_form_banner">جهت نام‌نویسی افراد فاقد شماره بیمه، لازم است فرم اظهارنامه تکمیل و به همراه تصویر کارت ملی، شناسنامه و یک قطعه عکس بیمه‌شده در مرحلهٔ بعد بارگذاری شود.</string>
     <string name="abs_form_download">دریافت فرم اظهارنامهٔ نام‌نویسی</string>
     <string name="abs_form_declaration_file">فرم-اظهارنامه-نام‌نویسی.pdf</string>
+    <string name="objection_pdf_file">اعتراض-%1$s.pdf</string>
+    <string name="article_sixteen_pdf_file">ماده۱۶-%1$s.pdf</string>
 
     <string name="abs_form_err_incomplete">لطفاً همهٔ فیلدهای این مرحله را تکمیل کنید.</string>
     <string name="abs_form_err_national_id">کد ملی واردشده معتبر نیست.</string>

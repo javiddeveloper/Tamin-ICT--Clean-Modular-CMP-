@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers
 
 import androidx.compose.runtime.Immutable
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
 import com.tamin.taminhamrah.model.common.isValidIranianNationalId
 import taminx.core.core_ui.ws_form_err_docs
 import taminx.core.core_ui.ws_form_err_agree
@@ -32,6 +33,8 @@ data class WorkshopRecentlyAddedMembersUiState(
     val isSearchOpen: Boolean = false,
     /** The row being confirmed or deleted; its actions show progress meanwhile. */
     val busyPersonalId: Long? = null,
+    /** The blank declaration form, once fetched — shown in the app's PDF viewer. */
+    val declarationPdf: PdfDownloadPR? = null,
     /** افزودن پرسنل جدید, once the list has asked for it. */
     val form: RegistrationFormState? = null,
 ) {
@@ -65,6 +68,7 @@ data class WorkshopRecentlyAddedMembersUiState(
         data class FormUploadingChanged(val isUploading: Boolean) : PartialState
         data class FormSubmittingChanged(val isSubmitting: Boolean) : PartialState
         data class FormDeclarationDownloading(val isDownloading: Boolean) : PartialState
+        data class DeclarationPdfChanged(val pdf: PdfDownloadPR?) : PartialState
         data class FormPickerOpened(val picker: RegistrationPicker?) : PartialState
         data class FormPickerQueryChanged(val query: String) : PartialState
         data class FormPickerLoading(val isLoading: Boolean) : PartialState
@@ -210,6 +214,8 @@ sealed interface WorkshopRecentlyAddedMembersIntent {
     /** «دریافت فرم اظهارنامهٔ نام‌نویسی» — the blank declaration the person fills in. */
     data object FormDownloadDeclaration : WorkshopRecentlyAddedMembersIntent
 
+    data object DeclarationViewerDismissed : WorkshopRecentlyAddedMembersIntent
+
     /** A picked image, with the type the user filed it under. */
     class FormAddDocument(
         val fileName: String,
@@ -227,9 +233,6 @@ sealed interface WorkshopRecentlyAddedMembersEvent {
     data class ShowMessage(val message: StringResource) : WorkshopRecentlyAddedMembersEvent
 
     /** The member form opens on this registration; a new one is [personalRequestId] `0`. */
-    /** The blank declaration form, ready to be written to the device. */
-    data class SaveDeclarationForm(val bytes: ByteArray) : WorkshopRecentlyAddedMembersEvent
-
     /** Filed, with the tracking code the service returned. */
     data class RegistrationFiled(val referenceCode: String) : WorkshopRecentlyAddedMembersEvent
 

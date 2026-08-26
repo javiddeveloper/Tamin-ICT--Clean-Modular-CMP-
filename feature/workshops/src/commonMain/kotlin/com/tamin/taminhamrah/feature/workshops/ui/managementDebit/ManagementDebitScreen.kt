@@ -34,6 +34,8 @@ import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtPR
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestStatus
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import taminx.core.core_ui.article_sixteen_pdf_file
+import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.DetailRow
@@ -109,6 +111,17 @@ fun ManagementDebitContent(
 
     // درخواست رسیدگی is a page of this screen, not a route: only this ViewModel holds the domain
     // row the request is filed against.
+    state.viewerPdf?.let { pdf ->
+        TaminPdfViewer(
+            fileName = stringResource(Res.string.article_sixteen_pdf_file, state.workshopId),
+            pdf = pdf,
+            downloadFailed = false,
+            onRequestDownload = {},
+            onDismiss = { onIntent(ManagementDebitIntent.DismissViewer) },
+            title = stringResource(Res.string.workshop_action_article_sixteen),
+        )
+    }
+
     state.form?.let { form ->
         BackHandler { onIntent(ManagementDebitIntent.FormDismissed) }
         ArticleSixteenFormPage(

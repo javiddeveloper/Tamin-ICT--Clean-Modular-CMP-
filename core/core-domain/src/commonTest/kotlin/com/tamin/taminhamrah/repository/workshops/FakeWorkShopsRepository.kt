@@ -81,6 +81,9 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     var lastPaymentRequest: DebitPaymentRequestDN? = null
         private set
     var deletedPersonalId: Long? = null
+    var newMemberIsNew: NewMemberIsNewDN = NewMemberIsNewDN()
+    var registrationResult: NewMemberRegistrationResultDN = NewMemberRegistrationResultDN()
+    var lastRegistrationRequest: NewMemberRegistrationDN? = null
         private set
 
     override suspend fun getEmployerAgreements(
@@ -158,13 +161,16 @@ class FakeWorkShopsRepository : WorkShopsRepository {
 
     override suspend fun deleteRecentlyAddedMember(personalId: Long) {
         answer { deletedPersonalId = personalId }
+    }
 
     override suspend fun checkNewMemberIsNew(nationalId: String): NewMemberIsNewDN =
-        NewMemberIsNewDN()
+        answer { newMemberIsNew }
 
     override suspend fun createNewMemberRegistration(
         request: NewMemberRegistrationDN,
-    ): NewMemberRegistrationResultDN = NewMemberRegistrationResultDN()
+    ): NewMemberRegistrationResultDN = answer {
+        lastRegistrationRequest = request
+        registrationResult
     }
 
     override suspend fun getArticleSixteenDebts(

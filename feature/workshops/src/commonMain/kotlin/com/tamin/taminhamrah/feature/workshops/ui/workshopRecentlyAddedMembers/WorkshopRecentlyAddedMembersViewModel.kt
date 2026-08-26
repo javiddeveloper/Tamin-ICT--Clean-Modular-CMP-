@@ -1,6 +1,9 @@
 package com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers
 
 import com.tamin.taminhamrah.base.BaseViewModel
+import io.ktor.utils.io.ByteReadChannel
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
+import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamPR
 import com.tamin.taminhamrah.feature.workshops.ui.model.RegistrationDocumentTypes
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachmentUploader
 import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersUiState.PartialState
@@ -14,6 +17,7 @@ import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberQuery
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.ui.digitsOnly
 import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
+import com.tamin.taminhamrah.useCases.common.GetCityUseCase
 import com.tamin.taminhamrah.useCases.common.GetJobTitleUseCase
 import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
 import com.tamin.taminhamrah.useCases.personal.PutInsuredRegistrationDocListUseCase
@@ -43,6 +47,7 @@ class WorkshopRecentlyAddedMembersViewModel(
     private val uploadAttachment: WorkshopAttachmentUploader,
     private val putRegistrationDocuments: PutInsuredRegistrationDocListUseCase,
     private val getCities: GetCitiesUseCase,
+    private val getCity: GetCityUseCase,
     private val getJobTitle: GetJobTitleUseCase,
     private val getRegistrationDeclarationForm: GetRegistrationDeclarationFormUseCase,
 ) : BaseViewModel<
@@ -91,6 +96,8 @@ class WorkshopRecentlyAddedMembersViewModel(
         is WorkshopRecentlyAddedMembersIntent.FormPickerOpened -> openPicker(intent.picker)
         is WorkshopRecentlyAddedMembersIntent.FormPickerQueryChanged -> searchPicker(intent.query)
         WorkshopRecentlyAddedMembersIntent.FormDownloadDeclaration -> downloadDeclaration()
+        WorkshopRecentlyAddedMembersIntent.DeclarationViewerDismissed ->
+            just(PartialState.DeclarationPdfChanged(null))
         is WorkshopRecentlyAddedMembersIntent.FormOptionPicked ->
             just(PartialState.FormOptionPicked(intent.picker, intent.option))
 
@@ -194,24 +201,59 @@ class WorkshopRecentlyAddedMembersViewModel(
             return@flow
         }
         emit(PartialState.FormChanged(member.asFormState()))
+        emitAll(resolveDraftLabels(member))
+    }
+
+    /**
+     * Turns the codes a re-opened draft carries into the names the fields should show.
+     *
+     * The row stores what the service files — `cityOfBirthId`, a job code — so each is looked up
+     * and the field re-seeded as though the user had picked it. A lookup that fails leaves the
+     * code showing rather than failing the edit, which is why each is caught on its own.
+     */
+    private fun resolveDraftLabels(member: WorkshopNewMemberPR): Flow<PartialState> = flow {
+        emitAll(resolveCity(member.cityOfBirthId, RegistrationPicker.BIRTH_CITY))
+        emitAll(resolveCity(member.cityOfIssueId, RegistrationPicker.ISSUE_CITY))
+
+        val jobCode = member.jobCode
+        if (jobCode.isNotBlank()) {
+            val name = runCatching {
+                getJobTitle(emptyList()).first()?.list.orEmpty()
+                    .firstOrNull { it.jobCode == jobCode }?.jobDescription
+            }.getOrNull()
+            if (name != null) {
+                emit(
+                    PartialState.FormOptionPicked(
+                        RegistrationPicker.JOB,
+                        PickedOption(jobCode, name),
+                    ),
+                )
+            }
+        }
+    }
+
+    private fun resolveCity(
+        cityId: String,
+        picker: RegistrationPicker,
+    ): Flow<PartialState> = flow {
+        if (cityId.isBlank()) return@flow
+        val name = runCatching { getCity(cityId).first().cityName }.getOrNull() ?: return@flow
+        emit(PartialState.FormOptionPicked(picker, PickedOption(cityId, name)))
     }
 
     /**
      * A draft re-opened as the form that produced it.
      *
      * Everything comes off the list row, which already carries the codes — `relation-tamins`
-     * returns the person's cities and job on the row itself, so re-opening costs no request. The
-     * two city pickers show their code until the lookup is opened and a name chosen; the row does
-     * not carry the names, only what the service files.
+     * returns the person's cities and job on the row itself, so re-opening costs no request.
+     * The row carries codes, not names, so the fields start empty and [resolveDraftLabels] fills
+     * them in as each lookup answers — a code is not a thing the user can read.
      */
     private fun WorkshopNewMemberPR.asFormState(): RegistrationFormState = RegistrationFormState(
         firstName = firstName,
         lastName = lastName,
         nationalId = nationalId.digitsOnly(),
         birthDate = birthDate,
-        birthCity = cityOfBirthId.takeIf { it.isNotBlank() }?.let { PickedOption(it, it) },
-        issueCity = cityOfIssueId.takeIf { it.isNotBlank() }?.let { PickedOption(it, it) },
-        job = jobCode.takeIf { it.isNotBlank() }?.let { PickedOption(it, it) },
         startDate = startDate,
         personalId = personalId,
     )
@@ -223,11 +265,11 @@ class WorkshopRecentlyAddedMembersViewModel(
      * device's own saver; the screen writes it, because only the UI layer knows where downloads
      * belong on each platform.
      */
-    private fun downloadDeclaration(): Flow<PartialState> = flow<PartialState> {
+    private fun downloadDeclaration(): Flow<PartialState> = flow {
         emit(PartialState.FormDeclarationDownloading(true))
         val bytes = getRegistrationDeclarationForm().first()
         emit(PartialState.FormDeclarationDownloading(false))
-        sendEvent(WorkshopRecentlyAddedMembersEvent.SaveDeclarationForm(bytes))
+        emit(PartialState.DeclarationPdfChanged(bytes.asPdfDownload()))
     }.catch {
         emit(PartialState.FormDeclarationDownloading(false))
         emit(PartialState.Error(it.toSingleLineMessage()))
@@ -442,6 +484,9 @@ class WorkshopRecentlyAddedMembersViewModel(
             copy(isSubmitting = partialState.isSubmitting)
         }
 
+        is PartialState.DeclarationPdfChanged ->
+            currentState.copy(declarationPdf = partialState.pdf)
+
         is PartialState.FormDeclarationDownloading -> currentState.editForm {
             copy(isDownloadingDeclaration = partialState.isDownloading)
         }
@@ -483,3 +528,13 @@ private inline fun WorkshopRecentlyAddedMembersUiState.editForm(
 
 /** Forms count their steps from one. */
 private const val FIRST_STEP = 1
+
+/**
+ * The declaration's bytes as the viewer's own model.
+ *
+ * `getRegistrationDeclarationForm` answers with bytes because the form is a static PDF rather
+ * than a generated report; the viewer takes a channel, so it is wrapped here instead of the
+ * screen learning that difference.
+ */
+private fun ByteArray.asPdfDownload(): PdfDownloadPR =
+    PdfDownloadPR(InputStreamPR(ByteReadChannel(this)))
