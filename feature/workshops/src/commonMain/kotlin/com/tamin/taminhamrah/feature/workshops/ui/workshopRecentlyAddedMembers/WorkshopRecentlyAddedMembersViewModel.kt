@@ -1,9 +1,6 @@
 package com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers
 
 import com.tamin.taminhamrah.base.BaseViewModel
-import io.ktor.utils.io.ByteReadChannel
-import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
-import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamPR
 import com.tamin.taminhamrah.feature.workshops.ui.model.RegistrationDocumentTypes
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachmentUploader
 import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersUiState.PartialState
@@ -11,6 +8,7 @@ import com.tamin.taminhamrah.mapper.workshop.toPresentation
 import com.tamin.taminhamrah.model.common.isValidIranianNationalId
 import com.tamin.taminhamrah.model.personal.DocumentFileDN
 import com.tamin.taminhamrah.model.personal.InsuredDocDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.asPdfDownload
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberPR
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberQuery
@@ -528,13 +526,3 @@ private inline fun WorkshopRecentlyAddedMembersUiState.editForm(
 
 /** Forms count their steps from one. */
 private const val FIRST_STEP = 1
-
-/**
- * The declaration's bytes as the viewer's own model.
- *
- * `getRegistrationDeclarationForm` answers with bytes because the form is a static PDF rather
- * than a generated report; the viewer takes a channel, so it is wrapped here instead of the
- * screen learning that difference.
- */
-private fun ByteArray.asPdfDownload(): PdfDownloadPR =
-    PdfDownloadPR(InputStreamPR(ByteReadChannel(this)))

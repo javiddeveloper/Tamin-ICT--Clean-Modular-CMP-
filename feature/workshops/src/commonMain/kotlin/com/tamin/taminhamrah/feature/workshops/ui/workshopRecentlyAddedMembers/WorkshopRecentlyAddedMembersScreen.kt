@@ -38,8 +38,9 @@ import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.BackHandler
+import taminx.core.core_ui.abs_form_download
+import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import taminx.core.core_ui.abs_form_declaration_file
-import com.tamin.taminhamrah.ui.components.rememberPdfSaver
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
@@ -111,6 +112,23 @@ fun WorkshopRecentlyAddedMembersContent(
 
     // The registration is a page of this screen, not a route: it is created against the workshop
     // this list is already showing.
+    // The blank declaration goes through the app's own viewer, which renders it and keeps a copy
+    // in Downloads — the same chain every other document in the app uses.
+    state.declarationPdf?.let { pdf ->
+        TaminPdfViewer(
+            fileName = stringResource(Res.string.abs_form_declaration_file),
+            pdf = pdf,
+            downloadFailed = false,
+            onRequestDownload = {
+                onIntent(WorkshopRecentlyAddedMembersIntent.FormDownloadDeclaration)
+            },
+            onDismiss = {
+                onIntent(WorkshopRecentlyAddedMembersIntent.DeclarationViewerDismissed)
+            },
+            title = stringResource(Res.string.abs_form_download),
+        )
+    }
+
     state.form?.let { form ->
         BackHandler { onIntent(WorkshopRecentlyAddedMembersIntent.FormDismissed) }
         RegistrationFormPage(
@@ -328,10 +346,6 @@ private fun WorkshopRecentlyAddedMembersScreenPreview() {
 @Composable
 private fun HandleRecentlyAddedMembersEvents(events: Flow<WorkshopRecentlyAddedMembersEvent>) {
     val toaster = LocalToaster.current
-    // Where a download belongs is a platform question, so the bytes come up as an event and the
-    // device's own saver writes them — the ViewModel never learns what a Downloads folder is.
-    val pdfSaver = rememberPdfSaver()
-    val declarationFileName = stringResource(Res.string.abs_form_declaration_file)
     LaunchedEffect(events, toaster) {
         events.collect { event ->
             when (event) {
@@ -345,9 +359,6 @@ private fun HandleRecentlyAddedMembersEvents(events: Flow<WorkshopRecentlyAddedM
                 is WorkshopRecentlyAddedMembersEvent.OpenCartable -> toaster.info(
                     getString(Res.string.new_member_follow_body, event.referenceCode),
                 )
-
-                is WorkshopRecentlyAddedMembersEvent.SaveDeclarationForm ->
-                    pdfSaver.save(declarationFileName, event.bytes)
 
                 is WorkshopRecentlyAddedMembersEvent.RegistrationFiled -> toaster.success(
                     getString(Res.string.abs_form_done_body, event.referenceCode),
