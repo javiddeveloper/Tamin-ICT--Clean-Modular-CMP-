@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.model.pregnancyPay
 
+import com.tamin.taminhamrah.tools.ErrorCarrier
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -17,7 +18,9 @@ data class PregnancyMainInfoDTO(
     @SerialName("bankName") val bankName: String? = null,
     @SerialName("insuranceTypeDesc") val insuranceTypeDesc: String? = null,
     @SerialName("insuranceStatusDesc") val insuranceStatusDesc: String? = null,
-)
+    @SerialName("message") override val message: String? = null,
+    @SerialName("cause") override val cause: String? = null,
+) : ErrorCarrier
 
 @Serializable
 data class PregnancyBranchWorkshopDTO(

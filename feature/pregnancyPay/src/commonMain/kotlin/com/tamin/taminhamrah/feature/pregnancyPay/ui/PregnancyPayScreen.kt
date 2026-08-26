@@ -516,7 +516,6 @@ private fun PregnancyPayContent(
     ErrorStateView(
         message = state.error,
         onDismiss = onBackClicked,
-        onRetry = { onIntent(PregnancyPayIntent.LoadInitialData) },
     )
 }
 
