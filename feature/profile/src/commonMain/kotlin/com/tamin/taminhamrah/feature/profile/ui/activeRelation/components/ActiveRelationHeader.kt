@@ -20,19 +20,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import com.tamin.taminhamrah.ui.components.collapseAway
 import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.DarkTaminColors
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.toparea.TopAreaState
+import com.tamin.taminhamrah.ui.toparea.topAreaAlpha
+import com.tamin.taminhamrah.ui.toparea.topAreaHide
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -52,14 +56,20 @@ internal fun ActiveRelationHeader(
     inactiveCount: Int,
     lastCheckTime: String,
     onBackClicked: () -> Unit,
+    topAreaState: TopAreaState,
     modifier: Modifier = Modifier,
-    collapseProgress: () -> Float = { 0f },
 ) {
     val taminColors = LocalTaminColors.current
     val isDark = taminColors == DarkTaminColors
 
     val topBarGradient =
         remember(isDark) { Brush.horizontalGradient(taminColors.profileGradientStops) }
+
+    // Trims the font's built-in leading above/below each line so the status badge and the
+    // stats line beneath it sit close together instead of the extra line-height padding.
+    val trimmedLineHeight = remember {
+        LineHeightStyle(alignment = LineHeightStyle.Alignment.Center, trim = LineHeightStyle.Trim.Both)
+    }
 
     // Title fades out and the status text fades in over the same title-row spot, so
     // scrolling reads as the status taking over the title's place rather than two
@@ -69,16 +79,14 @@ internal fun ActiveRelationHeader(
     val statusText = if (activeCount > 0) stringResource(Res.string.active_relation_header_status_ok) else stringResource(Res.string.active_relation_header_status_error)
     val statusColor =
         if (activeCount > 0) taminColors.springGreenText else taminColors.dangerText
-    val titleAlpha = { (1f - collapseProgress() * 2f).coerceIn(0f, 1f) }
-    val collapsedAlpha = { ((collapseProgress() - 0.5f) * 2f).coerceIn(0f, 1f) }
 
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(
                 RoundedCornerShape(
-                    bottomEnd = CornerRadius.chip,
-                    bottomStart = CornerRadius.chip
+                    bottomEnd = 40.dp,
+                    bottomStart = 40.dp
                 )
             )
             .background(taminTopAppBarGradient(taminColors.profileGradientStops)),
@@ -88,6 +96,7 @@ internal fun ActiveRelationHeader(
             title = title,
             centerTitle = true,
             background = topBarGradient,
+            bottomPadding = Spacing.none,
             titleContent = {
                 Box(modifier = Modifier.fillMaxWidth()) {
                     Text(
@@ -97,7 +106,7 @@ internal fun ActiveRelationHeader(
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .graphicsLayer { alpha = titleAlpha() },
+                            .topAreaAlpha(topAreaState, from = 1f, to = 0f, endProgress = 0.5f),
                     )
                     Text(
                         text = statusText,
@@ -107,12 +116,13 @@ internal fun ActiveRelationHeader(
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .graphicsLayer { alpha = collapsedAlpha() },
+                            .topAreaAlpha(topAreaState, from = 0f, to = 1f, startProgress = 0.5f),
                     )
                 }
             },
             navigationIcon = {
                 TaminTopAppBarButton(
+                    bordered = true,
                     icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                     contentDescription = null,
                     onClick = onBackClicked,
@@ -126,30 +136,29 @@ internal fun ActiveRelationHeader(
                     icon = vectorResource(Res.drawable.ic_communication),
                     contentDescription = null,
                     onClick = {},
-                    modifier = Modifier.graphicsLayer { alpha = collapsedAlpha() },
+                    modifier = Modifier.topAreaAlpha(topAreaState, from = 0f, to = 1f, startProgress = 0.5f),
                 )
             },
         )
 
         // Only the expanded-state furniture below the title row folds away; the title
         // row itself stays put so the bar reads the same as the rest of the app once collapsed.
+        // This shrinks the column's own measured height, which is what makes the header's total
+        // rendered height track the drag -- so it must span the full 0..1 progress range (the
+        // same range maxOffsetPx models), never a narrower one, or the header visibly collapses
+        // faster than the finger.
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .collapseAway(collapseProgress)
+                .topAreaHide(topAreaState)
                 .padding(bottom = Spacing.xl),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(Spacing.md))
-
             AnimatedRingHeaderIcon(
-                icon = vectorResource(Res.drawable.ic_communication)
+                icon = vectorResource(Res.drawable.ic_communication),
+                animated = !topAreaState.isMeasureProbe
             )
-
-            Spacer(modifier = Modifier.height(Spacing.sm))
-
             Row(
-                modifier = Modifier.padding(bottom = Spacing.xs),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
@@ -163,7 +172,7 @@ internal fun ActiveRelationHeader(
                 Spacer(Modifier.width(4.dp))
                 Text(
                     text = statusText,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleMedium.copy(lineHeightStyle = trimmedLineHeight),
                     fontWeight = FontWeight.Bold,
                     color = statusColor
                 )
@@ -172,15 +181,36 @@ internal fun ActiveRelationHeader(
             val activeText = stringResource(Res.string.active_relation_header_active_count, activeCount.toString().toPersianDigits())
             val inactiveText = stringResource(Res.string.active_relation_header_inactive_count, inactiveCount.toString().toPersianDigits())
             val checkTimeText = stringResource(Res.string.active_relation_header_check_time, lastCheckTime)
+            Spacer(modifier = Modifier.height(Spacing.sm))
 
             Text(
                 text = "$activeText · $inactiveText · $checkTimeText",
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodySmall.copy(lineHeightStyle = trimmedLineHeight),
                 color = taminColors.txtNatProfile
             )
         }
+
+        // Zero height while expanded, growing to CollapsedBottomSpace as the header folds --
+        // the inverse of topAreaHide above. Gives the collapsed bar breathing room below its
+        // title row without adding to the expanded gap between the title and the ring icon.
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .topAreaReveal(topAreaState, CollapsedBottomSpace)
+        )
     }
 }
+
+private val CollapsedBottomSpace = 20.dp
+
+/** Grows a child from zero up to [height] as [state] folds -- the inverse of [topAreaHide]. */
+private fun Modifier.topAreaReveal(state: TopAreaState, height: androidx.compose.ui.unit.Dp): Modifier =
+    layout { measurable, constraints ->
+        val targetPx = height.roundToPx()
+        val revealedPx = (targetPx * state.progress).roundToInt()
+        val placeable = measurable.measure(constraints.copy(minHeight = 0, maxHeight = revealedPx.coerceAtLeast(0)))
+        layout(placeable.width, revealedPx) { placeable.place(0, 0) }
+    }
 
 @com.tamin.taminhamrah.ui.PreviewRtlTheme
 @Composable
@@ -190,7 +220,8 @@ private fun PreviewActiveRelationHeader() {
             activeCount = 1,
             inactiveCount = 0,
             lastCheckTime = "۱۰:۲۴",
-            onBackClicked = {}
+            onBackClicked = {},
+            topAreaState = com.tamin.taminhamrah.ui.toparea.rememberTopAreaState(224.dp, 64.dp)
         )
     }
 }

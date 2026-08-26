@@ -150,6 +150,11 @@ internal interface UserApiService {
         @Query("filter") filter: String
     ): BaseDTO<JsonElement?>
 
+    @GET("certificate/report")
+    suspend fun getWageCertificateReport(
+        @Query("filter") filter: String
+    ): BaseDTO<JsonElement?>
+
     @GET("recipients")
     suspend fun getRecipients(
         @QueryMap parameters: Map<String, String>

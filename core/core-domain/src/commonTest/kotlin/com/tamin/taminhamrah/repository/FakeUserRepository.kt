@@ -31,6 +31,7 @@ class FakeUserRepository : UserRepository {
     var electronicFilePages: List<List<ElectronicFileDN>> = emptyList()
     var userProfileResult: UserProfileDN? = null
     var statusCertificateReportResult: String = ""
+    var wageCertificateReportResult: String = ""
     var recipientsResult: List<RecipientDN> = emptyList()
 
     var shouldThrowError = false
@@ -125,6 +126,11 @@ class FakeUserRepository : UserRepository {
     override suspend fun getStatusCertificateReport(filters: List<ApiFilterDN>): Flow<String> = flow {
         if (shouldThrowError) throw error
         emit(statusCertificateReportResult)
+    }
+
+    override suspend fun getWageCertificateReport(filters: List<ApiFilterDN>): Flow<String> = flow {
+        if (shouldThrowError) throw error
+        emit(wageCertificateReportResult)
     }
 
     override suspend fun getRecipients(filters: List<ApiFilterDN>): Flow<List<RecipientDN>> = flow {
