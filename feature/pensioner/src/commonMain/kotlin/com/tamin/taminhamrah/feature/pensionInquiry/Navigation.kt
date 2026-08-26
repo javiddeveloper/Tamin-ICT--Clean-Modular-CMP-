@@ -10,7 +10,6 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.deservedTreatment.Deserve
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll.PayRollScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.EdictScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.issuanceCertificate.IssuanceCertificateScreen
-import com.tamin.taminhamrah.feature.pensionInquiry.ui.deferredInstallment.DeferredInstallmentScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.DisabilityPensionScreen
 import kotlinx.serialization.Serializable
 
@@ -31,9 +30,6 @@ data object EdictRoute
 
 @Serializable
 data object IssuanceCertificateRoute
-
-@Serializable
-data object DeferredInstallmentRoute
 
 @Serializable
 data object DisabilityPensionRoute
@@ -60,10 +56,6 @@ fun NavController.navigateToEdict(navOptions: NavOptions? = null) {
 
 fun NavController.navigateToIssuanceCertificate(navOptions: NavOptions? = null) {
     navigate(IssuanceCertificateRoute, navOptions)
-}
-
-fun NavController.navigateToDeferredInstallment(navOptions: NavOptions? = null) {
-    navigate(DeferredInstallmentRoute, navOptions)
 }
 
 fun NavController.navigateToDisabilityPension(navOptions: NavOptions? = null) {
@@ -100,15 +92,9 @@ fun NavGraphBuilder.edictScreen(onBack: () -> Unit) {
     }
 }
 
-fun NavGraphBuilder.issuanceCertificateScreen(onBack: () -> Unit) {
+fun NavGraphBuilder.issuanceCertificateScreen(onBack: () -> Unit, onGoHome: () -> Unit) {
     composableWithFadeTransitions<IssuanceCertificateRoute> {
-        IssuanceCertificateScreen(onBack = onBack)
-    }
-}
-
-fun NavGraphBuilder.deferredInstallmentScreen(onBack: () -> Unit) {
-    composableWithFadeTransitions<DeferredInstallmentRoute> {
-        DeferredInstallmentScreen(onBack = onBack)
+        IssuanceCertificateScreen(onBack = onBack, onGoHome = onGoHome)
     }
 }
 
@@ -117,4 +103,3 @@ fun NavGraphBuilder.disabilityPensionScreen(onBack: () -> Unit) {
         DisabilityPensionScreen(onBack = onBack)
     }
 }
-

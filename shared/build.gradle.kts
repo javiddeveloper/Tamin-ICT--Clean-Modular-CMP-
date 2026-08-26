@@ -50,6 +50,8 @@ kotlin {
             api(project(":feature:settings"))
             api(project(":feature:orotez-protez"))
             api(project(":feature:girlSurvivor"))
+            api(project(":feature:deferredInstallment"))
+            api(project(":feature:history-objection"))
             api(project(":feature:pensionSurvivor"))
             api(libs.androidx.lifecycle.viewmodel)
             implementation(libs.ktor.client.core)

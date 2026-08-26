@@ -33,7 +33,7 @@ interface PensionApiService {
     @GET("pension-inquiry")
     suspend fun getPensionInquiry(
         @QueryMap parameters: Map<String, String>
-    ) : BaseDTO<ListData<PensionInquiryDTO>>
+    ): BaseDTO<ListData<PensionInquiryDTO>>
 
     @GET("pensioner-no")
     suspend fun getPensionerId(): BaseDTO<ListData<PensionIdDTO>>
@@ -48,11 +48,6 @@ interface PensionApiService {
     suspend fun sendRequestDeferredInstallmentCertificate(
         @Body deferredInstallmentRequest: DeferredInstallmentRequest
     ): BaseDTO<DeferredInstallmentCertificateDTO>
-
-    @GET("fish")
-    suspend fun getPensionerPayRoll(
-        @Query("filter") filter: String,
-    ): BaseDTO<ListData<PayRollDTO>>
 
     @GET("disability-request/personal")
     suspend fun getDisabilityPersonalInfo(
@@ -69,6 +64,16 @@ interface PensionApiService {
         @QueryMap parameters: Map<String, String>
     ): HttpStatement
 
+    @GET("fish")
+    suspend fun getPensionerPayRoll(
+        @Query("filter") filter: String,
+    ): BaseDTO<ListData<PayRollDTO>>
+
+    @GET("fish/annoncment")
+    suspend fun sendPayRollToInbox(
+        @Query("filter") filter: String,
+    ): BaseDTO<JsonElement?>?
+
     @Streaming
     @GET("hokm/report")
     suspend fun getEdictReportPDF(
@@ -79,6 +84,7 @@ interface PensionApiService {
     suspend fun getRetirementRequestInfo(
         @QueryMap parameters: Map<String, String>
     ): BaseDTO<ListData<RetirementRequestDTO>>
+
     @GET("pension-request/personal")
     suspend fun authenticationAndGetPersonalInfo(
         @Query("ticketCode") authenticationsCode: Long
@@ -86,6 +92,7 @@ interface PensionApiService {
 
     @GET("pension-request/checkRequests")
     suspend fun checkRetirementStatus(): BaseDTO<RetirementStatusDTO>
+
     @GET("pension-request/getTicket")
     suspend fun getAuthenticationCode(
     ): BaseDTO<AuthenticationTicketDTO>
@@ -102,6 +109,7 @@ interface PensionApiService {
         @Path("requestId") requestId: String,
         @Body body: RetirementSaveDocumentRequest
     ): BaseDTO<String?>
+
     @GET("hokm/annoncment")
     suspend fun sendEdictPensionerToMyInbox(
         @QueryMap parameters: Map<String, String>

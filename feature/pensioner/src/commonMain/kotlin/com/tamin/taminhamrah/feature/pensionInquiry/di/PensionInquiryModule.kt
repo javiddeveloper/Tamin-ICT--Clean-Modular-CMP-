@@ -6,7 +6,6 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.deservedTreatment.Deserve
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll.PayRollViewModel
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.EdictViewModel
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.issuanceCertificate.IssuanceCertificateViewModel
-import com.tamin.taminhamrah.feature.pensionInquiry.ui.deferredInstallment.DeferredInstallmentViewModel
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.DisabilityPensionViewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
@@ -18,7 +17,5 @@ val pensionInquiryModule = module {
     viewModelOf(::PayRollViewModel)
     viewModelOf(::EdictViewModel)
     viewModelOf(::IssuanceCertificateViewModel)
-    viewModelOf(::DeferredInstallmentViewModel)
     viewModelOf(::DisabilityPensionViewModel)
 }
-

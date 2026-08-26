@@ -442,10 +442,18 @@ fun TaminOutlinedButton(
     disabledContainerColor: Color = Color.Transparent,
     disabledContentColor: Color = LocalTaminColors.current.textMuted,
     textStyle: TextStyle = MaterialTheme.typography.titleMedium,
+    iconPosition: IconPosition? = null,
 ) {
     val currentBorderColor = if (enabled) borderColor else disabledBorderColor
     val currentContainerColor = if (enabled) containerColor else disabledContainerColor
     val currentContentColor = if (enabled) contentColor else disabledContentColor
+
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val showIconBeforeText = when (iconPosition) {
+        null -> true
+        IconPosition.Start -> !isRtl
+        IconPosition.End -> isRtl
+    }
 
     Row(
         modifier = modifier
@@ -464,7 +472,7 @@ fun TaminOutlinedButton(
             Alignment.CenterHorizontally,
         ),
     ) {
-        if (icon != null) {
+        if (icon != null && showIconBeforeText) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
@@ -478,6 +486,15 @@ fun TaminOutlinedButton(
             style = textStyle,
             color = currentContentColor
         )
+
+        if (icon != null && !showIconBeforeText) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = currentContentColor,
+                modifier = Modifier.size(IconSize.medium).then(iconModifier),
+            )
+        }
     }
 }
 

@@ -9,11 +9,14 @@ import com.tamin.taminhamrah.data.local.entity.CityEntity
 import com.tamin.taminhamrah.data.local.entity.ProvinceEntity
 import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSource
 import com.tamin.taminhamrah.model.common.BeneficiaryDTO
+import com.tamin.taminhamrah.model.common.InsuranceTypeDTO
 import com.tamin.taminhamrah.model.common.JobTitleDTO
+import com.tamin.taminhamrah.model.common.UserInsuredInfoDTO
 import com.tamin.taminhamrah.model.common.MainServiceDto
 import com.tamin.taminhamrah.model.common.RecipientDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
+import app.cash.turbine.test
 import io.ktor.client.statement.HttpStatement
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,9 +53,11 @@ class CityProvinceRepositoryCacheTest {
         )
         val remote = FakeCommonRemoteDataSource(error = IllegalStateException("503"))
 
-        val provinces = repository(remote, dao).getProvinces().toList().last()
-
-        assertEquals(listOf("07"), provinces.map { it.provinceCode })
+        repository(remote, dao).getProvinces().test {
+            val provinces = awaitItem()
+            assertEquals(listOf("07"), provinces.map { it.provinceCode })
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
@@ -71,11 +76,12 @@ class CityProvinceRepositoryCacheTest {
         )
         val remote = FakeCommonRemoteDataSource(provinces = listOf(tehranProvince))
 
-        val emissions = repository(remote, dao).getProvinces().toList()
-
-        // Cache first so the picker fills immediately, then the server's answer.
-        assertEquals(listOf("99"), emissions.first().map { it.provinceCode })
-        assertEquals(listOf("07"), emissions.last().map { it.provinceCode })
+        repository(remote, dao).getProvinces().test {
+            // Cache first so the picker fills immediately, then the server's answer.
+            assertEquals(listOf("99"), awaitItem().map { it.provinceCode })
+            assertEquals(listOf("07"), awaitItem().map { it.provinceCode })
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
@@ -117,6 +123,22 @@ private class FakeCityProvinceDao(
 
     override fun getCitiesByProvinceCode(provinceCode: String): Flow<List<CityEntity>> =
         cityRows.map { all -> all.filter { it.provinceCode == provinceCode } }
+
+    override suspend fun upsertCities(cities: List<CityEntity>) {
+        cities.forEach { upsertCity(it) }
+    }
+
+    override suspend fun clearCitiesByProvinceCode(provinceCode: String) {
+        cityRows.value = cityRows.value.filterNot { it.provinceCode == provinceCode }
+    }
+
+    override suspend fun upsertProvinces(provinces: List<ProvinceEntity>) {
+        provinces.forEach { upsertProvince(it) }
+    }
+
+    override suspend fun clearProvinces() {
+        provinceRows.value = emptyList()
+    }
 }
 
 private class FakeCommonRemoteDataSource(
@@ -135,11 +157,19 @@ private class FakeCommonRemoteDataSource(
         return CityNameDto(list = cities, total = cities.size)
     }
 
+    override suspend fun getCitiesByProvince(query: ApiQueryParamDN): CityNameDto {
+        error?.let { throw it }
+        return CityNameDto(list = cities, total = cities.size)
+    }
+
+    override suspend fun getInsuranceTypes(query: ApiQueryParamDN): ListData<InsuranceTypeDTO>? = unused()
+
     override suspend fun getMainMenu(versionCode: String, forceUpdate: Boolean): List<MainServiceDto> = unused()
     override suspend fun getBeneficiary(query: ApiQueryParamDN): ListData<BeneficiaryDTO> = unused()
     override suspend fun getRecipientList(query: ApiQueryParamDN): ListData<RecipientDTO> = unused()
     override suspend fun getRegistrationDeclarationForm(): HttpStatement = unused()
     override suspend fun getJobTitle(query: ApiQueryParamDN): ListData<JobTitleDTO>? = unused()
+    override suspend fun checkInsuredInfo(): UserInsuredInfoDTO = unused()
 }
 
 private fun <T> unused(): T = error("not part of the city/province cache path under test")

@@ -4,8 +4,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -77,14 +76,14 @@ import com.tamin.taminhamrah.feature.healthProfile.healthProfileScreen
 import com.tamin.taminhamrah.feature.healthProfile.navigateToHealthProfile
 import com.tamin.taminhamrah.feature.history.historyJobInfoScreen
 import com.tamin.taminhamrah.feature.history.historyScreen
+import com.tamin.taminhamrah.feature.deferredInstallment.deferredInstallmentScreen
+import com.tamin.taminhamrah.feature.deferredInstallment.navigateToDeferredInstallment
 import com.tamin.taminhamrah.feature.pensionInquiry.calculatePensionScreen
-import com.tamin.taminhamrah.feature.pensionInquiry.deferredInstallmentScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.deservedTreatmentScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.disabilityPensionScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.edictScreen
 import com.tamin.taminhamrah.feature.girlSurvivor.girlSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.issuanceCertificateScreen
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeferredInstallment
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeservedTreatment
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDisabilityPension
 import com.tamin.taminhamrah.feature.pensionSurvivor.navigateToPensionSurvivor
@@ -100,6 +99,7 @@ import com.tamin.taminhamrah.feature.addDependent.AddDependentRoute
 import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceContractScreen
 import com.tamin.taminhamrah.feature.taminServices.TaminServicesRoute
 import com.tamin.taminhamrah.feature.taminServices.occurrenceScreen
+import com.tamin.taminhamrah.feature.taminServices.inspectionScreen
 import com.tamin.taminhamrah.feature.taminServices.sendInsuranceHistoryToInstitutionsScreen
 import com.tamin.taminhamrah.feature.taminServices.taminServicesScreen
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
@@ -114,6 +114,8 @@ import com.tamin.taminhamrah.feature.settings.SettingsRoute
 import com.tamin.taminhamrah.feature.settings.settingsScreen
 import com.tamin.taminhamrah.feature.userRequest.UserRequestRoute
 import com.tamin.taminhamrah.feature.userRequest.userRequestGraph
+import com.tamin.taminhamrah.feature.historyobjection.historyObjectionScreen
+import com.tamin.taminhamrah.feature.historyobjection.historyObjectionStepperScreen
 import com.tamin.taminhamrah.feature.orotezprotez.orotezProtezScreen
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
@@ -266,14 +268,12 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
         bottomBar = {
             AnimatedVisibility(
                 visible = isBottomBarVisible,
-                enter = slideInVertically(
-                    initialOffsetY = { it },
-                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300)
+                enter = fadeIn(
+                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300),
                 ),
-                exit = slideOutVertically(
-                    targetOffsetY = { it },
-                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300)
-                )
+                exit = fadeOut(
+                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300),
+                ),
             ) {
                 Box(
                     modifier = Modifier
@@ -341,6 +341,7 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = paddingValues.calculateTopPadding())
+                .consumeWindowInsets(paddingValues)
                 .safeHazeSource(state = hazeState, isEnabled = isBottomBarVisible)
         ) {
             NavHost(
@@ -430,6 +431,10 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                     onDone = { navController.popBackStack() }
                 )
 
+                inspectionScreen(
+                    onBack = { navController.popBackStack() }
+                )
+
                 pensionStatusInquiryGraph(
                     onBack = { navController.popBackStack() }
                 )
@@ -443,7 +448,15 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                 deservedTreatmentScreen(onBack = { navController.popBackStack() })
                 payrollScreen(onBack = { navController.popBackStack() })
                 edictScreen(onBack = { navController.popBackStack() })
-                issuanceCertificateScreen(onBack = { navController.popBackStack() })
+                issuanceCertificateScreen(
+                    onBack = { navController.popBackStack() },
+                    onGoHome = {
+                        navController.navigate(Route.Home) {
+                            popUpTo(navController.graph.findStartDestination().id) { inclusive = false }
+                            launchSingleTop = true
+                        }
+                    }
+                )
                 deferredInstallmentScreen(onBack = { navController.popBackStack() })
                 girlSurvivorScreen(onBack = { navController.popBackStack() })
                 pensionSurvivorScreen(
@@ -496,6 +509,13 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                 securityScreen(onNavigateBack = { navController.popBackStack() })
 
                 orotezProtezScreen(onBack = { navController.popBackStack() })
+
+                historyObjectionScreen(navController = navController, onBack = { navController.popBackStack() })
+
+                historyObjectionStepperScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateHome = { navController.popBackStack(Route.Home, inclusive = false) },
+                )
 
                 healthProfileScreen(onBack = { navController.popBackStack() })
             }

@@ -26,6 +26,8 @@ import com.tamin.taminhamrah.dataSource.pension.PensionRemoteDataSource
 import com.tamin.taminhamrah.dataSource.pension.PensionRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.inbox.PersonalInboxRemoteDataSource
 import com.tamin.taminhamrah.dataSource.inbox.PersonalInboxRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.historyObjection.HistoryObjectionRemoteDataSource
+import com.tamin.taminhamrah.dataSource.historyObjection.HistoryObjectionRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.request.UserRequestRemoteDataSource
 import com.tamin.taminhamrah.dataSource.request.UserRequestRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.personal.PersonalRemoteDataSource
@@ -44,6 +46,8 @@ import com.tamin.taminhamrah.dataSource.orotezProtez.OrotezProtezRemoteDataSourc
 import com.tamin.taminhamrah.dataSource.orotezProtez.OrotezProtezRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSource
 import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.inspection.InspectionRemoteDataSource
+import com.tamin.taminhamrah.dataSource.inspection.InspectionRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.occurrence.OccurrenceRemoteDataSource
 import com.tamin.taminhamrah.dataSource.occurrence.OccurrenceRemoteDataSourceImpl
 import org.koin.core.module.dsl.bind
@@ -138,6 +142,14 @@ val remoteModule = module {
         )
     }
 
+    single<HistoryObjectionRemoteDataSource> {
+        HistoryObjectionRemoteDataSourceImpl(
+            historyObjectionApiService = get(),
+            apiQueryBuilder = get(),
+            errorParser = get()
+        )
+    }
+
     single<PersonalInboxRemoteDataSource> {
         PersonalInboxRemoteDataSourceImpl(
             personalInboxApiService = get(named("personalInboxApiService")),
@@ -214,6 +226,14 @@ val remoteModule = module {
         OrotezProtezRemoteDataSourceImpl(
             orotezProtezApiService = get(),
             apiQueryBuilder = get(),
+            errorParser = get()
+        )
+    }
+
+    single<InspectionRemoteDataSource> {
+        InspectionRemoteDataSourceImpl(
+            apiService = get(),
+            queryBuilder = get(),
             errorParser = get()
         )
     }

@@ -60,6 +60,10 @@ interface UserRemoteDataSource {
         filter: List<ApiFilterDN>
     ): String?
 
+    suspend fun getWageCertificateReport(
+        filter: List<ApiFilterDN>
+    ): String?
+
     suspend fun getRecipients(
         query: ApiQueryParamDN
     ): ListData<RecipientDTO>?
