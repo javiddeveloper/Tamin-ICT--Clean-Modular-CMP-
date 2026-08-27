@@ -8,38 +8,26 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.HttpStatusErrorMapper
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
+import com.tamin.taminhamrah.tools.safeCall
 
 class InquiryEducationRemoteDataSourceImpl(
     private val inquiryEducationApiService: InquiryEducationApiService,
     private val errorParser: ErrorParser,
 ) : InquiryEducationRemoteDataSource {
 
-    override suspend fun getDataForEducation(): EducationDependentsListDTO? {
-        return try {
+    override suspend fun getDataForEducation(): EducationDependentsListDTO? =
+        errorParser.safeCall("getDataForEducation") {
             inquiryEducationApiService.getDataForEducation().extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
-    }
+
 
     override suspend fun inquiryEducationCertificate(
         code: String,
         educationCode: String,
-    ): String? {
-        return try {
+    ): String? = errorParser.safeCall("inquiryEducationCertificate"){
             inquiryEducationApiService
                 .inquiryEducationCertificate(code = code, educationCode = educationCode)
                 .extractNullableData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
     }
 
