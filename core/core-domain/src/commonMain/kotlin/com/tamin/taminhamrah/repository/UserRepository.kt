@@ -58,6 +58,10 @@ interface UserRepository {
         filters: List<ApiFilterDN> = emptyList()
     ): Flow<String>
 
+    suspend fun getWageCertificateReport(
+        filters: List<ApiFilterDN> = emptyList()
+    ): Flow<String>
+
     suspend fun getRecipients(
         filters: List<ApiFilterDN> = emptyList()
     ): Flow<List<RecipientDN>>

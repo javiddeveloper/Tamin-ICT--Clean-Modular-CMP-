@@ -12,7 +12,9 @@ import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamPR
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
 import com.tamin.taminhamrah.useCases.personalInbox.DeleteMyRequestUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetMyRequestPdfUseCase
-import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxItemsUseCase
+import com.tamin.taminhamrah.paging.Paginator
+import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
+import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxItemsPageUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxSizeUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.InboxLicenseOperation
 import io.ktor.util.decodeBase64Bytes
@@ -26,6 +28,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import org.jetbrains.compose.resources.getString
 import taminx.core.core_ui.Res
@@ -39,7 +42,7 @@ import taminx.core.core_ui.permit_duration_one_week
 import taminx.core.core_ui.permit_duration_one_year
 
 class MyInboxViewModel(
-    private val getPersonalInboxItemsUseCase: GetPersonalInboxItemsUseCase,
+    private val getPersonalInboxItemsPageUseCase: GetPersonalInboxItemsPageUseCase,
     private val getPersonalInboxSizeUseCase: GetPersonalInboxSizeUseCase,
     private val getMyRequestPdfUseCase: GetMyRequestPdfUseCase,
     private val deleteMyRequestUseCase: DeleteMyRequestUseCase,
@@ -47,6 +50,10 @@ class MyInboxViewModel(
 ) : BaseViewModel<MyInboxUiState, PartialState, MyInboxEvent, MyInboxIntent>(
     initialState = MyInboxUiState()
 ) {
+
+    private val paginator = Paginator(
+        loadPage = { query -> getPersonalInboxItemsPageUseCase(query).first() },
+    )
 
     init {
         sendIntent(MyInboxIntent.LoadDurations)
@@ -56,6 +63,9 @@ class MyInboxViewModel(
     override fun handleIntent(intent: MyInboxIntent): Flow<PartialState> {
         return when (intent) {
             is MyInboxIntent.LoadInbox -> handleLoadInbox()
+            is MyInboxIntent.LoadNextPage -> flow { paginator.loadNext() }
+            is MyInboxIntent.RetryNextPage -> flow { paginator.retry() }
+            is MyInboxIntent.RefreshInbox -> refreshInbox()
             is MyInboxIntent.LoadDurations -> handleLoadDurations()
             is MyInboxIntent.OnBackClicked -> {
                 sendEvent(NavigateBack)
@@ -126,9 +136,28 @@ class MyInboxViewModel(
         }
 
     private fun handleLoadInbox(): Flow<PartialState> = merge(
-        loadInboxItems(),
+        observePaging(),
+        flow { paginator.loadNext() },
         loadInboxSize(),
     )
+    private fun refreshInbox(): Flow<PartialState> = merge(
+        flow<PartialState> { paginator.refresh() },
+        loadInboxSize(),
+    )
+
+    private fun observePaging(): Flow<PartialState> = paginator.state.map { paging ->
+        val errorMessage = paging.error?.toSingleLineMessage()
+        if (errorMessage != null && paging.items.isEmpty()) {
+            sendEvent(ShowError(errorMessage))
+        }
+        PartialState.PagingChanged(
+            items = paging.items.toPresentation().toImmutableList(),
+            isLoadingFirstPage = paging.isLoadingFirstPage,
+            isLoadingNextPage = paging.isLoadingNextPage,
+            endReached = paging.endReached,
+            error = errorMessage,
+        )
+    }
 
     private fun handleLoadDurations(): Flow<PartialState> = flow {
         val durations = persistentListOf(
@@ -138,17 +167,6 @@ class MyInboxViewModel(
             PermitDurationPR(label = getString(Res.string.permit_duration_one_year), valueInDays = 365)
         )
         emit(PartialState.DurationsLoaded(durations))
-    }
-
-    private fun loadInboxItems(): Flow<PartialState> = flow {
-        emit(PartialState.Loading(true))
-        try {
-            getPersonalInboxItemsUseCase().collect { items ->
-                emit(PartialState.ItemsLoaded(items.toPresentation().toImmutableList()))
-            }
-        } catch (e: Exception) {
-            emit(emitError(e.message ?: getString(Res.string.error_unknown_fallback)))
-        }
     }
 
     private fun loadInboxSize(): Flow<PartialState> = flow {
@@ -183,8 +201,7 @@ class MyInboxViewModel(
         try {
             deleteMyRequestUseCase(requestId.toString()).collect()
             emit(PartialState.HideDeleteConfirmation)
-            // Refresh inbox after deletion
-            handleLoadInbox().collect { emit(it) }
+            refreshInbox().collect { emit(it) }
         } catch (e: Exception) {
             emit(emitError(e.message ?: getString(Res.string.error_delete_message)))
         } finally {
@@ -200,8 +217,7 @@ class MyInboxViewModel(
                 operation = InboxLicenseOperation.CANCEL
             ).collect()
             emit(PartialState.HideCancelLicenseConfirmation)
-            // Refresh inbox after cancellation
-            handleLoadInbox().collect { emit(it) }
+            refreshInbox().collect { emit(it) }
         } catch (e: Exception) {
             emit(emitError(e.message ?: getString(Res.string.error_cancel_license_message)))
         } finally {
@@ -218,8 +234,7 @@ class MyInboxViewModel(
                 duration = duration.valueInDays.toString()
             ).collect()
             emit(PartialState.HideInquiryPermitSheet)
-            // Refresh inbox after issuing
-            handleLoadInbox().collect { emit(it) }
+            refreshInbox().collect { emit(it) }
         } catch (e: Exception) {
             emit(emitError(e.message ?: getString(Res.string.error_issue_license_message)))
         } finally {
@@ -240,9 +255,12 @@ class MyInboxViewModel(
             error = partialState.message
         )
 
-        is PartialState.ItemsLoaded -> currentState.copy(
-            isLoading = false,
-            items = partialState.items
+        is PartialState.PagingChanged -> currentState.copy(
+            items = partialState.items,
+            isLoading = partialState.isLoadingFirstPage,
+            isLoadingNextPage = partialState.isLoadingNextPage,
+            endReached = partialState.endReached,
+            paginationError = partialState.error,
         )
 
         is PartialState.SizeLoaded -> currentState.copy(

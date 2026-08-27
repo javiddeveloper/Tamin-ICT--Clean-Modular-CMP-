@@ -1,8 +1,10 @@
 package com.tamin.taminhamrah.repository.common
 
 import com.tamin.taminhamrah.model.common.BeneficiaryDN
+import com.tamin.taminhamrah.model.common.InsuranceTypeDN
 import com.tamin.taminhamrah.model.common.JobTitleListDN
 import com.tamin.taminhamrah.model.common.MainServiceDN
+import com.tamin.taminhamrah.model.common.UserTypeInfoDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import kotlinx.coroutines.flow.Flow
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
@@ -15,4 +17,6 @@ interface CommonRepository {
     fun getRegistrationDeclarationForm(): Flow<ByteArray>
     fun getJobTitle(query: ApiQueryParamDN): Flow<JobTitleListDN?>
     fun getRoles(): Flow<List<com.tamin.taminhamrah.model.common.RoleDN>>
+    fun getInsuranceTypes(searchText: String? = null): Flow<List<InsuranceTypeDN>>
+    fun checkUserType(): Flow<UserTypeInfoDN>
 }

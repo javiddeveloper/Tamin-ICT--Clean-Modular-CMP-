@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +36,8 @@ import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.ShimmerBlock
+import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
@@ -56,6 +59,7 @@ fun ValidationStatusCard(
     badgeText: String,
     modifier: Modifier = Modifier,
     isValid: Boolean = true,
+    isLoading: Boolean = false,
 ) {
     val colors = LocalTaminColors.current
     val isDark = colors == DarkTaminColors
@@ -99,28 +103,48 @@ fun ValidationStatusCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
-            StatusIconButton(isValid = isValid)
+            if (isLoading) {
+                ShimmerBlock(
+                    modifier = Modifier.size(IconSize.largePlus),
+                    cornerRadius = CornerRadius.listRow,
+                )
 
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = colors.textPrimary,
-                    )
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
+                ) {
+                    ShimmerBlock(modifier = Modifier.width(ShimmerSize.titleWidth).height(ShimmerSize.titleHeight))
+                    ShimmerBlock(modifier = Modifier.width(ShimmerSize.subtitleWidth).height(ShimmerSize.subtitleHeight))
+                }
+
+                ShimmerBlock(
+                    modifier = Modifier.width(ShimmerSize.badgeWidth).height(ShimmerSize.badgeHeight),
+                    cornerRadius = CornerRadius.full,
                 )
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.labelMedium.copy(
-                        fontWeight = FontWeight.Normal,
-                        color = colors.textSecondary,
+            } else {
+                StatusIconButton(isValid = isValid)
+
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
+                ) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = colors.textPrimary,
+                        )
                     )
-                )
+                    Text(
+                        text = subtitle,
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = FontWeight.Normal,
+                            color = colors.textSecondary,
+                        )
+                    )
+                }
+                StatusBadge(text = badgeText, isValid = isValid)
             }
-            StatusBadge(text = badgeText, isValid = isValid)
         }
     }
 }
@@ -202,6 +226,13 @@ private fun ValidationStatusCardPreview() {
                     badgeText = "نامعتبر",
                     hazeState = hazeState,
                     isValid = false
+                )
+                ValidationStatusCard(
+                    title = "",
+                    subtitle = "",
+                    badgeText = "",
+                    hazeState = hazeState,
+                    isLoading = true
                 )
             }
         }
