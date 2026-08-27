@@ -19,6 +19,7 @@ import taminx.core.core_ui.ill_days_calc_rate_title_married
 import taminx.core.core_ui.ill_days_calc_rate_title_single
 import taminx.core.core_ui.ill_days_calc_rest_days_value
 import taminx.core.core_ui.ill_days_error_end_before_start
+import taminx.core.core_ui.ill_days_error_rest_days_too_long
 import kotlin.math.max
 
 class IllDaysCalculateViewModel(
@@ -76,6 +77,11 @@ class IllDaysCalculateViewModel(
         if (start == null || end == null || marital == null) return
         if (end < start) {
             sendEvent(IllDaysCalculateEvent.ShowToast(getString(Res.string.ill_days_error_end_before_start)))
+            return
+        }
+        val days = state.dayCount ?: computeDayCount(start, end) ?: 1
+        if (days > MAX_REST_DAYS) {
+            sendEvent(IllDaysCalculateEvent.ShowToast(getString(Res.string.ill_days_error_rest_days_too_long)))
             return
         }
         emit(PartialState.Calculating(true))
@@ -157,5 +163,6 @@ class IllDaysCalculateViewModel(
 
     private companion object {
         const val MILLIS_PER_DAY = 86_400_000L
+        const val MAX_REST_DAYS = 365
     }
 }

@@ -70,11 +70,16 @@ fun TaminSearchableOptionSheet(
     subtitle: String? = null,
     searchPlaceholder: String = stringResource(Res.string.active_relation_search_placeholder),
     showSearch: Boolean = true,
+    /**
+     * When non-null, search is delegated to the caller (e.g. remote city filter).
+     * Local contains-filter is skipped so the parent can replace [items].
+     */
+    onSearchQueryChange: ((String) -> Unit)? = null,
 ) {
     val colors = LocalTaminColors.current
     var query by remember { mutableStateOf("") }
-    val filtered = remember(items, query, showSearch) {
-        if (!showSearch || query.isBlank()) {
+    val filtered = remember(items, query, showSearch, onSearchQueryChange) {
+        if (!showSearch || query.isBlank() || onSearchQueryChange != null) {
             items
         } else {
             items.filter { it.label.contains(query, ignoreCase = true) }
@@ -113,7 +118,10 @@ fun TaminSearchableOptionSheet(
             if (showSearch) {
                 CustomSearchBar(
                     query = query,
-                    onQueryChange = { query = it },
+                    onQueryChange = {
+                        query = it
+                        onSearchQueryChange?.invoke(it)
+                    },
                     placeHolder = searchPlaceholder,
                     modifier = Modifier.fillMaxWidth(),
                 )
