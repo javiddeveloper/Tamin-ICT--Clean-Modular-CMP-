@@ -63,7 +63,6 @@ import taminx.core.core_ui.pension_survivor_deceased_history_confirm_label
 import taminx.core.core_ui.pension_survivor_deceased_id_children_page
 import taminx.core.core_ui.pension_survivor_deceased_id_first_page
 import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 
 @Composable
 fun DeceasedDocumentsStep(
@@ -283,7 +282,6 @@ private fun deceasedDocumentTitle(type: DeceasedDocumentType): String = stringRe
     },
 )
 
-@OptIn(ExperimentalEncodingApi::class)
 @Composable
 private fun rememberBase64Thumbnail(bytes: ByteArray?): String? {
     val state = produceState<String?>(initialValue = null, bytes) {

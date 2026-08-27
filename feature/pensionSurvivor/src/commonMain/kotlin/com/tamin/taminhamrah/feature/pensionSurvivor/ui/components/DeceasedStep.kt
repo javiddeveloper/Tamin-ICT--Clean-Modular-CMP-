@@ -107,9 +107,6 @@ import taminx.core.core_ui.pension_survivor_deceased_previous_pension
 import taminx.core.core_ui.verify_issue_place_label
 import taminx.core.core_ui.verify_label_age
 import taminx.core.core_ui.verify_label_gender
-import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
-
 @Composable
 fun DeceasedStep(
     state: PensionSurvivorUiState,

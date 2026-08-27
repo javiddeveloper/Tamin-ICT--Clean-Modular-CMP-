@@ -9,6 +9,10 @@ android {
 
 kotlin {
     sourceSets {
+        all {
+            languageSettings.optIn("org.jetbrains.compose.resources.ExperimentalResourceApi")
+            languageSettings.optIn("kotlin.io.encoding.ExperimentalEncodingApi")
+        }
         commonMain.dependencies {
             implementation(libs.androidx.navigation.compose)
             implementation(libs.koin.compose)
@@ -17,6 +21,8 @@ kotlin {
             implementation(libs.filekit.core)
             implementation(libs.filekit.dialog.compose)
             implementation(libs.kotlinx.datetime)
+            // Needed for ByteReadChannel when opening the bundled rules PDF in TaminPdfViewer
+            implementation(libs.ktor.client.core)
         }
     }
 }

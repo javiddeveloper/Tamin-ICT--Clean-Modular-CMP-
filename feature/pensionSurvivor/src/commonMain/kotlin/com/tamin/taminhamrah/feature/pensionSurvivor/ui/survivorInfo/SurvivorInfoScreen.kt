@@ -117,7 +117,6 @@ import taminx.core.core_ui.pension_survivor_show_survivor_info
 import taminx.core.core_ui.pension_survivor_title
 import taminx.core.core_ui.verify_label_national_id
 import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 
 @Composable
 fun SurvivorInfoScreen(
@@ -629,7 +628,6 @@ private fun survivorDocumentTitle(type: SurvivorDocumentType): String = stringRe
     },
 )
 
-@OptIn(ExperimentalEncodingApi::class)
 @Composable
 private fun rememberBase64Thumbnail(bytes: ByteArray?): String? {
     val base64 by produceState<String?>(initialValue = null, bytes) {

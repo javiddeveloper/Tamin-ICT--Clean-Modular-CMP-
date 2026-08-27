@@ -63,7 +63,6 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -147,7 +146,6 @@ fun PensionSurvivorScreen(
         },
         onOpenRulesDocument = {
             scope.launch {
-                @OptIn(ExperimentalResourceApi::class)
                 try {
                     val bytes = Res.readBytes(RULES_PDF_RESOURCE_PATH)
                     rulesPdf = PdfDownloadPR(InputStreamPR(ByteReadChannel(bytes)))
