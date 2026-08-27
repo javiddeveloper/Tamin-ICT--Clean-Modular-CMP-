@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -25,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import com.tamin.taminhamrah.feature.inquiryEducation.ui.components.InquiryEducationFailureStep
+import com.tamin.taminhamrah.feature.inquiryEducation.ui.components.InquiryEducationFormSkeleton
 import com.tamin.taminhamrah.feature.inquiryEducation.ui.components.InquiryEducationFormStep
 import com.tamin.taminhamrah.feature.inquiryEducation.ui.components.InquiryEducationSuccessStep
 import com.tamin.taminhamrah.feature.inquiryEducation.ui.contract.InquiryEducationEvent
@@ -42,6 +42,8 @@ import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.ShimmerBlock
+import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
@@ -111,25 +113,28 @@ private fun InquiryEducationContent(
             )
         },
         bottomBar = {
-            if (!(state.isLoading && state.step == InquiryEducationStep.Form)) {
-                InquiryEducationBottomBar(
-                    state = state,
-                    onIntent = onIntent,
-                )
+            when {
+                state.isLoading && state.step == InquiryEducationStep.Form -> {
+                    InquiryEducationBottomBarSkeleton()
+                }
+                else -> {
+                    InquiryEducationBottomBar(
+                        state = state,
+                        onIntent = onIntent,
+                    )
+                }
             }
         },
     ) { padding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding).padding(top = Spacing.sm),
+                .padding(padding)
+                .padding(top = Spacing.sm),
         ) {
             when {
                 state.isLoading && state.step == InquiryEducationStep.Form -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        color = colors.blueText,
-                    )
+                    InquiryEducationFormSkeleton(modifier = Modifier.fillMaxSize())
                 }
                 state.step == InquiryEducationStep.Form -> {
                     InquiryEducationFormStep(
@@ -192,6 +197,22 @@ private fun InquiryEducationHeader(
             style = MaterialTheme.typography.labelLarge,
             color = colors.textHeaderSubtitle,
             modifier = Modifier.padding(horizontal = Spacing.lg),
+        )
+    }
+}
+
+@Composable
+private fun InquiryEducationBottomBarSkeleton() {
+    TaminBottomBar(
+        modifier = Modifier
+            .navigationBarsPadding()
+            .imePadding(),
+    ) {
+        ShimmerBlock(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(ShimmerSize.fieldHeight),
+            cornerRadius = CornerRadius.cardCompact,
         )
     }
 }

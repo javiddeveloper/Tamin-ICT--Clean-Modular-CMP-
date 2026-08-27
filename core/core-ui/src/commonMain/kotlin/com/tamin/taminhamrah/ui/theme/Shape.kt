@@ -136,4 +136,14 @@ object HeaderDecoration {
 object ShimmerSize {
     val valueWidth = 56.dp
     val valueHeight = 14.dp
+    val labelWidth = 72.dp
+    val sectionLabelWidth = 48.dp
+    val hintWidth = 120.dp
+    val titleWidth = 160.dp
+    val chipWidth = 64.dp
+    val infoBodyHeight = 80.dp
+    val copyRowHeight = 36.dp
+    val sonCardHeight = 72.dp
+    val fieldHeight = ButtonDimens.height
+    val helperLineWidth = 200.dp
 }
