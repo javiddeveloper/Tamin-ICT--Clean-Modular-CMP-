@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileIntent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState.PartialState
 import com.tamin.taminhamrah.feature.profile.ui.model.ProfileMenuItem
+import com.tamin.taminhamrah.mapper.activeRelation.toUiModelList
 import com.tamin.taminhamrah.mapper.identity.toPresentation
 import com.tamin.taminhamrah.mapper.relation.toPresentation
 import com.tamin.taminhamrah.model.DarkThemeConfig
@@ -19,11 +20,13 @@ import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCase
 import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
 import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
+import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
 import com.tamin.taminhamrah.useCases.user.VerifyChangeMobileUseCase
 import com.tamin.taminhamrah.util.HeaderConstant
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
@@ -35,6 +38,7 @@ class ProfileViewModel(
     private val getUserProfileImageUseCase: UserProfileImageUseCase,
     private val taminRelationUseCase: TaminRelationUseCase,
     private val sendImageRequestUseCase: SendImageRequestUseCase,
+    private val subdominantUseCase: SubdominantUseCase,
     private val signOutUseCase: SignOutUseCase,
     private val getSignOutUrlUseCase: GetSignOutUrlUseCase,
     private val getInsuredActiveBranchUseCase: GetInsuredActiveBranchUseCase,
@@ -90,8 +94,24 @@ class ProfileViewModel(
                 )
             }
         }
+        val dependentsCountFlow = flow {
+            subdominantUseCase().collect { subdominant ->
+                emit(PartialState.DependentsCountLoaded(subdominant.list?.size ?: 0))
+            }
+        }
+        val activeRelationFlow = flow {
+            getRelationTaminAllUseCase.invoke().collect { relations ->
+                val uiItems = relations.toUiModelList()
+                emit(
+                    PartialState.ActiveRelationStatusLoaded(
+                        activeCount = uiItems.count { it.isActive },
+                        inactiveCount = uiItems.count { !it.isActive }
+                    )
+                )
+            }
+        }
 
-        merge(userIdFlow, imageFlow, identityFlow, taminRelationFlow).collect {
+        merge(userIdFlow, imageFlow, identityFlow, taminRelationFlow, dependentsCountFlow, activeRelationFlow).collect {
             emit(it)
         }
     }
@@ -205,6 +225,16 @@ class ProfileViewModel(
 
         is PartialState.TaminRelationLoaded -> currentState.copy(
             taminRelation = partialState.relation
+        )
+
+        is PartialState.DependentsCountLoaded -> currentState.copy(
+            dependentsCount = partialState.count
+        )
+
+        is PartialState.ActiveRelationStatusLoaded -> currentState.copy(
+            activeRelationCount = partialState.activeCount,
+            inactiveRelationCount = partialState.inactiveCount,
+            isActiveRelationLoading = false
         )
 
         is PartialState.ImageRequestLoading -> currentState.copy(

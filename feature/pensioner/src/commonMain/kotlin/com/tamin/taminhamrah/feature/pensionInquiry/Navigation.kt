@@ -114,9 +114,9 @@ fun NavGraphBuilder.edictScreen(onBack: () -> Unit) {
     }
 }
 
-fun NavGraphBuilder.issuanceCertificateScreen(onBack: () -> Unit) {
+fun NavGraphBuilder.issuanceCertificateScreen(onBack: () -> Unit, onGoHome: () -> Unit) {
     composableWithFadeTransitions<IssuanceCertificateRoute> {
-        IssuanceCertificateScreen(onBack = onBack)
+        IssuanceCertificateScreen(onBack = onBack, onGoHome = onGoHome)
     }
 }
 

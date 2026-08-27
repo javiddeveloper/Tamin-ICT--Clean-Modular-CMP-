@@ -7,6 +7,9 @@ import com.tamin.taminhamrah.feature.deferredInstallment.ui.contract.DeferredIns
 import com.tamin.taminhamrah.feature.deferredInstallment.ui.contract.GUARANTEE_FOR_OTHERS
 import com.tamin.taminhamrah.feature.deferredInstallment.ui.contract.GUARANTEE_FOR_SELF
 import com.tamin.taminhamrah.model.common.BeneficiaryDN
+import com.tamin.taminhamrah.model.common.InsuranceTypeDN
+import com.tamin.taminhamrah.model.common.UserType
+import com.tamin.taminhamrah.model.common.UserTypeInfoDN
 import com.tamin.taminhamrah.model.common.JobTitleListDN
 import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.pension.EdictPensionerDN
@@ -327,4 +330,10 @@ private class FakeDeferredInstallmentCommonRepository : CommonRepository {
     override fun getRegistrationDeclarationForm(): Flow<ByteArray> = error("not used")
     override fun getJobTitle(query: ApiQueryParamDN): Flow<JobTitleListDN?> = error("not used")
     override fun getRoles(): Flow<List<com.tamin.taminhamrah.model.common.RoleDN>> = error("not used")
+    override fun getInsuranceTypes(searchText: String?): Flow<List<InsuranceTypeDN>> {
+        error("not used")
+    }
+    override fun checkUserType(): Flow<UserTypeInfoDN> = flow {
+        emit(UserTypeInfoDN(userType = UserType.INSURED))
+    }
 }

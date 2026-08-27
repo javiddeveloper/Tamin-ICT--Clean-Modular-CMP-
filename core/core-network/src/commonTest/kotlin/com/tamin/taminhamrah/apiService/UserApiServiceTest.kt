@@ -108,4 +108,18 @@ class UserApiServiceTest : BaseApiTest() {
         assertNull(response.data)
     }
 
+    @Test
+    fun `getWageCertificateReport should return success with null data`() = runTest {
+        val jsonResponse = UserTestData.certificateReportSuccess
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createUserApiService()
+
+        val response = apiService.getWageCertificateReport("[]")
+
+        assertEquals(200, response.status)
+        assertEquals("SUCCESSFUL", response.family)
+        assertNull(response.data)
+    }
+
 }

@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDN
 import com.tamin.taminhamrah.model.bankAccount.BankAccountDN
 import com.tamin.taminhamrah.model.certificate.RecipientDN
 import com.tamin.taminhamrah.model.common.CityDN
+import com.tamin.taminhamrah.model.common.CityListResultDN
 import com.tamin.taminhamrah.model.common.ProvinceDN
 import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDN
 import com.tamin.taminhamrah.model.identity.IdentityInfoDN
@@ -77,6 +78,7 @@ class FakeUserRepository : UserRepository {
     override suspend fun downloadDocument(url: String): PdfDownloadDN =
         PdfDownloadDN()
     override suspend fun getStatusCertificateReport(filters: List<ApiFilterDN>): Flow<String> = flowOf("")
+    override suspend fun getWageCertificateReport(filters: List<ApiFilterDN>): Flow<String> = flowOf("")
     override suspend fun getRecipients(filters: List<ApiFilterDN>): Flow<List<RecipientDN>> = flowOf(emptyList())
 
 }
@@ -87,6 +89,7 @@ class FakeCityProvinceRepository : CityProvinceRepository {
     override fun getProvince(provinceId: String): Flow<ProvinceDN> = flow {}
     override fun getProvinces(): Flow<List<ProvinceDN>> = flowOf(emptyList())
     override fun getCities(cityName: String?, provinceCode: String?): Flow<List<CityDN>> = flowOf(emptyList())
+    override fun getCitiesByProvince(provinceCode: String): Flow<CityListResultDN> = flowOf(CityListResultDN(emptyList()))
 }
 
 

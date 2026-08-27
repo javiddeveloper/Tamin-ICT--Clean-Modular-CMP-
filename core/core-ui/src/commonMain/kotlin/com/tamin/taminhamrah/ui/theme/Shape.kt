@@ -146,4 +146,9 @@ object ShimmerSize {
     val sonCardHeight = 72.dp
     val fieldHeight = ButtonDimens.height
     val helperLineWidth = 200.dp
+    val titleHeight = 14.dp
+    val subtitleWidth = 180.dp
+    val subtitleHeight = 12.dp
+    val badgeWidth = 56.dp
+    val badgeHeight = 24.dp
 }

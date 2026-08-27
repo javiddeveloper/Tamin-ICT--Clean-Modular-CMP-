@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.repository.personalInbox
 
 import com.tamin.taminhamrah.model.inbox.PersonalInboxItemDN
 import com.tamin.taminhamrah.model.inbox.PersonalInboxSizeDN
+import com.tamin.taminhamrah.model.paging.PageDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -11,6 +12,7 @@ class FakePersonalInboxRepository : PersonalInboxRepository {
     var error: Throwable = RuntimeException("Error")
     var inboxItemsResult: List<PersonalInboxItemDN> = emptyList()
     var inboxSizeResult: PersonalInboxSizeDN = PersonalInboxSizeDN(usage = "0", total = "10")
+    var inboxItemsTotal: Int? = null
     var lastQuery: ApiQueryParamDN? = null
     var deletedRequestId: String? = null
     var lastInquiryParams: Triple<String, String, String?>? = null
@@ -19,6 +21,13 @@ class FakePersonalInboxRepository : PersonalInboxRepository {
         lastQuery = query
         if (shouldThrowError) throw error
         emit(inboxItemsResult)
+    }
+
+
+    override fun getInboxItemsPage(query: ApiQueryParamDN): Flow<PageDN<PersonalInboxItemDN>> = flow {
+        lastQuery = query
+        if (shouldThrowError) throw error
+        emit(PageDN(items = inboxItemsResult, total = inboxItemsTotal))
     }
 
     override fun getInboxSize(): Flow<PersonalInboxSizeDN> = flow {

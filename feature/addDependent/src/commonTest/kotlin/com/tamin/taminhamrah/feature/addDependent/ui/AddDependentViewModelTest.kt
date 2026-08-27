@@ -10,6 +10,7 @@ import com.tamin.taminhamrah.feature.addDependent.ui.contract.STEP_VERIFICATION
 import com.tamin.taminhamrah.feature.addDependent.ui.contract.StepperMode
 import com.tamin.taminhamrah.feature.addDependent.ui.model.FamilyRelationshipPR
 import com.tamin.taminhamrah.model.common.CityDN
+import com.tamin.taminhamrah.model.common.CityListResultDN
 import com.tamin.taminhamrah.model.common.CityPR
 import com.tamin.taminhamrah.model.common.ProvinceDN
 import com.tamin.taminhamrah.repository.CityProvinceRepository
@@ -120,4 +121,5 @@ private object EmptyCityProvinceRepository : CityProvinceRepository {
     override fun getProvinces(): Flow<List<ProvinceDN>> = flowOf(emptyList())
     override fun getCities(cityName: String?, provinceCode: String?): Flow<List<CityDN>> =
         flowOf(emptyList())
+    override fun getCitiesByProvince(provinceCode: String): Flow<CityListResultDN> = flowOf(CityListResultDN(emptyList()))
 }

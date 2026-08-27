@@ -20,6 +20,7 @@ import com.tamin.taminhamrah.feature.settings.di.settingsModule
 import com.tamin.taminhamrah.feature.addDependent.di.addDependentModule
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.di.pensionStatusInquiryModule
 import com.tamin.taminhamrah.feature.userRequest.di.userRequestModule
+import com.tamin.taminhamrah.feature.historyobjection.di.historyObjectionModule
 import com.tamin.taminhamrah.feature.orotezprotez.di.orotezProtezModule
 import com.tamin.taminhamrah.feature.girlSurvivor.di.girlSurvivorModule
 import com.tamin.taminhamrah.feature.deferredInstallment.di.deferredInstallmentModule
@@ -62,6 +63,7 @@ val sharedModules: List<Module>
         orotezProtezModule,
         girlSurvivorModule,
         deferredInstallmentModule,
+        historyObjectionModule,
         inquiryEducationModule,
     )
 

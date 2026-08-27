@@ -20,6 +20,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
@@ -66,6 +67,25 @@ class OrotezProtezViewModelTest {
         assertEquals("10-20", state.branch?.id)
         assertNotNull(state.mainInfo)
         assertNull(state.error)
+    }
+
+    @Test
+    fun loadInitialData_onFailure_keepsErrorMessageAfterLoadingFinishes() = runTest(testDispatcher) {
+        val failingRepository = FakeOrotezProtezRepository().apply {
+            shouldThrowOnLoad = true
+            loadError = RuntimeException("boom")
+        }
+        val failingViewModel = OrotezProtezViewModel(
+            getRequestInsuredMainInfoUseCase = GetRequestInsuredMainInfoUseCase(failingRepository),
+            getInsuredPersonsUseCase = GetInsuredPersonsUseCase(failingRepository),
+            uploadImageUseCase = UploadImageUseCase(FakeContractsRepository()),
+            saveShortTermOrthosisUseCase = SaveShortTermOrthosisUseCase(failingRepository),
+        )
+
+        val state = failingViewModel.uiState.value
+
+        assertFalse(state.isLoading)
+        assertNotNull(state.error)
     }
 
     @Test
