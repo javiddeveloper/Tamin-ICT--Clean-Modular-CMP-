@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -23,11 +24,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.components.LegalRepresentativeHeader
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.components.LegalRepresentativeHeroSubtitle
+import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.components.LegalRepresentativeIdentitySummaryCard
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopPR
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.ErrorStateView
-import com.tamin.taminhamrah.ui.components.StatTile
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -42,7 +43,9 @@ import taminx.core.core_ui.legal_representative_hub_subtitle
 import taminx.core.core_ui.legal_representative_info_banner
 import taminx.core.core_ui.legal_representative_open_action
 import taminx.core.core_ui.legal_representative_workshop_code_label
-import taminx.core.core_ui.legal_representative_workshop_stat_label
+
+/** How far the identity card rides up into the header's gradient, straddling the seam. */
+private val HeroCardOverlap = Spacing.xxl
 
 @Composable
 fun LegalRepresentativeWorkshopsScreen(
@@ -74,60 +77,67 @@ private fun LegalRepresentativeWorkshopsContent(
     val taminColors = LocalTaminColors.current
 
     Column(modifier = Modifier.fillMaxSize()) {
-        LegalRepresentativeHeader(onBackClicked = onBackClicked) {
+        LegalRepresentativeHeader(onBackClicked = onBackClicked, heroCardOverlap = HeroCardOverlap) {
             LegalRepresentativeHeroSubtitle(stringResource(Res.string.legal_representative_hub_subtitle))
         }
 
-        Box(modifier = Modifier.fillMaxSize()) {
-            when {
-                uiState.isLoading -> CircularProgressIndicator(
-                    color = taminColors.blueText,
-                    modifier = Modifier.align(Alignment.Center),
-                )
+        // The card rides up into the header's reserved extra space; wrapping it together with
+        // everything below in a single offset keeps their normal spacing intact instead of
+        // opening a gap where the card used to sit.
+        Column(modifier = Modifier.fillMaxSize().offset(y = -HeroCardOverlap)) {
+            LegalRepresentativeIdentitySummaryCard(
+                fullName = uiState.fullName,
+                workshopCount = uiState.workshops.size,
+                modifier = Modifier.padding(horizontal = Spacing.lg),
+            )
 
-                uiState.error != null -> ErrorStateView(
-                    message = uiState.error,
-                    onDismiss = {},
-                    onRetry = onRetry,
-                    modifier = Modifier.align(Alignment.Center),
-                )
+            Box(modifier = Modifier.fillMaxSize()) {
+                when {
+                    uiState.isLoading -> CircularProgressIndicator(
+                        color = taminColors.blueText,
+                        modifier = Modifier.align(Alignment.Center),
+                    )
 
-                uiState.workshops.isEmpty() -> EmptyStateMessage(
-                    icon = Icons.Filled.Groups,
-                    title = stringResource(Res.string.legal_representative_empty_title),
-                    modifier = Modifier.align(Alignment.Center),
-                )
+                    uiState.error != null -> ErrorStateView(
+                        message = uiState.error,
+                        onDismiss = {},
+                        onRetry = onRetry,
+                        modifier = Modifier.align(Alignment.Center),
+                    )
 
-                else -> LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.lg),
-                    verticalArrangement = Arrangement.spacedBy(Spacing.md),
-                ) {
-                    item {
-                        StatTile(
-                            label = stringResource(Res.string.legal_representative_workshop_stat_label),
-                            amount = uiState.workshops.size.toString(),
-                            containerColor = taminColors.greenBg,
-                            contentColor = taminColors.teal,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    }
-                    item {
-                        Text(
-                            text = stringResource(Res.string.legal_representative_info_banner),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = taminColors.textMuted,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .taminSurface()
-                                .padding(Spacing.md),
-                        )
-                    }
-                    items(uiState.workshops) { workshop ->
-                        LegalRepresentativeWorkshopCard(
-                            workshop = workshop,
-                            onOpenWorkshop = onOpenWorkshop,
-                        )
+                    uiState.workshops.isEmpty() -> EmptyStateMessage(
+                        icon = Icons.Filled.Groups,
+                        title = stringResource(Res.string.legal_representative_empty_title),
+                        modifier = Modifier.align(Alignment.Center),
+                    )
+
+                    else -> LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(
+                            start = Spacing.lg,
+                            end = Spacing.lg,
+                            top = Spacing.lg,
+                            bottom = Spacing.lg + HeroCardOverlap,
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.md),
+                    ) {
+                        item {
+                            Text(
+                                text = stringResource(Res.string.legal_representative_info_banner),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = taminColors.textMuted,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .taminSurface()
+                                    .padding(Spacing.md),
+                            )
+                        }
+                        items(uiState.workshops) { workshop ->
+                            LegalRepresentativeWorkshopCard(
+                                workshop = workshop,
+                                onOpenWorkshop = onOpenWorkshop,
+                            )
+                        }
                     }
                 }
             }
