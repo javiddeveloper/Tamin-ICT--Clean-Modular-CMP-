@@ -31,6 +31,10 @@ fun EmployerWorkshopDN.toPresentation(): EmployerWorkshopPR {
     return EmployerWorkshopPR(
         sswn = sswn,
         branchTitle = branchTitle,
+        branchName = branchName,
+        lastAddress = lastAddress,
+        characterCode = characterCode,
+        characterDesc = characterDesc,
         workshopApproveDate = workshopApproveDate,
         inclusionDate = inclusionDate,
         brhCode = brhCode,

@@ -27,9 +27,13 @@ class GetAllEmployerAgreementByNationalIdUseCaseTest : BaseUseCaseTest() {
         val expectedList = EmployerAgreementListDN(
             list = listOf(
                 EmployerAgreementDN(
-                    workshop = EmployerWorkshopDN(workshopName = "Workshop 1", workshopId = "111", branchCode = "01", employerName = "John Doe", actitvityCode = null, activityName = null, branchTitle = null, brhCode = null, inclusionDate = null, sswn = null, userId = null, workshopApproveDate = null, workshopRegisterDate = null, workshopUnemployedStat = null),
+                    workshop = EmployerWorkshopDN(
+                        workshopName = "Workshop 1",
+                        workshopId = "111",
+                        branchCode = "01",
+                        employerName = "John Doe",
+                    ),
                     nationalcode = "1234567890",
-                    createdt = null, createuid = null, dname = null, emailaddr = null, enddate = null, firstname = null, lastname = null, letDate = null, letNo = null, logicalDeleted = null, mastcusttype = null, masttyp = null, mobileno = null, nationalno = null, pymseq = null, regdate = null, regemailseq = null, regno = null, risuid = null, roletype = null, special = null, startdate = null
                 )
             ),
             total = 1

@@ -37,20 +37,24 @@ data class EmployerAgreementPR(
 @Immutable
 @Serializable
 data class EmployerWorkshopPR(
-    val sswn: String?,
-    val branchTitle: String?,
-    val workshopApproveDate: String?,
-    val inclusionDate: String?,
-    val brhCode: String?,
-    val activityName: String?,
-    val workshopRegisterDate: String?,
-    val branchCode: String?,
-    val workshopName: String?,
-    val employerName: String?,
-    val actitvityCode: String?,
-    val userId: String?,
-    val workshopId: String?,
-    val workshopUnemployedStat: String?,
+    val sswn: String? = null,
+    val branchTitle: String? = null,
+    val branchName: String? = null,
+    val lastAddress: String? = null,
+    val characterCode: String? = null,
+    val characterDesc: String? = null,
+    val workshopApproveDate: String? = null,
+    val inclusionDate: String? = null,
+    val brhCode: String? = null,
+    val activityName: String? = null,
+    val workshopRegisterDate: String? = null,
+    val branchCode: String? = null,
+    val workshopName: String? = null,
+    val employerName: String? = null,
+    val actitvityCode: String? = null,
+    val userId: String? = null,
+    val workshopId: String? = null,
+    val workshopUnemployedStat: String? = null,
 )
 
 @Immutable

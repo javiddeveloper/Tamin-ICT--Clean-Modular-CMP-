@@ -12,6 +12,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.managementDebit.ManagementDebi
 import com.tamin.taminhamrah.feature.workshops.ui.workshopMembers.WorkshopMembersViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.workshopStackholders.WorkshopStackholdersViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersViewModel
+import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.CompleteEmployerInfoViewModel
 
 val workshopsModule = module {
     viewModelOf(::WorkshopsViewModel)
@@ -23,4 +24,5 @@ val workshopsModule = module {
     viewModelOf(::WorkshopMembersViewModel)
     viewModelOf(::WorkshopStackholdersViewModel)
     viewModelOf(::WorkshopRecentlyAddedMembersViewModel)
+    viewModelOf(::CompleteEmployerInfoViewModel)
 }

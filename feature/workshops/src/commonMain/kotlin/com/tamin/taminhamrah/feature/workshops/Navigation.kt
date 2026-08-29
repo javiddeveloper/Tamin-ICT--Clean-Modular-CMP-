@@ -66,11 +66,24 @@ data class WorkshopRecentlyAddedMembersRoute(
     val branchCode: String
 )
 
+@Serializable
+data object CompleteEmployerInfoRoute
+
 fun NavController.navigateToWorkshops() {
     navigate(WorkshopsRoute)
 }
 
+fun NavController.navigateToCompleteEmployerInfo() {
+    navigate(CompleteEmployerInfoRoute)
+}
+
 fun NavGraphBuilder.workshopsScreen(navController: NavController) {
+
+    composableWithFadeTransitions<CompleteEmployerInfoRoute> {
+        com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.CompleteEmployerInfoRoute(
+            onBack = { navController.popBackStack() },
+        )
+    }
 
     composableWithFadeTransitions<WorkshopsRoute> {
         WorkshopsScreen(

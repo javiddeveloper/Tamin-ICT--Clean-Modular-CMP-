@@ -42,6 +42,8 @@ import com.tamin.taminhamrah.apiService.inspection.InspectionApiService
 import com.tamin.taminhamrah.apiService.inspection.createInspectionApiService
 import com.tamin.taminhamrah.apiService.occurrence.OccurrenceApiService
 import com.tamin.taminhamrah.apiService.occurrence.createOccurrenceApiService
+import com.tamin.taminhamrah.apiService.employerInfo.EmployerInfoApiService
+import com.tamin.taminhamrah.apiService.employerInfo.createEmployerInfoApiService
 import com.tamin.taminhamrah.util.NetworkConstants
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
@@ -170,6 +172,11 @@ val ApiClientsModule = module {
     single<InspectionApiService> {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.createInspectionApiService()
+    }
+
+    single<EmployerInfoApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createEmployerInfoApiService()
     }
 }
 

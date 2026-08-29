@@ -1,0 +1,722 @@
+package com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.components
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.DateRange
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.tamin.taminhamrah.model.employerInfo.CompanyTypePR
+import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.util.PersianDateFormatter
+import com.tamin.taminhamrah.util.toPersianDigits
+import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.employer_info_btn_send_otp
+import taminx.core.core_ui.employer_info_ceo_birth_label
+import taminx.core.core_ui.employer_info_ceo_name_prefix
+import taminx.core.core_ui.employer_info_ceo_nid_label
+import taminx.core.core_ui.employer_info_ceo_section_title
+import taminx.core.core_ui.employer_info_company_type_label
+import taminx.core.core_ui.employer_info_email
+import taminx.core.core_ui.employer_info_legal_form_title
+import taminx.core.core_ui.employer_info_legal_name_prefix
+import taminx.core.core_ui.employer_info_legal_nid_label
+import taminx.core.core_ui.employer_info_mobile
+import taminx.core.core_ui.employer_info_tel_label
+import taminx.core.core_ui.ic_tamin_chevron_back
+
+private val ButtonGradient = Brush.linearGradient(
+    colors = listOf(Color(0xFF3B6FD4), Color(0xFF173D7E)),
+)
+
+@Composable
+fun LegalWorkshopFormSection(
+    legalNationalId: String,
+    onLegalNationalIdChanged: (String) -> Unit,
+    isLegalWorkshopInquiring: Boolean,
+    legalWorkshopName: String?,
+    selectedCompanyType: CompanyTypePR?,
+    onOpenCompanyTypePicker: () -> Unit,
+    ceoNationalId: String,
+    onCeoNationalIdChanged: (String) -> Unit,
+    ceoBirthDatePersian: String,
+    onCeoBirthDateSelected: (millis: Long, persianDate: String) -> Unit,
+    isCeoInquiring: Boolean,
+    ceoFullName: String?,
+    telephone: String,
+    onTelephoneChanged: (String) -> Unit,
+    mobile: String,
+    onMobileChanged: (String) -> Unit,
+    email: String,
+    onEmailChanged: (String) -> Unit,
+    errorMessage: String?,
+    hasAttemptedSubmit: Boolean,
+    isLoading: Boolean,
+    onSubmit: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+    var showDatePicker by remember { mutableStateOf(false) }
+
+    val isLegalNidError = hasAttemptedSubmit && legalNationalId.filter { it.isDigit() }.length != 11
+    val isCompanyTypeError = hasAttemptedSubmit && selectedCompanyType == null
+    val isCeoNidError = hasAttemptedSubmit && ceoNationalId.filter { it.isDigit() }.length != 10
+    val isCeoBirthError = hasAttemptedSubmit && ceoBirthDatePersian.isBlank()
+    val isMobileError = hasAttemptedSubmit && !mobile.filter { it.isDigit() }.matches(Regex("^09\\d{9}$"))
+    val isEmailError = hasAttemptedSubmit && !email.trim().matches(Regex("^\\S+@\\S+\\.\\S+$"))
+
+    Column(
+        modifier = modifier.fillMaxWidth().padding(horizontal = Spacing.lg),
+        verticalArrangement = Arrangement.spacedBy(11.dp),
+    ) {
+        // Section 1: Legal Workshop Info Card
+        Text(
+            text = stringResource(Res.string.employer_info_legal_form_title),
+            style = MaterialTheme.typography.titleSmall.copy(
+                fontWeight = FontWeight.Bold,
+                color = colors.textPrimary,
+                fontSize = 12.5.sp,
+            ),
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(
+                    elevation = 4.dp,
+                    shape = RoundedCornerShape(18.dp),
+                    ambientColor = Color(0x0A0F172A),
+                    spotColor = Color(0x0A0F172A),
+                )
+                .clip(RoundedCornerShape(18.dp))
+                .background(colors.bgSurface)
+                .border(1.dp, colors.border, RoundedCornerShape(18.dp))
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(9.dp),
+        ) {
+            // Legal National ID
+            Column {
+                Text(
+                    text = stringResource(Res.string.employer_info_legal_nid_label),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        color = colors.textSecondary,
+                        fontSize = 11.sp,
+                    ),
+                    modifier = Modifier.padding(bottom = 5.dp),
+                )
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                    BasicTextField(
+                        value = legalNationalId,
+                        onValueChange = { onLegalNationalIdChanged(it.filter { c -> c.isDigit() }.take(11)) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        textStyle = TextStyle(
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = colors.textPrimary,
+                        ),
+                        cursorBrush = SolidColor(colors.blueText),
+                        decorationBox = { innerTextField ->
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(44.dp)
+                                    .clip(RoundedCornerShape(13.dp))
+                                    .background(colors.bgPage)
+                                    .border(
+                                        width = 1.dp,
+                                        color = if (isLegalNidError) colors.dangerText else colors.border,
+                                        shape = RoundedCornerShape(13.dp),
+                                    )
+                                    .padding(horizontal = 12.dp),
+                                contentAlignment = Alignment.CenterStart,
+                            ) {
+                                if (legalNationalId.isEmpty()) {
+                                    Text(
+                                        text = "۱۱ رقم".toPersianDigits(),
+                                        style = MaterialTheme.typography.bodySmall.copy(
+                                            color = colors.textMuted,
+                                        ),
+                                    )
+                                }
+                                innerTextField()
+                                if (isLegalWorkshopInquiring) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(16.dp).align(Alignment.CenterEnd),
+                                        strokeWidth = 2.dp,
+                                        color = colors.blueText,
+                                    )
+                                }
+                            }
+                        },
+                    )
+                }
+            }
+
+            // Resolved Legal Entity Name Card
+            AnimatedVisibility(
+                visible = !legalWorkshopName.isNullOrBlank(),
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut(),
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(13.dp))
+                        .background(colors.blueBg)
+                        .border(1.dp, Color(0xFFDCE7FB), RoundedCornerShape(13.dp))
+                        .padding(horizontal = 11.dp, vertical = 9.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text(
+                        text = stringResource(Res.string.employer_info_legal_name_prefix),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            color = colors.blueText,
+                            fontSize = 10.sp,
+                        ),
+                    )
+                    Text(
+                        text = legalWorkshopName.orEmpty(),
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = colors.blueText,
+                            fontSize = 11.5.sp,
+                        ),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+
+            // Company Type Picker
+            Column {
+                Text(
+                    text = stringResource(Res.string.employer_info_company_type_label),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        color = colors.textSecondary,
+                        fontSize = 11.sp,
+                    ),
+                    modifier = Modifier.padding(bottom = 5.dp),
+                )
+                SelectPickerChip(
+                    text = selectedCompanyType?.title ?: "انتخاب کنید",
+                    isSelected = selectedCompanyType != null,
+                    isError = isCompanyTypeError,
+                    onClick = onOpenCompanyTypePicker,
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(2.dp))
+
+        // Section 2: CEO / Board Member Info Card
+        Text(
+            text = stringResource(Res.string.employer_info_ceo_section_title),
+            style = MaterialTheme.typography.titleSmall.copy(
+                fontWeight = FontWeight.Bold,
+                color = colors.textPrimary,
+                fontSize = 12.5.sp,
+            ),
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(
+                    elevation = 4.dp,
+                    shape = RoundedCornerShape(18.dp),
+                    ambientColor = Color(0x0A0F172A),
+                    spotColor = Color(0x0A0F172A),
+                )
+                .clip(RoundedCornerShape(18.dp))
+                .background(colors.bgSurface)
+                .border(1.dp, colors.border, RoundedCornerShape(18.dp))
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(9.dp),
+        ) {
+            // National ID & Birth Date Grid
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(9.dp),
+            ) {
+                // CEO National ID
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(Res.string.employer_info_ceo_nid_label),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            color = colors.textSecondary,
+                            fontSize = 11.sp,
+                        ),
+                        modifier = Modifier.padding(bottom = 5.dp),
+                    )
+                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                        BasicTextField(
+                            value = ceoNationalId,
+                            onValueChange = { onCeoNationalIdChanged(it.filter { c -> c.isDigit() }.take(10)) },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            singleLine = true,
+                            textStyle = TextStyle(
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = colors.textPrimary,
+                            ),
+                            cursorBrush = SolidColor(colors.blueText),
+                            decorationBox = { innerTextField ->
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(44.dp)
+                                        .clip(RoundedCornerShape(13.dp))
+                                        .background(colors.bgPage)
+                                        .border(
+                                            width = 1.dp,
+                                            color = if (isCeoNidError) colors.dangerText else colors.border,
+                                            shape = RoundedCornerShape(13.dp),
+                                        )
+                                        .padding(horizontal = 12.dp),
+                                    contentAlignment = Alignment.CenterStart,
+                                ) {
+                                    if (ceoNationalId.isEmpty()) {
+                                        Text(
+                                            text = "۱۰ رقم".toPersianDigits(),
+                                            style = MaterialTheme.typography.bodySmall.copy(
+                                                color = colors.textMuted,
+                                            ),
+                                        )
+                                    }
+                                    innerTextField()
+                                }
+                            },
+                        )
+                    }
+                }
+
+                // Date of Birth Picker
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(Res.string.employer_info_ceo_birth_label),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            color = colors.textSecondary,
+                            fontSize = 11.sp,
+                        ),
+                        modifier = Modifier.padding(bottom = 5.dp),
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(44.dp)
+                            .clip(RoundedCornerShape(13.dp))
+                            .background(colors.bgPage)
+                            .border(
+                                width = 1.dp,
+                                color = if (isCeoBirthError) colors.dangerText else colors.border,
+                                shape = RoundedCornerShape(13.dp),
+                            )
+                            .clickable { showDatePicker = true }
+                            .padding(horizontal = 11.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(7.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.DateRange,
+                            contentDescription = null,
+                            tint = colors.blueText,
+                            modifier = Modifier.size(15.dp),
+                        )
+                        val dateText = ceoBirthDatePersian.ifBlank { "انتخاب تاریخ" }
+                        val isDateSelected = ceoBirthDatePersian.isNotBlank()
+                        Text(
+                            text = dateText,
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontWeight = if (isDateSelected) FontWeight.Bold else FontWeight.Medium,
+                                color = if (isDateSelected) colors.textPrimary else colors.textMuted,
+                                fontSize = 11.5.sp,
+                            ),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                }
+            }
+
+            // Resolved CEO Name Card
+            AnimatedVisibility(
+                visible = !ceoFullName.isNullOrBlank(),
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut(),
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(13.dp))
+                        .background(colors.greenBg)
+                        .border(1.dp, Color(0xFFC6EAD6), RoundedCornerShape(13.dp))
+                        .padding(horizontal = 11.dp, vertical = 9.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text(
+                        text = stringResource(Res.string.employer_info_ceo_name_prefix),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            color = Color(0xFF03794A),
+                            fontSize = 10.sp,
+                        ),
+                    )
+                    Text(
+                        text = ceoFullName.orEmpty(),
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF03794A),
+                            fontSize = 11.5.sp,
+                        ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+
+            // Phone & Mobile Grid
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(9.dp),
+            ) {
+                // Fixed Phone
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(Res.string.employer_info_tel_label),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            color = colors.textSecondary,
+                            fontSize = 11.sp,
+                        ),
+                        modifier = Modifier.padding(bottom = 5.dp),
+                    )
+                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                        BasicTextField(
+                            value = telephone,
+                            onValueChange = { onTelephoneChanged(it.filter { c -> c.isDigit() }.take(11)) },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                            singleLine = true,
+                            textStyle = TextStyle(
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = colors.textPrimary,
+                            ),
+                            cursorBrush = SolidColor(colors.blueText),
+                            decorationBox = { innerTextField ->
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(44.dp)
+                                        .clip(RoundedCornerShape(13.dp))
+                                        .background(colors.bgPage)
+                                        .border(1.dp, colors.border, RoundedCornerShape(13.dp))
+                                        .padding(horizontal = 12.dp),
+                                    contentAlignment = Alignment.CenterStart,
+                                ) {
+                                    if (telephone.isEmpty()) {
+                                        Text(
+                                            text = "۰۵۱۳۷۶۵۴۳۲۱".toPersianDigits(),
+                                            style = MaterialTheme.typography.bodySmall.copy(
+                                                color = colors.textMuted,
+                                            ),
+                                        )
+                                    }
+                                    innerTextField()
+                                }
+                            },
+                        )
+                    }
+                }
+
+                // Mobile Phone
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(Res.string.employer_info_mobile),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            color = colors.textSecondary,
+                            fontSize = 11.sp,
+                        ),
+                        modifier = Modifier.padding(bottom = 5.dp),
+                    )
+                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                        BasicTextField(
+                            value = mobile,
+                            onValueChange = { onMobileChanged(it.filter { c -> c.isDigit() }.take(11)) },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                            singleLine = true,
+                            textStyle = TextStyle(
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = colors.textPrimary,
+                            ),
+                            cursorBrush = SolidColor(colors.blueText),
+                            decorationBox = { innerTextField ->
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(44.dp)
+                                        .clip(RoundedCornerShape(13.dp))
+                                        .background(colors.bgPage)
+                                        .border(
+                                            width = 1.dp,
+                                            color = if (isMobileError) colors.dangerText else colors.border,
+                                            shape = RoundedCornerShape(13.dp),
+                                        )
+                                        .padding(horizontal = 12.dp),
+                                    contentAlignment = Alignment.CenterStart,
+                                ) {
+                                    if (mobile.isEmpty()) {
+                                        Text(
+                                            text = "۰۹۱۵۳۲۱۴۴۷۸".toPersianDigits(),
+                                            style = MaterialTheme.typography.bodySmall.copy(
+                                                color = colors.textMuted,
+                                            ),
+                                        )
+                                    }
+                                    innerTextField()
+                                }
+                            },
+                        )
+                    }
+                }
+            }
+
+            // Email
+            Column {
+                Text(
+                    text = stringResource(Res.string.employer_info_email),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        color = colors.textSecondary,
+                        fontSize = 11.sp,
+                    ),
+                    modifier = Modifier.padding(bottom = 5.dp),
+                )
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                    BasicTextField(
+                        value = email,
+                        onValueChange = { onEmailChanged(it.trim()) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                        singleLine = true,
+                        textStyle = TextStyle(
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = colors.textPrimary,
+                        ),
+                        cursorBrush = SolidColor(colors.blueText),
+                        decorationBox = { innerTextField ->
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(44.dp)
+                                    .clip(RoundedCornerShape(13.dp))
+                                    .background(colors.bgPage)
+                                    .border(
+                                        width = 1.dp,
+                                        color = if (isEmailError) colors.dangerText else colors.border,
+                                        shape = RoundedCornerShape(13.dp),
+                                    )
+                                    .padding(horizontal = 12.dp),
+                                contentAlignment = Alignment.CenterStart,
+                            ) {
+                                if (email.isEmpty()) {
+                                    Text(
+                                        text = "info@company.ir",
+                                        style = MaterialTheme.typography.bodySmall.copy(
+                                            color = colors.textMuted,
+                                        ),
+                                    )
+                                }
+                                innerTextField()
+                            }
+                        },
+                    )
+                }
+            }
+        }
+
+        // Error message line
+        if (!errorMessage.isNullOrBlank()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Info,
+                    contentDescription = null,
+                    tint = colors.dangerText,
+                    modifier = Modifier.size(14.dp),
+                )
+                Text(
+                    text = errorMessage,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = colors.dangerText,
+                        fontSize = 11.sp,
+                    ),
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(2.dp))
+
+        // Submit Button
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp)
+                .shadow(
+                    elevation = 6.dp,
+                    shape = RoundedCornerShape(15.dp),
+                    ambientColor = Color(0x30173D7E),
+                    spotColor = Color(0x30173D7E),
+                )
+                .clip(RoundedCornerShape(15.dp))
+                .background(ButtonGradient)
+                .clickable(enabled = !isLoading, onClick = onSubmit),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    color = Color.White,
+                    strokeWidth = 2.dp,
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Outlined.Email,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(17.dp),
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+                Text(
+                    text = stringResource(Res.string.employer_info_btn_send_otp),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        fontSize = 13.5.sp,
+                    ),
+                )
+            }
+        }
+    }
+
+    if (showDatePicker) {
+        TaminJalaliDatePicker(
+            title = "انتخاب تاریخ تولد مدیرعامل",
+            onDismiss = { showDatePicker = false },
+            onConfirm = { year, month, day ->
+                val millis = PersianDateFormatter.toEpochMillis(year, month, day)
+                val persianStr = PersianDateFormatter.format(year, month, day)
+                onCeoBirthDateSelected(millis, persianStr)
+                showDatePicker = false
+            },
+        )
+    }
+}
+
+@Composable
+private fun SelectPickerChip(
+    text: String,
+    isSelected: Boolean,
+    isError: Boolean = false,
+    onClick: () -> Unit,
+) {
+    val colors = LocalTaminColors.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(44.dp)
+            .clip(RoundedCornerShape(13.dp))
+            .background(colors.bgPage)
+            .border(
+                width = 1.dp,
+                color = if (isError) colors.dangerText else colors.border,
+                shape = RoundedCornerShape(13.dp),
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall.copy(
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                color = if (isSelected) colors.textPrimary else colors.textMuted,
+                fontSize = 12.sp,
+            ),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f),
+        )
+        Icon(
+            imageVector = vectorResource(Res.drawable.ic_tamin_chevron_back),
+            contentDescription = null,
+            tint = colors.textMuted,
+            modifier = Modifier.size(14.dp).rotate(-90f),
+        )
+    }
+}

@@ -25,6 +25,12 @@ fun EmployerWorkshopDTO.toDomain(): EmployerWorkshopDN {
     return EmployerWorkshopDN(
         sswn = sswn,
         branchTitle = branchTitle,
+        // `branch.organizationName` is the branch name the employer-info list shows; `branchTitle`
+        // is a separate field the same payload sometimes carries, so neither replaces the other.
+        branchName = branch?.organizationName,
+        lastAddress = lastAddress,
+        characterCode = character?.characterCode,
+        characterDesc = character?.characterDesc,
         workshopApproveDate = workshopApproveDate,
         inclusionDate = inclusionDate,
         brhCode = brhCode,

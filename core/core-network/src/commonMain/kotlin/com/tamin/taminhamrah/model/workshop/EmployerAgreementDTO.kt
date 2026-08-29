@@ -35,11 +35,14 @@ data class EmployerAgreementDTO(
 data class EmployerWorkshopDTO(
     @SerialName("actitvityCode") val actitvityCode: String?,
     @SerialName("activityName") val activityName: String?,
+    @SerialName("branch") val branch: EmployerWorkshopBranchDTO? = null,
     @SerialName("branchCode") val branchCode: String?,
     @SerialName("branchTitle") val branchTitle: String?,
     @SerialName("brhCode") val brhCode: String?,
+    @SerialName("character") val character: EmployerWorkshopCharacterDTO? = null,
     @SerialName("employerName") val employerName: String?,
     @SerialName("inclusionDate") val inclusionDate: String?,
+    @SerialName("lastAddress") val lastAddress: String? = null,
     @SerialName("sswn") val sswn: String?,
     @SerialName("userId") val userId: String?,
     @SerialName("workshopApproveDate") val workshopApproveDate: String?,
@@ -47,4 +50,23 @@ data class EmployerWorkshopDTO(
     @SerialName("workshopName") val workshopName: String?,
     @SerialName("workshopRegisterDate") val workshopRegisterDate: String?,
     @SerialName("workshopUnemployedStat") val workshopUnemployedStat: String?,
+)
+
+/** The branch handling the workshop. `organizationName` is the name shown beside its code. */
+@Serializable
+data class EmployerWorkshopBranchDTO(
+    @SerialName("code") val code: String? = null,
+    @SerialName("organizationName") val organizationName: String? = null,
+)
+
+/**
+ * Whether the workshop is a natural or a legal person.
+ *
+ * `characterCode` is `"01"` for حقیقی and `"02"` for حقوقی — only a حقوقی workshop can have its
+ * identity details completed, so this code decides whether the list row offers the form at all.
+ */
+@Serializable
+data class EmployerWorkshopCharacterDTO(
+    @SerialName("characterCode") val characterCode: String? = null,
+    @SerialName("characterDesc") val characterDesc: String? = null,
 )
