@@ -35,7 +35,8 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 @Composable
 fun GlassIconTile(
     icon: ImageVector,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    tint: Color = LocalTaminColors.current.glassIconTileIconTint,
 ) {
     val taminColors = LocalTaminColors.current
     Box(
@@ -56,7 +57,7 @@ fun GlassIconTile(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = taminColors.glassIconTileIconTint,
+            tint = tint,
             modifier = Modifier.size(IconSize.tileInner)
         )
     }
@@ -108,6 +109,7 @@ private fun RippleRing(
 @Composable
 fun AnimatedRingHeaderIcon(
     icon: ImageVector,
+    tint: Color = LocalTaminColors.current.glassIconTileIconTint,
     modifier: Modifier = Modifier,
     // False inside rememberMeasuredTopAreaState's measurement probe (see TopAreaState.isMeasureProbe)
     // -- the probe's layout size doesn't depend on the rings' animation state, only on this Box's
@@ -135,6 +137,6 @@ fun AnimatedRingHeaderIcon(
             delayMillis = 1650,
             animated = animated
         )
-        GlassIconTile(icon = icon)
+        GlassIconTile(icon = icon, tint = tint)
     }
 }

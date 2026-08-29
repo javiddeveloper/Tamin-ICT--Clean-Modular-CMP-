@@ -17,6 +17,9 @@ import com.tamin.taminhamrah.useCases.common.GetBeneficiaryUseCase
 import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
 import com.tamin.taminhamrah.useCases.common.GetCityUseCase
 import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
+import com.tamin.taminhamrah.useCases.common.GetCitiesByProvinceUseCase
+import com.tamin.taminhamrah.useCases.common.GetInsuranceTypesUseCase
+import com.tamin.taminhamrah.useCases.common.CheckUserTypeUseCase
 import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
 import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
 import com.tamin.taminhamrah.useCases.file.DownloadDocumentUseCase
@@ -37,6 +40,7 @@ import com.tamin.taminhamrah.useCases.pension.CheckRetirementStatusUseCase
 import com.tamin.taminhamrah.useCases.pension.SendRetirementDocumentUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.DeleteMyRequestUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.InboxInquiryLicenseUseCase
+import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxItemsPageUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxItemsUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxSizeUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetMyRequestPdfUseCase
@@ -136,6 +140,12 @@ import com.tamin.taminhamrah.useCases.health.UpdateSelfDeclarativeUseCase
 import com.tamin.taminhamrah.useCases.health.SyncIllnessSelfDeclarativesUseCase
 import com.tamin.taminhamrah.useCases.health.SyncDrugAllergiesUseCase
 import com.tamin.taminhamrah.useCases.health.GetActFrequenciesUseCase
+import com.tamin.taminhamrah.useCases.historyObjection.CheckHistoryObjectionStatusNotExistUseCase
+import com.tamin.taminhamrah.useCases.historyObjection.ConfirmHistoryObjectionNotExistUseCase
+import com.tamin.taminhamrah.useCases.historyObjection.DeleteHistoryObjectionNotExistRequestUseCase
+import com.tamin.taminhamrah.useCases.historyObjection.FinalConfirmHistoryObjectionNotExistUseCase
+import com.tamin.taminhamrah.useCases.historyObjection.GetHistoryObjectionNotExistRequestsUseCase
+import com.tamin.taminhamrah.useCases.historyObjection.SaveHistoryObjectionNotExistRequestUseCase
 import com.tamin.taminhamrah.useCases.workshops.CheckObjectionDeadlineUseCase
 import com.tamin.taminhamrah.useCases.workshops.CheckNewMemberIsNewUseCase
 import com.tamin.taminhamrah.useCases.workshops.CreateNewMemberRegistrationUseCase
@@ -253,6 +263,9 @@ val domainModule = module {
     factoryOf(::GetCitiesUseCase)
     factoryOf(::GetCityUseCase)
     factoryOf(::GetProvincesUseCase)
+    factoryOf(::GetCitiesByProvinceUseCase)
+    factoryOf(::GetInsuranceTypesUseCase)
+    factoryOf(::CheckUserTypeUseCase)
     factoryOf(::ChangeMobileUseCase)
     factoryOf(::VerifyChangeMobileUseCase)
     factoryOf(::GetBeneficiaryUseCase)
@@ -264,6 +277,12 @@ val domainModule = module {
     factoryOf(::GetUserRequestDetailUseCase)
     factoryOf(::GetShowRequestInfoUseCase)
     factoryOf(::DownloadUserRequestDocumentUseCase)
+    factoryOf(::CheckHistoryObjectionStatusNotExistUseCase)
+    factoryOf(::GetHistoryObjectionNotExistRequestsUseCase)
+    factoryOf(::SaveHistoryObjectionNotExistRequestUseCase)
+    factoryOf(::DeleteHistoryObjectionNotExistRequestUseCase)
+    factoryOf(::ConfirmHistoryObjectionNotExistUseCase)
+    factoryOf(::FinalConfirmHistoryObjectionNotExistUseCase)
 
     factoryOf(::GetTalfighInfosUseCase)
     factoryOf(::GetDastmozdInfosUseCase)
@@ -273,6 +292,7 @@ val domainModule = module {
     factoryOf(::CalculateMultipleWorkshopsPensionUseCase)
     factoryOf(::CalculateWagePensionUseCase)
     factoryOf(::GetPersonalInboxItemsUseCase)
+    factoryOf(::GetPersonalInboxItemsPageUseCase)
     factoryOf(::GetPersonalInboxSizeUseCase)
     factoryOf(::GetRequestInsuredMainInfoUseCase)
     factoryOf(::GetInsuredPersonsUseCase)

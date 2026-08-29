@@ -4,6 +4,7 @@ import androidx.navigation.NavController
 import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.history.navigateToHistory
 import com.tamin.taminhamrah.feature.history.navigateToHistoryJobInfo
+import com.tamin.taminhamrah.feature.historyobjection.navigateToHistoryObjection
 import com.tamin.taminhamrah.feature.deferredInstallment.navigateToDeferredInstallment
 import com.tamin.taminhamrah.feature.orotezprotez.navigateToOrotezProtez
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToCalculatePension
@@ -51,6 +52,7 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
         FeatureFlag.OROTEZ_PROTEZ -> navigateToOrotezProtez()
         FeatureFlag.OCCURRENCE -> navigateToOccurrence()
         FeatureFlag.LIST_OF_INSPECTIONS_PERFORMED -> navigateToInspection()
+        FeatureFlag.OBJECTION_NON_EXISTENT_HISTORY -> navigateToHistoryObjection()
         else -> Unit
     }
 }

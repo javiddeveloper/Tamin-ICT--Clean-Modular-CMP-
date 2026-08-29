@@ -512,6 +512,9 @@
     <string name="active_relation_header_inactive_count">%1$s ارتباط غیرفعال</string>
     <string name="active_relation_header_check_time">بررسی: امروز %1$s</string>
 
+    <string name="validation_status_badge_valid">معتبر</string>
+    <string name="validation_status_badge_invalid">نامعتبر</string>
+
     <!-- Inbox Item Card -->
     <string name="inbox_action_operations">عملیات</string>
     <string name="inbox_inquiry_password">کد رمز استعلام</string>
@@ -711,6 +714,7 @@
     <string name="bs_family_cancer">سابقه ابتلا به سرطان در خانواده</string>
     <string name="bs_province">استان</string>
     <string name="bs_city">شهر</string>
+    <string name="bs_insurance_type">نوع حق بیمه</string>
     <string name="bs_branch">شعبه تأمین اجتماعی</string>
     <string name="bs_blood_group">گروه خونی</string>
     <string name="bs_smoking_addiction">آیا از دخانیات استفاده می‌کنید؟</string>
@@ -798,6 +802,7 @@
     <string name="orotez_protez_submit_success_fallback">درخواست شما با موفقیت ثبت شد.</string>
     <string name="orotez_protez_submit_success_title">درخواست شما با موفقیت ثبت شد</string>
     <string name="orotez_protez_submit_success_confirm">متوجه شدم</string>
+    <string name="orotez_protez_bank_account_missing_title">امکان ثبت درخواست وجود ندارد</string>
     <string name="orotez_protez_document_source_subtitle">منبع تصویر را انتخاب کنید</string>
     <string name="orotez_protez_document_source_camera_title">دوربین</string>
     <string name="orotez_protez_document_source_camera_subtitle">گرفتن عکس جدید</string>
@@ -1177,6 +1182,71 @@
     <string name="inspection_request_success_subtitle_objection_format">اعتراض شما برای بررسی به شعبهٔ %1$s ارسال شد.</string>
     <string name="inspection_request_success_dismiss_button">متوجه شدم</string>
     <string name="inspection_request_success_tracking_label">کد رهگیری</string>
+    <string name="history_objection_title">اعتراض سابقه ناموجود</string>
+    <string name="history_objection_empty_title">هیچ سابقهٔ ناموجودی ثبت نکرده‌اید</string>
+    <string name="history_objection_empty_subtitle">اگر بازه‌ای از کارکرد شما در «کلیهٔ سوابق» دیده نمی‌شود، همین‌جا آن را اعلام کنید.</string>
+    <string name="history_objection_add_new">ثبت سابقهٔ ناموجود جدید</string>
+    <string name="history_objection_active_request_title">درخواست در حال بررسی</string>
+    <string name="history_objection_active_request_message">کاربر گرامی، در حال حاضر دارای یک درخواست در حال بررسی می‌باشید و امکان ثبت مجدد درخواست وجود ندارد.</string>
+    <string name="history_objection_denied_anonymous_message">امکان استفاده از این سرویس برای کاربران مهمان وجود ندارد.</string>
+    <string name="history_objection_denied_pensioner_message">این سرویس برای مستمری‌بگیران فعال نیست.</string>
+    <string name="history_objection_list_title">سوابق ناموجود ثبت‌شده</string>
+    <string name="history_objection_status_not_sent">ارسال نشده</string>
+    <string name="history_objection_workshop_name">نام کارگاه</string>
+    <string name="history_objection_workshop_code">کد کارگاه</string>
+    <string name="history_objection_insurance_number">شماره بیمه</string>
+    <string name="history_objection_start_date">تاریخ شروع</string>
+    <string name="history_objection_end_date">تاریخ پایان</string>
+    <string name="history_objection_delete">حذف</string>
+    <string name="history_objection_delete_confirm_title">حذف سابقه</string>
+    <string name="history_objection_delete_confirm_message">این مورد از فهرست درخواست‌های شما حذف می‌شود.</string>
+    <string name="history_objection_edit">ویرایش</string>
+    <string name="history_objection_description_label">توضیحات تکمیلی (اختیاری)</string>
+    <string name="history_objection_description_placeholder">توضیح دربارهٔ سوابق اعلام‌شده...</string>
+    <string name="history_objection_submit">تأیید و ارسال به تأمین اجتماعی</string>
+    <string name="history_objection_step_branch_title">اطلاعات شعبه</string>
+    <string name="history_objection_step_workshop_title">اطلاعات کارگاه</string>
+    <string name="history_objection_step_record_title">اطلاعات کارکرد</string>
+    <string name="history_objection_province_label">استان</string>
+    <string name="history_objection_province_placeholder">انتخاب استان</string>
+    <string name="history_objection_city_label">شهر</string>
+    <string name="history_objection_city_placeholder">انتخاب شهر</string>
+    <string name="history_objection_branch_label">شعبهٔ تأمین اجتماعی</string>
+    <string name="history_objection_branch_placeholder">انتخاب شعبه</string>
+    <string name="history_objection_insurance_type_label">نوع حق بیمه</string>
+    <string name="history_objection_insurance_type_placeholder">انتخاب نوع حق بیمه</string>
+    <string name="history_objection_workshop_id_label">شمارهٔ کارگاه (۱۰ رقم)</string>
+    <string name="history_objection_workshop_id_placeholder">مثال: ۶۳۹۳۶۱۰۰۱۹</string>
+    <string name="history_objection_workshop_name_placeholder">نام کارگاه محل کار</string>
+    <string name="history_objection_employer_name_label">نام کارفرما</string>
+    <string name="history_objection_employer_name_placeholder">نام و نام خانوادگی کارفرما</string>
+    <string name="history_objection_workshop_address_label">آدرس کارگاه</string>
+    <string name="history_objection_workshop_address_placeholder">آدرس کامل محل کارگاه</string>
+    <string name="history_objection_work_start_date_label">تاریخ شروع کارکرد</string>
+    <string name="history_objection_work_end_date_label">تاریخ پایان کارکرد</string>
+    <string name="history_objection_date_placeholder">انتخاب تاریخ</string>
+    <string name="history_objection_work_days_label">تعداد روز کارکرد</string>
+    <string name="history_objection_work_days_placeholder">مثلاً ۹۰</string>
+    <string name="history_objection_next_step">مرحلهٔ بعد</string>
+    <string name="history_objection_confirm">ثبت این سابقه</string>
+    <string name="history_objection_select_province_first">لطفاً ابتدا استان را انتخاب کنید</string>
+    <string name="history_objection_select_city_first">لطفاً ابتدا شهر را انتخاب کنید</string>
+    <string name="history_objection_cities_stale_warning">دریافت فهرست به‌روز شهرها با خطا مواجه شد؛ فهرست نمایش‌داده‌شده ممکن است قدیمی باشد.</string>
+    <string name="history_objection_submit_success_title">درخواست شما با موفقیت ثبت شد</string>
+    <string name="history_objection_submit_success_message">سابقهٔ ناموجود اعلام‌شدهٔ شما با موفقیت ثبت شد و برای بررسی ارسال گردید.</string>
+    <string name="history_objection_submit_success_confirm">متوجه شدم</string>
+    <string name="history_objection_submit_missing_data_error">اطلاعات وارد شده ناقص است. لطفاً مراحل را دوباره بررسی کنید.</string>
+    <string name="history_objection_date_range_invalid_error">تاریخ پایان باید حداقل ۱ روز بعد از تاریخ شروع باشد.</string>
+    <string name="history_objection_date_too_recent_error">تاریخ پایان باید حداقل ۲ ماه قبل از امروز باشد.</string>
+    <string name="history_objection_work_days_exceeds_range_error">تعداد روز کارکرد نباید از فاصلهٔ تاریخ شروع تا پایان بیشتر باشد.</string>
+    <string name="history_objection_delete_missing_data_error">امکان حذف این مورد وجود ندارد.</string>
+    <string name="history_objection_confirm_send_title">تأیید و ارسال درخواست</string>
+    <string name="history_objection_confirm_send_message">با ارسال، فهرست سوابق اعلام‌شده جهت بررسی برای تأمین اجتماعی ارسال می‌شود و امکان ویرایش وجود نخواهد داشت.</string>
+    <string name="history_objection_confirm_send_action">ارسال درخواست</string>
+    <string name="history_objection_confirm_send_rejected_error">امکان ثبت درخواست وجود ندارد. لطفاً بعداً دوباره تلاش کنید.</string>
+    <string name="history_objection_send_success_title">درخواست شما ثبت شد</string>
+    <string name="history_objection_send_success_tracking_label">کد پیگیری درخواست:</string>
+
 
     <!-- کارگاه‌های کارفرما — the workshop list and everything it launches -->
     <string name="workshops_title">کارگاه‌ها</string>

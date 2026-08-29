@@ -73,6 +73,7 @@ fun InboxItemCard(
         expanded = isExpanded,
         onExpandedChange = { isExpanded = it },
         modifier = modifier,
+        toggleButtonContentColor = colors.blueText,
     ) {
         DetailRow(
             label = stringResource(Res.string.identity_field_national_code),

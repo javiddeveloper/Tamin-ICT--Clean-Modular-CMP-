@@ -1,0 +1,25 @@
+package com.tamin.taminhamrah.model.historyObjection
+
+data class NotExistRequestDN(
+    val requestNumber: String? = null,
+    val requestType: String? = null,
+    val rowIndex: String? = null,
+    val insuredId: String? = null,
+    val workshopId: String? = null,
+    val workshopName: String? = null,
+    val workDays: String? = null,
+    val startDate: Long? = null,
+    val endDate: Long? = null,
+    val provinceCode: String? = null,
+    val branchCode: String? = null,
+    val insuranceType: String? = null,
+    val cityCode: String? = null,
+    val workshopManager: String? = null,
+    val workshopAddress: String? = null,
+    val branchName: String? = null,
+    val insuranceTypeDesc: String? = null,
+    val provinceName: String? = null,
+    val cityName: String? = null,
+    val confirmed: Boolean = false,
+    val userDesc: String? = null,
+)
