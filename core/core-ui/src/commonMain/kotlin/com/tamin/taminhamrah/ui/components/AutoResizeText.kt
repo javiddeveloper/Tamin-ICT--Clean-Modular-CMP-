@@ -35,10 +35,11 @@ fun AutoResizeText(
             if (readyToDraw) drawContent()
         },
         style = resizedTextStyle,
-        softWrap = true,
+        softWrap = maxLines > 1,
         maxLines = maxLines,
         onTextLayout = { result ->
-            if (result.didOverflowHeight && resizedTextStyle.fontSize > minFontSize) {
+            val overflows = result.didOverflowHeight || result.didOverflowWidth
+            if (overflows && resizedTextStyle.fontSize > minFontSize) {
                 resizedTextStyle = resizedTextStyle.copy(
                     fontSize = resizedTextStyle.fontSize * 0.95f
                 )

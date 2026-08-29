@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Image
@@ -36,6 +38,7 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import com.tamin.taminhamrah.ui.components.AutoResizeText
 import com.tamin.taminhamrah.ui.components.LoadAsyncImage
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.LiquidWaveProgressBar
@@ -155,7 +158,7 @@ fun TaminDocumentUploadCard(
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(Spacing.md),
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(1f, fill = false)
+                    modifier = Modifier.weight(1f),
                 ) {
                     TaminDocumentIconTile(
                         state = displayState,
@@ -163,15 +166,18 @@ fun TaminDocumentUploadCard(
                         onPreviewClick = onPreviewClick
                     )
 
-                    Column {
+                    Column(modifier = Modifier.weight(1f)) {
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
                             verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth(),
                         ) {
-                            Text(
+                            AutoResizeText(
                                 text = title,
                                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                                 color = colors.textPrimary,
+                                maxLines = 1,
+                                modifier = Modifier.weight(1f),
                             )
                             if (isRequired != null) {
                                 StatusPill(
@@ -300,4 +306,83 @@ private fun TaminDocumentIconTile(
     }
 }
 
+@PreviewRtlTheme
+@Composable
+private fun TaminDocumentUploadCardEmptyPreview() {
+    PreviewRtlThemeContent {
+        Column(modifier = Modifier.padding(Spacing.lg)) {
+            TaminDocumentUploadCard(
+                title = "تصویر کارت ملی",
+                state = TaminDocumentUploadState.Empty,
+                isRequired = true,
+                statusText = "بارگذاری نشده",
+                onCardClick = {},
+            )
+        }
+    }
+}
 
+@PreviewRtlTheme
+@Composable
+private fun TaminDocumentUploadCardUploadingPreview() {
+    PreviewRtlThemeContent {
+        Column(modifier = Modifier.padding(Spacing.lg)) {
+            TaminDocumentUploadCard(
+                title = "تصویر شناسنامه",
+                state = TaminDocumentUploadState.Uploading,
+                isRequired = false,
+                statusText = "در حال بارگذاری...",
+            )
+        }
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun TaminDocumentUploadCardUploadedPreview() {
+    PreviewRtlThemeContent {
+        Column(modifier = Modifier.padding(Spacing.lg)) {
+            TaminDocumentUploadCard(
+                title = "تصویر کارت ملی",
+                state = TaminDocumentUploadState.Uploaded,
+                isRequired = true,
+                statusText = "بارگذاری شد",
+                onCardClick = {},
+                onDeleteClick = {},
+            )
+        }
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun TaminDocumentUploadCardFailedPreview() {
+    PreviewRtlThemeContent {
+        Column(modifier = Modifier.padding(Spacing.lg)) {
+            TaminDocumentUploadCard(
+                title = "تصویر شناسنامه",
+                state = TaminDocumentUploadState.Failed,
+                isRequired = true,
+                statusText = "خطا در بارگذاری فایل",
+                onCardClick = {},
+            )
+        }
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun TaminDocumentUploadCardUploadedDarkPreview() {
+    PreviewRtlThemeContent(darkTheme = true) {
+        Column(modifier = Modifier.padding(Spacing.lg)) {
+            TaminDocumentUploadCard(
+                title = "تصویر کارت ملی",
+                state = TaminDocumentUploadState.Uploaded,
+                isRequired = true,
+                statusText = "بارگذاری شد",
+                onCardClick = {},
+                onDeleteClick = {},
+            )
+        }
+    }
+}

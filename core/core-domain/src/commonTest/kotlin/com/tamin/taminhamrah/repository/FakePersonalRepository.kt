@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoDN
 import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionDN
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
+import com.tamin.taminhamrah.model.personal.survivorDependent.SurvivorDependentDN
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
 import com.tamin.taminhamrah.model.personal.InsuredDocDN
 import com.tamin.taminhamrah.model.personal.NewInsuredSummaryDN
@@ -31,6 +32,7 @@ class FakePersonalRepository : PersonalRepository {
 
     var shouldThrowError = false
     var disabilityDependentInfoResult: List<DisabilityDependentDN> = emptyList()
+    var survivorListResult: List<SurvivorDependentDN> = emptyList()
     var confirmSurvivorsListResult: List<ConfirmSurvivorDN> = emptyList()
     var error: Throwable = RuntimeException("Personal Repository Error")
 
@@ -54,6 +56,11 @@ class FakePersonalRepository : PersonalRepository {
             if (shouldThrowError) throw error
             emit(disabilityDependentInfoResult)
         }
+
+    override fun getSurvivorList(deceasedNationalId: String): Flow<List<SurvivorDependentDN>> = flow {
+        if (shouldThrowError) throw error
+        emit(survivorListResult)
+    }
 
     override fun checkGirlSurvivorConditions(
         nationalCode: String,
