@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.feature.history.navigateToHistoryJobInfo
 import com.tamin.taminhamrah.feature.historyobjection.navigateToHistoryObjection
 import com.tamin.taminhamrah.feature.deferredInstallment.navigateToDeferredInstallment
 import com.tamin.taminhamrah.feature.orotezprotez.navigateToOrotezProtez
+import com.tamin.taminhamrah.feature.pregnancyPay.navigateToPregnancyPay
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToCalculatePension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeservedTreatment
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDisabilityPension
@@ -53,6 +54,7 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
         FeatureFlag.OCCURRENCE -> navigateToOccurrence()
         FeatureFlag.LIST_OF_INSPECTIONS_PERFORMED -> navigateToInspection()
         FeatureFlag.OBJECTION_NON_EXISTENT_HISTORY -> navigateToHistoryObjection()
+        FeatureFlag.REQUEST_FOR_PREGNANCY_PAY -> navigateToPregnancyPay()
         else -> Unit
     }
 }

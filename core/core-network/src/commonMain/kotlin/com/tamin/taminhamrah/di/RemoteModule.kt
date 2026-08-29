@@ -44,6 +44,8 @@ import com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSourc
 import com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.orotezProtez.OrotezProtezRemoteDataSource
 import com.tamin.taminhamrah.dataSource.orotezProtez.OrotezProtezRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.pregnancyPay.PregnancyPayRemoteDataSource
+import com.tamin.taminhamrah.dataSource.pregnancyPay.PregnancyPayRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSource
 import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.inspection.InspectionRemoteDataSource
@@ -234,6 +236,13 @@ val remoteModule = module {
         InspectionRemoteDataSourceImpl(
             apiService = get(),
             queryBuilder = get(),
+            errorParser = get()
+        )
+    }
+
+    single<PregnancyPayRemoteDataSource> {
+        PregnancyPayRemoteDataSourceImpl(
+            pregnancyPayApiService = get(),
             errorParser = get()
         )
     }

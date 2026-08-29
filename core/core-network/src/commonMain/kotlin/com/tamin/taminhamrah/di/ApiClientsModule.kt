@@ -24,6 +24,8 @@ import com.tamin.taminhamrah.apiService.inbox.PersonalInboxApiService
 import com.tamin.taminhamrah.apiService.inbox.createPersonalInboxApiService
 import com.tamin.taminhamrah.apiService.orotezProtez.OrotezProtezApiService
 import com.tamin.taminhamrah.apiService.orotezProtez.createOrotezProtezApiService
+import com.tamin.taminhamrah.apiService.pregnancyPay.PregnancyPayApiService
+import com.tamin.taminhamrah.apiService.pregnancyPay.createPregnancyPayApiService
 import com.tamin.taminhamrah.apiService.pension.PensionApiService
 import com.tamin.taminhamrah.apiService.pension.createPensionApiService
 import com.tamin.taminhamrah.apiService.personal.PersonalApiService
@@ -171,5 +173,10 @@ val ApiClientsModule = module {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.createInspectionApiService()
     }
+    single<PregnancyPayApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createPregnancyPayApiService()
+    }
+
 }
 

@@ -55,4 +55,6 @@ Good examples to copy: `feature/profile/.../ui/identity/contract/IdentityInContr
 
 `turbine` is available in `commonTest` of every feature module automatically (via `TaminHamrahKmpFeaturePlugin`) — use it to assert on `uiState` and `events`.
 
+⚠️ **`getString(Res.string...)` inside a ViewModel's `handleIntent`/validation path is unreliable under `testDebugUnitTest`**, even with `:feature:orotez-protez`'s own Robolectric setup (`unitTests.isIncludeAndroidResources = true` + a staged `robolectric-android-all` jar) copied verbatim into the module. The exception it throws gets caught by the `flatMapMerge.catch` in `BaseViewModel` and turned into the generic error `PartialState` instead of the specific one you emitted before/after the `getString` call — confirmed independently in `IssuanceCertificateViewModel` and again while building `:feature:pregnancyPay`. Neither `:feature:orotez-protez`'s nor `:feature:pregnancyPay`'s test suites assert on the specific message/partial state produced by such a call; they only assert on surrounding, `getString`-independent behavior (e.g. "step didn't advance"). Before writing a test that depends on one, run it first — don't assume Robolectric fixes it.
+
 Related: [[Overview]] · [[Navigation]] · [[Adding-a-Feature]]

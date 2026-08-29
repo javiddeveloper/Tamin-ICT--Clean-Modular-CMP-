@@ -117,6 +117,7 @@ import com.tamin.taminhamrah.feature.userRequest.userRequestGraph
 import com.tamin.taminhamrah.feature.historyobjection.historyObjectionScreen
 import com.tamin.taminhamrah.feature.historyobjection.historyObjectionStepperScreen
 import com.tamin.taminhamrah.feature.orotezprotez.orotezProtezScreen
+import com.tamin.taminhamrah.feature.pregnancyPay.pregnancyPayScreen
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
@@ -516,6 +517,8 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                     onBack = { navController.popBackStack() },
                     onNavigateHome = { navController.popBackStack(Route.Home, inclusive = false) },
                 )
+
+                pregnancyPayScreen(onBack = { navController.popBackStack() })
 
                 healthProfileScreen(onBack = { navController.popBackStack() })
             }
