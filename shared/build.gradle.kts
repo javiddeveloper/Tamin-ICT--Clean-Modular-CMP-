@@ -53,6 +53,7 @@ kotlin {
             api(project(":feature:pregnancyPay"))
             api(project(":feature:deferredInstallment"))
             api(project(":feature:history-objection"))
+            api(project(":feature:pensionSurvivor"))
             api(libs.androidx.lifecycle.viewmodel)
             implementation(libs.ktor.client.core)
             implementation(libs.kotlinx.serialization.json)

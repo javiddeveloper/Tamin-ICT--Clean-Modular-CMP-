@@ -304,6 +304,8 @@ val TaminInsuranceCardTrackBg = TaminInsuranceCardInk.copy(alpha = 0.08f)
 val TaminOnAccentInk = Color(0xFFFFFFFF)
 val TaminOnAccentInkSoft = TaminOnAccentInk.copy(alpha = 0.90f)
 val TaminOnAccentInkMuted = TaminOnAccentInk.copy(alpha = 0.80f)
+/** Dimmed white for inactive hero step segments (current-only highlight). */
+val TaminOnAccentInkFaint = TaminOnAccentInk.copy(alpha = 0.35f)
 
 /** Translucent fills and hairlines the same surfaces set on themselves. */
 val TaminOnAccentFill = TaminOnAccentInk.copy(alpha = 0.10f)
