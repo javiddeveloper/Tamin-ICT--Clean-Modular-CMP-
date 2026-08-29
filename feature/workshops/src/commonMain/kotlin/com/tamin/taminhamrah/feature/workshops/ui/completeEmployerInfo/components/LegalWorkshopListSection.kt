@@ -121,7 +121,7 @@ private fun WorkshopCardItem(
         modifier = modifier
             .fillMaxWidth()
             .shadow(
-                elevation = 4.dp,
+                elevation = CardElevation,
                 shape = RoundedCornerShape(18.dp),
                 ambientColor = colors.shadowSubtle,
                 spotColor = colors.shadowSubtle,
@@ -423,3 +423,5 @@ private fun DetailRow(
         }
     }
 }
+
+private val CardElevation = 6.dp
