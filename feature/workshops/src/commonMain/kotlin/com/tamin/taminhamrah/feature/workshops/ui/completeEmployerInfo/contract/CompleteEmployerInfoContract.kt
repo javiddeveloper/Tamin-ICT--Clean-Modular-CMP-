@@ -57,6 +57,9 @@ enum class CompleteEmployerInfoDialog {
 @Immutable
 data class CompleteEmployerInfoUiState(
     val isLoading: Boolean = false,
+    /** The ticket and submit calls only. Kept apart from [isLoading]: the initial load ends in a
+     *  database flow that never completes, so one shared flag left the button spinning for good. */
+    val isSubmitting: Boolean = false,
     val screen: CompleteEmployerInfoScreenState = CompleteEmployerInfoScreenState.LIST,
     val tab: CompleteEmployerInfoTab = CompleteEmployerInfoTab.LEGAL,
     val isVerifying: Boolean = false,
@@ -125,6 +128,7 @@ data class CompleteEmployerInfoUiState(
 
 sealed interface CompleteEmployerInfoPartialState {
     data class Loading(val isLoading: Boolean) : CompleteEmployerInfoPartialState
+    data class Submitting(val isSubmitting: Boolean) : CompleteEmployerInfoPartialState
     data class UserInfoLoaded(
         val fullName: String,
         val nationalCode: String,

@@ -31,6 +31,7 @@ import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.merge
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.ui.digitsOnly
 import taminx.core.core_ui.Res
@@ -131,7 +132,15 @@ class CompleteEmployerInfoViewModel(
             }
         }
 
-    private fun handleLoadInitialData(): Flow<CompleteEmployerInfoPartialState> = flow {
+    /**
+     * Provinces are collected alongside rather than in sequence: the repository ends in a database
+     * flow that never completes, so awaiting it here meant `Loading(false)` was never reached and
+     * the page stayed loading for as long as it was open.
+     */
+    private fun handleLoadInitialData(): Flow<CompleteEmployerInfoPartialState> =
+        merge(loadUserAndWorkshops(), loadProvinces())
+
+    private fun loadUserAndWorkshops(): Flow<CompleteEmployerInfoPartialState> = flow {
         emit(CompleteEmployerInfoPartialState.Loading(true))
 
         // Not swallowed: the real path sends its ticket to the mobile and email that come from
@@ -160,6 +169,10 @@ class CompleteEmployerInfoViewModel(
             emit(CompleteEmployerInfoPartialState.Error(e.toSingleLineMessage()))
         }
 
+        emit(CompleteEmployerInfoPartialState.Loading(false))
+    }
+
+    private fun loadProvinces(): Flow<CompleteEmployerInfoPartialState> = flow {
         try {
             getProvincesUseCase().collect { provinces ->
                 emit(
@@ -173,8 +186,6 @@ class CompleteEmployerInfoViewModel(
             // second tab, and blanking the workshop list for it would hide working content.
             sendEvent(CompleteEmployerInfoEvent.ShowToast(e.toSingleLineMessage()))
         }
-
-        emit(CompleteEmployerInfoPartialState.Loading(false))
     }
 
     private fun handleChangeLegalNationalId(nid: String): Flow<CompleteEmployerInfoPartialState> = flow {
@@ -296,16 +307,16 @@ class CompleteEmployerInfoViewModel(
             return@flow
         }
 
-        if (state.isLoading) return@flow
-        emit(CompleteEmployerInfoPartialState.Loading(true))
+        if (state.isSubmitting) return@flow
+        emit(CompleteEmployerInfoPartialState.Submitting(true))
 
         requestLegalTicketUseCase(mobile = mobileDigits, email = email, ceoNationalCode = ceoDigits)
             .catch { e ->
-                emit(CompleteEmployerInfoPartialState.Loading(false))
+                emit(CompleteEmployerInfoPartialState.Submitting(false))
                 sendEvent(CompleteEmployerInfoEvent.ShowToast(e.toSingleLineMessage()))
             }
             .collect {
-                emit(CompleteEmployerInfoPartialState.Loading(false))
+                emit(CompleteEmployerInfoPartialState.Submitting(false))
                 emit(CompleteEmployerInfoPartialState.StartVerification(VerifyPath.LEGAL))
             }
     }
@@ -323,19 +334,19 @@ class CompleteEmployerInfoViewModel(
             return@flow
         }
 
-        if (state.isLoading) return@flow
-        emit(CompleteEmployerInfoPartialState.Loading(true))
+        if (state.isSubmitting) return@flow
+        emit(CompleteEmployerInfoPartialState.Submitting(true))
 
         val email = state.userEmail.ifBlank { "tamin@tamin.ir" }
         val mobile = state.userMobile
 
         requestRealTicketUseCase(mobile = mobile, email = email)
             .catch { e ->
-                emit(CompleteEmployerInfoPartialState.Loading(false))
+                emit(CompleteEmployerInfoPartialState.Submitting(false))
                 sendEvent(CompleteEmployerInfoEvent.ShowToast(e.toSingleLineMessage()))
             }
             .collect {
-                emit(CompleteEmployerInfoPartialState.Loading(false))
+                emit(CompleteEmployerInfoPartialState.Submitting(false))
                 emit(CompleteEmployerInfoPartialState.StartVerification(VerifyPath.REAL))
             }
     }
@@ -349,8 +360,8 @@ class CompleteEmployerInfoViewModel(
             return@flow
         }
 
-        if (state.isLoading) return@flow
-        emit(CompleteEmployerInfoPartialState.Loading(true))
+        if (state.isSubmitting) return@flow
+        emit(CompleteEmployerInfoPartialState.Submitting(true))
 
         if (state.verifyPath == VerifyPath.LEGAL) {
             val selectedWs = state.selectedWorkshop
@@ -370,11 +381,11 @@ class CompleteEmployerInfoViewModel(
             )
             submitLegalWorkshopInfoUseCase(req)
                 .catch { e ->
-                    emit(CompleteEmployerInfoPartialState.Loading(false))
+                    emit(CompleteEmployerInfoPartialState.Submitting(false))
                     sendEvent(CompleteEmployerInfoEvent.ShowToast(e.toSingleLineMessage()))
                 }
                 .collect {
-                    emit(CompleteEmployerInfoPartialState.Loading(false))
+                    emit(CompleteEmployerInfoPartialState.Submitting(false))
                     emit(CompleteEmployerInfoPartialState.ShowDialog(CompleteEmployerInfoDialog.SUCCESS_LEGAL))
                 }
         } else {
@@ -385,11 +396,11 @@ class CompleteEmployerInfoViewModel(
             )
             submitRealWorkshopInfoUseCase(req)
                 .catch { e ->
-                    emit(CompleteEmployerInfoPartialState.Loading(false))
+                    emit(CompleteEmployerInfoPartialState.Submitting(false))
                     sendEvent(CompleteEmployerInfoEvent.ShowToast(e.toSingleLineMessage()))
                 }
                 .collect {
-                    emit(CompleteEmployerInfoPartialState.Loading(false))
+                    emit(CompleteEmployerInfoPartialState.Submitting(false))
                     emit(CompleteEmployerInfoPartialState.ShowDialog(CompleteEmployerInfoDialog.SUCCESS_REAL))
                 }
         }
@@ -400,6 +411,7 @@ class CompleteEmployerInfoViewModel(
         partialState: CompleteEmployerInfoPartialState,
     ): CompleteEmployerInfoUiState = when (partialState) {
         is CompleteEmployerInfoPartialState.Loading -> currentState.copy(isLoading = partialState.isLoading)
+        is CompleteEmployerInfoPartialState.Submitting -> currentState.copy(isSubmitting = partialState.isSubmitting)
         is CompleteEmployerInfoPartialState.UserInfoLoaded -> currentState.copy(
             userFullName = partialState.fullName,
             userNationalCode = partialState.nationalCode,
