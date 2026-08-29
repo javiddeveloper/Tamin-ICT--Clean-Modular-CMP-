@@ -17,6 +17,7 @@ class FakePregnancyPayRepository : PregnancyPayRepository {
     var shouldThrowOnSend = false
     var sendError: Throwable = RuntimeException("send failed")
     var lastSendRequest: SendPregnancyPayRequestDN? = null
+    var sendCallCount = 0
 
     var estimateResult: PregnancyPayEstimateDN = PregnancyPayEstimateDN(
         averageSalaryLast90Days = "2850000",
@@ -39,6 +40,7 @@ class FakePregnancyPayRepository : PregnancyPayRepository {
     }
 
     override fun sendPregnancyPayRequest(request: SendPregnancyPayRequestDN): Flow<String?> = flow {
+        sendCallCount++
         lastSendRequest = request
         if (shouldThrowOnSend) throw sendError
         emit(sendResult)

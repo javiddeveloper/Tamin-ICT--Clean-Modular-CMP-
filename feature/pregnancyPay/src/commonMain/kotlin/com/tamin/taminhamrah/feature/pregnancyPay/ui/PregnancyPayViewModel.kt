@@ -351,6 +351,8 @@ class PregnancyPayViewModel(
 
     private fun handleSubmitDocumentsClicked(): Flow<PartialState> = flow {
         val state = uiState.value
+        if (state.isSubmitting || state.hasSubmitted) return@flow
+
         if (state.requiredDocumentsUploadedCount < PregnancyPayRequiredDocumentIds.size) {
             emit(PartialState.DocumentValidationFailed(getString(Res.string.pregnancy_pay_document_validation_min_count)))
             return@flow
