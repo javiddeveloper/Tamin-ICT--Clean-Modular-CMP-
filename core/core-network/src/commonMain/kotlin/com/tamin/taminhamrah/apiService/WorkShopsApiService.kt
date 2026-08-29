@@ -8,6 +8,9 @@ package com.tamin.taminhamrah.apiService
 
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeRequestDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
@@ -17,12 +20,16 @@ import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDTO
 import com.tamin.taminhamrah.tools.BaseDTO
+import de.jensklingenberg.ktorfit.http.Body
+import de.jensklingenberg.ktorfit.http.DELETE
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Header
+import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.Query
 import de.jensklingenberg.ktorfit.http.QueryMap
 import de.jensklingenberg.ktorfit.http.Path
 import io.ktor.http.cio.Response
+import kotlinx.serialization.json.JsonElement
 
 internal interface WorkShopsApiService {
 
@@ -79,4 +86,51 @@ internal interface WorkShopsApiService {
         @QueryMap queries: Map<String, String>
     ): BaseDTO<ListData<WorkshopStackHolderDTO>>
 
+    // ─── Legal representative introduction (معرفی نماینده اشخاص حقوقی) ────────────────
+
+    @GET("v.1/legal-stakeholders/units")
+    suspend fun getLegalRepresentativeWorkshops(
+        @Query("page") page: String = "1",
+        @Query("start") start: String = "0",
+        @Query("limit") limit: String = "10",
+        @Query("filter") filter: String = "[]",
+        @Query("sort") sort: String = "[]",
+    ): BaseDTO<ListData<LegalRepresentativeWorkshopDTO>>
+
+    @GET("legal-stakeholders")
+    suspend fun getLegalRepresentatives(
+        @Query("stackType") stackType: String = "4",
+        @Query("workshopId") workshopId: String,
+        @Query("branchCode") branchCode: String,
+        @Query("page") page: String = "1",
+        @Query("start") start: String = "0",
+        @Query("limit") limit: String = "10",
+        @Query("filter") filter: String = "[]",
+        @Query("sort") sort: String = "[]",
+    ): BaseDTO<ListData<LegalRepresentativeDTO>>
+
+    @GET("legal-ticket")
+    suspend fun requestLegalTicket(): BaseDTO<JsonElement?>
+
+    @GET("legal-ticket/{nationalCode}")
+    suspend fun requestLegalTicketWithNationalCode(
+        @Path("nationalCode") nationalCode: String
+    ): BaseDTO<JsonElement?>
+
+    @POST("legal-ticket/validate/{ticket}")
+    suspend fun validateLegalTicket(
+        @Path("ticket") ticket: String
+    ): BaseDTO<JsonElement?>
+
+    @POST("legal-stakeholders/{ticket}")
+    suspend fun submitLegalRepresentative(
+        @Path("ticket") ticket: String,
+        @Body request: LegalRepresentativeRequestDTO,
+    ): BaseDTO<JsonElement?>
+
+    @DELETE("legal-stakeholders/{ticket}/{stackId}")
+    suspend fun deleteLegalRepresentative(
+        @Path("ticket") ticket: String,
+        @Path("stackId") stackId: Long,
+    ): BaseDTO<JsonElement?>
 }

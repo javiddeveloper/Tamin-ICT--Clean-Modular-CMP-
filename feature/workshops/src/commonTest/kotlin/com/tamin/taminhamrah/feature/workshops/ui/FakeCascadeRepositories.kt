@@ -19,6 +19,9 @@ import com.tamin.taminhamrah.model.contracts.PremiumRateDN
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDN
 import com.tamin.taminhamrah.model.contracts.SaveContactRequestDN
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeListDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeRequestDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeWorkshopListDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementListDN
@@ -145,6 +148,15 @@ internal class FakeCascadeWorkShopsRepository : WorkShopsRepository {
     override fun getWorkshopStackHolders(
         filters: List<ApiFilterDN>
     ): Flow<WorkshopStackHolderListDN?> = unused()
+    override fun getLegalRepresentativeWorkshops(): Flow<LegalRepresentativeWorkshopListDN?> = unused()
+    override fun getLegalRepresentatives(
+        workshopId: String,
+        branchCode: String
+    ): Flow<LegalRepresentativeListDN?> = unused()
+    override suspend fun requestLegalRepresentativeTicket(nationalCode: String?): Unit = unusedValue()
+    override suspend fun verifyLegalRepresentativeTicket(ticket: String): Unit = unusedValue()
+    override suspend fun submitLegalRepresentative(ticket: String, request: LegalRepresentativeRequestDN): Unit = unusedValue()
+    override suspend fun deleteLegalRepresentative(ticket: String, stakeId: Long): Unit = unusedValue()
 }
 
 private fun <T> unused(): Flow<T> =

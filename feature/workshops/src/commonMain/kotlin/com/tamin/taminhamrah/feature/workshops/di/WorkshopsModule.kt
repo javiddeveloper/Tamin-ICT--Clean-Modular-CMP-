@@ -12,6 +12,10 @@ import com.tamin.taminhamrah.feature.workshops.ui.managementDebit.ManagementDebi
 import com.tamin.taminhamrah.feature.workshops.ui.workshopMembers.WorkshopMembersViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.workshopStackholders.WorkshopStackholdersViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersViewModel
+import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.workshops.LegalRepresentativeWorkshopsViewModel
+import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.otp.LegalRepresentativeOtpViewModel
+import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.list.LegalRepresentativeListViewModel
+import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.add.AddLegalRepresentativeViewModel
 
 val workshopsModule = module {
     viewModelOf(::WorkshopsViewModel)
@@ -23,4 +27,8 @@ val workshopsModule = module {
     viewModelOf(::WorkshopMembersViewModel)
     viewModelOf(::WorkshopStackholdersViewModel)
     viewModelOf(::WorkshopRecentlyAddedMembersViewModel)
+    viewModelOf(::LegalRepresentativeWorkshopsViewModel)
+    viewModelOf(::LegalRepresentativeOtpViewModel)
+    viewModelOf(::LegalRepresentativeListViewModel)
+    viewModelOf(::AddLegalRepresentativeViewModel)
 }

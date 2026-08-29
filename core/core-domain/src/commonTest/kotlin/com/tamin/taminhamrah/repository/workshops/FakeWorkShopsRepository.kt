@@ -1,5 +1,8 @@
 package com.tamin.taminhamrah.repository.workshops
 
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeListDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeRequestDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeWorkshopListDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementListDN
@@ -100,5 +103,36 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     ): Flow<WorkshopStackHolderListDN?> = flow {
         if (shouldThrowError) throw error
         emit(workshopStackHoldersResult)
+    }
+
+    var legalRepresentativeWorkshopsResult: LegalRepresentativeWorkshopListDN? = null
+    override fun getLegalRepresentativeWorkshops(): Flow<LegalRepresentativeWorkshopListDN?> = flow {
+        if (shouldThrowError) throw error
+        emit(legalRepresentativeWorkshopsResult)
+    }
+
+    var legalRepresentativesResult: LegalRepresentativeListDN? = null
+    override fun getLegalRepresentatives(
+        workshopId: String,
+        branchCode: String
+    ): Flow<LegalRepresentativeListDN?> = flow {
+        if (shouldThrowError) throw error
+        emit(legalRepresentativesResult)
+    }
+
+    override suspend fun requestLegalRepresentativeTicket(nationalCode: String?) {
+        if (shouldThrowError) throw error
+    }
+
+    override suspend fun verifyLegalRepresentativeTicket(ticket: String) {
+        if (shouldThrowError) throw error
+    }
+
+    override suspend fun submitLegalRepresentative(ticket: String, request: LegalRepresentativeRequestDN) {
+        if (shouldThrowError) throw error
+    }
+
+    override suspend fun deleteLegalRepresentative(ticket: String, stakeId: Long) {
+        if (shouldThrowError) throw error
     }
 }

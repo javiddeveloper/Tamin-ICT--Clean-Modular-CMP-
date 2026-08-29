@@ -1,11 +1,15 @@
 package com.tamin.taminhamrah.mapper.workshop
 
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeWorkshopDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementListDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementPR
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementListPR
 import com.tamin.taminhamrah.model.workshop.EmployerWorkshopDN
 import com.tamin.taminhamrah.model.workshop.EmployerWorkshopPR
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativePR
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopPR
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetListDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetListPR
@@ -200,5 +204,32 @@ fun WorkshopNewMemberDN.toPresentation(): WorkshopNewMemberPR {
 fun WorkshopStackHolderDN.toPresentation(): WorkshopStackHolderPR {
     return WorkshopStackHolderPR(
         stackId = stackId, nationalId = nationalId, mobile = mobile, stackType = stackType
+    )
+}
+
+fun LegalRepresentativeWorkshopDN.toPresentation(): LegalRepresentativeWorkshopPR {
+    return LegalRepresentativeWorkshopPR(
+        workshopId = workshopId,
+        branchCode = branchCode,
+        workshopName = workshopName ?: "",
+        branchName = branchName,
+        special = special,
+        representativeCount = representativeCount,
+    )
+}
+
+fun LegalRepresentativeDN.toPresentation(): LegalRepresentativePR {
+    return LegalRepresentativePR(
+        stakeId = stakeId,
+        nationalId = nationalId,
+        mobile = mobile,
+        fullName = fullName,
+        hasElectronicNotification = hasElectronicNotification,
+        hasInternetList = hasInternetList,
+        hasInsuredRegistration = hasInsuredRegistration,
+        startDateLabel = com.tamin.taminhamrah.util.PersianDateFormatter.formatTimestamp(startDate),
+        workshopId = workshopId,
+        branchCode = branchCode,
+        special = special,
     )
 }

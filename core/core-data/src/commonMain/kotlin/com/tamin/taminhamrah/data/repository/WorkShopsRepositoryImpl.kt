@@ -4,8 +4,12 @@ import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSourc
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementListDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeListDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeRequestDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeWorkshopListDN
 import com.tamin.taminhamrah.repository.WorkShopsRepository
 import com.tamin.taminhamrah.data.mapper.toDomain
+import com.tamin.taminhamrah.data.mapper.toDto
 import com.tamin.taminhamrah.model.workshop.PaymentSheetListDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebitListDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN
@@ -145,5 +149,48 @@ class WorkShopsRepositoryImpl(
                 )
             }
         )
+    }
+
+    override fun getLegalRepresentativeWorkshops(): Flow<LegalRepresentativeWorkshopListDN?> = flow {
+        val response = remoteDataSource.getLegalRepresentativeWorkshops()
+        emit(
+            response?.let {
+                LegalRepresentativeWorkshopListDN(
+                    list = it.list?.map { item -> item.toDomain() } ?: emptyList(),
+                    total = it.total ?: 0
+                )
+            }
+        )
+    }
+
+    override fun getLegalRepresentatives(
+        workshopId: String,
+        branchCode: String
+    ): Flow<LegalRepresentativeListDN?> = flow {
+        val response = remoteDataSource.getLegalRepresentatives(workshopId, branchCode)
+        emit(
+            response?.let {
+                LegalRepresentativeListDN(
+                    list = it.list?.map { item -> item.toDomain() } ?: emptyList(),
+                    total = it.total ?: 0
+                )
+            }
+        )
+    }
+
+    override suspend fun requestLegalRepresentativeTicket(nationalCode: String?) {
+        remoteDataSource.requestLegalRepresentativeTicket(nationalCode)
+    }
+
+    override suspend fun verifyLegalRepresentativeTicket(ticket: String) {
+        remoteDataSource.verifyLegalRepresentativeTicket(ticket)
+    }
+
+    override suspend fun submitLegalRepresentative(ticket: String, request: LegalRepresentativeRequestDN) {
+        remoteDataSource.submitLegalRepresentative(ticket, request.toDto(ticket))
+    }
+
+    override suspend fun deleteLegalRepresentative(ticket: String, stakeId: Long) {
+        remoteDataSource.deleteLegalRepresentative(ticket, stakeId)
     }
 }

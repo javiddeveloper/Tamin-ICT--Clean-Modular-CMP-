@@ -13,6 +13,12 @@ import com.tamin.taminhamrah.feature.workshops.ui.workshopDebtInquiry.WorkshopDe
 import com.tamin.taminhamrah.feature.workshops.ui.workshopMembers.WorkshopMembersScreen
 import com.tamin.taminhamrah.feature.workshops.ui.workshopStackholders.WorkshopStackholdersScreen
 import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersScreen
+import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.workshops.LegalRepresentativeWorkshopsScreen
+import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.otp.LegalRepresentativeOtpScreen
+import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.list.LegalRepresentativeListScreen
+import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.add.AddLegalRepresentativeScreen
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativePR
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopPR
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -66,8 +72,45 @@ data class WorkshopRecentlyAddedMembersRoute(
     val branchCode: String
 )
 
+@Serializable
+data object LegalRepresentativeWorkshopsRoute
+
+@Serializable
+data class LegalRepresentativeOtpRoute(
+    val workshopId: String,
+    val branchCode: String,
+    val workshopName: String,
+    val branchName: String,
+)
+
+@Serializable
+data class LegalRepresentativeListRoute(
+    val workshopId: String,
+    val branchCode: String,
+    val workshopName: String,
+    val branchName: String,
+    val ticket: String,
+)
+
+@Serializable
+data class AddLegalRepresentativeRoute(
+    val workshopId: String,
+    val branchCode: String,
+    val workshopName: String,
+    val branchName: String,
+    val isEditMode: Boolean,
+    val nationalCode: String,
+    val hasElectronicNotification: Boolean,
+    val hasInternetList: Boolean,
+    val hasInsuredRegistration: Boolean,
+)
+
 fun NavController.navigateToWorkshops() {
     navigate(WorkshopsRoute)
+}
+
+fun NavController.navigateToLegalRepresentativeWorkshops() {
+    navigate(LegalRepresentativeWorkshopsRoute)
 }
 
 fun NavGraphBuilder.workshopsScreen(navController: NavController) {
@@ -162,6 +205,105 @@ fun NavGraphBuilder.workshopsScreen(navController: NavController) {
         WorkshopRecentlyAddedMembersScreen(
             workshopId = route.workshopId,
             branchCode = route.branchCode
+        )
+    }
+
+    // ─── Legal representative introduction (معرفی نماینده اشخاص حقوقی) ────────────────
+
+    composableWithFadeTransitions<LegalRepresentativeWorkshopsRoute> {
+        LegalRepresentativeWorkshopsScreen(
+            onBackClicked = { navController.popBackStack() },
+            onOpenWorkshop = { workshop: LegalRepresentativeWorkshopPR ->
+                navController.navigate(
+                    LegalRepresentativeOtpRoute(
+                        workshopId = workshop.workshopId,
+                        branchCode = workshop.branchCode,
+                        workshopName = workshop.workshopName,
+                        branchName = workshop.branchName ?: workshop.branchCode,
+                    )
+                )
+            },
+        )
+    }
+
+    composableWithFadeTransitions<LegalRepresentativeOtpRoute> { backStackEntry ->
+        val route = backStackEntry.toRoute<LegalRepresentativeOtpRoute>()
+        LegalRepresentativeOtpScreen(
+            workshopName = route.workshopName,
+            workshopSubtitle = "کد کارگاه ${route.workshopId} · شعبهٔ ${route.branchName}",
+            onBackClicked = { navController.popBackStack() },
+            onVerified = { ticket ->
+                navController.navigate(
+                    LegalRepresentativeListRoute(
+                        workshopId = route.workshopId,
+                        branchCode = route.branchCode,
+                        workshopName = route.workshopName,
+                        branchName = route.branchName,
+                        ticket = ticket,
+                    )
+                ) {
+                    popUpTo<LegalRepresentativeOtpRoute> { inclusive = true }
+                }
+            },
+        )
+    }
+
+    composableWithFadeTransitions<LegalRepresentativeListRoute> { backStackEntry ->
+        val route = backStackEntry.toRoute<LegalRepresentativeListRoute>()
+        LegalRepresentativeListScreen(
+            workshopId = route.workshopId,
+            branchCode = route.branchCode,
+            workshopName = route.workshopName,
+            workshopSubtitle = "کد کارگاه ${route.workshopId} · شعبهٔ ${route.branchName}",
+            ticket = route.ticket,
+            onBackClicked = { navController.popBackStack() },
+            onAddClicked = {
+                navController.navigate(
+                    AddLegalRepresentativeRoute(
+                        workshopId = route.workshopId,
+                        branchCode = route.branchCode,
+                        workshopName = route.workshopName,
+                        branchName = route.branchName,
+                        isEditMode = false,
+                        nationalCode = "",
+                        hasElectronicNotification = false,
+                        hasInternetList = false,
+                        hasInsuredRegistration = false,
+                    )
+                )
+            },
+            onEditClicked = { representative: LegalRepresentativePR ->
+                navController.navigate(
+                    AddLegalRepresentativeRoute(
+                        workshopId = route.workshopId,
+                        branchCode = route.branchCode,
+                        workshopName = route.workshopName,
+                        branchName = route.branchName,
+                        isEditMode = true,
+                        nationalCode = representative.nationalId,
+                        hasElectronicNotification = representative.hasElectronicNotification,
+                        hasInternetList = representative.hasInternetList,
+                        hasInsuredRegistration = representative.hasInsuredRegistration,
+                    )
+                )
+            },
+        )
+    }
+
+    composableWithFadeTransitions<AddLegalRepresentativeRoute> { backStackEntry ->
+        val route = backStackEntry.toRoute<AddLegalRepresentativeRoute>()
+        AddLegalRepresentativeScreen(
+            workshopId = route.workshopId,
+            branchCode = route.branchCode,
+            workshopName = route.workshopName,
+            workshopSubtitle = "کد کارگاه ${route.workshopId} · شعبهٔ ${route.branchName}",
+            isEditMode = route.isEditMode,
+            nationalCode = route.nationalCode,
+            hasElectronicNotification = route.hasElectronicNotification,
+            hasInternetList = route.hasInternetList,
+            hasInsuredRegistration = route.hasInsuredRegistration,
+            onBackClicked = { navController.popBackStack() },
+            onSubmitted = { navController.popBackStack() },
         )
     }
 }
