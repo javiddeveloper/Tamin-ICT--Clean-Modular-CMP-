@@ -2,6 +2,8 @@ package com.tamin.taminhamrah.feature.workshops.ui.objectionableDebit
 
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopObjectionableDebitListUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -17,7 +19,7 @@ class ObjectionableDebitViewModel(
             emit(ObjectionableDebitUiState.PartialState.Loading(true))
             try {
                 val res = useCase(intent.workshopId, intent.branchCode, emptyList()).first()
-                emit(ObjectionableDebitUiState.PartialState.Loaded(res?.list?.map { it.toPresentation() } ?: emptyList()))
+                emit(ObjectionableDebitUiState.PartialState.Loaded(res?.list?.map { it.toPresentation() }?.toPersistentList() ?: persistentListOf()))
             } catch (e: Exception) {
                 emit(ObjectionableDebitUiState.PartialState.Error(e.message))
             }

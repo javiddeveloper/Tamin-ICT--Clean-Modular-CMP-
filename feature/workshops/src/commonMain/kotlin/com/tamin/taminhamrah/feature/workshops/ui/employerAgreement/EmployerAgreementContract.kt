@@ -1,15 +1,21 @@
 package com.tamin.taminhamrah.feature.workshops.ui.employerAgreement
 
+import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementPR
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
-class EmployerAgreementUiState(
+// `data` on purpose: without structural equality two states holding the same values never
+// compare equal, so the screen recomposes on every emission whatever the annotation promises.
+@Immutable
+data class EmployerAgreementUiState(
     val isLoading: Boolean = false,
-    val list: List<EmployerAgreementPR> = emptyList(),
+    val list: ImmutableList<EmployerAgreementPR> = persistentListOf(),
     val error: String? = null
 ) {
     sealed class PartialState {
         data class Loading(val isLoading: Boolean) : PartialState()
-        data class Loaded(val list: List<EmployerAgreementPR>) : PartialState()
+        data class Loaded(val list: ImmutableList<EmployerAgreementPR>) : PartialState()
         data class Error(val message: String?) : PartialState()
     }
 }

@@ -1,15 +1,21 @@
 package com.tamin.taminhamrah.feature.workshops.ui.workshopMembers
 
+import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberPR
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
-class WorkshopMembersUiState(
+// `data` on purpose: without structural equality two states holding the same values never
+// compare equal, so the screen recomposes on every emission whatever the annotation promises.
+@Immutable
+data class WorkshopMembersUiState(
     val isLoading: Boolean = false,
-    val list: List<WorkshopMemberPR> = emptyList(),
+    val list: ImmutableList<WorkshopMemberPR> = persistentListOf(),
     val error: String? = null
 ) {
     sealed class PartialState {
         data class Loading(val isLoading: Boolean) : PartialState()
-        data class Loaded(val list: List<WorkshopMemberPR>) : PartialState()
+        data class Loaded(val list: ImmutableList<WorkshopMemberPR>) : PartialState()
         data class Error(val message: String?) : PartialState()
     }
 }

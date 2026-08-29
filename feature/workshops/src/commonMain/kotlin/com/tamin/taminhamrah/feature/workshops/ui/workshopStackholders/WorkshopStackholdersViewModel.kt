@@ -2,6 +2,8 @@ package com.tamin.taminhamrah.feature.workshops.ui.workshopStackholders
 
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
@@ -24,7 +26,7 @@ class WorkshopStackholdersViewModel(
                     ApiFilterDN(FilterProperty.WORKSHOPID_BRANCH_CODE, intent.branchCode, FilterOperator.EQ)
                 )
                 val res = useCase(filters).first()
-                emit(WorkshopStackholdersUiState.PartialState.Loaded(res?.list?.map { it.toPresentation() } ?: emptyList()))
+                emit(WorkshopStackholdersUiState.PartialState.Loaded(res?.list?.map { it.toPresentation() }?.toPersistentList() ?: persistentListOf()))
             } catch (e: Exception) {
                 emit(WorkshopStackholdersUiState.PartialState.Error(e.message))
             }
