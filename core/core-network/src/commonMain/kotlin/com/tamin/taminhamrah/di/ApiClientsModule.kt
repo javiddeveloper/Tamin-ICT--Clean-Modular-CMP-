@@ -28,6 +28,8 @@ import com.tamin.taminhamrah.apiService.pension.PensionApiService
 import com.tamin.taminhamrah.apiService.pension.createPensionApiService
 import com.tamin.taminhamrah.apiService.personal.PersonalApiService
 import com.tamin.taminhamrah.apiService.personal.createPersonalApiService
+import com.tamin.taminhamrah.apiService.historyObjection.HistoryObjectionApiService
+import com.tamin.taminhamrah.apiService.historyObjection.createHistoryObjectionApiService
 import com.tamin.taminhamrah.apiService.userRequest.createUserRequestApiService
 import com.tamin.taminhamrah.apiService.treatment.TreatmentApiService
 import com.tamin.taminhamrah.apiService.treatment.createTreatmentApiService
@@ -36,6 +38,8 @@ import com.tamin.taminhamrah.apiService.addDependent.AddDependentApiService
 import com.tamin.taminhamrah.apiService.addDependent.createAddDependentApiService
 import com.tamin.taminhamrah.apiService.calculateWagePension.CalculateWagePensionApiService
 import com.tamin.taminhamrah.apiService.calculateWagePension.createCalculateWagePensionApiService
+import com.tamin.taminhamrah.apiService.inspection.InspectionApiService
+import com.tamin.taminhamrah.apiService.inspection.createInspectionApiService
 import com.tamin.taminhamrah.apiService.occurrence.OccurrenceApiService
 import com.tamin.taminhamrah.apiService.occurrence.createOccurrenceApiService
 import com.tamin.taminhamrah.util.NetworkConstants
@@ -125,6 +129,11 @@ val ApiClientsModule = module {
         ktorfit.createUserRequestApiService()
     }
 
+    single<HistoryObjectionApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createHistoryObjectionApiService()
+    }
+
     single<PersonalInboxApiService>(named("personalInboxApiService")) {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.createPersonalInboxApiService()
@@ -158,4 +167,9 @@ val ApiClientsModule = module {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.createOccurrenceApiService()
     }
+    single<InspectionApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createInspectionApiService()
+    }
 }
+

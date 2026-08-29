@@ -16,6 +16,9 @@ import com.tamin.taminhamrah.useCases.common.GetRecipientListUseCase
 import com.tamin.taminhamrah.useCases.common.GetBeneficiaryUseCase
 import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
 import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
+import com.tamin.taminhamrah.useCases.common.GetCitiesByProvinceUseCase
+import com.tamin.taminhamrah.useCases.common.GetInsuranceTypesUseCase
+import com.tamin.taminhamrah.useCases.common.CheckUserTypeUseCase
 import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
 import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
 import com.tamin.taminhamrah.useCases.file.DownloadDocumentUseCase
@@ -29,12 +32,14 @@ import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
 import com.tamin.taminhamrah.useCases.pension.SendRequestDeferredInstallmentCertificateUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerPayRollUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerPayRollPDFUseCase
+import com.tamin.taminhamrah.useCases.pension.SendPayRollToInboxUseCase
 import com.tamin.taminhamrah.useCases.pension.GetUserAgeUseCase
 import com.tamin.taminhamrah.useCases.pension.GetRetirementRequestInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.CheckRetirementStatusUseCase
 import com.tamin.taminhamrah.useCases.pension.SendRetirementDocumentUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.DeleteMyRequestUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.InboxInquiryLicenseUseCase
+import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxItemsPageUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxItemsUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxSizeUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.GetMyRequestPdfUseCase
@@ -59,7 +64,9 @@ import com.tamin.taminhamrah.useCases.orotezProtez.SaveShortTermOrthosisUseCase
 import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
 import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.GetStatusCertificateReportUseCase
+import com.tamin.taminhamrah.useCases.user.GetWageCertificateReportUseCase
 import com.tamin.taminhamrah.useCases.user.GetRecipientsUseCase
+import com.tamin.taminhamrah.useCases.user.GetIdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
 import com.tamin.taminhamrah.useCases.auth.SignOutUseCase
@@ -148,6 +155,12 @@ import com.tamin.taminhamrah.useCases.workshops.GetObjectionableDebitsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetPaymentSheetsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetRecentlyAddedMembersUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebitsUseCase
+import com.tamin.taminhamrah.useCases.historyObjection.CheckHistoryObjectionStatusNotExistUseCase
+import com.tamin.taminhamrah.useCases.historyObjection.ConfirmHistoryObjectionNotExistUseCase
+import com.tamin.taminhamrah.useCases.historyObjection.DeleteHistoryObjectionNotExistRequestUseCase
+import com.tamin.taminhamrah.useCases.historyObjection.FinalConfirmHistoryObjectionNotExistUseCase
+import com.tamin.taminhamrah.useCases.historyObjection.GetHistoryObjectionNotExistRequestsUseCase
+import com.tamin.taminhamrah.useCases.historyObjection.SaveHistoryObjectionNotExistRequestUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebtInquiryUseCase
 import com.tamin.taminhamrah.useCases.workshops.PayWorkshopDebitUseCase
 import com.tamin.taminhamrah.useCases.workshops.SaveArticle16RequestUseCase
@@ -213,6 +226,7 @@ val domainModule = module {
     factoryOf(::SendRequestDeferredInstallmentCertificateUseCase)
     factoryOf(::GetPensionerPayRollUseCase)
     factoryOf(::GetPensionerPayRollPDFUseCase)
+    factoryOf(::SendPayRollToInboxUseCase)
     factoryOf(::GetUserAgeUseCase)
     factoryOf(::GetRetirementRequestInfoUseCase)
     factoryOf(::CheckRetirementStatusUseCase)
@@ -229,6 +243,8 @@ val domainModule = module {
     factoryOf(::GetInsuredActiveBranchUseCase)
     factoryOf(::GetRelationTaminAllUseCase)
     factoryOf(::GetStatusCertificateReportUseCase)
+    factoryOf(::GetWageCertificateReportUseCase)
+    factoryOf(::GetIdentityInfoUseCase)
     factoryOf(::GetRecipientsUseCase)
     factoryOf(::GetElectronicFileUseCase)
     factoryOf(::DownloadDocumentUseCase)
@@ -243,6 +259,9 @@ val domainModule = module {
     factoryOf(::GetAgeUseCase)
     factoryOf(::GetCitiesUseCase)
     factoryOf(::GetProvincesUseCase)
+    factoryOf(::GetCitiesByProvinceUseCase)
+    factoryOf(::GetInsuranceTypesUseCase)
+    factoryOf(::CheckUserTypeUseCase)
     factoryOf(::ChangeMobileUseCase)
     factoryOf(::VerifyChangeMobileUseCase)
     factoryOf(::GetBeneficiaryUseCase)
@@ -254,6 +273,12 @@ val domainModule = module {
     factoryOf(::GetUserRequestDetailUseCase)
     factoryOf(::GetShowRequestInfoUseCase)
     factoryOf(::DownloadUserRequestDocumentUseCase)
+    factoryOf(::CheckHistoryObjectionStatusNotExistUseCase)
+    factoryOf(::GetHistoryObjectionNotExistRequestsUseCase)
+    factoryOf(::SaveHistoryObjectionNotExistRequestUseCase)
+    factoryOf(::DeleteHistoryObjectionNotExistRequestUseCase)
+    factoryOf(::ConfirmHistoryObjectionNotExistUseCase)
+    factoryOf(::FinalConfirmHistoryObjectionNotExistUseCase)
 
     factoryOf(::GetTalfighInfosUseCase)
     factoryOf(::GetDastmozdInfosUseCase)
@@ -263,6 +288,7 @@ val domainModule = module {
     factoryOf(::CalculateMultipleWorkshopsPensionUseCase)
     factoryOf(::CalculateWagePensionUseCase)
     factoryOf(::GetPersonalInboxItemsUseCase)
+    factoryOf(::GetPersonalInboxItemsPageUseCase)
     factoryOf(::GetPersonalInboxSizeUseCase)
     factoryOf(::GetRequestInsuredMainInfoUseCase)
     factoryOf(::GetInsuredPersonsUseCase)

@@ -99,6 +99,7 @@ import com.tamin.taminhamrah.feature.addDependent.AddDependentRoute
 import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceContractScreen
 import com.tamin.taminhamrah.feature.taminServices.TaminServicesRoute
 import com.tamin.taminhamrah.feature.taminServices.occurrenceScreen
+import com.tamin.taminhamrah.feature.taminServices.inspectionScreen
 import com.tamin.taminhamrah.feature.taminServices.sendInsuranceHistoryToInstitutionsScreen
 import com.tamin.taminhamrah.feature.taminServices.taminServicesScreen
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
@@ -113,6 +114,8 @@ import com.tamin.taminhamrah.feature.settings.SettingsRoute
 import com.tamin.taminhamrah.feature.settings.settingsScreen
 import com.tamin.taminhamrah.feature.userRequest.UserRequestRoute
 import com.tamin.taminhamrah.feature.userRequest.userRequestGraph
+import com.tamin.taminhamrah.feature.historyobjection.historyObjectionScreen
+import com.tamin.taminhamrah.feature.historyobjection.historyObjectionStepperScreen
 import com.tamin.taminhamrah.feature.orotezprotez.orotezProtezScreen
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
@@ -428,6 +431,10 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                     onDone = { navController.popBackStack() }
                 )
 
+                inspectionScreen(
+                    onBack = { navController.popBackStack() }
+                )
+
                 pensionStatusInquiryGraph(
                     onBack = { navController.popBackStack() }
                 )
@@ -441,7 +448,15 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                 deservedTreatmentScreen(onBack = { navController.popBackStack() })
                 payrollScreen(onBack = { navController.popBackStack() })
                 edictScreen(onBack = { navController.popBackStack() })
-                issuanceCertificateScreen(onBack = { navController.popBackStack() })
+                issuanceCertificateScreen(
+                    onBack = { navController.popBackStack() },
+                    onGoHome = {
+                        navController.navigate(Route.Home) {
+                            popUpTo(navController.graph.findStartDestination().id) { inclusive = false }
+                            launchSingleTop = true
+                        }
+                    }
+                )
                 deferredInstallmentScreen(onBack = { navController.popBackStack() })
                 girlSurvivorScreen(onBack = { navController.popBackStack() })
                 pensionSurvivorScreen(onBack = { navController.popBackStack() })
@@ -491,6 +506,13 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                 securityScreen(onNavigateBack = { navController.popBackStack() })
 
                 orotezProtezScreen(onBack = { navController.popBackStack() })
+
+                historyObjectionScreen(navController = navController, onBack = { navController.popBackStack() })
+
+                historyObjectionStepperScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateHome = { navController.popBackStack(Route.Home, inclusive = false) },
+                )
 
                 healthProfileScreen(onBack = { navController.popBackStack() })
             }

@@ -49,6 +49,9 @@ enum class FilterProperty(val key: String) {
     @SerialName("provinceCode") PROVINCE_CODE("provinceCode"),
     // Lower-case 'c' on purpose: proxy/models/city names the field `provincecode`, which is also
     // why CityDto's @SerialName is spelled that way. Correcting it stops the filter working.
+    // Also used for special-insured-services/cities, which expects the same lowercase casing —
+    // do not add a second enum entry for it, kotlinx.serialization forbids duplicate SerialNames
+    // within one enum class.
     @SerialName("provincecode") PROVINCE_CODE_CITY("provincecode"),
     @SerialName("pensionerId") PENSIONER_ID("pensionerId"),
     @SerialName("startDate") START_DATE("startDate"),
@@ -84,6 +87,9 @@ enum class FilterProperty(val key: String) {
     @SerialName("requestStatus") REQUEST_STATUS("requestStatus"),
     @SerialName("isPublic") IS_PUBLIC("isPublic"),
     @SerialName("dependencyDesc") DEPENDENCY_DESC("dependencyDesc"),
+    @SerialName("type") TYPE("type"),
+    @SerialName("status") STATUS("status"),
+    @SerialName("jobDescription") JOB_DESCRIPTION("jobDescription"),
     @SerialName("bankName") BANK_NAME("bankName"),
 
     // Workshop member / stakeholder / absentee-registration lists. Each list addresses the same
@@ -100,6 +106,7 @@ enum class FilterProperty(val key: String) {
 
     @SerialName("debitNumber") DEBIT_NUMBER("debitNumber"),
     @SerialName("peymanSequence") PEYMAN_SEQUENCE("peymanSequence"),
+    @SerialName("insuranceTypeDesc") INSURANCE_TYPE_DESC("insuranceTypeDesc"),
 }
 
 

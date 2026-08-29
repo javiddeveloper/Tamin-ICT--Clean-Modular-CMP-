@@ -17,6 +17,7 @@ Read the relevant page there before searching the codebase:
 | Persian digits / typography | `docs/vault/Typography.md` |
 | Theme tokens (color, size, copy) | `docs/vault/Theme.md` |
 | Navigation | `docs/vault/Navigation.md` |
+| Scroll-driven collapsing headers (fold/unfold on drag) | `docs/vault/TopArea-System.md` |
 | DI and Koin | `docs/vault/Dependency-Injection.md` |
 | Networking, tokens, endpoints | `docs/vault/Networking.md` |
 | Database and schemas | `docs/vault/Database.md` |

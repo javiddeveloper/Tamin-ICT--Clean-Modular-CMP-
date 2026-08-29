@@ -7,12 +7,14 @@
 package com.tamin.taminhamrah.apiService
 
 import com.tamin.core.network.model.common.CityNameDto
+import com.tamin.taminhamrah.model.common.InsuranceTypeDTO
 import com.tamin.taminhamrah.model.common.MainServiceDto
 import com.tamin.core.network.model.common.ProvinceNameDto
 import com.tamin.taminhamrah.model.common.RecipientDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.common.BeneficiaryDTO
 import com.tamin.taminhamrah.model.common.JobTitleDTO
+import com.tamin.taminhamrah.model.common.UserInsuredInfoDTO
 import com.tamin.taminhamrah.tools.BaseDTO
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.QueryMap
@@ -33,6 +35,16 @@ internal interface CommonApiService {
     suspend fun getProvinceName(
         @QueryMap parameters: Map<String, String>
     ): BaseDTO<ProvinceNameDto>
+
+    @GET("special-insured-services/cities")
+    suspend fun getCitiesByProvince(
+        @QueryMap parameters: Map<String, String>
+    ): BaseDTO<CityNameDto>
+
+    @GET("proxy/models/insurance-type/")
+    suspend fun getInsuranceTypes(
+        @QueryMap parameters: Map<String, String>
+    ): BaseDTO<ListData<InsuranceTypeDTO>>
 
     @GET
     suspend fun getMainMenu(@Url url: String): BaseDTO<List<MainServiceDto>>
@@ -57,4 +69,7 @@ internal interface CommonApiService {
     suspend fun getJobTitle(
         @QueryMap queries: Map<String, String>
     ): BaseDTO<ListData<JobTitleDTO>>
+
+    @GET("login-services/logininfo")
+    suspend fun checkInsuredInfo(): BaseDTO<UserInsuredInfoDTO>
 }

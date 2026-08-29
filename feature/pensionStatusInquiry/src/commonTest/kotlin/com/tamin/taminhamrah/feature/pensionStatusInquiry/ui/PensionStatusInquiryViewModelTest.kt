@@ -168,6 +168,7 @@ private class TestPensionRepository : PensionRepository {
     override suspend fun authenticationAndGetPersonalInfo(authenticationsCode: Long) = unused()
     override suspend fun getAuthenticationCode() = unused()
     override suspend fun sendEdictPensionerToMyInbox(filters: List<ApiFilterDN>) = unused()
+    override suspend fun sendPayRollToInbox(filters: List<ApiFilterDN>) = unused()
 
     private fun unused(): Nothing = error("not used")
 }
