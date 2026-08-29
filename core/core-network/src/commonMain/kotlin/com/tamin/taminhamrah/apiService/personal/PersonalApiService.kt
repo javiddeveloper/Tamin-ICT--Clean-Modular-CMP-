@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoRequest
 import com.tamin.taminhamrah.model.personal.submitFinalSurvivorPension.SubmitFinalSurvivorPensionRequest
+import com.tamin.taminhamrah.model.personal.survivorDependent.SurvivorDependentDTO
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDTO
 import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoDTO
 import com.tamin.taminhamrah.model.personal.girlSurvivor.ConfirmGirlSurvivorRequestDTO
@@ -44,6 +45,11 @@ interface PersonalApiService {
     suspend fun getDisabilityDependentInfo(
         @QueryMap parameters: Map<String, String>
     ): BaseDTO<ListData<DisabilityDependentDTO>>
+
+    @GET("survivor-request/subdominant")
+    suspend fun getSurvivorList(
+        @Query("id") id: String,
+    ): BaseDTO<ListData<SurvivorDependentDTO>>
 
     @GET("survivor-request/condition")
     suspend fun checkGirlSurvivorConditions(

@@ -25,6 +25,8 @@ import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
+import com.tamin.taminhamrah.model.personal.survivorDependent.SurvivorDependentDN
+import com.tamin.taminhamrah.model.personal.survivorDependent.SurvivorDependentDTO
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDTO
 import com.tamin.taminhamrah.model.personal.survivorList.RequestModelDN
@@ -96,6 +98,25 @@ fun DisabilityDependentDTO.toDomain(): DisabilityDependentDN {
         genderDesc = personal?.gender?.genderDesc,
         relation = personal?.relation,
         tendencyDescription = tendency?.tendencyDescription
+    )
+}
+
+fun SurvivorDependentDTO.toDomain(): SurvivorDependentDN {
+    val relationWithTamin = relationWithTamin
+    val personal = relationWithTamin?.personal
+    val tendency = relationWithTamin?.relationWithTamin?.baseTendency
+    return SurvivorDependentDN(
+        firstName = personal?.firstName,
+        lastName = personal?.lastName,
+        nationalId = personal?.nationalId,
+        fatherName = personal?.fatherName,
+        idCardNumber = personal?.idCardNumber,
+        cityOfIssue = personal?.cityOfIssue,
+        genderCode = personal?.gender?.genderCode,
+        genderDesc = personal?.gender?.genderDesc,
+        dateOfBirth = personal?.dateOfBirth,
+        insuranceId = relationWithTamin?.insuranceId,
+        tendencyCode = tendency?.tendencyCode
     )
 }
 
