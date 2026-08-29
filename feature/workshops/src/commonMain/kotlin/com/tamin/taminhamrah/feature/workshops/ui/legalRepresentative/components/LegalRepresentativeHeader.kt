@@ -12,10 +12,15 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
+import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.GlassIconTile
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
@@ -28,34 +33,58 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.legal_representative_title
 
-/** The gradient hero bar shared by every screen in this flow, title + back button fixed. */
+/**
+ * The gradient hero bar shared by every screen in this flow — same structure as
+ * `OrotezProtezHeader` (`feature:orotez-protez`): an outer rounded-bottom column painted with
+ * `profileGradientStops` (navy), holding the [TaminTopAppBar] plus centered [content] below it,
+ * rather than `TaminTopAppBar`'s own default teal `content` slot.
+ */
 @Composable
 internal fun LegalRepresentativeHeader(
     onBackClicked: () -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit = {},
 ) {
-    TaminTopAppBar(
-        title = stringResource(Res.string.legal_representative_title),
-        modifier = modifier,
-        navigationIcon = {
-            TaminTopAppBarButton(
-                icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                contentDescription = null,
-                onClick = onBackClicked,
-                bordered = true,
-            )
-        },
-        content = { content() },
-    )
+    val taminColors = LocalTaminColors.current
+    val gradient = remember(taminColors.profileGradientStops) {
+        Brush.horizontalGradient(taminColors.profileGradientStops)
+    }
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(bottomStart = CornerRadius.x3l, bottomEnd = CornerRadius.x3l))
+            .background(gradient)
+            .padding(bottom = Spacing.smPlus),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        TaminTopAppBar(
+            title = stringResource(Res.string.legal_representative_title),
+            background = gradient,
+            bottomPadding = Spacing.smPlus,
+            navigationIcon = {
+                TaminTopAppBarButton(
+                    icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                    contentDescription = null,
+                    onClick = onBackClicked,
+                    bordered = true,
+                )
+            },
+        )
+        DecorativeBackgroundCircle(
+            size = 190.dp,
+            xOffset = 250.dp,
+            yOffset = (-150).dp
+        )
+        content()
+    }
 }
 
 /** The hub screen's own header content: an icon tile over a muted caption. */
 @Composable
 internal fun LegalRepresentativeHeroSubtitle(text: String) {
     val taminColors = LocalTaminColors.current
-    Spacer(Modifier.height(Spacing.smPlus))
-    GlassIconTile(icon = Icons.Filled.Person)
+    AnimatedRingHeaderIcon(icon = Icons.Filled.Person)
     Spacer(Modifier.height(Spacing.sm))
     Text(
         text = text,
@@ -71,10 +100,10 @@ internal fun LegalRepresentativeWorkshopSummaryCard(
     subtitle: String,
 ) {
     val taminColors = LocalTaminColors.current
-    Spacer(Modifier.height(Spacing.smPlus))
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(horizontal = Spacing.lg)
             .clip(RoundedCornerShape(CornerRadius.card))
             .background(taminColors.glassIconTileBg)
             .padding(Spacing.md),
