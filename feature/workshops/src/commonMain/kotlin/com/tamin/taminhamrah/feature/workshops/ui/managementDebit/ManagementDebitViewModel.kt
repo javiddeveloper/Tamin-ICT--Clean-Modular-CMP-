@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.workshops.ui.managementDebit
 
+import androidx.compose.runtime.mutableStateMapOf
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.managementDebit.ManagementDebitUiState.PartialState
 import com.tamin.taminhamrah.feature.workshops.ui.model.ArticleSixteenDocumentTypes
@@ -47,7 +48,7 @@ class ManagementDebitViewModel(
      * The domain rows the presentation rows were built from, kept so the submission works on the
      * debt the service sent rather than on its formatted copy.
      */
-    private var debtsByNumber: Map<String, WorkshopsDebtListModelDN> = emptyMap()
+    private val debtsByNumber = mutableStateMapOf<String, WorkshopsDebtListModelDN>()
 
     override fun handleIntent(intent: ManagementDebitIntent): Flow<PartialState> = when (intent) {
         is ManagementDebitIntent.Open -> open(intent)
@@ -121,8 +122,8 @@ class ManagementDebitViewModel(
                 page = page,
             )
         )
-        debtsByNumber = (if (page == 0) emptyMap() else debtsByNumber) +
-            result.items.associateBy { it.debitNumber }
+        if (page == 0) debtsByNumber.clear()
+        result.items.forEach { debtsByNumber[it.debitNumber] = it }
         emit(
             PartialState.Loaded(
                 uiState.value.list.loaded(result, isFirstPage = page == 0) { it.toPresentation() }

@@ -1,21 +1,22 @@
 package com.tamin.taminhamrah.feature.workshops.ui.objectionableDebit
 
+import androidx.compose.runtime.mutableStateMapOf
 import com.tamin.taminhamrah.base.BaseViewModel
+import com.tamin.taminhamrah.feature.workshops.ui.model.ObjectionDocumentTypes
+import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachmentUploader
 import com.tamin.taminhamrah.feature.workshops.ui.objectionableDebit.ObjectionableDebitUiState.PartialState
 import com.tamin.taminhamrah.mapper.personal.toPresentation
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
+import com.tamin.taminhamrah.model.workshop.DebitObjectionRequestDN
+import com.tamin.taminhamrah.model.workshop.ObjectionDocumentDN
 import com.tamin.taminhamrah.model.workshop.ObjectionKind
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtPR
-import com.tamin.taminhamrah.feature.workshops.ui.model.ObjectionDocumentTypes
-import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachmentUploader
-import com.tamin.taminhamrah.model.workshop.DebitObjectionRequestDN
-import com.tamin.taminhamrah.model.workshop.ObjectionDocumentDN
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
-import com.tamin.taminhamrah.useCases.workshops.SaveDebitObjectionUseCase
 import com.tamin.taminhamrah.useCases.workshops.CheckObjectionDeadlineUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetDebitObjectionPdfUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetObjectionableDebitsUseCase
+import com.tamin.taminhamrah.useCases.workshops.SaveDebitObjectionUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
@@ -42,7 +43,7 @@ class ObjectionableDebitViewModel(
      * The domain rows the presentation rows were built from, kept so a deadline check and the
      * eventual submission work on the debt the service sent rather than on its formatted copy.
      */
-    private var debtsByNumber: Map<String, WorkShopDebtDN> = emptyMap()
+    private val debtsByNumber = mutableStateMapOf<String, WorkShopDebtDN>()
 
     override fun handleIntent(intent: ObjectionableDebitIntent): Flow<PartialState> = when (intent) {
         is ObjectionableDebitIntent.Open -> open(intent)
@@ -91,8 +92,8 @@ class ObjectionableDebitViewModel(
         }
         emit(if (page == 0) PartialState.Loading else PartialState.LoadingMore)
         val result = getObjectionableDebits(workshopId, branchCode, page)
-        debtsByNumber = (if (page == 0) emptyMap() else debtsByNumber) +
-            result.items.associateBy { it.debitNumber }
+        if (page == 0) debtsByNumber.clear()
+        result.items.forEach { debtsByNumber[it.debitNumber] = it }
         emit(
             PartialState.Loaded(
                 uiState.value.list.loaded(result, isFirstPage = page == 0) { it.toPresentation() }
@@ -155,7 +156,7 @@ class ObjectionableDebitViewModel(
      */
     private fun addAttachment(
         intent: ObjectionableDebitIntent.FormAddDocument,
-    ): Flow<PartialState> = flow<PartialState> {
+    ): Flow<PartialState> = flow {
         emit(PartialState.FormUploadingChanged(true))
         val attachment = uploadAttachment(
             fileName = intent.fileName,
