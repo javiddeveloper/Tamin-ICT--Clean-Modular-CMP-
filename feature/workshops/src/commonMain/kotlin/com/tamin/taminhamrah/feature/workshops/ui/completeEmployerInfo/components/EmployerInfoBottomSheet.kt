@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,8 +28,12 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,6 +46,7 @@ import com.tamin.taminhamrah.model.employerInfo.CompanyTypePR
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.Thickness
 import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
@@ -84,23 +90,35 @@ fun EmployerInfoBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = colors.bgSurface,
-        shape = RoundedCornerShape(topStart = CornerRadius.sheet, topEnd = CornerRadius.sheet),
+        // The design's sheet sits on the page color and holds a white card of rows, rather than
+        // being one white surface.
+        containerColor = colors.bgPage,
+        shape = RoundedCornerShape(topStart = SheetCorner, topEnd = SheetCorner),
+        dragHandle = {
+            Box(
+                modifier = Modifier
+                    .padding(top = Spacing.smd, bottom = Spacing.smd)
+                    .size(width = GrabberWidth, height = GrabberHeight)
+                    .clip(RoundedCornerShape(GrabberHeight))
+                    .background(colors.chevron),
+            )
+        },
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
-                .padding(bottom = Spacing.md),
+                .padding(horizontal = Spacing.page)
+                .padding(bottom = Spacing.xl),
         ) {
-            // Sheet Title
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium.copy(
+                style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.SemiBold,
                     color = colors.textPrimary,
                 ),
-                modifier = Modifier.padding(horizontal = Spacing.xl, vertical = Spacing.sm),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().padding(bottom = Spacing.md),
             )
 
             Box(
@@ -128,7 +146,14 @@ fun EmployerInfoBottomSheet(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(max = 380.dp),
+                        .heightIn(max = 380.dp)
+                        .clip(RoundedCornerShape(CornerRadius.xl))
+                        .background(colors.bgSurface)
+                        .border(
+                            width = Thickness.border,
+                            color = colors.border,
+                            shape = RoundedCornerShape(CornerRadius.xl),
+                        ),
                 ) {
                     when (activeBottomSheet) {
                         ActiveBottomSheet.COMPANY_TYPE -> {
@@ -188,13 +213,25 @@ private fun SheetItemRow(
     val bg = if (isSelected) colors.blueBg else Color.Transparent
     val fg = if (isSelected) colors.blueText else colors.textPrimary
     val weight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
+    val dividerColor = colors.divider
+    val dividerThickness = Thickness.border
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .heightIn(min = RowMinHeight)
             .clickable(onClick = onClick)
             .background(bg)
-            .padding(horizontal = Spacing.xl, vertical = 13.dp),
+            .drawBehind {
+                val stroke = dividerThickness.toPx()
+                drawLine(
+                    color = dividerColor,
+                    start = Offset(0f, size.height - stroke / 2),
+                    end = Offset(size.width, size.height - stroke / 2),
+                    strokeWidth = stroke,
+                )
+            }
+            .padding(horizontal = Spacing.smd, vertical = 11.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
@@ -219,3 +256,8 @@ private fun SheetItemRow(
         }
     }
 }
+
+private val SheetCorner = 28.dp
+private val GrabberWidth = 40.dp
+private val GrabberHeight = 4.dp
+private val RowMinHeight = 50.dp

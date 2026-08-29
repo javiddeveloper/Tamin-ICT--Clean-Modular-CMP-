@@ -38,7 +38,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
@@ -49,14 +48,14 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.model.employerInfo.CompanyTypePR
-import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.components.SegmentedInputField
+import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.components.animatedErrorBorder
+import com.tamin.taminhamrah.ui.digitsOnly
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.util.PersianDateFormatter
-import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
@@ -73,8 +72,6 @@ import taminx.core.core_ui.employer_info_legal_name_prefix
 import taminx.core.core_ui.employer_info_legal_nid_label
 import taminx.core.core_ui.employer_info_mobile
 import taminx.core.core_ui.employer_info_pick_date
-import taminx.core.core_ui.employer_info_placeholder_10_digits
-import taminx.core.core_ui.employer_info_placeholder_11_digits
 import taminx.core.core_ui.employer_info_placeholder_mobile
 import taminx.core.core_ui.employer_info_placeholder_tel
 import taminx.core.core_ui.employer_info_select_hint
@@ -114,11 +111,11 @@ fun LegalWorkshopFormSection(
     val colors = LocalTaminColors.current
     var showDatePicker by remember { mutableStateOf(false) }
 
-    val isLegalNidError = hasAttemptedSubmit && legalNationalId.filter { it.isDigit() }.length != 11
+    val isLegalNidError = hasAttemptedSubmit && legalNationalId.digitsOnly().length != LEGAL_NATIONAL_ID_SLOTS
     val isCompanyTypeError = hasAttemptedSubmit && selectedCompanyType == null
-    val isCeoNidError = hasAttemptedSubmit && ceoNationalId.filter { it.isDigit() }.length != 10
+    val isCeoNidError = hasAttemptedSubmit && ceoNationalId.digitsOnly().length != CEO_NATIONAL_ID_SLOTS
     val isCeoBirthError = hasAttemptedSubmit && ceoBirthDatePersian.isBlank()
-    val isMobileError = hasAttemptedSubmit && !mobile.filter { it.isDigit() }.matches(MOBILE_REGEX)
+    val isMobileError = hasAttemptedSubmit && !mobile.digitsOnly().matches(MOBILE_REGEX)
     val isEmailError = hasAttemptedSubmit && !email.trim().matches(EMAIL_REGEX)
 
     Column(
@@ -139,7 +136,7 @@ fun LegalWorkshopFormSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .shadow(
-                    elevation = 4.dp,
+                    elevation = CardElevation,
                     shape = RoundedCornerShape(18.dp),
                     ambientColor = colors.shadowSubtle,
                     spotColor = colors.shadowSubtle,
@@ -247,7 +244,7 @@ fun LegalWorkshopFormSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .shadow(
-                    elevation = 4.dp,
+                    elevation = CardElevation,
                     shape = RoundedCornerShape(18.dp),
                     ambientColor = colors.shadowSubtle,
                     spotColor = colors.shadowSubtle,
@@ -275,11 +272,11 @@ fun LegalWorkshopFormSection(
                         modifier = Modifier.padding(bottom = 5.dp),
                     )
                     SegmentedInputField(
-                            value = ceoNationalId,
-                            onValueChange = onCeoNationalIdChanged,
-                            slotCount = CEO_NATIONAL_ID_SLOTS,
-                            error = isCeoNidError,
-                        )
+                        value = ceoNationalId,
+                        onValueChange = onCeoNationalIdChanged,
+                        slotCount = CEO_NATIONAL_ID_SLOTS,
+                        error = isCeoNidError,
+                    )
                 }
 
                 // Date of Birth Picker
@@ -649,3 +646,6 @@ private const val CEO_NATIONAL_ID_SLOTS = 10
 
 /** The radius every typed field in this form shares, matching the segmented fields beside them. */
 private val FieldCorner = 13.dp
+
+/** The lift the design gives every surface that floats above the page. */
+private val CardElevation = 6.dp

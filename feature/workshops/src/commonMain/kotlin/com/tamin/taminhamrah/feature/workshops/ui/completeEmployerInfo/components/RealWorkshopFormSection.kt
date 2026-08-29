@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,8 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Info
@@ -30,12 +27,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
@@ -48,7 +41,6 @@ import com.tamin.taminhamrah.ui.components.SegmentedInputField
 import com.tamin.taminhamrah.ui.digitsOnly
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
@@ -58,7 +50,6 @@ import taminx.core.core_ui.employer_info_btn_send_otp
 import taminx.core.core_ui.employer_info_city_label
 import taminx.core.core_ui.employer_info_city_needs_province
 import taminx.core.core_ui.employer_info_email
-import taminx.core.core_ui.employer_info_placeholder_10_digits
 import taminx.core.core_ui.employer_info_province_label
 import taminx.core.core_ui.employer_info_real_code_label
 import taminx.core.core_ui.employer_info_real_hint
@@ -95,12 +86,12 @@ fun RealWorkshopFormSection(
         modifier = modifier.fillMaxWidth().padding(horizontal = Spacing.lg),
         verticalArrangement = Arrangement.spacedBy(11.dp),
     ) {
-        // Workshop Code & Email card
+        // One card: code, e-mail and the three pickers, as the design draws them
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .shadow(
-                    elevation = 4.dp,
+                    elevation = CardElevation,
                     shape = RoundedCornerShape(18.dp),
                     ambientColor = colors.shadowSubtle,
                     spotColor = colors.shadowSubtle,
@@ -171,24 +162,7 @@ fun RealWorkshopFormSection(
                     )
                 }
             }
-        }
 
-        // Location Pickers Card (Province -> City -> Branch)
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .shadow(
-                    elevation = 4.dp,
-                    shape = RoundedCornerShape(18.dp),
-                    ambientColor = colors.shadowSubtle,
-                    spotColor = colors.shadowSubtle,
-                )
-                .clip(RoundedCornerShape(18.dp))
-                .background(colors.bgSurface)
-                .border(1.dp, colors.border, RoundedCornerShape(18.dp))
-                .padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(9.dp),
-        ) {
             // Province & City 2-column row
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -367,3 +341,5 @@ private fun SelectChip(
 private const val CHEVRON_DOWN_DEGREES = 90f
 
 private const val WORKSHOP_CODE_SLOTS = 10
+
+private val CardElevation = 6.dp
