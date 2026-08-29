@@ -64,7 +64,6 @@ import taminx.core.core_ui.employer_info_real_badge
 import taminx.core.core_ui.employer_info_real_notice
 import taminx.core.core_ui.employer_info_value_missing
 import taminx.core.core_ui.employer_info_workshop_code
-import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.no_items_found
 
@@ -343,7 +342,7 @@ private fun WorkshopCardItem(
                 )
                 Spacer(modifier = Modifier.size(6.dp))
                 Icon(
-                    imageVector = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                    imageVector = vectorResource(Res.drawable.ic_tamin_chevron_forward),
                     contentDescription = null,
                     tint = colors.onGradient,
                     modifier = Modifier.size(15.dp),

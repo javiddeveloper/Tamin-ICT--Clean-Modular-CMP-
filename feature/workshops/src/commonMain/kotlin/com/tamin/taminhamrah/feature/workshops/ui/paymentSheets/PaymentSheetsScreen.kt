@@ -1,17 +1,9 @@
 package com.tamin.taminhamrah.feature.workshops.ui.paymentSheets
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import org.koin.compose.koinInject
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,11 +11,20 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.model.workshop.PaymentSheetPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import kotlinx.collections.immutable.persistentListOf
+import org.koin.compose.koinInject
 
 @Composable
 fun PaymentSheetsScreen(
@@ -99,7 +100,7 @@ private fun PaymentSheetsContentPreview() {
         PaymentSheetsContent(
             state = PaymentSheetsUiState(
                 isLoading = false,
-                paymentSheets = listOf(
+                paymentSheets = persistentListOf(
                     PaymentSheetPR(
                         orderNo = "9900020917749",
                         orderRow = "01",

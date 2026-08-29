@@ -277,6 +277,39 @@ class CompleteEmployerInfoViewModelTest {
         }
     }
 
+    /**
+     * The service returns one row per agreement, so one workshop can arrive several times. Rows
+     * keyed on workshop and branch then collide, which crashes `LazyColumn` outright and makes one
+     * card's expander open all of its twins.
+     */
+    @Test
+    fun repeatedAgreementsOnOneWorkshopStillGetDistinctRowIds() = runTest(testDispatcher) {
+        val twin = EmployerWorkshopDN(
+            sswn = null, branchTitle = null, branchName = "شعبه ۳ کرج", lastAddress = null,
+            characterCode = "01", characterDesc = null, workshopApproveDate = null,
+            inclusionDate = null, brhCode = null, activityName = null, workshopRegisterDate = null,
+            branchCode = "0960", workshopName = "آموزشگاه کامپیوتر", employerName = null,
+            actitvityCode = null, userId = null, workshopId = "0968210170",
+            workshopUnemployedStat = null,
+        )
+        val agreement = EmployerAgreementDN(
+            pymseq = null, regno = null, firstname = null, emailaddr = null, workshop = twin,
+            nationalno = null, mobileno = null, startdate = null, mastcusttype = null,
+            createdt = null, masttyp = null, logicalDeleted = false, regemailseq = null,
+            lastname = null, special = null, risuid = null, nationalcode = null, enddate = null,
+            letDate = null, regdate = null, roletype = null, dname = null, letNo = null,
+            createuid = null,
+        )
+        fakeWorkShopsRepo.agreementsOverride = listOf(agreement, agreement, agreement)
+
+        viewModel.sendIntent(CompleteEmployerInfoIntent.LoadInitialData)
+        viewModel.uiState.test {
+            val state = awaitUntil { it.workshops.size == 3 }
+            assertEquals(3, state.workshops.map { it.id }.toSet().size)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     @Test
     fun `timer expiration triggers expired dialog`() = runTest(testDispatcher) {
         viewModel.uiState.test {
@@ -373,7 +406,11 @@ private class FakeTestUserRepo : UserRepository {
 }
 
 private class FakeTestWorkShopsRepo : WorkShopsRepository {
+    /** Set to replace the default two rows, e.g. with several agreements on one workshop. */
+    var agreementsOverride: List<EmployerAgreementDN>? = null
+
     override suspend fun getAllEmployerAgreementByNationalId(filters: List<ApiFilterDN>): EmployerAgreementListDN {
+        agreementsOverride?.let { return EmployerAgreementListDN(total = it.size, list = it) }
         return EmployerAgreementListDN(
             total = 2,
             list = listOf(

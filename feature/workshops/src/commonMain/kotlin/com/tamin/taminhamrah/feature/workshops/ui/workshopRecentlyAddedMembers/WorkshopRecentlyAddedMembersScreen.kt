@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import kotlinx.collections.immutable.persistentListOf
 import org.koin.compose.koinInject
 
 @Composable
@@ -68,7 +69,7 @@ private fun WorkshopRecentlyAddedMembersScreenPreview() {
         WorkshopRecentlyAddedMembersContent(
             state = WorkshopRecentlyAddedMembersUiState(
                 isLoading = false,
-                list = listOf(
+                list = persistentListOf(
                     WorkshopNewMemberPR(
                         id = 1,
                         dateOfStart = null,

@@ -1,15 +1,19 @@
 package com.tamin.taminhamrah.feature.workshops.ui.paymentSheets
 
+import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.workshop.PaymentSheetPR
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
+@Immutable
 data class PaymentSheetsUiState(
     val isLoading: Boolean = false,
-    val paymentSheets: List<PaymentSheetPR> = emptyList(),
+    val paymentSheets: ImmutableList<PaymentSheetPR> = persistentListOf(),
     val error: String? = null
 ) {
     sealed interface PartialState {
         data class Loading(val isLoading: Boolean) : PartialState
-        data class PaymentSheetsLoaded(val list: List<PaymentSheetPR>) : PartialState
+        data class PaymentSheetsLoaded(val list: ImmutableList<PaymentSheetPR>) : PartialState
         data class Error(val message: String?) : PartialState
     }
 }

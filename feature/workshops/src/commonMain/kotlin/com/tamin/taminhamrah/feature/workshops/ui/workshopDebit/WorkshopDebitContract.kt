@@ -1,16 +1,20 @@
 package com.tamin.taminhamrah.feature.workshops.ui.workshopDebit
 
+import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.workshop.WorkshopDebitPR
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
+@Immutable
 data class WorkshopDebitUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
-    val workshopDebits: List<WorkshopDebitPR> = emptyList(),
+    val workshopDebits: ImmutableList<WorkshopDebitPR> = persistentListOf(),
 ) {
     sealed interface PartialState {
         data class Loading(val isLoading: Boolean) : PartialState
         data class Error(val message: String?) : PartialState
-        data class WorkshopDebitsLoaded(val list: List<WorkshopDebitPR>) : PartialState
+        data class WorkshopDebitsLoaded(val list: ImmutableList<WorkshopDebitPR>) : PartialState
     }
 }
 

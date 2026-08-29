@@ -3,6 +3,8 @@ package com.tamin.taminhamrah.feature.workshops.ui.workshopDebit
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebit.WorkshopDebitUiState.PartialState
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebitUseCase
 import kotlinx.coroutines.flow.Flow
@@ -32,7 +34,7 @@ class WorkshopDebitViewModel(
                 workshopId = intent.workshopId,
                 branchCode = intent.branchCode
             )
-            val list = response?.list?.map { it.toPresentation() } ?: emptyList()
+            val list = response?.list?.map { it.toPresentation() }?.toPersistentList() ?: persistentListOf()
             emit(PartialState.WorkshopDebitsLoaded(list))
 
         } catch (e: Exception) {

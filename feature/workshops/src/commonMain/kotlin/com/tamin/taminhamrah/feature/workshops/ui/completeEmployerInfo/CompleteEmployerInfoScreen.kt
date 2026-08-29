@@ -317,7 +317,7 @@ private fun CompleteEmployerInfoScreenPreview() {
  * badge are the mapper's work, and a preview holding them as literals still looks right after the
  * mapper stops producing them.
  */
-private fun previewWorkshops(): ImmutableList<WorkshopItemPR> = persistentListOf(
+internal fun previewWorkshops(): ImmutableList<WorkshopItemPR> = persistentListOf(
     previewAgreement(
         workshopId = "۰۰۸۱۶۳۱۸۲۹",
         name = "شرکت صنایع دما بخار مشهد",
@@ -343,7 +343,7 @@ private fun previewWorkshops(): ImmutableList<WorkshopItemPR> = persistentListOf
 )
 
 @Suppress("LongParameterList")
-private fun previewAgreement(
+internal fun previewAgreement(
     workshopId: String,
     name: String,
     branchName: String,

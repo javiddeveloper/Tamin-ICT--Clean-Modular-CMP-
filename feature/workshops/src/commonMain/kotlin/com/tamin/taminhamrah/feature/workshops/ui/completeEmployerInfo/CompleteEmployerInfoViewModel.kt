@@ -11,7 +11,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.contract.
 import com.tamin.taminhamrah.mapper.common.toCityPresentation
 import com.tamin.taminhamrah.mapper.common.toProvincePresentation
 import com.tamin.taminhamrah.mapper.contracts.toBranchPresentation
-import com.tamin.taminhamrah.mapper.employerInfo.toWorkshopItemPR
+import com.tamin.taminhamrah.mapper.employerInfo.toWorkshopItemPRs
 import com.tamin.taminhamrah.model.employerInfo.LegalWorkshopInfoRequestDN
 import com.tamin.taminhamrah.model.employerInfo.RealWorkshopInfoRequestDN
 import com.tamin.taminhamrah.useCases.common.GetCitiesByProvinceUseCase
@@ -154,7 +154,7 @@ class CompleteEmployerInfoViewModel(
 
         try {
             val agreements = getAllEmployerAgreementUseCase(emptyList())
-            val items = agreements?.list?.map { it.toWorkshopItemPR() }.orEmpty()
+            val items = agreements?.list?.toWorkshopItemPRs().orEmpty()
             emit(CompleteEmployerInfoPartialState.WorkshopsLoaded(items.toImmutableList()))
         } catch (e: Exception) {
             emit(CompleteEmployerInfoPartialState.Error(e.toSingleLineMessage()))

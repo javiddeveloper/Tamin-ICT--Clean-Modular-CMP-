@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.model.workshop.WorkshopDebitPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import kotlinx.collections.immutable.persistentListOf
 import org.koin.compose.koinInject
 
 @Composable
@@ -105,7 +106,7 @@ private fun WorkshopDebitContentPreview() {
         WorkshopDebitContent(
             state = WorkshopDebitUiState(
                 isLoading = false,
-                workshopDebits = listOf(
+                workshopDebits = persistentListOf(
                     WorkshopDebitPR(
                         debitNumber = "1070040032789",
                         debitCreateReasonCode = "05",
