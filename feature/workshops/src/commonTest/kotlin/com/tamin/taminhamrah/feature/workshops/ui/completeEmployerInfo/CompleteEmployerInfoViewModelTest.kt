@@ -310,6 +310,31 @@ class CompleteEmployerInfoViewModelTest {
         }
     }
 
+    /**
+     * The submit button is driven by [CompleteEmployerInfoUiState.canSubmitReal], so the rule that
+     * enables it and the message printed under it have to be the same rule.
+     */
+    @Test
+    fun realFormCannotBeSubmittedUntilEveryRequirementIsMet() = runTest(testDispatcher) {
+        viewModel.uiState.test {
+            val empty = awaitUntil { it.userMobile.isNotBlank() }
+            assertFalse(empty.canSubmitReal)
+
+            viewModel.sendIntent(CompleteEmployerInfoIntent.ChangeRealWorkshopCode("0012345678"))
+            // code alone is not enough: the branch is still missing
+            assertFalse(awaitUntil { it.realWorkshopCode.isNotBlank() }.canSubmitReal)
+
+            viewModel.sendIntent(CompleteEmployerInfoIntent.SelectProvince(ProvincePR(provinceCode = "07", provinceName = "تهران")))
+            awaitUntil { it.cities.isNotEmpty() }
+            viewModel.sendIntent(CompleteEmployerInfoIntent.SelectCity(CityPR(cityCode = "0701", cityName = "تهران")))
+            awaitUntil { it.branches.isNotEmpty() }
+            viewModel.sendIntent(CompleteEmployerInfoIntent.SelectBranch(BranchPR(code = "123", name = "شعبه ۱")))
+
+            assertTrue(awaitUntil { it.selectedBranch != null }.canSubmitReal)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     @Test
     fun `timer expiration triggers expired dialog`() = runTest(testDispatcher) {
         viewModel.uiState.test {

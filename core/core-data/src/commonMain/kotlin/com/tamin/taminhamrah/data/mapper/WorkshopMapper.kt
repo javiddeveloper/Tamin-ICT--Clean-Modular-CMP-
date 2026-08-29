@@ -25,9 +25,9 @@ fun EmployerWorkshopDTO.toDomain(): EmployerWorkshopDN {
     return EmployerWorkshopDN(
         sswn = sswn,
         branchTitle = branchTitle,
-        // The payload carries the branch's name twice: flat, and nested under `branch`. The old
-        // app's list row binds the flat one, so that wins; the nested one is the fallback.
-        branchName = branchName ?: branch?.organizationName,
+        // `branchTitle` is what this endpoint actually names the branch; `branch` is null on it.
+        // Kept as the fallback because the nested object is populated on other workshop services.
+        branchName = branch?.organizationName,
         lastAddress = lastAddress,
         characterCode = character?.characterCode,
         characterDesc = character?.characterDesc,

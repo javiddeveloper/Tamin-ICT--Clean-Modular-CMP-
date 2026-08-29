@@ -37,6 +37,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.contract.
 import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.contract.CompleteEmployerInfoTab
 import com.tamin.taminhamrah.model.employerInfo.WorkshopItemPR
 import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import org.jetbrains.compose.resources.stringResource
@@ -114,41 +115,16 @@ fun EmployerInfoHero(
 
                 if (screen == CompleteEmployerInfoScreenState.LIST) {
                     Spacer(modifier = Modifier.height(Spacing.md))
-                    // Centered Icon with subtle concentric circle rings
+                    // The app's header icon: a glass tile inside two rings that pulse out of it.
+                    // Every other hero draws it this way, animation included.
                     Box(
                         modifier = Modifier.fillMaxWidth(),
                         contentAlignment = Alignment.Center,
                     ) {
-                        // Outer ring 1
-                        Box(
-                            modifier = Modifier
-                                .size(110.dp)
-                                .clip(CircleShape)
-                                .border(1.dp, colors.onGradient.copy(alpha = 0.08f), CircleShape),
+                        AnimatedRingHeaderIcon(
+                            icon = vectorResource(Res.drawable.ic_employer_workshop_person),
+                            tint = colors.onGradient,
                         )
-                        // Outer ring 2
-                        Box(
-                            modifier = Modifier
-                                .size(80.dp)
-                                .clip(CircleShape)
-                                .border(1.dp, colors.onGradient.copy(alpha = 0.12f), CircleShape),
-                        )
-                        // Icon Box
-                        Box(
-                            modifier = Modifier
-                                .size(50.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(colors.onGradient.copy(alpha = 0.18f))
-                                .border(1.dp, colors.onGradient.copy(alpha = 0.28f), RoundedCornerShape(16.dp)),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Icon(
-                                imageVector = vectorResource(Res.drawable.ic_employer_workshop_person),
-                                contentDescription = null,
-                                tint = colors.onGradient,
-                                modifier = Modifier.size(26.dp),
-                            )
-                        }
                     }
 
                     Spacer(modifier = Modifier.height(Spacing.xs))
@@ -310,6 +286,12 @@ fun EmployerInfoHero(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .shadow(
+                            elevation = CardElevation,
+                            shape = RoundedCornerShape(16.dp),
+                            ambientColor = colors.shadowSubtle,
+                            spotColor = colors.shadowSubtle,
+                        )
                         .clip(RoundedCornerShape(16.dp))
                         .background(colors.bgSurface)
                         .border(1.dp, colors.border, RoundedCornerShape(16.dp))
@@ -368,3 +350,6 @@ fun EmployerInfoHero(
         }
     }
 }
+
+/** The lift the design gives every surface that floats above the page. */
+private val CardElevation = 6.dp

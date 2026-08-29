@@ -277,40 +277,19 @@ class CompleteEmployerInfoViewModel(
 
     private fun handleSubmitLegalForm(): Flow<CompleteEmployerInfoPartialState> = flow {
         val state = uiState.value
-        val nidDigits = state.legalNationalId.digitsOnly()
-        val ceoDigits = state.ceoNationalId.digitsOnly()
-        val mobileDigits = state.legalMobile.digitsOnly()
-        val email = state.legalEmail.trim()
-
-        if (nidDigits.length != 11) {
-            emit(CompleteEmployerInfoPartialState.LegalValidationFailed(Res.string.employer_info_err_legal_nid))
+        val blocking = state.legalBlockingError
+        if (blocking != null) {
+            emit(CompleteEmployerInfoPartialState.LegalValidationFailed(blocking))
             return@flow
         }
-        if (state.selectedCompanyType == null) {
-            emit(CompleteEmployerInfoPartialState.LegalValidationFailed(Res.string.employer_info_err_company_type))
-            return@flow
-        }
-        if (ceoDigits.length != 10) {
-            emit(CompleteEmployerInfoPartialState.LegalValidationFailed(Res.string.employer_info_err_ceo_nid))
-            return@flow
-        }
-        if (state.ceoBirthDateMillis == null) {
-            emit(CompleteEmployerInfoPartialState.LegalValidationFailed(Res.string.employer_info_err_ceo_birth))
-            return@flow
-        }
-        if (!mobileDigits.matches(Regex("^09\\d{9}$"))) {
-            emit(CompleteEmployerInfoPartialState.LegalValidationFailed(Res.string.employer_info_err_mobile))
-            return@flow
-        }
-        if (!email.matches(Regex("^\\S+@\\S+\\.\\S+$"))) {
-            emit(CompleteEmployerInfoPartialState.LegalValidationFailed(Res.string.employer_info_err_email))
-            return@flow
-        }
-
         if (state.isSubmitting) return@flow
         emit(CompleteEmployerInfoPartialState.Submitting(true))
 
-        requestLegalTicketUseCase(mobile = mobileDigits, email = email, ceoNationalCode = ceoDigits)
+        requestLegalTicketUseCase(
+            mobile = state.legalMobile.digitsOnly(),
+            email = state.legalEmail.trim(),
+            ceoNationalCode = state.ceoNationalId.digitsOnly(),
+        )
             .catch { e ->
                 emit(CompleteEmployerInfoPartialState.Submitting(false))
                 sendEvent(CompleteEmployerInfoEvent.ShowToast(e.toSingleLineMessage()))
@@ -323,24 +302,18 @@ class CompleteEmployerInfoViewModel(
 
     private fun handleSubmitRealForm(): Flow<CompleteEmployerInfoPartialState> = flow {
         val state = uiState.value
-        val wsDigits = state.realWorkshopCode.digitsOnly()
-
-        if (wsDigits.length != 10) {
-            emit(CompleteEmployerInfoPartialState.RealValidationFailed(Res.string.employer_info_err_ws_code))
+        val blocking = state.realBlockingError
+        if (blocking != null) {
+            emit(CompleteEmployerInfoPartialState.RealValidationFailed(blocking))
             return@flow
         }
-        if (state.selectedProvince == null || state.selectedCity == null || state.selectedBranch == null) {
-            emit(CompleteEmployerInfoPartialState.RealValidationFailed(Res.string.employer_info_err_province_city_branch))
-            return@flow
-        }
-
         if (state.isSubmitting) return@flow
         emit(CompleteEmployerInfoPartialState.Submitting(true))
 
-        val email = state.userEmail.ifBlank { "tamin@tamin.ir" }
-        val mobile = state.userMobile
-
-        requestRealTicketUseCase(mobile = mobile, email = email)
+        requestRealTicketUseCase(
+            mobile = state.userMobile.digitsOnly(),
+            email = state.userEmail.trim().ifBlank { FALLBACK_TICKET_EMAIL },
+        )
             .catch { e ->
                 emit(CompleteEmployerInfoPartialState.Submitting(false))
                 sendEvent(CompleteEmployerInfoEvent.ShowToast(e.toSingleLineMessage()))
@@ -355,8 +328,9 @@ class CompleteEmployerInfoViewModel(
         val state = uiState.value
         val otpDigits = state.otpCode.digitsOnly()
 
-        if (otpDigits.length < 5) {
-            emit(CompleteEmployerInfoPartialState.OtpValidationFailed(Res.string.employer_info_err_otp_code))
+        val blocking = state.otpBlockingError
+        if (blocking != null) {
+            emit(CompleteEmployerInfoPartialState.OtpValidationFailed(blocking))
             return@flow
         }
 
@@ -597,3 +571,6 @@ class CompleteEmployerInfoViewModel(
     override fun createErrorState(message: String): CompleteEmployerInfoPartialState =
         CompleteEmployerInfoPartialState.Error(message)
 }
+
+/** What the old app sends when the account carries no email; the ticket service rejects a blank. */
+private const val FALLBACK_TICKET_EMAIL = "tamin@tamin.ir"

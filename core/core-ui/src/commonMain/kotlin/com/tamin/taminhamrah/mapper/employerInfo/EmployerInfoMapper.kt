@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.model.employerInfo.LegalWorkshopDN
 import com.tamin.taminhamrah.model.employerInfo.LegalWorkshopPR
 import com.tamin.taminhamrah.model.employerInfo.WorkshopItemPR
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
+import com.tamin.taminhamrah.util.toFormattedDate
 
 fun LegalWorkshopDN.toPresentation(): LegalWorkshopPR =
     LegalWorkshopPR(
@@ -41,7 +42,7 @@ fun EmployerAgreementDN.toWorkshopItemPR(fallbackId: String = ""): WorkshopItemP
     // object and are not interchangeable with them.
     val workshopId = ws?.workshopId.orEmpty()
     val branchCode = ws?.branchCode.orEmpty()
-    val branchName = ws?.branchName ?: ws?.branchTitle.orEmpty()
+    val branchName = ws?.branchTitle ?: ws?.branchName.orEmpty()
     return WorkshopItemPR(
         id = pymseq ?: "$workshopId-$branchCode-$fallbackId",
         name = ws?.workshopName ?: ws?.employerName ?: dname.orEmpty(),
@@ -49,8 +50,10 @@ fun EmployerAgreementDN.toWorkshopItemPR(fallbackId: String = ""): WorkshopItemP
         branch = branchName,
         bcode = branchCode,
         isLegal = ws?.characterCode == CHARACTER_CODE_LEGAL,
-        branchLabel = if (branchCode.isBlank()) branchName else "$branchName · $branchCode",
-        letDate = letDate ?: ws?.workshopApproveDate.orEmpty(),
+        branchLabel = if (branchCode.isBlank()) branchName else "$branchName – $branchCode",
+        // The service sends `yyyyMMdd` with no separators; the old app's list row separates it
+        // the same way before showing it.
+        letDate = (letDate ?: ws?.workshopApproveDate).orEmpty().toFormattedDate(),
         email = emailaddr.orEmpty(),
         mobile = mobileno.orEmpty(),
         address = ws?.lastAddress.orEmpty(),

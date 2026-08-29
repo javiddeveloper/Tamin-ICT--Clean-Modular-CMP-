@@ -19,7 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -45,6 +44,8 @@ import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.model.common.CityPR
 import com.tamin.taminhamrah.model.common.ProvincePR
 import com.tamin.taminhamrah.model.contracts.BranchPR
+import com.tamin.taminhamrah.ui.components.SegmentedInputField
+import com.tamin.taminhamrah.ui.digitsOnly
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.toPersianDigits
@@ -79,12 +80,13 @@ fun RealWorkshopFormSection(
     onOpenBranchPicker: () -> Unit,
     errorMessage: String?,
     hasAttemptedSubmit: Boolean,
-    isLoading: Boolean,
+    isSubmitting: Boolean,
+    canSubmit: Boolean,
     onSubmit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    val isCodeError = hasAttemptedSubmit && workshopCode.filter { it.isDigit() }.length != 10
+    val isCodeError = hasAttemptedSubmit && workshopCode.digitsOnly().length != WORKSHOP_CODE_SLOTS
     val isProvinceError = hasAttemptedSubmit && selectedProvince == null
     val isCityError = hasAttemptedSubmit && selectedCity == null
     val isBranchError = hasAttemptedSubmit && selectedBranch == null
@@ -120,46 +122,12 @@ fun RealWorkshopFormSection(
                     ),
                     modifier = Modifier.padding(bottom = 5.dp),
                 )
-                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                    BasicTextField(
-                        value = workshopCode,
-                        onValueChange = { onWorkshopCodeChanged(it.filter { c -> c.isDigit() }.take(10)) },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
-                        textStyle = TextStyle(
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = colors.textPrimary,
-                        ),
-                        cursorBrush = SolidColor(colors.blueText),
-                        decorationBox = { innerTextField ->
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(44.dp)
-                                    .clip(RoundedCornerShape(13.dp))
-                                    .background(colors.bgPage)
-                                    .border(
-                                        width = 1.dp,
-                                        color = if (isCodeError) colors.dangerText else colors.border,
-                                        shape = RoundedCornerShape(13.dp),
-                                    )
-                                    .padding(horizontal = 12.dp),
-                                contentAlignment = Alignment.CenterStart,
-                            ) {
-                                if (workshopCode.isEmpty()) {
-                                    Text(
-                                        text = stringResource(Res.string.employer_info_placeholder_10_digits),
-                                        style = MaterialTheme.typography.bodySmall.copy(
-                                            color = colors.textMuted,
-                                        ),
-                                    )
-                                }
-                                innerTextField()
-                            }
-                        },
-                    )
-                }
+                SegmentedInputField(
+                    value = workshopCode,
+                    onValueChange = onWorkshopCodeChanged,
+                    slotCount = WORKSHOP_CODE_SLOTS,
+                    error = isCodeError,
+                )
             }
 
             // Email (Read-only from Profile)
@@ -331,46 +299,13 @@ fun RealWorkshopFormSection(
         Spacer(modifier = Modifier.height(2.dp))
 
         // Submit Button
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp)
-                .shadow(
-                    elevation = 6.dp,
-                    shape = RoundedCornerShape(15.dp),
-                    ambientColor = colors.shadowPrimary,
-                    spotColor = colors.shadowPrimary,
-                )
-                .clip(RoundedCornerShape(15.dp))
-                .background(colors.buttonGradient)
-                .clickable(enabled = !isLoading, onClick = onSubmit),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-        ) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    color = colors.onGradient,
-                    strokeWidth = 2.dp,
-                )
-            } else {
-                Icon(
-                    imageVector = Icons.Outlined.Email,
-                    contentDescription = null,
-                    tint = colors.onGradient,
-                    modifier = Modifier.size(17.dp),
-                )
-                Spacer(modifier = Modifier.size(8.dp))
-                Text(
-                    text = stringResource(Res.string.employer_info_btn_send_otp),
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        color = colors.onGradient,
-                        fontSize = 13.5.sp,
-                    ),
-                )
-            }
-        }
+        EmployerInfoSubmitButton(
+            text = stringResource(Res.string.employer_info_btn_send_otp),
+            icon = Icons.Outlined.Email,
+            enabled = canSubmit,
+            isSubmitting = isSubmitting,
+            onSubmit = onSubmit,
+        )
     }
 }
 
@@ -419,7 +354,16 @@ private fun SelectChip(
             imageVector = vectorResource(Res.drawable.ic_tamin_chevron_back),
             contentDescription = null,
             tint = colors.textMuted,
-            modifier = Modifier.size(13.dp).rotate(-90f),
+            modifier = Modifier.size(13.dp).rotate(CHEVRON_DOWN_DEGREES),
         )
     }
 }
+
+/**
+ * `ic_tamin_chevron_back` is auto-mirrored, so on a right-to-left page it already draws pointing
+ * right; a quarter turn clockwise from there points it down at the list it opens. Turning the
+ * other way is what left these carets upside down. Same value core-ui's own `PickerRow` uses.
+ */
+private const val CHEVRON_DOWN_DEGREES = 90f
+
+private const val WORKSHOP_CODE_SLOTS = 10

@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -40,6 +39,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.contract.
 import com.tamin.taminhamrah.ui.components.SegmentedInputField
 import com.tamin.taminhamrah.ui.components.rememberTaminCountdownState
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
@@ -57,7 +57,8 @@ fun EmployerInfoVerifySection(
     onOtpCodeChanged: (String) -> Unit,
     verifyPath: VerifyPath?,
     errorMessage: String?,
-    isLoading: Boolean,
+    isSubmitting: Boolean,
+    canSubmit: Boolean,
     onEditInfo: () -> Unit,
     onSubmit: () -> Unit,
     onTimerExpired: () -> Unit,
@@ -221,41 +222,42 @@ fun EmployerInfoVerifySection(
                 stringResource(Res.string.employer_info_verify_real_submit)
             }
 
+            if (isSubmitting) {
+                // Same shimmer the rest of the page loads with, in the button's own footprint.
+                ShimmerBlock(
+                    modifier = Modifier.weight(0.62f).height(50.dp),
+                    cornerRadius = 14.dp,
+                )
+                return@Row
+            }
+
             Row(
                 modifier = Modifier
                     .weight(0.62f)
                     .height(50.dp)
                     .shadow(
-                        elevation = 6.dp,
+                        elevation = if (canSubmit) 6.dp else 0.dp,
                         shape = RoundedCornerShape(14.dp),
                         ambientColor = colors.shadowPrimary,
                         spotColor = colors.shadowPrimary,
                     )
                     .clip(RoundedCornerShape(14.dp))
-                    .background(colors.buttonGradient)
-                    .clickable(enabled = !isLoading, onClick = onSubmit),
+                    .background(if (canSubmit) colors.buttonGradient else colors.buttonDisabledGradient)
+                    .clickable(enabled = canSubmit, onClick = onSubmit),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
             ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
+                Text(
+                    text = submitText,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontWeight = FontWeight.SemiBold,
                         color = colors.onGradient,
-                        strokeWidth = 2.dp,
-                    )
-                } else {
-                    Text(
-                        text = submitText,
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            color = colors.onGradient,
-                            fontSize = 11.5.sp,
-                        ),
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
+                        fontSize = 11.5.sp,
+                    ),
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
             }
         }
     }

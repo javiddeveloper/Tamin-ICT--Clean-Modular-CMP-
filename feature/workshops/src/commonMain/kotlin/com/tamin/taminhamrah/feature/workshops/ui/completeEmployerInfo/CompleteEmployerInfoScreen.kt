@@ -170,7 +170,8 @@ fun CompleteEmployerInfoScreen(
                                     onOtpCodeChanged = { onIntent(CompleteEmployerInfoIntent.ChangeOtpCode(it)) },
                                     verifyPath = state.verifyPath,
                                     errorMessage = if (state.hasAttemptedOtpSubmit) state.otpValidationError?.let { stringResource(it) } else null,
-                                    isLoading = state.isLoading,
+                                    isSubmitting = state.isSubmitting,
+                                    canSubmit = state.canSubmitOtp,
                                     onEditInfo = { onIntent(CompleteEmployerInfoIntent.BackFromOtp) },
                                     onSubmit = { onIntent(CompleteEmployerInfoIntent.SubmitOtpVerification) },
                                     onTimerExpired = { onIntent(CompleteEmployerInfoIntent.OnTimerExpired) },
@@ -201,9 +202,16 @@ fun CompleteEmployerInfoScreen(
                                     onMobileChanged = { onIntent(CompleteEmployerInfoIntent.ChangeLegalMobile(it)) },
                                     email = state.legalEmail,
                                     onEmailChanged = { onIntent(CompleteEmployerInfoIntent.ChangeLegalEmail(it)) },
-                                    errorMessage = if (state.hasAttemptedLegalSubmit) state.legalValidationError?.let { stringResource(it) } else null,
+                                    // Shown as soon as the form is touched, so a disabled button
+                                    // always says what is still missing.
+                                    errorMessage = if (state.hasTouchedLegalForm) {
+                                        state.legalBlockingError?.let { stringResource(it) }
+                                    } else {
+                                        null
+                                    },
                                     hasAttemptedSubmit = state.hasAttemptedLegalSubmit,
-                                    isLoading = state.isLoading,
+                                    isSubmitting = state.isSubmitting,
+                                    canSubmit = state.canSubmitLegal,
                                     onSubmit = { onIntent(CompleteEmployerInfoIntent.SubmitLegalForm) },
                                 )
                             }
@@ -225,9 +233,14 @@ fun CompleteEmployerInfoScreen(
                                     onOpenBranchPicker = {
                                         onIntent(CompleteEmployerInfoIntent.OpenBottomSheet(ActiveBottomSheet.BRANCH))
                                     },
-                                    errorMessage = if (state.hasAttemptedRealSubmit) state.realValidationError?.let { stringResource(it) } else null,
+                                    errorMessage = if (state.hasTouchedRealForm) {
+                                        state.realBlockingError?.let { stringResource(it) }
+                                    } else {
+                                        null
+                                    },
                                     hasAttemptedSubmit = state.hasAttemptedRealSubmit,
-                                    isLoading = state.isLoading,
+                                    isSubmitting = state.isSubmitting,
+                                    canSubmit = state.canSubmitReal,
                                     onSubmit = { onIntent(CompleteEmployerInfoIntent.SubmitRealForm) },
                                 )
                             }

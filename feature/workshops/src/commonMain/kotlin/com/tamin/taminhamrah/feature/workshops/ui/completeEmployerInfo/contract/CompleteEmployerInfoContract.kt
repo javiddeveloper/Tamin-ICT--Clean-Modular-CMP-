@@ -10,7 +10,18 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
+import com.tamin.taminhamrah.ui.digitsOnly
 import org.jetbrains.compose.resources.StringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.employer_info_err_ceo_birth
+import taminx.core.core_ui.employer_info_err_ceo_nid
+import taminx.core.core_ui.employer_info_err_company_type
+import taminx.core.core_ui.employer_info_err_email
+import taminx.core.core_ui.employer_info_err_legal_nid
+import taminx.core.core_ui.employer_info_err_mobile
+import taminx.core.core_ui.employer_info_err_otp_code
+import taminx.core.core_ui.employer_info_err_province_city_branch
+import taminx.core.core_ui.employer_info_err_ws_code
 
 enum class CompleteEmployerInfoScreenState {
     LIST,
@@ -117,6 +128,50 @@ data class CompleteEmployerInfoUiState(
     val dialogState: CompleteEmployerInfoDialog? = null,
     val generalError: String? = null,
 ) {
+    /**
+     * The first unmet requirement of the legal form, in the order the design checks them, or null
+     * when it is ready to send. Derived rather than stored so the button's enabled state and the
+     * message under it can never disagree.
+     */
+    val legalBlockingError: StringResource?
+        get() = when {
+            legalNationalId.digitsOnly().length != LEGAL_NATIONAL_ID_LENGTH ->
+                Res.string.employer_info_err_legal_nid
+            selectedCompanyType == null -> Res.string.employer_info_err_company_type
+            ceoNationalId.digitsOnly().length != CEO_NATIONAL_ID_LENGTH ->
+                Res.string.employer_info_err_ceo_nid
+            ceoBirthDateMillis == null -> Res.string.employer_info_err_ceo_birth
+            !MOBILE_PATTERN.matches(legalMobile.digitsOnly()) -> Res.string.employer_info_err_mobile
+            !EMAIL_PATTERN.matches(legalEmail.trim()) -> Res.string.employer_info_err_email
+            else -> null
+        }
+
+    val realBlockingError: StringResource?
+        get() = when {
+            realWorkshopCode.digitsOnly().length != WORKSHOP_CODE_LENGTH ->
+                Res.string.employer_info_err_ws_code
+            selectedProvince == null || selectedCity == null || selectedBranch == null ->
+                Res.string.employer_info_err_province_city_branch
+            else -> null
+        }
+
+    val otpBlockingError: StringResource?
+        get() = if (otpCode.digitsOnly().length < OTP_LENGTH) Res.string.employer_info_err_otp_code else null
+
+    val canSubmitLegal: Boolean get() = legalBlockingError == null
+    val canSubmitReal: Boolean get() = realBlockingError == null
+    val canSubmitOtp: Boolean get() = otpBlockingError == null
+
+    /** True once anything has been typed or chosen, so a disabled button can explain itself. */
+    val hasTouchedLegalForm: Boolean
+        get() = legalNationalId.isNotBlank() || selectedCompanyType != null ||
+            ceoNationalId.isNotBlank() || ceoBirthDateMillis != null ||
+            legalMobile.isNotBlank() || legalEmail.isNotBlank()
+
+    val hasTouchedRealForm: Boolean
+        get() = realWorkshopCode.isNotBlank() || selectedProvince != null ||
+            selectedCity != null || selectedBranch != null
+
     val step: EmployerInfoStep
         get() = when {
             isVerifying -> EmployerInfoStep.VERIFY
@@ -224,3 +279,11 @@ sealed interface CompleteEmployerInfoEvent {
     data object NavigateBack : CompleteEmployerInfoEvent
     data class ShowToast(val message: String) : CompleteEmployerInfoEvent
 }
+
+private const val LEGAL_NATIONAL_ID_LENGTH = 11
+private const val CEO_NATIONAL_ID_LENGTH = 10
+private const val WORKSHOP_CODE_LENGTH = 10
+private const val OTP_LENGTH = 5
+
+private val MOBILE_PATTERN = Regex("""^09\d{9}$""")
+private val EMAIL_PATTERN = Regex("""^\S+@\S+\.\S+$""")

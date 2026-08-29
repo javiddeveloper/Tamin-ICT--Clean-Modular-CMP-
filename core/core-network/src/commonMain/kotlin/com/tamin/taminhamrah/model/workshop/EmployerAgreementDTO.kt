@@ -37,7 +37,6 @@ data class EmployerWorkshopDTO(
     @SerialName("activityName") val activityName: String?,
     @SerialName("branch") val branch: EmployerWorkshopBranchDTO? = null,
     @SerialName("branchCode") val branchCode: String?,
-    @SerialName("branchName") val branchName: String? = null,
     @SerialName("branchTitle") val branchTitle: String?,
     @SerialName("brhCode") val brhCode: String?,
     @SerialName("character") val character: EmployerWorkshopCharacterDTO? = null,
