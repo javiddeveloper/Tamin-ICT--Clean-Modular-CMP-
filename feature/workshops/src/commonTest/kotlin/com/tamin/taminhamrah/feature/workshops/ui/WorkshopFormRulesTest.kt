@@ -93,7 +93,7 @@ class WorkshopFormRulesTest {
     // ---------------------------------------------------------------------- ماده ۱۶
 
     @Test
-    fun `a ماده ۱۶ request says nothing while step one is still up`() {
+    fun `an article sixteen request says nothing while step one is still up`() {
         val onStepOne = ArticleSixteenFormState(
             debt = ArticleSixteenDebtPR(),
             step = 1,
@@ -106,7 +106,7 @@ class WorkshopFormRulesTest {
     }
 
     @Test
-    fun `a ماده ۱۶ request on its last step asks for documents first`() {
+    fun `an article sixteen request on its last step asks for documents first`() {
         val onLastStep = ArticleSixteenFormState(
             debt = ArticleSixteenDebtPR(),
             step = 2,
@@ -119,7 +119,7 @@ class WorkshopFormRulesTest {
     }
 
     @Test
-    fun `a ماده ۱۶ request with documents asks for the tick`() {
+    fun `an article sixteen request with documents asks for the tick`() {
         val onLastStep = ArticleSixteenFormState(
             debt = ArticleSixteenDebtPR(),
             step = 2,
