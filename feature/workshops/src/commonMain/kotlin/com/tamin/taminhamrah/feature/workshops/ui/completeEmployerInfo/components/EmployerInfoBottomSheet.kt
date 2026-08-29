@@ -42,6 +42,12 @@ import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.ImmutableList
+import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.employer_info_company_type_label
+import taminx.core.core_ui.employer_info_sheet_branch
+import taminx.core.core_ui.employer_info_sheet_city
+import taminx.core.core_ui.employer_info_sheet_province
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,12 +72,14 @@ fun EmployerInfoBottomSheet(
     if (activeBottomSheet == null) return
 
     val colors = LocalTaminColors.current
-    val title = when (activeBottomSheet) {
-        ActiveBottomSheet.COMPANY_TYPE -> "نوع شرکت"
-        ActiveBottomSheet.PROVINCE -> "انتخاب استان"
-        ActiveBottomSheet.CITY -> "انتخاب شهر"
-        ActiveBottomSheet.BRANCH -> "انتخاب شعبه"
-    }
+    val title = stringResource(
+        when (activeBottomSheet) {
+            ActiveBottomSheet.COMPANY_TYPE -> Res.string.employer_info_company_type_label
+            ActiveBottomSheet.PROVINCE -> Res.string.employer_info_sheet_province
+            ActiveBottomSheet.CITY -> Res.string.employer_info_sheet_city
+            ActiveBottomSheet.BRANCH -> Res.string.employer_info_sheet_branch
+        }
+    )
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -89,7 +97,7 @@ fun EmployerInfoBottomSheet(
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.SemiBold,
                     color = colors.textPrimary,
                 ),
                 modifier = Modifier.padding(horizontal = Spacing.xl, vertical = Spacing.sm),
@@ -127,7 +135,7 @@ fun EmployerInfoBottomSheet(
                             items(COMPANY_TYPES, key = { it.code }) { item ->
                                 val isSelected = selectedCompanyType?.code == item.code
                                 SheetItemRow(
-                                    title = item.title,
+                                    title = stringResource(item.titleRes),
                                     isSelected = isSelected,
                                     onClick = { onSelectCompanyType(item) },
                                 )
@@ -179,7 +187,7 @@ private fun SheetItemRow(
     val colors = LocalTaminColors.current
     val bg = if (isSelected) colors.blueBg else Color.Transparent
     val fg = if (isSelected) colors.blueText else colors.textPrimary
-    val weight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+    val weight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
 
     Row(
         modifier = Modifier

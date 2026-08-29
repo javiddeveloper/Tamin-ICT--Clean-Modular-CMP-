@@ -25,11 +25,24 @@ import com.tamin.taminhamrah.useCases.employerInfo.SubmitLegalWorkshopInfoUseCas
 import com.tamin.taminhamrah.useCases.employerInfo.SubmitRealWorkshopInfoUseCase
 import com.tamin.taminhamrah.useCases.user.GetUserProfileUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetAllEmployerAgreementByNationalIdUseCase
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
+import com.tamin.taminhamrah.ui.digitsOnly
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.employer_info_err_ceo_birth
+import taminx.core.core_ui.employer_info_err_ceo_nid
+import taminx.core.core_ui.employer_info_err_company_type
+import taminx.core.core_ui.employer_info_err_email
+import taminx.core.core_ui.employer_info_err_legal_nid
+import taminx.core.core_ui.employer_info_err_mobile
+import taminx.core.core_ui.employer_info_err_otp_code
+import taminx.core.core_ui.employer_info_err_province_city_branch
+import taminx.core.core_ui.employer_info_err_ws_code
 
 class CompleteEmployerInfoViewModel(
     private val getAllEmployerAgreementUseCase: GetAllEmployerAgreementByNationalIdUseCase,
@@ -113,11 +126,17 @@ class CompleteEmployerInfoViewModel(
             is CompleteEmployerInfoIntent.CloseDialog -> flow {
                 emit(CompleteEmployerInfoPartialState.DismissDialog)
             }
+            is CompleteEmployerInfoIntent.DismissGeneralError -> flow {
+                emit(CompleteEmployerInfoPartialState.ErrorDismissed)
+            }
         }
 
     private fun handleLoadInitialData(): Flow<CompleteEmployerInfoPartialState> = flow {
         emit(CompleteEmployerInfoPartialState.Loading(true))
 
+        // Not swallowed: the real path sends its ticket to the mobile and email that come from
+        // here, so a silent failure would post a ticket request with two empty contacts and leave
+        // the person staring at a server error that names nothing.
         try {
             getUserProfileUseCase().collect { userProfile ->
                 emit(
@@ -129,14 +148,16 @@ class CompleteEmployerInfoViewModel(
                     )
                 )
             }
-        } catch (_: Exception) {}
+        } catch (e: Exception) {
+            sendEvent(CompleteEmployerInfoEvent.ShowToast(e.toSingleLineMessage()))
+        }
 
         try {
             val agreements = getAllEmployerAgreementUseCase(emptyList())
             val items = agreements?.list?.map { it.toWorkshopItemPR() }.orEmpty()
             emit(CompleteEmployerInfoPartialState.WorkshopsLoaded(items.toImmutableList()))
         } catch (e: Exception) {
-            emit(CompleteEmployerInfoPartialState.Error(e.message ?: "خطا در دریافت لیست کارگاه‌ها"))
+            emit(CompleteEmployerInfoPartialState.Error(e.toSingleLineMessage()))
         }
 
         try {
@@ -147,20 +168,25 @@ class CompleteEmployerInfoViewModel(
                     )
                 )
             }
-        } catch (_: Exception) {}
+        } catch (e: Exception) {
+            // A toast rather than the list's error state: the province picker sits behind the
+            // second tab, and blanking the workshop list for it would hide working content.
+            sendEvent(CompleteEmployerInfoEvent.ShowToast(e.toSingleLineMessage()))
+        }
 
         emit(CompleteEmployerInfoPartialState.Loading(false))
     }
 
     private fun handleChangeLegalNationalId(nid: String): Flow<CompleteEmployerInfoPartialState> = flow {
-        val digits = nid.filter { it.isDigit() }
+        val digits = nid.digitsOnly()
         emit(CompleteEmployerInfoPartialState.LegalNationalIdChanged(digits))
         if (digits.length == 11) {
             emit(CompleteEmployerInfoPartialState.LegalWorkshopInquiryLoading(true))
             getLegalWorkshopUseCase(digits)
-                .catch {
+                .catch { error ->
                     emit(CompleteEmployerInfoPartialState.LegalWorkshopInquiryResult(null, isError = true))
                     emit(CompleteEmployerInfoPartialState.LegalWorkshopInquiryLoading(false))
+                    sendEvent(CompleteEmployerInfoEvent.ShowToast(error.toSingleLineMessage()))
                 }
                 .collect { result ->
                     emit(CompleteEmployerInfoPartialState.LegalWorkshopInquiryResult(result.name, isError = false))
@@ -170,15 +196,16 @@ class CompleteEmployerInfoViewModel(
     }
 
     private fun handleChangeCeoNationalId(nid: String): Flow<CompleteEmployerInfoPartialState> = flow {
-        val digits = nid.filter { it.isDigit() }
+        val digits = nid.digitsOnly()
         emit(CompleteEmployerInfoPartialState.CeoNationalIdChanged(digits))
         val currentBirthMillis = uiState.value.ceoBirthDateMillis
         if (digits.length == 10 && currentBirthMillis != null) {
             emit(CompleteEmployerInfoPartialState.CeoInquiryLoading(true))
             getLegalWorkshopCeoUseCase(digits, currentBirthMillis)
-                .catch {
+                .catch { error ->
                     emit(CompleteEmployerInfoPartialState.CeoInquiryResult(null, isError = true))
                     emit(CompleteEmployerInfoPartialState.CeoInquiryLoading(false))
+                    sendEvent(CompleteEmployerInfoEvent.ShowToast(error.toSingleLineMessage()))
                 }
                 .collect { result ->
                     emit(CompleteEmployerInfoPartialState.CeoInquiryResult(result.fullName, isError = false))
@@ -189,13 +216,14 @@ class CompleteEmployerInfoViewModel(
 
     private fun handleSelectCeoBirthDate(millis: Long, persianDate: String): Flow<CompleteEmployerInfoPartialState> = flow {
         emit(CompleteEmployerInfoPartialState.CeoBirthDateSelected(millis, persianDate))
-        val currentCeoNid = uiState.value.ceoNationalId.filter { it.isDigit() }
+        val currentCeoNid = uiState.value.ceoNationalId.digitsOnly()
         if (currentCeoNid.length == 10) {
             emit(CompleteEmployerInfoPartialState.CeoInquiryLoading(true))
             getLegalWorkshopCeoUseCase(currentCeoNid, millis)
-                .catch {
+                .catch { error ->
                     emit(CompleteEmployerInfoPartialState.CeoInquiryResult(null, isError = true))
                     emit(CompleteEmployerInfoPartialState.CeoInquiryLoading(false))
+                    sendEvent(CompleteEmployerInfoEvent.ShowToast(error.toSingleLineMessage()))
                 }
                 .collect { result ->
                     emit(CompleteEmployerInfoPartialState.CeoInquiryResult(result.fullName, isError = false))
@@ -208,9 +236,12 @@ class CompleteEmployerInfoViewModel(
         emit(CompleteEmployerInfoPartialState.ProvinceSelected(province))
         emit(CompleteEmployerInfoPartialState.CitiesLoading(true))
         getCitiesByProvinceUseCase(province.provinceCode)
-            .catch {
-                emit(CompleteEmployerInfoPartialState.CitiesLoaded(kotlinx.collections.immutable.persistentListOf()))
+            .catch { error ->
+                // An empty picker with no explanation reads as a broken screen, so the parsed
+                // message goes to the toast host rather than being dropped with the list.
+                emit(CompleteEmployerInfoPartialState.CitiesLoaded(persistentListOf()))
                 emit(CompleteEmployerInfoPartialState.CitiesLoading(false))
+                sendEvent(CompleteEmployerInfoEvent.ShowToast(error.toSingleLineMessage()))
             }
             .collect { result ->
                 emit(CompleteEmployerInfoPartialState.CitiesLoaded(result.cities.toCityPresentation().toImmutableList()))
@@ -222,9 +253,10 @@ class CompleteEmployerInfoViewModel(
         emit(CompleteEmployerInfoPartialState.CitySelected(city))
         emit(CompleteEmployerInfoPartialState.BranchesLoading(true))
         getBranchesUseCase(city.cityCode)
-            .catch {
-                emit(CompleteEmployerInfoPartialState.BranchesLoaded(kotlinx.collections.immutable.persistentListOf()))
+            .catch { error ->
+                emit(CompleteEmployerInfoPartialState.BranchesLoaded(persistentListOf()))
                 emit(CompleteEmployerInfoPartialState.BranchesLoading(false))
+                sendEvent(CompleteEmployerInfoEvent.ShowToast(error.toSingleLineMessage()))
             }
             .collect { branches ->
                 emit(CompleteEmployerInfoPartialState.BranchesLoaded(branches.toBranchPresentation().toImmutableList()))
@@ -234,33 +266,33 @@ class CompleteEmployerInfoViewModel(
 
     private fun handleSubmitLegalForm(): Flow<CompleteEmployerInfoPartialState> = flow {
         val state = uiState.value
-        val nidDigits = state.legalNationalId.filter { it.isDigit() }
-        val ceoDigits = state.ceoNationalId.filter { it.isDigit() }
-        val mobileDigits = state.legalMobile.filter { it.isDigit() }
+        val nidDigits = state.legalNationalId.digitsOnly()
+        val ceoDigits = state.ceoNationalId.digitsOnly()
+        val mobileDigits = state.legalMobile.digitsOnly()
         val email = state.legalEmail.trim()
 
         if (nidDigits.length != 11) {
-            emit(CompleteEmployerInfoPartialState.LegalValidationFailed("شناسهٔ ملی شخصیت حقوقی باید ۱۱ رقم باشد."))
+            emit(CompleteEmployerInfoPartialState.LegalValidationFailed(Res.string.employer_info_err_legal_nid))
             return@flow
         }
         if (state.selectedCompanyType == null) {
-            emit(CompleteEmployerInfoPartialState.LegalValidationFailed("لطفاً نوع شرکت را انتخاب کنید."))
+            emit(CompleteEmployerInfoPartialState.LegalValidationFailed(Res.string.employer_info_err_company_type))
             return@flow
         }
         if (ceoDigits.length != 10) {
-            emit(CompleteEmployerInfoPartialState.LegalValidationFailed("کد ملی مدیرعامل یا عضو هیئت مدیره باید ۱۰ رقم باشد."))
+            emit(CompleteEmployerInfoPartialState.LegalValidationFailed(Res.string.employer_info_err_ceo_nid))
             return@flow
         }
         if (state.ceoBirthDateMillis == null) {
-            emit(CompleteEmployerInfoPartialState.LegalValidationFailed("لطفاً تاریخ تولد مدیرعامل را انتخاب کنید."))
+            emit(CompleteEmployerInfoPartialState.LegalValidationFailed(Res.string.employer_info_err_ceo_birth))
             return@flow
         }
         if (!mobileDigits.matches(Regex("^09\\d{9}$"))) {
-            emit(CompleteEmployerInfoPartialState.LegalValidationFailed("لطفاً شمارهٔ تلفن همراه را به‌درستی وارد کنید."))
+            emit(CompleteEmployerInfoPartialState.LegalValidationFailed(Res.string.employer_info_err_mobile))
             return@flow
         }
         if (!email.matches(Regex("^\\S+@\\S+\\.\\S+$"))) {
-            emit(CompleteEmployerInfoPartialState.LegalValidationFailed("لطفاً پست الکترونیک را به‌درستی وارد کنید."))
+            emit(CompleteEmployerInfoPartialState.LegalValidationFailed(Res.string.employer_info_err_email))
             return@flow
         }
 
@@ -270,7 +302,7 @@ class CompleteEmployerInfoViewModel(
         requestLegalTicketUseCase(mobile = mobileDigits, email = email, ceoNationalCode = ceoDigits)
             .catch { e ->
                 emit(CompleteEmployerInfoPartialState.Loading(false))
-                sendEvent(CompleteEmployerInfoEvent.ShowToast(e.message ?: "خطا در ارسال کد اعتبارسنجی"))
+                sendEvent(CompleteEmployerInfoEvent.ShowToast(e.toSingleLineMessage()))
             }
             .collect {
                 emit(CompleteEmployerInfoPartialState.Loading(false))
@@ -280,14 +312,14 @@ class CompleteEmployerInfoViewModel(
 
     private fun handleSubmitRealForm(): Flow<CompleteEmployerInfoPartialState> = flow {
         val state = uiState.value
-        val wsDigits = state.realWorkshopCode.filter { it.isDigit() }
+        val wsDigits = state.realWorkshopCode.digitsOnly()
 
         if (wsDigits.length != 10) {
-            emit(CompleteEmployerInfoPartialState.RealValidationFailed("لطفاً کد کارگاه را به‌درستی وارد کنید."))
+            emit(CompleteEmployerInfoPartialState.RealValidationFailed(Res.string.employer_info_err_ws_code))
             return@flow
         }
         if (state.selectedProvince == null || state.selectedCity == null || state.selectedBranch == null) {
-            emit(CompleteEmployerInfoPartialState.RealValidationFailed("لطفاً استان، شهر و شعبهٔ رسیدگی‌کننده را انتخاب کنید."))
+            emit(CompleteEmployerInfoPartialState.RealValidationFailed(Res.string.employer_info_err_province_city_branch))
             return@flow
         }
 
@@ -300,7 +332,7 @@ class CompleteEmployerInfoViewModel(
         requestRealTicketUseCase(mobile = mobile, email = email)
             .catch { e ->
                 emit(CompleteEmployerInfoPartialState.Loading(false))
-                sendEvent(CompleteEmployerInfoEvent.ShowToast(e.message ?: "خطا در ارسال کد اعتبارسنجی"))
+                sendEvent(CompleteEmployerInfoEvent.ShowToast(e.toSingleLineMessage()))
             }
             .collect {
                 emit(CompleteEmployerInfoPartialState.Loading(false))
@@ -310,10 +342,10 @@ class CompleteEmployerInfoViewModel(
 
     private fun handleSubmitOtp(): Flow<CompleteEmployerInfoPartialState> = flow {
         val state = uiState.value
-        val otpDigits = state.otpCode.filter { it.isDigit() }
+        val otpDigits = state.otpCode.digitsOnly()
 
         if (otpDigits.length < 5) {
-            emit(CompleteEmployerInfoPartialState.OtpValidationFailed("لطفاً کد اعتبارسنجی پنج‌رقمی را وارد کنید."))
+            emit(CompleteEmployerInfoPartialState.OtpValidationFailed(Res.string.employer_info_err_otp_code))
             return@flow
         }
 
@@ -323,21 +355,23 @@ class CompleteEmployerInfoViewModel(
         if (state.verifyPath == VerifyPath.LEGAL) {
             val selectedWs = state.selectedWorkshop
             val req = LegalWorkshopInfoRequestDN(
-                workshopId = selectedWs?.id.orEmpty(),
+                // `id` is the row's composite key, not a workshop number — the service is
+                // addressed with the workshop code and its branch code.
+                workshopId = selectedWs?.code.orEmpty(),
                 branchCode = selectedWs?.bcode.orEmpty(),
-                workshopNationalCode = state.legalNationalId,
+                workshopNationalCode = state.legalNationalId.digitsOnly(),
                 legalWorkshopTypeCode = state.selectedCompanyType?.code.orEmpty(),
-                ceoNationalId = state.ceoNationalId,
+                ceoNationalId = state.ceoNationalId.digitsOnly(),
                 ceoBirthDateMillis = state.ceoBirthDateMillis ?: 0L,
-                telephone = state.telephone,
-                mobile = state.legalMobile,
-                email = state.legalEmail,
+                telephone = state.telephone.digitsOnly(),
+                mobile = state.legalMobile.digitsOnly(),
+                email = state.legalEmail.trim(),
                 ticketCode = otpDigits,
             )
             submitLegalWorkshopInfoUseCase(req)
                 .catch { e ->
                     emit(CompleteEmployerInfoPartialState.Loading(false))
-                    sendEvent(CompleteEmployerInfoEvent.ShowToast(e.message ?: "خطا در ثبت اطلاعات"))
+                    sendEvent(CompleteEmployerInfoEvent.ShowToast(e.toSingleLineMessage()))
                 }
                 .collect {
                     emit(CompleteEmployerInfoPartialState.Loading(false))
@@ -346,13 +380,13 @@ class CompleteEmployerInfoViewModel(
         } else {
             val req = RealWorkshopInfoRequestDN(
                 branchCode = state.selectedBranch?.code.orEmpty(),
-                workshopCode = state.realWorkshopCode,
+                workshopCode = state.realWorkshopCode.digitsOnly(),
                 ticketCode = otpDigits,
             )
             submitRealWorkshopInfoUseCase(req)
                 .catch { e ->
                     emit(CompleteEmployerInfoPartialState.Loading(false))
-                    sendEvent(CompleteEmployerInfoEvent.ShowToast(e.message ?: "خطا در ثبت اطلاعات"))
+                    sendEvent(CompleteEmployerInfoEvent.ShowToast(e.toSingleLineMessage()))
                 }
                 .collect {
                     emit(CompleteEmployerInfoPartialState.Loading(false))
@@ -461,8 +495,8 @@ class CompleteEmployerInfoViewModel(
             selectedProvince = partialState.province,
             selectedCity = null,
             selectedBranch = null,
-            cities = kotlinx.collections.immutable.persistentListOf(),
-            branches = kotlinx.collections.immutable.persistentListOf(),
+            cities = persistentListOf(),
+            branches = persistentListOf(),
             realValidationError = null,
             activeBottomSheet = null,
         )
@@ -476,7 +510,7 @@ class CompleteEmployerInfoViewModel(
         is CompleteEmployerInfoPartialState.CitySelected -> currentState.copy(
             selectedCity = partialState.city,
             selectedBranch = null,
-            branches = kotlinx.collections.immutable.persistentListOf(),
+            branches = persistentListOf(),
             realValidationError = null,
             activeBottomSheet = null,
         )
@@ -545,6 +579,7 @@ class CompleteEmployerInfoViewModel(
             generalError = partialState.message,
             isLoading = false,
         )
+        is CompleteEmployerInfoPartialState.ErrorDismissed -> currentState.copy(generalError = null)
     }
 
     override fun createErrorState(message: String): CompleteEmployerInfoPartialState =

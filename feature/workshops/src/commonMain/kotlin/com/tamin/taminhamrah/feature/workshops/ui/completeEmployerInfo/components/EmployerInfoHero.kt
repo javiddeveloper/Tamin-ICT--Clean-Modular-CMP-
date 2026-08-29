@@ -42,12 +42,15 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.employer_info_hero_full_name
+import taminx.core.core_ui.employer_info_hero_national_code
 import taminx.core.core_ui.employer_info_subtitle
 import taminx.core.core_ui.employer_info_tab_legal
 import taminx.core.core_ui.employer_info_tab_real
 import taminx.core.core_ui.employer_info_title
 import taminx.core.core_ui.employer_info_workshop_code
-import taminx.core.core_ui.ic_branch
+import taminx.core.core_ui.ic_employer_workshop
+import taminx.core.core_ui.ic_employer_workshop_person
 import taminx.core.core_ui.ic_tamin_chevron_back
 
 @Composable
@@ -83,15 +86,15 @@ fun EmployerInfoHero(
                         modifier = Modifier
                             .size(36.dp)
                             .clip(RoundedCornerShape(14.dp))
-                            .background(Color.White.copy(alpha = 0.12f))
-                            .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(14.dp))
+                            .background(colors.onGradient.copy(alpha = 0.12f))
+                            .border(1.dp, colors.onGradient.copy(alpha = 0.20f), RoundedCornerShape(14.dp))
                             .clickable(onClick = onBack),
                         contentAlignment = Alignment.Center,
                     ) {
                         Icon(
                             imageVector = vectorResource(Res.drawable.ic_tamin_chevron_back),
                             contentDescription = null,
-                            tint = Color.White,
+                            tint = colors.onGradient,
                             modifier = Modifier.size(18.dp),
                         )
                     }
@@ -99,8 +102,8 @@ fun EmployerInfoHero(
                     Text(
                         text = stringResource(Res.string.employer_info_title),
                         style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White,
+                            fontWeight = FontWeight.SemiBold,
+                            color = colors.onGradient,
                         ),
                         textAlign = TextAlign.Center,
                         modifier = Modifier.weight(1f),
@@ -121,28 +124,28 @@ fun EmployerInfoHero(
                             modifier = Modifier
                                 .size(110.dp)
                                 .clip(CircleShape)
-                                .border(1.dp, Color.White.copy(alpha = 0.08f), CircleShape),
+                                .border(1.dp, colors.onGradient.copy(alpha = 0.08f), CircleShape),
                         )
                         // Outer ring 2
                         Box(
                             modifier = Modifier
                                 .size(80.dp)
                                 .clip(CircleShape)
-                                .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape),
+                                .border(1.dp, colors.onGradient.copy(alpha = 0.12f), CircleShape),
                         )
                         // Icon Box
                         Box(
                             modifier = Modifier
                                 .size(50.dp)
                                 .clip(RoundedCornerShape(16.dp))
-                                .background(Color.White.copy(alpha = 0.18f))
-                                .border(1.dp, Color.White.copy(alpha = 0.28f), RoundedCornerShape(16.dp)),
+                                .background(colors.onGradient.copy(alpha = 0.18f))
+                                .border(1.dp, colors.onGradient.copy(alpha = 0.28f), RoundedCornerShape(16.dp)),
                             contentAlignment = Alignment.Center,
                         ) {
                             Icon(
-                                imageVector = vectorResource(Res.drawable.ic_branch),
+                                imageVector = vectorResource(Res.drawable.ic_employer_workshop_person),
                                 contentDescription = null,
-                                tint = Color.White,
+                                tint = colors.onGradient,
                                 modifier = Modifier.size(26.dp),
                             )
                         }
@@ -165,8 +168,8 @@ fun EmployerInfoHero(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(16.dp))
-                            .background(Color.White.copy(alpha = 0.10f))
-                            .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(16.dp))
+                            .background(colors.onGradient.copy(alpha = 0.10f))
+                            .border(1.dp, colors.onGradient.copy(alpha = 0.18f), RoundedCornerShape(16.dp))
                             .padding(Spacing.sm),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
@@ -175,13 +178,13 @@ fun EmployerInfoHero(
                             modifier = Modifier
                                 .size(36.dp)
                                 .clip(RoundedCornerShape(12.dp))
-                                .background(Color.White.copy(alpha = 0.16f)),
+                                .background(colors.onGradient.copy(alpha = 0.16f)),
                             contentAlignment = Alignment.Center,
                         ) {
                             Icon(
-                                imageVector = vectorResource(Res.drawable.ic_branch),
+                                imageVector = vectorResource(Res.drawable.ic_employer_workshop),
                                 contentDescription = null,
-                                tint = Color.White,
+                                tint = colors.onGradient,
                                 modifier = Modifier.size(19.dp),
                             )
                         }
@@ -189,8 +192,8 @@ fun EmployerInfoHero(
                             Text(
                                 text = selectedWorkshop.name,
                                 style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = colors.onGradient,
                                 ),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
@@ -209,7 +212,7 @@ fun EmployerInfoHero(
                                     Text(
                                         text = selectedWorkshop.code,
                                         style = MaterialTheme.typography.labelMedium.copy(
-                                            fontWeight = FontWeight.Bold,
+                                            fontWeight = FontWeight.SemiBold,
                                             color = colors.txtNameProfile,
                                         ),
                                     )
@@ -251,7 +254,7 @@ fun EmployerInfoHero(
                         Text(
                             text = userFullName.ifBlank { "-" },
                             style = MaterialTheme.typography.bodyMedium.copy(
-                                fontWeight = FontWeight.Bold,
+                                fontWeight = FontWeight.SemiBold,
                                 color = colors.blueText,
                             ),
                             maxLines = 1,
@@ -259,7 +262,7 @@ fun EmployerInfoHero(
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = "نام و نام خانوادگی",
+                            text = stringResource(Res.string.employer_info_hero_full_name),
                             style = MaterialTheme.typography.labelSmall.copy(
                                 color = colors.textMuted,
                             ),
@@ -281,14 +284,14 @@ fun EmployerInfoHero(
                             Text(
                                 text = userNationalCode.ifBlank { "-" },
                                 style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontWeight = FontWeight.Bold,
+                                    fontWeight = FontWeight.SemiBold,
                                     color = colors.blueText,
                                 ),
                             )
                         }
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = "کد ملی",
+                            text = stringResource(Res.string.employer_info_hero_national_code),
                             style = MaterialTheme.typography.labelSmall.copy(
                                 color = colors.textMuted,
                             ),
@@ -330,8 +333,8 @@ fun EmployerInfoHero(
                         Text(
                             text = stringResource(Res.string.employer_info_tab_legal),
                             style = MaterialTheme.typography.bodyMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = if (isLegal) Color.White else colors.textSecondary,
+                                fontWeight = FontWeight.SemiBold,
+                                color = if (isLegal) colors.onGradient else colors.textSecondary,
                                 fontSize = 12.5.sp,
                             ),
                         )
@@ -354,8 +357,8 @@ fun EmployerInfoHero(
                         Text(
                             text = stringResource(Res.string.employer_info_tab_real),
                             style = MaterialTheme.typography.bodyMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = if (isReal) Color.White else colors.textSecondary,
+                                fontWeight = FontWeight.SemiBold,
+                                color = if (isReal) colors.onGradient else colors.textSecondary,
                                 fontSize = 12.5.sp,
                             ),
                         )

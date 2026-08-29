@@ -1480,6 +1480,27 @@
     <string name="employer_info_err_email">لطفاً پست الکترونیک را به‌درستی وارد کنید.</string>
     <string name="employer_info_err_ws_code">لطفاً کد کارگاه را به‌درستی وارد کنید.</string>
     <string name="employer_info_err_province_city_branch">لطفاً استان، شهر و شعبهٔ رسیدگی‌کننده را انتخاب کنید.</string>
-    <string name="employer_info_err_otp_code">لطفاً کد اعتبارسنجی پنج‌رقمي را وارد کنید.</string>
+    <string name="employer_info_company_type_government">دولتی</string>
+    <string name="employer_info_company_type_public">عمومی - غیردولتی</string>
+    <string name="employer_info_company_type_private">خصوصی</string>
+    <string name="employer_info_company_type_foreign">شخصیت حقوقی خارجی</string>
+    <string name="employer_info_sheet_province">انتخاب استان</string>
+    <string name="employer_info_sheet_city">انتخاب شهر</string>
+    <string name="employer_info_sheet_branch">انتخاب شعبه</string>
+    <string name="employer_info_hero_full_name">نام و نام خانوادگی</string>
+    <string name="employer_info_hero_national_code">کد ملی</string>
+    <string name="employer_info_province_label">استان</string>
+    <string name="employer_info_city_label">شهر</string>
+    <string name="employer_info_city_needs_province">ابتدا استان</string>
+    <string name="employer_info_branch_needs_city">ابتدا شهر را انتخاب کنید</string>
+    <string name="employer_info_select_hint">انتخاب کنید</string>
+    <string name="employer_info_pick_date">انتخاب تاریخ</string>
+    <string name="employer_info_ceo_birth_picker_title">انتخاب تاریخ تولد مدیرعامل</string>
+    <string name="employer_info_placeholder_11_digits">۱۱ رقم</string>
+    <string name="employer_info_placeholder_10_digits">۱۰ رقم</string>
+    <string name="employer_info_placeholder_tel">۰۵۱۳۷۶۵۴۳۲۱</string>
+    <string name="employer_info_placeholder_mobile">۰۹۱۵۰۰۰۰۰۰۰</string>
+    <string name="employer_info_value_missing">-</string>
+    <string name="employer_info_err_otp_code">لطفاً کد اعتبارسنجی پنج‌رقمی را وارد کنید.</string>
 
 </resources>

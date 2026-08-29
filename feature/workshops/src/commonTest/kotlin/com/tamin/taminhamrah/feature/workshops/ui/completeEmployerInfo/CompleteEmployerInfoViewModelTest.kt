@@ -248,6 +248,35 @@ class CompleteEmployerInfoViewModelTest {
         }
     }
 
+    /**
+     * The segmented fields accept Persian-Indic digits, and `Char.isDigit()` is true for them, so
+     * a length check alone lets them through to the wire. The service only reads ASCII.
+     */
+    @Test
+    fun persianDigitsAreFoldedToAsciiBeforeTheRequestIsSent() = runTest(testDispatcher) {
+        viewModel.uiState.test {
+            awaitUntil { it.userMobile.isNotBlank() }
+
+            viewModel.sendIntent(CompleteEmployerInfoIntent.ChangeRealWorkshopCode("۰۰۱۲۳۴۵۶۷۸"))
+            viewModel.sendIntent(CompleteEmployerInfoIntent.SelectProvince(ProvincePR(provinceCode = "07", provinceName = "تهران")))
+            awaitUntil { it.cities.isNotEmpty() }
+            viewModel.sendIntent(CompleteEmployerInfoIntent.SelectCity(CityPR(cityCode = "0701", cityName = "تهران")))
+            awaitUntil { it.branches.isNotEmpty() }
+            viewModel.sendIntent(CompleteEmployerInfoIntent.SelectBranch(BranchPR(code = "123", name = "شعبه ۱")))
+            viewModel.sendIntent(CompleteEmployerInfoIntent.SubmitRealForm)
+            awaitUntil { it.isVerifying }
+
+            viewModel.sendIntent(CompleteEmployerInfoIntent.ChangeOtpCode("۱۲۳۴۵"))
+            viewModel.sendIntent(CompleteEmployerInfoIntent.SubmitOtpVerification)
+            awaitUntil { it.dialogState == CompleteEmployerInfoDialog.SUCCESS_REAL }
+
+            val sent = fakeEmployerInfoRepo.lastRealRequest
+            assertEquals("0012345678", sent?.workshopCode)
+            assertEquals("12345", sent?.ticketCode)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     @Test
     fun `timer expiration triggers expired dialog`() = runTest(testDispatcher) {
         viewModel.uiState.test {
@@ -278,6 +307,10 @@ private class FakeTestEmployerInfoRepo : EmployerInfoRepository {
     var legalWorkshopResult = LegalWorkshopDN(name = "شرکت پتروشیمی", nationalCode = "10101234567")
     var legalWorkshopCeoResult = LegalWorkshopCeoDN(firstName = "علی", lastName = "محمدی")
 
+    /** What the screen actually asked to be sent — asserted on, not just what came back. */
+    var lastRealRequest: RealWorkshopInfoRequestDN? = null
+    var lastLegalRequest: LegalWorkshopInfoRequestDN? = null
+
     override fun getLegalWorkshop(legalWorkshopId: String): Flow<LegalWorkshopDN> = flow {
         emit(legalWorkshopResult)
     }
@@ -291,6 +324,7 @@ private class FakeTestEmployerInfoRepo : EmployerInfoRepository {
     }
 
     override fun submitLegalWorkshopInfo(request: LegalWorkshopInfoRequestDN): Flow<String> = flow {
+        lastLegalRequest = request
         emit("OK")
     }
 
@@ -299,6 +333,7 @@ private class FakeTestEmployerInfoRepo : EmployerInfoRepository {
     }
 
     override fun submitRealWorkshopInfo(request: RealWorkshopInfoRequestDN): Flow<String> = flow {
+        lastRealRequest = request
         emit("OK")
     }
 }

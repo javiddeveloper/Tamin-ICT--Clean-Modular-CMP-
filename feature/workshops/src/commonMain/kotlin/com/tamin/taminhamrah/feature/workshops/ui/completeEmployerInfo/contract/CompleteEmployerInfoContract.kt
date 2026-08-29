@@ -10,6 +10,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
+import org.jetbrains.compose.resources.StringResource
 
 enum class CompleteEmployerInfoScreenState {
     LIST,
@@ -31,6 +32,20 @@ enum class ActiveBottomSheet {
     PROVINCE,
     CITY,
     BRANCH,
+}
+
+/**
+ * The one body of the page that is on screen at a time.
+ *
+ * [depth] is how deep into the flow the step sits, and is what decides which way the page pushes:
+ * the two tabs are siblings, the form is one level in from them, and the validation step one
+ * further. Going deeper pushes forward, coming back pushes back.
+ */
+enum class EmployerInfoStep(val depth: Int) {
+    LEGAL_LIST(depth = 0),
+    REAL_FORM(depth = 1),
+    LEGAL_FORM(depth = 2),
+    VERIFY(depth = 3),
 }
 
 enum class CompleteEmployerInfoDialog {
@@ -73,7 +88,7 @@ data class CompleteEmployerInfoUiState(
     val legalMobile: String = "",
     val legalEmail: String = "",
     val hasAttemptedLegalSubmit: Boolean = false,
-    val legalValidationError: String? = null,
+    val legalValidationError: StringResource? = null,
 
     // Real Form (Tab: Real)
     val realWorkshopCode: String = "",
@@ -87,18 +102,26 @@ data class CompleteEmployerInfoUiState(
     val isBranchesLoading: Boolean = false,
     val selectedBranch: BranchPR? = null,
     val hasAttemptedRealSubmit: Boolean = false,
-    val realValidationError: String? = null,
+    val realValidationError: StringResource? = null,
 
     // Verification / OTP
     val otpCode: String = "",
     val hasAttemptedOtpSubmit: Boolean = false,
-    val otpValidationError: String? = null,
+    val otpValidationError: StringResource? = null,
 
     // Bottom Sheet & Dialog
     val activeBottomSheet: ActiveBottomSheet? = null,
     val dialogState: CompleteEmployerInfoDialog? = null,
     val generalError: String? = null,
-)
+) {
+    val step: EmployerInfoStep
+        get() = when {
+            isVerifying -> EmployerInfoStep.VERIFY
+            screen == CompleteEmployerInfoScreenState.LEGAL_FORM -> EmployerInfoStep.LEGAL_FORM
+            tab == CompleteEmployerInfoTab.REAL -> EmployerInfoStep.REAL_FORM
+            else -> EmployerInfoStep.LEGAL_LIST
+        }
+}
 
 sealed interface CompleteEmployerInfoPartialState {
     data class Loading(val isLoading: Boolean) : CompleteEmployerInfoPartialState
@@ -125,7 +148,7 @@ sealed interface CompleteEmployerInfoPartialState {
     data class TelephoneChanged(val tel: String) : CompleteEmployerInfoPartialState
     data class LegalMobileChanged(val mobile: String) : CompleteEmployerInfoPartialState
     data class LegalEmailChanged(val email: String) : CompleteEmployerInfoPartialState
-    data class LegalValidationFailed(val error: String) : CompleteEmployerInfoPartialState
+    data class LegalValidationFailed(val error: StringResource) : CompleteEmployerInfoPartialState
 
     // Real form partials
     data class RealWorkshopCodeChanged(val code: String) : CompleteEmployerInfoPartialState
@@ -137,7 +160,7 @@ sealed interface CompleteEmployerInfoPartialState {
     data class BranchesLoading(val isLoading: Boolean) : CompleteEmployerInfoPartialState
     data class BranchesLoaded(val branches: ImmutableList<BranchPR>) : CompleteEmployerInfoPartialState
     data class BranchSelected(val branch: BranchPR) : CompleteEmployerInfoPartialState
-    data class RealValidationFailed(val error: String) : CompleteEmployerInfoPartialState
+    data class RealValidationFailed(val error: StringResource) : CompleteEmployerInfoPartialState
 
     // Sheets & Dialogs
     data class OpenSheet(val sheet: ActiveBottomSheet) : CompleteEmployerInfoPartialState
@@ -146,13 +169,14 @@ sealed interface CompleteEmployerInfoPartialState {
     // Verification
     data class StartVerification(val path: VerifyPath) : CompleteEmployerInfoPartialState
     data class OtpCodeChanged(val code: String) : CompleteEmployerInfoPartialState
-    data class OtpValidationFailed(val error: String) : CompleteEmployerInfoPartialState
+    data class OtpValidationFailed(val error: StringResource) : CompleteEmployerInfoPartialState
     data object BackFromVerification : CompleteEmployerInfoPartialState
     data object BackToList : CompleteEmployerInfoPartialState
 
     data class ShowDialog(val dialog: CompleteEmployerInfoDialog) : CompleteEmployerInfoPartialState
     data object DismissDialog : CompleteEmployerInfoPartialState
     data class Error(val message: String) : CompleteEmployerInfoPartialState
+    data object ErrorDismissed : CompleteEmployerInfoPartialState
 }
 
 sealed interface CompleteEmployerInfoIntent {
@@ -189,6 +213,7 @@ sealed interface CompleteEmployerInfoIntent {
     data object BackToWorkshopList : CompleteEmployerInfoIntent
     data object OnTimerExpired : CompleteEmployerInfoIntent
     data object CloseDialog : CompleteEmployerInfoIntent
+    data object DismissGeneralError : CompleteEmployerInfoIntent
 }
 
 sealed interface CompleteEmployerInfoEvent {

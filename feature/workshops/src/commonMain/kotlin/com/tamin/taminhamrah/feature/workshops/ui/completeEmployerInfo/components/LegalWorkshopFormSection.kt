@@ -60,6 +60,7 @@ import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.employer_info_btn_send_otp
 import taminx.core.core_ui.employer_info_ceo_birth_label
+import taminx.core.core_ui.employer_info_ceo_birth_picker_title
 import taminx.core.core_ui.employer_info_ceo_name_prefix
 import taminx.core.core_ui.employer_info_ceo_nid_label
 import taminx.core.core_ui.employer_info_ceo_section_title
@@ -69,6 +70,12 @@ import taminx.core.core_ui.employer_info_legal_form_title
 import taminx.core.core_ui.employer_info_legal_name_prefix
 import taminx.core.core_ui.employer_info_legal_nid_label
 import taminx.core.core_ui.employer_info_mobile
+import taminx.core.core_ui.employer_info_pick_date
+import taminx.core.core_ui.employer_info_placeholder_10_digits
+import taminx.core.core_ui.employer_info_placeholder_11_digits
+import taminx.core.core_ui.employer_info_placeholder_mobile
+import taminx.core.core_ui.employer_info_placeholder_tel
+import taminx.core.core_ui.employer_info_select_hint
 import taminx.core.core_ui.employer_info_tel_label
 import taminx.core.core_ui.ic_tamin_chevron_back
 
@@ -119,7 +126,7 @@ fun LegalWorkshopFormSection(
         Text(
             text = stringResource(Res.string.employer_info_legal_form_title),
             style = MaterialTheme.typography.titleSmall.copy(
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.SemiBold,
                 color = colors.textPrimary,
                 fontSize = 12.5.sp,
             ),
@@ -159,7 +166,7 @@ fun LegalWorkshopFormSection(
                         singleLine = true,
                         textStyle = TextStyle(
                             fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.SemiBold,
                             color = colors.textPrimary,
                         ),
                         cursorBrush = SolidColor(colors.blueText),
@@ -180,7 +187,7 @@ fun LegalWorkshopFormSection(
                             ) {
                                 if (legalNationalId.isEmpty()) {
                                     Text(
-                                        text = "۱۱ رقم".toPersianDigits(),
+                                        text = stringResource(Res.string.employer_info_placeholder_11_digits),
                                         style = MaterialTheme.typography.bodySmall.copy(
                                             color = colors.textMuted,
                                         ),
@@ -222,7 +229,7 @@ fun LegalWorkshopFormSection(
                         Text(
                             text = legalWorkshopName.orEmpty(),
                             style = MaterialTheme.typography.bodySmall.copy(
-                                fontWeight = FontWeight.Bold,
+                                fontWeight = FontWeight.SemiBold,
                                 color = colors.blueText,
                                 fontSize = 11.5.sp,
                             ),
@@ -246,7 +253,8 @@ fun LegalWorkshopFormSection(
                     modifier = Modifier.padding(bottom = 5.dp),
                 )
                 SelectPickerChip(
-                    text = selectedCompanyType?.title ?: "انتخاب کنید",
+                    text = selectedCompanyType?.titleRes?.let { stringResource(it) }
+                        ?: stringResource(Res.string.employer_info_select_hint),
                     isSelected = selectedCompanyType != null,
                     isError = isCompanyTypeError,
                     onClick = onOpenCompanyTypePicker,
@@ -260,7 +268,7 @@ fun LegalWorkshopFormSection(
         Text(
             text = stringResource(Res.string.employer_info_ceo_section_title),
             style = MaterialTheme.typography.titleSmall.copy(
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.SemiBold,
                 color = colors.textPrimary,
                 fontSize = 12.5.sp,
             ),
@@ -305,7 +313,7 @@ fun LegalWorkshopFormSection(
                             singleLine = true,
                             textStyle = TextStyle(
                                 fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold,
+                                fontWeight = FontWeight.SemiBold,
                                 color = colors.textPrimary,
                             ),
                             cursorBrush = SolidColor(colors.blueText),
@@ -326,7 +334,7 @@ fun LegalWorkshopFormSection(
                                 ) {
                                     if (ceoNationalId.isEmpty()) {
                                         Text(
-                                            text = "۱۰ رقم".toPersianDigits(),
+                                            text = stringResource(Res.string.employer_info_placeholder_10_digits),
                                             style = MaterialTheme.typography.bodySmall.copy(
                                                 color = colors.textMuted,
                                             ),
@@ -372,12 +380,12 @@ fun LegalWorkshopFormSection(
                             tint = colors.blueText,
                             modifier = Modifier.size(15.dp),
                         )
-                        val dateText = ceoBirthDatePersian.ifBlank { "انتخاب تاریخ" }
+                        val dateText = ceoBirthDatePersian.ifBlank { stringResource(Res.string.employer_info_pick_date) }
                         val isDateSelected = ceoBirthDatePersian.isNotBlank()
                         Text(
                             text = dateText,
                             style = MaterialTheme.typography.bodySmall.copy(
-                                fontWeight = if (isDateSelected) FontWeight.Bold else FontWeight.Medium,
+                                fontWeight = if (isDateSelected) FontWeight.SemiBold else FontWeight.Medium,
                                 color = if (isDateSelected) colors.textPrimary else colors.textMuted,
                                 fontSize = 11.5.sp,
                             ),
@@ -418,7 +426,7 @@ fun LegalWorkshopFormSection(
                         Text(
                             text = ceoFullName.orEmpty(),
                             style = MaterialTheme.typography.bodySmall.copy(
-                                fontWeight = FontWeight.Bold,
+                                fontWeight = FontWeight.SemiBold,
                                 color = colors.greenText,
                                 fontSize = 11.5.sp,
                             ),
@@ -454,7 +462,7 @@ fun LegalWorkshopFormSection(
                             singleLine = true,
                             textStyle = TextStyle(
                                 fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold,
+                                fontWeight = FontWeight.SemiBold,
                                 color = colors.textPrimary,
                             ),
                             cursorBrush = SolidColor(colors.blueText),
@@ -471,7 +479,7 @@ fun LegalWorkshopFormSection(
                                 ) {
                                     if (telephone.isEmpty()) {
                                         Text(
-                                            text = "۰۵۱۳۷۶۵۴۳۲۱".toPersianDigits(),
+                                            text = stringResource(Res.string.employer_info_placeholder_tel),
                                             style = MaterialTheme.typography.bodySmall.copy(
                                                 color = colors.textMuted,
                                             ),
@@ -503,7 +511,7 @@ fun LegalWorkshopFormSection(
                             singleLine = true,
                             textStyle = TextStyle(
                                 fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold,
+                                fontWeight = FontWeight.SemiBold,
                                 color = colors.textPrimary,
                             ),
                             cursorBrush = SolidColor(colors.blueText),
@@ -524,7 +532,7 @@ fun LegalWorkshopFormSection(
                                 ) {
                                     if (mobile.isEmpty()) {
                                         Text(
-                                            text = "۰۹۱۵۳۲۱۴۴۷۸".toPersianDigits(),
+                                            text = stringResource(Res.string.employer_info_placeholder_mobile),
                                             style = MaterialTheme.typography.bodySmall.copy(
                                                 color = colors.textMuted,
                                             ),
@@ -557,7 +565,7 @@ fun LegalWorkshopFormSection(
                         singleLine = true,
                         textStyle = TextStyle(
                             fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.SemiBold,
                             color = colors.textPrimary,
                         ),
                         cursorBrush = SolidColor(colors.blueText),
@@ -608,7 +616,7 @@ fun LegalWorkshopFormSection(
                 Text(
                     text = errorMessage,
                     style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.SemiBold,
                         color = colors.dangerText,
                         fontSize = 11.sp,
                     ),
@@ -638,22 +646,22 @@ fun LegalWorkshopFormSection(
             if (isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(20.dp),
-                    color = Color.White,
+                    color = colors.onGradient,
                     strokeWidth = 2.dp,
                 )
             } else {
                 Icon(
                     imageVector = Icons.Outlined.Email,
                     contentDescription = null,
-                    tint = Color.White,
+                    tint = colors.onGradient,
                     modifier = Modifier.size(17.dp),
                 )
                 Spacer(modifier = Modifier.size(8.dp))
                 Text(
                     text = stringResource(Res.string.employer_info_btn_send_otp),
                     style = MaterialTheme.typography.bodyMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
+                        fontWeight = FontWeight.SemiBold,
+                        color = colors.onGradient,
                         fontSize = 13.5.sp,
                     ),
                 )
@@ -663,7 +671,7 @@ fun LegalWorkshopFormSection(
 
     if (showDatePicker) {
         TaminJalaliDatePicker(
-            title = "انتخاب تاریخ تولد مدیرعامل",
+            title = stringResource(Res.string.employer_info_ceo_birth_picker_title),
             onDismiss = { showDatePicker = false },
             onConfirm = { year, month, day ->
                 val millis = PersianDateFormatter.toEpochMillis(year, month, day)
@@ -702,7 +710,7 @@ private fun SelectPickerChip(
         Text(
             text = text,
             style = MaterialTheme.typography.bodySmall.copy(
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
                 color = if (isSelected) colors.textPrimary else colors.textMuted,
                 fontSize = 12.sp,
             ),

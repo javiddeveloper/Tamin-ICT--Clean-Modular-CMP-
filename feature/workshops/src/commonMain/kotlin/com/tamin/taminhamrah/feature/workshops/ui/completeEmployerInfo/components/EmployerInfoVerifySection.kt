@@ -117,7 +117,7 @@ fun EmployerInfoVerifySection(
                     Text(
                         text = stringResource(Res.string.employer_info_verify_title),
                         style = MaterialTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.SemiBold,
                             color = colors.textPrimary,
                         ),
                     )
@@ -156,7 +156,7 @@ fun EmployerInfoVerifySection(
                     Text(
                         text = countdownState.formattedTime,
                         style = MaterialTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.SemiBold,
                             color = clockFg,
                         ),
                     )
@@ -207,7 +207,7 @@ fun EmployerInfoVerifySection(
                 Text(
                     text = stringResource(Res.string.employer_info_verify_edit_info),
                     style = MaterialTheme.typography.bodySmall.copy(
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.SemiBold,
                         color = colors.textSecondary,
                         fontSize = 11.5.sp,
                     ),
@@ -240,15 +240,15 @@ fun EmployerInfoVerifySection(
                 if (isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
-                        color = Color.White,
+                        color = colors.onGradient,
                         strokeWidth = 2.dp,
                     )
                 } else {
                     Text(
                         text = submitText,
                         style = MaterialTheme.typography.bodySmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White,
+                            fontWeight = FontWeight.SemiBold,
+                            color = colors.onGradient,
                             fontSize = 11.5.sp,
                         ),
                         textAlign = TextAlign.Center,

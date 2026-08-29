@@ -118,7 +118,7 @@ fun EmployerInfoDialogs(
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.SemiBold,
                     color = colors.textPrimary,
                 ),
                 textAlign = TextAlign.Center,

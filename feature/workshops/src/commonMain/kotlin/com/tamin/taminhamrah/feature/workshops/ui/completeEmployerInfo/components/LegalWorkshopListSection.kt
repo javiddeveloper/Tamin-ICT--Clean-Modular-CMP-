@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -31,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -41,6 +42,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.model.employerInfo.WorkshopItemPR
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
+import com.tamin.taminhamrah.ui.components.StaggeredEntranceState
+import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.ImmutableList
@@ -59,42 +62,49 @@ import taminx.core.core_ui.employer_info_let_date
 import taminx.core.core_ui.employer_info_mobile
 import taminx.core.core_ui.employer_info_real_badge
 import taminx.core.core_ui.employer_info_real_notice
+import taminx.core.core_ui.employer_info_value_missing
 import taminx.core.core_ui.employer_info_workshop_code
 import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.no_items_found
 
-@Composable
-fun LegalWorkshopListSection(
+/**
+ * Emits the workshop cards straight into the page's lazy list.
+ *
+ * A `LazyListScope` extension rather than a composable holding its own `Column`: an employer can
+ * hold up to a hundred agreements, and a non-lazy column composes and keeps every one of them
+ * alive whether it is on screen.
+ */
+fun LazyListScope.legalWorkshopListSection(
     workshops: ImmutableList<WorkshopItemPR>,
     expandedWorkshopIds: ImmutableSet<String>,
+    entranceState: StaggeredEntranceState,
     onToggleExpanded: (String) -> Unit,
     onSelectWorkshop: (WorkshopItemPR) -> Unit,
-    modifier: Modifier = Modifier,
 ) {
     if (workshops.isEmpty()) {
-        EmptyStateMessage(
-            icon = Icons.Outlined.Info,
-            title = stringResource(Res.string.no_items_found),
-            modifier = modifier.fillMaxWidth().padding(Spacing.xxl),
-        )
+        item(key = "workshops-empty") {
+            EmptyStateMessage(
+                icon = Icons.Outlined.Info,
+                title = stringResource(Res.string.no_items_found),
+                modifier = Modifier.fillMaxWidth().padding(Spacing.xxl),
+            )
+        }
         return
     }
 
-    Column(
-        modifier = modifier.fillMaxWidth().padding(horizontal = Spacing.lg),
-        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
-    ) {
-        workshops.forEach { workshop ->
-            androidx.compose.runtime.key(workshop.id) {
-                val isExpanded = expandedWorkshopIds.contains(workshop.id)
-                WorkshopCardItem(
-                    workshop = workshop,
-                    isExpanded = isExpanded,
-                    onToggleExpanded = { onToggleExpanded(workshop.id) },
-                    onSelectWorkshop = { onSelectWorkshop(workshop) },
-                )
-            }
-        }
+    itemsIndexed(workshops, key = { _, item -> item.id }) { index, workshop ->
+        WorkshopCardItem(
+            workshop = workshop,
+            isExpanded = expandedWorkshopIds.contains(workshop.id),
+            onToggleExpanded = { onToggleExpanded(workshop.id) },
+            onSelectWorkshop = { onSelectWorkshop(workshop) },
+            modifier = Modifier
+                // The app's own list entrance: the value is read inside a graphicsLayer, so a
+                // frame of it costs no recomposition.
+                .staggeredItemEntrance(index = index, key = workshop.id, state = entranceState)
+                .padding(horizontal = Spacing.lg, vertical = Spacing.xs),
+        )
     }
 }
 
@@ -131,7 +141,7 @@ private fun WorkshopCardItem(
             Text(
                 text = workshop.name,
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.SemiBold,
                     color = colors.textPrimary,
                     lineHeight = 22.sp,
                 ),
@@ -158,7 +168,7 @@ private fun WorkshopCardItem(
                 Text(
                     text = badgeText,
                     style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.SemiBold,
                         color = badgeFg,
                         fontSize = 9.5.sp,
                     ),
@@ -193,7 +203,7 @@ private fun WorkshopCardItem(
                     Text(
                         text = workshop.code,
                         style = MaterialTheme.typography.bodySmall.copy(
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.SemiBold,
                             color = colors.textPrimary,
                         ),
                     )
@@ -216,15 +226,11 @@ private fun WorkshopCardItem(
                     ),
                 )
                 Spacer(modifier = Modifier.height(2.dp))
-                val branchText = if (workshop.bcode.isNotBlank()) {
-                    "${workshop.branch} · ${workshop.bcode}"
-                } else {
-                    workshop.branch
-                }
+                val branchText = workshop.branchLabel
                 Text(
-                    text = branchText.ifBlank { "-" },
+                    text = branchText.ifBlank { stringResource(Res.string.employer_info_value_missing) },
                     style = MaterialTheme.typography.bodySmall.copy(
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.SemiBold,
                         color = colors.textPrimary,
                     ),
                     maxLines = 1,
@@ -294,12 +300,12 @@ private fun WorkshopCardItem(
                     stringResource(Res.string.employer_info_btn_details)
                 },
                 style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.SemiBold,
                     color = colors.textSecondary,
                 ),
             )
             Icon(
-                imageVector = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                imageVector = vectorResource(Res.drawable.ic_tamin_chevron_forward),
                 contentDescription = null,
                 tint = colors.textMuted,
                 modifier = Modifier
@@ -330,8 +336,8 @@ private fun WorkshopCardItem(
                 Text(
                     text = stringResource(Res.string.employer_info_btn_complete),
                     style = MaterialTheme.typography.bodyMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
+                        fontWeight = FontWeight.SemiBold,
+                        color = colors.onGradient,
                         fontSize = 12.5.sp,
                     ),
                 )
@@ -339,7 +345,7 @@ private fun WorkshopCardItem(
                 Icon(
                     imageVector = vectorResource(Res.drawable.ic_tamin_chevron_back),
                     contentDescription = null,
-                    tint = Color.White,
+                    tint = colors.onGradient,
                     modifier = Modifier.size(15.dp),
                 )
             }
@@ -399,7 +405,7 @@ private fun DetailRow(
                 Text(
                     text = value,
                     style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.SemiBold,
                         color = colors.textPrimary,
                         fontSize = 11.sp,
                     ),
@@ -409,7 +415,7 @@ private fun DetailRow(
             Text(
                 text = value,
                 style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.SemiBold,
                     color = colors.textPrimary,
                     fontSize = 11.sp,
                 ),

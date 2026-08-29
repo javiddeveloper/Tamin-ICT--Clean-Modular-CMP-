@@ -52,10 +52,18 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.employer_info_branch
+import taminx.core.core_ui.employer_info_branch_needs_city
 import taminx.core.core_ui.employer_info_btn_send_otp
+import taminx.core.core_ui.employer_info_city_label
+import taminx.core.core_ui.employer_info_city_needs_province
 import taminx.core.core_ui.employer_info_email
+import taminx.core.core_ui.employer_info_placeholder_10_digits
+import taminx.core.core_ui.employer_info_province_label
 import taminx.core.core_ui.employer_info_real_code_label
 import taminx.core.core_ui.employer_info_real_hint
+import taminx.core.core_ui.employer_info_sheet_branch
+import taminx.core.core_ui.employer_info_sheet_city
+import taminx.core.core_ui.employer_info_sheet_province
 import taminx.core.core_ui.ic_tamin_chevron_back
 
 @Composable
@@ -120,7 +128,7 @@ fun RealWorkshopFormSection(
                         singleLine = true,
                         textStyle = TextStyle(
                             fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.SemiBold,
                             color = colors.textPrimary,
                         ),
                         cursorBrush = SolidColor(colors.blueText),
@@ -141,7 +149,7 @@ fun RealWorkshopFormSection(
                             ) {
                                 if (workshopCode.isEmpty()) {
                                     Text(
-                                        text = "۱۰ رقم".toPersianDigits(),
+                                        text = stringResource(Res.string.employer_info_placeholder_10_digits),
                                         style = MaterialTheme.typography.bodySmall.copy(
                                             color = colors.textMuted,
                                         ),
@@ -180,7 +188,7 @@ fun RealWorkshopFormSection(
                         Text(
                             text = userEmail.ifBlank { "tamin@tamin.ir" },
                             style = MaterialTheme.typography.bodySmall.copy(
-                                fontWeight = FontWeight.Bold,
+                                fontWeight = FontWeight.SemiBold,
                                 color = colors.textPrimary,
                             ),
                             maxLines = 1,
@@ -221,7 +229,7 @@ fun RealWorkshopFormSection(
                 // Province
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "استان",
+                        text = stringResource(Res.string.employer_info_province_label),
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.SemiBold,
                             color = colors.textSecondary,
@@ -230,7 +238,7 @@ fun RealWorkshopFormSection(
                         modifier = Modifier.padding(bottom = 5.dp),
                     )
                     SelectChip(
-                        text = selectedProvince?.provinceName ?: "انتخاب استان",
+                        text = selectedProvince?.provinceName ?: stringResource(Res.string.employer_info_sheet_province),
                         isSelected = selectedProvince != null,
                         isError = isProvinceError,
                         onClick = onOpenProvincePicker,
@@ -241,7 +249,7 @@ fun RealWorkshopFormSection(
                 val isCityEnabled = selectedProvince != null
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "شهر",
+                        text = stringResource(Res.string.employer_info_city_label),
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.SemiBold,
                             color = colors.textSecondary,
@@ -250,7 +258,9 @@ fun RealWorkshopFormSection(
                         modifier = Modifier.padding(bottom = 5.dp),
                     )
                     SelectChip(
-                        text = selectedCity?.cityName ?: if (isCityEnabled) "انتخاب شهر" else "ابتدا استان",
+                        text = selectedCity?.cityName ?: stringResource(
+                            if (isCityEnabled) Res.string.employer_info_sheet_city else Res.string.employer_info_city_needs_province
+                        ),
                         isSelected = selectedCity != null,
                         isEnabled = isCityEnabled,
                         isError = isCityError,
@@ -272,7 +282,9 @@ fun RealWorkshopFormSection(
                     modifier = Modifier.padding(bottom = 5.dp),
                 )
                 SelectChip(
-                    text = selectedBranch?.name ?: if (isBranchEnabled) "انتخاب شعبه" else "ابتدا شهر را انتخاب کنید",
+                    text = selectedBranch?.name ?: stringResource(
+                        if (isBranchEnabled) Res.string.employer_info_sheet_branch else Res.string.employer_info_branch_needs_city
+                    ),
                     isSelected = selectedBranch != null,
                     isEnabled = isBranchEnabled,
                     isError = isBranchError,
@@ -297,7 +309,7 @@ fun RealWorkshopFormSection(
                 Text(
                     text = errorMessage,
                     style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.SemiBold,
                         color = colors.dangerText,
                         fontSize = 11.sp,
                     ),
@@ -338,22 +350,22 @@ fun RealWorkshopFormSection(
             if (isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(20.dp),
-                    color = Color.White,
+                    color = colors.onGradient,
                     strokeWidth = 2.dp,
                 )
             } else {
                 Icon(
                     imageVector = Icons.Outlined.Email,
                     contentDescription = null,
-                    tint = Color.White,
+                    tint = colors.onGradient,
                     modifier = Modifier.size(17.dp),
                 )
                 Spacer(modifier = Modifier.size(8.dp))
                 Text(
                     text = stringResource(Res.string.employer_info_btn_send_otp),
                     style = MaterialTheme.typography.bodyMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
+                        fontWeight = FontWeight.SemiBold,
+                        color = colors.onGradient,
                         fontSize = 13.5.sp,
                     ),
                 )
@@ -373,7 +385,7 @@ private fun SelectChip(
     val colors = LocalTaminColors.current
     val bg = if (!isEnabled) colors.bgPage.copy(alpha = 0.5f) else colors.bgPage
     val fg = if (isSelected) colors.textPrimary else colors.textMuted
-    val weight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+    val weight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
 
     Row(
         modifier = Modifier

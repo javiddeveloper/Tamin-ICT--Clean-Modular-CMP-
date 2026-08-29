@@ -106,6 +106,13 @@ data class TaminColors(
     val verifiedIconGradient: Brush?,
     val verifiedIconBg: Color,
     val verifiedIconTint: Color,
+
+    /**
+     * Content drawn on top of a brand gradient — the hero header, the gradient buttons, the
+     * selected tab. The same in both themes on purpose: those gradients are dark in both, so the
+     * content on them does not follow the page.
+     */
+    val onGradient: Color,
 )
 
 val LightTaminColors = TaminColors(
@@ -224,6 +231,7 @@ val LightTaminColors = TaminColors(
     verifiedIconGradient = null,
     verifiedIconBg = TaminLightSurface,
     verifiedIconTint = TaminLightSuccess, // greenText
+    onGradient = Color.White,
 )
 
 val DarkTaminColors = TaminColors(
@@ -348,5 +356,6 @@ val DarkTaminColors = TaminColors(
     verifiedIconGradient = null,
     verifiedIconBg = TaminDarkGreenBg, // greenBg
     verifiedIconTint = TaminDarkSuccess, // greenText
+    onGradient = Color.White,
 )
 

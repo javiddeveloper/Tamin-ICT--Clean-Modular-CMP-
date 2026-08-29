@@ -20,22 +20,28 @@ fun LegalWorkshopCeoDN.toPresentation(): LegalWorkshopCeoPR =
         fullName = fullName,
     )
 
+/** Legal persons carry character code `"02"`; `"01"` is a natural person. */
+private const val CHARACTER_CODE_LEGAL = "02"
+
 fun EmployerAgreementDN.toWorkshopItemPR(): WorkshopItemPR {
     val ws = workshop
-    val isLegal = ws?.characterCode == "02"
-    val branchDisplay = ws?.branchName ?: ws?.branchTitle ?: ""
-    val branchCode = ws?.brhCode ?: ws?.branchCode ?: ""
+    // `workshopId` and `branchCode` are the pair the submit call is addressed with, so the row
+    // shows exactly what it will send. `sswn` and `brhCode` are different fields on the same
+    // object and are not interchangeable with them.
+    val workshopId = ws?.workshopId.orEmpty()
+    val branchCode = ws?.branchCode.orEmpty()
+    val branchName = ws?.branchName ?: ws?.branchTitle.orEmpty()
     return WorkshopItemPR(
-        id = ws?.sswn ?: ws?.workshopId ?: "",
-        name = ws?.workshopName ?: ws?.employerName ?: dname ?: "",
-        code = ws?.sswn ?: ws?.workshopId ?: "",
-        branch = branchDisplay,
+        id = "$workshopId-$branchCode",
+        name = ws?.workshopName ?: ws?.employerName ?: dname.orEmpty(),
+        code = workshopId,
+        branch = branchName,
         bcode = branchCode,
-        isLegal = isLegal,
-        characterDesc = ws?.characterDesc ?: if (isLegal) "شخصیت حقوقی" else "شخصیت حقیقی",
-        letDate = letDate ?: ws?.workshopApproveDate ?: "",
-        email = emailaddr ?: "",
-        mobile = mobileno ?: "",
-        address = ws?.lastAddress ?: "",
+        isLegal = ws?.characterCode == CHARACTER_CODE_LEGAL,
+        branchLabel = if (branchCode.isBlank()) branchName else "$branchName · $branchCode",
+        letDate = letDate ?: ws?.workshopApproveDate.orEmpty(),
+        email = emailaddr.orEmpty(),
+        mobile = mobileno.orEmpty(),
+        address = ws?.lastAddress.orEmpty(),
     )
 }
