@@ -27,7 +27,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -52,12 +51,15 @@ fun EmployerInfoBottomSheet(
     selectedCompanyType: CompanyTypePR?,
     onSelectCompanyType: (CompanyTypePR) -> Unit,
     provinces: ImmutableList<ProvincePR>,
+    isProvincesLoading: Boolean = false,
     selectedProvince: ProvincePR?,
     onSelectProvince: (ProvincePR) -> Unit,
     cities: ImmutableList<CityPR>,
+    isCitiesLoading: Boolean = false,
     selectedCity: CityPR?,
     onSelectCity: (CityPR) -> Unit,
     branches: ImmutableList<BranchPR>,
+    isBranchesLoading: Boolean = false,
     selectedBranch: BranchPR?,
     onSelectBranch: (BranchPR) -> Unit,
 ) {
@@ -102,50 +104,64 @@ fun EmployerInfoBottomSheet(
 
             Spacer(modifier = Modifier.height(Spacing.xs))
 
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 380.dp),
-            ) {
-                when (activeBottomSheet) {
-                    ActiveBottomSheet.COMPANY_TYPE -> {
-                        items(COMPANY_TYPES) { item ->
-                            val isSelected = selectedCompanyType?.code == item.code
-                            SheetItemRow(
-                                title = item.title,
-                                isSelected = isSelected,
-                                onClick = { onSelectCompanyType(item) },
-                            )
+            val isCurrentLoading = when (activeBottomSheet) {
+                ActiveBottomSheet.PROVINCE -> isProvincesLoading && provinces.isEmpty()
+                ActiveBottomSheet.CITY -> isCitiesLoading && cities.isEmpty()
+                ActiveBottomSheet.BRANCH -> isBranchesLoading && branches.isEmpty()
+                ActiveBottomSheet.COMPANY_TYPE -> false
+            }
+
+            if (isCurrentLoading) {
+                EmployerInfoSheetShimmer(
+                    itemCount = 6,
+                    modifier = Modifier.padding(vertical = Spacing.sm),
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 380.dp),
+                ) {
+                    when (activeBottomSheet) {
+                        ActiveBottomSheet.COMPANY_TYPE -> {
+                            items(COMPANY_TYPES, key = { it.code }) { item ->
+                                val isSelected = selectedCompanyType?.code == item.code
+                                SheetItemRow(
+                                    title = item.title,
+                                    isSelected = isSelected,
+                                    onClick = { onSelectCompanyType(item) },
+                                )
+                            }
                         }
-                    }
-                    ActiveBottomSheet.PROVINCE -> {
-                        items(provinces) { item ->
-                            val isSelected = selectedProvince?.provinceCode == item.provinceCode
-                            SheetItemRow(
-                                title = item.provinceName,
-                                isSelected = isSelected,
-                                onClick = { onSelectProvince(item) },
-                            )
+                        ActiveBottomSheet.PROVINCE -> {
+                            items(provinces, key = { it.provinceCode }) { item ->
+                                val isSelected = selectedProvince?.provinceCode == item.provinceCode
+                                SheetItemRow(
+                                    title = item.provinceName,
+                                    isSelected = isSelected,
+                                    onClick = { onSelectProvince(item) },
+                                )
+                            }
                         }
-                    }
-                    ActiveBottomSheet.CITY -> {
-                        items(cities) { item ->
-                            val isSelected = selectedCity?.cityCode == item.cityCode
-                            SheetItemRow(
-                                title = item.cityName,
-                                isSelected = isSelected,
-                                onClick = { onSelectCity(item) },
-                            )
+                        ActiveBottomSheet.CITY -> {
+                            items(cities, key = { it.cityCode }) { item ->
+                                val isSelected = selectedCity?.cityCode == item.cityCode
+                                SheetItemRow(
+                                    title = item.cityName,
+                                    isSelected = isSelected,
+                                    onClick = { onSelectCity(item) },
+                                )
+                            }
                         }
-                    }
-                    ActiveBottomSheet.BRANCH -> {
-                        items(branches) { item ->
-                            val isSelected = selectedBranch?.code == item.code
-                            SheetItemRow(
-                                title = item.name,
-                                isSelected = isSelected,
-                                onClick = { onSelectBranch(item) },
-                            )
+                        ActiveBottomSheet.BRANCH -> {
+                            items(branches, key = { it.code }) { item ->
+                                val isSelected = selectedBranch?.code == item.code
+                                SheetItemRow(
+                                    title = item.name,
+                                    isSelected = isSelected,
+                                    onClick = { onSelectBranch(item) },
+                                )
+                            }
                         }
                     }
                 }

@@ -31,7 +31,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -58,10 +57,6 @@ import taminx.core.core_ui.employer_info_email
 import taminx.core.core_ui.employer_info_real_code_label
 import taminx.core.core_ui.employer_info_real_hint
 import taminx.core.core_ui.ic_tamin_chevron_back
-
-private val ButtonGradient = Brush.linearGradient(
-    colors = listOf(Color(0xFF3B6FD4), Color(0xFF173D7E)),
-)
 
 @Composable
 fun RealWorkshopFormSection(
@@ -97,8 +92,8 @@ fun RealWorkshopFormSection(
                 .shadow(
                     elevation = 4.dp,
                     shape = RoundedCornerShape(18.dp),
-                    ambientColor = Color(0x0A0F172A),
-                    spotColor = Color(0x0A0F172A),
+                    ambientColor = colors.shadowSubtle,
+                    spotColor = colors.shadowSubtle,
                 )
                 .clip(RoundedCornerShape(18.dp))
                 .background(colors.bgSurface)
@@ -175,7 +170,7 @@ fun RealWorkshopFormSection(
                         .fillMaxWidth()
                         .height(44.dp)
                         .clip(RoundedCornerShape(13.dp))
-                        .background(Color(0xFFF1F4F9))
+                        .background(colors.bgPage)
                         .border(1.dp, colors.border, RoundedCornerShape(13.dp))
                         .padding(horizontal = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -209,8 +204,8 @@ fun RealWorkshopFormSection(
                 .shadow(
                     elevation = 4.dp,
                     shape = RoundedCornerShape(18.dp),
-                    ambientColor = Color(0x0A0F172A),
-                    spotColor = Color(0x0A0F172A),
+                    ambientColor = colors.shadowSubtle,
+                    spotColor = colors.shadowSubtle,
                 )
                 .clip(RoundedCornerShape(18.dp))
                 .background(colors.bgSurface)
@@ -331,11 +326,11 @@ fun RealWorkshopFormSection(
                 .shadow(
                     elevation = 6.dp,
                     shape = RoundedCornerShape(15.dp),
-                    ambientColor = Color(0x30173D7E),
-                    spotColor = Color(0x30173D7E),
+                    ambientColor = colors.shadowPrimary,
+                    spotColor = colors.shadowPrimary,
                 )
                 .clip(RoundedCornerShape(15.dp))
-                .background(ButtonGradient)
+                .background(colors.buttonGradient)
                 .clickable(enabled = !isLoading, onClick = onSubmit),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
@@ -376,7 +371,7 @@ private fun SelectChip(
     onClick: () -> Unit,
 ) {
     val colors = LocalTaminColors.current
-    val bg = if (!isEnabled) Color(0xFFF1F4F9) else colors.bgPage
+    val bg = if (!isEnabled) colors.bgPage.copy(alpha = 0.5f) else colors.bgPage
     val fg = if (isSelected) colors.textPrimary else colors.textMuted
     val weight = if (isSelected) FontWeight.Bold else FontWeight.Medium
 

@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -29,7 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
@@ -51,10 +49,6 @@ import taminx.core.core_ui.employer_info_verify_legal_submit
 import taminx.core.core_ui.employer_info_verify_real_submit
 import taminx.core.core_ui.employer_info_verify_subtitle
 import taminx.core.core_ui.employer_info_verify_title
-
-private val ButtonGradient = Brush.linearGradient(
-    colors = listOf(Color(0xFF3B6FD4), Color(0xFF173D7E)),
-)
 
 @Composable
 fun EmployerInfoVerifySection(
@@ -90,8 +84,8 @@ fun EmployerInfoVerifySection(
                 .shadow(
                     elevation = 6.dp,
                     shape = RoundedCornerShape(20.dp),
-                    ambientColor = Color(0x0E0F172A),
-                    spotColor = Color(0x0E0F172A),
+                    ambientColor = colors.shadowSubtle,
+                    spotColor = colors.shadowSubtle,
                 )
                 .clip(RoundedCornerShape(20.dp))
                 .background(colors.bgSurface)
@@ -147,7 +141,7 @@ fun EmployerInfoVerifySection(
             val isLow = countdownState.isLowTime
             val clockFg = if (isLow) colors.dangerText else colors.blueText
             val clockBg = if (isLow) colors.dangerBg else colors.blueBg
-            val clockBorder = if (isLow) Color(0xFFF3C9C4) else Color(0xFFDCE7FB)
+            val clockBorder = if (isLow) colors.dangerBorder else colors.hawkesBlue
 
             Row(
                 modifier = Modifier
@@ -234,11 +228,11 @@ fun EmployerInfoVerifySection(
                     .shadow(
                         elevation = 6.dp,
                         shape = RoundedCornerShape(14.dp),
-                        ambientColor = Color(0x30173D7E),
-                        spotColor = Color(0x30173D7E),
+                        ambientColor = colors.shadowPrimary,
+                        spotColor = colors.shadowPrimary,
                     )
                     .clip(RoundedCornerShape(14.dp))
-                    .background(ButtonGradient)
+                    .background(colors.buttonGradient)
                     .clickable(enabled = !isLoading, onClick = onSubmit),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,

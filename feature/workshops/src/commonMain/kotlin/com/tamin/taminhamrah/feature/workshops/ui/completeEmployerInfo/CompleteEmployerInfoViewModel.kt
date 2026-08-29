@@ -1,13 +1,11 @@
 package com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo
 
 import com.tamin.taminhamrah.base.BaseViewModel
-import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.contract.ActiveBottomSheet
 import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.contract.CompleteEmployerInfoDialog
 import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.contract.CompleteEmployerInfoEvent
 import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.contract.CompleteEmployerInfoIntent
 import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.contract.CompleteEmployerInfoPartialState
 import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.contract.CompleteEmployerInfoScreenState
-import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.contract.CompleteEmployerInfoTab
 import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.contract.CompleteEmployerInfoUiState
 import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.contract.VerifyPath
 import com.tamin.taminhamrah.mapper.common.toCityPresentation
@@ -208,23 +206,29 @@ class CompleteEmployerInfoViewModel(
 
     private fun handleSelectProvince(province: com.tamin.taminhamrah.model.common.ProvincePR): Flow<CompleteEmployerInfoPartialState> = flow {
         emit(CompleteEmployerInfoPartialState.ProvinceSelected(province))
+        emit(CompleteEmployerInfoPartialState.CitiesLoading(true))
         getCitiesByProvinceUseCase(province.provinceCode)
             .catch {
                 emit(CompleteEmployerInfoPartialState.CitiesLoaded(kotlinx.collections.immutable.persistentListOf()))
+                emit(CompleteEmployerInfoPartialState.CitiesLoading(false))
             }
             .collect { result ->
                 emit(CompleteEmployerInfoPartialState.CitiesLoaded(result.cities.toCityPresentation().toImmutableList()))
+                emit(CompleteEmployerInfoPartialState.CitiesLoading(false))
             }
     }
 
     private fun handleSelectCity(city: com.tamin.taminhamrah.model.common.CityPR): Flow<CompleteEmployerInfoPartialState> = flow {
         emit(CompleteEmployerInfoPartialState.CitySelected(city))
+        emit(CompleteEmployerInfoPartialState.BranchesLoading(true))
         getBranchesUseCase(city.cityCode)
             .catch {
                 emit(CompleteEmployerInfoPartialState.BranchesLoaded(kotlinx.collections.immutable.persistentListOf()))
+                emit(CompleteEmployerInfoPartialState.BranchesLoading(false))
             }
             .collect { branches ->
                 emit(CompleteEmployerInfoPartialState.BranchesLoaded(branches.toBranchPresentation().toImmutableList()))
+                emit(CompleteEmployerInfoPartialState.BranchesLoading(false))
             }
     }
 
@@ -462,8 +466,12 @@ class CompleteEmployerInfoViewModel(
             realValidationError = null,
             activeBottomSheet = null,
         )
+        is CompleteEmployerInfoPartialState.CitiesLoading -> currentState.copy(
+            isCitiesLoading = partialState.isLoading,
+        )
         is CompleteEmployerInfoPartialState.CitiesLoaded -> currentState.copy(
             cities = partialState.cities,
+            isCitiesLoading = false,
         )
         is CompleteEmployerInfoPartialState.CitySelected -> currentState.copy(
             selectedCity = partialState.city,
@@ -472,8 +480,12 @@ class CompleteEmployerInfoViewModel(
             realValidationError = null,
             activeBottomSheet = null,
         )
+        is CompleteEmployerInfoPartialState.BranchesLoading -> currentState.copy(
+            isBranchesLoading = partialState.isLoading,
+        )
         is CompleteEmployerInfoPartialState.BranchesLoaded -> currentState.copy(
             branches = partialState.branches,
+            isBranchesLoading = false,
         )
         is CompleteEmployerInfoPartialState.BranchSelected -> currentState.copy(
             selectedBranch = partialState.branch,

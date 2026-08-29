@@ -31,7 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
@@ -42,7 +41,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.model.employerInfo.WorkshopItemPR
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
-import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.ImmutableList
@@ -64,10 +62,6 @@ import taminx.core.core_ui.employer_info_real_notice
 import taminx.core.core_ui.employer_info_workshop_code
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.no_items_found
-
-private val ButtonGradient = Brush.linearGradient(
-    colors = listOf(Color(0xFF3B6FD4), Color(0xFF173D7E)),
-)
 
 @Composable
 fun LegalWorkshopListSection(
@@ -91,13 +85,15 @@ fun LegalWorkshopListSection(
         verticalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
         workshops.forEach { workshop ->
-            val isExpanded = expandedWorkshopIds.contains(workshop.id)
-            WorkshopCardItem(
-                workshop = workshop,
-                isExpanded = isExpanded,
-                onToggleExpanded = { onToggleExpanded(workshop.id) },
-                onSelectWorkshop = { onSelectWorkshop(workshop) },
-            )
+            androidx.compose.runtime.key(workshop.id) {
+                val isExpanded = expandedWorkshopIds.contains(workshop.id)
+                WorkshopCardItem(
+                    workshop = workshop,
+                    isExpanded = isExpanded,
+                    onToggleExpanded = { onToggleExpanded(workshop.id) },
+                    onSelectWorkshop = { onSelectWorkshop(workshop) },
+                )
+            }
         }
     }
 }
@@ -118,8 +114,8 @@ private fun WorkshopCardItem(
             .shadow(
                 elevation = 4.dp,
                 shape = RoundedCornerShape(18.dp),
-                ambientColor = Color(0x0A0F172A),
-                spotColor = Color(0x0A0F172A),
+                ambientColor = colors.shadowSubtle,
+                spotColor = colors.shadowSubtle,
             )
             .clip(RoundedCornerShape(18.dp))
             .background(colors.bgSurface)
@@ -150,7 +146,7 @@ private fun WorkshopCardItem(
             }
             val badgeFg = if (workshop.isLegal) colors.blueText else colors.orangeText
             val badgeBg = if (workshop.isLegal) colors.blueBg else colors.orangeBg
-            val badgeBorder = if (workshop.isLegal) Color(0xFFDCE7FB) else Color(0xFFF0DCA8)
+            val badgeBorder = if (workshop.isLegal) colors.hawkesBlue else colors.orangeBg
 
             Box(
                 modifier = Modifier
@@ -322,11 +318,11 @@ private fun WorkshopCardItem(
                     .shadow(
                         elevation = 4.dp,
                         shape = RoundedCornerShape(14.dp),
-                        ambientColor = Color(0x20173D7E),
-                        spotColor = Color(0x20173D7E),
+                        ambientColor = colors.shadowPrimary,
+                        spotColor = colors.shadowPrimary,
                     )
                     .clip(RoundedCornerShape(14.dp))
-                    .background(ButtonGradient)
+                    .background(colors.buttonGradient)
                     .clickable(onClick = onSelectWorkshop),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
@@ -354,7 +350,7 @@ private fun WorkshopCardItem(
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(13.dp))
                     .background(colors.orangeBg)
-                    .border(1.dp, Color(0xFFF0DCA8), RoundedCornerShape(13.dp))
+                    .border(1.dp, colors.orangeBg, RoundedCornerShape(13.dp))
                     .padding(horizontal = 11.dp, vertical = 9.dp),
                 verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.spacedBy(7.dp),
@@ -368,7 +364,7 @@ private fun WorkshopCardItem(
                 Text(
                     text = stringResource(Res.string.employer_info_real_notice),
                     style = MaterialTheme.typography.bodySmall.copy(
-                        color = Color(0xFF8A5C08),
+                        color = colors.orangeText,
                         lineHeight = 20.sp,
                         fontSize = 10.5.sp,
                     ),

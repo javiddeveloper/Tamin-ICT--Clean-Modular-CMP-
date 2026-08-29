@@ -131,8 +131,10 @@ sealed interface CompleteEmployerInfoPartialState {
     data class RealWorkshopCodeChanged(val code: String) : CompleteEmployerInfoPartialState
     data class ProvincesLoaded(val provinces: ImmutableList<ProvincePR>) : CompleteEmployerInfoPartialState
     data class ProvinceSelected(val province: ProvincePR) : CompleteEmployerInfoPartialState
+    data class CitiesLoading(val isLoading: Boolean) : CompleteEmployerInfoPartialState
     data class CitiesLoaded(val cities: ImmutableList<CityPR>) : CompleteEmployerInfoPartialState
     data class CitySelected(val city: CityPR) : CompleteEmployerInfoPartialState
+    data class BranchesLoading(val isLoading: Boolean) : CompleteEmployerInfoPartialState
     data class BranchesLoaded(val branches: ImmutableList<BranchPR>) : CompleteEmployerInfoPartialState
     data class BranchSelected(val branch: BranchPR) : CompleteEmployerInfoPartialState
     data class RealValidationFailed(val error: String) : CompleteEmployerInfoPartialState

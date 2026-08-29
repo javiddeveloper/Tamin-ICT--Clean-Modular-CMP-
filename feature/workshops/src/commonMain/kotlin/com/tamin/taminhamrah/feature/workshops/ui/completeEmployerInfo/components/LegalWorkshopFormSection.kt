@@ -39,14 +39,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -74,9 +72,8 @@ import taminx.core.core_ui.employer_info_mobile
 import taminx.core.core_ui.employer_info_tel_label
 import taminx.core.core_ui.ic_tamin_chevron_back
 
-private val ButtonGradient = Brush.linearGradient(
-    colors = listOf(Color(0xFF3B6FD4), Color(0xFF173D7E)),
-)
+private val MOBILE_REGEX = Regex("^09\\d{9}$")
+private val EMAIL_REGEX = Regex("^\\S+@\\S+\\.\\S+$")
 
 @Composable
 fun LegalWorkshopFormSection(
@@ -111,8 +108,8 @@ fun LegalWorkshopFormSection(
     val isCompanyTypeError = hasAttemptedSubmit && selectedCompanyType == null
     val isCeoNidError = hasAttemptedSubmit && ceoNationalId.filter { it.isDigit() }.length != 10
     val isCeoBirthError = hasAttemptedSubmit && ceoBirthDatePersian.isBlank()
-    val isMobileError = hasAttemptedSubmit && !mobile.filter { it.isDigit() }.matches(Regex("^09\\d{9}$"))
-    val isEmailError = hasAttemptedSubmit && !email.trim().matches(Regex("^\\S+@\\S+\\.\\S+$"))
+    val isMobileError = hasAttemptedSubmit && !mobile.filter { it.isDigit() }.matches(MOBILE_REGEX)
+    val isEmailError = hasAttemptedSubmit && !email.trim().matches(EMAIL_REGEX)
 
     Column(
         modifier = modifier.fillMaxWidth().padding(horizontal = Spacing.lg),
@@ -134,8 +131,8 @@ fun LegalWorkshopFormSection(
                 .shadow(
                     elevation = 4.dp,
                     shape = RoundedCornerShape(18.dp),
-                    ambientColor = Color(0x0A0F172A),
-                    spotColor = Color(0x0A0F172A),
+                    ambientColor = colors.shadowSubtle,
+                    spotColor = colors.shadowSubtle,
                 )
                 .clip(RoundedCornerShape(18.dp))
                 .background(colors.bgSurface)
@@ -190,53 +187,50 @@ fun LegalWorkshopFormSection(
                                     )
                                 }
                                 innerTextField()
-                                if (isLegalWorkshopInquiring) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(16.dp).align(Alignment.CenterEnd),
-                                        strokeWidth = 2.dp,
-                                        color = colors.blueText,
-                                    )
-                                }
                             }
                         },
                     )
                 }
             }
 
-            // Resolved Legal Entity Name Card
-            AnimatedVisibility(
-                visible = !legalWorkshopName.isNullOrBlank(),
-                enter = expandVertically() + fadeIn(),
-                exit = shrinkVertically() + fadeOut(),
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(13.dp))
-                        .background(colors.blueBg)
-                        .border(1.dp, Color(0xFFDCE7FB), RoundedCornerShape(13.dp))
-                        .padding(horizontal = 11.dp, vertical = 9.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+            // Inquiry Shimmer or Resolved Legal Entity Name Card
+            if (isLegalWorkshopInquiring) {
+                EmployerInfoLegalInquiryShimmer()
+            } else {
+                AnimatedVisibility(
+                    visible = !legalWorkshopName.isNullOrBlank(),
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut(),
                 ) {
-                    Text(
-                        text = stringResource(Res.string.employer_info_legal_name_prefix),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            color = colors.blueText,
-                            fontSize = 10.sp,
-                        ),
-                    )
-                    Text(
-                        text = legalWorkshopName.orEmpty(),
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = colors.blueText,
-                            fontSize = 11.5.sp,
-                        ),
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f),
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(13.dp))
+                            .background(colors.blueBg)
+                            .border(1.dp, colors.hawkesBlue, RoundedCornerShape(13.dp))
+                            .padding(horizontal = 11.dp, vertical = 9.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.employer_info_legal_name_prefix),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = colors.blueText,
+                                fontSize = 10.sp,
+                            ),
+                        )
+                        Text(
+                            text = legalWorkshopName.orEmpty(),
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = colors.blueText,
+                                fontSize = 11.5.sp,
+                            ),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
                 }
             }
 
@@ -278,8 +272,8 @@ fun LegalWorkshopFormSection(
                 .shadow(
                     elevation = 4.dp,
                     shape = RoundedCornerShape(18.dp),
-                    ambientColor = Color(0x0A0F172A),
-                    spotColor = Color(0x0A0F172A),
+                    ambientColor = colors.shadowSubtle,
+                    spotColor = colors.shadowSubtle,
                 )
                 .clip(RoundedCornerShape(18.dp))
                 .background(colors.bgSurface)
@@ -395,40 +389,44 @@ fun LegalWorkshopFormSection(
                 }
             }
 
-            // Resolved CEO Name Card
-            AnimatedVisibility(
-                visible = !ceoFullName.isNullOrBlank(),
-                enter = expandVertically() + fadeIn(),
-                exit = shrinkVertically() + fadeOut(),
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(13.dp))
-                        .background(colors.greenBg)
-                        .border(1.dp, Color(0xFFC6EAD6), RoundedCornerShape(13.dp))
-                        .padding(horizontal = 11.dp, vertical = 9.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+            // Inquiry Shimmer or Resolved CEO Name Card
+            if (isCeoInquiring) {
+                EmployerInfoCeoInquiryShimmer()
+            } else {
+                AnimatedVisibility(
+                    visible = !ceoFullName.isNullOrBlank(),
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut(),
                 ) {
-                    Text(
-                        text = stringResource(Res.string.employer_info_ceo_name_prefix),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            color = Color(0xFF03794A),
-                            fontSize = 10.sp,
-                        ),
-                    )
-                    Text(
-                        text = ceoFullName.orEmpty(),
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF03794A),
-                            fontSize = 11.5.sp,
-                        ),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f),
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(13.dp))
+                            .background(colors.greenBg)
+                            .border(1.dp, colors.greenBorder, RoundedCornerShape(13.dp))
+                            .padding(horizontal = 11.dp, vertical = 9.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.employer_info_ceo_name_prefix),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = colors.greenText,
+                                fontSize = 10.sp,
+                            ),
+                        )
+                        Text(
+                            text = ceoFullName.orEmpty(),
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = colors.greenText,
+                                fontSize = 11.5.sp,
+                            ),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
                 }
             }
 
@@ -628,11 +626,11 @@ fun LegalWorkshopFormSection(
                 .shadow(
                     elevation = 6.dp,
                     shape = RoundedCornerShape(15.dp),
-                    ambientColor = Color(0x30173D7E),
-                    spotColor = Color(0x30173D7E),
+                    ambientColor = colors.shadowPrimary,
+                    spotColor = colors.shadowPrimary,
                 )
                 .clip(RoundedCornerShape(15.dp))
-                .background(ButtonGradient)
+                .background(colors.buttonGradient)
                 .clickable(enabled = !isLoading, onClick = onSubmit),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,

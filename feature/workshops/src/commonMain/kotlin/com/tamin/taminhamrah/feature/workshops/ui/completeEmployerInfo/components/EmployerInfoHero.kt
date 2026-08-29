@@ -25,7 +25,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
@@ -48,16 +47,8 @@ import taminx.core.core_ui.employer_info_tab_legal
 import taminx.core.core_ui.employer_info_tab_real
 import taminx.core.core_ui.employer_info_title
 import taminx.core.core_ui.employer_info_workshop_code
-import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_branch
-
-private val HeaderGradient = Brush.verticalGradient(
-    colors = listOf(Color(0xFF173D7E), Color(0xFF1F4FA3)),
-)
-
-private val ActiveTabGradient = Brush.linearGradient(
-    colors = listOf(Color(0xFF3B6FD4), Color(0xFF173D7E)),
-)
+import taminx.core.core_ui.ic_tamin_chevron_back
 
 @Composable
 fun EmployerInfoHero(
@@ -78,7 +69,7 @@ fun EmployerInfoHero(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(bottomStart = 30.dp, bottomEnd = 30.dp))
-                .background(HeaderGradient)
+                .background(colors.heroGradient)
                 .padding(horizontal = Spacing.lg, vertical = Spacing.md),
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
@@ -161,7 +152,7 @@ fun EmployerInfoHero(
                     Text(
                         text = stringResource(Res.string.employer_info_subtitle),
                         style = MaterialTheme.typography.bodySmall.copy(
-                            color = Color(0xFFAFC4EC),
+                            color = colors.textHeaderSubtitle,
                         ),
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth(),
@@ -211,7 +202,7 @@ fun EmployerInfoHero(
                                 Text(
                                     text = stringResource(Res.string.employer_info_workshop_code),
                                     style = MaterialTheme.typography.labelSmall.copy(
-                                        color = Color(0xFFAFC4EC),
+                                        color = colors.textHeaderSubtitle,
                                     ),
                                 )
                                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
@@ -219,7 +210,7 @@ fun EmployerInfoHero(
                                         text = selectedWorkshop.code,
                                         style = MaterialTheme.typography.labelMedium.copy(
                                             fontWeight = FontWeight.Bold,
-                                            color = Color(0xFFE4EDFF),
+                                            color = colors.txtNameProfile,
                                         ),
                                     )
                                 }
@@ -244,8 +235,8 @@ fun EmployerInfoHero(
                         .shadow(
                             elevation = 8.dp,
                             shape = RoundedCornerShape(CornerRadius.lg),
-                            ambientColor = Color(0x1A0F172A),
-                            spotColor = Color(0x1A0F172A),
+                            ambientColor = colors.shadowSubtle,
+                            spotColor = colors.shadowSubtle,
                         )
                         .clip(RoundedCornerShape(CornerRadius.lg))
                         .background(colors.bgSurface)
@@ -330,7 +321,7 @@ fun EmployerInfoHero(
                             .height(40.dp)
                             .clip(RoundedCornerShape(12.dp))
                             .then(
-                                if (isLegal) Modifier.background(ActiveTabGradient)
+                                if (isLegal) Modifier.background(colors.buttonGradient)
                                 else Modifier.background(Color.Transparent)
                             )
                             .clickable { onSelectTab(CompleteEmployerInfoTab.LEGAL) },
@@ -354,7 +345,7 @@ fun EmployerInfoHero(
                             .height(40.dp)
                             .clip(RoundedCornerShape(12.dp))
                             .then(
-                                if (isReal) Modifier.background(ActiveTabGradient)
+                                if (isReal) Modifier.background(colors.buttonGradient)
                                 else Modifier.background(Color.Transparent)
                             )
                             .clickable { onSelectTab(CompleteEmployerInfoTab.REAL) },
