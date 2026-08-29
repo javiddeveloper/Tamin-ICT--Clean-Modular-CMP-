@@ -50,6 +50,16 @@ import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSource
 import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.versionHistory.VersionHistoryRemoteDataSource
 import com.tamin.taminhamrah.dataSource.versionHistory.VersionHistoryRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.health.HealthRemoteDataSource
+import com.tamin.taminhamrah.dataSource.health.HealthRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.contactUs.ContactUsRemoteDataSource
+import com.tamin.taminhamrah.dataSource.contactUs.ContactUsRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSource
+import com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.orotezProtez.OrotezProtezRemoteDataSource
+import com.tamin.taminhamrah.dataSource.orotezProtez.OrotezProtezRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.pregnancyPay.PregnancyPayRemoteDataSource
+import com.tamin.taminhamrah.dataSource.pregnancyPay.PregnancyPayRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSource
 import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSourceImpl
 import com.tamin.taminhamrah.repository.AgentRepository
@@ -248,6 +258,13 @@ val remoteModule = module {
         EmployerInfoRemoteDataSourceImpl(
             apiService = get(),
             queryBuilder = get(),
+            errorParser = get()
+        )
+    }
+
+    single<PregnancyPayRemoteDataSource> {
+        PregnancyPayRemoteDataSourceImpl(
+            pregnancyPayApiService = get(),
             errorParser = get()
         )
     }

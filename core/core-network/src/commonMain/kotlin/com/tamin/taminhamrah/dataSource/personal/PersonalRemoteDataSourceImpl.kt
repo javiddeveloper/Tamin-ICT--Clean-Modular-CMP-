@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.model.personal.age.AgeDTO
 import com.tamin.taminhamrah.model.personal.disabilityRequest.DisabilityDependentDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
+import com.tamin.taminhamrah.model.personal.survivorDependent.SurvivorDependentDTO
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDTO
 import com.tamin.taminhamrah.model.personal.girlSurvivor.ConfirmGirlSurvivorRequestDTO
 import com.tamin.taminhamrah.model.personal.submitFinalSurvivorPension.SubmitFinalSurvivorPensionRequest
@@ -53,6 +54,11 @@ class PersonalRemoteDataSourceImpl(
             personalApiService.getDisabilityDependentInfo(
                 queryBuilder.buildQuery(query)
             ).extractData().list ?: emptyList()
+        }
+
+    override suspend fun getSurvivorList(deceasedNationalId: String): List<SurvivorDependentDTO> =
+        errorParser.safeCall("getSurvivorList", ErrorUri.UNKNOWN) {
+            personalApiService.getSurvivorList(deceasedNationalId).extractData().list ?: emptyList()
         }
 
     override suspend fun checkGirlSurvivorConditions(

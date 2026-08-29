@@ -63,6 +63,13 @@ object PersonalTestData {
     val girlSurvivorPersonalSuccess: String
         get() = readResourceFile("mocks/girl_survivor_personal_success.json")
 
+    /**
+     * Live-shaped `survivor-request/personal` payload (includes nested
+     * `relationWithTamins` objects with Jackson-style int identity refs).
+     */
+    val survivorRequestPersonalLiveSuccess: String
+        get() = readResourceFile("mocks/survivor_request_personal_live_success.json")
+
     val girlSurvivorConditionSuccess: String
         get() = readResourceFile("mocks/girl_survivor_condition_success.json")
 
