@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,7 +25,9 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_email
 import taminx.core.core_ui.legal_representative_otp_sent_message
 
 private const val OTP_LENGTH = 5
@@ -56,7 +57,7 @@ internal fun LegalRepresentativeOtpSection(
             text = requestLabel,
             onClick = onRequestTicket,
             isLoading = isRequestingTicket,
-            icon = Icons.AutoMirrored.Filled.Send,
+            icon = vectorResource(Res.drawable.ic_email),
             modifier = modifier.fillMaxWidth(),
         )
         return

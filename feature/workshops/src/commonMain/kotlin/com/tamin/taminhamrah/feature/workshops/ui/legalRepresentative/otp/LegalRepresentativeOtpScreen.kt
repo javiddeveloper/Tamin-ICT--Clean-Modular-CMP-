@@ -1,15 +1,21 @@
 package com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.otp
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.outlined.ConfirmationNumber
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,8 +32,11 @@ import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.components
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.GlassIconTile
 import com.tamin.taminhamrah.ui.components.LoadingButton
+import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.Thickness
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
@@ -66,10 +75,26 @@ fun LegalRepresentativeOtpScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Spacer(Modifier.height(Spacing.lg))
-            GlassIconTile(
-                icon = Icons.Outlined.ConfirmationNumber,
-                tint = taminColors.blueText,
-            )
+            Box(
+                modifier = Modifier
+                    .size(IconSize.xxlarge)
+                    .background(
+                        color = taminColors.blueBg,
+                        shape = RoundedCornerShape(CornerRadius.chip)
+                    )
+                    .border(
+                        width = Thickness.border,
+                        color = taminColors.blueText.copy(0.1f),
+                        shape = RoundedCornerShape(CornerRadius.chip),
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.ConfirmationNumber,
+                    contentDescription = null,
+                    tint = taminColors.blueText,
+                )
+            }
             Spacer(Modifier.height(Spacing.md))
             Text(
                 text = stringResource(Res.string.legal_representative_otp_heading),

@@ -9,10 +9,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Domain
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,12 +31,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
-import com.tamin.taminhamrah.ui.components.GlassIconTile
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.ShimmerSize
@@ -115,25 +118,44 @@ internal fun LegalRepresentativeWorkshopSummaryCard(
     subtitle: String,
 ) {
     val taminColors = LocalTaminColors.current
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = Spacing.lg)
             .clip(RoundedCornerShape(CornerRadius.card))
             .background(taminColors.glassIconTileBg)
             .padding(Spacing.md),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = workshopName,
-            style = MaterialTheme.typography.titleSmall,
-            color = Color.White,
-        )
-        Spacer(Modifier.height(2.dp))
-        Text(
-            text = subtitle,
-            style = MaterialTheme.typography.labelMedium,
-            color = taminColors.textHeaderSubtitle,
-        )
+        Box(
+            modifier = Modifier
+                .size(IconSize.largePlus)
+                .background(
+                    color = Color.White.copy(alpha = 0.2f),
+                    shape = RoundedCornerShape(CornerRadius.chip)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Domain,
+                contentDescription = null,
+                tint = Color.White,
+            )
+        }
+        Column {
+            Text(
+                text = workshopName,
+                style = MaterialTheme.typography.titleSmall,
+                color = Color.White,
+            )
+            Spacer(Modifier.height(2.dp))
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.labelMedium,
+                color = taminColors.textHeaderSubtitle,
+            )
+        }
     }
 }
 
