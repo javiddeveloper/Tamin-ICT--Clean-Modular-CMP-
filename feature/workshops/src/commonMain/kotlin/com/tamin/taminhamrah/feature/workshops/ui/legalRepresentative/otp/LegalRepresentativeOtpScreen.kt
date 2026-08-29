@@ -38,8 +38,10 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.legal_representative_otp_description
 import taminx.core.core_ui.legal_representative_otp_heading
 import taminx.core.core_ui.legal_representative_otp_request_action
@@ -131,7 +133,7 @@ fun LegalRepresentativeOtpScreen(
                     onClick = { viewModel.sendIntent(LegalRepresentativeOtpIntent.VerifyTicket) },
                     isLoading = uiState.isVerifying,
                     enabled = uiState.otpCode.isNotBlank() && !uiState.isVerifying,
-                    icon = Icons.Filled.CheckCircle,
+                    icon = vectorResource(Res.drawable.ic_tamin_check),
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
