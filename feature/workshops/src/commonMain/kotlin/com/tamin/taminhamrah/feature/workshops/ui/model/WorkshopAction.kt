@@ -6,6 +6,7 @@ import org.jetbrains.compose.resources.StringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_workshop_article_sixteen
 import taminx.core.core_ui.ic_tamin_workshop_inquiry
+import taminx.core.core_ui.ic_tamin_workshop_members
 import taminx.core.core_ui.ic_tamin_workshop_new_member
 import taminx.core.core_ui.ic_tamin_workshop_objection
 import taminx.core.core_ui.ic_tamin_workshop_payment
@@ -16,6 +17,8 @@ import taminx.core.core_ui.workshop_action_debit_turnover
 import taminx.core.core_ui.workshop_action_debit_turnover_desc
 import taminx.core.core_ui.workshop_action_debt_inquiry
 import taminx.core.core_ui.workshop_action_debt_inquiry_desc
+import taminx.core.core_ui.workshop_action_members
+import taminx.core.core_ui.workshop_action_members_desc
 import taminx.core.core_ui.workshop_action_new_member
 import taminx.core.core_ui.workshop_action_new_member_desc
 import taminx.core.core_ui.workshop_action_objection
@@ -75,5 +78,11 @@ enum class WorkshopAction(
         description = Res.string.workshop_action_article_sixteen_desc,
         icon = Res.drawable.ic_tamin_workshop_article_sixteen,
         tint = StatusTint.PURPLE,
+    ),
+    MEMBERS(
+        label = Res.string.workshop_action_members,
+        description = Res.string.workshop_action_members_desc,
+        icon = Res.drawable.ic_tamin_workshop_members,
+        tint = StatusTint.TEAL,
     ),
 }
