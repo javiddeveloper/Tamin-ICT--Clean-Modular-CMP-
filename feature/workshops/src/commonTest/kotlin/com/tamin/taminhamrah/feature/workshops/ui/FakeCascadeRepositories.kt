@@ -112,6 +112,12 @@ internal class FakeCascadeContractsRepository : ContractsRepository {
     override fun checkInsurancePaymentStatus(systemType: String): Flow<Any?> = unused()
     override fun uploadImage(request: UploadImageRequestDN): Flow<String> = unused()
     override fun saveContact(request: SaveContactRequestDN): Flow<Any?> = unused()
+
+    override fun getOptionalPremiumRange(): Flow<FreelancePremiumRangeDN> = flow {
+        emit(FreelancePremiumRangeDN(paymentTabayi = 0L, lowPremium = 0L, history = 0, highPremium = 0L))
+    }
+    override fun checkRedCrossStatus(): Flow<String> = flow { emit("ok") }
+    override fun checkMedicalStudent(): Flow<String> = flow { emit("ok14") }
 }
 
 internal class FakeCascadeWorkShopsRepository : WorkShopsRepository {
