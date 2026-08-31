@@ -116,6 +116,7 @@ fun EmployerInfoBottomSheet(
             groupRowsInCard = true,
             selectOnTap = true,
             showSubmitButton = false,
+            highlightSelectedRow = true,
             // نوع شرکت is short and unsearched, but the design still draws it as rows, not chips.
             showRowList = true,
         ),

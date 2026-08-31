@@ -75,6 +75,8 @@ data class TaminBottomSheetStyle(
     /** Tapping a row submits it there and then, instead of arming the submit button. */
     val selectOnTap: Boolean = false,
     val showSubmitButton: Boolean = true,
+    /** Colors the chosen row's label as well as its check mark. Off keeps every label the same. */
+    val highlightSelectedRow: Boolean = false,
     /**
      * Rows or chips. Null follows the sheet type's own `showSearch`, which is how this was decided
      * before the style existed — set it when a short, unsearched list still wants rows.
@@ -308,7 +310,7 @@ fun TaminBottomSheet(
                                     TaminText(
                                         text = item.title,
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = if (isSelected) {
+                                        color = if (isSelected && style.highlightSelectedRow) {
                                             LocalTaminColors.current.blueText
                                         } else {
                                             LocalTaminColors.current.textPrimary
