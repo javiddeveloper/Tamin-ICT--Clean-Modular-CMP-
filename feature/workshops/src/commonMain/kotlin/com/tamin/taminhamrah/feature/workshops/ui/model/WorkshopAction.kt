@@ -5,6 +5,9 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_workshop_payment
+import taminx.core.core_ui.ic_tamin_workshop_turnover
+import taminx.core.core_ui.workshop_action_debit_turnover
+import taminx.core.core_ui.workshop_action_debit_turnover_desc
 import taminx.core.core_ui.workshop_action_payment_sheets
 import taminx.core.core_ui.workshop_action_payment_sheets_desc
 
@@ -30,5 +33,11 @@ enum class WorkshopAction(
         description = Res.string.workshop_action_payment_sheets_desc,
         icon = Res.drawable.ic_tamin_workshop_payment,
         tint = StatusTint.INFO,
+    ),
+    DEBIT_TURNOVER(
+        label = Res.string.workshop_action_debit_turnover,
+        description = Res.string.workshop_action_debit_turnover_desc,
+        icon = Res.drawable.ic_tamin_workshop_turnover,
+        tint = StatusTint.TEAL,
     ),
 }

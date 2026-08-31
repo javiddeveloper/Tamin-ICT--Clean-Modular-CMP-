@@ -4,8 +4,10 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.toRoute
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopsRoute
+import com.tamin.taminhamrah.feature.workshops.ui.demandDocuments.DemandDocumentsScreen
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
 import com.tamin.taminhamrah.feature.workshops.ui.paymentSheets.PaymentSheetsScreen
+import com.tamin.taminhamrah.feature.workshops.ui.workshopDebit.WorkshopDebitScreen
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import kotlinx.serialization.Serializable
 
@@ -21,13 +23,35 @@ data object WorkshopsListRoute
 @Serializable
 data class PaymentSheetsRoute(val workshopId: String, val branchCode: String, val workshopName: String = "")
 
+@Serializable
+data class WorkshopDebitRoute(
+    val workshopId: String,
+    val branchCode: String,
+    val workshopName: String = "",
+)
+
+/**
+ * مطالبات is keyed on the debt, not the workshop: it is opened from a row of گردش حساب بدهی
+ * rather than from the کارگاه menu, so it is the only destination here that does not start from
+ * a workshop identity.
+ */
+@Serializable
+data class DemandDocumentsRoute(
+    val debitNumber: String,
+    val branchCode: String,
+    val workshopName: String = "",
+)
+
 fun NavController.navigateToWorkshops() {
     navigate(WorkshopsListRoute)
 }
 
+/**
+ * @param onOpenUrl leaves the app: the debt payment page is hosted outside it.
+ */
 fun NavGraphBuilder.workshopsScreen(
     navController: NavController,
-    @Suppress("UNUSED_PARAMETER") onOpenUrl: (String) -> Unit,
+    onOpenUrl: (String) -> Unit,
 ) {
     composableWithFadeTransitions<WorkshopsListRoute> {
         WorkshopsRoute(
@@ -47,6 +71,32 @@ fun NavGraphBuilder.workshopsScreen(
             onBack = { navController.popBackStack() },
         )
     }
+
+    composableWithFadeTransitions<WorkshopDebitRoute> { entry ->
+        val route = entry.toRoute<WorkshopDebitRoute>()
+        WorkshopDebitScreen(
+            workshopId = route.workshopId,
+            branchCode = route.branchCode,
+            workshopName = route.workshopName,
+            onBack = { navController.popBackStack() },
+            onOpenDocuments = { debitNumber, branchCode ->
+                navController.navigate(
+                    DemandDocumentsRoute(debitNumber, branchCode, route.workshopName),
+                )
+            },
+            onOpenUrl = onOpenUrl,
+        )
+    }
+
+    composableWithFadeTransitions<DemandDocumentsRoute> { entry ->
+        val route = entry.toRoute<DemandDocumentsRoute>()
+        DemandDocumentsScreen(
+            debitNumber = route.debitNumber,
+            branchCode = route.branchCode,
+            workshopName = route.workshopName,
+            onBack = { navController.popBackStack() },
+        )
+    }
 }
 
 /**
@@ -61,4 +111,5 @@ private fun WorkshopAction.route(
     workshopName: String,
 ): Any = when (this) {
     WorkshopAction.PAYMENT_SHEETS -> PaymentSheetsRoute(workshopId, branchCode, workshopName)
+    WorkshopAction.DEBIT_TURNOVER -> WorkshopDebitRoute(workshopId, branchCode, workshopName)
 }
