@@ -53,10 +53,6 @@ class FakeUserRepository : UserRepository {
 
     override suspend fun getCurrentUser(): Flow<CurrentUserDN> = flow { }
 
-    override suspend fun getWageCertificateReport(
-        filters: List<ApiFilterDN>,
-    ): Flow<String> = flow { }
-
     override fun checkUserIsNew(nationalId: String): Flow<Boolean> = flowOf(false)
     override suspend fun registerBankAccount(
         accountNumber: String,

@@ -194,7 +194,7 @@ private fun SurvivorCard(
             Box(
                 modifier = Modifier
                     .size(IconSize.xlarge)
-                    .background(colors.hawkesBlue, CircleShape),
+                    .background(colors.blueBg, CircleShape),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
@@ -231,7 +231,7 @@ private fun SurvivorCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .dashedOutline(colors.blueText, CornerRadius.lg, Thickness.border)
-                    .background(colors.hawkesBlue, RoundedCornerShape(CornerRadius.lg))
+                    .background(colors.blueBg, RoundedCornerShape(CornerRadius.lg))
                     .clickable(onClick = onCompleteClick)
                     .padding(vertical = Spacing.md, horizontal = Spacing.lg),
                 contentAlignment = Alignment.Center,

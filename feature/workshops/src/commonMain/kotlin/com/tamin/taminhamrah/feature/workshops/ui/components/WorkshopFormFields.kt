@@ -25,8 +25,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopConstants
+import com.tamin.taminhamrah.feature.workshops.ui.model.PersonSearch
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
-import com.tamin.taminhamrah.feature.workshops.ui.workshopMembers.PersonSearch
 import com.tamin.taminhamrah.ui.components.InputRestriction
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
