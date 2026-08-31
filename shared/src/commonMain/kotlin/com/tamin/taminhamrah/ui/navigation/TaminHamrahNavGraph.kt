@@ -188,7 +188,7 @@ internal fun TaminHamrahNavGraph(
     val isProfileSelected = currentDestination?.hasRoute<ProfileRoute.Main>() == true
     val isHomeSelected = currentDestination?.hasRoute<Route.Home>() == true
 
-val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
+    val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
 
     // بررسی Feature Flag سراسری Agent برای کنترل نمایش FAB
     val featureManager: FeatureManager = koinInject()
@@ -256,7 +256,8 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
     val hazeState = remember { HazeState(initialBlurEnabled = true) }
     val snackbarHostState = remember { SnackbarHostState() }
     val snackbarScope = rememberCoroutineScope()
-    Scaffold(contentWindowInsets = WindowInsets(0),
+    Scaffold(
+        contentWindowInsets = WindowInsets(0),
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         floatingActionButton = {
             AnimatedVisibility(
@@ -282,7 +283,9 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                         .fillMaxWidth()
                         .background(brush = AppBarScrim.bottomGradient)
                 ) {
-                    val selectedIndex = remember(currentTab) { navigationItems.indexOfFirst { it.isSelected }.coerceAtLeast(0) }
+                    val selectedIndex = remember(currentTab) {
+                        navigationItems.indexOfFirst { it.isSelected }.coerceAtLeast(0)
+                    }
                     FloatingGlassNavigationBar(
                         hazeState = hazeState,
                         selectedIndex = selectedIndex,
@@ -454,7 +457,9 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                     onBack = { navController.popBackStack() },
                     onGoHome = {
                         navController.navigate(Route.Home) {
-                            popUpTo(navController.graph.findStartDestination().id) { inclusive = false }
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                inclusive = false
+                            }
                             launchSingleTop = true
                         }
                     }
@@ -462,7 +467,9 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                 deferredInstallmentScreen(onBack = { navController.popBackStack() })
                 girlSurvivorScreen(onBack = { navController.popBackStack() })
                 inquiryEducationScreen(onBack = { navController.popBackStack() })
-                pensionSurvivorScreen(onBack = { navController.popBackStack() })
+                pensionSurvivorScreen(
+                    navController = navController,
+                    onBack = { navController.popBackStack() })
                 disabilityPensionScreen(onBack = { navController.popBackStack() })
 
                 historyScreen()
@@ -510,7 +517,9 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
 
                 orotezProtezScreen(onBack = { navController.popBackStack() })
 
-                historyObjectionScreen(navController = navController, onBack = { navController.popBackStack() })
+                historyObjectionScreen(
+                    navController = navController,
+                    onBack = { navController.popBackStack() })
 
                 historyObjectionStepperScreen(
                     onBack = { navController.popBackStack() },
@@ -775,9 +784,11 @@ fun HomeScreen(
         }
     }
 }
+
 @Composable
 private fun AgentFab(onClick: () -> Unit) {
-    val infiniteTransition = androidx.compose.animation.core.rememberInfiniteTransition(label = "fab_pulse")
+    val infiniteTransition =
+        androidx.compose.animation.core.rememberInfiniteTransition(label = "fab_pulse")
     val glowAlpha by infiniteTransition.animateFloat(
         initialValue = 0.4f,
         targetValue = 0.9f,
