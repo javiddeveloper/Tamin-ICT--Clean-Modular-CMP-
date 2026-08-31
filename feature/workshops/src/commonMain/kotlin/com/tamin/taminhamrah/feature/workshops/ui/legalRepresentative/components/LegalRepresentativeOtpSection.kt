@@ -48,6 +48,8 @@ private const val COUNTDOWN_SECONDS = 5 * 60
  * The request → countdown → code-entry widget shared by the workshop-level OTP screen and the
  * agent-level OTP embedded in the add/edit form. [sentToLabel] is `null` before a code is
  * requested; once non-null the request button is replaced by the countdown and input field.
+ * [titleLabel] and [showSentMessage] let the add/edit form show a compact header instead of the
+ * full sent-message paragraph, without affecting the workshop-level OTP screen's own layout.
  */
 @Composable
 internal fun LegalRepresentativeOtpSection(
@@ -62,6 +64,8 @@ internal fun LegalRepresentativeOtpSection(
     modifier: Modifier = Modifier,
     requestButtonBackground: Brush? = null,
     requestButtonContentColor: Color? = null,
+    titleLabel: String? = null,
+    showSentMessage: Boolean = true,
 ) {
     val taminColors = LocalTaminColors.current
 
@@ -85,11 +89,20 @@ internal fun LegalRepresentativeOtpSection(
             .padding(Spacing.lg),
         verticalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
-        Text(
-            text = stringResource(Res.string.legal_representative_otp_sent_message),
-            style = MaterialTheme.typography.bodySmall,
-            color = taminColors.textMuted,
-        )
+        titleLabel?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.labelSmall,
+                color = taminColors.textMuted,
+            )
+        }
+        if (showSentMessage) {
+            Text(
+                text = stringResource(Res.string.legal_representative_otp_sent_message),
+                style = MaterialTheme.typography.bodySmall,
+                color = taminColors.textMuted,
+            )
+        }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,

@@ -54,6 +54,7 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.legal_representative_access_code_label
 import taminx.core.core_ui.legal_representative_access_services_hint
+import taminx.core.core_ui.legal_representative_credit_code_label
 import taminx.core.core_ui.legal_representative_add_heading
 import taminx.core.core_ui.legal_representative_edit_heading
 import taminx.core.core_ui.legal_representative_electronic_notification
@@ -185,29 +186,42 @@ fun AddLegalRepresentativeScreen(
                 )
             }
 
-            Column(
-                modifier = Modifier.fillMaxWidth().taminSurface().padding(Spacing.md),
-                verticalArrangement = Arrangement.spacedBy(Spacing.sm),
-            ) {
-                Text(
-                    text = stringResource(Res.string.legal_representative_otp_description_agent),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = taminColors.textMuted,
-                )
+            if (uiState.isTicketRequested) {
                 LegalRepresentativeOtpSection(
-                    isTicketRequested = uiState.isTicketRequested,
+                    isTicketRequested = true,
                     isRequestingTicket = uiState.isRequestingTicket,
                     otpCode = uiState.otpCode,
                     otpError = uiState.otpError,
-                    sentToLabel = if (uiState.isTicketRequested) {
-                        stringResource(Res.string.legal_representative_otp_sent_to_national_code, uiState.nationalCode)
-                    } else null,
+                    sentToLabel = stringResource(Res.string.legal_representative_otp_sent_to_national_code, uiState.nationalCode),
                     requestLabel = stringResource(Res.string.legal_representative_otp_request_action),
                     onRequestTicket = { viewModel.sendIntent(AddLegalRepresentativeIntent.RequestTicket) },
                     onOtpChanged = { viewModel.sendIntent(AddLegalRepresentativeIntent.OtpChanged(it)) },
-                    requestButtonBackground = SolidColor(taminColors.blueBg),
-                    requestButtonContentColor = taminColors.blueText,
+                    titleLabel = stringResource(Res.string.legal_representative_credit_code_label),
+                    showSentMessage = false,
                 )
+            } else {
+                Column(
+                    modifier = Modifier.fillMaxWidth().taminSurface().padding(Spacing.md),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+                ) {
+                    Text(
+                        text = stringResource(Res.string.legal_representative_otp_description_agent),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = taminColors.textMuted,
+                    )
+                    LegalRepresentativeOtpSection(
+                        isTicketRequested = false,
+                        isRequestingTicket = uiState.isRequestingTicket,
+                        otpCode = uiState.otpCode,
+                        otpError = uiState.otpError,
+                        sentToLabel = null,
+                        requestLabel = stringResource(Res.string.legal_representative_otp_request_action),
+                        onRequestTicket = { viewModel.sendIntent(AddLegalRepresentativeIntent.RequestTicket) },
+                        onOtpChanged = { viewModel.sendIntent(AddLegalRepresentativeIntent.OtpChanged(it)) },
+                        requestButtonBackground = SolidColor(taminColors.blueBg),
+                        requestButtonContentColor = taminColors.blueText,
+                    )
+                }
             }
 
             Spacer(Modifier.height(Spacing.sm))
