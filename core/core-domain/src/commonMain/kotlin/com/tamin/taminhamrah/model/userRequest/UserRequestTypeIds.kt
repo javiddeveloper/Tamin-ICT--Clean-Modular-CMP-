@@ -9,6 +9,6 @@ object UserRequestTypeIds {
     const val OTHER_REQUEST = 18L
     const val DOCUMENT_CHECK_19 = 19L
     const val DEFERRED_INSTALLMENT = 22L
-    const val ARTICLE16 = 26L
+    const val ARTICLE_SIXTEEN = 26L
     const val MEDICAL_COMMISSION = 27L
 }

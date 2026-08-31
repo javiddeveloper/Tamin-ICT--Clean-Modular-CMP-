@@ -1,7 +1,7 @@
 package com.tamin.taminhamrah.dataSource.request
 
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
-import com.tamin.taminhamrah.model.userRequest.Article16RequestInfoDTO
+import com.tamin.taminhamrah.model.userRequest.ArticleSixteenRequestInfoDTO
 import com.tamin.taminhamrah.model.userRequest.DeferredInstallmentInfoDTO
 import com.tamin.taminhamrah.model.userRequest.FollowUpObjectionHistoryDTO
 import com.tamin.taminhamrah.model.userRequest.PregnancyLookupDTO
@@ -36,7 +36,7 @@ interface UserRequestRemoteDataSource {
 
     suspend fun getPregnancyTypes(): ListData<PregnancyLookupDTO>
 
-    suspend fun getArticle16RequestInfo(objectionNumber: Long): Article16RequestInfoDTO
+    suspend fun getArticleSixteenRequestInfo(objectionNumber: Long): ArticleSixteenRequestInfoDTO
 
     suspend fun getDeferredInstallmentInfo(requestId: String): DeferredInstallmentInfoDTO
 

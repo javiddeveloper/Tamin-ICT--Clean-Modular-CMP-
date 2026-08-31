@@ -23,7 +23,7 @@ fun userRequestStatusTone(statusCode: String): UserRequestStatusTone {
 
         UserRequestWorkflowStatus.PROCESSING_COMPLETE,
         UserRequestWorkflowStatus.FINAL_APPROVED,
-        UserRequestWorkflowStatus.ARTICLE16_APPROVED,
+        UserRequestWorkflowStatus.ARTICLE_SIXTEEN_APPROVED,
         -> UserRequestStatusTone.APPROVED
 
         else -> UserRequestStatusTone.NEUTRAL
@@ -39,7 +39,7 @@ fun userRequestProgressPhase(statusCode: String): UserRequestProgressPhase {
 
         UserRequestWorkflowStatus.PROCESSING_COMPLETE,
         UserRequestWorkflowStatus.FINAL_APPROVED,
-        UserRequestWorkflowStatus.ARTICLE16_APPROVED,
+        UserRequestWorkflowStatus.ARTICLE_SIXTEEN_APPROVED,
         -> UserRequestProgressPhase.COMPLETED
 
         else -> UserRequestProgressPhase.IN_PROGRESS

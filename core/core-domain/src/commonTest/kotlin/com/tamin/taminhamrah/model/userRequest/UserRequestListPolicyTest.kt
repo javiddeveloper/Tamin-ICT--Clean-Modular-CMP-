@@ -31,7 +31,7 @@ class UserRequestListPolicyTest {
         )
         assertEquals(
             UserRequestViewCapability.VIEW_DETAILS,
-            UserRequestListPolicy.viewCapability(UserRequestTypeIds.ARTICLE16, "2602"),
+            UserRequestListPolicy.viewCapability(UserRequestTypeIds.ARTICLE_SIXTEEN, "2602"),
         )
         assertEquals(
             UserRequestViewCapability.VIEW_DETAILS,

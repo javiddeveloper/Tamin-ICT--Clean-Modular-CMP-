@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
+import com.tamin.taminhamrah.model.user.CurrentUserDN
 import com.tamin.taminhamrah.model.user.EditMobileResponseDN
 import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.model.user.UserProfileDN
@@ -50,6 +51,8 @@ class FakeUserRepository : UserRepository {
         userProfileResult?.let { emit(it) }
     }
 
+    override suspend fun getCurrentUser(): Flow<CurrentUserDN> = flow { }
+
     override fun checkUserIsNew(nationalId: String): Flow<Boolean> = flowOf(false)
     override suspend fun registerBankAccount(
         accountNumber: String,
@@ -59,7 +62,7 @@ class FakeUserRepository : UserRepository {
     ): Flow<String?> = flowOf(null)
 
     override suspend fun getStatusCertificateReport(filters: List<ApiFilterDN>): Flow<String> = flowOf("")
-    override suspend fun getWageCertificateReport(filters: List<ApiFilterDN>): Flow<String> = flowOf("")
+    override suspend fun getWageCertificateReport(filters: List<ApiFilterDN>): Flow<String>  = flowOf("")
 
     override suspend fun getRecipients(filters: List<ApiFilterDN>): Flow<List<RecipientDN>> = flowOf(emptyList())
 }

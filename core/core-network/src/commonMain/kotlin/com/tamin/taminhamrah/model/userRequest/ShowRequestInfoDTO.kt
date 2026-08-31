@@ -87,13 +87,13 @@ data class PregnancyLookupDTO(
 )
 
 @Serializable
-data class Article16RequestInfoDTO(
+data class ArticleSixteenRequestInfoDTO(
     @SerialName("defectDesc") val defectDesc: String? = null,
-    @SerialName("objectionPhotos") val objectionPhotos: List<Article16ObjectionPhotoDTO>? = null,
+    @SerialName("objectionPhotos") val objectionPhotos: List<ArticleSixteenObjectionPhotoDTO>? = null,
 )
 
 @Serializable
-data class Article16ObjectionPhotoDTO(
+data class ArticleSixteenObjectionPhotoDTO(
     @SerialName("guid") val guid: String? = null,
     @SerialName("seqNo") val seqNo: Int? = null,
     @SerialName("type") val type: String? = null,
