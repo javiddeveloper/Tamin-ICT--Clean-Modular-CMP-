@@ -332,7 +332,7 @@ class CompleteEmployerInfoViewModelTest {
             letDate = null, regdate = null, roletype = null, dname = null, letNo = null,
             createuid = null,
         )
-        val agreement2 = agreement1.copy(pymseq = "2")
+        val agreement2 = agreement1.copy(pymseq = "2", letDate = "1403/01/01")
         fakeWorkShopsRepo.agreementsOverride = listOf(agreement1, agreement2)
 
         viewModel.sendIntent(CompleteEmployerInfoIntent.LoadInitialData)

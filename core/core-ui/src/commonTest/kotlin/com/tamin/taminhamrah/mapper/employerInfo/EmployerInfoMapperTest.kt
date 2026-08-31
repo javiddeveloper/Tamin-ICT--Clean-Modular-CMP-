@@ -31,7 +31,7 @@ class EmployerInfoMapperTest {
     }
 
     @Test
-    fun toWorkshopItemPRs_deduplicatesExactDuplicateObjectsFromApi() {
+    fun toWorkshopItemPRs_deduplicatesDuplicateWorkshopContentEvenWithDifferentPymseq() {
         val workshop = EmployerWorkshopDN(
             workshopId = "0968210170",
             branchCode = "0960",
@@ -40,24 +40,33 @@ class EmployerInfoMapperTest {
             characterCode = "01",
             lastAddress = "کرج، میدان شهدا",
         )
-        val duplicateAgreement = EmployerAgreementDN(
+        // API sends agreements that have different agreement sequences (pymseq) or timestamps
+        // but have identical workshop content
+        val agreement1 = EmployerAgreementDN(
             pymseq = "1001",
             emailaddr = "tavakoli@email.com",
             mobileno = "09120000000",
             letDate = "14030519",
             workshop = workshop,
         )
-
-        // API sends duplicate identical objects
-        val listWithDuplicates = listOf(
-            duplicateAgreement,
-            duplicateAgreement,
-            duplicateAgreement,
+        val agreement2 = EmployerAgreementDN(
+            pymseq = "1002",
+            emailaddr = "tavakoli@email.com",
+            mobileno = "09120000000",
+            letDate = "14030519",
+            workshop = workshop,
+        )
+        val agreement3 = EmployerAgreementDN(
+            pymseq = "1003",
+            emailaddr = "tavakoli@email.com",
+            mobileno = "09120000000",
+            letDate = "14030519",
+            workshop = workshop,
         )
 
-        val result = listWithDuplicates.toWorkshopItemPRs()
+        val result = listOf(agreement1, agreement2, agreement3).toWorkshopItemPRs()
 
-        // Only 1 item should be shown
+        // Only 1 item should be shown because everything in the workshop object content is the same
         assertEquals(1, result.size)
         val item = result.first()
         assertEquals("1001", item.id)
@@ -101,5 +110,25 @@ class EmployerInfoMapperTest {
         assertEquals("1002", result[1].id)
         assertEquals("شرکت صنایع دما بخار", result[1].name)
         assertTrue(result[1].isLegal)
+    }
+
+    @Test
+    fun toWorkshopItemPRs_preservesAgreementsWithDifferentDetails() {
+        val workshop = EmployerWorkshopDN(
+            workshopId = "0968210170",
+            branchCode = "0960",
+            branchTitle = "شعبه کرج",
+            workshopName = "آموزشگاه کامپیوتر توکلی",
+            characterCode = "01",
+        )
+        // Two agreements for same workshop but different letDate
+        val agreement1 = EmployerAgreementDN(pymseq = "1001", letDate = "14020101", workshop = workshop)
+        val agreement2 = EmployerAgreementDN(pymseq = "1002", letDate = "14030101", workshop = workshop)
+
+        val result = listOf(agreement1, agreement2).toWorkshopItemPRs()
+
+        assertEquals(2, result.size)
+        assertEquals("1402/01/01", result[0].letDate)
+        assertEquals("1403/01/01", result[1].letDate)
     }
 }
