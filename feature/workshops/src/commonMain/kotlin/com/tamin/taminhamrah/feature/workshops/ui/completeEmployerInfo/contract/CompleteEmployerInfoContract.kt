@@ -13,13 +13,16 @@ import kotlinx.collections.immutable.persistentSetOf
 import com.tamin.taminhamrah.ui.digitsOnly
 import org.jetbrains.compose.resources.StringResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.employer_info_err_branch
 import taminx.core.core_ui.employer_info_err_ceo_birth
 import taminx.core.core_ui.employer_info_err_ceo_nid
+import taminx.core.core_ui.employer_info_err_city
 import taminx.core.core_ui.employer_info_err_company_type
 import taminx.core.core_ui.employer_info_err_email
 import taminx.core.core_ui.employer_info_err_legal_nid
 import taminx.core.core_ui.employer_info_err_mobile
 import taminx.core.core_ui.employer_info_err_otp_code
+import taminx.core.core_ui.employer_info_err_province
 import taminx.core.core_ui.employer_info_err_province_city_branch
 import taminx.core.core_ui.employer_info_err_ws_code
 
@@ -172,15 +175,15 @@ data class CompleteEmployerInfoUiState(
         }
 
     val provinceError: StringResource?
-        get() = Res.string.employer_info_err_province_city_branch
+        get() = Res.string.employer_info_err_province
             .takeIf { hasTouchedRealForm && selectedProvince == null }
 
     val cityError: StringResource?
-        get() = Res.string.employer_info_err_province_city_branch
+        get() = Res.string.employer_info_err_city
             .takeIf { selectedProvince != null && selectedCity == null && hasTouchedRealForm }
 
     val branchError: StringResource?
-        get() = Res.string.employer_info_err_province_city_branch
+        get() = Res.string.employer_info_err_branch
             .takeIf { selectedCity != null && selectedBranch == null }
 
     val legalNationalIdError: StringResource?

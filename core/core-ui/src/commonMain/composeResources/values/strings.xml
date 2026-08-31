@@ -1480,6 +1480,9 @@
     <string name="employer_info_err_email">لطفاً پست الکترونیک را به‌درستی وارد کنید.</string>
     <string name="employer_info_err_ws_code">لطفاً کد کارگاه را به‌درستی وارد کنید.</string>
     <string name="employer_info_err_province_city_branch">لطفاً استان، شهر و شعبهٔ رسیدگی‌کننده را انتخاب کنید.</string>
+    <string name="employer_info_err_province">لطفاً استان را انتخاب کنید.</string>
+    <string name="employer_info_err_city">لطفاً شهر را انتخاب کنید.</string>
+    <string name="employer_info_err_branch">لطفاً شعبهٔ رسیدگی‌کننده را انتخاب کنید.</string>
     <string name="employer_info_company_type_government">دولتی</string>
     <string name="employer_info_company_type_public">عمومی - غیردولتی</string>
     <string name="employer_info_company_type_private">خصوصی</string>
