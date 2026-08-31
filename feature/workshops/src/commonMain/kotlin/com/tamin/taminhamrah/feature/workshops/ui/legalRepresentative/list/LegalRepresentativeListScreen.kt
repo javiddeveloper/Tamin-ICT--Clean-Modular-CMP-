@@ -1,5 +1,7 @@
 package com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.list
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,11 +13,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -25,9 +28,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -40,11 +46,15 @@ import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.ErrorStateView
+import com.tamin.taminhamrah.ui.components.IconPosition
+import com.tamin.taminhamrah.ui.components.LabeledBlock
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.taminSurface
+import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.persistentListOf
@@ -52,8 +62,12 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_arrow_down
+import taminx.core.core_ui.ic_setting
+import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_edit
 import taminx.core.core_ui.ic_trash
+import taminx.core.core_ui.legal_representative_access_level_label
 import taminx.core.core_ui.legal_representative_add_action
 import taminx.core.core_ui.legal_representative_all_contracts_value
 import taminx.core.core_ui.legal_representative_branch_code_label
@@ -114,21 +128,25 @@ fun LegalRepresentativeListScreen(
 
         Column(modifier = Modifier.fillMaxSize().padding(horizontal = Spacing.lg)) {
             Spacer(Modifier.height(Spacing.md))
-            TaminFilledButton(
-                text = stringResource(Res.string.legal_representative_add_action),
-                onClick = { viewModel.sendIntent(LegalRepresentativeListIntent.AddClicked) },
-                icon = Icons.Filled.Add,
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-            )
-            Spacer(Modifier.height(Spacing.sm))
-            Text(
-                text = stringResource(
-                    Res.string.legal_representative_list_section_label,
-                    uiState.representatives.size,
-                ),
-                style = MaterialTheme.typography.bodyMedium,
-                color = taminColors.textMuted,
-            )
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(
+                        Res.string.legal_representative_list_section_label,
+                        uiState.representatives.size,
+                    ),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = taminColors.textPrimary,
+                )
+                AddRepresentativeChip(
+                    text = stringResource(Res.string.legal_representative_add_action),
+                    onClick = { viewModel.sendIntent(LegalRepresentativeListIntent.AddClicked) },
+                )
+            }
             Spacer(Modifier.height(Spacing.md))
 
             Box(modifier = Modifier.fillMaxSize()) {
@@ -240,37 +258,92 @@ private fun LegalRepresentativeCard(
 
     Column(
         modifier = Modifier.fillMaxWidth().taminSurface().padding(Spacing.lg),
-        verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+        verticalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
+        Column {
+            Text(
+                text = representative.fullName ?: representative.nationalId,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = taminColors.textPrimary,
+            )
+            val mobile = representative.mobile
+            if (!mobile.isNullOrBlank()) {
+                NumericText(
+                    text = mobile,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = taminColors.textMuted,
+                )
+            }
+        }
+
+        if (accessLabel.isNotEmpty()) {
+            LabeledBlock(
+                label = stringResource(Res.string.legal_representative_access_level_label),
+                value = accessLabel,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(CornerRadius.md))
+                    .background(taminColors.bgPage)
+                    .padding(Spacing.md),
+            )
+        }
+
+        if (isExpanded) {
+            DetailRow(
+                label = stringResource(Res.string.legal_representative_workshop_code_label),
+                value = representative.workshopId,
+            )
+            DetailRow(
+                label = stringResource(Res.string.legal_representative_branch_code_label),
+                value = representative.branchCode,
+            )
+            DetailRow(
+                label = stringResource(Res.string.legal_representative_start_date_label),
+                value = representative.startDateLabel,
+            )
+            if (representative.special) {
+                DetailRow(
+                    label = stringResource(Res.string.legal_representative_selected_contracts_label),
+                    value = stringResource(Res.string.legal_representative_all_contracts_value),
+                    numeric = false,
+                )
+            }
+        }
+
+        val chevronRotation by animateFloatAsState(
+            targetValue = if (isExpanded) -90f else 90f,
+            label = "legal-representative-chevron",
+        )
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            Column {
-                Text(
-                    text = representative.fullName ?: representative.nationalId,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = taminColors.textPrimary,
-                )
-                val mobile = representative.mobile
-                if (!mobile.isNullOrBlank()) {
-                    NumericText(
-                        text = mobile,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = taminColors.textMuted,
-                    )
-                }
-            }
-            Box {
-                Icon(
-                    imageVector = Icons.Filled.MoreVert,
-                    contentDescription = stringResource(Res.string.legal_representative_operations_action),
-                    tint = taminColors.textMuted,
-                    modifier = Modifier
-                        .clickable(onClick = onToggleMenu)
-                        .padding(Spacing.xs),
+            TaminOutlinedButton(
+                text = stringResource(
+                    if (isExpanded) Res.string.legal_representative_collapse_action
+                    else Res.string.legal_representative_more_details_action
+                ),
+                onClick = onToggleExpand,
+                icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                iconModifier = Modifier.size(IconSize.small).graphicsLayer { rotationZ = chevronRotation },
+                iconPosition = IconPosition.End,
+                containerColor = taminColors.blueBg,
+                borderColor = Color.Transparent,
+                contentColor = taminColors.blueText,
+                height = 44.dp,
+                textStyle = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.weight(1f),
+            )
+            Box(modifier = Modifier.weight(0.5f)) {
+                TaminFilledButton(
+                    text = stringResource(Res.string.legal_representative_operations_action),
+                    onClick = onToggleMenu,
+                    icon = vectorResource(Res.drawable.ic_setting),
+                    iconPosition = IconPosition.End,
+                    background = taminColors.iconGradientSuccess,
+                    height = 44.dp,
+                    textStyle = MaterialTheme.typography.titleSmall,
                 )
                 RecordActionMenu(
                     expanded = isMenuOpen,
@@ -298,47 +371,36 @@ private fun LegalRepresentativeCard(
                 )
             }
         }
+    }
+}
 
-        if (accessLabel.isNotEmpty()) {
-            Text(
-                text = accessLabel,
-                style = MaterialTheme.typography.labelMedium,
-                color = taminColors.textMuted,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = Spacing.xs),
-            )
-        }
-
-        if (isExpanded) {
-            DetailRow(
-                label = stringResource(Res.string.legal_representative_workshop_code_label),
-                value = representative.workshopId,
-            )
-            DetailRow(
-                label = stringResource(Res.string.legal_representative_branch_code_label),
-                value = representative.branchCode,
-            )
-            DetailRow(
-                label = stringResource(Res.string.legal_representative_start_date_label),
-                value = representative.startDateLabel,
-            )
-            if (representative.special) {
-                DetailRow(
-                    label = stringResource(Res.string.legal_representative_selected_contracts_label),
-                    value = stringResource(Res.string.legal_representative_all_contracts_value),
-                    numeric = false,
-                )
-            }
-        }
-
-        TaminOutlinedButton(
-            text = stringResource(
-                if (isExpanded) Res.string.legal_representative_collapse_action
-                else Res.string.legal_representative_more_details_action
-            ),
-            onClick = onToggleExpand,
-            modifier = Modifier.fillMaxWidth(),
+/** Compact pill button sized to its label, sitting beside the section title instead of a full-width CTA. */
+@Composable
+private fun AddRepresentativeChip(
+    text: String,
+    onClick: () -> Unit,
+) {
+    val taminColors = LocalTaminColors.current
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(CornerRadius.lg))
+            .background(taminColors.buttonGradient)
+            .clickable(onClick = onClick)
+            .padding(horizontal = Spacing.page, vertical = Spacing.smPlus),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Add,
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier.size(IconSize.small),
+        )
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
         )
     }
 }
