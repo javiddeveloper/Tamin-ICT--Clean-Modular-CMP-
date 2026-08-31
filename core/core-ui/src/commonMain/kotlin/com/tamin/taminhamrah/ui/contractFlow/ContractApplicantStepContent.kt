@@ -1,9 +1,9 @@
-package com.tamin.taminhamrah.model.contractFlow
+﻿package com.tamin.taminhamrah.ui.contractFlow
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -13,6 +13,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.contractFlow.ContractApplicantType
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun ContractApplicantStepContent(
@@ -25,7 +27,7 @@ fun ContractApplicantStepContent(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         ContractApplicantType.entries.forEach { type ->
-            Row(
+            androidx.compose.foundation.layout.Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .selectable(
@@ -41,7 +43,7 @@ fun ContractApplicantStepContent(
                     onClick = null,
                 )
                 Text(
-                    text = type.label,
+                    text = stringResource(type.labelRes),
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }

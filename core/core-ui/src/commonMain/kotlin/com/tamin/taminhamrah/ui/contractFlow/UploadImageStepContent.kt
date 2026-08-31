@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.model.contractFlow
+﻿package com.tamin.taminhamrah.ui.contractFlow
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,23 +23,32 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
+import com.tamin.taminhamrah.model.contractFlow.UploadImagePR
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.name
 import io.github.vinceglb.filekit.readBytes
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.contract_upload_add_documents
+import taminx.core.core_ui.contract_upload_description_label
+import taminx.core.core_ui.contract_upload_format_hint
+import taminx.core.core_ui.contract_upload_image_content_description
+import taminx.core.core_ui.contract_upload_read_error
+import taminx.core.core_ui.contract_upload_remove_image
 
 @Composable
 fun UploadImageStepContent(
@@ -55,6 +64,8 @@ fun UploadImageStepContent(
     val scope = rememberCoroutineScope()
     var pickError by remember { mutableStateOf<String?>(null) }
     val hasDocument = previewBytes != null || uploadedDocuments.isNotEmpty()
+    val uploadedImageDescription = stringResource(Res.string.contract_upload_image_content_description)
+    val readErrorMessage = stringResource(Res.string.contract_upload_read_error)
 
     val filePickerLauncher = rememberFilePickerLauncher(
         type = FileKitType.Image,
@@ -66,7 +77,7 @@ fun UploadImageStepContent(
                 val bytes = file.readBytes()
                 onImagePicked(file.name, bytes)
             } catch (_: Exception) {
-                pickError = "خطا در خواندن فایل"
+                pickError = readErrorMessage
             }
         }
     }
@@ -82,7 +93,7 @@ fun UploadImageStepContent(
                 tint = MaterialTheme.colorScheme.primary,
             )
             Text(
-                text = "تصویر می‌بایست در قالب (jpeg) بوده و اندازه آن حداکثر ۲ مگابایت باشد.",
+                text = stringResource(Res.string.contract_upload_format_hint),
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
@@ -91,8 +102,8 @@ fun UploadImageStepContent(
             value = description,
             onValueChange = onDescriptionChange,
             modifier = Modifier.fillMaxWidth(),
-            label = { Text("شرح تصویر") },
-            placeholder = { Text("شرح تصویر") },
+            label = { Text(stringResource(Res.string.contract_upload_description_label)) },
+            placeholder = { Text(stringResource(Res.string.contract_upload_description_label)) },
             enabled = !isUploading,
             singleLine = false,
         )
@@ -107,7 +118,7 @@ fun UploadImageStepContent(
                 previewBytes?.let { bytes ->
                     SubcomposeAsyncImage(
                         model = bytes,
-                        contentDescription = description.ifBlank { "تصویر بارگذاری شده" },
+                        contentDescription = description.ifBlank { uploadedImageDescription },
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop,
                         loading = {
@@ -150,7 +161,7 @@ fun UploadImageStepContent(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "حذف تصویر",
+                            contentDescription = stringResource(Res.string.contract_upload_remove_image),
                             modifier = Modifier.padding(4.dp),
                         )
                     }
@@ -167,7 +178,7 @@ fun UploadImageStepContent(
                     contentDescription = null,
                     modifier = Modifier.padding(end = 8.dp),
                 )
-                Text("افزودن مدارک")
+                Text(stringResource(Res.string.contract_upload_add_documents))
             }
         }
 

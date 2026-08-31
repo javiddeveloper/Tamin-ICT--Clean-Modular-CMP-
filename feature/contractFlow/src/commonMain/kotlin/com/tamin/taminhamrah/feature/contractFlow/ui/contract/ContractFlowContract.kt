@@ -1,12 +1,12 @@
-package com.tamin.taminhamrah.feature.contractFlow.ui.contract
+﻿package com.tamin.taminhamrah.feature.contractFlow.ui.contract
 
 import com.tamin.taminhamrah.feature.contractFlow.config.ContractFlowConfig
 import com.tamin.taminhamrah.model.common.CityPR
 import com.tamin.taminhamrah.model.common.ProvincePR
 import com.tamin.taminhamrah.model.contractFlow.BranchSelectionFormPR
-import com.tamin.taminhamrah.model.contractFlow.ContractApplicantType
+import com.tamin.taminhamrah.contractFlow.ContractApplicantType
 import com.tamin.taminhamrah.model.contractFlow.ContractEligibilityPR
-import com.tamin.taminhamrah.model.contractFlow.ContractStep
+import com.tamin.taminhamrah.contractFlow.ContractStep
 import com.tamin.taminhamrah.model.contractFlow.FreelanceContractResultPR
 import com.tamin.taminhamrah.model.contractFlow.FreelancePremiumRangePR
 import com.tamin.taminhamrah.model.contractFlow.SpcPremiumRateOptionPR

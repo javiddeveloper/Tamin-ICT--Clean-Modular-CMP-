@@ -1432,4 +1432,99 @@
     <string name="history_objection_send_success_title">درخواست شما ثبت شد</string>
     <string name="history_objection_send_success_tracking_label">کد پیگیری درخواست:</string>
 
+    <!-- Contract flow -->
+    <string name="contract_list_title">لیست قراردادها</string>
+    <string name="contract_new_contract">انعقاد قرارداد جدید</string>
+    <string name="contract_empty_list">قراردادی یافت نشد</string>
+    <string name="contract_field_number">شماره قرارداد</string>
+    <string name="contract_field_request_date">تاریخ درخواست</string>
+    <string name="contract_field_insurance_type">نوع حق بیمه</string>
+    <string name="contract_field_monthly_premium">مبلغ حق بیمه ماهانه</string>
+    <string name="contract_field_monthly_income">درآمد ماهانه</string>
+    <string name="contract_field_treatment_support">حمایت درمان</string>
+    <string name="contract_field_job">شغل</string>
+    <string name="contract_value_dash">—</string>
+
+    <string name="contract_student_screen_title">انعقاد قرارداد بیمه دانشجویی</string>
+    <string name="contract_student_insurance_type">بیمه دانشجویی</string>
+    <string name="contract_freelance_screen_title">انعقاد قرارداد بیمه صاحبان حرف و مشاغل آزاد</string>
+    <string name="contract_freelance_insurance_type">بیمه صاحبان حرف و مشاغل آزاد</string>
+    <string name="contract_housewife_screen_title">انعقاد قرارداد بیمه زنان خانه‌دار</string>
+    <string name="contract_housewife_insurance_type">بیمه زنان خانه‌دار</string>
+    <string name="contract_optional_screen_title">انعقاد قرارداد بیمه اختیاری</string>
+    <string name="contract_optional_insurance_type">بیمه اختیاری</string>
+
+    <string name="contract_step_registration">نام نویسی</string>
+    <string name="contract_step_authorization">احراز شرایط انعقاد قرارداد</string>
+    <string name="contract_step_contract_terms">مقررات و ضوابط انعقاد قرارداد</string>
+    <string name="contract_step_user_info">اطلاعات کاربر</string>
+    <string name="contract_step_contract_applicant">متقاضی قرارداد</string>
+    <string name="contract_step_select_branch">انتخاب شعبه تأمین اجتماعی</string>
+    <string name="contract_step_upload_image">بارگذاری مدارک</string>
+    <string name="contract_step_treatment_support">حمایت درمانی</string>
+    <string name="contract_step_insurance_premium">تعیین حق بیمه ماهانه</string>
+    <string name="contract_step_salary">محاسبه حق بیمه</string>
+    <string name="contract_step_submit_contract">ثبت قرارداد</string>
+
+    <string name="contract_applicant_personal">متقاضی شخصا قرارداد منعقد می نماید</string>
+    <string name="contract_applicant_guardian">قیم متقاضی قرارداد منعقد می نماید</string>
+
+    <string name="contract_flow_national_id">کد ملی: %1$s</string>
+    <string name="contract_flow_birth_date">تاریخ تولد: %1$s</string>
+    <string name="contract_flow_registration_message">متقاضی محترم، نام‌نویسی شما با شماره بیمه تأمین اجتماعی %1$s انجام شده است.</string>
+    <string name="contract_flow_step_not_implemented">این مرحله هنوز پیاده‌سازی نشده است.</string>
+    <string name="contract_flow_step_previous">مرحله قبل</string>
+    <string name="contract_flow_step_next">مرحله بعد</string>
+    <string name="contract_flow_submit_contract">انعقاد قرارداد</string>
+
+    <string name="contract_user_info_edit_hint">متقاضی محترم، در صورت نادرست بودن اطلاعات، می‌توانید از طریق فرم زیر نسبت به ویرایش اطلاعات خود اقدام نمایید.</string>
+    <string name="contract_field_address">آدرس محل سکونت</string>
+    <string name="contract_field_phone">شماره تلفن</string>
+
+    <string name="contract_branch_notice_1">متقاضی محترم، پس از ثبت قرارداد، امکان تغییر شعبه وجود ندارد؛ لطفا در انتخاب شعبه دقت نمایید.</string>
+    <string name="contract_branch_notice_2">در صورت عدم ارائه خدمات الکترونیکی، ممکن است نیاز به مراجعه حضوری به شعبه انتخابی داشته باشید.</string>
+
+    <string name="contract_upload_format_hint">تصویر می‌بایست در قالب (jpeg) بوده و اندازه آن حداکثر ۲ مگابایت باشد.</string>
+    <string name="contract_upload_description_label">شرح تصویر</string>
+    <string name="contract_upload_image_content_description">تصویر بارگذاری شده</string>
+    <string name="contract_upload_remove_image">حذف تصویر</string>
+    <string name="contract_upload_add_documents">افزودن مدارک</string>
+    <string name="contract_upload_read_error">خطا در خواندن فایل</string>
+    <string name="contract_upload_jpeg_only_error">فقط تصاویر با فرمت JPEG مجاز هستند.</string>
+    <string name="contract_upload_failed_error">خطا در بارگذاری تصویر</string>
+
+    <string name="contract_terms_confirm_hint">تایید این مرحله به منزله مطالعه و پذیرش مقررات و ضوابط انعقاد قرارداد می‌باشد.</string>
+    <string name="contract_terms_view_rules">مشاهده ضوابط و مقررات</string>
+    <string name="contract_terms_commitment_title">تعهدنامه</string>
+    <string name="contract_terms_commitment_prefix">اینجانب %1$s </string>
+    <string name="contract_terms_commitment_suffix"> با آگاهی کامل و در صحت عقلی، شرایط و مقررات فوق را مطالعه و خود را در هنگام قرارداد و در ادامه بیمه پردازی ملزم به رعایت آن می‌دانم در غیر اینصورت کلیه تبعات و مسئولیت‌های آن متوجه اینجانب بوده و سازمان تأمین اجتماعی در این خصوص مسئولیتی نخواهد داشت.</string>
+
+    <string name="contract_premium_range_unavailable">محدوده حق بیمه در دسترس نیست.</string>
+    <string name="contract_premium_calc_unavailable">محاسبه حق بیمه در دسترس نیست.</string>
+    <string name="contract_premium_range_min_max">حداقل: %1$s — حداکثر: %2$s</string>
+    <string name="contract_premium_selected_amount">مبلغ انتخابی: %1$s ریال</string>
+    <string name="contract_premium_calculate_monthly">محاسبه حق بیمه ماهانه</string>
+    <string name="contract_premium_monthly_salary">دستمزد ماهانه شما بر اساس حق بیمه انتخابی %1$s ریال می‌باشد</string>
+    <string name="contract_premium_rate_not_found">نرخ حق بیمه‌ای یافت نشد.</string>
+
+    <string name="contract_submit_agreement">اینجانب %1$s به شماره ملی %2$s درخواست انعقاد قرارداد %3$s %4$s با دستمزد مبنا %5$s ریال را دارم.</string>
+    <string name="contract_submit_success">قرارداد با شماره %1$s در تاریخ %2$s ثبت شد.</string>
+
+    <string name="contract_eligibility_eligible">متقاضی محترم، شما به علت: %1$s دارای شرایط لازم برای عقد قرارداد %2$s هستید.</string>
+    <string name="contract_eligibility_ineligible">متقاضی محترم، شما به علت: %1$s فاقد شرایط لازم برای عقد قرارداد %2$s هستید.</string>
+    <string name="contract_eligibility_reason_min_history">داشتن حداقل ۱۰ سال سابقه پرداخت حق بیمه نزد سازمان تأمین اجتماعی</string>
+    <string name="contract_eligibility_reason_age_under_50">سن کمتر از ۵۰ سال</string>
+    <string name="contract_eligibility_reason_zero_history">داشتن ۰ روز سابقه و سن در زمان تقاضا</string>
+    <string name="contract_eligibility_reason_max_two_contracts">داشتن حداکثر دو قرارداد حرف و مشاغل</string>
+    <string name="contract_eligibility_reason_not_met">عدم احراز شرایط سن و سابقه</string>
+    <string name="contract_eligibility_reason_history_age">داشتن %1$s روز سابقه و سن %2$s در زمان تقاضا</string>
+
+    <string name="contract_gender_honorific_male">آقای</string>
+    <string name="contract_gender_honorific_female">خانم</string>
+    <string name="contract_female_only_service">این خدمت مختص بانوان است.</string>
+    <string name="contract_error_red_crescent_day_limit">امکان انتخاب این شغل تنها تا روز ۲۰ هر ماه وجود دارد.</string>
+    <string name="contract_error_medical_student_not_allowed">امکان انتخاب این شغل برای شما وجود ندارد.</string>
+    <string name="contract_treatment_support_yes">حمایت درمان دارد</string>
+    <string name="contract_treatment_support_no">حمایت درمان ندارد</string>
+
 </resources>

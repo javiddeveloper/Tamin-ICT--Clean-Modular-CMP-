@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.model.contractFlow
+﻿package com.tamin.taminhamrah.ui.contractFlow
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,6 +11,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.model.contractFlow.FreelancePremiumRangePR
+import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.contract_premium_calc_unavailable
+import taminx.core.core_ui.contract_premium_calculate_monthly
+import taminx.core.core_ui.contract_premium_monthly_salary
+import taminx.core.core_ui.contract_premium_range_min_max
+import taminx.core.core_ui.contract_premium_range_unavailable
+import taminx.core.core_ui.contract_premium_selected_amount
 
 @Composable
 fun PremiumSalaryStepContent(
@@ -34,14 +43,14 @@ fun PremiumSalaryStepContent(
 
         showPremiumSlider && premiumRange == null -> {
             Text(
-                text = "محدوده حق بیمه در دسترس نیست.",
+                text = stringResource(Res.string.contract_premium_range_unavailable),
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
 
         !showPremiumSlider && calculatedMonthlySalary == null && !isCalculating -> {
             Text(
-                text = "محاسبه حق بیمه در دسترس نیست.",
+                text = stringResource(Res.string.contract_premium_calc_unavailable),
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
@@ -55,11 +64,18 @@ fun PremiumSalaryStepContent(
                     val range = high - low
 
                     Text(
-                        text = "حداقل: ${premiumRange.lowPremium} — حداکثر: ${premiumRange.highPremium}",
+                        text = stringResource(
+                            Res.string.contract_premium_range_min_max,
+                            premiumRange.lowPremium.toString(),
+                            premiumRange.highPremium.toString(),
+                        ),
                         style = MaterialTheme.typography.bodySmall,
                     )
                     Text(
-                        text = "مبلغ انتخابی: ${current.toLong()} ریال",
+                        text = stringResource(
+                            Res.string.contract_premium_selected_amount,
+                            current.toLong().toString(),
+                        ),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                     if (range > 0f) {
@@ -78,13 +94,16 @@ fun PremiumSalaryStepContent(
                         if (isCalculating) {
                             CircularProgressIndicator()
                         } else {
-                            Text("محاسبه حق بیمه ماهانه")
+                            Text(stringResource(Res.string.contract_premium_calculate_monthly))
                         }
                     }
                 }
                 calculatedMonthlySalary?.let { salary ->
                     Text(
-                        text = "دستمزد ماهانه شما بر اساس حق بیمه انتخابی $salary ریال می‌باشد",
+                        text = stringResource(
+                            Res.string.contract_premium_monthly_salary,
+                            salary.toString(),
+                        ),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }

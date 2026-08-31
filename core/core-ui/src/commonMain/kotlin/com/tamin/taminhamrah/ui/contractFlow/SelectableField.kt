@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.model.contractFlow
+﻿package com.tamin.taminhamrah.ui.contractFlow
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

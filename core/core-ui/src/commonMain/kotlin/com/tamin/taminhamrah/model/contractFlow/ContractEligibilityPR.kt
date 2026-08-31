@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.model.contractFlow
 
 import androidx.compose.runtime.Immutable
+import com.tamin.taminhamrah.contractFlow.ContractEligibilityReason
 import kotlinx.serialization.Serializable
 
 @Immutable
@@ -8,30 +9,15 @@ import kotlinx.serialization.Serializable
 data class ContractEligibilityPR(
     val statusCode: Int,
     val isEligible: Boolean,
-    val reasonText: String,
+    val reason: ContractEligibilityReason,
+    val historyDays: String? = null,
+    val ageFormatted: String? = null,
 ) {
-    fun message(insuranceTypeLabel: String = STUDENT_INSURANCE_LABEL): String =
-        if (isEligible) {
-            "متقاضی محترم، شما به علت: $reasonText دارای شرایط لازم برای عقد قرارداد $insuranceTypeLabel هستید."
-        } else {
-            "متقاضی محترم، شما به علت: $reasonText فاقد شرایط لازم برای عقد قرارداد $insuranceTypeLabel هستید."
-        }
-
     companion object {
-        const val STUDENT_INSURANCE_LABEL = "بیمه دانشجویی"
-
-        private val eligibilityReasons = listOf(
-            "داشتن حداقل ۱۰ سال سابقه پرداخت حق بیمه نزد سازمان تأمین اجتماعی",
-            "سن کمتر از ۵۰ سال",
-            "داشتن ۰ روز سابقه و سن در زمان تقاضا",
-            "داشتن حداکثر دو قرارداد حرف و مشاغل",
-            "عدم احراز شرایط سن و سابقه",
-        )
-
         fun unavailable(): ContractEligibilityPR = ContractEligibilityPR(
             statusCode = -1,
             isEligible = false,
-            reasonText = eligibilityReasons[4],
+            reason = ContractEligibilityReason.AGE_HISTORY_NOT_MET,
         )
 
         fun from(
@@ -40,26 +26,43 @@ data class ContractEligibilityPR(
             age: String?,
         ): ContractEligibilityPR {
             val isEligible = statusCode in 1..4
-            val reasonText = when {
-                !isEligible -> eligibilityReasons[4]
-                statusCode == 3 -> buildStatusThreeReason(history, age)
-                else -> eligibilityReasons[statusCode - 1]
+            val reason = when {
+                !isEligible -> ContractEligibilityReason.AGE_HISTORY_NOT_MET
+                statusCode == 3 -> resolveHistoryAndAgeReason(history, age)
+                statusCode == 1 -> ContractEligibilityReason.MIN_TEN_YEARS_HISTORY
+                statusCode == 2 -> ContractEligibilityReason.AGE_UNDER_FIFTY
+                statusCode == 4 -> ContractEligibilityReason.MAX_TWO_FREELANCE_CONTRACTS
+                else -> ContractEligibilityReason.AGE_HISTORY_NOT_MET
+            }
+            val (historyDays, ageFormatted) = if (reason == ContractEligibilityReason.HISTORY_AND_AGE_DYNAMIC) {
+                buildHistoryAndAgeArgs(history, age)
+            } else {
+                null to null
             }
             return ContractEligibilityPR(
                 statusCode = statusCode,
                 isEligible = isEligible,
-                reasonText = reasonText,
+                reason = reason,
+                historyDays = historyDays,
+                ageFormatted = ageFormatted,
             )
         }
 
-        private fun buildStatusThreeReason(history: String?, age: String?): String {
+        private fun resolveHistoryAndAgeReason(history: String?, age: String?): ContractEligibilityReason {
             if (age.isNullOrBlank() || age.length < 6) {
-                return eligibilityReasons[2]
+                return ContractEligibilityReason.ZERO_HISTORY_PLACEHOLDER
+            }
+            return ContractEligibilityReason.HISTORY_AND_AGE_DYNAMIC
+        }
+
+        private fun buildHistoryAndAgeArgs(history: String?, age: String?): Pair<String, String> {
+            if (age.isNullOrBlank() || age.length < 6) {
+                return "" to ""
             }
             val year = age.substring(0, 2)
             val month = age.substring(2, 4)
             val day = age.substring(4, 6)
-            return "داشتن ${history?:""} روز سابقه و سن $year/$month/$day در زمان تقاضا"
+            return (history.orEmpty()) to "$year/$month/$day"
         }
     }
 }

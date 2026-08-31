@@ -102,7 +102,6 @@ import com.tamin.taminhamrah.useCases.contracts.GetSpcPremiumRatesUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeFreelanceContractByGuardianUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeOptionalContractByGuardianUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeContractUseCase
-import com.tamin.taminhamrah.useCases.contracts.MakeFreelanceContractUseCase
 import com.tamin.taminhamrah.useCases.contracts.SaveContactUseCase
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetHistoryJobInfosUseCase
@@ -313,7 +312,6 @@ val domainModule = module {
     factoryOf(::CheckMedicalStudentUseCase)
     factoryOf(::CalculateFreelanceSalaryUseCase)
     factoryOf(::CalculateOptionalSalaryUseCase)
-    factoryOf(::MakeFreelanceContractUseCase)
     factoryOf(::MakeContractUseCase)
     factoryOf(::MakeFreelanceContractByGuardianUseCase)
     factoryOf(::MakeOptionalContractByGuardianUseCase)

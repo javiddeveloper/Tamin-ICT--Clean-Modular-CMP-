@@ -35,7 +35,24 @@ import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.contracts.ui.contract.ContractsIntent
 import com.tamin.taminhamrah.feature.contracts.ui.contract.ContractsUiState
 import com.tamin.taminhamrah.model.contracts.ContractPR
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.back_content_description
+import taminx.core.core_ui.contract_empty_list
+import taminx.core.core_ui.contract_field_insurance_type
+import taminx.core.core_ui.contract_field_job
+import taminx.core.core_ui.contract_field_monthly_income
+import taminx.core.core_ui.contract_field_monthly_premium
+import taminx.core.core_ui.contract_field_number
+import taminx.core.core_ui.contract_field_request_date
+import taminx.core.core_ui.contract_field_treatment_support
+import taminx.core.core_ui.contract_treatment_support_no
+import taminx.core.core_ui.contract_treatment_support_yes
+import taminx.core.core_ui.contract_list_title
+import taminx.core.core_ui.contract_new_contract
+import taminx.core.core_ui.contract_value_dash
+import taminx.core.core_ui.error_unknown
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -95,7 +112,7 @@ fun ContractsScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "انعقاد قرارداد جدید",
+                    text = stringResource(Res.string.contract_new_contract),
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
@@ -157,10 +174,13 @@ fun ContractsContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("لیست قراردادها") },
+                title = { Text(stringResource(Res.string.contract_list_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBackClicked) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "بازگشت")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(Res.string.back_content_description),
+                        )
                     }
                 },
             )
@@ -168,7 +188,7 @@ fun ContractsContent(
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = onNewContractClicked,
-                text = { Text("انعقاد قرارداد جدید") },
+                text = { Text(stringResource(Res.string.contract_new_contract)) },
                 icon = { }
             )
         }
@@ -185,7 +205,7 @@ fun ContractsContent(
 
                 uiState.error != null && uiState.contracts.isEmpty() -> {
                     Text(
-                        text = uiState.error ?: "خطای ناشناخته",
+                        text = uiState.error ?: stringResource(Res.string.error_unknown),
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier
                             .align(Alignment.Center)
@@ -196,7 +216,7 @@ fun ContractsContent(
 
                 uiState.contracts.isEmpty() -> {
                     Text(
-                        text = "قراردادی یافت نشد",
+                        text = stringResource(Res.string.contract_empty_list),
                         modifier = Modifier.align(Alignment.Center),
                     )
                 }
@@ -251,25 +271,34 @@ private fun ContractItem(contract: ContractPR) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            ContractRow(label = "شماره قرارداد", value = contract.contractNumber)
-            ContractRow(label = "تاریخ درخواست", value = contract.requestDate)
-            ContractRow(label = "نوع حق بیمه", value = contract.insuranceType)
-            ContractRow(label = "مبلغ حق بیمه ماهانه", value = contract.monthlyPremiumLabel)
+            ContractRow(label = stringResource(Res.string.contract_field_number), value = contract.contractNumber)
+            ContractRow(label = stringResource(Res.string.contract_field_request_date), value = contract.requestDate)
+            ContractRow(label = stringResource(Res.string.contract_field_insurance_type), value = contract.insuranceType)
+            ContractRow(label = stringResource(Res.string.contract_field_monthly_premium), value = contract.monthlyPremiumLabel)
             ContractRow(
-                label = "درآمد ماهانه",
+                label = stringResource(Res.string.contract_field_monthly_income),
                 value = contract.monthlyIncome,
                 valueColor = MaterialTheme.colorScheme.primary,
             )
             ContractRow(
-                label = "حمایت درمان",
-                value = contract.treatmentSupportText,
+                label = stringResource(Res.string.contract_field_treatment_support),
+                value = stringResource(
+                    if (contract.hasTreatmentSupport) {
+                        Res.string.contract_treatment_support_yes
+                    } else {
+                        Res.string.contract_treatment_support_no
+                    },
+                ),
                 valueColor = if (contract.hasTreatmentSupport) {
                     MaterialTheme.colorScheme.primary
                 } else {
                     MaterialTheme.colorScheme.error
                 },
             )
-            ContractRow(label = "شغل", value = contract.jobTitle.ifBlank { "—" })
+            ContractRow(
+                label = stringResource(Res.string.contract_field_job),
+                value = contract.jobTitle.ifBlank { stringResource(Res.string.contract_value_dash) },
+            )
         }
     }
 }

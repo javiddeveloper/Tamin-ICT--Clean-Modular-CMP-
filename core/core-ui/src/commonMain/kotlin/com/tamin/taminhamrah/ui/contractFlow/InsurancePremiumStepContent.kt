@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.model.contractFlow
+﻿package com.tamin.taminhamrah.ui.contractFlow
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,7 +13,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.model.contractFlow.SpcPremiumRateOptionPR
 import com.tamin.taminhamrah.model.contracts.FreeJobDN
+import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.contract_field_job
+import taminx.core.core_ui.contract_premium_rate_not_found
 
 @Composable
 fun InsurancePremiumStepContent(
@@ -35,7 +40,7 @@ fun InsurancePremiumStepContent(
 
         premiumRates.isEmpty() -> {
             Text(
-                text = "نرخ حق بیمه‌ای یافت نشد.",
+                text = stringResource(Res.string.contract_premium_rate_not_found),
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
@@ -44,7 +49,7 @@ fun InsurancePremiumStepContent(
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (showFreeJobSelector) {
                     SelectableField(
-                        label = "شغل",
+                        label = stringResource(Res.string.contract_field_job),
                         options = freeJobs,
                         selectedCode = selectedFreeJobCode.orEmpty(),
                         selectedName = selectedFreeJobName.orEmpty(),

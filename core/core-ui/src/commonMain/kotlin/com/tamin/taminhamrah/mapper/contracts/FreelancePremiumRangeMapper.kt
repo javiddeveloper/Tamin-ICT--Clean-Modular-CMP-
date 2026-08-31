@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.contractFlow.ui.mapper
+package com.tamin.taminhamrah.mapper.contracts
 
 import com.tamin.taminhamrah.model.contractFlow.FreelancePremiumRangePR
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDN

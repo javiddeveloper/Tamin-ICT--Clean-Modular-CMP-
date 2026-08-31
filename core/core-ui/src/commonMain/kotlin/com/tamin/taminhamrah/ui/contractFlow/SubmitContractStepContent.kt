@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.model.contractFlow
+﻿package com.tamin.taminhamrah.ui.contractFlow
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,7 +13,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.model.contractFlow.FreelanceContractResultPR
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoPR
+import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.contract_flow_submit_contract
+import taminx.core.core_ui.contract_submit_agreement
+import taminx.core.core_ui.contract_submit_success
 
 @Composable
 fun SubmitContractStepContent(
@@ -55,12 +61,16 @@ fun SubmitContractStepContent(
             if (isSubmitting) {
                 CircularProgressIndicator()
             } else {
-                Text("انعقاد قرارداد")
+                Text(stringResource(Res.string.contract_flow_submit_contract))
             }
         }
         submittedContract?.let { result ->
             Text(
-                text = "قرارداد با شماره ${result.contractNumber} در تاریخ ${result.contractDate} ثبت شد.",
+                text = stringResource(
+                    Res.string.contract_submit_success,
+                    result.contractNumber,
+                    result.contractDate,
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.primary,
             )
@@ -68,6 +78,7 @@ fun SubmitContractStepContent(
     }
 }
 
+@Composable
 private fun buildAgreementText(
     registrationInfo: RegistrationInfoPR,
     premiumRateDescription: String?,
@@ -76,6 +87,12 @@ private fun buildAgreementText(
 ): String {
     val rate = premiumRateDescription.orEmpty()
     val salary = calculatedMonthlySalary?.toString().orEmpty()
-    return "اینجانب ${registrationInfo.fullName} به شماره ملی ${registrationInfo.nationalId} " +
-        "درخواست انعقاد قرارداد $agreementContractLabel $rate با دستمزد مبنا $salary ریال را دارم."
+    return stringResource(
+        Res.string.contract_submit_agreement,
+        registrationInfo.fullName,
+        registrationInfo.nationalId,
+        agreementContractLabel,
+        rate,
+        salary,
+    )
 }

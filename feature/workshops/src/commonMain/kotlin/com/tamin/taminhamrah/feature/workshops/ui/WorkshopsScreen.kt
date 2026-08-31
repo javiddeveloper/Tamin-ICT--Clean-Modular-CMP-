@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.workshops.ui
+﻿package com.tamin.taminhamrah.feature.workshops.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -33,8 +33,8 @@ import com.tamin.taminhamrah.model.common.CityPR
 import com.tamin.taminhamrah.model.common.ProvincePR
 import com.tamin.taminhamrah.model.contracts.BranchPR
 import com.tamin.taminhamrah.model.contractFlow.BranchSelectionFormPR
-import com.tamin.taminhamrah.model.contractFlow.SelectBranchStepContent
-import com.tamin.taminhamrah.model.contractFlow.SelectableField
+import com.tamin.taminhamrah.ui.contractFlow.SelectBranchStepContent
+import com.tamin.taminhamrah.ui.contractFlow.SelectableField
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementPR
 import com.tamin.taminhamrah.model.workshop.EmployerWorkshopPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme

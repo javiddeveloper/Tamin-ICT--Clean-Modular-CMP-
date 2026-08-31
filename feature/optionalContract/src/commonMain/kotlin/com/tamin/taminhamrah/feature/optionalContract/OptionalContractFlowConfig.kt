@@ -3,13 +3,17 @@ package com.tamin.taminhamrah.feature.optionalContract
 import com.tamin.taminhamrah.feature.contractFlow.config.ContractFlowConfig
 import com.tamin.taminhamrah.feature.contractFlow.config.OPTIONAL_FLOW_STEPS
 import com.tamin.taminhamrah.model.common.FeatureFlag
+import com.tamin.taminhamrah.model.contracts.ContractPremiumTypeCode
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.contract_optional_insurance_type
+import taminx.core.core_ui.contract_optional_screen_title
 
 class OptionalContractFlowConfig : ContractFlowConfig {
     override val featureFlag = FeatureFlag.OPTIONAL_INSURANCE
-    override val screenTitle = "انعقاد قرارداد بیمه اختیاری"
-    override val insuranceTypeLabel = "بیمه اختیاری"
-    override val agreementContractLabel = "بیمه اختیاری"
-    override val premiumTypeCode = "02"
+    override val screenTitleRes = Res.string.contract_optional_screen_title
+    override val insuranceTypeLabelRes = Res.string.contract_optional_insurance_type
+    override val agreementContractLabelRes = Res.string.contract_optional_insurance_type
+    override val premiumTypeCode = ContractPremiumTypeCode.OPTIONAL
     override val steps = OPTIONAL_FLOW_STEPS
     override val requiresFreeJob = false
     override val usesFreelancePremiumRange = false

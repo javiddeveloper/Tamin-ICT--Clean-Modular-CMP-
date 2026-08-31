@@ -1,18 +1,19 @@
 package com.tamin.taminhamrah.feature.contractFlow.config
 
+import com.tamin.taminhamrah.contractFlow.ContractStep
+import com.tamin.taminhamrah.contractFlow.displayNumber
+import com.tamin.taminhamrah.contractFlow.isFirstStep
+import com.tamin.taminhamrah.contractFlow.isLastStep
+import com.tamin.taminhamrah.contractFlow.nextStep
+import com.tamin.taminhamrah.contractFlow.previousStep
 import com.tamin.taminhamrah.model.common.FeatureFlag
-import com.tamin.taminhamrah.model.contractFlow.ContractStep
-import com.tamin.taminhamrah.model.contractFlow.displayNumber
-import com.tamin.taminhamrah.model.contractFlow.isFirstStep
-import com.tamin.taminhamrah.model.contractFlow.isLastStep
-import com.tamin.taminhamrah.model.contractFlow.nextStep
-import com.tamin.taminhamrah.model.contractFlow.previousStep
+import org.jetbrains.compose.resources.StringResource
 
 interface ContractFlowConfig {
     val featureFlag: FeatureFlag
-    val screenTitle: String
-    val insuranceTypeLabel: String
-    val agreementContractLabel: String
+    val screenTitleRes: StringResource
+    val insuranceTypeLabelRes: StringResource
+    val agreementContractLabelRes: StringResource
     val premiumTypeCode: String
     val steps: List<ContractStep>
     val requiresFreeJob: Boolean

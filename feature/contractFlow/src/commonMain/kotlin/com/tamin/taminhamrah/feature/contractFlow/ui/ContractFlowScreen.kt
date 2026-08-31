@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.contractFlow.ui
+﻿package com.tamin.taminhamrah.feature.contractFlow.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -43,28 +43,44 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.contractFlow.ui.contract.ContractFlowIntent
 import com.tamin.taminhamrah.feature.contractFlow.ui.contract.ContractFlowUiState
 import com.tamin.taminhamrah.model.common.CityPR
 import com.tamin.taminhamrah.model.common.ProvincePR
-import com.tamin.taminhamrah.model.contractFlow.ContractApplicantStepContent
-import com.tamin.taminhamrah.model.contractFlow.ContractApplicantType
+import com.tamin.taminhamrah.ui.contractFlow.ContractApplicantStepContent
+import com.tamin.taminhamrah.contractFlow.ContractApplicantType
 import com.tamin.taminhamrah.model.contractFlow.ContractEligibilityPR
-import com.tamin.taminhamrah.model.contractFlow.ContractStep
-import com.tamin.taminhamrah.model.contractFlow.ContractTermsStepContent
-import com.tamin.taminhamrah.model.contractFlow.InsurancePremiumStepContent
-import com.tamin.taminhamrah.model.contractFlow.PremiumSalaryStepContent
-import com.tamin.taminhamrah.model.contractFlow.SelectBranchStepContent
+import com.tamin.taminhamrah.contractFlow.ContractStep
+import com.tamin.taminhamrah.ui.contractFlow.ContractTermsStepContent
+import com.tamin.taminhamrah.ui.contractFlow.InsurancePremiumStepContent
+import com.tamin.taminhamrah.ui.contractFlow.PremiumSalaryStepContent
+import com.tamin.taminhamrah.ui.contractFlow.SelectBranchStepContent
 import com.tamin.taminhamrah.model.contractFlow.SpcPremiumRateOptionPR
-import com.tamin.taminhamrah.model.contractFlow.SubmitContractStepContent
-import com.tamin.taminhamrah.model.contractFlow.UploadImageStepContent
+import com.tamin.taminhamrah.ui.contractFlow.SubmitContractStepContent
+import com.tamin.taminhamrah.ui.contractFlow.UploadImageStepContent
 import com.tamin.taminhamrah.model.contractFlow.UserInfoFormPR
-import com.tamin.taminhamrah.model.contractFlow.UserInfoStepContent
+import com.tamin.taminhamrah.ui.contractFlow.UserInfoStepContent
+import com.tamin.taminhamrah.ui.contractFlow.eligibilityMessage
 import com.tamin.taminhamrah.model.contracts.BranchPR
 import com.tamin.taminhamrah.model.contracts.FreeJobDN
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoPR
+import com.tamin.taminhamrah.ui.theme.ButtonDimens
+import com.tamin.taminhamrah.ui.theme.Elevation
+import com.tamin.taminhamrah.ui.theme.IconSize
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.Thickness
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.back_content_description
+import taminx.core.core_ui.contract_flow_birth_date
+import taminx.core.core_ui.contract_flow_national_id
+import taminx.core.core_ui.contract_flow_registration_message
+import taminx.core.core_ui.contract_flow_step_next
+import taminx.core.core_ui.contract_flow_step_not_implemented
+import taminx.core.core_ui.contract_flow_step_previous
+import taminx.core.core_ui.error_unknown
 
 @Composable
 fun ContractFlowScreen(
@@ -81,10 +97,17 @@ fun ContractFlowScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(state.config?.screenTitle ?: "") },
+                title = {
+                    state.config?.screenTitleRes?.let { titleRes ->
+                        Text(stringResource(titleRes))
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "بازگشت")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(Res.string.back_content_description),
+                        )
                     }
                 },
             )
@@ -179,7 +202,7 @@ private fun ContractFlowContent(
 
             state.error != null && state.registrationInfo == null -> {
                 Text(
-                    text = state.error ?: "خطای ناشناخته",
+                    text = state.error ?: stringResource(Res.string.error_unknown),
                     color = MaterialTheme.colorScheme.error,
                 )
             }
@@ -187,15 +210,15 @@ private fun ContractFlowContent(
             else -> {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(0.dp),
+                    contentPadding = PaddingValues(Spacing.lg),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.none),
                 ) {
                     state.registrationInfo?.let { info ->
                         item {
                             RegistrationHeaderCard(info)
                         }
                         item {
-                            Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(Spacing.lg))
                         }
                         item {
                             ContractStepper(
@@ -234,10 +257,10 @@ private fun RegistrationHeaderCard(info: RegistrationInfoPR) {
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
     ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(modifier = Modifier.padding(Spacing.lg), verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
             Text(text = info.fullName, style = MaterialTheme.typography.titleLarge)
-            Text(text = "کد ملی: ${info.nationalId}")
-            Text(text = "تاریخ تولد: ${info.birthDateFormatted}")
+            Text(text = stringResource(Res.string.contract_flow_national_id, info.nationalId))
+            Text(text = stringResource(Res.string.contract_flow_birth_date, info.birthDateFormatted))
         }
     }
 }
@@ -265,7 +288,7 @@ private fun ContractStepper(
     onClearDocument: () -> Unit,
     onShowRules: () -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.none)) {
         val config = state.config
         val steps = config?.steps ?: emptyList()
         steps.forEachIndexed { index, step ->
@@ -288,10 +311,10 @@ private fun ContractStepper(
                             if (state.eligibility != null) {
                                 AuthorizationStepContent(
                                     eligibility = state.eligibility,
-                                    insuranceTypeLabel = config?.insuranceTypeLabel ?: "",
+                                    insuranceTypeLabel = config?.insuranceTypeLabelRes?.let { stringResource(it) }.orEmpty(),
                                 )
                             } else {
-                                CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                                CircularProgressIndicator(modifier = Modifier.size(IconSize.medium))
                             }
                         }
                         ContractStep.STEP_CONTRACT_TERMS -> {
@@ -354,7 +377,7 @@ private fun ContractStepper(
                         }
                         ContractStep.STEP_TREATMENT_SUPPORT -> {
                             Text(
-                                text = "این مرحله هنوز پیاده‌سازی نشده است.",
+                                text = stringResource(Res.string.contract_flow_step_not_implemented),
                                 style = MaterialTheme.typography.bodyMedium,
                             )
                         }
@@ -392,7 +415,7 @@ private fun ContractStepper(
                                     .firstOrNull { it.code == state.selectedPremiumRateCode }
                                     ?.description,
                                 calculatedMonthlySalary = state.calculatedMonthlySalary,
-                                agreementContractLabel = config?.agreementContractLabel ?: "",
+                                agreementContractLabel = config?.agreementContractLabelRes?.let { stringResource(it) }.orEmpty(),
                                 isAgreementConfirmed = state.isAgreementConfirmed,
                                 isSubmitting = state.isSubmittingContract,
                                 submittedContract = state.submittedContract,
@@ -460,7 +483,8 @@ private fun StepperItem(
     content: @Composable () -> Unit,
     navigation: @Composable () -> Unit,
 ) {
-    val activeColor = Color(0xFF2E7D32)
+    val taminColors = LocalTaminColors.current
+    val activeColor = taminColors.greenText
     val upcomingColor = MaterialTheme.colorScheme.outline
     val indicatorColor = when (stepState) {
         StepState.COMPLETED -> activeColor
@@ -471,7 +495,7 @@ private fun StepperItem(
     Row(modifier = Modifier.fillMaxWidth()) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.width(40.dp),
+            modifier = Modifier.width(Spacing.xxxl),
         ) {
             StepIndicator(
                 stepIndex = displayNumber,
@@ -481,8 +505,8 @@ private fun StepperItem(
             if (!isLast) {
                 Box(
                     modifier = Modifier
-                        .width(2.dp)
-                        .height(if (stepState == StepState.ACTIVE) 120.dp else 32.dp)
+                        .width(Thickness.medium)
+                        .height(if (stepState == StepState.ACTIVE) Spacing.xxxxxxl + Spacing.xxxxl else Spacing.xxl)
                         .background(
                             if (stepState == StepState.COMPLETED) activeColor else upcomingColor.copy(alpha = 0.4f),
                         ),
@@ -490,16 +514,16 @@ private fun StepperItem(
             }
         }
 
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(Spacing.md))
 
         Column(
             modifier = Modifier
                 .weight(1f)
-                .padding(bottom = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+                .padding(bottom = Spacing.lg),
+            verticalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
             Text(
-                text = "$displayNumber. ${step.title}",
+                text = "$displayNumber. ${stringResource(step.titleRes)}",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = if (stepState == StepState.ACTIVE) FontWeight.Bold else FontWeight.Normal,
                 color = when (stepState) {
@@ -514,11 +538,11 @@ private fun StepperItem(
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surface,
                     ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = Elevation.xxs),
                 ) {
                     Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.padding(Spacing.lg),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.md),
                     ) {
                         content()
                         navigation()
@@ -537,13 +561,13 @@ private fun StepIndicator(
 ) {
     Box(
         modifier = Modifier
-            .size(32.dp)
+            .size(IconSize.badge)
             .clip(CircleShape)
             .background(
                 if (stepState == StepState.UPCOMING) Color.Transparent else indicatorColor,
             )
             .border(
-                width = 2.dp,
+                width = Thickness.medium,
                 color = indicatorColor,
                 shape = CircleShape,
             ),
@@ -555,7 +579,7 @@ private fun StepIndicator(
                     imageVector = Icons.Default.Check,
                     contentDescription = null,
                     tint = Color.White,
-                    modifier = Modifier.size(18.dp),
+                    modifier = Modifier.size(ButtonDimens.loadingIndicatorSize),
                 )
             }
             StepState.ACTIVE -> {
@@ -582,9 +606,9 @@ private fun RegistrationStepContent(
     info: RegistrationInfoPR,
     genderGateError: String? = null,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
         Text(
-            text = "متقاضی محترم، نام‌نویسی شما با شماره بیمه تأمین اجتماعی ${info.insuranceId} انجام شده است.",
+            text = stringResource(Res.string.contract_flow_registration_message, info.insuranceId),
             style = MaterialTheme.typography.bodyMedium,
         )
         genderGateError?.let { error ->
@@ -602,18 +626,19 @@ private fun AuthorizationStepContent(
     eligibility: ContractEligibilityPR,
     insuranceTypeLabel: String,
 ) {
+    val taminColors = LocalTaminColors.current
     Row(
         verticalAlignment = Alignment.Top,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
         Icon(
             imageVector = if (eligibility.isEligible) Icons.Default.Check else Icons.Default.Close,
             contentDescription = null,
-            tint = if (eligibility.isEligible) Color(0xFF2E7D32) else MaterialTheme.colorScheme.error,
-            modifier = Modifier.size(24.dp),
+            tint = if (eligibility.isEligible) taminColors.greenText else MaterialTheme.colorScheme.error,
+            modifier = Modifier.size(IconSize.medium),
         )
         Text(
-            text = eligibility.message(insuranceTypeLabel),
+            text = eligibility.eligibilityMessage(insuranceTypeLabel),
             style = MaterialTheme.typography.bodyMedium,
         )
     }
@@ -630,7 +655,7 @@ private fun StepNavigationButtons(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
         if (showPrevious) {
             OutlinedButton(
@@ -640,10 +665,10 @@ private fun StepNavigationButtons(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     contentDescription = null,
-                    modifier = Modifier.size(18.dp),
+                    modifier = Modifier.size(ButtonDimens.loadingIndicatorSize),
                 )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text("مرحله قبل")
+                Spacer(modifier = Modifier.width(Spacing.xs))
+                Text(stringResource(Res.string.contract_flow_step_previous))
             }
         }
         if (showNext) {
@@ -657,17 +682,17 @@ private fun StepNavigationButtons(
             ) {
                 if (nextLoading) {
                     CircularProgressIndicator(
-                        modifier = Modifier.size(18.dp),
-                        strokeWidth = 2.dp,
+                        modifier = Modifier.size(ButtonDimens.loadingIndicatorSize),
+                        strokeWidth = ButtonDimens.loadingIndicatorStroke,
                         color = MaterialTheme.colorScheme.onPrimary,
                     )
                 } else {
-                    Text("مرحله بعد")
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(stringResource(Res.string.contract_flow_step_next))
+                    Spacer(modifier = Modifier.width(Spacing.xs))
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                         contentDescription = null,
-                        modifier = Modifier.size(18.dp),
+                        modifier = Modifier.size(ButtonDimens.loadingIndicatorSize),
                     )
                 }
             }

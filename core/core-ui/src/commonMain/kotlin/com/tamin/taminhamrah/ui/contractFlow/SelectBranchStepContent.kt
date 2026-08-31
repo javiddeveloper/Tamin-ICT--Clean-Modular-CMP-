@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.model.contractFlow
+﻿package com.tamin.taminhamrah.ui.contractFlow
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,19 +19,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.model.common.CityPR
 import com.tamin.taminhamrah.model.common.ProvincePR
+import com.tamin.taminhamrah.model.contractFlow.BranchSelectionFormPR
 import com.tamin.taminhamrah.model.contracts.BranchPR
-import kotlinx.collections.immutable.ImmutableList
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetType
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.bs_branch
+import taminx.core.core_ui.bs_city
+import taminx.core.core_ui.bs_province
+import taminx.core.core_ui.contract_branch_notice_1
+import taminx.core.core_ui.contract_branch_notice_2
 
-/**
- * The notices shown above the pickers for the student-contract flow, which is what this
- * component was written for. Hoisted to a top-level constant so the default argument is
- * the same instance on every recomposition rather than a fresh list.
- */
-val ContractBranchNotices: ImmutableList<String> = persistentListOf(
-    "متقاضی محترم، پس از ثبت قرارداد، امکان تغییر شعبه وجود ندارد؛ لطفا در انتخاب شعبه دقت نمایید.",
-    "در صورت عدم ارائه خدمات الکترونیکی، ممکن است نیاز به مراجعه حضوری به شعبه انتخابی داشته باشید.",
+val ContractBranchNotices: ImmutableList<StringResource> = persistentListOf(
+    Res.string.contract_branch_notice_1,
+    Res.string.contract_branch_notice_2,
 )
 
 @Composable
@@ -47,11 +51,7 @@ fun SelectBranchStepContent(
     onCitySelected: (CityPR) -> Unit,
     onBranchSelected: (BranchPR) -> Unit,
     modifier: Modifier = Modifier,
-    // Callers outside the contract flow (e.g. filtering a workshop list) pass an empty list;
-    // defaulted so every existing call site keeps its current two notices.
-    notices: ImmutableList<String> = ContractBranchNotices,
-    // A lookup that failed reports itself on its own field, so one bad request does not take the
-    // whole step down with it. Null keeps the field in its normal state.
+    notices: ImmutableList<StringResource> = ContractBranchNotices,
     provincesError: String? = null,
     citiesError: String? = null,
     branchesError: String? = null,
@@ -63,12 +63,12 @@ fun SelectBranchStepContent(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        notices.forEach { notice ->
-            InfoCard(text = notice)
+        notices.forEach { noticeRes ->
+            InfoCard(text = stringResource(noticeRes))
         }
 
         SelectableField(
-            label = "استان",
+            label = stringResource(Res.string.bs_province),
             options = provinces,
             selectedCode = branchSelection.provinceCode,
             selectedName = branchSelection.provinceName,
@@ -82,7 +82,7 @@ fun SelectBranchStepContent(
         )
 
         SelectableField(
-            label = "شهر",
+            label = stringResource(Res.string.bs_city),
             options = cities,
             selectedCode = branchSelection.cityCode,
             selectedName = branchSelection.cityName,
@@ -97,7 +97,7 @@ fun SelectBranchStepContent(
         )
 
         SelectableField(
-            label = "شعبه تأمین اجتماعی",
+            label = stringResource(Res.string.bs_branch),
             options = branches,
             selectedCode = branchSelection.branchCode,
             selectedName = branchSelection.branchName,

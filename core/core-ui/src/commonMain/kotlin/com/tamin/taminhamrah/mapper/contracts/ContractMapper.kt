@@ -4,27 +4,27 @@ import com.tamin.taminhamrah.model.contracts.BranchDN
 import com.tamin.taminhamrah.model.contracts.BranchPR
 import com.tamin.taminhamrah.model.contracts.ContractDN
 import com.tamin.taminhamrah.model.contracts.ContractPR
+import com.tamin.taminhamrah.model.contracts.ContractStatusCode
 import com.tamin.taminhamrah.util.PersianDateFormatter
 
 fun ContractDN.toPresentation(): ContractPR {
     val statusDesc = contractStatusObject?.selfIsuContStatDesc
-        ?: (contractStatus?:"")
+        ?: (contractStatus ?: "")
     val hasTreatmentSupport = resolveTreatmentSupport()
     return ContractPR(
-        contractNumber = contractNumber?.toString()?:"",
+        contractNumber = contractNumber?.toString() ?: "",
         statusDesc = statusDesc,
-        isActive = !statusDesc.contains("ابطال"),
+        isActive = contractStatusObject?.selfIsuContStatCode != ContractStatusCode.CANCELLED,
         requestDate = PersianDateFormatter.formatTimestamp(
             createDate ?: contractDate ?: creatDate ?: startDate,
         ),
         insuranceType = premiumType?.insuranceDescription
             ?: premiumType?.insuranceKind
-            ?: (premiumTypeCode?:""),
-        monthlyPremiumLabel = premiumRate?.spcrateDescription?:"",
+            ?: (premiumTypeCode ?: ""),
+        monthlyPremiumLabel = premiumRate?.spcrateDescription ?: "",
         monthlyIncome = salary?.toString() ?: "",
-        treatmentSupportText = if (hasTreatmentSupport) "حمایت درمان دارد" else "حمایت درمان ندارد",
         hasTreatmentSupport = hasTreatmentSupport,
-        jobTitle = freeJob?.discrioption?:"",
+        jobTitle = freeJob?.discrioption ?: "",
     )
 }
 
@@ -38,5 +38,3 @@ fun BranchDN.toPresentation(): BranchPR = BranchPR(
 fun List<BranchDN>.toBranchPresentation(): List<BranchPR> = map { it.toPresentation() }
 
 private fun ContractDN.resolveTreatmentSupport(): Boolean = cntDrmn != "2"
-
-

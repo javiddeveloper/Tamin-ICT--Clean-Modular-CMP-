@@ -4,13 +4,17 @@ import com.tamin.taminhamrah.feature.contractFlow.config.ContractFlowConfig
 import com.tamin.taminhamrah.feature.contractFlow.config.SPECIAL_INSURED_STEPS
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.contracts.ContractFreeJobCode
+import com.tamin.taminhamrah.model.contracts.ContractPremiumTypeCode
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.contract_student_insurance_type
+import taminx.core.core_ui.contract_student_screen_title
 
 class StudentContractFlowConfig : ContractFlowConfig {
     override val featureFlag = FeatureFlag.STUDENT_INSURANCE
-    override val screenTitle = "انعقاد قرارداد بیمه دانشجویی"
-    override val insuranceTypeLabel = "بیمه دانشجویی"
-    override val agreementContractLabel = "بیمه دانشجویی"
-    override val premiumTypeCode = "01"
+    override val screenTitleRes = Res.string.contract_student_screen_title
+    override val insuranceTypeLabelRes = Res.string.contract_student_insurance_type
+    override val agreementContractLabelRes = Res.string.contract_student_insurance_type
+    override val premiumTypeCode = ContractPremiumTypeCode.FREELANCE
     override val steps = SPECIAL_INSURED_STEPS
     override val requiresFreeJob = false
     override val usesFreelancePremiumRange = true

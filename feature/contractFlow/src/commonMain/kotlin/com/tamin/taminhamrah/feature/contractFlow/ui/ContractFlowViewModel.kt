@@ -1,25 +1,25 @@
-package com.tamin.taminhamrah.feature.contractFlow.ui
+﻿package com.tamin.taminhamrah.feature.contractFlow.ui
 
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.contractFlow.config.ContractFlowConfig
-import com.tamin.taminhamrah.feature.contractFlow.config.FreelanceSpecialJobs
+import com.tamin.taminhamrah.model.contracts.FreelanceSpecialJobCode
 import com.tamin.taminhamrah.feature.contractFlow.ui.contract.ContractFlowEvent
 import com.tamin.taminhamrah.feature.contractFlow.ui.contract.ContractFlowIntent
 import com.tamin.taminhamrah.feature.contractFlow.ui.contract.ContractFlowUiState
 import com.tamin.taminhamrah.feature.contractFlow.ui.contract.ContractFlowUiState.PartialState
-import com.tamin.taminhamrah.feature.contractFlow.ui.mapper.toPresentation as toContractResultPresentation
-import com.tamin.taminhamrah.feature.contractFlow.ui.mapper.toPresentation as toPremiumRangePresentation
-import com.tamin.taminhamrah.feature.contractFlow.ui.mapper.toSpcPremiumRateOptions
-import com.tamin.taminhamrah.feature.contractFlow.ui.mapper.resolveEligibility
 import com.tamin.taminhamrah.mapper.common.filterByProvinceCode
+import com.tamin.taminhamrah.mapper.contracts.resolveEligibility
+import com.tamin.taminhamrah.mapper.contracts.toPresentation as toContractResultPresentation
+import com.tamin.taminhamrah.mapper.contracts.toPresentation as toPremiumRangePresentation
+import com.tamin.taminhamrah.mapper.contracts.toSpcPremiumRateOptions
 import com.tamin.taminhamrah.mapper.common.toCityPresentation
 import com.tamin.taminhamrah.mapper.common.toProvincePresentation
 import com.tamin.taminhamrah.mapper.contracts.toBranchPresentation
 import com.tamin.taminhamrah.mapper.contracts.toPresentation
 import com.tamin.taminhamrah.model.common.CityPR
 import com.tamin.taminhamrah.model.common.ProvincePR
-import com.tamin.taminhamrah.model.contractFlow.ContractApplicantType
-import com.tamin.taminhamrah.model.contractFlow.ContractStep
+import com.tamin.taminhamrah.contractFlow.ContractApplicantType
+import com.tamin.taminhamrah.contractFlow.ContractStep
 import com.tamin.taminhamrah.model.contractFlow.SpcPremiumRateOptionPR
 import com.tamin.taminhamrah.model.contractFlow.UploadImagePR
 import com.tamin.taminhamrah.model.contractFlow.UserInfoFormPR
@@ -51,6 +51,13 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
+import org.jetbrains.compose.resources.getString
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.contract_error_medical_student_not_allowed
+import taminx.core.core_ui.contract_error_red_crescent_day_limit
+import taminx.core.core_ui.contract_female_only_service
+import taminx.core.core_ui.contract_upload_failed_error
+import taminx.core.core_ui.contract_upload_jpeg_only_error
 
 class ContractFlowViewModel(
     private val config: ContractFlowConfig,
@@ -135,8 +142,8 @@ class ContractFlowViewModel(
                 val presentation = info.toPresentation()
                 emit(PartialState.RegistrationInfoLoaded(presentation))
                 emit(PartialState.UserInfoChanged(UserInfoFormPR.fromRegistration(presentation)))
-                if (config.requiresFemaleGender && presentation.genderTitle == "آقای") {
-                    emit(PartialState.GenderGateError("این خدمت مختص بانوان است."))
+                if (config.requiresFemaleGender && !presentation.isFemale) {
+                    emit(PartialState.GenderGateError(getString(Res.string.contract_female_only_service)))
                 }
             }
         } catch (e: Exception) {
@@ -338,7 +345,7 @@ class ContractFlowViewModel(
     private fun handleUploadPickedImage(fileName: String, bytes: ByteArray): Flow<PartialState> = flow {
         emit(PartialState.UploadDocumentError(null))
         if (!isJpegFileName(fileName)) {
-            emit(PartialState.UploadDocumentError("فقط تصاویر با فرمت JPEG مجاز هستند."))
+            emit(PartialState.UploadDocumentError(getString(Res.string.contract_upload_jpeg_only_error)))
             return@flow
         }
         emit(PartialState.DocumentPreviewSet(bytes))
@@ -361,7 +368,7 @@ class ContractFlowViewModel(
                 )
             }
         } catch (e: Exception) {
-            emit(PartialState.UploadDocumentError(e.message ?: "خطا در بارگذاری تصویر"))
+            emit(PartialState.UploadDocumentError(e.message ?: getString(Res.string.contract_upload_failed_error)))
         } finally {
             emit(PartialState.UploadingDocument(false))
         }
@@ -385,11 +392,11 @@ class ContractFlowViewModel(
         val jobName = job.discrioption.orEmpty()
 
         when (jobCode) {
-            FreelanceSpecialJobs.RED_CRESCENT_CODE -> {
+            FreelanceSpecialJobCode.RED_CRESCENT_CODE -> {
                 try {
                     val day = checkRedCrossStatusUseCase().first().toIntOrNull()
                     if (day == null || day > 20) {
-                        emit(PartialState.Error("امکان انتخاب این شغل تنها تا روز ۲۰ هر ماه وجود دارد."))
+                        emit(PartialState.Error(getString(Res.string.contract_error_red_crescent_day_limit)))
                         return@flow
                     }
                     emitAll(
@@ -397,7 +404,7 @@ class ContractFlowViewModel(
                             jobCode = jobCode,
                             jobName = jobName,
                             forceTreatmentSupport = true,
-                            lockedPremiumRate = FreelanceSpecialJobs.RED_CRESCENT_PREMIUM_RATE,
+                            lockedPremiumRate = FreelanceSpecialJobCode.RED_CRESCENT_PREMIUM_RATE,
                             hidePremiumSlider = true,
                             allowsPayment = false,
                         ),
@@ -406,11 +413,11 @@ class ContractFlowViewModel(
                     emit(PartialState.Error(e.message))
                 }
             }
-            FreelanceSpecialJobs.MEDICAL_STUDENT_CODE -> {
+            FreelanceSpecialJobCode.MEDICAL_STUDENT_CODE -> {
                 try {
                     val status = checkMedicalStudentUseCase().first()
-                    if (status != FreelanceSpecialJobs.MEDICAL_STUDENT_OK_STATUS) {
-                        emit(PartialState.Error("امکان انتخاب این شغل برای شما وجود ندارد."))
+                    if (status != FreelanceSpecialJobCode.MEDICAL_STUDENT_OK_STATUS) {
+                        emit(PartialState.Error(getString(Res.string.contract_error_medical_student_not_allowed)))
                         return@flow
                     }
                     emitAll(
@@ -418,7 +425,7 @@ class ContractFlowViewModel(
                             jobCode = jobCode,
                             jobName = jobName,
                             forceTreatmentSupport = false,
-                            lockedPremiumRate = FreelanceSpecialJobs.MEDICAL_STUDENT_PREMIUM_RATE,
+                            lockedPremiumRate = FreelanceSpecialJobCode.MEDICAL_STUDENT_PREMIUM_RATE,
                             hidePremiumSlider = true,
                             allowsPayment = false,
                         ),

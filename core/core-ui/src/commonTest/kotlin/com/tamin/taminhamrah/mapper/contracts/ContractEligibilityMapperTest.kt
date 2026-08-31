@@ -1,5 +1,6 @@
-package com.tamin.taminhamrah.feature.contractFlow.ui.mapper
+﻿package com.tamin.taminhamrah.mapper.contracts
 
+import com.tamin.taminhamrah.contractFlow.ContractEligibilityReason
 import com.tamin.taminhamrah.model.contracts.ContractDN
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -14,7 +15,7 @@ class ContractEligibilityMapperTest {
 
         assertTrue(eligibility.isEligible)
         assertEquals(2, eligibility.statusCode)
-        assertEquals("سن کمتر از ۵۰ سال", eligibility.reasonText)
+        assertEquals(ContractEligibilityReason.AGE_UNDER_FIFTY, eligibility.reason)
     }
 
     @Test
@@ -22,7 +23,7 @@ class ContractEligibilityMapperTest {
         val eligibility = listOf(contract(eligibilityStatus = "5")).resolveEligibility()
 
         assertFalse(eligibility.isEligible)
-        assertEquals("عدم احراز شرایط سن و سابقه", eligibility.reasonText)
+        assertEquals(ContractEligibilityReason.AGE_HISTORY_NOT_MET, eligibility.reason)
     }
 
     @Test
@@ -36,10 +37,9 @@ class ContractEligibilityMapperTest {
         ).resolveEligibility()
 
         assertTrue(eligibility.isEligible)
-        assertEquals(
-            "داشتن 0 روز سابقه و سن 36/09/26 در زمان تقاضا",
-            eligibility.reasonText,
-        )
+        assertEquals(ContractEligibilityReason.HISTORY_AND_AGE_DYNAMIC, eligibility.reason)
+        assertEquals("0", eligibility.historyDays)
+        assertEquals("36/09/26", eligibility.ageFormatted)
     }
 
     @Test

@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.model.contractFlow
+﻿package com.tamin.taminhamrah.ui.contractFlow
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,13 +18,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.mapper.contracts.genderHonorific
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoPR
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.contract_terms_commitment_prefix
+import taminx.core.core_ui.contract_terms_commitment_suffix
+import taminx.core.core_ui.contract_terms_commitment_title
+import taminx.core.core_ui.contract_terms_confirm_hint
+import taminx.core.core_ui.contract_terms_view_rules
 
 @Composable
 fun ContractTermsStepContent(
@@ -34,6 +42,8 @@ fun ContractTermsStepContent(
     onShowRules: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val colors = LocalTaminColors.current
+
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -51,11 +61,11 @@ fun ContractTermsStepContent(
                 Icon(
                     imageVector = Icons.Outlined.Info,
                     contentDescription = null,
-                    tint = Color(0xFFE65100),
+                    tint = colors.orangeText,
                     modifier = Modifier.size(22.dp),
                 )
                 Text(
-                    text = "تایید این مرحله به منزله مطالعه و پذیرش مقررات و ضوابط انعقاد قرارداد می‌باشد.",
+                    text = stringResource(Res.string.contract_terms_confirm_hint),
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
@@ -65,11 +75,11 @@ fun ContractTermsStepContent(
             onClick = onShowRules,
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Text("مشاهده ضوابط و مقررات")
+            Text(stringResource(Res.string.contract_terms_view_rules))
         }
 
         Text(
-            text = "تعهدنامه",
+            text = stringResource(Res.string.contract_terms_commitment_title),
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold,
         )
@@ -84,7 +94,7 @@ fun ContractTermsStepContent(
             )
             Text(
                 text = buildCommitmentText(
-                    genderTitle = info.genderTitle,
+                    genderHonorific = info.genderHonorific(),
                     fullName = info.fullName,
                 ),
                 style = MaterialTheme.typography.bodyMedium,
@@ -94,17 +104,14 @@ fun ContractTermsStepContent(
     }
 }
 
+@Composable
 private fun buildCommitmentText(
-    genderTitle: String,
+    genderHonorific: String,
     fullName: String,
 ) = buildAnnotatedString {
-    append("اینجانب $genderTitle ")
-    withStyle(SpanStyle(color = Color(0xFF2E7D32), fontWeight = FontWeight.Bold)) {
+    append(stringResource(Res.string.contract_terms_commitment_prefix, genderHonorific))
+    withStyle(SpanStyle(color = LocalTaminColors.current.greenText, fontWeight = FontWeight.Bold)) {
         append(fullName)
     }
-    append(
-        " با آگاهی کامل و در صحت عقلی، شرایط و مقررات فوق را مطالعه و خود را در هنگام قرارداد " +
-            "و در ادامه بیمه پردازی ملزم به رعایت آن می‌دانم در غیر اینصورت کلیه تبعات و مسئولیت‌های آن " +
-            "متوجه اینجانب بوده و سازمان تأمین اجتماعی در این خصوص مسئولیتی نخواهد داشت.",
-    )
+    append(stringResource(Res.string.contract_terms_commitment_suffix))
 }
