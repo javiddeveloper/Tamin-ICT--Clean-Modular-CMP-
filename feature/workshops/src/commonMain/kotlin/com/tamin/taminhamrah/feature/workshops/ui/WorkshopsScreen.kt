@@ -32,9 +32,9 @@ import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState
 import com.tamin.taminhamrah.model.common.CityPR
 import com.tamin.taminhamrah.model.common.ProvincePR
 import com.tamin.taminhamrah.model.contracts.BranchPR
-import com.tamin.taminhamrah.model.studentContract.BranchSelectionFormPR
-import com.tamin.taminhamrah.model.studentContract.SelectBranchStepContent
-import com.tamin.taminhamrah.model.studentContract.SelectableField
+import com.tamin.taminhamrah.model.contractFlow.BranchSelectionFormPR
+import com.tamin.taminhamrah.model.contractFlow.SelectBranchStepContent
+import com.tamin.taminhamrah.model.contractFlow.SelectableField
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementPR
 import com.tamin.taminhamrah.model.workshop.EmployerWorkshopPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme

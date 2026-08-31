@@ -18,10 +18,10 @@ import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPayRoll
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.navigateToPensionStatusInquiry
 import com.tamin.taminhamrah.feature.pensionSurvivor.navigateToPensionSurvivor
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPrescription
-import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToFreelanceInsuranceContract
-import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToHousewifeInsuranceContract
-import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToOptionalInsuranceContract
-import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToStudentInsuranceContract
+import com.tamin.taminhamrah.feature.studentContract.navigateToStudentContract
+import com.tamin.taminhamrah.feature.freelanceContract.navigateToFreelanceContract
+import com.tamin.taminhamrah.feature.housewifeContract.navigateToHousewifeContract
+import com.tamin.taminhamrah.feature.optionalContract.navigateToOptionalContract
 import com.tamin.taminhamrah.feature.taminServices.navigateToOccurrence
 import com.tamin.taminhamrah.feature.taminServices.navigateToInspection
 import com.tamin.taminhamrah.feature.taminServices.navigateToSendInsuranceHistoryToInstitutions
@@ -33,10 +33,10 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
         FeatureFlag.MERGE_HISTORY -> navigateToHistory()
         FeatureFlag.WORKSHOPS -> navigateToWorkshops()
         FeatureFlag.CONTRACTS -> navigateToContracts()
-        FeatureFlag.STUDENT_INSURANCE -> navigateToStudentInsuranceContract()
-        FeatureFlag.FREELANCE_INSURANCE -> navigateToFreelanceInsuranceContract()
-        FeatureFlag.OPTIONAL_INSURANCE -> navigateToOptionalInsuranceContract()
-        FeatureFlag.HOUSEWIFE_INSURANCE -> navigateToHousewifeInsuranceContract()
+        FeatureFlag.STUDENT_INSURANCE -> navigateToStudentContract()
+        FeatureFlag.FREELANCE_INSURANCE -> navigateToFreelanceContract()
+        FeatureFlag.OPTIONAL_INSURANCE -> navigateToOptionalContract()
+        FeatureFlag.HOUSEWIFE_INSURANCE -> navigateToHousewifeContract()
         FeatureFlag.PENSION_INQUIRY -> navigateToPensionStatusInquiry()
         FeatureFlag.CALCULATE_WAGE_PENSION -> navigateToCalculatePension()
         FeatureFlag.PRESCRIPTION -> navigateToPrescription()

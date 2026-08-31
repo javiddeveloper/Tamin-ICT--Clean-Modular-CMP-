@@ -48,8 +48,12 @@ Colors, spacing, radius: [[Theme]] — never hardcode `Color`, `.dp`, or UI copy
 | `:feature:cartable` | `feature/cartable` | `…feature.cartable` |
 | `:feature:history` | `feature/history` | `…feature.history` |
 | `:feature:contracts` | `feature/contracts` | `…feature.contracts` |
+| `:feature:contractFlow` | `feature/contractFlow` | `…feature.contractFlow` — shared insurance contract wizard |
+| `:feature:studentContract` | `feature/studentContract` | `…feature.studentContract` |
+| `:feature:housewifeContract` | `feature/housewifeContract` | `…feature.housewifeContract` |
+| `:feature:freelanceContract` | `feature/freelanceContract` | `…feature.freelanceContract` |
+| `:feature:optionalContract` | `feature/optionalContract` | `…feature.optionalContract` |
 | `:feature:workshops` | `feature/workshops` | `…feature.workshops` |
-| `:feature:studentInsuranceContract` | `feature/studentInsuranceContract` | `…feature.studentInsuranceContract` |
 | `:feature:agent` | `feature/agent` | `…feature.agent` |
 | `:feature:healthProfile` | `feature/healthProfile` | `…feature.healthProfile` |
 | `:feature:taminServices` | `feature/taminServices` | `…feature.taminServices` |

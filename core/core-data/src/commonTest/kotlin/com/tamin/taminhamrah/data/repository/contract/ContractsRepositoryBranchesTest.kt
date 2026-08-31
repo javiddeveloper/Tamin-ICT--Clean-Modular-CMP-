@@ -186,6 +186,9 @@ private class FakeContractsRemoteDataSource(
     override suspend fun getFreelancePremiumRange(
         params: FreelancePremiumRangeParams,
     ): FreelancePremiumRangeDTO = unused()
+    override suspend fun getOptionalPremiumRange(): FreelancePremiumRangeDTO = unused()
+    override suspend fun checkRedCrossStatus(): String = unused()
+    override suspend fun checkMedicalStudent(): String = unused()
     override suspend fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Long = unused()
     override suspend fun calculateOptionalSalary(premiumRateCode: String): Long = unused()
     override suspend fun getFreeJobWages(query: ApiQueryParamDN): ListData<FreeJobDTO> = unused()

@@ -89,6 +89,9 @@ import com.tamin.taminhamrah.useCases.common.GetJobTitleUseCase
 import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetContractsUseCase
 import com.tamin.taminhamrah.useCases.contracts.CalculateFreelanceSalaryUseCase
+import com.tamin.taminhamrah.useCases.contracts.GetOptionalPremiumRangeUseCase
+import com.tamin.taminhamrah.useCases.contracts.CheckRedCrossStatusUseCase
+import com.tamin.taminhamrah.useCases.contracts.CheckMedicalStudentUseCase
 import com.tamin.taminhamrah.useCases.contracts.CalculateOptionalSalaryUseCase
 import com.tamin.taminhamrah.useCases.contracts.CheckInsurancePaymentStatusUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetFreelancePremiumRangeUseCase
@@ -305,6 +308,9 @@ val domainModule = module {
     factoryOf(::GetBranchesUseCase)
     factoryOf(::GetSpcPremiumRatesUseCase)
     factoryOf(::GetFreelancePremiumRangeUseCase)
+    factoryOf(::GetOptionalPremiumRangeUseCase)
+    factoryOf(::CheckRedCrossStatusUseCase)
+    factoryOf(::CheckMedicalStudentUseCase)
     factoryOf(::CalculateFreelanceSalaryUseCase)
     factoryOf(::CalculateOptionalSalaryUseCase)
     factoryOf(::MakeFreelanceContractUseCase)

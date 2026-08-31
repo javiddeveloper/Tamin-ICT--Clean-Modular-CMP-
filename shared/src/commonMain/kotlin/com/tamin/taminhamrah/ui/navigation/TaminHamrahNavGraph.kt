@@ -96,7 +96,10 @@ import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
 import com.tamin.taminhamrah.feature.addDependent.addDependentGraph
 import com.tamin.taminhamrah.feature.addDependent.AddDependentRoute
-import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceContractScreen
+import com.tamin.taminhamrah.feature.studentContract.studentContractScreen
+import com.tamin.taminhamrah.feature.housewifeContract.housewifeContractScreen
+import com.tamin.taminhamrah.feature.freelanceContract.freelanceContractScreen
+import com.tamin.taminhamrah.feature.optionalContract.optionalContractScreen
 import com.tamin.taminhamrah.feature.taminServices.TaminServicesRoute
 import com.tamin.taminhamrah.feature.taminServices.occurrenceScreen
 import com.tamin.taminhamrah.feature.taminServices.inspectionScreen
@@ -485,7 +488,10 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
 
                 userRequestGraph(navController = navController)
 
-                studentInsuranceContractScreen(onBack = { navController.popBackStack() })
+                studentContractScreen(onBack = { navController.popBackStack() })
+                housewifeContractScreen(onBack = { navController.popBackStack() })
+                freelanceContractScreen(onBack = { navController.popBackStack() })
+                optionalContractScreen(onBack = { navController.popBackStack() })
 
                 // Maps the assistant's destination ids to real routes. Ids come from
                 // AgentDestination; anything unmapped is ignored rather than crashing.

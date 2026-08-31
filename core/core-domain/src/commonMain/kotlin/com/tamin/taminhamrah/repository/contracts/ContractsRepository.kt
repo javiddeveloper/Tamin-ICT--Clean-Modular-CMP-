@@ -28,6 +28,9 @@ interface ContractsRepository {
     fun getSpcPremiumRates(): Flow<List<PremiumRateDN>>
     fun getFreeJobWages(): Flow<List<FreeJobDN>>
     fun getFreelancePremiumRange(params: FreelancePremiumRangeParams): Flow<FreelancePremiumRangeDN>
+    fun getOptionalPremiumRange(): Flow<FreelancePremiumRangeDN>
+    fun checkRedCrossStatus(): Flow<String>
+    fun checkMedicalStudent(): Flow<String>
     fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Flow<Long>
     fun calculateOptionalSalary(premiumRateCode: String): Flow<Long>
     fun makeFreelanceContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN>

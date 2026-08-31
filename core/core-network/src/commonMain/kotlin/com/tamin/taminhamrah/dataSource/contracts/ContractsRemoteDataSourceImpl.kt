@@ -103,6 +103,42 @@ class ContractsRemoteDataSourceImpl(
         }
     }
 
+    override suspend fun getOptionalPremiumRange(): FreelancePremiumRangeDTO {
+        return try {
+            contractsApiService.getOptionalPremiumRange().extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun checkRedCrossStatus(): String {
+        return try {
+            contractsApiService.checkRedCrossStatus().extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun checkMedicalStudent(): String {
+        return try {
+            contractsApiService.checkMedicalStudent().extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
     override suspend fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Long {
         return try {
             contractsApiService.calculateFreelanceSalary(

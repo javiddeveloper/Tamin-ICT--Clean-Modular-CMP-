@@ -37,7 +37,7 @@ class ContractsViewModel(
     private fun handleLoadContracts(): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
 
-        val contractIds = listOf(33, 34, 36, 37, 39)
+        val contractIds = listOf(33, 34, 36, 37)
 
         try {
             val menuItems = getMainMenuUseCase(AppConfig.versionName, false).first()
