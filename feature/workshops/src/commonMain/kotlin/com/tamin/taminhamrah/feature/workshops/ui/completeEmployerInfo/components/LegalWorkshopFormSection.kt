@@ -583,41 +583,42 @@ private fun SelectPickerChip(
 ) {
     val colors = LocalTaminColors.current
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(44.dp)
-            .clip(RoundedCornerShape(13.dp))
-            .background(colors.bgPage)
-            .animatedErrorBorder(
-                isError = isError,
-                errorColor = colors.dangerText,
-                normalColor = colors.border,
-                borderWidth = Thickness.border,
-                cornerRadius = FieldCorner,
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(44.dp)
+                .clip(RoundedCornerShape(13.dp))
+                .background(colors.bgPage)
+                .animatedErrorBorder(
+                    isError = isError,
+                    errorColor = colors.dangerText,
+                    normalColor = colors.border,
+                    borderWidth = Thickness.border,
+                    cornerRadius = FieldCorner,
+                )
+                .clickable(onClick = onClick)
+                .padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
+                    color = if (isSelected) colors.textPrimary else colors.textMuted,
+                    fontSize = 12.sp,
+                ),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
             )
-            .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodySmall.copy(
-                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
-                color = if (isSelected) colors.textPrimary else colors.textMuted,
-                fontSize = 12.sp,
-            ),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f),
-        )
-        Icon(
-            imageVector = vectorResource(Res.drawable.ic_tamin_chevron_back),
-            contentDescription = null,
-            tint = colors.textMuted,
-            modifier = Modifier.size(14.dp).rotate(CHEVRON_DOWN_DEGREES),
-        )
+            Icon(
+                imageVector = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                contentDescription = null,
+                tint = colors.textMuted,
+                modifier = Modifier.size(14.dp).rotate(CHEVRON_DOWN_DEGREES),
+            )
+        }
     }
 }
 
