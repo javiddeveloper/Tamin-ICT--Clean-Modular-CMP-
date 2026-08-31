@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.workshops.di
 
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopsViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.demandDocuments.DemandDocumentsViewModel
+import com.tamin.taminhamrah.feature.workshops.ui.managementDebit.ManagementDebitViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachmentUploader
 import com.tamin.taminhamrah.feature.workshops.ui.objectionableDebit.ObjectionableDebitViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.paymentSheets.PaymentSheetsViewModel
@@ -17,6 +18,7 @@ val workshopsModule = module {
     factoryOf(::WorkshopAttachmentUploader)
 
     viewModelOf(::WorkshopsViewModel)
+    viewModelOf(::ManagementDebitViewModel)
     viewModelOf(::WorkshopRecentlyAddedMembersViewModel)
     viewModelOf(::ObjectionableDebitViewModel)
     viewModelOf(::WorkshopDebtInquiryViewModel)

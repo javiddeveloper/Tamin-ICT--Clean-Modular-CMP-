@@ -288,6 +288,24 @@ class WorkshopsViewModelTest {
     }
 
     @Test
+    fun `article sixteen navigates rather than pre-checking for debts`() = runTest(testDispatcher) {
+        repository.employerAgreements = agreementsPage(count = 1, total = 1)
+        val viewModel = viewModel()
+        val workshop = viewModel.uiState.value.list.items.first()
+
+        viewModel.events.test {
+            viewModel.sendIntent(
+                WorkshopsIntent.ActionSelected(WorkshopAction.ARTICLE_SIXTEEN, workshop),
+            )
+
+            // It used to answer with a toast when the debt list came back empty, which cost a
+            // request per tap and made it the one row that does not open a screen.
+            assertTrue(awaitItem() is WorkshopsEvent.Navigate)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun `a refused list keeps the service's own wording`() = runTest(testDispatcher) {
         repository.error = TaminApiException(title = "دسترسی مجاز نیست")
         val viewModel = viewModel()
