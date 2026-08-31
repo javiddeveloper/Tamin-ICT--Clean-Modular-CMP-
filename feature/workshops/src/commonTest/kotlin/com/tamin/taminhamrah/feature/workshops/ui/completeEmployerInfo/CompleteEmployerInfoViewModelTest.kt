@@ -317,10 +317,11 @@ class CompleteEmployerInfoViewModelTest {
             name = "\u0622\u0645\u0648\u0632\u0634\u06AF\u0627\u0647 \u06A9\u0627\u0645\u067E\u06CC\u0648\u062A\u0631",
             characterCode = "01",
         )
-        fakeWorkShopsRepo.employerAgreements = PagedListDN(items = listOf(twin, twin, twin), total = 3)
-
-        viewModel.sendIntent(CompleteEmployerInfoIntent.LoadInitialData)
         viewModel.uiState.test {
+            awaitUntil { it.workshops.isNotEmpty() }
+            fakeWorkShopsRepo.employerAgreements = PagedListDN(items = listOf(twin, twin, twin), total = 3)
+            viewModel.sendIntent(CompleteEmployerInfoIntent.LoadInitialData)
+
             val state = awaitUntil { it.workshops.size == 3 }
             assertEquals(3, state.workshops.map { it.id }.toSet().size)
             cancelAndIgnoreRemainingEvents()
