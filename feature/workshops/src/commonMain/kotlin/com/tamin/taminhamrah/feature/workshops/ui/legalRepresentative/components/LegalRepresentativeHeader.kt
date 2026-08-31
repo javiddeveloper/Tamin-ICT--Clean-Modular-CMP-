@@ -27,7 +27,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
@@ -41,6 +40,8 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.toparea.TopAreaState
+import com.tamin.taminhamrah.ui.toparea.topAreaHide
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
@@ -59,8 +60,6 @@ import taminx.core.core_ui.legal_representative_workshop_stat_label
 internal fun LegalRepresentativeHeader(
     onBackClicked: () -> Unit,
     modifier: Modifier = Modifier,
-    /** Extra blue space left below [content] for a [LegalRepresentativeIdentitySummaryCard] to ride up into. */
-    heroCardOverlap: Dp = Spacing.none,
     content: @Composable () -> Unit = {},
 ) {
     val taminColors = LocalTaminColors.current
@@ -73,7 +72,7 @@ internal fun LegalRepresentativeHeader(
             .fillMaxWidth()
             .clip(RoundedCornerShape(bottomStart = CornerRadius.x3l, bottomEnd = CornerRadius.x3l))
             .background(gradient)
-            .padding(bottom = Spacing.smPlus + heroCardOverlap),
+            .padding(bottom = Spacing.smPlus),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         TaminTopAppBar(
@@ -98,17 +97,33 @@ internal fun LegalRepresentativeHeader(
     }
 }
 
-/** The hub screen's own header content: an icon tile over a muted caption. */
+/**
+ * The hub screen's own header content: an icon tile over a muted caption. Folds away and fades
+ * out as [topAreaState] collapses -- see [[TopArea-System]] -- so only the slim top bar remains
+ * once the list has been scrolled.
+ */
 @Composable
-internal fun LegalRepresentativeHeroSubtitle(text: String) {
+internal fun LegalRepresentativeHeroSubtitle(
+    text: String,
+    topAreaState: TopAreaState,
+    modifier: Modifier = Modifier,
+) {
     val taminColors = LocalTaminColors.current
-    AnimatedRingHeaderIcon(icon = Icons.Filled.Person)
-    Spacer(Modifier.height(Spacing.sm))
-    Text(
-        text = text,
-        style = MaterialTheme.typography.labelLarge,
-        color = taminColors.textHeaderSubtitle,
-    )
+    Column(
+        modifier = modifier.topAreaHide(topAreaState),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        // Statically rendered while this composable is one of rememberMeasuredTopAreaState's
+        // off-screen measure probes -- an infinite-repeat animation there would otherwise keep
+        // requesting frames for a slot that's never actually drawn.
+        AnimatedRingHeaderIcon(icon = Icons.Filled.Person, animated = !topAreaState.isMeasureProbe)
+        Spacer(Modifier.height(Spacing.sm))
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelLarge,
+            color = taminColors.textHeaderSubtitle,
+        )
+    }
 }
 
 /** A small card summarizing the workshop, embedded in the header on every later screen. */
@@ -161,8 +176,9 @@ internal fun LegalRepresentativeWorkshopSummaryCard(
 
 /**
  * The hub screen's identity card — the user's own name and their legal-representative workshop
- * count, side by side with a divider. Composed as the first item of a block the caller offsets up
- * by [LegalRepresentativeHeader]'s `heroCardOverlap`, so it rides up to straddle the header seam.
+ * count, side by side with a divider. Unlike [LegalRepresentativeHeroSubtitle], this card is never
+ * wrapped in a `topArea*` behavior modifier, so it stays fully shown and pinned above the list
+ * regardless of scroll — only the header content above it folds away.
  */
 @Composable
 internal fun LegalRepresentativeIdentitySummaryCard(

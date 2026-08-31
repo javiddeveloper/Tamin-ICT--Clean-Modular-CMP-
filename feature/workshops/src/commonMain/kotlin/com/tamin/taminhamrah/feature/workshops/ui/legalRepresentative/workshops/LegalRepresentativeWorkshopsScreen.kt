@@ -9,11 +9,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Groups
@@ -51,6 +51,11 @@ import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
+import com.tamin.taminhamrah.ui.toparea.TopAreaState
+import com.tamin.taminhamrah.ui.toparea.driveTopArea
+import com.tamin.taminhamrah.ui.toparea.rememberMeasuredTopAreaState
+import com.tamin.taminhamrah.ui.toparea.reportTopAreaHeight
+import com.tamin.taminhamrah.ui.toparea.topAreaContentPadding
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -66,9 +71,6 @@ import taminx.core.core_ui.legal_representative_info_banner
 import taminx.core.core_ui.legal_representative_open_action
 import taminx.core.core_ui.legal_representative_special_workshop_badge
 import taminx.core.core_ui.legal_representative_workshop_code_label
-
-/** How far the identity card rides up into the header's gradient, straddling the seam. */
-private val HeroCardOverlap = Spacing.xxl
 
 @Composable
 fun LegalRepresentativeWorkshopsScreen(
@@ -99,70 +101,109 @@ private fun LegalRepresentativeWorkshopsContent(
 ) {
     val taminColors = LocalTaminColors.current
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        LegalRepresentativeHeader(
+    // Folds the header's icon/subtitle from the list's own drag, snapping on release. The
+    // identity card below it is never wrapped in a topArea behavior, so it stays fully shown and
+    // pinned above the list -- only the header's own content folds and fades away. The drag
+    // budget is measured from this exact header+card block, so it can't drift out of sync with a
+    // copy or font change to either. See docs/vault/TopArea-System.md.
+    val topArea = rememberMeasuredTopAreaState { state ->
+        LegalRepresentativeWorkshopsTopArea(
+            fullName = uiState.fullName,
+            workshopCount = uiState.workshops.size,
             onBackClicked = onBackClicked,
-            heroCardOverlap = HeroCardOverlap
-        ) {
-            LegalRepresentativeHeroSubtitle(stringResource(Res.string.legal_representative_hub_subtitle))
-        }
+            topAreaState = state,
+        )
+    }
+    val listState = rememberLazyListState()
 
-        // The card rides up into the header's reserved extra space; wrapping it together with
-        // everything below in a single offset keeps their normal spacing intact instead of
-        // opening a gap where the card used to sit.
-        Column(modifier = Modifier.fillMaxSize().offset(y = -HeroCardOverlap)) {
-            LegalRepresentativeIdentitySummaryCard(
-                fullName = uiState.fullName,
-                workshopCount = uiState.workshops.size,
-                modifier = Modifier.padding(horizontal = Spacing.lg),
+    // Overlaid rather than a plain Column so the header keeps drawing edge-to-edge behind the
+    // status bar while the list passes underneath it as it scrolls.
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(taminColors.bgPage),
+    ) {
+        when {
+            uiState.isLoading -> CircularProgressIndicator(
+                color = taminColors.blueText,
+                modifier = Modifier.align(Alignment.Center),
             )
 
-            Box(modifier = Modifier.fillMaxSize()) {
-                when {
-                    uiState.isLoading -> CircularProgressIndicator(
-                        color = taminColors.blueText,
-                        modifier = Modifier.align(Alignment.Center),
-                    )
+            uiState.error != null -> ErrorStateView(
+                message = uiState.error,
+                onDismiss = {},
+                onRetry = onRetry,
+                modifier = Modifier.align(Alignment.Center),
+            )
 
-                    uiState.error != null -> ErrorStateView(
-                        message = uiState.error,
-                        onDismiss = {},
-                        onRetry = onRetry,
-                        modifier = Modifier.align(Alignment.Center),
-                    )
+            uiState.workshops.isEmpty() -> EmptyStateMessage(
+                icon = Icons.Filled.Groups,
+                title = stringResource(Res.string.legal_representative_empty_title),
+                modifier = Modifier.align(Alignment.Center),
+            )
 
-                    uiState.workshops.isEmpty() -> EmptyStateMessage(
-                        icon = Icons.Filled.Groups,
-                        title = stringResource(Res.string.legal_representative_empty_title),
-                        modifier = Modifier.align(Alignment.Center),
+            else -> LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .driveTopArea(topArea, listState),
+                contentPadding = topAreaContentPadding(
+                    state = topArea,
+                    rest = PaddingValues(start = Spacing.lg, end = Spacing.lg, top = Spacing.lg, bottom = Spacing.lg),
+                ),
+                verticalArrangement = Arrangement.spacedBy(Spacing.md),
+            ) {
+                item {
+                    BannerCard(
+                        message = stringResource(Res.string.legal_representative_info_banner),
+                        type = BannerType.Info,
                     )
-
-                    else -> LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(
-                            start = Spacing.lg,
-                            end = Spacing.lg,
-                            top = Spacing.lg,
-                            bottom = Spacing.lg + HeroCardOverlap,
-                        ),
-                        verticalArrangement = Arrangement.spacedBy(Spacing.md),
-                    ) {
-                        item {
-                            BannerCard(
-                                message = stringResource(Res.string.legal_representative_info_banner),
-                                type = BannerType.Info,
-                            )
-                        }
-                        items(uiState.workshops) { workshop ->
-                            LegalRepresentativeWorkshopCard(
-                                workshop = workshop,
-                                onOpenWorkshop = onOpenWorkshop,
-                            )
-                        }
-                    }
+                }
+                items(uiState.workshops) { workshop ->
+                    LegalRepresentativeWorkshopCard(
+                        workshop = workshop,
+                        onOpenWorkshop = onOpenWorkshop,
+                    )
                 }
             }
         }
+
+        LegalRepresentativeWorkshopsTopArea(
+            fullName = uiState.fullName,
+            workshopCount = uiState.workshops.size,
+            onBackClicked = onBackClicked,
+            topAreaState = topArea,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .reportTopAreaHeight(topArea),
+        )
+    }
+}
+
+/**
+ * The hub's floating top area: the folding gradient hero (back button, icon, subtitle) plus the
+ * identity card, which stays fully visible and pinned beneath it regardless of scroll.
+ */
+@Composable
+private fun LegalRepresentativeWorkshopsTopArea(
+    fullName: String?,
+    workshopCount: Int,
+    onBackClicked: () -> Unit,
+    topAreaState: TopAreaState,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        LegalRepresentativeHeader(onBackClicked = onBackClicked) {
+            LegalRepresentativeHeroSubtitle(
+                text = stringResource(Res.string.legal_representative_hub_subtitle),
+                topAreaState = topAreaState,
+            )
+        }
+        LegalRepresentativeIdentitySummaryCard(
+            fullName = fullName,
+            workshopCount = workshopCount,
+            modifier = Modifier.padding(horizontal = Spacing.lg, vertical = Spacing.md),
+        )
     }
 }
 
