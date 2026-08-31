@@ -46,6 +46,8 @@ import com.tamin.taminhamrah.apiService.occurrence.OccurrenceApiService
 import com.tamin.taminhamrah.apiService.occurrence.createOccurrenceApiService
 import com.tamin.taminhamrah.apiService.employerInfo.EmployerInfoApiService
 import com.tamin.taminhamrah.apiService.employerInfo.createEmployerInfoApiService
+import com.tamin.taminhamrah.apiService.inquiryEducation.InquiryEducationApiService
+import com.tamin.taminhamrah.apiService.inquiryEducation.createInquiryEducationApiService
 import com.tamin.taminhamrah.util.NetworkConstants
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
@@ -185,5 +187,10 @@ val ApiClientsModule = module {
         ktorfit.createPregnancyPayApiService()
     }
 
+
+    single<InquiryEducationApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createInquiryEducationApiService()
+    }
 }
 
