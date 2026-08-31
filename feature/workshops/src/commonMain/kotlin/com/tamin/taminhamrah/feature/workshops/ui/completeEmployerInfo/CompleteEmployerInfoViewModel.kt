@@ -12,8 +12,11 @@ import com.tamin.taminhamrah.mapper.common.toCityPresentation
 import com.tamin.taminhamrah.mapper.common.toProvincePresentation
 import com.tamin.taminhamrah.mapper.contracts.toBranchPresentation
 import com.tamin.taminhamrah.mapper.employerInfo.toWorkshopItemPRs
+import com.tamin.taminhamrah.model.employerInfo.LegalWorkshopCeoDN
 import com.tamin.taminhamrah.model.employerInfo.LegalWorkshopInfoRequestDN
 import com.tamin.taminhamrah.model.employerInfo.RealWorkshopInfoRequestDN
+import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
+import com.tamin.taminhamrah.ui.digitsOnly
 import com.tamin.taminhamrah.useCases.common.GetCitiesByProvinceUseCase
 import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
@@ -28,22 +31,12 @@ import com.tamin.taminhamrah.useCases.workshops.GetAllEmployerAgreementByNationa
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableSet
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
-import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
-import com.tamin.taminhamrah.ui.digitsOnly
-import taminx.core.core_ui.Res
-import taminx.core.core_ui.employer_info_err_ceo_birth
-import taminx.core.core_ui.employer_info_err_ceo_nid
-import taminx.core.core_ui.employer_info_err_company_type
-import taminx.core.core_ui.employer_info_err_email
-import taminx.core.core_ui.employer_info_err_legal_nid
-import taminx.core.core_ui.employer_info_err_mobile
-import taminx.core.core_ui.employer_info_err_otp_code
-import taminx.core.core_ui.employer_info_err_province_city_branch
-import taminx.core.core_ui.employer_info_err_ws_code
 
 class CompleteEmployerInfoViewModel(
     private val getAllEmployerAgreementUseCase: GetAllEmployerAgreementByNationalIdUseCase,
@@ -145,9 +138,14 @@ class CompleteEmployerInfoViewModel(
 
         // Not swallowed: the real path sends its ticket to the mobile and email that come from
         // here, so a silent failure would post a ticket request with two empty contacts and leave
-        // the person staring at a server error that names nothing.
-        try {
-            getUserProfileUseCase().collect { userProfile ->
+        // the person staring at a server error that names nothing. `catch` rather than a raw
+        // try/catch around `collect`, so cancelling the screen stays a cancellation instead of
+        // being reported as a failure.
+        getUserProfileUseCase()
+            .catch { error ->
+                sendEvent(CompleteEmployerInfoEvent.ShowToast(error.toSingleLineMessage()))
+            }
+            .collect { userProfile ->
                 emit(
                     CompleteEmployerInfoPartialState.UserInfoLoaded(
                         fullName = listOfNotNull(userProfile.firstName, userProfile.lastName).joinToString(" ").trim(),
@@ -157,14 +155,15 @@ class CompleteEmployerInfoViewModel(
                     )
                 )
             }
-        } catch (e: Exception) {
-            sendEvent(CompleteEmployerInfoEvent.ShowToast(e.toSingleLineMessage()))
-        }
 
         try {
             val agreements = getAllEmployerAgreementUseCase(emptyList())
             val items = agreements?.list?.toWorkshopItemPRs().orEmpty()
             emit(CompleteEmployerInfoPartialState.WorkshopsLoaded(items.toImmutableList()))
+        } catch (e: CancellationException) {
+            // A suspend call, so there is no `catch` operator to lean on: cancellation has to be
+            // let through by hand or leaving the screen mid-load reports itself as an error.
+            throw e
         } catch (e: Exception) {
             emit(CompleteEmployerInfoPartialState.Error(e.toSingleLineMessage()))
         }
@@ -173,36 +172,35 @@ class CompleteEmployerInfoViewModel(
     }
 
     private fun loadProvinces(): Flow<CompleteEmployerInfoPartialState> = flow {
-        try {
-            getProvincesUseCase().collect { provinces ->
+        getProvincesUseCase()
+            .catch { error ->
+                // A toast rather than the list's error state: the province picker sits behind the
+                // second tab, and blanking the workshop list for it would hide working content.
+                sendEvent(CompleteEmployerInfoEvent.ShowToast(error.toSingleLineMessage()))
+            }
+            .collect { provinces ->
                 emit(
                     CompleteEmployerInfoPartialState.ProvincesLoaded(
                         provinces.toProvincePresentation().toImmutableList()
                     )
                 )
             }
-        } catch (e: Exception) {
-            // A toast rather than the list's error state: the province picker sits behind the
-            // second tab, and blanking the workshop list for it would hide working content.
-            sendEvent(CompleteEmployerInfoEvent.ShowToast(e.toSingleLineMessage()))
-        }
     }
 
     private fun handleChangeLegalNationalId(nid: String): Flow<CompleteEmployerInfoPartialState> = flow {
         val digits = nid.digitsOnly()
         emit(CompleteEmployerInfoPartialState.LegalNationalIdChanged(digits))
         if (digits.length == 11) {
-            emit(CompleteEmployerInfoPartialState.LegalWorkshopInquiryLoading(true))
-            getLegalWorkshopUseCase(digits)
-                .catch { error ->
-                    emit(CompleteEmployerInfoPartialState.LegalWorkshopInquiryResult(null, isError = true))
-                    emit(CompleteEmployerInfoPartialState.LegalWorkshopInquiryLoading(false))
-                    sendEvent(CompleteEmployerInfoEvent.ShowToast(error.toSingleLineMessage()))
-                }
-                .collect { result ->
-                    emit(CompleteEmployerInfoPartialState.LegalWorkshopInquiryResult(result.name, isError = false))
-                    emit(CompleteEmployerInfoPartialState.LegalWorkshopInquiryLoading(false))
-                }
+            collectWhileLoading(
+                source = getLegalWorkshopUseCase(digits),
+                loading = CompleteEmployerInfoPartialState::LegalWorkshopInquiryLoading,
+                onSuccess = {
+                    CompleteEmployerInfoPartialState.LegalWorkshopInquiryResult(it.name, isError = false)
+                },
+                onFailure = {
+                    CompleteEmployerInfoPartialState.LegalWorkshopInquiryResult(null, isError = true)
+                },
+            )
         }
     }
 
@@ -211,17 +209,7 @@ class CompleteEmployerInfoViewModel(
         emit(CompleteEmployerInfoPartialState.CeoNationalIdChanged(digits))
         val currentBirthMillis = uiState.value.ceoBirthDateMillis
         if (digits.length == 10 && currentBirthMillis != null) {
-            emit(CompleteEmployerInfoPartialState.CeoInquiryLoading(true))
-            getLegalWorkshopCeoUseCase(digits, currentBirthMillis)
-                .catch { error ->
-                    emit(CompleteEmployerInfoPartialState.CeoInquiryResult(null, isError = true))
-                    emit(CompleteEmployerInfoPartialState.CeoInquiryLoading(false))
-                    sendEvent(CompleteEmployerInfoEvent.ShowToast(error.toSingleLineMessage()))
-                }
-                .collect { result ->
-                    emit(CompleteEmployerInfoPartialState.CeoInquiryResult(result.fullName, isError = false))
-                    emit(CompleteEmployerInfoPartialState.CeoInquiryLoading(false))
-                }
+            collectCeoInquiry(getLegalWorkshopCeoUseCase(digits, currentBirthMillis))
         }
     }
 
@@ -229,50 +217,32 @@ class CompleteEmployerInfoViewModel(
         emit(CompleteEmployerInfoPartialState.CeoBirthDateSelected(millis, persianDate))
         val currentCeoNid = uiState.value.ceoNationalId.digitsOnly()
         if (currentCeoNid.length == 10) {
-            emit(CompleteEmployerInfoPartialState.CeoInquiryLoading(true))
-            getLegalWorkshopCeoUseCase(currentCeoNid, millis)
-                .catch { error ->
-                    emit(CompleteEmployerInfoPartialState.CeoInquiryResult(null, isError = true))
-                    emit(CompleteEmployerInfoPartialState.CeoInquiryLoading(false))
-                    sendEvent(CompleteEmployerInfoEvent.ShowToast(error.toSingleLineMessage()))
-                }
-                .collect { result ->
-                    emit(CompleteEmployerInfoPartialState.CeoInquiryResult(result.fullName, isError = false))
-                    emit(CompleteEmployerInfoPartialState.CeoInquiryLoading(false))
-                }
+            collectCeoInquiry(getLegalWorkshopCeoUseCase(currentCeoNid, millis))
         }
     }
 
     private fun handleSelectProvince(province: com.tamin.taminhamrah.model.common.ProvincePR): Flow<CompleteEmployerInfoPartialState> = flow {
         emit(CompleteEmployerInfoPartialState.ProvinceSelected(province))
-        emit(CompleteEmployerInfoPartialState.CitiesLoading(true))
-        getCitiesByProvinceUseCase(province.provinceCode)
-            .catch { error ->
-                // An empty picker with no explanation reads as a broken screen, so the parsed
-                // message goes to the toast host rather than being dropped with the list.
-                emit(CompleteEmployerInfoPartialState.CitiesLoaded(persistentListOf()))
-                emit(CompleteEmployerInfoPartialState.CitiesLoading(false))
-                sendEvent(CompleteEmployerInfoEvent.ShowToast(error.toSingleLineMessage()))
-            }
-            .collect { result ->
-                emit(CompleteEmployerInfoPartialState.CitiesLoaded(result.cities.toCityPresentation().toImmutableList()))
-                emit(CompleteEmployerInfoPartialState.CitiesLoading(false))
-            }
+        collectWhileLoading(
+            source = getCitiesByProvinceUseCase(province.provinceCode),
+            loading = CompleteEmployerInfoPartialState::CitiesLoading,
+            onSuccess = {
+                CompleteEmployerInfoPartialState.CitiesLoaded(it.cities.toCityPresentation().toImmutableList())
+            },
+            onFailure = { CompleteEmployerInfoPartialState.CitiesLoaded(persistentListOf()) },
+        )
     }
 
     private fun handleSelectCity(city: com.tamin.taminhamrah.model.common.CityPR): Flow<CompleteEmployerInfoPartialState> = flow {
         emit(CompleteEmployerInfoPartialState.CitySelected(city))
-        emit(CompleteEmployerInfoPartialState.BranchesLoading(true))
-        getBranchesUseCase(city.cityCode)
-            .catch { error ->
-                emit(CompleteEmployerInfoPartialState.BranchesLoaded(persistentListOf()))
-                emit(CompleteEmployerInfoPartialState.BranchesLoading(false))
-                sendEvent(CompleteEmployerInfoEvent.ShowToast(error.toSingleLineMessage()))
-            }
-            .collect { branches ->
-                emit(CompleteEmployerInfoPartialState.BranchesLoaded(branches.toBranchPresentation().toImmutableList()))
-                emit(CompleteEmployerInfoPartialState.BranchesLoading(false))
-            }
+        collectWhileLoading(
+            source = getBranchesUseCase(city.cityCode),
+            loading = CompleteEmployerInfoPartialState::BranchesLoading,
+            onSuccess = {
+                CompleteEmployerInfoPartialState.BranchesLoaded(it.toBranchPresentation().toImmutableList())
+            },
+            onFailure = { CompleteEmployerInfoPartialState.BranchesLoaded(persistentListOf()) },
+        )
     }
 
     private fun handleSubmitLegalForm(): Flow<CompleteEmployerInfoPartialState> = flow {
@@ -379,6 +349,44 @@ class CompleteEmployerInfoViewModel(
                 }
         }
     }
+
+    /**
+     * The shape every lookup on this screen shares: raise a loading flag, replace it with the
+     * result, and on failure fall back to an empty answer while the parsed message goes to the
+     * toast host - an empty picker with no explanation reads as a broken screen.
+     *
+     * `catch` rather than a try/catch around `collect`, so cancelling the screen mid-lookup stays
+     * a cancellation instead of being reported as a failure.
+     */
+    private suspend fun <T> FlowCollector<CompleteEmployerInfoPartialState>.collectWhileLoading(
+        source: Flow<T>,
+        loading: (Boolean) -> CompleteEmployerInfoPartialState,
+        onSuccess: (T) -> CompleteEmployerInfoPartialState,
+        onFailure: () -> CompleteEmployerInfoPartialState,
+    ) {
+        val downstream = this
+        downstream.emit(loading(true))
+        source
+            .catch { error ->
+                downstream.emit(onFailure())
+                downstream.emit(loading(false))
+                sendEvent(CompleteEmployerInfoEvent.ShowToast(error.toSingleLineMessage()))
+            }
+            .collect { value ->
+                downstream.emit(onSuccess(value))
+                downstream.emit(loading(false))
+            }
+    }
+
+    /** The manager's identity is looked up from two different fields, on the same terms. */
+    private suspend fun FlowCollector<CompleteEmployerInfoPartialState>.collectCeoInquiry(
+        source: Flow<LegalWorkshopCeoDN>,
+    ) = collectWhileLoading(
+        source = source,
+        loading = CompleteEmployerInfoPartialState::CeoInquiryLoading,
+        onSuccess = { CompleteEmployerInfoPartialState.CeoInquiryResult(it.fullName, isError = false) },
+        onFailure = { CompleteEmployerInfoPartialState.CeoInquiryResult(null, isError = true) },
+    )
 
     override fun reduceState(
         currentState: CompleteEmployerInfoUiState,
