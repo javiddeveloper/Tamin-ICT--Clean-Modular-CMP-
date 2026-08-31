@@ -204,12 +204,12 @@ fun CompleteEmployerInfoScreen(
                                     onEmailChanged = { onIntent(CompleteEmployerInfoIntent.ChangeLegalEmail(it)) },
                                     // Shown as soon as the form is touched, so a disabled button
                                     // always says what is still missing.
-                                    errorMessage = if (state.hasTouchedLegalForm) {
-                                        state.legalBlockingError?.let { stringResource(it) }
-                                    } else {
-                                        null
-                                    },
-                                    hasAttemptedSubmit = state.hasAttemptedLegalSubmit,
+                                    legalNationalIdError = state.legalNationalIdError?.let { stringResource(it) },
+                                    companyTypeError = state.companyTypeError?.let { stringResource(it) },
+                                    ceoNationalIdError = state.ceoNationalIdError?.let { stringResource(it) },
+                                    ceoBirthError = state.ceoBirthError?.let { stringResource(it) },
+                                    mobileError = state.legalMobileError?.let { stringResource(it) },
+                                    emailError = state.legalEmailError?.let { stringResource(it) },
                                     isSubmitting = state.isSubmitting,
                                     canSubmit = state.canSubmitLegal,
                                     onSubmit = { onIntent(CompleteEmployerInfoIntent.SubmitLegalForm) },

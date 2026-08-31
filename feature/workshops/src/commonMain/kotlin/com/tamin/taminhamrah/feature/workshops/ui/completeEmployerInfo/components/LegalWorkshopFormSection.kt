@@ -23,7 +23,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Email
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -51,7 +50,6 @@ import com.tamin.taminhamrah.model.employerInfo.CompanyTypePR
 import com.tamin.taminhamrah.ui.components.SegmentedInputField
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.components.animatedErrorBorder
-import com.tamin.taminhamrah.ui.digitsOnly
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
@@ -78,8 +76,6 @@ import taminx.core.core_ui.employer_info_select_hint
 import taminx.core.core_ui.employer_info_tel_label
 import taminx.core.core_ui.ic_tamin_chevron_back
 
-private val MOBILE_REGEX = Regex("^09\\d{9}$")
-private val EMAIL_REGEX = Regex("^\\S+@\\S+\\.\\S+$")
 
 @Composable
 fun LegalWorkshopFormSection(
@@ -101,8 +97,12 @@ fun LegalWorkshopFormSection(
     onMobileChanged: (String) -> Unit,
     email: String,
     onEmailChanged: (String) -> Unit,
-    errorMessage: String?,
-    hasAttemptedSubmit: Boolean,
+    legalNationalIdError: String?,
+    companyTypeError: String?,
+    ceoNationalIdError: String?,
+    ceoBirthError: String?,
+    mobileError: String?,
+    emailError: String?,
     isSubmitting: Boolean,
     canSubmit: Boolean,
     onSubmit: () -> Unit,
@@ -111,12 +111,14 @@ fun LegalWorkshopFormSection(
     val colors = LocalTaminColors.current
     var showDatePicker by remember { mutableStateOf(false) }
 
-    val isLegalNidError = hasAttemptedSubmit && legalNationalId.digitsOnly().length != LEGAL_NATIONAL_ID_SLOTS
-    val isCompanyTypeError = hasAttemptedSubmit && selectedCompanyType == null
-    val isCeoNidError = hasAttemptedSubmit && ceoNationalId.digitsOnly().length != CEO_NATIONAL_ID_SLOTS
-    val isCeoBirthError = hasAttemptedSubmit && ceoBirthDatePersian.isBlank()
-    val isMobileError = hasAttemptedSubmit && !mobile.digitsOnly().matches(MOBILE_REGEX)
-    val isEmailError = hasAttemptedSubmit && !email.trim().matches(EMAIL_REGEX)
+    // Each field is red exactly when it has a message to show underneath, so the border and the
+    // reason can never disagree.
+    val isLegalNidError = legalNationalIdError != null
+    val isCompanyTypeError = companyTypeError != null
+    val isCeoNidError = ceoNationalIdError != null
+    val isCeoBirthError = ceoBirthError != null
+    val isMobileError = mobileError != null
+    val isEmailError = emailError != null
 
     Column(
         modifier = modifier.fillMaxWidth().padding(horizontal = Spacing.lg),
@@ -163,6 +165,7 @@ fun LegalWorkshopFormSection(
                     onValueChange = onLegalNationalIdChanged,
                     slotCount = LEGAL_NATIONAL_ID_SLOTS,
                     error = isLegalNidError,
+                    errorMessage = legalNationalIdError,
                 )
             }
 
@@ -223,6 +226,7 @@ fun LegalWorkshopFormSection(
                         ?: stringResource(Res.string.employer_info_select_hint),
                     isSelected = selectedCompanyType != null,
                     isError = isCompanyTypeError,
+                    errorMessage = companyTypeError,
                     onClick = onOpenCompanyTypePicker,
                 )
             }
@@ -276,6 +280,7 @@ fun LegalWorkshopFormSection(
                         onValueChange = onCeoNationalIdChanged,
                         slotCount = CEO_NATIONAL_ID_SLOTS,
                         error = isCeoNidError,
+                        errorMessage = ceoNationalIdError,
                     )
                 }
 
@@ -328,6 +333,7 @@ fun LegalWorkshopFormSection(
                             modifier = Modifier.weight(1f),
                         )
                     }
+                    FieldErrorText(ceoBirthError)
                 }
             }
 
@@ -479,6 +485,7 @@ fun LegalWorkshopFormSection(
                             },
                         )
                     }
+                    FieldErrorText(mobileError)
                 }
             }
 
@@ -534,34 +541,12 @@ fun LegalWorkshopFormSection(
                             }
                         },
                     )
+                    FieldErrorText(emailError)
                 }
             }
         }
 
         // Error message line
-        if (!errorMessage.isNullOrBlank()) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Info,
-                    contentDescription = null,
-                    tint = colors.dangerText,
-                    modifier = Modifier.size(14.dp),
-                )
-                Text(
-                    text = errorMessage,
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        color = colors.dangerText,
-                        fontSize = 11.sp,
-                    ),
-                )
-            }
-        }
-
         Spacer(modifier = Modifier.height(2.dp))
 
         // Submit Button
@@ -593,9 +578,11 @@ private fun SelectPickerChip(
     text: String,
     isSelected: Boolean,
     isError: Boolean = false,
+    errorMessage: String? = null,
     onClick: () -> Unit,
 ) {
     val colors = LocalTaminColors.current
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
     Row(
         modifier = Modifier
             .fillMaxWidth()

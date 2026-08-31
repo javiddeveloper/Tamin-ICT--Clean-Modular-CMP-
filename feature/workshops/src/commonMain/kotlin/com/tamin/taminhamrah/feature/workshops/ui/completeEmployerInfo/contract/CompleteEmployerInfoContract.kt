@@ -10,6 +10,8 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
+import com.tamin.taminhamrah.model.common.isValidEmail
+import com.tamin.taminhamrah.model.common.isValidIranianMobile
 import com.tamin.taminhamrah.ui.digitsOnly
 import org.jetbrains.compose.resources.StringResource
 import taminx.core.core_ui.Res
@@ -144,8 +146,8 @@ data class CompleteEmployerInfoUiState(
             ceoNationalId.digitsOnly().length != CEO_NATIONAL_ID_LENGTH ->
                 Res.string.employer_info_err_ceo_nid
             ceoBirthDateMillis == null -> Res.string.employer_info_err_ceo_birth
-            !MOBILE_PATTERN.matches(legalMobile.digitsOnly()) -> Res.string.employer_info_err_mobile
-            !EMAIL_PATTERN.matches(legalEmail.trim()) -> Res.string.employer_info_err_email
+            !isValidIranianMobile(legalMobile.digitsOnly()) -> Res.string.employer_info_err_mobile
+            !isValidEmail(legalEmail) -> Res.string.employer_info_err_email
             else -> null
         }
 
@@ -206,11 +208,11 @@ data class CompleteEmployerInfoUiState(
 
     val legalMobileError: StringResource?
         get() = Res.string.employer_info_err_mobile
-            .takeIf { legalMobile.isNotBlank() && !MOBILE_PATTERN.matches(legalMobile.digitsOnly()) }
+            .takeIf { legalMobile.isNotBlank() && !isValidIranianMobile(legalMobile.digitsOnly()) }
 
     val legalEmailError: StringResource?
         get() = Res.string.employer_info_err_email
-            .takeIf { legalEmail.isNotBlank() && !EMAIL_PATTERN.matches(legalEmail.trim()) }
+            .takeIf { legalEmail.isNotBlank() && !isValidEmail(legalEmail) }
 
     val canSubmitLegal: Boolean get() = legalBlockingError == null
     val canSubmitReal: Boolean get() = realBlockingError == null
@@ -339,5 +341,3 @@ private const val CEO_NATIONAL_ID_LENGTH = 10
 private const val WORKSHOP_CODE_LENGTH = 10
 private const val OTP_LENGTH = 5
 
-private val MOBILE_PATTERN = Regex("""^09\d{9}$""")
-private val EMAIL_PATTERN = Regex("""^\S+@\S+\.\S+$""")
