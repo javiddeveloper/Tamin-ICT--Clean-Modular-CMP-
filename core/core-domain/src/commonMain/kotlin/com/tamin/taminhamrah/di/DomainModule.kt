@@ -178,6 +178,7 @@ import com.tamin.taminhamrah.useCases.workshops.GetWorkshopStackHoldersUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopsDebtsListUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetLegalRepresentativeWorkshopsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetLegalRepresentativesUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetLegalRepresentativeWorkshopContractsUseCase
 import com.tamin.taminhamrah.useCases.workshops.RequestLegalRepresentativeTicketUseCase
 import com.tamin.taminhamrah.useCases.workshops.VerifyLegalRepresentativeTicketUseCase
 import com.tamin.taminhamrah.useCases.workshops.SubmitLegalRepresentativeUseCase
@@ -368,6 +369,7 @@ val domainModule = module {
     factoryOf(::GetWorkshopStackHoldersUseCase)
     factoryOf(::GetLegalRepresentativeWorkshopsUseCase)
     factoryOf(::GetLegalRepresentativesUseCase)
+    factoryOf(::GetLegalRepresentativeWorkshopContractsUseCase)
     factoryOf(::RequestLegalRepresentativeTicketUseCase)
     factoryOf(::VerifyLegalRepresentativeTicketUseCase)
     factoryOf(::SubmitLegalRepresentativeUseCase)

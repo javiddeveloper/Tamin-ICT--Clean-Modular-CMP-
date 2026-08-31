@@ -2,16 +2,21 @@ package com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.add
 
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.util.isValidIranianNationalCode
+import com.tamin.taminhamrah.mapper.workshop.toPresentation
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeRequestDN
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
+import com.tamin.taminhamrah.useCases.workshops.GetLegalRepresentativeWorkshopContractsUseCase
 import com.tamin.taminhamrah.useCases.workshops.RequestLegalRepresentativeTicketUseCase
 import com.tamin.taminhamrah.useCases.workshops.SubmitLegalRepresentativeUseCase
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.merge
 
 class AddLegalRepresentativeViewModel(
     private val requestLegalRepresentativeTicketUseCase: RequestLegalRepresentativeTicketUseCase,
     private val submitLegalRepresentativeUseCase: SubmitLegalRepresentativeUseCase,
+    private val getLegalRepresentativeWorkshopContractsUseCase: GetLegalRepresentativeWorkshopContractsUseCase,
 ) : BaseViewModel<
     AddLegalRepresentativeUiState,
     AddLegalRepresentativeUiState.PartialState,
@@ -22,19 +27,23 @@ class AddLegalRepresentativeViewModel(
     override fun handleIntent(
         intent: AddLegalRepresentativeIntent
     ): Flow<AddLegalRepresentativeUiState.PartialState> = when (intent) {
-        is AddLegalRepresentativeIntent.Init -> flow {
-            emit(
-                AddLegalRepresentativeUiState.PartialState.Init(
-                    workshopId = intent.workshopId,
-                    branchCode = intent.branchCode,
-                    isEditMode = intent.isEditMode,
-                    nationalCode = intent.nationalCode,
-                    hasElectronicNotification = intent.hasElectronicNotification,
-                    hasInternetList = intent.hasInternetList,
-                    hasInsuredRegistration = intent.hasInsuredRegistration,
+        is AddLegalRepresentativeIntent.Init -> merge(
+            flow {
+                emit(
+                    AddLegalRepresentativeUiState.PartialState.Init(
+                        workshopId = intent.workshopId,
+                        branchCode = intent.branchCode,
+                        isEditMode = intent.isEditMode,
+                        nationalCode = intent.nationalCode,
+                        hasElectronicNotification = intent.hasElectronicNotification,
+                        hasInternetList = intent.hasInternetList,
+                        hasInsuredRegistration = intent.hasInsuredRegistration,
+                        isSpecialWorkshop = intent.special,
+                    )
                 )
-            )
-        }
+            },
+            if (intent.special) loadContracts(intent.workshopId, intent.branchCode) else flow { }
+        )
 
         is AddLegalRepresentativeIntent.NationalCodeChanged -> flow {
             val digitsOnly = intent.value.filter { it.isDigit() }.take(10)
@@ -78,6 +87,24 @@ class AddLegalRepresentativeViewModel(
             emit(AddLegalRepresentativeUiState.PartialState.OtpChanged(intent.value))
         }
 
+        is AddLegalRepresentativeIntent.OpenContractPicker -> flow {
+            emit(AddLegalRepresentativeUiState.PartialState.ContractPickerOpened)
+        }
+
+        is AddLegalRepresentativeIntent.DismissContractPicker -> flow {
+            emit(AddLegalRepresentativeUiState.PartialState.ContractPickerDismissed)
+        }
+
+        is AddLegalRepresentativeIntent.ToggleContractRow -> flow {
+            val current = uiState.value.selectedContractRows
+            val updated = if (current.contains(intent.contractRow)) {
+                current - intent.contractRow
+            } else {
+                current + intent.contractRow
+            }
+            emit(AddLegalRepresentativeUiState.PartialState.ContractRowToggled(updated))
+        }
+
         is AddLegalRepresentativeIntent.Submit -> flow {
             val state = uiState.value
             if (state.isSubmitting || !state.canSubmit) return@flow
@@ -89,16 +116,34 @@ class AddLegalRepresentativeViewModel(
                         nationalCode = state.nationalCode,
                         workshopId = state.workshopId,
                         branchCode = state.branchCode,
-                        special = false,
+                        special = state.isSpecialWorkshop,
                         hasElectronicNotification = state.hasElectronicNotification,
                         hasInternetList = state.hasInternetList,
                         hasInsuredRegistration = state.hasInsuredRegistration,
+                        contractRows = state.selectedContractRows,
                     )
                 )
                 emit(AddLegalRepresentativeUiState.PartialState.Submitted)
             } catch (e: Exception) {
                 emit(AddLegalRepresentativeUiState.PartialState.SubmitFailed(e.toSingleLineMessage()))
             }
+        }
+    }
+
+    private fun loadContracts(
+        workshopId: String,
+        branchCode: String
+    ): Flow<AddLegalRepresentativeUiState.PartialState> = flow {
+        emit(AddLegalRepresentativeUiState.PartialState.LoadingContracts)
+        try {
+            val result = getLegalRepresentativeWorkshopContractsUseCase(workshopId, branchCode).first()
+            emit(
+                AddLegalRepresentativeUiState.PartialState.ContractsLoaded(
+                    result?.list?.map { it.toPresentation() } ?: emptyList()
+                )
+            )
+        } catch (e: Exception) {
+            emit(AddLegalRepresentativeUiState.PartialState.ContractsLoadFailed(e.toSingleLineMessage()))
         }
     }
 
@@ -114,6 +159,7 @@ class AddLegalRepresentativeViewModel(
             hasElectronicNotification = partialState.hasElectronicNotification,
             hasInternetList = partialState.hasInternetList,
             hasInsuredRegistration = partialState.hasInsuredRegistration,
+            isSpecialWorkshop = partialState.isSpecialWorkshop,
         )
 
         is AddLegalRepresentativeUiState.PartialState.NationalCodeChanged -> currentState.copy(
@@ -144,6 +190,24 @@ class AddLegalRepresentativeViewModel(
 
         is AddLegalRepresentativeUiState.PartialState.OtpChanged ->
             currentState.copy(otpCode = partialState.value, otpError = null)
+
+        is AddLegalRepresentativeUiState.PartialState.LoadingContracts ->
+            currentState.copy(isLoadingContracts = true)
+
+        is AddLegalRepresentativeUiState.PartialState.ContractsLoaded ->
+            currentState.copy(isLoadingContracts = false, availableContracts = partialState.contracts)
+
+        is AddLegalRepresentativeUiState.PartialState.ContractsLoadFailed ->
+            currentState.copy(isLoadingContracts = false, error = partialState.message)
+
+        is AddLegalRepresentativeUiState.PartialState.ContractPickerOpened ->
+            currentState.copy(isContractPickerOpen = true)
+
+        is AddLegalRepresentativeUiState.PartialState.ContractPickerDismissed ->
+            currentState.copy(isContractPickerOpen = false)
+
+        is AddLegalRepresentativeUiState.PartialState.ContractRowToggled ->
+            currentState.copy(selectedContractRows = partialState.selectedContractRows)
 
         is AddLegalRepresentativeUiState.PartialState.Submitting ->
             currentState.copy(isSubmitting = true, error = null)

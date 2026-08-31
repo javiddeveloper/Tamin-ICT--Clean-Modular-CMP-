@@ -1159,7 +1159,8 @@
     <string name="legal_representative_delete_confirm_message">دسترسی %1$s به سرویس‌های این کارگاه حذف شود؟</string>
     <string name="legal_representative_delete_confirm_action">حذف نماینده</string>
     <string name="legal_representative_cancel_action">انصراف</string>
-    <string name="legal_representative_empty_list_message">هنوز نماینده‌ای برای این کارگاه ثبت نشده است.</string>
+    <string name="legal_representative_empty_list_message">برای این کارگاه نماینده‌ای ثبت نشده است</string>
+    <string name="legal_representative_empty_list_hint">با دکمهٔ «معرفی نماینده» اولین نماینده را اضافه کنید.</string>
     <string name="legal_representative_add_title">معرفی نماینده</string>
     <string name="legal_representative_edit_title">ویرایش نماینده</string>
     <string name="legal_representative_add_heading">معرفی نمایندهٔ جدید</string>
@@ -1173,6 +1174,10 @@
     <string name="legal_representative_internet_list">لیست اینترنتی</string>
     <string name="legal_representative_insured_registration">نام‌نویسی بیمه‌شده</string>
     <string name="legal_representative_access_code_label">کد دسترسی</string>
+    <string name="legal_representative_contracts_label">پیمان‌های انتخاب‌شده</string>
+    <string name="legal_representative_contracts_placeholder">انتخاب پیمان‌ها</string>
+    <string name="legal_representative_contracts_picker_title">پیمان‌های این نماینده</string>
+    <string name="legal_representative_contracts_confirm_action">تأیید انتخاب</string>
     <string name="legal_representative_submit_action">ثبت</string>
     <string name="legal_representative_add_success_message">نمایندهٔ جدید برای این کارگاه ثبت شد.</string>
     <string name="legal_representative_edit_success_message">دسترسی‌های نمایندهٔ انتخاب‌شده به‌روزرسانی شد.</string>

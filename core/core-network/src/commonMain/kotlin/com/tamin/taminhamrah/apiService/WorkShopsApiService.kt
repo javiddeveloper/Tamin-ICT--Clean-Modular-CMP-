@@ -8,6 +8,7 @@ package com.tamin.taminhamrah.apiService
 
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeContractDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeRequestDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopDTO
@@ -108,6 +109,19 @@ internal interface WorkShopsApiService {
         @Query("filter") filter: String = "[]",
         @Query("sort") sort: String = "[]",
     ): BaseDTO<ListData<LegalRepresentativeDTO>>
+
+    // The workshop's contracts (پیمان‌ها) — only relevant for a "special" workshop. Mirrors the
+    // legacy Android app's real endpoint of the same shape.
+    @GET("workshop-services/get-employer-agreement-by-workshop-id-and-branch-code/{workshopId}/{branchCode}")
+    suspend fun getLegalRepresentativeWorkshopContracts(
+        @Path("workshopId") workshopId: String,
+        @Path("branchCode") branchCode: String,
+        @Query("page") page: String = "1",
+        @Query("start") start: String = "0",
+        @Query("limit") limit: String = "100",
+        @Query("filter") filter: String = "[]",
+        @Query("sort") sort: String = "[]",
+    ): BaseDTO<ListData<LegalRepresentativeContractDTO>>
 
     @GET("legal-ticket")
     suspend fun requestLegalTicket(): BaseDTO<JsonElement?>

@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.mapper.workshop
 
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeContractDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeWorkshopDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
@@ -8,6 +9,7 @@ import com.tamin.taminhamrah.model.workshop.EmployerAgreementPR
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementListPR
 import com.tamin.taminhamrah.model.workshop.EmployerWorkshopDN
 import com.tamin.taminhamrah.model.workshop.EmployerWorkshopPR
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeContractPR
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativePR
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopPR
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
@@ -231,5 +233,12 @@ fun LegalRepresentativeDN.toPresentation(): LegalRepresentativePR {
         workshopId = workshopId,
         branchCode = branchCode,
         special = special,
+    )
+}
+
+fun LegalRepresentativeContractDN.toPresentation(): LegalRepresentativeContractPR {
+    return LegalRepresentativeContractPR(
+        contractRow = contractRow,
+        title = title,
     )
 }

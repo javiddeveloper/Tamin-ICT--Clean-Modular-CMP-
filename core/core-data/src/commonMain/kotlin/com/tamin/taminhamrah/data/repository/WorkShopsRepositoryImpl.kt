@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSourc
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementListDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeContractListDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeListDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeRequestDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeWorkshopListDN
@@ -171,6 +172,21 @@ class WorkShopsRepositoryImpl(
         emit(
             response?.let {
                 LegalRepresentativeListDN(
+                    list = it.list?.map { item -> item.toDomain() } ?: emptyList(),
+                    total = it.total ?: 0
+                )
+            }
+        )
+    }
+
+    override fun getLegalRepresentativeWorkshopContracts(
+        workshopId: String,
+        branchCode: String
+    ): Flow<LegalRepresentativeContractListDN?> = flow {
+        val response = remoteDataSource.getLegalRepresentativeWorkshopContracts(workshopId, branchCode)
+        emit(
+            response?.let {
+                LegalRepresentativeContractListDN(
                     list = it.list?.map { item -> item.toDomain() } ?: emptyList(),
                     total = it.total ?: 0
                 )

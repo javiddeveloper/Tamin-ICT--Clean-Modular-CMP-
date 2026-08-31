@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.repository.workshops
 
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeContractListDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeListDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeRequestDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeWorkshopListDN
@@ -118,6 +119,15 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     ): Flow<LegalRepresentativeListDN?> = flow {
         if (shouldThrowError) throw error
         emit(legalRepresentativesResult)
+    }
+
+    var legalRepresentativeWorkshopContractsResult: LegalRepresentativeContractListDN? = null
+    override fun getLegalRepresentativeWorkshopContracts(
+        workshopId: String,
+        branchCode: String
+    ): Flow<LegalRepresentativeContractListDN?> = flow {
+        if (shouldThrowError) throw error
+        emit(legalRepresentativeWorkshopContractsResult)
     }
 
     override suspend fun requestLegalRepresentativeTicket(nationalCode: String?) {

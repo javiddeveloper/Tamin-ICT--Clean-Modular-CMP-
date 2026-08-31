@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.data.mapper
 
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeContractDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeRequestDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeWorkshopDN
@@ -7,6 +8,7 @@ import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
 import com.tamin.taminhamrah.model.workshop.EmployerWorkshopDN
 import com.tamin.taminhamrah.model.workshop.EmployerWorkshopDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeContractDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeRequestDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopDTO
@@ -263,5 +265,13 @@ fun LegalRepresentativeRequestDN.toDto(ticket: String): LegalRepresentativeReque
         workshopId = workshopId,
         special = special,
         ticket = ticket,
+        contractRows = contractRows.takeIf { special && it.isNotEmpty() },
+    )
+}
+
+fun LegalRepresentativeContractDTO.toDomain(): LegalRepresentativeContractDN {
+    return LegalRepresentativeContractDN(
+        contractRow = contractRow ?: "",
+        title = title,
     )
 }

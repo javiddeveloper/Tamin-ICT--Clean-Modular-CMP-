@@ -56,4 +56,16 @@ data class LegalRepresentativeRequestDN(
     val hasElectronicNotification: Boolean,
     val hasInternetList: Boolean,
     val hasInsuredRegistration: Boolean,
+    val contractRows: List<String> = emptyList(),
+)
+
+/** One contract (پیمان) belonging to a "special" (پیمانکاری) workshop. */
+data class LegalRepresentativeContractDN(
+    val contractRow: String,
+    val title: String? = null,
+)
+
+data class LegalRepresentativeContractListDN(
+    val list: List<LegalRepresentativeContractDN>,
+    val total: Int,
 )

@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.dataSource.workshopsSource
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeContractDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeRequestDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopDTO
@@ -65,6 +66,11 @@ interface WorkShopsRemoteDataSource {
         workshopId: String,
         branchCode: String
     ): ListData<LegalRepresentativeDTO>?
+
+    suspend fun getLegalRepresentativeWorkshopContracts(
+        workshopId: String,
+        branchCode: String
+    ): ListData<LegalRepresentativeContractDTO>?
 
     suspend fun requestLegalRepresentativeTicket(nationalCode: String?)
 

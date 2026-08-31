@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.repository
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementListDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeContractListDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeListDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeRequestDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeWorkshopListDN
@@ -67,6 +68,12 @@ interface WorkShopsRepository {
         workshopId: String,
         branchCode: String
     ): Flow<LegalRepresentativeListDN?>
+
+    /** Contracts (پیمان‌ها) belonging to one workshop — only relevant for a "special" workshop. */
+    fun getLegalRepresentativeWorkshopContracts(
+        workshopId: String,
+        branchCode: String
+    ): Flow<LegalRepresentativeContractListDN?>
 
     /** Requests a one-time verification code, optionally scoped to a specific national code. */
     suspend fun requestLegalRepresentativeTicket(nationalCode: String? = null)

@@ -19,6 +19,7 @@ import com.tamin.taminhamrah.model.contracts.PremiumRateDN
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDN
 import com.tamin.taminhamrah.model.contracts.SaveContactRequestDN
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeContractListDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeListDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeRequestDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeWorkshopListDN
@@ -153,6 +154,10 @@ internal class FakeCascadeWorkShopsRepository : WorkShopsRepository {
         workshopId: String,
         branchCode: String
     ): Flow<LegalRepresentativeListDN?> = unused()
+    override fun getLegalRepresentativeWorkshopContracts(
+        workshopId: String,
+        branchCode: String
+    ): Flow<LegalRepresentativeContractListDN?> = unused()
     override suspend fun requestLegalRepresentativeTicket(nationalCode: String?): Unit = unusedValue()
     override suspend fun verifyLegalRepresentativeTicket(ticket: String): Unit = unusedValue()
     override suspend fun submitLegalRepresentative(ticket: String, request: LegalRepresentativeRequestDN): Unit = unusedValue()

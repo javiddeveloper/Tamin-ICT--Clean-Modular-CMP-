@@ -40,4 +40,21 @@ data class LegalRepresentativeRequestDTO(
     // The legacy Android client also duplicated the ticket here even though it's already the
     // {ticket} path segment — kept for fidelity with the confirmed-unchanged backend contract.
     @SerialName("ticket") val ticket: String?,
+    // Only meaningful when [special] is true — the workshop's contract rows (پیمان‌ها) this
+    // representative gets access to. Absent/empty for a non-special workshop.
+    @SerialName("contractRows") val contractRows: List<String>? = null,
+)
+
+/**
+ * One contract (پیمان) belonging to a "special" (پیمانکاری) workshop.
+ *
+ * The legacy Android app's equivalent response (`EmployerWorkshop`) never carried a
+ * human-readable contract title — only workshop/person fields plus [contractRow] (there,
+ * `pymseq`). [title] is a best-guess field name pending a real API sample, matching the same
+ * caveat already on [LegalRepresentativeDTO.fullName].
+ */
+@Serializable
+data class LegalRepresentativeContractDTO(
+    @SerialName("contractRow") val contractRow: String? = null,
+    @SerialName("title") val title: String? = null,
 )

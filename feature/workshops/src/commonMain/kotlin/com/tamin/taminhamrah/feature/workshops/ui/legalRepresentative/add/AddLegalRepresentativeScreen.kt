@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.add
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,14 +12,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,12 +31,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.components.LegalRepresentativeContractPickerSheet
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.components.LegalRepresentativeHeader
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.components.LegalRepresentativeOtpSection
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.components.LegalRepresentativeWorkshopSummaryCard
@@ -43,20 +47,24 @@ import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminStyledTextField
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.graphics.SolidColor
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_check
+import taminx.core.core_ui.ic_tamin_chevron_forward
+import taminx.core.core_ui.ic_tamin_workshop_badge
 import taminx.core.core_ui.legal_representative_access_code_label
 import taminx.core.core_ui.legal_representative_access_services_hint
-import taminx.core.core_ui.legal_representative_credit_code_label
 import taminx.core.core_ui.legal_representative_add_heading
+import taminx.core.core_ui.legal_representative_add_success_message
+import taminx.core.core_ui.legal_representative_contracts_label
+import taminx.core.core_ui.legal_representative_credit_code_label
 import taminx.core.core_ui.legal_representative_edit_heading
+import taminx.core.core_ui.legal_representative_edit_success_message
 import taminx.core.core_ui.legal_representative_electronic_notification
 import taminx.core.core_ui.legal_representative_insured_registration
 import taminx.core.core_ui.legal_representative_internet_list
@@ -65,8 +73,6 @@ import taminx.core.core_ui.legal_representative_national_code_placeholder
 import taminx.core.core_ui.legal_representative_otp_description_agent
 import taminx.core.core_ui.legal_representative_otp_request_action
 import taminx.core.core_ui.legal_representative_otp_sent_to_national_code
-import taminx.core.core_ui.legal_representative_add_success_message
-import taminx.core.core_ui.legal_representative_edit_success_message
 import taminx.core.core_ui.legal_representative_submit_action
 import taminx.core.core_ui.legal_representative_success_confirm
 import taminx.core.core_ui.legal_representative_success_title
@@ -82,6 +88,7 @@ fun AddLegalRepresentativeScreen(
     hasElectronicNotification: Boolean,
     hasInternetList: Boolean,
     hasInsuredRegistration: Boolean,
+    special: Boolean,
     onBackClicked: () -> Unit,
     onSubmitted: () -> Unit,
     viewModel: AddLegalRepresentativeViewModel = koinViewModel(),
@@ -98,6 +105,7 @@ fun AddLegalRepresentativeScreen(
                 hasElectronicNotification = hasElectronicNotification,
                 hasInternetList = hasInternetList,
                 hasInsuredRegistration = hasInsuredRegistration,
+                special = special,
             )
         )
     }
@@ -186,6 +194,13 @@ fun AddLegalRepresentativeScreen(
                 )
             }
 
+            if (uiState.isSpecialWorkshop) {
+                LegalRepresentativeContractsSummaryRow(
+                    selectedContractRows = uiState.selectedContractRows,
+                    onClick = { viewModel.sendIntent(AddLegalRepresentativeIntent.OpenContractPicker) },
+                )
+            }
+
             if (uiState.isTicketRequested) {
                 LegalRepresentativeOtpSection(
                     isTicketRequested = true,
@@ -255,6 +270,69 @@ fun AddLegalRepresentativeScreen(
                 )
             },
             dismissButton = {},
+        )
+    }
+
+    if (uiState.isContractPickerOpen) {
+        LegalRepresentativeContractPickerSheet(
+            contracts = uiState.availableContracts,
+            selectedContractRows = uiState.selectedContractRows,
+            isLoading = uiState.isLoadingContracts,
+            onToggleContractRow = { viewModel.sendIntent(AddLegalRepresentativeIntent.ToggleContractRow(it)) },
+            onConfirm = { viewModel.sendIntent(AddLegalRepresentativeIntent.DismissContractPicker) },
+        )
+    }
+}
+
+/**
+ * The "پیمان‌های انتخاب‌شده" summary row — shown only for a "special" (پیمانکاری) workshop.
+ * Tapping it opens [LegalRepresentativeContractPickerSheet].
+ */
+@Composable
+private fun LegalRepresentativeContractsSummaryRow(
+    selectedContractRows: List<String>,
+    onClick: () -> Unit,
+) {
+    val taminColors = LocalTaminColors.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .taminSurface(cornerRadius = CornerRadius.lg)
+            .clickable(onClick = onClick)
+            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        ) {
+            Icon(
+                imageVector = vectorResource(Res.drawable.ic_tamin_workshop_badge),
+                contentDescription = null,
+                tint = taminColors.orangeText,
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(RoundedCornerShape(CornerRadius.md))
+                    .background(taminColors.orangeBg)
+                    .padding(Spacing.xs),
+            )
+                Text(
+                    text = stringResource(Res.string.legal_representative_contracts_label),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = taminColors.textMuted,
+                )
+                    NumericText(
+                        text = selectedContractRows.joinToString(separator = " ، "),
+                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                        color = taminColors.textPrimary,
+                    )
+        }
+        Icon(
+            imageVector = vectorResource(Res.drawable.ic_tamin_chevron_forward),
+            contentDescription = null,
+            tint = taminColors.textMuted,
+            modifier = Modifier.size(IconSize.small),
         )
     }
 }

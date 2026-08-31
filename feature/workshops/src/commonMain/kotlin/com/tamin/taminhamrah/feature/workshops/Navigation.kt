@@ -81,6 +81,7 @@ data class LegalRepresentativeOtpRoute(
     val branchCode: String,
     val workshopName: String,
     val branchName: String,
+    val special: Boolean,
 )
 
 @Serializable
@@ -90,6 +91,7 @@ data class LegalRepresentativeListRoute(
     val workshopName: String,
     val branchName: String,
     val ticket: String,
+    val special: Boolean,
 )
 
 @Serializable
@@ -103,6 +105,7 @@ data class AddLegalRepresentativeRoute(
     val hasElectronicNotification: Boolean,
     val hasInternetList: Boolean,
     val hasInsuredRegistration: Boolean,
+    val special: Boolean,
 )
 
 fun NavController.navigateToWorkshops() {
@@ -220,6 +223,7 @@ fun NavGraphBuilder.workshopsScreen(navController: NavController) {
                         branchCode = workshop.branchCode,
                         workshopName = workshop.workshopName,
                         branchName = workshop.branchName ?: workshop.branchCode,
+                        special = workshop.special,
                     )
                 )
             },
@@ -240,6 +244,7 @@ fun NavGraphBuilder.workshopsScreen(navController: NavController) {
                         workshopName = route.workshopName,
                         branchName = route.branchName,
                         ticket = ticket,
+                        special = route.special,
                     )
                 ) {
                     popUpTo<LegalRepresentativeOtpRoute> { inclusive = true }
@@ -269,6 +274,7 @@ fun NavGraphBuilder.workshopsScreen(navController: NavController) {
                         hasElectronicNotification = false,
                         hasInternetList = false,
                         hasInsuredRegistration = false,
+                        special = route.special,
                     )
                 )
             },
@@ -284,6 +290,7 @@ fun NavGraphBuilder.workshopsScreen(navController: NavController) {
                         hasElectronicNotification = representative.hasElectronicNotification,
                         hasInternetList = representative.hasInternetList,
                         hasInsuredRegistration = representative.hasInsuredRegistration,
+                        special = route.special,
                     )
                 )
             },
@@ -302,6 +309,7 @@ fun NavGraphBuilder.workshopsScreen(navController: NavController) {
             hasElectronicNotification = route.hasElectronicNotification,
             hasInternetList = route.hasInternetList,
             hasInsuredRegistration = route.hasInsuredRegistration,
+            special = route.special,
             onBackClicked = { navController.popBackStack() },
             onSubmitted = { navController.popBackStack() },
         )
