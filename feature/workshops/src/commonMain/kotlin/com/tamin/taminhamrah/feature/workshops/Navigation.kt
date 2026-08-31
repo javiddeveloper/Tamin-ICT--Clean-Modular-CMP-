@@ -6,8 +6,10 @@ import androidx.navigation.toRoute
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopsRoute
 import com.tamin.taminhamrah.feature.workshops.ui.demandDocuments.DemandDocumentsScreen
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
+import com.tamin.taminhamrah.feature.workshops.ui.objectionableDebit.ObjectionableDebitScreen
 import com.tamin.taminhamrah.feature.workshops.ui.paymentSheets.PaymentSheetsScreen
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebit.WorkshopDebitScreen
+import com.tamin.taminhamrah.feature.workshops.ui.workshopDebtInquiry.WorkshopDebtInquiryScreen
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import kotlinx.serialization.Serializable
 
@@ -38,6 +40,20 @@ data class WorkshopDebitRoute(
 @Serializable
 data class DemandDocumentsRoute(
     val debitNumber: String,
+    val branchCode: String,
+    val workshopName: String = "",
+)
+
+@Serializable
+data class WorkshopDebtInquiryRoute(
+    val workshopId: String,
+    val branchCode: String,
+    val workshopName: String = "",
+)
+
+@Serializable
+data class ObjectionableDebitRoute(
+    val workshopId: String,
     val branchCode: String,
     val workshopName: String = "",
 )
@@ -97,6 +113,25 @@ fun NavGraphBuilder.workshopsScreen(
             onBack = { navController.popBackStack() },
         )
     }
+
+    composableWithFadeTransitions<WorkshopDebtInquiryRoute> { entry ->
+        val route = entry.toRoute<WorkshopDebtInquiryRoute>()
+        WorkshopDebtInquiryScreen(
+            workshopId = route.workshopId,
+            branchCode = route.branchCode,
+            workshopName = route.workshopName,
+            onBack = { navController.popBackStack() },
+        )
+    }
+    composableWithFadeTransitions<ObjectionableDebitRoute> { entry ->
+        val route = entry.toRoute<ObjectionableDebitRoute>()
+        ObjectionableDebitScreen(
+            workshopId = route.workshopId,
+            branchCode = route.branchCode,
+            workshopName = route.workshopName,
+            onBack = { navController.popBackStack() },
+        )
+    }
 }
 
 /**
@@ -112,4 +147,12 @@ private fun WorkshopAction.route(
 ): Any = when (this) {
     WorkshopAction.PAYMENT_SHEETS -> PaymentSheetsRoute(workshopId, branchCode, workshopName)
     WorkshopAction.DEBIT_TURNOVER -> WorkshopDebitRoute(workshopId, branchCode, workshopName)
+<<<<<<< HEAD
+    WorkshopAction.DEBT_INQUIRY ->
+        WorkshopDebtInquiryRoute(workshopId, branchCode, workshopName)
+=======
+    WorkshopAction.DEBT_INQUIRY -> WorkshopDebtInquiryRoute(workshopId, branchCode, workshopName)
+    WorkshopAction.OBJECTION ->
+        ObjectionableDebitRoute(workshopId, branchCode, workshopName)
+>>>>>>> 23b0f1376 (EM-2602 کارگاه‌های کارفرما (صفحات اعتراض به بدهی))
 }
