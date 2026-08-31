@@ -38,9 +38,11 @@ import com.tamin.taminhamrah.model.common.CityPR
 import com.tamin.taminhamrah.model.common.ProvincePR
 import com.tamin.taminhamrah.model.contracts.BranchPR
 import com.tamin.taminhamrah.ui.components.SegmentedInputField
+import com.tamin.taminhamrah.ui.components.animatedErrorBorder
 import com.tamin.taminhamrah.ui.digitsOnly
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.Thickness
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
@@ -303,10 +305,12 @@ private fun SelectChip(
             .alpha(if (isEnabled) 1f else 0.6f)
             .clip(RoundedCornerShape(13.dp))
             .background(bg)
-            .border(
-                width = 1.dp,
-                color = if (isError) colors.dangerText else colors.border,
-                shape = RoundedCornerShape(13.dp),
+            .animatedErrorBorder(
+                isError = isError,
+                errorColor = colors.dangerText,
+                normalColor = colors.border,
+                borderWidth = Thickness.border,
+                cornerRadius = ChipCorner,
             )
             .clickable(enabled = isEnabled, onClick = onClick)
             .padding(horizontal = 11.dp),
@@ -343,3 +347,6 @@ private const val CHEVRON_DOWN_DEGREES = 90f
 private const val WORKSHOP_CODE_SLOTS = 10
 
 private val CardElevation = 6.dp
+
+/** The picker chips share the radius of the fields above them. */
+private val ChipCorner = 13.dp
