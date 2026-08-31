@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.feature.inquiryEducation.ui.contract.InquiryEducati
 import com.tamin.taminhamrah.mapper.inquiryEducation.toPresentation
 import com.tamin.taminhamrah.useCases.inquiryEducation.GetDataForEducationUseCase
 import com.tamin.taminhamrah.useCases.inquiryEducation.InquiryEducationCertificateUseCase
+import com.tamin.taminhamrah.useCases.user.GetUserProfileUseCase
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.persistentListOf
@@ -31,6 +32,7 @@ private const val EDUCATION_CODE_LENGTH = 10
 class InquiryEducationViewModel(
     private val getDataForEducationUseCase: GetDataForEducationUseCase,
     private val inquiryEducationCertificateUseCase: InquiryEducationCertificateUseCase,
+    private val getUserProfileUseCase: GetUserProfileUseCase,
 ) : BaseViewModel<InquiryEducationUiState, PartialState, InquiryEducationEvent, InquiryEducationIntent>(
     initialState = InquiryEducationUiState(),
 ) {
@@ -108,10 +110,14 @@ class InquiryEducationViewModel(
             )
             return
         }
-        val nationalId = state.selectedNationalId ?: return
+        val apiCode = if (state.sons.isEmpty()) {
+            SELF_INQUIRY_CODE
+        } else {
+            state.selectedNationalId ?: return
+        }
         emit(PartialState.Submitting(true))
         val result = inquiryEducationCertificateUseCase(
-            code = nationalId,
+            code = apiCode,
             educationCode = state.educationCode,
         ).first().toPresentation()
         emit(PartialState.Submitting(false))
@@ -119,18 +125,25 @@ class InquiryEducationViewModel(
             emit(PartialState.SubmitFailure(getString(Res.string.inquiry_education_failure_empty)))
             return
         }
-        val son = state.sons.first { it.nationalId == nationalId }
+        val (studentName, studentNationalId) = if (state.sons.isEmpty()) {
+            val profile = getUserProfileUseCase().first()
+            listOfNotNull(profile.firstName, profile.lastName).joinToString(" ") to
+                profile.nationalCode.orEmpty()
+        } else {
+            val son = state.sons.first { it.nationalId == state.selectedNationalId }
+            son.fullName to son.nationalId
+        }
         val (jy, jm, jd) = PersianDateFormatter.today()
         val date = "$jy/${jm.toString().padStart(2, '0')}/${jd.toString().padStart(2, '0')}".toPersianDigits()
         val body = getString(
             Res.string.inquiry_education_success_body,
-            son.fullName,
+            studentName,
             result.message,
         )
         emit(
             PartialState.SubmitSuccess(
-                studentName = son.fullName,
-                studentNationalId = son.nationalId,
+                studentName = studentName,
+                studentNationalId = studentNationalId,
                 universityName = result.message,
                 inquiryCode = state.educationCode,
                 inquiryDate = date,
@@ -194,6 +207,7 @@ class InquiryEducationViewModel(
         PartialState.SubmitFailure(message)
 
     private companion object {
+        const val SELF_INQUIRY_CODE = "1"
         val EDUCATION_CODE_REGEX = Regex("^[A-Za-z0-9]{10}$")
     }
 }

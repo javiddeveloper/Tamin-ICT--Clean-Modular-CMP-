@@ -32,7 +32,6 @@ import com.tamin.taminhamrah.ui.components.CopyIconButton
 import com.tamin.taminhamrah.ui.components.SectionLabel
 import com.tamin.taminhamrah.ui.components.SegmentedInputField
 import com.tamin.taminhamrah.ui.components.StatusPill
-import com.tamin.taminhamrah.ui.components.TaminEmptyState
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.rememberCopyAction
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -47,7 +46,6 @@ import taminx.core.core_ui.inquiry_education_code_counter
 import taminx.core.core_ui.inquiry_education_code_helper
 import taminx.core.core_ui.inquiry_education_code_label
 import taminx.core.core_ui.inquiry_education_copy_address
-import taminx.core.core_ui.inquiry_education_empty_sons
 import taminx.core.core_ui.inquiry_education_info_body
 import taminx.core.core_ui.inquiry_education_msrt_url_copy
 import taminx.core.core_ui.inquiry_education_msrt_url_display
@@ -74,18 +72,13 @@ fun InquiryEducationFormStep(
     ) {
         InquiryEducationInfoSurface()
 
-        when {
-            state.sons.isNotEmpty() -> {
-                SonSelectionSection(
-                    sons = state.sons,
-                    selectedNationalId = state.selectedNationalId,
-                    sonSelectionError = state.sonSelectionError,
-                    onSelectSon = { onIntent(InquiryEducationIntent.SelectSon(it)) },
-                )
-            }
-            !state.isLoading -> {
-                TaminEmptyState(stringResource(Res.string.inquiry_education_empty_sons))
-            }
+        if (state.sons.isNotEmpty()) {
+            SonSelectionSection(
+                sons = state.sons,
+                selectedNationalId = state.selectedNationalId,
+                sonSelectionError = state.sonSelectionError,
+                onSelectSon = { onIntent(InquiryEducationIntent.SelectSon(it)) },
+            )
         }
 
         EducationCodeSection(

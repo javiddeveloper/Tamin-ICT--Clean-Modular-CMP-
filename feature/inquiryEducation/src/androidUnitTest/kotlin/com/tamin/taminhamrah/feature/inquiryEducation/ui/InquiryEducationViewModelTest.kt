@@ -6,17 +6,32 @@ import com.tamin.taminhamrah.feature.inquiryEducation.ui.contract.InquiryEducati
 import com.tamin.taminhamrah.feature.inquiryEducation.ui.contract.InquiryEducationIntent
 import com.tamin.taminhamrah.feature.inquiryEducation.ui.contract.InquiryEducationStep
 import com.tamin.taminhamrah.feature.inquiryEducation.ui.contract.InquiryEducationUiState
-import com.tamin.taminhamrah.model.inquiryEducation.EducationDependentItemDN
+import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDN
+import com.tamin.taminhamrah.model.bankAccount.BankAccountDN
+import com.tamin.taminhamrah.model.certificate.RecipientDN
+import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDN
+import com.tamin.taminhamrah.model.identity.IdentityInfoDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
+import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.subdominant.SubdominantDN
+import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
+import com.tamin.taminhamrah.model.user.EditMobileResponseDN
+import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.model.inquiryEducation.EducationDependentsDN
 import com.tamin.taminhamrah.model.inquiryEducation.InquiryEducationCertificateDN
+import com.tamin.taminhamrah.model.inquiryEducation.EducationDependentItemDN
+import com.tamin.taminhamrah.model.user.UserProfileDN
+import com.tamin.taminhamrah.repository.UserRepository
 import com.tamin.taminhamrah.repository.inquiryEducation.InquiryEducationRepository
 import com.tamin.taminhamrah.useCases.inquiryEducation.GetDataForEducationUseCase
 import com.tamin.taminhamrah.useCases.inquiryEducation.InquiryEducationCertificateUseCase
+import com.tamin.taminhamrah.useCases.user.GetUserProfileUseCase
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -43,11 +58,13 @@ class InquiryEducationViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var repository: FakeInquiryEducationRepository
+    private lateinit var userRepository: FakeUserRepository
 
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         repository = FakeInquiryEducationRepository()
+        userRepository = FakeUserRepository()
     }
 
     @AfterTest
@@ -56,6 +73,7 @@ class InquiryEducationViewModelTest {
     private fun createViewModel(): InquiryEducationViewModel = InquiryEducationViewModel(
         getDataForEducationUseCase = GetDataForEducationUseCase(repository),
         inquiryEducationCertificateUseCase = InquiryEducationCertificateUseCase(repository),
+        getUserProfileUseCase = GetUserProfileUseCase(userRepository),
     )
 
     @Test
@@ -247,6 +265,35 @@ class InquiryEducationViewModelTest {
     }
 
     @Test
+    fun submit_emptySons_selfInquiry_usesSelfCodeAndProfile() = runTest(testDispatcher) {
+        repository.dependentsResult = EducationDependentsDN()
+        repository.certificateResult = InquiryEducationCertificateDN(message = UNIVERSITY_NAME)
+        userRepository.userProfileResult = UserProfileDN(
+            entityId = null,
+            login = null,
+            firstName = "رضا",
+            lastName = "احمدی",
+            email = null,
+            nationalCode = "1122334455",
+            mobile = null,
+        )
+        val viewModel = createViewModel()
+
+        viewModel.uiState.test {
+            awaitUntil { !it.isLoading && it.sons.isEmpty() }
+            viewModel.sendIntent(InquiryEducationIntent.EducationCodeChanged(VALID_CODE))
+            viewModel.sendIntent(InquiryEducationIntent.Submit)
+            val state = awaitUntil { it.step == InquiryEducationStep.Success }
+            assertEquals("1", repository.lastCode)
+            assertEquals(VALID_CODE, repository.lastEducationCode)
+            assertEquals("رضا احمدی", state.studentName)
+            assertEquals("1122334455", state.studentNationalId)
+            assertEquals(UNIVERSITY_NAME, state.universityName)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun backToServices_emitsNavigateBack() = runTest(testDispatcher) {
         val viewModel = createViewModel()
 
@@ -274,6 +321,39 @@ class InquiryEducationViewModelTest {
         const val FAILURE_EMPTY =
             "متقاضی محترم، اطلاعاتی در مورد اشتغال به تحصیل شما دریافت نگردید. در صورت اطمینان از صحت کد رهگیری وارد شده،برای تعیین تکلیف وضعیت اشتغال به تحصیل به دانشگاه مربوطه مراجعه نمائید."
     }
+}
+
+private class FakeUserRepository : UserRepository {
+    var userProfileResult: UserProfileDN? = null
+
+    override fun getIdentityInfo(): Flow<IdentityInfoDN> = flow { }
+    override suspend fun getUserProfileImage(): Flow<String> = flowOf("")
+    override suspend fun fetchTaminRelation(): Flow<TaminRelationDN> = flow { }
+    override suspend fun sendImageRequest(branchCode: String, serialId: String): Flow<String> = flowOf("")
+    override suspend fun changeMobile(mobileNumber: String): Flow<EditMobileResponseDN> = flow { }
+    override suspend fun verifyChangeMobileCode(mobile: String, otp: String, otpHashCode: String): Flow<String> =
+        flowOf("")
+    override suspend fun getSubDominantsInfo(filters: List<ApiFilterDN>): Flow<SubdominantDN> = flow { }
+    override suspend fun getBankAccountList(filters: List<ApiFilterDN>): Flow<List<BankAccountDN>> =
+        flowOf(emptyList())
+    override suspend fun getInsuredActiveBranch(): Flow<List<InsuredActiveBranchDN>> = flowOf(emptyList())
+    override suspend fun getRelationTaminAll(filters: List<ApiFilterDN>): Flow<List<ActiveRelationDN>> =
+        flowOf(emptyList())
+    override fun getElectronicFile(filters: List<ApiFilterDN>): Flow<List<ElectronicFileDN>> = flowOf(emptyList())
+    override suspend fun downloadDocument(url: String): PdfDownloadDN = PdfDownloadDN(pdf = null)
+    override suspend fun getUserProfile(): Flow<UserProfileDN> = flow {
+        userProfileResult?.let { emit(it) }
+    }
+    override fun checkUserIsNew(nationalId: String): Flow<Boolean> = flowOf(false)
+    override suspend fun registerBankAccount(
+        accountNumber: String,
+        bankCode: String,
+        accountTypeCode: String,
+        startDateMillis: Long,
+    ): Flow<String?> = flowOf(null)
+    override suspend fun getStatusCertificateReport(filters: List<ApiFilterDN>): Flow<String> = flowOf("")
+    override suspend fun getWageCertificateReport(filters: List<ApiFilterDN>): Flow<String> = flowOf("")
+    override suspend fun getRecipients(filters: List<ApiFilterDN>): Flow<List<RecipientDN>> = flowOf(emptyList())
 }
 
 private class FakeInquiryEducationRepository : InquiryEducationRepository {
