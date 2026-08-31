@@ -32,6 +32,8 @@ import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamPR
+import com.tamin.taminhamrah.model.personal.survivorDependent.SurvivorDependentDN
+import com.tamin.taminhamrah.model.personal.survivorDependent.SurvivorDependentPR
 import kotlin.jvm.JvmName
 
 fun PersonalInfoDN.toPresentation(): PersonalInfoPR {
@@ -113,8 +115,29 @@ fun DisabilityWorkDN.toPresentation(): DisabilityWorkPR {
     )
 }
 
+fun SurvivorDependentDN.toPresentation(): SurvivorDependentPR {
+    return SurvivorDependentPR(
+        firstName = firstName ?: "",
+        lastName = lastName ?: "",
+        nationalId = nationalId ?: "",
+        fatherName = fatherName ?: "",
+        idCardNumber = idCardNumber ?: "",
+        cityOfIssue = cityOfIssue ?: "",
+        genderCode = genderCode ?: "",
+        genderDesc = genderDesc ?: "",
+        dateOfBirth = dateOfBirth?.toString() ?: "",
+        insuranceId = insuranceId ?: "",
+        tendencyCode = tendencyCode ?: ""
+    )
+}
+
 @JvmName("disabilityDependentToPresentation")
 fun List<DisabilityDependentDN>.toPresentation(): List<DisabilityDependentPR> {
+    return map { it.toPresentation() }
+}
+
+@JvmName("survivorDependentToPresentation")
+fun List<SurvivorDependentDN>.toPresentation(): List<SurvivorDependentPR> {
     return map { it.toPresentation() }
 }
 

@@ -55,14 +55,23 @@ import com.tamin.taminhamrah.useCases.personal.GetAgeUseCase
 import com.tamin.taminhamrah.useCases.personal.GetPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetDisabilityDependentInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetConfirmSurvivorsListUseCase
+import com.tamin.taminhamrah.useCases.personal.GetFinalSurvivorPensionPDFUseCase
 import com.tamin.taminhamrah.useCases.personal.CheckGirlSurvivorConditionsUseCase
 import com.tamin.taminhamrah.useCases.personal.ConfirmGirlSurvivorUseCase
 import com.tamin.taminhamrah.useCases.personal.GetGirlSurvivorReportUseCase
+import com.tamin.taminhamrah.useCases.personal.GetSurvivorListUseCase
+import com.tamin.taminhamrah.useCases.personal.SaveSurvivorInfoUseCase
+import com.tamin.taminhamrah.useCases.personal.SubmitFinalSurvivorPensionUseCase
 import com.tamin.taminhamrah.useCases.orotezProtez.GetInsuredPersonsUseCase
 import com.tamin.taminhamrah.useCases.orotezProtez.GetRequestInsuredMainInfoUseCase
 import com.tamin.taminhamrah.useCases.orotezProtez.SaveShortTermOrthosisUseCase
 import com.tamin.taminhamrah.useCases.inquiryEducation.GetDataForEducationUseCase
 import com.tamin.taminhamrah.useCases.inquiryEducation.InquiryEducationCertificateUseCase
+import com.tamin.taminhamrah.useCases.pregnancyPay.CalculatePregnancyPayEstimateUseCase
+import com.tamin.taminhamrah.useCases.pregnancyPay.GetPregnancyMainInfoUseCase
+import com.tamin.taminhamrah.useCases.pregnancyPay.GetPregnancyStatusListUseCase
+import com.tamin.taminhamrah.useCases.pregnancyPay.GetPregnancyTypeListUseCase
+import com.tamin.taminhamrah.useCases.pregnancyPay.SendPregnancyPayRequestUseCase
 import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
 import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.GetStatusCertificateReportUseCase
@@ -240,10 +249,14 @@ val domainModule = module {
     factoryOf(::GetPersonalInfoUseCase)
     factoryOf(::GetDeceasedInfoUseCase)
     factoryOf(::GetDisabilityDependentInfoUseCase)
+    factoryOf(::GetSurvivorListUseCase)
     factoryOf(::CheckGirlSurvivorConditionsUseCase)
     factoryOf(::GetGirlSurvivorReportUseCase)
     factoryOf(::ConfirmGirlSurvivorUseCase)
     factoryOf(::GetConfirmSurvivorsListUseCase)
+    factoryOf(::SaveSurvivorInfoUseCase)
+    factoryOf(::GetFinalSurvivorPensionPDFUseCase)
+    factoryOf(::SubmitFinalSurvivorPensionUseCase)
     factoryOf(::GetAgeUseCase)
     factoryOf(::GetCitiesUseCase)
     factoryOf(::GetProvincesUseCase)
@@ -283,6 +296,11 @@ val domainModule = module {
     factoryOf(::SaveShortTermOrthosisUseCase)
     factoryOf(::GetDataForEducationUseCase)
     factoryOf(::InquiryEducationCertificateUseCase)
+    factoryOf(::GetPregnancyMainInfoUseCase)
+    factoryOf(::GetPregnancyStatusListUseCase)
+    factoryOf(::GetPregnancyTypeListUseCase)
+    factoryOf(::SendPregnancyPayRequestUseCase)
+    factoryOf(::CalculatePregnancyPayEstimateUseCase)
     factoryOf(::GetMyRequestPdfUseCase)
     factoryOf(::DeleteMyRequestUseCase)
     factoryOf(::InboxInquiryLicenseUseCase)

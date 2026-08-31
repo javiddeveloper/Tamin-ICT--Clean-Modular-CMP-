@@ -79,30 +79,7 @@ internal fun StepSectionTitle(title: String, modifier: Modifier = Modifier) {
     )
 }
 
-@Composable
-internal fun SquareIconButton(
-    icon: ImageVector,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val colors = LocalTaminColors.current
 
-    Box(
-        modifier = modifier
-            .size(54.dp)
-            .clip(RoundedCornerShape(CornerRadius.lg))
-            .border(1.dp, colors.border, RoundedCornerShape(CornerRadius.lg))
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = colors.textPrimary,
-            modifier = Modifier.size(22.dp)
-        )
-    }
-}
 
 @Composable
 internal fun AddDependentShimmer(modifier: Modifier = Modifier) {

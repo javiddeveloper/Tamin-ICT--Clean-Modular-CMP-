@@ -60,6 +60,7 @@ Colors, spacing, radius: [[Theme]] — never hardcode `Color`, `.dp`, or UI copy
 | `:feature:deferredInstallment` | `feature/deferredInstallment` | `…feature.deferredInstallment` |
 | `:feature:pensionStatusInquiry` | `feature/pensionStatusInquiry` | `…feature.pensionStatusInquiry` |
 | `:feature:girlSurvivor` | `feature/girlSurvivor` | `…feature.girlSurvivor` |
+| `:feature:pensionSurvivor` | `feature/pensionSurvivor` | `…feature.pensionSurvivor` |
 
 ### Layout of a feature module
 

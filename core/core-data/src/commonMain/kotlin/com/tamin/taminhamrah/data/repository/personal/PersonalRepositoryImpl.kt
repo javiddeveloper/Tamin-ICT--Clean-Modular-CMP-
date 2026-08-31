@@ -16,6 +16,7 @@ import com.tamin.taminhamrah.model.personal.PersonalInfoDN
 import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionDN
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
+import com.tamin.taminhamrah.model.personal.survivorDependent.SurvivorDependentDN
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
 import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoDN
 import com.tamin.taminhamrah.model.personal.girlSurvivor.ConfirmGirlSurvivorDN
@@ -75,6 +76,10 @@ class PersonalRepositoryImpl(
             emit(response.map { it.toDomain() })
 
         }
+
+    override fun getSurvivorList(deceasedNationalId: String): Flow<List<SurvivorDependentDN>> = flow {
+        emit(personalRemoteDataSource.getSurvivorList(deceasedNationalId).map { it.toDomain() })
+    }
 
     override fun checkGirlSurvivorConditions(
         nationalCode: String,
