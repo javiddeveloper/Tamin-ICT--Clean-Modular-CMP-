@@ -96,7 +96,7 @@ private fun PregnancyPayOptionRow(
 ) {
     val colors = LocalTaminColors.current
     val backgroundColor = if (isSelected) colors.blueBg else colors.bgSurface
-    val borderColor = if (isSelected) colors.hawkesBlue else colors.border
+    val borderColor = if (isSelected) colors.blueBorder else colors.border
 
     Row(
         modifier = Modifier

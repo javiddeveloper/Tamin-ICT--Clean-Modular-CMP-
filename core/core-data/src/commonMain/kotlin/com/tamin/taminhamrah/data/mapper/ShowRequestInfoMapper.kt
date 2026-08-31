@@ -1,7 +1,7 @@
 package com.tamin.taminhamrah.data.mapper
 
-import com.tamin.taminhamrah.model.userRequest.Article16DetailDN
-import com.tamin.taminhamrah.model.userRequest.Article16RequestInfoDTO
+import com.tamin.taminhamrah.model.userRequest.ArticleSixteenDetailDN
+import com.tamin.taminhamrah.model.userRequest.ArticleSixteenRequestInfoDTO
 import com.tamin.taminhamrah.model.userRequest.DeferredInstallmentDetailDN
 import com.tamin.taminhamrah.model.userRequest.DeferredInstallmentInfoDTO
 import com.tamin.taminhamrah.model.userRequest.FollowUpObjectionDetailDN
@@ -79,9 +79,9 @@ fun DeferredInstallmentInfoDTO.toDetails(): UserRequestDetailsDN {
     )
 }
 
-fun Article16RequestInfoDTO.toDetails(): UserRequestDetailsDN {
+fun ArticleSixteenRequestInfoDTO.toDetails(): UserRequestDetailsDN {
     return UserRequestDetailsDN(
-        article16 = Article16DetailDN(
+        articleSixteen = ArticleSixteenDetailDN(
             defectDesc = defectDesc,
             result = defectDesc,
         ),

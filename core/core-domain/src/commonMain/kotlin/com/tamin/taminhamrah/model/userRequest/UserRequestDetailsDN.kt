@@ -3,7 +3,7 @@ package com.tamin.taminhamrah.model.userRequest
 data class UserRequestDetailsDN(
     val deferredInstallment: DeferredInstallmentDetailDN? = null,
     val illDay: IllDayDetailDN? = null,
-    val article16: Article16DetailDN? = null,
+    val articleSixteen: ArticleSixteenDetailDN? = null,
     val followUpObjection: FollowUpObjectionDetailDN? = null,
     val pregnancy: PregnancyDetailDN? = null,
     val rejectReason: String? = null,
@@ -66,7 +66,7 @@ data class IllDayDetailDN(
     val expirationDate: String? = null,
 )
 
-data class Article16DetailDN(
+data class ArticleSixteenDetailDN(
     val meetingDate: String? = null,
     val result: String? = null,
     val defectDesc: String? = null,

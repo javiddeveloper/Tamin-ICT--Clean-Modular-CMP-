@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
+import com.tamin.taminhamrah.model.user.CurrentUserDN
 import com.tamin.taminhamrah.model.user.EditMobileResponseDN
 import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.model.user.UserProfileDN
@@ -49,6 +50,8 @@ class FakeUserRepository : UserRepository {
         if (shouldThrowError) throw RuntimeException("Error")
         userProfileResult?.let { emit(it) }
     }
+
+    override suspend fun getCurrentUser(): Flow<CurrentUserDN> = flow { }
 
     override fun checkUserIsNew(nationalId: String): Flow<Boolean> = flowOf(false)
     override suspend fun registerBankAccount(

@@ -1,14 +1,13 @@
 package com.tamin.taminhamrah.model.workshop
 
 import androidx.compose.runtime.Immutable
-import kotlinx.serialization.Serializable
 
-
+/** One ذینفع row. */
 @Immutable
-@Serializable
 data class WorkshopStackHolderPR(
-    val stackId: Int?,
-    val nationalId: String?,
-    val mobile: String?,
-    val stackType: String?
+    val nationalId: String = "",
+    val fullName: String = "",
+    val fatherName: String = "",
+    val birthDate: String = "",
+    val stackType: String = "",
 )

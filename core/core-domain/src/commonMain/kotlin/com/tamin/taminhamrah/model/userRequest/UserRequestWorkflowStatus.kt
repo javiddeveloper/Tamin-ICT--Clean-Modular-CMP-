@@ -13,7 +13,7 @@ enum class UserRequestWorkflowStatus(val code: Int) {
     FINAL_APPROVED(18),
     DISAPPROVED(19),
     DOCUMENT_DEFECT(21),
-    ARTICLE16_APPROVED(2602);
+    ARTICLE_SIXTEEN_APPROVED(2602);
 
     val tabCategory: UserRequestTabCategory
         get() = when (this) {
@@ -24,7 +24,7 @@ enum class UserRequestWorkflowStatus(val code: Int) {
 
             PROCESSING_COMPLETE,
             FINAL_APPROVED,
-            ARTICLE16_APPROVED,
+            ARTICLE_SIXTEEN_APPROVED,
             -> UserRequestTabCategory.COMPLETED
 
             else -> UserRequestTabCategory.IN_PROGRESS
