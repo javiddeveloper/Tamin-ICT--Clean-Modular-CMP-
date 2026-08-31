@@ -106,8 +106,6 @@ data class CompleteEmployerInfoUiState(
     val telephone: String = "",
     val legalMobile: String = "",
     val legalEmail: String = "",
-    val hasAttemptedLegalSubmit: Boolean = false,
-    val legalValidationError: StringResource? = null,
 
     // Real Form (Tab: Real)
     val realWorkshopCode: String = "",
@@ -120,8 +118,6 @@ data class CompleteEmployerInfoUiState(
     val branches: ImmutableList<BranchPR> = persistentListOf(),
     val isBranchesLoading: Boolean = false,
     val selectedBranch: BranchPR? = null,
-    val hasAttemptedRealSubmit: Boolean = false,
-    val realValidationError: StringResource? = null,
 
     // Verification / OTP
     val otpCode: String = "",
@@ -263,7 +259,6 @@ sealed interface CompleteEmployerInfoPartialState {
     data class TelephoneChanged(val tel: String) : CompleteEmployerInfoPartialState
     data class LegalMobileChanged(val mobile: String) : CompleteEmployerInfoPartialState
     data class LegalEmailChanged(val email: String) : CompleteEmployerInfoPartialState
-    data class LegalValidationFailed(val error: StringResource) : CompleteEmployerInfoPartialState
 
     // Real form partials
     data class RealWorkshopCodeChanged(val code: String) : CompleteEmployerInfoPartialState
@@ -275,7 +270,6 @@ sealed interface CompleteEmployerInfoPartialState {
     data class BranchesLoading(val isLoading: Boolean) : CompleteEmployerInfoPartialState
     data class BranchesLoaded(val branches: ImmutableList<BranchPR>) : CompleteEmployerInfoPartialState
     data class BranchSelected(val branch: BranchPR) : CompleteEmployerInfoPartialState
-    data class RealValidationFailed(val error: StringResource) : CompleteEmployerInfoPartialState
 
     // Sheets & Dialogs
     data class OpenSheet(val sheet: ActiveBottomSheet) : CompleteEmployerInfoPartialState

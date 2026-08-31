@@ -12,6 +12,8 @@ import com.tamin.taminhamrah.mapper.common.toCityPresentation
 import com.tamin.taminhamrah.mapper.common.toProvincePresentation
 import com.tamin.taminhamrah.mapper.contracts.toBranchPresentation
 import com.tamin.taminhamrah.mapper.employerInfo.toWorkshopItemPRs
+import com.tamin.taminhamrah.model.common.CityPR
+import com.tamin.taminhamrah.model.common.ProvincePR
 import com.tamin.taminhamrah.model.employerInfo.LegalWorkshopCeoDN
 import com.tamin.taminhamrah.model.employerInfo.LegalWorkshopInfoRequestDN
 import com.tamin.taminhamrah.model.employerInfo.RealWorkshopInfoRequestDN
@@ -221,7 +223,7 @@ class CompleteEmployerInfoViewModel(
         }
     }
 
-    private fun handleSelectProvince(province: com.tamin.taminhamrah.model.common.ProvincePR): Flow<CompleteEmployerInfoPartialState> = flow {
+    private fun handleSelectProvince(province: ProvincePR): Flow<CompleteEmployerInfoPartialState> = flow {
         emit(CompleteEmployerInfoPartialState.ProvinceSelected(province))
         collectWhileLoading(
             source = getCitiesByProvinceUseCase(province.provinceCode),
@@ -233,7 +235,7 @@ class CompleteEmployerInfoViewModel(
         )
     }
 
-    private fun handleSelectCity(city: com.tamin.taminhamrah.model.common.CityPR): Flow<CompleteEmployerInfoPartialState> = flow {
+    private fun handleSelectCity(city: CityPR): Flow<CompleteEmployerInfoPartialState> = flow {
         emit(CompleteEmployerInfoPartialState.CitySelected(city))
         collectWhileLoading(
             source = getBranchesUseCase(city.cityCode),
@@ -247,11 +249,9 @@ class CompleteEmployerInfoViewModel(
 
     private fun handleSubmitLegalForm(): Flow<CompleteEmployerInfoPartialState> = flow {
         val state = uiState.value
-        val blocking = state.legalBlockingError
-        if (blocking != null) {
-            emit(CompleteEmployerInfoPartialState.LegalValidationFailed(blocking))
-            return@flow
-        }
+        // Each field prints its own reason, and the button is disabled while any of them does,
+        // so there is nothing left to announce here.
+        if (state.legalBlockingError != null) return@flow
         if (state.isSubmitting) return@flow
         emit(CompleteEmployerInfoPartialState.Submitting(true))
 
@@ -272,11 +272,9 @@ class CompleteEmployerInfoViewModel(
 
     private fun handleSubmitRealForm(): Flow<CompleteEmployerInfoPartialState> = flow {
         val state = uiState.value
-        val blocking = state.realBlockingError
-        if (blocking != null) {
-            emit(CompleteEmployerInfoPartialState.RealValidationFailed(blocking))
-            return@flow
-        }
+        // Each field prints its own reason, and the button is disabled while any of them does,
+        // so there is nothing left to announce here.
+        if (state.realBlockingError != null) return@flow
         if (state.isSubmitting) return@flow
         emit(CompleteEmployerInfoPartialState.Submitting(true))
 
@@ -423,17 +421,12 @@ class CompleteEmployerInfoViewModel(
             telephone = "",
             legalMobile = "",
             legalEmail = "",
-            hasAttemptedLegalSubmit = false,
-            legalValidationError = null,
         )
         is CompleteEmployerInfoPartialState.SwitchTab -> currentState.copy(
             tab = partialState.tab,
-            realValidationError = null,
-            hasAttemptedRealSubmit = false,
         )
         is CompleteEmployerInfoPartialState.LegalNationalIdChanged -> currentState.copy(
             legalNationalId = partialState.nid,
-            legalValidationError = null,
             legalWorkshopName = if (partialState.nid.length < 11) null else currentState.legalWorkshopName,
         )
         is CompleteEmployerInfoPartialState.LegalWorkshopInquiryLoading -> currentState.copy(
@@ -444,18 +437,15 @@ class CompleteEmployerInfoViewModel(
         )
         is CompleteEmployerInfoPartialState.CompanyTypeSelected -> currentState.copy(
             selectedCompanyType = partialState.companyType,
-            legalValidationError = null,
             activeBottomSheet = null,
         )
         is CompleteEmployerInfoPartialState.CeoNationalIdChanged -> currentState.copy(
             ceoNationalId = partialState.nid,
-            legalValidationError = null,
             ceoFullName = if (partialState.nid.length < 10) null else currentState.ceoFullName,
         )
         is CompleteEmployerInfoPartialState.CeoBirthDateSelected -> currentState.copy(
             ceoBirthDateMillis = partialState.millis,
             ceoBirthDatePersian = partialState.persianDate,
-            legalValidationError = null,
         )
         is CompleteEmployerInfoPartialState.CeoInquiryLoading -> currentState.copy(
             isCeoInquiring = partialState.isLoading,
@@ -468,19 +458,12 @@ class CompleteEmployerInfoViewModel(
         )
         is CompleteEmployerInfoPartialState.LegalMobileChanged -> currentState.copy(
             legalMobile = partialState.mobile,
-            legalValidationError = null,
         )
         is CompleteEmployerInfoPartialState.LegalEmailChanged -> currentState.copy(
             legalEmail = partialState.email,
-            legalValidationError = null,
-        )
-        is CompleteEmployerInfoPartialState.LegalValidationFailed -> currentState.copy(
-            hasAttemptedLegalSubmit = true,
-            legalValidationError = partialState.error,
         )
         is CompleteEmployerInfoPartialState.RealWorkshopCodeChanged -> currentState.copy(
             realWorkshopCode = partialState.code,
-            realValidationError = null,
         )
         is CompleteEmployerInfoPartialState.ProvincesLoaded -> currentState.copy(
             provinces = partialState.provinces,
@@ -491,7 +474,6 @@ class CompleteEmployerInfoViewModel(
             selectedBranch = null,
             cities = persistentListOf(),
             branches = persistentListOf(),
-            realValidationError = null,
             activeBottomSheet = null,
         )
         is CompleteEmployerInfoPartialState.CitiesLoading -> currentState.copy(
@@ -505,7 +487,6 @@ class CompleteEmployerInfoViewModel(
             selectedCity = partialState.city,
             selectedBranch = null,
             branches = persistentListOf(),
-            realValidationError = null,
             activeBottomSheet = null,
         )
         is CompleteEmployerInfoPartialState.BranchesLoading -> currentState.copy(
@@ -517,12 +498,7 @@ class CompleteEmployerInfoViewModel(
         )
         is CompleteEmployerInfoPartialState.BranchSelected -> currentState.copy(
             selectedBranch = partialState.branch,
-            realValidationError = null,
             activeBottomSheet = null,
-        )
-        is CompleteEmployerInfoPartialState.RealValidationFailed -> currentState.copy(
-            hasAttemptedRealSubmit = true,
-            realValidationError = partialState.error,
         )
         is CompleteEmployerInfoPartialState.OpenSheet -> currentState.copy(
             activeBottomSheet = partialState.sheet,
@@ -555,8 +531,6 @@ class CompleteEmployerInfoViewModel(
             screen = CompleteEmployerInfoScreenState.LIST,
             isVerifying = false,
             selectedWorkshop = null,
-            hasAttemptedLegalSubmit = false,
-            legalValidationError = null,
         )
         is CompleteEmployerInfoPartialState.ShowDialog -> currentState.copy(
             dialogState = partialState.dialog,
