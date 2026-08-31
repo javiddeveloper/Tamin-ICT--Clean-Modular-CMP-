@@ -10,6 +10,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.objectionableDebit.Objectionab
 import com.tamin.taminhamrah.feature.workshops.ui.paymentSheets.PaymentSheetsScreen
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebit.WorkshopDebitScreen
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebtInquiry.WorkshopDebtInquiryScreen
+import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersScreen
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import kotlinx.serialization.Serializable
 
@@ -53,6 +54,13 @@ data class WorkshopDebtInquiryRoute(
 
 @Serializable
 data class ObjectionableDebitRoute(
+    val workshopId: String,
+    val branchCode: String,
+    val workshopName: String = "",
+)
+
+@Serializable
+data class WorkshopRecentlyAddedMembersRoute(
     val workshopId: String,
     val branchCode: String,
     val workshopName: String = "",
@@ -132,6 +140,15 @@ fun NavGraphBuilder.workshopsScreen(
             onBack = { navController.popBackStack() },
         )
     }
+    composableWithFadeTransitions<WorkshopRecentlyAddedMembersRoute> { entry ->
+        val route = entry.toRoute<WorkshopRecentlyAddedMembersRoute>()
+        WorkshopRecentlyAddedMembersScreen(
+            workshopId = route.workshopId,
+            branchCode = route.branchCode,
+            workshopName = route.workshopName,
+            onBack = { navController.popBackStack() },
+        )
+    }
 }
 
 /**
@@ -151,4 +168,6 @@ private fun WorkshopAction.route(
         WorkshopDebtInquiryRoute(workshopId, branchCode, workshopName)
     WorkshopAction.OBJECTION ->
         ObjectionableDebitRoute(workshopId, branchCode, workshopName)
+    WorkshopAction.NEW_MEMBER ->
+        WorkshopRecentlyAddedMembersRoute(workshopId, branchCode, workshopName)
 }
