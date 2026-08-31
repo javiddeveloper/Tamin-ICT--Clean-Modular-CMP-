@@ -27,7 +27,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.components.LegalRepresentativeHeader
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.components.LegalRepresentativeHeroSubtitle
@@ -71,6 +73,9 @@ import taminx.core.core_ui.legal_representative_info_banner
 import taminx.core.core_ui.legal_representative_open_action
 import taminx.core.core_ui.legal_representative_special_workshop_badge
 import taminx.core.core_ui.legal_representative_workshop_code_label
+
+/** How far the identity card rides up into the header's gradient, straddling the seam. */
+private val HeroCardOverlap = Spacing.xxl
 
 @Composable
 fun LegalRepresentativeWorkshopsScreen(
@@ -182,7 +187,8 @@ private fun LegalRepresentativeWorkshopsContent(
 
 /**
  * The hub's floating top area: the folding gradient hero (back button, icon, subtitle) plus the
- * identity card, which stays fully visible and pinned beneath it regardless of scroll.
+ * identity card, which stays fully visible and pinned beneath it regardless of scroll -- riding
+ * up by [HeroCardOverlap] to straddle the header's seam, same as before the header could fold.
  */
 @Composable
 private fun LegalRepresentativeWorkshopsTopArea(
@@ -193,7 +199,10 @@ private fun LegalRepresentativeWorkshopsTopArea(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        LegalRepresentativeHeader(onBackClicked = onBackClicked) {
+        LegalRepresentativeHeader(
+            onBackClicked = onBackClicked,
+            heroCardOverlap = HeroCardOverlap,
+        ) {
             LegalRepresentativeHeroSubtitle(
                 text = stringResource(Res.string.legal_representative_hub_subtitle),
                 topAreaState = topAreaState,
@@ -202,8 +211,29 @@ private fun LegalRepresentativeWorkshopsTopArea(
         LegalRepresentativeIdentitySummaryCard(
             fullName = fullName,
             workshopCount = workshopCount,
-            modifier = Modifier.padding(horizontal = Spacing.lg, vertical = Spacing.md),
+            // Rides up into the header's reserved bottom space, rather than sitting right after
+            // it, so the card visually straddles the header's seam. Reports a height reduced by
+            // the same overlap so reportTopAreaHeight sees the true visual footprint of this
+            // whole block, not the overlap counted twice as reserved list space.
+            modifier = Modifier
+                .straddlePreviousSibling(HeroCardOverlap)
+                .padding(horizontal = Spacing.lg),
         )
+    }
+}
+
+/**
+ * Shifts this child up by [overlap] to overlap the previous sibling's bottom edge, while
+ * reporting a height reduced by that same amount -- so a parent measuring total column height
+ * (here, [reportTopAreaHeight]) sees the true visual footprint instead of double-counting the
+ * overlap as reserved space.
+ */
+private fun Modifier.straddlePreviousSibling(overlap: Dp): Modifier = layout { measurable, constraints ->
+    val placeable = measurable.measure(constraints)
+    val overlapPx = overlap.roundToPx()
+    val reportedHeight = (placeable.height - overlapPx).coerceAtLeast(0)
+    layout(placeable.width, reportedHeight) {
+        placeable.placeRelative(0, -overlapPx)
     }
 }
 

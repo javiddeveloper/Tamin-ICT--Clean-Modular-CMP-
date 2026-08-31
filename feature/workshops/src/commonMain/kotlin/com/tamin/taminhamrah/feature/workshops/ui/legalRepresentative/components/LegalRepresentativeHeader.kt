@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
@@ -60,6 +61,8 @@ import taminx.core.core_ui.legal_representative_workshop_stat_label
 internal fun LegalRepresentativeHeader(
     onBackClicked: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Extra blue space left below [content] for a [LegalRepresentativeIdentitySummaryCard] to ride up into. */
+    heroCardOverlap: Dp = Spacing.none,
     content: @Composable () -> Unit = {},
 ) {
     val taminColors = LocalTaminColors.current
@@ -72,7 +75,7 @@ internal fun LegalRepresentativeHeader(
             .fillMaxWidth()
             .clip(RoundedCornerShape(bottomStart = CornerRadius.x3l, bottomEnd = CornerRadius.x3l))
             .background(gradient)
-            .padding(bottom = Spacing.smPlus),
+            .padding(bottom = Spacing.smPlus + heroCardOverlap),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         TaminTopAppBar(
@@ -176,9 +179,11 @@ internal fun LegalRepresentativeWorkshopSummaryCard(
 
 /**
  * The hub screen's identity card — the user's own name and their legal-representative workshop
- * count, side by side with a divider. Unlike [LegalRepresentativeHeroSubtitle], this card is never
- * wrapped in a `topArea*` behavior modifier, so it stays fully shown and pinned above the list
- * regardless of scroll — only the header content above it folds away.
+ * count, side by side with a divider. Composed as the sibling right after a block the caller
+ * offsets up by [LegalRepresentativeHeader]'s `heroCardOverlap`, so it rides up to straddle the
+ * header seam. Unlike [LegalRepresentativeHeroSubtitle], this card is never wrapped in a
+ * `topArea*` behavior modifier, so it stays fully shown and pinned above the list regardless of
+ * scroll — only the header content above it folds away.
  */
 @Composable
 internal fun LegalRepresentativeIdentitySummaryCard(
