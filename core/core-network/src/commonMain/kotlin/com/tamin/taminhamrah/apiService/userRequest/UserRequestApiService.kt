@@ -1,6 +1,6 @@
 package com.tamin.taminhamrah.apiService.userRequest
 
-import com.tamin.taminhamrah.model.userRequest.Article16RequestInfoDTO
+import com.tamin.taminhamrah.model.userRequest.ArticleSixteenRequestInfoDTO
 import com.tamin.taminhamrah.model.userRequest.DeferredInstallmentInfoDTO
 import com.tamin.taminhamrah.model.userRequest.FollowUpObjectionHistoryDTO
 import com.tamin.taminhamrah.model.userRequest.PregnancyLookupDTO
@@ -60,9 +60,9 @@ interface UserRequestApiService {
     suspend fun getPregnancyTypes(): BaseDTO<ListData<PregnancyLookupDTO>>
 
     @GET("debit-objection/objection-request/{objectionNumber}")
-    suspend fun getArticle16RequestInfo(
+    suspend fun getArticleSixteenRequestInfo(
         @Path("objectionNumber") objectionNumber: Long
-    ): BaseDTO<Article16RequestInfoDTO>
+    ): BaseDTO<ArticleSixteenRequestInfoDTO>
 
     @GET("wage-assignment/request/{requestId}")
     suspend fun getDeferredInstallmentInfo(

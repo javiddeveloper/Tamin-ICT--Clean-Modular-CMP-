@@ -24,9 +24,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.Dp
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.theme.ButtonDimens
@@ -52,6 +52,9 @@ fun LoadingButton(
     icon: ImageVector? = null,
     /** Defaults to every existing caller's expectation: icon before text. */
     iconPosition: LoadingButtonIconPosition = LoadingButtonIconPosition.LEADING,
+    /** Shorter than the page-level default for a button that sits inside a form footer. */
+    height: Dp = ButtonDimens.height,
+    shape: Shape = RoundedCornerShape(CornerRadius.xl),
 ) {
     val taminColors = LocalTaminColors.current
     val backgroundBrush = if (enabled) {
@@ -67,12 +70,12 @@ fun LoadingButton(
             .fillMaxWidth()
             .shadow(
                 elevation = if (enabled) Elevation.button else Elevation.none,
-                shape = RoundedCornerShape(CornerRadius.xl),
+                shape = shape,
                 ambientColor = shadowColor,
                 spotColor = shadowColor
             )
-            .height(ButtonDimens.height)
-            .clip(RoundedCornerShape(CornerRadius.xl))
+            .height(height)
+            .clip(shape)
             .background(backgroundBrush)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },

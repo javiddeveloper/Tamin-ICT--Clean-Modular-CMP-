@@ -98,7 +98,7 @@ fun GirlSurvivorCommitmentStep(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(CornerRadius.card))
                 .background(colors.bgSurface)
-                .border(1.dp, colors.hawkesBlue, RoundedCornerShape(CornerRadius.card))
+                .border(1.dp, colors.blueBorder, RoundedCornerShape(CornerRadius.card))
                 .padding(Spacing.md),
             verticalArrangement = Arrangement.spacedBy(Spacing.smd),
         ) {

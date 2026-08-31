@@ -15,6 +15,7 @@ import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
+import com.tamin.taminhamrah.model.user.CurrentUserDN
 import com.tamin.taminhamrah.model.user.EditMobileResponseDN
 import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.model.inquiryEducation.EducationDependentsDN
@@ -328,6 +329,7 @@ private class FakeUserRepository : UserRepository {
 
     override fun getIdentityInfo(): Flow<IdentityInfoDN> = flow { }
     override suspend fun getUserProfileImage(): Flow<String> = flowOf("")
+    override suspend fun getCurrentUser(): Flow<CurrentUserDN> = flow { }
     override suspend fun fetchTaminRelation(): Flow<TaminRelationDN> = flow { }
     override suspend fun sendImageRequest(branchCode: String, serialId: String): Flow<String> = flowOf("")
     override suspend fun changeMobile(mobileNumber: String): Flow<EditMobileResponseDN> = flow { }

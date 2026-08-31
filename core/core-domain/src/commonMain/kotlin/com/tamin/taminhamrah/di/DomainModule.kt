@@ -15,6 +15,7 @@ import com.tamin.taminhamrah.useCases.bankAccount.RegisterBankAccountUseCase
 import com.tamin.taminhamrah.useCases.common.GetRecipientListUseCase
 import com.tamin.taminhamrah.useCases.common.GetBeneficiaryUseCase
 import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
+import com.tamin.taminhamrah.useCases.common.GetCityUseCase
 import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
 import com.tamin.taminhamrah.useCases.common.GetCitiesByProvinceUseCase
 import com.tamin.taminhamrah.useCases.common.GetInsuranceTypesUseCase
@@ -126,6 +127,7 @@ import com.tamin.taminhamrah.useCases.treatment.GetElectronicPrescriptionPriceUs
 import com.tamin.taminhamrah.useCases.treatment.GetDependantUnderEighteenUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetPrescriptionPdfFileUseCase
 import com.tamin.taminhamrah.useCases.treatment.DownloadLabResultPdfUseCase
+import com.tamin.taminhamrah.useCases.user.GetCurrentUserUseCase
 import com.tamin.taminhamrah.useCases.user.GetUserProfileUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientGeneralUseCase
 import com.tamin.taminhamrah.useCases.health.GetPatientSelfDeclarativeUseCase
@@ -155,10 +157,28 @@ import com.tamin.taminhamrah.useCases.historyObjection.DeleteHistoryObjectionNot
 import com.tamin.taminhamrah.useCases.historyObjection.FinalConfirmHistoryObjectionNotExistUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.GetHistoryObjectionNotExistRequestsUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.SaveHistoryObjectionNotExistRequestUseCase
-import com.tamin.taminhamrah.useCases.workshops.GetAllEmployerAgreementByNationalIdUseCase
-import com.tamin.taminhamrah.useCases.workshops.GetAllPaymentSheetsUseCase
-import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebitUseCase
+import com.tamin.taminhamrah.useCases.workshops.CheckObjectionDeadlineUseCase
+import com.tamin.taminhamrah.useCases.workshops.CheckNewMemberIsNewUseCase
+import com.tamin.taminhamrah.useCases.workshops.CreateNewMemberRegistrationUseCase
+import com.tamin.taminhamrah.useCases.workshops.ConfirmRecentlyAddedMemberUseCase
+import com.tamin.taminhamrah.useCases.workshops.DeleteRecentlyAddedMemberUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenDebtsUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenReportPdfUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenRequestInfoUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenWorkshopInfoUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetDebitObjectionPdfUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetDebitReasonsUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetDebitTurnoverPdfUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetDemandDocumentsUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetEmployerAgreementsUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetObjectionableDebitsUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetPaymentSheetsUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetRecentlyAddedMembersUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebitsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebtInquiryUseCase
+import com.tamin.taminhamrah.useCases.workshops.PayWorkshopDebitUseCase
+import com.tamin.taminhamrah.useCases.workshops.SaveArticleSixteenRequestUseCase
+import com.tamin.taminhamrah.useCases.workshops.SaveDebitObjectionUseCase
 import com.tamin.taminhamrah.useCases.agent.SendAgentPromptUseCase
 import com.tamin.taminhamrah.useCases.agent.CheckChatAllowedUseCase
 import com.tamin.taminhamrah.useCases.agent.DeleteAgentSessionUseCase
@@ -174,10 +194,7 @@ import com.tamin.taminhamrah.useCases.agent.SaveCachedMessageUseCase
 import com.tamin.taminhamrah.useCases.agent.StartAgentSessionUseCase
 import com.tamin.taminhamrah.useCases.agent.UpdateAgentSessionUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopMembersUseCase
-import com.tamin.taminhamrah.useCases.workshops.GetWorkshopObjectionableDebitListUseCase
-import com.tamin.taminhamrah.useCases.workshops.GetWorkshopRecentlyAddedMembersUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopStackHoldersUseCase
-import com.tamin.taminhamrah.useCases.workshops.GetWorkshopsDebtsListUseCase
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -265,6 +282,7 @@ val domainModule = module {
     factoryOf(::SubmitFinalSurvivorPensionUseCase)
     factoryOf(::GetAgeUseCase)
     factoryOf(::GetCitiesUseCase)
+    factoryOf(::GetCityUseCase)
     factoryOf(::GetProvincesUseCase)
     factoryOf(::GetCitiesByProvinceUseCase)
     factoryOf(::GetInsuranceTypesUseCase)
@@ -326,10 +344,6 @@ val domainModule = module {
     factoryOf(::SaveContactUseCase)
     factoryOf(::GetFreeJobWagesUseCase)
     factoryOf(::UploadImageUseCase)
-    factoryOf(::GetAllEmployerAgreementByNationalIdUseCase)
-    factoryOf(::GetAllPaymentSheetsUseCase)
-    factoryOf(::GetWorkshopDebitUseCase)
-    factoryOf(::GetWorkshopDebtInquiryUseCase)
     factoryOf(::GetDisabilityPersonalInfoUseCase)
     // Agent
     factoryOf(::SendAgentPromptUseCase)
@@ -360,15 +374,36 @@ val domainModule = module {
     factoryOf(::GetPrescriptionPdfFileUseCase)
     factoryOf(::DownloadLabResultPdfUseCase)
     factoryOf(::GetUserProfileUseCase)
+    factoryOf(::GetCurrentUserUseCase)
     factoryOf(::GetJobTitleUseCase)
     factoryOf(::GetRegistrationDeclarationFormUseCase)
     factoryOf(::GetRequestSummaryUseCase)
     factoryOf(::PutInsuredRegistrationDocListUseCase)
     factoryOf(::CheckUserIsNewUseCase)
+    // کارگاه‌های کارفرما — the list, then one group per action it launches
+    factoryOf(::GetEmployerAgreementsUseCase)
+    factoryOf(::GetPaymentSheetsUseCase)
+    factoryOf(::GetDebitReasonsUseCase)
+    factoryOf(::GetWorkshopDebitsUseCase)
+    factoryOf(::GetDemandDocumentsUseCase)
+    factoryOf(::GetDebitTurnoverPdfUseCase)
+    factoryOf(::PayWorkshopDebitUseCase)
+    factoryOf(::GetWorkshopDebtInquiryUseCase)
+    factoryOf(::GetObjectionableDebitsUseCase)
+    factoryOf(::CheckObjectionDeadlineUseCase)
+    factoryOf(::SaveDebitObjectionUseCase)
+    factoryOf(::GetDebitObjectionPdfUseCase)
+    factoryOf(::GetRecentlyAddedMembersUseCase)
+    factoryOf(::ConfirmRecentlyAddedMemberUseCase)
+    factoryOf(::DeleteRecentlyAddedMemberUseCase)
+    factoryOf(::CheckNewMemberIsNewUseCase)
+    factoryOf(::CreateNewMemberRegistrationUseCase)
+    factoryOf(::GetArticleSixteenDebtsUseCase)
+    factoryOf(::GetArticleSixteenWorkshopInfoUseCase)
+    factoryOf(::GetArticleSixteenRequestInfoUseCase)
+    factoryOf(::SaveArticleSixteenRequestUseCase)
+    factoryOf(::GetArticleSixteenReportPdfUseCase)
     factoryOf(::GetWorkshopMembersUseCase)
-    factoryOf(::GetWorkshopObjectionableDebitListUseCase)
-    factoryOf(::GetWorkshopRecentlyAddedMembersUseCase)
-    factoryOf(::GetWorkshopsDebtsListUseCase)
     factoryOf(::GetWorkshopStackHoldersUseCase)
     factoryOf(::GetTreatmentCostsUseCase)
     factoryOf(::GetTreatmentCostsPDFUseCase)

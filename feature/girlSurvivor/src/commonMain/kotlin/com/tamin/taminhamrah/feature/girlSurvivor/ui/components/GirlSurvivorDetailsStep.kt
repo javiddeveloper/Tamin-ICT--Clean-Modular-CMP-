@@ -147,7 +147,7 @@ private fun GirlSurvivorProfileCard(
             .fillMaxWidth()
             .clip(shape)
             .background(colors.bgSurface)
-            .border(1.dp, colors.hawkesBlue, shape)
+            .border(1.dp, colors.blueBorder, shape)
             .padding(Spacing.md),
     ) {
         rows.forEachIndexed { index, row ->
@@ -173,7 +173,7 @@ private fun GirlSurvivorPensionToggle(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .dashedOutline(colors.hawkesBlue, CornerRadius.card, 1.dp)
+            .dashedOutline(colors.blueBorder, CornerRadius.card, 1.dp)
             .padding(horizontal = Spacing.md, vertical = Spacing.smd),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,

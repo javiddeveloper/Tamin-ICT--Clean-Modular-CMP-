@@ -483,7 +483,7 @@ internal fun TaminHamrahNavGraph(
                     onOpenUrl = { url -> openUrl(url) }
                 )
 
-                workshopsScreen(navController)
+                workshopsScreen(navController, onOpenUrl = { url -> openUrl(url) })
 
                 myInboxScreen(onNavigateBack = { navController.popBackStack() })
 

@@ -2,7 +2,7 @@ package com.tamin.taminhamrah.dataSource.request
 
 import com.tamin.taminhamrah.apiService.userRequest.UserRequestApiService
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
-import com.tamin.taminhamrah.model.userRequest.Article16RequestInfoDTO
+import com.tamin.taminhamrah.model.userRequest.ArticleSixteenRequestInfoDTO
 import com.tamin.taminhamrah.model.userRequest.DeferredInstallmentInfoDTO
 import com.tamin.taminhamrah.model.userRequest.FollowUpObjectionHistoryDTO
 import com.tamin.taminhamrah.model.userRequest.PregnancyLookupDTO
@@ -62,8 +62,8 @@ class UserRequestRemoteDataSourceImpl(
         return fetchListData { requestApiService.getPregnancyTypes() }
     }
 
-    override suspend fun getArticle16RequestInfo(objectionNumber: Long): Article16RequestInfoDTO {
-        return fetchData { requestApiService.getArticle16RequestInfo(objectionNumber) }
+    override suspend fun getArticleSixteenRequestInfo(objectionNumber: Long): ArticleSixteenRequestInfoDTO {
+        return fetchData { requestApiService.getArticleSixteenRequestInfo(objectionNumber) }
     }
 
     override suspend fun getDeferredInstallmentInfo(requestId: String): DeferredInstallmentInfoDTO {

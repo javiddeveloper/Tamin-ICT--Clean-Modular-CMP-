@@ -1,36 +1,25 @@
 package com.tamin.taminhamrah.model.workshop
 
 import androidx.compose.runtime.Immutable
-import kotlinx.serialization.Serializable
 
-
+/** One برگ پرداخت row, formatted for display. */
 @Immutable
-@Serializable
 data class PaymentSheetPR(
-    val orderNo: String?,
-    val orderRow: String?,
-    val payId: String?,
-    val mastCustomerCode: String?,
-    val rcntrow: String?,
-    val mastCustomerName: String?,
-    val debitCreateReasonCode: String?,
-    val debitCreateReasonDesc: String?,
-    val debitNo: String?,
-    val docDate: Long?,
-    val paySeqAmount: Long?,
-    val orpStatusCode: String?,
-    val orpStatusDesc: String?,
-    val cardDate: Long?,
-    val payKindCode: String?,
-    val payKindDesc: String?,
-    val ouragGno: String?,
-    val ouragSDate: String?
+    val debitNumber: String = "",
+    val agreementRow: String = "",
+    val amount: String = "",
+    val collectDate: String = "",
+    val issueDate: String = "",
+    val status: PaymentSheetStatus = PaymentSheetStatus.UNKNOWN,
+    val statusLabel: String = "",
+    val debitReason: String = "",
+    val payKind: String = "",
+    val documentNumber: String = "",
 )
 
-
+/** One entry of the علت ایجاد بدهی picker. [code] is what the search sends. */
 @Immutable
-@Serializable
-data class PaymentSheetListPR(
-    val list: List<PaymentSheetPR>?,
-    val total: Int?
+data class DebitReasonPR(
+    val code: String = "",
+    val title: String = "",
 )
