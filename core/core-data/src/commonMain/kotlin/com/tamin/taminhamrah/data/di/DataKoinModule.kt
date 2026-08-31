@@ -48,6 +48,8 @@ import com.tamin.taminhamrah.data.repository.InspectionRepositoryImpl
 import com.tamin.taminhamrah.repository.inspection.InspectionRepository
 import com.tamin.taminhamrah.data.repository.occurrence.OccurrenceRepositoryImpl
 import com.tamin.taminhamrah.repository.occurrence.OccurrenceRepository
+import com.tamin.taminhamrah.data.repository.funeralAllowance.FuneralAllowanceRepositoryImpl
+import com.tamin.taminhamrah.repository.funeralAllowance.FuneralAllowanceRepository
 import com.tamin.taminhamrah.data.repository.historyObjection.HistoryObjectionRepositoryImpl
 import com.tamin.taminhamrah.repository.historyObjection.HistoryObjectionRepository
 import org.koin.core.module.dsl.bind
@@ -81,4 +83,5 @@ val dataKoinModule = module {
     singleOf(::HistoryObjectionRepositoryImpl) { bind<HistoryObjectionRepository>() }
     singleOf(::PregnancyPayRepositoryImpl) { bind<PregnancyPayRepository>() }
     singleOf(::InquiryEducationRepositoryImpl) { bind<InquiryEducationRepository>() }
+    singleOf(::FuneralAllowanceRepositoryImpl) { bind<FuneralAllowanceRepository>() }
 }

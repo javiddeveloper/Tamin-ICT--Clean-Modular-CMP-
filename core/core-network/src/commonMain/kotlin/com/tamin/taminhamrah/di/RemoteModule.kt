@@ -52,6 +52,8 @@ import com.tamin.taminhamrah.dataSource.inspection.InspectionRemoteDataSource
 import com.tamin.taminhamrah.dataSource.inspection.InspectionRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.occurrence.OccurrenceRemoteDataSource
 import com.tamin.taminhamrah.dataSource.occurrence.OccurrenceRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.funeralAllowance.FuneralAllowanceRemoteDataSource
+import com.tamin.taminhamrah.dataSource.funeralAllowance.FuneralAllowanceRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.inquiryEducation.InquiryEducationRemoteDataSource
 import com.tamin.taminhamrah.dataSource.inquiryEducation.InquiryEducationRemoteDataSourceImpl
 import org.koin.core.module.dsl.bind
@@ -252,6 +254,13 @@ val remoteModule = module {
     single<InquiryEducationRemoteDataSource> {
         InquiryEducationRemoteDataSourceImpl(
             inquiryEducationApiService = get(),
+            errorParser = get()
+        )
+    }
+
+    single<FuneralAllowanceRemoteDataSource> {
+        FuneralAllowanceRemoteDataSourceImpl(
+            apiService = get(),
             errorParser = get()
         )
     }

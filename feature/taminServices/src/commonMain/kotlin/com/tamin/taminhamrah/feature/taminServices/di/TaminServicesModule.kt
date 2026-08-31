@@ -19,6 +19,11 @@ import com.tamin.taminhamrah.useCases.inspection.GetInspectionReportPDFUseCase
 import com.tamin.taminhamrah.useCases.inspection.GetJobListUseCase
 import com.tamin.taminhamrah.useCases.inspection.SubmitInspectionUseCase
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.InspectionViewModel
+import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.FuneralAllowanceViewModel
+import com.tamin.taminhamrah.useCases.funeralAllowance.ConfirmFuneralAccountCorrectionUseCase
+import com.tamin.taminhamrah.useCases.funeralAllowance.GetFuneralAllowanceInfoUseCase
+import com.tamin.taminhamrah.useCases.funeralAllowance.SubmitFuneralAllowanceRequestUseCase
+import com.tamin.taminhamrah.useCases.funeralAllowance.ValidateDeceasedUseCase
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
@@ -44,5 +49,11 @@ val TaminServicesModule = module {
     factoryOf(::SubmitInspectionUseCase)
     factoryOf(::GetInspectionReportPDFUseCase)
     viewModelOf(::InspectionViewModel)
+
+    viewModelOf(::FuneralAllowanceViewModel)
+    factoryOf(::GetFuneralAllowanceInfoUseCase)
+    factoryOf(::ValidateDeceasedUseCase)
+    factoryOf(::SubmitFuneralAllowanceRequestUseCase)
+    factoryOf(::ConfirmFuneralAccountCorrectionUseCase)
 }
 

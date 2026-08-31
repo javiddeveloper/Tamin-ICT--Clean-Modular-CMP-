@@ -17,8 +17,8 @@ import com.tamin.taminhamrah.feature.inquiryEducation.navigateToInquiryEducation
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToIssuanceCertificate
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPayRoll
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.navigateToPensionStatusInquiry
-import com.tamin.taminhamrah.feature.pensionSurvivor.navigateToPensionSurvivor
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPrescription
+import com.tamin.taminhamrah.feature.pensionSurvivor.navigateToPensionSurvivor
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToFreelanceInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToHousewifeInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToOptionalInsuranceContract
@@ -26,6 +26,7 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToStudentI
 import com.tamin.taminhamrah.feature.taminServices.navigateToOccurrence
 import com.tamin.taminhamrah.feature.taminServices.navigateToInspection
 import com.tamin.taminhamrah.feature.taminServices.navigateToSendInsuranceHistoryToInstitutions
+import com.tamin.taminhamrah.feature.taminServices.navigateToFuneralAllowance
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.model.common.FeatureFlag
 
@@ -57,6 +58,7 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
         FeatureFlag.OBJECTION_NON_EXISTENT_HISTORY -> navigateToHistoryObjection()
         FeatureFlag.INQUIRY_EDUCATION -> navigateToInquiryEducation()
         FeatureFlag.REQUEST_FOR_PREGNANCY_PAY -> navigateToPregnancyPay()
+        FeatureFlag.REQUEST_FUNERAL_GRANT -> navigateToFuneralAllowance()
         else -> Unit
     }
 }
