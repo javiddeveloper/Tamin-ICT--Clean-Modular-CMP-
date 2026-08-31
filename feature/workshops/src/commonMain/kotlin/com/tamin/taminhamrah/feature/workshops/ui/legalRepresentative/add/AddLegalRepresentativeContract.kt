@@ -32,6 +32,9 @@ data class AddLegalRepresentativeUiState(
     val canSubmit: Boolean
         get() = nationalCode.length == 10 && otpCode.isNotBlank() && !isSubmitting
 
+    val canRequestTicket: Boolean
+        get() = nationalCode.length == 10 && nationalCodeError == null && !isRequestingTicket
+
     sealed interface PartialState {
         data class Init(
             val workshopId: String,
@@ -50,6 +53,7 @@ data class AddLegalRepresentativeUiState(
         data object RequestingTicket : PartialState
         data object TicketRequested : PartialState
         data class RequestTicketFailed(val message: String?) : PartialState
+        data class RequestTicketValidationFailed(val message: String) : PartialState
         data class OtpChanged(val value: String) : PartialState
         data object Submitting : PartialState
         data object Submitted : PartialState

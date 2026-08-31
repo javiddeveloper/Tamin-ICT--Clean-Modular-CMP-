@@ -59,10 +59,15 @@ class AddLegalRepresentativeViewModel(
         }
 
         is AddLegalRepresentativeIntent.RequestTicket -> flow {
-            if (uiState.value.isRequestingTicket) return@flow
+            val state = uiState.value
+            if (state.isRequestingTicket) return@flow
+            if (!state.canRequestTicket) {
+                emit(AddLegalRepresentativeUiState.PartialState.RequestTicketValidationFailed(NATIONAL_CODE_REQUIRED_ERROR))
+                return@flow
+            }
             emit(AddLegalRepresentativeUiState.PartialState.RequestingTicket)
             try {
-                requestLegalRepresentativeTicketUseCase(uiState.value.nationalCode)
+                requestLegalRepresentativeTicketUseCase(state.nationalCode)
                 emit(AddLegalRepresentativeUiState.PartialState.TicketRequested)
             } catch (e: Exception) {
                 emit(AddLegalRepresentativeUiState.PartialState.RequestTicketFailed(e.toSingleLineMessage()))
@@ -134,6 +139,9 @@ class AddLegalRepresentativeViewModel(
         is AddLegalRepresentativeUiState.PartialState.RequestTicketFailed ->
             currentState.copy(isRequestingTicket = false, error = partialState.message)
 
+        is AddLegalRepresentativeUiState.PartialState.RequestTicketValidationFailed ->
+            currentState.copy(nationalCodeError = partialState.message)
+
         is AddLegalRepresentativeUiState.PartialState.OtpChanged ->
             currentState.copy(otpCode = partialState.value, otpError = null)
 
@@ -152,5 +160,6 @@ class AddLegalRepresentativeViewModel(
 
     private companion object {
         const val NATIONAL_CODE_ERROR = "کد ملی معتبر نیست."
+        const val NATIONAL_CODE_REQUIRED_ERROR = "ابتدا کد ملی ۱۰ رقمی و معتبر نماینده را وارد کنید."
     }
 }
