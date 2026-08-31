@@ -147,12 +147,8 @@ private fun WorkshopAction.route(
 ): Any = when (this) {
     WorkshopAction.PAYMENT_SHEETS -> PaymentSheetsRoute(workshopId, branchCode, workshopName)
     WorkshopAction.DEBIT_TURNOVER -> WorkshopDebitRoute(workshopId, branchCode, workshopName)
-<<<<<<< HEAD
     WorkshopAction.DEBT_INQUIRY ->
         WorkshopDebtInquiryRoute(workshopId, branchCode, workshopName)
-=======
-    WorkshopAction.DEBT_INQUIRY -> WorkshopDebtInquiryRoute(workshopId, branchCode, workshopName)
     WorkshopAction.OBJECTION ->
         ObjectionableDebitRoute(workshopId, branchCode, workshopName)
->>>>>>> 23b0f1376 (EM-2602 کارگاه‌های کارفرما (صفحات اعتراض به بدهی))
 }
