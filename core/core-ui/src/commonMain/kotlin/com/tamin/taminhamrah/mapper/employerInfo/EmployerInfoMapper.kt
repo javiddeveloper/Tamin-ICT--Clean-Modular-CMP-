@@ -33,7 +33,7 @@ private const val CHARACTER_CODE_LEGAL = "02"
  * on workshop and branch crashed the list and made one card's expander open all of its twins.
  */
 fun List<EmployerAgreementDN>.toWorkshopItemPRs(): List<WorkshopItemPR> =
-    mapIndexed { index, agreement -> agreement.toWorkshopItemPR(fallbackId = index.toString()) }
+    distinct().mapIndexed { index, agreement -> agreement.toWorkshopItemPR(fallbackId = index.toString()) }
 
 fun EmployerAgreementDN.toWorkshopItemPR(fallbackId: String = ""): WorkshopItemPR {
     val ws = workshop

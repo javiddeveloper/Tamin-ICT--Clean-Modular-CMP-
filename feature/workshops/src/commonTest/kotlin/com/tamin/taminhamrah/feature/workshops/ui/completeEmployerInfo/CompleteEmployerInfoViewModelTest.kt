@@ -278,12 +278,11 @@ class CompleteEmployerInfoViewModelTest {
     }
 
     /**
-     * The service returns one row per agreement, so one workshop can arrive several times. Rows
-     * keyed on workshop and branch then collide, which crashes `LazyColumn` outright and makes one
-     * card's expander open all of its twins.
+     * Exact duplicate objects sent by the API where all properties are the same are deduplicated
+     * so only one workshop card gets shown.
      */
     @Test
-    fun repeatedAgreementsOnOneWorkshopStillGetDistinctRowIds() = runTest(testDispatcher) {
+    fun exactDuplicateAgreementsFromApiAreDeduplicatedToSingleItem() = runTest(testDispatcher) {
         val twin = EmployerWorkshopDN(
             sswn = null, branchTitle = null, branchName = "شعبه ۳ کرج", lastAddress = null,
             characterCode = "01", characterDesc = null, workshopApproveDate = null,
@@ -304,8 +303,44 @@ class CompleteEmployerInfoViewModelTest {
 
         viewModel.sendIntent(CompleteEmployerInfoIntent.LoadInitialData)
         viewModel.uiState.test {
-            val state = awaitUntil { it.workshops.size == 3 }
-            assertEquals(3, state.workshops.map { it.id }.toSet().size)
+            val state = awaitUntil { it.workshops.size == 1 }
+            assertEquals(1, state.workshops.size)
+            assertEquals("آموزشگاه کامپیوتر", state.workshops[0].name)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    /**
+     * The service returns one row per agreement, so multiple distinct agreements on one workshop
+     * can arrive. Distinct agreements still receive distinct row IDs.
+     */
+    @Test
+    fun distinctAgreementsOnOneWorkshopStillGetDistinctRowIds() = runTest(testDispatcher) {
+        val twin = EmployerWorkshopDN(
+            sswn = null, branchTitle = null, branchName = "شعبه ۳ کرج", lastAddress = null,
+            characterCode = "01", characterDesc = null, workshopApproveDate = null,
+            inclusionDate = null, brhCode = null, activityName = null, workshopRegisterDate = null,
+            branchCode = "0960", workshopName = "آموزشگاه کامپیوتر", employerName = null,
+            actitvityCode = null, userId = null, workshopId = "0968210170",
+            workshopUnemployedStat = null,
+        )
+        val agreement1 = EmployerAgreementDN(
+            pymseq = "1", regno = null, firstname = null, emailaddr = null, workshop = twin,
+            nationalno = null, mobileno = null, startdate = null, mastcusttype = null,
+            createdt = null, masttyp = null, logicalDeleted = false, regemailseq = null,
+            lastname = null, special = null, risuid = null, nationalcode = null, enddate = null,
+            letDate = null, regdate = null, roletype = null, dname = null, letNo = null,
+            createuid = null,
+        )
+        val agreement2 = agreement1.copy(pymseq = "2")
+        fakeWorkShopsRepo.agreementsOverride = listOf(agreement1, agreement2)
+
+        viewModel.sendIntent(CompleteEmployerInfoIntent.LoadInitialData)
+        viewModel.uiState.test {
+            val state = awaitUntil { it.workshops.size == 2 }
+            assertEquals(2, state.workshops.map { it.id }.toSet().size)
+            assertEquals("1", state.workshops[0].id)
+            assertEquals("2", state.workshops[1].id)
             cancelAndIgnoreRemainingEvents()
         }
     }
