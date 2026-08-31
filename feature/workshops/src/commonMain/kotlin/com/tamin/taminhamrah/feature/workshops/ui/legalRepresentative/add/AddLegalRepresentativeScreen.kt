@@ -276,15 +276,9 @@ private fun LegalRepresentativeCheckboxRow(
                 RoundedCornerShape(CornerRadius.chip)
             )
             .padding(horizontal = Spacing.md, vertical = Spacing.sm),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Bold,
-            color = taminColors.textPrimary,
-        )
         Checkbox(
             checked = checked,
             onCheckedChange = onCheckedChange,
@@ -292,6 +286,12 @@ private fun LegalRepresentativeCheckboxRow(
                 checkedColor = taminColors.blueText,
                 uncheckedColor = taminColors.border,
             ),
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold,
+            color = taminColors.textPrimary,
         )
     }
 }
