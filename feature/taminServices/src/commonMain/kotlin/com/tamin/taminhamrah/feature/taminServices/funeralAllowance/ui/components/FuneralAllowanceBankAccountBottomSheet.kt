@@ -45,6 +45,7 @@ fun FuneralAllowanceBankAccountBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
+        containerColor = LocalTaminColors.current.bgPage
     ) {
         Column(
             modifier = Modifier
@@ -89,11 +90,11 @@ private fun BankAccountItem(
     onClick: () -> Unit,
 ) {
     val taminColors = LocalTaminColors.current
-    val bankName = account.bank?.name ?: account.bankNameFallback ?: ""
-    val accountType = account.accountType?.name ?: account.accountTypeNameFallback ?: ""
+    val bankName = account.bank?.label?.let { org.jetbrains.compose.resources.stringResource(it) } ?: account.bankNameFallback ?: ""
+    val accountType = account.accountType?.label?.let { org.jetbrains.compose.resources.stringResource(it) } ?: account.accountTypeNameFallback ?: ""
     val combinedName = if (accountType.isNotBlank()) "$bankName - $accountType" else bankName
 
-    val bgColor = if (isSelected) taminColors.blueBg else taminColors.bgPage
+    val bgColor = if (isSelected) taminColors.blueBg else taminColors.bgSurface
     val borderColor = if (isSelected) taminColors.blueText else taminColors.border
 
     Row(

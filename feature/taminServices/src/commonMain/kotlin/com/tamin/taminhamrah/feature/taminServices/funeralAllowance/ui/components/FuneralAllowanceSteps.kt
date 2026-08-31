@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.componen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -143,56 +145,27 @@ fun Step2DeceasedAndBankInfo(
         }
 
         // Bank Account Selection
-        Column {
-            TaminText(
-                text = "حساب بانکی جهت واریز *",
-                color = taminColors.textSecondary,
-                modifier = Modifier.padding(bottom = Spacing.sm)
-            )
-
-            val selected = uiState.selectedBankAccount
-            val bankName = selected?.bank?.name ?: selected?.bankNameFallback ?: ""
-            val accountType = selected?.accountType?.name ?: selected?.accountTypeNameFallback ?: ""
-            val title = if (accountType.isNotBlank()) "$bankName - $accountType" else bankName
-            val subtitle = selected?.accountNumber ?: "انتخاب کنید"
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .border(1.dp, taminColors.border, RoundedCornerShape(12.dp))
-                    .background(taminColors.bgSurface)
-                    .clickable { onIntent(FuneralAllowanceIntent.ShowBankAccountBottomSheet(true)) }
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowDown,
-                    contentDescription = null,
-                    tint = taminColors.textMuted
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Column(horizontalAlignment = Alignment.End) {
-                    TaminText(text = title, color = taminColors.textPrimary)
-                    TaminText(text = subtitle, color = taminColors.textMuted)
-                }
-                Spacer(modifier = Modifier.width(Spacing.md))
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(taminColors.blueBg),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Home,
-                        contentDescription = null,
-                        tint = taminColors.blueText,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
+        val selected = uiState.selectedBankAccount
+        val bankName = selected?.bank?.label?.let { stringResource(it) } ?: selected?.bankNameFallback ?: ""
+        val accountType = selected?.accountType?.label?.let { stringResource(it) } ?: selected?.accountTypeNameFallback ?: ""
+        val title = if (accountType.isNotBlank()) "$bankName - $accountType" else bankName
+        val displayValue = if (selected != null) {
+            if (title.isNotBlank()) "$title - ${selected.accountNumber}" else selected.accountNumber
+        } else {
+            ""
         }
+
+        TaminStyledTextField(
+            value = displayValue,
+            onValueChange = {},
+            label = "حساب بانکی جهت واریز",
+            placeholder = "انتخاب کنید",
+            leadingIcon = Icons.Outlined.Home,
+            trailingIcon = Icons.Default.KeyboardArrowDown,
+            readOnly = true,
+            isRequired = true,
+            onClick = { onIntent(FuneralAllowanceIntent.ShowBankAccountBottomSheet(true)) }
+        )
 
         // Confirmation Checkbox
         Row(
@@ -201,23 +174,30 @@ fun Step2DeceasedAndBankInfo(
                 .clip(RoundedCornerShape(12.dp))
                 .border(1.dp, taminColors.border, RoundedCornerShape(12.dp))
                 .background(taminColors.bgSurface)
-                .clickable { onIntent(FuneralAllowanceIntent.ToggleAccountConfirmation(!uiState.isAccountConfirmed)) }
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }) {
+                    onIntent(
+                        FuneralAllowanceIntent.ToggleAccountConfirmation(!uiState.isAccountConfirmed)
+                    )
+                }
                 .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.Top
         ) {
-            TaminText(
-                text = "تأیید می‌کنم حساب انتخاب‌شده به نام اینجانب و فعال است و کمک‌هزینه به همین حساب واریز شود.",
-                color = taminColors.textSecondary,
-                modifier = Modifier.weight(1f)
-            )
-            Spacer(modifier = Modifier.width(Spacing.md))
             Checkbox(
+                modifier = Modifier.size(10.dp),
                 checked = uiState.isAccountConfirmed,
                 onCheckedChange = { onIntent(FuneralAllowanceIntent.ToggleAccountConfirmation(it)) },
                 colors = CheckboxDefaults.colors(
                     checkedColor = taminColors.blueText,
                     uncheckedColor = taminColors.border
                 )
+            )
+            Spacer(modifier = Modifier.width(Spacing.md))
+            TaminText(
+                text = "تأیید می‌کنم حساب انتخاب‌شده به نام اینجانب و فعال است و کمک‌هزینه به همین حساب واریز شود.",
+                color = taminColors.textSecondary,
+                style = MaterialTheme.typography.titleSmall,
             )
         }
     }
