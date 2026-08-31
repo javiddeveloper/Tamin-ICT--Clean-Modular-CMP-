@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.model.employerInfo.WorkshopItemPR
+import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.StaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
@@ -259,22 +260,22 @@ private fun WorkshopCardItem(
                 DetailRow(
                     label = stringResource(Res.string.employer_info_let_date),
                     value = workshop.letDate.ifBlank { "-" },
-                    isLtr = true,
+                    numeric = true,
                 )
                 DetailRow(
                     label = stringResource(Res.string.employer_info_email),
                     value = workshop.email.ifBlank { "-" },
-                    isLtr = true,
+                    numeric = true,
                 )
                 DetailRow(
                     label = stringResource(Res.string.employer_info_mobile),
                     value = workshop.mobile.ifBlank { "-" },
-                    isLtr = true,
+                    numeric = true,
                 )
                 DetailRow(
                     label = stringResource(Res.string.employer_info_address),
                     value = workshop.address.ifBlank { "-" },
-                    isLtr = false,
+                    numeric = false,
                 )
             }
         }
@@ -376,50 +377,6 @@ private fun WorkshopCardItem(
                     textAlign = TextAlign.Justify,
                 )
             }
-        }
-    }
-}
-
-@Composable
-private fun DetailRow(
-    label: String,
-    value: String,
-    isLtr: Boolean,
-) {
-    val colors = LocalTaminColors.current
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.Top,
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall.copy(
-                color = colors.textMuted,
-                fontSize = 10.5.sp,
-            ),
-        )
-        if (isLtr) {
-            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                Text(
-                    text = value,
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        color = colors.textPrimary,
-                        fontSize = 11.sp,
-                    ),
-                )
-            }
-        } else {
-            Text(
-                text = value,
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    color = colors.textPrimary,
-                    fontSize = 11.sp,
-                ),
-                textAlign = TextAlign.Left,
-            )
         }
     }
 }
