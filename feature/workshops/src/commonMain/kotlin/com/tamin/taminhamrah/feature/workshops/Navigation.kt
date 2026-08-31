@@ -13,6 +13,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.workshopDebit.WorkshopDebitScr
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebtInquiry.WorkshopDebtInquiryScreen
 import com.tamin.taminhamrah.feature.workshops.ui.workshopMembers.WorkshopMembersScreen
 import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersScreen
+import com.tamin.taminhamrah.feature.workshops.ui.workshopStackholders.WorkshopStackholdersScreen
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import kotlinx.serialization.Serializable
 
@@ -77,6 +78,13 @@ data class ManagementDebitRoute(
 
 @Serializable
 data class WorkshopMembersRoute(
+    val workshopId: String,
+    val branchCode: String,
+    val workshopName: String = "",
+)
+
+@Serializable
+data class WorkshopStackholdersRoute(
     val workshopId: String,
     val branchCode: String,
     val workshopName: String = "",
@@ -183,6 +191,15 @@ fun NavGraphBuilder.workshopsScreen(
             onBack = { navController.popBackStack() },
         )
     }
+    composableWithFadeTransitions<WorkshopStackholdersRoute> { entry ->
+        val route = entry.toRoute<WorkshopStackholdersRoute>()
+        WorkshopStackholdersScreen(
+            workshopId = route.workshopId,
+            branchCode = route.branchCode,
+            workshopName = route.workshopName,
+            onBack = { navController.popBackStack() },
+        )
+    }
 }
 
 /**
@@ -208,4 +225,6 @@ private fun WorkshopAction.route(
         ManagementDebitRoute(workshopId, branchCode, workshopName)
     WorkshopAction.MEMBERS ->
         WorkshopMembersRoute(workshopId, branchCode, workshopName)
+    WorkshopAction.STACKHOLDERS ->
+        WorkshopStackholdersRoute(workshopId, branchCode, workshopName)
 }

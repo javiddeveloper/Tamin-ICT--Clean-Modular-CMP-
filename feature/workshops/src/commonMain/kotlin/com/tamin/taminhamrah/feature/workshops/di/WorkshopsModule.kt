@@ -10,6 +10,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.workshopDebit.WorkshopDebitVie
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebtInquiry.WorkshopDebtInquiryViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.workshopMembers.WorkshopMembersViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersViewModel
+import com.tamin.taminhamrah.feature.workshops.ui.workshopStackholders.WorkshopStackholdersViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
@@ -19,6 +20,7 @@ val workshopsModule = module {
     factoryOf(::WorkshopAttachmentUploader)
 
     viewModelOf(::WorkshopsViewModel)
+    viewModelOf(::WorkshopStackholdersViewModel)
     viewModelOf(::WorkshopMembersViewModel)
     viewModelOf(::ManagementDebitViewModel)
     viewModelOf(::WorkshopRecentlyAddedMembersViewModel)
