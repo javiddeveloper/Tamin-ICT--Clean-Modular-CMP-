@@ -165,7 +165,7 @@ class IllDaysWizardViewModel(
             }
             emit(PartialState.InsuredLoaded(info))
             val branches = info.branchWorkshops.toImmutableList()
-            val selected = branches.firstOrNull()
+            val selected = branches.singleOrNull()
             emit(PartialState.BranchesLoaded(branches = branches, selected = selected))
             val cities = getCitiesUseCase().first().toCityPresentation().toImmutableList()
             emit(PartialState.CitiesLoaded(cities))
