@@ -1,6 +1,11 @@
 package com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.list
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -288,9 +293,12 @@ private fun LegalRepresentativeCard(
         insuredRegistrationLabel.takeIf { representative.hasInsuredRegistration },
     ).joinToString(" · ")
 
+    // Spacing around the collapsible details block is applied inside it (not via a blanket
+    // `Arrangement.spacedBy` here), so the gap animates away together with the content instead of
+    // vanishing in a single frame once AnimatedVisibility fully disposes it after collapsing —
+    // see RecordCard.kt for the same convention.
     Column(
         modifier = Modifier.fillMaxWidth().taminSurface().padding(Spacing.lg),
-        verticalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
         Column {
             Text(
@@ -310,6 +318,7 @@ private fun LegalRepresentativeCard(
         }
 
         if (accessLabel.isNotEmpty()) {
+            Spacer(Modifier.height(Spacing.md))
             LabeledBlock(
                 label = stringResource(Res.string.legal_representative_access_level_label),
                 value = accessLabel,
@@ -321,28 +330,37 @@ private fun LegalRepresentativeCard(
             )
         }
 
-        if (isExpanded) {
-            DetailRow(
-                label = stringResource(Res.string.legal_representative_workshop_code_label),
-                value = representative.workshopId,
-            )
-            DetailRow(
-                label = stringResource(Res.string.legal_representative_branch_code_label),
-                value = representative.branchCode,
-            )
-            DetailRow(
-                label = stringResource(Res.string.legal_representative_start_date_label),
-                value = representative.startDateLabel,
-            )
-            if (representative.special) {
+        AnimatedVisibility(
+            visible = isExpanded,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut(),
+        ) {
+            Column(
+                modifier = Modifier.padding(top = Spacing.md),
+                verticalArrangement = Arrangement.spacedBy(Spacing.md),
+            ) {
                 DetailRow(
-                    label = stringResource(Res.string.legal_representative_selected_contracts_label),
-                    value = stringResource(Res.string.legal_representative_all_contracts_value),
-                    numeric = false,
+                    label = stringResource(Res.string.legal_representative_workshop_code_label),
+                    value = representative.workshopId,
                 )
+                DetailRow(
+                    label = stringResource(Res.string.legal_representative_branch_code_label),
+                    value = representative.branchCode,
+                )
+                DetailRow(
+                    label = stringResource(Res.string.legal_representative_start_date_label),
+                    value = representative.startDateLabel,
+                )
+                if (representative.special) {
+                    DetailRow(
+                        label = stringResource(Res.string.legal_representative_selected_contracts_label),
+                        value = stringResource(Res.string.legal_representative_all_contracts_value),
+                        numeric = false,
+                    )
+                }
             }
         }
-
+        Spacer(Modifier.height(Spacing.md))
         val chevronRotation by animateFloatAsState(
             targetValue = if (isExpanded) -90f else 90f,
             label = "legal-representative-chevron",
