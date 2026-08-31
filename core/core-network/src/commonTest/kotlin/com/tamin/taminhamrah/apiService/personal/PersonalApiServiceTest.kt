@@ -45,6 +45,25 @@ class PersonalApiServiceTest : BaseApiTest() {
     }
 
     @Test
+    fun `getPersonalInfo should parse live survivor-request personal payload with relationWithTamins objects`() =
+        runTest {
+            val ktorfit = createMockKtorfit(PersonalTestData.survivorRequestPersonalLiveSuccess)
+            val apiService = ktorfit.createPersonalApiService()
+
+            val response = apiService.getPersonalInfo()
+
+            assertEquals(200, response.status)
+            assertNotNull(response.data)
+            assertEquals("0012886024", response.data?.insuranceId)
+            assertEquals("علي", response.data?.personal?.firstName)
+            assertEquals("عيسي زاده", response.data?.personal?.lastName)
+            assertEquals("6360110032", response.data?.personal?.nationalId)
+            assertEquals("01", response.data?.personal?.gender?.genderCode)
+            assertEquals(2, response.data?.request?.personal)
+            assertEquals("1234567890", response.data?.personal?.contacts?.firstOrNull()?.zipCode)
+        }
+
+    @Test
     fun `checkGirlSurvivorConditions should surface bare Persian 500 body`() = runTest {
         val message = "اطلاعاتی از حکم مستمری یا فوت فرد مورد نظر شما یافت نشد."
         val ktorfit = createMockKtorfit(

@@ -62,6 +62,9 @@ old_android/
 progress.txt
 test.txt
 
+## Local-only pension survivor API mocks (never commit / push)
+feature/pensionSurvivor/src/localMocks/
+
 ## Code review working files (local only)
 review/
 docs/vault/Code-Review.md

@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoDTO
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
 import com.tamin.taminhamrah.model.personal.disabilityRequest.DisabilityDependentDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
+import com.tamin.taminhamrah.model.personal.survivorDependent.SurvivorDependentDTO
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDTO
 import com.tamin.taminhamrah.model.personal.girlSurvivor.ConfirmGirlSurvivorRequestDTO
 import com.tamin.taminhamrah.model.personal.submitFinalSurvivorPension.SubmitFinalSurvivorPensionRequest
@@ -18,6 +19,7 @@ interface PersonalRemoteDataSource {
     suspend fun getDeceasedInfo(nationalId: String): DeceasedInfoDTO
     suspend fun getAge(birthDate: Long): AgeDTO
     suspend fun getDisabilityDependentInfo(query: ApiQueryParamDN): List<DisabilityDependentDTO>
+    suspend fun getSurvivorList(deceasedNationalId: String): List<SurvivorDependentDTO>
     suspend fun confirmSurvivorsList(query: ApiQueryParamDN): List<ConfirmSurvivorDTO>
     suspend fun submitFinalSurvivorPension(requestId: Int, body: SubmitFinalSurvivorPensionRequest): String?
     suspend fun getFinalSurvivorPensionPDF(): PdfDownloadDTO

@@ -10,7 +10,6 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.deservedTreatment.Deserve
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll.PayRollScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.EdictScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.issuanceCertificate.IssuanceCertificateScreen
-import com.tamin.taminhamrah.feature.pensionInquiry.ui.pensionSurvivor.PensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.DisabilityPensionScreen
 import kotlinx.serialization.Serializable
 
@@ -31,15 +30,6 @@ data object EdictRoute
 
 @Serializable
 data object IssuanceCertificateRoute
-
-@Serializable
-data object DeferredInstallmentRoute
-
-@Serializable
-data object GirlSurvivorRoute
-
-@Serializable
-data object PensionSurvivorRoute
 
 @Serializable
 data object DisabilityPensionRoute
@@ -66,18 +56,6 @@ fun NavController.navigateToEdict(navOptions: NavOptions? = null) {
 
 fun NavController.navigateToIssuanceCertificate(navOptions: NavOptions? = null) {
     navigate(IssuanceCertificateRoute, navOptions)
-}
-
-fun NavController.navigateToDeferredInstallment(navOptions: NavOptions? = null) {
-    navigate(DeferredInstallmentRoute, navOptions)
-}
-
-fun NavController.navigateToGirlSurvivor(navOptions: NavOptions? = null) {
-    navigate(GirlSurvivorRoute, navOptions)
-}
-
-fun NavController.navigateToPensionSurvivor(navOptions: NavOptions? = null) {
-    navigate(PensionSurvivorRoute, navOptions)
 }
 
 fun NavController.navigateToDisabilityPension(navOptions: NavOptions? = null) {
@@ -120,15 +98,8 @@ fun NavGraphBuilder.issuanceCertificateScreen(onBack: () -> Unit, onGoHome: () -
     }
 }
 
-fun NavGraphBuilder.pensionSurvivorScreen(onBack: () -> Unit) {
-    composableWithFadeTransitions<PensionSurvivorRoute> {
-        PensionSurvivorScreen(onBack = onBack)
-    }
-}
-
 fun NavGraphBuilder.disabilityPensionScreen(onBack: () -> Unit) {
     composableWithFadeTransitions<DisabilityPensionRoute> {
         DisabilityPensionScreen(onBack = onBack)
     }
 }
-

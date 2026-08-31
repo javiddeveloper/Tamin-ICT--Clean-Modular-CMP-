@@ -115,6 +115,8 @@ object IconSize {
     val stepperCircle = 30.dp
     val stepperConnectorHeight = 2.dp
     val stepperConnectorWidth = 44.dp
+    /** Segment height for [com.tamin.taminhamrah.ui.components.TaminHeroStepProgress] on hero headers. */
+    val heroStepSegmentHeight = 4.dp
 }
 
 object Thickness {
