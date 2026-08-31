@@ -26,6 +26,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.components.LegalRepresentativeHeader
@@ -117,19 +119,32 @@ fun AddLegalRepresentativeScreen(
                 style = MaterialTheme.typography.titleMedium,
                 color = taminColors.textPrimary,
             )
-
-            TaminStyledTextField(
-                value = uiState.nationalCode,
-                onValueChange = { viewModel.sendIntent(AddLegalRepresentativeIntent.NationalCodeChanged(it)) },
-                label = stringResource(Res.string.legal_representative_national_code_label),
-                placeholder = stringResource(Res.string.legal_representative_national_code_placeholder),
-                leadingIcon = if (uiState.isEditMode) Icons.Outlined.Lock else null,
-                readOnly = uiState.isEditMode,
-                errorText = uiState.nationalCodeError,
-                isValid = uiState.nationalCodeError?.let { false },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                maxLength = 10,
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .taminSurface()
+                    .padding(Spacing.md),
+            ) {
+                TaminStyledTextField(
+                    value = uiState.nationalCode,
+                    onValueChange = {
+                        viewModel.sendIntent(
+                            AddLegalRepresentativeIntent.NationalCodeChanged(
+                                it
+                            )
+                        )
+                    },
+                    label = stringResource(Res.string.legal_representative_national_code_label),
+                    placeholder = stringResource(Res.string.legal_representative_national_code_placeholder),
+                    leadingIcon = if (uiState.isEditMode) Icons.Outlined.Lock else null,
+                    readOnly = uiState.isEditMode,
+                    errorText = uiState.nationalCodeError,
+                    isValid = uiState.nationalCodeError?.let { false },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    maxLength = 10,
+                    textFieldBg = taminColors.blueBg
+                )
+            }
 
             Text(
                 text = stringResource(Res.string.legal_representative_access_services_hint),

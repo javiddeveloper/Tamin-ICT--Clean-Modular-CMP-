@@ -1127,6 +1127,7 @@
     <string name="legal_representative_title">معرفی نمایندهٔ اشخاص حقوقی</string>
     <string name="legal_representative_hub_subtitle">کارگاه‌های حقوقی که در آن‌ها سمت دارید</string>
     <string name="legal_representative_workshop_stat_label">کارگاه</string>
+    <string name="legal_representative_full_name_label">نام و نام خانوادگی</string>
     <string name="legal_representative_info_banner">برای مدیریت نمایندگان هر کارگاه، ابتدا هویت شما با کد اعتباری یکبار مصرف تأیید می‌شود.</string>
     <string name="legal_representative_workshop_code_label">کد کارگاه</string>
     <string name="legal_representative_branch_code_label">کد شعبه</string>
@@ -1164,6 +1165,8 @@
     <string name="legal_representative_national_code_label">کد ملی نماینده</string>
     <string name="legal_representative_national_code_placeholder">۱۰ رقم</string>
     <string name="legal_representative_access_services_hint">سرویس‌هایی که نماینده باید به آن‌ها دسترسی داشته باشد را تعیین کنید.</string>
+    <string name="legal_representative_access_level_label">سطح دسترسی</string>
+    <string name="legal_representative_active_status_label">دارای دسترسی</string>
     <string name="legal_representative_electronic_notification">ابلاغ الکترونیکی</string>
     <string name="legal_representative_internet_list">لیست اینترنتی</string>
     <string name="legal_representative_insured_registration">نام‌نویسی بیمه‌شده</string>
