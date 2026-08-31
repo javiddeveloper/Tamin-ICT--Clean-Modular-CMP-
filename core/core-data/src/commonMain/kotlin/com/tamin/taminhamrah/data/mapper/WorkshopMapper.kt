@@ -273,5 +273,6 @@ fun LegalRepresentativeContractDTO.toDomain(): LegalRepresentativeContractDN {
     return LegalRepresentativeContractDN(
         contractRow = contractRow ?: "",
         title = title,
+        nationalCode = nationalCode,
     )
 }

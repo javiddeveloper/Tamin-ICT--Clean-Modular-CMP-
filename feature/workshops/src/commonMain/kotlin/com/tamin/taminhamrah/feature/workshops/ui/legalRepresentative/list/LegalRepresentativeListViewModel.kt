@@ -2,8 +2,10 @@ package com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.list
 
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativePR
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.workshops.DeleteLegalRepresentativeUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetLegalRepresentativeWorkshopContractsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetLegalRepresentativesUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -11,6 +13,7 @@ import kotlinx.coroutines.flow.flow
 
 class LegalRepresentativeListViewModel(
     private val getLegalRepresentativesUseCase: GetLegalRepresentativesUseCase,
+    private val getLegalRepresentativeWorkshopContractsUseCase: GetLegalRepresentativeWorkshopContractsUseCase,
     private val deleteLegalRepresentativeUseCase: DeleteLegalRepresentativeUseCase,
 ) : BaseViewModel<
     LegalRepresentativeListUiState,
@@ -32,8 +35,7 @@ class LegalRepresentativeListViewModel(
             currentTicket = intent.ticket
             emit(LegalRepresentativeListUiState.PartialState.Loading(true))
             try {
-                val result = getLegalRepresentativesUseCase(intent.workshopId, intent.branchCode).first()
-                emit(LegalRepresentativeListUiState.PartialState.Loaded(result?.list?.map { it.toPresentation() } ?: emptyList()))
+                emit(LegalRepresentativeListUiState.PartialState.Loaded(loadRepresentatives(intent.workshopId, intent.branchCode)))
             } catch (e: Exception) {
                 emit(LegalRepresentativeListUiState.PartialState.Error(e.toSingleLineMessage()))
             }
@@ -63,8 +65,7 @@ class LegalRepresentativeListViewModel(
             try {
                 deleteLegalRepresentativeUseCase(uiState.value.ticket, target.stakeId)
                 emit(LegalRepresentativeListUiState.PartialState.Deleted)
-                val result = getLegalRepresentativesUseCase(currentWorkshopId, currentBranchCode).first()
-                emit(LegalRepresentativeListUiState.PartialState.Loaded(result?.list?.map { it.toPresentation() } ?: emptyList()))
+                emit(LegalRepresentativeListUiState.PartialState.Loaded(loadRepresentatives(currentWorkshopId, currentBranchCode)))
             } catch (e: Exception) {
                 emit(LegalRepresentativeListUiState.PartialState.DeleteFailed(e.toSingleLineMessage()))
             }
@@ -77,6 +78,20 @@ class LegalRepresentativeListViewModel(
         is LegalRepresentativeListIntent.AddClicked -> flow {
             sendEvent(LegalRepresentativeListEvent.NavigateToAdd)
         }
+    }
+
+    private suspend fun loadRepresentatives(workshopId: String, branchCode: String): List<LegalRepresentativePR> {
+        val representatives = getLegalRepresentativesUseCase(workshopId, branchCode).first()?.list ?: emptyList()
+        if (representatives.none { it.special }) {
+            return representatives.map { it.toPresentation() }
+        }
+        val contractRowsByNationalId: Map<String, List<String>> = getLegalRepresentativeWorkshopContractsUseCase(workshopId, branchCode)
+            .first()
+            ?.list
+            .orEmpty()
+            .filter { !it.nationalCode.isNullOrBlank() }
+            .groupBy({ it.nationalCode!! }, valueTransform = { it.contractRow })
+        return representatives.map { it.toPresentation(contractRowsByNationalId[it.nationalId] ?: emptyList()) }
     }
 
     override fun reduceState(

@@ -1151,7 +1151,6 @@
     <string name="legal_representative_collapse_action">بستن</string>
     <string name="legal_representative_start_date_label">تاریخ شروع دسترسی</string>
     <string name="legal_representative_selected_contracts_label">پیمان‌های انتخاب‌شده</string>
-    <string name="legal_representative_all_contracts_value">همهٔ پیمان‌ها</string>
     <string name="legal_representative_operations_action">عملیات</string>
     <string name="legal_representative_edit_action">ویرایش اطلاعات</string>
     <string name="legal_representative_delete_action">حذف نماینده</string>

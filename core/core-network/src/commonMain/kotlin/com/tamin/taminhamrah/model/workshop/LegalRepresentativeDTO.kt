@@ -45,16 +45,9 @@ data class LegalRepresentativeRequestDTO(
     @SerialName("contractRows") val contractRows: List<String>? = null,
 )
 
-/**
- * One contract (پیمان) belonging to a "special" (پیمانکاری) workshop.
- *
- * The legacy Android app's equivalent response (`EmployerWorkshop`) never carried a
- * human-readable contract title — only workshop/person fields plus [contractRow] (there,
- * `pymseq`). [title] is a best-guess field name pending a real API sample, matching the same
- * caveat already on [LegalRepresentativeDTO.fullName].
- */
 @Serializable
 data class LegalRepresentativeContractDTO(
     @SerialName("contractRow") val contractRow: String? = null,
     @SerialName("title") val title: String? = null,
+    @SerialName("nationalCode") val nationalCode: String? = null,
 )

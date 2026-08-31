@@ -220,7 +220,7 @@ fun LegalRepresentativeWorkshopDN.toPresentation(): LegalRepresentativeWorkshopP
     )
 }
 
-fun LegalRepresentativeDN.toPresentation(): LegalRepresentativePR {
+fun LegalRepresentativeDN.toPresentation(contractRows: List<String> = emptyList()): LegalRepresentativePR {
     return LegalRepresentativePR(
         stakeId = stakeId,
         nationalId = nationalId,
@@ -233,6 +233,7 @@ fun LegalRepresentativeDN.toPresentation(): LegalRepresentativePR {
         workshopId = workshopId,
         branchCode = branchCode,
         special = special,
+        contractRows = contractRows,
     )
 }
 

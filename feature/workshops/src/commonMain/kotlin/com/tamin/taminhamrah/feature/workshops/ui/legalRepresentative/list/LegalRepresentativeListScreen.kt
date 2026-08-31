@@ -76,7 +76,6 @@ import taminx.core.core_ui.ic_tamin_edit
 import taminx.core.core_ui.ic_trash
 import taminx.core.core_ui.legal_representative_access_level_label
 import taminx.core.core_ui.legal_representative_add_action
-import taminx.core.core_ui.legal_representative_all_contracts_value
 import taminx.core.core_ui.legal_representative_branch_code_label
 import taminx.core.core_ui.legal_representative_cancel_action
 import taminx.core.core_ui.legal_representative_collapse_action
@@ -351,11 +350,10 @@ private fun LegalRepresentativeCard(
                     label = stringResource(Res.string.legal_representative_start_date_label),
                     value = representative.startDateLabel,
                 )
-                if (representative.special) {
+                if (representative.special && representative.contractRows.isNotEmpty()) {
                     DetailRow(
                         label = stringResource(Res.string.legal_representative_selected_contracts_label),
-                        value = stringResource(Res.string.legal_representative_all_contracts_value),
-                        numeric = false,
+                        value = representative.contractRows.joinToString(separator = " ، "),
                     )
                 }
             }

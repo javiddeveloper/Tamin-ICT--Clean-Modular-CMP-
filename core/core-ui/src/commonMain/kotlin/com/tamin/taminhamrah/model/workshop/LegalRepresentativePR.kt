@@ -15,4 +15,5 @@ data class LegalRepresentativePR(
     val workshopId: String,
     val branchCode: String,
     val special: Boolean,
+    val contractRows: List<String>,
 )
