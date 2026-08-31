@@ -19,6 +19,9 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
+import org.jetbrains.compose.resources.getString
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.workers_payment_url_missing
 
 class WorkersPaymentViewModel(
     private val getWorkersPaymentInfoUseCase: GetWorkersPaymentInfoUseCase,
@@ -83,7 +86,7 @@ class WorkersPaymentViewModel(
             val url = result.paymentUrl
             if (url.isNullOrBlank()) {
                 emit(PartialState.ProcessingPayment(false))
-                sendEvent(WorkersPaymentEvent.ShowToast("لینک پرداخت دریافت نشد. لطفاً دوباره تلاش کنید."))
+                sendEvent(WorkersPaymentEvent.ShowToast(getString(Res.string.workers_payment_url_missing)))
                 return@flow
             }
             emit(PartialState.PaymentTicketReady(result.ticket, result.paymentInfo))

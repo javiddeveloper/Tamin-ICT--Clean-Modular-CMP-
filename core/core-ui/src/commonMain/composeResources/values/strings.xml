@@ -1237,4 +1237,5 @@
     <string name="workers_payment_success_subtitle">حق بیمهٔ %1$s به مبلغ %2$s ریال پرداخت شد.</string>
     <string name="workers_payment_success_tracking_label">شمارهٔ پیگیری تراکنش</string>
     <string name="workers_payment_success_dismiss">متوجه شدم</string>
+    <string name="workers_payment_url_missing">لینک پرداخت دریافت نشد. لطفاً دوباره تلاش کنید.</string>
 </resources>
