@@ -233,12 +233,10 @@ fun CompleteEmployerInfoScreen(
                                     onOpenBranchPicker = {
                                         onIntent(CompleteEmployerInfoIntent.OpenBottomSheet(ActiveBottomSheet.BRANCH))
                                     },
-                                    errorMessage = if (state.hasTouchedRealForm) {
-                                        state.realBlockingError?.let { stringResource(it) }
-                                    } else {
-                                        null
-                                    },
-                                    hasAttemptedSubmit = state.hasAttemptedRealSubmit,
+                                    workshopCodeError = state.workshopCodeError?.let { stringResource(it) },
+                                    provinceError = state.provinceError?.let { stringResource(it) },
+                                    cityError = state.cityError?.let { stringResource(it) },
+                                    branchError = state.branchError?.let { stringResource(it) },
                                     isSubmitting = state.isSubmitting,
                                     canSubmit = state.canSubmitReal,
                                     onSubmit = { onIntent(CompleteEmployerInfoIntent.SubmitRealForm) },

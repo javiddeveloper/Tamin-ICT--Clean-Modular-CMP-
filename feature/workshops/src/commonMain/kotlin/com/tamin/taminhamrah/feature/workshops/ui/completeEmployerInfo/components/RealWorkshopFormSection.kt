@@ -39,7 +39,7 @@ import com.tamin.taminhamrah.model.common.ProvincePR
 import com.tamin.taminhamrah.model.contracts.BranchPR
 import com.tamin.taminhamrah.ui.components.SegmentedInputField
 import com.tamin.taminhamrah.ui.components.animatedErrorBorder
-import com.tamin.taminhamrah.ui.digitsOnly
+import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
@@ -71,18 +71,22 @@ fun RealWorkshopFormSection(
     onOpenCityPicker: () -> Unit,
     selectedBranch: BranchPR?,
     onOpenBranchPicker: () -> Unit,
-    errorMessage: String?,
-    hasAttemptedSubmit: Boolean,
+    workshopCodeError: String?,
+    provinceError: String?,
+    cityError: String?,
+    branchError: String?,
     isSubmitting: Boolean,
     canSubmit: Boolean,
     onSubmit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    val isCodeError = hasAttemptedSubmit && workshopCode.digitsOnly().length != WORKSHOP_CODE_SLOTS
-    val isProvinceError = hasAttemptedSubmit && selectedProvince == null
-    val isCityError = hasAttemptedSubmit && selectedCity == null
-    val isBranchError = hasAttemptedSubmit && selectedBranch == null
+    // Each field is red exactly when it has a message to show underneath, so the border and the
+    // reason can never disagree.
+    val isCodeError = workshopCodeError != null
+    val isProvinceError = provinceError != null
+    val isCityError = cityError != null
+    val isBranchError = branchError != null
 
     Column(
         modifier = modifier.fillMaxWidth().padding(horizontal = Spacing.lg),
@@ -120,6 +124,7 @@ fun RealWorkshopFormSection(
                     onValueChange = onWorkshopCodeChanged,
                     slotCount = WORKSHOP_CODE_SLOTS,
                     error = isCodeError,
+                    errorMessage = workshopCodeError,
                 )
             }
 
@@ -185,6 +190,7 @@ fun RealWorkshopFormSection(
                         text = selectedProvince?.provinceName ?: stringResource(Res.string.employer_info_sheet_province),
                         isSelected = selectedProvince != null,
                         isError = isProvinceError,
+                        errorMessage = provinceError,
                         onClick = onOpenProvincePicker,
                     )
                 }
@@ -208,6 +214,7 @@ fun RealWorkshopFormSection(
                         isSelected = selectedCity != null,
                         isEnabled = isCityEnabled,
                         isError = isCityError,
+                        errorMessage = cityError,
                         onClick = { if (isCityEnabled) onOpenCityPicker() },
                     )
                 }
@@ -232,31 +239,8 @@ fun RealWorkshopFormSection(
                     isSelected = selectedBranch != null,
                     isEnabled = isBranchEnabled,
                     isError = isBranchError,
+                    errorMessage = branchError,
                     onClick = { if (isBranchEnabled) onOpenBranchPicker() },
-                )
-            }
-        }
-
-        // Error message line
-        if (!errorMessage.isNullOrBlank()) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Info,
-                    contentDescription = null,
-                    tint = colors.dangerText,
-                    modifier = Modifier.size(14.dp),
-                )
-                Text(
-                    text = errorMessage,
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        color = colors.dangerText,
-                        fontSize = 11.sp,
-                    ),
                 )
             }
         }
@@ -291,9 +275,11 @@ private fun SelectChip(
     isSelected: Boolean,
     isEnabled: Boolean = true,
     isError: Boolean = false,
+    errorMessage: String? = null,
     onClick: () -> Unit,
 ) {
     val colors = LocalTaminColors.current
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
     val bg = if (!isEnabled) colors.bgPage.copy(alpha = 0.5f) else colors.bgPage
     val fg = if (isSelected) colors.textPrimary else colors.textMuted
     val weight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
@@ -333,6 +319,37 @@ private fun SelectChip(
             contentDescription = null,
             tint = colors.textMuted,
             modifier = Modifier.size(13.dp).rotate(CHEVRON_DOWN_DEGREES),
+        )
+        }
+
+        FieldErrorText(errorMessage)
+    }
+}
+
+/**
+ * The reason a field is red, printed directly under it. A border alone says where, not why.
+ */
+@Composable
+internal fun FieldErrorText(message: String?) {
+    if (message.isNullOrBlank()) return
+    val colors = LocalTaminColors.current
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.Info,
+            contentDescription = null,
+            tint = colors.dangerText,
+            modifier = Modifier.size(IconSize.small),
+        )
+        Text(
+            text = message,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.SemiBold,
+                color = colors.dangerText,
+            ),
         )
     }
 }

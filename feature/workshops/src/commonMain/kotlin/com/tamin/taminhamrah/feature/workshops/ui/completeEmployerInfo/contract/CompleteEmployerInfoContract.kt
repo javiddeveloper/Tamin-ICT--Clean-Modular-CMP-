@@ -158,6 +158,57 @@ data class CompleteEmployerInfoUiState(
     val otpBlockingError: StringResource?
         get() = if (otpCode.digitsOnly().length < OTP_LENGTH) Res.string.employer_info_err_otp_code else null
 
+    /**
+     * Each field's own complaint, shown under that field rather than as one message at the foot of
+     * the form.
+     *
+     * A typed field only complains once it holds something wrong - an empty form should not open
+     * covered in red. A picker waits until the form has been touched, since there is nothing to be
+     * "half right" about in a choice.
+     */
+    val workshopCodeError: StringResource?
+        get() = Res.string.employer_info_err_ws_code.takeIf {
+            realWorkshopCode.isNotBlank() && realWorkshopCode.digitsOnly().length != WORKSHOP_CODE_LENGTH
+        }
+
+    val provinceError: StringResource?
+        get() = Res.string.employer_info_err_province_city_branch
+            .takeIf { hasTouchedRealForm && selectedProvince == null }
+
+    val cityError: StringResource?
+        get() = Res.string.employer_info_err_province_city_branch
+            .takeIf { selectedProvince != null && selectedCity == null && hasTouchedRealForm }
+
+    val branchError: StringResource?
+        get() = Res.string.employer_info_err_province_city_branch
+            .takeIf { selectedCity != null && selectedBranch == null }
+
+    val legalNationalIdError: StringResource?
+        get() = Res.string.employer_info_err_legal_nid.takeIf {
+            legalNationalId.isNotBlank() && legalNationalId.digitsOnly().length != LEGAL_NATIONAL_ID_LENGTH
+        }
+
+    val companyTypeError: StringResource?
+        get() = Res.string.employer_info_err_company_type
+            .takeIf { hasTouchedLegalForm && selectedCompanyType == null }
+
+    val ceoNationalIdError: StringResource?
+        get() = Res.string.employer_info_err_ceo_nid.takeIf {
+            ceoNationalId.isNotBlank() && ceoNationalId.digitsOnly().length != CEO_NATIONAL_ID_LENGTH
+        }
+
+    val ceoBirthError: StringResource?
+        get() = Res.string.employer_info_err_ceo_birth
+            .takeIf { hasTouchedLegalForm && ceoBirthDateMillis == null }
+
+    val legalMobileError: StringResource?
+        get() = Res.string.employer_info_err_mobile
+            .takeIf { legalMobile.isNotBlank() && !MOBILE_PATTERN.matches(legalMobile.digitsOnly()) }
+
+    val legalEmailError: StringResource?
+        get() = Res.string.employer_info_err_email
+            .takeIf { legalEmail.isNotBlank() && !EMAIL_PATTERN.matches(legalEmail.trim()) }
+
     val canSubmitLegal: Boolean get() = legalBlockingError == null
     val canSubmitReal: Boolean get() = realBlockingError == null
     val canSubmitOtp: Boolean get() = otpBlockingError == null
