@@ -304,26 +304,33 @@ class CompleteEmployerInfoViewModelTest {
     }
 
     /**
-     * The service returns one row per agreement, so one workshop can arrive several times. The
-     * merged model carries no agreement sequence to tell those rows apart, so position is the only
-     * discriminator left — and it has to be enough, because duplicate keys crash `LazyColumn` and
-     * make one card's expander open all of its twins.
+     * The service returns one row per agreement, so one workshop can arrive several times. Rows
+     * that are identical in every field the card shows are the same row to a reader, so the mapper
+     * collapses them; rows that differ in any of it are kept and must still get distinct ids,
+     * because duplicate keys crash `LazyColumn` and make one card's expander open all of its twins.
      */
     @Test
-    fun repeatedAgreementsOnOneWorkshopStillGetDistinctRowIds() = runTest(testDispatcher) {
+    fun identicalAgreementsCollapseAndDifferingOnesKeepDistinctRowIds() = runTest(testDispatcher) {
         val twin = agreementOf(
             workshopId = "0968210170",
             branchCode = "0960",
-            name = "\u0622\u0645\u0648\u0632\u0634\u06AF\u0627\u0647 \u06A9\u0627\u0645\u067E\u06CC\u0648\u062A\u0631",
+            name = "آموزشگاه",
             characterCode = "01",
         )
+        val differing = twin.copy(email = "second@tamin.ir")
+
         viewModel.uiState.test {
             awaitUntil { it.workshops.isNotEmpty() }
+
             fakeWorkShopsRepo.employerAgreements = PagedListDN(items = listOf(twin, twin, twin), total = 3)
             viewModel.sendIntent(CompleteEmployerInfoIntent.LoadInitialData)
+            assertEquals(1, awaitUntil { it.workshops.size == 1 }.workshops.size)
 
-            val state = awaitUntil { it.workshops.size == 3 }
-            assertEquals(3, state.workshops.map { it.id }.toSet().size)
+            fakeWorkShopsRepo.employerAgreements = PagedListDN(items = listOf(twin, differing), total = 2)
+            viewModel.sendIntent(CompleteEmployerInfoIntent.LoadInitialData)
+            val kept = awaitUntil { it.workshops.size == 2 }
+            assertEquals(2, kept.workshops.map { it.id }.toSet().size)
+
             cancelAndIgnoreRemainingEvents()
         }
     }
