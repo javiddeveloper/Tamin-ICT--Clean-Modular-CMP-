@@ -1,6 +1,8 @@
 package com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.add
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
@@ -43,6 +46,7 @@ import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.graphics.SolidColor
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -201,6 +205,8 @@ fun AddLegalRepresentativeScreen(
                     requestLabel = stringResource(Res.string.legal_representative_otp_request_action),
                     onRequestTicket = { viewModel.sendIntent(AddLegalRepresentativeIntent.RequestTicket) },
                     onOtpChanged = { viewModel.sendIntent(AddLegalRepresentativeIntent.OtpChanged(it)) },
+                    requestButtonBackground = SolidColor(taminColors.blueBg),
+                    requestButtonContentColor = taminColors.blueText,
                 )
             }
 
@@ -250,7 +256,11 @@ private fun LegalRepresentativeCheckboxRow(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(CornerRadius.chip))
-            .background(if (checked) taminColors.blueBg else taminColors.bgSurface)
+            .background(if (checked) taminColors.blueBg else taminColors.bgPage)
+            .border(
+                BorderStroke(1.dp, if (checked) taminColors.blueText.copy(0.3f) else taminColors.border),
+                RoundedCornerShape(CornerRadius.chip)
+            )
             .padding(horizontal = Spacing.md, vertical = Spacing.sm),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -258,12 +268,16 @@ private fun LegalRepresentativeCheckboxRow(
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold,
             color = taminColors.textPrimary,
         )
         Checkbox(
             checked = checked,
             onCheckedChange = onCheckedChange,
-            colors = CheckboxDefaults.colors(checkedColor = taminColors.blueText),
+            colors = CheckboxDefaults.colors(
+                checkedColor = taminColors.blueText,
+                uncheckedColor = taminColors.border,
+            ),
         )
     }
 }

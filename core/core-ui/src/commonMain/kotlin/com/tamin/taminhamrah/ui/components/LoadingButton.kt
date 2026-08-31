@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -52,15 +53,17 @@ fun LoadingButton(
     icon: ImageVector? = null,
     /** Defaults to every existing caller's expectation: icon before text. */
     iconPosition: LoadingButtonIconPosition = LoadingButtonIconPosition.LEADING,
+    background: Brush? = null,
+    contentColor: Color? = null,
 ) {
     val taminColors = LocalTaminColors.current
-    val backgroundBrush = if (enabled) {
+    val backgroundBrush = background ?: if (enabled) {
         taminColors.buttonGradient
     } else {
         taminColors.buttonDisabledGradient
     }
-    val contentColor = if (enabled) Color.White else Color.White.copy(alpha = 0.6f)
-    val shadowColor = if (enabled) taminColors.shadowPrimary else Color.Transparent
+    val contentColor = contentColor ?: if (enabled) Color.White else Color.White.copy(alpha = 0.6f)
+    val shadowColor = if (background == null && enabled) taminColors.shadowPrimary else Color.Transparent
 
     Box(
         modifier = modifier
