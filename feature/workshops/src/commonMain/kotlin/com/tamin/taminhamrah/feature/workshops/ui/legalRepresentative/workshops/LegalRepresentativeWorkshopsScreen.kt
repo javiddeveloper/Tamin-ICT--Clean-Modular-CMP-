@@ -32,11 +32,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.components.LegalRepresentativeHeader
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.components.LegalRepresentativeHeroSubtitle
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.components.LegalRepresentativeIdentitySummaryCard
+import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.list.AddRepresentativeChip
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopPR
 import com.tamin.taminhamrah.ui.components.BannerCard
 import com.tamin.taminhamrah.ui.components.BannerType
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.ErrorStateView
+import com.tamin.taminhamrah.ui.components.IconPosition
 import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
 import com.tamin.taminhamrah.ui.components.NumericText
@@ -210,11 +212,11 @@ private fun LegalRepresentativeWorkshopCard(
                 style = MaterialTheme.typography.bodySmall,
                 color = taminColors.textMuted,
             )
-            LoadingButton(
+            AddRepresentativeChip(
                 text = stringResource(Res.string.legal_representative_open_action),
                 onClick = { onOpenWorkshop(workshop) },
                 icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
-                iconPosition = LoadingButtonIconPosition.TRAILING,
+                iconPosition = IconPosition.End,
             )
         }
     }

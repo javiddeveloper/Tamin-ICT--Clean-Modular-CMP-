@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -374,13 +375,32 @@ private fun LegalRepresentativeCard(
     }
 }
 
+
 /** Compact pill button sized to its label, sitting beside the section title instead of a full-width CTA. */
 @Composable
-private fun AddRepresentativeChip(
+fun AddRepresentativeChip(
     text: String,
     onClick: () -> Unit,
+    icon: ImageVector = Icons.Filled.Add,
+    iconPosition: IconPosition = IconPosition.Start,
 ) {
     val taminColors = LocalTaminColors.current
+    val iconContent: @Composable () -> Unit = {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier.size(IconSize.small),
+        )
+    }
+    val label: @Composable () -> Unit = {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+        )
+    }
     Row(
         modifier = Modifier
             .clip(RoundedCornerShape(CornerRadius.lg))
@@ -390,17 +410,12 @@ private fun AddRepresentativeChip(
         horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(
-            imageVector = Icons.Filled.Add,
-            contentDescription = null,
-            tint = Color.White,
-            modifier = Modifier.size(IconSize.small),
-        )
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Bold,
-            color = Color.White,
-        )
+        if (iconPosition == IconPosition.Start) {
+            iconContent()
+            label()
+        } else {
+            label()
+            iconContent()
+        }
     }
 }
