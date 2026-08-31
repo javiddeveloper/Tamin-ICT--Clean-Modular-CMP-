@@ -1133,6 +1133,7 @@
     <string name="legal_representative_branch_code_label">کد شعبه</string>
     <string name="legal_representative_branch_and_count">شعبهٔ %1$s · %2$d نماینده</string>
     <string name="legal_representative_open_action">معرفی نمایندگان</string>
+    <string name="legal_representative_special_workshop_badge">کارگاه خاص</string>
     <string name="legal_representative_empty_title">هیچ کارگاه حقوقی‌ای یافت نشد</string>
     <string name="legal_representative_otp_title">تأیید هویت</string>
     <string name="legal_representative_otp_heading">تأیید هویت با بلیت امنیتی</string>
@@ -1141,6 +1142,7 @@
     <string name="legal_representative_otp_request_action">دریافت کد اعتباری یکبار مصرف</string>
     <string name="legal_representative_otp_sent_message">پیامکی حاوی کد اعتباری برای شما ارسال شد. آن را در کادر زیر وارد کنید.</string>
     <string name="legal_representative_otp_sent_to_national_code">ارسال‌شده به کد ملی %1$s</string>
+    <string name="legal_representative_credit_code_label">کد اعتباری</string>
     <string name="legal_representative_otp_verify_action">صحت‌سنجی کد اعتباری</string>
     <string name="legal_representative_list_title">نمایندگان کارگاه</string>
     <string name="legal_representative_list_section_label">نمایندگان دارای دسترسی (%1$d)</string>

@@ -42,6 +42,7 @@ import com.tamin.taminhamrah.ui.components.IconPosition
 import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
 import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.dashedOutline
 import com.tamin.taminhamrah.ui.components.rememberCopyAction
 import com.tamin.taminhamrah.ui.components.taminSurface
@@ -63,6 +64,7 @@ import taminx.core.core_ui.legal_representative_empty_title
 import taminx.core.core_ui.legal_representative_hub_subtitle
 import taminx.core.core_ui.legal_representative_info_banner
 import taminx.core.core_ui.legal_representative_open_action
+import taminx.core.core_ui.legal_representative_special_workshop_badge
 import taminx.core.core_ui.legal_representative_workshop_code_label
 
 /** How far the identity card rides up into the header's gradient, straddling the seam. */
@@ -177,12 +179,25 @@ private fun LegalRepresentativeWorkshopCard(
             .padding(Spacing.lg),
         verticalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
-        Text(
-            text = workshop.workshopName,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = taminColors.textPrimary,
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = workshop.workshopName,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = taminColors.textPrimary,
+            )
+            if (workshop.special) {
+                StatusPill(
+                    text = stringResource(Res.string.legal_representative_special_workshop_badge),
+                    containerColor = taminColors.orangeBg,
+                    contentColor = taminColors.orangeText,
+                )
+            }
+        }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
