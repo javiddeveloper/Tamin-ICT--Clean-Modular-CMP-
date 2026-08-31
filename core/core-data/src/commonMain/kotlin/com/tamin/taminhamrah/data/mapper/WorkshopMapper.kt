@@ -93,6 +93,7 @@ fun EmployerWorkshopDTO.toDomain(): WorkshopSummaryDN = WorkshopSummaryDN(
     contractRow = contractRow.orEmpty(),
     branchOfficeCode = branch?.code.orEmpty(),
     branchOfficeName = branch?.organizationName.orEmpty(),
+    characterCode = character?.characterCode.orEmpty(),
     characterDescription = character?.characterDesc.orEmpty(),
     workshopTypeDescription = workshopType?.workshopTypeDesc.orEmpty(),
     statusCode = workshopStatus?.workshopStatusCode.orEmpty(),

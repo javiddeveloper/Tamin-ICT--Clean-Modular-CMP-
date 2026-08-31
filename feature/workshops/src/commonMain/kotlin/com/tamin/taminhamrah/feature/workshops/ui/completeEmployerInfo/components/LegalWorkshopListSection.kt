@@ -156,7 +156,7 @@ private fun WorkshopCardItem(
             }
             val badgeFg = if (workshop.isLegal) colors.blueText else colors.orangeText
             val badgeBg = if (workshop.isLegal) colors.blueBg else colors.orangeBg
-            val badgeBorder = if (workshop.isLegal) colors.hawkesBlue else colors.orangeBg
+            val badgeBorder = if (workshop.isLegal) colors.blueBorder else colors.orangeBg
 
             Box(
                 modifier = Modifier

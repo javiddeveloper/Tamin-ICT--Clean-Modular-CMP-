@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
+import com.tamin.taminhamrah.feature.workshops.fake.FakeWorkShopsRepository
 import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.contract.CompleteEmployerInfoDialog
 import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.contract.CompleteEmployerInfoIntent
 import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.contract.CompleteEmployerInfoTab
@@ -43,15 +44,15 @@ import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
+import com.tamin.taminhamrah.model.user.CurrentUserDN
 import com.tamin.taminhamrah.model.user.EditMobileResponseDN
 import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.model.user.UserProfileDN
+import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
-import com.tamin.taminhamrah.model.workshop.EmployerAgreementListDN
-import com.tamin.taminhamrah.model.workshop.EmployerWorkshopDN
+import com.tamin.taminhamrah.model.workshop.WorkshopSummaryDN
 import com.tamin.taminhamrah.repository.CityProvinceRepository
 import com.tamin.taminhamrah.repository.UserRepository
-import com.tamin.taminhamrah.repository.WorkShopsRepository
 import com.tamin.taminhamrah.repository.contracts.ContractsRepository
 import com.tamin.taminhamrah.repository.employerInfo.EmployerInfoRepository
 import com.tamin.taminhamrah.useCases.common.GetCitiesByProvinceUseCase
@@ -64,7 +65,7 @@ import com.tamin.taminhamrah.useCases.employerInfo.RequestRealTicketUseCase
 import com.tamin.taminhamrah.useCases.employerInfo.SubmitLegalWorkshopInfoUseCase
 import com.tamin.taminhamrah.useCases.employerInfo.SubmitRealWorkshopInfoUseCase
 import com.tamin.taminhamrah.useCases.user.GetUserProfileUseCase
-import com.tamin.taminhamrah.useCases.workshops.GetAllEmployerAgreementByNationalIdUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetEmployerAgreementsUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -88,7 +89,7 @@ class CompleteEmployerInfoViewModelTest {
 
     private lateinit var fakeEmployerInfoRepo: FakeTestEmployerInfoRepo
     private lateinit var fakeUserRepo: FakeTestUserRepo
-    private lateinit var fakeWorkShopsRepo: FakeTestWorkShopsRepo
+    private lateinit var fakeWorkShopsRepo: FakeWorkShopsRepository
     private lateinit var fakeCityProvinceRepo: FakeTestCityProvinceRepo
     private lateinit var fakeContractsRepo: FakeTestContractsRepo
     private lateinit var viewModel: CompleteEmployerInfoViewModel
@@ -98,12 +99,14 @@ class CompleteEmployerInfoViewModelTest {
         Dispatchers.setMain(testDispatcher)
         fakeEmployerInfoRepo = FakeTestEmployerInfoRepo()
         fakeUserRepo = FakeTestUserRepo()
-        fakeWorkShopsRepo = FakeTestWorkShopsRepo()
+        fakeWorkShopsRepo = FakeWorkShopsRepository().apply {
+            employerAgreements = PagedListDN(items = listOf(legalWorkshop, realWorkshop), total = 2)
+        }
         fakeCityProvinceRepo = FakeTestCityProvinceRepo()
         fakeContractsRepo = FakeTestContractsRepo()
 
         viewModel = CompleteEmployerInfoViewModel(
-            getAllEmployerAgreementUseCase = GetAllEmployerAgreementByNationalIdUseCase(fakeWorkShopsRepo),
+            getEmployerAgreements = GetEmployerAgreementsUseCase(fakeWorkShopsRepo),
             getUserProfileUseCase = GetUserProfileUseCase(fakeUserRepo),
             getLegalWorkshopUseCase = GetLegalWorkshopUseCase(fakeEmployerInfoRepo),
             getLegalWorkshopCeoUseCase = GetLegalWorkshopCeoUseCase(fakeEmployerInfoRepo),
@@ -283,23 +286,13 @@ class CompleteEmployerInfoViewModelTest {
      */
     @Test
     fun exactDuplicateAgreementsFromApiAreDeduplicatedToSingleItem() = runTest(testDispatcher) {
-        val twin = EmployerWorkshopDN(
-            sswn = null, branchTitle = null, branchName = "شعبه ۳ کرج", lastAddress = null,
-            characterCode = "01", characterDesc = null, workshopApproveDate = null,
-            inclusionDate = null, brhCode = null, activityName = null, workshopRegisterDate = null,
-            branchCode = "0960", workshopName = "آموزشگاه کامپیوتر", employerName = null,
-            actitvityCode = null, userId = null, workshopId = "0968210170",
-            workshopUnemployedStat = null,
+        val twin = agreementOf(
+            workshopId = "0968210170",
+            branchCode = "0960",
+            name = "\u0622\u0645\u0648\u0632\u0634\u06AF\u0627\u0647 \u06A9\u0627\u0645\u067E\u06CC\u0648\u062A\u0631",
+            characterCode = "01",
         )
-        val agreement = EmployerAgreementDN(
-            pymseq = null, regno = null, firstname = null, emailaddr = null, workshop = twin,
-            nationalno = null, mobileno = null, startdate = null, mastcusttype = null,
-            createdt = null, masttyp = null, logicalDeleted = false, regemailseq = null,
-            lastname = null, special = null, risuid = null, nationalcode = null, enddate = null,
-            letDate = null, regdate = null, roletype = null, dname = null, letNo = null,
-            createuid = null,
-        )
-        fakeWorkShopsRepo.agreementsOverride = listOf(agreement, agreement, agreement)
+        fakeWorkShopsRepo.employerAgreements = PagedListDN(items = listOf(twin, twin, twin), total = 3)
 
         viewModel.sendIntent(CompleteEmployerInfoIntent.LoadInitialData)
         viewModel.uiState.test {
@@ -311,36 +304,25 @@ class CompleteEmployerInfoViewModelTest {
     }
 
     /**
-     * The service returns one row per agreement, so multiple distinct agreements on one workshop
-     * can arrive. Distinct agreements still receive distinct row IDs.
+     * The service returns one row per agreement, so one workshop can arrive several times. The
+     * merged model carries no agreement sequence to tell those rows apart, so position is the only
+     * discriminator left — and it has to be enough, because duplicate keys crash `LazyColumn` and
+     * make one card's expander open all of its twins.
      */
     @Test
-    fun distinctAgreementsOnOneWorkshopStillGetDistinctRowIds() = runTest(testDispatcher) {
-        val twin = EmployerWorkshopDN(
-            sswn = null, branchTitle = null, branchName = "شعبه ۳ کرج", lastAddress = null,
-            characterCode = "01", characterDesc = null, workshopApproveDate = null,
-            inclusionDate = null, brhCode = null, activityName = null, workshopRegisterDate = null,
-            branchCode = "0960", workshopName = "آموزشگاه کامپیوتر", employerName = null,
-            actitvityCode = null, userId = null, workshopId = "0968210170",
-            workshopUnemployedStat = null,
+    fun repeatedAgreementsOnOneWorkshopStillGetDistinctRowIds() = runTest(testDispatcher) {
+        val twin = agreementOf(
+            workshopId = "0968210170",
+            branchCode = "0960",
+            name = "\u0622\u0645\u0648\u0632\u0634\u06AF\u0627\u0647 \u06A9\u0627\u0645\u067E\u06CC\u0648\u062A\u0631",
+            characterCode = "01",
         )
-        val agreement1 = EmployerAgreementDN(
-            pymseq = "1", regno = null, firstname = null, emailaddr = null, workshop = twin,
-            nationalno = null, mobileno = null, startdate = null, mastcusttype = null,
-            createdt = null, masttyp = null, logicalDeleted = false, regemailseq = null,
-            lastname = null, special = null, risuid = null, nationalcode = null, enddate = null,
-            letDate = null, regdate = null, roletype = null, dname = null, letNo = null,
-            createuid = null,
-        )
-        val agreement2 = agreement1.copy(pymseq = "2", letDate = "1403/01/01")
-        fakeWorkShopsRepo.agreementsOverride = listOf(agreement1, agreement2)
+        fakeWorkShopsRepo.employerAgreements = PagedListDN(items = listOf(twin, twin, twin), total = 3)
 
         viewModel.sendIntent(CompleteEmployerInfoIntent.LoadInitialData)
         viewModel.uiState.test {
-            val state = awaitUntil { it.workshops.size == 2 }
-            assertEquals(2, state.workshops.map { it.id }.toSet().size)
-            assertEquals("1", state.workshops[0].id)
-            assertEquals("2", state.workshops[1].id)
+            val state = awaitUntil { it.workshops.size == 3 }
+            assertEquals(3, state.workshops.map { it.id }.toSet().size)
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -432,6 +414,8 @@ private class FakeTestEmployerInfoRepo : EmployerInfoRepository {
 }
 
 private class FakeTestUserRepo : UserRepository {
+    override suspend fun getCurrentUser(): Flow<CurrentUserDN> = flowOf(CurrentUserDN())
+
     override suspend fun getUserProfile(): Flow<UserProfileDN> = flow {
         emit(
             UserProfileDN(
@@ -463,119 +447,6 @@ private class FakeTestUserRepo : UserRepository {
     override suspend fun getStatusCertificateReport(filters: List<ApiFilterDN>): Flow<String> = flowOf("")
     override suspend fun getWageCertificateReport(filters: List<ApiFilterDN>): Flow<String> = flowOf("")
     override suspend fun getRecipients(filters: List<ApiFilterDN>): Flow<List<RecipientDN>> = flowOf(emptyList())
-}
-
-private class FakeTestWorkShopsRepo : WorkShopsRepository {
-    /** Set to replace the default two rows, e.g. with several agreements on one workshop. */
-    var agreementsOverride: List<EmployerAgreementDN>? = null
-
-    override suspend fun getAllEmployerAgreementByNationalId(filters: List<ApiFilterDN>): EmployerAgreementListDN {
-        agreementsOverride?.let { return EmployerAgreementListDN(total = it.size, list = it) }
-        return EmployerAgreementListDN(
-            total = 2,
-            list = listOf(
-                EmployerAgreementDN(
-                    pymseq = "1",
-                    regno = "123",
-                    firstname = "حسین",
-                    lastname = "توکلی",
-                    emailaddr = "info@damabokhar.ir",
-                    workshop = EmployerWorkshopDN(
-                        sswn = "0081631829",
-                        branchTitle = "شعبه ۲ مشهد",
-                        branchName = "شعبه ۲ مشهد",
-                        lastAddress = "مشهد، خیام",
-                        characterCode = "02",
-                        characterDesc = "شخصیت حقوقی",
-                        workshopApproveDate = "1403/05/19",
-                        inclusionDate = null,
-                        brhCode = "1202",
-                        activityName = null,
-                        workshopRegisterDate = null,
-                        branchCode = "1202",
-                        workshopName = "شرکت تست",
-                        employerName = "شرکت تست",
-                        actitvityCode = null,
-                        userId = null,
-                        workshopId = "0081631829",
-                        workshopUnemployedStat = null,
-                    ),
-                    nationalno = null,
-                    mobileno = "09153214478",
-                    startdate = null,
-                    mastcusttype = null,
-                    createdt = null,
-                    masttyp = null,
-                    logicalDeleted = null,
-                    regemailseq = null,
-                    special = null,
-                    risuid = null,
-                    nationalcode = null,
-                    enddate = null,
-                    letDate = "1403/05/19",
-                    regdate = null,
-                    roletype = null,
-                    dname = "شرکت تست",
-                    letNo = null,
-                    createuid = null,
-                ),
-                EmployerAgreementDN(
-                    pymseq = "2",
-                    regno = "124",
-                    firstname = "محمد",
-                    lastname = "جعفری",
-                    emailaddr = "clinic@gmail.com",
-                    workshop = EmployerWorkshopDN(
-                        sswn = "0016318941",
-                        branchTitle = "شعبه ۵ مشهد",
-                        branchName = "شعبه ۵ مشهد",
-                        lastAddress = "مشهد، احمدآباد",
-                        characterCode = "01",
-                        characterDesc = "شخصیت حقیقی",
-                        workshopApproveDate = "1402/11/03",
-                        inclusionDate = null,
-                        brhCode = "1205",
-                        activityName = null,
-                        workshopRegisterDate = null,
-                        branchCode = "1205",
-                        workshopName = "درمانگاه دندانپزشکی",
-                        employerName = "درمانگاه دندانپزشکی",
-                        actitvityCode = null,
-                        userId = null,
-                        workshopId = "0016318941",
-                        workshopUnemployedStat = null,
-                    ),
-                    nationalno = null,
-                    mobileno = "09151102234",
-                    startdate = null,
-                    mastcusttype = null,
-                    createdt = null,
-                    masttyp = null,
-                    logicalDeleted = null,
-                    regemailseq = null,
-                    special = null,
-                    risuid = null,
-                    nationalcode = null,
-                    enddate = null,
-                    letDate = "1402/11/03",
-                    regdate = null,
-                    roletype = null,
-                    dname = "درمانگاه دندانپزشکی",
-                    letNo = null,
-                    createuid = null,
-                )
-            )
-        )
-    }
-
-    override suspend fun getPaymentSheets(filters: List<ApiFilterDN>) = null
-    override suspend fun getWorkshopDebit(workshopId: String, branchCode: String) = null
-    override suspend fun getWorkshopDebtInquiry(workshopId: String, branchCode: String) = null
-    override fun getWorkshopObjectionableDebitList(workshopNumber: String, branchCode: String, filters: List<ApiFilterDN>) = flowOf(null)
-    override fun getWorkshopRecentlyAddedMembers(filters: List<ApiFilterDN>) = flowOf(null)
-    override fun getWorkshopsDebtsList(workshopId: String, branchId: String, filters: List<ApiFilterDN>) = flowOf(null)
-    override fun getWorkshopMembers(filters: List<ApiFilterDN>) = flowOf(null)
-    override fun getWorkshopStackHolders(filters: List<ApiFilterDN>) = flowOf(null)
 }
 
 private class FakeTestCityProvinceRepo : CityProvinceRepository {
@@ -627,3 +498,44 @@ private class FakeTestContractsRepo : ContractsRepository {
     override fun uploadImage(request: UploadImageRequestDN): Flow<String> = flowOf("img1")
     override fun saveContact(request: SaveContactRequestDN): Flow<Any?> = flowOf(null)
 }
+
+/** One agreement in the shape the merged model uses. */
+private fun agreementOf(
+    workshopId: String,
+    branchCode: String,
+    name: String,
+    characterCode: String,
+    branchOfficeName: String = "",
+    email: String = "",
+    mobile: String = "",
+) = EmployerAgreementDN(
+    commitmentDate = "14030519",
+    email = email,
+    mobile = mobile,
+    workshop = WorkshopSummaryDN(
+        workshopId = workshopId,
+        branchCode = branchCode,
+        name = name,
+        branchOfficeName = branchOfficeName,
+        branchOfficeCode = branchCode,
+        characterCode = characterCode,
+    ),
+)
+
+private val legalWorkshop = agreementOf(
+    workshopId = "0081631829",
+    branchCode = "1202",
+    name = "\u0634\u0631\u06A9\u062A \u062A\u0633\u062A",
+    characterCode = "02",
+    branchOfficeName = "\u0634\u0639\u0628\u0647 \u06F2 \u0645\u0634\u0647\u062F",
+    email = "info@damabokhar.ir",
+    mobile = "09153214478",
+)
+
+private val realWorkshop = agreementOf(
+    workshopId = "0016318941",
+    branchCode = "1205",
+    name = "\u062F\u0631\u0645\u0627\u0646\u06AF\u0627\u0647",
+    characterCode = "01",
+    branchOfficeName = "\u0634\u0639\u0628\u0647 \u06F5 \u0645\u0634\u0647\u062F",
+)

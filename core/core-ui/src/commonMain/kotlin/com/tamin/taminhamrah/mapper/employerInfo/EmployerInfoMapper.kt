@@ -63,26 +63,28 @@ private data class WorkshopItemContent(
 )
 
 fun EmployerAgreementDN.toWorkshopItemPR(fallbackId: String = ""): WorkshopItemPR {
-    val ws = workshop
-    // `workshopId` and `branchCode` are the pair the submit call is addressed with, so the row
-    // shows exactly what it will send. `sswn` and `brhCode` are different fields on the same
-    // object and are not interchangeable with them.
-    val workshopId = ws?.workshopId.orEmpty()
-    val branchCode = ws?.branchCode.orEmpty()
-    val branchName = ws?.branchTitle ?: ws?.branchName.orEmpty()
+    // Two different branch codes: `branchCode` is identity half two, the path segment every
+    // downstream call takes, and is what the request must carry. `branchOfficeCode` is the office
+    // number the card labels کد شعبه. They are not interchangeable.
+    val requestBranchCode = workshop.branchCode
+    val officeName = workshop.branchOfficeName
+    val officeCode = workshop.branchOfficeCode
     return WorkshopItemPR(
-        id = pymseq ?: "$workshopId-$branchCode-$fallbackId",
-        name = ws?.workshopName ?: ws?.employerName ?: dname.orEmpty(),
-        code = workshopId,
-        branch = branchName,
-        bcode = branchCode,
-        isLegal = ws?.characterCode == CHARACTER_CODE_LEGAL,
-        branchLabel = if (branchCode.isBlank()) branchName else "$branchName – $branchCode",
+        // The service returns one row per agreement, so one workshop can arrive several times;
+        // the position is what separates the twins.
+        id = "${workshop.workshopId}-$requestBranchCode-$fallbackId",
+        name = workshop.name.ifBlank { workshop.employerName },
+        code = workshop.workshopId,
+        branch = officeName,
+        bcode = requestBranchCode,
+        isLegal = workshop.characterCode == CHARACTER_CODE_LEGAL,
+        branchLabel = if (officeCode.isBlank()) officeName else "$officeName – $officeCode",
         // The service sends `yyyyMMdd` with no separators; the old app's list row separates it
         // the same way before showing it.
-        letDate = (letDate ?: ws?.workshopApproveDate).orEmpty().toFormattedDate(),
-        email = emailaddr.orEmpty(),
-        mobile = mobileno.orEmpty(),
-        address = ws?.lastAddress.orEmpty(),
+        letDate = commitmentDate.ifBlank { workshop.approveDate }.toFormattedDate(),
+        email = email,
+        mobile = mobile,
+        address = workshop.address,
     )
 }
+

@@ -141,7 +141,7 @@ fun EmployerInfoVerifySection(
             val isLow = countdownState.isLowTime
             val clockFg = if (isLow) colors.dangerText else colors.blueText
             val clockBg = if (isLow) colors.dangerBg else colors.blueBg
-            val clockBorder = if (isLow) colors.dangerBorder else colors.hawkesBlue
+            val clockBorder = if (isLow) colors.dangerBorder else colors.blueBorder
 
             Row(
                 modifier = Modifier

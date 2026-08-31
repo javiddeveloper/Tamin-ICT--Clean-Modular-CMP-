@@ -29,7 +29,8 @@ import com.tamin.taminhamrah.useCases.employerInfo.RequestRealTicketUseCase
 import com.tamin.taminhamrah.useCases.employerInfo.SubmitLegalWorkshopInfoUseCase
 import com.tamin.taminhamrah.useCases.employerInfo.SubmitRealWorkshopInfoUseCase
 import com.tamin.taminhamrah.useCases.user.GetUserProfileUseCase
-import com.tamin.taminhamrah.useCases.workshops.GetAllEmployerAgreementByNationalIdUseCase
+import com.tamin.taminhamrah.model.workshop.WorkshopListQuery
+import com.tamin.taminhamrah.useCases.workshops.GetEmployerAgreementsUseCase
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableSet
@@ -41,7 +42,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
 
 class CompleteEmployerInfoViewModel(
-    private val getAllEmployerAgreementUseCase: GetAllEmployerAgreementByNationalIdUseCase,
+    private val getEmployerAgreements: GetEmployerAgreementsUseCase,
     private val getUserProfileUseCase: GetUserProfileUseCase,
     private val getLegalWorkshopUseCase: GetLegalWorkshopUseCase,
     private val getLegalWorkshopCeoUseCase: GetLegalWorkshopCeoUseCase,
@@ -159,8 +160,8 @@ class CompleteEmployerInfoViewModel(
             }
 
         try {
-            val agreements = getAllEmployerAgreementUseCase(emptyList())
-            val items = agreements?.list?.toWorkshopItemPRs().orEmpty()
+            val agreements = getEmployerAgreements(WorkshopListQuery())
+            val items = agreements.items.toWorkshopItemPRs()
             emit(CompleteEmployerInfoPartialState.WorkshopsLoaded(items.toImmutableList()))
         } catch (e: CancellationException) {
             // A suspend call, so there is no `catch` operator to lean on: cancellation has to be

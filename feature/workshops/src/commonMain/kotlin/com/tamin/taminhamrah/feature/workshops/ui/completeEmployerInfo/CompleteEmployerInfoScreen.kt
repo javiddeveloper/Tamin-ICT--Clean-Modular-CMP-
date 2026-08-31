@@ -38,7 +38,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.contract.
 import com.tamin.taminhamrah.mapper.employerInfo.toWorkshopItemPR
 import com.tamin.taminhamrah.model.employerInfo.WorkshopItemPR
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
-import com.tamin.taminhamrah.model.workshop.EmployerWorkshopDN
+import com.tamin.taminhamrah.model.workshop.WorkshopSummaryDN
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.ErrorStateView
@@ -332,10 +332,10 @@ internal fun previewWorkshops(): ImmutableList<WorkshopItemPR> = persistentListO
     previewAgreement(
         workshopId = "۰۰۸۱۶۳۱۸۲۹",
         name = "شرکت صنایع دما بخار مشهد",
-        branchName = "شعبهٔ ۲ مشهد",
-        branchCode = "۱۲۰۲",
+        branchOfficeName = "شعبهٔ ۲ مشهد",
+        branchOfficeCode = "۱۲۰۲",
         characterCode = "02",
-        letDate = "۱۴۰۳/۰۵/۱۹",
+        commitmentDate = "۱۴۰۳/۰۵/۱۹",
         email = "info@damabokhar.ir",
         mobile = "۰۹۱۵۳۲۱۴۴۷۸",
         address = "مشهد، بلوار خیام، نبش خیام ۳۲، پلاک ۱۴",
@@ -343,10 +343,10 @@ internal fun previewWorkshops(): ImmutableList<WorkshopItemPR> = persistentListO
     previewAgreement(
         workshopId = "۰۰۱۶۳۱۸۹۴۱",
         name = "درمانگاه دندانپزشکی دکتر محمدجعفری جبلی",
-        branchName = "شعبهٔ ۵ مشهد",
-        branchCode = "۱۲۰۵",
+        branchOfficeName = "شعبهٔ ۵ مشهد",
+        branchOfficeCode = "۱۲۰۵",
         characterCode = "01",
-        letDate = "۱۴۰۲/۱۱/۰۳",
+        commitmentDate = "۱۴۰۲/۱۱/۰۳",
         email = "clinic.jebeli@gmail.com",
         mobile = "۰۹۱۵۱۱۰۲۲۳۴",
         address = "مشهد، خیابان احمدآباد، نبش قائم، ساختمان پزشکان",
@@ -357,25 +357,27 @@ internal fun previewWorkshops(): ImmutableList<WorkshopItemPR> = persistentListO
 internal fun previewAgreement(
     workshopId: String,
     name: String,
-    branchName: String,
-    branchCode: String,
+    branchOfficeName: String,
+    branchOfficeCode: String,
     characterCode: String,
-    letDate: String,
+    commitmentDate: String,
     email: String,
     mobile: String,
     address: String,
 ) = EmployerAgreementDN(
-    pymseq = null, regno = null, firstname = null, emailaddr = email, nationalno = null,
-    mobileno = mobile, startdate = null, mastcusttype = null, createdt = null, masttyp = null,
-    logicalDeleted = false, regemailseq = null, lastname = null, special = null, risuid = null,
-    nationalcode = null, enddate = null, letDate = letDate, regdate = null, roletype = null,
-    dname = null, letNo = null, createuid = null,
-    workshop = EmployerWorkshopDN(
-        sswn = null, branchTitle = null, branchName = branchName, lastAddress = address,
-        characterCode = characterCode, characterDesc = null, workshopApproveDate = null,
-        inclusionDate = null, brhCode = null, activityName = null, workshopRegisterDate = null,
-        branchCode = branchCode, workshopName = name, employerName = null, actitvityCode = null,
-        userId = null, workshopId = workshopId, workshopUnemployedStat = null,
+    commitmentDate = commitmentDate,
+    email = email,
+    mobile = mobile,
+    workshop = WorkshopSummaryDN(
+        workshopId = workshopId,
+        // Identity half two, which the request carries; the office code below is what the card
+        // shows as کد شعبه.
+        branchCode = "0960",
+        name = name,
+        address = address,
+        branchOfficeCode = branchOfficeCode,
+        branchOfficeName = branchOfficeName,
+        characterCode = characterCode,
     ),
 )
 

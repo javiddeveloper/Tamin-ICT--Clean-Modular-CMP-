@@ -289,7 +289,7 @@ fun EmployerInfoLegalInquiryShimmer(
             .fillMaxWidth()
             .clip(RoundedCornerShape(13.dp))
             .background(colors.blueBg)
-            .border(1.dp, colors.hawkesBlue, RoundedCornerShape(13.dp))
+            .border(1.dp, colors.blueBorder, RoundedCornerShape(13.dp))
             .padding(horizontal = 11.dp, vertical = 9.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
