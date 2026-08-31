@@ -1752,6 +1752,28 @@
     <string name="funeral_allowance_bank_issue_desc">درخواست شما به دلیل مشکل در شماره حساب بانکی، امکان تأیید توسط شعبه را ندارد. لطفاً پس از اصلاح شماره حساب، روی دکمهٔ «مشکل شماره حساب خود را برطرف نموده‌ام» کلیک نمایید.</string>
     <string name="funeral_allowance_fix_bank_account">مشکل شماره حساب خود را برطرف نموده‌ام</string>
     <string name="funeral_allowance_dialog_dismiss">متوجه شدم</string>
+    <string name="funeral_allowance_continue_request">ادامه درخواست</string>
+    <string name="funeral_allowance_cancel">انصراف</string>
+    <string name="funeral_allowance_previous_step">مرحله قبلی</string>
+    <string name="funeral_allowance_deceased_inquired_info">اطلاعات استعلام‌شده متوفی</string>
+    <string name="funeral_allowance_national_id">کد ملی</string>
+    <string name="funeral_allowance_relationship_with_insured">نسبت با بیمه‌شده</string>
+    <string name="funeral_allowance_dependent_status">وضعیت تبعی</string>
+    <string name="funeral_allowance_deposit_account">حساب بانکی جهت واریز</string>
+    <string name="funeral_allowance_select_hint">انتخاب کنید</string>
+    <string name="funeral_allowance_account_confirmation">تأیید می‌کنم حساب انتخاب‌شده به نام اینجانب و فعال است و کمک‌هزینه به همین حساب واریز شود.</string>
+    <string name="funeral_allowance_eligibility_banner">شرایط برخورداری از کمک‌هزینه مراسم ترحیم احراز شد. برای ادامه، اطلاعات متوفی و حساب واریز را تأیید کنید.</string>
+    <string name="funeral_allowance_national_id_length_hint">۱۰ رقم</string>
+    <string name="funeral_allowance_deceased_national_code_hint">کد ملی متوفی باید در سوابق افراد تبعی شما ثبت شده باشد. با استعلام، رابطه خویشاوندی و تاریخ فوت از ثبت احوال خوانده می‌شود.</string>
+    <string name="funeral_allowance_bank_sheet_subtitle">یکی از حساب‌های ثبت‌شدهٔ خود را انتخاب کنید</string>
+    <string name="funeral_allowance_eligibility_success_title">شرایط برخورداری احراز شد</string>
+    <string name="funeral_allowance_submit_success_title">درخواست شما ثبت شد</string>
+    <string name="funeral_allowance_back_to_services">بازگشت به خدمات</string>
+    <string name="funeral_allowance_exit_confirmation_title">فرم را رها می‌کنید؟</string>
+    <string name="funeral_allowance_exit_confirmation_desc">اطلاعات واردشده ذخیره نشده و در صورت خروج از بین می‌رود.</string>
+    <string name="funeral_allowance_exit_confirmation_confirm">ادامه تکمیل فرم</string>
+    <string name="funeral_allowance_exit_confirmation_dismiss">بی‌خیال، خروج از فرم</string>
+    <string name="funeral_allowance_eligibility_success_desc">بر اساس استعلام انجام‌شده، شما واجد شرایط دریافت کمک‌هزینه مراسم ترحیم هستید. در ادامه اطلاعات متوفی و حساب واریز را تأیید و مدارک را بارگذاری کنید.</string>
 
     <!-- Bank Account Modal (shown before short-term benefit requests when the user has no registered bank account) -->
     <string name="no_bank_account_title">انجام درخواست امکان‌پذیر نیست</string>

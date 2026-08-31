@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.feature.taminServices.funeralAllowance
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.contract.FuneralAllowanceEvent
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.contract.FuneralAllowanceIntent
+import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.contract.FuneralAllowanceStep
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.contract.FuneralAllowanceUiState
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.contract.FuneralAllowanceUiState.PartialState
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.model.toPR
@@ -47,7 +48,7 @@ class FuneralAllowanceViewModel(
         is FuneralAllowanceIntent.SubmitRequest -> submitRequest()
         is FuneralAllowanceIntent.ConfirmAccountCorrection -> confirmAccountCorrection()
         is FuneralAllowanceIntent.GoToNextStep -> flow { emit(PartialState.GoToNextStep) }
-        is FuneralAllowanceIntent.GoToPreviousStep -> flow { emit(PartialState.GoToPreviousStep) }
+        is FuneralAllowanceIntent.GoToPreviousStep -> goToPreviousStep()
         is FuneralAllowanceIntent.SelectBankAccount -> flow { emit(PartialState.BankAccountSelected(intent.bankAccount)) }
         is FuneralAllowanceIntent.ToggleAccountConfirmation -> flow { emit(PartialState.AccountConfirmationToggled(intent.isConfirmed)) }
         is FuneralAllowanceIntent.ShowBankAccountBottomSheet -> flow { emit(PartialState.ShowBankAccountBottomSheet(intent.show)) }
@@ -133,6 +134,18 @@ class FuneralAllowanceViewModel(
         }
     }
 
+    /**
+     * "Back" steps through the wizard; once on the first step there is nowhere left to go, so
+     * leave the screen entirely. Mirrors the occurrence flow's [goToPreviousStep].
+     */
+    private fun goToPreviousStep(): Flow<PartialState> = flow {
+        if (uiState.value.currentStep == FuneralAllowanceStep.APPLICANT_INFO) {
+            sendEvent(FuneralAllowanceEvent.NavigateBack)
+        } else {
+            emit(PartialState.GoToPreviousStep)
+        }
+    }
+
     private fun submitRequest(): Flow<PartialState> = flow {
         val state = uiState.value
         val info = state.info ?: return@flow
@@ -213,10 +226,10 @@ class FuneralAllowanceViewModel(
             currentState.copy(isConfirmingCorrection = partialState.inProgress)
 
         is PartialState.GoToNextStep -> currentState.copy(
-            currentStep = com.tamin.taminhamrah.feature.taminServices.funeralAllowance.contract.FuneralAllowanceStep.values().getOrNull(currentState.currentStep.ordinal + 1) ?: currentState.currentStep
+            currentStep = FuneralAllowanceStep.values().getOrNull(currentState.currentStep.ordinal + 1) ?: currentState.currentStep
         )
         is PartialState.GoToPreviousStep -> currentState.copy(
-            currentStep = com.tamin.taminhamrah.feature.taminServices.funeralAllowance.contract.FuneralAllowanceStep.values().getOrNull(currentState.currentStep.ordinal - 1) ?: currentState.currentStep
+            currentStep = FuneralAllowanceStep.values().getOrNull(currentState.currentStep.ordinal - 1) ?: currentState.currentStep
         )
         is PartialState.BankAccountSelected -> currentState.copy(
             selectedBankAccount = partialState.bankAccount,

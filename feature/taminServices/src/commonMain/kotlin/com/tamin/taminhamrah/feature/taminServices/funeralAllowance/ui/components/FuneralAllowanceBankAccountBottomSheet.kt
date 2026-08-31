@@ -31,6 +31,10 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.funeral_allowance_bank_sheet_subtitle
+import taminx.core.core_ui.funeral_allowance_deposit_account
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,11 +58,11 @@ fun FuneralAllowanceBankAccountBottomSheet(
                 .padding(bottom = Spacing.lg)
         ) {
             TaminText(
-                text = "حساب بانکی جهت واریز",
+                text = stringResource(Res.string.funeral_allowance_deposit_account),
                 modifier = Modifier.padding(bottom = Spacing.sm)
             )
             TaminText(
-                text = "یکی از حساب‌های ثبت‌شدهٔ خود را انتخاب کنید",
+                text = stringResource(Res.string.funeral_allowance_bank_sheet_subtitle),
                 color = LocalTaminColors.current.textSecondary,
                 modifier = Modifier.padding(bottom = Spacing.lg)
             )

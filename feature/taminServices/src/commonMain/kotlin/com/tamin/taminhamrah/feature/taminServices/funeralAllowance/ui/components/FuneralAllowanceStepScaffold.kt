@@ -1,20 +1,33 @@
 package com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.components
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.contract.FuneralAllowanceStep
+import com.tamin.taminhamrah.ui.components.StepIndicator
+import com.tamin.taminhamrah.ui.components.StepIndicatorModel
+import com.tamin.taminhamrah.ui.components.StepState
 import com.tamin.taminhamrah.ui.components.TaminBottomActionBar
 import com.tamin.taminhamrah.ui.components.topbars.TaminStepTopAppBar
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.Spacing
+import kotlinx.collections.immutable.persistentListOf
+import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.funeral_allowance_applicant_info
+import taminx.core.core_ui.funeral_allowance_deceased_info
 
 @Composable
 internal fun FuneralAllowanceStepScaffold(
     title: String,
-    stepNumber: Int,
-    totalSteps: Int,
+    currentStep: FuneralAllowanceStep,
     onBackClicked: () -> Unit,
     primaryText: String,
     primaryEnabled: Boolean,
@@ -29,13 +42,21 @@ internal fun FuneralAllowanceStepScaffold(
     Scaffold(
         modifier = modifier.fillMaxSize().imePadding(),
         topBar = {
-            TaminStepTopAppBar(
-                title = title,
-                onBackClicked = onBackClicked,
-                onCloseClicked = onCloseClicked,
-                currentStep = stepNumber,
-                totalSteps = totalSteps,
-            )
+            Surface(color = LocalTaminColors.current.bgSurface) {
+                Column {
+                    TaminStepTopAppBar(
+                        title = title,
+                        onBackClicked = onBackClicked,
+                        onCloseClicked = onCloseClicked,
+                    )
+                    FuneralAllowanceStepIndicator(
+                        currentStep = currentStep,
+                        modifier = Modifier.padding(
+                            horizontal = Spacing.lg,
+                        ).padding(bottom = Spacing.md),
+                    )
+                }
+            }
         },
         bottomBar = {
             TaminBottomActionBar(
@@ -49,5 +70,34 @@ internal fun FuneralAllowanceStepScaffold(
         },
         contentWindowInsets = WindowInsets(0),
         content = content,
+    )
+}
+
+/**
+ * Two-step progress header ([FuneralAllowanceStep.APPLICANT_INFO] then
+ * [FuneralAllowanceStep.DECEASED_AND_BANK_INFO]) rendered with the shared
+ * [StepIndicator] — the same component orotez-protez uses. There is no third step.
+ */
+@Composable
+private fun FuneralAllowanceStepIndicator(
+    currentStep: FuneralAllowanceStep,
+    modifier: Modifier = Modifier,
+) {
+    val currentIndex = currentStep.ordinal
+
+    StepIndicator(
+        modifier = modifier,
+        steps = persistentListOf(
+            StepIndicatorModel(
+                title = stringResource(Res.string.funeral_allowance_applicant_info),
+                stepNumber = "۱",
+                state = if (currentIndex == 0) StepState.Active else StepState.Completed,
+            ),
+            StepIndicatorModel(
+                title = stringResource(Res.string.funeral_allowance_deceased_info),
+                stepNumber = "۲",
+                state = if (currentIndex >= 1) StepState.Active else StepState.Inactive,
+            ),
+        ),
     )
 }

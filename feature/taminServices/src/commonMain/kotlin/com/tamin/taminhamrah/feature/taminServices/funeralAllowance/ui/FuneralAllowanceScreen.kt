@@ -1,80 +1,65 @@
 package com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.FuneralAllowanceViewModel
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.contract.FuneralAllowanceEvent
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.contract.FuneralAllowanceIntent
+import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.contract.FuneralAllowanceStep
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.contract.FuneralAllowanceUiState
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.model.FuneralAllowanceInfoPR
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.model.RegisteredFuneralRequestPR
+import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.components.FuneralAllowanceBankAccountBottomSheet
+import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.components.FuneralAllowanceEligibilitySuccessDialog
+import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.components.FuneralAllowanceRequestSubmittedDialog
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.components.FuneralAllowanceStep1ShimmerSkeleton
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.components.FuneralAllowanceStepScaffold
+import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.components.FuneralMessageDialog
+import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.components.Step1ApplicantInfo
+import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.components.Step2DeceasedAndBankInfo
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
-import com.tamin.taminhamrah.ui.components.DetailRow
+import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.NoBankAccountDialog
-import com.tamin.taminhamrah.ui.components.SectionLabel
-import com.tamin.taminhamrah.ui.components.TaminDivider
+import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminEmptyState
-import com.tamin.taminhamrah.ui.components.TaminStyledTextField
-import com.tamin.taminhamrah.ui.components.TaminText
-import com.tamin.taminhamrah.ui.components.taminSurface
+import com.tamin.taminhamrah.ui.components.TaminFilledButton
+import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
-import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.ui.theme.Thickness
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.funeral_allowance_account_number
-import taminx.core.core_ui.funeral_allowance_applicant_info
-import taminx.core.core_ui.funeral_allowance_bank_issue_desc
-import taminx.core.core_ui.funeral_allowance_bank_name
+import taminx.core.core_ui.funeral_allowance_cancel
 import taminx.core.core_ui.funeral_allowance_check_eligibility
-import taminx.core.core_ui.funeral_allowance_death_date
-import taminx.core.core_ui.funeral_allowance_deceased_info
-import taminx.core.core_ui.funeral_allowance_deceased_national_code
+import taminx.core.core_ui.funeral_allowance_continue_request
 import taminx.core.core_ui.funeral_allowance_empty
-import taminx.core.core_ui.funeral_allowance_full_name
-import taminx.core.core_ui.funeral_allowance_insurance_number
-import taminx.core.core_ui.funeral_allowance_last_branch
-import taminx.core.core_ui.funeral_allowance_mobile
-import taminx.core.core_ui.funeral_allowance_registered_request_title
-import taminx.core.core_ui.funeral_allowance_request_date
-import taminx.core.core_ui.funeral_allowance_request_status
+import taminx.core.core_ui.funeral_allowance_exit_confirmation_confirm
+import taminx.core.core_ui.funeral_allowance_exit_confirmation_desc
+import taminx.core.core_ui.funeral_allowance_exit_confirmation_dismiss
+import taminx.core.core_ui.funeral_allowance_exit_confirmation_title
+import taminx.core.core_ui.funeral_allowance_previous_step
+import taminx.core.core_ui.funeral_allowance_submit_request
 import taminx.core.core_ui.funeral_allowance_title
 
 @Composable
@@ -88,7 +73,10 @@ fun FuneralAllowanceRoute(
     var dialog by remember { mutableStateOf<DialogMessage?>(null) }
     var showSuccessDialog by remember { mutableStateOf(false) }
 
-    androidx.compose.runtime.LaunchedEffect(uiState.deceasedValidation?.isEligible) {
+    /** Backend success text for the terminal "request submitted" modal; null hides it. */
+    var submittedMessage by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(uiState.deceasedValidation?.isEligible) {
         if (uiState.deceasedValidation?.isEligible == true) {
             showSuccessDialog = true
         }
@@ -97,7 +85,7 @@ fun FuneralAllowanceRoute(
     FuneralAllowanceEvents(
         events = viewModel.events,
         onShowInfo = { dialog = DialogMessage(it, navigateBackOnDismiss = false) },
-        onShowSuccess = { },
+        onShowSuccess = { submittedMessage = it },
         onShowError = { toaster.error(it) },
         onNavigateBack = onBackClicked,
         onNavigateToBankAccount = onNavigateToBankAccount,
@@ -117,7 +105,7 @@ fun FuneralAllowanceRoute(
     }
 
     dialog?.let { current ->
-        com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.components.FuneralMessageDialog(
+        FuneralMessageDialog(
             title = stringResource(Res.string.funeral_allowance_title),
             message = current.message,
             onDismiss = {
@@ -128,7 +116,7 @@ fun FuneralAllowanceRoute(
     }
 
     if (showSuccessDialog) {
-        com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.components.FuneralAllowanceEligibilitySuccessDialog(
+        FuneralAllowanceEligibilitySuccessDialog(
             onContinue = {
                 showSuccessDialog = false
                 // TODO: Handle navigation to step 2
@@ -136,9 +124,28 @@ fun FuneralAllowanceRoute(
             onDismiss = { showSuccessDialog = false }
         )
     }
+
+    submittedMessage?.let { message ->
+        FuneralAllowanceRequestSubmittedDialog(
+            message = message,
+            onBackToServices = {
+                submittedMessage = null
+                onBackClicked()
+            },
+        )
+    }
 }
 
 private data class DialogMessage(val message: String, val navigateBackOnDismiss: Boolean)
+
+/**
+ * Steps on which "close" must warn before leaving — the user has entered / confirmed data that
+ * isn't persisted. Step 1 (applicant info) carries no user input, so closing there just leaves.
+ * Mirrors the occurrence flow's exit guard.
+ */
+private val STEPS_REQUIRING_EXIT_CONFIRMATION = setOf(
+    FuneralAllowanceStep.DECEASED_AND_BANK_INFO,
+)
 
 @Composable
 private fun FuneralAllowanceEvents(
@@ -167,19 +174,63 @@ internal fun FuneralAllowanceScreen(
     onBack: () -> Unit,
 ) {
     val isEligible = uiState.deceasedValidation?.isEligible == true
-    val isStep1 = uiState.currentStep == com.tamin.taminhamrah.feature.taminServices.funeralAllowance.contract.FuneralAllowanceStep.APPLICANT_INFO
+    val isStep1 = uiState.currentStep == FuneralAllowanceStep.APPLICANT_INFO
 
-    com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.components.FuneralAllowanceStepScaffold(
+    var showExitConfirmation by remember { mutableStateOf(false) }
+
+    // "Close" leaves the whole flow; on a data-entry step it asks first. "Back" (top-bar arrow
+    // and system back) steps backwards — the ViewModel emits NavigateBack once past step 1.
+    val onExitRequested = remember(uiState.currentStep, onBack) {
+        {
+            if (uiState.currentStep in STEPS_REQUIRING_EXIT_CONFIRMATION) {
+                showExitConfirmation = true
+            } else {
+                onBack()
+            }
+        }
+    }
+
+    BackHandler(onBack = { onIntent(FuneralAllowanceIntent.GoToPreviousStep) })
+
+    if (showExitConfirmation) {
+        TaminConfirmationDialog(
+            title = stringResource(Res.string.funeral_allowance_exit_confirmation_title),
+            description = stringResource(Res.string.funeral_allowance_exit_confirmation_desc),
+            icon = Icons.AutoMirrored.Outlined.HelpOutline,
+            confirmButton = {
+                TaminFilledButton(
+                    text = stringResource(Res.string.funeral_allowance_exit_confirmation_confirm),
+                    onClick = { showExitConfirmation = false },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                )
+            },
+            dismissButton = {
+                TaminOutlinedButton(
+                    text = stringResource(Res.string.funeral_allowance_exit_confirmation_dismiss),
+                    onClick = {
+                        showExitConfirmation = false
+                        onBack()
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                )
+            },
+            onDismissRequest = { showExitConfirmation = false },
+        )
+    }
+
+    FuneralAllowanceStepScaffold(
         title = stringResource(Res.string.funeral_allowance_title),
-        stepNumber = if (isStep1) 1 else 2,
-        totalSteps = 3,
-        onBackClicked = {
-            if (isStep1) onBack() else onIntent(FuneralAllowanceIntent.GoToPreviousStep)
-        },
+        currentStep = uiState.currentStep,
+        onBackClicked = { onIntent(FuneralAllowanceIntent.GoToPreviousStep) },
+        // Step 1 has no unsaved input, so its back arrow already leaves — no separate close there.
+        onCloseClicked = if (isStep1) null else onExitRequested,
         primaryText = if (isStep1) {
-            if (isEligible) "ادامه درخواست" else stringResource(Res.string.funeral_allowance_check_eligibility)
+            if (isEligible) stringResource(Res.string.funeral_allowance_continue_request)
+            else stringResource(Res.string.funeral_allowance_check_eligibility)
         } else {
-            "مرحله بعدی"
+            stringResource(Res.string.funeral_allowance_submit_request)
         },
         primaryEnabled = if (isStep1) {
             if (isEligible) true else uiState.deceasedNationalCode.length == 10 && !uiState.isValidatingDeceased
@@ -195,13 +246,17 @@ internal fun FuneralAllowanceScreen(
                     onIntent(FuneralAllowanceIntent.ValidateDeceased)
                 }
             } else {
-                // Next step action for step 2 (presumably submit or step 3 preview)
+                // Step 2 is the last step — its primary action submits the request.
                 onIntent(FuneralAllowanceIntent.SubmitRequest)
             }
         },
-        secondaryText = if (isStep1) "انصراف" else "مرحله قبلی",
+        secondaryText = if (isStep1) {
+            stringResource(Res.string.funeral_allowance_cancel)
+        } else {
+            stringResource(Res.string.funeral_allowance_previous_step)
+        },
         onSecondaryClick = {
-            if (isStep1) onBack() else onIntent(FuneralAllowanceIntent.GoToPreviousStep)
+            if (isStep1) onExitRequested() else onIntent(FuneralAllowanceIntent.GoToPreviousStep)
         },
     ) { innerPadding ->
         Box(
@@ -212,8 +267,9 @@ internal fun FuneralAllowanceScreen(
             val info = uiState.info
             when {
                 info == null && uiState.isLoading -> {
-                    com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.components.FuneralAllowanceStep1ShimmerSkeleton()
+                    FuneralAllowanceStep1ShimmerSkeleton()
                 }
+
                 info == null -> TaminEmptyState(
                     message = stringResource(Res.string.funeral_allowance_empty),
                     modifier = Modifier.fillMaxSize(),
@@ -227,18 +283,22 @@ internal fun FuneralAllowanceScreen(
                     verticalArrangement = Arrangement.spacedBy(Spacing.lg),
                 ) {
                     when (uiState.currentStep) {
-                        com.tamin.taminhamrah.feature.taminServices.funeralAllowance.contract.FuneralAllowanceStep.APPLICANT_INFO -> {
-                            com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.components.Step1ApplicantInfo(
+                        FuneralAllowanceStep.APPLICANT_INFO -> {
+                           Step1ApplicantInfo(
                                 uiState = uiState,
                                 onIntent = onIntent,
                             )
                         }
-                        com.tamin.taminhamrah.feature.taminServices.funeralAllowance.contract.FuneralAllowanceStep.DECEASED_AND_BANK_INFO -> {
+
+                        FuneralAllowanceStep.DECEASED_AND_BANK_INFO -> {
                             if (uiState.showBankAccountIssueFlow) {
                                 // Normally shouldn't reach step 2 if there's an issue, but just in case
-                                com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.components.Step1ApplicantInfo(uiState, onIntent)
+                                Step1ApplicantInfo(
+                                    uiState,
+                                    onIntent
+                                )
                             } else {
-                                com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.components.Step2DeceasedAndBankInfo(
+                                Step2DeceasedAndBankInfo(
                                     uiState = uiState,
                                     onIntent = onIntent,
                                 )
@@ -251,39 +311,11 @@ internal fun FuneralAllowanceScreen(
     }
 
     if (uiState.showBankAccountBottomSheet) {
-        com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.components.FuneralAllowanceBankAccountBottomSheet(
+       FuneralAllowanceBankAccountBottomSheet(
             bankAccounts = uiState.bankAccounts,
             selectedAccount = uiState.selectedBankAccount,
             onSelect = { onIntent(FuneralAllowanceIntent.SelectBankAccount(it)) },
             onDismiss = { onIntent(FuneralAllowanceIntent.ShowBankAccountBottomSheet(false)) }
-        )
-    }
-}
-
-@Composable
-fun EligibilitySuccessBanner() {
-    val taminColors = LocalTaminColors.current
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(taminColors.greenBg)
-            .border(1.dp, taminColors.greenBorder, RoundedCornerShape(12.dp))
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = Icons.Default.Check,
-            contentDescription = null,
-            tint = taminColors.greenText,
-            modifier = Modifier.size(24.dp)
-        )
-        Spacer(modifier = Modifier.width(Spacing.md))
-        TaminText(
-            text = "شرایط برخورداری از کمک‌هزینه مراسم ترحیم احراز شد. برای ادامه، اطلاعات متوفی و حساب واریز را تأیید کنید.",
-            color = taminColors.greenText,
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.weight(1f)
         )
     }
 }
@@ -336,6 +368,56 @@ private fun FuneralAllowanceScreenBankIssuePreview() {
                     ),
                 ),
             ),
+            onIntent = {},
+            onBack = {},
+        )
+    }
+}
+
+private val PreviewStep2State = FuneralAllowanceUiState(
+    currentStep = com.tamin.taminhamrah.feature.taminServices.funeralAllowance.contract.FuneralAllowanceStep.DECEASED_AND_BANK_INFO,
+    info = PreviewInfo,
+    deceasedNationalCode = "0039073041",
+    deceasedValidation = com.tamin.taminhamrah.feature.taminServices.funeralAllowance.model.DeceasedValidationPR(
+        deceasedFullName = "علي اكبر شيخ عباسي",
+        relationship = "همسر",
+        isEligible = true,
+        message = "دارای شرایط می‌باشید",
+        dependentStatus = "مستمری‌بگیر بازنشسته",
+        deathDate = "۱۴۰۵/۰۱/۱۰",
+    ),
+    selectedBankAccount = com.tamin.taminhamrah.model.bankAccount.BankAccountPR(
+        id = 1,
+        bank = null,
+        bankNameFallback = "بانک ملت",
+        accountType = null,
+        accountTypeNameFallback = "کوتاه‌مدت",
+        accountNumber = "1234567890",
+        startDate = null,
+        endDate = null,
+        isActive = true,
+    ),
+    isAccountConfirmed = true,
+)
+
+@PreviewRtlTheme
+@Composable
+private fun FuneralAllowanceScreenStep2Preview() {
+    PreviewRtlThemeContent {
+        FuneralAllowanceScreen(
+            uiState = PreviewStep2State,
+            onIntent = {},
+            onBack = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun FuneralAllowanceScreenStep2PreviewDark() {
+    PreviewRtlThemeContent(darkTheme = true) {
+        FuneralAllowanceScreen(
+            uiState = PreviewStep2State,
             onIntent = {},
             onBack = {},
         )

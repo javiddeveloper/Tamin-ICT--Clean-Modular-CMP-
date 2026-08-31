@@ -13,30 +13,34 @@ import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.funeral_allowance_continue_request
-import taminx.core.core_ui.funeral_allowance_eligibility_success_desc
-import taminx.core.core_ui.funeral_allowance_eligibility_success_title
+import taminx.core.core_ui.funeral_allowance_back_to_services
+import taminx.core.core_ui.funeral_allowance_submit_success_title
 
+/**
+ * Terminal success modal shown after a funeral-allowance request is submitted (or an
+ * account-correction is confirmed). [message] is the backend's success text, which already
+ * names the reviewing branch. The single action returns the user to the services menu.
+ */
 @Composable
-internal fun FuneralAllowanceEligibilitySuccessDialog(
-    onContinue: () -> Unit,
-    onDismiss: () -> Unit,
+internal fun FuneralAllowanceRequestSubmittedDialog(
+    message: String,
+    onBackToServices: () -> Unit,
 ) {
     val taminColors = LocalTaminColors.current
 
     TaminConfirmationDialog(
-        title = stringResource(Res.string.funeral_allowance_eligibility_success_title),
-        description = stringResource(Res.string.funeral_allowance_eligibility_success_desc),
+        title = stringResource(Res.string.funeral_allowance_submit_success_title),
+        description = message,
         confirmButton = {
             TaminFilledButton(
-                text = stringResource(Res.string.funeral_allowance_continue_request),
-                onClick = onContinue,
+                text = stringResource(Res.string.funeral_allowance_back_to_services),
+                onClick = onBackToServices,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
             )
         },
         dismissButton = {},
-        onDismissRequest = onDismiss,
+        onDismissRequest = onBackToServices,
         icon = Icons.Default.Check,
         iconTint = taminColors.greenText,
         iconBackground = taminColors.greenBg,

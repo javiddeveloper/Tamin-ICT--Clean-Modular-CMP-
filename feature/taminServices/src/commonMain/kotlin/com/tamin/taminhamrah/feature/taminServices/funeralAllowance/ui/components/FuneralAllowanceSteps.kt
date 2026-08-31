@@ -5,7 +5,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,7 +27,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.contract.FuneralAllowanceIntent
@@ -48,20 +46,30 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.funeral_allowance_account_confirmation
 import taminx.core.core_ui.funeral_allowance_account_number
 import taminx.core.core_ui.funeral_allowance_applicant_info
 import taminx.core.core_ui.funeral_allowance_bank_issue_desc
 import taminx.core.core_ui.funeral_allowance_bank_name
 import taminx.core.core_ui.funeral_allowance_death_date
 import taminx.core.core_ui.funeral_allowance_deceased_info
+import taminx.core.core_ui.funeral_allowance_deceased_inquired_info
 import taminx.core.core_ui.funeral_allowance_deceased_national_code
+import taminx.core.core_ui.funeral_allowance_deceased_national_code_hint
+import taminx.core.core_ui.funeral_allowance_dependent_status
+import taminx.core.core_ui.funeral_allowance_deposit_account
+import taminx.core.core_ui.funeral_allowance_eligibility_banner
 import taminx.core.core_ui.funeral_allowance_full_name
 import taminx.core.core_ui.funeral_allowance_insurance_number
 import taminx.core.core_ui.funeral_allowance_last_branch
 import taminx.core.core_ui.funeral_allowance_mobile
+import taminx.core.core_ui.funeral_allowance_national_id
+import taminx.core.core_ui.funeral_allowance_national_id_length_hint
 import taminx.core.core_ui.funeral_allowance_registered_request_title
+import taminx.core.core_ui.funeral_allowance_relationship_with_insured
 import taminx.core.core_ui.funeral_allowance_request_date
 import taminx.core.core_ui.funeral_allowance_request_status
+import taminx.core.core_ui.funeral_allowance_select_hint
 
 @Composable
 fun Step1ApplicantInfo(
@@ -112,33 +120,33 @@ fun Step2DeceasedAndBankInfo(
             verticalArrangement = Arrangement.spacedBy(Spacing.xs),
         ) {
             TaminText(
-                text = "اطلاعات استعلام‌شده متوفی",
+                text = stringResource(Res.string.funeral_allowance_deceased_inquired_info),
                 style = MaterialTheme.typography.labelLarge.copy(color = taminColors.textPrimary)
             )
             DetailRow(
-                label = "نام و نام خانوادگی",
+                label = stringResource(Res.string.funeral_allowance_full_name),
                 value = deceasedValidation?.deceasedFullName?.ifBlank { "—" } ?: "—",
                 numeric = false,
             )
             HorizontalDivider(thickness = Thickness.border, color = taminColors.divider)
             DetailRow(
-                label = "کد ملی",
+                label = stringResource(Res.string.funeral_allowance_national_id),
                 value = uiState.deceasedNationalCode.ifBlank { "—" },
             )
             HorizontalDivider(thickness = Thickness.border, color = taminColors.divider)
             DetailRow(
-                label = "نسبت با بیمه‌شده",
+                label = stringResource(Res.string.funeral_allowance_relationship_with_insured),
                 value = deceasedValidation?.relationship?.ifBlank { "—" } ?: "—",
                 numeric = false,
             )
             HorizontalDivider(thickness = Thickness.border, color = taminColors.divider)
             DetailRow(
-                label = "تاریخ فوت",
+                label = stringResource(Res.string.funeral_allowance_death_date),
                 value = deceasedValidation?.deathDate?.ifBlank { "—" } ?: "—",
             )
             HorizontalDivider(thickness = Thickness.border, color = taminColors.divider)
             DetailRow(
-                label = "وضعیت تبعی",
+                label = stringResource(Res.string.funeral_allowance_dependent_status),
                 value = deceasedValidation?.dependentStatus?.ifBlank { "—" } ?: "—",
                 numeric = false,
             )
@@ -146,8 +154,10 @@ fun Step2DeceasedAndBankInfo(
 
         // Bank Account Selection
         val selected = uiState.selectedBankAccount
-        val bankName = selected?.bank?.label?.let { stringResource(it) } ?: selected?.bankNameFallback ?: ""
-        val accountType = selected?.accountType?.label?.let { stringResource(it) } ?: selected?.accountTypeNameFallback ?: ""
+        val bankName =
+            selected?.bank?.label?.let { stringResource(it) } ?: selected?.bankNameFallback ?: ""
+        val accountType = selected?.accountType?.label?.let { stringResource(it) }
+            ?: selected?.accountTypeNameFallback ?: ""
         val title = if (accountType.isNotBlank()) "$bankName - $accountType" else bankName
         val displayValue = if (selected != null) {
             if (title.isNotBlank()) "$title - ${selected.accountNumber}" else selected.accountNumber
@@ -158,8 +168,8 @@ fun Step2DeceasedAndBankInfo(
         TaminStyledTextField(
             value = displayValue,
             onValueChange = {},
-            label = "حساب بانکی جهت واریز",
-            placeholder = "انتخاب کنید",
+            label = stringResource(Res.string.funeral_allowance_deposit_account),
+            placeholder = stringResource(Res.string.funeral_allowance_select_hint),
             leadingIcon = Icons.Outlined.Home,
             trailingIcon = Icons.Default.KeyboardArrowDown,
             readOnly = true,
@@ -181,11 +191,10 @@ fun Step2DeceasedAndBankInfo(
                         FuneralAllowanceIntent.ToggleAccountConfirmation(!uiState.isAccountConfirmed)
                     )
                 }
-                .padding(16.dp),
+                .padding(8.dp),
             verticalAlignment = Alignment.Top
         ) {
             Checkbox(
-                modifier = Modifier.size(10.dp),
                 checked = uiState.isAccountConfirmed,
                 onCheckedChange = { onIntent(FuneralAllowanceIntent.ToggleAccountConfirmation(it)) },
                 colors = CheckboxDefaults.colors(
@@ -193,9 +202,10 @@ fun Step2DeceasedAndBankInfo(
                     uncheckedColor = taminColors.border
                 )
             )
-            Spacer(modifier = Modifier.width(Spacing.md))
+            Spacer(modifier = Modifier.width(Spacing.xs))
             TaminText(
-                text = "تأیید می‌کنم حساب انتخاب‌شده به نام اینجانب و فعال است و کمک‌هزینه به همین حساب واریز شود.",
+                modifier = Modifier.padding(top = 13.dp),
+                text = stringResource(Res.string.funeral_allowance_account_confirmation),
                 color = taminColors.textSecondary,
                 style = MaterialTheme.typography.titleSmall,
             )
@@ -212,18 +222,19 @@ fun EligibilitySuccessBanner() {
             .clip(RoundedCornerShape(12.dp))
             .background(taminColors.greenBg)
             .border(1.dp, taminColors.greenBorder, RoundedCornerShape(12.dp))
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(12.dp),
+        verticalAlignment = Alignment.Top
     ) {
         Icon(
             imageVector = Icons.Default.Check,
             contentDescription = null,
             tint = taminColors.greenText,
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(18.dp)
         )
         Spacer(modifier = Modifier.width(Spacing.md))
         TaminText(
-            text = "شرایط برخورداری از کمک‌هزینه مراسم ترحیم احراز شد. برای ادامه، اطلاعات متوفی و حساب واریز را تأیید کنید.",
+            textAlign = TextAlign.Justify,
+            text = stringResource(Res.string.funeral_allowance_eligibility_banner),
             color = taminColors.greenText,
             style = MaterialTheme.typography.bodySmall,
             modifier = Modifier.weight(1f)
@@ -304,14 +315,14 @@ private fun DeceasedInquirySection(
             value = uiState.deceasedNationalCode,
             onValueChange = { onIntent(FuneralAllowanceIntent.DeceasedNationalCodeChanged(it)) },
             label = stringResource(Res.string.funeral_allowance_deceased_national_code) + " *",
-            placeholder = "۱۰ رقم",
+            placeholder = stringResource(Res.string.funeral_allowance_national_id_length_hint),
             isValid = if (uiState.deceasedNationalCodeError != null) false else null,
             errorText = uiState.deceasedNationalCodeError,
             readOnly = isEligible,
         )
 
         TaminText(
-            text = "کد ملی متوفی باید در سوابق افراد تبعی شما ثبت شده باشد. با استعلام، رابطه خویشاوندی و تاریخ فوت از ثبت احوال خوانده می‌شود.",
+            text = stringResource(Res.string.funeral_allowance_deceased_national_code_hint),
             color = taminColors.textSecondary,
             style = MaterialTheme.typography.bodySmall,
             textAlign = TextAlign.Start,
