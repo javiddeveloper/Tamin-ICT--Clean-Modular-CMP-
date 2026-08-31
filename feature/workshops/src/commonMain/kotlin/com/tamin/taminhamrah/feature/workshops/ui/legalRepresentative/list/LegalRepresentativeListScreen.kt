@@ -214,7 +214,7 @@ fun LegalRepresentativeListScreen(
             ),
             icon = vectorResource(Res.drawable.ic_trash),
             iconTint = taminColors.dangerText,
-            iconBackground = taminColors.dangerBg,
+            iconBackground = taminColors.dangerBorder,
             onDismissRequest = { viewModel.sendIntent(LegalRepresentativeListIntent.CancelDelete) },
             confirmButton = {
                 TaminFilledButton(
