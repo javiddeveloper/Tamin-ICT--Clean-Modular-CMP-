@@ -12,9 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.outlined.ConfirmationNumber
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -42,6 +40,7 @@ import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_check
+import taminx.core.core_ui.ic_tamin_ticket
 import taminx.core.core_ui.legal_representative_otp_description
 import taminx.core.core_ui.legal_representative_otp_heading
 import taminx.core.core_ui.legal_representative_otp_request_action
@@ -92,7 +91,7 @@ fun LegalRepresentativeOtpScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.ConfirmationNumber,
+                    imageVector = vectorResource(Res.drawable.ic_tamin_ticket),
                     contentDescription = null,
                     tint = taminColors.blueText,
                 )

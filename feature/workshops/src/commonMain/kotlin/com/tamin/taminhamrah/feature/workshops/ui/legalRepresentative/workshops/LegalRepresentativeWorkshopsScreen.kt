@@ -67,6 +67,7 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.action_copy
 import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.ic_tamin_copy
+import taminx.core.core_ui.ic_tamin_workshop_badge
 import taminx.core.core_ui.legal_representative_branch_and_count
 import taminx.core.core_ui.legal_representative_branch_code_label
 import taminx.core.core_ui.legal_representative_empty_title

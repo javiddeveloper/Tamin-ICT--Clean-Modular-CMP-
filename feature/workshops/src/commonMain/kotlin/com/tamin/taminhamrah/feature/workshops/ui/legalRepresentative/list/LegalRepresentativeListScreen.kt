@@ -19,7 +19,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.People
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -34,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -45,7 +45,6 @@ import com.tamin.taminhamrah.ui.ActionMenuItem
 import com.tamin.taminhamrah.ui.RecordActionMenu
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.DetailRow
-import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.IconPosition
 import com.tamin.taminhamrah.ui.components.LabeledBlock
@@ -53,11 +52,13 @@ import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
+import com.tamin.taminhamrah.ui.components.dashedOutline
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.Thickness
 import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -80,6 +81,7 @@ import taminx.core.core_ui.legal_representative_delete_confirm_message
 import taminx.core.core_ui.legal_representative_delete_confirm_title
 import taminx.core.core_ui.legal_representative_edit_action
 import taminx.core.core_ui.legal_representative_electronic_notification
+import taminx.core.core_ui.legal_representative_empty_list_hint
 import taminx.core.core_ui.legal_representative_empty_list_message
 import taminx.core.core_ui.legal_representative_insured_registration
 import taminx.core.core_ui.legal_representative_internet_list
@@ -168,10 +170,8 @@ fun LegalRepresentativeListScreen(
                         modifier = Modifier.align(Alignment.Center),
                     )
 
-                    uiState.representatives.isEmpty() -> EmptyStateMessage(
-                        icon = Icons.Filled.People,
-                        title = stringResource(Res.string.legal_representative_empty_list_message),
-                        modifier = Modifier.align(Alignment.Center),
+                    uiState.representatives.isEmpty() -> LegalRepresentativeEmptyState(
+                        modifier = Modifier.align(Alignment.TopCenter),
                     )
 
                     else -> LazyColumn(
@@ -232,6 +232,37 @@ fun LegalRepresentativeListScreen(
                     modifier = Modifier.fillMaxWidth(),
                 )
             },
+        )
+    }
+}
+
+/** Dashed, bordered notice shown in place of the list when a workshop has no representatives yet. */
+@Composable
+private fun LegalRepresentativeEmptyState(modifier: Modifier = Modifier) {
+    val taminColors = LocalTaminColors.current
+    val shape = RoundedCornerShape(CornerRadius.xlg)
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(taminColors.bgSurface)
+            .dashedOutline(taminColors.border, CornerRadius.xlg, Thickness.border)
+            .padding(vertical = Spacing.xl, horizontal = Spacing.lg),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+    ) {
+        Text(
+            text = stringResource(Res.string.legal_representative_empty_list_message),
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
+            color = taminColors.textSecondary,
+            textAlign = TextAlign.Center,
+        )
+        Text(
+            text = stringResource(Res.string.legal_representative_empty_list_hint),
+            style = MaterialTheme.typography.labelSmall,
+            color = taminColors.textMuted,
+            textAlign = TextAlign.Center,
         )
     }
 }

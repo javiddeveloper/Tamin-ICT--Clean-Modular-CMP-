@@ -12,9 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Domain
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -47,6 +44,8 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.ic_tamin_legal_representative
+import taminx.core.core_ui.ic_tamin_workshop
 import taminx.core.core_ui.legal_representative_full_name_label
 import taminx.core.core_ui.legal_representative_title
 import taminx.core.core_ui.legal_representative_workshop_stat_label
@@ -119,7 +118,10 @@ internal fun LegalRepresentativeHeroSubtitle(
         // Statically rendered while this composable is one of rememberMeasuredTopAreaState's
         // off-screen measure probes -- an infinite-repeat animation there would otherwise keep
         // requesting frames for a slot that's never actually drawn.
-        AnimatedRingHeaderIcon(icon = Icons.Filled.Person, animated = !topAreaState.isMeasureProbe)
+        AnimatedRingHeaderIcon(
+            icon = vectorResource(Res.drawable.ic_tamin_legal_representative),
+            animated = !topAreaState.isMeasureProbe,
+        )
         Spacer(Modifier.height(Spacing.sm))
         Text(
             text = text,
@@ -156,7 +158,7 @@ internal fun LegalRepresentativeWorkshopSummaryCard(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = Icons.Filled.Domain,
+                imageVector = vectorResource(Res.drawable.ic_tamin_workshop),
                 contentDescription = null,
                 tint = Color.White,
             )
@@ -215,7 +217,7 @@ internal fun LegalRepresentativeIdentitySummaryCard(
                     text = fullName,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
-                    color = taminColors.textPrimary,
+                    color = taminColors.blueText,
                     textAlign = TextAlign.Center,
                 )
             }
@@ -240,7 +242,7 @@ internal fun LegalRepresentativeIdentitySummaryCard(
             NumericText(
                 text = workshopCount.toString(),
                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                color = taminColors.textPrimary,
+                color = taminColors.blueText,
             )
             Spacer(Modifier.height(Spacing.xxs))
             Text(
