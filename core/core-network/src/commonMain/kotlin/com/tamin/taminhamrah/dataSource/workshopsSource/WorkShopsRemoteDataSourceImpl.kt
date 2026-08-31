@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.apiService.WorkShopsApiService
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeContractDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeRequestDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopDTO
@@ -182,6 +183,20 @@ internal class WorkShopsRemoteDataSourceImpl(
     ): ListData<LegalRepresentativeDTO>? {
         return try {
             val response = apiService.getLegalRepresentatives(workshopId = workshopId, branchCode = branchCode)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun getLegalRepresentativeWorkshopContracts(
+        workshopId: String,
+        branchCode: String
+    ): ListData<LegalRepresentativeContractDTO>? {
+        return try {
+            val response = apiService.getLegalRepresentativeWorkshopContracts(workshopId = workshopId, branchCode = branchCode)
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
