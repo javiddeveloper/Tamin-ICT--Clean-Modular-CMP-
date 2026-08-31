@@ -89,6 +89,7 @@ fun WorkersPaymentRoute(
     // Success populates uiState.paymentReceipt and screen 2 shows WorkersPaymentSuccessDialog.
     val lifecycleState by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
     LaunchedEffect(lifecycleState) {
+        println("WorkersPaymentCallback: lifecycle=$lifecycleState hasPendingPayment=${viewModel.uiState.value.hasPendingPayment}") // TEMP
         if (lifecycleState == Lifecycle.State.RESUMED && viewModel.uiState.value.hasPendingPayment) {
             viewModel.sendIntent(WorkersPaymentIntent.VerifyPendingPayment)
         }

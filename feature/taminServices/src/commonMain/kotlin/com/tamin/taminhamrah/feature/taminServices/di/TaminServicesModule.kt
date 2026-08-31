@@ -5,8 +5,12 @@ import com.tamin.taminhamrah.feature.taminServices.sendHistoryToInstitutions.Sen
 import com.tamin.taminhamrah.feature.taminServices.ui.TamminServicesViewModel
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.WorkersPaymentViewModel
 import com.tamin.taminhamrah.useCases.workersPayment.GetWorkersPaymentInfoUseCase
+import com.tamin.taminhamrah.useCases.workersPayment.HandleWorkersPaymentDeepLinkUseCase
+import com.tamin.taminhamrah.useCases.workersPayment.HandleWorkersPaymentDeepLinkUseCaseImpl
 import com.tamin.taminhamrah.useCases.workersPayment.InspectWorkersPaymentTicketUseCase
 import com.tamin.taminhamrah.useCases.workersPayment.PayWorkersDebitUseCase
+import com.tamin.taminhamrah.useCases.workersPayment.WorkersPaymentCallbackNotifier
+import com.tamin.taminhamrah.useCases.workersPayment.WorkersPaymentCallbackNotifierImpl
 import com.tamin.taminhamrah.useCases.history.GetUserInfosUseCase
 import com.tamin.taminhamrah.useCases.history.SendToInstitutionUseCase
 import com.tamin.taminhamrah.useCases.occurrence.GetAllWorkshopsUseCase
@@ -24,7 +28,9 @@ import com.tamin.taminhamrah.useCases.inspection.GetJobListUseCase
 import com.tamin.taminhamrah.useCases.inspection.SubmitInspectionUseCase
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.InspectionViewModel
 import org.koin.core.module.dsl.factoryOf
+import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val TaminServicesModule = module {
@@ -47,6 +53,9 @@ val TaminServicesModule = module {
     factoryOf(::GetWorkersPaymentInfoUseCase)
     factoryOf(::PayWorkersDebitUseCase)
     factoryOf(::InspectWorkersPaymentTicketUseCase)
+    // Singleton: shared between the platform deep-link entry points and WorkersPaymentViewModel.
+    singleOf(::WorkersPaymentCallbackNotifierImpl) bind WorkersPaymentCallbackNotifier::class
+    factoryOf(::HandleWorkersPaymentDeepLinkUseCaseImpl) bind HandleWorkersPaymentDeepLinkUseCase::class
     factoryOf(::GetInspectionListUseCase)
     factoryOf(::GetBranchListUseCase)
     factoryOf(::GetJobListUseCase)

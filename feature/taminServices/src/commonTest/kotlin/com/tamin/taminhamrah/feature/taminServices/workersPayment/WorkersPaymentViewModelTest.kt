@@ -11,6 +11,7 @@ import com.tamin.taminhamrah.util.NetworkConstants
 import com.tamin.taminhamrah.useCases.workersPayment.GetWorkersPaymentInfoUseCase
 import com.tamin.taminhamrah.useCases.workersPayment.InspectWorkersPaymentTicketUseCase
 import com.tamin.taminhamrah.useCases.workersPayment.PayWorkersDebitUseCase
+import com.tamin.taminhamrah.useCases.workersPayment.WorkersPaymentCallbackNotifierImpl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -38,12 +39,14 @@ class WorkersPaymentViewModelTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private lateinit var repository: FakeWorkersPaymentRepository
+    private lateinit var callbackNotifier: WorkersPaymentCallbackNotifierImpl
     private lateinit var viewModel: WorkersPaymentViewModel
 
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         repository = FakeWorkersPaymentRepository()
+        callbackNotifier = WorkersPaymentCallbackNotifierImpl()
     }
 
     @AfterTest
@@ -55,6 +58,7 @@ class WorkersPaymentViewModelTest {
         getWorkersPaymentInfoUseCase = GetWorkersPaymentInfoUseCase(repository),
         payWorkersDebitUseCase = PayWorkersDebitUseCase(repository),
         inspectWorkersPaymentTicketUseCase = InspectWorkersPaymentTicketUseCase(repository),
+        callbackNotifier = callbackNotifier,
     )
 
     // ── init list load ──────────────────────────────────────────────────────
@@ -214,6 +218,31 @@ class WorkersPaymentViewModelTest {
     }
 
     @Test
+    fun `gateway callback verifies the pending payment and produces a receipt`() = runTest(testDispatcher) {
+        val viewModel = driveToPendingPayment()
+        repository.inspectTicketResult = "پرداخت با موفقیت انجام شد."
+
+        callbackNotifier.notifyCallback()
+
+        val state = viewModel.uiState.value
+        val receipt = assertNotNull(state.paymentReceipt)
+        assertEquals("T-1", receipt.trackingCode)
+        assertNull(state.pendingTicket)
+        assertEquals("T-1" to "enc-info", repository.lastInspectTicketParams)
+    }
+
+    @Test
+    fun `gateway callback with no pending payment is ignored`() = runTest(testDispatcher) {
+        repository.paymentInfoResult = WorkersPaymentInfoListDN(0L, 0L, 0L, 1, listOf(sampleDn()))
+        viewModel = buildViewModel()
+
+        callbackNotifier.notifyCallback()
+
+        assertNull(viewModel.uiState.value.paymentReceipt)
+        assertNull(repository.lastInspectTicketParams)
+    }
+
+    @Test
     fun `VerifyPendingPayment with no pending ticket is a no-op`() = runTest(testDispatcher) {
         repository.paymentInfoResult = WorkersPaymentInfoListDN(0L, 0L, 0L, 1, listOf(sampleDn()))
         viewModel = buildViewModel()
@@ -225,7 +254,7 @@ class WorkersPaymentViewModelTest {
     }
 
     @Test
-    fun `VerifyPendingPayment failure emits a toast and resets the verifying flag`() = runTest(testDispatcher) {
+    fun `VerifyPendingPayment failure is silent - no toast, resets the verifying flag`() = runTest(testDispatcher) {
         val viewModel = driveToPendingPayment()
         repository.shouldThrowError = true
 
@@ -233,14 +262,19 @@ class WorkersPaymentViewModelTest {
             // buffered by the successful payDebit inside driveToPendingPayment()
             assertIs<WorkersPaymentEvent.OpenPaymentUrl>(awaitItem())
             viewModel.sendIntent(WorkersPaymentIntent.VerifyPendingPayment)
-            val event = assertIs<WorkersPaymentEvent.ShowToast>(awaitItem())
-            assertTrue(event.message.isNotBlank())
+            // matches legacy: a failed inpectTicket on the callback surfaces nothing
+            expectNoEvents()
             cancelAndIgnoreRemainingEvents()
         }
 
         val state = viewModel.uiState.value
         assertNull(state.paymentReceipt)
         assertFalse(state.isVerifying)
+        // one-shot: pending ticket dropped so RESUMED / the callback can't retry-loop
+        assertNull(state.pendingTicket)
+        assertFalse(state.hasPendingPayment)
+        // failure steps back off the confirmation screen to the debt list
+        assertNull(state.selectedPaymentItem)
     }
 
     @Test

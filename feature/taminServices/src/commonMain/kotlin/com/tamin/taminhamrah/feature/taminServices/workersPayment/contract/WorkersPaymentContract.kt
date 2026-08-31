@@ -56,6 +56,9 @@ data class WorkersPaymentUiState(
         data class PaymentTicketReady(val ticket: String?, val paymentInfo: String?) : PartialState
         data class Verifying(val inProgress: Boolean) : PartialState
         data class PaymentVerified(val receipt: PaymentReceipt) : PartialState
+
+        /** Drop the pending ticket after a verification attempt that didn't confirm a payment — one-shot, like legacy. */
+        data object PendingPaymentCleared : PartialState
         data object ReceiptDismissed : PartialState
         data class PaymentScreenOpened(val item: WorkersPaymentInfoPR) : PartialState
         data object PaymentScreenClosed : PartialState

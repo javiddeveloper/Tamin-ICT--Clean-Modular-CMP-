@@ -10,12 +10,14 @@ import androidx.lifecycle.lifecycleScope
 import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.ui.MainApp
 import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCase
+import com.tamin.taminhamrah.useCases.workersPayment.HandleWorkersPaymentDeepLinkUseCase
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
 class MainActivity : FragmentActivity() {
 
     private val handleAuthDeepLinkUseCase: HandleAuthDeepLinkUseCase by inject()
+    private val handleWorkersPaymentDeepLinkUseCase: HandleWorkersPaymentDeepLinkUseCase by inject()
     private val tokenStoreManager: TokenStoreManager by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,10 +40,42 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun handleIntent(intent: Intent?) {
-        intent?.data?.toString()?.let { uri ->
-            lifecycleScope.launch {
-                handleAuthDeepLinkUseCase(uri)
+        logDeepLinkProbe(intent) // TEMP: inspect what the payment gateway sends back
+        val uri = intent?.data?.toString() ?: return
+        if (handleWorkersPaymentDeepLinkUseCase(uri)) return
+        lifecycleScope.launch {
+            handleAuthDeepLinkUseCase(uri)
+        }
+    }
+
+    // TEMP diagnostic — dumps every part of an incoming deep-link Intent so we can see whether the
+    // payment gateway appends any result data (query string, path, fragment, extras) to
+    // mytamin://workers_payment_callback. Remove once confirmed. Filter logcat by tag "DeepLinkProbe".
+    private fun logDeepLinkProbe(intent: Intent?) {
+        val data = intent?.data
+        val sb = StringBuilder()
+        sb.appendLine("--- deep link ---")
+        sb.appendLine("action       = ${intent?.action}")
+        sb.appendLine("dataString   = ${intent?.dataString}")
+        sb.appendLine("uri          = $data")
+        sb.appendLine("isOpaque     = ${data?.isOpaque}")
+        sb.appendLine("scheme       = ${data?.scheme}")
+        sb.appendLine("host         = ${runCatching { data?.host }.getOrNull()}")
+        sb.appendLine("path         = ${runCatching { data?.path }.getOrNull()}")
+        sb.appendLine("pathSegments = ${runCatching { data?.pathSegments }.getOrNull()}")
+        sb.appendLine("sspart       = ${data?.schemeSpecificPart}")
+        sb.appendLine("encodedQuery = ${runCatching { data?.encodedQuery }.getOrNull()}")
+        sb.appendLine("fragment     = ${data?.fragment}")
+        runCatching {
+            data?.queryParameterNames?.forEach { name ->
+                sb.appendLine("  query[$name] = ${data.getQueryParameter(name)}")
             }
         }
+        intent?.extras?.let { ex ->
+            ex.keySet().forEach { k ->
+                sb.appendLine("  extra[$k] = ${runCatching { @Suppress("DEPRECATION") ex.get(k) }.getOrNull()}")
+            }
+        }
+        android.util.Log.i("DeepLinkProbe", sb.toString())
     }
 }

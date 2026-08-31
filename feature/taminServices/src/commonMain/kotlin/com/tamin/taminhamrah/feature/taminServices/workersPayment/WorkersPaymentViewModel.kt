@@ -12,13 +12,17 @@ import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.workersPayment.GetWorkersPaymentInfoUseCase
 import com.tamin.taminhamrah.useCases.workersPayment.InspectWorkersPaymentTicketUseCase
 import com.tamin.taminhamrah.useCases.workersPayment.PayWorkersDebitUseCase
+import com.tamin.taminhamrah.useCases.workersPayment.WorkersPaymentCallbackNotifier
 import com.tamin.taminhamrah.util.NetworkConstants
+import androidx.lifecycle.viewModelScope
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.workers_payment_url_missing
@@ -27,12 +31,39 @@ class WorkersPaymentViewModel(
     private val getWorkersPaymentInfoUseCase: GetWorkersPaymentInfoUseCase,
     private val payWorkersDebitUseCase: PayWorkersDebitUseCase,
     private val inspectWorkersPaymentTicketUseCase: InspectWorkersPaymentTicketUseCase,
+    private val callbackNotifier: WorkersPaymentCallbackNotifier,
 ) : BaseViewModel<WorkersPaymentUiState, PartialState, WorkersPaymentEvent, WorkersPaymentIntent>(
     initialState = WorkersPaymentUiState(),
 ) {
 
+    /**
+     * Set synchronously in [handleIntent] so the two verification triggers (the gateway-callback
+     * notifier and `WorkersPaymentRoute`'s lifecycle-RESUMED effect) can't both start an
+     * `inspectTicket` call for the same ticket. `handleIntent` is invoked sequentially by
+     * `BaseViewModel`, so a plain flag is enough — no atomics needed.
+     */
+    private var verificationInFlight = false
+
     init {
         sendIntent(WorkersPaymentIntent.LoadPaymentInfo)
+        observeGatewayCallback()
+    }
+
+    /**
+     * The payment gateway redirects to `mytamin://workers_payment_callback` when the user finishes.
+     * The platform deep-link entry points forward that to [callbackNotifier]; when it fires and a
+     * ticket is still pending, verify it. `WorkersPaymentRoute` also verifies on lifecycle RESUMED,
+     * which covers a manual return (deep link blocked, or not wired on the platform) — the
+     * [verificationInFlight] guard keeps the two paths from double-calling `inspectTicket`.
+     */
+    private fun observeGatewayCallback() {
+        viewModelScope.launch {
+            callbackNotifier.callbacks.collect {
+                if (uiState.value.hasPendingPayment) {
+                    sendIntent(WorkersPaymentIntent.VerifyPendingPayment)
+                }
+            }
+        }
     }
 
     override fun handleIntent(intent: WorkersPaymentIntent): Flow<PartialState> = when (intent) {
@@ -41,7 +72,15 @@ class WorkersPaymentViewModel(
         is WorkersPaymentIntent.OpenPaymentScreen -> flow { emit(PartialState.PaymentScreenOpened(intent.item)) }
         is WorkersPaymentIntent.ClosePaymentScreen -> flow { emit(PartialState.PaymentScreenClosed) }
         is WorkersPaymentIntent.PayItem -> payItem(intent.item)
-        is WorkersPaymentIntent.VerifyPendingPayment -> verifyPendingPayment()
+        is WorkersPaymentIntent.VerifyPendingPayment -> {
+            if (verificationInFlight || uiState.value.pendingTicket == null) {
+                emptyFlow()
+            } else {
+                verificationInFlight = true
+                verifyPendingPayment()
+            }
+        }
+
         is WorkersPaymentIntent.DismissReceipt -> dismissReceipt()
     }
 
@@ -116,10 +155,17 @@ class WorkersPaymentViewModel(
             )
             emit(PartialState.Verifying(false))
         } catch (e: Exception) {
-            emit(PartialState.Verifying(false))
-            sendEvent(WorkersPaymentEvent.ShowToast(e.toSingleLineMessage()))
+            // Match the legacy flow: a non-200 from inpectTicket on the gateway callback (user
+            // cancelled, TFH 500, …) is swallowed silently — no toast, no dialog. Only a
+            // successful verification does anything user-visible. Legacy routes the failed result
+            // to MainViewModel.mldErrorState, which no Activity-level observer listens to.
+            // One-shot, like legacy (which wipes ticket+paymentInfo before every attempt): drop the
+            // pending ticket so a later RESUMED / callback can't re-run inpectTicket in a loop.
+            emit(PartialState.PendingPaymentCleared)
+            // Verification failed → step back off the confirmation screen to the debt list.
+            emit(PartialState.PaymentScreenClosed)
         }
-    }
+    }.onCompletion { verificationInFlight = false }
 
     override fun reduceState(
         currentState: WorkersPaymentUiState,
@@ -149,13 +195,28 @@ class WorkersPaymentViewModel(
             paymentReceipt = partialState.receipt,
         )
 
+        is PartialState.PendingPaymentCleared -> currentState.copy(
+            isVerifying = false,
+            pendingTicket = null,
+            pendingPaymentInfo = null,
+        )
+
         is PartialState.ReceiptDismissed -> currentState.copy(
             paymentReceipt = null,
             selectedPaymentItem = null,
         )
 
-        is PartialState.PaymentScreenOpened -> currentState.copy(selectedPaymentItem = partialState.item)
-        is PartialState.PaymentScreenClosed -> currentState.copy(selectedPaymentItem = null)
+        // Clear any error on every screen 1 <-> screen 2 transition so an error raised on one
+        // screen can never straddle the navigation and reappear on the other.
+        is PartialState.PaymentScreenOpened -> currentState.copy(
+            selectedPaymentItem = partialState.item,
+            errorMessage = null,
+        )
+
+        is PartialState.PaymentScreenClosed -> currentState.copy(
+            selectedPaymentItem = null,
+            errorMessage = null,
+        )
 
         is PartialState.Error -> currentState.copy(
             isLoading = false,

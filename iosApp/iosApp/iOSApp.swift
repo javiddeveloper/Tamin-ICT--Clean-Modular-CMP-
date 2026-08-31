@@ -11,6 +11,11 @@ struct iOSApp: App {
         WindowGroup {
             ComposeView()
                 .ignoresSafeArea()
+                .onOpenURL { url in
+                    // Mirrors Android's MainActivity.handleIntent — forwards mytamin://* deep links
+                    // (payment gateway callback, auth) into shared code.
+                    IosDeepLinkBridgeKt.handleExternalDeepLink(uri: url.absoluteString)
+                }
         }
     }
 }
