@@ -25,6 +25,7 @@ import com.tamin.taminhamrah.feature.orotezprotez.di.orotezProtezModule
 import com.tamin.taminhamrah.feature.girlSurvivor.di.girlSurvivorModule
 import com.tamin.taminhamrah.feature.pensionSurvivor.di.pensionSurvivorModule
 import com.tamin.taminhamrah.feature.deferredInstallment.di.deferredInstallmentModule
+import com.tamin.taminhamrah.feature.inquiryEducation.di.inquiryEducationModule
 import com.tamin.taminhamrah.feature.pregnancyPay.di.pregnancyPayModule
 import com.tamin.taminhamrah.plugin.di.pluginModule
 import org.koin.core.context.startKoin
@@ -67,6 +68,7 @@ val sharedModules: List<Module>
         historyObjectionModule,
         pensionSurvivorModule,
         pregnancyPayModule,
+        inquiryEducationModule,
     )
 
 fun initKoin(appDeclaration: KoinAppDeclaration = {}) {
