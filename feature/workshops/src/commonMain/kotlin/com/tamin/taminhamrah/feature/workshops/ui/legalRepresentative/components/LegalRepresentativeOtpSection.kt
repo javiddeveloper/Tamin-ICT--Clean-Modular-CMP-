@@ -40,17 +40,11 @@ import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_email
 import taminx.core.core_ui.legal_representative_otp_sent_message
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val OTP_LENGTH = 5
 private const val COUNTDOWN_SECONDS = 5 * 60
 
-/**
- * The request → countdown → code-entry widget shared by the workshop-level OTP screen and the
- * agent-level OTP embedded in the add/edit form. [sentToLabel] is `null` before a code is
- * requested; once non-null the request button is replaced by the countdown and input field.
- * [titleLabel] and [showSentMessage] let the add/edit form show a compact header instead of the
- * full sent-message paragraph, without affecting the workshop-level OTP screen's own layout.
- */
 @Composable
 internal fun LegalRepresentativeOtpSection(
     isTicketRequested: Boolean,
@@ -66,6 +60,7 @@ internal fun LegalRepresentativeOtpSection(
     requestButtonContentColor: Color? = null,
     titleLabel: String? = null,
     showSentMessage: Boolean = true,
+    onExpired: () -> Unit = {},
 ) {
     val taminColors = LocalTaminColors.current
 
@@ -112,7 +107,7 @@ internal fun LegalRepresentativeOtpSection(
                 style = MaterialTheme.typography.bodySmall,
                 color = taminColors.textMuted,
             )
-            OtpCountdown()
+            OtpCountdown(onExpired = onExpired)
         }
         OtpInputField(
             value = otpCode,
@@ -125,15 +120,15 @@ internal fun LegalRepresentativeOtpSection(
     }
 }
 
-/** Local, cosmetic-only countdown — the request button re-enabling is server-driven, not this. */
 @Composable
-private fun OtpCountdown() {
+private fun OtpCountdown(onExpired: () -> Unit) {
     var secondsLeft by remember { mutableStateOf(COUNTDOWN_SECONDS) }
     LaunchedEffect(Unit) {
         while (secondsLeft > 0) {
-            delay(1000)
+            delay(1000.milliseconds)
             secondsLeft--
         }
+        onExpired()
     }
     val minutes = secondsLeft / 60
     val seconds = secondsLeft % 60

@@ -1144,6 +1144,9 @@
     <string name="legal_representative_otp_sent_to_national_code">ارسال‌شده به کد ملی %1$s</string>
     <string name="legal_representative_credit_code_label">کد اعتباری</string>
     <string name="legal_representative_otp_verify_action">صحت‌سنجی کد اعتباری</string>
+    <string name="legal_representative_otp_expired_title">مهلت کد اعتباری به پایان رسید</string>
+    <string name="legal_representative_otp_expired_message">فرصت ارسال بلیت امنیتی به پایان رسید. لطفاً دوباره تلاش کنید.</string>
+    <string name="legal_representative_otp_retry_action">تلاش مجدد</string>
     <string name="legal_representative_list_title">نمایندگان کارگاه</string>
     <string name="legal_representative_list_section_label">نمایندگان دارای دسترسی (%1$d)</string>
     <string name="legal_representative_add_action">معرفی نماینده</string>

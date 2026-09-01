@@ -272,7 +272,7 @@ fun LegalRepresentativeRequestDN.toDto(ticket: String): LegalRepresentativeReque
 fun LegalRepresentativeContractDTO.toDomain(): LegalRepresentativeContractDN {
     return LegalRepresentativeContractDN(
         contractRow = contractRow ?: "",
-        title = title,
+        title = listOfNotNull(firstName, lastName).joinToString(" ").ifBlank { null },
         nationalCode = nationalCode,
     )
 }

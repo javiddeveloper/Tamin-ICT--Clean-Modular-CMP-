@@ -47,7 +47,8 @@ data class LegalRepresentativeRequestDTO(
 
 @Serializable
 data class LegalRepresentativeContractDTO(
-    @SerialName("contractRow") val contractRow: String? = null,
-    @SerialName("title") val title: String? = null,
-    @SerialName("nationalCode") val nationalCode: String? = null,
+    @SerialName("pymseq") val contractRow: String? = null,
+    @SerialName("firstname") val firstName: String? = null,
+    @SerialName("lastname") val lastName: String? = null,
+    @SerialName("nationalcode") val nationalCode: String? = null,
 )

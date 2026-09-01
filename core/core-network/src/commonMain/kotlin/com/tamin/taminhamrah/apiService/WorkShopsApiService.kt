@@ -87,13 +87,11 @@ internal interface WorkShopsApiService {
         @QueryMap queries: Map<String, String>
     ): BaseDTO<ListData<WorkshopStackHolderDTO>>
 
-    // ─── Legal representative introduction (معرفی نماینده اشخاص حقوقی) ────────────────
-
     @GET("v.1/legal-stakeholders/units")
     suspend fun getLegalRepresentativeWorkshops(
         @Query("page") page: String = "1",
         @Query("start") start: String = "0",
-        @Query("limit") limit: String = "10",
+        @Query("limit") limit: String = "1000",
         @Query("filter") filter: String = "[]",
         @Query("sort") sort: String = "[]",
     ): BaseDTO<ListData<LegalRepresentativeWorkshopDTO>>
@@ -105,7 +103,7 @@ internal interface WorkShopsApiService {
         @Query("branchCode") branchCode: String,
         @Query("page") page: String = "1",
         @Query("start") start: String = "0",
-        @Query("limit") limit: String = "10",
+        @Query("limit") limit: String = "1000",
         @Query("filter") filter: String = "[]",
         @Query("sort") sort: String = "[]",
     ): BaseDTO<ListData<LegalRepresentativeDTO>>
@@ -118,7 +116,7 @@ internal interface WorkShopsApiService {
         @Path("branchCode") branchCode: String,
         @Query("page") page: String = "1",
         @Query("start") start: String = "0",
-        @Query("limit") limit: String = "100",
+        @Query("limit") limit: String = "1000",
         @Query("filter") filter: String = "[]",
         @Query("sort") sort: String = "[]",
     ): BaseDTO<ListData<LegalRepresentativeContractDTO>>

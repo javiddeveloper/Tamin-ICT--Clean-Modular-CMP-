@@ -87,6 +87,14 @@ class AddLegalRepresentativeViewModel(
             emit(AddLegalRepresentativeUiState.PartialState.OtpChanged(intent.value))
         }
 
+        is AddLegalRepresentativeIntent.OtpExpired -> flow {
+            emit(AddLegalRepresentativeUiState.PartialState.OtpExpired)
+        }
+
+        is AddLegalRepresentativeIntent.DismissOtpExpiredDialog -> flow {
+            emit(AddLegalRepresentativeUiState.PartialState.OtpExpiredDialogDismissed)
+        }
+
         is AddLegalRepresentativeIntent.OpenContractPicker -> flow {
             emit(AddLegalRepresentativeUiState.PartialState.ContractPickerOpened)
         }
@@ -190,6 +198,12 @@ class AddLegalRepresentativeViewModel(
 
         is AddLegalRepresentativeUiState.PartialState.OtpChanged ->
             currentState.copy(otpCode = partialState.value, otpError = null)
+
+        is AddLegalRepresentativeUiState.PartialState.OtpExpired ->
+            currentState.copy(isOtpExpired = true, isTicketRequested = false, otpCode = "")
+
+        is AddLegalRepresentativeUiState.PartialState.OtpExpiredDialogDismissed ->
+            currentState.copy(isOtpExpired = false)
 
         is AddLegalRepresentativeUiState.PartialState.LoadingContracts ->
             currentState.copy(isLoadingContracts = true)

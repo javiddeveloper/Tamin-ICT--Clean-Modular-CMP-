@@ -46,6 +46,14 @@ class LegalRepresentativeOtpViewModel(
                 emit(LegalRepresentativeOtpUiState.PartialState.VerifyFailed(e.toSingleLineMessage()))
             }
         }
+
+        is LegalRepresentativeOtpIntent.OtpExpired -> flow {
+            emit(LegalRepresentativeOtpUiState.PartialState.Expired)
+        }
+
+        is LegalRepresentativeOtpIntent.DismissExpiredDialog -> flow {
+            emit(LegalRepresentativeOtpUiState.PartialState.ExpiredDialogDismissed)
+        }
     }
 
     override fun reduceState(
@@ -69,6 +77,12 @@ class LegalRepresentativeOtpViewModel(
 
         is LegalRepresentativeOtpUiState.PartialState.VerifyFailed ->
             currentState.copy(isVerifying = false, error = partialState.message)
+
+        is LegalRepresentativeOtpUiState.PartialState.Expired ->
+            currentState.copy(isExpired = true, isTicketRequested = false, otpCode = "")
+
+        is LegalRepresentativeOtpUiState.PartialState.ExpiredDialogDismissed ->
+            currentState.copy(isExpired = false)
     }
 
     override fun createErrorState(message: String): LegalRepresentativeOtpUiState.PartialState =

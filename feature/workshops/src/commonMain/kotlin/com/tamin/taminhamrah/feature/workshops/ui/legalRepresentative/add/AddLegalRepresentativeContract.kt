@@ -22,6 +22,7 @@ data class AddLegalRepresentativeUiState(
     val isRequestingTicket: Boolean = false,
     val otpCode: String = "",
     val otpError: String? = null,
+    val isOtpExpired: Boolean = false,
     val isSubmitting: Boolean = false,
     val error: String? = null,
     val isSuccess: Boolean = false,
@@ -62,6 +63,8 @@ data class AddLegalRepresentativeUiState(
         data class RequestTicketFailed(val message: String?) : PartialState
         data class RequestTicketValidationFailed(val message: String) : PartialState
         data class OtpChanged(val value: String) : PartialState
+        data object OtpExpired : PartialState
+        data object OtpExpiredDialogDismissed : PartialState
         data object LoadingContracts : PartialState
         data class ContractsLoaded(val contracts: List<LegalRepresentativeContractPR>) : PartialState
         data class ContractsLoadFailed(val message: String?) : PartialState
@@ -92,6 +95,8 @@ sealed interface AddLegalRepresentativeIntent {
     data class InsuredRegistrationChanged(val value: Boolean) : AddLegalRepresentativeIntent
     data object RequestTicket : AddLegalRepresentativeIntent
     data class OtpChanged(val value: String) : AddLegalRepresentativeIntent
+    data object OtpExpired : AddLegalRepresentativeIntent
+    data object DismissOtpExpiredDialog : AddLegalRepresentativeIntent
     data object OpenContractPicker : AddLegalRepresentativeIntent
     data object DismissContractPicker : AddLegalRepresentativeIntent
     data class ToggleContractRow(val contractRow: String) : AddLegalRepresentativeIntent
