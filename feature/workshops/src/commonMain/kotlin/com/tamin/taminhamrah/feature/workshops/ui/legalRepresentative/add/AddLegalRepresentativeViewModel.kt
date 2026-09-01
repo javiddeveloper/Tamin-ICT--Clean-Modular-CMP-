@@ -8,6 +8,8 @@ import com.tamin.taminhamrah.useCases.workshops.GetLegalRepresentativeWorkshopCo
 import com.tamin.taminhamrah.useCases.workshops.RequestLegalRepresentativeTicketUseCase
 import com.tamin.taminhamrah.useCases.workshops.SubmitLegalRepresentativeUseCase
 import com.tamin.taminhamrah.util.ValidationUtils
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -106,9 +108,9 @@ class AddLegalRepresentativeViewModel(
         is AddLegalRepresentativeIntent.ToggleContractRow -> flow {
             val current = uiState.value.selectedContractRows
             val updated = if (current.contains(intent.contractRow)) {
-                current - intent.contractRow
+                current.toPersistentList().remove(intent.contractRow)
             } else {
-                current + intent.contractRow
+                current.toPersistentList().add(intent.contractRow)
             }
             emit(AddLegalRepresentativeUiState.PartialState.ContractRowToggled(updated))
         }
@@ -147,7 +149,7 @@ class AddLegalRepresentativeViewModel(
             val result = getLegalRepresentativeWorkshopContractsUseCase(workshopId, branchCode).first()
             emit(
                 AddLegalRepresentativeUiState.PartialState.ContractsLoaded(
-                    result?.list?.map { it.toPresentation() } ?: emptyList()
+                    result?.list?.map { it.toPresentation() }?.toPersistentList() ?: persistentListOf()
                 )
             )
         } catch (e: Exception) {

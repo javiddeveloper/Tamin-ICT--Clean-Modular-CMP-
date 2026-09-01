@@ -7,6 +7,8 @@ import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.workshops.DeleteLegalRepresentativeUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetLegalRepresentativeWorkshopContractsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetLegalRepresentativesUseCase
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -65,7 +67,10 @@ class LegalRepresentativeListViewModel(
             try {
                 deleteLegalRepresentativeUseCase(uiState.value.ticket, target.stakeId)
                 emit(LegalRepresentativeListUiState.PartialState.Deleted)
-                emit(LegalRepresentativeListUiState.PartialState.Loaded(loadRepresentatives(currentWorkshopId, currentBranchCode)))
+                val updated = uiState.value.representatives
+                    .filterNot { it.stakeId == target.stakeId }
+                    .toPersistentList()
+                emit(LegalRepresentativeListUiState.PartialState.Loaded(updated))
             } catch (e: Exception) {
                 emit(LegalRepresentativeListUiState.PartialState.DeleteFailed(e.toSingleLineMessage()))
             }
@@ -80,10 +85,10 @@ class LegalRepresentativeListViewModel(
         }
     }
 
-    private suspend fun loadRepresentatives(workshopId: String, branchCode: String): List<LegalRepresentativePR> {
+    private suspend fun loadRepresentatives(workshopId: String, branchCode: String): ImmutableList<LegalRepresentativePR> {
         val representatives = getLegalRepresentativesUseCase(workshopId, branchCode).first()?.list ?: emptyList()
         if (representatives.none { it.special }) {
-            return representatives.map { it.toPresentation() }
+            return representatives.map { it.toPresentation() }.toPersistentList()
         }
         val contractRowsByNationalId: Map<String, List<String>> = getLegalRepresentativeWorkshopContractsUseCase(workshopId, branchCode)
             .first()
@@ -91,7 +96,7 @@ class LegalRepresentativeListViewModel(
             .orEmpty()
             .filter { !it.nationalCode.isNullOrBlank() }
             .groupBy({ it.nationalCode!! }, valueTransform = { it.contractRow })
-        return representatives.map { it.toPresentation(contractRowsByNationalId[it.nationalId] ?: emptyList()) }
+        return representatives.map { it.toPresentation(contractRowsByNationalId[it.nationalId] ?: emptyList()) }.toPersistentList()
     }
 
     override fun reduceState(

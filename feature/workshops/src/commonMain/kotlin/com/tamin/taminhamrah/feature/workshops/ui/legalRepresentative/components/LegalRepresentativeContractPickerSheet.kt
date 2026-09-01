@@ -29,6 +29,7 @@ import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.legal_representative_contracts_confirm_action
@@ -38,8 +39,8 @@ import taminx.core.core_ui.no_items_found
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LegalRepresentativeContractPickerSheet(
-    contracts: List<LegalRepresentativeContractPR>,
-    selectedContractRows: List<String>,
+    contracts: ImmutableList<LegalRepresentativeContractPR>,
+    selectedContractRows: ImmutableList<String>,
     isLoading: Boolean,
     onToggleContractRow: (String) -> Unit,
     onConfirm: () -> Unit,

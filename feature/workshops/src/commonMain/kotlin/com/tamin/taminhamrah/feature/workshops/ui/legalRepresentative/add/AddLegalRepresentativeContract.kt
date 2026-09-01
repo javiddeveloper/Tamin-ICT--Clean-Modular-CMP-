@@ -2,6 +2,8 @@ package com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.add
 
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeContractPR
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 @Immutable
 data class AddLegalRepresentativeUiState(
@@ -14,8 +16,8 @@ data class AddLegalRepresentativeUiState(
     val hasInternetList: Boolean = false,
     val hasInsuredRegistration: Boolean = false,
     val isSpecialWorkshop: Boolean = false,
-    val availableContracts: List<LegalRepresentativeContractPR> = emptyList(),
-    val selectedContractRows: List<String> = emptyList(),
+    val availableContracts: ImmutableList<LegalRepresentativeContractPR> = persistentListOf(),
+    val selectedContractRows: ImmutableList<String> = persistentListOf(),
     val isLoadingContracts: Boolean = false,
     val isContractPickerOpen: Boolean = false,
     val isTicketRequested: Boolean = false,
@@ -66,11 +68,11 @@ data class AddLegalRepresentativeUiState(
         data object OtpExpired : PartialState
         data object OtpExpiredDialogDismissed : PartialState
         data object LoadingContracts : PartialState
-        data class ContractsLoaded(val contracts: List<LegalRepresentativeContractPR>) : PartialState
+        data class ContractsLoaded(val contracts: ImmutableList<LegalRepresentativeContractPR>) : PartialState
         data class ContractsLoadFailed(val message: String?) : PartialState
         data object ContractPickerOpened : PartialState
         data object ContractPickerDismissed : PartialState
-        data class ContractRowToggled(val selectedContractRows: List<String>) : PartialState
+        data class ContractRowToggled(val selectedContractRows: ImmutableList<String>) : PartialState
         data object Submitting : PartialState
         data object Submitted : PartialState
         data class SubmitFailed(val message: String?) : PartialState

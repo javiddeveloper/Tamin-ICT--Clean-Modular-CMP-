@@ -5,6 +5,8 @@ import com.tamin.taminhamrah.mapper.identity.toPresentation
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
 import com.tamin.taminhamrah.useCases.user.GetIdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetLegalRepresentativeWorkshopsUseCase
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
@@ -34,7 +36,7 @@ class LegalRepresentativeWorkshopsViewModel(
             val result = getLegalRepresentativeWorkshopsUseCase().first()
             emit(
                 LegalRepresentativeWorkshopsUiState.PartialState.Loaded(
-                    result?.list?.map { it.toPresentation() } ?: emptyList()
+                    result?.list?.map { it.toPresentation() }?.toPersistentList() ?: persistentListOf()
                 )
             )
         } catch (e: Exception) {

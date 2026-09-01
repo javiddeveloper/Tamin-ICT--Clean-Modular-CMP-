@@ -52,6 +52,7 @@ import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -318,7 +319,7 @@ fun AddLegalRepresentativeScreen(
 
 @Composable
 private fun LegalRepresentativeContractsSummaryRow(
-    selectedContractRows: List<String>,
+    selectedContractRows: ImmutableList<String>,
     onClick: () -> Unit,
 ) {
     val taminColors = LocalTaminColors.current

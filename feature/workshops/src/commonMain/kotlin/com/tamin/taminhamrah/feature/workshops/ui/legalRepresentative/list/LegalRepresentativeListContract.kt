@@ -2,6 +2,8 @@ package com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.list
 
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativePR
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 @Immutable
 data class LegalRepresentativeListUiState(
@@ -9,7 +11,7 @@ data class LegalRepresentativeListUiState(
     val branchCode: String = "",
     val ticket: String = "",
     val isLoading: Boolean = false,
-    val representatives: List<LegalRepresentativePR> = emptyList(),
+    val representatives: ImmutableList<LegalRepresentativePR> = persistentListOf(),
     val error: String? = null,
     val expandedStakeId: Long? = null,
     val menuOpenStakeId: Long? = null,
@@ -18,7 +20,7 @@ data class LegalRepresentativeListUiState(
 ) {
     sealed interface PartialState {
         data class Loading(val isLoading: Boolean) : PartialState
-        data class Loaded(val representatives: List<LegalRepresentativePR>) : PartialState
+        data class Loaded(val representatives: ImmutableList<LegalRepresentativePR>) : PartialState
         data class Error(val message: String?) : PartialState
         data class ToggleExpand(val stakeId: Long?) : PartialState
         data class ToggleMenu(val stakeId: Long?) : PartialState
