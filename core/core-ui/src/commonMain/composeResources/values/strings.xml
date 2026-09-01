@@ -1374,6 +1374,30 @@
     <string name="inspection_request_success_subtitle_objection_format">اعتراض شما برای بررسی به شعبهٔ %1$s ارسال شد.</string>
     <string name="inspection_request_success_dismiss_button">متوجه شدم</string>
     <string name="inspection_request_success_tracking_label">کد رهگیری</string>
+
+    <!-- ===================== Employer Online Services (خدمات غیرحضوری کارفرمایان) ===================== -->
+    <string name="employer_online_services_title">خدمات غیرحضوری کارفرمایان</string>
+    <string name="employer_online_services_subtitle">تعهدنامه‌های خدمات غیرحضوری شما</string>
+    <string name="employer_online_services_full_name">نام و نام خانوادگی</string>
+    <string name="employer_online_services_national_code">کد ملی</string>
+    <string name="employer_online_services_request_button">ثبت درخواست تعهدنامه</string>
+    <string name="employer_online_services_count_label">تعهدنامه</string>
+    <string name="employer_online_services_status_active">فعال</string>
+    <string name="employer_online_services_status_inactive">غیرفعال</string>
+    <string name="employer_online_services_workshop_code">شماره کارگاه</string>
+    <string name="employer_online_services_branch">شعبه</string>
+    <string name="employer_online_services_commitment_date">تاریخ تعهد</string>
+    <string name="employer_online_services_start_date">تاریخ شروع</string>
+    <string name="employer_online_services_mobile">تلفن همراه</string>
+    <string name="employer_online_services_email">پست الکترونیک</string>
+    <string name="employer_online_services_address">نشانی</string>
+    <string name="employer_online_services_contract_rows">ردیف‌های پیمان</string>
+    <string name="employer_online_services_empty_title">تعهدنامه‌ای یافت نشد</string>
+    <string name="employer_online_services_empty_subtitle">تاکنون تعهدنامه‌ای برای شما ثبت نشده است</string>
+    <string name="employer_online_services_list_error_title">دریافت تعهدنامه‌ها ناموفق بود</string>
+    <string name="employer_online_services_error_retry">تلاش مجدد</string>
+    <string name="employer_online_services_coming_soon_toast">این بخش به‌زودی فعال می‌شود</string>
+
     <string name="history_objection_title">اعتراض سابقه ناموجود</string>
     <string name="history_objection_empty_title">هیچ سابقهٔ ناموجودی ثبت نکرده‌اید</string>
     <string name="history_objection_empty_subtitle">اگر بازه‌ای از کارکرد شما در «کلیهٔ سوابق» دیده نمی‌شود، همین‌جا آن را اعلام کنید.</string>
