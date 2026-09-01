@@ -1523,7 +1523,18 @@
     <string name="contract_gender_honorific_female">خانم</string>
     <string name="contract_female_only_service">این خدمت مختص بانوان است.</string>
     <string name="contract_error_red_crescent_day_limit">امکان انتخاب این شغل تنها تا روز ۲۰ هر ماه وجود دارد.</string>
+    <string name="contract_error_red_crescent_not_eligible">امکان انتخاب شغل هلال احمر برای شما وجود ندارد.</string>
     <string name="contract_error_medical_student_not_allowed">امکان انتخاب این شغل برای شما وجود ندارد.</string>
+    <string name="contract_preflight_not_registered">شما هنوز نام‌نویسی نشده‌اید و امکان انعقاد قرارداد وجود ندارد.</string>
+    <string name="contract_preflight_active_contract">شما در حال حاضر قرارداد فعال دارید.</string>
+    <string name="contract_preflight_under_age">سن شما کمتر از ۱۸ سال است.</string>
+    <string name="contract_preflight_cancelled_20_days">قرارداد قبلی شما بیش از ۲۰ روز پیش ابطال شده است.</string>
+    <string name="contract_preflight_cancelled_3_months">قرارداد قبلی شما بیش از سه ماه پیش ابطال شده است.</string>
+    <string name="contract_preflight_other_contract">شما قرارداد فعال دیگری دارید که با این نوع بیمه تداخل دارد.</string>
+    <string name="contract_payment_dialog_title">ثبت قرارداد</string>
+    <string name="contract_payment_dialog_message">قرارداد با شماره %1$s ثبت شد.</string>
+    <string name="contract_payment_dialog_pay">پرداخت حق بیمه</string>
+    <string name="contract_payment_dialog_dismiss">متوجه شدم</string>
     <string name="contract_treatment_support_yes">حمایت درمان دارد</string>
     <string name="contract_treatment_support_no">حمایت درمان ندارد</string>
 

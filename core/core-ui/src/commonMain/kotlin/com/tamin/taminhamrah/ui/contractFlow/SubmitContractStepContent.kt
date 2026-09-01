@@ -15,6 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.model.contractFlow.FreelanceContractResultPR
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoPR
+import com.tamin.taminhamrah.ui.toPriceFormat
+import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.contract_flow_submit_contract
@@ -86,7 +88,7 @@ private fun buildAgreementText(
     agreementContractLabel: String,
 ): String {
     val rate = premiumRateDescription.orEmpty()
-    val salary = calculatedMonthlySalary?.toString().orEmpty()
+    val salary = calculatedMonthlySalary?.toPriceFormat()?.toPersianDigits().orEmpty()
     return stringResource(
         Res.string.contract_submit_agreement,
         registrationInfo.fullName,

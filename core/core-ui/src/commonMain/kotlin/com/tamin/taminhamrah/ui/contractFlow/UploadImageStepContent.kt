@@ -170,7 +170,7 @@ fun UploadImageStepContent(
         } else {
             Button(
                 onClick = { filePickerLauncher.launch() },
-                enabled = !isUploading,
+                enabled = !isUploading && description.isNotBlank(),
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Icon(

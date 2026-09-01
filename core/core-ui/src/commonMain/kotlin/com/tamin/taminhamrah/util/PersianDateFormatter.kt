@@ -136,6 +136,24 @@ object PersianDateFormatter {
         return gregorianToJalali(dateTime.year, dateTime.monthNumber, dateTime.dayOfMonth)
     }
 
+    /** Whole years since [dateOfBirthEpoch], or null when the epoch is missing. */
+    fun ageYearsFromBirthEpoch(dateOfBirthEpoch: Long?): Int? {
+        if (dateOfBirthEpoch == null) return null
+        val birthDate = Instant.fromEpochMilliseconds(dateOfBirthEpoch)
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+            .date
+        val today = Instant.fromEpochMilliseconds(currentTimeMillis())
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+            .date
+        var age = today.year - birthDate.year
+        if (today.monthNumber < birthDate.monthNumber ||
+            (today.monthNumber == birthDate.monthNumber && today.dayOfMonth < birthDate.dayOfMonth)
+        ) {
+            age--
+        }
+        return age
+    }
+
     /** The current wall-clock time as hour/minute, for time pickers' default selection. */
     fun now(): Pair<Int, Int> {
         val dateTime = Instant.fromEpochMilliseconds(currentTimeMillis())

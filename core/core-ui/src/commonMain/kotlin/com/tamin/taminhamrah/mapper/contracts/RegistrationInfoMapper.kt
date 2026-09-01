@@ -22,5 +22,7 @@ fun RegistrationInfoDN.toPresentation(): RegistrationInfoPR {
         phoneNumber = contact?.phoneNumber?:"",
         mobileNumber = mobile,
         hasMobile = mobile.isNotBlank(),
+        insuranceIdValid = insuranceIdValidity,
+        dateOfBirthEpoch = personal?.dateOfBirth,
     )
 }

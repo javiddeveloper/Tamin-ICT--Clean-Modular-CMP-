@@ -20,13 +20,14 @@ import org.jetbrains.compose.resources.stringResource
 fun ContractApplicantStepContent(
     selectedType: ContractApplicantType,
     onTypeSelected: (ContractApplicantType) -> Unit,
+    availableTypes: List<ContractApplicantType> = listOf(ContractApplicantType.PERSONAL),
     modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        ContractApplicantType.entries.forEach { type ->
+        availableTypes.forEach { type ->
             androidx.compose.foundation.layout.Row(
                 modifier = Modifier
                     .fillMaxWidth()

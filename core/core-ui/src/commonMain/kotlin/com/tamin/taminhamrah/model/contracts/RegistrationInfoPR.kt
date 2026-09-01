@@ -16,6 +16,8 @@ data class RegistrationInfoPR(
     val phoneNumber: String,
     val mobileNumber: String,
     val hasMobile: Boolean,
+    val insuranceIdValid: Boolean = true,
+    val dateOfBirthEpoch: Long? = null,
 ) {
     val isFemale: Boolean get() = genderCode == FEMALE_GENDER_CODE
 
