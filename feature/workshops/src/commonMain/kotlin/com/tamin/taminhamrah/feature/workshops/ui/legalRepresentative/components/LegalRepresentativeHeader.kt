@@ -45,7 +45,7 @@ import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_legal_representative
-import taminx.core.core_ui.ic_tamin_workshop
+import taminx.core.core_ui.ic_tamin_workshop_legal
 import taminx.core.core_ui.legal_representative_full_name_label
 import taminx.core.core_ui.legal_representative_title
 import taminx.core.core_ui.legal_representative_workshop_stat_label
@@ -158,7 +158,7 @@ internal fun LegalRepresentativeWorkshopSummaryCard(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = vectorResource(Res.drawable.ic_tamin_workshop),
+                imageVector = vectorResource(Res.drawable.ic_tamin_workshop_legal),
                 contentDescription = null,
                 tint = Color.White,
             )
