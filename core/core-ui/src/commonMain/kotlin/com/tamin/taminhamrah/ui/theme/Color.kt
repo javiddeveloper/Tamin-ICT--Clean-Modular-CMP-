@@ -328,6 +328,13 @@ val TaminOnAccentInkMuted = TaminOnAccentInk.copy(alpha = 0.80f)
 /** Dimmed white for inactive hero step segments (current-only highlight). */
 val TaminOnAccentInkFaint = TaminOnAccentInk.copy(alpha = 0.35f)
 
+/**
+ * Hero step segments the wizard has already been through, when it tracks how far the user has got
+ * rather than lighting only the current one. Reads between [TaminOnAccentInk] and
+ * [TaminOnAccentInkFaint], so all three states stay distinguishable in one strip.
+ */
+val TaminOnAccentInkReached = TaminOnAccentInk.copy(alpha = 0.62f)
+
 /** Translucent fills and hairlines the same surfaces set on themselves. */
 val TaminOnAccentFill = TaminOnAccentInk.copy(alpha = 0.10f)
 val TaminOnAccentFillStrong = TaminOnAccentInk.copy(alpha = 0.16f)

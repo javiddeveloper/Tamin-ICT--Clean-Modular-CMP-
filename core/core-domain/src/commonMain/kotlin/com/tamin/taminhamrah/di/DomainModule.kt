@@ -37,6 +37,7 @@ import com.tamin.taminhamrah.useCases.pension.SendPayRollToInboxUseCase
 import com.tamin.taminhamrah.useCases.pension.GetUserAgeUseCase
 import com.tamin.taminhamrah.useCases.pension.GetRetirementRequestInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.CheckRetirementStatusUseCase
+import com.tamin.taminhamrah.useCases.pension.CreateRetirementRequestUseCase
 import com.tamin.taminhamrah.useCases.pension.SendRetirementDocumentUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.DeleteMyRequestUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.InboxInquiryLicenseUseCase
@@ -356,6 +357,7 @@ val domainModule = module {
     factoryOf(::UpdateAgentSessionUseCase)
 
     factoryOf(::SendRetirementDocumentUseCase)
+    factoryOf(::CreateRetirementRequestUseCase)
     factoryOf(::GetRolesUseCase)
 
 

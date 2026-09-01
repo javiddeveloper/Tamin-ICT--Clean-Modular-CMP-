@@ -10,6 +10,8 @@ import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequest
 import com.tamin.taminhamrah.model.pension.retirement.RetirementPersonalDTO
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestCreatedDTO
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestFormDTO
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDTO
 import com.tamin.taminhamrah.model.pension.sendRetirementDocument.RetirementSaveDocumentRequest
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
@@ -113,6 +115,14 @@ class PensionRemoteDataSourceImpl(
     ): ListData<RetirementRequestDTO> = errorParser.safeCall("getRetirementRequestInfo") {
         val filterJson = apiQueryBuilder.buildFilterJson(filter)
         val response = pensionApiService.getRetirementRequestInfo(mapOf("filter" to filterJson))
+        response.extractData()
+    }
+
+    override suspend fun createRetirementRequest(
+        authenticationsCode: Long,
+        form: RetirementRequestFormDTO
+    ): RetirementRequestCreatedDTO = errorParser.safeCall("createRetirementRequest") {
+        val response = pensionApiService.createRetirementRequest(authenticationsCode, form)
         response.extractData()
     }
 
