@@ -87,9 +87,9 @@ internal object MockLegalRepresentativeData {
             mobile = "09121234567",
             fullName = "محمد رضایی",
             startDate = 1720000000000L,
-            workshopId = "9098123",
+            workshopId = "9098133",
             workshopName = "بازرگانی نوین تجارت",
-            branchCode = "1201",
+            branchCode = "1203",
             special = false,
         ),
     )
