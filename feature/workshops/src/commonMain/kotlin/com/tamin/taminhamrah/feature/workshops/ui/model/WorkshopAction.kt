@@ -3,6 +3,10 @@ package com.tamin.taminhamrah.feature.workshops.ui.model
 import com.tamin.taminhamrah.feature.workshops.ui.components.StatusTint
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_tamin_workshop_payment
+import taminx.core.core_ui.workshop_action_payment_sheets
+import taminx.core.core_ui.workshop_action_payment_sheets_desc
 
 /**
  * The services a picked کارگاه can be taken to, in the order the menu lists them.
@@ -12,14 +16,19 @@ import org.jetbrains.compose.resources.StringResource
  * do. Every action is offered for every workshop regardless of its activity status, which is how
  * the service behaves.
  *
- * Empty for now: a row belongs here only once the screen it opens exists. The `when` in
- * `WorkshopAction.route()` is exhaustive, so the compiler refuses an action with nowhere to go —
- * which is the codebase saying a menu row and its destination are one change, and why each
- * service arrives as its own task rather than a row that quietly does nothing.
+ * A row belongs here only once the screen it opens exists: the `when` in `WorkshopAction.route()`
+ * is exhaustive, so the compiler refuses an action with nowhere to go.
  */
 enum class WorkshopAction(
     val label: StringResource,
     val description: StringResource,
     val icon: DrawableResource,
     val tint: StatusTint,
-)
+) {
+    PAYMENT_SHEETS(
+        label = Res.string.workshop_action_payment_sheets,
+        description = Res.string.workshop_action_payment_sheets_desc,
+        icon = Res.drawable.ic_tamin_workshop_payment,
+        tint = StatusTint.INFO,
+    ),
+}

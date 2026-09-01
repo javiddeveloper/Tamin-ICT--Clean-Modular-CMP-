@@ -27,6 +27,7 @@ import com.tamin.taminhamrah.feature.taminServices.navigateToOccurrence
 import com.tamin.taminhamrah.feature.taminServices.navigateToInspection
 import com.tamin.taminhamrah.feature.taminServices.navigateToSendInsuranceHistoryToInstitutions
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
+import com.tamin.taminhamrah.feature.workshops.navigateToCompleteEmployerInfo
 import com.tamin.taminhamrah.feature.workshops.navigateToLegalRepresentativeWorkshops
 import com.tamin.taminhamrah.model.common.FeatureFlag
 
@@ -34,6 +35,7 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
     when (flag) {
         FeatureFlag.MERGE_HISTORY -> navigateToHistory()
         FeatureFlag.WORKSHOPS -> navigateToWorkshops()
+        FeatureFlag.COMPLETE_WORKSHOP_INFO -> navigateToCompleteEmployerInfo()
         FeatureFlag.STACK_HOLDER_LIST -> navigateToLegalRepresentativeWorkshops()
         FeatureFlag.CONTRACTS -> navigateToContracts()
         FeatureFlag.STUDENT_INSURANCE -> navigateToStudentInsuranceContract()
