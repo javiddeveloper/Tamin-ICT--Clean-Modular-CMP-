@@ -4,16 +4,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopsRoute
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
-import com.tamin.taminhamrah.feature.workshops.ui.WorkshopsScreen
 import androidx.navigation.toRoute
-import com.tamin.taminhamrah.feature.workshops.ui.managementDebit.ManagementDebitScreen
-import com.tamin.taminhamrah.feature.workshops.ui.objectionableDebit.ObjectionableDebitScreen
-import com.tamin.taminhamrah.feature.workshops.ui.paymentSheets.PaymentSheetsScreen
-import com.tamin.taminhamrah.feature.workshops.ui.workshopDebit.WorkshopDebitScreen
-import com.tamin.taminhamrah.feature.workshops.ui.workshopDebtInquiry.WorkshopDebtInquiryScreen
-import com.tamin.taminhamrah.feature.workshops.ui.workshopMembers.WorkshopMembersScreen
-import com.tamin.taminhamrah.feature.workshops.ui.workshopStackholders.WorkshopStackholdersScreen
-import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersScreen
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.workshops.LegalRepresentativeWorkshopsScreen
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.otp.LegalRepresentativeOtpScreen
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.list.LegalRepresentativeListScreen
@@ -68,61 +59,6 @@ fun NavController.navigateToWorkshops() {
 fun NavController.navigateToLegalRepresentativeWorkshops() {
     navigate(LegalRepresentativeWorkshopsRoute)
 }
-
-fun NavGraphBuilder.workshopsScreen(navController: NavController) {
-
-    composableWithFadeTransitions<WorkshopsRoute> {
-        WorkshopsScreen(
-            navigateToPaymentSheets = { workshopId, branchCode ->
-                navController.navigate(PaymentSheetsRoute(workshopId, branchCode))
-            },
-            navigateToWorkshopDebit = { workshopId, branchCode ->
-                navController.navigate(WorkshopDebitRoute(workshopId, branchCode))
-            },
-            navigateToWorkshopDebtInquiry = { workshopId, branchCode ->
-                navController.navigate(WorkshopDebtInquiryRoute(workshopId, branchCode))
-            },
-            navigateToObjectionableDebit = { workshopId, branchCode ->
-                navController.navigate(ObjectionableDebitRoute(workshopId, branchCode))
-            },
-            navigateToManagementDebit = { workshopId, branchCode ->
-                navController.navigate(ManagementDebitRoute(workshopId, branchCode))
-            },
-            navigateToWorkshopMembers = { workshopId, branchCode ->
-                navController.navigate(WorkshopMembersRoute(workshopId, branchCode))
-            },
-            navigateToWorkshopStackholders = { workshopId, branchCode ->
-                navController.navigate(WorkshopStackholdersRoute(workshopId, branchCode))
-            },
-            navigateToWorkshopRecentlyAddedMembers = { workshopId, branchCode ->
-                navController.navigate(WorkshopRecentlyAddedMembersRoute(workshopId, branchCode))
-            }
-        )
-    }
-
-    composableWithFadeTransitions<PaymentSheetsRoute> { backStackEntry ->
-        val route = backStackEntry.toRoute<PaymentSheetsRoute>()
-        PaymentSheetsScreen(
-            workshopId = route.workshopId,
-            branchCode = route.branchCode
-        )
-    }
-
-    composableWithFadeTransitions<WorkshopDebitRoute> { backStackEntry ->
-        val route = backStackEntry.toRoute<WorkshopDebitRoute>()
-        WorkshopDebitScreen(
-            workshopId = route.workshopId,
-            branchCode = route.branchCode
-        )
-    }
-
-    composableWithFadeTransitions<WorkshopDebtInquiryRoute> { backStackEntry ->
-        val route = backStackEntry.toRoute<WorkshopDebtInquiryRoute>()
-        WorkshopDebtInquiryScreen(
-            workshopId = route.workshopId,
-            branchCode = route.branchCode
-        )
-    }
 
 /**
  * کارگاه‌های کارفرما: the list, and the جزئیات screen it opens.
