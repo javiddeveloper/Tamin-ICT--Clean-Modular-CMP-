@@ -26,6 +26,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -44,10 +45,14 @@ import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contra
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contract.EmployerOnlineServicesIntent
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contract.EmployerOnlineServicesUiState
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.components.EmployerAgreementCard
+import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.components.EmployerOnlineServicesFilterChipRow
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.components.EmployerOnlineServicesHeader
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.components.EmployerOnlineServicesListSkeleton
+import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.components.EmployerOnlineServicesSearchEmptyState
+import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.components.EmployerOnlineServicesSearchSheet
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.components.IdentityInfoCard
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.model.EmployerAgreementRowPR
+import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.model.EmployerAgreementSearch
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.model.IdentityCardPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
@@ -130,13 +135,23 @@ internal fun EmployerOnlineServicesScreen(
     uiState: EmployerOnlineServicesUiState,
     onIntent: (EmployerOnlineServicesIntent) -> Unit,
     onBackClicked: () -> Unit,
+    initialSearchCriteria: EmployerAgreementSearch = EmployerAgreementSearch(),
 ) {
     val taminColors = LocalTaminColors.current
     val collapse = rememberCollapsingHeaderState(HeaderCollapseDistance)
     var headerHeightPx by remember { mutableIntStateOf(0) }
+    var showSearchSheet by remember { mutableStateOf(false) }
+    var searchCriteria by remember { mutableStateOf(initialSearchCriteria) }
 
     val list = uiState.agreementsList
     val agreementsError = uiState.errors[EmployerOnlineServicesErrorSource.AGREEMENTS]
+
+    // Client-side filter over the already-loaded list — exactly inspection's search: nothing is
+    // re-fetched, the criteria just narrows what the list shows.
+    val visibleAgreements = remember(list.agreements, searchCriteria) {
+        if (searchCriteria.isEmpty) list.agreements
+        else list.agreements.filter { searchCriteria.matches(it) }
+    }
 
     Box(
         modifier = Modifier
@@ -205,17 +220,37 @@ internal fun EmployerOnlineServicesScreen(
                     )
                 }
 
-                else -> itemsIndexed(
-                    list.agreements,
-                    key = { _, item -> item.workshopId + "-" + item.branchCode },
-                ) { _, item ->
-                    EmployerAgreementCard(
-                        item = item,
-                        onContractRowsClicked = {
-                            onIntent(EmployerOnlineServicesIntent.OpenContractRows(item))
-                        },
-                        modifier = Modifier.padding(horizontal = Spacing.lg),
-                    )
+                else -> {
+                    if (!searchCriteria.isEmpty) {
+                        item {
+                            EmployerOnlineServicesFilterChipRow(
+                                criteria = searchCriteria,
+                                onClear = { searchCriteria = EmployerAgreementSearch() },
+                                modifier = Modifier.padding(horizontal = Spacing.lg),
+                            )
+                        }
+                    }
+
+                    if (visibleAgreements.isEmpty()) {
+                        item {
+                            EmployerOnlineServicesSearchEmptyState(
+                                modifier = Modifier.padding(horizontal = Spacing.lg),
+                            )
+                        }
+                    }
+
+                    itemsIndexed(
+                        visibleAgreements,
+                        key = { _, item -> item.workshopId + "-" + item.branchCode },
+                    ) { _, item ->
+                        EmployerAgreementCard(
+                            item = item,
+                            onContractRowsClicked = {
+                                onIntent(EmployerOnlineServicesIntent.OpenContractRows(item))
+                            },
+                            modifier = Modifier.padding(horizontal = Spacing.lg),
+                        )
+                    }
                 }
             }
         }
@@ -232,6 +267,7 @@ internal fun EmployerOnlineServicesScreen(
                 EmployerOnlineServicesHeader(
                     collapseProgress = collapse.progressProvider,
                     onBackClicked = onBackClicked,
+                    onSearchClicked = { showSearchSheet = true },
                 )
                 Spacer(modifier = Modifier.height(IdentityCardOverhang))
             }
@@ -247,6 +283,21 @@ internal fun EmployerOnlineServicesScreen(
         if (uiState.isLoading && list.agreements.isNotEmpty()) {
             LoadingStateOverlay()
         }
+    }
+
+    if (showSearchSheet) {
+        EmployerOnlineServicesSearchSheet(
+            initial = searchCriteria,
+            onDismiss = { showSearchSheet = false },
+            onApply = { criteria ->
+                searchCriteria = criteria
+                showSearchSheet = false
+            },
+            onClear = {
+                searchCriteria = EmployerAgreementSearch()
+                showSearchSheet = false
+            },
+        )
     }
 }
 
@@ -395,6 +446,38 @@ private fun EmployerOnlineServicesScreenLoadingPreview() {
                 uiState = EmployerOnlineServicesUiState(isLoading = true),
                 onIntent = {},
                 onBackClicked = {},
+            )
+        }
+    }
+}
+
+private val PreviewNoMatchSearchCriteria = EmployerAgreementSearch(workshopCode = "00000000000")
+
+@PreviewRtlTheme
+@Composable
+private fun EmployerOnlineServicesScreenSearchEmptyPreviewLight() {
+    PreviewRtlThemeContent {
+        AppToastHost {
+            EmployerOnlineServicesScreen(
+                uiState = PreviewLoadedState,
+                onIntent = {},
+                onBackClicked = {},
+                initialSearchCriteria = PreviewNoMatchSearchCriteria,
+            )
+        }
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun EmployerOnlineServicesScreenSearchEmptyPreviewDark() {
+    PreviewRtlThemeContent(darkTheme = true) {
+        AppToastHost {
+            EmployerOnlineServicesScreen(
+                uiState = PreviewLoadedState,
+                onIntent = {},
+                onBackClicked = {},
+                initialSearchCriteria = PreviewNoMatchSearchCriteria,
             )
         }
     }

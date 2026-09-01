@@ -1397,6 +1397,16 @@
     <string name="employer_online_services_list_error_title">دریافت تعهدنامه‌ها ناموفق بود</string>
     <string name="employer_online_services_error_retry">تلاش مجدد</string>
     <string name="employer_online_services_coming_soon_toast">این بخش به‌زودی فعال می‌شود</string>
+    <string name="employer_online_services_search_sheet_title">جستجو در تعهدنامه‌ها</string>
+    <string name="employer_online_services_search_branch_label">کد شعبه</string>
+    <string name="employer_online_services_search_workshop_label">کد کارگاه</string>
+    <string name="employer_online_services_search_optional_hint">اختیاری</string>
+    <string name="employer_online_services_search_button">جستجو</string>
+    <string name="employer_online_services_search_clear_button">حذف فیلتر</string>
+    <string name="employer_online_services_filter_label">فیلتر</string>
+    <string name="employer_online_services_filter_clear_chip">حذف</string>
+    <string name="employer_online_services_search_empty_title">تعهدنامه‌ای با این مشخصات یافت نشد</string>
+    <string name="employer_online_services_search_empty_subtitle">فیلتر را حذف کنید یا درخواست تعهدنامه ثبت کنید.</string>
 
     <string name="history_objection_title">اعتراض سابقه ناموجود</string>
     <string name="history_objection_empty_title">هیچ سابقهٔ ناموجودی ثبت نکرده‌اید</string>
