@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.workshops.ui.objectionStatus.list
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,10 +14,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Circle
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Search
@@ -27,7 +27,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,13 +34,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.workshops.ui.objectionStatus.components.label
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopListScaffold
-import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopRecordCard
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopTextField
 import com.tamin.taminhamrah.feature.workshops.ui.components.colors
 import com.tamin.taminhamrah.feature.workshops.ui.components.tint
@@ -52,16 +50,21 @@ import com.tamin.taminhamrah.model.workshop.WorkShopObjectionStatus
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionType
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
+import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.DetailRow
+import com.tamin.taminhamrah.ui.components.IconPosition
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.rideUpIntoHeader
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.digitsOnly
 import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.HeaderDecoration
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -72,6 +75,7 @@ import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.ic_tamin_chevron_down
 import taminx.core.core_ui.objection_status_action_document
 import taminx.core.core_ui.objection_status_action_document_article16
 import taminx.core.core_ui.objection_status_action_no_document
@@ -100,6 +104,8 @@ import taminx.core.core_ui.objection_status_subtitle
 import taminx.core.core_ui.objection_status_title
 import taminx.core.core_ui.objection_status_vote_type
 import taminx.core.core_ui.objection_status_workshop_id
+import taminx.core.core_ui.workshop_card_collapse
+import taminx.core.core_ui.workshop_card_expand
 import taminx.core.core_ui.workshop_code
 
 @Composable
@@ -149,12 +155,26 @@ fun ObjectionStatusContent(
                     onClick = { onIntent(ObjectionStatusIntent.SearchOpenChanged(true)) },
                 )
             },
+            bottomPadding = WorkshopDimens.headerBottomPadding,
         ) {
-            ObjectionStatusGradientHeader(
-                identityName = state.identityName,
-                identityNationalId = state.identityNationalId,
-            )
+            ObjectionStatusHeroContent()
         }
+
+        // The identity card rides 42dp up into the navy, the same overlap the workshop list's own
+        // stats strip uses — drawing outside the bar's bounds is why this sits here, a sibling of
+        // it in a Column that does not clip, rather than inside the TaminTopAppBar's own content.
+        IdentityCard(
+            name = state.identityName,
+            nationalId = state.identityNationalId,
+            totalCount = state.totalCount,
+            modifier = Modifier
+                .padding(horizontal = Spacing.page)
+                .rideUpIntoHeader(
+                    progress = { 0f },
+                    expandedOverlap = WorkshopDimens.statsCardOverlap,
+                    collapsedOverlap = WorkshopDimens.statsCardOverlap,
+                ),
+        )
 
         WorkshopListScaffold(
             state = state.list,
@@ -163,10 +183,6 @@ fun ObjectionStatusContent(
             key = { it.seqNo ?: it.hashCode() },
             header = {
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
-                    ObjectionStatusStatRow(
-                        totalCount = state.totalCount,
-                        onOpenSearch = { onIntent(ObjectionStatusIntent.SearchOpenChanged(true)) },
-                    )
                     if (state.applied.isNotEmpty) {
                         AppliedFiltersRow(
                             applied = state.applied,
@@ -195,102 +211,33 @@ fun ObjectionStatusContent(
     }
 }
 
-/** The gradient hero: icon badge, subtitle, and the identity card floating into its lower edge. */
+/** The gradient hero's own content: the decorative wash, the ring-icon badge, and the subtitle. */
 @Composable
-private fun ObjectionStatusGradientHeader(
-    identityName: String,
-    identityNationalId: String,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
+private fun ObjectionStatusHeroContent(modifier: Modifier = Modifier) {
+    val colors = LocalTaminColors.current
+    Box(modifier = modifier.fillMaxWidth()) {
+        DecorativeBackgroundCircle(
+            size = HeaderDecoration.circleSize,
+            xOffset = HeaderDecoration.circleXOffset,
+            yOffset = HeaderDecoration.circleYOffset,
+        )
         Column(
             modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            Box(
-                modifier = Modifier
-                    .size(WorkshopDimens.identityIconTile)
-                    .border(1.dp, Color.White.copy(alpha = 0.28f), RoundedCornerShape(CornerRadius.lg))
-                    .background(Color.White.copy(alpha = 0.13f), RoundedCornerShape(CornerRadius.lg)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Description,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(IconSize.banner),
-                )
-            }
+            AnimatedRingHeaderIcon(icon = Icons.Default.Description)
             Text(
                 text = stringResource(Res.string.objection_status_subtitle),
                 style = MaterialTheme.typography.labelMedium,
-                color = Color.White.copy(alpha = 0.72f),
-            )
-        }
-
-        IdentityCard(name = identityName, nationalId = identityNationalId)
-    }
-}
-
-/** The stat chip + tappable search field, on the plain page background below the gradient. */
-@Composable
-private fun ObjectionStatusStatRow(
-    totalCount: Int,
-    onOpenSearch: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(
-            modifier = Modifier
-                .taminSurface(CornerRadius.xl)
-                .padding(horizontal = Spacing.md, vertical = Spacing.sm),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
-        ) {
-            NumericText(
-                text = totalCount.toString().toPersianDigits(),
-                style = MaterialTheme.typography.titleMedium,
-                color = LocalTaminColors.current.blueText,
-            )
-            Text(
-                text = stringResource(Res.string.objection_status_stat_count),
-                style = MaterialTheme.typography.labelSmall,
-                color = LocalTaminColors.current.blueText,
-            )
-        }
-        Row(
-            modifier = Modifier
-                .weight(1f)
-                .taminSurface(CornerRadius.xl)
-                .clickable(onClick = onOpenSearch)
-                .padding(horizontal = Spacing.md, vertical = Spacing.smPlus),
-            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = stringResource(Res.string.objection_status_search_field),
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold,
-                color = LocalTaminColors.current.textSecondary,
-                modifier = Modifier.weight(1f),
-            )
-            Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = null,
-                tint = LocalTaminColors.current.textSecondary,
-                modifier = Modifier.size(IconSize.small),
+                color = colors.textHeaderSubtitle,
             )
         }
     }
 }
 
 @Composable
-private fun IdentityCard(name: String, nationalId: String, modifier: Modifier = Modifier) {
+private fun IdentityCard(name: String, nationalId: String,totalCount: Int, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -298,6 +245,17 @@ private fun IdentityCard(name: String, nationalId: String, modifier: Modifier = 
             .padding(horizontal = Spacing.sm, vertical = Spacing.md),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        IdentityCell(
+            value = name,
+            label = stringResource(Res.string.objection_status_identity_name),
+            modifier = Modifier.weight(1f),
+        )
+        Box(
+            modifier = Modifier
+                .padding(horizontal = Spacing.xs)
+                .background(LocalTaminColors.current.divider)
+                .size(width = 1.dp, height = 32.dp),
+        )
         IdentityCell(
             value = nationalId,
             label = stringResource(Res.string.objection_status_identity_national_id),
@@ -310,9 +268,9 @@ private fun IdentityCard(name: String, nationalId: String, modifier: Modifier = 
                 .size(width = 1.dp, height = 32.dp),
         )
         IdentityCell(
-            value = name,
-            label = stringResource(Res.string.objection_status_identity_name),
-            modifier = Modifier.weight(1f),
+            value = totalCount.toString().toPersianDigits(),
+            label = stringResource(Res.string.objection_status_stat_count),
+            modifier = Modifier.weight(0.5f),
         )
     }
 }
@@ -423,7 +381,15 @@ private fun FilterChip(text: String, onRemove: () -> Unit, modifier: Modifier = 
     }
 }
 
-/** One objection row: collapsed identity cells, expandable detail, two action buttons. */
+/**
+ * One objection row: status pill + type, two identity cells, a date/number split cell, a
+ * «جزئیات بیشتر» toggle and finally the two actions — in that order, matching the design.
+ *
+ * Drawn locally rather than through [com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopRecordCard]
+ * because that shared shell always places its `buttons` row *before* the expand toggle; this
+ * design puts the toggle before the buttons, and gives the toggle a filled chip instead of the
+ * shared shell's dashed rule.
+ */
 @Composable
 private fun ObjectionRow(
     objection: WorkShopObjectionPR,
@@ -434,51 +400,39 @@ private fun ObjectionRow(
     var isExpanded by remember { mutableStateOf(false) }
     val (pillBackground, pillForeground) = objection.status.tint.colors()
     val colors = LocalTaminColors.current
+    val hasDocument = objection.seqNo != null
+    val buttonShape = RoundedCornerShape(CornerRadius.lg)
+    val buttonTextStyle = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold)
 
-    WorkshopRecordCard(
-        modifier = modifier,
-        isExpanded = isExpanded,
-        onToggle = { isExpanded = !isExpanded },
-        buttons = {
-            TaminOutlinedButton(
-                text = if (objection.seqNo == null) {
-                    stringResource(Res.string.objection_status_action_no_document)
-                } else if (objection.objectionType == WorkShopObjectionType.ARTICLE_SIXTEEN) {
-                    stringResource(Res.string.objection_status_action_document_article16)
-                } else {
-                    stringResource(Res.string.objection_status_action_document)
-                },
-                onClick = { onOpenDocument(objection) },
-                enabled = objection.seqNo != null,
-                icon = Icons.Default.Description,
-                modifier = Modifier.weight(1f),
-            )
-            TaminOutlinedButton(
-                text = stringResource(Res.string.objection_status_action_sms),
-                onClick = { onOpenSms(objection) },
-                enabled = objection.seqNo != null,
-                modifier = Modifier.weight(1f),
-            )
-        },
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .taminSurface(WorkshopDimens.cardCorner)
+            .padding(
+                start = WorkshopDimens.cardHorizontalPadding,
+                end = WorkshopDimens.cardHorizontalPadding,
+                top = WorkshopDimens.cardTopPadding,
+                bottom = WorkshopDimens.cardBottomPadding,
+            ),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             verticalAlignment = Alignment.Top,
         ) {
-            StatusPill(
-                text = objection.status.label(),
-                containerColor = pillBackground,
-                contentColor = pillForeground,
-                icon = Icons.Default.Circle,
-                borderColor = pillForeground.copy(alpha = WorkshopDimens.statusPillBorderAlpha),
-            )
             Text(
                 text = objection.objectionType.label(),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
                 color = colors.textPrimary,
                 modifier = Modifier.weight(1f),
+            )
+            StatusPill(
+                text = objection.status.label(),
+                containerColor = pillBackground,
+                contentColor = pillForeground,
+                fontWeight = FontWeight.ExtraBold,
+                borderColor = pillForeground.copy(alpha = WorkshopDimens.statusPillBorderAlpha),
             )
         }
 
@@ -497,12 +451,25 @@ private fun ObjectionRow(
                 modifier = Modifier.weight(1f),
             )
         }
-        ObjectionSplitCell(
-            leftLabel = stringResource(Res.string.objection_status_objection_number),
-            leftValue = objection.objectionNumber,
-            rightLabel = stringResource(Res.string.objection_status_objection_date),
-            rightValue = objection.objectionDate,
-            modifier = Modifier.padding(top = Spacing.xs),
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        ) {
+            ObjectionCell(
+                label = stringResource(Res.string.objection_status_objection_number),
+                value = objection.objectionNumber,
+                modifier = Modifier.weight(1f),
+            )
+            ObjectionCell(
+                label = stringResource(Res.string.objection_status_objection_date),
+                value = objection.objectionDate,
+                modifier = Modifier.weight(1f),
+            )
+        }
+        ObjectionExpandToggle(
+            isExpanded = isExpanded,
+            onToggle = { isExpanded = !isExpanded },
+            modifier = Modifier.padding(top = Spacing.sm),
         )
 
         if (isExpanded) {
@@ -527,6 +494,90 @@ private fun ObjectionRow(
                 )
             }
         }
+
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
+            horizontalArrangement = Arrangement.spacedBy(WorkshopDimens.cardButtonGap),
+        ) {
+            TaminOutlinedButton(
+                text = stringResource(Res.string.objection_status_action_sms),
+                onClick = { onOpenSms(objection) },
+                enabled = hasDocument,
+                icon = Icons.AutoMirrored.Filled.Chat,
+                iconPosition = IconPosition.End,
+                height = WorkshopDimens.cardButtonHeight,
+                shape = buttonShape,
+                containerColor = colors.bgSurface,
+                contentColor = colors.textSecondary,
+                borderColor = colors.border,
+                disabledContainerColor = colors.bgPage,
+                disabledContentColor = colors.textMuted,
+                disabledBorderColor = colors.border,
+                textStyle = buttonTextStyle,
+                modifier = Modifier.weight(1f),
+            )
+            TaminOutlinedButton(
+                text = when {
+                    !hasDocument -> stringResource(Res.string.objection_status_action_no_document)
+                    objection.objectionType == WorkShopObjectionType.ARTICLE_SIXTEEN ->
+                        stringResource(Res.string.objection_status_action_document_article16)
+                    else -> stringResource(Res.string.objection_status_action_document)
+                },
+                onClick = { onOpenDocument(objection) },
+                enabled = hasDocument,
+                icon = Icons.Default.Description,
+                iconPosition = IconPosition.End,
+                height = WorkshopDimens.cardButtonHeight,
+                shape = buttonShape,
+                containerColor = colors.blueBg,
+                contentColor = colors.blueText,
+                borderColor = colors.blueBorder,
+                disabledContainerColor = colors.bgPage,
+                disabledContentColor = colors.textMuted,
+                disabledBorderColor = colors.border,
+                textStyle = buttonTextStyle,
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+/** «جزئیات بیشتر» / «بستن» on a filled chip, matching this screen's design (the shared
+ * [com.tamin.taminhamrah.feature.workshops.ui.components.CardExpandToggle] draws a dashed rule instead). */
+@Composable
+private fun ObjectionExpandToggle(
+    isExpanded: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+    val rotation by animateFloatAsState(if (isExpanded) WorkshopDimens.toggleHalfTurn else 0f, label = "objectionToggleChevron")
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(CornerRadius.lg))
+            .background(colors.bgPage)
+            .clickable(onClick = onToggle)
+            .padding(vertical = Spacing.smPlus),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = stringResource(if (isExpanded) Res.string.workshop_card_collapse else Res.string.workshop_card_expand),
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
+            color = colors.textSecondary,
+        )
+        Icon(
+            imageVector = vectorResource(Res.drawable.ic_tamin_chevron_down),
+            contentDescription = null,
+            tint = colors.textSecondary,
+            modifier = Modifier
+                .padding(start = Spacing.tabSelector)
+                .size(WorkshopDimens.toggleChevronSize)
+                .graphicsLayer { rotationZ = rotation },
+        )
     }
 }
 
@@ -540,42 +591,6 @@ private fun ObjectionCell(label: String, value: String, modifier: Modifier = Mod
     ) {
         Text(text = label, style = MaterialTheme.typography.labelSmall, color = LocalTaminColors.current.textMuted)
         NumericText(text = value, style = MaterialTheme.typography.labelLarge, color = LocalTaminColors.current.textPrimary)
-    }
-}
-
-@Composable
-private fun ObjectionSplitCell(
-    leftLabel: String,
-    leftValue: String,
-    rightLabel: String,
-    rightValue: String,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(LocalTaminColors.current.bgPage, RoundedCornerShape(CornerRadius.lg))
-            .padding(horizontal = Spacing.sm, vertical = Spacing.xs),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Spacing.xxs)) {
-            Text(text = leftLabel, style = MaterialTheme.typography.labelSmall, color = LocalTaminColors.current.textMuted)
-            NumericText(text = leftValue, style = MaterialTheme.typography.labelLarge, color = LocalTaminColors.current.textPrimary)
-        }
-        Box(
-            modifier = Modifier
-                .padding(horizontal = Spacing.xs)
-                .background(LocalTaminColors.current.divider)
-                .size(width = 1.dp, height = 28.dp),
-        )
-        Column(
-            modifier = Modifier.weight(1f),
-            horizontalAlignment = Alignment.End,
-            verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
-        ) {
-            Text(text = rightLabel, style = MaterialTheme.typography.labelSmall, color = LocalTaminColors.current.textMuted)
-            NumericText(text = rightValue, style = MaterialTheme.typography.labelLarge, color = LocalTaminColors.current.textPrimary)
-        }
     }
 }
 
