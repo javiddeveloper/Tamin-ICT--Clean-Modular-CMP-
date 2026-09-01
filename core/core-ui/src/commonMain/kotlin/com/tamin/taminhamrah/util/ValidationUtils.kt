@@ -84,23 +84,4 @@ object ValidationUtils {
         if (startTimestamp == null || endTimestamp == null) return true
         return endTimestamp >= startTimestamp
     }
-
-    /**
-     * Validates Iranian National ID using 10-digit checksum algorithm.
-     */
-    fun isNationalIdValid(nationalId: String): Boolean {
-        if (nationalId.length != 10 || !nationalId.all { it.isDigit() }) return false
-        if (nationalId.toSet().size == 1) return false
-
-        val digits = nationalId.map { it.digitToInt() }
-        val checkDigit = digits[9]
-        val sum = (0..8).sumOf { i -> digits[i] * (10 - i) }
-        val remainder = sum % 11
-
-        return if (remainder < 2) {
-            checkDigit == remainder
-        } else {
-            checkDigit == (11 - remainder)
-        }
-    }
 }

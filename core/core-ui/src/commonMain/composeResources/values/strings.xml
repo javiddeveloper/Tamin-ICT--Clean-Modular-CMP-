@@ -1193,7 +1193,6 @@
     <string name="legal_representative_delete_success_message">نمایندهٔ انتخاب‌شده حذف شد.</string>
     <string name="legal_representative_success_title">با موفقیت انجام شد</string>
     <string name="legal_representative_success_confirm">متوجه شدم</string>
-    <string name="legal_representative_national_code_error">کد ملی معتبر نیست.</string>
 
     <!-- Occurrence / Accident Report -->
     <string name="occurrence_title">گزارش حادثه ناشی از کار</string>

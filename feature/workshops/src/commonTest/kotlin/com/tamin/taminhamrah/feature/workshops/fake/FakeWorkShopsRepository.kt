@@ -239,16 +239,32 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         emit(answer { legalRepresentativeWorkshopContractsResult })
     }
 
+    var requestTicketCallCount: Int = 0
+        private set
+    var lastRequestTicketNationalCode: String? = null
+        private set
     override suspend fun requestLegalRepresentativeTicket(nationalCode: String?) {
-        answer { }
+        answer {
+            requestTicketCallCount++
+            lastRequestTicketNationalCode = nationalCode
+        }
     }
 
+    var lastVerifiedTicket: String? = null
+        private set
     override suspend fun verifyLegalRepresentativeTicket(ticket: String) {
-        answer { }
+        answer { lastVerifiedTicket = ticket }
     }
 
+    var lastSubmittedTicket: String? = null
+        private set
+    var lastSubmittedRequest: LegalRepresentativeRequestDN? = null
+        private set
     override suspend fun submitLegalRepresentative(ticket: String, request: LegalRepresentativeRequestDN) {
-        answer { }
+        answer {
+            lastSubmittedTicket = ticket
+            lastSubmittedRequest = request
+        }
     }
 
     override suspend fun deleteLegalRepresentative(ticket: String, stakeId: Long) {

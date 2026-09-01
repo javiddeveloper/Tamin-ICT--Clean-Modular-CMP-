@@ -2,12 +2,12 @@ package com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.add
 
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
+import com.tamin.taminhamrah.model.common.isValidIranianNationalId
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeRequestDN
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.workshops.GetLegalRepresentativeWorkshopContractsUseCase
 import com.tamin.taminhamrah.useCases.workshops.RequestLegalRepresentativeTicketUseCase
 import com.tamin.taminhamrah.useCases.workshops.SubmitLegalRepresentativeUseCase
-import com.tamin.taminhamrah.util.ValidationUtils
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.Flow
@@ -49,7 +49,7 @@ class AddLegalRepresentativeViewModel(
 
         is AddLegalRepresentativeIntent.NationalCodeChanged -> flow {
             val digitsOnly = intent.value.filter { it.isDigit() }.take(10)
-            val error = if (digitsOnly.length == 10 && !ValidationUtils.isNationalIdValid(digitsOnly)) {
+            val error = if (digitsOnly.length == 10 && !isValidIranianNationalId(digitsOnly)) {
                 NATIONAL_CODE_ERROR
             } else {
                 null
