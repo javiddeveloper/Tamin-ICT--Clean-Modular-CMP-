@@ -12,6 +12,7 @@ import com.tamin.taminhamrah.feature.healthProfile.di.healthProfileModule
 import com.tamin.taminhamrah.feature.myinbox.di.myInboxModule
 import com.tamin.taminhamrah.feature.profile.di.profileModule
 import com.tamin.taminhamrah.feature.treatment.di.treatmentModule
+import com.tamin.taminhamrah.feature.workshops.di.completeEmployerInfoModule
 import com.tamin.taminhamrah.feature.workshops.di.workshopsModule
 import com.tamin.taminhamrah.feature.studentInsuranceContract.di.studentInsuranceContractModule
 import com.tamin.taminhamrah.feature.changemobile.di.changeMobileModule
@@ -54,6 +55,7 @@ val sharedModules: List<Module>
         contractsModule,
         TaminServicesModule,
         workshopsModule,
+        completeEmployerInfoModule,
         studentInsuranceContractModule,
         healthProfileModule,
         changeMobileModule,
