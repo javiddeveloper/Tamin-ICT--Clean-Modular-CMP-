@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +32,8 @@ import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.components
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.GlassIconTile
 import com.tamin.taminhamrah.ui.components.LoadingButton
+import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
+import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -42,8 +46,11 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.ic_tamin_ticket
 import taminx.core.core_ui.legal_representative_otp_description
+import taminx.core.core_ui.legal_representative_otp_expired_message
+import taminx.core.core_ui.legal_representative_otp_expired_title
 import taminx.core.core_ui.legal_representative_otp_heading
 import taminx.core.core_ui.legal_representative_otp_request_action
+import taminx.core.core_ui.legal_representative_otp_retry_action
 import taminx.core.core_ui.legal_representative_otp_verify_action
 
 @Composable
@@ -122,6 +129,7 @@ fun LegalRepresentativeOtpScreen(
                 requestLabel = stringResource(Res.string.legal_representative_otp_request_action),
                 onRequestTicket = { viewModel.sendIntent(LegalRepresentativeOtpIntent.RequestTicket) },
                 onOtpChanged = { viewModel.sendIntent(LegalRepresentativeOtpIntent.OtpChanged(it)) },
+                onExpired = { viewModel.sendIntent(LegalRepresentativeOtpIntent.OtpExpired) },
                 modifier = Modifier.fillMaxWidth(),
             )
 
@@ -137,5 +145,24 @@ fun LegalRepresentativeOtpScreen(
                 )
             }
         }
+    }
+
+    if (uiState.isExpired) {
+        TaminConfirmationDialog(
+            title = stringResource(Res.string.legal_representative_otp_expired_title),
+            description = stringResource(Res.string.legal_representative_otp_expired_message),
+            icon = Icons.Default.AccessTime,
+            iconTint = taminColors.dangerText,
+            iconBackground = taminColors.dangerBorder,
+            onDismissRequest = { viewModel.sendIntent(LegalRepresentativeOtpIntent.DismissExpiredDialog) },
+            confirmButton = {
+                TaminFilledButton(
+                    text = stringResource(Res.string.legal_representative_otp_retry_action),
+                    onClick = { viewModel.sendIntent(LegalRepresentativeOtpIntent.DismissExpiredDialog) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            },
+            dismissButton = {},
+        )
     }
 }
