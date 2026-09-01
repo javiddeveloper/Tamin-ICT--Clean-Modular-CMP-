@@ -13,15 +13,20 @@ import com.tamin.taminhamrah.model.workshop.DebitPaymentDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDN
 import com.tamin.taminhamrah.model.workshop.DebitReasonDN
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmissionDN
+import com.tamin.taminhamrah.model.workshop.EmployerContactInfoDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetQuery
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDN
 import com.tamin.taminhamrah.model.workshop.WorkshopListQuery
+import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDN
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDN
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberQuery
+import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDN
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDN
@@ -130,4 +135,35 @@ interface WorkShopsRepository {
     suspend fun getWorkshopStackHolders(
         query: WorkshopStackHolderQuery,
     ): PagedListDN<WorkshopStackHolderDN>
+
+    // ------------------------------------------------- خدمات غیرحضوری کارفرما (employerEservicesAgreement)
+
+    /**
+     * Step 1 — request the OTP ticket. Builds the `mobileNumber`/`email`/`serviceName` filter
+     * internally; returns the backend's bare confirmation message.
+     */
+    suspend fun requestEmployerAgreementTicket(mobile: String, email: String): String
+
+    /** Step 2 — exchange the entered OTP for the employer's identity block. */
+    suspend fun getEmployerAgreementContactInfo(verificationCode: String): EmployerContactInfoDN
+
+    /** Step 2 — one page of the employer's workshops that have no contract yet. */
+    suspend fun getWorkshopsWithoutContract(page: Int = 0): PagedListDN<WorkshopWithoutContractDN>
+
+    /** Contract / پیمانکار rows of one workshop. */
+    suspend fun getWorkshopContractRows(
+        workshopId: String,
+        branchCode: String,
+        page: Int = 0,
+    ): PagedListDN<WorkshopContractRowDN>
+
+    /** Management side — employer-agreements already registered against one workshop. */
+    suspend fun getEmployerAgreementsByWorkshop(
+        workshopId: String,
+        branchCode: String,
+        page: Int = 0,
+    ): PagedListDN<EmployerAgreementByWorkshopDN>
+
+    /** Step 3 — submit the final agreement. Returns the backend's bare success message. */
+    suspend fun submitEmployerAgreement(request: EmployerAgreementSubmissionDN): String
 }

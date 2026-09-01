@@ -107,6 +107,13 @@ enum class FilterProperty(val key: String) {
 
     @SerialName("debitNumber") DEBIT_NUMBER("debitNumber"),
     @SerialName("peymanSequence") PEYMAN_SEQUENCE("peymanSequence"),
+
+    // خدمات غیرحضوری کارفرما — the `workshop-services/request-ticket` filter for the
+    // employerEservicesAgreement flow addresses these three columns (see
+    // WorkShopsRemoteDataSourceImpl.requestEmployerAgreementTicket).
+    @SerialName("mobileNumber") MOBILE_NUMBER("mobileNumber"),
+    @SerialName("email") EMAIL("email"),
+    @SerialName("serviceName") SERVICE_NAME("serviceName"),
 }
 
 
