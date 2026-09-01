@@ -2,166 +2,63 @@ package com.tamin.taminhamrah.feature.workshops
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import com.tamin.taminhamrah.ui.composableWithFadeTransitions
-import com.tamin.taminhamrah.feature.workshops.ui.WorkshopsScreen
 import androidx.navigation.toRoute
-import com.tamin.taminhamrah.feature.workshops.ui.managementDebit.ManagementDebitScreen
-import com.tamin.taminhamrah.feature.workshops.ui.objectionableDebit.ObjectionableDebitScreen
+import com.tamin.taminhamrah.feature.workshops.ui.WorkshopsRoute
+import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
 import com.tamin.taminhamrah.feature.workshops.ui.paymentSheets.PaymentSheetsScreen
-import com.tamin.taminhamrah.feature.workshops.ui.workshopDebit.WorkshopDebitScreen
-import com.tamin.taminhamrah.feature.workshops.ui.workshopDebtInquiry.WorkshopDebtInquiryScreen
-import com.tamin.taminhamrah.feature.workshops.ui.workshopMembers.WorkshopMembersScreen
-import com.tamin.taminhamrah.feature.workshops.ui.workshopStackholders.WorkshopStackholdersScreen
-import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersScreen
+import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object WorkshopsRoute
+data object WorkshopsListRoute
 
+/**
+ * Every destination the list launches into carries the workshop identity in the route itself.
+ *
+ * The old app passed it through bundle keys, and one screen read a key nobody wrote, so it
+ * silently never loaded. A typed route makes that particular failure impossible.
+ */
 @Serializable
-data class PaymentSheetsRoute(
-    val workshopId: String,
-    val branchCode: String
-)
-
-@Serializable
-data class WorkshopDebitRoute(
-    val workshopId: String,
-    val branchCode: String
-)
-
-@Serializable
-data class WorkshopDebtInquiryRoute(
-    val workshopId: String,
-    val branchCode: String
-)
-
-@Serializable
-data class ObjectionableDebitRoute(
-    val workshopId: String,
-    val branchCode: String
-)
-
-@Serializable
-data class ManagementDebitRoute(
-    val workshopId: String,
-    val branchCode: String
-)
-
-@Serializable
-data class WorkshopMembersRoute(
-    val workshopId: String,
-    val branchCode: String
-)
-
-@Serializable
-data class WorkshopStackholdersRoute(
-    val workshopId: String,
-    val branchCode: String
-)
-
-@Serializable
-data class WorkshopRecentlyAddedMembersRoute(
-    val workshopId: String,
-    val branchCode: String
-)
+data class PaymentSheetsRoute(val workshopId: String, val branchCode: String, val workshopName: String = "")
 
 fun NavController.navigateToWorkshops() {
-    navigate(WorkshopsRoute)
+    navigate(WorkshopsListRoute)
 }
 
-fun NavGraphBuilder.workshopsScreen(navController: NavController) {
-
-    composableWithFadeTransitions<WorkshopsRoute> {
-        WorkshopsScreen(
-            navigateToPaymentSheets = { workshopId, branchCode ->
-                navController.navigate(PaymentSheetsRoute(workshopId, branchCode))
+fun NavGraphBuilder.workshopsScreen(
+    navController: NavController,
+    @Suppress("UNUSED_PARAMETER") onOpenUrl: (String) -> Unit,
+) {
+    composableWithFadeTransitions<WorkshopsListRoute> {
+        WorkshopsRoute(
+            onBack = { navController.popBackStack() },
+            onOpenAction = { action, workshopId, branchCode, workshopName ->
+                navController.navigate(action.route(workshopId, branchCode, workshopName))
             },
-            navigateToWorkshopDebit = { workshopId, branchCode ->
-                navController.navigate(WorkshopDebitRoute(workshopId, branchCode))
-            },
-            navigateToWorkshopDebtInquiry = { workshopId, branchCode ->
-                navController.navigate(WorkshopDebtInquiryRoute(workshopId, branchCode))
-            },
-            navigateToObjectionableDebit = { workshopId, branchCode ->
-                navController.navigate(ObjectionableDebitRoute(workshopId, branchCode))
-            },
-            navigateToManagementDebit = { workshopId, branchCode ->
-                navController.navigate(ManagementDebitRoute(workshopId, branchCode))
-            },
-            navigateToWorkshopMembers = { workshopId, branchCode ->
-                navController.navigate(WorkshopMembersRoute(workshopId, branchCode))
-            },
-            navigateToWorkshopStackholders = { workshopId, branchCode ->
-                navController.navigate(WorkshopStackholdersRoute(workshopId, branchCode))
-            },
-            navigateToWorkshopRecentlyAddedMembers = { workshopId, branchCode ->
-                navController.navigate(WorkshopRecentlyAddedMembersRoute(workshopId, branchCode))
-            }
         )
     }
 
-    composableWithFadeTransitions<PaymentSheetsRoute> { backStackEntry ->
-        val route = backStackEntry.toRoute<PaymentSheetsRoute>()
+    composableWithFadeTransitions<PaymentSheetsRoute> { entry ->
+        val route = entry.toRoute<PaymentSheetsRoute>()
         PaymentSheetsScreen(
             workshopId = route.workshopId,
-            branchCode = route.branchCode
+            branchCode = route.branchCode,
+            workshopName = route.workshopName,
+            onBack = { navController.popBackStack() },
         )
     }
+}
 
-    composableWithFadeTransitions<WorkshopDebitRoute> { backStackEntry ->
-        val route = backStackEntry.toRoute<WorkshopDebitRoute>()
-        WorkshopDebitScreen(
-            workshopId = route.workshopId,
-            branchCode = route.branchCode
-        )
-    }
-
-    composableWithFadeTransitions<WorkshopDebtInquiryRoute> { backStackEntry ->
-        val route = backStackEntry.toRoute<WorkshopDebtInquiryRoute>()
-        WorkshopDebtInquiryScreen(
-            workshopId = route.workshopId,
-            branchCode = route.branchCode
-        )
-    }
-
-    composableWithFadeTransitions<ObjectionableDebitRoute> { backStackEntry ->
-        val route = backStackEntry.toRoute<ObjectionableDebitRoute>()
-        ObjectionableDebitScreen(
-            workshopId = route.workshopId,
-            branchCode = route.branchCode
-        )
-    }
-
-    composableWithFadeTransitions<ManagementDebitRoute> { backStackEntry ->
-        val route = backStackEntry.toRoute<ManagementDebitRoute>()
-        ManagementDebitScreen(
-            workshopId = route.workshopId,
-            branchCode = route.branchCode
-        )
-    }
-
-    composableWithFadeTransitions<WorkshopMembersRoute> { backStackEntry ->
-        val route = backStackEntry.toRoute<WorkshopMembersRoute>()
-        WorkshopMembersScreen(
-            workshopId = route.workshopId,
-            branchCode = route.branchCode
-        )
-    }
-
-    composableWithFadeTransitions<WorkshopStackholdersRoute> { backStackEntry ->
-        val route = backStackEntry.toRoute<WorkshopStackholdersRoute>()
-        WorkshopStackholdersScreen(
-            workshopId = route.workshopId,
-            branchCode = route.branchCode
-        )
-    }
-
-    composableWithFadeTransitions<WorkshopRecentlyAddedMembersRoute> { backStackEntry ->
-        val route = backStackEntry.toRoute<WorkshopRecentlyAddedMembersRoute>()
-        WorkshopRecentlyAddedMembersScreen(
-            workshopId = route.workshopId,
-            branchCode = route.branchCode
-        )
-    }
+/**
+ * Where each menu entry goes.
+ *
+ * One `when` over the enum, so adding an action is a compile error here until it has a
+ * destination, rather than a menu row that quietly does nothing.
+ */
+private fun WorkshopAction.route(
+    workshopId: String,
+    branchCode: String,
+    workshopName: String,
+): Any = when (this) {
+    WorkshopAction.PAYMENT_SHEETS -> PaymentSheetsRoute(workshopId, branchCode, workshopName)
 }

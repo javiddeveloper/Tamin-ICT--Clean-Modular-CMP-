@@ -44,7 +44,7 @@ class GetShowRequestInfoUseCaseTest {
         repository.error = RuntimeException("Network Error")
 
         assertFailsWith<RuntimeException> {
-            useCase("req-1", UserRequestTypeIds.ARTICLE16)
+            useCase("req-1", UserRequestTypeIds.ARTICLE_SIXTEEN)
         }
     }
 }

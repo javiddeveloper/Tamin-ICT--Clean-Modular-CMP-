@@ -67,6 +67,11 @@ enum class FilterProperty(val key: String) {
     @SerialName("branchCode") PAYMENT_BRANCH_CODE("branchCode"),
     @SerialName("workshopCode") WORKSHOP_CODE("workshopCode"),
     @SerialName("nationalCode") NATIONAL_CODE("nationalCode"),
+    // The employer-info ticket endpoints name the contact fields this way; `mobile` above is
+    // a different filter on a different service and is not interchangeable with it.
+    @SerialName("mobileNumber") MOBILE_NUMBER("mobileNumber"),
+    @SerialName("email") EMAIL("email"),
+    @SerialName("serviceName") SERVICE_NAME("serviceName"),
     @SerialName("birthDate") BIRTH_DATE("birthDate"),
     @SerialName("payIdFrom") PAY_ID_FROM("payIdFrom"),
     @SerialName("payIdTo") PAY_ID_TO("payIdTo"),
@@ -92,6 +97,21 @@ enum class FilterProperty(val key: String) {
     @SerialName("jobDescription") JOB_DESCRIPTION("jobDescription"),
     @SerialName("bankName") BANK_NAME("bankName"),
     @SerialName("insuranceTypeDesc") INSURANCE_TYPE_DESC("insuranceTypeDesc"),
+
+    // Workshop member / stakeholder / absentee-registration lists. Each list addresses the same
+    // two people-columns under a different prefix, which is why there is one entry per list
+    // rather than a shared "nationalId".
+    @SerialName("insurance.id") INSURANCE_ID("insurance.id"),
+    @SerialName("insurance.nationalId") INSURANCE_NATIONAL_ID("insurance.nationalId"),
+    @SerialName("personal.nationalId") PERSONAL_NATIONAL_ID("personal.nationalId"),
+    @SerialName("personal.request.status.requestCode")
+    PERSONAL_REQUEST_STATUS_CODE("personal.request.status.requestCode"),
+
+    /** The branch, on the `employers` list only — every other workshop list calls it a branch code. */
+    @SerialName("organizationId") ORGANIZATION_ID("organizationId"),
+
+    @SerialName("debitNumber") DEBIT_NUMBER("debitNumber"),
+    @SerialName("peymanSequence") PEYMAN_SEQUENCE("peymanSequence"),
 }
 
 

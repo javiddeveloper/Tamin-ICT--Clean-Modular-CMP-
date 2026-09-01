@@ -219,6 +219,19 @@ object PersianDateFormatter {
         return start.daysUntil(end)
     }
 
+    /**
+     * Whole days from [date] to today, or null when [date] is not a Jalali date.
+     *
+     * Both shapes the services send are accepted (`14050131` and `1405/01/31`). Used for the
+     * filing deadlines that are decided on the device rather than by a `diff-days` endpoint; a
+     * negative result means the date is in the future.
+     */
+    fun daysSince(date: String): Int? {
+        val (year, month, day) = date.toJalaliParts() ?: return null
+        val (todayYear, todayMonth, todayDay) = today()
+        return dayNumber(todayYear, todayMonth, todayDay) - dayNumber(year, month, day)
+    }
+
     /** Formats a Jalali date the way the API and the UI both spell it: `1404/02/15`. */
     fun format(jy: Int, jm: Int, jd: Int): String =
         "${jy.toPersianDigits()}/${jm.toTwoDigitPersian()}/${jd.toTwoDigitPersian()}"

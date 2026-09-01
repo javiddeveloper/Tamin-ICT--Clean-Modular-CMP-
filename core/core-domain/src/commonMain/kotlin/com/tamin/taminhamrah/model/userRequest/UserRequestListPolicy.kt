@@ -23,7 +23,7 @@ object UserRequestListPolicy {
             UserRequestTypeIds.ORTHOTICS_PROSTHESIS ->
                 status == UserRequestWorkflowStatus.DOCUMENT_DEFECT.code ||
                     status == UserRequestWorkflowStatus.DISAPPROVED.code
-            UserRequestTypeIds.ARTICLE16 -> status == UserRequestWorkflowStatus.ARTICLE16_APPROVED.code
+            UserRequestTypeIds.ARTICLE_SIXTEEN -> status == UserRequestWorkflowStatus.ARTICLE_SIXTEEN_APPROVED.code
             UserRequestTypeIds.DEFERRED_INSTALLMENT -> status == UserRequestWorkflowStatus.FINAL_APPROVED.code
             UserRequestTypeIds.MEDICAL_COMMISSION -> false
             else -> false

@@ -1,50 +1,50 @@
 package com.tamin.taminhamrah.model.workshop
 
+/**
+ * One کارگاه the signed-in user is registered against as کارفرما.
+ *
+ * Strings are non-null and empty when the service omitted them, so neither the mapper below nor
+ * any screen has to spell the same `?: ""` again; the display fallback (`-`) is applied once, at
+ * the presentation edge.
+ */
 data class EmployerAgreementDN(
-    val pymseq: String?,
-    val regno: String?,
-    val firstname: String?,
-    val emailaddr: String?,
-    val workshop: EmployerWorkshopDN?,
-    val nationalno: String?,
-    val mobileno: String?,
-    val startdate: String?,
-    val mastcusttype: String?,
-    val createdt: String?,
-    val masttyp: String?,
-    val logicalDeleted: Boolean?,
-    val regemailseq: String?,
-    val lastname: String?,
-    val special: String?,
-    val risuid: String?,
-    val nationalcode: String?,
-    val enddate: String?,
-    val letDate: String?,
-    val regdate: String?,
-    val roletype: String?,
-    val dname: String?,
-    val letNo: String?,
-    val createuid: String?,
+    val startDate: String = "",
+    val commitmentDate: String = "",
+    val email: String = "",
+    val mobile: String = "",
+    val workshop: WorkshopSummaryDN = WorkshopSummaryDN(),
 )
 
-data class EmployerWorkshopDN(
-    val sswn: String?,
-    val branchTitle: String?,
-    val workshopApproveDate: String?,
-    val inclusionDate: String?,
-    val brhCode: String?,
-    val activityName: String?,
-    val workshopRegisterDate: String?,
-    val branchCode: String?,
-    val workshopName: String?,
-    val employerName: String?,
-    val actitvityCode: String?,
-    val userId: String?,
-    val workshopId: String?,
-    val workshopUnemployedStat: String?,
-)
-
-data class EmployerAgreementListDN(
-    val list: List<EmployerAgreementDN>?,
-    val total: Int
-)
+data class WorkshopSummaryDN(
+    /** Identity half one. Blank means the row cannot be acted on. */
+    val workshopId: String = "",
+    /** Identity half two — the branch path segment every downstream service takes. */
+    val branchCode: String = "",
+    val name: String = "",
+    val employerName: String = "",
+    val activityName: String = "",
+    val address: String = "",
+    val registerDate: String = "",
+    val approveDate: String = "",
+    val contractRow: String = "",
+    /** The branch *office* code, which is what the card labels کد شعبه — not [branchCode]. */
+    val branchOfficeCode: String = "",
+    val branchOfficeName: String = "",
+    /**
+     * `01` حقیقی / `02` حقوقی.
+     *
+     * Kept alongside [characterDescription] because only a حقوقی workshop may have its identity
+     * details completed, and that decision cannot be made on the description: the service spells
+     * it with an Arabic ي ("حقيقي"), so matching on the text is a spelling coincidence away from
+     * offering the form to the wrong workshops.
+     */
+    val characterCode: String = "",
+    /** حقیقی / حقوقی, as the service words it — for display only. */
+    val characterDescription: String = "",
+    val workshopTypeDescription: String = "",
+    val statusCode: String = "",
+    val statusDescription: String = "",
+) {
+    /** Both halves present is the precondition for every action on this workshop. */
+    val hasIdentity: Boolean get() = workshopId.isNotBlank() && branchCode.isNotBlank()
+}

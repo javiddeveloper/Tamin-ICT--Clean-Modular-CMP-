@@ -80,7 +80,7 @@ fun GirlSurvivorDetailsSkeleton(modifier: Modifier = Modifier) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .dashedOutline(colors.hawkesBlue, CornerRadius.card, 1.dp)
+                .dashedOutline(colors.blueBorder, CornerRadius.card, 1.dp)
                 .padding(horizontal = Spacing.md, vertical = Spacing.smd),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
@@ -111,7 +111,7 @@ private fun GirlSurvivorProfileCardSkeleton(modifier: Modifier = Modifier) {
             .fillMaxWidth()
             .clip(shape)
             .background(colors.bgSurface)
-            .border(1.dp, colors.hawkesBlue, shape)
+            .border(1.dp, colors.blueBorder, shape)
             .padding(Spacing.md),
         verticalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {

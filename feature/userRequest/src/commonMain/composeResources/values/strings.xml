@@ -93,8 +93,8 @@
     <string name="user_request_detail_amount">مبلغ</string>
     <string name="user_request_detail_objection_date">تاریخ ثبت اعتراض</string>
     <string name="user_request_detail_objection_reason">علت اعتراض</string>
-    <string name="user_request_detail_article16_date">تاریخ طرح در هیات</string>
-    <string name="user_request_detail_article16_result">رای هیات</string>
+    <string name="user_request_detail_article_sixteen_date">تاریخ طرح در هیات</string>
+    <string name="user_request_detail_article_sixteen_result">رای هیات</string>
     <string name="user_request_detail_request_info">اطلاعات درخواست</string>
     <string name="user_request_detail_user_info">اطلاعات بیمه شده</string>
     <string name="user_request_detail_insurance_number">شماره بیمه</string>
@@ -106,8 +106,8 @@
     <string name="user_request_detail_rest_days">مدت استراحت</string>
     <string name="user_request_detail_pregnancy_status">وضعیت بارداری</string>
     <string name="user_request_detail_pregnancy_type">نوع بارداری</string>
-    <string name="user_request_detail_article16_info">اطلاعات اعتراض ماده ۱۶</string>
-    <string name="user_request_detail_article16_defect">توضیح نقص</string>
+    <string name="user_request_detail_article_sixteen_info">اطلاعات اعتراض ماده ۱۶</string>
+    <string name="user_request_detail_article_sixteen_defect">توضیح نقص</string>
     <string name="user_request_detail_objection_info">پیگیری نتیجه اعتراض</string>
     <string name="user_request_detail_user_desc">توضیح کاربر</string>
     <string name="user_request_detail_answer_date">تاریخ رسیدگی</string>

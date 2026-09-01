@@ -71,18 +71,22 @@ fun CopyIconButton(
  *
  * The write is suspending on the current clipboard API, so it runs in the composition's scope; the
  * confirmation follows it rather than racing it.
+ *
+ * @param announce false for a caller that confirms the copy itself — a chip that swaps its glyph
+ * for a tick, say. It also keeps that caller off [LocalToaster], which has no default value on
+ * purpose, so the component still composes in a preview with no `AppToastHost` above it.
  */
 @Composable
-fun rememberCopyAction(value: String): () -> Unit {
+fun rememberCopyAction(value: String, announce: Boolean = true): () -> Unit {
     val clipboard = LocalClipboard.current
-    val toaster = LocalToaster.current
+    val toaster = if (announce) LocalToaster.current else null
     val copiedMessage = stringResource(Res.string.action_copied)
     val scope = rememberCoroutineScope()
     return remember(value, clipboard, toaster, copiedMessage, scope) {
         {
             scope.launch {
                 clipboard.setClipEntry(plainTextClipEntry(value))
-                toaster.success(copiedMessage)
+                toaster?.success(copiedMessage)
             }
         }
     }

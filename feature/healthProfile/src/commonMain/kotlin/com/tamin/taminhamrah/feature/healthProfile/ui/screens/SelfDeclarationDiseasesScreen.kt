@@ -169,7 +169,7 @@ fun SelfDeclarationDiseasesScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         IconBox(
                             painter = painterResource(Res.drawable.ic_health_disease),
-                            backgroundColor = LocalTaminColors.current.hawkesBlue.copy(alpha = 0.6f),
+                            backgroundColor = LocalTaminColors.current.blueBorder.copy(alpha = 0.6f),
                             contentDescription = null,
                         )
                         Spacer(modifier = Modifier.width(8.dp))

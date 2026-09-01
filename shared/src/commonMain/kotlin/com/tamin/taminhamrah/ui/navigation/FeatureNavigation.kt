@@ -13,6 +13,7 @@ import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeservedTreatment
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDisabilityPension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToEdict
 import com.tamin.taminhamrah.feature.girlSurvivor.navigateToGirlSurvivor
+import com.tamin.taminhamrah.feature.inquiryEducation.navigateToInquiryEducation
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToIssuanceCertificate
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPayRoll
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.navigateToPensionStatusInquiry
@@ -24,12 +25,14 @@ import com.tamin.taminhamrah.feature.taminServices.navigateToOccurrence
 import com.tamin.taminhamrah.feature.taminServices.navigateToInspection
 import com.tamin.taminhamrah.feature.taminServices.navigateToSendInsuranceHistoryToInstitutions
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
+import com.tamin.taminhamrah.feature.workshops.navigateToCompleteEmployerInfo
 import com.tamin.taminhamrah.model.common.FeatureFlag
 
 fun NavController.navigateToFeature(flag: FeatureFlag) {
     when (flag) {
         FeatureFlag.MERGE_HISTORY -> navigateToHistory()
         FeatureFlag.WORKSHOPS -> navigateToWorkshops()
+        FeatureFlag.COMPLETE_WORKSHOP_INFO -> navigateToCompleteEmployerInfo()
         FeatureFlag.CONTRACTS -> navigateToContracts()
         FeatureFlag.STUDENT_INSURANCE -> navigateToContractFlow(ContractType.STUDENT)
         FeatureFlag.FREELANCE_INSURANCE -> navigateToContractFlow(ContractType.FREELANCE)
@@ -52,6 +55,7 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
         FeatureFlag.OCCURRENCE -> navigateToOccurrence()
         FeatureFlag.LIST_OF_INSPECTIONS_PERFORMED -> navigateToInspection()
         FeatureFlag.OBJECTION_NON_EXISTENT_HISTORY -> navigateToHistoryObjection()
+        FeatureFlag.INQUIRY_EDUCATION -> navigateToInquiryEducation()
         FeatureFlag.REQUEST_FOR_PREGNANCY_PAY -> navigateToPregnancyPay()
         else -> Unit
     }

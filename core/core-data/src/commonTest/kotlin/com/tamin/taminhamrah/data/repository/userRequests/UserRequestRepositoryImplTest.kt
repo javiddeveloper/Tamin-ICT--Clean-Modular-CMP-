@@ -5,7 +5,7 @@ import com.tamin.taminhamrah.data.local.entity.UserRequestEntity
 import com.tamin.taminhamrah.dataSource.request.UserRequestRemoteDataSource
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
-import com.tamin.taminhamrah.model.userRequest.Article16RequestInfoDTO
+import com.tamin.taminhamrah.model.userRequest.ArticleSixteenRequestInfoDTO
 import com.tamin.taminhamrah.model.userRequest.DeferredInstallmentInfoDTO
 import com.tamin.taminhamrah.model.userRequest.FollowUpObjectionHistoryDTO
 import com.tamin.taminhamrah.model.userRequest.PregnancyLookupDTO
@@ -144,7 +144,7 @@ class UserRequestRepositoryImplTest {
         var getShortTermInfoResult = ListData<ShortTermRequestInfoDTO>(total = 0, list = emptyList())
         var getPregnancyStatusResult = ListData<PregnancyLookupDTO>(total = 0, list = emptyList())
         var getPregnancyTypesResult = ListData<PregnancyLookupDTO>(total = 0, list = emptyList())
-        var getArticle16Result = Article16RequestInfoDTO()
+        var getArticleSixteenResult = ArticleSixteenRequestInfoDTO()
         var getDeferredInstallmentResult = DeferredInstallmentInfoDTO()
         var getFollowUpResult = ListData<FollowUpObjectionHistoryDTO>(total = 0, list = emptyList())
         var downloadDocumentResult = ""
@@ -172,7 +172,7 @@ class UserRequestRepositoryImplTest {
 
         override suspend fun getPregnancyTypes() = getPregnancyTypesResult
 
-        override suspend fun getArticle16RequestInfo(objectionNumber: Long) = getArticle16Result
+        override suspend fun getArticleSixteenRequestInfo(objectionNumber: Long) = getArticleSixteenResult
 
         override suspend fun getDeferredInstallmentInfo(requestId: String) = getDeferredInstallmentResult
 
