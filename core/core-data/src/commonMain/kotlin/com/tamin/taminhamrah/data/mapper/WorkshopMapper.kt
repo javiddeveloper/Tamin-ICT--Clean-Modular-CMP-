@@ -91,8 +91,11 @@ fun EmployerWorkshopDTO.toDomain(): WorkshopSummaryDN = WorkshopSummaryDN(
     registerDate = workshopRegisterDate.orEmpty(),
     approveDate = workshopApproveDate.orEmpty(),
     contractRow = contractRow.orEmpty(),
-    branchOfficeCode = branch?.code.orEmpty(),
-    branchOfficeName = branch?.organizationName.orEmpty(),
+    // The nested `branch` object is absent on the employer-agreement service, which names the
+    // same office flat; without the fallback the card's شعبه cell reads "-".
+    branchOfficeCode = branch?.code ?: brhCode.orEmpty(),
+    branchOfficeName = branch?.organizationName ?: branchTitle.orEmpty(),
+    characterCode = character?.characterCode.orEmpty(),
     characterDescription = character?.characterDesc.orEmpty(),
     workshopTypeDescription = workshopType?.workshopTypeDesc.orEmpty(),
     statusCode = workshopStatus?.workshopStatusCode.orEmpty(),

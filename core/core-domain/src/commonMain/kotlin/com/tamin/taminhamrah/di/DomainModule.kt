@@ -66,6 +66,8 @@ import com.tamin.taminhamrah.useCases.personal.SubmitFinalSurvivorPensionUseCase
 import com.tamin.taminhamrah.useCases.orotezProtez.GetInsuredPersonsUseCase
 import com.tamin.taminhamrah.useCases.orotezProtez.GetRequestInsuredMainInfoUseCase
 import com.tamin.taminhamrah.useCases.orotezProtez.SaveShortTermOrthosisUseCase
+import com.tamin.taminhamrah.useCases.inquiryEducation.GetDataForEducationUseCase
+import com.tamin.taminhamrah.useCases.inquiryEducation.InquiryEducationCertificateUseCase
 import com.tamin.taminhamrah.useCases.pregnancyPay.CalculatePregnancyPayEstimateUseCase
 import com.tamin.taminhamrah.useCases.pregnancyPay.GetPregnancyMainInfoUseCase
 import com.tamin.taminhamrah.useCases.pregnancyPay.GetPregnancyStatusListUseCase
@@ -204,6 +206,12 @@ import com.tamin.taminhamrah.useCases.treatment.GetMedicalConfirmationPDFUseCase
 import com.tamin.taminhamrah.useCases.treatment.SendToInboxMedicalConfirmationUseCase
 import com.tamin.taminhamrah.useCases.addDependent.AddNewDependentUseCase
 import com.tamin.taminhamrah.useCases.addDependent.GetActiveBranchesUseCase
+import com.tamin.taminhamrah.useCases.employerInfo.GetLegalWorkshopUseCase
+import com.tamin.taminhamrah.useCases.employerInfo.GetLegalWorkshopCeoUseCase
+import com.tamin.taminhamrah.useCases.employerInfo.RequestLegalTicketUseCase
+import com.tamin.taminhamrah.useCases.employerInfo.SubmitLegalWorkshopInfoUseCase
+import com.tamin.taminhamrah.useCases.employerInfo.RequestRealTicketUseCase
+import com.tamin.taminhamrah.useCases.employerInfo.SubmitRealWorkshopInfoUseCase
 import com.tamin.taminhamrah.useCases.addDependent.GetDependentInfoUseCase
 import com.tamin.taminhamrah.useCases.addDependent.GetFamilyRelationshipsFromProxyUseCase
 import com.tamin.taminhamrah.useCases.addDependent.GetFamilyRelationshipsUseCase
@@ -310,6 +318,8 @@ val domainModule = module {
     factoryOf(::GetRequestInsuredMainInfoUseCase)
     factoryOf(::GetInsuredPersonsUseCase)
     factoryOf(::SaveShortTermOrthosisUseCase)
+    factoryOf(::GetDataForEducationUseCase)
+    factoryOf(::InquiryEducationCertificateUseCase)
     factoryOf(::GetPregnancyMainInfoUseCase)
     factoryOf(::GetPregnancyStatusListUseCase)
     factoryOf(::GetPregnancyTypeListUseCase)
@@ -442,5 +452,13 @@ val domainModule = module {
     factoryOf(::InquiryEducationCodeUseCase)
     factoryOf(::UploadDependentImageUseCase)
     factoryOf(::AddNewDependentUseCase)
+
+    // Employer Info UseCases
+    factoryOf(::GetLegalWorkshopUseCase)
+    factoryOf(::GetLegalWorkshopCeoUseCase)
+    factoryOf(::RequestLegalTicketUseCase)
+    factoryOf(::SubmitLegalWorkshopInfoUseCase)
+    factoryOf(::RequestRealTicketUseCase)
+    factoryOf(::SubmitRealWorkshopInfoUseCase)
 }
 

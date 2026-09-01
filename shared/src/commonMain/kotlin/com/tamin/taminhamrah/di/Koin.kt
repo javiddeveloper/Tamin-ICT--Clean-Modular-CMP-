@@ -12,6 +12,7 @@ import com.tamin.taminhamrah.feature.healthProfile.di.healthProfileModule
 import com.tamin.taminhamrah.feature.myinbox.di.myInboxModule
 import com.tamin.taminhamrah.feature.profile.di.profileModule
 import com.tamin.taminhamrah.feature.treatment.di.treatmentModule
+import com.tamin.taminhamrah.feature.workshops.di.completeEmployerInfoModule
 import com.tamin.taminhamrah.feature.workshops.di.workshopsModule
 import com.tamin.taminhamrah.feature.studentInsuranceContract.di.studentInsuranceContractModule
 import com.tamin.taminhamrah.feature.changemobile.di.changeMobileModule
@@ -25,6 +26,7 @@ import com.tamin.taminhamrah.feature.orotezprotez.di.orotezProtezModule
 import com.tamin.taminhamrah.feature.girlSurvivor.di.girlSurvivorModule
 import com.tamin.taminhamrah.feature.pensionSurvivor.di.pensionSurvivorModule
 import com.tamin.taminhamrah.feature.deferredInstallment.di.deferredInstallmentModule
+import com.tamin.taminhamrah.feature.inquiryEducation.di.inquiryEducationModule
 import com.tamin.taminhamrah.feature.pregnancyPay.di.pregnancyPayModule
 import com.tamin.taminhamrah.plugin.di.pluginModule
 import org.koin.core.context.startKoin
@@ -52,6 +54,7 @@ val sharedModules: List<Module>
         contractsModule,
         TaminServicesModule,
         workshopsModule,
+        completeEmployerInfoModule,
         studentInsuranceContractModule,
         healthProfileModule,
         changeMobileModule,
@@ -67,6 +70,7 @@ val sharedModules: List<Module>
         historyObjectionModule,
         pensionSurvivorModule,
         pregnancyPayModule,
+        inquiryEducationModule,
     )
 
 fun initKoin(appDeclaration: KoinAppDeclaration = {}) {
