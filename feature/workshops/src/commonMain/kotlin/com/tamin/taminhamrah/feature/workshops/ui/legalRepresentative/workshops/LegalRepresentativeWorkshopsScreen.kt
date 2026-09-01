@@ -19,7 +19,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -36,6 +35,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.components.LegalRepresentativeHeader
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.components.LegalRepresentativeHeroSubtitle
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.components.LegalRepresentativeIdentitySummaryCard
+import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.components.LegalRepresentativeWorkshopsSkeleton
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.list.AddRepresentativeChip
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopPR
 import com.tamin.taminhamrah.ui.components.BannerCard
@@ -132,10 +132,7 @@ private fun LegalRepresentativeWorkshopsContent(
             .background(taminColors.bgPage),
     ) {
         when {
-            uiState.isLoading -> CircularProgressIndicator(
-                color = taminColors.blueText,
-                modifier = Modifier.align(Alignment.Center),
-            )
+            uiState.isLoading -> LegalRepresentativeWorkshopsSkeleton(modifier = Modifier.fillMaxSize())
 
             uiState.error != null -> ErrorStateView(
                 message = uiState.error,

@@ -44,6 +44,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.components
 import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
+import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminStyledTextField
 import com.tamin.taminhamrah.ui.components.taminSurface
@@ -123,7 +124,7 @@ fun AddLegalRepresentativeScreen(
 
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .weight(1f)
                 .verticalScroll(rememberScrollState())
                 .padding(Spacing.lg),
             verticalArrangement = Arrangement.spacedBy(Spacing.md),
@@ -243,8 +244,15 @@ fun AddLegalRepresentativeScreen(
                     )
                 }
             }
+        }
 
-            Spacer(Modifier.height(Spacing.sm))
+        TaminDivider()
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(taminColors.bgPage)
+                .padding(Spacing.lg),
+        ) {
             LoadingButton(
                 text = stringResource(Res.string.legal_representative_submit_action),
                 onClick = { viewModel.sendIntent(AddLegalRepresentativeIntent.Submit) },

@@ -24,7 +24,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -44,6 +43,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.components.LegalRepresentativeHeader
+import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.components.LegalRepresentativeListSkeleton
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.components.LegalRepresentativeWorkshopSummaryCard
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativePR
 import com.tamin.taminhamrah.ui.ActionMenuItem
@@ -158,10 +158,7 @@ fun LegalRepresentativeListScreen(
 
             Box(modifier = Modifier.fillMaxSize()) {
                 when {
-                    uiState.isLoading -> CircularProgressIndicator(
-                        color = taminColors.blueText,
-                        modifier = Modifier.align(Alignment.Center),
-                    )
+                    uiState.isLoading -> LegalRepresentativeListSkeleton(modifier = Modifier.fillMaxSize())
 
                     uiState.error != null -> ErrorStateView(
                         message = uiState.error,
