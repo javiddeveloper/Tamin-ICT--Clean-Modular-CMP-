@@ -97,6 +97,9 @@ class WorkshopsViewModelTest {
 
         viewModel.uiState.test {
             awaitItem()
+            // A real second page carries different workshops; identical rows would collapse.
+            repository.employerAgreements =
+                agreementsPage(count = WORKSHOP_PAGE_SIZE, total = 30, startAt = WORKSHOP_PAGE_SIZE)
             viewModel.sendIntent(WorkshopsIntent.LoadMore)
             awaitUntil { it.list.items.size > WORKSHOP_PAGE_SIZE }
 
@@ -296,13 +299,13 @@ class WorkshopsViewModelTest {
         assertFalse(viewModel.uiState.value.list.isLoading)
     }
 
-    private fun agreementsPage(count: Int, total: Int) = PagedListDN(
+    private fun agreementsPage(count: Int, total: Int, startAt: Int = 0) = PagedListDN(
         items = List(count) {
             EmployerAgreementDN(
                 workshop = WorkshopSummaryDN(
-                    workshopId = "096821017$it",
+                    workshopId = "09682101${startAt + it}",
                     branchCode = "14",
-                    name = "آموزشگاه شماره $it",
+                    name = "آموزشگاه شماره ${startAt + it}",
                     statusCode = "1",
                 ),
             )
