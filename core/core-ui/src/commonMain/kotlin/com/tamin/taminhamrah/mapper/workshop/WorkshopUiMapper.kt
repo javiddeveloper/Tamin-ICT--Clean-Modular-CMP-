@@ -9,11 +9,6 @@ import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoPR
 import com.tamin.taminhamrah.model.workshop.DebitReasonDN
 import com.tamin.taminhamrah.model.workshop.DebitReasonPR
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
-import com.tamin.taminhamrah.model.workshop.EmployerAgreementListDN
-import com.tamin.taminhamrah.model.workshop.EmployerAgreementPR
-import com.tamin.taminhamrah.model.workshop.EmployerAgreementListPR
-import com.tamin.taminhamrah.model.workshop.EmployerWorkshopDN
-import com.tamin.taminhamrah.model.workshop.EmployerWorkshopPR
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeContractPR
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativePR
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopPR

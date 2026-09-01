@@ -16,7 +16,6 @@ import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDTO
 import com.tamin.taminhamrah.model.workshop.DebitReasonDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
-import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeContractDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeRequestDTO
