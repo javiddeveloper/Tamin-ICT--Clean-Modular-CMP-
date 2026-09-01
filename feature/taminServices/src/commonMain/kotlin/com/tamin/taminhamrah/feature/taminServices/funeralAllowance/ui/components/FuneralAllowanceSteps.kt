@@ -38,6 +38,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.SectionLabel
 import com.tamin.taminhamrah.ui.components.TaminDivider
+import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminStyledTextField
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.taminSurface
@@ -59,6 +60,7 @@ import taminx.core.core_ui.funeral_allowance_deceased_national_code_hint
 import taminx.core.core_ui.funeral_allowance_dependent_status
 import taminx.core.core_ui.funeral_allowance_deposit_account
 import taminx.core.core_ui.funeral_allowance_eligibility_banner
+import taminx.core.core_ui.funeral_allowance_fix_bank_account
 import taminx.core.core_ui.funeral_allowance_full_name
 import taminx.core.core_ui.funeral_allowance_insurance_number
 import taminx.core.core_ui.funeral_allowance_last_branch
@@ -87,6 +89,8 @@ fun Step1ApplicantInfo(
         if (uiState.showBankAccountIssueFlow) {
             BankAccountIssueSection(
                 request = info.registeredRequest,
+                isConfirming = uiState.isConfirmingCorrection,
+                onFixAccountClick = { onIntent(FuneralAllowanceIntent.ConfirmAccountCorrection) },
             )
         } else {
             DeceasedInquirySection(
@@ -333,6 +337,8 @@ private fun DeceasedInquirySection(
 @Composable
 private fun BankAccountIssueSection(
     request: RegisteredFuneralRequestPR?,
+    isConfirming: Boolean,
+    onFixAccountClick: () -> Unit,
 ) {
     val colors = LocalTaminColors.current
     Column(
@@ -370,6 +376,15 @@ private fun BankAccountIssueSection(
                 numeric = false,
             )
         }
+
+        // "مشکل شماره حساب خود را برطرف نموده‌ام" — re-submits the stuck request via
+        // confirmShorttremFuneral/{requestId}. Mirrors the legacy btnCorrectedAccountNumber.
+        TaminFilledButton(
+            text = stringResource(Res.string.funeral_allowance_fix_bank_account),
+            onClick = onFixAccountClick,
+            enabled = !isConfirming,
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
 }
 
@@ -397,6 +412,42 @@ private fun Step1Preview() {
                         requestHelpType = "",
                         hasBankAccountIssue = false,
                         registeredRequest = null
+                    )
+                ),
+                onIntent = {}
+            )
+        }
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun Step1BankAccountIssuePreview() {
+    PreviewRtlThemeContent {
+        Column(modifier = Modifier.background(LocalTaminColors.current.bgPage).padding(16.dp)) {
+            Step1ApplicantInfo(
+                uiState = FuneralAllowanceUiState(
+                    info = FuneralAllowanceInfoPR(
+                        fullName = "نام متقاضی",
+                        firstName = "تست",
+                        lastName = "تست",
+                        insuranceNumber = "12345678",
+                        bankAccount = "1234567890",
+                        bankName = "بانک تست",
+                        mobileNumber = "09123456789",
+                        branchName = "شعبه تست",
+                        branchCode = "123",
+                        nationalCode = "1234567890",
+                        deceasedNationalId = "0021234567",
+                        requestHelpType = "",
+                        hasBankAccountIssue = true,
+                        registeredRequest = RegisteredFuneralRequestPR(
+                            requestId = 42L,
+                            deceasedNationalId = "0021234567",
+                            deathDate = "۱۴۰۴/۰۳/۱۲",
+                            requestDate = "۱۴۰۴/۰۳/۱۵",
+                            statusName = "در انتظار تأیید شعبه",
+                        ),
                     )
                 ),
                 onIntent = {}
