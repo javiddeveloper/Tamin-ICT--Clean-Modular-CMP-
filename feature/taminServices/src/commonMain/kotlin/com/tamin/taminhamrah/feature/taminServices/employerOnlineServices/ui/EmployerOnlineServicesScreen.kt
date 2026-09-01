@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -92,6 +93,9 @@ private val HeaderCollapseDistance = 160.dp
  * gives its `ValidationStatusCard`.
  */
 private val IdentityCardOverhang = 48.dp
+
+/** Shared height for the landing action row — the gradient request button and the count tile. */
+private val ActionRowHeight = 56.dp
 
 @Composable
 fun EmployerOnlineServicesRoute(
@@ -323,17 +327,18 @@ private fun LandingActionRow(
     val taminColors = LocalTaminColors.current
 
     Row(
-        modifier = modifier.fillMaxWidth().height(60.dp),
+        modifier = modifier.fillMaxWidth().height(ActionRowHeight),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Button(
             modifier = Modifier
                 .weight(1f)
+                .fillMaxHeight()
                 .clip(RoundedCornerShape(16.dp))
-                .background(brush = Brush.linearGradient(colors = listOf(TaminNavy300, TaminNavy900)))
-                .padding(vertical = 2.dp),
+                .background(brush = Brush.linearGradient(colors = listOf(TaminNavy300, TaminNavy900))),
             shape = RoundedCornerShape(16.dp),
+            contentPadding = PaddingValues(horizontal = Spacing.md),
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
             onClick = onRequestClicked,
         ) {
@@ -350,13 +355,14 @@ private fun LandingActionRow(
         Spacer(Modifier.width(Spacing.sm))
 
         Column(
-            verticalArrangement = Arrangement.Top,
+            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
+                .fillMaxHeight()
                 .clip(RoundedCornerShape(16.dp))
                 .background(color = taminColors.bgSurface, shape = RoundedCornerShape(16.dp))
                 .border(width = 1.dp, color = taminColors.border, shape = RoundedCornerShape(16.dp))
-                .padding(horizontal = 12.dp, vertical = 4.dp),
+                .padding(horizontal = 12.dp),
         ) {
             TaminText(text = count.toString(), color = taminColors.textPrimary)
             TaminText(
