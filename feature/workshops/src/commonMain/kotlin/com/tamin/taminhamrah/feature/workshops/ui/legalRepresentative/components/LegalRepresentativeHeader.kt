@@ -50,12 +50,6 @@ import taminx.core.core_ui.legal_representative_full_name_label
 import taminx.core.core_ui.legal_representative_title
 import taminx.core.core_ui.legal_representative_workshop_stat_label
 
-/**
- * The gradient hero bar shared by every screen in this flow — same structure as
- * `OrotezProtezHeader` (`feature:orotez-protez`): an outer rounded-bottom column painted with
- * `profileGradientStops` (navy), holding the [TaminTopAppBar] plus centered [content] below it,
- * rather than `TaminTopAppBar`'s own default teal `content` slot.
- */
 @Composable
 internal fun LegalRepresentativeHeader(
     onBackClicked: () -> Unit,
@@ -99,11 +93,6 @@ internal fun LegalRepresentativeHeader(
     }
 }
 
-/**
- * The hub screen's own header content: an icon tile over a muted caption. Folds away and fades
- * out as [topAreaState] collapses -- see [[TopArea-System]] -- so only the slim top bar remains
- * once the list has been scrolled.
- */
 @Composable
 internal fun LegalRepresentativeHeroSubtitle(
     text: String,
@@ -131,7 +120,6 @@ internal fun LegalRepresentativeHeroSubtitle(
     }
 }
 
-/** A small card summarizing the workshop, embedded in the header on every later screen. */
 @Composable
 internal fun LegalRepresentativeWorkshopSummaryCard(
     workshopName: String,
@@ -179,14 +167,6 @@ internal fun LegalRepresentativeWorkshopSummaryCard(
     }
 }
 
-/**
- * The hub screen's identity card — the user's own name and their legal-representative workshop
- * count, side by side with a divider. Composed as the sibling right after a block the caller
- * offsets up by [LegalRepresentativeHeader]'s `heroCardOverlap`, so it rides up to straddle the
- * header seam. Unlike [LegalRepresentativeHeroSubtitle], this card is never wrapped in a
- * `topArea*` behavior modifier, so it stays fully shown and pinned above the list regardless of
- * scroll — only the header content above it folds away.
- */
 @Composable
 internal fun LegalRepresentativeIdentitySummaryCard(
     fullName: String?,

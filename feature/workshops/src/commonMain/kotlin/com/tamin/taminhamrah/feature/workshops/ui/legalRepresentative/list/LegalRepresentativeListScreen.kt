@@ -112,9 +112,6 @@ fun LegalRepresentativeListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // ON_RESUME also fires on first entry, so this alone covers both the initial load and a
-    // re-fetch whenever the user pops back onto this screen after adding, editing, or deleting
-    // a representative on the screen above.
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         viewModel.sendIntent(LegalRepresentativeListIntent.Load(workshopId, branchCode, ticket))
     }

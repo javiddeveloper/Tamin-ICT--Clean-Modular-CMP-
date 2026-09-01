@@ -138,25 +138,18 @@ interface WorkShopsRepository {
         query: WorkshopStackHolderQuery,
     ): PagedListDN<WorkshopStackHolderDN>
 
-    /** Workshops (کارگاه‌های حقوقی) the current user has legal-representative rights on. */
     fun getLegalRepresentativeWorkshops(): Flow<LegalRepresentativeWorkshopListDN?>
-
-    /** Representatives already registered for one workshop. */
     fun getLegalRepresentatives(
         workshopId: String,
         branchCode: String
     ): Flow<LegalRepresentativeListDN?>
-
-    /** Contracts (پیمان‌ها) belonging to one workshop — only relevant for a "special" workshop. */
     fun getLegalRepresentativeWorkshopContracts(
         workshopId: String,
         branchCode: String
     ): Flow<LegalRepresentativeContractListDN?>
 
-    /** Requests a one-time verification code, optionally scoped to a specific national code. */
     suspend fun requestLegalRepresentativeTicket(nationalCode: String? = null)
 
-    /** Verifies a one-time code. The code itself becomes the "ticket" used by later calls. */
     suspend fun verifyLegalRepresentativeTicket(ticket: String)
 
     suspend fun submitLegalRepresentative(ticket: String, request: LegalRepresentativeRequestDN)

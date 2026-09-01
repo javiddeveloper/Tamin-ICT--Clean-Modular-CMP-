@@ -1,5 +1,9 @@
 package com.tamin.taminhamrah.feature.workshops.fake
 
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeContractListDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeListDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeRequestDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeWorkshopListDN
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
@@ -30,6 +34,8 @@ import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDN
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
 import com.tamin.taminhamrah.repository.WorkShopsRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 /**
  * A workshops repository a test can drive.
@@ -210,5 +216,42 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     private inline fun <T> answer(block: () -> T): T {
         error?.let { throw it }
         return block()
+    }
+
+    var legalRepresentativeWorkshopsResult: LegalRepresentativeWorkshopListDN? = null
+    override fun getLegalRepresentativeWorkshops(): Flow<LegalRepresentativeWorkshopListDN?> = flow {
+        emit(answer { legalRepresentativeWorkshopsResult })
+    }
+
+    var legalRepresentativesResult: LegalRepresentativeListDN? = null
+    override fun getLegalRepresentatives(
+        workshopId: String,
+        branchCode: String
+    ): Flow<LegalRepresentativeListDN?> = flow {
+        emit(answer { legalRepresentativesResult })
+    }
+
+    var legalRepresentativeWorkshopContractsResult: LegalRepresentativeContractListDN? = null
+    override fun getLegalRepresentativeWorkshopContracts(
+        workshopId: String,
+        branchCode: String
+    ): Flow<LegalRepresentativeContractListDN?> = flow {
+        emit(answer { legalRepresentativeWorkshopContractsResult })
+    }
+
+    override suspend fun requestLegalRepresentativeTicket(nationalCode: String?) {
+        answer { }
+    }
+
+    override suspend fun verifyLegalRepresentativeTicket(ticket: String) {
+        answer { }
+    }
+
+    override suspend fun submitLegalRepresentative(ticket: String, request: LegalRepresentativeRequestDN) {
+        answer { }
+    }
+
+    override suspend fun deleteLegalRepresentative(ticket: String, stakeId: Long) {
+        answer { }
     }
 }

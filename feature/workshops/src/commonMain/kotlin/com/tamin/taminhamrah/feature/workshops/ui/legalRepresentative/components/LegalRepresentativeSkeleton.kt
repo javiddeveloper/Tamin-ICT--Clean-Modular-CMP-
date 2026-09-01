@@ -30,11 +30,6 @@ private const val WORKSHOP_PLACEHOLDER_CARDS = 3
 private const val REPRESENTATIVE_PLACEHOLDER_CARDS = 3
 private const val CONTRACT_PLACEHOLDER_ROWS = 4
 
-/**
- * Stands in for the workshop list while [LegalRepresentativeWorkshopsViewModel][com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.workshops.LegalRepresentativeWorkshopsViewModel]
- * loads. Shaped like the real workshop card (same [taminSurface] outline, same row layout) so
- * nothing jumps when the real cards land.
- */
 @Composable
 fun LegalRepresentativeWorkshopsSkeleton(modifier: Modifier = Modifier) {
     LazyColumn(
@@ -83,10 +78,6 @@ private fun LegalRepresentativeWorkshopCardSkeleton() {
     }
 }
 
-/**
- * Stands in for a workshop's representative list while it loads. Shaped like the real
- * `LegalRepresentativeCard` (name/mobile block, access-level row, action-buttons row).
- */
 @Composable
 fun LegalRepresentativeListSkeleton(modifier: Modifier = Modifier) {
     LazyColumn(
@@ -121,10 +112,6 @@ private fun LegalRepresentativeCardSkeleton() {
     }
 }
 
-/**
- * Stands in for the "special" workshop's contract-row picker while it loads. Shaped like the real
- * `ContractRow` (checkbox + two-line label), minus the checkbox's interactivity.
- */
 @Composable
 fun LegalRepresentativeContractsSkeleton(modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {

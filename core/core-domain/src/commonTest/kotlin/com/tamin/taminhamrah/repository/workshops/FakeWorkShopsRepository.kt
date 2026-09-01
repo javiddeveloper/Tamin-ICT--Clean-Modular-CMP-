@@ -4,16 +4,6 @@ import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeContra
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeListDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeRequestDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeWorkshopListDN
-import com.tamin.taminhamrah.model.request.ApiFilterDN
-import com.tamin.taminhamrah.model.request.ApiQueryParamDN
-import com.tamin.taminhamrah.model.workshop.EmployerAgreementListDN
-import com.tamin.taminhamrah.model.workshop.PaymentSheetListDN
-import com.tamin.taminhamrah.model.workshop.WorkShopDebtListDN
-import com.tamin.taminhamrah.model.workshop.WorkshopDebitListDN
-import com.tamin.taminhamrah.model.workshop.WorkshopMemberListDN
-import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberListDN
-import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderListDN
-import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListDN
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
@@ -44,6 +34,8 @@ import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDN
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
 import com.tamin.taminhamrah.repository.WorkShopsRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 /**
  * A workshops repository a test can drive.
@@ -228,8 +220,7 @@ class FakeWorkShopsRepository : WorkShopsRepository {
 
     var legalRepresentativeWorkshopsResult: LegalRepresentativeWorkshopListDN? = null
     override fun getLegalRepresentativeWorkshops(): Flow<LegalRepresentativeWorkshopListDN?> = flow {
-        if (shouldThrowError) throw error
-        emit(legalRepresentativeWorkshopsResult)
+        emit(answer { legalRepresentativeWorkshopsResult })
     }
 
     var legalRepresentativesResult: LegalRepresentativeListDN? = null
@@ -237,8 +228,7 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         workshopId: String,
         branchCode: String
     ): Flow<LegalRepresentativeListDN?> = flow {
-        if (shouldThrowError) throw error
-        emit(legalRepresentativesResult)
+        emit(answer { legalRepresentativesResult })
     }
 
     var legalRepresentativeWorkshopContractsResult: LegalRepresentativeContractListDN? = null
@@ -246,23 +236,22 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         workshopId: String,
         branchCode: String
     ): Flow<LegalRepresentativeContractListDN?> = flow {
-        if (shouldThrowError) throw error
-        emit(legalRepresentativeWorkshopContractsResult)
+        emit(answer { legalRepresentativeWorkshopContractsResult })
     }
 
     override suspend fun requestLegalRepresentativeTicket(nationalCode: String?) {
-        if (shouldThrowError) throw error
+        answer { }
     }
 
     override suspend fun verifyLegalRepresentativeTicket(ticket: String) {
-        if (shouldThrowError) throw error
+        answer { }
     }
 
     override suspend fun submitLegalRepresentative(ticket: String, request: LegalRepresentativeRequestDN) {
-        if (shouldThrowError) throw error
+        answer { }
     }
 
     override suspend fun deleteLegalRepresentative(ticket: String, stakeId: Long) {
-        if (shouldThrowError) throw error
+        answer { }
     }
 }

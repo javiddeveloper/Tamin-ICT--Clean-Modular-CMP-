@@ -37,11 +37,7 @@ data class LegalRepresentativeRequestDTO(
     @SerialName("nationalCode") val nationalCode: String?,
     @SerialName("workshopId") val workshopId: String?,
     @SerialName("special") val special: Boolean?,
-    // The legacy Android client also duplicated the ticket here even though it's already the
-    // {ticket} path segment — kept for fidelity with the confirmed-unchanged backend contract.
     @SerialName("ticket") val ticket: String?,
-    // Only meaningful when [special] is true — the workshop's contract rows (پیمان‌ها) this
-    // representative gets access to. Absent/empty for a non-special workshop.
     @SerialName("contractRows") val contractRows: List<String>? = null,
 )
 

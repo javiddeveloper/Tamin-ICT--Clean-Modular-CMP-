@@ -316,10 +316,6 @@ fun AddLegalRepresentativeScreen(
     }
 }
 
-/**
- * The "پیمان‌های انتخاب‌شده" summary row — shown only for a "special" (پیمانکاری) workshop.
- * Tapping it opens [LegalRepresentativeContractPickerSheet].
- */
 @Composable
 private fun LegalRepresentativeContractsSummaryRow(
     selectedContractRows: List<String>,

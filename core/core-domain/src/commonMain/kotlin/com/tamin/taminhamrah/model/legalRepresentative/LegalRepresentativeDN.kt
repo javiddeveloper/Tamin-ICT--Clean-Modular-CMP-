@@ -37,7 +37,6 @@ data class LegalRepresentativeListDN(
     val total: Int,
 )
 
-/** Body of a submit (add or edit) request. */
 data class LegalRepresentativeRequestDN(
     val nationalCode: String,
     val workshopId: String,

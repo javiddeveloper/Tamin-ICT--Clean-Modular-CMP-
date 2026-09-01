@@ -51,11 +51,9 @@ fun LoadingButton(
     enabled: Boolean = true,
     isLoading: Boolean = false,
     icon: ImageVector? = null,
-    /** Defaults to every existing caller's expectation: icon before text. */
     iconPosition: LoadingButtonIconPosition = LoadingButtonIconPosition.LEADING,
     background: Brush? = null,
     contentColor: Color? = null,
-    /** Shorter than the page-level default for a button that sits inside a form footer. */
     height: Dp = ButtonDimens.height,
     shape: Shape = RoundedCornerShape(CornerRadius.xl),
 ) {
