@@ -307,7 +307,7 @@ private fun PayableResultCard(result: IllDaysCalcResultUi) {
         Text(
             text = stringResource(Res.string.ill_days_calc_payable_label),
             style = MaterialTheme.typography.labelLarge,
-            color = colors.hawkesBlue,
+            color = colors.blueText,
         )
         Text(
             text = result.payableAmountLabel,
