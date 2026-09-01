@@ -107,6 +107,7 @@ import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
 import com.tamin.taminhamrah.feature.treatment.treatmentGraph
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.completeEmployerInfoScreen
+import com.tamin.taminhamrah.feature.workshops.debtObjectionStatusScreen
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
 import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
@@ -486,6 +487,7 @@ internal fun TaminHamrahNavGraph(
 
                 workshopsScreen(navController, onOpenUrl = { url -> openUrl(url) })
                 completeEmployerInfoScreen(navController)
+                debtObjectionStatusScreen(navController)
 
                 myInboxScreen(onNavigateBack = { navController.popBackStack() })
 

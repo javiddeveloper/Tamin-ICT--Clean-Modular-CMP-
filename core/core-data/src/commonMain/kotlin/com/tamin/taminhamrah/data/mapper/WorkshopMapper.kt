@@ -43,6 +43,12 @@ import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetStatus
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDTO
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionType
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionStatus
+import com.tamin.taminhamrah.model.workshop.SmsMessageDN
+import com.tamin.taminhamrah.model.workshop.SmsMessageDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDN
@@ -394,4 +400,23 @@ fun NewMemberRegistrationDN.toDto(): NewMemberRegistrationDTO = NewMemberRegistr
 
 fun NewMemberRegistrationResultDTO.toDomain(): NewMemberRegistrationResultDN =
     NewMemberRegistrationResultDN(personalId = id)
+
+// ------------------------------------------------------------- پیگیری وضعیت اعتراض
+
+fun WorkShopObjectionDTO.toDomain(): WorkShopObjectionDN = WorkShopObjectionDN(
+    seqNo = seqNo,
+    workshopId = workshopId.orEmpty(),
+    debitNumber = debitNumber.orEmpty(),
+    branchCode = branchCode.orEmpty(),
+    objectionType = WorkShopObjectionType.fromCode(objectionType),
+    objectionDate = objectionDate.orEmpty(),
+    objectionDescription = objectionDesc.orEmpty(),
+    status = WorkShopObjectionStatus.fromCode(status),
+    voteTypeDescription = voteType?.description.orEmpty(),
+)
+
+fun SmsMessageDTO.toDomain(): SmsMessageDN = SmsMessageDN(
+    description = smsDescription.orEmpty(),
+    status = WorkShopObjectionStatus.fromCode(status),
+)
 

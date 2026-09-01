@@ -5,6 +5,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestStatus
 import com.tamin.taminhamrah.model.workshop.PaymentSheetStatus
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionStatus
 import com.tamin.taminhamrah.model.workshop.WorkshopActivityStatus
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 
@@ -57,4 +58,22 @@ val ArticleSixteenRequestStatus.tint: StatusTint
         ArticleSixteenRequestStatus.REJECTED -> StatusTint.NEGATIVE
         ArticleSixteenRequestStatus.SUBMITTED -> StatusTint.INFO
         ArticleSixteenRequestStatus.NONE, ArticleSixteenRequestStatus.UNKNOWN -> StatusTint.NEUTRAL
+    }
+
+/**
+ * پیگیری وضعیت اعتراض status colors, matching the legacy app's own `gridStatusTypeColor`
+ * (1/5/6 = neutral, 2 = red, 3 = blue, 4 = amber). APPROVED (6, "تایید رای") is deliberately left
+ * neutral rather than given a positive/green tint — that is the legacy behavior, not an oversight,
+ * so don't "fix" it into [StatusTint.POSITIVE].
+ */
+val WorkShopObjectionStatus.tint: StatusTint
+    get() = when (this) {
+        WorkShopObjectionStatus.SUBMITTED,
+        WorkShopObjectionStatus.TIME_ALLOCATED,
+        WorkShopObjectionStatus.APPROVED,
+        WorkShopObjectionStatus.UNKNOWN,
+        -> StatusTint.NEUTRAL
+        WorkShopObjectionStatus.CALCULATION_REVIEW -> StatusTint.NEGATIVE
+        WorkShopObjectionStatus.BOARD_REVIEW -> StatusTint.INFO
+        WorkShopObjectionStatus.RECALCULATED -> StatusTint.WARNING
     }

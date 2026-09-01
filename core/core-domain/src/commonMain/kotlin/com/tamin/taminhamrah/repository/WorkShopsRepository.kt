@@ -29,6 +29,9 @@ import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDN
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionQuery
+import com.tamin.taminhamrah.model.workshop.SmsMessageDN
 
 /**
  * Everything the کارگاه‌های کارفرما feature reads and writes.
@@ -130,4 +133,10 @@ interface WorkShopsRepository {
     suspend fun getWorkshopStackHolders(
         query: WorkshopStackHolderQuery,
     ): PagedListDN<WorkshopStackHolderDN>
+
+    // ------------------------------------------------------------- پیگیری وضعیت اعتراض
+
+    suspend fun getWorkShopObjections(query: WorkShopObjectionQuery): PagedListDN<WorkShopObjectionDN>
+
+    suspend fun getWorkShopObjectionSms(seqNo: Long, page: Int = 0): PagedListDN<SmsMessageDN>
 }

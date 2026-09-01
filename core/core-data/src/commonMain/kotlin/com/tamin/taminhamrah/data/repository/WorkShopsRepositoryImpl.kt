@@ -38,6 +38,9 @@ import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDN
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionQuery
+import com.tamin.taminhamrah.model.workshop.SmsMessageDN
 import com.tamin.taminhamrah.repository.WorkShopsRepository
 
 /**
@@ -245,6 +248,28 @@ class WorkShopsRepositoryImpl(
             .getWorkshopStackHolders(pageQuery(query.page, query.pageSize, filters))
             .toDomainPage { it.toDomain() }
     }
+
+    // ------------------------------------------------------------- پیگیری وضعیت اعتراض
+
+    override suspend fun getWorkShopObjections(
+        query: WorkShopObjectionQuery,
+    ): PagedListDN<WorkShopObjectionDN> {
+        val filters = buildFilters {
+            add(FilterProperty.PAYMENT_WORKSHOP_ID, query.workshopId)
+            // The legacy client wrote "شماره اعتراض" into a filter key the backend never reads
+            // (`branchCode`), a silent no-op there. Filtered on `seqNo` here instead — the field
+            // that actually represents an objection number on the model.
+            add(FilterProperty.SEQ_NO, query.objectionNumber)
+            add(FilterProperty.DEBIT_NUMBER, query.debitNumber)
+        }
+        return remoteDataSource
+            .getWorkShopObjections(pageQuery(query.page, query.pageSize, filters))
+            .toDomainPage { it.toDomain() }
+    }
+
+    override suspend fun getWorkShopObjectionSms(seqNo: Long, page: Int): PagedListDN<SmsMessageDN> =
+        remoteDataSource.getWorkShopObjectionSms(seqNo, pageQuery(page))
+            .toDomainPage { it.toDomain() }
 
     private fun pageQuery(
         page: Int,

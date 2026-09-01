@@ -83,3 +83,19 @@ data class ArticleSixteenDebtQuery(
     val page: Int = 0,
     val pageSize: Int = WORKSHOP_PAGE_SIZE,
 )
+
+/**
+ * Filters of the پیگیری وضعیت اعتراض search sheet. All optional, all matched exactly.
+ *
+ * Unlike every other list on this repository, this one has no required workshop/branch identity —
+ * it is reached from the services menu, not from a picked workshop row, and shows every objection
+ * the employer has filed across all of their workshops.
+ */
+data class WorkShopObjectionQuery(
+    val workshopId: String? = null,
+    /** شمارهٔ اعتراض — filtered on `seqNo`, see [com.tamin.taminhamrah.model.request.FilterProperty.SEQ_NO]. */
+    val objectionNumber: String? = null,
+    val debitNumber: String? = null,
+    val page: Int = 0,
+    val pageSize: Int = WORKSHOP_PAGE_SIZE,
+)

@@ -19,6 +19,8 @@ import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberConfirmResultDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDTO
+import com.tamin.taminhamrah.model.workshop.SmsMessageDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDTO
@@ -213,6 +215,21 @@ internal class WorkShopsRemoteDataSourceImpl(
         query: ApiQueryParamDN
     ): ListData<WorkshopStackHolderDTO> = call {
         apiService.getWorkshopStackHolders(query.toQueries()).extractData()
+    }
+
+    // ------------------------------------------------------------- پیگیری وضعیت اعتراض
+
+    override suspend fun getWorkShopObjections(
+        query: ApiQueryParamDN
+    ): ListData<WorkShopObjectionDTO> = call {
+        apiService.getWorkShopObjections(query.toQueries()).extractData()
+    }
+
+    override suspend fun getWorkShopObjectionSms(
+        objectionCode: Long,
+        query: ApiQueryParamDN,
+    ): ListData<SmsMessageDTO> = call {
+        apiService.getWorkShopObjectionSms(objectionCode, query.toQueries()).extractData()
     }
 
     private fun ApiQueryParamDN.toQueries(): Map<String, String> = queryBuilder.buildQuery(this)

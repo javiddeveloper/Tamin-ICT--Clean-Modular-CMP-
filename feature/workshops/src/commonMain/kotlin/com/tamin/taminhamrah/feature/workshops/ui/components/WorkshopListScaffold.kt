@@ -52,7 +52,9 @@ fun <T> WorkshopListScaffold(
     emptyMessage: String = stringResource(Res.string.workshop_empty_list),
     key: ((T) -> Any)? = null,
     header: (@Composable () -> Unit)? = null,
-    row: @Composable (T) -> Unit,
+    /** A row that also needs its position — see `SmsTimelineItem`, the one caller so far. */
+    indexedRow: (@Composable (index: Int, item: T) -> Unit)? = null,
+    row: (@Composable (T) -> Unit)? = null,
 ) {
     // The three states share one set of insets: a header that keeps the page margins while the
     // list is loading, then loses them once the rows arrive, reads as the page jumping sideways.
@@ -106,7 +108,7 @@ fun <T> WorkshopListScaffold(
             // caller's key meaningful while making a collision impossible, and these lists only
             // ever grow at the end, so an item's index — and therefore its identity — is stable.
             key = key?.let { keyOf -> { index, item -> "$index:${keyOf(item)}" } },
-        ) { _, item -> row(item) }
+        ) { index, item -> indexedRow?.invoke(index, item) ?: row?.invoke(item) }
 
         if (state.isLoadingMore) {
             item(key = WorkshopConstants.FOOTER_KEY) {

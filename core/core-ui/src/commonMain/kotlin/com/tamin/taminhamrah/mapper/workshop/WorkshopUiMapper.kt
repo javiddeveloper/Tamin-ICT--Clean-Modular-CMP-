@@ -23,6 +23,10 @@ import com.tamin.taminhamrah.model.workshop.WorkshopPR
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDN
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderPR
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionPR
+import com.tamin.taminhamrah.model.workshop.SmsMessageDN
+import com.tamin.taminhamrah.model.workshop.SmsMessagePR
 import com.tamin.taminhamrah.ui.orDash
 import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.util.toPersianDigits
@@ -185,6 +189,27 @@ fun WorkshopStackHolderDN.toPresentation(): WorkshopStackHolderPR = WorkshopStac
     fatherName = fatherName.orDash(),
     birthDate = birthDate.orDashTimestamp(),
     stackType = stackType.orDash(),
+)
+
+// ------------------------------------------------------------- پیگیری وضعیت اعتراض
+
+fun WorkShopObjectionDN.toPresentation(): WorkShopObjectionPR = WorkShopObjectionPR(
+    seqNo = seqNo,
+    workshopId = workshopId.orDashDigits(),
+    debitNumber = debitNumber.orDashDigits(),
+    // seqNo is nullable; bridged through the non-null orDashDigits() with an empty default, whose
+    // own ifBlank{null} branch already turns that into the same "-" fallback as a real blank.
+    objectionNumber = (seqNo?.toString() ?: "").orDashDigits(),
+    objectionDate = objectionDate.orDashDate(),
+    objectionDescription = objectionDescription.orDash(),
+    voteTypeDescription = voteTypeDescription.orDash(),
+    objectionType = objectionType,
+    status = status,
+)
+
+fun SmsMessageDN.toPresentation(): SmsMessagePR = SmsMessagePR(
+    description = description.orDash(),
+    status = status,
 )
 
 // ------------------------------------------------------------------ formatting

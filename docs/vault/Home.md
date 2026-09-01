@@ -36,6 +36,7 @@ tags: [moc]
 
 - [[Feature-Flags]] — dynamic menu, `FeatureFlag`, `FeatureManager`
 - [[History-Objection]] — اعتراض به سوابق ناموجود, and why its repository is still a stub ⚠️
+- [[Debt-Objection-Status]] — پیگیری وضعیت اعتراض به بدهی, `:feature:workshops` → `ui/objectionStatus`
 - [[AI-Agent]] — architecture of the AI assistant rewrite
 - [[AI-Agent-API-Contract]] — exact JSON contract the client parses
 - [[Glossary]] — Persian domain term ↔ name in code
