@@ -6,11 +6,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
 import com.tamin.taminhamrah.model.workshop.WorkshopActivityStatus
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
 import org.jetbrains.compose.resources.StringResource
-import com.tamin.taminhamrah.model.common.CityPR
-import com.tamin.taminhamrah.model.common.ProvincePR
-import com.tamin.taminhamrah.model.contracts.BranchPR
-import com.tamin.taminhamrah.model.contractFlow.BranchSelectionFormPR
-import com.tamin.taminhamrah.model.workshop.EmployerAgreementPR
+
 
 /**
  * State of the کارگاه‌های کارفرما list.
