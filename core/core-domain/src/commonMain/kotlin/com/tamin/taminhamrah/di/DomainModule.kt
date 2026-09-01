@@ -206,6 +206,12 @@ import com.tamin.taminhamrah.useCases.treatment.GetMedicalConfirmationPDFUseCase
 import com.tamin.taminhamrah.useCases.treatment.SendToInboxMedicalConfirmationUseCase
 import com.tamin.taminhamrah.useCases.addDependent.AddNewDependentUseCase
 import com.tamin.taminhamrah.useCases.addDependent.GetActiveBranchesUseCase
+import com.tamin.taminhamrah.useCases.employerInfo.GetLegalWorkshopUseCase
+import com.tamin.taminhamrah.useCases.employerInfo.GetLegalWorkshopCeoUseCase
+import com.tamin.taminhamrah.useCases.employerInfo.RequestLegalTicketUseCase
+import com.tamin.taminhamrah.useCases.employerInfo.SubmitLegalWorkshopInfoUseCase
+import com.tamin.taminhamrah.useCases.employerInfo.RequestRealTicketUseCase
+import com.tamin.taminhamrah.useCases.employerInfo.SubmitRealWorkshopInfoUseCase
 import com.tamin.taminhamrah.useCases.addDependent.GetDependentInfoUseCase
 import com.tamin.taminhamrah.useCases.addDependent.GetFamilyRelationshipsFromProxyUseCase
 import com.tamin.taminhamrah.useCases.addDependent.GetFamilyRelationshipsUseCase
@@ -446,5 +452,13 @@ val domainModule = module {
     factoryOf(::InquiryEducationCodeUseCase)
     factoryOf(::UploadDependentImageUseCase)
     factoryOf(::AddNewDependentUseCase)
+
+    // Employer Info UseCases
+    factoryOf(::GetLegalWorkshopUseCase)
+    factoryOf(::GetLegalWorkshopCeoUseCase)
+    factoryOf(::RequestLegalTicketUseCase)
+    factoryOf(::SubmitLegalWorkshopInfoUseCase)
+    factoryOf(::RequestRealTicketUseCase)
+    factoryOf(::SubmitRealWorkshopInfoUseCase)
 }
 
