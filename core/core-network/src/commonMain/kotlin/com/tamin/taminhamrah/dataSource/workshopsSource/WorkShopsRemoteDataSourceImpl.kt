@@ -28,6 +28,8 @@ internal class WorkShopsRemoteDataSourceImpl(
     private val queryBuilder: ApiQueryBuilder,
     private val errorParser: ErrorParser,
 ) : WorkShopsRemoteDataSource {
+    private val legalRepresentativeListQuery = ApiQueryParamDN(page = 1, start = 0, limit = 1000)
+
     override suspend fun getAllEmployerAgreementByNationalId(query: ApiQueryParamDN): ListData<EmployerAgreementDTO> {
         val queries = queryBuilder.buildQuery(query)
         return try {
@@ -168,7 +170,8 @@ internal class WorkShopsRemoteDataSourceImpl(
 
     override suspend fun getLegalRepresentativeWorkshops(): ListData<LegalRepresentativeWorkshopDTO>? {
         return try {
-            val response = apiService.getLegalRepresentativeWorkshops()
+            val queries = queryBuilder.buildQuery(legalRepresentativeListQuery)
+            val response = apiService.getLegalRepresentativeWorkshops(queries)
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
@@ -182,7 +185,12 @@ internal class WorkShopsRemoteDataSourceImpl(
         branchCode: String
     ): ListData<LegalRepresentativeDTO>? {
         return try {
-            val response = apiService.getLegalRepresentatives(workshopId = workshopId, branchCode = branchCode)
+            val queries = queryBuilder.buildQuery(legalRepresentativeListQuery) + mapOf(
+                "stackType" to "4",
+                "workshopId" to workshopId,
+                "branchCode" to branchCode,
+            )
+            val response = apiService.getLegalRepresentatives(queries)
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
@@ -196,7 +204,8 @@ internal class WorkShopsRemoteDataSourceImpl(
         branchCode: String
     ): ListData<LegalRepresentativeContractDTO>? {
         return try {
-            val response = apiService.getLegalRepresentativeWorkshopContracts(workshopId = workshopId, branchCode = branchCode)
+            val queries = queryBuilder.buildQuery(legalRepresentativeListQuery)
+            val response = apiService.getLegalRepresentativeWorkshopContracts(workshopId, branchCode, queries)
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)

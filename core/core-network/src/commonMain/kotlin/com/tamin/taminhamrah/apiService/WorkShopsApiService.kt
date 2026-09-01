@@ -89,36 +89,19 @@ internal interface WorkShopsApiService {
 
     @GET("v.1/legal-stakeholders/units")
     suspend fun getLegalRepresentativeWorkshops(
-        @Query("page") page: String = "1",
-        @Query("start") start: String = "0",
-        @Query("limit") limit: String = "1000",
-        @Query("filter") filter: String = "[]",
-        @Query("sort") sort: String = "[]",
+        @QueryMap queries: Map<String, String>
     ): BaseDTO<ListData<LegalRepresentativeWorkshopDTO>>
 
     @GET("legal-stakeholders")
     suspend fun getLegalRepresentatives(
-        @Query("stackType") stackType: String = "4",
-        @Query("workshopId") workshopId: String,
-        @Query("branchCode") branchCode: String,
-        @Query("page") page: String = "1",
-        @Query("start") start: String = "0",
-        @Query("limit") limit: String = "1000",
-        @Query("filter") filter: String = "[]",
-        @Query("sort") sort: String = "[]",
+        @QueryMap queries: Map<String, String>
     ): BaseDTO<ListData<LegalRepresentativeDTO>>
 
-    // The workshop's contracts (پیمان‌ها) — only relevant for a "special" workshop. Mirrors the
-    // legacy Android app's real endpoint of the same shape.
     @GET("workshop-services/get-employer-agreement-by-workshop-id-and-branch-code/{workshopId}/{branchCode}")
     suspend fun getLegalRepresentativeWorkshopContracts(
         @Path("workshopId") workshopId: String,
         @Path("branchCode") branchCode: String,
-        @Query("page") page: String = "1",
-        @Query("start") start: String = "0",
-        @Query("limit") limit: String = "1000",
-        @Query("filter") filter: String = "[]",
-        @Query("sort") sort: String = "[]",
+        @QueryMap queries: Map<String, String>
     ): BaseDTO<ListData<LegalRepresentativeContractDTO>>
 
     @GET("legal-ticket")
