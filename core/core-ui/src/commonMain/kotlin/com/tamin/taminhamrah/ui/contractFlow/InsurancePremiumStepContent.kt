@@ -26,6 +26,7 @@ fun InsurancePremiumStepContent(
     selectedCode: String?,
     isLoading: Boolean,
     onRateSelected: (SpcPremiumRateOptionPR) -> Unit,
+    isRateSelectionEnabled: Boolean = true,
     showFreeJobSelector: Boolean = false,
     freeJobs: List<FreeJobDN> = emptyList(),
     selectedFreeJobCode: String? = null,
@@ -65,14 +66,20 @@ fun InsurancePremiumStepContent(
                             .fillMaxWidth()
                             .selectable(
                                 selected = rate.code == selectedCode,
-                                onClick = { onRateSelected(rate) },
+                                enabled = isRateSelectionEnabled,
+                                onClick = {
+                                    if (isRateSelectionEnabled) onRateSelected(rate)
+                                },
                             ),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         RadioButton(
                             selected = rate.code == selectedCode,
-                            onClick = { onRateSelected(rate) },
+                            onClick = {
+                                if (isRateSelectionEnabled) onRateSelected(rate)
+                            },
+                            enabled = isRateSelectionEnabled,
                         )
                         Text(
                             text = rate.description,

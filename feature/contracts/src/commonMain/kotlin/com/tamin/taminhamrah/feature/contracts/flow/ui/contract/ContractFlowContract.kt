@@ -26,6 +26,8 @@ data class ContractFlowUiState(
     val rawTypedContracts: List<ContractDN> = emptyList(),
     val hasLoadedTypedContracts: Boolean = false,
     val allContracts: List<ContractDN> = emptyList(),
+    val hasLoadedAllContracts: Boolean = false,
+    val allContractsLoadFailed: Boolean = false,
     val eligibility: ContractEligibilityPR? = null,
     val isRulesConfirmed: Boolean = false,
     val userInfo: UserInfoFormPR = UserInfoFormPR(),
@@ -111,6 +113,7 @@ data class ContractFlowUiState(
         data class ContractsLoaded(val contracts: List<ContractPR>) : PartialState()
         data class RawTypedContractsLoaded(val contracts: List<ContractDN>) : PartialState()
         data class AllContractsLoaded(val contracts: List<ContractDN>) : PartialState()
+        data object AllContractsLoadFailed : PartialState()
         data class EligibilityLoaded(val eligibility: ContractEligibilityPR) : PartialState()
         data class RulesConfirmedChanged(val confirmed: Boolean) : PartialState()
         data class UserInfoChanged(val userInfo: UserInfoFormPR) : PartialState()

@@ -41,6 +41,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,6 +70,8 @@ import com.tamin.taminhamrah.ui.contractFlow.eligibilityMessage
 import com.tamin.taminhamrah.model.contracts.BranchPR
 import com.tamin.taminhamrah.model.contracts.FreeJobDN
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoPR
+import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamPR
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
 import com.tamin.taminhamrah.ui.theme.ButtonDimens
 import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.IconSize
@@ -76,10 +79,13 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.util.toPersianDigits
+import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.back_content_description
@@ -93,6 +99,8 @@ import taminx.core.core_ui.contract_payment_dialog_dismiss
 import taminx.core.core_ui.contract_payment_dialog_message
 import taminx.core.core_ui.contract_payment_dialog_pay
 import taminx.core.core_ui.contract_payment_dialog_title
+import taminx.core.core_ui.contract_rules_unavailable
+import taminx.core.core_ui.contract_terms_view_rules
 import taminx.core.core_ui.error_unknown
 import org.jetbrains.compose.resources.stringResource
 
@@ -105,7 +113,33 @@ fun ContractFlowScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val toaster = LocalToaster.current
+    val scope = rememberCoroutineScope()
+    val rulesUnavailableMessage = stringResource(Res.string.contract_rules_unavailable)
+    val rulesTitle = stringResource(Res.string.contract_terms_view_rules)
     var paymentDialog by remember { mutableStateOf<PaymentDialogState?>(null) }
+    var showRulesPdfViewer by remember { mutableStateOf(false) }
+    var rulesPdf by remember { mutableStateOf<PdfDownloadPR?>(null) }
+    var rulesPdfLoadFailed by remember { mutableStateOf(false) }
+
+    val openRulesDocument: () -> Unit = {
+        val rulesPath = state.config?.rulesPdfPath
+        if (rulesPath.isNullOrBlank()) {
+            toaster.error(rulesUnavailableMessage)
+        } else {
+            scope.launch {
+                try {
+                    val bytes = Res.readBytes("files/$rulesPath")
+                    rulesPdf = PdfDownloadPR(InputStreamPR(ByteReadChannel(bytes)))
+                    rulesPdfLoadFailed = false
+                    showRulesPdfViewer = true
+                } catch (_: Exception) {
+                    rulesPdf = null
+                    rulesPdfLoadFailed = true
+                    toaster.error(rulesUnavailableMessage)
+                }
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.sendIntent(ContractFlowIntent.LoadInitialData)
@@ -217,8 +251,26 @@ fun ContractFlowScreen(
             onClearDocument = {
                 viewModel.sendIntent(ContractFlowIntent.ClearUploadedDocument)
             },
-            onShowRules = onShowRules,
+            onShowRules = {
+                openRulesDocument()
+                onShowRules()
+            },
             modifier = Modifier.padding(padding),
+        )
+    }
+
+    if (showRulesPdfViewer) {
+        TaminPdfViewer(
+            fileName = state.config?.rulesPdfPath ?: "rules.pdf",
+            pdf = rulesPdf,
+            downloadFailed = rulesPdfLoadFailed,
+            onRequestDownload = {},
+            onDismiss = {
+                showRulesPdfViewer = false
+                rulesPdf = null
+                rulesPdfLoadFailed = false
+            },
+            title = rulesTitle,
         )
     }
 }
@@ -440,8 +492,9 @@ private fun ContractStepper(
                         ContractStep.STEP_INSURANCE_PREMIUM -> {
                             InsurancePremiumStepContent(
                                 premiumRates = state.premiumRates,
-                                selectedCode = state.selectedPremiumRateCode,
+                                selectedCode = state.lockedPremiumRateCode ?: state.selectedPremiumRateCode,
                                 isLoading = state.isPremiumRatesLoading,
+                                isRateSelectionEnabled = state.lockedPremiumRateCode == null,
                                 onRateSelected = onPremiumRateSelected,
                                 showFreeJobSelector = config?.requiresFreeJob == true,
                                 freeJobs = state.freeJobs,

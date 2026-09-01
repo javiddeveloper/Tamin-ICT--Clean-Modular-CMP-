@@ -67,6 +67,7 @@ import taminx.core.core_ui.contract_preflight_cancelled_3_months
 import taminx.core.core_ui.contract_preflight_not_registered
 import taminx.core.core_ui.contract_preflight_other_contract
 import taminx.core.core_ui.contract_preflight_under_age
+import taminx.core.core_ui.contract_preflight_contracts_load_failed
 import taminx.core.core_ui.contract_upload_failed_error
 import taminx.core.core_ui.contract_upload_jpeg_only_error
 
@@ -169,18 +170,24 @@ class ContractFlowViewModel(
                 emit(PartialState.AllContractsLoaded(contracts))
                 emitPreflightGateIfReady()
             }
-        } catch (_: Exception) {
-            // Non-fatal: other-contract preflight falls back to typed contracts only.
+        } catch (e: Exception) {
+            emit(PartialState.AllContractsLoadFailed)
+            emitPreflightGateIfReady()
         }
     }
 
     private suspend fun kotlinx.coroutines.flow.FlowCollector<PartialState>.emitPreflightGateIfReady() {
         val registration = uiState.value.registrationInfo ?: return
         if (!uiState.value.hasLoadedTypedContracts) return
+        if (!uiState.value.hasLoadedAllContracts) return
+        if (uiState.value.allContractsLoadFailed) {
+            emit(PartialState.PreflightGateError(getString(Res.string.contract_preflight_contracts_load_failed)))
+            return
+        }
         val block = resolvePreflightBlock(
             registration = registration,
             typedContracts = uiState.value.rawTypedContracts,
-            allContracts = uiState.value.allContracts.ifEmpty { uiState.value.rawTypedContracts },
+            allContracts = uiState.value.allContracts,
             currentPremiumTypeCode = config.premiumTypeCode,
         ) ?: return
         emit(PartialState.PreflightGateError(preflightMessage(block)))
@@ -456,6 +463,7 @@ class ContractFlowViewModel(
     }
 
     private fun handleSelectPremiumRate(rate: SpcPremiumRateOptionPR): Flow<PartialState> = flow {
+        if (uiState.value.lockedPremiumRateCode != null) return@flow
         emit(PartialState.PremiumRateSelected(rate.code))
     }
 
@@ -740,6 +748,12 @@ class ContractFlowViewModel(
         )
         is PartialState.AllContractsLoaded -> currentState.copy(
             allContracts = partialState.contracts,
+            hasLoadedAllContracts = true,
+            allContractsLoadFailed = false,
+        )
+        PartialState.AllContractsLoadFailed -> currentState.copy(
+            hasLoadedAllContracts = true,
+            allContractsLoadFailed = true,
         )
         is PartialState.EligibilityLoaded -> currentState.copy(
             eligibility = partialState.eligibility,

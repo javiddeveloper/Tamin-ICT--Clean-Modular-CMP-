@@ -1864,6 +1864,7 @@
 
     <string name="contract_terms_confirm_hint">تایید این مرحله به منزله مطالعه و پذیرش مقررات و ضوابط انعقاد قرارداد می‌باشد.</string>
     <string name="contract_terms_view_rules">مشاهده ضوابط و مقررات</string>
+    <string name="contract_rules_unavailable">فایل ضوابط و مقررات در دسترس نیست.</string>
     <string name="contract_terms_commitment_title">تعهدنامه</string>
     <string name="contract_terms_commitment_prefix">اینجانب %1$s </string>
     <string name="contract_terms_commitment_suffix"> با آگاهی کامل و در صحت عقلی، شرایط و مقررات فوق را مطالعه و خود را در هنگام قرارداد و در ادامه بیمه پردازی ملزم به رعایت آن می‌دانم در غیر اینصورت کلیه تبعات و مسئولیت‌های آن متوجه اینجانب بوده و سازمان تأمین اجتماعی در این خصوص مسئولیتی نخواهد داشت.</string>
@@ -1900,6 +1901,7 @@
     <string name="contract_preflight_cancelled_20_days">قرارداد قبلی شما بیش از ۲۰ روز پیش ابطال شده است.</string>
     <string name="contract_preflight_cancelled_3_months">قرارداد قبلی شما بیش از سه ماه پیش ابطال شده است.</string>
     <string name="contract_preflight_other_contract">شما قرارداد فعال دیگری دارید که با این نوع بیمه تداخل دارد.</string>
+    <string name="contract_preflight_contracts_load_failed">بارگذاری لیست قراردادها ناموفق بود. لطفاً دوباره تلاش کنید.</string>
     <string name="contract_payment_dialog_title">ثبت قرارداد</string>
     <string name="contract_payment_dialog_message">قرارداد با شماره %1$s ثبت شد.</string>
     <string name="contract_payment_dialog_pay">پرداخت حق بیمه</string>

@@ -61,6 +61,30 @@ class ContractPreflightGateTest {
     }
 
     @Test
+    fun `returns CANCELLED_OVER_20_DAYS when typed contract has status 4`() {
+        val block = resolvePreflightBlock(
+            registration = sampleRegistration(),
+            typedContracts = listOf(contractWithStatus(ContractStatusCode.CANCELLED_OVER_20_DAYS)),
+            allContracts = emptyList(),
+            currentPremiumTypeCode = "01",
+        )
+
+        assertEquals(ContractPreflightBlock.CANCELLED_OVER_20_DAYS, block)
+    }
+
+    @Test
+    fun `returns CANCELLED_OVER_3_MONTHS when typed contract has status 5`() {
+        val block = resolvePreflightBlock(
+            registration = sampleRegistration(),
+            typedContracts = listOf(contractWithStatus(ContractStatusCode.CANCELLED_OVER_3_MONTHS)),
+            allContracts = emptyList(),
+            currentPremiumTypeCode = "01",
+        )
+
+        assertEquals(ContractPreflightBlock.CANCELLED_OVER_3_MONTHS, block)
+    }
+
+    @Test
     fun `returns OTHER_ACTIVE_CONTRACT when another premium type is active`() {
         val block = resolvePreflightBlock(
             registration = sampleRegistration(),
