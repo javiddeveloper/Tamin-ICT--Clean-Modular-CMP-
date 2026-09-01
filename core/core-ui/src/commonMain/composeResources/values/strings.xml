@@ -1407,6 +1407,19 @@
     <string name="employer_online_services_filter_clear_chip">حذف</string>
     <string name="employer_online_services_search_empty_title">تعهدنامه‌ای با این مشخصات یافت نشد</string>
     <string name="employer_online_services_search_empty_subtitle">فیلتر را حذف کنید یا درخواست تعهدنامه ثبت کنید.</string>
+    <string name="employer_online_services_contract_rows_title">ردیف‌های پیمان کارگاه</string>
+    <string name="employer_online_services_contract_rows_workshop_code">کد کارگاه</string>
+    <string name="employer_online_services_contract_row_chip">ردیف %1$s</string>
+    <string name="employer_online_services_contract_row_national_code">کد ملی</string>
+    <string name="employer_online_services_contract_row_ticket_code">کد بلیت</string>
+    <string name="employer_online_services_contract_row_email">پست الکترونیک</string>
+    <string name="employer_online_services_contract_row_mobile">تلفن همراه</string>
+    <string name="employer_online_services_contract_row_landline">تلفن ثابت</string>
+    <string name="employer_online_services_contract_row_period">بازهٔ قرارداد</string>
+    <string name="employer_online_services_contract_row_period_value">%1$s تا %2$s</string>
+    <string name="employer_online_services_contract_rows_empty_title">ردیفی برای این کارگاه یافت نشد</string>
+    <string name="employer_online_services_contract_rows_empty_subtitle">این کارگاه ردیف پیمانی ثبت‌شده‌ای ندارد.</string>
+    <string name="employer_online_services_contract_rows_error_title">دریافت ردیف‌های پیمان ناموفق بود</string>
 
     <string name="history_objection_title">اعتراض سابقه ناموجود</string>
     <string name="history_objection_empty_title">هیچ سابقهٔ ناموجودی ثبت نکرده‌اید</string>

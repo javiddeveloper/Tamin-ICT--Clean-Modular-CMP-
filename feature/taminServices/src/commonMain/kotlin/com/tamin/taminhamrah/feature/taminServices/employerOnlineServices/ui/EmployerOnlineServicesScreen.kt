@@ -43,6 +43,7 @@ import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contra
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contract.EmployerOnlineServicesErrorSource
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contract.EmployerOnlineServicesEvent
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contract.EmployerOnlineServicesIntent
+import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contract.EmployerOnlineServicesScreen
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contract.EmployerOnlineServicesUiState
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.components.EmployerAgreementCard
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.components.EmployerOnlineServicesFilterChipRow
@@ -57,6 +58,7 @@ import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.mod
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.TaminText
@@ -107,11 +109,22 @@ fun EmployerOnlineServicesRoute(
         onNavigateBack = onBackClicked,
     )
 
-    EmployerOnlineServicesScreen(
-        uiState = uiState,
-        onIntent = viewModel::sendIntent,
-        onBackClicked = onBackClicked,
-    )
+    when (uiState.currentScreen) {
+        EmployerOnlineServicesScreen.AGREEMENTS_LIST -> EmployerAgreementsListScreen(
+            uiState = uiState,
+            onIntent = viewModel::sendIntent,
+            onBackClicked = onBackClicked,
+        )
+
+        EmployerOnlineServicesScreen.CONTRACT_ROWS -> {
+            BackHandler(onBack = { viewModel.sendIntent(EmployerOnlineServicesIntent.CloseContractRows) })
+            EmployerContractRowsScreen(
+                uiState = uiState,
+                onIntent = viewModel::sendIntent,
+                onBackClicked = { viewModel.sendIntent(EmployerOnlineServicesIntent.CloseContractRows) },
+            )
+        }
+    }
 }
 
 @Composable
@@ -131,7 +144,7 @@ private fun EmployerOnlineServicesEvents(
 }
 
 @Composable
-internal fun EmployerOnlineServicesScreen(
+internal fun EmployerAgreementsListScreen(
     uiState: EmployerOnlineServicesUiState,
     onIntent: (EmployerOnlineServicesIntent) -> Unit,
     onBackClicked: () -> Unit,
@@ -406,7 +419,7 @@ private val PreviewLoadedState = EmployerOnlineServicesUiState(
 private fun EmployerOnlineServicesScreenPreviewLight() {
     PreviewRtlThemeContent {
         AppToastHost {
-            EmployerOnlineServicesScreen(uiState = PreviewLoadedState, onIntent = {}, onBackClicked = {})
+            EmployerAgreementsListScreen(uiState = PreviewLoadedState, onIntent = {}, onBackClicked = {})
         }
     }
 }
@@ -416,7 +429,7 @@ private fun EmployerOnlineServicesScreenPreviewLight() {
 private fun EmployerOnlineServicesScreenPreviewDark() {
     PreviewRtlThemeContent(darkTheme = true) {
         AppToastHost {
-            EmployerOnlineServicesScreen(uiState = PreviewLoadedState, onIntent = {}, onBackClicked = {})
+            EmployerAgreementsListScreen(uiState = PreviewLoadedState, onIntent = {}, onBackClicked = {})
         }
     }
 }
@@ -426,7 +439,7 @@ private fun EmployerOnlineServicesScreenPreviewDark() {
 private fun EmployerOnlineServicesScreenEmptyPreview() {
     PreviewRtlThemeContent {
         AppToastHost {
-            EmployerOnlineServicesScreen(
+            EmployerAgreementsListScreen(
                 uiState = EmployerOnlineServicesUiState(
                     agreementsList = AgreementsListUiState(identity = PreviewIdentity),
                 ),
@@ -442,7 +455,7 @@ private fun EmployerOnlineServicesScreenEmptyPreview() {
 private fun EmployerOnlineServicesScreenLoadingPreview() {
     PreviewRtlThemeContent(darkTheme = true) {
         AppToastHost {
-            EmployerOnlineServicesScreen(
+            EmployerAgreementsListScreen(
                 uiState = EmployerOnlineServicesUiState(isLoading = true),
                 onIntent = {},
                 onBackClicked = {},
@@ -458,7 +471,7 @@ private val PreviewNoMatchSearchCriteria = EmployerAgreementSearch(workshopCode 
 private fun EmployerOnlineServicesScreenSearchEmptyPreviewLight() {
     PreviewRtlThemeContent {
         AppToastHost {
-            EmployerOnlineServicesScreen(
+            EmployerAgreementsListScreen(
                 uiState = PreviewLoadedState,
                 onIntent = {},
                 onBackClicked = {},
@@ -473,7 +486,7 @@ private fun EmployerOnlineServicesScreenSearchEmptyPreviewLight() {
 private fun EmployerOnlineServicesScreenSearchEmptyPreviewDark() {
     PreviewRtlThemeContent(darkTheme = true) {
         AppToastHost {
-            EmployerOnlineServicesScreen(
+            EmployerAgreementsListScreen(
                 uiState = PreviewLoadedState,
                 onIntent = {},
                 onBackClicked = {},
