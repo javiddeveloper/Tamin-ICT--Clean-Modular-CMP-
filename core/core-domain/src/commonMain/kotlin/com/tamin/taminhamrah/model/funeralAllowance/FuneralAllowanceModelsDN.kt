@@ -37,9 +37,10 @@ data class RegisteredFuneralRequestDN(
 )
 
 /**
- * Result of `shortterm/validateFuneral/{nationalCode}`, parsed from the positional string array
- * (native `DeceasedInfoResponse`). [isEligible] mirrors legacy: the raw list must have at least
- * 8 entries and `data[6] == "1"`.
+ * Result of `shortterm/validateFuneral/{nationalCode}`. The backend's raw positional string array
+ * is decoded into named fields by `DeceasedValidationDTO.fromPositional` in core-network; this is
+ * the mapped domain view. [isEligible] mirrors legacy (the raw list must carry at least 8 entries
+ * and `data[6] == "1"`); [deathDate] is already formatted `yyyy/MM/dd` by the DTO→domain mapper.
  */
 data class DeceasedValidationDN(
     val deceasedFullName: String,
@@ -49,26 +50,7 @@ data class DeceasedValidationDN(
     val message: String,
     val dependentStatus: String,
     val deathDate: String,
-) {
-    companion object {
-        fun fromRawList(data: List<String?>): DeceasedValidationDN {
-            val eligible = data.size >= 8 && data.getOrNull(6) == "1"
-            val rawDeathDate = data.getOrNull(13).orEmpty()
-            val formattedDeathDate = if (rawDeathDate.length == 8) {
-                "${rawDeathDate.substring(0, 4)}/${rawDeathDate.substring(4, 6)}/${rawDeathDate.substring(6, 8)}"
-            } else rawDeathDate
-
-            return DeceasedValidationDN(
-                deceasedFullName = data.getOrNull(4).orEmpty(),
-                relationship = data.getOrNull(5).orEmpty(),
-                isEligible = eligible,
-                message = data.getOrNull(7).orEmpty(),
-                dependentStatus = data.getOrNull(9).orEmpty(),
-                deathDate = formattedDeathDate,
-            )
-        }
-    }
-}
+)
 
 /** Everything needed to POST `funeral-no-presence/saveShorttremFuneral`. */
 data class SubmitFuneralAllowanceParamsDN(

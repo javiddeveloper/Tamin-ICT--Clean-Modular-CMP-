@@ -2,85 +2,17 @@ package com.tamin.taminhamrah.model.funeralAllowance
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 /**
- * [DeceasedValidationDN.fromRawList] parses the positional string array the backend returns from
- * `shortterm/validateFuneral/{nationalCode}` (native `DeceasedInfoResponse`). The index map and the
- * "at least 8 entries and data[6] == \"1\"" eligibility rule are legacy behaviour, so each edge is
- * pinned here. [FuneralAllowanceInfoDN.toSubmitParams] and [fullName] are also covered.
+ * Covers the pure domain helpers on the funeral-allowance models: [FuneralAllowanceInfoDN.toSubmitParams]
+ * and [FuneralAllowanceInfoDN.fullName].
+ *
+ * The positional-array decoding that used to live here (`DeceasedValidationDN.fromRawList`) moved to
+ * `DeceasedValidationDTO.fromPositional` in core-network — its edge cases are pinned in that module's
+ * `DeceasedValidationDTOTest`, and the DTO→domain date formatting in core-data's
+ * `FuneralAllowanceRepositoryImplTest`.
  */
 class FuneralAllowanceModelsTest {
-
-    private fun rawList(
-        name: String = "زهرا رضایی",
-        relationship: String = "همسر",
-        eligibleFlag: String = "1",
-        message: String = "دارای شرایط می‌باشید",
-        dependentStatus: String = "همسر",
-        deathDate: String = "14050110",
-    ): List<String?> = listOf(
-        "0", "1", "2", "3",       // [0..3] unused
-        name,                     // [4]
-        relationship,             // [5]
-        eligibleFlag,             // [6]
-        message,                  // [7]
-        "8",                      // [8] unused
-        dependentStatus,          // [9]
-        "10", "11", "12",         // [10..12] unused
-        deathDate,                // [13]
-    )
-
-    @Test
-    fun `fromRawList maps the positional fields the app uses`() {
-        val result = DeceasedValidationDN.fromRawList(rawList())
-
-        assertEquals("زهرا رضایی", result.deceasedFullName)
-        assertEquals("همسر", result.relationship)
-        assertEquals("دارای شرایط می‌باشید", result.message)
-        assertEquals("همسر", result.dependentStatus)
-        assertTrue(result.isEligible)
-    }
-
-    @Test
-    fun `fromRawList formats an 8-digit death date as yyyy slash MM slash dd`() {
-        val result = DeceasedValidationDN.fromRawList(rawList(deathDate = "14050110"))
-
-        assertEquals("1405/01/10", result.deathDate)
-    }
-
-    @Test
-    fun `fromRawList leaves a non 8-digit death date untouched`() {
-        val result = DeceasedValidationDN.fromRawList(rawList(deathDate = "1405/01/10"))
-
-        assertEquals("1405/01/10", result.deathDate)
-    }
-
-    @Test
-    fun `fromRawList treats a non-1 eligibility flag as not eligible`() {
-        assertFalse(DeceasedValidationDN.fromRawList(rawList(eligibleFlag = "0")).isEligible)
-        assertFalse(DeceasedValidationDN.fromRawList(rawList(eligibleFlag = "")).isEligible)
-    }
-
-    @Test
-    fun `fromRawList treats a short list as not eligible and falls back to empty strings`() {
-        val result = DeceasedValidationDN.fromRawList(listOf("a", "b", "c"))
-
-        assertFalse(result.isEligible)
-        assertEquals("", result.deceasedFullName)
-        assertEquals("", result.relationship)
-        assertEquals("", result.deathDate)
-    }
-
-    @Test
-    fun `fromRawList tolerates null entries`() {
-        val list = rawList().toMutableList().also { it[4] = null; it[5] = null }
-        val result = DeceasedValidationDN.fromRawList(list)
-
-        assertEquals("", result.deceasedFullName)
-        assertEquals("", result.relationship)
-    }
 
     @Test
     fun `toSubmitParams copies branch and insured fields and the entered deceased id`() {

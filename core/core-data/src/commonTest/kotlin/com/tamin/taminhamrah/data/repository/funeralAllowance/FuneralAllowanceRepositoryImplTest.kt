@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.data.repository.funeralAllowance
 
 import com.tamin.taminhamrah.dataSource.funeralAllowance.FuneralAllowanceRemoteDataSource
+import com.tamin.taminhamrah.model.funeralAllowance.DeceasedValidationDTO
 import com.tamin.taminhamrah.model.funeralAllowance.FuneralAllowanceInfoDTO
 import com.tamin.taminhamrah.model.funeralAllowance.FuneralAllowanceRequestDTO
 import com.tamin.taminhamrah.model.funeralAllowance.SubmitFuneralAllowanceParamsDN
@@ -13,7 +14,7 @@ import kotlin.test.assertTrue
 
 class FakeFuneralAllowanceRemoteDataSource : FuneralAllowanceRemoteDataSource {
     var infoResult: FuneralAllowanceInfoDTO = FuneralAllowanceInfoDTO()
-    var validateResult: List<String?> = emptyList()
+    var validateResult: DeceasedValidationDTO = DeceasedValidationDTO()
     var submitResult: String = "درخواست شما ثبت شد"
     var confirmResult: String = "درخواست شما ثبت شد"
 
@@ -27,7 +28,7 @@ class FakeFuneralAllowanceRemoteDataSource : FuneralAllowanceRemoteDataSource {
         return infoResult
     }
 
-    override suspend fun validateDeceased(nationalCode: String): List<String?> {
+    override suspend fun validateDeceased(nationalCode: String): DeceasedValidationDTO {
         shouldThrowError?.let { throw it }
         lastValidateNationalCode = nationalCode
         return validateResult
@@ -78,10 +79,14 @@ class FuneralAllowanceRepositoryImplTest {
     }
 
     @Test
-    fun validateDeceased_appliesFromRawListParsing() = runTest {
-        remoteDataSource.validateResult = listOf(
-            "0", "1", "2", "3", "زهرا رضایی", "همسر", "1", "دارای شرایط", "8", "همسر",
-            "10", "11", "12", "14050110",
+    fun validateDeceased_mapsDtoToDomainAndFormatsDeathDate() = runTest {
+        remoteDataSource.validateResult = DeceasedValidationDTO(
+            fullName = "زهرا رضایی",
+            relationship = "همسر",
+            isEligible = true,
+            message = "دارای شرایط",
+            dependentStatus = "همسر",
+            deathDateRaw = "14050110",
         )
 
         val result = repository.validateDeceased("0055667788")
@@ -94,12 +99,16 @@ class FuneralAllowanceRepositoryImplTest {
     }
 
     @Test
-    fun validateDeceased_shortList_isNotEligible() = runTest {
-        remoteDataSource.validateResult = listOf("a", "b", "c")
+    fun validateDeceased_passesThroughIneligibleAndNonYyyymmddDate() = runTest {
+        remoteDataSource.validateResult = DeceasedValidationDTO(
+            isEligible = false,
+            deathDateRaw = "1405/01/10",
+        )
 
         val result = repository.validateDeceased("0055667788")
 
         assertTrue(!result.isEligible)
+        assertEquals("1405/01/10", result.deathDate)
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.dataSource.funeralAllowance
 
 import com.tamin.taminhamrah.apiService.funeralAllowance.FuneralAllowanceApiService
+import com.tamin.taminhamrah.model.funeralAllowance.DeceasedValidationDTO
 import com.tamin.taminhamrah.model.funeralAllowance.FuneralAllowanceInfoDTO
 import com.tamin.taminhamrah.model.funeralAllowance.FuneralAllowanceRequestDTO
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
@@ -26,9 +27,9 @@ internal class FuneralAllowanceRemoteDataSourceImpl(
         }
     }
 
-    override suspend fun validateDeceased(nationalCode: String): List<String?> {
+    override suspend fun validateDeceased(nationalCode: String): DeceasedValidationDTO {
         return try {
-            apiService.validateDeceased(nationalCode).extractData()
+            DeceasedValidationDTO.fromPositional(apiService.validateDeceased(nationalCode).extractData())
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {

@@ -20,10 +20,10 @@ internal interface FuneralAllowanceApiService {
     suspend fun getFuneralAllowanceInfo(): BaseDTO<FuneralAllowanceInfoDTO>
 
     /**
-     * Eligibility check for the deceased. `data` is a positional string array; the parts the app
-     * uses (native `DeceasedInfoResponse`):
-     * `[4]` deceased full name, `[5]` relationship, `[6]` eligibility flag ("1" = eligible),
-     * `[7]` message shown when not eligible.
+     * Eligibility check for the deceased. `data` is a bare positional string array (native
+     * `DeceasedInfoResponse`); the raw list is decoded into named fields by
+     * [com.tamin.taminhamrah.model.funeralAllowance.DeceasedValidationDTO.fromPositional] in the
+     * remote data source — see that type's KDoc for the slot map. Callers never index it directly.
      */
     @GET("shortterm/validateFuneral/{nationalCode}")
     suspend fun validateDeceased(

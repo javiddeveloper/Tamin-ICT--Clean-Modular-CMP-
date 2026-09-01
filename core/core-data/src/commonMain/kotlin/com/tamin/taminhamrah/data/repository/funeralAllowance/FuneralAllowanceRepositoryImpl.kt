@@ -16,7 +16,7 @@ class FuneralAllowanceRepositoryImpl(
         remoteDataSource.getFuneralAllowanceInfo().toDomain()
 
     override suspend fun validateDeceased(nationalCode: String): DeceasedValidationDN =
-        DeceasedValidationDN.fromRawList(remoteDataSource.validateDeceased(nationalCode))
+        remoteDataSource.validateDeceased(nationalCode).toDomain()
 
     override suspend fun submitFuneralAllowanceRequest(params: SubmitFuneralAllowanceParamsDN): String =
         remoteDataSource.submitFuneralAllowanceRequest(params.toRequestDTO())

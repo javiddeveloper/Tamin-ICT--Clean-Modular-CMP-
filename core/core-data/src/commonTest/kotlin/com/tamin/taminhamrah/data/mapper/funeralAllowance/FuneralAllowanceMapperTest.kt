@@ -1,11 +1,13 @@
 package com.tamin.taminhamrah.data.mapper.funeralAllowance
 
+import com.tamin.taminhamrah.model.funeralAllowance.DeceasedValidationDTO
 import com.tamin.taminhamrah.model.funeralAllowance.FuneralAllowanceInfoDTO
 import com.tamin.taminhamrah.model.funeralAllowance.RequestFuneralDTO
 import com.tamin.taminhamrah.model.funeralAllowance.SubmitFuneralAllowanceParamsDN
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class FuneralAllowanceMapperTest {
 
@@ -91,6 +93,31 @@ class FuneralAllowanceMapperTest {
         assertEquals(0L, registered.requestId)
         assertEquals("", registered.statusName)
         assertNull(registered.requestTimestamp)
+    }
+
+    @Test
+    fun deceasedValidationDto_toDomain_copiesFieldsAndFormatsYyyymmddDeathDate() {
+        val domain = DeceasedValidationDTO(
+            fullName = "زهرا رضایی",
+            relationship = "همسر",
+            isEligible = true,
+            message = "دارای شرایط",
+            dependentStatus = "همسر",
+            deathDateRaw = "14050110",
+        ).toDomain()
+
+        assertEquals("زهرا رضایی", domain.deceasedFullName)
+        assertEquals("همسر", domain.relationship)
+        assertTrue(domain.isEligible)
+        assertEquals("دارای شرایط", domain.message)
+        assertEquals("همسر", domain.dependentStatus)
+        assertEquals("1405/01/10", domain.deathDate)
+    }
+
+    @Test
+    fun deceasedValidationDto_toDomain_leavesANonYyyymmddDeathDateUntouched() {
+        assertEquals("1405/01/10", DeceasedValidationDTO(deathDateRaw = "1405/01/10").toDomain().deathDate)
+        assertEquals("", DeceasedValidationDTO(deathDateRaw = "").toDomain().deathDate)
     }
 
     @Test

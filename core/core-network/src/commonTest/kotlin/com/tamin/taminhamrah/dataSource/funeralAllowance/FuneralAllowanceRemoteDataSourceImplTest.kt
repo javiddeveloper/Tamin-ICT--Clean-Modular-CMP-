@@ -16,6 +16,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 class FakeFuneralAllowanceApiService : FuneralAllowanceApiService {
     var infoResult: BaseDTO<FuneralAllowanceInfoDTO> =
@@ -83,14 +84,36 @@ class FuneralAllowanceRemoteDataSourceImplTest {
     }
 
     @Test
-    fun validateDeceased_success_forwardsCodeAndReturnsRawList() = runTest {
-        val raw = listOf<String?>("0", "1", "2", "3", "زهرا", "همسر", "1")
+    fun validateDeceased_success_forwardsCodeAndDecodesPositionalArray() = runTest {
+        val raw = listOf<String?>(
+            "0", "1", "2", "3", "زهرا رضایی", "همسر", "1", "دارای شرایط", "8", "همسر",
+            "10", "11", "12", "14050110",
+        )
         apiService.validateResult = BaseDTO(status = 200, family = "OK", reason = "OK", data = raw)
 
         val result = dataSource.validateDeceased("0055667788")
 
-        assertEquals(raw, result)
         assertEquals("0055667788", apiService.lastValidateNationalCode)
+        assertEquals("زهرا رضایی", result.fullName)
+        assertEquals("همسر", result.relationship)
+        assertTrue(result.isEligible)
+        assertEquals("دارای شرایط", result.message)
+        assertEquals("14050110", result.deathDateRaw)
+    }
+
+    @Test
+    fun validateDeceased_shortArray_decodesAsNotEligibleWithBlankFields() = runTest {
+        apiService.validateResult = BaseDTO(
+            status = 200, family = "OK", reason = "OK",
+            data = listOf<String?>("0", "1", "2", "3", "زهرا"),
+        )
+
+        val result = dataSource.validateDeceased("0055667788")
+
+        assertTrue(!result.isEligible)
+        assertEquals("زهرا", result.fullName)
+        assertEquals("", result.relationship)
+        assertEquals("", result.deathDateRaw)
     }
 
     @Test
