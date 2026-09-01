@@ -4,24 +4,31 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
@@ -43,6 +50,12 @@ fun TaminDocumentSourceSheet(
     onSelectCamera: () -> Unit,
     onSelectGallery: () -> Unit,
     onRemove: (() -> Unit)? = null,
+    /**
+     * Glyphs for the two source rows. Both null — the default — keeps the text-only sheet every
+     * existing caller was built against.
+     */
+    cameraIcon: ImageVector? = null,
+    galleryIcon: ImageVector? = null,
     onDismiss: () -> Unit,
 ) {
     val colors = LocalTaminColors.current
@@ -76,11 +89,13 @@ fun TaminDocumentSourceSheet(
                 TaminDocumentSourceRow(
                     title = stringResource(Res.string.occurrence_document_source_camera_title),
                     subtitle = stringResource(Res.string.occurrence_document_source_camera_subtitle),
+                    icon = cameraIcon,
                     onClick = onSelectCamera,
                 )
                 TaminDocumentSourceRow(
                     title = stringResource(Res.string.occurrence_document_source_gallery_title),
                     subtitle = stringResource(Res.string.occurrence_document_source_gallery_subtitle),
+                    icon = galleryIcon,
                     onClick = onSelectGallery,
                 )
                 if (showRemoveOption && onRemove != null) {
@@ -101,6 +116,7 @@ private fun TaminDocumentSourceRow(
     title: String,
     subtitle: String?,
     onClick: () -> Unit,
+    icon: ImageVector? = null,
     isDestructive: Boolean = false,
 ) {
     val colors = LocalTaminColors.current
@@ -108,7 +124,7 @@ private fun TaminDocumentSourceRow(
     val background = if (isDestructive) colors.dangerBg else colors.bgSurface
     val border = if (isDestructive) colors.dangerBorder else colors.border
 
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = OptionRowMinHeight)
@@ -117,19 +133,40 @@ private fun TaminDocumentSourceRow(
             .border(Thickness.border, border, RoundedCornerShape(CornerRadius.lg))
             .clickable(onClick = onClick)
             .padding(horizontal = Spacing.lg, vertical = Spacing.lg),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-            color = titleColor,
-        )
-        if (subtitle != null) {
-            Spacer(Modifier.height(Spacing.xxs))
+        if (icon != null) {
+            Box(
+                modifier = Modifier
+                    .size(IconTileSize)
+                    .background(colors.blueBg, RoundedCornerShape(CornerRadius.textFieldIcon)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = if (isDestructive) colors.dangerText else colors.blueText,
+                    modifier = Modifier.size(IconSize.small),
+                )
+            }
+        }
+        Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = subtitle,
-                style = MaterialTheme.typography.labelSmall,
-                color = colors.textMuted,
+                text = title,
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = titleColor,
             )
+            if (subtitle != null) {
+                Spacer(Modifier.height(Spacing.xxs))
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = colors.textMuted,
+                )
+            }
         }
     }
 }
+
+private val IconTileSize = 30.dp

@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -55,10 +56,16 @@ fun LoadingButton(
     /** Shorter than the page-level default for a button that sits inside a form footer. */
     height: Dp = ButtonDimens.height,
     shape: Shape = RoundedCornerShape(CornerRadius.xl),
+    /**
+     * The enabled fill. Defaults to the app's primary blue; pass
+     * [com.tamin.taminhamrah.ui.theme.SemanticColors.successGradient] for the confirming action
+     * that ends a flow, which the design paints green. The disabled fill never varies.
+     */
+    enabledBrush: Brush? = null,
 ) {
     val taminColors = LocalTaminColors.current
     val backgroundBrush = if (enabled) {
-        taminColors.buttonGradient
+        enabledBrush ?: taminColors.buttonGradient
     } else {
         taminColors.buttonDisabledGradient
     }

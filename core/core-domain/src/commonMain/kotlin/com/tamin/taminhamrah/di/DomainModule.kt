@@ -37,6 +37,8 @@ import com.tamin.taminhamrah.useCases.pension.SendPayRollToInboxUseCase
 import com.tamin.taminhamrah.useCases.pension.GetUserAgeUseCase
 import com.tamin.taminhamrah.useCases.pension.GetRetirementRequestInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.CheckRetirementStatusUseCase
+import com.tamin.taminhamrah.useCases.pension.GetAuthenticationCodeUseCase
+import com.tamin.taminhamrah.useCases.pension.AuthenticationAndGetPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.CreateRetirementRequestUseCase
 import com.tamin.taminhamrah.useCases.pension.SendRetirementDocumentUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.DeleteMyRequestUseCase
@@ -251,6 +253,10 @@ val domainModule = module {
     factoryOf(::GetUserAgeUseCase)
     factoryOf(::GetRetirementRequestInfoUseCase)
     factoryOf(::CheckRetirementStatusUseCase)
+    factoryOf(::GetAuthenticationCodeUseCase)
+    factoryOf(::AuthenticationAndGetPersonalInfoUseCase)
+    factoryOf(::CreateRetirementRequestUseCase)
+    factoryOf(::SendRetirementDocumentUseCase)
     factoryOf(::GetEdictPensionerUseCase)
     factoryOf(::GetEdictReportPDFUseCase)
     factoryOf(::SendEdictPensionerToMyInboxUseCase)

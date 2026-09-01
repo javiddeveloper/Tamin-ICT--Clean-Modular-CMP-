@@ -53,6 +53,7 @@ kotlin {
             api(project(":feature:pregnancyPay"))
             api(project(":feature:deferredInstallment"))
             api(project(":feature:history-objection"))
+            api(project(":feature:retirementPension"))
             api(project(":feature:pensionSurvivor"))
             api(project(":feature:inquiryEducation"))
             api(libs.androidx.lifecycle.viewmodel)
