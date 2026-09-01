@@ -1,6 +1,8 @@
 package com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui
 
 import com.tamin.taminhamrah.base.BaseViewModel
+import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contract.AgreementRequestStep
+import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contract.AgreementRequestUiState
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contract.ContractRowsUiState
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contract.EmployerOnlineServicesErrorSource
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contract.EmployerOnlineServicesEvent
@@ -8,19 +10,26 @@ import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contra
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contract.EmployerOnlineServicesUiState
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contract.EmployerOnlineServicesUiState.PartialState
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contract.EmployerOnlineServicesScreen
+import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.mapper.toAgreementDocumentPR
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.mapper.toIdentityCardPR
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.mapper.toRowPR
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmissionDN
 import com.tamin.taminhamrah.model.workshop.WorkshopListQuery
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
+import com.tamin.taminhamrah.useCases.content.GetLegalDocumentUseCase
 import com.tamin.taminhamrah.useCases.user.GetUserProfileUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetEmployerAgreementContactInfoUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetEmployerAgreementsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopContractRowsUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetWorkshopsWithoutContractUseCase
+import com.tamin.taminhamrah.useCases.workshops.RequestEmployerAgreementTicketUseCase
+import com.tamin.taminhamrah.useCases.workshops.SubmitEmployerAgreementUseCase
+import com.tamin.taminhamrah.util.LegalDocumentIds
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
@@ -33,16 +42,28 @@ import kotlinx.coroutines.flow.onStart
  * screen with a fatal, retryable error tagged to that call — the same per-source error map the
  * inspection wizard uses. A card's "ردیف‌های پیمان" tap switches [EmployerOnlineServicesUiState.currentScreen]
  * to [EmployerOnlineServicesScreen.CONTRACT_ROWS] and loads that workshop's rows
- * ([GetWorkshopContractRowsUseCase]). Wizard steps for "ثبت درخواست تعهدنامه" attach to this same
- * ViewModel/contract when their design lands (see `TODO(step 2+)`).
+ * ([GetWorkshopContractRowsUseCase]).
+ *
+ * "ثبت درخواست تعهدنامه" opens [EmployerOnlineServicesScreen.REQUEST_WIZARD] — the same shared
+ * ViewModel drives its two steps (اعتبارسنجی → پذیرش تعهدنامه) through [AgreementRequestUiState]:
+ * [RequestEmployerAgreementTicketUseCase] sends the OTP to the registered mobile, then
+ * [GetEmployerAgreementContactInfoUseCase] verifies the code and reads back the employer identity.
  */
 class EmployerOnlineServicesViewModel(
     private val getUserProfileUseCase: GetUserProfileUseCase,
     private val getEmployerAgreementsUseCase: GetEmployerAgreementsUseCase,
     private val getWorkshopContractRowsUseCase: GetWorkshopContractRowsUseCase,
+    private val requestEmployerAgreementTicketUseCase: RequestEmployerAgreementTicketUseCase,
+    private val getEmployerAgreementContactInfoUseCase: GetEmployerAgreementContactInfoUseCase,
+    private val getWorkshopsWithoutContractUseCase: GetWorkshopsWithoutContractUseCase,
+    private val getLegalDocumentUseCase: GetLegalDocumentUseCase,
+    private val submitEmployerAgreementUseCase: SubmitEmployerAgreementUseCase,
 ) : BaseViewModel<EmployerOnlineServicesUiState, PartialState, EmployerOnlineServicesEvent, EmployerOnlineServicesIntent>(
     initialState = EmployerOnlineServicesUiState(),
 ) {
+
+    /** Bumped on every successful (re)send so the code screen's countdown restarts. */
+    private var ticketNonce = 0
 
     init {
         sendIntent(EmployerOnlineServicesIntent.Load)
@@ -60,9 +81,53 @@ class EmployerOnlineServicesViewModel(
             }
             .onCompletion { emit(PartialState.Loading(false)) }
 
-        // TODO(step 2+): replace with the agreement-request wizard once its design is available.
-        EmployerOnlineServicesIntent.OpenAgreementRequest ->
-            flow<PartialState> { sendEvent(EmployerOnlineServicesEvent.ShowComingSoon) }
+        EmployerOnlineServicesIntent.OpenAgreementRequest -> flow<PartialState> {
+            emit(PartialState.RequestWizardOpened)
+            emit(PartialState.ScreenChanged(EmployerOnlineServicesScreen.REQUEST_WIZARD))
+        }
+
+        EmployerOnlineServicesIntent.CloseAgreementRequest ->
+            flow<PartialState> { emit(PartialState.RequestWizardClosed) }
+
+        is EmployerOnlineServicesIntent.UpdateRequestEmail ->
+            flow<PartialState> { emit(PartialState.RequestEmailUpdated(intent.email)) }
+
+        is EmployerOnlineServicesIntent.UpdateRequestCode ->
+            flow<PartialState> { emit(PartialState.RequestCodeUpdated(intent.code)) }
+
+        EmployerOnlineServicesIntent.RequestAgreementTicket -> requestTicket()
+            .onStart {
+                emit(PartialState.ErrorCleared(EmployerOnlineServicesErrorSource.REQUEST_TICKET))
+                emit(PartialState.RequestSubmitting(true))
+            }
+            .onCompletion { emit(PartialState.RequestSubmitting(false)) }
+
+        EmployerOnlineServicesIntent.EditAgreementContact ->
+            flow<PartialState> { emit(PartialState.RequestContactEditing) }
+
+        EmployerOnlineServicesIntent.VerifyAgreementCode -> verifyCode()
+            .onStart {
+                emit(PartialState.ErrorCleared(EmployerOnlineServicesErrorSource.VERIFY_CODE))
+                emit(PartialState.RequestSubmitting(true))
+            }
+            .onCompletion { emit(PartialState.RequestSubmitting(false)) }
+
+        is EmployerOnlineServicesIntent.SetAgreementAccepted ->
+            flow<PartialState> { emit(PartialState.AgreementAcceptedChanged(intent.accepted)) }
+
+        EmployerOnlineServicesIntent.SubmitAgreement -> submitAgreement()
+            .onStart {
+                emit(PartialState.ErrorCleared(EmployerOnlineServicesErrorSource.SUBMIT))
+                emit(PartialState.RequestSubmitting(true))
+            }
+            .onCompletion { emit(PartialState.RequestSubmitting(false)) }
+
+        EmployerOnlineServicesIntent.DismissAgreementSuccess -> flow<PartialState> {
+            emit(PartialState.RequestWizardClosed)
+            emitAll(loadAgreements())
+        }
+            .onStart { emit(PartialState.Loading(true)) }
+            .onCompletion { emit(PartialState.Loading(false)) }
 
         is EmployerOnlineServicesIntent.OpenContractRows -> flow<PartialState> {
             val row = intent.row
@@ -90,14 +155,19 @@ class EmployerOnlineServicesViewModel(
         EmployerOnlineServicesErrorSource.CONTRACT_ROWS -> uiState.value.contractRows.let {
             loadContractRows(it.workshopId, it.branchCode)
         }
+        EmployerOnlineServicesErrorSource.REQUEST_TICKET -> requestTicket()
+        EmployerOnlineServicesErrorSource.VERIFY_CODE -> verifyCode()
+        EmployerOnlineServicesErrorSource.STEP2_CONTENT -> uiState.value.agreementRequest.let {
+            loadStep2Content(name = it.employerName, nationalCode = it.employerNationalCode)
+        }
+        EmployerOnlineServicesErrorSource.SUBMIT -> submitAgreement()
     }
 
-    private fun loadIdentity(): Flow<PartialState> = flow {
-        emitAll(
-            getUserProfileUseCase().map { profile ->
-                PartialState.IdentityLoaded(profile.toIdentityCardPR()) as PartialState
-            },
-        )
+    private fun loadIdentity(): Flow<PartialState> = flow<PartialState> {
+        getUserProfileUseCase().collect { profile ->
+            emit(PartialState.IdentityLoaded(profile.toIdentityCardPR()))
+            emit(PartialState.ContactPrefillLoaded(profile.mobile.orEmpty(), profile.email.orEmpty()))
+        }
     }.catch { e ->
         emit(PartialState.Error(e.toSingleLineMessage(), EmployerOnlineServicesErrorSource.IDENTITY))
     }
@@ -114,6 +184,63 @@ class EmployerOnlineServicesViewModel(
         emit(PartialState.ContractRowsLoaded(page.items.map { it.toPresentation() }))
     }.catch { e ->
         emit(PartialState.Error(e.toSingleLineMessage(), EmployerOnlineServicesErrorSource.CONTRACT_ROWS))
+    }
+
+    private fun requestTicket(): Flow<PartialState> = flow<PartialState> {
+        val request = uiState.value.agreementRequest
+        requestEmployerAgreementTicketUseCase(mobile = request.mobile, email = request.email)
+        emit(PartialState.RequestTicketIssued(++ticketNonce))
+    }.catch { e ->
+        emit(PartialState.Error(e.toSingleLineMessage(), EmployerOnlineServicesErrorSource.REQUEST_TICKET))
+    }
+
+    private fun verifyCode(): Flow<PartialState> = flow<PartialState> {
+        val info = getEmployerAgreementContactInfoUseCase(uiState.value.agreementRequest.code).toPresentation()
+        emit(
+            PartialState.AgreementCodeVerified(
+                employerName = info.fullName,
+                employerNationalCode = info.nationalCode,
+                currentMobile = info.currentMobile,
+                currentEmail = info.currentEmail,
+            ),
+        )
+        emitAll(loadStep2Content(name = info.fullName, nationalCode = info.nationalCode))
+    }.catch { e ->
+        emit(PartialState.Error(e.toSingleLineMessage(), EmployerOnlineServicesErrorSource.VERIFY_CODE))
+    }
+
+    /** Step 2 needs both the کارگاه‌های بدون تعهدنامه list and the تعهدنامه wording; they load together. */
+    private fun loadStep2Content(name: String, nationalCode: String): Flow<PartialState> =
+        merge(loadWorkshopsWithoutContract(), loadAgreementDocument(name, nationalCode))
+            .onStart { emit(PartialState.Step2ContentLoading(true)) }
+            .onCompletion { emit(PartialState.Step2ContentLoading(false)) }
+
+    private fun loadWorkshopsWithoutContract(): Flow<PartialState> = flow<PartialState> {
+        val page = getWorkshopsWithoutContractUseCase(page = 0)
+        emit(PartialState.WorkshopsWithoutContractLoaded(page.items.map { it.toPresentation() }))
+    }.catch { e ->
+        emit(PartialState.Error(e.toSingleLineMessage(), EmployerOnlineServicesErrorSource.STEP2_CONTENT))
+    }
+
+    private fun loadAgreementDocument(name: String, nationalCode: String): Flow<PartialState> = flow<PartialState> {
+        val document = getLegalDocumentUseCase(LegalDocumentIds.EMPLOYER_ESERVICES_AGREEMENT)
+        emit(PartialState.AgreementDocumentLoaded(document.toAgreementDocumentPR(name, nationalCode)))
+    }.catch { e ->
+        emit(PartialState.Error(e.toSingleLineMessage(), EmployerOnlineServicesErrorSource.STEP2_CONTENT))
+    }
+
+    private fun submitAgreement(): Flow<PartialState> = flow<PartialState> {
+        val request = uiState.value.agreementRequest
+        submitEmployerAgreementUseCase(
+            EmployerAgreementSubmissionDN(
+                mobile = request.mobile,
+                email = request.email,
+                ticketCode = request.code,
+            ),
+        )
+        emit(PartialState.AgreementSubmitted)
+    }.catch { e ->
+        emit(PartialState.Error(e.toSingleLineMessage(), EmployerOnlineServicesErrorSource.SUBMIT))
     }
 
     override fun reduceState(
@@ -144,12 +271,101 @@ class EmployerOnlineServicesViewModel(
             errors = currentState.errors - EmployerOnlineServicesErrorSource.IDENTITY,
         )
 
+        is PartialState.ContactPrefillLoaded -> currentState.copy(
+            profileMobile = partialState.mobile,
+            profileEmail = partialState.email,
+        )
+
         is PartialState.AgreementsLoaded -> currentState.copy(
             agreementsList = currentState.agreementsList.copy(
                 agreements = partialState.agreements,
                 agreementCount = partialState.total,
             ),
             errors = currentState.errors - EmployerOnlineServicesErrorSource.AGREEMENTS,
+        )
+
+        PartialState.RequestWizardOpened -> currentState.copy(
+            agreementRequest = AgreementRequestUiState(
+                mobile = currentState.profileMobile,
+                email = currentState.profileEmail,
+            ),
+            errors = currentState.errors -
+                EmployerOnlineServicesErrorSource.REQUEST_TICKET -
+                EmployerOnlineServicesErrorSource.VERIFY_CODE,
+        )
+
+        PartialState.RequestWizardClosed -> currentState.copy(
+            currentScreen = EmployerOnlineServicesScreen.AGREEMENTS_LIST,
+            agreementRequest = AgreementRequestUiState(),
+            errors = currentState.errors -
+                EmployerOnlineServicesErrorSource.REQUEST_TICKET -
+                EmployerOnlineServicesErrorSource.VERIFY_CODE,
+        )
+
+        is PartialState.RequestEmailUpdated -> currentState.copy(
+            agreementRequest = currentState.agreementRequest.copy(email = partialState.email),
+        )
+
+        is PartialState.RequestCodeUpdated -> currentState.copy(
+            agreementRequest = currentState.agreementRequest.copy(code = partialState.code),
+        )
+
+        is PartialState.RequestTicketIssued -> currentState.copy(
+            agreementRequest = currentState.agreementRequest.copy(
+                ticketRequested = true,
+                ticketNonce = partialState.nonce,
+                code = "",
+            ),
+            errors = currentState.errors - EmployerOnlineServicesErrorSource.REQUEST_TICKET,
+        )
+
+        PartialState.RequestContactEditing -> currentState.copy(
+            agreementRequest = currentState.agreementRequest.copy(
+                step = AgreementRequestStep.VALIDATION,
+                ticketRequested = false,
+                code = "",
+            ),
+            errors = currentState.errors - EmployerOnlineServicesErrorSource.VERIFY_CODE,
+        )
+
+        is PartialState.RequestSubmitting -> currentState.copy(
+            agreementRequest = currentState.agreementRequest.copy(isSubmitting = partialState.submitting),
+        )
+
+        is PartialState.AgreementCodeVerified -> currentState.copy(
+            agreementRequest = currentState.agreementRequest.copy(
+                step = AgreementRequestStep.ACCEPT_AGREEMENT,
+                employerName = partialState.employerName,
+                employerNationalCode = partialState.employerNationalCode,
+                currentMobile = partialState.currentMobile,
+                currentEmail = partialState.currentEmail,
+                accepted = false,
+                isSubmitted = false,
+            ),
+            errors = currentState.errors - EmployerOnlineServicesErrorSource.VERIFY_CODE,
+        )
+
+        is PartialState.Step2ContentLoading -> currentState.copy(
+            agreementRequest = currentState.agreementRequest.copy(isStep2Loading = partialState.loading),
+        )
+
+        is PartialState.WorkshopsWithoutContractLoaded -> currentState.copy(
+            agreementRequest = currentState.agreementRequest.copy(
+                workshopsWithoutContract = partialState.workshops,
+            ),
+        )
+
+        is PartialState.AgreementDocumentLoaded -> currentState.copy(
+            agreementRequest = currentState.agreementRequest.copy(document = partialState.document),
+        )
+
+        is PartialState.AgreementAcceptedChanged -> currentState.copy(
+            agreementRequest = currentState.agreementRequest.copy(accepted = partialState.accepted),
+        )
+
+        PartialState.AgreementSubmitted -> currentState.copy(
+            agreementRequest = currentState.agreementRequest.copy(isSubmitted = true),
+            errors = currentState.errors - EmployerOnlineServicesErrorSource.SUBMIT,
         )
 
         is PartialState.Error -> currentState.copy(

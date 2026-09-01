@@ -1421,6 +1421,37 @@
     <string name="employer_online_services_contract_rows_empty_subtitle">این کارگاه ردیف پیمانی ثبت‌شده‌ای ندارد.</string>
     <string name="employer_online_services_contract_rows_error_title">دریافت ردیف‌های پیمان ناموفق بود</string>
 
+    <!-- Employer online services — "ثبت درخواست تعهدنامه" request wizard -->
+    <string name="employer_online_services_request_title">درخواست استفاده از خدمات غیرحضوری</string>
+    <string name="employer_online_services_request_step_validation">اعتبارسنجی</string>
+    <string name="employer_online_services_request_step_accept">پذیرش تعهدنامه</string>
+    <string name="employer_online_services_request_section_title">ثبت درخواست تعهدنامه</string>
+    <string name="employer_online_services_request_mobile_label">شماره تلفن همراه</string>
+    <string name="employer_online_services_request_email_label">پست الکترونیک</string>
+    <string name="employer_online_services_request_field_placeholder">وارد کنید</string>
+    <string name="employer_online_services_request_email_error">پست الکترونیک معتبر نیست</string>
+    <string name="employer_online_services_request_contact_hint">بلیت امنیتی به شمارهٔ همراه ثبت‌شده در حساب کاربری شما ارسال می‌شود. پست الکترونیک را در صورت تغییر اصلاح کنید.</string>
+    <string name="employer_online_services_request_send_code">ارسال پیامک اعتبارسنجی</string>
+    <string name="employer_online_services_request_resend_code">ارسال مجدد کد</string>
+    <string name="employer_online_services_request_code_card_title">کد اعتبارسنجی</string>
+    <string name="employer_online_services_request_code_sent_to">ارسال‌شده به %1$s</string>
+    <string name="employer_online_services_request_code_ttl_caption">زمان باقی مانده تا انقضای بلیت امنیتی</string>
+    <string name="employer_online_services_request_code_label">کد اعتبارسنجی</string>
+    <string name="employer_online_services_request_code_placeholder">- - - - -</string>
+    <string name="employer_online_services_request_verify">تأیید و مشاهدهٔ تعهدنامه</string>
+    <string name="employer_online_services_request_edit_contact">ویرایش اطلاعات</string>
+    <string name="employer_online_services_request_edit_hint">برای بازگشت و اصلاح داده‌ها، دکمهٔ ویرایش اطلاعات را بزنید.</string>
+    <string name="employer_online_services_request_new_mobile">شماره همراه جدید</string>
+    <string name="employer_online_services_request_current_mobile">شماره همراه فعلی</string>
+    <string name="employer_online_services_request_new_email">پست الکترونیک جدید</string>
+    <string name="employer_online_services_request_current_email">پست الکترونیک فعلی</string>
+    <string name="employer_online_services_request_workshops_without_contract">کارگاه‌های بدون تعهدنامهٔ غیرحضوری</string>
+    <string name="employer_online_services_request_submit">ثبت تعهدنامه</string>
+    <string name="employer_online_services_request_step2_error_title">دریافت اطلاعات تعهدنامه ناموفق بود</string>
+    <string name="employer_online_services_request_success_title">تعهدنامه ثبت شد</string>
+    <string name="employer_online_services_request_success_body">تعهدنامهٔ خدمات غیرحضوری کارفرمایان با موفقیت ثبت شد و در فهرست تعهدنامه‌های شما قابل مشاهده است.</string>
+    <string name="employer_online_services_request_success_dismiss">متوجه شدم</string>
+
     <string name="history_objection_title">اعتراض سابقه ناموجود</string>
     <string name="history_objection_empty_title">هیچ سابقهٔ ناموجودی ثبت نکرده‌اید</string>
     <string name="history_objection_empty_subtitle">اگر بازه‌ای از کارکرد شما در «کلیهٔ سوابق» دیده نمی‌شود، همین‌جا آن را اعلام کنید.</string>

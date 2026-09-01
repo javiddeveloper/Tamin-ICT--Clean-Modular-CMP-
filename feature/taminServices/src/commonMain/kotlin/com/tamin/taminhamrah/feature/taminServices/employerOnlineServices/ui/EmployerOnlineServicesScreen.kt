@@ -77,7 +77,6 @@ import com.tamin.taminhamrah.ui.theme.TaminNavy900
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.employer_online_services_coming_soon_toast
 import taminx.core.core_ui.employer_online_services_count_label
 import taminx.core.core_ui.employer_online_services_empty_subtitle
 import taminx.core.core_ui.employer_online_services_empty_title
@@ -104,12 +103,10 @@ fun EmployerOnlineServicesRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val toaster = LocalToaster.current
-    val comingSoonMessage = stringResource(Res.string.employer_online_services_coming_soon_toast)
 
     EmployerOnlineServicesEvents(
         events = viewModel.events,
         onShowToast = { toaster.error(it) },
-        onShowComingSoon = { toaster.error(comingSoonMessage) },
         onNavigateBack = onBackClicked,
     )
 
@@ -128,6 +125,12 @@ fun EmployerOnlineServicesRoute(
                 onBackClicked = { viewModel.sendIntent(EmployerOnlineServicesIntent.CloseContractRows) },
             )
         }
+
+        EmployerOnlineServicesScreen.REQUEST_WIZARD -> EmployerAgreementRequestScreen(
+            uiState = uiState,
+            onIntent = viewModel::sendIntent,
+            onClose = { viewModel.sendIntent(EmployerOnlineServicesIntent.CloseAgreementRequest) },
+        )
     }
 }
 
@@ -135,13 +138,11 @@ fun EmployerOnlineServicesRoute(
 private fun EmployerOnlineServicesEvents(
     events: Flow<EmployerOnlineServicesEvent>,
     onShowToast: (String) -> Toast,
-    onShowComingSoon: () -> Toast,
     onNavigateBack: () -> Unit,
 ) {
     events.collectWithLifecycleAware { event ->
         when (event) {
             is EmployerOnlineServicesEvent.ShowToast -> onShowToast(event.message)
-            EmployerOnlineServicesEvent.ShowComingSoon -> onShowComingSoon()
             EmployerOnlineServicesEvent.NavigateBack -> onNavigateBack()
         }
     }

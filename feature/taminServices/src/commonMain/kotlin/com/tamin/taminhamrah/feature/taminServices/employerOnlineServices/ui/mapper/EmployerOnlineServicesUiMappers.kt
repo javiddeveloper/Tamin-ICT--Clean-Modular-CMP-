@@ -1,7 +1,9 @@
 package com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.mapper
 
+import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.model.AgreementDocumentPR
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.model.EmployerAgreementRowPR
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.model.IdentityCardPR
+import com.tamin.taminhamrah.model.content.LegalDocumentDN
 import com.tamin.taminhamrah.model.user.UserProfileDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
 import com.tamin.taminhamrah.model.workshop.WorkshopActivityStatus
@@ -42,6 +44,17 @@ fun EmployerAgreementDN.toRowPR(): EmployerAgreementRowPR = with(workshop) {
         email = this@toRowPR.email.orDash(),
     )
 }
+
+/**
+ * Bakes the signed-in employer's identity into the تعهدنامه intro (the `{name}` / `{nationalCode}`
+ * placeholders the document ships with) so the card renders one finished paragraph.
+ */
+fun LegalDocumentDN.toAgreementDocumentPR(name: String, nationalCode: String): AgreementDocumentPR =
+    AgreementDocumentPR(
+        intro = intro.replace("{name}", name).replace("{nationalCode}", nationalCode),
+        clauses = clauses,
+        acknowledgement = acknowledgement,
+    )
 
 /** «شعبهٔ ۲ مشهد · ۱۲۰۲» — name and code together, or whichever half is present, or a dash. */
 private fun com.tamin.taminhamrah.model.workshop.WorkshopSummaryDN.branchOfficeLabel(): String {

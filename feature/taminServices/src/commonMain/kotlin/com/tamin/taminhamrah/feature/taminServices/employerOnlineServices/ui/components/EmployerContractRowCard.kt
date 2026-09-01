@@ -34,7 +34,6 @@ import taminx.core.core_ui.employer_online_services_contract_row_mobile
 import taminx.core.core_ui.employer_online_services_contract_row_national_code
 import taminx.core.core_ui.employer_online_services_contract_row_period
 import taminx.core.core_ui.employer_online_services_contract_row_period_value
-import taminx.core.core_ui.employer_online_services_contract_row_ticket_code
 
 /**
  * One پیمانکار / contract row of a workshop: a «ردیف NNN» pill + the person's name, then the
@@ -92,10 +91,6 @@ internal fun EmployerContractRowCard(
         DetailRow(
             label = stringResource(Res.string.employer_online_services_contract_row_national_code),
             value = item.nationalCode,
-        )
-        DetailRow(
-            label = stringResource(Res.string.employer_online_services_contract_row_ticket_code),
-            value = item.postalCode,
         )
         DetailRow(
             label = stringResource(Res.string.employer_online_services_contract_row_email),

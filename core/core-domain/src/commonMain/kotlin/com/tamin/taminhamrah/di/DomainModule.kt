@@ -221,6 +221,7 @@ import com.tamin.taminhamrah.useCases.addDependent.UploadDependentImageUseCase
 import com.tamin.taminhamrah.useCases.user.mockUseCases.MockSubdominantUseCase
 import com.tamin.taminhamrah.useCases.versionHistory.GetVersionHistoryUseCase
 import com.tamin.taminhamrah.useCases.contactUs.GetContactUsUseCase
+import com.tamin.taminhamrah.useCases.content.GetLegalDocumentUseCase
 
 val domainModule = module {
     // Add Dependent UseCases
@@ -412,6 +413,7 @@ val domainModule = module {
     factoryOf(::GetWorkshopContractRowsUseCase)
     factoryOf(::GetEmployerAgreementsByWorkshopUseCase)
     factoryOf(::SubmitEmployerAgreementUseCase)
+    factoryOf(::GetLegalDocumentUseCase)
     factoryOf(::GetTreatmentCostsUseCase)
     factoryOf(::GetTreatmentCostsPDFUseCase)
     factoryOf(::SendToInboxTreatmentCostsUseCase)
