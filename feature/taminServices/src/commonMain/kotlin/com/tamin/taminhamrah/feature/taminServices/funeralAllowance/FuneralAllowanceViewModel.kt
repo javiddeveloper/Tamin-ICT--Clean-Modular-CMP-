@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.contract.Fun
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.model.toPR
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.model.toSubmitParams
 import com.tamin.taminhamrah.mapper.bankAccount.toPresentation
+import com.tamin.taminhamrah.model.bankAccount.BankAccountDN
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCase
 import com.tamin.taminhamrah.useCases.funeralAllowance.ConfirmFuneralAccountCorrectionUseCase
@@ -70,8 +71,8 @@ class FuneralAllowanceViewModel(
     private fun checkBankAccountThenLoadInfo(): Flow<PartialState> = flow {
         emit(PartialState.ClearError)
         emit(PartialState.CheckingBankAccount(true))
-        val hasBankAccount = try {
-            getBankAccountListUseCase().first().isNotEmpty()
+        val bankAccounts = try {
+            getBankAccountListUseCase().first()
         } catch (e: Exception) {
             emit(PartialState.CheckingBankAccount(false))
             val message = e.toSingleLineMessage()
@@ -80,18 +81,17 @@ class FuneralAllowanceViewModel(
             return@flow
         }
         emit(PartialState.CheckingBankAccount(false))
-        if (!hasBankAccount) {
+        if (bankAccounts.isEmpty()) {
             emit(PartialState.NoBankAccount)
             return@flow
         }
-        emitAll(loadInfo())
+        emitAll(loadInfo(bankAccounts))
     }
 
-    private fun loadInfo(): Flow<PartialState> = flow {
+    private fun loadInfo(bankAccounts: List<BankAccountDN>): Flow<PartialState> = flow {
         try {
-            val bankAccounts = getBankAccountListUseCase().first().map { it.toPresentation() }
             val info = getFuneralAllowanceInfoUseCase()
-            emit(PartialState.InfoLoaded(info.toPR(), bankAccounts))
+            emit(PartialState.InfoLoaded(info.toPR(), bankAccounts.map { it.toPresentation() }))
         } catch (e: Exception) {
             val message = e.toSingleLineMessage()
             emit(PartialState.Error(message))

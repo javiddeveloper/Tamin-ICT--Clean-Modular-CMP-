@@ -119,7 +119,7 @@ fun FuneralAllowanceRoute(
         FuneralAllowanceEligibilitySuccessDialog(
             onContinue = {
                 showSuccessDialog = false
-                // TODO: Handle navigation to step 2
+                viewModel.sendIntent(FuneralAllowanceIntent.GoToNextStep)
             },
             onDismiss = { showSuccessDialog = false }
         )
