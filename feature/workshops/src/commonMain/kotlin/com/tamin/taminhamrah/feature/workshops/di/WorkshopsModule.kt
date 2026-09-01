@@ -1,9 +1,8 @@
 package com.tamin.taminhamrah.feature.workshops.di
 
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopsViewModel
-import com.tamin.taminhamrah.feature.workshops.ui.paymentSheets.PaymentSheetsViewModel
-import com.tamin.taminhamrah.feature.workshops.ui.workshopDebit.WorkshopDebitViewModel
-import com.tamin.taminhamrah.feature.workshops.ui.workshopDebtInquiry.WorkshopDebtInquiryViewModel
+import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachmentUploader
+import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
@@ -18,6 +17,9 @@ import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.list.Legal
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.add.AddLegalRepresentativeViewModel
 
 val workshopsModule = module {
+    // Shared by the three forms that attach evidence.
+    factoryOf(::WorkshopAttachmentUploader)
+
     viewModelOf(::WorkshopsViewModel)
     viewModelOf(::PaymentSheetsViewModel)
     viewModelOf(::WorkshopDebitViewModel)

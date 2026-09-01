@@ -42,7 +42,7 @@ fun TaminServicesHeader(
                 containerColor = LocalTaminColors.current.chipBg,
                 text = badgeText, border = BorderStroke(
                     width = 1.dp,
-                    color = LocalTaminColors.current.hawkesBlue
+                    color = LocalTaminColors.current.blueBorder
                 )
             )
         }

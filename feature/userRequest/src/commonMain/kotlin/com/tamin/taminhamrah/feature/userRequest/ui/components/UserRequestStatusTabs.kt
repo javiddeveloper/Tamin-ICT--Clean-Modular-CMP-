@@ -47,7 +47,7 @@ fun UserRequestStatusTabs(
 
             val bg = if (isSelected) taminColors.chipBg else taminColors.bgSurface
             val textCol = if (isSelected) colorScheme.primary else taminColors.textSecondary
-            val borderCol = if (isSelected) taminColors.hawkesBlue else taminColors.divider
+            val borderCol = if (isSelected) taminColors.blueBorder else taminColors.divider
 
             Box(
                 modifier = Modifier

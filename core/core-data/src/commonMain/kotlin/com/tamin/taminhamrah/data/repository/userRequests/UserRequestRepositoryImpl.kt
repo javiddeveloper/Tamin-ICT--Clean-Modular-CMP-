@@ -102,9 +102,9 @@ internal class UserRequestRepositoryImpl(
             UserRequestTypeIds.ILL_DAY,
             UserRequestTypeIds.ORTHOTICS_PROSTHESIS,
             UserRequestTypeIds.PREGNANCY -> getShortTermDetails(referenceId, requestTypeId)
-            UserRequestTypeIds.ARTICLE16 -> {
+            UserRequestTypeIds.ARTICLE_SIXTEEN -> {
                 val objectionNumber = referenceId.toLongOrNull() ?: return null
-                requestRemoteDataSource.getArticle16RequestInfo(objectionNumber).toDetails()
+                requestRemoteDataSource.getArticleSixteenRequestInfo(objectionNumber).toDetails()
             }
             UserRequestTypeIds.DEFERRED_INSTALLMENT ->
                 requestRemoteDataSource.getDeferredInstallmentInfo(referenceId).toDetails()

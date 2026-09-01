@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.workshops
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
+import com.tamin.taminhamrah.feature.workshops.ui.WorkshopsRoute
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopsScreen
 import androidx.navigation.toRoute
@@ -22,55 +23,7 @@ import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopPR
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object WorkshopsRoute
-
-@Serializable
-data class PaymentSheetsRoute(
-    val workshopId: String,
-    val branchCode: String
-)
-
-@Serializable
-data class WorkshopDebitRoute(
-    val workshopId: String,
-    val branchCode: String
-)
-
-@Serializable
-data class WorkshopDebtInquiryRoute(
-    val workshopId: String,
-    val branchCode: String
-)
-
-@Serializable
-data class ObjectionableDebitRoute(
-    val workshopId: String,
-    val branchCode: String
-)
-
-@Serializable
-data class ManagementDebitRoute(
-    val workshopId: String,
-    val branchCode: String
-)
-
-@Serializable
-data class WorkshopMembersRoute(
-    val workshopId: String,
-    val branchCode: String
-)
-
-@Serializable
-data class WorkshopStackholdersRoute(
-    val workshopId: String,
-    val branchCode: String
-)
-
-@Serializable
-data class WorkshopRecentlyAddedMembersRoute(
-    val workshopId: String,
-    val branchCode: String
-)
+data object WorkshopsListRoute
 
 @Serializable
 data object LegalRepresentativeWorkshopsRoute
@@ -109,7 +62,7 @@ data class AddLegalRepresentativeRoute(
 )
 
 fun NavController.navigateToWorkshops() {
-    navigate(WorkshopsRoute)
+    navigate(WorkshopsListRoute)
 }
 
 fun NavController.navigateToLegalRepresentativeWorkshops() {
@@ -171,43 +124,24 @@ fun NavGraphBuilder.workshopsScreen(navController: NavController) {
         )
     }
 
-    composableWithFadeTransitions<ObjectionableDebitRoute> { backStackEntry ->
-        val route = backStackEntry.toRoute<ObjectionableDebitRoute>()
-        ObjectionableDebitScreen(
-            workshopId = route.workshopId,
-            branchCode = route.branchCode
-        )
-    }
-
-    composableWithFadeTransitions<ManagementDebitRoute> { backStackEntry ->
-        val route = backStackEntry.toRoute<ManagementDebitRoute>()
-        ManagementDebitScreen(
-            workshopId = route.workshopId,
-            branchCode = route.branchCode
-        )
-    }
-
-    composableWithFadeTransitions<WorkshopMembersRoute> { backStackEntry ->
-        val route = backStackEntry.toRoute<WorkshopMembersRoute>()
-        WorkshopMembersScreen(
-            workshopId = route.workshopId,
-            branchCode = route.branchCode
-        )
-    }
-
-    composableWithFadeTransitions<WorkshopStackholdersRoute> { backStackEntry ->
-        val route = backStackEntry.toRoute<WorkshopStackholdersRoute>()
-        WorkshopStackholdersScreen(
-            workshopId = route.workshopId,
-            branchCode = route.branchCode
-        )
-    }
-
-    composableWithFadeTransitions<WorkshopRecentlyAddedMembersRoute> { backStackEntry ->
-        val route = backStackEntry.toRoute<WorkshopRecentlyAddedMembersRoute>()
-        WorkshopRecentlyAddedMembersScreen(
-            workshopId = route.workshopId,
-            branchCode = route.branchCode
+/**
+ * کارگاه‌های کارفرما: the list, and the جزئیات screen it opens.
+ *
+ * Each service the detail menu offers arrives as its own task, bringing its route, its destination
+ * and its row in [com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction] together. The
+ * `when` that maps an action to its route is introduced with the first of them, so that from then
+ * on the compiler refuses an action with nowhere to go.
+ */
+fun NavGraphBuilder.workshopsScreen(
+    navController: NavController,
+    @Suppress("UNUSED_PARAMETER") onOpenUrl: (String) -> Unit,
+) {
+    composableWithFadeTransitions<WorkshopsListRoute> {
+        WorkshopsRoute(
+            onBack = { navController.popBackStack() },
+            // No services yet: WorkshopAction is empty until a screen exists to open, so no menu
+            // row can be tapped. The first service restores the dispatch.
+            onOpenAction = { _, _, _, _ -> },
         )
     }
 
