@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
@@ -25,10 +26,12 @@ import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import com.tamin.taminhamrah.ui.components.collapseAway
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.toparea.TopAreaState
+import com.tamin.taminhamrah.ui.toparea.rememberTopAreaState
+import com.tamin.taminhamrah.ui.toparea.topAreaHide
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
@@ -39,15 +42,19 @@ import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_search
 
 /**
- * The navy gradient header of the Employer Online Services landing screen — the same
- * collapse-on-scroll header the inspection list uses ([collapseProgress] drives the ring icon +
- * subtitle away as the list scrolls up). Title, subtitle and icon are the only things that differ.
+ * The navy gradient header of the Employer Online Services landing screen. Folds on the list's own
+ * drag through the TopArea system (`docs/vault/TopArea-System.md`) — same as
+ * `LegalRepresentativeWorkshopsScreen`: [topAreaState] drives the ring icon + subtitle away (and
+ * out of the layout) as the list scrolls up, snapping to fully-open / fully-closed on release.
+ * [heroCardOverlap] leaves that much extra gradient below the content for the identity card to ride
+ * up into, straddling the seam.
  */
 @Composable
 internal fun EmployerOnlineServicesHeader(
     onBackClicked: () -> Unit,
+    topAreaState: TopAreaState,
     modifier: Modifier = Modifier,
-    collapseProgress: () -> Float = { 0f },
+    heroCardOverlap: Dp = Spacing.none,
     onSearchClicked: () -> Unit = {},
 ) {
     val taminColors = LocalTaminColors.current
@@ -59,7 +66,8 @@ internal fun EmployerOnlineServicesHeader(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(bottomStart = CornerRadius.x3l, bottomEnd = CornerRadius.x3l))
-            .background(gradient),
+            .background(gradient)
+            .padding(bottom = heroCardOverlap),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         TaminTopAppBar(
@@ -84,7 +92,7 @@ internal fun EmployerOnlineServicesHeader(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .collapseAway(collapseProgress)
+                        .topAreaHide(topAreaState)
                         .padding(horizontal = Spacing.page, vertical = Spacing.smPlus),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
@@ -93,7 +101,12 @@ internal fun EmployerOnlineServicesHeader(
                         xOffset = 450.dp,
                         yOffset = (-150).dp,
                     )
-                    AnimatedRingHeaderIcon(icon = Icons.Outlined.Description)
+                    // Rendered statically while this header is one of rememberMeasuredTopAreaState's
+                    // off-screen measure probes — its size doesn't depend on the ring animation.
+                    AnimatedRingHeaderIcon(
+                        icon = Icons.Outlined.Description,
+                        animated = !topAreaState.isMeasureProbe,
+                    )
                     Spacer(Modifier.height(Spacing.sm))
                     Text(
                         text = stringResource(Res.string.employer_online_services_subtitle),
@@ -110,7 +123,10 @@ internal fun EmployerOnlineServicesHeader(
 @Composable
 private fun EmployerOnlineServicesHeaderPreviewLight() {
     PreviewRtlThemeContent {
-        EmployerOnlineServicesHeader(onBackClicked = {})
+        EmployerOnlineServicesHeader(
+            onBackClicked = {},
+            topAreaState = rememberTopAreaState(expandedHeight = 300.dp, collapsedHeight = 96.dp),
+        )
     }
 }
 
@@ -118,6 +134,9 @@ private fun EmployerOnlineServicesHeaderPreviewLight() {
 @Composable
 private fun EmployerOnlineServicesHeaderPreviewDark() {
     PreviewRtlThemeContent(darkTheme = true) {
-        EmployerOnlineServicesHeader(onBackClicked = {})
+        EmployerOnlineServicesHeader(
+            onBackClicked = {},
+            topAreaState = rememberTopAreaState(expandedHeight = 300.dp, collapsedHeight = 96.dp),
+        )
     }
 }

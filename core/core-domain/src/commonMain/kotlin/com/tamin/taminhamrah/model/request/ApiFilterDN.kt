@@ -116,9 +116,6 @@ enum class FilterProperty(val key: String) {
     // خدمات غیرحضوری کارفرما — the `workshop-services/request-ticket` filter for the
     // employerEservicesAgreement flow addresses these three columns (see
     // WorkShopsRemoteDataSourceImpl.requestEmployerAgreementTicket).
-    @SerialName("mobileNumber") MOBILE_NUMBER("mobileNumber"),
-    @SerialName("email") EMAIL("email"),
-    @SerialName("serviceName") SERVICE_NAME("serviceName"),
 }
 
 

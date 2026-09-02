@@ -48,8 +48,6 @@ import de.jensklingenberg.ktorfit.http.QueryMap
 import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.PUT
 import de.jensklingenberg.ktorfit.http.Path
-import de.jensklingenberg.ktorfit.http.Query
-import de.jensklingenberg.ktorfit.http.QueryMap
 import io.ktor.client.statement.HttpStatement
 import kotlinx.serialization.json.JsonElement
 import io.ktor.http.cio.Response

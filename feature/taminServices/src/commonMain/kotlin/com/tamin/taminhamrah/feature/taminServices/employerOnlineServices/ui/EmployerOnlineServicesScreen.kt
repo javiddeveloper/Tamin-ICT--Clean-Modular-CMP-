@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Description
@@ -26,7 +27,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,8 +35,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -64,9 +64,7 @@ import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.TaminText
-import com.tamin.taminhamrah.ui.components.rememberCollapsingHeaderState
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
-import com.tamin.taminhamrah.ui.components.reservedHeight
 import com.tamin.taminhamrah.ui.components.toast.AppToastHost
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.Toast
@@ -75,6 +73,11 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminNavy300
 import com.tamin.taminhamrah.ui.theme.TaminNavy900
+import com.tamin.taminhamrah.ui.toparea.TopAreaState
+import com.tamin.taminhamrah.ui.toparea.driveTopArea
+import com.tamin.taminhamrah.ui.toparea.rememberMeasuredTopAreaState
+import com.tamin.taminhamrah.ui.toparea.reportTopAreaHeight
+import com.tamin.taminhamrah.ui.toparea.topAreaContentPadding
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
@@ -83,12 +86,9 @@ import taminx.core.core_ui.employer_online_services_empty_subtitle
 import taminx.core.core_ui.employer_online_services_empty_title
 import taminx.core.core_ui.employer_online_services_request_button
 
-private val HeaderCollapseDistance = 160.dp
-
 /**
- * How far the identity card hangs below the header gradient. The rest of the card sits *on* the
- * gradient, so it straddles the bottom edge — the same overlap [com.tamin.taminhamrah.feature.profile]
- * gives its `ValidationStatusCard`.
+ * How far the identity card rides up into the header gradient, straddling the seam — same idea as
+ * `LegalRepresentativeWorkshopsScreen`'s `HeroCardOverlap`.
  */
 private val IdentityCardOverhang = 48.dp
 
@@ -155,8 +155,6 @@ internal fun EmployerAgreementsListScreen(
     initialSearchCriteria: EmployerAgreementSearch = EmployerAgreementSearch(),
 ) {
     val taminColors = LocalTaminColors.current
-    val collapse = rememberCollapsingHeaderState(HeaderCollapseDistance)
-    var headerHeightPx by remember { mutableIntStateOf(0) }
     var showSearchSheet by remember { mutableStateOf(false) }
     var searchCriteria by remember { mutableStateOf(initialSearchCriteria) }
 
@@ -170,26 +168,40 @@ internal fun EmployerAgreementsListScreen(
         else list.agreements.filter { searchCriteria.matches(it) }
     }
 
+    // Folds the header's icon + subtitle from the list's own drag, snapping to open/closed on
+    // release — the identity card below it stays fully shown, pinned above the list. The drag
+    // budget is measured from this exact header + card block, so it can't drift out of sync with a
+    // copy or font change. See docs/vault/TopArea-System.md.
+    val topArea = rememberMeasuredTopAreaState { state ->
+        EmployerOnlineServicesTopArea(
+            identity = list.identity,
+            onBackClicked = onBackClicked,
+            onSearchClicked = { showSearchSheet = true },
+            topAreaState = state,
+        )
+    }
+    val listState = rememberLazyListState()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(taminColors.bgPage),
     ) {
         LazyColumn(
+            state = listState,
             overscrollEffect = rememberJellyOverscroll(),
             modifier = Modifier
                 .fillMaxSize()
-                .nestedScroll(collapse.nestedScrollConnection),
-            contentPadding = PaddingValues(
-                bottom = WindowInsets.navigationBars.asPaddingValues()
-                    .calculateBottomPadding() + Spacing.lg,
+                .driveTopArea(topArea, listState),
+            contentPadding = topAreaContentPadding(
+                state = topArea,
+                rest = PaddingValues(
+                    bottom = WindowInsets.navigationBars.asPaddingValues()
+                        .calculateBottomPadding() + Spacing.lg,
+                ),
             ),
             verticalArrangement = Arrangement.spacedBy(Spacing.lg),
         ) {
-            item {
-                Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
-            }
-
             item {
                 LandingActionRow(
                     count = list.agreementCount,
@@ -267,30 +279,17 @@ internal fun EmployerAgreementsListScreen(
             }
         }
 
-        // Pinned header + identity card overlapping its bottom edge, measured as one block so the
-        // list reserves exactly the space it occupies (mirrors profile's top-bar / status-card).
-        Box(
+        // The real, interactive top area floats over the list and reports its own rendered height
+        // back so the list reserves exactly the space it occupies.
+        EmployerOnlineServicesTopArea(
+            identity = list.identity,
+            onBackClicked = onBackClicked,
+            onSearchClicked = { showSearchSheet = true },
+            topAreaState = topArea,
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .fillMaxWidth()
-                .onSizeChanged { headerHeightPx = it.height },
-        ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                EmployerOnlineServicesHeader(
-                    collapseProgress = collapse.progressProvider,
-                    onBackClicked = onBackClicked,
-                    onSearchClicked = { showSearchSheet = true },
-                )
-                Spacer(modifier = Modifier.height(IdentityCardOverhang))
-            }
-
-            IdentityInfoCard(
-                identity = list.identity,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(horizontal = Spacing.lg),
-            )
-        }
+                .reportTopAreaHeight(topArea),
+        )
 
         if (uiState.isLoading && list.agreements.isNotEmpty()) {
             LoadingStateOverlay()
@@ -310,6 +309,56 @@ internal fun EmployerAgreementsListScreen(
                 showSearchSheet = false
             },
         )
+    }
+}
+
+/**
+ * The landing screen's floating top area: the folding gradient header (back, search, ring icon,
+ * subtitle) with the کارفرما identity card riding up [IdentityCardOverhang] into its gradient to
+ * straddle the seam. Composed twice — once off-screen by [rememberMeasuredTopAreaState] to measure
+ * the fold budget, once for real over the list with [reportTopAreaHeight]. Mirrors
+ * `LegalRepresentativeWorkshopsScreen`'s `LegalRepresentativeWorkshopsTopArea`.
+ */
+@Composable
+private fun EmployerOnlineServicesTopArea(
+    identity: IdentityCardPR,
+    onBackClicked: () -> Unit,
+    onSearchClicked: () -> Unit,
+    topAreaState: TopAreaState,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        EmployerOnlineServicesHeader(
+            onBackClicked = onBackClicked,
+            topAreaState = topAreaState,
+            heroCardOverlap = IdentityCardOverhang,
+            onSearchClicked = onSearchClicked,
+        )
+        IdentityInfoCard(
+            identity = identity,
+            // Rides up into the header's reserved bottom space so it straddles the seam, and
+            // reports a height reduced by the same overlap so reportTopAreaHeight sees the true
+            // footprint instead of counting the overlap twice as reserved list space.
+            modifier = Modifier
+                .straddlePreviousSibling(IdentityCardOverhang)
+                .padding(horizontal = Spacing.lg),
+        )
+        Spacer(Modifier.height(Spacing.lg))
+    }
+}
+
+/**
+ * Shifts this child up by [overlap] to overlap the previous sibling's bottom edge, while reporting
+ * a height reduced by that same amount — so a parent measuring total column height (here,
+ * [reportTopAreaHeight]) sees the true visual footprint instead of double-counting the overlap.
+ * Same helper as `LegalRepresentativeWorkshopsScreen`.
+ */
+private fun Modifier.straddlePreviousSibling(overlap: Dp): Modifier = layout { measurable, constraints ->
+    val placeable = measurable.measure(constraints)
+    val overlapPx = overlap.roundToPx()
+    val reportedHeight = (placeable.height - overlapPx).coerceAtLeast(0)
+    layout(placeable.width, reportedHeight) {
+        placeable.placeRelative(0, -overlapPx)
     }
 }
 
