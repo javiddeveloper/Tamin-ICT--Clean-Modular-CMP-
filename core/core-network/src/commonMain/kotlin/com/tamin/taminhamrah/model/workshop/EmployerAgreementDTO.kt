@@ -33,8 +33,8 @@ data class EmployerWorkshopDTO(
     @SerialName("workshopRegisterDate") val workshopRegisterDate: String? = null,
     @SerialName("workshopApproveDate") val workshopApproveDate: String? = null,
     @SerialName("contractRow") val contractRow: String? = null,
-    /** The branch *office*: `branch.code` is what the card shows as کد شعبه, not [branchCode]. */
     @SerialName("branch") val branch: WorkshopBranchDTO? = null,
+    @SerialName("branchTitle") val branchTitle:String? = null,
     @SerialName("character") val character: WorkshopCharacterDTO? = null,
     @SerialName("workshopType") val workshopType: WorkshopTypeDTO? = null,
     @SerialName("workshopStatus") val workshopStatus: WorkshopStatusDTO? = null,

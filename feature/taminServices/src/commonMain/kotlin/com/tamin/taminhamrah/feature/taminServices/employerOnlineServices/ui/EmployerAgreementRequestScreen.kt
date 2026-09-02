@@ -27,7 +27,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.Icon
@@ -87,6 +87,7 @@ import taminx.core.core_ui.employer_online_services_request_edit_hint
 import taminx.core.core_ui.employer_online_services_request_email_error
 import taminx.core.core_ui.employer_online_services_request_email_label
 import taminx.core.core_ui.employer_online_services_request_field_placeholder
+import taminx.core.core_ui.employer_online_services_request_mobile_error
 import taminx.core.core_ui.employer_online_services_request_mobile_label
 import taminx.core.core_ui.employer_online_services_request_resend_code
 import taminx.core.core_ui.employer_online_services_request_section_title
@@ -269,7 +270,7 @@ private fun ContactFormStep(
             TaminBottomActionBar(
                 primaryText = stringResource(Res.string.employer_online_services_request_send_code),
                 onPrimaryClick = { onIntent(EmployerOnlineServicesIntent.RequestAgreementTicket) },
-                primaryEnabled = request.isEmailValid && !request.isSubmitting,
+                primaryEnabled = request.isMobileValid && request.isEmailValid && !request.isSubmitting,
                 isPrimaryLoading = request.isSubmitting,
                 showChevron = false,
             )
@@ -297,12 +298,17 @@ private fun ContactFormStep(
                 verticalArrangement = Arrangement.spacedBy(Spacing.lg),
             ) {
                 TaminStyledTextField(
-                    value = request.mobile.toPersianDigits(),
-                    onValueChange = {},
+                    value = request.mobile,
+                    onValueChange = { onIntent(EmployerOnlineServicesIntent.UpdateRequestMobile(it)) },
                     label = stringResource(Res.string.employer_online_services_request_mobile_label),
                     placeholder = placeholder,
-                    leadingIcon = Icons.Outlined.Lock,
-                    readOnly = true,
+                    leadingIcon = Icons.Outlined.Phone,
+                    isRequired = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                    inputRestriction = InputRestriction.DigitsOnly,
+                    maxLength = 11,
+                    isValid = request.mobile.takeIf { it.isNotBlank() }?.let { request.isMobileValid },
+                    errorText = stringResource(Res.string.employer_online_services_request_mobile_error),
                 )
                 TaminStyledTextField(
                     value = request.email,

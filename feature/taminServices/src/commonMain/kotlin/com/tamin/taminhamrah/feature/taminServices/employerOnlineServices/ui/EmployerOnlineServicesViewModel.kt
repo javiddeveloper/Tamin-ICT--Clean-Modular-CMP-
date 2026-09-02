@@ -89,6 +89,9 @@ class EmployerOnlineServicesViewModel(
         EmployerOnlineServicesIntent.CloseAgreementRequest ->
             flow<PartialState> { emit(PartialState.RequestWizardClosed) }
 
+        is EmployerOnlineServicesIntent.UpdateRequestMobile ->
+            flow<PartialState> { emit(PartialState.RequestMobileUpdated(intent.mobile)) }
+
         is EmployerOnlineServicesIntent.UpdateRequestEmail ->
             flow<PartialState> { emit(PartialState.RequestEmailUpdated(intent.email)) }
 
@@ -300,6 +303,10 @@ class EmployerOnlineServicesViewModel(
             errors = currentState.errors -
                 EmployerOnlineServicesErrorSource.REQUEST_TICKET -
                 EmployerOnlineServicesErrorSource.VERIFY_CODE,
+        )
+
+        is PartialState.RequestMobileUpdated -> currentState.copy(
+            agreementRequest = currentState.agreementRequest.copy(mobile = partialState.mobile),
         )
 
         is PartialState.RequestEmailUpdated -> currentState.copy(

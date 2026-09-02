@@ -1430,7 +1430,8 @@
     <string name="employer_online_services_request_email_label">پست الکترونیک</string>
     <string name="employer_online_services_request_field_placeholder">وارد کنید</string>
     <string name="employer_online_services_request_email_error">پست الکترونیک معتبر نیست</string>
-    <string name="employer_online_services_request_contact_hint">بلیت امنیتی به شمارهٔ همراه ثبت‌شده در حساب کاربری شما ارسال می‌شود. پست الکترونیک را در صورت تغییر اصلاح کنید.</string>
+    <string name="employer_online_services_request_mobile_error">شماره تلفن همراه معتبر نیست</string>
+    <string name="employer_online_services_request_contact_hint">بلیت امنیتی به شمارهٔ همراهی که وارد می‌کنید ارسال می‌شود. شماره همراه و پست الکترونیک را در صورت تغییر اصلاح کنید.</string>
     <string name="employer_online_services_request_send_code">ارسال پیامک اعتبارسنجی</string>
     <string name="employer_online_services_request_resend_code">ارسال مجدد کد</string>
     <string name="employer_online_services_request_code_card_title">کد اعتبارسنجی</string>

@@ -92,13 +92,15 @@ data class ContractRowsUiState(
 /**
  * State of the "ثبت درخواست تعهدنامه" wizard.
  *
- * [mobile] is the user's registered number — read-only, the OTP is sent there. [email] is prefilled
- * from the profile and editable. [ticketRequested] flips step 1 from the contact form to the code
- * entry; [ticketNonce] bumps on every (re)send so the code screen's countdown restarts.
+ * [mobile] and [email] are prefilled from the profile and both editable — the OTP is sent to
+ * whatever [mobile] holds when "ارسال پیامک اعتبارسنجی" is pressed, and both are submitted with the
+ * agreement. [ticketRequested] flips step 1 from the contact form to the code entry; [ticketNonce]
+ * bumps on every (re)send so the code screen's countdown restarts.
  */
 @Immutable
 data class AgreementRequestUiState(
     val step: AgreementRequestStep = AgreementRequestStep.VALIDATION,
+    /** Prefilled from the profile, editable — the number the OTP is sent to and the agreement registers. */
     val mobile: String = "",
     val email: String = "",
     val ticketRequested: Boolean = false,
@@ -122,6 +124,9 @@ data class AgreementRequestUiState(
     val isSubmitted: Boolean = false,
 ) {
     val isEmailValid: Boolean get() = ValidationUtils.isEmailValid(email)
+
+    /** Non-blank and a well-formed Iranian mobile (`09` + 9 digits) — gates "ارسال پیامک اعتبارسنجی". */
+    val isMobileValid: Boolean get() = ValidationUtils.isMobileNumberValid(mobile)
     val isCodeComplete: Boolean get() = code.length == CODE_LENGTH
 
     companion object {
@@ -172,6 +177,7 @@ data class EmployerOnlineServicesUiState(
         /** Leave the wizard, back to the landing list, discarding its state. */
         data object RequestWizardClosed : PartialState
 
+        data class RequestMobileUpdated(val mobile: String) : PartialState
         data class RequestEmailUpdated(val email: String) : PartialState
         data class RequestCodeUpdated(val code: String) : PartialState
 
@@ -221,6 +227,7 @@ sealed interface EmployerOnlineServicesIntent {
     /** Back out of the request wizard to the landing list. */
     data object CloseAgreementRequest : EmployerOnlineServicesIntent
 
+    data class UpdateRequestMobile(val mobile: String) : EmployerOnlineServicesIntent
     data class UpdateRequestEmail(val email: String) : EmployerOnlineServicesIntent
     data class UpdateRequestCode(val code: String) : EmployerOnlineServicesIntent
 

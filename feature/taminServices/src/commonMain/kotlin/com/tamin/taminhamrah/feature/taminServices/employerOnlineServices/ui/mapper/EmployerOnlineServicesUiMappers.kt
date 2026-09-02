@@ -58,7 +58,7 @@ fun LegalDocumentDN.toAgreementDocumentPR(name: String, nationalCode: String): A
 
 /** «شعبهٔ ۲ مشهد · ۱۲۰۲» — name and code together, or whichever half is present, or a dash. */
 private fun com.tamin.taminhamrah.model.workshop.WorkshopSummaryDN.branchOfficeLabel(): String {
-    val name = branchOfficeName.takeIf { it.isNotBlank() }
+    val name = branchTitle.takeIf { it.isNotBlank() }
     val code = branchOfficeCode.takeIf { it.isNotBlank() }?.toPersianDigits()
     return listOfNotNull(name, code).joinToString(separator = " · ").orDash()
 }

@@ -107,6 +107,7 @@ fun EmployerWorkshopDTO.toDomain(): WorkshopSummaryDN = WorkshopSummaryDN(
     workshopTypeDescription = workshopType?.workshopTypeDesc.orEmpty(),
     statusCode = workshopStatus?.workshopStatusCode.orEmpty(),
     statusDescription = workshopStatus?.workshopStatusDesc.orEmpty(),
+    branchTitle = branchTitle.orEmpty()
 )
 
 // ---------------------------------------------- خدمات غیرحضوری کارفرما (employerEservicesAgreement)
