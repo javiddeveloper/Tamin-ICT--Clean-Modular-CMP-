@@ -55,7 +55,7 @@ val mockMenuData = listOf(
     MainServiceDto(id = 1002, name = "اطلاعات پیمان", showRole = listOf(3), icon = "contract", status = MenuServiceStatus.ACTIVE),
     MainServiceDto(id = 1003, name = "واگذارندگان", showRole = listOf(3), icon = "ic_assigner", status = MenuServiceStatus.ACTIVE),
     MainServiceDto(id = 1004, name = "تکمیل اطلاعات کارفرمایی", showRole = listOf(3), icon = "employer_info", status = MenuServiceStatus.ACTIVE),
-    MainServiceDto(id = 1005, name = "لیست ذینفعان", showRole = listOf(3), icon = "relationship", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 1005, name = "معرفی نماینده اشخاص حقوقی", showRole = listOf(3), icon = "relationship", status = MenuServiceStatus.ACTIVE),
     MainServiceDto(id = 1006, name = "پیگیری وضعیت اعتراض", showRole = listOf(3), icon = "protest", status = MenuServiceStatus.ACTIVE),
     MainServiceDto(id = 1007, name = "درخواست خدمات غیرحضوری", showRole = listOf(3), icon = "onlineServiceReq", status = MenuServiceStatus.ACTIVE),
     MainServiceDto(id = 1008, name = "بازرسی انجام شده", showRole = listOf(3), icon = "cctv", status = MenuServiceStatus.ACTIVE),
