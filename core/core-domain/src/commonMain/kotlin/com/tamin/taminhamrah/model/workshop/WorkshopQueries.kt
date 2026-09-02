@@ -4,6 +4,13 @@ package com.tamin.taminhamrah.model.workshop
 const val WORKSHOP_PAGE_SIZE = 10
 
 /**
+ * Single-window size for workshop lists that don't have real paging wired yet: ask for one wide page
+ * and render whatever comes back, the same `limit = 100` shortcut other single-shot list queries in
+ * the app take (`ContractsRepositoryImpl.contractListQuery`, `InspectionRepositoryImpl`).
+ */
+const val WORKSHOP_FULL_PAGE_SIZE = 100
+
+/**
  * What one page of a workshop list is asked for.
  *
  * Search and filter are two fields of one query rather than two calls: the old client sent

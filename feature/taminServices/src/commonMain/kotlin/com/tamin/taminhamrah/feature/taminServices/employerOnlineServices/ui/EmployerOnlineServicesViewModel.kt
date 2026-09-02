@@ -15,6 +15,7 @@ import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.map
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.mapper.toRowPR
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmissionDN
+import com.tamin.taminhamrah.model.workshop.WORKSHOP_FULL_PAGE_SIZE
 import com.tamin.taminhamrah.model.workshop.WorkshopListQuery
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.content.GetLegalDocumentUseCase
@@ -176,14 +177,16 @@ class EmployerOnlineServicesViewModel(
     }
 
     private fun loadAgreements(): Flow<PartialState> = flow<PartialState> {
-        val page = getEmployerAgreementsUseCase(WorkshopListQuery(page = 0))
+        // No paging on this screen yet — pull one wide window and show all of it.
+        val page = getEmployerAgreementsUseCase(WorkshopListQuery(pageSize = WORKSHOP_FULL_PAGE_SIZE))
         emit(PartialState.AgreementsLoaded(page.items.map { it.toRowPR() }, page.total))
     }.catch { e ->
         emit(PartialState.Error(e.toSingleLineMessage(), EmployerOnlineServicesErrorSource.AGREEMENTS))
     }
 
     private fun loadContractRows(workshopId: String, branchCode: String): Flow<PartialState> = flow<PartialState> {
-        val page = getWorkshopContractRowsUseCase(workshopId, branchCode, page = 0)
+        // Not paged — the repository fetches one wide window for this list.
+        val page = getWorkshopContractRowsUseCase(workshopId, branchCode)
         emit(PartialState.ContractRowsLoaded(page.items.map { it.toPresentation() }))
     }.catch { e ->
         emit(PartialState.Error(e.toSingleLineMessage(), EmployerOnlineServicesErrorSource.CONTRACT_ROWS))
@@ -219,7 +222,8 @@ class EmployerOnlineServicesViewModel(
             .onCompletion { emit(PartialState.Step2ContentLoading(false)) }
 
     private fun loadWorkshopsWithoutContract(): Flow<PartialState> = flow<PartialState> {
-        val page = getWorkshopsWithoutContractUseCase(page = 0)
+        // Not paged — the repository fetches one wide window for this list.
+        val page = getWorkshopsWithoutContractUseCase()
         emit(PartialState.WorkshopsWithoutContractLoaded(page.items.map { it.toPresentation() }))
     }.catch { e ->
         emit(PartialState.Error(e.toSingleLineMessage(), EmployerOnlineServicesErrorSource.STEP2_CONTENT))

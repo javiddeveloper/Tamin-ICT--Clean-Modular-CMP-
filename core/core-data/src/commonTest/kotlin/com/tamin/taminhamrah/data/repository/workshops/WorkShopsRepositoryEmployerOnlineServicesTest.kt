@@ -32,7 +32,7 @@ class WorkShopsRepositoryEmployerOnlineServicesTest {
     }
 
     @Test
-    fun `workshops-without-contract folds ListData into a page and asks with the right window`() = runTest {
+    fun `workshops-without-contract folds ListData into a page and asks for one wide window`() = runTest {
         remote.workshopsWithoutContract = ListData(
             total = 42,
             list = listOf(
@@ -40,15 +40,15 @@ class WorkShopsRepositoryEmployerOnlineServicesTest {
             ),
         )
 
-        val page = repository.getWorkshopsWithoutContract(page = 3)
+        val page = repository.getWorkshopsWithoutContract(page = 0)
 
         assertEquals(42, page.total)
         assertEquals(1, page.items.size)
         assertEquals("1071410004", page.items.first().workshopId)
-        // page 3, ten rows a page -> start 30, limit 10.
-        assertEquals(3, remote.lastWorkshopsQuery?.page)
-        assertEquals(30, remote.lastWorkshopsQuery?.start)
-        assertEquals(WORKSHOP_PAGE_SIZE, remote.lastWorkshopsQuery?.limit)
+        // This list has no paging wired yet -> one wide window: start 0, limit 100.
+        assertEquals(0, remote.lastWorkshopsQuery?.page)
+        assertEquals(0, remote.lastWorkshopsQuery?.start)
+        assertEquals(WORKSHOP_FULL_PAGE_SIZE, remote.lastWorkshopsQuery?.limit)
     }
 
     @Test
@@ -227,5 +227,30 @@ class WorkShopsRepositoryEmployerOnlineServicesTest {
         override suspend fun getArticleSixteenReportPdf(seqNumber: Long): PdfDownloadDTO = notUsed()
         override suspend fun getWorkshopMembers(query: ApiQueryParamDN): ListData<WorkshopMemberDTO> = notUsed()
         override suspend fun getWorkshopStackHolders(query: ApiQueryParamDN): ListData<WorkshopStackHolderDTO> = notUsed()
+        override suspend fun getLegalRepresentativeWorkshops(): ListData<LegalRepresentativeWorkshopDTO> = notUsed()
+
+        override suspend fun getLegalRepresentatives(
+            workshopId: String,
+            branchCode: String
+        ): ListData<LegalRepresentativeDTO> = notUsed()
+
+        override suspend fun getLegalRepresentativeWorkshopContracts(
+            workshopId: String,
+            branchCode: String
+        ): ListData<LegalRepresentativeContractDTO> = notUsed()
+
+        override suspend fun requestLegalRepresentativeTicket(nationalCode: String?) = notUsed()
+
+        override suspend fun verifyLegalRepresentativeTicket(ticket: String) = notUsed()
+
+        override suspend fun submitLegalRepresentative(
+            ticket: String,
+            request: LegalRepresentativeRequestDTO
+        )  = notUsed()
+
+        override suspend fun deleteLegalRepresentative(
+            ticket: String,
+            stackId: Long
+        ) = notUsed()
     }
 }
