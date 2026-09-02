@@ -533,6 +533,97 @@ fun SelectBranchStepShimmerSkeleton(
     }
 }
 
+/**
+ * Step 4: Contract Applicant & Guardian Shimmer Skeleton.
+ */
+@Composable
+fun ContractApplicantStepShimmerSkeleton(
+    modifier: Modifier = Modifier,
+) {
+    val taminColors = LocalTaminColors.current
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(CornerRadius.x2l),
+        colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
+        border = CardDefaults.outlinedCardBorder().copy(brush = androidx.compose.ui.graphics.SolidColor(taminColors.border)),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Spacing.lg),
+            verticalArrangement = Arrangement.spacedBy(Spacing.md),
+        ) {
+            // Option 1
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .clip(RoundedCornerShape(CornerRadius.lg))
+                    .shimmer(),
+            )
+
+            // Option 2
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .clip(RoundedCornerShape(CornerRadius.lg))
+                    .shimmer(),
+            )
+
+            // Guardian Inputs Skeleton
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(52.dp)
+                        .clip(RoundedCornerShape(CornerRadius.lg))
+                        .shimmer(),
+                )
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(52.dp)
+                        .clip(RoundedCornerShape(CornerRadius.lg))
+                        .shimmer(),
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
+                    .clip(RoundedCornerShape(CornerRadius.lg))
+                    .shimmer(),
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(52.dp)
+                        .clip(RoundedCornerShape(CornerRadius.lg))
+                        .shimmer(),
+                )
+                Box(
+                    modifier = Modifier
+                        .width(120.dp)
+                        .height(52.dp)
+                        .clip(RoundedCornerShape(CornerRadius.lg))
+                        .shimmer(),
+                )
+            }
+        }
+    }
+}
+
 // -------------------------------------------------------------------------
 // Previews
 // -------------------------------------------------------------------------
@@ -558,6 +649,14 @@ private fun ContractRegistrationStepShimmerSkeletonPreview() {
 private fun UserInfoStepShimmerSkeletonPreview() {
     PreviewRtlThemeContent {
         UserInfoStepShimmerSkeleton()
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun ContractApplicantStepShimmerSkeletonPreview() {
+    PreviewRtlThemeContent {
+        ContractApplicantStepShimmerSkeleton()
     }
 }
 

@@ -335,6 +335,32 @@ fun ContractFlowScreenContent(
                                             onTypeSelected = {
                                                 onIntent(ContractFlowIntent.SetContractApplicantType(it))
                                             },
+                                            guardianForm = state.guardianForm,
+                                            onGuardianNationalIdChange = {
+                                                onIntent(ContractFlowIntent.UpdateGuardianForm(state.guardianForm.copy(nationalId = it)))
+                                            },
+                                            onGuardianLetterNumberChange = {
+                                                onIntent(ContractFlowIntent.UpdateGuardianForm(state.guardianForm.copy(letterNumber = it)))
+                                            },
+                                            onGuardianFullNameChange = {
+                                                onIntent(ContractFlowIntent.UpdateGuardianForm(state.guardianForm.copy(fullName = it)))
+                                            },
+                                            onGuardianLetterDateChange = { formatted, epoch ->
+                                                onIntent(
+                                                    ContractFlowIntent.UpdateGuardianForm(
+                                                        state.guardianForm.copy(
+                                                            letterDateFormatted = formatted,
+                                                            letterDateEpoch = epoch,
+                                                        ),
+                                                    ),
+                                                )
+                                            },
+                                            onGuardianImagePicked = { fileName, bytes ->
+                                                onIntent(ContractFlowIntent.UploadGuardianImage(fileName, bytes))
+                                            },
+                                            onClearGuardianDocument = {
+                                                onIntent(ContractFlowIntent.ClearGuardianDocument)
+                                            },
                                         )
                                     }
 
@@ -523,7 +549,8 @@ private fun isStepValid(state: ContractFlowUiState): Boolean {
             isUserInfoStepComplete(state.userInfo) && !state.isSavingContact
         }
         ContractStep.STEP_CONTRACT_APPLICANT -> {
-            state.contractApplicantType == ContractApplicantType.PERSONAL
+            state.contractApplicantType == ContractApplicantType.PERSONAL ||
+                (state.contractApplicantType == ContractApplicantType.GUARDIAN && state.guardianForm.isValid)
         }
         ContractStep.STEP_SELECT_BRANCH -> {
             state.branchSelection.isValid

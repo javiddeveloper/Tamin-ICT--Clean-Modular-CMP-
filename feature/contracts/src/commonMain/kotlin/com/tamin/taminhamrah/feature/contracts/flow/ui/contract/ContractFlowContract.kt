@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.model.contractFlow.ContractEligibilityPR
 import com.tamin.taminhamrah.contractFlow.ContractStep
 import com.tamin.taminhamrah.model.contractFlow.FreelanceContractResultPR
 import com.tamin.taminhamrah.model.contractFlow.FreelancePremiumRangePR
+import com.tamin.taminhamrah.model.contractFlow.GuardianFormPR
 import com.tamin.taminhamrah.model.contractFlow.SpcPremiumRateOptionPR
 import com.tamin.taminhamrah.model.contractFlow.UploadImagePR
 import com.tamin.taminhamrah.model.contractFlow.UserInfoFormPR
@@ -37,6 +38,7 @@ data class ContractFlowUiState(
     val selectedFreeJobName: String? = null,
     val isFreeJobsLoading: Boolean = false,
     val contractApplicantType: ContractApplicantType = ContractApplicantType.PERSONAL,
+    val guardianForm: GuardianFormPR = GuardianFormPR(),
     val branchSelection: BranchSelectionFormPR = BranchSelectionFormPR(),
     val cities: List<CityPR> = emptyList(),
     val branchCities: List<CityPR> = emptyList(),
@@ -86,7 +88,8 @@ data class ContractFlowUiState(
                 ContractStep.STEP_CONTRACT_TERMS -> isRulesConfirmed
                 ContractStep.STEP_USER_INFO -> isUserInfoStepComplete(userInfo)
                 ContractStep.STEP_CONTRACT_APPLICANT ->
-                    contractApplicantType == ContractApplicantType.PERSONAL
+                    contractApplicantType == ContractApplicantType.PERSONAL ||
+                        (contractApplicantType == ContractApplicantType.GUARDIAN && guardianForm.isValid)
                 ContractStep.STEP_SELECT_BRANCH -> branchSelection.isValid
                 ContractStep.STEP_UPLOAD_IMAGE ->
                     documentDescription.isNotBlank() && uploadedDocuments.isNotEmpty()
@@ -158,6 +161,10 @@ data class ContractFlowUiState(
         data class PreflightGateError(val message: String?) : PartialState()
         data class PaymentAllowedChanged(val allowed: Boolean) : PartialState()
         data class TreatmentSupportCodeChanged(val code: String) : PartialState()
+        data class GuardianFormChanged(val form: GuardianFormPR) : PartialState()
+        data class GuardianDocumentUploading(val isUploading: Boolean) : PartialState()
+        data class GuardianDocumentUploaded(val guid: String, val name: String, val bytes: ByteArray) : PartialState()
+        data object GuardianDocumentCleared : PartialState()
     }
 }
 
@@ -168,6 +175,9 @@ sealed class ContractFlowIntent {
     data class SetRulesConfirmed(val confirmed: Boolean) : ContractFlowIntent()
     data class UpdateUserInfo(val userInfo: UserInfoFormPR) : ContractFlowIntent()
     data class SetContractApplicantType(val type: ContractApplicantType) : ContractFlowIntent()
+    data class UpdateGuardianForm(val form: GuardianFormPR) : ContractFlowIntent()
+    data class UploadGuardianImage(val fileName: String, val bytes: ByteArray) : ContractFlowIntent()
+    data object ClearGuardianDocument : ContractFlowIntent()
     data class SelectBranchProvince(val province: ProvincePR) : ContractFlowIntent()
     data class SelectBranchCity(val city: CityPR) : ContractFlowIntent()
     data class SelectBranch(val branch: BranchPR) : ContractFlowIntent()

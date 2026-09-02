@@ -1835,8 +1835,21 @@
     <string name="contract_step_salary">محاسبه حق بیمه</string>
     <string name="contract_step_submit_contract">ثبت قرارداد</string>
 
-    <string name="contract_applicant_personal">متقاضی شخصا قرارداد منعقد می نماید</string>
-    <string name="contract_applicant_guardian">قیم متقاضی قرارداد منعقد می نماید</string>
+    <string name="contract_applicant_personal">متقاضی شخصاً قرارداد منعقد می‌نماید</string>
+    <string name="contract_applicant_guardian">قیم متقاضی قرارداد منعقد می‌نماید</string>
+    <string name="contract_guardian_national_id_label">کد ملی قیم *</string>
+    <string name="contract_guardian_national_id_placeholder">۱۰ رقم</string>
+    <string name="contract_guardian_letter_no_label">شمارهٔ قیم‌نامه *</string>
+    <string name="contract_guardian_letter_no_placeholder">حداقل ۱۰ رقم</string>
+    <string name="contract_guardian_full_name_label">نام و نام خانوادگی قیم *</string>
+    <string name="contract_guardian_full_name_placeholder">نام کامل قیم</string>
+    <string name="contract_guardian_letter_date_label">تاریخ قیم‌نامه *</string>
+    <string name="contract_guardian_letter_date_placeholder">انتخاب تاریخ</string>
+    <string name="contract_guardian_upload_button">تصویر قیم‌نامه</string>
+    <string name="contract_guardian_upload_success">قیم‌نامه</string>
+    <string name="contract_guardian_upload_hint">تصویر می‌بایست در قالب jpeg بوده و اندازهٔ آن حداکثر ۲ مگابایت باشد.</string>
+    <string name="contract_branch_warning_banner">پس از ثبت قرارداد امکان تغییر شعبهٔ تأمین اجتماعی میسر نمی‌باشد؛ لذا در خصوص انتخاب شعبه دقت کافی بعمل آید.</string>
+    <string name="contract_branch_info_banner">جهت انجام فرآیندهایی که هنوز غیرحضوری نشده‌اند، در صورت لزوم به شعبهٔ انتخابی خود مراجعه نمایید.</string>
 
     <string name="contract_flow_national_id">کد ملی: %1$s</string>
     <string name="contract_flow_birth_date">تاریخ تولد: %1$s</string>

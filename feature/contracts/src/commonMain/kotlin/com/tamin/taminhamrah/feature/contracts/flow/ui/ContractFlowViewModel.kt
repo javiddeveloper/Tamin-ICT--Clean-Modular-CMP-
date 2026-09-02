@@ -23,6 +23,7 @@ import com.tamin.taminhamrah.model.common.CityPR
 import com.tamin.taminhamrah.model.common.ProvincePR
 import com.tamin.taminhamrah.contractFlow.ContractApplicantType
 import com.tamin.taminhamrah.contractFlow.ContractStep
+import com.tamin.taminhamrah.model.contractFlow.GuardianFormPR
 import com.tamin.taminhamrah.model.contractFlow.SpcPremiumRateOptionPR
 import com.tamin.taminhamrah.model.contractFlow.UploadImagePR
 import com.tamin.taminhamrah.model.contractFlow.UserInfoFormPR
@@ -108,6 +109,9 @@ class ContractFlowViewModel(
             is ContractFlowIntent.SetRulesConfirmed -> handleSetRulesConfirmed(intent.confirmed)
             is ContractFlowIntent.UpdateUserInfo -> handleUpdateUserInfo(intent.userInfo)
             is ContractFlowIntent.SetContractApplicantType -> handleSetContractApplicantType(intent.type)
+            is ContractFlowIntent.UpdateGuardianForm -> handleUpdateGuardianForm(intent.form)
+            is ContractFlowIntent.UploadGuardianImage -> handleUploadGuardianImage(intent.fileName, intent.bytes)
+            ContractFlowIntent.ClearGuardianDocument -> handleClearGuardianDocument()
             is ContractFlowIntent.SelectBranchProvince -> handleSelectBranchProvince(intent.province)
             is ContractFlowIntent.SelectBranchCity -> handleSelectBranchCity(intent.city)
             is ContractFlowIntent.SelectBranch -> handleSelectBranch(intent.branch)
@@ -385,6 +389,38 @@ class ContractFlowViewModel(
 
     private fun handleSetContractApplicantType(type: ContractApplicantType): Flow<PartialState> = flow {
         emit(PartialState.ContractApplicantTypeChanged(type))
+    }
+
+    private fun handleUpdateGuardianForm(form: GuardianFormPR): Flow<PartialState> = flow {
+        emit(PartialState.GuardianFormChanged(form))
+    }
+
+    private fun handleUploadGuardianImage(fileName: String, bytes: ByteArray): Flow<PartialState> = flow {
+        if (!isJpegFileName(fileName)) {
+            val errorMsg = getString(Res.string.contract_upload_jpeg_only_error)
+            emit(PartialState.GuardianFormChanged(uiState.value.guardianForm.copy(uploadError = errorMsg)))
+            sendEvent(ContractFlowEvent.ShowMessage(errorMsg))
+            return@flow
+        }
+        emit(PartialState.GuardianDocumentUploading(true))
+        try {
+            val request = UploadImageRequestDN(
+                fileName = fileName,
+                bytes = bytes,
+                description = "تصویر قیم نامه",
+            )
+            uploadImageUseCase(request).collect { imageId ->
+                emit(PartialState.GuardianDocumentUploaded(guid = imageId, name = fileName, bytes = bytes))
+            }
+        } catch (e: Exception) {
+            val message = e.message ?: getString(Res.string.contract_upload_failed_error)
+            emit(PartialState.GuardianFormChanged(uiState.value.guardianForm.copy(uploadError = message, isUploadingDocument = false)))
+            sendEvent(ContractFlowEvent.ShowMessage(message))
+        }
+    }
+
+    private fun handleClearGuardianDocument(): Flow<PartialState> = flow {
+        emit(PartialState.GuardianDocumentCleared)
     }
 
     private fun handleSelectBranchCity(city: CityPR): Flow<PartialState> = merge(
@@ -817,6 +853,32 @@ class ContractFlowViewModel(
         )
         is PartialState.ContractApplicantTypeChanged -> currentState.copy(
             contractApplicantType = partialState.type,
+        )
+        is PartialState.GuardianFormChanged -> currentState.copy(
+            guardianForm = partialState.form,
+        )
+        is PartialState.GuardianDocumentUploading -> currentState.copy(
+            guardianForm = currentState.guardianForm.copy(
+                isUploadingDocument = partialState.isUploading,
+                uploadError = null,
+            ),
+        )
+        is PartialState.GuardianDocumentUploaded -> currentState.copy(
+            guardianForm = currentState.guardianForm.copy(
+                documentGuid = partialState.guid,
+                documentName = partialState.name,
+                documentPreviewBytes = partialState.bytes,
+                isUploadingDocument = false,
+                uploadError = null,
+            ),
+        )
+        is PartialState.GuardianDocumentCleared -> currentState.copy(
+            guardianForm = currentState.guardianForm.copy(
+                documentGuid = null,
+                documentName = null,
+                documentPreviewBytes = null,
+                uploadError = null,
+            ),
         )
         is PartialState.BranchSelectionChanged -> currentState.copy(
             branchSelection = partialState.branchSelection,
