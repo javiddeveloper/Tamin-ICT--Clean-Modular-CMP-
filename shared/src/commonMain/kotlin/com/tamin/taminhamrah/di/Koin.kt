@@ -104,7 +104,6 @@ val sharedModules: List<Module>
 
         workshopsModule,
         completeEmployerInfoModule,
-        studentInsuranceContractModule,
         healthProfileModule,
 
         changeMobileModule,
