@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.workshops.ui.objectionStatus.components.label
@@ -317,16 +318,9 @@ private fun AppliedFiltersRow(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = stringResource(Res.string.objection_status_remove_filters),
+                text = stringResource(Res.string.objection_status_filter_chip),
                 style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-                color = colors.textSecondary,
-            )
-            Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = null,
-                tint = colors.textSecondary,
-                modifier = Modifier.size(IconSize.small),
+                color = colors.textMuted,
             )
         }
 
@@ -351,11 +345,17 @@ private fun AppliedFiltersRow(
                 modifier = Modifier.weight(1f),
             )
         }
-
         Text(
-            text = stringResource(Res.string.objection_status_filter_chip),
+            text = stringResource(Res.string.objection_status_remove_filters),
             style = MaterialTheme.typography.labelSmall,
-            color = colors.textMuted,
+            fontWeight = FontWeight.Bold,
+            color = colors.textSecondary,
+        )
+        Icon(
+            imageVector = Icons.Default.Close,
+            contentDescription = null,
+            tint = colors.textSecondary,
+            modifier = Modifier.size(IconSize.small),
         )
     }
 }
@@ -612,6 +612,7 @@ private fun ObjectionSearchSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = colors.bgSurface,
+        shape = RoundedCornerShape(topStart = CornerRadius.sheet, topEnd = CornerRadius.sheet),
         modifier = modifier,
     ) {
         Column(
@@ -626,6 +627,7 @@ private fun ObjectionSearchSheet(
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
                 color = colors.textPrimary,
+                textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),
             )
             val placeholder = stringResource(Res.string.objection_status_field_optional)
@@ -634,16 +636,16 @@ private fun ObjectionSearchSheet(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             ) {
                 WorkshopTextField(
-                    label = stringResource(Res.string.objection_status_objection_number),
-                    value = filters.objectionNumber,
-                    onValueChange = { onFiltersChange(filters.copy(objectionNumber = it.digitsOnly())) },
+                    label = stringResource(Res.string.objection_status_workshop_id),
+                    value = filters.workshopId,
+                    onValueChange = { onFiltersChange(filters.copy(workshopId = it.digitsOnly())) },
                     placeholder = placeholder,
                     modifier = Modifier.weight(1f),
                 )
                 WorkshopTextField(
-                    label = stringResource(Res.string.objection_status_workshop_id),
-                    value = filters.workshopId,
-                    onValueChange = { onFiltersChange(filters.copy(workshopId = it.digitsOnly())) },
+                    label = stringResource(Res.string.objection_status_objection_number),
+                    value = filters.objectionNumber,
+                    onValueChange = { onFiltersChange(filters.copy(objectionNumber = it.digitsOnly())) },
                     placeholder = placeholder,
                     modifier = Modifier.weight(1f),
                 )
@@ -658,18 +660,20 @@ private fun ObjectionSearchSheet(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             ) {
-                TaminPrimaryButton(
-                    text = stringResource(Res.string.objection_status_search),
-                    onClick = onSearch,
-                    icon = Icons.Default.Search,
-                    background = colors.buttonGradient,
-                    shape = RoundedCornerShape(CornerRadius.xl),
-                    modifier = Modifier.weight(1f),
-                )
                 TaminOutlinedButton(
                     text = stringResource(Res.string.objection_status_clear_filters),
                     onClick = onClear,
                     shape = RoundedCornerShape(CornerRadius.xl),
+                    modifier = Modifier.weight(0.3f),
+                )
+                TaminPrimaryButton(
+                    text = stringResource(Res.string.objection_status_search),
+                    onClick = onSearch,
+                    icon = Icons.Default.Search,
+                    iconAtStart = true,
+                    background = colors.buttonGradient,
+                    shape = RoundedCornerShape(CornerRadius.xl),
+                    modifier = Modifier.weight(0.7f),
                 )
             }
         }

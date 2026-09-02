@@ -18,7 +18,7 @@ data class WorkShopObjectionDTO(
 
 @Serializable
 data class VoteTypeDTO(
-    @SerialName("description") val description: String? = null,
+    @SerialName("voteTypeDesc") val description: String? = null,
 )
 
 @Serializable
