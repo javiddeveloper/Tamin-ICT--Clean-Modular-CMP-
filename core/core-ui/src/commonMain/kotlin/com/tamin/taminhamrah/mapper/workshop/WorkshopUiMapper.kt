@@ -208,6 +208,7 @@ fun WorkShopObjectionDN.toPresentation(): WorkShopObjectionPR = WorkShopObjectio
 )
 
 fun SmsMessageDN.toPresentation(): SmsMessagePR = SmsMessagePR(
+    id = id,
     description = description.orDash(),
     status = status,
 )

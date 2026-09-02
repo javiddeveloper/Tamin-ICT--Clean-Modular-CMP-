@@ -115,6 +115,7 @@ fun ObjectionSmsContent(
             state = state.list,
             onLoadMore = onLoadMore,
             emptyMessage = stringResource(Res.string.objection_sms_empty),
+            key = { it.id ?: it.hashCode() },
             header = {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -207,10 +208,12 @@ private fun ObjectionSmsScreenPreview() {
                 list = com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState(
                     items = persistentListOf(
                         SmsMessagePR(
+                            id = 1,
                             description = "اعتراض شما به شمارهٔ ۱۴۰۳۰۰۸۷۲ در شعبهٔ ۷ تهران ثبت شد.",
                             status = WorkShopObjectionStatus.SUBMITTED,
                         ),
                         SmsMessagePR(
+                            id = 2,
                             description = "پروندهٔ بدهی جهت بازنگری محاسبات به واحد درآمد ارجاع شد.",
                             status = WorkShopObjectionStatus.CALCULATION_REVIEW,
                         ),

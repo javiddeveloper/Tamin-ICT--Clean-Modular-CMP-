@@ -659,7 +659,7 @@ private fun ObjectionSearchSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = colors.bgSurface,
+        containerColor = colors.bgPage,
         shape = RoundedCornerShape(topStart = CornerRadius.sheet, topEnd = CornerRadius.sheet),
         modifier = modifier,
     ) {
@@ -712,7 +712,7 @@ private fun ObjectionSearchSheet(
                     text = stringResource(Res.string.objection_status_clear_filters),
                     onClick = onClear,
                     shape = RoundedCornerShape(CornerRadius.xl),
-                    modifier = Modifier.weight(0.3f),
+                    modifier = Modifier.weight(0.3f).background(colors.bgSurface),
                 )
                 TaminPrimaryButton(
                     text = stringResource(Res.string.objection_status_search),

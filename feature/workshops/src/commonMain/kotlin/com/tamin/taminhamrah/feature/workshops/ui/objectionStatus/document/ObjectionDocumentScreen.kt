@@ -158,7 +158,7 @@ fun ObjectionDocumentContent(
                 objectionType = state.objectionType,
                 objectionNumber = state.seqNo.toString().toPersianDigits(),
                 onNavigateToSibling = onOpenSms,
-                siblingIcon = Icons.Default.Send,
+                siblingIcon = Icons.Default.Description,
                 siblingContentDescription = stringResource(Res.string.objection_status_action_sms),
             )
         }

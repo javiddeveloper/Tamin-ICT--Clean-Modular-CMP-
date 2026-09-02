@@ -23,6 +23,7 @@ data class VoteTypeDTO(
 
 @Serializable
 data class SmsMessageDTO(
+    @SerialName("id") val id: Long? = null,
     @SerialName("smsDescription") val smsDescription: String? = null,
     @SerialName("status") val status: String? = null,
 )

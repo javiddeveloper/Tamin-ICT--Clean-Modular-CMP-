@@ -16,9 +16,10 @@ data class WorkShopObjectionPR(
     val status: WorkShopObjectionStatus,
 )
 
-/** One پیامک tied to one objection. */
+/** One پیامک tied to one objection — [id] is the message's own identity, not the objection's `seqNo`. */
 @Immutable
 data class SmsMessagePR(
+    val id: Long?,
     val description: String,
     val status: WorkShopObjectionStatus,
 )

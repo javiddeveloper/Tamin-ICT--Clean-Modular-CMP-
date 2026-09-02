@@ -73,8 +73,17 @@ enum class WorkShopObjectionStatus(val code: String?) {
     }
 }
 
-/** One پیامک sent about an objection, in the order the service returns them. */
+/**
+ * One پیامک sent about an objection, in the order the service returns them.
+ *
+ * [id] is the message's own identity — distinct from the parent objection's `seqNo`, which every
+ * message in the thread shares. Two genuinely different messages can have identical
+ * [description]/[status] (the service resends the same notice more than once for the same event),
+ * so without [id] the shared paged-list dedup (`PagedListState.loaded`, which drops structurally
+ * equal rows) silently collapses them into one — a real, observed bug, not a hypothetical.
+ */
 data class SmsMessageDN(
+    val id: Long? = null,
     val description: String = "",
     val status: WorkShopObjectionStatus = WorkShopObjectionStatus.UNKNOWN,
 )

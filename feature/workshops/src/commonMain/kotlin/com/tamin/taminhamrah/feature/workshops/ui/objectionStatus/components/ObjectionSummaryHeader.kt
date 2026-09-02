@@ -48,23 +48,26 @@ fun ObjectionSummaryHeader(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .padding(top = Spacing.xlg)
             .background(Color.White.copy(alpha = 0.1f), RoundedCornerShape(CornerRadius.xl))
             .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(CornerRadius.xl))
             .padding(horizontal = Spacing.md, vertical = Spacing.smPlus),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
-        Row(
+
+        Box(
             modifier = Modifier
-                .background(Color.White.copy(alpha = 0.16f), RoundedCornerShape(CornerRadius.chip))
-                .border(1.dp, Color.White.copy(alpha = 0.26f), RoundedCornerShape(CornerRadius.chip))
-                .padding(horizontal = Spacing.sm, vertical = Spacing.xxs),
+                .size(WorkshopSummaryIconSize)
+                .background(Color.White.copy(alpha = 0.16f), RoundedCornerShape(CornerRadius.lg))
+                .clickable(onClick = onNavigateToSibling),
+            contentAlignment = Alignment.Center,
         ) {
-            Text(
-                text = status.label(),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
+            Icon(
+                imageVector = siblingIcon,
+                contentDescription = siblingContentDescription,
+                tint = Color.White,
+                modifier = Modifier.size(IconSize.small),
             )
         }
 
@@ -89,19 +92,17 @@ fun ObjectionSummaryHeader(
                 )
             }
         }
-
-        Box(
+        Row(
             modifier = Modifier
-                .size(WorkshopSummaryIconSize)
-                .background(Color.White.copy(alpha = 0.16f), RoundedCornerShape(CornerRadius.lg))
-                .clickable(onClick = onNavigateToSibling),
-            contentAlignment = Alignment.Center,
+                .background(Color.White.copy(alpha = 0.16f), RoundedCornerShape(CornerRadius.chip))
+                .border(1.dp, Color.White.copy(alpha = 0.26f), RoundedCornerShape(CornerRadius.chip))
+                .padding(horizontal = Spacing.sm, vertical = Spacing.xxs),
         ) {
-            Icon(
-                imageVector = siblingIcon,
-                contentDescription = siblingContentDescription,
-                tint = Color.White,
-                modifier = Modifier.size(IconSize.small),
+            Text(
+                text = status.label(),
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
             )
         }
     }
