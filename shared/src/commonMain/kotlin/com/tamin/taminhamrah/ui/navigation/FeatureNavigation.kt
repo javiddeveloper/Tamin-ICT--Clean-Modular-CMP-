@@ -29,6 +29,7 @@ import com.tamin.taminhamrah.feature.taminServices.navigateToInspection
 import com.tamin.taminhamrah.feature.taminServices.navigateToSendInsuranceHistoryToInstitutions
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.navigateToCompleteEmployerInfo
+import com.tamin.taminhamrah.feature.workshops.navigateToLegalRepresentativeWorkshops
 import com.tamin.taminhamrah.model.common.FeatureFlag
 
 fun NavController.navigateToFeature(flag: FeatureFlag) {
@@ -36,6 +37,7 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
         FeatureFlag.MERGE_HISTORY -> navigateToHistory()
         FeatureFlag.WORKSHOPS -> navigateToWorkshops()
         FeatureFlag.COMPLETE_WORKSHOP_INFO -> navigateToCompleteEmployerInfo()
+        FeatureFlag.STACK_HOLDER_LIST -> navigateToLegalRepresentativeWorkshops()
         FeatureFlag.CONTRACTS -> navigateToContracts()
         FeatureFlag.STUDENT_INSURANCE -> navigateToStudentInsuranceContract()
         FeatureFlag.FREELANCE_INSURANCE -> navigateToFreelanceInsuranceContract()
@@ -50,6 +52,7 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
         FeatureFlag.ISSUANCE_WAGE_CERTIFICATE -> navigateToIssuanceCertificate()
         FeatureFlag.DEFERRED_INSTALLMENT_CERTIFICATE -> navigateToDeferredInstallment()
         FeatureFlag.GIRL_SURVIVOR -> navigateToGirlSurvivor()
+        FeatureFlag.REQUEST_PENSION_BY_SURVIVOR,
         FeatureFlag.REQUEST_PENSION_BY_SURVIVOR_112 -> navigateToPensionSurvivor()
         FeatureFlag.DISABILITY_PENSION -> navigateToDisabilityPension()
         FeatureFlag.VIEW_TITLE_JOB -> navigateToHistoryJobInfo()

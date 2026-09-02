@@ -9,6 +9,11 @@ import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
+import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.workshops.LegalRepresentativeWorkshopsViewModel
+import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.otp.LegalRepresentativeOtpViewModel
+import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.list.LegalRepresentativeListViewModel
+import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.add.AddLegalRepresentativeViewModel
+
 val workshopsModule = module {
     // Shared by the three forms that attach evidence.
     factoryOf(::WorkshopAttachmentUploader)
@@ -17,4 +22,8 @@ val workshopsModule = module {
     viewModelOf(::PaymentSheetsViewModel)
     viewModelOf(::WorkshopDebitViewModel)
     viewModelOf(::DemandDocumentsViewModel)
+    viewModelOf(::LegalRepresentativeWorkshopsViewModel)
+    viewModelOf(::LegalRepresentativeOtpViewModel)
+    viewModelOf(::LegalRepresentativeListViewModel)
+    viewModelOf(::AddLegalRepresentativeViewModel)
 }

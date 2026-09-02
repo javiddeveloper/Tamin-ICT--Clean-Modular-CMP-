@@ -9,6 +9,13 @@ import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
 import com.tamin.taminhamrah.feature.workshops.ui.paymentSheets.PaymentSheetsScreen
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebit.WorkshopDebitScreen
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
+import androidx.navigation.toRoute
+import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.workshops.LegalRepresentativeWorkshopsScreen
+import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.otp.LegalRepresentativeOtpScreen
+import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.list.LegalRepresentativeListScreen
+import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.add.AddLegalRepresentativeScreen
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativePR
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopPR
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -42,12 +49,60 @@ data class DemandDocumentsRoute(
     val workshopName: String = "",
 )
 
+@Serializable
+data object LegalRepresentativeWorkshopsRoute
+
+@Serializable
+data class LegalRepresentativeOtpRoute(
+    val workshopId: String,
+    val branchCode: String,
+    val workshopName: String,
+    val branchName: String,
+    val special: Boolean,
+)
+
+@Serializable
+data class LegalRepresentativeListRoute(
+    val workshopId: String,
+    val branchCode: String,
+    val workshopName: String,
+    val branchName: String,
+    val ticket: String,
+    val special: Boolean,
+)
+
+@Serializable
+data class AddLegalRepresentativeRoute(
+    val workshopId: String,
+    val branchCode: String,
+    val workshopName: String,
+    val branchName: String,
+    val isEditMode: Boolean,
+    val nationalCode: String,
+    val hasElectronicNotification: Boolean,
+    val hasInternetList: Boolean,
+    val hasInsuredRegistration: Boolean,
+    val special: Boolean,
+)
+
 fun NavController.navigateToWorkshops() {
     navigate(WorkshopsListRoute)
 }
 
 /**
  * @param onOpenUrl leaves the app: the debt payment page is hosted outside it.
+ */
+fun NavController.navigateToLegalRepresentativeWorkshops() {
+    navigate(LegalRepresentativeWorkshopsRoute)
+}
+
+/**
+ * کارگاه‌های کارفرما: the list, and the جزئیات screen it opens.
+ *
+ * Each service the detail menu offers arrives as its own task, bringing its route, its destination
+ * and its row in [com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction] together. The
+ * `when` that maps an action to its route is introduced with the first of them, so that from then
+ * on the compiler refuses an action with nowhere to go.
  */
 fun NavGraphBuilder.workshopsScreen(
     navController: NavController,
@@ -95,6 +150,110 @@ fun NavGraphBuilder.workshopsScreen(
             branchCode = route.branchCode,
             workshopName = route.workshopName,
             onBack = { navController.popBackStack() },
+        )
+    }
+
+    // ─── Legal representative introduction (معرفی نماینده اشخاص حقوقی) ────────────────
+
+    composableWithFadeTransitions<LegalRepresentativeWorkshopsRoute> {
+        LegalRepresentativeWorkshopsScreen(
+            onBackClicked = { navController.popBackStack() },
+            onOpenWorkshop = { workshop: LegalRepresentativeWorkshopPR ->
+                navController.navigate(
+                    LegalRepresentativeOtpRoute(
+                        workshopId = workshop.workshopId,
+                        branchCode = workshop.branchCode,
+                        workshopName = workshop.workshopName,
+                        branchName = workshop.branchName ?: workshop.branchCode,
+                        special = workshop.special,
+                    )
+                )
+            },
+        )
+    }
+
+    composableWithFadeTransitions<LegalRepresentativeOtpRoute> { backStackEntry ->
+        val route = backStackEntry.toRoute<LegalRepresentativeOtpRoute>()
+        LegalRepresentativeOtpScreen(
+            workshopName = route.workshopName,
+            workshopSubtitle = "کد کارگاه ${route.workshopId} · شعبهٔ ${route.branchName}",
+            onBackClicked = { navController.popBackStack() },
+            onVerified = { ticket ->
+                navController.navigate(
+                    LegalRepresentativeListRoute(
+                        workshopId = route.workshopId,
+                        branchCode = route.branchCode,
+                        workshopName = route.workshopName,
+                        branchName = route.branchName,
+                        ticket = ticket,
+                        special = route.special,
+                    )
+                ) {
+                    popUpTo<LegalRepresentativeOtpRoute> { inclusive = true }
+                }
+            },
+        )
+    }
+
+    composableWithFadeTransitions<LegalRepresentativeListRoute> { backStackEntry ->
+        val route = backStackEntry.toRoute<LegalRepresentativeListRoute>()
+        LegalRepresentativeListScreen(
+            workshopId = route.workshopId,
+            branchCode = route.branchCode,
+            workshopName = route.workshopName,
+            workshopSubtitle = "کد کارگاه ${route.workshopId} · شعبهٔ ${route.branchName}",
+            ticket = route.ticket,
+            onBackClicked = { navController.popBackStack() },
+            onAddClicked = {
+                navController.navigate(
+                    AddLegalRepresentativeRoute(
+                        workshopId = route.workshopId,
+                        branchCode = route.branchCode,
+                        workshopName = route.workshopName,
+                        branchName = route.branchName,
+                        isEditMode = false,
+                        nationalCode = "",
+                        hasElectronicNotification = false,
+                        hasInternetList = false,
+                        hasInsuredRegistration = false,
+                        special = route.special,
+                    )
+                )
+            },
+            onEditClicked = { representative: LegalRepresentativePR ->
+                navController.navigate(
+                    AddLegalRepresentativeRoute(
+                        workshopId = route.workshopId,
+                        branchCode = route.branchCode,
+                        workshopName = route.workshopName,
+                        branchName = route.branchName,
+                        isEditMode = true,
+                        nationalCode = representative.nationalId,
+                        hasElectronicNotification = representative.hasElectronicNotification,
+                        hasInternetList = representative.hasInternetList,
+                        hasInsuredRegistration = representative.hasInsuredRegistration,
+                        special = route.special,
+                    )
+                )
+            },
+        )
+    }
+
+    composableWithFadeTransitions<AddLegalRepresentativeRoute> { backStackEntry ->
+        val route = backStackEntry.toRoute<AddLegalRepresentativeRoute>()
+        AddLegalRepresentativeScreen(
+            workshopId = route.workshopId,
+            branchCode = route.branchCode,
+            workshopName = route.workshopName,
+            workshopSubtitle = "کد کارگاه ${route.workshopId} · شعبهٔ ${route.branchName}",
+            isEditMode = route.isEditMode,
+            nationalCode = route.nationalCode,
+            hasElectronicNotification = route.hasElectronicNotification,
+            hasInternetList = route.hasInternetList,
+            hasInsuredRegistration = route.hasInsuredRegistration,
+            special = route.special,
+            onBackClicked = { navController.popBackStack() },
+            onSubmitted = { navController.popBackStack() },
         )
     }
 }
