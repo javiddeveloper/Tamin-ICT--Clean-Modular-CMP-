@@ -23,6 +23,7 @@ import com.tamin.taminhamrah.model.workshop.WorkshopMemberDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopContractDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDTO
 
@@ -31,6 +32,20 @@ interface WorkShopsRemoteDataSource {
     suspend fun getAllEmployerAgreementByNationalId(
         query: ApiQueryParamDN
     ): ListData<EmployerAgreementDTO>
+
+    /** ردیف پیمان‌های one workshop that has a تعهدنامه. */
+    suspend fun getEmployerAgreementsByWorkshop(
+        workshopId: String,
+        branchCode: String,
+        query: ApiQueryParamDN,
+    ): ListData<EmployerAgreementDTO>
+
+    /** ردیف پیمان‌های one workshop with no تعهدنامه — a different row model. */
+    suspend fun getWorkshopContracts(
+        workshopId: String,
+        branchCode: String,
+        query: ApiQueryParamDN,
+    ): ListData<WorkshopContractDTO>
 
     suspend fun getWorkshopPaymentSheets(
         query: ApiQueryParamDN

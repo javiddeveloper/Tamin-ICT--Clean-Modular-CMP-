@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.workshops.di
 
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopsViewModel
+import com.tamin.taminhamrah.feature.workshops.ui.contractRows.ContractRowsViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.paymentSheets.PaymentSheetsViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachmentUploader
 import org.koin.core.module.dsl.factoryOf
@@ -13,4 +14,5 @@ val workshopsModule = module {
 
     viewModelOf(::WorkshopsViewModel)
     viewModelOf(::PaymentSheetsViewModel)
+    viewModelOf(::ContractRowsViewModel)
 }

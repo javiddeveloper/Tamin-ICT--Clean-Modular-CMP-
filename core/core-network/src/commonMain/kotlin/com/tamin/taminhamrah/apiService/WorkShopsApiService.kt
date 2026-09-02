@@ -27,6 +27,7 @@ import com.tamin.taminhamrah.model.workshop.WorkshopMemberDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopContractDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDTO
 import com.tamin.taminhamrah.tools.BaseDTO
@@ -48,6 +49,32 @@ internal interface WorkShopsApiService {
     suspend fun getAllEmployerAgreementByNationalId(
         @QueryMap queries: Map<String, String>
     ): BaseDTO<ListData<EmployerAgreementDTO>>
+
+    // ------------------------------------------------------------------------ ردیف‌های پیمان
+
+    /**
+     * ردیف پیمان‌های a workshop that *has* a تعهدنامه — same row shape as the list above, narrowed
+     * to one workshop/branch instead of every workshop the signed-in national id holds.
+     */
+    @GET("workshop-services/get-employer-agreement-by-workshop-id-and-branch-code/{workshopId}/{branchCode}")
+    suspend fun getEmployerAgreementsByWorkshop(
+        @Path("workshopId") workshopId: String,
+        @Path("branchCode") branchCode: String,
+        @QueryMap queries: Map<String, String>,
+    ): BaseDTO<ListData<EmployerAgreementDTO>>
+
+    /**
+     * ردیف پیمان‌های a workshop with no تعهدنامه on file — a leaner row, and a different model.
+     *
+     * `contract-employer-workshop-info-…` is the service's own spelling, and the response names
+     * two fields differently from the call above; see [WorkshopContractDTO].
+     */
+    @GET("workshop-services/contract-employer-workshop-info-with-workshop-and-branch-code/{workshopId}/{branchCode}")
+    suspend fun getWorkshopContracts(
+        @Path("workshopId") workshopId: String,
+        @Path("branchCode") branchCode: String,
+        @QueryMap queries: Map<String, String>,
+    ): BaseDTO<ListData<WorkshopContractDTO>>
 
     // -------------------------------------------------------------------------- برگ پرداخت‌ها
 
