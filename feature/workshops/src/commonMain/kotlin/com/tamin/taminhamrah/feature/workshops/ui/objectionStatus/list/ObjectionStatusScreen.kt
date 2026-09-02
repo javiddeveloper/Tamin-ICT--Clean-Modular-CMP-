@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.workshops.ui.objectionStatus.list
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -497,13 +498,7 @@ private fun ObjectionRow(
                 modifier = Modifier.weight(1f),
             )
         }
-        ObjectionExpandToggle(
-            isExpanded = isExpanded,
-            onToggle = { isExpanded = !isExpanded },
-            modifier = Modifier.padding(top = Spacing.sm),
-        )
-
-        if (isExpanded) {
+        AnimatedVisibility(visible = isExpanded) {
             Column(
                 modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
                 verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
@@ -525,6 +520,12 @@ private fun ObjectionRow(
                 )
             }
         }
+
+        ObjectionExpandToggle(
+            isExpanded = isExpanded,
+            onToggle = { isExpanded = !isExpanded },
+            modifier = Modifier.padding(top = Spacing.sm),
+        )
 
         Row(
             modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
