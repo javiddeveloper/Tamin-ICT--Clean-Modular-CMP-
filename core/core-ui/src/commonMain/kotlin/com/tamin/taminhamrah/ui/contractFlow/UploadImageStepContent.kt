@@ -35,6 +35,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
 import com.tamin.taminhamrah.model.contractFlow.UploadImagePR
+import com.tamin.taminhamrah.ui.components.TaminTextField
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
@@ -98,14 +99,16 @@ fun UploadImageStepContent(
             )
         }
 
-        OutlinedTextField(
+        TaminTextField(
             value = description,
             onValueChange = onDescriptionChange,
             modifier = Modifier.fillMaxWidth(),
-            label = { Text(stringResource(Res.string.contract_upload_description_label)) },
-            placeholder = { Text(stringResource(Res.string.contract_upload_description_label)) },
+            label = stringResource(Res.string.contract_upload_description_label),
+            placeholder = stringResource(Res.string.contract_upload_description_label),
             enabled = !isUploading,
             singleLine = false,
+            minLines = 2,
+            maxLines = 4,
         )
 
         if (hasDocument) {

@@ -9,30 +9,28 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.model.common.CityPR
 import com.tamin.taminhamrah.model.contractFlow.UserInfoFormPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.TaminTextField
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
+import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.contract_field_address_required
@@ -78,21 +76,21 @@ fun UserInfoStepContent(
                     .clip(bannerShape)
                     .background(colors.blueBg)
                     .border(Thickness.border, colors.blueText.copy(alpha = 0.20f), bannerShape)
-                    .padding(horizontal = Spacing.md, vertical = Spacing.md),
+                .padding(horizontal = Spacing.md, vertical = Spacing.md),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             ) {
-                Text(
-                    text = stringResource(Res.string.contract_user_info_banner),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.textPrimary,
-                    modifier = Modifier.weight(1f),
-                )
                 Icon(
                     imageVector = Icons.Outlined.Info,
                     contentDescription = null,
                     tint = colors.blueText,
                     modifier = Modifier.size(IconSize.medium),
+                )
+                Text(
+                    text = stringResource(Res.string.contract_user_info_banner),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.textPrimary,
+                    modifier = Modifier.weight(1f),
                 )
             }
 
@@ -113,60 +111,26 @@ fun UserInfoStepContent(
                     modifier = Modifier.weight(1f),
                 )
 
-                Column(
+                val isZipError = userInfo.zipCode.isNotEmpty() && userInfo.zipCode.length != 10
+                TaminTextField(
+                    value = userInfo.zipCode.toPersianDigits(),
+                    onValueChange = onZipCodeChange,
+                    label = stringResource(Res.string.contract_field_postal_code_required),
+                    isError = isZipError,
+                    errorMessage = if (isZipError) stringResource(Res.string.occurrence_field_postal_code_error) else null,
+                    keyboardType = KeyboardType.Number,
                     modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(Spacing.xs),
-                ) {
-                    val isZipError = userInfo.zipCode.isNotEmpty() && userInfo.zipCode.length != 10
-                    OutlinedTextField(
-                        value = userInfo.zipCode,
-                        onValueChange = onZipCodeChange,
-                        label = { Text(stringResource(Res.string.contract_field_postal_code_required)) },
-                        singleLine = true,
-                        isError = isZipError,
-                        shape = RoundedCornerShape(CornerRadius.lg),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = colors.blueText,
-                            unfocusedBorderColor = colors.border,
-                            errorBorderColor = colors.dangerText,
-                            focusedTextColor = colors.textPrimary,
-                            unfocusedTextColor = colors.textPrimary,
-                            cursorColor = colors.blueText,
-                            focusedContainerColor = colors.bgSurface,
-                            unfocusedContainerColor = colors.bgSurface,
-                        ),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    if (isZipError) {
-                        Text(
-                            text = stringResource(Res.string.occurrence_field_postal_code_error),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = colors.dangerText,
-                            modifier = Modifier.padding(horizontal = Spacing.xs),
-                        )
-                    }
-                }
+                )
             }
 
             // Row 2: Residential Address
-            OutlinedTextField(
+            TaminTextField(
                 value = userInfo.address,
                 onValueChange = onAddressChange,
-                label = { Text(stringResource(Res.string.contract_field_address_required)) },
+                label = stringResource(Res.string.contract_field_address_required),
+                singleLine = false,
                 minLines = 2,
                 maxLines = 4,
-                shape = RoundedCornerShape(CornerRadius.lg),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = colors.blueText,
-                    unfocusedBorderColor = colors.border,
-                    focusedTextColor = colors.textPrimary,
-                    unfocusedTextColor = colors.textPrimary,
-                    cursorColor = colors.blueText,
-                    focusedContainerColor = colors.bgSurface,
-                    unfocusedContainerColor = colors.bgSurface,
-                ),
-                modifier = Modifier.fillMaxWidth(),
             )
 
             // Row 3: Phone Number & Mobile (Readonly with Lock)
@@ -174,30 +138,18 @@ fun UserInfoStepContent(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.md),
             ) {
-                OutlinedTextField(
-                    value = userInfo.phoneNumber,
+                TaminTextField(
+                    value = userInfo.phoneNumber.toPersianDigits(),
                     onValueChange = onPhoneNumberChange,
-                    label = { Text(stringResource(Res.string.contract_field_phone_required)) },
-                    singleLine = true,
-                    shape = RoundedCornerShape(CornerRadius.lg),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = colors.blueText,
-                        unfocusedBorderColor = colors.border,
-                        focusedTextColor = colors.textPrimary,
-                        unfocusedTextColor = colors.textPrimary,
-                        cursorColor = colors.blueText,
-                        focusedContainerColor = colors.bgSurface,
-                        unfocusedContainerColor = colors.bgSurface,
-                    ),
+                    label = stringResource(Res.string.contract_field_phone_required),
+                    keyboardType = KeyboardType.Phone,
                     modifier = Modifier.weight(1f),
                 )
 
-                OutlinedTextField(
-                    value = userInfo.mobileNumber,
+                TaminTextField(
+                    value = userInfo.mobileNumber.toPersianDigits(),
                     onValueChange = {},
-                    label = { Text(stringResource(Res.string.contract_field_mobile_readonly)) },
-                    singleLine = true,
+                    label = stringResource(Res.string.contract_field_mobile_readonly),
                     enabled = false,
                     leadingIcon = {
                         Icon(
@@ -207,13 +159,6 @@ fun UserInfoStepContent(
                             modifier = Modifier.size(IconSize.small),
                         )
                     },
-                    shape = RoundedCornerShape(CornerRadius.lg),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        disabledBorderColor = colors.border,
-                        disabledTextColor = colors.textSecondary,
-                        disabledLabelColor = colors.textMuted,
-                        disabledContainerColor = colors.bgPage,
-                    ),
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -232,15 +177,14 @@ private fun UserInfoStepContentPopulatedPreview() {
         UserInfoStepContent(
             userInfo = UserInfoFormPR(
                 cityCode = "021",
-                cityName = "تهران",
-                address = "خیابان آزادی، خیابان استاد معین، پلاک ۱۲",
-                zipCode = "1234567890",
-                phoneNumber = "02166001234",
-                mobileNumber = "09121234567",
+                cityName = "مشهد",
+                address = "مشهد، بلوار وکیل‌آباد، نبش وکیل‌آباد ۵۲",
+                zipCode = "9187654321",
+                phoneNumber = "05832245678",
+                mobileNumber = "09143018372",
             ),
             cities = listOf(
-                CityPR(cityCode = "021", cityName = "تهران", provinceCode = "021"),
-                CityPR(cityCode = "031", cityName = "اصفهان", provinceCode = "031"),
+                CityPR(cityCode = "021", cityName = "مشهد", provinceCode = "021"),
             ),
             isCitiesLoading = false,
             onCitySelected = {},
@@ -257,7 +201,7 @@ private fun UserInfoStepContentEmptyPreview() {
     PreviewRtlThemeContent {
         UserInfoStepContent(
             userInfo = UserInfoFormPR(
-                mobileNumber = "09121234567",
+                mobileNumber = "09143018372",
             ),
             cities = emptyList(),
             isCitiesLoading = false,
