@@ -99,7 +99,11 @@ fun DemandDocumentsContent(
             onLoadMore = { onIntent(DemandDocumentsIntent.LoadMore) },
             key = { it.docNumber },
             header = {
-                WorkshopSectionHeader(title = heading, count = state.list.items.size)
+                WorkshopSectionHeader(
+                    title = heading,
+                    count = state.list.items.size,
+                    copyValue = debitNumber,
+                )
             },
         ) { document ->
             DemandDocumentCard(
@@ -154,6 +158,7 @@ private fun DemandDocumentCard(
         DetailRow(
             label = stringResource(Res.string.workshop_demand_doc_number),
             value = document.docNumberLabel,
+            copyValue = document.docNumber,
             verticalPadding = WorkshopDimens.cellVerticalPadding,
         )
         TaminDivider()

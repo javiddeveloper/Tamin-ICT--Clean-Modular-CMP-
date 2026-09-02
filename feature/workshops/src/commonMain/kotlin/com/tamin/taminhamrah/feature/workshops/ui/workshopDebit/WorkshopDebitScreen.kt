@@ -143,6 +143,7 @@ private fun WorkshopDebtCard(
         DetailRow(
             label = stringResource(Res.string.payment_sheet_debit_number),
             value = debt.debitNumberLabel,
+            copyValue = debt.debitNumber,
             verticalPadding = WorkshopDimens.cellVerticalPadding,
         )
         TaminDivider()
