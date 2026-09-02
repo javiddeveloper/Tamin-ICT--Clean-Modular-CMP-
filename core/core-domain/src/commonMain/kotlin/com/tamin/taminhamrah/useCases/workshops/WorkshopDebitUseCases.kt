@@ -39,6 +39,19 @@ class GetDebitTurnoverPdfUseCase(private val repository: WorkShopsRepository) {
  * payment, and splitting them across two callers is how the old client ended up able to pay
  * without checking. A refused pre-check returns [DebitPaymentDN] with `succeeded = false` so the
  * caller has one shape to handle.
+ *
+ * The old client made a third call before opening the payment page and this one deliberately does
+ * not, so that the next reader does not have to derive it from `my-tamin-droid` again:
+ * `normalDebitPaymentPreview()` issued `GET {TFH_URL}ticket/current-user/{ticket}` and then threw
+ * the response away. Its fragment used only `isSuccess` plus `data.ticket`, and `data.ticket` had
+ * been overwritten client-side with the ticket the app already held, so the address it opened —
+ * `TFH_PAYMENT_VIEW_PAGE + ticket` — is byte-for-byte the one built here. The call was left over
+ * from an in-app payment screen that was abandoned; the block that consumed its payload is still
+ * there, commented out, under the author's note that it did not work.
+ *
+ * It is a GET, so it reads rather than binds the ticket. Dropping it also drops a silent failure:
+ * that fragment had no `else`, so a preview that failed left the button doing nothing at all.
+ * Here the page opens and the gateway reports its own problems.
  */
 class PayWorkshopDebitUseCase(private val repository: WorkShopsRepository) {
     suspend operator fun invoke(request: DebitPaymentRequestDN): DebitPaymentDN {
