@@ -103,10 +103,8 @@ fun ContractApplicantStepContent(
 ) {
     if (isLoading) {
         ContractApplicantStepShimmerSkeleton(modifier = modifier)
-        return
-    }
-
-    val colors = LocalTaminColors.current
+    } else {
+        val colors = LocalTaminColors.current
     val cardShape = RoundedCornerShape(CornerRadius.x2l)
     val optionShape = RoundedCornerShape(CornerRadius.lg)
     val scope = rememberCoroutineScope()
@@ -385,17 +383,18 @@ fun ContractApplicantStepContent(
         }
     }
 
-    if (showDatePicker) {
-        TaminJalaliDatePicker(
-            title = stringResource(Res.string.contract_guardian_letter_date_label),
-            onDismiss = { showDatePicker = false },
-            onConfirm = { year, month, day ->
-                val formatted = "$year/${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')}"
-                val epoch = PersianDateFormatter.toEpochMillis(year, month, day)
-                onGuardianLetterDateChange(formatted, epoch)
-                showDatePicker = false
-            },
-        )
+        if (showDatePicker) {
+            TaminJalaliDatePicker(
+                title = stringResource(Res.string.contract_guardian_letter_date_label),
+                onDismiss = { showDatePicker = false },
+                onConfirm = { year, month, day ->
+                    val formatted = "$year/${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')}"
+                    val epoch = PersianDateFormatter.toEpochMillis(year, month, day)
+                    onGuardianLetterDateChange(formatted, epoch)
+                    showDatePicker = false
+                },
+            )
+        }
     }
 }
 

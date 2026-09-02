@@ -54,75 +54,74 @@ fun ContractRegistrationStepContent(
 ) {
     if (isLoading) {
         ContractRegistrationStepShimmerSkeleton(modifier = modifier)
-        return
-    }
+    } else {
+        val colors = LocalTaminColors.current
+        val cardShape = RoundedCornerShape(CornerRadius.x2l)
 
-    val colors = LocalTaminColors.current
-    val cardShape = RoundedCornerShape(CornerRadius.x2l)
-
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(cardShape)
-            .background(colors.bgSurface)
-            .border(Thickness.border, colors.border, cardShape)
-            .padding(Spacing.lg),
-        verticalArrangement = Arrangement.spacedBy(Spacing.md),
-    ) {
-        // Banner 1: Registration Status
-        RegistrationBannerCard(
-            insuranceId = info.insuranceId,
-        )
-
-        // Banner 2: Eligibility Status or Error
-        if (genderGateError != null || preflightGateError != null || (eligibility != null && !eligibility.isEligible)) {
-            val errorMsg = genderGateError ?: preflightGateError ?: eligibility?.eligibilityMessage(insuranceTypeLabel).orEmpty()
-            BannerCard(
-                message = errorMsg,
-                type = BannerType.Error,
-            )
-        } else {
-            EligibilityBannerCard(
-                insuranceTypeLabel = insuranceTypeLabel,
-                eligibility = eligibility,
-            )
-        }
-
-        // 2x2 User Details Grid
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .clip(cardShape)
+                .background(colors.bgSurface)
+                .border(Thickness.border, colors.border, cardShape)
+                .padding(Spacing.lg),
+            verticalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
-            DetailInfoTile(
-                label = stringResource(Res.string.contract_field_full_name),
-                value = info.fullName,
-                numeric = false,
-                modifier = Modifier.weight(1f),
+            // Banner 1: Registration Status
+            RegistrationBannerCard(
+                insuranceId = info.insuranceId,
             )
-            DetailInfoTile(
-                label = stringResource(Res.string.contract_field_national_id),
-                value = info.nationalId,
-                numeric = true,
-                modifier = Modifier.weight(1f),
-            )
-        }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-        ) {
-            DetailInfoTile(
-                label = stringResource(Res.string.contract_field_birth_date),
-                value = info.birthDateFormatted,
-                numeric = false,
-                modifier = Modifier.weight(1f),
-            )
-            DetailInfoTile(
-                label = stringResource(Res.string.contract_field_contract_type),
-                value = insuranceTypeLabel,
-                numeric = false,
-                modifier = Modifier.weight(1f),
-            )
+            // Banner 2: Eligibility Status or Error
+            if (genderGateError != null || preflightGateError != null || (eligibility != null && !eligibility.isEligible)) {
+                val errorMsg = genderGateError ?: preflightGateError ?: eligibility?.eligibilityMessage(insuranceTypeLabel).orEmpty()
+                BannerCard(
+                    message = errorMsg,
+                    type = BannerType.Error,
+                )
+            } else {
+                EligibilityBannerCard(
+                    insuranceTypeLabel = insuranceTypeLabel,
+                    eligibility = eligibility,
+                )
+            }
+
+            // 2x2 User Details Grid
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+            ) {
+                DetailInfoTile(
+                    label = stringResource(Res.string.contract_field_full_name),
+                    value = info.fullName,
+                    numeric = false,
+                    modifier = Modifier.weight(1f),
+                )
+                DetailInfoTile(
+                    label = stringResource(Res.string.contract_field_national_id),
+                    value = info.nationalId,
+                    numeric = true,
+                    modifier = Modifier.weight(1f),
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+            ) {
+                DetailInfoTile(
+                    label = stringResource(Res.string.contract_field_birth_date),
+                    value = info.birthDateFormatted,
+                    numeric = false,
+                    modifier = Modifier.weight(1f),
+                )
+                DetailInfoTile(
+                    label = stringResource(Res.string.contract_field_contract_type),
+                    value = insuranceTypeLabel,
+                    numeric = false,
+                    modifier = Modifier.weight(1f),
+                )
+            }
         }
     }
 }

@@ -64,121 +64,120 @@ fun SelectBranchStepContent(
 ) {
     if (isLoading) {
         SelectBranchStepShimmerSkeleton(modifier = modifier)
-        return
-    }
+    } else {
+        val colors = LocalTaminColors.current
+        val cardShape = RoundedCornerShape(CornerRadius.x2l)
+        val bannerShape = RoundedCornerShape(CornerRadius.card)
 
-    val colors = LocalTaminColors.current
-    val cardShape = RoundedCornerShape(CornerRadius.x2l)
-    val bannerShape = RoundedCornerShape(CornerRadius.card)
-
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(cardShape)
-            .background(colors.bgSurface)
-            .border(Thickness.border, colors.border, cardShape)
-            .padding(Spacing.lg),
-        verticalArrangement = Arrangement.spacedBy(Spacing.md),
-    ) {
-        // Warning Banner (Top)
-        val warningBg = Color(0xFFFFFBEB)
-        val warningBorder = Color(0xFFFDE68A)
-        val warningText = Color(0xFFB45309)
-
-        Row(
-            modifier = Modifier
+        Column(
+            modifier = modifier
                 .fillMaxWidth()
-                .clip(bannerShape)
-                .background(warningBg)
-                .border(Thickness.border, warningBorder, bannerShape)
-                .padding(horizontal = Spacing.md, vertical = Spacing.md),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                .clip(cardShape)
+                .background(colors.bgSurface)
+                .border(Thickness.border, colors.border, cardShape)
+                .padding(Spacing.lg),
+            verticalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
-            Icon(
-                imageVector = Icons.Outlined.WarningAmber,
-                contentDescription = null,
-                tint = warningText,
-                modifier = Modifier.size(IconSize.medium),
-            )
-            Text(
-                text = stringResource(Res.string.contract_branch_warning_banner),
-                style = MaterialTheme.typography.bodySmall,
-                color = warningText,
-                modifier = Modifier.weight(1f),
-            )
-        }
+            // Warning Banner (Top)
+            val warningBg = Color(0xFFFFFBEB)
+            val warningBorder = Color(0xFFFDE68A)
+            val warningText = Color(0xFFB45309)
 
-        // Province selector
-        SelectableField(
-            label = stringResource(Res.string.bs_province) + " *",
-            options = provinces,
-            selectedCode = branchSelection.provinceCode,
-            selectedName = branchSelection.provinceName,
-            optionCode = { it.provinceCode },
-            optionName = { it.provinceName },
-            isLoading = isProvincesLoading,
-            onSelected = onProvinceSelected,
-            errorMessage = provincesError,
-            onRetry = onRetryProvinces,
-            sheetType = TaminBottomSheetType.PROVINCE,
-        )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(bannerShape)
+                    .background(warningBg)
+                    .border(Thickness.border, warningBorder, bannerShape)
+                    .padding(horizontal = Spacing.md, vertical = Spacing.md),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.WarningAmber,
+                    contentDescription = null,
+                    tint = warningText,
+                    modifier = Modifier.size(IconSize.medium),
+                )
+                Text(
+                    text = stringResource(Res.string.contract_branch_warning_banner),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = warningText,
+                    modifier = Modifier.weight(1f),
+                )
+            }
 
-        // City selector
-        SelectableField(
-            label = stringResource(Res.string.bs_city) + " *",
-            options = cities,
-            selectedCode = branchSelection.cityCode,
-            selectedName = branchSelection.cityName,
-            optionCode = { it.cityCode },
-            optionName = { it.cityName },
-            isLoading = isCitiesLoading,
-            enabled = branchSelection.provinceCode.isNotBlank(),
-            onSelected = onCitySelected,
-            errorMessage = citiesError,
-            onRetry = onRetryCities,
-            sheetType = TaminBottomSheetType.CITY,
-        )
-
-        // Branch selector
-        SelectableField(
-            label = stringResource(Res.string.bs_branch) + " *",
-            options = branches,
-            selectedCode = branchSelection.branchCode,
-            selectedName = branchSelection.branchName,
-            optionCode = { it.code },
-            optionName = { it.name },
-            isLoading = isBranchesLoading,
-            enabled = branchSelection.cityCode.isNotBlank(),
-            onSelected = onBranchSelected,
-            errorMessage = branchesError,
-            onRetry = onRetryBranches,
-            sheetType = TaminBottomSheetType.BRANCH,
-        )
-
-        // Info Banner (Bottom)
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(bannerShape)
-                .background(colors.blueBg)
-                .border(Thickness.border, colors.blueText.copy(alpha = 0.20f), bannerShape)
-                .padding(horizontal = Spacing.md, vertical = Spacing.md),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Info,
-                contentDescription = null,
-                tint = colors.blueText,
-                modifier = Modifier.size(IconSize.medium),
+            // Province selector
+            SelectableField(
+                label = stringResource(Res.string.bs_province) + " *",
+                options = provinces,
+                selectedCode = branchSelection.provinceCode,
+                selectedName = branchSelection.provinceName,
+                optionCode = { it.provinceCode },
+                optionName = { it.provinceName },
+                isLoading = isProvincesLoading,
+                onSelected = onProvinceSelected,
+                errorMessage = provincesError,
+                onRetry = onRetryProvinces,
+                sheetType = TaminBottomSheetType.PROVINCE,
             )
-            Text(
-                text = stringResource(Res.string.contract_branch_info_banner),
-                style = MaterialTheme.typography.bodySmall,
-                color = colors.textSecondary,
-                modifier = Modifier.weight(1f),
+
+            // City selector
+            SelectableField(
+                label = stringResource(Res.string.bs_city) + " *",
+                options = cities,
+                selectedCode = branchSelection.cityCode,
+                selectedName = branchSelection.cityName,
+                optionCode = { it.cityCode },
+                optionName = { it.cityName },
+                isLoading = isCitiesLoading,
+                enabled = branchSelection.provinceCode.isNotBlank(),
+                onSelected = onCitySelected,
+                errorMessage = citiesError,
+                onRetry = onRetryCities,
+                sheetType = TaminBottomSheetType.CITY,
             )
+
+            // Branch selector
+            SelectableField(
+                label = stringResource(Res.string.bs_branch) + " *",
+                options = branches,
+                selectedCode = branchSelection.branchCode,
+                selectedName = branchSelection.branchName,
+                optionCode = { it.code },
+                optionName = { it.name },
+                isLoading = isBranchesLoading,
+                enabled = branchSelection.cityCode.isNotBlank(),
+                onSelected = onBranchSelected,
+                errorMessage = branchesError,
+                onRetry = onRetryBranches,
+                sheetType = TaminBottomSheetType.BRANCH,
+            )
+
+            // Info Banner (Bottom)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(bannerShape)
+                    .background(colors.blueBg)
+                    .border(Thickness.border, colors.blueText.copy(alpha = 0.20f), bannerShape)
+                    .padding(horizontal = Spacing.md, vertical = Spacing.md),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Info,
+                    contentDescription = null,
+                    tint = colors.blueText,
+                    modifier = Modifier.size(IconSize.medium),
+                )
+                Text(
+                    text = stringResource(Res.string.contract_branch_info_banner),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.textSecondary,
+                    modifier = Modifier.weight(1f),
+                )
+            }
         }
     }
 }

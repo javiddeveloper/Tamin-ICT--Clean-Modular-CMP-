@@ -26,7 +26,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.model.common.CityPR
 import com.tamin.taminhamrah.model.contractFlow.UserInfoFormPR
-import com.tamin.taminhamrah.ui.components.TaminText
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -56,132 +57,106 @@ fun UserInfoStepContent(
 ) {
     if (isLoading) {
         UserInfoStepShimmerSkeleton(modifier = modifier)
-        return
-    }
+    } else {
+        val colors = LocalTaminColors.current
+        val cardShape = RoundedCornerShape(CornerRadius.x2l)
+        val bannerShape = RoundedCornerShape(CornerRadius.card)
 
-    val colors = LocalTaminColors.current
-    val cardShape = RoundedCornerShape(CornerRadius.x2l)
-    val bannerShape = RoundedCornerShape(CornerRadius.card)
-
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(cardShape)
-            .background(colors.bgSurface)
-            .border(Thickness.border, colors.border, cardShape)
-            .padding(Spacing.lg),
-        verticalArrangement = Arrangement.spacedBy(Spacing.md),
-    ) {
-        // Blue Info Banner
-        Row(
-            modifier = Modifier
+        Column(
+            modifier = modifier
                 .fillMaxWidth()
-                .clip(bannerShape)
-                .background(colors.blueBg)
-                .border(Thickness.border, colors.blueText.copy(alpha = 0.20f), bannerShape)
-                .padding(horizontal = Spacing.md, vertical = Spacing.md),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                .clip(cardShape)
+                .background(colors.bgSurface)
+                .border(Thickness.border, colors.border, cardShape)
+                .padding(Spacing.lg),
+            verticalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
-            Text(
-                text = stringResource(Res.string.contract_user_info_banner),
-                style = MaterialTheme.typography.bodyMedium,
-                color = colors.textPrimary,
-                modifier = Modifier.weight(1f),
-            )
-            Icon(
-                imageVector = Icons.Outlined.Info,
-                contentDescription = null,
-                tint = colors.blueText,
-                modifier = Modifier.size(IconSize.medium),
-            )
-        }
-
-        // Row 1: City Selector & Postal Code
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-        ) {
-            SelectableField(
-                label = stringResource(Res.string.contract_field_residence_city),
-                options = cities,
-                selectedCode = userInfo.cityCode,
-                selectedName = userInfo.cityName,
-                optionCode = { it.cityCode },
-                optionName = { it.cityName },
-                isLoading = isCitiesLoading,
-                onSelected = onCitySelected,
-                modifier = Modifier.weight(1f),
-            )
-
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+            // Blue Info Banner
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(bannerShape)
+                    .background(colors.blueBg)
+                    .border(Thickness.border, colors.blueText.copy(alpha = 0.20f), bannerShape)
+                    .padding(horizontal = Spacing.md, vertical = Spacing.md),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             ) {
-                val isZipError = userInfo.zipCode.isNotEmpty() && userInfo.zipCode.length != 10
-                OutlinedTextField(
-                    value = userInfo.zipCode,
-                    onValueChange = onZipCodeChange,
-                    label = { Text(stringResource(Res.string.contract_field_postal_code_required)) },
-                    singleLine = true,
-                    isError = isZipError,
-                    shape = RoundedCornerShape(CornerRadius.lg),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = colors.blueText,
-                        unfocusedBorderColor = colors.border,
-                        errorBorderColor = colors.dangerText,
-                        focusedTextColor = colors.textPrimary,
-                        unfocusedTextColor = colors.textPrimary,
-                        cursorColor = colors.blueText,
-                        focusedContainerColor = colors.bgSurface,
-                        unfocusedContainerColor = colors.bgSurface,
-                    ),
-                    modifier = Modifier.fillMaxWidth(),
+                Text(
+                    text = stringResource(Res.string.contract_user_info_banner),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.textPrimary,
+                    modifier = Modifier.weight(1f),
                 )
-                if (isZipError) {
-                    Text(
-                        text = stringResource(Res.string.occurrence_field_postal_code_error),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = colors.dangerText,
-                        modifier = Modifier.padding(horizontal = Spacing.xs),
+                Icon(
+                    imageVector = Icons.Outlined.Info,
+                    contentDescription = null,
+                    tint = colors.blueText,
+                    modifier = Modifier.size(IconSize.medium),
+                )
+            }
+
+            // Row 1: City Selector & Postal Code
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+            ) {
+                SelectableField(
+                    label = stringResource(Res.string.contract_field_residence_city),
+                    options = cities,
+                    selectedCode = userInfo.cityCode,
+                    selectedName = userInfo.cityName,
+                    optionCode = { it.cityCode },
+                    optionName = { it.cityName },
+                    isLoading = isCitiesLoading,
+                    onSelected = onCitySelected,
+                    modifier = Modifier.weight(1f),
+                )
+
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+                ) {
+                    val isZipError = userInfo.zipCode.isNotEmpty() && userInfo.zipCode.length != 10
+                    OutlinedTextField(
+                        value = userInfo.zipCode,
+                        onValueChange = onZipCodeChange,
+                        label = { Text(stringResource(Res.string.contract_field_postal_code_required)) },
+                        singleLine = true,
+                        isError = isZipError,
+                        shape = RoundedCornerShape(CornerRadius.lg),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = colors.blueText,
+                            unfocusedBorderColor = colors.border,
+                            errorBorderColor = colors.dangerText,
+                            focusedTextColor = colors.textPrimary,
+                            unfocusedTextColor = colors.textPrimary,
+                            cursorColor = colors.blueText,
+                            focusedContainerColor = colors.bgSurface,
+                            unfocusedContainerColor = colors.bgSurface,
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
                     )
+                    if (isZipError) {
+                        Text(
+                            text = stringResource(Res.string.occurrence_field_postal_code_error),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = colors.dangerText,
+                            modifier = Modifier.padding(horizontal = Spacing.xs),
+                        )
+                    }
                 }
             }
-        }
 
-        // Row 2: Residential Address
-        OutlinedTextField(
-            value = userInfo.address,
-            onValueChange = onAddressChange,
-            label = { Text(stringResource(Res.string.contract_field_address_required)) },
-            minLines = 2,
-            maxLines = 4,
-            shape = RoundedCornerShape(CornerRadius.lg),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = colors.blueText,
-                unfocusedBorderColor = colors.border,
-                focusedTextColor = colors.textPrimary,
-                unfocusedTextColor = colors.textPrimary,
-                cursorColor = colors.blueText,
-                focusedContainerColor = colors.bgSurface,
-                unfocusedContainerColor = colors.bgSurface,
-            ),
-            modifier = Modifier.fillMaxWidth(),
-        )
-
-        // Row 3: Phone Number & Mobile (Readonly with Lock)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-        ) {
+            // Row 2: Residential Address
             OutlinedTextField(
-                value = userInfo.phoneNumber,
-                onValueChange = onPhoneNumberChange,
-                label = { Text(stringResource(Res.string.contract_field_phone_required)) },
-                singleLine = true,
+                value = userInfo.address,
+                onValueChange = onAddressChange,
+                label = { Text(stringResource(Res.string.contract_field_address_required)) },
+                minLines = 2,
+                maxLines = 4,
                 shape = RoundedCornerShape(CornerRadius.lg),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = colors.blueText,
                     unfocusedBorderColor = colors.border,
@@ -191,32 +166,57 @@ fun UserInfoStepContent(
                     focusedContainerColor = colors.bgSurface,
                     unfocusedContainerColor = colors.bgSurface,
                 ),
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.fillMaxWidth(),
             )
 
-            OutlinedTextField(
-                value = userInfo.mobileNumber,
-                onValueChange = {},
-                label = { Text(stringResource(Res.string.contract_field_mobile_readonly)) },
-                singleLine = true,
-                enabled = false,
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Outlined.Lock,
-                        contentDescription = null,
-                        tint = colors.textMuted,
-                        modifier = Modifier.size(IconSize.small),
-                    )
-                },
-                shape = RoundedCornerShape(CornerRadius.lg),
-                colors = OutlinedTextFieldDefaults.colors(
-                    disabledBorderColor = colors.border,
-                    disabledTextColor = colors.textSecondary,
-                    disabledLabelColor = colors.textMuted,
-                    disabledContainerColor = colors.bgPage,
-                ),
-                modifier = Modifier.weight(1f),
-            )
+            // Row 3: Phone Number & Mobile (Readonly with Lock)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+            ) {
+                OutlinedTextField(
+                    value = userInfo.phoneNumber,
+                    onValueChange = onPhoneNumberChange,
+                    label = { Text(stringResource(Res.string.contract_field_phone_required)) },
+                    singleLine = true,
+                    shape = RoundedCornerShape(CornerRadius.lg),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = colors.blueText,
+                        unfocusedBorderColor = colors.border,
+                        focusedTextColor = colors.textPrimary,
+                        unfocusedTextColor = colors.textPrimary,
+                        cursorColor = colors.blueText,
+                        focusedContainerColor = colors.bgSurface,
+                        unfocusedContainerColor = colors.bgSurface,
+                    ),
+                    modifier = Modifier.weight(1f),
+                )
+
+                OutlinedTextField(
+                    value = userInfo.mobileNumber,
+                    onValueChange = {},
+                    label = { Text(stringResource(Res.string.contract_field_mobile_readonly)) },
+                    singleLine = true,
+                    enabled = false,
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Outlined.Lock,
+                            contentDescription = null,
+                            tint = colors.textMuted,
+                            modifier = Modifier.size(IconSize.small),
+                        )
+                    },
+                    shape = RoundedCornerShape(CornerRadius.lg),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        disabledBorderColor = colors.border,
+                        disabledTextColor = colors.textSecondary,
+                        disabledLabelColor = colors.textMuted,
+                        disabledContainerColor = colors.bgPage,
+                    ),
+                    modifier = Modifier.weight(1f),
+                )
+            }
         }
     }
 }
@@ -225,10 +225,10 @@ fun UserInfoStepContent(
 // Previews
 // -------------------------------------------------------------------------
 
-@com.tamin.taminhamrah.ui.PreviewRtlTheme
+@PreviewRtlTheme
 @Composable
 private fun UserInfoStepContentPopulatedPreview() {
-    com.tamin.taminhamrah.ui.PreviewRtlThemeContent {
+    PreviewRtlThemeContent {
         UserInfoStepContent(
             userInfo = UserInfoFormPR(
                 cityCode = "021",
@@ -251,10 +251,10 @@ private fun UserInfoStepContentPopulatedPreview() {
     }
 }
 
-@com.tamin.taminhamrah.ui.PreviewRtlTheme
+@PreviewRtlTheme
 @Composable
 private fun UserInfoStepContentEmptyPreview() {
-    com.tamin.taminhamrah.ui.PreviewRtlThemeContent {
+    PreviewRtlThemeContent {
         UserInfoStepContent(
             userInfo = UserInfoFormPR(
                 mobileNumber = "09121234567",
