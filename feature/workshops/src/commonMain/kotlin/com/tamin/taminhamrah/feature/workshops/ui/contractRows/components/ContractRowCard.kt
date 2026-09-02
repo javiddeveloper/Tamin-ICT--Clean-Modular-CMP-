@@ -11,14 +11,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.model.workshop.ContractRowPR
-import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -110,6 +112,12 @@ fun ContractRowCard(
                 Tile(
                     label = stringResource(Res.string.contract_rows_email),
                     value = row.email,
+                    // An address, not a number. The theme's `ss01` would paint its digits as
+                    // Persian glyphs, so `…۲۰۲۰@gmail.com` is what the user reads back and
+                    // retypes — and it is not the address. Confirmed against a live row.
+                    latinDigits = true,
+                    // The design ellipses this one cell rather than wrapping it.
+                    singleLine = true,
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -155,6 +163,15 @@ private fun Tile(
     value: String,
     modifier: Modifier = Modifier,
     numeric: Boolean = true,
+    /**
+     * Drops the theme's `ss01`, so ASCII digits stay Latin.
+     *
+     * For the one value on this card that is an identifier rather than a quantity. `"tnum"`
+     * *replaces* the default feature list — it does not add to it — which is exactly the effect
+     * wanted here.
+     */
+    latinDigits: Boolean = false,
+    singleLine: Boolean = false,
 ) {
     val colors = LocalTaminColors.current
     Column(
@@ -172,21 +189,21 @@ private fun Tile(
             style = MaterialTheme.typography.labelSmall,
             color = colors.textMuted,
         )
-        val valueStyle = MaterialTheme.typography.labelMedium
-        if (numeric) {
-            NumericText(
-                text = value,
-                style = valueStyle.copy(fontWeight = FontWeight.Bold),
-                color = colors.textPrimary,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        } else {
+        val base = MaterialTheme.typography.labelMedium
+        val valueStyle = if (latinDigits) base.copy(fontFeatureSettings = "tnum") else base
+        // Same job as `NumericText` — force left-to-right so a code does not read back to front —
+        // but inline, because this cell also needs a line limit and widening the shared component
+        // would touch every one of its callers for one screen's sake.
+        val direction = if (numeric) LayoutDirection.Ltr else LocalLayoutDirection.current
+        CompositionLocalProvider(LocalLayoutDirection provides direction) {
             Text(
                 text = value,
                 style = valueStyle,
                 fontWeight = FontWeight.Bold,
                 color = colors.textPrimary,
+                maxLines = if (singleLine) 1 else Int.MAX_VALUE,
                 overflow = TextOverflow.Ellipsis,
+                modifier = if (numeric) Modifier.fillMaxWidth() else Modifier,
             )
         }
     }
