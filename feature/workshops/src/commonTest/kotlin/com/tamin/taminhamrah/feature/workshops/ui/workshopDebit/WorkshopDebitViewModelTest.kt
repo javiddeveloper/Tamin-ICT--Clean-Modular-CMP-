@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.model.workshop.DebitPaymentDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDN
 import com.tamin.taminhamrah.model.workshop.WORKSHOP_PAGE_SIZE
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
+import com.tamin.taminhamrah.tools.errorHandling.TaminApiException
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebitsUseCase
 import com.tamin.taminhamrah.useCases.workshops.PayWorkshopDebitUseCase
 import kotlinx.coroutines.Dispatchers
@@ -176,6 +177,53 @@ class WorkshopDebitViewModelTest {
         assertNull(repository.lastPaymentRequest)
     }
 
+    /**
+     * The second regression this class carries.
+     *
+     * A payment that never reached the service used to be reported as the *list*'s error, and the
+     * list only draws its error when it has no rows — so a 500 left the button doing visibly
+     * nothing while the debts sat on screen.
+     */
+    @Test
+    fun `a payment that never reached the service still says so`() = runTest(testDispatcher) {
+        repository.workshopDebits = debtsPage(count = 2, total = 2)
+
+        val viewModel = viewModel()
+        open(viewModel)
+        repository.error = TaminApiException(title = SERVER_FAILURE)
+
+        viewModel.events.test {
+            viewModel.sendIntent(
+                WorkshopDebitIntent.PayDebit(viewModel.uiState.value.list.items[0])
+            )
+            val event = awaitItem()
+            assertTrue(event is WorkshopDebitEvent.ShowServerMessage)
+            assertEquals(SERVER_FAILURE, event.message)
+        }
+
+        val state = viewModel.uiState.value
+        assertNull(state.list.error, "a failed payment must not put the list into an error state")
+        assertEquals(2, state.list.items.size)
+        assertNull(state.payingDebitNumber, "the row must stop showing progress")
+    }
+
+    /** A failure with nothing to say must not surface as an empty toast. */
+    @Test
+    fun `a failure with no wording falls back to the refusal message`() = runTest(testDispatcher) {
+        repository.workshopDebits = debtsPage(count = 1, total = 1)
+
+        val viewModel = viewModel()
+        open(viewModel)
+        repository.error = TaminApiException(title = "")
+
+        viewModel.events.test {
+            viewModel.sendIntent(
+                WorkshopDebitIntent.PayDebit(viewModel.uiState.value.list.items[0])
+            )
+            assertTrue(awaitItem() is WorkshopDebitEvent.ShowMessage)
+        }
+    }
+
     @Test
     fun `the row stops showing progress once the answer is in`() = runTest(testDispatcher) {
         repository.workshopDebits = debtsPage(count = 1, total = 1)
@@ -230,5 +278,6 @@ class WorkshopDebitViewModelTest {
         const val RAW_AGREEMENT_ROW = "09600002"
         const val PAYMENT_URL = "https://example.invalid/pay/ticket"
         const val REFUSAL = "بدهی ارسالی معتبر نمی باشد."
+        const val SERVER_FAILURE = "خطای سرور"
     }
 }

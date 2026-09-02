@@ -80,14 +80,32 @@ class WorkshopDebitViewModel(
         )
         emit(PartialState.Paying(null))
 
-        when {
-            result.isPayable -> sendEvent(WorkshopDebitEvent.OpenPaymentPage(result.paymentPageUrl))
-            result.message.isNotBlank() -> sendEvent(WorkshopDebitEvent.ShowServerMessage(result.message))
-            else -> sendEvent(WorkshopDebitEvent.ShowMessage(Res.string.workshop_debt_payment_refused))
+        if (result.isPayable) {
+            sendEvent(WorkshopDebitEvent.OpenPaymentPage(result.paymentPageUrl))
+        } else {
+            reportPaymentFailure(result.message)
         }
     }.catch {
         emit(PartialState.Paying(null))
-        emit(PartialState.Error(it.toSingleLineMessage()))
+        // Not [PartialState.Error]: that sets the *list*'s error, which the scaffold only draws
+        // for an empty list — so a debt that failed to reach the payment service at all (a 500,
+        // a dropped connection) told the user nothing while the rows sat there unchanged.
+        reportPaymentFailure(it.toSingleLineMessage())
+    }
+
+    /**
+     * Why a payment did not happen, said out loud.
+     *
+     * Refusals and transport failures arrive by different routes but read the same to the user, and
+     * both go through here so that neither can end up silent: a blank reason still produces the
+     * fallback wording rather than an empty toast.
+     */
+    private fun reportPaymentFailure(message: String) {
+        if (message.isBlank()) {
+            sendEvent(WorkshopDebitEvent.ShowMessage(Res.string.workshop_debt_payment_refused))
+        } else {
+            sendEvent(WorkshopDebitEvent.ShowServerMessage(message))
+        }
     }
 
     override fun reduceState(

@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButton
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButtonTone
@@ -81,6 +82,7 @@ fun DemandDocumentsContent(
     // Opening is a screen concern: the view model only owns the bytes, and the viewer asks for
     // those itself once it finds nothing cached.
     var isViewerOpen by remember(debitNumber) { mutableStateOf(false) }
+    val colors = LocalTaminColors.current
 
     WorkshopScreenShell(
         title = stringResource(Res.string.workshop_debt_documents),
@@ -113,6 +115,9 @@ fun DemandDocumentsContent(
                 Res.string.workshop_turnover_filename_format,
                 debitNumber,
             ),
+            // The viewer opens over this feature, so it keeps this feature's bar rather than the
+            // app-wide default, which is a different hue entirely.
+            background = Brush.horizontalGradient(colors.profileGradientStops),
             pdf = state.viewerPdf,
             downloadFailed = state.downloadFailed,
             onRequestDownload = { onIntent(DemandDocumentsIntent.ShowCalculationPdf) },
