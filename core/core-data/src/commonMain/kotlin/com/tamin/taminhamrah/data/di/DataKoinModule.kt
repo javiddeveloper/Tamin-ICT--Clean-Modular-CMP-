@@ -17,6 +17,7 @@ import com.tamin.taminhamrah.data.repository.pension.PensionRepositoryImpl
 import com.tamin.taminhamrah.data.repository.userRequests.UserRequestRepositoryImpl
 import com.tamin.taminhamrah.data.repository.orotezProtez.OrotezProtezRepositoryImpl
 import com.tamin.taminhamrah.data.repository.inquiryEducation.InquiryEducationRepositoryImpl
+import com.tamin.taminhamrah.data.repository.requestPaymentForIllDays.RequestPaymentForIllDaysRepositoryImpl
 import com.tamin.taminhamrah.data.repository.pregnancyPay.PregnancyPayRepositoryImpl
 import com.tamin.taminhamrah.data.repository.personal.PersonalRepositoryImpl
 import com.tamin.taminhamrah.feature.FeatureManager
@@ -33,6 +34,7 @@ import com.tamin.taminhamrah.repository.pension.PensionRepository
 import com.tamin.taminhamrah.repository.userRequest.UserRequestRepository
 import com.tamin.taminhamrah.repository.orotezProtez.OrotezProtezRepository
 import com.tamin.taminhamrah.repository.inquiryEducation.InquiryEducationRepository
+import com.tamin.taminhamrah.repository.requestPaymentForIllDays.RequestPaymentForIllDaysRepository
 import com.tamin.taminhamrah.repository.pregnancyPay.PregnancyPayRepository
 import com.tamin.taminhamrah.repository.personal.PersonalRepository
 import com.tamin.taminhamrah.repository.health.HealthRepository
@@ -78,6 +80,7 @@ val dataKoinModule = module {
     singleOf(::VersionHistoryRepositoryImpl) { bind<VersionHistoryRepository>() }
     singleOf(::ContactUsRepositoryImpl) { bind<ContactUsRepository>() }
     singleOf(::OrotezProtezRepositoryImpl) { bind<OrotezProtezRepository>() }
+    singleOf(::RequestPaymentForIllDaysRepositoryImpl) { bind<RequestPaymentForIllDaysRepository>() }
     singleOf(::OccurrenceRepositoryImpl) { bind<OccurrenceRepository>() }
     singleOf(::InspectionRepositoryImpl) { bind<InspectionRepository>() }
     singleOf(::HistoryObjectionRepositoryImpl) { bind<HistoryObjectionRepository>() }

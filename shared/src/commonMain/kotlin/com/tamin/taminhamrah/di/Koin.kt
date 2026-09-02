@@ -27,6 +27,7 @@ import com.tamin.taminhamrah.feature.girlSurvivor.di.girlSurvivorModule
 import com.tamin.taminhamrah.feature.pensionSurvivor.di.pensionSurvivorModule
 import com.tamin.taminhamrah.feature.deferredInstallment.di.deferredInstallmentModule
 import com.tamin.taminhamrah.feature.inquiryEducation.di.inquiryEducationModule
+import com.tamin.taminhamrah.feature.requestPaymentForIllDays.di.requestPaymentForIllDaysModule
 import com.tamin.taminhamrah.feature.pregnancyPay.di.pregnancyPayModule
 import com.tamin.taminhamrah.plugin.di.pluginModule
 import org.koin.core.context.startKoin
@@ -68,6 +69,7 @@ val sharedModules: List<Module>
         girlSurvivorModule,
         deferredInstallmentModule,
         historyObjectionModule,
+        requestPaymentForIllDaysModule,
         pensionSurvivorModule,
         pregnancyPayModule,
         inquiryEducationModule,
