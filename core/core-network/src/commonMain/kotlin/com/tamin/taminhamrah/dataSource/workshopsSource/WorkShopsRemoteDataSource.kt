@@ -15,6 +15,10 @@ import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDTO
 import com.tamin.taminhamrah.model.workshop.DebitReasonDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeContractDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeRequestDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmitRequestDTO
 import com.tamin.taminhamrah.model.workshop.EmployerCommitmentInfoDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberConfirmResultDTO
@@ -126,6 +130,26 @@ interface WorkShopsRemoteDataSource {
     suspend fun getWorkshopStackHolders(
         query: ApiQueryParamDN
     ): ListData<WorkshopStackHolderDTO>
+
+    suspend fun getLegalRepresentativeWorkshops(): ListData<LegalRepresentativeWorkshopDTO>?
+
+    suspend fun getLegalRepresentatives(
+        workshopId: String,
+        branchCode: String
+    ): ListData<LegalRepresentativeDTO>?
+
+    suspend fun getLegalRepresentativeWorkshopContracts(
+        workshopId: String,
+        branchCode: String
+    ): ListData<LegalRepresentativeContractDTO>?
+
+    suspend fun requestLegalRepresentativeTicket(nationalCode: String?)
+
+    suspend fun verifyLegalRepresentativeTicket(ticket: String)
+
+    suspend fun submitLegalRepresentative(ticket: String, request: LegalRepresentativeRequestDTO)
+
+    suspend fun deleteLegalRepresentative(ticket: String, stackId: Long)
 
     // ------------------------------------------------- خدمات غیرحضوری کارفرما (employerEservicesAgreement)
 

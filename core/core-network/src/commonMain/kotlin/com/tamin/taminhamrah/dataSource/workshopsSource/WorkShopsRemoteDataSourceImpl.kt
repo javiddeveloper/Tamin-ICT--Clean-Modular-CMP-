@@ -22,6 +22,10 @@ import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmitRequestDTO
 import com.tamin.taminhamrah.model.workshop.EmployerCommitmentInfoDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeContractDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeRequestDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberConfirmResultDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
@@ -42,6 +46,7 @@ import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
 import com.tamin.taminhamrah.tools.readPdfChannel
+import com.tamin.taminhamrah.tools.extractMessage
 
 /** `serviceName` the `request-ticket` endpoint expects for the Employer → Online Services flow. */
 private const val EMPLOYER_ESERVICES_AGREEMENT = "employerEservicesAgreement"
@@ -51,7 +56,7 @@ internal class WorkShopsRemoteDataSourceImpl(
     private val queryBuilder: ApiQueryBuilder,
     private val errorParser: ErrorParser,
 ) : WorkShopsRemoteDataSource {
-
+    private val legalRepresentativeListQuery = ApiQueryParamDN(page = 1, start = 0, limit = 1000)
     // ---------------------------------------------------------------- کارگاه‌های کارفرما
 
     override suspend fun getAllEmployerAgreementByNationalId(
@@ -291,5 +296,96 @@ internal class WorkShopsRemoteDataSourceImpl(
         throw errorParser.parseGeneralError(e)
     } catch (e: Exception) {
         throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+    }
+
+    override suspend fun getLegalRepresentativeWorkshops(): ListData<LegalRepresentativeWorkshopDTO>? {
+        return try {
+            val queries = queryBuilder.buildQuery(legalRepresentativeListQuery)
+            val response = apiService.getLegalRepresentativeWorkshops(queries)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun getLegalRepresentatives(
+        workshopId: String,
+        branchCode: String
+    ): ListData<LegalRepresentativeDTO>? {
+        return try {
+            val queries = queryBuilder.buildQuery(legalRepresentativeListQuery) + mapOf(
+                "stackType" to "4",
+                "workshopId" to workshopId,
+                "branchCode" to branchCode,
+            )
+            val response = apiService.getLegalRepresentatives(queries)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun getLegalRepresentativeWorkshopContracts(
+        workshopId: String,
+        branchCode: String
+    ): ListData<LegalRepresentativeContractDTO>? {
+        return try {
+            val queries = queryBuilder.buildQuery(legalRepresentativeListQuery)
+            val response = apiService.getLegalRepresentativeWorkshopContracts(workshopId, branchCode, queries)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun requestLegalRepresentativeTicket(nationalCode: String?) {
+        try {
+            val response = if (nationalCode.isNullOrEmpty()) {
+                apiService.requestLegalTicket()
+            } else {
+                apiService.requestLegalTicketWithNationalCode(nationalCode)
+            }
+            response.extractMessage()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun verifyLegalRepresentativeTicket(ticket: String) {
+        try {
+            apiService.validateLegalTicket(ticket).extractMessage()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun submitLegalRepresentative(ticket: String, request: LegalRepresentativeRequestDTO) {
+        try {
+            apiService.submitLegalRepresentative(ticket, request).extractMessage()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun deleteLegalRepresentative(ticket: String, stackId: Long) {
+        try {
+            apiService.deleteLegalRepresentative(ticket, stackId).extractMessage()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
     }
 }

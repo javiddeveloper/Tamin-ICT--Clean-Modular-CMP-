@@ -31,7 +31,16 @@ data class WorkshopSummaryDN(
     val branchOfficeCode: String = "",
     val branchTitle: String = "",
     val branchOfficeName: String = "",
-    /** حقیقی / حقوقی. */
+    /**
+     * `01` حقیقی / `02` حقوقی.
+     *
+     * Kept alongside [characterDescription] because only a حقوقی workshop may have its identity
+     * details completed, and that decision cannot be made on the description: the service spells
+     * it with an Arabic ي ("حقيقي"), so matching on the text is a spelling coincidence away from
+     * offering the form to the wrong workshops.
+     */
+    val characterCode: String = "",
+    /** حقیقی / حقوقی, as the service words it — for display only. */
     val characterDescription: String = "",
     val workshopTypeDescription: String = "",
     val statusCode: String = "",

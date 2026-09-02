@@ -67,6 +67,11 @@ enum class FilterProperty(val key: String) {
     @SerialName("branchCode") PAYMENT_BRANCH_CODE("branchCode"),
     @SerialName("workshopCode") WORKSHOP_CODE("workshopCode"),
     @SerialName("nationalCode") NATIONAL_CODE("nationalCode"),
+    // The employer-info ticket endpoints name the contact fields this way; `mobile` above is
+    // a different filter on a different service and is not interchangeable with it.
+    @SerialName("mobileNumber") MOBILE_NUMBER("mobileNumber"),
+    @SerialName("email") EMAIL("email"),
+    @SerialName("serviceName") SERVICE_NAME("serviceName"),
     @SerialName("birthDate") BIRTH_DATE("birthDate"),
     @SerialName("payIdFrom") PAY_ID_FROM("payIdFrom"),
     @SerialName("payIdTo") PAY_ID_TO("payIdTo"),

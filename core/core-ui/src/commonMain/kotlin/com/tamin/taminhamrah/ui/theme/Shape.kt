@@ -154,3 +154,8 @@ object ShimmerSize {
     val badgeWidth = 56.dp
     val badgeHeight = 24.dp
 }
+
+/** Scrollable list area inside modal option sheets (city / branch pickers). */
+object SheetDimens {
+    val listMaxHeight = 300.dp
+}

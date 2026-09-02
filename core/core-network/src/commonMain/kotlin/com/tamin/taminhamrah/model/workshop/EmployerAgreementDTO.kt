@@ -33,8 +33,16 @@ data class EmployerWorkshopDTO(
     @SerialName("workshopRegisterDate") val workshopRegisterDate: String? = null,
     @SerialName("workshopApproveDate") val workshopApproveDate: String? = null,
     @SerialName("contractRow") val contractRow: String? = null,
+    /**
+     * The branch *office*: `branch.code` is what the card shows as کد شعبه, not [branchCode].
+     *
+     * This endpoint sends `branch` as null and names the same office flat instead, in
+     * [branchTitle] and [brhCode] — verified against a live response. Both shapes are read, or the
+     * card's شعبه cell comes out empty.
+     */
     @SerialName("branch") val branch: WorkshopBranchDTO? = null,
     @SerialName("branchTitle") val branchTitle:String? = null,
+    @SerialName("brhCode") val brhCode: String? = null,
     @SerialName("character") val character: WorkshopCharacterDTO? = null,
     @SerialName("workshopType") val workshopType: WorkshopTypeDTO? = null,
     @SerialName("workshopStatus") val workshopStatus: WorkshopStatusDTO? = null,

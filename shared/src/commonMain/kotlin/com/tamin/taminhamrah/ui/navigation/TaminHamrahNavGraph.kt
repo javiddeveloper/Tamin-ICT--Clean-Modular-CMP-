@@ -107,6 +107,7 @@ import com.tamin.taminhamrah.feature.taminServices.taminServicesScreen
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
 import com.tamin.taminhamrah.feature.treatment.treatmentGraph
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
+import com.tamin.taminhamrah.feature.workshops.completeEmployerInfoScreen
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
 import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
@@ -119,6 +120,7 @@ import com.tamin.taminhamrah.feature.userRequest.userRequestGraph
 import com.tamin.taminhamrah.feature.historyobjection.historyObjectionScreen
 import com.tamin.taminhamrah.feature.historyobjection.historyObjectionStepperScreen
 import com.tamin.taminhamrah.feature.orotezprotez.orotezProtezScreen
+import com.tamin.taminhamrah.feature.requestPaymentForIllDays.requestPaymentForIllDaysScreen
 import com.tamin.taminhamrah.feature.pregnancyPay.pregnancyPayScreen
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
@@ -489,6 +491,7 @@ internal fun TaminHamrahNavGraph(
                 )
 
                 workshopsScreen(navController, onOpenUrl = { url -> openUrl(url) })
+                completeEmployerInfoScreen(navController)
 
                 myInboxScreen(onNavigateBack = { navController.popBackStack() })
 
@@ -530,6 +533,8 @@ internal fun TaminHamrahNavGraph(
                     onBack = { navController.popBackStack() },
                     onNavigateHome = { navController.popBackStack(Route.Home, inclusive = false) },
                 )
+
+                requestPaymentForIllDaysScreen(onBack = { navController.popBackStack() })
 
                 pregnancyPayScreen(onBack = { navController.popBackStack() })
 

@@ -22,6 +22,10 @@ import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmitRequestDTO
 import com.tamin.taminhamrah.model.workshop.EmployerCommitmentInfoDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberConfirmResultDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeContractDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeRequestDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
@@ -38,6 +42,9 @@ import com.tamin.taminhamrah.tools.BaseDTO
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.DELETE
 import de.jensklingenberg.ktorfit.http.GET
+import de.jensklingenberg.ktorfit.http.Header
+import de.jensklingenberg.ktorfit.http.Query
+import de.jensklingenberg.ktorfit.http.QueryMap
 import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.PUT
 import de.jensklingenberg.ktorfit.http.Path
@@ -45,6 +52,7 @@ import de.jensklingenberg.ktorfit.http.Query
 import de.jensklingenberg.ktorfit.http.QueryMap
 import io.ktor.client.statement.HttpStatement
 import kotlinx.serialization.json.JsonElement
+import io.ktor.http.cio.Response
 
 internal interface WorkShopsApiService {
 
@@ -217,6 +225,48 @@ internal interface WorkShopsApiService {
     suspend fun getWorkshopStackHolders(
         @QueryMap queries: Map<String, String>
     ): BaseDTO<ListData<WorkshopStackHolderDTO>>
+
+    @GET("v.1/legal-stakeholders/units")
+    suspend fun getLegalRepresentativeWorkshops(
+        @QueryMap queries: Map<String, String>
+    ): BaseDTO<ListData<LegalRepresentativeWorkshopDTO>>
+
+    @GET("legal-stakeholders")
+    suspend fun getLegalRepresentatives(
+        @QueryMap queries: Map<String, String>
+    ): BaseDTO<ListData<LegalRepresentativeDTO>>
+
+    @GET("workshop-services/get-employer-agreement-by-workshop-id-and-branch-code/{workshopId}/{branchCode}")
+    suspend fun getLegalRepresentativeWorkshopContracts(
+        @Path("workshopId") workshopId: String,
+        @Path("branchCode") branchCode: String,
+        @QueryMap queries: Map<String, String>
+    ): BaseDTO<ListData<LegalRepresentativeContractDTO>>
+
+    @GET("legal-ticket")
+    suspend fun requestLegalTicket(): BaseDTO<JsonElement?>
+
+    @GET("legal-ticket/{nationalCode}")
+    suspend fun requestLegalTicketWithNationalCode(
+        @Path("nationalCode") nationalCode: String
+    ): BaseDTO<JsonElement?>
+
+    @POST("legal-ticket/validate/{ticket}")
+    suspend fun validateLegalTicket(
+        @Path("ticket") ticket: String
+    ): BaseDTO<JsonElement?>
+
+    @POST("legal-stakeholders/{ticket}")
+    suspend fun submitLegalRepresentative(
+        @Path("ticket") ticket: String,
+        @Body request: LegalRepresentativeRequestDTO,
+    ): BaseDTO<JsonElement?>
+
+    @DELETE("legal-stakeholders/{ticket}/{stackId}")
+    suspend fun deleteLegalRepresentative(
+        @Path("ticket") ticket: String,
+        @Path("stackId") stackId: Long,
+    ): BaseDTO<JsonElement?>
 
     // ------------------------------------------------- خدمات غیرحضوری کارفرما (employerEservicesAgreement)
     //

@@ -68,6 +68,10 @@ import com.tamin.taminhamrah.useCases.orotezProtez.GetRequestInsuredMainInfoUseC
 import com.tamin.taminhamrah.useCases.orotezProtez.SaveShortTermOrthosisUseCase
 import com.tamin.taminhamrah.useCases.inquiryEducation.GetDataForEducationUseCase
 import com.tamin.taminhamrah.useCases.inquiryEducation.InquiryEducationCertificateUseCase
+import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.CalcIllnessAmountUseCase
+import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.GetCovidResultUseCase
+import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.GetIllDaysInsuredMainInfoUseCase
+import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.SendRequestForIllDayUseCase
 import com.tamin.taminhamrah.useCases.pregnancyPay.CalculatePregnancyPayEstimateUseCase
 import com.tamin.taminhamrah.useCases.pregnancyPay.GetPregnancyMainInfoUseCase
 import com.tamin.taminhamrah.useCases.pregnancyPay.GetPregnancyStatusListUseCase
@@ -195,6 +199,13 @@ import com.tamin.taminhamrah.useCases.agent.StartAgentSessionUseCase
 import com.tamin.taminhamrah.useCases.agent.UpdateAgentSessionUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopMembersUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopStackHoldersUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetLegalRepresentativeWorkshopsUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetLegalRepresentativesUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetLegalRepresentativeWorkshopContractsUseCase
+import com.tamin.taminhamrah.useCases.workshops.RequestLegalRepresentativeTicketUseCase
+import com.tamin.taminhamrah.useCases.workshops.VerifyLegalRepresentativeTicketUseCase
+import com.tamin.taminhamrah.useCases.workshops.SubmitLegalRepresentativeUseCase
+import com.tamin.taminhamrah.useCases.workshops.DeleteLegalRepresentativeUseCase
 import com.tamin.taminhamrah.useCases.workshops.RequestEmployerAgreementTicketUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetEmployerAgreementContactInfoUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopsWithoutContractUseCase
@@ -212,6 +223,12 @@ import com.tamin.taminhamrah.useCases.treatment.GetMedicalConfirmationPDFUseCase
 import com.tamin.taminhamrah.useCases.treatment.SendToInboxMedicalConfirmationUseCase
 import com.tamin.taminhamrah.useCases.addDependent.AddNewDependentUseCase
 import com.tamin.taminhamrah.useCases.addDependent.GetActiveBranchesUseCase
+import com.tamin.taminhamrah.useCases.employerInfo.GetLegalWorkshopUseCase
+import com.tamin.taminhamrah.useCases.employerInfo.GetLegalWorkshopCeoUseCase
+import com.tamin.taminhamrah.useCases.employerInfo.RequestLegalTicketUseCase
+import com.tamin.taminhamrah.useCases.employerInfo.SubmitLegalWorkshopInfoUseCase
+import com.tamin.taminhamrah.useCases.employerInfo.RequestRealTicketUseCase
+import com.tamin.taminhamrah.useCases.employerInfo.SubmitRealWorkshopInfoUseCase
 import com.tamin.taminhamrah.useCases.addDependent.GetDependentInfoUseCase
 import com.tamin.taminhamrah.useCases.addDependent.GetFamilyRelationshipsFromProxyUseCase
 import com.tamin.taminhamrah.useCases.addDependent.GetFamilyRelationshipsUseCase
@@ -321,6 +338,10 @@ val domainModule = module {
     factoryOf(::SaveShortTermOrthosisUseCase)
     factoryOf(::GetDataForEducationUseCase)
     factoryOf(::InquiryEducationCertificateUseCase)
+    factoryOf(::GetIllDaysInsuredMainInfoUseCase)
+    factoryOf(::GetCovidResultUseCase)
+    factoryOf(::CalcIllnessAmountUseCase)
+    factoryOf(::SendRequestForIllDayUseCase)
     factoryOf(::GetPregnancyMainInfoUseCase)
     factoryOf(::GetPregnancyStatusListUseCase)
     factoryOf(::GetPregnancyTypeListUseCase)
@@ -406,6 +427,13 @@ val domainModule = module {
     factoryOf(::GetArticleSixteenReportPdfUseCase)
     factoryOf(::GetWorkshopMembersUseCase)
     factoryOf(::GetWorkshopStackHoldersUseCase)
+    factoryOf(::GetLegalRepresentativeWorkshopsUseCase)
+    factoryOf(::GetLegalRepresentativesUseCase)
+    factoryOf(::GetLegalRepresentativeWorkshopContractsUseCase)
+    factoryOf(::RequestLegalRepresentativeTicketUseCase)
+    factoryOf(::VerifyLegalRepresentativeTicketUseCase)
+    factoryOf(::SubmitLegalRepresentativeUseCase)
+    factoryOf(::DeleteLegalRepresentativeUseCase)
     // خدمات غیرحضوری کارفرما — the employerEservicesAgreement stepper + management drill-downs
     factoryOf(::RequestEmployerAgreementTicketUseCase)
     factoryOf(::GetEmployerAgreementContactInfoUseCase)
@@ -461,5 +489,13 @@ val domainModule = module {
     factoryOf(::InquiryEducationCodeUseCase)
     factoryOf(::UploadDependentImageUseCase)
     factoryOf(::AddNewDependentUseCase)
+
+    // Employer Info UseCases
+    factoryOf(::GetLegalWorkshopUseCase)
+    factoryOf(::GetLegalWorkshopCeoUseCase)
+    factoryOf(::RequestLegalTicketUseCase)
+    factoryOf(::SubmitLegalWorkshopInfoUseCase)
+    factoryOf(::RequestRealTicketUseCase)
+    factoryOf(::SubmitRealWorkshopInfoUseCase)
 }
 
