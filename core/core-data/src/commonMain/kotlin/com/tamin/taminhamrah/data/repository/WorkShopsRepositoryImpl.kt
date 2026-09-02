@@ -20,12 +20,14 @@ import com.tamin.taminhamrah.model.workshop.DebitObjectionResultDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDN
+import com.tamin.taminhamrah.model.workshop.ContractRowQuery
 import com.tamin.taminhamrah.model.workshop.DebitReasonDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetQuery
 import com.tamin.taminhamrah.model.workshop.WORKSHOP_PAGE_SIZE
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
+import com.tamin.taminhamrah.model.workshop.WorkshopContractDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDN
 import com.tamin.taminhamrah.model.workshop.WorkshopListQuery
@@ -67,6 +69,31 @@ class WorkShopsRepositoryImpl(
             .getAllEmployerAgreementByNationalId(pageQuery(query.page, query.pageSize, filters))
             .toDomainPage { it.toDomain() }
     }
+
+    // ------------------------------------------------------------------ ردیف‌های پیمان
+
+    /*
+     * Both contract-row calls take the workshop and branch as path segments, so neither builds a
+     * filter — the query carries page and size only.
+     */
+
+    override suspend fun getContractRowsWithAgreement(
+        query: ContractRowQuery,
+    ): PagedListDN<EmployerAgreementDN> =
+        remoteDataSource.getEmployerAgreementsByWorkshop(
+            workshopId = query.workshopId,
+            branchCode = query.branchCode,
+            query = pageQuery(query.page, query.pageSize),
+        ).toDomainPage { it.toDomain() }
+
+    override suspend fun getContractRowsWithoutAgreement(
+        query: ContractRowQuery,
+    ): PagedListDN<WorkshopContractDN> =
+        remoteDataSource.getWorkshopContracts(
+            workshopId = query.workshopId,
+            branchCode = query.branchCode,
+            query = pageQuery(query.page, query.pageSize),
+        ).toDomainPage { it.toDomain() }
 
     // -------------------------------------------------------------------- برگ پرداخت‌ها
 

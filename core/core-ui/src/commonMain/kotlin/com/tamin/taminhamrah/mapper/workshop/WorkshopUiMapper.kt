@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.mapper.workshop
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtPR
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoDN
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoPR
+import com.tamin.taminhamrah.model.workshop.ContractRowPR
 import com.tamin.taminhamrah.model.workshop.DebitReasonDN
 import com.tamin.taminhamrah.model.workshop.DebitReasonPR
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
@@ -10,6 +11,7 @@ import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetPR
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtPR
+import com.tamin.taminhamrah.model.workshop.WorkshopContractDN
 import com.tamin.taminhamrah.model.workshop.WorkshopActivityStatus
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryPR
@@ -58,6 +60,38 @@ fun EmployerAgreementDN.toPresentation(): WorkshopPR = with(workshop) {
         approveDate = approveDate.orDashDate(),
     )
 }
+
+// ------------------------------------------------------------------------ ردیف‌های پیمان
+
+/**
+ * A تعهدنامه‌دار row: seven fields, from the agreement envelope and the workshop nested in it.
+ *
+ * ردیف پیمان comes from the agreement's own `pymseq`, *not* from the workshop's `contractRow` —
+ * the two are different columns and the نام کارگاه on this card belongs to the workshop while the
+ * ردیف belongs to the agreement.
+ */
+fun EmployerAgreementDN.toContractRow(): ContractRowPR = ContractRowPR(
+    workshopId = workshop.workshopId,
+    branchCode = workshop.branchCode,
+    name = workshop.name.orDash(),
+    rowLabel = contractRow.orDashDigits(),
+    workshopCodeLabel = workshop.workshopId.orDashDigits(),
+    commitmentDate = startDate.orDashDate(),
+    mobile = mobile.orDashDigits(),
+    email = email.orDash(),
+    // Blank, not dashed: the card drops the tile entirely rather than drawing a dash across it.
+    address = workshop.address,
+)
+
+/** A بدون تعهدنامه row: the same card with the contact block absent, because the data is. */
+fun WorkshopContractDN.toContractRow(): ContractRowPR = ContractRowPR(
+    workshopId = workshopId,
+    branchCode = branchCode,
+    name = workshopName.orDash(),
+    rowLabel = contractRow.orDashDigits(),
+    workshopCodeLabel = workshopId.orDashDigits(),
+    commitmentDate = startDate.orDashDate(),
+)
 
 // -------------------------------------------------------------------------- برگ پرداخت‌ها
 
