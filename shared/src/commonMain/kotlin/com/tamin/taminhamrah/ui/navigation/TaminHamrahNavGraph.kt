@@ -119,6 +119,7 @@ import com.tamin.taminhamrah.feature.userRequest.userRequestGraph
 import com.tamin.taminhamrah.feature.historyobjection.historyObjectionScreen
 import com.tamin.taminhamrah.feature.historyobjection.historyObjectionStepperScreen
 import com.tamin.taminhamrah.feature.orotezprotez.orotezProtezScreen
+import com.tamin.taminhamrah.feature.requestPaymentForIllDays.requestPaymentForIllDaysScreen
 import com.tamin.taminhamrah.feature.pregnancyPay.pregnancyPayScreen
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
@@ -527,6 +528,8 @@ internal fun TaminHamrahNavGraph(
                     onBack = { navController.popBackStack() },
                     onNavigateHome = { navController.popBackStack(Route.Home, inclusive = false) },
                 )
+
+                requestPaymentForIllDaysScreen(onBack = { navController.popBackStack() })
 
                 pregnancyPayScreen(onBack = { navController.popBackStack() })
 

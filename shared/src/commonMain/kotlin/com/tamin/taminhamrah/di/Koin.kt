@@ -50,6 +50,7 @@ import com.tamin.taminhamrah.feature.pensionSurvivor.di.pensionSurvivorModule
 
 import com.tamin.taminhamrah.feature.deferredInstallment.di.deferredInstallmentModule
 import com.tamin.taminhamrah.feature.inquiryEducation.di.inquiryEducationModule
+import com.tamin.taminhamrah.feature.requestPaymentForIllDays.di.requestPaymentForIllDaysModule
 import com.tamin.taminhamrah.feature.pregnancyPay.di.pregnancyPayModule
 
 import com.tamin.taminhamrah.plugin.di.pluginModule
@@ -127,7 +128,7 @@ val sharedModules: List<Module>
         deferredInstallmentModule,
 
         historyObjectionModule,
-
+        requestPaymentForIllDaysModule,
         pensionSurvivorModule,
 
         pregnancyPayModule,
