@@ -61,6 +61,13 @@ feature/pensionSurvivor/src/localMocks/
 ## Personal Cursor skills (local only — edit freely, never push)
 /.cursor/skills/tamin-pre-pr-review/
 /.cursor/skills/tamin-pre-commit-review/
+/.cursor/skills/jira-time-log/
+/.cursor/skills/tamin-legacy-feature-port/
+
+## Local QA / agent working files (never push)
+.gstack/
+.superpowers/
+docs/superpowers/
 
 ## Code review working files (local only)
 review/
