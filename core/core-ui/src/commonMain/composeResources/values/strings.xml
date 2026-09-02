@@ -1541,6 +1541,7 @@
     <string name="workshop_demand_doc_step">مرحله</string>
     <string name="workshop_demand_doc_state">وضعیت</string>
     <string name="workshop_demand_doc_calculation">مشاهده جزئیات محاسبه</string>
+    <string name="workshop_turnover_filename_format">workshop_turnover_%1$s.pdf</string>
 
     <!-- استعلام بدهی -->
     <string name="workshop_inquiry_result">وضعیت بدهی</string>

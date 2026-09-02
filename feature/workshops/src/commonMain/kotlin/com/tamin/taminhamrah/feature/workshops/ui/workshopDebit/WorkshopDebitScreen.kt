@@ -187,7 +187,7 @@ private fun WorkshopDebtCard(
             TaminDivider()
             DetailRow(
                 label = stringResource(Res.string.payment_sheet_agreement_row),
-                value = debt.agreementRow,
+                value = debt.agreementRowLabel,
                 verticalPadding = WorkshopDimens.cellVerticalPadding,
             )
 
@@ -228,7 +228,8 @@ private fun WorkshopDebitScreenPreview() {
                             remainingAmount = "۱۴٬۲۰۳٬۳۱۱",
                             fromDate = "۱۳۹۶/۰۷/۰۱",
                             toDate = "۱۳۹۷/۰۶/۳۱",
-                            agreementRow = "۰۹۶۰۰۰۰۲",
+                            agreementRow = "09600002",
+                            agreementRowLabel = "۰۹۶۰۰۰۰۲",
                         ),
                     ),
                 ),

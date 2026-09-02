@@ -3,6 +3,9 @@ package com.tamin.taminhamrah.feature.workshops.ui.demandDocuments
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButton
@@ -18,6 +21,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.TaminDivider
+import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.persistentListOf
@@ -32,6 +36,7 @@ import taminx.core.core_ui.workshop_demand_doc_state
 import taminx.core.core_ui.workshop_demand_doc_step
 import taminx.core.core_ui.workshop_demand_doc_type
 import taminx.core.core_ui.workshop_docs_debit_heading
+import taminx.core.core_ui.workshop_turnover_filename_format
 
 /**
  * اسناد مطالبه of one debt, each openable as a PDF.
@@ -73,6 +78,10 @@ fun DemandDocumentsContent(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // Opening is a screen concern: the view model only owns the bytes, and the viewer asks for
+    // those itself once it finds nothing cached.
+    var isViewerOpen by remember(debitNumber) { mutableStateOf(false) }
+
     WorkshopScreenShell(
         title = stringResource(Res.string.workshop_debt_documents),
         onBack = onBack,
@@ -93,9 +102,25 @@ fun DemandDocumentsContent(
         ) { document ->
             DemandDocumentCard(
                 document = document,
-                onShowCalculation = { onIntent(DemandDocumentsIntent.ShowCalculationPdf) },
+                onShowCalculation = { isViewerOpen = true },
             )
         }
+    }
+
+    if (isViewerOpen) {
+        TaminPdfViewer(
+            fileName = stringResource(
+                Res.string.workshop_turnover_filename_format,
+                debitNumber,
+            ),
+            pdf = state.viewerPdf,
+            downloadFailed = state.downloadFailed,
+            onRequestDownload = { onIntent(DemandDocumentsIntent.ShowCalculationPdf) },
+            onDismiss = {
+                isViewerOpen = false
+                onIntent(DemandDocumentsIntent.DismissViewer)
+            },
+        )
     }
 }
 
