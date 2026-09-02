@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.contractRows.contract.Contract
 import com.tamin.taminhamrah.feature.workshops.ui.contractRows.contract.ContractRowsIntent
 import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
+import com.tamin.taminhamrah.model.workshop.WORKSHOP_PAGE_SIZE
 import com.tamin.taminhamrah.model.workshop.WorkshopContractDN
 import com.tamin.taminhamrah.model.workshop.WorkshopSummaryDN
 import com.tamin.taminhamrah.useCases.workshops.GetContractRowsWithAgreementUseCase
@@ -244,6 +245,75 @@ class ContractRowsViewModelTest {
         vm.uiState.test {
             assertEquals(1, awaitItem().list.items.size)
         }
+    }
+
+    // ------------------------------------------------------------------------ paging
+
+    /**
+     * Load-more, which no real account can reach.
+     *
+     * Every workshop this feature was tested against holds at most one ردیف پیمان, so the second
+     * page only ever exists here. A full page plus a larger total is exactly what the service
+     * sends when more remain, and it is the only condition under which [PagedListState.hasMore]
+     * is true.
+     */
+    @Test
+    fun `a full first page asks for a second and appends it`() = runTest(testDispatcher) {
+        val firstPage = List(WORKSHOP_PAGE_SIZE) { agreementRow(row = "${it + 1}") }
+        repository.contractRowsWithAgreement = PagedListDN(firstPage, total = WORKSHOP_PAGE_SIZE + 3)
+
+        val vm = viewModel()
+        vm.sendIntent(ContractRowsIntent.Open("9028212822", "0210"))
+        vm.uiState.test {
+            val state = awaitItem()
+            assertEquals(WORKSHOP_PAGE_SIZE, state.list.items.size)
+            assertTrue(state.list.hasMore)
+            // start = page * pageSize, so the next page is ordinal 1 — the value the repository
+            // is about to be asked for.
+            assertEquals(1, state.list.nextPage)
+        }
+
+        val secondPage = List(3) { agreementRow(row = "${WORKSHOP_PAGE_SIZE + it + 1}") }
+        repository.contractRowsWithAgreement = PagedListDN(secondPage, total = WORKSHOP_PAGE_SIZE + 3)
+        vm.sendIntent(ContractRowsIntent.LoadMore)
+
+        vm.uiState.test {
+            val state = awaitItem()
+            // Appended, not replaced — reaching the end of a list must not flick back to page one.
+            assertEquals(WORKSHOP_PAGE_SIZE + 3, state.list.items.size)
+            assertEquals("۱", state.list.items.first().rowLabel)
+            assertFalse(state.list.hasMore)
+        }
+        assertEquals(1, repository.lastContractRowQuery?.page)
+    }
+
+    /** A short page is the end of the list even when the service overstates its total. */
+    @Test
+    fun `a short page ends the list`() = runTest(testDispatcher) {
+        repository.contractRowsWithAgreement =
+            PagedListDN(listOf(agreementRow("1")), total = 99)
+
+        val vm = viewModel()
+        vm.sendIntent(ContractRowsIntent.Open("9028212822", "0210"))
+
+        vm.uiState.test {
+            assertFalse(awaitItem().list.hasMore)
+        }
+    }
+
+    /** Scrolling a list that has no more pages must not fire another request. */
+    @Test
+    fun `load more does nothing once the list is exhausted`() = runTest(testDispatcher) {
+        repository.contractRowsWithAgreement = PagedListDN(listOf(agreementRow("1")), total = 1)
+
+        val vm = viewModel()
+        vm.sendIntent(ContractRowsIntent.Open("9028212822", "0210"))
+        vm.sendIntent(ContractRowsIntent.LoadMore)
+
+        vm.uiState.test {
+            assertEquals(1, awaitItem().list.items.size)
+        }
+        assertEquals(0, repository.lastContractRowQuery?.page)
     }
 
     /**
