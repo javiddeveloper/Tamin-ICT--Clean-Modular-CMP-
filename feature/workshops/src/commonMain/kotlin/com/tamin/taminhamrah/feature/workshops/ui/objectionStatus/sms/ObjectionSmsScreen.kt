@@ -20,9 +20,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tamin.taminhamrah.feature.workshops.ui.components.DashedEmptyStateCard
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopListScaffold
 import com.tamin.taminhamrah.feature.workshops.ui.components.colors
 import com.tamin.taminhamrah.feature.workshops.ui.components.tint
@@ -93,11 +96,13 @@ fun ObjectionSmsContent(
     Column(modifier = modifier.fillMaxWidth().background(colors.bgPage)) {
         TaminTopAppBar(
             title = stringResource(Res.string.objection_sms_title),
+            background = Brush.horizontalGradient(colors.profileGradientStops),
             navigationIcon = {
                 TaminTopAppBarButton(
                     icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                     contentDescription = null,
                     onClick = onBack,
+                    bordered = true,
                 )
             },
         ) {
@@ -114,7 +119,7 @@ fun ObjectionSmsContent(
         WorkshopListScaffold(
             state = state.list,
             onLoadMore = onLoadMore,
-            emptyMessage = stringResource(Res.string.objection_sms_empty),
+            emptyContent = { ObjectionSmsEmptyState() },
             key = { it.id ?: it.hashCode() },
             header = {
                 Row(
@@ -136,6 +141,21 @@ fun ObjectionSmsContent(
                 }
             },
             indexedRow = { index, sms -> SmsTimelineItem(index = index + 1, sms = sms) },
+        )
+    }
+}
+
+/** «پیامکی برای این اعتراض ارسال نشده است» — no per-message identity needed, just the one line. */
+@Composable
+private fun ObjectionSmsEmptyState(modifier: Modifier = Modifier) {
+    val colors = LocalTaminColors.current
+    DashedEmptyStateCard(modifier = modifier) {
+        Text(
+            text = stringResource(Res.string.objection_sms_empty),
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = colors.textPrimary,
+            textAlign = TextAlign.Center,
         )
     }
 }

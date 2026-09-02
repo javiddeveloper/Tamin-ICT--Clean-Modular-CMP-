@@ -33,15 +33,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.workshops.ui.objectionStatus.components.label
+import com.tamin.taminhamrah.feature.workshops.ui.components.DashedEmptyStateCard
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopListScaffold
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopTextField
 import com.tamin.taminhamrah.feature.workshops.ui.components.colors
@@ -71,7 +70,6 @@ import com.tamin.taminhamrah.ui.theme.HeaderDecoration
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.stringResource
@@ -147,17 +145,20 @@ fun ObjectionStatusContent(
     Column(modifier = modifier.fillMaxWidth().background(colors.bgPage)) {
         TaminTopAppBar(
             title = stringResource(Res.string.objection_status_title),
+            background = Brush.horizontalGradient(colors.profileGradientStops),
             navigationIcon = {
                 TaminTopAppBarButton(
                     icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                     contentDescription = null,
                     onClick = onBack,
+                    bordered = true
                 )
             },
             action = {
                 TaminTopAppBarButton(
                     icon = Icons.Default.Search,
                     contentDescription = stringResource(Res.string.objection_status_search),
+                    bordered = true,
                     onClick = { onIntent(ObjectionStatusIntent.SearchOpenChanged(true)) },
                 )
             },
@@ -394,26 +395,7 @@ private fun FilterChip(text: String, onRemove: () -> Unit, modifier: Modifier = 
 @Composable
 private fun ObjectionEmptyState(modifier: Modifier = Modifier) {
     val colors = LocalTaminColors.current
-    val shape = RoundedCornerShape(CornerRadius.card)
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .drawBehind {
-                drawRoundRect(
-                    color = colors.border,
-                    style = Stroke(
-                        width = Thickness.medium.toPx(),
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f),
-                    ),
-                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(CornerRadius.card.toPx()),
-                )
-            }
-            .clip(shape)
-            .background(colors.bgSurface)
-            .padding(horizontal = Spacing.page, vertical = Spacing.xxl),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(Spacing.xs),
-    ) {
+    DashedEmptyStateCard(modifier = modifier) {
         Text(
             text = stringResource(Res.string.objection_status_empty_title),
             style = MaterialTheme.typography.titleSmall,
