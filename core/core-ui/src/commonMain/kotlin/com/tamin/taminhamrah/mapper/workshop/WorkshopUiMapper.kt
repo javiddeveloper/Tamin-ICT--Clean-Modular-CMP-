@@ -1,5 +1,8 @@
 package com.tamin.taminhamrah.mapper.workshop
 
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeContractDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeWorkshopDN
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtPR
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoDN
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoPR
@@ -7,6 +10,9 @@ import com.tamin.taminhamrah.model.workshop.ContractRowPR
 import com.tamin.taminhamrah.model.workshop.DebitReasonDN
 import com.tamin.taminhamrah.model.workshop.DebitReasonPR
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeContractPR
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativePR
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopPR
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetPR
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
@@ -239,3 +245,38 @@ private fun Long?.orDashTimestamp(): String = PersianDateFormatter.formatTimesta
  * zero are different answers, and the dash is the one that does not claim a figure.
  */
 private fun Long?.orDashAmount(): String = this?.let { "${it.toPriceFormat()} ریال" }.orDash()
+
+fun LegalRepresentativeWorkshopDN.toPresentation(): LegalRepresentativeWorkshopPR {
+    return LegalRepresentativeWorkshopPR(
+        workshopId = workshopId,
+        branchCode = branchCode,
+        workshopName = workshopName ?: "",
+        branchName = branchName,
+        special = special,
+        representativeCount = representativeCount,
+    )
+}
+
+fun LegalRepresentativeDN.toPresentation(contractRows: List<String> = emptyList()): LegalRepresentativePR {
+    return LegalRepresentativePR(
+        stakeId = stakeId,
+        nationalId = nationalId,
+        mobile = mobile,
+        fullName = fullName,
+        hasElectronicNotification = hasElectronicNotification,
+        hasInternetList = hasInternetList,
+        hasInsuredRegistration = hasInsuredRegistration,
+        startDateLabel = PersianDateFormatter.formatTimestamp(startDate),
+        workshopId = workshopId,
+        branchCode = branchCode,
+        special = special,
+        contractRows = contractRows,
+    )
+}
+
+fun LegalRepresentativeContractDN.toPresentation(): LegalRepresentativeContractPR {
+    return LegalRepresentativeContractPR(
+        contractRow = contractRow,
+        title = title,
+    )
+}

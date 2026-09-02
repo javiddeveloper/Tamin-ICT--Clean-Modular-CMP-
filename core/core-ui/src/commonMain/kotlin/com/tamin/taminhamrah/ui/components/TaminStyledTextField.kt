@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.SpanStyle
@@ -90,6 +91,7 @@ fun TaminStyledTextField(
     onFocusChanged: ((Boolean) -> Unit)? = null,
     maxLength: Int? = null,
     inputRestriction: InputRestriction = InputRestriction.None,
+    textFieldBg: Color = LocalTaminColors.current.bgSurface
 ) {
     val taminColors = LocalTaminColors.current
     var isFocused by remember { mutableStateOf(false) }
@@ -128,7 +130,7 @@ fun TaminStyledTextField(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
-                    .background(taminColors.bgSurface, RoundedCornerShape(13.dp))
+                    .background(textFieldBg, RoundedCornerShape(13.dp))
                     .border(BorderStroke(1.5.dp, borderColor), RoundedCornerShape(13.dp))
                     .onFocusChanged { focusState ->
                         isFocused = focusState.isFocused
