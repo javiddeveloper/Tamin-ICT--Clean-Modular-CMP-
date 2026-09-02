@@ -598,6 +598,85 @@ private data class PaymentDialogState(
 // Previews
 // -------------------------------------------------------------------------
 
+private val MockRegistrationInfo = com.tamin.taminhamrah.model.contracts.RegistrationInfoPR(
+    fullName = "علی محمدی",
+    nationalId = "0012345678",
+    birthDateFormatted = "1375/04/15",
+    insuranceId = "12345678",
+    genderCode = "01",
+    address = "مشهد، بلوار وکیل‌آباد، نبش وکیل‌آباد ۵۲",
+    zipCode = "9187654321",
+    phoneNumber = "05832245678",
+    mobileNumber = "09143018372",
+    hasMobile = true,
+)
+
+private val MockConfig = com.tamin.taminhamrah.feature.contracts.flow.config.StudentContractFlowConfig()
+
+private val MockUserInfo = com.tamin.taminhamrah.model.contractFlow.UserInfoFormPR(
+    cityCode = "021",
+    cityName = "مشهد",
+    address = "مشهد، بلوار وکیل‌آباد، نبش وکیل‌آباد ۵۲",
+    zipCode = "9187654321",
+    phoneNumber = "05832245678",
+    mobileNumber = "09143018372",
+)
+
+private val MockGuardianForm = com.tamin.taminhamrah.model.contractFlow.GuardianFormPR(
+    nationalId = "0012345678",
+    letterNumber = "1234567890",
+    fullName = "رضا نادری",
+    letterDateFormatted = "1405/07/11",
+    documentGuid = "sample-guid",
+)
+
+private val MockBranchSelection = com.tamin.taminhamrah.model.contractFlow.BranchSelectionFormPR(
+    provinceCode = "021",
+    provinceName = "تهران",
+    cityCode = "021",
+    cityName = "تهران",
+    branchCode = "001",
+    branchName = "شعبه ۱ تهران (شهدای هفتم تیر)",
+)
+
+private val MockProvinces = listOf(
+    com.tamin.taminhamrah.model.common.ProvincePR(provinceCode = "021", provinceName = "تهران"),
+)
+
+private val MockCities = listOf(
+    com.tamin.taminhamrah.model.common.CityPR(cityCode = "021", cityName = "تهران", provinceCode = "021"),
+    com.tamin.taminhamrah.model.common.CityPR(cityCode = "051", cityName = "مشهد", provinceCode = "051"),
+)
+
+private val MockBranches = listOf(
+    com.tamin.taminhamrah.model.contracts.BranchPR(code = "001", name = "شعبه ۱ تهران (شهدای هفتم تیر)"),
+)
+
+private val MockPremiumRates = listOf(
+    com.tamin.taminhamrah.model.contractFlow.SpcPremiumRateOptionPR(
+        code = "1",
+        description = "۱۲ درصد — شامل بازنشستگی و فوت بعد از بازنشستگی",
+        insurancePercent = "12",
+    ),
+    com.tamin.taminhamrah.model.contractFlow.SpcPremiumRateOptionPR(
+        code = "2",
+        description = "۱۴ درصد — شامل بازنشستگی و فوت قبل و بعد از بازنشستگی",
+        insurancePercent = "14",
+    ),
+    com.tamin.taminhamrah.model.contractFlow.SpcPremiumRateOptionPR(
+        code = "3",
+        description = "۱۸ درصد — شامل بازنشستگی، فوت و ازکارافتادگی",
+        insurancePercent = "18",
+    ),
+)
+
+private val MockPremiumRange = com.tamin.taminhamrah.model.contractFlow.FreelancePremiumRangePR(
+    lowPremium = 14_000_000L,
+    highPremium = 50_000_000L,
+    paymentTabayi = 71_661_840L,
+    history = 120,
+)
+
 @PreviewRtlTheme
 @Composable
 private fun ContractFlowScreenContentLoadingPreview() {
@@ -616,24 +695,13 @@ private fun ContractFlowScreenContentLoadingPreview() {
 
 @PreviewRtlTheme
 @Composable
-private fun ContractFlowScreenContentStep1Preview() {
+private fun ContractFlowScreenContentStep1RegistrationPreview() {
     PreviewRtlThemeContent {
         ContractFlowScreenContent(
             state = ContractFlowUiState(
                 isLoading = false,
-                registrationInfo = com.tamin.taminhamrah.model.contracts.RegistrationInfoPR(
-                    fullName = "علی محمدی",
-                    nationalId = "0012345678",
-                    birthDateFormatted = "1375/04/15",
-                    insuranceId = "12345678",
-                    genderCode = "01",
-                    address = "تهران",
-                    zipCode = "1234567890",
-                    phoneNumber = "02166001234",
-                    mobileNumber = "09121234567",
-                    hasMobile = true,
-                ),
-                config = com.tamin.taminhamrah.feature.contracts.flow.config.StudentContractFlowConfig(),
+                registrationInfo = MockRegistrationInfo,
+                config = MockConfig,
                 currentStep = ContractStep.STEP_REGISTRATION,
                 eligibility = com.tamin.taminhamrah.model.contractFlow.ContractEligibilityPR(
                     statusCode = 1,
@@ -650,26 +718,188 @@ private fun ContractFlowScreenContentStep1Preview() {
 
 @PreviewRtlTheme
 @Composable
-private fun ContractFlowScreenContentStep2Preview() {
+private fun ContractFlowScreenContentStep2TermsPreview() {
     PreviewRtlThemeContent {
         ContractFlowScreenContent(
             state = ContractFlowUiState(
                 isLoading = false,
-                registrationInfo = com.tamin.taminhamrah.model.contracts.RegistrationInfoPR(
-                    fullName = "علی محمدی",
-                    nationalId = "0012345678",
-                    birthDateFormatted = "1375/04/15",
-                    insuranceId = "12345678",
-                    genderCode = "01",
-                    address = "تهران",
-                    zipCode = "1234567890",
-                    phoneNumber = "02166001234",
-                    mobileNumber = "09121234567",
-                    hasMobile = true,
-                ),
-                config = com.tamin.taminhamrah.feature.contracts.flow.config.StudentContractFlowConfig(),
+                registrationInfo = MockRegistrationInfo,
+                config = MockConfig,
                 currentStep = ContractStep.STEP_CONTRACT_TERMS,
                 isRulesConfirmed = true,
+            ),
+            onBack = {},
+            onShowRules = {},
+            onIntent = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun ContractFlowScreenContentStep3UserInfoPreview() {
+    PreviewRtlThemeContent {
+        ContractFlowScreenContent(
+            state = ContractFlowUiState(
+                isLoading = false,
+                registrationInfo = MockRegistrationInfo,
+                config = MockConfig,
+                currentStep = ContractStep.STEP_USER_INFO,
+                userInfo = MockUserInfo,
+                cities = MockCities,
+            ),
+            onBack = {},
+            onShowRules = {},
+            onIntent = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun ContractFlowScreenContentStep4ApplicantPersonalPreview() {
+    PreviewRtlThemeContent {
+        ContractFlowScreenContent(
+            state = ContractFlowUiState(
+                isLoading = false,
+                registrationInfo = MockRegistrationInfo,
+                config = MockConfig,
+                currentStep = ContractStep.STEP_CONTRACT_APPLICANT,
+                contractApplicantType = ContractApplicantType.PERSONAL,
+            ),
+            onBack = {},
+            onShowRules = {},
+            onIntent = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun ContractFlowScreenContentStep4ApplicantGuardianPreview() {
+    PreviewRtlThemeContent {
+        ContractFlowScreenContent(
+            state = ContractFlowUiState(
+                isLoading = false,
+                registrationInfo = MockRegistrationInfo,
+                config = MockConfig,
+                currentStep = ContractStep.STEP_CONTRACT_APPLICANT,
+                contractApplicantType = ContractApplicantType.GUARDIAN,
+                guardianForm = MockGuardianForm,
+            ),
+            onBack = {},
+            onShowRules = {},
+            onIntent = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun ContractFlowScreenContentStep5SelectBranchPreview() {
+    PreviewRtlThemeContent {
+        ContractFlowScreenContent(
+            state = ContractFlowUiState(
+                isLoading = false,
+                registrationInfo = MockRegistrationInfo,
+                config = MockConfig,
+                currentStep = ContractStep.STEP_SELECT_BRANCH,
+                branchSelection = MockBranchSelection,
+                provinces = MockProvinces,
+                branchCities = MockCities,
+                branches = MockBranches,
+            ),
+            onBack = {},
+            onShowRules = {},
+            onIntent = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun ContractFlowScreenContentStep6UploadImagePreview() {
+    PreviewRtlThemeContent {
+        ContractFlowScreenContent(
+            state = ContractFlowUiState(
+                isLoading = false,
+                registrationInfo = MockRegistrationInfo,
+                config = MockConfig,
+                currentStep = ContractStep.STEP_UPLOAD_IMAGE,
+                documentDescription = "تصویر کارت دانشجویی",
+                uploadedDocuments = listOf(
+                    com.tamin.taminhamrah.model.contractFlow.UploadImagePR(
+                        imageId = "doc-1",
+                        fileName = "student_card.jpg",
+                        description = "تصویر کارت دانشجویی",
+                    ),
+                ),
+            ),
+            onBack = {},
+            onShowRules = {},
+            onIntent = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun ContractFlowScreenContentStep7InsurancePremiumPreview() {
+    PreviewRtlThemeContent {
+        ContractFlowScreenContent(
+            state = ContractFlowUiState(
+                isLoading = false,
+                registrationInfo = MockRegistrationInfo,
+                config = MockConfig,
+                currentStep = ContractStep.STEP_INSURANCE_PREMIUM,
+                premiumRates = MockPremiumRates,
+                selectedPremiumRateCode = "3",
+                treatmentSupportCode = ContractFlowUiState.TREATMENT_SUPPORT_WITH,
+            ),
+            onBack = {},
+            onShowRules = {},
+            onIntent = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun ContractFlowScreenContentStep8SalaryPreview() {
+    PreviewRtlThemeContent {
+        ContractFlowScreenContent(
+            state = ContractFlowUiState(
+                isLoading = false,
+                registrationInfo = MockRegistrationInfo,
+                config = MockConfig,
+                currentStep = ContractStep.STEP_SALARY,
+                premiumRange = MockPremiumRange,
+                selectedMonthlyPremium = 14_000_000L,
+                calculatedMonthlySalary = 71_661_840L,
+                isPremiumCalculated = true,
+            ),
+            onBack = {},
+            onShowRules = {},
+            onIntent = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun ContractFlowScreenContentStep9SubmitContractPreview() {
+    PreviewRtlThemeContent {
+        ContractFlowScreenContent(
+            state = ContractFlowUiState(
+                isLoading = false,
+                registrationInfo = MockRegistrationInfo,
+                config = MockConfig,
+                currentStep = ContractStep.STEP_SUBMIT_CONTRACT,
+                selectedMonthlyPremium = 14_000_000L,
+                calculatedMonthlySalary = 71_661_840L,
+                selectedPremiumRateCode = "3",
+                branchSelection = MockBranchSelection,
+                isAgreementConfirmed = true,
             ),
             onBack = {},
             onShowRules = {},
