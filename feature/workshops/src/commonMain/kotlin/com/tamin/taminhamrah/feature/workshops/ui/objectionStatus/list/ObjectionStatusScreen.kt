@@ -11,10 +11,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -36,9 +38,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.workshops.ui.objectionStatus.components.label
 import com.tamin.taminhamrah.feature.workshops.ui.components.DashedEmptyStateCard
@@ -63,7 +67,6 @@ import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import com.tamin.taminhamrah.ui.components.rideUpIntoHeader
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.digitsOnly
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -71,6 +74,12 @@ import com.tamin.taminhamrah.ui.theme.HeaderDecoration
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.toparea.TopAreaState
+import com.tamin.taminhamrah.ui.toparea.driveTopArea
+import com.tamin.taminhamrah.ui.toparea.rememberMeasuredTopAreaState
+import com.tamin.taminhamrah.ui.toparea.reportTopAreaHeight
+import com.tamin.taminhamrah.ui.toparea.topAreaContentPadding
+import com.tamin.taminhamrah.ui.toparea.topAreaHide
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.stringResource
@@ -143,50 +152,34 @@ fun ObjectionStatusContent(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    Column(modifier = modifier.fillMaxWidth().background(colors.bgPage)) {
-        TaminTopAppBar(
-            title = stringResource(Res.string.objection_status_title),
-            background = Brush.horizontalGradient(colors.profileGradientStops),
-            navigationIcon = {
-                TaminTopAppBarButton(
-                    icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                    contentDescription = null,
-                    onClick = onBack,
-                    bordered = true
-                )
-            },
-            action = {
-                TaminTopAppBarButton(
-                    icon = Icons.Default.Search,
-                    contentDescription = stringResource(Res.string.objection_status_search),
-                    bordered = true,
-                    onClick = { onIntent(ObjectionStatusIntent.SearchOpenChanged(true)) },
-                )
-            },
-            bottomPadding = WorkshopDimens.headerBottomPadding,
-        ) {
-            ObjectionStatusHeroContent()
-        }
 
-        // The identity card rides 42dp up into the navy, the same overlap the workshop list's own
-        // stats strip uses — drawing outside the bar's bounds is why this sits here, a sibling of
-        // it in a Column that does not clip, rather than inside the TaminTopAppBar's own content.
-        IdentityCard(
-            name = state.identityName,
-            nationalId = state.identityNationalId,
+    // Folds the header's icon/subtitle from the list's own drag, snapping on release. The
+    // identity card below it is never wrapped in a topArea behavior, so it stays fully shown and
+    // pinned above the list -- only the header's own content folds and fades away. The drag
+    // budget is measured from this exact header+card block, so it can't drift out of sync with a
+    // copy or font change to either. Same scenario as `LegalRepresentativeWorkshopsScreen`'s hub
+    // page — see docs/vault/TopArea-System.md.
+    val topArea = rememberMeasuredTopAreaState { topAreaState ->
+        ObjectionStatusTopArea(
+            identityName = state.identityName,
+            identityNationalId = state.identityNationalId,
             totalCount = state.totalCount,
-            modifier = Modifier
-                .padding(horizontal = Spacing.page)
-                .rideUpIntoHeader(
-                    progress = { 0f },
-                    expandedOverlap = WorkshopDimens.statsCardOverlap,
-                    collapsedOverlap = WorkshopDimens.statsCardOverlap,
-                ),
+            onBack = onBack,
+            onSearchClick = { onIntent(ObjectionStatusIntent.SearchOpenChanged(true)) },
+            topAreaState = topAreaState,
         )
+    }
+    val listState = rememberLazyListState()
 
+    // Overlaid rather than a plain Column so the header keeps drawing edge-to-edge behind the
+    // status bar while the list passes underneath it as it scrolls.
+    Box(modifier = modifier.fillMaxSize().background(colors.bgPage)) {
         WorkshopListScaffold(
             state = state.list,
             onLoadMore = { onIntent(ObjectionStatusIntent.LoadMore) },
+            listState = listState,
+            modifier = Modifier.fillMaxSize().driveTopArea(topArea, listState),
+            contentPadding = topAreaContentPadding(state = topArea, rest = WorkshopDimens.listContentPadding),
             emptyContent = { ObjectionEmptyState() },
             key = { it.seqNo ?: it.hashCode() },
             header = {
@@ -206,6 +199,18 @@ fun ObjectionStatusContent(
                 onOpenDocument = onOpenDocument,
             )
         }
+
+        ObjectionStatusTopArea(
+            identityName = state.identityName,
+            identityNationalId = state.identityNationalId,
+            totalCount = state.totalCount,
+            onBack = onBack,
+            onSearchClick = { onIntent(ObjectionStatusIntent.SearchOpenChanged(true)) },
+            topAreaState = topArea,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .reportTopAreaHeight(topArea),
+        )
     }
 
     if (state.isSearchOpen) {
@@ -219,9 +224,80 @@ fun ObjectionStatusContent(
     }
 }
 
+/**
+ * The list screen's floating top area: the folding gradient hero (back button, search action,
+ * icon, subtitle) plus the identity card, which stays fully visible and pinned beneath it
+ * regardless of scroll — riding up by [WorkshopDimens.statsCardOverlap] to straddle the header's
+ * seam, same as before the header could fold.
+ */
+@Composable
+private fun ObjectionStatusTopArea(
+    identityName: String,
+    identityNationalId: String,
+    totalCount: Int,
+    onBack: () -> Unit,
+    onSearchClick: () -> Unit,
+    topAreaState: TopAreaState,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        TaminTopAppBar(
+            title = stringResource(Res.string.objection_status_title),
+            background = Brush.horizontalGradient(LocalTaminColors.current.profileGradientStops),
+            navigationIcon = {
+                TaminTopAppBarButton(
+                    icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                    contentDescription = null,
+                    onClick = onBack,
+                    bordered = true
+                )
+            },
+            action = {
+                TaminTopAppBarButton(
+                    icon = Icons.Default.Search,
+                    contentDescription = stringResource(Res.string.objection_status_search),
+                    bordered = true,
+                    onClick = onSearchClick,
+                )
+            },
+            bottomPadding = WorkshopDimens.headerBottomPadding,
+        ) {
+            ObjectionStatusHeroContent(topAreaState = topAreaState)
+        }
+        IdentityCard(
+            name = identityName,
+            nationalId = identityNationalId,
+            totalCount = totalCount,
+            // Rides up into the header's reserved bottom space, rather than sitting right after
+            // it, so the card visually straddles the header's seam. Reports a height reduced by
+            // the same overlap so reportTopAreaHeight sees the true visual footprint of this
+            // whole block, not the overlap counted twice as reserved list space.
+            modifier = Modifier
+                .straddlePreviousSibling(WorkshopDimens.statsCardOverlap)
+                .padding(horizontal = Spacing.page),
+        )
+    }
+}
+
+/**
+ * Shifts this child up by [overlap] to overlap the previous sibling's bottom edge, while
+ * reporting a height reduced by that same amount — so a parent measuring total column height
+ * (here, [reportTopAreaHeight]) sees the true visual footprint instead of double-counting the
+ * overlap as reserved space. Same file-local idiom `LegalRepresentativeWorkshopsScreen` uses for
+ * its own identity card.
+ */
+private fun Modifier.straddlePreviousSibling(overlap: Dp): Modifier = layout { measurable, constraints ->
+    val placeable = measurable.measure(constraints)
+    val overlapPx = overlap.roundToPx()
+    val reportedHeight = (placeable.height - overlapPx).coerceAtLeast(0)
+    layout(placeable.width, reportedHeight) {
+        placeable.placeRelative(0, -overlapPx)
+    }
+}
+
 /** The gradient hero's own content: the decorative wash, the ring-icon badge, and the subtitle. */
 @Composable
-private fun ObjectionStatusHeroContent(modifier: Modifier = Modifier) {
+private fun ObjectionStatusHeroContent(topAreaState: TopAreaState, modifier: Modifier = Modifier) {
     val colors = LocalTaminColors.current
     Box(modifier = modifier.fillMaxWidth()) {
         DecorativeBackgroundCircle(
@@ -230,11 +306,14 @@ private fun ObjectionStatusHeroContent(modifier: Modifier = Modifier) {
             yOffset = HeaderDecoration.circleYOffset,
         )
         Column(
-            modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
+            modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm).topAreaHide(topAreaState),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            AnimatedRingHeaderIcon(icon = Icons.Default.Description)
+            // Statically rendered while this composable is one of rememberMeasuredTopAreaState's
+            // off-screen measure probes — an infinite-repeat animation there would otherwise keep
+            // requesting frames for a slot that's never actually drawn. See TopAreaState.isMeasureProbe.
+            AnimatedRingHeaderIcon(icon = Icons.Default.Description, animated = !topAreaState.isMeasureProbe)
             Text(
                 text = stringResource(Res.string.objection_status_subtitle),
                 style = MaterialTheme.typography.labelMedium,
