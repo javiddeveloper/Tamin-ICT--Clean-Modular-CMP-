@@ -30,6 +30,8 @@ import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDTO
 import com.tamin.taminhamrah.model.workshop.DebitReasonDN
 import com.tamin.taminhamrah.model.workshop.DebitReasonDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopContractDN
+import com.tamin.taminhamrah.model.workshop.WorkshopContractDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
 import com.tamin.taminhamrah.model.workshop.EmployerWorkshopDTO
@@ -74,6 +76,7 @@ fun <D, T> ListData<D>.toDomainPage(map: (D) -> T): PagedListDN<T> = PagedListDN
 // ------------------------------------------------------------------ کارگاه‌های کارفرما
 
 fun EmployerAgreementDTO.toDomain(): EmployerAgreementDN = EmployerAgreementDN(
+    contractRow = contractRow.orEmpty(),
     startDate = startDate.orEmpty(),
     commitmentDate = commitmentDate.orEmpty(),
     email = email.orEmpty(),
@@ -100,6 +103,20 @@ fun EmployerWorkshopDTO.toDomain(): WorkshopSummaryDN = WorkshopSummaryDN(
     workshopTypeDescription = workshopType?.workshopTypeDesc.orEmpty(),
     statusCode = workshopStatus?.workshopStatusCode.orEmpty(),
     statusDescription = workshopStatus?.workshopStatusDesc.orEmpty(),
+)
+
+// ------------------------------------------------------------------------ ردیف‌های پیمان
+
+/**
+ * The lean contract row flattens its nested workshop, because the card reads three fields from it
+ * and nothing downstream needs the object.
+ */
+fun WorkshopContractDTO.toDomain(): WorkshopContractDN = WorkshopContractDN(
+    contractRow = contractRow.orEmpty(),
+    startDate = startDate.orEmpty(),
+    workshopId = workshop?.workshopId.orEmpty(),
+    branchCode = workshop?.branchCode.orEmpty(),
+    workshopName = workshop?.workshopName.orEmpty(),
 )
 
 // ------------------------------------------------------------------------ برگ پرداخت‌ها

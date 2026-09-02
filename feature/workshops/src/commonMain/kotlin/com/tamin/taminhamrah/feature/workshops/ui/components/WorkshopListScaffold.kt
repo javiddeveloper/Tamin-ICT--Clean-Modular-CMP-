@@ -52,6 +52,15 @@ fun <T> WorkshopListScaffold(
     emptyMessage: String = stringResource(Res.string.workshop_empty_list),
     key: ((T) -> Any)? = null,
     header: (@Composable () -> Unit)? = null,
+    /**
+     * What stands in for the list when the service answers with nothing.
+     *
+     * Null — the default every existing caller takes — draws [emptyMessage] as a plain title.
+     * ردیف‌های پیمان passes its own, because it has two different reasons to be empty ("no workshop
+     * chosen yet" and "this workshop has no rows") and the design words and illustrates them
+     * differently.
+     */
+    empty: (@Composable () -> Unit)? = null,
     row: @Composable (T) -> Unit,
 ) {
     // The three states share one set of insets: a header that keeps the page margins while the
@@ -71,7 +80,9 @@ fun <T> WorkshopListScaffold(
             verticalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
             header?.invoke()
-            EmptyStateMessage(icon = Icons.Outlined.Info, title = emptyMessage)
+            if (empty != null) empty() else {
+                EmptyStateMessage(icon = Icons.Outlined.Info, title = emptyMessage)
+            }
         }
         return
     }
