@@ -54,6 +54,7 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
         FeatureFlag.ISSUANCE_WAGE_CERTIFICATE -> navigateToIssuanceCertificate()
         FeatureFlag.DEFERRED_INSTALLMENT_CERTIFICATE -> navigateToDeferredInstallment()
         FeatureFlag.GIRL_SURVIVOR -> navigateToGirlSurvivor()
+        FeatureFlag.REQUEST_PENSION_BY_SURVIVOR,
         FeatureFlag.REQUEST_PENSION_BY_SURVIVOR_112 -> navigateToPensionSurvivor()
         FeatureFlag.DISABILITY_PENSION -> navigateToDisabilityPension()
         FeatureFlag.VIEW_TITLE_JOB -> navigateToHistoryJobInfo()
