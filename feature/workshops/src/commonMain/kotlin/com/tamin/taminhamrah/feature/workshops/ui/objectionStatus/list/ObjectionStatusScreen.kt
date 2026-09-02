@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Search
@@ -76,6 +75,8 @@ import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_chevron_down
+import taminx.core.core_ui.ic_tamin_objection_document
+import taminx.core.core_ui.ic_tamin_objection_sms
 import taminx.core.core_ui.objection_status_action_document
 import taminx.core.core_ui.objection_status_action_document_article16
 import taminx.core.core_ui.objection_status_action_no_document
@@ -503,7 +504,8 @@ private fun ObjectionRow(
                 text = stringResource(Res.string.objection_status_action_sms),
                 onClick = { onOpenSms(objection) },
                 enabled = hasDocument,
-                icon = Icons.AutoMirrored.Filled.Chat,
+                icon = vectorResource(Res.drawable.ic_tamin_objection_sms),
+                iconModifier = Modifier.size(IconSize.small),
                 iconPosition = IconPosition.End,
                 height = WorkshopDimens.cardButtonHeight,
                 shape = buttonShape,
@@ -525,7 +527,8 @@ private fun ObjectionRow(
                 },
                 onClick = { onOpenDocument(objection) },
                 enabled = hasDocument,
-                icon = Icons.Default.Description,
+                icon = vectorResource(Res.drawable.ic_tamin_objection_document),
+                iconModifier = Modifier.size(IconSize.small),
                 iconPosition = IconPosition.End,
                 height = WorkshopDimens.cardButtonHeight,
                 shape = buttonShape,
