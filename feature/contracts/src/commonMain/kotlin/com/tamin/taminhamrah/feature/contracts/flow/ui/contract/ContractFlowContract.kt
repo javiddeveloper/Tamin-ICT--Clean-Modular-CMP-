@@ -79,9 +79,9 @@ data class ContractFlowUiState(
             return !isSavingContact && when (currentStep) {
                 ContractStep.STEP_REGISTRATION ->
                     registrationInfo != null &&
-                        eligibility != null &&
                         genderGateError == null &&
-                        preflightGateError == null
+                        preflightGateError == null &&
+                        (eligibility == null || eligibility.isEligible)
                 ContractStep.STEP_AUTHORIZATION -> eligibility?.isEligible == true
                 ContractStep.STEP_CONTRACT_TERMS -> isRulesConfirmed
                 ContractStep.STEP_USER_INFO -> isUserInfoStepComplete(userInfo)
@@ -97,7 +97,7 @@ data class ContractFlowUiState(
                     hasPremiumRate && hasFreeJob
                 }
                 ContractStep.STEP_SALARY -> isPremiumCalculated
-                ContractStep.STEP_SUBMIT_CONTRACT -> submittedContract != null
+                ContractStep.STEP_SUBMIT_CONTRACT -> isAgreementConfirmed && !isSubmittingContract
             }
         }
 

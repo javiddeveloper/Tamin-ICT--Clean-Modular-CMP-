@@ -1,4 +1,4 @@
-﻿package com.tamin.taminhamrah.ui.contractFlow
+package com.tamin.taminhamrah.ui.contractFlow
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -49,5 +49,20 @@ fun ContractApplicantStepContent(
                 )
             }
         }
+    }
+}
+
+// -------------------------------------------------------------------------
+// Previews
+// -------------------------------------------------------------------------
+
+@com.tamin.taminhamrah.ui.PreviewRtlTheme
+@Composable
+private fun ContractApplicantStepContentPreview() {
+    com.tamin.taminhamrah.ui.PreviewRtlThemeContent {
+        ContractApplicantStepContent(
+            selectedType = ContractApplicantType.PERSONAL,
+            onTypeSelected = {},
+        )
     }
 }

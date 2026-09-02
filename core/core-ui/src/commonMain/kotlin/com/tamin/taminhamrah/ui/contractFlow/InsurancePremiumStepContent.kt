@@ -1,4 +1,4 @@
-﻿package com.tamin.taminhamrah.ui.contractFlow
+package com.tamin.taminhamrah.ui.contractFlow
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -36,7 +36,7 @@ fun InsurancePremiumStepContent(
 ) {
     when {
         isLoading && premiumRates.isEmpty() -> {
-            CircularProgressIndicator()
+            InsurancePremiumStepShimmerSkeleton()
         }
 
         premiumRates.isEmpty() -> {
@@ -89,5 +89,26 @@ fun InsurancePremiumStepContent(
                 }
             }
         }
+    }
+}
+
+// -------------------------------------------------------------------------
+// Previews
+// -------------------------------------------------------------------------
+
+@com.tamin.taminhamrah.ui.PreviewRtlTheme
+@Composable
+private fun InsurancePremiumStepContentPreview() {
+    com.tamin.taminhamrah.ui.PreviewRtlThemeContent {
+        InsurancePremiumStepContent(
+            premiumRates = listOf(
+                SpcPremiumRateOptionPR(code = "12", description = "نرخ ۱۲ درصد (بازنشستگی و فوت بعد از بازنشستگی)", insurancePercent = "12"),
+                SpcPremiumRateOptionPR(code = "14", description = "نرخ ۱۴ درصد (بازنشستگی و فوت قبل و بعد از بازنشستگی)", insurancePercent = "14"),
+                SpcPremiumRateOptionPR(code = "18", description = "نرخ ۱۸ درصد (بازنشستگی، ازکارافتادگی و فوت)", insurancePercent = "18"),
+            ),
+            selectedCode = "14",
+            isLoading = false,
+            onRateSelected = {},
+        )
     }
 }

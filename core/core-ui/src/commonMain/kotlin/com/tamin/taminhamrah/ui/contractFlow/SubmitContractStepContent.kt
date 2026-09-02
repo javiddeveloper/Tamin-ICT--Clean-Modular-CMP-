@@ -1,4 +1,4 @@
-﻿package com.tamin.taminhamrah.ui.contractFlow
+package com.tamin.taminhamrah.ui.contractFlow
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -97,4 +97,37 @@ private fun buildAgreementText(
         rate,
         salary,
     )
+}
+
+// -------------------------------------------------------------------------
+// Previews
+// -------------------------------------------------------------------------
+
+@com.tamin.taminhamrah.ui.PreviewRtlTheme
+@Composable
+private fun SubmitContractStepContentPreview() {
+    com.tamin.taminhamrah.ui.PreviewRtlThemeContent {
+        SubmitContractStepContent(
+            registrationInfo = RegistrationInfoPR(
+                fullName = "علی محمدی",
+                nationalId = "0012345678",
+                birthDateFormatted = "1375/04/15",
+                insuranceId = "12345678",
+                genderCode = "01",
+                address = "تهران",
+                zipCode = "1234567890",
+                phoneNumber = "02166001234",
+                mobileNumber = "09121234567",
+                hasMobile = true,
+            ),
+            selectedPremiumRateDescription = "نرخ ۱۴ درصد (بازنشستگی و فوت قبل و بعد از بازنشستگی)",
+            calculatedMonthlySalary = 25000000L,
+            agreementContractLabel = "بیمه دانشجویی",
+            isAgreementConfirmed = true,
+            isSubmitting = false,
+            submittedContract = null,
+            onAgreementConfirmedChange = {},
+            onSubmit = {},
+        )
+    }
 }

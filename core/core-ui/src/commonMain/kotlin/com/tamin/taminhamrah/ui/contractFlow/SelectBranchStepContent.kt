@@ -1,4 +1,4 @@
-﻿package com.tamin.taminhamrah.ui.contractFlow
+package com.tamin.taminhamrah.ui.contractFlow
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -50,6 +50,7 @@ fun SelectBranchStepContent(
     onProvinceSelected: (ProvincePR) -> Unit,
     onCitySelected: (CityPR) -> Unit,
     onBranchSelected: (BranchPR) -> Unit,
+    isLoading: Boolean = false,
     modifier: Modifier = Modifier,
     notices: ImmutableList<StringResource> = ContractBranchNotices,
     provincesError: String? = null,
@@ -59,6 +60,11 @@ fun SelectBranchStepContent(
     onRetryCities: (() -> Unit)? = null,
     onRetryBranches: (() -> Unit)? = null,
 ) {
+    if (isLoading) {
+        SelectBranchStepShimmerSkeleton(modifier = modifier)
+        return
+    }
+
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -140,5 +146,35 @@ private fun InfoCard(
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
+    }
+}
+
+// -------------------------------------------------------------------------
+// Previews
+// -------------------------------------------------------------------------
+
+@com.tamin.taminhamrah.ui.PreviewRtlTheme
+@Composable
+private fun SelectBranchStepContentPreview() {
+    com.tamin.taminhamrah.ui.PreviewRtlThemeContent {
+        SelectBranchStepContent(
+            branchSelection = BranchSelectionFormPR(
+                provinceCode = "021",
+                provinceName = "تهران",
+                cityCode = "021",
+                cityName = "تهران",
+                branchCode = "001",
+                branchName = "شعبه ۱ تهران (شهدای هفتم تیر)",
+            ),
+            provinces = listOf(ProvincePR(provinceCode = "021", provinceName = "تهران")),
+            cities = listOf(CityPR(cityCode = "021", cityName = "تهران", provinceCode = "021")),
+            branches = listOf(BranchPR(code = "001", name = "شعبه ۱ تهران (شهدای هفتم تیر)")),
+            isProvincesLoading = false,
+            isCitiesLoading = false,
+            isBranchesLoading = false,
+            onProvinceSelected = {},
+            onCitySelected = {},
+            onBranchSelected = {},
+        )
     }
 }

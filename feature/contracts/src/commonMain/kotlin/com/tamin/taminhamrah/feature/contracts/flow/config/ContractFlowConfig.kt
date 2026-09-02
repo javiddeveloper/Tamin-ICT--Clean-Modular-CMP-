@@ -38,10 +38,6 @@ interface ContractFlowConfig {
     fun isLastStep(step: ContractStep): Boolean = steps.isLastStep(step)
 }
 
-val SPECIAL_INSURED_STEPS = ContractStep.stepsFor(
-    includeUploadImage = true,
-    includeTreatmentSupport = false,
-    includePremiumRate = true,
-)
+val SPECIAL_INSURED_STEPS = ContractStep.STUDENT_STEPS
 
 val OPTIONAL_FLOW_STEPS = ContractStep.OPTIONAL_STEPS

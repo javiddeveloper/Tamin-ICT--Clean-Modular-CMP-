@@ -1,4 +1,4 @@
-﻿package com.tamin.taminhamrah.ui.contractFlow
+package com.tamin.taminhamrah.ui.contractFlow
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -197,5 +197,26 @@ fun UploadImageStepContent(
                 style = MaterialTheme.typography.bodySmall,
             )
         }
+    }
+}
+
+// -------------------------------------------------------------------------
+// Previews
+// -------------------------------------------------------------------------
+
+@com.tamin.taminhamrah.ui.PreviewRtlTheme
+@Composable
+private fun UploadImageStepContentPreview() {
+    com.tamin.taminhamrah.ui.PreviewRtlThemeContent {
+        UploadImageStepContent(
+            description = "گواهی اشتغال به تحصیل ترم جاری",
+            previewBytes = null,
+            uploadedDocuments = emptyList(),
+            isUploading = false,
+            uploadError = null,
+            onDescriptionChange = {},
+            onImagePicked = { _, _ -> },
+            onClearDocument = {},
+        )
     }
 }

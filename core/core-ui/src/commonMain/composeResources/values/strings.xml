@@ -1909,4 +1909,56 @@
     <string name="contract_treatment_support_yes">حمایت درمان دارد</string>
     <string name="contract_treatment_support_no">حمایت درمان ندارد</string>
 
+    <string name="contract_hero_step_1_title">نام‌نویسی و احراز شرایط</string>
+    <string name="contract_hero_step_1_desc">وضعیت نام‌نویسی و شرایط انعقاد قرارداد شما بررسی شد.</string>
+    <string name="contract_hero_step_2_title">مقررات و ضوابط</string>
+    <string name="contract_hero_step_2_desc">ضوابط قرارداد را مطالعه و تعهدنامه را تأیید کنید.</string>
+    <string name="contract_hero_step_3_title">اطلاعات کاربر</string>
+    <string name="contract_hero_step_3_desc">نشانی، کد پستی و شمارهٔ تماس خود را بازبینی کنید.</string>
+    <string name="contract_hero_step_4_title">متقاضی قرارداد</string>
+    <string name="contract_hero_step_4_desc">نوع تقاضای انعقاد قرارداد را مشخص کنید.</string>
+    <string name="contract_hero_step_5_title">انتخاب شعبه تأمین اجتماعی</string>
+    <string name="contract_hero_step_5_desc">استان، شهر و شعبهٔ مورد نظر خود را انتخاب کنید.</string>
+    <string name="contract_hero_step_6_title">بارگذاری مدارک</string>
+    <string name="contract_hero_step_6_desc">تصویر مدارک مورد نیاز را بارگذاری نمایید.</string>
+    <string name="contract_hero_step_7_title">تعیین حق بیمه ماهانه</string>
+    <string name="contract_hero_step_7_desc">نرخ پرداخت حق بیمهٔ ماهانه را انتخاب کنید.</string>
+    <string name="contract_hero_step_8_title">محاسبه حق بیمه</string>
+    <string name="contract_hero_step_8_desc">مبلغ حق بیمه و دستمزد مبنای کسر حق بیمه را محاسبه کنید.</string>
+    <string name="contract_hero_step_9_title">ثبت قرارداد</string>
+    <string name="contract_hero_step_9_desc">اطلاعات را بازبینی و قرارداد را تأیید نهایی نمایید.</string>
+
+    <string name="contract_step_reg_banner_1">متقاضی محترم، نام‌نویسی شما با شمارهٔ بیمهٔ تأمین اجتماعی %1$s انجام شده است.</string>
+    <string name="contract_step_reg_banner_2_student">شرایط لازم برای انعقاد قرارداد %1$s را دارید؛ سن شما کمتر از ۵۰ سال است و قرارداد فعال دیگری ندارید.</string>
+    <string name="contract_field_full_name">نام و نام خانوادگی</string>
+    <string name="contract_field_national_id">کد ملی</string>
+    <string name="contract_field_birth_date">تاریخ تولد</string>
+    <string name="contract_field_contract_type">نوع قرارداد</string>
+
+    <string name="contract_terms_info_banner">تأیید این مرحله به منزلهٔ مطالعه و پذیرش مقررات و ضوابط انعقاد قرارداد می‌باشد.</string>
+    <string name="contract_terms_view_rules_btn">مشاهده ضوابط و مقررات</string>
+    <string name="contract_terms_commitment_header">تعهدنامه</string>
+    <string name="contract_terms_commitment_body_full">اینجانب %1$s با آگاهی کامل و در صحت عقلی، شرایط و مقررات فوق را مطالعه کرده و خود را در هنگام انعقاد قرارداد و در ادامهٔ بیمه‌پردازی ملزم به رعایت آن می‌دانم؛ در غیر اینصورت کلیهٔ تبعات و مسئولیت‌های آن متوجه اینجانب بوده و سازمان تأمین‌اجتماعی در این خصوص مسئولیتی نخواهد داشت.</string>
+
+    <string name="contract_user_info_banner">در صورت صحیح نبودن اطلاعات، می‌توانید از فرم زیر برای ویرایش مشخصات استفاده نمایید.</string>
+    <string name="contract_field_residence_city">شهر محل سکونت *</string>
+    <string name="contract_field_postal_code_required">کد پستی *</string>
+    <string name="contract_field_address_required">آدرس محل سکونت *</string>
+    <string name="contract_field_phone_required">شمارهٔ تلفن *</string>
+    <string name="contract_field_mobile_readonly">تلفن همراه</string>
+
+    <string name="contract_rules_sheet_title_student">مقررات و ضوابط انعقاد قرارداد بیمۀ دانشجویی</string>
+    <string name="contract_rules_sheet_page_counter">۱ از ۱</string>
+    <string name="contract_rules_sheet_student_p1">بیمۀ دانشجویی از انواع بیمه‌های خودپرداز سازمان تأمین اجتماعی است. دانشجویانی که تحت پوشش هیچ‌یک از بیمه‌های اجباری قرار ندارند، می‌توانند با انعقاد قرارداد و پرداخت حق بیمۀ ماهانه از حمایت‌های قانونی سازمان بهره‌مند شوند.</string>
+    <string name="contract_rules_sheet_student_section1_title">شرایط انعقاد قرارداد:</string>
+    <string name="contract_rules_sheet_student_section1_item1">۱. سن متقاضی در زمان انعقاد قرارداد نباید کمتر از ۱۸ سال و بیشتر از ۵۰ سال تمام باشد.</string>
+    <string name="contract_rules_sheet_student_section1_item2">۲. متقاضی نباید مشمول قوانین بیمه‌ای دیگری بوده یا قرارداد خودپرداز فعال داشته باشد.</string>
+    <string name="contract_rules_sheet_student_section1_item3">۳. اشتغال به تحصیل متقاضی باید با ارائهٔ گواهی معتبر از مرکز آموزشی احراز شود.</string>
+    <string name="contract_rules_sheet_student_section1_item4">۴. برای متقاضیان کمتر از ۱۸ سال، انعقاد قرارداد با ارائهٔ قیم‌نامهٔ معتبر توسط قیم انجام می‌شود.</string>
+    <string name="contract_rules_sheet_student_section2_title">نرخ حق بیمه و معافیت از معاینات پزشکی:</string>
+    <string name="contract_rules_sheet_student_section2_item1">۱. با انتخاب نرخ ۱۲ درصد از معاینات پزشکی معاف می‌باشید. این نرخ شامل حمایت بازنشستگی و فوت پس از بازنشستگی است.</string>
+    <string name="contract_rules_sheet_student_section2_item2">۲. با انتخاب نرخ ۱۴ درصد، با داشتن حداقل ۱ سال سابقهٔ بیمه‌پردازی، از معاینات پزشکی معاف می‌باشید. این نرخ شامل حمایت بازنشستگی و فوت است.</string>
+    <string name="contract_rules_sheet_student_section2_item3">۳. با انتخاب نرخ ۱۸ درصد، در صورتی که در ۱۰ سال قبل از انعقاد قرارداد حداقل ۱ سال و در ۱ سال قبل از انعقاد قرارداد حداقل ۹۰ روز سابقهٔ بیمه‌پردازی داشته باشید، از معاینات پزشکی معاف می‌باشید. این نرخ شامل حمایت بازنشستگی، فوت و ازکارافتادگی است.</string>
+    <string name="contract_rules_sheet_understood">متوجه شدم</string>
+    <string name="contract_next_step">مرحلهٔ بعدی</string>
 </resources>
