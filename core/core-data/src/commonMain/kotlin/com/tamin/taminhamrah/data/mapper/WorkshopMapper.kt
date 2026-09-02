@@ -409,7 +409,6 @@ fun NewMemberRegistrationDN.toDto(): NewMemberRegistrationDTO = NewMemberRegistr
 fun NewMemberRegistrationResultDTO.toDomain(): NewMemberRegistrationResultDN =
     NewMemberRegistrationResultDN(personalId = id)
 
-// ------------------------------------------------------------- پیگیری وضعیت اعتراض
 
 fun WorkShopObjectionDTO.toDomain(): WorkShopObjectionDN = WorkShopObjectionDN(
     seqNo = seqNo,
@@ -423,11 +422,6 @@ fun WorkShopObjectionDTO.toDomain(): WorkShopObjectionDN = WorkShopObjectionDN(
     voteTypeDescription = voteType?.description.orEmpty(),
 )
 
-/**
- * The service sends the literal string `"null"` for some messages (confirmed on a real capture,
- * id `65188505`) rather than omitting `smsDescription` or sending a real JSON null — `orEmpty()`
- * alone does not catch that, so it would otherwise render the word "null" to the user.
- */
 fun SmsMessageDTO.toDomain(): SmsMessageDN = SmsMessageDN(
     id = id,
     description = smsDescription.takeUnless { it.isNullOrEmpty() || it.equals("null", ignoreCase = true) }.orEmpty(),

@@ -197,14 +197,10 @@ fun WorkshopStackHolderDN.toPresentation(): WorkshopStackHolderPR = WorkshopStac
     stackType = stackType.orDash(),
 )
 
-// ------------------------------------------------------------- پیگیری وضعیت اعتراض
-
 fun WorkShopObjectionDN.toPresentation(): WorkShopObjectionPR = WorkShopObjectionPR(
     seqNo = seqNo,
     workshopId = workshopId.orDashDigits(),
     debitNumber = debitNumber.orDashDigits(),
-    // seqNo is nullable; bridged through the non-null orDashDigits() with an empty default, whose
-    // own ifBlank{null} branch already turns that into the same "-" fallback as a real blank.
     objectionNumber = (seqNo?.toString() ?: "").orDashDigits(),
     objectionDate = objectionDate.orDashDate(),
     objectionDescription = objectionDescription.orDash(),

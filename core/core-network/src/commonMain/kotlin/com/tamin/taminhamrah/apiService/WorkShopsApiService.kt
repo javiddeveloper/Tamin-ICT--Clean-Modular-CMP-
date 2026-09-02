@@ -263,8 +263,6 @@ internal interface WorkShopsApiService {
         @Path("stackId") stackId: Long,
     ): BaseDTO<JsonElement?>
 
-    // ------------------------------------------------------------- پیگیری وضعیت اعتراض
-
     @GET("debit-objection/objection-all")
     suspend fun getWorkShopObjections(
         @QueryMap queries: Map<String, String>

@@ -222,8 +222,6 @@ internal class WorkShopsRemoteDataSourceImpl(
         apiService.getWorkshopStackHolders(query.toQueries()).extractData()
     }
 
-    // ------------------------------------------------------------- پیگیری وضعیت اعتراض
-
     override suspend fun getWorkShopObjections(
         query: ApiQueryParamDN
     ): ListData<WorkShopObjectionDTO> = call {

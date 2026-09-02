@@ -50,16 +50,12 @@ fun <T> WorkshopListScaffold(
     listState: LazyListState = rememberLazyListState(),
     contentPadding: PaddingValues = WorkshopDimens.listContentPadding,
     emptyMessage: String = stringResource(Res.string.workshop_empty_list),
-    /** Replaces the default icon+title empty state — see `ObjectionEmptyState`, the one caller so far. */
     emptyContent: (@Composable () -> Unit)? = null,
     key: ((T) -> Any)? = null,
     header: (@Composable () -> Unit)? = null,
-    /** A row that also needs its position — see `SmsTimelineItem`, the one caller so far. */
     indexedRow: (@Composable (index: Int, item: T) -> Unit)? = null,
     row: (@Composable (T) -> Unit)? = null,
 ) {
-    // The three states share one set of insets: a header that keeps the page margins while the
-    // list is loading, then loses them once the rows arrive, reads as the page jumping sideways.
     if (state.isFirstLoad) {
         WorkshopListSkeleton(
             modifier = modifier,

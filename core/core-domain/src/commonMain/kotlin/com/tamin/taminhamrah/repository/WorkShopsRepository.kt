@@ -159,8 +159,6 @@ interface WorkShopsRepository {
 
     suspend fun deleteLegalRepresentative(ticket: String, stakeId: Long)
 
-    // ------------------------------------------------------------- پیگیری وضعیت اعتراض
-
     suspend fun getWorkShopObjections(query: WorkShopObjectionQuery): PagedListDN<WorkShopObjectionDN>
 
     suspend fun getWorkShopObjectionSms(seqNo: Long, page: Int = 0): PagedListDN<SmsMessageDN>

@@ -112,8 +112,6 @@ enum class FilterProperty(val key: String) {
 
     @SerialName("debitNumber") DEBIT_NUMBER("debitNumber"),
     @SerialName("peymanSequence") PEYMAN_SEQUENCE("peymanSequence"),
-
-    /** شمارهٔ اعتراض on پیگیری وضعیت اعتراض — the objection row's own `seqNo`. */
     @SerialName("seqNo") SEQ_NO("seqNo"),
 }
 

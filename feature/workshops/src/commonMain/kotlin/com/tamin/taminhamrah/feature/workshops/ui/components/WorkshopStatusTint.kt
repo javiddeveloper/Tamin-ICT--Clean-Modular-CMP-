@@ -60,12 +60,6 @@ val ArticleSixteenRequestStatus.tint: StatusTint
         ArticleSixteenRequestStatus.NONE, ArticleSixteenRequestStatus.UNKNOWN -> StatusTint.NEUTRAL
     }
 
-/**
- * پیگیری وضعیت اعتراض status colors, per the Figma design (node 1788:357): APPROVED ("تایید رای")
- * is green, CALCULATION_REVIEW ("بازنگری محاسبات") is red, BOARD_REVIEW ("طرح در هیئت") is blue,
- * and RECALCULATED ("تجدید محاسبه شده") is amber — each status renders in a distinct color rather
- * than collapsing several statuses into the same neutral tint.
- */
 val WorkShopObjectionStatus.tint: StatusTint
     get() = when (this) {
         WorkShopObjectionStatus.SUBMITTED,

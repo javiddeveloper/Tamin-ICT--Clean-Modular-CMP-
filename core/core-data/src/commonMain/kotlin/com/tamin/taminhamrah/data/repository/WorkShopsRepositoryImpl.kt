@@ -258,16 +258,11 @@ class WorkShopsRepositoryImpl(
             .toDomainPage { it.toDomain() }
     }
 
-    // ------------------------------------------------------------- پیگیری وضعیت اعتراض
-
     override suspend fun getWorkShopObjections(
         query: WorkShopObjectionQuery,
     ): PagedListDN<WorkShopObjectionDN> {
         val filters = buildFilters {
             add(FilterProperty.PAYMENT_WORKSHOP_ID, query.workshopId)
-            // The legacy client wrote "شماره اعتراض" into a filter key the backend never reads
-            // (`branchCode`), a silent no-op there. Filtered on `seqNo` here instead — the field
-            // that actually represents an objection number on the model.
             add(FilterProperty.SEQ_NO, query.objectionNumber)
             add(FilterProperty.DEBIT_NUMBER, query.debitNumber)
         }
