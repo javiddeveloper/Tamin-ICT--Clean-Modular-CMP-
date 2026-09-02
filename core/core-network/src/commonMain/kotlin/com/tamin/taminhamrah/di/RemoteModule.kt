@@ -18,14 +18,10 @@ import com.tamin.taminhamrah.dataSource.calculateWagePension.CalculateWagePensio
 import com.tamin.taminhamrah.dataSource.calculateWagePension.CalculateWagePensionRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSource
 import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSourceImpl
-import com.tamin.taminhamrah.dataSource.contactUs.ContactUsRemoteDataSource
-import com.tamin.taminhamrah.dataSource.contactUs.ContactUsRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSource
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.employerInfo.EmployerInfoRemoteDataSource
 import com.tamin.taminhamrah.dataSource.employerInfo.EmployerInfoRemoteDataSourceImpl
-import com.tamin.taminhamrah.dataSource.health.HealthRemoteDataSource
-import com.tamin.taminhamrah.dataSource.health.HealthRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.historyObjection.HistoryObjectionRemoteDataSource
 import com.tamin.taminhamrah.dataSource.historyObjection.HistoryObjectionRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.historySource.HistoryRemoteDataSource
@@ -52,6 +48,12 @@ import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSource
 import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.versionHistory.VersionHistoryRemoteDataSource
 import com.tamin.taminhamrah.dataSource.versionHistory.VersionHistoryRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.health.HealthRemoteDataSource
+import com.tamin.taminhamrah.dataSource.health.HealthRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.contactUs.ContactUsRemoteDataSource
+import com.tamin.taminhamrah.dataSource.contactUs.ContactUsRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.requestPaymentForIllDays.RequestPaymentForIllDaysRemoteDataSource
+import com.tamin.taminhamrah.dataSource.requestPaymentForIllDays.RequestPaymentForIllDaysRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSource
 import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSourceImpl
 import com.tamin.taminhamrah.repository.AgentRepository
@@ -252,6 +254,13 @@ val remoteModule = module {
         EmployerInfoRemoteDataSourceImpl(
             apiService = get(),
             queryBuilder = get(),
+            errorParser = get()
+        )
+    }
+
+    single<RequestPaymentForIllDaysRemoteDataSource> {
+        RequestPaymentForIllDaysRemoteDataSourceImpl(
+            apiService = get(),
             errorParser = get()
         )
     }

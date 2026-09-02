@@ -68,6 +68,10 @@ import com.tamin.taminhamrah.useCases.orotezProtez.GetRequestInsuredMainInfoUseC
 import com.tamin.taminhamrah.useCases.orotezProtez.SaveShortTermOrthosisUseCase
 import com.tamin.taminhamrah.useCases.inquiryEducation.GetDataForEducationUseCase
 import com.tamin.taminhamrah.useCases.inquiryEducation.InquiryEducationCertificateUseCase
+import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.CalcIllnessAmountUseCase
+import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.GetCovidResultUseCase
+import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.GetIllDaysInsuredMainInfoUseCase
+import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.SendRequestForIllDayUseCase
 import com.tamin.taminhamrah.useCases.pregnancyPay.CalculatePregnancyPayEstimateUseCase
 import com.tamin.taminhamrah.useCases.pregnancyPay.GetPregnancyMainInfoUseCase
 import com.tamin.taminhamrah.useCases.pregnancyPay.GetPregnancyStatusListUseCase
@@ -197,6 +201,13 @@ import com.tamin.taminhamrah.useCases.agent.StartAgentSessionUseCase
 import com.tamin.taminhamrah.useCases.agent.UpdateAgentSessionUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopMembersUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopStackHoldersUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetLegalRepresentativeWorkshopsUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetLegalRepresentativesUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetLegalRepresentativeWorkshopContractsUseCase
+import com.tamin.taminhamrah.useCases.workshops.RequestLegalRepresentativeTicketUseCase
+import com.tamin.taminhamrah.useCases.workshops.VerifyLegalRepresentativeTicketUseCase
+import com.tamin.taminhamrah.useCases.workshops.SubmitLegalRepresentativeUseCase
+import com.tamin.taminhamrah.useCases.workshops.DeleteLegalRepresentativeUseCase
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -322,6 +333,10 @@ val domainModule = module {
     factoryOf(::SaveShortTermOrthosisUseCase)
     factoryOf(::GetDataForEducationUseCase)
     factoryOf(::InquiryEducationCertificateUseCase)
+    factoryOf(::GetIllDaysInsuredMainInfoUseCase)
+    factoryOf(::GetCovidResultUseCase)
+    factoryOf(::CalcIllnessAmountUseCase)
+    factoryOf(::SendRequestForIllDayUseCase)
     factoryOf(::GetPregnancyMainInfoUseCase)
     factoryOf(::GetPregnancyStatusListUseCase)
     factoryOf(::GetPregnancyTypeListUseCase)
@@ -409,6 +424,13 @@ val domainModule = module {
     factoryOf(::GetArticleSixteenReportPdfUseCase)
     factoryOf(::GetWorkshopMembersUseCase)
     factoryOf(::GetWorkshopStackHoldersUseCase)
+    factoryOf(::GetLegalRepresentativeWorkshopsUseCase)
+    factoryOf(::GetLegalRepresentativesUseCase)
+    factoryOf(::GetLegalRepresentativeWorkshopContractsUseCase)
+    factoryOf(::RequestLegalRepresentativeTicketUseCase)
+    factoryOf(::VerifyLegalRepresentativeTicketUseCase)
+    factoryOf(::SubmitLegalRepresentativeUseCase)
+    factoryOf(::DeleteLegalRepresentativeUseCase)
     factoryOf(::GetTreatmentCostsUseCase)
     factoryOf(::GetTreatmentCostsPDFUseCase)
     factoryOf(::SendToInboxTreatmentCostsUseCase)

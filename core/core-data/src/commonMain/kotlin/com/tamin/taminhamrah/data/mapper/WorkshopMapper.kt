@@ -1,5 +1,9 @@
 package com.tamin.taminhamrah.data.mapper
 
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeContractDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeRequestDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeWorkshopDN
 import com.tamin.taminhamrah.model.workshop.RelationWithTaminDTO
 import com.tamin.taminhamrah.model.workshop.PersonalRegistrationDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
@@ -33,6 +37,10 @@ import com.tamin.taminhamrah.model.workshop.DebitReasonDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
 import com.tamin.taminhamrah.model.workshop.EmployerWorkshopDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeContractDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeRequestDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRequestDN
 import com.tamin.taminhamrah.model.workshop.NewMemberRequestDTO
 import com.tamin.taminhamrah.model.workshop.ObjectionDocumentDN
@@ -426,3 +434,56 @@ fun SmsMessageDTO.toDomain(): SmsMessageDN = SmsMessageDN(
     status = WorkShopObjectionStatus.fromCode(status),
 )
 
+
+fun LegalRepresentativeWorkshopDTO.toDomain(): LegalRepresentativeWorkshopDN {
+    return LegalRepresentativeWorkshopDN(
+        workshopId = workshopId ?: "",
+        branchCode = branchCode ?: "",
+        workshopName = workshopName,
+        branchName = branchName,
+        nationalId = nationalId,
+        special = special ?: false,
+        representativeCount = representativeCount,
+    )
+}
+
+fun LegalRepresentativeDTO.toDomain(): LegalRepresentativeDN {
+    return LegalRepresentativeDN(
+        stakeId = stakeId ?: 0L,
+        nationalId = nationalId ?: "",
+        accessCode = accessCode ?: "",
+        mobile = mobile,
+        fullName = fullName,
+        startDate = startDate,
+        workshopId = workshopId ?: "",
+        workshopName = workshopName,
+        branchCode = branchCode ?: "",
+        special = special ?: false,
+    )
+}
+
+fun LegalRepresentativeRequestDN.toDto(ticket: String): LegalRepresentativeRequestDTO {
+    val accessCode = buildString {
+        append(if (hasElectronicNotification) '1' else '0')
+        append(if (hasInternetList) '1' else '0')
+        append(if (hasInsuredRegistration) '1' else '0')
+        append("00000")
+    }
+    return LegalRepresentativeRequestDTO(
+        accessCode = accessCode,
+        branchCode = branchCode,
+        nationalCode = nationalCode,
+        workshopId = workshopId,
+        special = special,
+        ticket = ticket,
+        contractRows = contractRows.takeIf { special && it.isNotEmpty() },
+    )
+}
+
+fun LegalRepresentativeContractDTO.toDomain(): LegalRepresentativeContractDN {
+    return LegalRepresentativeContractDN(
+        contractRow = contractRow ?: "",
+        title = listOfNotNull(firstName, lastName).joinToString(" ").ifBlank { null },
+        nationalCode = nationalCode,
+    )
+}
