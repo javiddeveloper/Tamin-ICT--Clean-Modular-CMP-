@@ -50,6 +50,8 @@ fun <T> WorkshopListScaffold(
     listState: LazyListState = rememberLazyListState(),
     contentPadding: PaddingValues = WorkshopDimens.listContentPadding,
     emptyMessage: String = stringResource(Res.string.workshop_empty_list),
+    /** Replaces the default icon+title empty state — see `ObjectionEmptyState`, the one caller so far. */
+    emptyContent: (@Composable () -> Unit)? = null,
     key: ((T) -> Any)? = null,
     header: (@Composable () -> Unit)? = null,
     /** A row that also needs its position — see `SmsTimelineItem`, the one caller so far. */
@@ -73,7 +75,11 @@ fun <T> WorkshopListScaffold(
             verticalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
             header?.invoke()
-            EmptyStateMessage(icon = Icons.Outlined.Info, title = emptyMessage)
+            if (emptyContent != null) {
+                emptyContent()
+            } else {
+                EmptyStateMessage(icon = Icons.Outlined.Info, title = emptyMessage)
+            }
         }
         return
     }
