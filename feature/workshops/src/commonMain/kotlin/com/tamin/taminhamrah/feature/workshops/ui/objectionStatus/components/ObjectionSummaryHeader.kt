@@ -59,8 +59,7 @@ fun ObjectionSummaryHeader(
         Box(
             modifier = Modifier
                 .size(WorkshopSummaryIconSize)
-                .background(Color.White.copy(alpha = 0.16f), RoundedCornerShape(CornerRadius.lg))
-                .clickable(onClick = onNavigateToSibling),
+                .background(Color.White.copy(alpha = 0.16f), RoundedCornerShape(CornerRadius.lg)),
             contentAlignment = Alignment.Center,
         ) {
             Icon(

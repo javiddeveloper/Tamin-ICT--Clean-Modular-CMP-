@@ -44,7 +44,6 @@ class ObjectionDocumentViewModel(
     private fun downloadFile(): Flow<PartialState> = flow {
         val state = uiState.value
         emit(PartialState.Downloading)
-        emit(PartialState.PdfChanged(null))
         val pdf = if (state.objectionType == WorkShopObjectionType.ARTICLE_SIXTEEN) {
             getArticleSixteenReportPdf(state.seqNo)
         } else {
@@ -65,7 +64,7 @@ class ObjectionDocumentViewModel(
             objectionType = partialState.objectionType,
             objectionStatus = partialState.objectionStatus,
         )
-        PartialState.Downloading -> currentState.copy(isDownloading = true, downloadFailed = false)
+        PartialState.Downloading -> currentState.copy(isDownloading = true, downloadFailed = false, pdf = null)
         is PartialState.PdfChanged -> currentState.copy(isDownloading = false, pdf = partialState.pdf)
         PartialState.DownloadFailed -> currentState.copy(isDownloading = false, downloadFailed = true)
     }

@@ -243,7 +243,7 @@ fun ObjectionDocumentContent(
                     )
                 }
 
-                if (downloadedBytes == null) {
+                if (state.isDownloading) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
