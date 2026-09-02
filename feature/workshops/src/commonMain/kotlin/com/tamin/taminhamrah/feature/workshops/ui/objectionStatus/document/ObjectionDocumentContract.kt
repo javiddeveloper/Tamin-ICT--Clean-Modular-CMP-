@@ -14,8 +14,6 @@ data class ObjectionDocumentUiState(
     val objectionType: WorkShopObjectionType = WorkShopObjectionType.UNKNOWN,
     val objectionStatus: WorkShopObjectionStatus = WorkShopObjectionStatus.UNKNOWN,
     val isDownloading: Boolean = false,
-    val pdf: PdfDownloadPR? = null,
-    val downloadFailed: Boolean = false,
 ) {
     sealed interface PartialState {
         data class Opened(
@@ -28,8 +26,9 @@ data class ObjectionDocumentUiState(
         ) : PartialState
 
         data object Downloading : PartialState
-        data class PdfChanged(val pdf: PdfDownloadPR?) : PartialState
-        data object DownloadFailed : PartialState
+
+        /** Reached on both success and failure — [ObjectionDocumentEvent] carries the outcome. */
+        data object DownloadFinished : PartialState
     }
 }
 
@@ -46,4 +45,16 @@ sealed interface ObjectionDocumentIntent {
     data object DownloadFile : ObjectionDocumentIntent
 }
 
-sealed interface ObjectionDocumentEvent
+/**
+ * One-shot outcome of a download, dispatched via `sendEvent` rather than stored in [ObjectionDocumentUiState].
+ *
+ * [DownloadSucceeded.pdf] wraps a single-use byte channel ([com.tamin.taminhamrah.ui.components.drainBytesOrNull]
+ * drains it once) — keeping it in the persisted UiState let a screen recomposition after the fact
+ * (e.g. a fresh Composition on the same ViewModel) replay the drain against an already-emptied
+ * channel and show a false "no document" dialog for a download that had actually succeeded. An
+ * event is consumed exactly once, so that can no longer happen.
+ */
+sealed interface ObjectionDocumentEvent {
+    data class DownloadSucceeded(val pdf: PdfDownloadPR) : ObjectionDocumentEvent
+    data object DownloadFailed : ObjectionDocumentEvent
+}

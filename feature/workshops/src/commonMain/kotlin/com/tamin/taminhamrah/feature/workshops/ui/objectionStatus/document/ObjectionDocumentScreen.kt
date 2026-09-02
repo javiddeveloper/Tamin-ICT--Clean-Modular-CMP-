@@ -37,6 +37,7 @@ import com.tamin.taminhamrah.model.workshop.WorkShopObjectionStatus
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionType
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
@@ -73,6 +74,14 @@ import taminx.core.core_ui.objection_document_title_article16
 import taminx.core.core_ui.objection_status_action_sms
 import taminx.core.core_ui.workshop_code
 
+/** What the download result banner/dialog is showing right now — purely local UI state, driven by
+ * [ObjectionDocumentEvent] rather than [ObjectionDocumentUiState] (see the contract's doc on why). */
+sealed interface DownloadResultDialog {
+    data object None : DownloadResultDialog
+    data class Success(val fileSizeBytes: Int) : DownloadResultDialog
+    data object NoDocument : DownloadResultDialog
+}
+
 @Composable
 fun ObjectionDocumentScreen(
     seqNo: Long,
@@ -87,6 +96,8 @@ fun ObjectionDocumentScreen(
     viewModel: ObjectionDocumentViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val saver = rememberPdfSaver()
+    var resultDialog by remember(seqNo) { mutableStateOf<DownloadResultDialog>(DownloadResultDialog.None) }
 
     LaunchedEffect(seqNo) {
         viewModel.sendIntent(
@@ -101,8 +112,29 @@ fun ObjectionDocumentScreen(
         )
     }
 
+    // Consumed once per event, unlike a LaunchedEffect keyed on persisted state: the downloaded
+    // bytes' channel is single-use (drainBytesOrNull), so this must never run twice for the same
+    // download.
+    viewModel.events.collectWithLifecycleAware { event ->
+        when (event) {
+            is ObjectionDocumentEvent.DownloadSucceeded -> {
+                val usable = event.pdf.drainBytesOrNull()
+                resultDialog = if (usable == null) {
+                    DownloadResultDialog.NoDocument
+                } else {
+                    saver.save("objection_$seqNo.pdf", usable)
+                    DownloadResultDialog.Success(usable.size)
+                }
+            }
+
+            ObjectionDocumentEvent.DownloadFailed -> resultDialog = DownloadResultDialog.NoDocument
+        }
+    }
+
     ObjectionDocumentContent(
         state = state,
+        resultDialog = resultDialog,
+        onDismissResultDialog = { resultDialog = DownloadResultDialog.None },
         onBack = onBack,
         onOpenSms = onOpenSms,
         onDownload = { viewModel.sendIntent(ObjectionDocumentIntent.DownloadFile) },
@@ -113,32 +145,14 @@ fun ObjectionDocumentScreen(
 @Composable
 fun ObjectionDocumentContent(
     state: ObjectionDocumentUiState,
+    resultDialog: DownloadResultDialog,
+    onDismissResultDialog: () -> Unit,
     onBack: () -> Unit,
     onOpenSms: () -> Unit,
     onDownload: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    val saver = rememberPdfSaver()
-    var downloadedBytes by remember(state.seqNo) { mutableStateOf<Int?>(null) }
-    var showSuccessDialog by remember { mutableStateOf(false) }
-    var showNoDocumentDialog by remember { mutableStateOf(false) }
-
-    LaunchedEffect(state.pdf, state.downloadFailed) {
-        val pdf = state.pdf ?: run {
-            if (state.downloadFailed) showNoDocumentDialog = true
-            return@LaunchedEffect
-        }
-        val usable = pdf.drainBytesOrNull()
-        if (usable == null) {
-            showNoDocumentDialog = true
-        } else {
-            saver.save("objection_${state.seqNo}.pdf", usable)
-            downloadedBytes = usable.size
-            showSuccessDialog = true
-        }
-    }
-
     val isArticleSixteen = state.objectionType == WorkShopObjectionType.ARTICLE_SIXTEEN
     Column(modifier = modifier.fillMaxWidth().background(colors.bgPage)) {
         TaminTopAppBar(
@@ -211,8 +225,8 @@ fun ObjectionDocumentContent(
                             color = colors.textPrimary,
                         )
                         Text(
-                            text = downloadedBytes?.let { bytes ->
-                                stringResource(Res.string.objection_document_file_size, bytes / 1024)
+                            text = (resultDialog as? DownloadResultDialog.Success)?.let {
+                                stringResource(Res.string.objection_document_file_size, it.fileSizeBytes / 1024)
                             } ?: if (isArticleSixteen) {
                                 stringResource(Res.string.objection_document_subtitle_article16)
                             } else {
@@ -260,7 +274,7 @@ fun ObjectionDocumentContent(
         }
     }
 
-    if (showSuccessDialog) {
+    if (resultDialog is DownloadResultDialog.Success) {
         TaminConfirmationDialog(
             title = stringResource(Res.string.objection_document_downloaded_title),
             description = stringResource(Res.string.objection_document_downloaded_desc),
@@ -268,19 +282,19 @@ fun ObjectionDocumentContent(
             confirmButton = {
                 LoadingButton(
                     text = stringResource(Res.string.objection_document_got_it),
-                    onClick = { showSuccessDialog = false },
+                    onClick = onDismissResultDialog,
                     isLoading = false,
                     modifier = Modifier.fillMaxWidth(),
                 )
             },
             dismissButton = {},
-            onDismissRequest = { showSuccessDialog = false },
+            onDismissRequest = onDismissResultDialog,
             iconTint = colors.greenText,
             iconBackground = colors.greenBg,
         )
     }
 
-    if (showNoDocumentDialog) {
+    if (resultDialog is DownloadResultDialog.NoDocument) {
         TaminConfirmationDialog(
             title = stringResource(Res.string.objection_document_no_document_title),
             description = stringResource(Res.string.objection_document_no_document_desc),
@@ -288,13 +302,13 @@ fun ObjectionDocumentContent(
             confirmButton = {
                 LoadingButton(
                     text = stringResource(Res.string.objection_document_got_it),
-                    onClick = { showNoDocumentDialog = false },
+                    onClick = onDismissResultDialog,
                     isLoading = false,
                     modifier = Modifier.fillMaxWidth(),
                 )
             },
             dismissButton = {},
-            onDismissRequest = { showNoDocumentDialog = false },
+            onDismissRequest = onDismissResultDialog,
             iconTint = colors.dangerText,
             iconBackground = colors.dangerBorder,
         )
@@ -314,6 +328,8 @@ private fun ObjectionDocumentScreenPreview() {
                 objectionType = WorkShopObjectionType.ESTIMATE,
                 objectionStatus = WorkShopObjectionStatus.BOARD_REVIEW,
             ),
+            resultDialog = DownloadResultDialog.None,
+            onDismissResultDialog = {},
             onBack = {},
             onOpenSms = {},
             onDownload = {},

@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.workshops
 
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.toRoute
 import com.tamin.taminhamrah.feature.workshops.ui.objectionStatus.document.ObjectionDocumentScreen
@@ -38,6 +39,14 @@ fun NavController.navigateToDebtObjectionStatus() {
     navigate(DebtObjectionStatusRoute)
 }
 
+/**
+ * Both `onOpenSms`/`onOpenDocument` callbacks below are wired to two different entry points: the
+ * list row's own action buttons (a fresh push, always) and the sibling screen's summary-header
+ * shortcut (SMS ↔ document). For the latter, popping back to the entry we just came from — instead
+ * of pushing a duplicate — keeps that entry's already-loaded state (see `ObjectionSmsViewModel`'s
+ * "re-opening the same seqNo does not refetch" comment) and keeps the back stack from growing by one
+ * every time the user bounces between the two screens.
+ */
 private fun NavController.navigateToObjectionSms(
     seqNo: Long,
     debitNumber: String,
@@ -46,6 +55,10 @@ private fun NavController.navigateToObjectionSms(
     objectionType: WorkShopObjectionType,
     status: WorkShopObjectionStatus,
 ) {
+    if (previousBackStackEntry?.destination?.hasRoute<ObjectionSmsRoute>() == true) {
+        popBackStack()
+        return
+    }
     navigate(
         ObjectionSmsRoute(
             seqNo, debitNumber, workshopId, objectionDate,
@@ -62,6 +75,10 @@ private fun NavController.navigateToObjectionDocument(
     objectionType: WorkShopObjectionType,
     status: WorkShopObjectionStatus,
 ) {
+    if (previousBackStackEntry?.destination?.hasRoute<ObjectionDocumentRoute>() == true) {
+        popBackStack()
+        return
+    }
     navigate(
         ObjectionDocumentRoute(
             seqNo, debitNumber, workshopId, objectionDate,

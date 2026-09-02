@@ -41,16 +41,22 @@ class ObjectionDocumentViewModel(
         ObjectionDocumentIntent.DownloadFile -> downloadFile()
     }
 
+    /** Guarded so two taps before the first request resolves can't fire two downloads at once. */
     private fun downloadFile(): Flow<PartialState> = flow {
         val state = uiState.value
+        if (state.isDownloading) return@flow
         emit(PartialState.Downloading)
         val pdf = if (state.objectionType == WorkShopObjectionType.ARTICLE_SIXTEEN) {
             getArticleSixteenReportPdf(state.seqNo)
         } else {
             getDebitObjectionPdf(state.seqNo)
         }
-        emit(PartialState.PdfChanged(pdf.toPresentation()))
-    }.catch { emit(PartialState.DownloadFailed) }
+        sendEvent(ObjectionDocumentEvent.DownloadSucceeded(pdf.toPresentation()))
+        emit(PartialState.DownloadFinished)
+    }.catch {
+        sendEvent(ObjectionDocumentEvent.DownloadFailed)
+        emit(PartialState.DownloadFinished)
+    }
 
     override fun reduceState(
         currentState: ObjectionDocumentUiState,
@@ -64,10 +70,9 @@ class ObjectionDocumentViewModel(
             objectionType = partialState.objectionType,
             objectionStatus = partialState.objectionStatus,
         )
-        PartialState.Downloading -> currentState.copy(isDownloading = true, downloadFailed = false, pdf = null)
-        is PartialState.PdfChanged -> currentState.copy(isDownloading = false, pdf = partialState.pdf)
-        PartialState.DownloadFailed -> currentState.copy(isDownloading = false, downloadFailed = true)
+        PartialState.Downloading -> currentState.copy(isDownloading = true)
+        PartialState.DownloadFinished -> currentState.copy(isDownloading = false)
     }
 
-    override fun createErrorState(message: String): PartialState = PartialState.DownloadFailed
+    override fun createErrorState(message: String): PartialState = PartialState.DownloadFinished
 }
