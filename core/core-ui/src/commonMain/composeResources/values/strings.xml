@@ -156,6 +156,7 @@
     <string name="tab_services">خدمات</string>
     <string name="tab_treatment">درمان</string>
     <string name="tab_profile">پروفایل</string>
+    <string name="tab_agent">دستیار هوشمند</string>
 
     <!-- Login Bottom Sheet -->
     <string name="login_to_tamin_man">ورود به سامانه تأمین من</string>
