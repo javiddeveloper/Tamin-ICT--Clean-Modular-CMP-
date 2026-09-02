@@ -267,25 +267,38 @@ class ContractFlowViewModel(
         }
     }
 
-    private fun handleSelectBranchProvince(province: ProvincePR): Flow<PartialState> = flow {
-        emit(
-            PartialState.BranchSelectionChanged(
-                uiState.value.branchSelection.copy(
-                    provinceCode = province.provinceCode,
-                    provinceName = province.provinceName,
-                    cityCode = "",
-                    cityName = "",
-                    branchCode = "",
-                    branchName = "",
+    private fun handleSelectBranchProvince(province: ProvincePR): Flow<PartialState> = merge(
+        flow {
+            emit(
+                PartialState.BranchSelectionChanged(
+                    uiState.value.branchSelection.copy(
+                        provinceCode = province.provinceCode,
+                        provinceName = province.provinceName,
+                        cityCode = "",
+                        cityName = "",
+                        branchCode = "",
+                        branchName = "",
+                    ),
                 ),
-            ),
-        )
-        emit(
-            PartialState.BranchCitiesLoaded(
-                uiState.value.cities.filterByProvinceCode(province.provinceCode),
-            ),
-        )
-        emit(PartialState.BranchesLoaded(emptyList()))
+            )
+            emit(PartialState.BranchCitiesLoaded(emptyList()))
+            emit(PartialState.BranchesLoaded(emptyList()))
+        },
+        loadBranchCities(province.provinceCode),
+    )
+
+    private fun loadBranchCities(provinceCode: String): Flow<PartialState> = flow {
+        if (provinceCode.isBlank()) return@flow
+        emit(PartialState.BranchCitiesLoading(true))
+        try {
+            identityInfoUseCase.getCities(provinceCode = provinceCode).collect { cities ->
+                emit(PartialState.BranchCitiesLoaded(cities.toCityPresentation()))
+            }
+        } catch (e: Exception) {
+            emitError(e.message)
+        } finally {
+            emit(PartialState.BranchCitiesLoading(false))
+        }
     }
 
     private fun loadBranches(cityCode: String): Flow<PartialState> = flow {
@@ -803,18 +816,10 @@ class ContractFlowViewModel(
         is PartialState.CitiesLoading -> currentState.copy(
             isCitiesLoading = partialState.isLoading,
         )
-        is PartialState.CitiesLoaded -> {
-            val cities = partialState.cities
-            currentState.copy(
-                isCitiesLoading = false,
-                cities = cities,
-                branchCities = if (currentState.branchSelection.provinceCode.isNotBlank()) {
-                    cities.filterByProvinceCode(currentState.branchSelection.provinceCode)
-                } else {
-                    currentState.branchCities
-                },
-            )
-        }
+        is PartialState.CitiesLoaded -> currentState.copy(
+            isCitiesLoading = false,
+            cities = partialState.cities,
+        )
         is PartialState.ProvincesLoading -> currentState.copy(
             isProvincesLoading = partialState.isLoading,
         )
