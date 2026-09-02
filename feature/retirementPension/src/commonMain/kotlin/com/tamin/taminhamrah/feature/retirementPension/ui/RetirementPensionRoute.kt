@@ -469,7 +469,7 @@ private fun RetirementBottomBar(
                 icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
                 iconPosition = LoadingButtonIconPosition.TRAILING,
                 // The design paints the action that actually submits green, not blue.
-                enabledBrush = LocalTaminColors.current.successGradient
+                background = LocalTaminColors.current.successGradient
                     .takeIf { screen == RetirementScreen.Form && isFinalStep },
             )
         }
