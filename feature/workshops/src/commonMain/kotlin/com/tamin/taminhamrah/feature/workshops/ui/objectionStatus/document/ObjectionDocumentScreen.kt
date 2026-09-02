@@ -5,10 +5,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -46,7 +47,6 @@ import com.tamin.taminhamrah.ui.components.rememberPdfSaver
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
-import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
@@ -55,6 +55,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_download
+import taminx.core.core_ui.ic_tamin_objection_document
 import taminx.core.core_ui.objection_document_debit_number
 import taminx.core.core_ui.objection_document_download_button
 import taminx.core.core_ui.objection_document_downloaded_desc
@@ -181,9 +182,23 @@ fun ObjectionDocumentContent(
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(colors.dangerBorder, RoundedCornerShape(CornerRadius.lg)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = vectorResource(Res.drawable.ic_tamin_objection_document),
+                            contentDescription = null,
+                            tint = colors.dangerText,
+                            modifier = Modifier.size(24.dp),
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(Spacing.md))
                     Column(verticalArrangement = Arrangement.spacedBy(Spacing.xxs)) {
                         Text(
                             text = if (isArticleSixteen) {
@@ -205,18 +220,6 @@ fun ObjectionDocumentContent(
                             },
                             style = MaterialTheme.typography.labelSmall,
                             color = colors.textMuted,
-                        )
-                    }
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .background(colors.dangerBg, RoundedCornerShape(CornerRadius.lg)),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Description,
-                            contentDescription = null,
-                            tint = colors.dangerText,
                         )
                     }
                 }
@@ -244,23 +247,6 @@ fun ObjectionDocumentContent(
                         label = stringResource(Res.string.objection_document_objection_date),
                         value = state.objectionDate,
                     )
-                }
-
-                if (state.isDownloading) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .taminSurface(CornerRadius.lg)
-                            .padding(Spacing.md),
-                        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
-                    ) {
-                        repeat(4) {
-                            ShimmerBlock(
-                                modifier = Modifier.fillMaxWidth().height(8.dp),
-                                cornerRadius = CornerRadius.chip,
-                            )
-                        }
-                    }
                 }
             }
 
@@ -310,7 +296,7 @@ fun ObjectionDocumentContent(
             dismissButton = {},
             onDismissRequest = { showNoDocumentDialog = false },
             iconTint = colors.dangerText,
-            iconBackground = colors.dangerBg,
+            iconBackground = colors.dangerBorder,
         )
     }
 }

@@ -79,15 +79,15 @@ fun ObjectionSummaryHeader(
                 maxLines = 1,
             )
             Row(horizontalArrangement = Arrangement.spacedBy(Spacing.xs), verticalAlignment = Alignment.CenterVertically) {
-                NumericText(
-                    text = objectionNumber,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = Color.White.copy(alpha = 0.85f),
-                )
                 Text(
                     text = "شمارهٔ اعتراض",
                     style = MaterialTheme.typography.labelSmall,
                     color = Color.White.copy(alpha = 0.65f),
+                )
+                NumericText(
+                    text = objectionNumber,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Color.White.copy(alpha = 0.85f),
                 )
             }
         }
