@@ -58,6 +58,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.InputRestriction
 import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.components.OtpInputField
 import com.tamin.taminhamrah.ui.components.StepIndicator
 import com.tamin.taminhamrah.ui.components.StepIndicatorModel
 import com.tamin.taminhamrah.ui.components.StepState
@@ -78,7 +79,6 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.employer_online_services_request_code_card_title
-import taminx.core.core_ui.employer_online_services_request_code_placeholder
 import taminx.core.core_ui.employer_online_services_request_code_sent_to
 import taminx.core.core_ui.employer_online_services_request_code_ttl_caption
 import taminx.core.core_ui.employer_online_services_request_contact_hint
@@ -424,7 +424,9 @@ private fun CodeEntryStep(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                    // Top-align: the OTP field grows downward when its error line shows, and the
+                    // edit button must stay level with the segment box, not re-center against it.
+                    verticalAlignment = Alignment.Top
                 ) {
                     Box(
                         modifier = Modifier
@@ -446,15 +448,14 @@ private fun CodeEntryStep(
                         )
                     }
                     Spacer(Modifier.width(Spacing.sm))
-                    TaminStyledTextField(
+                    OtpInputField(
                         modifier = Modifier.weight(1f),
                         value = request.code,
                         onValueChange = { onIntent(EmployerOnlineServicesIntent.UpdateRequestCode(it)) },
-                        label = "",
-                        placeholder = stringResource(Res.string.employer_online_services_request_code_placeholder),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        inputRestriction = InputRestriction.DigitsOnly,
-                        maxLength = AgreementRequestUiState.CODE_LENGTH,
+                        length = AgreementRequestUiState.CODE_LENGTH,
+                        enabled = !request.isSubmitting,
+                        error = !error.isNullOrBlank(),
+                        errorMessage = error,
                     )
                 }
             }
@@ -467,7 +468,6 @@ private fun CodeEntryStep(
                 color = colors.textMuted,
             )
 
-            RequestError(message = error)
             Spacer(Modifier.height(Spacing.lg))
         }
     }
