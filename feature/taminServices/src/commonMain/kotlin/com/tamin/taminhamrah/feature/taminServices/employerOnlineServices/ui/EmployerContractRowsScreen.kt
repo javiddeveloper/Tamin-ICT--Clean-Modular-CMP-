@@ -33,6 +33,7 @@ import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contra
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contract.EmployerOnlineServicesUiState
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.components.EmployerContractRowCard
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.components.EmployerContractRowsHeader
+import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.components.EmployerOnlineServicesErrorView
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.components.EmployerOnlineServicesListSkeleton
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.components.EmployerWorkshopInfoCard
 import com.tamin.taminhamrah.model.workshop.WorkshopContractRowPR
@@ -49,8 +50,6 @@ import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.employer_online_services_contract_rows_empty_subtitle
 import taminx.core.core_ui.employer_online_services_contract_rows_empty_title
-import taminx.core.core_ui.employer_online_services_contract_rows_error_title
-import taminx.core.core_ui.employer_online_services_error_retry
 
 /** How far the workshop card hangs below the header gradient — mirrors the landing identity card. */
 private val WorkshopCardOverhang = 44.dp
@@ -98,23 +97,18 @@ internal fun EmployerContractRowsScreen(
                 }
 
                 error != null && rows.rows.isEmpty() -> item {
-                    EmptyStateMessage(
-                        icon = Icons.Outlined.Description,
-                        title = stringResource(Res.string.employer_online_services_contract_rows_error_title),
-                        subtitle = error,
-                        actionLabel = stringResource(Res.string.employer_online_services_error_retry),
-                        onAction = {
+                    EmployerOnlineServicesErrorView(
+                        error = error,
+                        onRetry = {
                             onIntent(
                                 EmployerOnlineServicesIntent.RetrySource(
                                     EmployerOnlineServicesErrorSource.CONTRACT_ROWS,
                                 ),
                             )
                         },
-                        showIconTile = true,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(320.dp)
-                            .padding(horizontal = Spacing.xlg),
+                            .height(320.dp),
                     )
                 }
 

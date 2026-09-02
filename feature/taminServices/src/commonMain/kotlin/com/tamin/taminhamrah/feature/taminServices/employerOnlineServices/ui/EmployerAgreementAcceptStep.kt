@@ -23,7 +23,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
@@ -46,12 +45,12 @@ import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contra
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contract.AgreementRequestUiState
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contract.EmployerOnlineServicesErrorSource
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contract.EmployerOnlineServicesIntent
+import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.components.EmployerOnlineServicesErrorView
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.components.EmployerOnlineServicesListSkeleton
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.model.AgreementDocumentPR
 import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminBottomActionBar
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
@@ -65,14 +64,12 @@ import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.employer_online_services_error_retry
 import taminx.core.core_ui.employer_online_services_national_code
 import taminx.core.core_ui.employer_online_services_request_current_email
 import taminx.core.core_ui.employer_online_services_request_current_mobile
 import taminx.core.core_ui.employer_online_services_request_edit_contact
 import taminx.core.core_ui.employer_online_services_request_new_email
 import taminx.core.core_ui.employer_online_services_request_new_mobile
-import taminx.core.core_ui.employer_online_services_request_step2_error_title
 import taminx.core.core_ui.employer_online_services_request_submit
 import taminx.core.core_ui.employer_online_services_request_success_body
 import taminx.core.core_ui.employer_online_services_request_success_dismiss
@@ -126,19 +123,15 @@ internal fun AcceptAgreementStep(
             when {
                 request.isStep2Loading && !contentReady -> EmployerOnlineServicesListSkeleton()
 
-                error != null && !contentReady -> EmptyStateMessage(
-                    icon = Icons.Outlined.Description,
-                    title = stringResource(Res.string.employer_online_services_request_step2_error_title),
-                    subtitle = error,
-                    actionLabel = stringResource(Res.string.employer_online_services_error_retry),
-                    onAction = {
+                error != null && !contentReady -> EmployerOnlineServicesErrorView(
+                    error = error,
+                    onRetry = {
                         onIntent(
                             EmployerOnlineServicesIntent.RetrySource(
                                 EmployerOnlineServicesErrorSource.STEP2_CONTENT,
                             ),
                         )
                     },
-                    showIconTile = true,
                     modifier = Modifier.fillMaxWidth().height(320.dp),
                 )
 

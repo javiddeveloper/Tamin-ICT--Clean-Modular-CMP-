@@ -47,6 +47,7 @@ import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contra
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contract.EmployerOnlineServicesScreen
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contract.EmployerOnlineServicesUiState
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.components.EmployerAgreementCard
+import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.components.EmployerOnlineServicesErrorView
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.components.EmployerOnlineServicesFilterChipRow
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.components.EmployerOnlineServicesHeader
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.components.EmployerOnlineServicesListSkeleton
@@ -80,8 +81,6 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.employer_online_services_count_label
 import taminx.core.core_ui.employer_online_services_empty_subtitle
 import taminx.core.core_ui.employer_online_services_empty_title
-import taminx.core.core_ui.employer_online_services_error_retry
-import taminx.core.core_ui.employer_online_services_list_error_title
 import taminx.core.core_ui.employer_online_services_request_button
 
 private val HeaderCollapseDistance = 160.dp
@@ -205,23 +204,18 @@ internal fun EmployerAgreementsListScreen(
                 }
 
                 agreementsError != null && list.agreements.isEmpty() -> item {
-                    EmptyStateMessage(
-                        icon = Icons.Outlined.Description,
-                        title = stringResource(Res.string.employer_online_services_list_error_title),
-                        subtitle = agreementsError,
-                        actionLabel = stringResource(Res.string.employer_online_services_error_retry),
-                        onAction = {
+                    EmployerOnlineServicesErrorView(
+                        error = agreementsError,
+                        onRetry = {
                             onIntent(
                                 EmployerOnlineServicesIntent.RetrySource(
                                     EmployerOnlineServicesErrorSource.AGREEMENTS,
                                 ),
                             )
                         },
-                        showIconTile = true,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(320.dp)
-                            .padding(horizontal = Spacing.xlg),
+                            .height(320.dp),
                     )
                 }
 
