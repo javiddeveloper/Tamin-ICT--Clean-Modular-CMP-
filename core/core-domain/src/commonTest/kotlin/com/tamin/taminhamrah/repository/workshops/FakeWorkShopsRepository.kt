@@ -74,6 +74,16 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     var employerAgreementSubmitMessage: String = ""
     var lastEmployerAgreementSubmission: EmployerAgreementSubmissionDN? = null
         private set
+    var lastTicketRequest: Pair<String, String>? = null
+        private set
+    var lastContactInfoCode: String? = null
+        private set
+    var lastWorkshopsWithoutContractPage: Int? = null
+        private set
+    var lastContractRowsArgs: Triple<String, String, Int>? = null
+        private set
+    var lastAgreementsByWorkshopArgs: Triple<String, String, Int>? = null
+        private set
 
     /** Set to make the next call throw instead of answering. */
     var error: Throwable? = null
@@ -221,27 +231,42 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     }
 
     override suspend fun requestEmployerAgreementTicket(mobile: String, email: String): String =
-        answer { ticketRequestMessage }
+        answer {
+            lastTicketRequest = mobile to email
+            ticketRequestMessage
+        }
 
     override suspend fun getEmployerAgreementContactInfo(
         verificationCode: String,
-    ): EmployerContactInfoDN = answer { employerContactInfo }
+    ): EmployerContactInfoDN = answer {
+        lastContactInfoCode = verificationCode
+        employerContactInfo
+    }
 
     override suspend fun getWorkshopsWithoutContract(
         page: Int,
-    ): PagedListDN<WorkshopWithoutContractDN> = answer { workshopsWithoutContract }
+    ): PagedListDN<WorkshopWithoutContractDN> = answer {
+        lastWorkshopsWithoutContractPage = page
+        workshopsWithoutContract
+    }
 
     override suspend fun getWorkshopContractRows(
         workshopId: String,
         branchCode: String,
         page: Int,
-    ): PagedListDN<WorkshopContractRowDN> = answer { workshopContractRows }
+    ): PagedListDN<WorkshopContractRowDN> = answer {
+        lastContractRowsArgs = Triple(workshopId, branchCode, page)
+        workshopContractRows
+    }
 
     override suspend fun getEmployerAgreementsByWorkshop(
         workshopId: String,
         branchCode: String,
         page: Int,
-    ): PagedListDN<EmployerAgreementByWorkshopDN> = answer { employerAgreementsByWorkshop }
+    ): PagedListDN<EmployerAgreementByWorkshopDN> = answer {
+        lastAgreementsByWorkshopArgs = Triple(workshopId, branchCode, page)
+        employerAgreementsByWorkshop
+    }
 
     override suspend fun submitEmployerAgreement(request: EmployerAgreementSubmissionDN): String =
         answer {
