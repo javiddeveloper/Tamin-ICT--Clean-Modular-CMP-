@@ -390,7 +390,8 @@ private fun AppliedFiltersRow(
 ) {
     val colors = LocalTaminColors.current
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().padding(vertical = Spacing.sm)
+        ,
         horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
         verticalAlignment = Alignment.CenterVertically,
     ) {
