@@ -63,7 +63,7 @@ private const val OTP_WINDOW_SECONDS = 900
 
 private const val SECOND_MILLIS = 1_000L
 private const val SECONDS_PER_MINUTE = 60
-private val CountdownDigitWidth = 12.dp
+private val CountdownDigitWidth = 9.dp
 
 /**
  * Step 2 — the SMS code. Entering the sixth digit *is* the verification: the code is the ticket the

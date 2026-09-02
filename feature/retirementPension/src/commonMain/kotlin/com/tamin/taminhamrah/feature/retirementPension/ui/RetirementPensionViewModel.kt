@@ -442,7 +442,14 @@ class RetirementPensionViewModel(
      */
     private suspend fun FlowCollector<PartialState>.createRequest() {
         val state = uiState.value
-        val ticketCode = state.ticketCode ?: return
+        // Without the verified ticket the server has nothing to create the request against. Say so
+        // rather than returning quietly: a primary button that does nothing at all reads as a
+        // broken app, not as a missing precondition.
+        val ticketCode = state.ticketCode
+        if (ticketCode == null) {
+            sendEvent(RetirementPensionEvent.RequestCreationFailed)
+            return
+        }
 
         emit(PartialState.Loading(true))
         try {
@@ -487,7 +494,11 @@ class RetirementPensionViewModel(
         nextStep: RetirementStep,
     ) {
         val state = uiState.value
-        val requestId = state.requestId?.takeIf(String::isNotBlank) ?: return
+        val requestId = state.requestId?.takeIf(String::isNotBlank)
+        if (requestId == null) {
+            sendEvent(RetirementPensionEvent.RequestCreationFailed)
+            return
+        }
 
         emit(PartialState.Loading(true))
         try {

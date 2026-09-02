@@ -39,6 +39,10 @@ internal object RetirementHistoryCalculator {
 
     private const val DAYS_PER_YEAR = 365.0
 
+    /** The estimate is reported to the nearest thousand rial. */
+    private const val ROUNDING_STEP = 1_000L
+    private const val ROUNDING_HALF = ROUNDING_STEP / 2
+
     /** A duration carried as separate units, already normalized. */
     data class Duration(val years: Int, val months: Int, val days: Int)
 
@@ -89,7 +93,11 @@ internal object RetirementHistoryCalculator {
         if (averageWage <= 0L) return 0L
         val contributionYears = totalHistoryDays / DAYS_PER_YEAR
         val creditedYears = min(contributionYears, MAX_CREDITED_YEARS)
-        val estimate = ceil(averageWage.toDouble() / DAYS_PER_MONTH * creditedYears).toLong()
+        // Rounded to the nearest thousand, the way the design prints it: an estimate carrying
+        // single rials claims a precision this calculation does not have. The floor below is left
+        // exact — it is a legal figure, not an estimate, and must not be rounded past.
+        val estimate =
+            roundToThousand(ceil(averageWage.toDouble() / DAYS_PER_MONTH * creditedYears).toLong())
 
         val floor = if (contributionYears >= FULL_FLOOR_YEARS) {
             MINIMUM_MONTHLY_PENSION
@@ -98,6 +106,9 @@ internal object RetirementHistoryCalculator {
         }
         return maxOf(estimate, floor)
     }
+
+    private fun roundToThousand(value: Long): Long =
+        (value + ROUNDING_HALF) / ROUNDING_STEP * ROUNDING_STEP
 
     /**
      * The (days, wage) pairs one yearly row carries, skipping months with no contribution.

@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import com.tamin.taminhamrah.feature.retirementPension.ui.contract.RetirementFormError
 import com.tamin.taminhamrah.ui.components.SegmentedInputField
 import com.tamin.taminhamrah.ui.components.TaminText
+import com.tamin.taminhamrah.ui.components.TaminTextArea
 import com.tamin.taminhamrah.ui.components.animatedErrorBorder
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.taminSurface
@@ -269,6 +270,39 @@ internal fun RetirementNumericField(
             placeholders = slots ?: dashedSlots(slotCount),
         )
     }
+}
+
+/**
+ * A single-line free-text field.
+ *
+ * Built on [TaminTextArea] rather than [TaminTextField]: the design draws a 46px box with 10px of
+ * padding, and Material's outlined field will not go below its own 56dp minimum without clipping
+ * the text. `TaminTextArea` is already the app's own box at exactly that padding, and it is what
+ * the address fields on these same steps use — so the two now match.
+ */
+@Composable
+internal fun RetirementTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    isRequired: Boolean,
+    modifier: Modifier = Modifier,
+    placeholder: String? = null,
+    isError: Boolean = false,
+    errorMessage: String? = null,
+) {
+    TaminTextArea(
+        value = value,
+        onValueChange = onValueChange,
+        label = label,
+        modifier = modifier,
+        placeholder = placeholder.orEmpty(),
+        isRequired = isRequired,
+        error = isError,
+        errorMessage = errorMessage,
+        minLines = 1,
+        maxLines = 1,
+    )
 }
 
 /** The field's own default — a dash per slot — kept out of the call site so it is not rebuilt. */

@@ -26,7 +26,7 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.ic_tamin_document_lines
 import taminx.core.core_ui.retirement_pension_consent_label
 import taminx.core.core_ui.retirement_pension_rules_body
@@ -95,7 +95,7 @@ private fun RulesLink(onClick: () -> Unit, modifier: Modifier = Modifier) {
             modifier = Modifier.weight(1f),
         )
         Icon(
-            imageVector = vectorResource(Res.drawable.ic_tamin_chevron_back),
+            imageVector = vectorResource(Res.drawable.ic_tamin_chevron_forward),
             contentDescription = null,
             tint = colors.blueText,
             modifier = Modifier.size(IconSize.small),

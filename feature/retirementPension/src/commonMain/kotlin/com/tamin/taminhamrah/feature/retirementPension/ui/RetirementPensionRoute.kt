@@ -157,7 +157,16 @@ internal fun RetirementPensionScreen(
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        topBar = { RetirementHeader(state = state, onIntent = onIntent) },
+        topBar = {
+            // Narrow values, not the whole state: the hero is on screen throughout, and nothing it
+            // draws changes while a field is being typed into.
+            RetirementHeader(
+                screen = state.screen,
+                step = state.step,
+                maxReachedStep = state.maxReachedStep,
+                onIntent = onIntent,
+            )
+        },
         bottomBar = {
             if (state.screen != RetirementScreen.Track) {
                 RetirementBottomBar(
@@ -235,12 +244,14 @@ internal fun RetirementPensionScreen(
 
 @Composable
 private fun RetirementHeader(
-    state: RetirementPensionUiState,
+    screen: RetirementScreen,
+    step: RetirementStep,
+    maxReachedStep: RetirementStep,
     onIntent: (RetirementPensionIntent) -> Unit,
 ) {
-    val isForm = state.screen == RetirementScreen.Form
+    val isForm = screen == RetirementScreen.Form
     val title = stringResource(
-        if (state.screen == RetirementScreen.Track) {
+        if (screen == RetirementScreen.Track) {
             Res.string.retirement_pension_track_title
         } else {
             Res.string.retirement_pension_title
@@ -275,11 +286,11 @@ private fun RetirementHeader(
     ) {
         if (isForm) {
             TaminHeroStepProgress(
-                stepTitle = state.step.title(),
-                currentStep = state.step.number,
+                stepTitle = step.title(),
+                currentStep = step.number,
                 totalSteps = RetirementStep.TOTAL,
-                hint = state.step.hint(),
-                maxReachedStep = state.maxReachedStep.number,
+                hint = step.hint(),
+                maxReachedStep = maxReachedStep.number,
                 onStepClick = { number ->
                     RetirementStep.entries.getOrNull(number - 1)?.let {
                         onIntent(RetirementPensionIntent.GoToStep(it))

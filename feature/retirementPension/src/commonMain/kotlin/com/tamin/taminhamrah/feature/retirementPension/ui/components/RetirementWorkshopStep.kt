@@ -9,7 +9,6 @@ import com.tamin.taminhamrah.feature.retirementPension.ui.contract.RetirementFor
 import com.tamin.taminhamrah.model.pension.retirement.RetirementBranchInfoPR
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.TaminTextArea
-import com.tamin.taminhamrah.ui.components.TaminTextField
 import com.tamin.taminhamrah.ui.theme.Spacing
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
@@ -64,13 +63,13 @@ internal fun RetirementWorkshopStep(
             )
         }
 
-        TaminTextField(
+        RetirementTextField(
             value = workshopName,
             onValueChange = onWorkshopNameChange,
             label = stringResource(Res.string.retirement_pension_field_workshop_name),
+            isRequired = true,
             isError = error == RetirementFormError.WorkshopName,
             errorMessage = error?.takeIf { it == RetirementFormError.WorkshopName }?.text(),
-            animateErrorBorder = true,
         )
 
         // Ten slots need the full width; the design's narrow box beside the name cannot hold them.
@@ -104,19 +103,21 @@ internal fun RetirementWorkshopStep(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(Spacing.cardGap),
         ) {
-            TaminTextField(
+            RetirementTextField(
                 value = employerName,
                 onValueChange = onEmployerNameChange,
                 label = stringResource(Res.string.retirement_pension_field_employer_name),
+                isRequired = false,
                 placeholder = stringResource(
                     Res.string.retirement_pension_field_employer_name_placeholder,
                 ),
                 modifier = Modifier.weight(1f),
             )
-            TaminTextField(
+            RetirementTextField(
                 value = activityType,
                 onValueChange = onActivityTypeChange,
                 label = stringResource(Res.string.retirement_pension_field_activity_type),
+                isRequired = false,
                 placeholder = stringResource(
                     Res.string.retirement_pension_field_activity_type_placeholder,
                 ),

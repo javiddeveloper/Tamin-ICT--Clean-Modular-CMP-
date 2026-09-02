@@ -35,7 +35,7 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.ic_tamin_clock
 import taminx.core.core_ui.retirement_pension_age_value
 import taminx.core.core_ui.retirement_pension_age_gate_passed
@@ -212,7 +212,7 @@ private fun RetirementTrackRow(onClick: () -> Unit) {
             modifier = Modifier.weight(1f),
         )
         Icon(
-            imageVector = vectorResource(Res.drawable.ic_tamin_chevron_back),
+            imageVector = vectorResource(Res.drawable.ic_tamin_chevron_forward),
             contentDescription = null,
             tint = colors.chevron,
             modifier = Modifier.size(IconSize.small),
