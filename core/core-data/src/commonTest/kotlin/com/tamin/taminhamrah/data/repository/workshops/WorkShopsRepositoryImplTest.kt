@@ -8,6 +8,10 @@ import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.model.utils.ListData
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeContractDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeRequestDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestInfoDTO
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveRequestDTO
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveResultDTO
@@ -82,6 +86,13 @@ private class FakeWorkShopsRemoteDataSource : WorkShopsRemoteDataSource {
     override suspend fun getArticleSixteenReportPdf(seqNumber: Long): PdfDownloadDTO = notImplemented()
     override suspend fun getWorkshopMembers(query: ApiQueryParamDN) = notImplemented()
     override suspend fun getWorkshopStackHolders(query: ApiQueryParamDN) = notImplemented()
+    override suspend fun getLegalRepresentativeWorkshops(): ListData<LegalRepresentativeWorkshopDTO>? = notImplemented()
+    override suspend fun getLegalRepresentatives(workshopId: String, branchCode: String): ListData<LegalRepresentativeDTO>? = notImplemented()
+    override suspend fun getLegalRepresentativeWorkshopContracts(workshopId: String, branchCode: String): ListData<LegalRepresentativeContractDTO>? = notImplemented()
+    override suspend fun requestLegalRepresentativeTicket(nationalCode: String?) = notImplemented()
+    override suspend fun verifyLegalRepresentativeTicket(ticket: String) = notImplemented()
+    override suspend fun submitLegalRepresentative(ticket: String, request: LegalRepresentativeRequestDTO) = notImplemented()
+    override suspend fun deleteLegalRepresentative(ticket: String, stackId: Long) = notImplemented()
 
     private fun notImplemented(): Nothing = throw UnsupportedOperationException("not needed by this test")
 }
