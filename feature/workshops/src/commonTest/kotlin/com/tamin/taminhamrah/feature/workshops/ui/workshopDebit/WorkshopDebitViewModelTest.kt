@@ -103,6 +103,29 @@ class WorkshopDebitViewModelTest {
             assertEquals(BRANCH_CODE, sent.branchCode)
         }
 
+    /**
+     * A debt whose agreement row the service reports as `null` must not be paid for with an empty
+     * one: the list answers `"peymanSequence": null`, the old client omits the field entirely, and
+     * sending `""` instead was answered with `ProxyRuntimeException`.
+     */
+    @Test
+    fun `a debt with no agreement row sends none`() = runTest(testDispatcher) {
+        repository.workshopDebits = PagedListDN(
+            items = listOf(
+                WorkShopDebtDN(debitNumber = RAW_DEBIT_NUMBER, agreementRow = ""),
+            ),
+            total = 1,
+        )
+        repository.paymentPreCheck = DebitPaymentPreCheckDN(allowed = true)
+        repository.paymentResult = DebitPaymentDN(succeeded = true, paymentPageUrl = PAYMENT_URL)
+
+        val viewModel = viewModel()
+        open(viewModel)
+        viewModel.sendIntent(WorkshopDebitIntent.PayDebit(viewModel.uiState.value.list.items[0]))
+
+        assertEquals("", assertNotNull(repository.lastPaymentRequest).agreementRow)
+    }
+
     @Test
     fun `an accepted payment sends the user to the payment page`() = runTest(testDispatcher) {
         repository.workshopDebits = debtsPage(count = 1, total = 1)
@@ -120,6 +143,75 @@ class WorkshopDebitViewModelTest {
             assertTrue(event is WorkshopDebitEvent.OpenPaymentPage)
             assertEquals(PAYMENT_URL, event.url)
         }
+    }
+
+    /**
+     * The gateway is asked to bind the ticket to the signed-in user before anyone is sent to it,
+     * so the ticket that reaches the gateway has to be the one the payment service just issued.
+     */
+    @Test
+    fun `an accepted payment confirms its ticket with the gateway first`() =
+        runTest(testDispatcher) {
+            repository.workshopDebits = debtsPage(count = 1, total = 1)
+            repository.paymentPreCheck = DebitPaymentPreCheckDN(allowed = true)
+            repository.paymentResult = DebitPaymentDN(
+                succeeded = true,
+                paymentPageUrl = PAYMENT_URL,
+                ticket = TICKET,
+            )
+
+            val viewModel = viewModel()
+            open(viewModel)
+            viewModel.sendIntent(WorkshopDebitIntent.PayDebit(viewModel.uiState.value.list.items[0]))
+
+            assertEquals(TICKET, repository.confirmedTicket)
+        }
+
+    /**
+     * A ticket the gateway will not honor must stop the flow rather than open a page that cannot
+     * be paid. The old client read this outcome and then ignored it, which is how a dead ticket
+     * became a button that did nothing.
+     */
+    @Test
+    fun `a ticket the gateway refuses is reported and no page is opened`() =
+        runTest(testDispatcher) {
+            repository.workshopDebits = debtsPage(count = 1, total = 1)
+            repository.paymentPreCheck = DebitPaymentPreCheckDN(allowed = true)
+            repository.paymentResult = DebitPaymentDN(
+                succeeded = true,
+                paymentPageUrl = PAYMENT_URL,
+                ticket = TICKET,
+            )
+
+            val viewModel = viewModel()
+            open(viewModel)
+            repository.error = TaminApiException(title = GATEWAY_REFUSAL)
+
+            viewModel.events.test {
+                viewModel.sendIntent(
+                    WorkshopDebitIntent.PayDebit(viewModel.uiState.value.list.items[0])
+                )
+                val event = awaitItem()
+                assertTrue(event is WorkshopDebitEvent.ShowServerMessage, "expected a spoken failure")
+                // The reason is reported as the error formatter leaves it, and that formatter drops
+                // a trailing full stop so the message can be composed with a subtitle.
+                assertEquals(GATEWAY_REFUSAL.removeSuffix("."), event.message)
+            }
+            assertNull(viewModel.uiState.value.payingDebitNumber)
+        }
+
+    /** A refused debt never reaches the gateway: there is no ticket to bind. */
+    @Test
+    fun `a refused payment never confirms a ticket`() = runTest(testDispatcher) {
+        repository.workshopDebits = debtsPage(count = 1, total = 1)
+        repository.paymentPreCheck = DebitPaymentPreCheckDN(allowed = true)
+        repository.paymentResult = DebitPaymentDN(succeeded = false, message = REFUSAL)
+
+        val viewModel = viewModel()
+        open(viewModel)
+        viewModel.sendIntent(WorkshopDebitIntent.PayDebit(viewModel.uiState.value.list.items[0]))
+
+        assertNull(repository.confirmedTicket)
     }
 
     @Test
@@ -277,6 +369,8 @@ class WorkshopDebitViewModelTest {
         const val RAW_DEBIT_NUMBER = "6310030089235"
         const val RAW_AGREEMENT_ROW = "09600002"
         const val PAYMENT_URL = "https://example.invalid/pay/ticket"
+        const val TICKET = "ticket-9028218513"
+        const val GATEWAY_REFUSAL = "تیکت پرداخت معتبر نیست."
         const val REFUSAL = "بدهی ارسالی معتبر نمی باشد."
         const val SERVER_FAILURE = "خطای سرور"
     }

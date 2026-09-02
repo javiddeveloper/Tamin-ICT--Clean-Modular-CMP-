@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.feature.profile.ui.contactUs
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -41,13 +42,13 @@ import com.tamin.taminhamrah.model.contactUs.SocialChannelTypePR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
-import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.rememberCollapsingHeaderState
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.reservedHeight
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.success
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.ShimmerCardList
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.util.ExternalAppLauncher
 import kotlinx.collections.immutable.toImmutableList
@@ -57,6 +58,10 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.contact_us_copied
 
 private val HeaderCollapseDistance = 160.dp
+
+/** What the page stands in with while the contact details load. */
+private const val LoadingPlaceholderCards = 3
+private val LoadingPlaceholderCardHeight = 150.dp
 
 @Composable
 fun ContactUsRoute(
@@ -140,7 +145,20 @@ fun ContactUsScreen(
             .background(colors.bgPage)
     ) {
         if (state.isLoading) {
-            LoadingStateOverlay()
+            Column(modifier = Modifier.fillMaxSize()) {
+                // Stands in for the floating header, which is measured rather than fixed.
+                Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
+                ShimmerCardList(
+                    count = LoadingPlaceholderCards,
+                    cardHeight = LoadingPlaceholderCardHeight,
+                    spacing = Spacing.md,
+                    contentPadding = PaddingValues(
+                        top = Spacing.md,
+                        start = Spacing.page,
+                        end = Spacing.page
+                    )
+                )
+            }
         } else {
             state.contactInfo?.let { info ->
                 LazyColumn(
@@ -208,6 +226,17 @@ private fun ContactUsScreenLightPreview() {
                 isLoading = false,
                 contactInfo = getSampleContactUsPR()
             ),
+            onIntent = {}
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun ContactUsScreenLoadingPreview() {
+    PreviewRtlThemeContent {
+        ContactUsScreen(
+            state = ContactUsUiState(isLoading = true),
             onIntent = {}
         )
     }

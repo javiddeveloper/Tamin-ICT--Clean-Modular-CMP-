@@ -18,34 +18,34 @@ import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDTO
 import com.tamin.taminhamrah.model.workshop.DebitReasonDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
-import com.tamin.taminhamrah.model.workshop.NewMemberConfirmResultDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeContractDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeRequestDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopDTO
+import com.tamin.taminhamrah.model.workshop.NewMemberConfirmResultDTO
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
+import com.tamin.taminhamrah.model.workshop.PaymentTicketInfoDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDTO
-import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
-import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDTO
 import com.tamin.taminhamrah.tools.BaseDTO
+import com.tamin.taminhamrah.util.NetworkConstants
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.DELETE
 import de.jensklingenberg.ktorfit.http.GET
-import de.jensklingenberg.ktorfit.http.Header
-import de.jensklingenberg.ktorfit.http.Query
-import de.jensklingenberg.ktorfit.http.QueryMap
 import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.PUT
 import de.jensklingenberg.ktorfit.http.Path
+import de.jensklingenberg.ktorfit.http.QueryMap
+import de.jensklingenberg.ktorfit.http.Url
 import io.ktor.client.statement.HttpStatement
 import kotlinx.serialization.json.JsonElement
-import io.ktor.http.cio.Response
 
 internal interface WorkShopsApiService {
 
@@ -105,6 +105,17 @@ internal interface WorkShopsApiService {
         @Body request: DebitPaymentRequestDTO,
     ): BaseDTO<DebitPaymentDTO>
 
+    /**
+     * Binds a payment ticket to the signed-in user, on the gateway's own host.
+     *
+     * Absolute, because TFH is not behind this service's base URL — the caller builds the address
+     * from [NetworkConstants.BASE_URL_TFH].
+     */
+    @GET
+    suspend fun getPaymentTicketInfo(
+        @Url url: String,
+    ): BaseDTO<PaymentTicketInfoDTO>
+
     // ---------------------------------------------------------------------- استعلام بدهی کارگاه
 
     @GET("workshop-services/workshop-debit/{workshopId}/{branchCode}")
@@ -160,7 +171,7 @@ internal interface WorkShopsApiService {
     ): BaseDTO<JsonElement?>
 
     /**
-     * Whether this national id is someone the organisation has never registered.
+     * Whether this national id is someone the organization has never registered.
      *
      * `relation-tamins/isnew` — the registration asks before it creates, because an existing
      * person is edited rather than added again.

@@ -32,7 +32,6 @@ import com.tamin.taminhamrah.model.activeRelation.ActiveRelationPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
-import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
@@ -40,14 +39,20 @@ import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.ToasterState
 import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.ShimmerCardList
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
 import com.tamin.taminhamrah.ui.toparea.driveTopArea
 import com.tamin.taminhamrah.ui.toparea.rememberMeasuredTopAreaState
 import com.tamin.taminhamrah.ui.toparea.reportTopAreaHeight
 import com.tamin.taminhamrah.ui.toparea.topAreaContentPadding
+import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
+
+/** What the list stands in with while it loads — shaped like [ActiveRelationItemCard]. */
+private const val LoadingPlaceholderCards = 3
+private val LoadingPlaceholderCardHeight = 180.dp
 
 @Composable
 internal fun ActiveRelationRoute(
@@ -152,6 +157,19 @@ internal fun ActiveRelationScreen(
             }
         }
 
+        // Drawn before the header so the header still floats over it, and inset by the same
+        // top-area padding as the list, so the cards land where the placeholders were.
+        if (uiState.isLoading) {
+            ShimmerCardList(
+                count = LoadingPlaceholderCards,
+                cardHeight = LoadingPlaceholderCardHeight,
+                contentPadding = topAreaContentPadding(
+                    state = topArea,
+                    rest = PaddingValues(horizontal = Spacing.lg)
+                )
+            )
+        }
+
         // The header floats on top so the list passes underneath it as it scrolls away.
         ActiveRelationHeader(
             activeCount = uiState.activeCount,
@@ -163,10 +181,6 @@ internal fun ActiveRelationScreen(
                 .align(Alignment.TopCenter)
                 .reportTopAreaHeight(topArea)
         )
-
-        if (uiState.isLoading) {
-            LoadingStateOverlay()
-        }
     }
 
     if (uiState.showCertificateSheet && uiState.selectedItem != null) {
@@ -206,6 +220,17 @@ private fun PreviewActiveRelationScreenLight() {
                 inactiveCount = 1,
                 lastCheckTime = "۱۰:۲۴"
             ),
+            onIntent = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PreviewActiveRelationScreenLoading() {
+    PreviewRtlThemeContent {
+        ActiveRelationScreen(
+            uiState = ActiveRelationUiState(isLoading = true),
             onIntent = {},
         )
     }

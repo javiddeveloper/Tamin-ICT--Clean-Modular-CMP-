@@ -4,13 +4,13 @@ import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toDomainPage
 import com.tamin.taminhamrah.data.mapper.toDto
 import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSource
-import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
-import com.tamin.taminhamrah.model.request.ApiFilterDN
-import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeContractListDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeListDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeRequestDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeWorkshopListDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
+import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.model.util.PagedListDN
@@ -26,6 +26,8 @@ import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDN
 import com.tamin.taminhamrah.model.workshop.DebitReasonDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetQuery
 import com.tamin.taminhamrah.model.workshop.WORKSHOP_PAGE_SIZE
@@ -35,17 +37,12 @@ import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDN
 import com.tamin.taminhamrah.model.workshop.WorkshopListQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDN
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberQuery
-import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
-import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDN
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDN
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
 import com.tamin.taminhamrah.repository.WorkShopsRepository
-import com.tamin.taminhamrah.data.mapper.toDomain
-import com.tamin.taminhamrah.data.mapper.toDto
-import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -131,6 +128,10 @@ class WorkShopsRepositoryImpl(
 
     override suspend fun payWorkshopDebit(request: DebitPaymentRequestDN): DebitPaymentDN =
         remoteDataSource.payWorkshopDebit(request.toDto()).toDomain()
+
+    override suspend fun confirmPaymentTicket(ticket: String) {
+        remoteDataSource.confirmPaymentTicket(ticket)
+    }
 
     // ------------------------------------------------------------ استعلام بدهی کارگاه
 
@@ -286,7 +287,7 @@ class WorkShopsRepositoryImpl(
             response?.let {
                 LegalRepresentativeWorkshopListDN(
                     list = it.list?.map { item -> item.toDomain() } ?: emptyList(),
-                    total = it.total ?: 0
+                    total = it.total
                 )
             }
         )
@@ -301,7 +302,7 @@ class WorkShopsRepositoryImpl(
             response?.let {
                 LegalRepresentativeListDN(
                     list = it.list?.map { item -> item.toDomain() } ?: emptyList(),
-                    total = it.total ?: 0
+                    total = it.total
                 )
             }
         )
@@ -316,7 +317,7 @@ class WorkShopsRepositoryImpl(
             response?.let {
                 LegalRepresentativeContractListDN(
                     list = it.list?.map { item -> item.toDomain() } ?: emptyList(),
-                    total = it.total ?: 0
+                    total = it.total
                 )
             }
         )

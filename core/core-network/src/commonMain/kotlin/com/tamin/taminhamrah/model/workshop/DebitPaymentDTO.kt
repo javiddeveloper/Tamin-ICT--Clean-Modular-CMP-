@@ -15,15 +15,27 @@ data class DebitPaymentPreCheckDTO(
     @SerialName("queryResult") val queryResult: Int? = null,
 )
 
-/** Body of `POST debit-online-payment/pay-normal-debit`. */
+/**
+ * Body of `POST debit-online-payment/pay-normal-debit`.
+ *
+ * Two fields are spelled the way the service expects rather than the way Kotlin would default to,
+ * and both were answered with `ProxyRuntimeException` when they were not:
+ *
+ * - [deposit] is a string of `"1"` or `"0"`, never `"true"`/`"false"`. It carries no default, so it
+ *   is always written — `encodeDefaults` is off for this client, and a value equal to its default
+ *   would be dropped from the body entirely.
+ * - [agreementRow] is absent rather than blank when the debt has none. The list answers
+ *   `"peymanSequence": null` for such a debt, and the old client — which omits nulls — sends no
+ *   such field at all. Null here is dropped for the same `encodeDefaults` reason, which is what is
+ *   wanted.
+ */
 @Serializable
 data class DebitPaymentRequestDTO(
     @SerialName("branchCode") val branchCode: String,
     @SerialName("workshopId") val workshopId: String,
     @SerialName("debitNumber") val debitNumber: String,
-    @SerialName("peymanSequence") val agreementRow: String,
-    /** Whether the payment is filed as a bank deposit. The service takes the flag as a string. */
-    @SerialName("seporde") val deposit: String = "false",
+    @SerialName("seporde") val deposit: String,
+    @SerialName("peymanSequence") val agreementRow: String? = null,
 )
 
 /**

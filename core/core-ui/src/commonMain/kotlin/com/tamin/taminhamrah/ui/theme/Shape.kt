@@ -153,6 +153,12 @@ object ShimmerSize {
     val subtitleHeight = 12.dp
     val badgeWidth = 56.dp
     val badgeHeight = 24.dp
+
+    /** A whole card standing in for one the list has not loaded yet. */
+    val cardHeight = 120.dp
+
+    /** One row of a list inside a sheet. */
+    val rowHeight = 56.dp
 }
 
 /** Scrollable list area inside modal option sheets (city / branch pickers). */

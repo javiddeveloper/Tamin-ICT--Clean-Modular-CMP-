@@ -196,6 +196,7 @@ fun DebitPaymentDTO.toDomain(): DebitPaymentDN {
         succeeded = succeed == true,
         message = responseMessage.orEmpty(),
         paymentPageUrl = ticket?.let { TFH_PAYMENT_PAGE + it }.orEmpty(),
+        ticket = ticket.orEmpty(),
     )
 }
 
@@ -203,9 +204,14 @@ fun DebitPaymentRequestDN.toDto(): DebitPaymentRequestDTO = DebitPaymentRequestD
     branchCode = branchCode,
     workshopId = workshopId,
     debitNumber = debitNumber,
-    agreementRow = agreementRow,
-    deposit = deposit.toString(),
+    // "1"/"0", not "true"/"false" — see [DebitPaymentRequestDTO].
+    deposit = if (deposit) DEPOSIT_YES else DEPOSIT_NO,
+    // A debt with no agreement row leaves the field out rather than sending it empty.
+    agreementRow = agreementRow.takeIf { it.isNotBlank() },
 )
+
+private const val DEPOSIT_YES = "1"
+private const val DEPOSIT_NO = "0"
 
 /**
  * The wire value of `objectionType` on `objection-save` — a Persian label, not a code. The same

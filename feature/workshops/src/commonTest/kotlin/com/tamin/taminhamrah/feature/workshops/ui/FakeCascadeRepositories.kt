@@ -154,6 +154,7 @@ internal class FakeCascadeWorkShopsRepository : WorkShopsRepository {
     override suspend fun getDebitTurnoverPdf(debitNumber: String, branchCode: String): PdfDownloadDN = unusedValue()
     override suspend fun checkDebitPayment(debitNumber: String, branchCode: String): DebitPaymentPreCheckDN = unusedValue()
     override suspend fun payWorkshopDebit(request: DebitPaymentRequestDN): DebitPaymentDN = unusedValue()
+    override suspend fun confirmPaymentTicket(ticket: String) = unusedValue<Unit>()
     override suspend fun getWorkshopDebtInquiry(
         workshopId: String,
         branchCode: String

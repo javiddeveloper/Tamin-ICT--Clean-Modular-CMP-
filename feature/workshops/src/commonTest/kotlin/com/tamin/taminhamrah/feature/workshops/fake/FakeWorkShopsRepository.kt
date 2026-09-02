@@ -85,6 +85,8 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         private set
     var lastPaymentRequest: DebitPaymentRequestDN? = null
         private set
+    var confirmedTicket: String? = null
+        private set
     var deletedPersonalId: Long? = null
     var newMemberIsNew: Boolean = true
     var registrationResult: NewMemberRegistrationResultDN = NewMemberRegistrationResultDN()
@@ -132,6 +134,10 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     override suspend fun payWorkshopDebit(request: DebitPaymentRequestDN): DebitPaymentDN = answer {
         lastPaymentRequest = request
         paymentResult
+    }
+
+    override suspend fun confirmPaymentTicket(ticket: String) {
+        answer { confirmedTicket = ticket }
     }
 
     override suspend fun getWorkshopDebtInquiry(

@@ -68,6 +68,8 @@ interface WorkShopsRemoteDataSource {
 
     suspend fun payWorkshopDebit(request: DebitPaymentRequestDTO): DebitPaymentDTO
 
+    suspend fun confirmPaymentTicket(ticket: String)
+
     suspend fun getWorkshopDebtInquiry(
         workshopId: String,
         branchCode: String

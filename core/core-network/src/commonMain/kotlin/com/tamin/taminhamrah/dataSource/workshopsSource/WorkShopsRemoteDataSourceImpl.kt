@@ -15,6 +15,7 @@ import com.tamin.taminhamrah.model.workshop.DebitPaymentDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDTO
 import com.tamin.taminhamrah.model.workshop.DebitReasonDTO
+import com.tamin.taminhamrah.util.NetworkConstants
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeContractDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeDTO
@@ -105,6 +106,15 @@ internal class WorkShopsRemoteDataSourceImpl(
 
     override suspend fun payWorkshopDebit(request: DebitPaymentRequestDTO): DebitPaymentDTO = call {
         apiService.payWorkshopDebit(request).extractData()
+    }
+
+    override suspend fun confirmPaymentTicket(ticket: String) {
+        call {
+            val url = NetworkConstants.BASE_URL_TFH + NetworkConstants.TFH_TICKET_PATH + ticket
+            // Extracted rather than ignored: that is what turns a refusal envelope into a throw,
+            // which is the whole of what this call reports.
+            apiService.getPaymentTicketInfo(url).extractData()
+        }
     }
 
     // ---------------------------------------------------------------------- استعلام بدهی کارگاه

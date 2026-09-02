@@ -3,7 +3,7 @@ package com.tamin.taminhamrah.model.workshop
 /**
  * Outcome of asking to pay a debt online.
  *
- * A rejection is a *successful* call that says no, so it is modelled rather than thrown:
+ * A rejection is a *successful* call that says no, so it is modeled rather than thrown:
  * [succeeded] false with a [message] is the normal shape of "this debt cannot be paid".
  */
 data class DebitPaymentDN(
@@ -11,6 +11,11 @@ data class DebitPaymentDN(
     val message: String = "",
     /** The full address of the payment page, already built from the ticket. Blank when refused. */
     val paymentPageUrl: String = "",
+    /**
+     * The ticket the page is addressed by, kept separately because the gateway is asked to bind it
+     * to the signed-in user before the page is opened.
+     */
+    val ticket: String = "",
 ) {
     /** There is somewhere to send the user only when the service both agreed and gave a ticket. */
     val isPayable: Boolean get() = succeeded && paymentPageUrl.isNotBlank()
