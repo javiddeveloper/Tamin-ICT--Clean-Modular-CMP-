@@ -202,6 +202,13 @@ import com.tamin.taminhamrah.useCases.agent.StartAgentSessionUseCase
 import com.tamin.taminhamrah.useCases.agent.UpdateAgentSessionUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopMembersUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopStackHoldersUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetLegalRepresentativeWorkshopsUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetLegalRepresentativesUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetLegalRepresentativeWorkshopContractsUseCase
+import com.tamin.taminhamrah.useCases.workshops.RequestLegalRepresentativeTicketUseCase
+import com.tamin.taminhamrah.useCases.workshops.VerifyLegalRepresentativeTicketUseCase
+import com.tamin.taminhamrah.useCases.workshops.SubmitLegalRepresentativeUseCase
+import com.tamin.taminhamrah.useCases.workshops.DeleteLegalRepresentativeUseCase
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -421,6 +428,13 @@ val domainModule = module {
     factoryOf(::GetArticleSixteenReportPdfUseCase)
     factoryOf(::GetWorkshopMembersUseCase)
     factoryOf(::GetWorkshopStackHoldersUseCase)
+    factoryOf(::GetLegalRepresentativeWorkshopsUseCase)
+    factoryOf(::GetLegalRepresentativesUseCase)
+    factoryOf(::GetLegalRepresentativeWorkshopContractsUseCase)
+    factoryOf(::RequestLegalRepresentativeTicketUseCase)
+    factoryOf(::VerifyLegalRepresentativeTicketUseCase)
+    factoryOf(::SubmitLegalRepresentativeUseCase)
+    factoryOf(::DeleteLegalRepresentativeUseCase)
     factoryOf(::GetTreatmentCostsUseCase)
     factoryOf(::GetTreatmentCostsPDFUseCase)
     factoryOf(::SendToInboxTreatmentCostsUseCase)

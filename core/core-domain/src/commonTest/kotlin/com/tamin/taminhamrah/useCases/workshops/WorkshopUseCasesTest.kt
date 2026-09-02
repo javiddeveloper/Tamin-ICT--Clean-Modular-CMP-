@@ -130,6 +130,23 @@ class WorkshopUseCasesTest : BaseUseCaseTest() {
         assertEquals("1234", repository.lastPaymentRequest?.debitNumber)
     }
 
+    // ------------------------------------------ legal representative ticket request
+
+    @Test
+    fun `requesting a ticket with no national code verifies the signed-in user`() = runTest {
+        RequestLegalRepresentativeTicketUseCase(repository)()
+
+        assertEquals(1, repository.requestTicketCallCount)
+        assertNull(repository.lastRequestTicketNationalCode)
+    }
+
+    @Test
+    fun `requesting a ticket for a national code verifies that representative instead`() = runTest {
+        RequestLegalRepresentativeTicketUseCase(repository)("0499370899")
+
+        assertEquals("0499370899", repository.lastRequestTicketNationalCode)
+    }
+
     private fun estimateDebt() = WorkShopDebtDN(
         debitNumber = "1234",
         orderRecipeDate = "14040101",

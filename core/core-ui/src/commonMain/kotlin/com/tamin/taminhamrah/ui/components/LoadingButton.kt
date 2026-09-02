@@ -51,26 +51,20 @@ fun LoadingButton(
     enabled: Boolean = true,
     isLoading: Boolean = false,
     icon: ImageVector? = null,
-    /** Defaults to every existing caller's expectation: icon before text. */
     iconPosition: LoadingButtonIconPosition = LoadingButtonIconPosition.LEADING,
-    /** Shorter than the page-level default for a button that sits inside a form footer. */
+    background: Brush? = null,
+    contentColor: Color? = null,
     height: Dp = ButtonDimens.height,
     shape: Shape = RoundedCornerShape(CornerRadius.xl),
-    /**
-     * The enabled fill. Defaults to the app's primary blue; pass
-     * [com.tamin.taminhamrah.ui.theme.SemanticColors.successGradient] for the confirming action
-     * that ends a flow, which the design paints green. The disabled fill never varies.
-     */
-    enabledBrush: Brush? = null,
 ) {
     val taminColors = LocalTaminColors.current
-    val backgroundBrush = if (enabled) {
-        enabledBrush ?: taminColors.buttonGradient
+    val backgroundBrush = background ?: if (enabled) {
+        taminColors.buttonGradient
     } else {
         taminColors.buttonDisabledGradient
     }
-    val contentColor = if (enabled) Color.White else Color.White.copy(alpha = 0.6f)
-    val shadowColor = if (enabled) taminColors.shadowPrimary else Color.Transparent
+    val contentColor = contentColor ?: if (enabled) Color.White else Color.White.copy(alpha = 0.6f)
+    val shadowColor = if (background == null && enabled) taminColors.shadowPrimary else Color.Transparent
 
     Box(
         modifier = modifier
