@@ -103,9 +103,9 @@ fun WorkshopDemandDocDN.toPresentation(): WorkshopDemandDocPR = WorkshopDemandDo
     docNumber = docNumber,
     docNumberLabel = docNumber.orDashDigits(),
     docDate = docDate.orDashDate(),
-    docType = docTypeDescription.orDash(),
-    step = debitStepDescription.orDash(),
-    state = debitStateDescription.orDash(),
+    docType = docTypeDescription.orDashProse(),
+    step = debitStepDescription.orDashProse(),
+    state = debitStateDescription.orDashProse(),
     isViewable = isViewable,
 )
 
@@ -191,6 +191,28 @@ fun WorkshopStackHolderDN.toPresentation(): WorkshopStackHolderPR = WorkshopStac
 // ------------------------------------------------------------------ formatting
 
 /** Digits the user reads are Persian; a value the service omitted is the design's dash. */
+/**
+ * A description as the reader expects to see it, or a dash.
+ *
+ * Service descriptions arrive with round brackets — «محاسبه (اعلام نشده)» — and a bracket is
+ * bidi-neutral: in a right-to-left run it is drawn with its mirror glyph, so the one the service
+ * opens with reaches the screen as a closing bracket and the value reads «محاسبه )اعلام نشده(».
+ * Swapping the pair cancels that. It is the reordering-safe half of the problem: both brackets are
+ * bidi class ON and both mirror, so each keeps the position the algorithm gives it and only the
+ * glyph changes.
+ *
+ * Stated here, at the presentation edge, so the domain keeps the service's own spelling.
+ */
+private fun String.orDashProse(): String = ifBlank { null }?.swapBrackets().orDash()
+
+private fun String.swapBrackets(): String = map { character ->
+    when (character) {
+        '(' -> ')'
+        ')' -> '('
+        else -> character
+    }
+}.joinToString("")
+
 private fun String.orDashDigits(): String = ifBlank { null }?.toPersianDigits().orDash()
 
 /** Compact Jalali (`14050131`) renders as `۱۴۰۵/۰۱/۳۱`; an absent date is a dash. */
