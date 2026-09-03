@@ -116,6 +116,11 @@ import com.tamin.taminhamrah.useCases.calculateWagePension.CalculateWagePensionU
 import com.tamin.taminhamrah.useCases.calculateWagePension.CheckMultipleWorkshopsUseCase
 import com.tamin.taminhamrah.useCases.calculateWagePension.GetMultipleWorkshopPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.GetDisabilityPersonalInfoUseCase
+import com.tamin.taminhamrah.useCases.pension.SaveDisabilityUserInfoUseCase
+import com.tamin.taminhamrah.useCases.pension.FinalConfirmDisabilityRequestUseCase
+import com.tamin.taminhamrah.useCases.pension.SaveDocumentDisabilityUseCase
+import com.tamin.taminhamrah.useCases.pension.GetMedicalCommissionPdfUseCase
+import com.tamin.taminhamrah.useCases.pension.GetRegisteredMedicalCommissionUseCase
 import com.tamin.taminhamrah.useCases.personal.GetRequestSummaryUseCase
 import com.tamin.taminhamrah.useCases.personal.PutInsuredRegistrationDocListUseCase
 import com.tamin.taminhamrah.useCases.user.CheckUserIsNewUseCase
@@ -360,6 +365,11 @@ val domainModule = module {
     factoryOf(::GetFreeJobWagesUseCase)
     factoryOf(::UploadImageUseCase)
     factoryOf(::GetDisabilityPersonalInfoUseCase)
+    factoryOf(::SaveDisabilityUserInfoUseCase)
+    factoryOf(::FinalConfirmDisabilityRequestUseCase)
+    factoryOf(::SaveDocumentDisabilityUseCase)
+    factoryOf(::GetMedicalCommissionPdfUseCase)
+    factoryOf(::GetRegisteredMedicalCommissionUseCase)
     // Agent
     factoryOf(::SendAgentPromptUseCase)
     factoryOf(::CheckChatAllowedUseCase)

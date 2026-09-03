@@ -6,6 +6,11 @@ import com.tamin.taminhamrah.model.pension.PensionIdDTO
 import com.tamin.taminhamrah.model.pension.PensionInquiryDTO
 import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDTO
 import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDTO
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityFinalConfirmRequest
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveDocumentRequest
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoRequest
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoResponseDTO
+import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.RegisteredMedicalCommissionDTO
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequest
@@ -25,6 +30,7 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
+import com.tamin.taminhamrah.tools.readPdfChannel
 import com.tamin.taminhamrah.tools.safeCall
 
 class PensionRemoteDataSourceImpl(
@@ -181,5 +187,43 @@ class PensionRemoteDataSourceImpl(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
             )
         }
+    }
+
+    override suspend fun saveDisabilityUserInfo(
+        body: DisabilitySaveInfoRequest
+    ): DisabilitySaveInfoResponseDTO = errorParser.safeCall("saveDisabilityUserInfo", ErrorUri.UNKNOWN) {
+        pensionApiService.saveDisabilityUserInfo(body).extractData()
+    }
+
+    override suspend fun finalConfirmDisabilityRequest(
+        requestId: Long,
+        body: DisabilityFinalConfirmRequest
+    ): String? = errorParser.safeCall("finalConfirmDisabilityRequest", ErrorUri.UNKNOWN) {
+        pensionApiService.finalConfirmDisabilityRequest(requestId, body).extractMessage()
+    }
+
+    override suspend fun saveDocumentDisability(
+        requestId: Long,
+        body: DisabilitySaveDocumentRequest
+    ): String? = errorParser.safeCall("saveDocumentDisability", ErrorUri.UNKNOWN) {
+        pensionApiService.saveDocumentDisability(requestId, body).extractMessage()
+    }
+
+    override suspend fun getMedicalCommissionPdf(
+        lastWorkshop: String
+    ): PdfDownloadDTO = errorParser.safeCall("getMedicalCommissionPdf", ErrorUri.UNKNOWN) {
+        val response = pensionApiService.getMedicalCommissionPdf(lastWorkshop)
+        PdfDownloadDTO(
+            pdf = InputStreamDTO(
+                pdf = response.readPdfChannel()
+            )
+        )
+    }
+
+    override suspend fun getRegisteredMedicalCommission(
+        query: ApiQueryParamDN
+    ): ListData<RegisteredMedicalCommissionDTO> = errorParser.safeCall("getRegisteredMedicalCommission") {
+        val response = pensionApiService.getRegisteredMedicalCommission(apiQueryBuilder.buildQuery(query))
+        response.extractData()
     }
 }

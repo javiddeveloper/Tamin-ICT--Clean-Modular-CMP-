@@ -6,6 +6,11 @@ import com.tamin.taminhamrah.model.pension.PensionIdDTO
 import com.tamin.taminhamrah.model.pension.PensionInquiryDTO
 import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDTO
 import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDTO
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityFinalConfirmRequest
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveDocumentRequest
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoRequest
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoResponseDTO
+import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.RegisteredMedicalCommissionDTO
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequest
@@ -187,6 +192,29 @@ private class FakePensionApiService(
         error("not used in PensionRemoteDataSourceImplTest")
 
     override suspend fun sendEdictPensionerToMyInbox(parameters: Map<String, String>): BaseDTO<JsonElement?> =
+        error("not used in PensionRemoteDataSourceImplTest")
+
+    override suspend fun saveDisabilityUserInfo(body: DisabilitySaveInfoRequest): BaseDTO<DisabilitySaveInfoResponseDTO> =
+        error("not used in PensionRemoteDataSourceImplTest")
+
+    override suspend fun finalConfirmDisabilityRequest(
+        requestId: Long,
+        body: DisabilityFinalConfirmRequest
+    ): BaseDTO<JsonElement?> =
+        error("not used in PensionRemoteDataSourceImplTest")
+
+    override suspend fun saveDocumentDisability(
+        requestId: Long,
+        body: DisabilitySaveDocumentRequest
+    ): BaseDTO<JsonElement?> =
+        error("not used in PensionRemoteDataSourceImplTest")
+
+    override suspend fun getMedicalCommissionPdf(lastWorkshop: String): HttpStatement =
+        error("not used in PensionRemoteDataSourceImplTest")
+
+    override suspend fun getRegisteredMedicalCommission(
+        parameters: Map<String, String>
+    ): BaseDTO<ListData<RegisteredMedicalCommissionDTO>> =
         error("not used in PensionRemoteDataSourceImplTest")
 
     private fun <T> success(data: T) = BaseDTO(

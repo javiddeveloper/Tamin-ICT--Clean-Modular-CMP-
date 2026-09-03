@@ -5,6 +5,11 @@ import com.tamin.taminhamrah.model.pension.PensionIdDTO
 import com.tamin.taminhamrah.model.pension.PensionInquiryDTO
 import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDTO
 import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDTO
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityFinalConfirmRequest
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveDocumentRequest
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoRequest
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoResponseDTO
+import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.RegisteredMedicalCommissionDTO
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequest
@@ -55,4 +60,10 @@ interface PensionRemoteDataSource {
     suspend fun sendPayRollToInbox(
         filter: List<ApiFilterDN>
     ): String?
+
+    suspend fun saveDisabilityUserInfo(body: DisabilitySaveInfoRequest): DisabilitySaveInfoResponseDTO
+    suspend fun finalConfirmDisabilityRequest(requestId: Long, body: DisabilityFinalConfirmRequest): String?
+    suspend fun saveDocumentDisability(requestId: Long, body: DisabilitySaveDocumentRequest): String?
+    suspend fun getMedicalCommissionPdf(lastWorkshop: String): PdfDownloadDTO
+    suspend fun getRegisteredMedicalCommission(query: ApiQueryParamDN): ListData<RegisteredMedicalCommissionDTO>
 }
