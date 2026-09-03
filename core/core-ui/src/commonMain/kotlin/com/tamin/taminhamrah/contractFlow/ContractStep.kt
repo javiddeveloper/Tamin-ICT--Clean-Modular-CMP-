@@ -37,7 +37,7 @@ enum class ContractStep(
     ),
     STEP_TREATMENT_SUPPORT(
         titleRes = Res.string.contract_step_treatment_support,
-        descRes = Res.string.contract_hero_step_7_desc,
+        descRes = Res.string.contract_hero_step_treatment_desc,
     ),
     STEP_INSURANCE_PREMIUM(
         titleRes = Res.string.contract_hero_step_7_title,
@@ -61,6 +61,7 @@ enum class ContractStep(
             STEP_CONTRACT_APPLICANT,
             STEP_SELECT_BRANCH,
             STEP_UPLOAD_IMAGE,
+            STEP_TREATMENT_SUPPORT,
             STEP_INSURANCE_PREMIUM,
             STEP_SALARY,
             STEP_SUBMIT_CONTRACT,

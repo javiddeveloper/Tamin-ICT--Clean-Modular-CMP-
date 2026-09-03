@@ -62,6 +62,7 @@ import com.tamin.taminhamrah.ui.contractFlow.InsurancePremiumStepContent
 import com.tamin.taminhamrah.ui.contractFlow.PremiumSalaryStepContent
 import com.tamin.taminhamrah.ui.contractFlow.SelectBranchStepContent
 import com.tamin.taminhamrah.ui.contractFlow.SubmitContractStepContent
+import com.tamin.taminhamrah.ui.contractFlow.TreatmentSupportStepContent
 import com.tamin.taminhamrah.ui.contractFlow.UploadImageStepContent
 import com.tamin.taminhamrah.ui.contractFlow.UserInfoStepContent
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -404,6 +405,32 @@ fun ContractFlowScreenContent(
                                         )
                                     }
 
+                                    ContractStep.STEP_TREATMENT_SUPPORT -> {
+                                        TreatmentSupportStepContent(
+                                            treatmentSupportCode = state.treatmentSupportCode,
+                                            isCommitmentConfirmed = state.isTreatmentCommitmentConfirmed,
+                                            forceTreatmentSupport = state.forceTreatmentSupport,
+                                            dependents = state.dependents,
+                                            isDependentsLoading = state.isDependentsLoading,
+                                            hasLoadedDependents = state.hasLoadedDependents,
+                                            dependentsError = state.dependentsError,
+                                            onSelectWithSupport = {
+                                                onIntent(ContractFlowIntent.SelectTreatmentSupport(true))
+                                            },
+                                            onSelectWithoutSupport = {
+                                                onIntent(ContractFlowIntent.SelectTreatmentSupport(false))
+                                            },
+                                            onCommitmentChanged = {
+                                                onIntent(ContractFlowIntent.SetTreatmentCommitment(it))
+                                            },
+                                            onViewDependents = {
+                                                onIntent(ContractFlowIntent.LoadDependents)
+                                            },
+                                            withSupportCode = ContractFlowUiState.TREATMENT_SUPPORT_WITH,
+                                            withoutSupportCode = ContractFlowUiState.TREATMENT_SUPPORT_WITHOUT,
+                                        )
+                                    }
+
                                     ContractStep.STEP_INSURANCE_PREMIUM -> {
                                         InsurancePremiumStepContent(
                                             premiumRates = state.premiumRates,
@@ -556,10 +583,16 @@ private fun isStepValid(state: ContractFlowUiState): Boolean {
             state.branchSelection.isValid
         }
         ContractStep.STEP_UPLOAD_IMAGE -> {
-            !state.isUploadingDocument
+            state.documentDescription.isNotBlank() &&
+                state.uploadedDocuments.isNotEmpty() &&
+                !state.isUploadingDocument
         }
         ContractStep.STEP_TREATMENT_SUPPORT -> {
-            true
+            state.treatmentSupportCode == ContractFlowUiState.TREATMENT_SUPPORT_WITHOUT ||
+                (
+                    state.treatmentSupportCode == ContractFlowUiState.TREATMENT_SUPPORT_WITH &&
+                        state.isTreatmentCommitmentConfirmed
+                    )
         }
         ContractStep.STEP_INSURANCE_PREMIUM -> {
             val hasPremiumRate = state.selectedPremiumRateCode != null || state.lockedPremiumRateCode != null
@@ -844,7 +877,27 @@ private fun ContractFlowScreenContentStep6UploadImagePreview() {
 
 @PreviewRtlTheme
 @Composable
-private fun ContractFlowScreenContentStep7InsurancePremiumPreview() {
+private fun ContractFlowScreenContentStep7TreatmentSupportPreview() {
+    PreviewRtlThemeContent {
+        ContractFlowScreenContent(
+            state = ContractFlowUiState(
+                isLoading = false,
+                registrationInfo = MockRegistrationInfo,
+                config = MockConfig,
+                currentStep = ContractStep.STEP_TREATMENT_SUPPORT,
+                treatmentSupportCode = ContractFlowUiState.TREATMENT_SUPPORT_WITH,
+                isTreatmentCommitmentConfirmed = false,
+            ),
+            onBack = {},
+            onShowRules = {},
+            onIntent = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun ContractFlowScreenContentStep8InsurancePremiumPreview() {
     PreviewRtlThemeContent {
         ContractFlowScreenContent(
             state = ContractFlowUiState(
@@ -865,7 +918,7 @@ private fun ContractFlowScreenContentStep7InsurancePremiumPreview() {
 
 @PreviewRtlTheme
 @Composable
-private fun ContractFlowScreenContentStep8SalaryPreview() {
+private fun ContractFlowScreenContentStep9SalaryPreview() {
     PreviewRtlThemeContent {
         ContractFlowScreenContent(
             state = ContractFlowUiState(
@@ -887,7 +940,7 @@ private fun ContractFlowScreenContentStep8SalaryPreview() {
 
 @PreviewRtlTheme
 @Composable
-private fun ContractFlowScreenContentStep9SubmitContractPreview() {
+private fun ContractFlowScreenContentStep10SubmitContractPreview() {
     PreviewRtlThemeContent {
         ContractFlowScreenContent(
             state = ContractFlowUiState(

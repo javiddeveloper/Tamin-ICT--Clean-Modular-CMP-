@@ -50,6 +50,8 @@ import com.tamin.taminhamrah.useCases.contracts.MakeContractUseCase
 import com.tamin.taminhamrah.useCases.contracts.SaveContactUseCase
 import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
+import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
+import com.tamin.taminhamrah.mapper.subdominant.toPresentation
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
@@ -69,6 +71,7 @@ import taminx.core.core_ui.contract_preflight_not_registered
 import taminx.core.core_ui.contract_preflight_other_contract
 import taminx.core.core_ui.contract_preflight_under_age
 import taminx.core.core_ui.contract_preflight_contracts_load_failed
+import taminx.core.core_ui.contract_treatment_dependents_load_error
 import taminx.core.core_ui.contract_upload_failed_error
 import taminx.core.core_ui.contract_upload_jpeg_only_error
 
@@ -89,6 +92,7 @@ class ContractFlowViewModel(
     private val makeContractUseCase: MakeContractUseCase,
     private val saveContactUseCase: SaveContactUseCase,
     private val uploadImageUseCase: UploadImageUseCase,
+    private val subdominantUseCase: SubdominantUseCase,
 ) : BaseViewModel<
     ContractFlowUiState,
     PartialState,
@@ -123,6 +127,9 @@ class ContractFlowViewModel(
             is ContractFlowIntent.SelectMonthlyPremium -> handleSelectMonthlyPremium(intent.amount)
             ContractFlowIntent.CalculateMonthlyPremium -> handleCalculateMonthlyPremium()
             is ContractFlowIntent.SetAgreementConfirmed -> handleSetAgreementConfirmed(intent.confirmed)
+            is ContractFlowIntent.SelectTreatmentSupport -> handleSelectTreatmentSupport(intent.withSupport)
+            is ContractFlowIntent.SetTreatmentCommitment -> handleSetTreatmentCommitment(intent.confirmed)
+            ContractFlowIntent.LoadDependents -> handleLoadDependents()
             ContractFlowIntent.SubmitContract -> handleSubmitContract()
         }
     }
@@ -589,6 +596,7 @@ class ContractFlowViewModel(
         emit(PartialState.ForceTreatmentSupportChanged(forceTreatmentSupport))
         if (forceTreatmentSupport) {
             emit(PartialState.TreatmentSupportCodeChanged(ContractFlowUiState.TREATMENT_SUPPORT_WITH))
+            emit(PartialState.TreatmentCommitmentChanged(true))
         }
         emit(PartialState.HidePremiumSliderChanged(hidePremiumSlider))
         emit(PartialState.LockedPremiumRateChanged(lockedPremiumRate))
@@ -702,6 +710,38 @@ class ContractFlowViewModel(
 
     private fun handleSetAgreementConfirmed(confirmed: Boolean): Flow<PartialState> = flow {
         emit(PartialState.AgreementConfirmedChanged(confirmed))
+    }
+
+    private fun handleSelectTreatmentSupport(withSupport: Boolean): Flow<PartialState> = flow {
+        if (uiState.value.forceTreatmentSupport && !withSupport) return@flow
+        val code = if (withSupport) {
+            ContractFlowUiState.TREATMENT_SUPPORT_WITH
+        } else {
+            ContractFlowUiState.TREATMENT_SUPPORT_WITHOUT
+        }
+        emit(PartialState.TreatmentSupportCodeChanged(code))
+        if (withSupport && uiState.value.forceTreatmentSupport) {
+            emit(PartialState.TreatmentCommitmentChanged(true))
+        }
+    }
+
+    private fun handleSetTreatmentCommitment(confirmed: Boolean): Flow<PartialState> = flow {
+        emit(PartialState.TreatmentCommitmentChanged(confirmed))
+    }
+
+    private fun handleLoadDependents(): Flow<PartialState> = flow {
+        emit(PartialState.DependentsLoading(true))
+        try {
+            subdominantUseCase().collect { result ->
+                emit(PartialState.DependentsLoaded(result.toPresentation().list))
+            }
+        } catch (e: Exception) {
+            emit(
+                PartialState.DependentsError(
+                    e.message ?: getString(Res.string.contract_treatment_dependents_load_error),
+                ),
+            )
+        }
     }
 
     private fun handleSubmitContract(): Flow<PartialState> = flow {
@@ -958,6 +998,16 @@ class ContractFlowViewModel(
         )
         is PartialState.ForceTreatmentSupportChanged -> currentState.copy(
             forceTreatmentSupport = partialState.forced,
+            treatmentSupportCode = if (partialState.forced) {
+                ContractFlowUiState.TREATMENT_SUPPORT_WITH
+            } else {
+                currentState.treatmentSupportCode
+            },
+            isTreatmentCommitmentConfirmed = if (partialState.forced) {
+                true
+            } else {
+                currentState.isTreatmentCommitmentConfirmed
+            },
         )
         is PartialState.HidePremiumSliderChanged -> currentState.copy(
             hidePremiumSlider = partialState.hidden,
@@ -976,6 +1026,24 @@ class ContractFlowViewModel(
         )
         is PartialState.TreatmentSupportCodeChanged -> currentState.copy(
             treatmentSupportCode = partialState.code,
+        )
+        is PartialState.TreatmentCommitmentChanged -> currentState.copy(
+            isTreatmentCommitmentConfirmed = partialState.confirmed,
+        )
+        is PartialState.DependentsLoading -> currentState.copy(
+            isDependentsLoading = partialState.isLoading,
+            dependentsError = if (partialState.isLoading) null else currentState.dependentsError,
+        )
+        is PartialState.DependentsLoaded -> currentState.copy(
+            isDependentsLoading = false,
+            hasLoadedDependents = true,
+            dependents = partialState.dependents,
+            dependentsError = null,
+        )
+        is PartialState.DependentsError -> currentState.copy(
+            isDependentsLoading = false,
+            hasLoadedDependents = true,
+            dependentsError = partialState.message,
         )
     }
 

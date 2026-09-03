@@ -31,6 +31,7 @@ import com.tamin.taminhamrah.ui.components.TaminBottomBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminOnAccentInkFaint
 import com.tamin.taminhamrah.ui.theme.Thickness
@@ -624,6 +625,190 @@ fun ContractApplicantStepShimmerSkeleton(
     }
 }
 
+/**
+ * Step 6: Document upload shimmer skeleton.
+ */
+@Composable
+fun UploadImageStepShimmerSkeleton(
+    modifier: Modifier = Modifier,
+) {
+    val taminColors = LocalTaminColors.current
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(CornerRadius.x2l),
+        colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
+        border = CardDefaults.outlinedCardBorder().copy(
+            brush = androidx.compose.ui.graphics.SolidColor(taminColors.border),
+        ),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Spacing.lg),
+            verticalArrangement = Arrangement.spacedBy(Spacing.md),
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(ShimmerSize.bannerHeight)
+                    .clip(RoundedCornerShape(CornerRadius.lg))
+                    .shimmer(),
+            )
+
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                Box(
+                    modifier = Modifier
+                        .width(ShimmerSize.labelWidth)
+                        .height(ShimmerSize.titleHeight)
+                        .clip(RoundedCornerShape(CornerRadius.xs))
+                        .shimmer(),
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(ShimmerSize.fieldHeight)
+                        .clip(RoundedCornerShape(CornerRadius.lg))
+                        .shimmer(),
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(ShimmerSize.uploadCardHeight)
+                    .clip(RoundedCornerShape(CornerRadius.card))
+                    .shimmer(),
+            )
+        }
+    }
+}
+
+/**
+ * Step 7: Treatment support shimmer skeleton.
+ */
+@Composable
+fun TreatmentSupportStepShimmerSkeleton(
+    modifier: Modifier = Modifier,
+) {
+    val taminColors = LocalTaminColors.current
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(CornerRadius.x2l),
+        colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
+        border = CardDefaults.outlinedCardBorder().copy(
+            brush = androidx.compose.ui.graphics.SolidColor(taminColors.border),
+        ),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Spacing.lg),
+            verticalArrangement = Arrangement.spacedBy(Spacing.md),
+        ) {
+            repeat(2) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(ShimmerSize.fieldHeight)
+                        .clip(RoundedCornerShape(CornerRadius.lg))
+                        .shimmer(),
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(ShimmerSize.bannerHeight)
+                    .clip(RoundedCornerShape(CornerRadius.lg))
+                    .shimmer(),
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(ShimmerSize.fieldHeight)
+                    .clip(RoundedCornerShape(CornerRadius.xl))
+                    .shimmer(),
+            )
+        }
+    }
+}
+
+/**
+ * Dependents bottom-sheet loading shimmer (name + relation pill + two info tiles).
+ */
+@Composable
+fun ContractDependentsSheetShimmerSkeleton(
+    modifier: Modifier = Modifier,
+    cardCount: Int = 3,
+) {
+    val colors = LocalTaminColors.current
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(Spacing.md),
+    ) {
+        repeat(cardCount) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(CornerRadius.xl),
+                colors = CardDefaults.cardColors(
+                    containerColor = colors.bgSurface,
+                ),
+                border = CardDefaults.outlinedCardBorder().copy(
+                    brush = androidx.compose.ui.graphics.SolidColor(colors.border),
+                ),
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(Spacing.md),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.md),
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(ShimmerSize.titleHeight)
+                                .clip(RoundedCornerShape(CornerRadius.xs))
+                                .shimmer(),
+                        )
+                        Box(
+                            modifier = Modifier
+                                .width(ShimmerSize.chipWidth)
+                                .height(ShimmerSize.badgeHeight)
+                                .clip(RoundedCornerShape(CornerRadius.chip))
+                                .shimmer(),
+                        )
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(ShimmerSize.sonCardHeight)
+                                .clip(RoundedCornerShape(CornerRadius.card))
+                                .shimmer(),
+                        )
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(ShimmerSize.sonCardHeight)
+                                .clip(RoundedCornerShape(CornerRadius.card))
+                                .shimmer(),
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
 // -------------------------------------------------------------------------
 // Previews
 // -------------------------------------------------------------------------
@@ -657,6 +842,30 @@ private fun UserInfoStepShimmerSkeletonPreview() {
 private fun ContractApplicantStepShimmerSkeletonPreview() {
     PreviewRtlThemeContent {
         ContractApplicantStepShimmerSkeleton()
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun UploadImageStepShimmerSkeletonPreview() {
+    PreviewRtlThemeContent {
+        UploadImageStepShimmerSkeleton()
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun TreatmentSupportStepShimmerSkeletonPreview() {
+    PreviewRtlThemeContent {
+        TreatmentSupportStepShimmerSkeleton()
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun ContractDependentsSheetShimmerSkeletonPreview() {
+    PreviewRtlThemeContent {
+        ContractDependentsSheetShimmerSkeleton()
     }
 }
 

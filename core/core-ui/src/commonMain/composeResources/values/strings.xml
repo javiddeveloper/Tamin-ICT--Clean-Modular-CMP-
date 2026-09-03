@@ -1831,6 +1831,17 @@
     <string name="contract_step_select_branch">انتخاب شعبه تأمین اجتماعی</string>
     <string name="contract_step_upload_image">بارگذاری مدارک</string>
     <string name="contract_step_treatment_support">حمایت درمانی</string>
+    <string name="contract_hero_step_treatment_desc">بهره‌مندی از حمایت درمان را انتخاب کنید.</string>
+    <string name="contract_treatment_want">خواهان حمایت درمان می‌باشم</string>
+    <string name="contract_treatment_not_want">خواهان حمایت درمان نمی‌باشم</string>
+    <string name="contract_treatment_commitment">متعهد می‌گردم اطلاعات افراد تبعی خویش را جهت بهره‌مندی از حمایت‌های درمانی تکمیل نمایم.</string>
+    <string name="contract_treatment_view_dependents">مشاهده افراد تبعی</string>
+    <string name="contract_treatment_dependents_sheet_title">افراد تبعی تحت پوشش</string>
+    <string name="contract_treatment_dependents_sheet_subtitle">در صورت انتخاب حمایت درمان، افراد زیر می‌توانند از خدمات درمانی بهره‌مند شوند.</string>
+    <string name="contract_treatment_dependents_empty">فرد تبعی ثبت‌شده‌ای یافت نشد.</string>
+    <string name="contract_treatment_dependents_load_error">خطا در دریافت لیست افراد تبعی</string>
+    <string name="contract_treatment_field_national_id">کد ملی</string>
+    <string name="contract_treatment_field_birth_date">تاریخ تولد</string>
     <string name="contract_step_insurance_premium">تعیین حق بیمه ماهانه</string>
     <string name="contract_step_salary">محاسبه حق بیمه</string>
     <string name="contract_step_submit_contract">ثبت قرارداد</string>
@@ -1866,14 +1877,18 @@
     <string name="contract_branch_notice_1">متقاضی محترم، پس از ثبت قرارداد، امکان تغییر شعبه وجود ندارد؛ لطفا در انتخاب شعبه دقت نمایید.</string>
     <string name="contract_branch_notice_2">در صورت عدم ارائه خدمات الکترونیکی، ممکن است نیاز به مراجعه حضوری به شعبه انتخابی داشته باشید.</string>
 
-    <string name="contract_upload_format_hint">تصویر می‌بایست در قالب (jpeg) بوده و اندازه آن حداکثر ۲ مگابایت باشد.</string>
+    <string name="contract_upload_format_hint">تصویر می‌بایست در قالب jpeg بوده و اندازه آن حداکثر ۲ مگابایت باشد. برای این قرارداد یک مدرک قابل بارگذاری است.</string>
     <string name="contract_upload_description_label">شرح تصویر</string>
+    <string name="contract_upload_description_required">شرح تصویر *</string>
+    <string name="contract_upload_description_placeholder">مثلاً گواهی اشتغال به تحصیل</string>
     <string name="contract_upload_image_content_description">تصویر بارگذاری شده</string>
     <string name="contract_upload_remove_image">حذف تصویر</string>
     <string name="contract_upload_add_documents">افزودن مدارک</string>
     <string name="contract_upload_read_error">خطا در خواندن فایل</string>
     <string name="contract_upload_jpeg_only_error">فقط تصاویر با فرمت JPEG مجاز هستند.</string>
     <string name="contract_upload_failed_error">خطا در بارگذاری تصویر</string>
+    <string name="contract_upload_status_uploading">در حال بارگذاری...</string>
+    <string name="contract_upload_status_uploaded">بارگذاری شد</string>
 
     <string name="contract_terms_confirm_hint">تایید این مرحله به منزله مطالعه و پذیرش مقررات و ضوابط انعقاد قرارداد می‌باشد.</string>
     <string name="contract_terms_view_rules">مشاهده ضوابط و مقررات</string>
@@ -1933,7 +1948,7 @@
     <string name="contract_hero_step_5_title">انتخاب شعبه تأمین اجتماعی</string>
     <string name="contract_hero_step_5_desc">استان، شهر و شعبهٔ مورد نظر خود را انتخاب کنید.</string>
     <string name="contract_hero_step_6_title">بارگذاری مدارک</string>
-    <string name="contract_hero_step_6_desc">تصویر مدارک مورد نیاز را بارگذاری نمایید.</string>
+    <string name="contract_hero_step_6_desc">شرح مدرک را بنویسید و یک تصویر پیوست کنید.</string>
     <string name="contract_hero_step_7_title">تعیین حق بیمه ماهانه</string>
     <string name="contract_hero_step_7_desc">نرخ پرداخت حق بیمهٔ ماهانه را انتخاب کنید.</string>
     <string name="contract_hero_step_8_title">محاسبه حق بیمه</string>

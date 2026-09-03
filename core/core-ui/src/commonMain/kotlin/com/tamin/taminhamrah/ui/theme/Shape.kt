@@ -153,4 +153,6 @@ object ShimmerSize {
     val subtitleHeight = 12.dp
     val badgeWidth = 56.dp
     val badgeHeight = 24.dp
+    val uploadCardHeight = 120.dp
+    val bannerHeight = 56.dp
 }

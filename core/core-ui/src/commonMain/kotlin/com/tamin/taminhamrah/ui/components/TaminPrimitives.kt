@@ -132,7 +132,9 @@ fun StatusPill(
         Text(
             text = text,
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = fontWeight),
-            color = contentColor
+            color = contentColor,
+            maxLines = 1,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
         )
     }
 }

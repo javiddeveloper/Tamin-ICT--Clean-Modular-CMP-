@@ -18,6 +18,7 @@ import com.tamin.taminhamrah.model.contracts.ContractDN
 import com.tamin.taminhamrah.model.contracts.ContractPR
 import com.tamin.taminhamrah.model.contracts.FreeJobDN
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoPR
+import com.tamin.taminhamrah.model.subdominant.SubdominantItemPR
 
 data class ContractFlowUiState(
     val isLoading: Boolean = false,
@@ -68,6 +69,11 @@ data class ContractFlowUiState(
     val uploadDocumentError: String? = null,
     val forceTreatmentSupport: Boolean = false,
     val treatmentSupportCode: String = TREATMENT_SUPPORT_WITH,
+    val isTreatmentCommitmentConfirmed: Boolean = false,
+    val dependents: List<SubdominantItemPR> = emptyList(),
+    val isDependentsLoading: Boolean = false,
+    val hasLoadedDependents: Boolean = false,
+    val dependentsError: String? = null,
     val hidePremiumSlider: Boolean = false,
     val lockedPremiumRateCode: String? = null,
     val genderGateError: String? = null,
@@ -93,7 +99,9 @@ data class ContractFlowUiState(
                 ContractStep.STEP_SELECT_BRANCH -> branchSelection.isValid
                 ContractStep.STEP_UPLOAD_IMAGE ->
                     documentDescription.isNotBlank() && uploadedDocuments.isNotEmpty()
-                ContractStep.STEP_TREATMENT_SUPPORT -> true
+                ContractStep.STEP_TREATMENT_SUPPORT ->
+                    treatmentSupportCode == TREATMENT_SUPPORT_WITHOUT ||
+                        (treatmentSupportCode == TREATMENT_SUPPORT_WITH && isTreatmentCommitmentConfirmed)
                 ContractStep.STEP_INSURANCE_PREMIUM -> {
                     val hasPremiumRate = selectedPremiumRateCode != null || lockedPremiumRateCode != null
                     val hasFreeJob = !flowConfig.requiresFreeJob || selectedFreeJobCode != null
@@ -161,6 +169,10 @@ data class ContractFlowUiState(
         data class PreflightGateError(val message: String?) : PartialState()
         data class PaymentAllowedChanged(val allowed: Boolean) : PartialState()
         data class TreatmentSupportCodeChanged(val code: String) : PartialState()
+        data class TreatmentCommitmentChanged(val confirmed: Boolean) : PartialState()
+        data class DependentsLoading(val isLoading: Boolean) : PartialState()
+        data class DependentsLoaded(val dependents: List<SubdominantItemPR>) : PartialState()
+        data class DependentsError(val message: String?) : PartialState()
         data class GuardianFormChanged(val form: GuardianFormPR) : PartialState()
         data class GuardianDocumentUploading(val isUploading: Boolean) : PartialState()
         data class GuardianDocumentUploaded(val guid: String, val name: String, val bytes: ByteArray) : PartialState()
@@ -189,6 +201,9 @@ sealed class ContractFlowIntent {
     data class SelectMonthlyPremium(val amount: Long) : ContractFlowIntent()
     data object CalculateMonthlyPremium : ContractFlowIntent()
     data class SetAgreementConfirmed(val confirmed: Boolean) : ContractFlowIntent()
+    data class SelectTreatmentSupport(val withSupport: Boolean) : ContractFlowIntent()
+    data class SetTreatmentCommitment(val confirmed: Boolean) : ContractFlowIntent()
+    data object LoadDependents : ContractFlowIntent()
     data object SubmitContract : ContractFlowIntent()
 }
 
