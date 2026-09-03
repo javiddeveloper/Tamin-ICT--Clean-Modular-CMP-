@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -26,15 +27,18 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.LayoutDirection
 import com.tamin.taminhamrah.model.contractFlow.FreelancePremiumRangePR
 import com.tamin.taminhamrah.model.contractFlow.SpcPremiumRateOptionPR
 import com.tamin.taminhamrah.model.contracts.FreeJobDN
@@ -73,6 +77,49 @@ import taminx.core.core_ui.ic_tamin_print
 import taminx.core.core_ui.unit_rial
 
 private const val RATE_14_PERCENT = "14"
+private const val PREMIUM_RATE_SINGLE_ROW_MAX = 4
+
+@Composable
+private fun PremiumRateGrid(
+    premiumRates: List<SpcPremiumRateOptionPR>,
+    selectedCode: String?,
+    isRateSelectionEnabled: Boolean,
+    onRateSelected: (SpcPremiumRateOptionPR) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val rows = if (premiumRates.size <= PREMIUM_RATE_SINGLE_ROW_MAX) {
+        listOf(premiumRates)
+    } else {
+        val itemsPerRow = (premiumRates.size + 1) / 2
+        premiumRates.chunked(itemsPerRow)
+    }
+    val columnsInWidestRow = rows.maxOf { it.size }
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        rows.forEach { rowRates ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+            ) {
+                rowRates.forEach { rate ->
+                    PremiumRateChip(
+                        rate = rate,
+                        selected = rate.code == selectedCode,
+                        enabled = isRateSelectionEnabled,
+                        onClick = { onRateSelected(rate) },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+                repeat(columnsInWidestRow - rowRates.size) {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+            }
+        }
+    }
+}
 
 @Composable
 fun InsurancePremiumStepContent(
@@ -142,20 +189,12 @@ fun InsurancePremiumStepContent(
 
                 PremiumRateLabel()
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-                ) {
-                    premiumRates.forEach { rate ->
-                        PremiumRateChip(
-                            rate = rate,
-                            selected = rate.code == selectedCode,
-                            enabled = isRateSelectionEnabled,
-                            onClick = { onRateSelected(rate) },
-                            modifier = Modifier.weight(1f),
-                        )
-                    }
-                }
+                PremiumRateGrid(
+                    premiumRates = premiumRates,
+                    selectedCode = selectedCode,
+                    isRateSelectionEnabled = isRateSelectionEnabled,
+                    onRateSelected = onRateSelected,
+                )
 
                 AnimatedVisibility(
                     visible = selectedRate?.insurancePercent == RATE_14_PERCENT,
@@ -297,28 +336,46 @@ private fun PremiumWageSection(
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            PremiumStepperButton(
-                icon = Icons.Outlined.Remove,
-                contentDescription = stringResource(Res.string.contract_premium_decrease),
-                enabled = current > low,
-                onClick = { onPremiumChange((current - step).coerceAtLeast(low)) },
-            )
+            Box(
+                modifier = Modifier.weight(1f),
+                contentAlignment = Alignment.Center,
+            ) {
+                PremiumStepperButton(
+                    icon = Icons.Outlined.Remove,
+                    contentDescription = stringResource(Res.string.contract_premium_decrease),
+                    enabled = current > low,
+                    onClick = { onPremiumChange((current - step).coerceAtLeast(low)) },
+                )
+            }
 
-            NumericText(
-                text = current.toPriceFormat(),
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = colors.textPrimary,
+            Box(
                 modifier = Modifier
                     .weight(1f)
                     .padding(vertical = Spacing.sm),
-            )
+                contentAlignment = Alignment.Center,
+            ) {
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                    Text(
+                        text = current.toPriceFormat(),
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        color = colors.textPrimary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
 
-            PremiumStepperButton(
-                icon = Icons.Outlined.Add,
-                contentDescription = stringResource(Res.string.contract_premium_increase),
-                enabled = current < high,
-                onClick = { onPremiumChange((current + step).coerceAtMost(high)) },
-            )
+            Box(
+                modifier = Modifier.weight(1f),
+                contentAlignment = Alignment.Center,
+            ) {
+                PremiumStepperButton(
+                    icon = Icons.Outlined.Add,
+                    contentDescription = stringResource(Res.string.contract_premium_increase),
+                    enabled = current < high,
+                    onClick = { onPremiumChange((current + step).coerceAtMost(high)) },
+                )
+            }
         }
 
         if (high > low) {
@@ -369,8 +426,8 @@ private fun PremiumWageSection(
             exit = fadeOut() + shrinkVertically(),
         ) {
             PremiumResultCard(
-                payablePremium = calculatedMonthlySalary ?: 0L,
-                baseWage = current,
+                payablePremium = current,
+                baseWage = calculatedMonthlySalary ?: 0L,
             )
         }
     }
@@ -475,24 +532,41 @@ private fun PremiumWageSectionShimmer(modifier: Modifier = Modifier) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
-                modifier = Modifier
-                    .size(ShimmerSize.stepperButtonSize)
-                    .clip(RoundedCornerShape(CornerRadius.md))
-                    .shimmer(),
-            )
+                modifier = Modifier.weight(1f),
+                contentAlignment = Alignment.Center,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(ShimmerSize.stepperButtonSize)
+                        .clip(RoundedCornerShape(CornerRadius.md))
+                        .shimmer(),
+                )
+            }
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .height(ShimmerSize.wageValueHeight)
-                    .clip(RoundedCornerShape(CornerRadius.md))
-                    .shimmer(),
-            )
+                    .height(ShimmerSize.wageValueHeight),
+                contentAlignment = Alignment.Center,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.7f)
+                        .height(ShimmerSize.wageValueHeight)
+                        .clip(RoundedCornerShape(CornerRadius.md))
+                        .shimmer(),
+                )
+            }
             Box(
-                modifier = Modifier
-                    .size(ShimmerSize.stepperButtonSize)
-                    .clip(RoundedCornerShape(CornerRadius.md))
-                    .shimmer(),
-            )
+                modifier = Modifier.weight(1f),
+                contentAlignment = Alignment.Center,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(ShimmerSize.stepperButtonSize)
+                        .clip(RoundedCornerShape(CornerRadius.md))
+                        .shimmer(),
+                )
+            }
         }
         Box(
             modifier = Modifier
@@ -520,10 +594,17 @@ private val PreviewRates = listOf(
     SpcPremiumRateOptionPR(code = "3", description = "۱۸ درصد", insurancePercent = "18"),
 )
 
-private val PreviewRange = FreelancePremiumRangePR(
+private val PreviewWageScaleRange = FreelancePremiumRangePR(
     lowPremium = 104_400_000L,
     highPremium = 216_578_072L,
     paymentTabayi = 1_000_000L,
+    history = 12,
+)
+
+private val PreviewPremiumScaleRange = FreelancePremiumRangePR(
+    lowPremium = 14_000_000L,
+    highPremium = 50_000_000L,
+    paymentTabayi = 500_000L,
     history = 12,
 )
 
@@ -551,7 +632,7 @@ private fun InsurancePremiumStepContentRateSelectedPreview() {
             selectedCode = "2",
             isLoading = false,
             onRateSelected = {},
-            premiumRange = PreviewRange,
+            premiumRange = PreviewWageScaleRange,
             selectedPremium = 104_400_000L,
             showPremiumSlider = true,
             onPremiumChange = {},
@@ -569,9 +650,9 @@ private fun InsurancePremiumStepContentCalculatedPreview() {
             selectedCode = "2",
             isLoading = false,
             onRateSelected = {},
-            premiumRange = PreviewRange,
-            selectedPremium = 189_400_000L,
-            calculatedMonthlySalary = 26_516_000L,
+            premiumRange = PreviewPremiumScaleRange,
+            selectedPremium = 26_516_000L,
+            calculatedMonthlySalary = 189_400_000L,
             isPremiumCalculated = true,
             showPremiumSlider = true,
             onPremiumChange = {},
@@ -600,6 +681,31 @@ private fun InsurancePremiumStepContentWageLoadingPreview() {
             isPremiumRangeLoading = true,
             premiumRange = null,
             showPremiumSlider = true,
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun InsurancePremiumStepContentSixRatesPreview() {
+    PreviewRtlThemeContent {
+        InsurancePremiumStepContent(
+            premiumRates = listOf(
+                SpcPremiumRateOptionPR(code = "1", description = "۱۲ درصد", insurancePercent = "12"),
+                SpcPremiumRateOptionPR(code = "2", description = "۱۴ درصد", insurancePercent = "14"),
+                SpcPremiumRateOptionPR(code = "3", description = "۱۸ درصد", insurancePercent = "18"),
+                SpcPremiumRateOptionPR(code = "4", description = "۲۰ درصد", insurancePercent = "20"),
+                SpcPremiumRateOptionPR(code = "5", description = "۲۲ درصد", insurancePercent = "22"),
+                SpcPremiumRateOptionPR(code = "6", description = "۲۴ درصد", insurancePercent = "24"),
+            ),
+            selectedCode = "2",
+            isLoading = false,
+            onRateSelected = {},
+            premiumRange = PreviewWageScaleRange,
+            selectedPremium = 104_400_000L,
+            showPremiumSlider = true,
+            onPremiumChange = {},
+            onCalculate = {},
         )
     }
 }

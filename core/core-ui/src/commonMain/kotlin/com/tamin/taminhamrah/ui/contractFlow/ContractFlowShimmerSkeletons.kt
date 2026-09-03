@@ -428,6 +428,20 @@ fun InsurancePremiumStepShimmerSkeleton(
                 )
             }
         }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        ) {
+            repeat(3) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(ShimmerSize.rateChipHeight)
+                        .clip(RoundedCornerShape(CornerRadius.lg))
+                        .shimmer(),
+                )
+            }
+        }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
