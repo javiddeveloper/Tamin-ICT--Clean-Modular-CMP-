@@ -155,4 +155,8 @@ object ShimmerSize {
     val badgeHeight = 24.dp
     val uploadCardHeight = 120.dp
     val bannerHeight = 56.dp
+    val rateChipHeight = 48.dp
+    val wageValueHeight = 28.dp
+    val sliderTrackHeight = 4.dp
+    val stepperButtonSize = 40.dp
 }

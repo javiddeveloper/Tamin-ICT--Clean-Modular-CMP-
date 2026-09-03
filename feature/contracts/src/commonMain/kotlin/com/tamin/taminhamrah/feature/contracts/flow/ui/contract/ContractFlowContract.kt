@@ -105,7 +105,12 @@ data class ContractFlowUiState(
                 ContractStep.STEP_INSURANCE_PREMIUM -> {
                     val hasPremiumRate = selectedPremiumRateCode != null || lockedPremiumRateCode != null
                     val hasFreeJob = !flowConfig.requiresFreeJob || selectedFreeJobCode != null
-                    hasPremiumRate && hasFreeJob
+                    val usesCombinedPremiumStep = flowConfig.steps.none { it == ContractStep.STEP_SALARY }
+                    val needsCalculation = usesCombinedPremiumStep &&
+                        !hidePremiumSlider &&
+                        (flowConfig.usesFreelancePremiumRange || flowConfig.isOptionalInsurance)
+                    val calculationComplete = !needsCalculation || (isPremiumCalculated && !isCalculatingPremium)
+                    hasPremiumRate && hasFreeJob && calculationComplete
                 }
                 ContractStep.STEP_SALARY -> isPremiumCalculated
                 ContractStep.STEP_SUBMIT_CONTRACT -> isAgreementConfirmed && !isSubmittingContract

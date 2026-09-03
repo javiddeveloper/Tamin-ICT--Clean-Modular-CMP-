@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.ui.contractFlow
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,6 +30,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.TaminBottomBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
+import com.tamin.taminhamrah.ui.theme.ButtonDimens
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.ShimmerSize
@@ -387,43 +389,117 @@ fun UserInfoStepShimmerSkeleton(
 }
 
 /**
- * Step 7: Insurance Premium Rate Shimmer Skeleton.
+ * Step 8: Insurance premium determination shimmer (rate chips + wage + calculate).
  */
 @Composable
 fun InsurancePremiumStepShimmerSkeleton(
     modifier: Modifier = Modifier,
 ) {
     val taminColors = LocalTaminColors.current
+    val cardShape = RoundedCornerShape(CornerRadius.x2l)
 
     Column(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(cardShape)
+            .background(taminColors.bgSurface)
+            .border(Thickness.border, taminColors.border, cardShape)
+            .padding(Spacing.lg),
         verticalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
-        repeat(3) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(CornerRadius.lg),
-                colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
-                border = CardDefaults.outlinedCardBorder().copy(brush = androidx.compose.ui.graphics.SolidColor(taminColors.border)),
-            ) {
-                Row(
+        Box(
+            modifier = Modifier
+                .width(ShimmerSize.sectionLabelWidth)
+                .height(ShimmerSize.titleHeight)
+                .clip(RoundedCornerShape(CornerRadius.xs))
+                .shimmer(),
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        ) {
+            repeat(3) {
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(Spacing.md),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-                ) {
-                    Box(modifier = Modifier.size(20.dp).clip(CircleShape).shimmer())
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(Spacing.xs),
-                    ) {
-                        Box(modifier = Modifier.width(130.dp).height(16.dp).clip(RoundedCornerShape(CornerRadius.xs)).shimmer())
-                        Box(modifier = Modifier.fillMaxWidth(0.8f).height(12.dp).clip(RoundedCornerShape(CornerRadius.xs)).shimmer())
-                    }
-                }
+                        .weight(1f)
+                        .height(ShimmerSize.rateChipHeight)
+                        .clip(RoundedCornerShape(CornerRadius.lg))
+                        .shimmer(),
+                )
             }
         }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(ShimmerSize.infoBodyHeight)
+                .clip(RoundedCornerShape(CornerRadius.listRow))
+                .shimmer(),
+        )
+        Box(
+            modifier = Modifier
+                .width(ShimmerSize.sectionLabelWidth)
+                .height(ShimmerSize.titleHeight)
+                .clip(RoundedCornerShape(CornerRadius.xs))
+                .shimmer(),
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(ShimmerSize.stepperButtonSize)
+                    .clip(RoundedCornerShape(CornerRadius.md))
+                    .shimmer(),
+            )
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(ShimmerSize.wageValueHeight)
+                    .clip(RoundedCornerShape(CornerRadius.md))
+                    .shimmer(),
+            )
+            Box(
+                modifier = Modifier
+                    .size(ShimmerSize.stepperButtonSize)
+                    .clip(RoundedCornerShape(CornerRadius.md))
+                    .shimmer(),
+            )
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(ShimmerSize.sliderTrackHeight)
+                .clip(RoundedCornerShape(CornerRadius.full))
+                .shimmer(),
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(ShimmerSize.valueWidth)
+                    .height(ShimmerSize.valueHeight)
+                    .clip(RoundedCornerShape(CornerRadius.xs))
+                    .shimmer(),
+            )
+            Box(
+                modifier = Modifier
+                    .width(ShimmerSize.valueWidth)
+                    .height(ShimmerSize.valueHeight)
+                    .clip(RoundedCornerShape(CornerRadius.xs))
+                    .shimmer(),
+            )
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(ButtonDimens.height)
+                .clip(RoundedCornerShape(CornerRadius.xl))
+                .shimmer(),
+        )
     }
 }
 

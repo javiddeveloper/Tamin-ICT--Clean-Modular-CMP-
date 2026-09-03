@@ -448,6 +448,20 @@ fun ContractFlowScreenContent(
                                             onFreeJobSelected = {
                                                 onIntent(ContractFlowIntent.SelectFreeJob(it))
                                             },
+                                            premiumRange = state.premiumRange,
+                                            selectedPremium = state.selectedMonthlyPremium,
+                                            calculatedMonthlySalary = state.calculatedMonthlySalary,
+                                            isPremiumRangeLoading = state.isPremiumRangeLoading,
+                                            isCalculating = state.isCalculatingPremium,
+                                            isPremiumCalculated = state.isPremiumCalculated,
+                                            showPremiumSlider = !state.hidePremiumSlider &&
+                                                (state.config?.usesFreelancePremiumRange == true || state.config?.isOptionalInsurance == true),
+                                            onPremiumChange = {
+                                                onIntent(ContractFlowIntent.SelectMonthlyPremium(it))
+                                            },
+                                            onCalculate = {
+                                                onIntent(ContractFlowIntent.CalculateMonthlyPremium)
+                                            },
                                         )
                                     }
 
@@ -597,7 +611,12 @@ private fun isStepValid(state: ContractFlowUiState): Boolean {
         ContractStep.STEP_INSURANCE_PREMIUM -> {
             val hasPremiumRate = state.selectedPremiumRateCode != null || state.lockedPremiumRateCode != null
             val hasFreeJob = !(state.config?.requiresFreeJob ?: false) || state.selectedFreeJobCode != null
-            hasPremiumRate && hasFreeJob
+            val usesCombinedPremiumStep = state.config?.steps?.none { it == ContractStep.STEP_SALARY } == true
+            val needsCalculation = usesCombinedPremiumStep &&
+                !state.hidePremiumSlider &&
+                (state.config?.usesFreelancePremiumRange == true || state.config?.isOptionalInsurance == true)
+            val calculationComplete = !needsCalculation || (state.isPremiumCalculated && !state.isCalculatingPremium)
+            hasPremiumRate && hasFreeJob && calculationComplete
         }
         ContractStep.STEP_SALARY -> {
             state.isPremiumCalculated && !state.isCalculatingPremium
@@ -704,10 +723,10 @@ private val MockPremiumRates = listOf(
 )
 
 private val MockPremiumRange = com.tamin.taminhamrah.model.contractFlow.FreelancePremiumRangePR(
-    lowPremium = 14_000_000L,
-    highPremium = 50_000_000L,
-    paymentTabayi = 71_661_840L,
-    history = 120,
+    lowPremium = 104_400_000L,
+    highPremium = 216_578_072L,
+    paymentTabayi = 1_000_000L,
+    history = 12,
 )
 
 @PreviewRtlTheme
@@ -906,7 +925,54 @@ private fun ContractFlowScreenContentStep8InsurancePremiumPreview() {
                 config = MockConfig,
                 currentStep = ContractStep.STEP_INSURANCE_PREMIUM,
                 premiumRates = MockPremiumRates,
-                selectedPremiumRateCode = "3",
+                selectedPremiumRateCode = "2",
+                premiumRange = MockPremiumRange,
+                selectedMonthlyPremium = 104_400_000L,
+                treatmentSupportCode = ContractFlowUiState.TREATMENT_SUPPORT_WITH,
+            ),
+            onBack = {},
+            onShowRules = {},
+            onIntent = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun ContractFlowScreenContentStep8InsurancePremiumCalculatedPreview() {
+    PreviewRtlThemeContent {
+        ContractFlowScreenContent(
+            state = ContractFlowUiState(
+                isLoading = false,
+                registrationInfo = MockRegistrationInfo,
+                config = MockConfig,
+                currentStep = ContractStep.STEP_INSURANCE_PREMIUM,
+                premiumRates = MockPremiumRates,
+                selectedPremiumRateCode = "2",
+                premiumRange = MockPremiumRange,
+                selectedMonthlyPremium = 189_400_000L,
+                calculatedMonthlySalary = 26_516_000L,
+                isPremiumCalculated = true,
+                treatmentSupportCode = ContractFlowUiState.TREATMENT_SUPPORT_WITH,
+            ),
+            onBack = {},
+            onShowRules = {},
+            onIntent = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun ContractFlowScreenContentStep8InsurancePremiumShimmerPreview() {
+    PreviewRtlThemeContent {
+        ContractFlowScreenContent(
+            state = ContractFlowUiState(
+                isLoading = false,
+                registrationInfo = MockRegistrationInfo,
+                config = MockConfig,
+                currentStep = ContractStep.STEP_INSURANCE_PREMIUM,
+                isPremiumRatesLoading = true,
                 treatmentSupportCode = ContractFlowUiState.TREATMENT_SUPPORT_WITH,
             ),
             onBack = {},

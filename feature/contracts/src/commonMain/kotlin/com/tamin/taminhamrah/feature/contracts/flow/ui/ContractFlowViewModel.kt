@@ -393,10 +393,33 @@ class ContractFlowViewModel(
         )
     }
 
-    private fun handleGoToPreviousStep(): Flow<PartialState> = flow {
-        val flowConfig = uiState.value.config ?: config
-        val previousStep = flowConfig.previousStep(uiState.value.currentStep) ?: return@flow
-        emit(PartialState.StepChanged(previousStep))
+    private fun handleGoToPreviousStep(): Flow<PartialState> = merge(
+        flow {
+            val flowConfig = uiState.value.config ?: config
+            val previousStep = flowConfig.previousStep(uiState.value.currentStep) ?: return@flow
+            emit(PartialState.StepChanged(previousStep))
+        },
+        flow {
+            val flowConfig = uiState.value.config ?: config
+            val previousStep = flowConfig.previousStep(uiState.value.currentStep) ?: return@flow
+            if (previousStep == ContractStep.STEP_INSURANCE_PREMIUM) {
+                emitAll(reloadPremiumRangeIfNeeded(flowConfig))
+            }
+        },
+    )
+
+    private fun reloadPremiumRangeIfNeeded(flowConfig: ContractFlowConfig): Flow<PartialState> {
+        val state = uiState.value
+        if (state.premiumRange != null || state.isPremiumRangeLoading) return flow { }
+        val hasRate = state.selectedPremiumRateCode != null || state.lockedPremiumRateCode != null
+        if (!hasRate) return flow { }
+        return when {
+            flowConfig.usesFreelancePremiumRange && !state.hidePremiumSlider ->
+                loadFreelancePremiumRange()
+            flowConfig.isOptionalInsurance ->
+                loadOptionalPremiumRange()
+            else -> flow { }
+        }
     }
 
     private fun handleSetRulesConfirmed(confirmed: Boolean): Flow<PartialState> = flow {
@@ -521,6 +544,13 @@ class ContractFlowViewModel(
     private fun handleSelectPremiumRate(rate: SpcPremiumRateOptionPR): Flow<PartialState> = flow {
         if (uiState.value.lockedPremiumRateCode != null) return@flow
         emit(PartialState.PremiumRateSelected(rate.code))
+        val flowConfig = uiState.value.config ?: config
+        when {
+            flowConfig.usesFreelancePremiumRange && !uiState.value.hidePremiumSlider ->
+                emitAll(loadFreelancePremiumRange(rate.code))
+            flowConfig.isOptionalInsurance ->
+                emitAll(loadOptionalPremiumRange())
+        }
     }
 
     private fun handleSelectFreeJob(job: FreeJobDN): Flow<PartialState> = flow {
@@ -614,8 +644,8 @@ class ContractFlowViewModel(
         emit(PartialState.PaymentAllowedChanged(config.allowsOnlinePaymentAfterSubmit))
     }
 
-    private fun loadFreelancePremiumRange(): Flow<PartialState> = flow {
-        val params = buildPremiumRangeParams() ?: return@flow
+    private fun loadFreelancePremiumRange(spcRateCodeOverride: String? = null): Flow<PartialState> = flow {
+        val params = buildPremiumRangeParams(spcRateCodeOverride) ?: return@flow
         emit(PartialState.PremiumRangeLoading(true))
         emit(PartialState.PremiumCalculated(false))
         try {
@@ -647,8 +677,9 @@ class ContractFlowViewModel(
         }
     }
 
-    private fun buildPremiumRangeParams(): FreelancePremiumRangeParams? {
-        val spcRateCode = uiState.value.selectedPremiumRateCode
+    private fun buildPremiumRangeParams(spcRateCodeOverride: String? = null): FreelancePremiumRangeParams? {
+        val spcRateCode = spcRateCodeOverride
+            ?: uiState.value.selectedPremiumRateCode
             ?: uiState.value.lockedPremiumRateCode
             ?: return null
         val lookupCode = resolveCntFreeJobCode() ?: return null
@@ -937,6 +968,11 @@ class ContractFlowViewModel(
         )
         is PartialState.PremiumRateSelected -> currentState.copy(
             selectedPremiumRateCode = partialState.code,
+            premiumRange = null,
+            selectedMonthlyPremium = null,
+            calculatedMonthlySalary = null,
+            isPremiumCalculated = false,
+            isPremiumRangeLoading = false,
         )
         is PartialState.PremiumRangeLoading -> currentState.copy(
             isPremiumRangeLoading = partialState.isLoading,

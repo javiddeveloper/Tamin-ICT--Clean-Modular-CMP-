@@ -1842,8 +1842,15 @@
     <string name="contract_treatment_dependents_load_error">خطا در دریافت لیست افراد تبعی</string>
     <string name="contract_treatment_field_national_id">کد ملی</string>
     <string name="contract_treatment_field_birth_date">تاریخ تولد</string>
-    <string name="contract_step_insurance_premium">تعیین حق بیمه ماهانه</string>
+    <string name="contract_step_insurance_premium">تعیین حق بیمه</string>
     <string name="contract_step_salary">محاسبه حق بیمه</string>
+    <string name="contract_premium_rate_label">نرخ حق بیمه ماهانه</string>
+    <string name="contract_premium_rate_percent">%1$s درصد</string>
+    <string name="contract_premium_rate_14_info">با انتخاب نرخ ۱۴ درصد با داشتن حداقل ۱ سال سابقه بیمه‌پردازی از معاینات پزشکی معاف می‌باشید. این نرخ شامل حمایت بازنشستگی و فوت است.</string>
+    <string name="contract_premium_base_wage_label">دستمزد مبنای ماهانه</string>
+    <string name="contract_premium_payable_label">حق بیمه ماهانه قابل پرداخت</string>
+    <string name="contract_premium_decrease">کاهش دستمزد</string>
+    <string name="contract_premium_increase">افزایش دستمزد</string>
     <string name="contract_step_submit_contract">ثبت قرارداد</string>
 
     <string name="contract_applicant_personal">متقاضی شخصاً قرارداد منعقد می‌نماید</string>
@@ -1949,8 +1956,8 @@
     <string name="contract_hero_step_5_desc">استان، شهر و شعبهٔ مورد نظر خود را انتخاب کنید.</string>
     <string name="contract_hero_step_6_title">بارگذاری مدارک</string>
     <string name="contract_hero_step_6_desc">شرح مدرک را بنویسید و یک تصویر پیوست کنید.</string>
-    <string name="contract_hero_step_7_title">تعیین حق بیمه ماهانه</string>
-    <string name="contract_hero_step_7_desc">نرخ پرداخت حق بیمهٔ ماهانه را انتخاب کنید.</string>
+    <string name="contract_hero_step_7_title">تعیین حق بیمه</string>
+    <string name="contract_hero_step_7_desc">نرخ حق بیمه و دستمزد مبنا را تعیین و محاسبه کنید.</string>
     <string name="contract_hero_step_8_title">محاسبه حق بیمه</string>
     <string name="contract_hero_step_8_desc">مبلغ حق بیمه و دستمزد مبنای کسر حق بیمه را محاسبه کنید.</string>
     <string name="contract_hero_step_9_title">ثبت قرارداد</string>

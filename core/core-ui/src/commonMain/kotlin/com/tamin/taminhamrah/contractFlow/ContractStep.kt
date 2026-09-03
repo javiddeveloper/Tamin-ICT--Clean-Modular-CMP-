@@ -54,6 +54,7 @@ enum class ContractStep(
     ;
 
     companion object {
+        /** Special-insured flows: rate + wage are one combined step (design: step 8 of 9). */
         val STUDENT_STEPS: List<ContractStep> = listOf(
             STEP_REGISTRATION,
             STEP_CONTRACT_TERMS,
@@ -63,7 +64,6 @@ enum class ContractStep(
             STEP_UPLOAD_IMAGE,
             STEP_TREATMENT_SUPPORT,
             STEP_INSURANCE_PREMIUM,
-            STEP_SALARY,
             STEP_SUBMIT_CONTRACT,
         )
 
