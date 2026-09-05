@@ -1888,6 +1888,7 @@
     <string name="contract_upload_description_label">شرح تصویر</string>
     <string name="contract_upload_description_required">شرح تصویر *</string>
     <string name="contract_upload_description_placeholder">مثلاً گواهی اشتغال به تحصیل</string>
+    <string name="contract_upload_description_empty_error">لطفاً شرح تصویر را وارد کنید.</string>
     <string name="contract_upload_image_content_description">تصویر بارگذاری شده</string>
     <string name="contract_upload_remove_image">حذف تصویر</string>
     <string name="contract_upload_add_documents">افزودن مدارک</string>
@@ -1914,6 +1915,18 @@
 
     <string name="contract_submit_agreement">اینجانب %1$s به شماره ملی %2$s درخواست انعقاد قرارداد %3$s %4$s با دستمزد مبنا %5$s ریال را دارم.</string>
     <string name="contract_submit_success">قرارداد با شماره %1$s در تاریخ %2$s ثبت شد.</string>
+    <string name="contract_summary_title">خلاصه قرارداد</string>
+    <string name="contract_summary_branch">شعبه انتخابی</string>
+    <string name="contract_summary_documents">مدارک</string>
+    <string name="contract_summary_premium">حق بیمه ماهانه</string>
+    <string name="contract_summary_document_value">مدرک</string>
+    <string name="contract_summary_applicant_personal">شخص متقاضی</string>
+    <string name="contract_summary_applicant_guardian">قیم متقاضی</string>
+    <string name="contract_summary_treatment_with">با حمایت درمان</string>
+    <string name="contract_summary_treatment_without">بدون حمایت درمان</string>
+    <string name="contract_summary_premium_value">%1$s ریال</string>
+    <string name="contract_save_edit">ثبت ویرایش</string>
+    <string name="contract_edit_step">ویرایش مرحله</string>
 
     <string name="contract_eligibility_eligible">متقاضی محترم، شما به علت: %1$s دارای شرایط لازم برای عقد قرارداد %2$s هستید.</string>
     <string name="contract_eligibility_ineligible">متقاضی محترم، شما به علت: %1$s فاقد شرایط لازم برای عقد قرارداد %2$s هستید.</string>
@@ -1941,6 +1954,10 @@
     <string name="contract_payment_dialog_message">قرارداد با شماره %1$s ثبت شد.</string>
     <string name="contract_payment_dialog_pay">پرداخت حق بیمه</string>
     <string name="contract_payment_dialog_dismiss">متوجه شدم</string>
+    <string name="contract_submit_success_title">قرارداد شما ثبت شد</string>
+    <string name="contract_submit_success_message">قرارداد شما در تاریخ %1$s ثبت شد. شما می‌توانید نسبت به پرداخت حق بیمه خود اقدام نمایید. در صورت عدم تمایل می‌توانید در زمان دیگری این کار را انجام دهید.</string>
+    <string name="contract_submit_failure_title">ثبت قرارداد با خطا مواجه شد</string>
+    <string name="contract_submit_failure_message_fallback">ثبت قرارداد انجام نشد. لطفاً دوباره تلاش کنید.</string>
     <string name="contract_treatment_support_yes">حمایت درمان دارد</string>
     <string name="contract_treatment_support_no">حمایت درمان ندارد</string>
 

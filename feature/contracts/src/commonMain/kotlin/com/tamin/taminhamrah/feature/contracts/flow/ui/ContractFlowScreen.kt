@@ -17,11 +17,8 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.tamin.taminhamrah.contractFlow.ContractApplicantType
 import com.tamin.taminhamrah.contractFlow.ContractStep
+import com.tamin.taminhamrah.contractFlow.isEditableFromSummary
 import com.tamin.taminhamrah.contractFlow.isFirstStep
 import com.tamin.taminhamrah.contractFlow.isLastStep
 import com.tamin.taminhamrah.feature.contracts.flow.ui.contract.ContractFlowEvent
@@ -46,6 +44,7 @@ import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
 import com.tamin.taminhamrah.ui.components.TaminBottomBar
 import com.tamin.taminhamrah.ui.components.TaminHeroStepProgress
+import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.buttons.SquareIconButton
@@ -57,6 +56,9 @@ import com.tamin.taminhamrah.ui.contractFlow.ContractApplicantStepContent
 import com.tamin.taminhamrah.ui.contractFlow.ContractFlowScreenShimmerSkeleton
 import com.tamin.taminhamrah.ui.contractFlow.ContractRegistrationStepContent
 import com.tamin.taminhamrah.ui.contractFlow.ContractRulesBottomSheet
+import com.tamin.taminhamrah.ui.contractFlow.ContractSubmitResult
+import com.tamin.taminhamrah.ui.contractFlow.ContractSubmitResultDialog
+import com.tamin.taminhamrah.ui.contractFlow.ContractSummaryRowPR
 import com.tamin.taminhamrah.ui.contractFlow.ContractTermsStepContent
 import com.tamin.taminhamrah.ui.contractFlow.InsurancePremiumStepContent
 import com.tamin.taminhamrah.ui.contractFlow.PremiumSalaryStepContent
@@ -67,6 +69,8 @@ import com.tamin.taminhamrah.ui.contractFlow.UploadImageStepContent
 import com.tamin.taminhamrah.ui.contractFlow.UserInfoStepContent
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.TaminOnAccentInkSoft
+import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
@@ -75,14 +79,25 @@ import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.contract_flow_submit_contract
 import taminx.core.core_ui.contract_next_step
-import taminx.core.core_ui.contract_payment_dialog_dismiss
-import taminx.core.core_ui.contract_payment_dialog_message
-import taminx.core.core_ui.contract_payment_dialog_pay
-import taminx.core.core_ui.contract_payment_dialog_title
+import taminx.core.core_ui.contract_save_edit
+import taminx.core.core_ui.contract_step_contract_applicant
+import taminx.core.core_ui.contract_step_treatment_support
+import taminx.core.core_ui.contract_step_user_info
+import taminx.core.core_ui.contract_summary_applicant_guardian
+import taminx.core.core_ui.contract_summary_applicant_personal
+import taminx.core.core_ui.contract_summary_branch
+import taminx.core.core_ui.contract_summary_document_value
+import taminx.core.core_ui.contract_summary_documents
+import taminx.core.core_ui.contract_summary_premium
+import taminx.core.core_ui.contract_summary_premium_value
+import taminx.core.core_ui.contract_summary_treatment_with
+import taminx.core.core_ui.contract_summary_treatment_without
 import taminx.core.core_ui.error_unknown
+import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.ic_tamin_cross
+import taminx.core.core_ui.no_items_found
 
 @Composable
 fun ContractFlowScreen(
@@ -93,7 +108,7 @@ fun ContractFlowScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val toaster = LocalToaster.current
-    var paymentDialog by remember { mutableStateOf<PaymentDialogState?>(null) }
+    var submitResult by remember { mutableStateOf<ContractSubmitResult?>(null) }
     var showRulesSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -103,37 +118,28 @@ fun ContractFlowScreen(
     HandleContractFlowEvents(
         events = viewModel.events,
         onShowMessage = { toaster.error(it) },
-        onShowPaymentOption = { contractNumber, amount ->
-            paymentDialog = PaymentDialogState(contractNumber, amount)
+        onShowSubmitSuccess = { contractNumber, contractDate, amount, canPayOnline ->
+            submitResult = ContractSubmitResult.Success(
+                contractNumber = contractNumber,
+                contractDate = contractDate,
+                amount = amount,
+                canPayOnline = canPayOnline,
+            )
+        },
+        onShowSubmitFailure = { message ->
+            submitResult = ContractSubmitResult.Failure(message = message)
         },
     )
 
-    paymentDialog?.let { dialog ->
-        AlertDialog(
-            onDismissRequest = { paymentDialog = null },
-            title = { Text(stringResource(Res.string.contract_payment_dialog_title)) },
-            text = {
-                Text(
-                    stringResource(
-                        Res.string.contract_payment_dialog_message,
-                        dialog.contractNumber.toPersianDigits(),
-                    ),
-                )
+    submitResult?.let { result ->
+        ContractSubmitResultDialog(
+            result = result,
+            onDismiss = { submitResult = null },
+            onPay = { contractNumber, amount ->
+                onPaymentRequested(contractNumber, amount)
             },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        onPaymentRequested(dialog.contractNumber, dialog.amount)
-                        paymentDialog = null
-                    },
-                ) {
-                    Text(stringResource(Res.string.contract_payment_dialog_pay))
-                }
-            },
-            dismissButton = {
-                OutlinedButton(onClick = { paymentDialog = null }) {
-                    Text(stringResource(Res.string.contract_payment_dialog_dismiss))
-                }
+            onRetry = {
+                viewModel.sendIntent(ContractFlowIntent.SubmitContract)
             },
         )
     }
@@ -176,10 +182,10 @@ fun ContractFlowScreenContent(
     val stepSubtitle = stringResource(state.currentStep.descRes)
 
     val handleNavigateBack: () -> Unit = {
-        if (steps.isFirstStep(state.currentStep)) {
-            onBack()
-        } else {
-            onIntent(ContractFlowIntent.GoToPreviousStep)
+        when {
+            state.isEditMode -> onIntent(ContractFlowIntent.GoToPreviousStep)
+            steps.isFirstStep(state.currentStep) -> onBack()
+            else -> onIntent(ContractFlowIntent.GoToPreviousStep)
         }
     }
 
@@ -210,13 +216,24 @@ fun ContractFlowScreenContent(
                     )
                 },
             ) {
-                TaminHeroStepProgress(
-                    stepTitle = stepTitle,
-                    stepSubtitle = stepSubtitle,
-                    currentStep = currentStepIndex,
-                    totalSteps = totalSteps,
-                    modifier = Modifier.padding(top = Spacing.md),
-                )
+                if (!state.isEditMode) {
+                    TaminHeroStepProgress(
+                        stepTitle = stepTitle,
+                        stepSubtitle = stepSubtitle,
+                        currentStep = currentStepIndex,
+                        totalSteps = totalSteps,
+                        modifier = Modifier.padding(top = Spacing.md),
+                    )
+                } else {
+                    TaminText(
+                        text = stepTitle,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TaminOnAccentInkSoft,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = Spacing.md),
+                    )
+                }
             }
         },
         bottomBar = {
@@ -224,10 +241,10 @@ fun ContractFlowScreenContent(
                 state = state,
                 steps = steps,
                 onNextStep = {
-                    if (steps.isLastStep(state.currentStep)) {
-                        onIntent(ContractFlowIntent.SubmitContract)
-                    } else {
-                        onIntent(ContractFlowIntent.GoToNextStep)
+                    when {
+                        state.isEditMode -> onIntent(ContractFlowIntent.SaveEdit)
+                        steps.isLastStep(state.currentStep) -> onIntent(ContractFlowIntent.SubmitContract)
+                        else -> onIntent(ContractFlowIntent.GoToNextStep)
                     }
                 },
                 onPreviousStep = {
@@ -486,6 +503,7 @@ fun ContractFlowScreenContent(
                                     ContractStep.STEP_SUBMIT_CONTRACT -> {
                                         val effectiveRateCode = state.lockedPremiumRateCode ?: state.selectedPremiumRateCode
                                         SubmitContractStepContent(
+                                            summaryRows = buildContractSummaryRows(state),
                                             registrationInfo = info,
                                             selectedPremiumRateDescription = state.premiumRates
                                                 .firstOrNull { it.code == effectiveRateCode }
@@ -498,10 +516,9 @@ fun ContractFlowScreenContent(
                                             onAgreementConfirmedChange = {
                                                 onIntent(ContractFlowIntent.SetAgreementConfirmed(it))
                                             },
-                                            onSubmit = {
-                                                onIntent(ContractFlowIntent.SubmitContract)
+                                            onEditStep = { step ->
+                                                onIntent(ContractFlowIntent.EditStep(step))
                                             },
-                                            canSubmit = true,
                                         )
                                     }
 
@@ -526,46 +543,62 @@ private fun ContractFlowBottomBar(
     val isFirst = steps.isFirstStep(state.currentStep)
     val isLast = steps.isLastStep(state.currentStep)
     val nextEnabled = isStepValid(state)
+    val isEditMode = state.isEditMode
 
     TaminBottomBar(
         modifier = Modifier
             .navigationBarsPadding()
             .imePadding(),
     ) {
-        if (isFirst) {
-            LoadingButton(
-                text = stringResource(Res.string.contract_next_step),
-                onClick = onNextStep,
-                enabled = nextEnabled,
-                isLoading = state.isLoading,
-                modifier = Modifier.fillMaxWidth(),
-                icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
-                iconPosition = LoadingButtonIconPosition.TRAILING,
-            )
-        } else {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
+        when {
+            isEditMode -> {
                 LoadingButton(
-                    text = if (isLast) {
-                        stringResource(Res.string.contract_flow_submit_contract)
-                    } else {
-                        stringResource(Res.string.contract_next_step)
-                    },
+                    text = stringResource(Res.string.contract_save_edit),
                     onClick = onNextStep,
                     enabled = nextEnabled,
-                    isLoading = if (isLast) state.isSubmittingContract else state.isLoading,
-                    modifier = Modifier.weight(1f),
-                    icon = if (!isLast) vectorResource(Res.drawable.ic_tamin_chevron_forward) else null,
+                    isLoading = state.isSavingContact || state.isLoading,
+                    modifier = Modifier.fillMaxWidth(),
+                    icon = vectorResource(Res.drawable.ic_tamin_check),
                     iconPosition = LoadingButtonIconPosition.TRAILING,
                 )
-
-                SquareIconButton(
-                    icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                    onClick = onPreviousStep,
+            }
+            isFirst -> {
+                LoadingButton(
+                    text = stringResource(Res.string.contract_next_step),
+                    onClick = onNextStep,
+                    enabled = nextEnabled,
+                    isLoading = state.isLoading,
+                    modifier = Modifier.fillMaxWidth(),
+                    icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
+                    iconPosition = LoadingButtonIconPosition.TRAILING,
                 )
+            }
+            else -> {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    SquareIconButton(
+                        icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                        onClick = onPreviousStep,
+                    )
+                    LoadingButton(
+                        text = if (isLast) {
+                            stringResource(Res.string.contract_flow_submit_contract)
+                        } else {
+                            stringResource(Res.string.contract_next_step)
+                        },
+                        onClick = onNextStep,
+                        enabled = nextEnabled,
+                        isLoading = if (isLast) state.isSubmittingContract else state.isLoading,
+                        modifier = Modifier.weight(1f),
+                        icon = if (!isLast) vectorResource(Res.drawable.ic_tamin_chevron_forward) else null,
+                        iconPosition = LoadingButtonIconPosition.TRAILING,
+                    )
+
+
+                }
             }
         }
     }
@@ -597,9 +630,7 @@ private fun isStepValid(state: ContractFlowUiState): Boolean {
             state.branchSelection.isValid
         }
         ContractStep.STEP_UPLOAD_IMAGE -> {
-            state.documentDescription.isNotBlank() &&
-                state.uploadedDocuments.isNotEmpty() &&
-                !state.isUploadingDocument
+            !state.isUploadingDocument
         }
         ContractStep.STEP_TREATMENT_SUPPORT -> {
             state.treatmentSupportCode == ContractFlowUiState.TREATMENT_SUPPORT_WITHOUT ||
@@ -628,23 +659,91 @@ private fun isStepValid(state: ContractFlowUiState): Boolean {
 }
 
 @Composable
+private fun buildContractSummaryRows(state: ContractFlowUiState): List<ContractSummaryRowPR> {
+    val steps = state.config?.steps.orEmpty()
+    return steps
+        .filter { it.isEditableFromSummary() }
+        .mapNotNull { step ->
+            val title = summaryTitleFor(step) ?: return@mapNotNull null
+            val value = summaryValueFor(state, step)
+            ContractSummaryRowPR(step = step, title = title, value = value)
+        }
+}
+
+@Composable
+private fun summaryTitleFor(step: ContractStep): String? = when (step) {
+    ContractStep.STEP_USER_INFO -> stringResource(Res.string.contract_step_user_info)
+    ContractStep.STEP_CONTRACT_APPLICANT -> stringResource(Res.string.contract_step_contract_applicant)
+    ContractStep.STEP_SELECT_BRANCH -> stringResource(Res.string.contract_summary_branch)
+    ContractStep.STEP_UPLOAD_IMAGE -> stringResource(Res.string.contract_summary_documents)
+    ContractStep.STEP_TREATMENT_SUPPORT -> stringResource(Res.string.contract_step_treatment_support)
+    ContractStep.STEP_INSURANCE_PREMIUM,
+    ContractStep.STEP_SALARY,
+    -> stringResource(Res.string.contract_summary_premium)
+    else -> null
+}
+
+@Composable
+private fun summaryValueFor(state: ContractFlowUiState, step: ContractStep): String = when (step) {
+    ContractStep.STEP_USER_INFO -> state.userInfo.cityName.ifBlank { state.branchSelection.cityName }
+    ContractStep.STEP_CONTRACT_APPLICANT -> when (state.contractApplicantType) {
+        ContractApplicantType.PERSONAL -> stringResource(Res.string.contract_summary_applicant_personal)
+        ContractApplicantType.GUARDIAN -> stringResource(Res.string.contract_summary_applicant_guardian)
+    }
+    ContractStep.STEP_SELECT_BRANCH -> state.branchSelection.branchName
+    ContractStep.STEP_UPLOAD_IMAGE ->
+        if (state.uploadedDocuments.isEmpty()) {
+            stringResource(Res.string.no_items_found)
+        } else {
+            state.documentDescription
+        }
+    ContractStep.STEP_TREATMENT_SUPPORT ->
+        if (state.treatmentSupportCode == ContractFlowUiState.TREATMENT_SUPPORT_WITH) {
+            stringResource(Res.string.contract_summary_treatment_with)
+        } else {
+            stringResource(Res.string.contract_summary_treatment_without)
+        }
+    ContractStep.STEP_INSURANCE_PREMIUM,
+    ContractStep.STEP_SALARY,
+    -> {
+        val amount = state.selectedMonthlyPremium ?: state.calculatedMonthlySalary
+        if (amount != null) {
+            stringResource(
+                Res.string.contract_summary_premium_value,
+                amount.toPriceFormat().toPersianDigits(),
+            )
+        } else {
+            ""
+        }
+    }
+    else -> ""
+}
+
+@Composable
 private fun HandleContractFlowEvents(
     events: Flow<ContractFlowEvent>,
     onShowMessage: (String) -> Unit,
-    onShowPaymentOption: (contractNumber: String, amount: Long) -> Unit,
+    onShowSubmitSuccess: (
+        contractNumber: String,
+        contractDate: String,
+        amount: Long,
+        canPayOnline: Boolean,
+    ) -> Unit,
+    onShowSubmitFailure: (String) -> Unit,
 ) {
     events.collectWithLifecycleAware { event ->
         when (event) {
             is ContractFlowEvent.ShowMessage -> onShowMessage(event.message)
-            is ContractFlowEvent.ShowPaymentOption -> onShowPaymentOption(event.contractNumber, event.amount)
+            is ContractFlowEvent.ShowSubmitSuccess -> onShowSubmitSuccess(
+                event.contractNumber,
+                event.contractDate,
+                event.amount,
+                event.canPayOnline,
+            )
+            is ContractFlowEvent.ShowSubmitFailure -> onShowSubmitFailure(event.message)
         }
     }
 }
-
-private data class PaymentDialogState(
-    val contractNumber: String,
-    val amount: Long,
-)
 
 // -------------------------------------------------------------------------
 // Previews
@@ -1014,11 +1113,50 @@ private fun ContractFlowScreenContentStep10SubmitContractPreview() {
                 registrationInfo = MockRegistrationInfo,
                 config = MockConfig,
                 currentStep = ContractStep.STEP_SUBMIT_CONTRACT,
-                selectedMonthlyPremium = 14_000_000L,
+                userInfo = MockUserInfo,
+                contractApplicantType = ContractApplicantType.PERSONAL,
+                branchSelection = MockBranchSelection.copy(branchName = "شعبه چناران"),
+                documentDescription = "مدرک",
+                uploadedDocuments = listOf(
+                    com.tamin.taminhamrah.model.contractFlow.UploadImagePR(
+                        imageId = "1",
+                        fileName = "doc.jpg",
+                        description = "مدرک",
+                    ),
+                ),
+                treatmentSupportCode = ContractFlowUiState.TREATMENT_SUPPORT_WITH,
+                isTreatmentCommitmentConfirmed = true,
+                selectedMonthlyPremium = 22_596_000L,
                 calculatedMonthlySalary = 71_661_840L,
                 selectedPremiumRateCode = "3",
-                branchSelection = MockBranchSelection,
-                isAgreementConfirmed = true,
+                premiumRates = listOf(
+                    com.tamin.taminhamrah.model.contractFlow.SpcPremiumRateOptionPR(
+                        code = "3",
+                        description = "نرخ ۱۴ درصد (بازنشستگی و فوت قبل و بعد از بازنشستگی)",
+                        insurancePercent = "14",
+                    ),
+                ),
+                isAgreementConfirmed = false,
+            ),
+            onBack = {},
+            onShowRules = {},
+            onIntent = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun ContractFlowScreenContentEditModePreview() {
+    PreviewRtlThemeContent {
+        ContractFlowScreenContent(
+            state = ContractFlowUiState(
+                isLoading = false,
+                registrationInfo = MockRegistrationInfo,
+                config = MockConfig,
+                currentStep = ContractStep.STEP_USER_INFO,
+                isEditMode = true,
+                userInfo = MockUserInfo,
             ),
             onBack = {},
             onShowRules = {},

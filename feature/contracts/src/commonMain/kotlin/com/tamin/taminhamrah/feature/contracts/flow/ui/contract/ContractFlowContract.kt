@@ -80,6 +80,7 @@ data class ContractFlowUiState(
     val preflightGateError: String? = null,
     val allowsOnlinePayment: Boolean = false,
     val currentStep: ContractStep = ContractStep.STEP_REGISTRATION,
+    val isEditMode: Boolean = false,
 ) {
     val canGoNext: Boolean
         get() {
@@ -97,8 +98,7 @@ data class ContractFlowUiState(
                     contractApplicantType == ContractApplicantType.PERSONAL ||
                         (contractApplicantType == ContractApplicantType.GUARDIAN && guardianForm.isValid)
                 ContractStep.STEP_SELECT_BRANCH -> branchSelection.isValid
-                ContractStep.STEP_UPLOAD_IMAGE ->
-                    documentDescription.isNotBlank() && uploadedDocuments.isNotEmpty()
+                ContractStep.STEP_UPLOAD_IMAGE -> !isUploadingDocument
                 ContractStep.STEP_TREATMENT_SUPPORT ->
                     treatmentSupportCode == TREATMENT_SUPPORT_WITHOUT ||
                         (treatmentSupportCode == TREATMENT_SUPPORT_WITH && isTreatmentCommitmentConfirmed)
@@ -166,7 +166,10 @@ data class ContractFlowUiState(
         data class UploadDocumentError(val message: String?) : PartialState()
         data class DocumentUploaded(val document: UploadImagePR) : PartialState()
         data object UploadedDocumentCleared : PartialState()
-        data class StepChanged(val step: ContractStep) : PartialState()
+        data class StepChanged(
+            val step: ContractStep,
+            val isEditMode: Boolean = false,
+        ) : PartialState()
         data class ForceTreatmentSupportChanged(val forced: Boolean) : PartialState()
         data class HidePremiumSliderChanged(val hidden: Boolean) : PartialState()
         data class LockedPremiumRateChanged(val code: String?) : PartialState()
@@ -189,6 +192,8 @@ sealed class ContractFlowIntent {
     data object LoadInitialData : ContractFlowIntent()
     data object GoToNextStep : ContractFlowIntent()
     data object GoToPreviousStep : ContractFlowIntent()
+    data class EditStep(val step: ContractStep) : ContractFlowIntent()
+    data object SaveEdit : ContractFlowIntent()
     data class SetRulesConfirmed(val confirmed: Boolean) : ContractFlowIntent()
     data class UpdateUserInfo(val userInfo: UserInfoFormPR) : ContractFlowIntent()
     data class SetContractApplicantType(val type: ContractApplicantType) : ContractFlowIntent()
@@ -213,7 +218,15 @@ sealed class ContractFlowIntent {
 }
 
 sealed class ContractFlowEvent {
-    data class ShowPaymentOption(val contractNumber: String, val amount: Long) : ContractFlowEvent()
+    data class ShowSubmitSuccess(
+        val contractNumber: String,
+        val contractDate: String,
+        val amount: Long,
+        val canPayOnline: Boolean,
+    ) : ContractFlowEvent()
+
+    data class ShowSubmitFailure(val message: String) : ContractFlowEvent()
+
     data class ShowMessage(val message: String) : ContractFlowEvent()
 }
 

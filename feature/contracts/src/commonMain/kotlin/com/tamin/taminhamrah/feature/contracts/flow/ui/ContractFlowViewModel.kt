@@ -23,6 +23,7 @@ import com.tamin.taminhamrah.model.common.CityPR
 import com.tamin.taminhamrah.model.common.ProvincePR
 import com.tamin.taminhamrah.contractFlow.ContractApplicantType
 import com.tamin.taminhamrah.contractFlow.ContractStep
+import com.tamin.taminhamrah.contractFlow.isEditableFromSummary
 import com.tamin.taminhamrah.model.contractFlow.GuardianFormPR
 import com.tamin.taminhamrah.model.contractFlow.SpcPremiumRateOptionPR
 import com.tamin.taminhamrah.model.contractFlow.UploadImagePR
@@ -71,6 +72,7 @@ import taminx.core.core_ui.contract_preflight_not_registered
 import taminx.core.core_ui.contract_preflight_other_contract
 import taminx.core.core_ui.contract_preflight_under_age
 import taminx.core.core_ui.contract_preflight_contracts_load_failed
+import taminx.core.core_ui.contract_submit_failure_message_fallback
 import taminx.core.core_ui.contract_treatment_dependents_load_error
 import taminx.core.core_ui.contract_upload_failed_error
 import taminx.core.core_ui.contract_upload_jpeg_only_error
@@ -110,6 +112,8 @@ class ContractFlowViewModel(
             ContractFlowIntent.LoadInitialData -> handleLoadInitialData()
             ContractFlowIntent.GoToNextStep -> handleGoToNextStep()
             ContractFlowIntent.GoToPreviousStep -> handleGoToPreviousStep()
+            is ContractFlowIntent.EditStep -> handleEditStep(intent.step)
+            ContractFlowIntent.SaveEdit -> handleSaveEdit()
             is ContractFlowIntent.SetRulesConfirmed -> handleSetRulesConfirmed(intent.confirmed)
             is ContractFlowIntent.UpdateUserInfo -> handleUpdateUserInfo(intent.userInfo)
             is ContractFlowIntent.SetContractApplicantType -> handleSetContractApplicantType(intent.type)
@@ -393,20 +397,61 @@ class ContractFlowViewModel(
         )
     }
 
-    private fun handleGoToPreviousStep(): Flow<PartialState> = merge(
-        flow {
-            val flowConfig = uiState.value.config ?: config
-            val previousStep = flowConfig.previousStep(uiState.value.currentStep) ?: return@flow
-            emit(PartialState.StepChanged(previousStep))
-        },
-        flow {
-            val flowConfig = uiState.value.config ?: config
-            val previousStep = flowConfig.previousStep(uiState.value.currentStep) ?: return@flow
-            if (previousStep == ContractStep.STEP_INSURANCE_PREMIUM) {
-                emitAll(reloadPremiumRangeIfNeeded(flowConfig))
+    private fun handleGoToPreviousStep(): Flow<PartialState> {
+        if (uiState.value.isEditMode) {
+            return flow {
+                emit(
+                    PartialState.StepChanged(
+                        step = ContractStep.STEP_SUBMIT_CONTRACT,
+                        isEditMode = false,
+                    ),
+                )
             }
-        },
-    )
+        }
+        return merge(
+            flow {
+                val flowConfig = uiState.value.config ?: config
+                val previousStep = flowConfig.previousStep(uiState.value.currentStep) ?: return@flow
+                emit(PartialState.StepChanged(previousStep))
+            },
+            flow {
+                val flowConfig = uiState.value.config ?: config
+                val previousStep = flowConfig.previousStep(uiState.value.currentStep) ?: return@flow
+                if (previousStep == ContractStep.STEP_INSURANCE_PREMIUM) {
+                    emitAll(reloadPremiumRangeIfNeeded(flowConfig))
+                }
+            },
+        )
+    }
+
+    private fun handleEditStep(step: ContractStep): Flow<PartialState> {
+        val flowConfig = uiState.value.config ?: config
+        if (step !in flowConfig.steps || !step.isEditableFromSummary()) return flow { }
+        return merge(
+            flow { emit(PartialState.StepChanged(step = step, isEditMode = true)) },
+            when (step) {
+                ContractStep.STEP_INSURANCE_PREMIUM,
+                ContractStep.STEP_SALARY,
+                -> reloadPremiumRangeIfNeeded(flowConfig)
+                else -> flow { }
+            },
+        )
+    }
+
+    private fun handleSaveEdit(): Flow<PartialState> {
+        if (!uiState.value.isEditMode || !uiState.value.canGoNext) return flow { }
+        if (uiState.value.currentStep == ContractStep.STEP_USER_INFO && hasContactChanged()) {
+            return saveContactThenAdvance(ContractStep.STEP_SUBMIT_CONTRACT)
+        }
+        return flow {
+            emit(
+                PartialState.StepChanged(
+                    step = ContractStep.STEP_SUBMIT_CONTRACT,
+                    isEditMode = false,
+                ),
+            )
+        }
+    }
 
     private fun reloadPremiumRangeIfNeeded(flowConfig: ContractFlowConfig): Flow<PartialState> {
         val state = uiState.value
@@ -783,20 +828,24 @@ class ContractFlowViewModel(
             makeContractUseCase(flowConfig.isOptionalInsurance, params).collect { result ->
                 val presentation = result.toContractResultPresentation()
                 emit(PartialState.ContractSubmitted(presentation))
-                if (uiState.value.allowsOnlinePayment) {
-                    val amount = uiState.value.calculatedMonthlySalary
-                        ?: uiState.value.selectedMonthlyPremium
-                        ?: 0L
-                    sendEvent(
-                        ContractFlowEvent.ShowPaymentOption(
-                            contractNumber = presentation.contractNumber,
-                            amount = amount,
-                        ),
-                    )
-                }
+                val amount = uiState.value.calculatedMonthlySalary
+                    ?: uiState.value.selectedMonthlyPremium
+                    ?: 0L
+                sendEvent(
+                    ContractFlowEvent.ShowSubmitSuccess(
+                        contractNumber = presentation.contractNumber,
+                        contractDate = presentation.contractDate,
+                        amount = amount,
+                        canPayOnline = uiState.value.allowsOnlinePayment,
+                    ),
+                )
             }
         } catch (e: Exception) {
-            emitError(e.message)
+            sendEvent(
+                ContractFlowEvent.ShowSubmitFailure(
+                    e.message ?: getString(Res.string.contract_submit_failure_message_fallback),
+                ),
+            )
         } finally {
             emit(PartialState.SubmittingContract(false))
         }
@@ -1031,6 +1080,7 @@ class ContractFlowViewModel(
         )
         is PartialState.StepChanged -> currentState.copy(
             currentStep = partialState.step,
+            isEditMode = partialState.isEditMode,
         )
         is PartialState.ForceTreatmentSupportChanged -> currentState.copy(
             forceTreatmentSupport = partialState.forced,

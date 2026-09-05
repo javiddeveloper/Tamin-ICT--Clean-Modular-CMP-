@@ -114,3 +114,15 @@ fun List<ContractStep>.displayNumber(step: ContractStep): Int {
 fun List<ContractStep>.isFirstStep(step: ContractStep): Boolean = firstOrNull() == step
 
 fun List<ContractStep>.isLastStep(step: ContractStep): Boolean = lastOrNull() == step
+
+fun ContractStep.isEditableFromSummary(): Boolean = when (this) {
+    ContractStep.STEP_USER_INFO,
+    ContractStep.STEP_CONTRACT_APPLICANT,
+    ContractStep.STEP_SELECT_BRANCH,
+    ContractStep.STEP_UPLOAD_IMAGE,
+    ContractStep.STEP_TREATMENT_SUPPORT,
+    ContractStep.STEP_INSURANCE_PREMIUM,
+    ContractStep.STEP_SALARY,
+    -> true
+    else -> false
+}

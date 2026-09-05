@@ -43,6 +43,7 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.contract_upload_add_documents
+import taminx.core.core_ui.contract_upload_description_empty_error
 import taminx.core.core_ui.contract_upload_description_placeholder
 import taminx.core.core_ui.contract_upload_description_required
 import taminx.core.core_ui.contract_upload_format_hint
@@ -72,7 +73,9 @@ fun UploadImageStepContent(
     val cardShape = RoundedCornerShape(CornerRadius.x2l)
     val scope = rememberCoroutineScope()
     var pickError by remember { mutableStateOf<String?>(null) }
+    var showDescriptionError by remember { mutableStateOf(false) }
     val readErrorMessage = stringResource(Res.string.contract_upload_read_error)
+    val descriptionEmptyError = stringResource(Res.string.contract_upload_description_empty_error)
     val uploadedDocument = uploadedDocuments.firstOrNull()
     val hasDocument = previewBytes != null || uploadedDocument != null
     val thumbnailBase64 = rememberBase64Thumbnail(previewBytes)
@@ -82,7 +85,7 @@ fun UploadImageStepContent(
         hasDocument -> TaminDocumentUploadState.Uploaded
         else -> TaminDocumentUploadState.Empty
     }
-    val canPick = !isUploading && description.isNotBlank() &&
+    val canPick = !isUploading &&
         (uploadState == TaminDocumentUploadState.Empty || uploadState == TaminDocumentUploadState.Failed)
 
     val filePickerLauncher = rememberFilePickerLauncher(
@@ -136,12 +139,23 @@ fun UploadImageStepContent(
 
         TaminTextField(
             value = description,
-            onValueChange = onDescriptionChange,
+            onValueChange = {
+                if (showDescriptionError && it.isNotBlank()) {
+                    showDescriptionError = false
+                }
+                onDescriptionChange(it)
+            },
             modifier = Modifier.fillMaxWidth(),
             label = stringResource(Res.string.contract_upload_description_required),
             placeholder = stringResource(Res.string.contract_upload_description_placeholder),
             enabled = !isUploading,
             singleLine = true,
+            isError = showDescriptionError && description.isBlank(),
+            errorMessage = if (showDescriptionError && description.isBlank()) {
+                descriptionEmptyError
+            } else {
+                null
+            },
         )
 
         TaminDocumentUploadCard(
@@ -150,7 +164,14 @@ fun UploadImageStepContent(
             statusText = statusText,
             thumbnailBase64 = thumbnailBase64,
             onCardClick = if (canPick) {
-                { filePickerLauncher.launch() }
+                {
+                    if (description.isBlank()) {
+                        showDescriptionError = true
+                    } else {
+                        showDescriptionError = false
+                        filePickerLauncher.launch()
+                    }
+                }
             } else {
                 null
             },
