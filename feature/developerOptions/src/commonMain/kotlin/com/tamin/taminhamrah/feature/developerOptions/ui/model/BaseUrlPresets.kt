@@ -20,8 +20,18 @@ fun BaseUrlKey.displayName(): String = when (this) {
 }
 
 /**
- * Known named base URLs collected from this project's build config and from
- * old_android/'s Constants.kt (legacy, read-only reference — see docs/vault/Reference-old-android.md).
+ * One-tap shortcuts back to each service's shipped default.
+ *
+ * ⚠️ **Only ever list a URL that is already a `NetworkConstants` compile-time default.**
+ *
+ * `feature:developerOptions` is an unconditional `api(project(...))` dependency of `:shared`, and
+ * the release build type sets `isMinifyEnabled = false` (`androidApp/build.gradle.kts`), so nothing
+ * here is stripped: every string literal in this file is readable in the published APK/IPA with
+ * `strings` on the extracted dex. Internal test hostnames and private-range IPs listed as presets
+ * would therefore be handed to anyone who downloads the app — which is why the test/staging
+ * addresses that used to live here were removed. Type them into the "آدرس دلخواه" field instead;
+ * `DeveloperOptionsRepository.setOverride` normalises and persists whatever is entered, so a test
+ * host survives an app restart exactly like a preset would.
  */
 object BaseUrlPresets {
 
@@ -37,22 +47,14 @@ object BaseUrlPresets {
         BaseUrlKey.AI to true
     )
 
-    val presets: Map<BaseUrlKey, List<BaseUrlPreset>> = mapOf(
-        BaseUrlKey.MAIN to listOf(
-            BaseUrlPreset("Production", "https://eservices.tamin.ir/api/"),
-            BaseUrlPreset("Test", "https://eservices.test.org:9090/api/")
-        ),
-        BaseUrlKey.ACCOUNT to listOf(
-            BaseUrlPreset("Production", "https://account.tamin.ir/auth/"),
-            BaseUrlPreset("Test", "https://account-test.tamin.ir:9090/auth/"),
-            BaseUrlPreset("Old Android Test", "http://s-naghavi.tamin.org:7002/auth/")
-        ),
-        BaseUrlKey.HEALTH_PROFILE to listOf(
-            BaseUrlPreset("Test", "http://172.16.14.115:5700/api/")
-        ),
-        BaseUrlKey.AI to listOf(
-            BaseUrlPreset("Production", "https://sw.tamin.ir/api/"),
-            BaseUrlPreset("Dev IP", "http://172.16.15.54:9001/")
-        )
-    )
+    /**
+     * Built from [BaseUrlKey.defaultValue] rather than repeated as literals, so this list cannot
+     * drift from `NetworkConstants` and cannot grow a non-shipping address by accident.
+     */
+    val presets: Map<BaseUrlKey, List<BaseUrlPreset>> =
+        BaseUrlKey.entries.associateWith { key ->
+            listOf(BaseUrlPreset(label = DEFAULT_PRESET_LABEL, url = key.defaultValue))
+        }
+
+    private const val DEFAULT_PRESET_LABEL = "Default"
 }

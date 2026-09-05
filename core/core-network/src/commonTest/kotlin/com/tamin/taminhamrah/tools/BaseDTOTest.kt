@@ -8,7 +8,9 @@ import com.tamin.taminhamrah.tools.errorHandling.shouldNavigateBack
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
+import com.tamin.taminhamrah.model.user.EditMobileResponseDto
 import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -193,6 +195,28 @@ class BaseDTOTest {
     }
 
     // --- extractTypedData (um-mobile-api gateway error envelope: {cause, message}) ---
+
+    @Test
+    fun `extractTypedData decodes the typed payload on success`() {
+        val dto = BaseDTO<kotlinx.serialization.json.JsonElement?>(
+            status = 200,
+            family = "System",
+            reason = "OK",
+            data = buildJsonObject {
+                put("traceId", "trace-1")
+                putJsonObject("data") {
+                    put("hash", "hash-1")
+                    put("expirationTime", 120L)
+                }
+            }
+        )
+
+        val decoded = dto.extractTypedData(Json, EditMobileResponseDto.serializer())
+
+        assertEquals("trace-1", decoded.traceId)
+        assertEquals("hash-1", decoded.data?.hash)
+        assertEquals(120L, decoded.data?.expirationTime)
+    }
 
     @Test
     fun `extractTypedData surfaces the gateway's own message on a 4xx error`() {
