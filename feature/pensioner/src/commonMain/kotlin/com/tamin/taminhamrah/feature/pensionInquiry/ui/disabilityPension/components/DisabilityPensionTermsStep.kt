@@ -109,19 +109,19 @@ fun DisabilityPensionTermsStep(
             if (state.showTermsValidationError) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.xs, Alignment.End),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.xs, Alignment.Start),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(
-                        text = stringResource(Res.string.disability_pension_terms_validation_error),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = colors.dangerText,
-                    )
                     Icon(
                         imageVector = Icons.Outlined.Info,
                         contentDescription = null,
                         tint = colors.dangerText,
                         modifier = Modifier.size(IconSize.small),
+                    )
+                    Text(
+                        text = stringResource(Res.string.disability_pension_terms_validation_error),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = colors.dangerText,
                     )
                 }
             }
