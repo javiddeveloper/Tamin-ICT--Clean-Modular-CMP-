@@ -58,6 +58,9 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
+import com.tamin.taminhamrah.ui.toparea.TopAreaState
+import com.tamin.taminhamrah.ui.toparea.topAreaHide
+import com.tamin.taminhamrah.ui.toparea.rememberTopAreaState
 import taminx.core.core_ui.action_back
 import taminx.core.core_ui.edict_search_title
 import taminx.core.core_ui.ic_inbox
@@ -86,7 +89,7 @@ private const val AMOUNT_COLLAPSED_SCALE = 0.72f
 fun WorkersPaymentHeader(
     state: WorkersPaymentUiState,
     onBack: () -> Unit,
-    collapseProgress: () -> Float = { 0f },
+    topAreaState: TopAreaState,
     onInfoClicked: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -99,7 +102,7 @@ fun WorkersPaymentHeader(
         TaminTopAppBar(
             title = stringResource(Res.string.workers_payment_title),
             background = gradient,
-            bottomPadding = HEADER_OVERLAP,
+            bottomPadding = Spacing.page + HEADER_OVERLAP,
             navigationIcon = {
                 TaminTopAppBarButton(
                     icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
@@ -119,6 +122,7 @@ fun WorkersPaymentHeader(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .topAreaHide(topAreaState)
                         .padding(horizontal = Spacing.page, vertical = Spacing.smPlus),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
@@ -140,16 +144,17 @@ fun WorkersPaymentHeader(
 
         WorkersPaymentSummaryCard(
             state = state,
-            collapseProgress = collapseProgress,
+            collapseProgress = topAreaState.progressProvider,
             modifier = Modifier
                 .fillMaxWidth()
                 .rideUpIntoHeader(
-                    progress = collapseProgress,
+                    progress = topAreaState.progressProvider,
                     expandedOverlap = HEADER_OVERLAP,
                     collapsedOverlap = HEADER_OVERLAP,
                 )
                 .padding(horizontal = Spacing.lg),
         )
+        Spacer(Modifier.height(Spacing.lg))
     }
 }
 
@@ -330,19 +335,12 @@ private val PreviewState = WorkersPaymentUiState(
 @Composable
 private fun WorkersPaymentHeaderExpandedPreview() {
     PreviewRtlThemeContent {
-        WorkersPaymentHeader(state = PreviewState, onBack = {}, onInfoClicked = {})
-    }
-}
-
-@PreviewRtlTheme
-@Composable
-private fun WorkersPaymentHeaderCollapsedPreview() {
-    PreviewRtlThemeContent {
         WorkersPaymentHeader(
             state = PreviewState,
             onBack = {},
-            collapseProgress = { 1f },
-            onInfoClicked = {})
+            topAreaState = rememberTopAreaState(expandedHeight = 300.dp, collapsedHeight = 96.dp),
+            onInfoClicked = {}
+        )
     }
 }
 
@@ -350,6 +348,11 @@ private fun WorkersPaymentHeaderCollapsedPreview() {
 @Composable
 private fun WorkersPaymentHeaderDarkPreview() {
     PreviewRtlThemeContent(darkTheme = true) {
-        WorkersPaymentHeader(state = PreviewState, onBack = {}, onInfoClicked = {})
+        WorkersPaymentHeader(
+            state = PreviewState,
+            onBack = {},
+            topAreaState = rememberTopAreaState(expandedHeight = 300.dp, collapsedHeight = 96.dp),
+            onInfoClicked = {}
+        )
     }
 }

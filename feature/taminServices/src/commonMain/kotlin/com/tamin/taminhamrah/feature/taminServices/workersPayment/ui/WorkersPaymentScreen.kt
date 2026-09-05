@@ -18,19 +18,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Verified
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -51,13 +49,15 @@ import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
-import com.tamin.taminhamrah.ui.components.rememberCollapsingHeaderState
-import com.tamin.taminhamrah.ui.components.reservedHeight
 import com.tamin.taminhamrah.ui.components.toast.AppToastHost
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.toparea.driveTopArea
+import com.tamin.taminhamrah.ui.toparea.rememberMeasuredTopAreaState
+import com.tamin.taminhamrah.ui.toparea.reportTopAreaHeight
+import com.tamin.taminhamrah.ui.toparea.topAreaContentPadding
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
@@ -65,8 +65,6 @@ import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.workers_payment_empty_subtitle
 import taminx.core.core_ui.workers_payment_empty_title
-
-private val HeaderCollapseDistance = 140.dp
 
 @Composable
 fun WorkersPaymentRoute(
@@ -158,9 +156,17 @@ internal fun WorkersPaymentListScreen(
     onBack: () -> Unit,
 ) {
     val taminColors = LocalTaminColors.current
-    val collapse = rememberCollapsingHeaderState(HeaderCollapseDistance)
-    var headerHeightPx by remember { mutableIntStateOf(0) }
     var showInfoSheet by remember { mutableStateOf(false) }
+
+    val topArea = rememberMeasuredTopAreaState { state ->
+        WorkersPaymentHeader(
+            state = uiState,
+            onBack = onBack,
+            topAreaState = state,
+            onInfoClicked = { showInfoSheet = true },
+        )
+    }
+    val listState = rememberLazyListState()
 
     Box(
         modifier = Modifier
@@ -168,15 +174,18 @@ internal fun WorkersPaymentListScreen(
             .background(taminColors.bgPage),
     ) {
         LazyColumn(
+            state = listState,
             modifier = Modifier
                 .fillMaxSize()
-                .nestedScroll(collapse.nestedScrollConnection),
-            contentPadding = PaddingValues(
-                bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + Spacing.lg,
+                .driveTopArea(topArea, listState),
+            contentPadding = topAreaContentPadding(
+                state = topArea,
+                rest = PaddingValues(
+                    bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + Spacing.lg,
+                ),
             ),
             verticalArrangement = Arrangement.spacedBy(Spacing.lg),
         ) {
-            item { Spacer(modifier = Modifier.reservedHeight { headerHeightPx }) }
 
             when {
                 uiState.isLoading && uiState.items.isEmpty() -> {
@@ -213,11 +222,11 @@ internal fun WorkersPaymentListScreen(
         WorkersPaymentHeader(
             state = uiState,
             onBack = onBack,
-            collapseProgress = collapse.progressProvider,
+            topAreaState = topArea,
             onInfoClicked = { showInfoSheet = true },
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .onSizeChanged { headerHeightPx = it.height },
+                .reportTopAreaHeight(topArea),
         )
 
         if (uiState.isLoading && uiState.items.isNotEmpty()) {
