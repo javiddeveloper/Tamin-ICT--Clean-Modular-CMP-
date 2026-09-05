@@ -16,7 +16,7 @@ object NetworkConstants {
     const val REQUEST_TIMEOUT_60_SEC = 60_000L
     const val REQUEST_TIMEOUT_5_MIN = 300_000L
     const val REDIRECT_URI = "mytamin://login"
-    const val DEFAULT_AUDIENCE = "https://es.tamin.ir,https://eservices.tamin.ir"
+    const val DEFAULT_AUDIENCE = "https://es.tamin.ir,https://eservices.tamin.ir,https://profile-api.tamin.ir"
     const val EDIT_MOBILE_URL = "https://apim.tamin.ir/t/um-mobile-api.tamin.ir/change-mobile-number/request/v1"
     const val VERIFY_EDIT_MOBILE_URL = "https://apim.tamin.ir/t/um-mobile-api.tamin.ir/change-mobile-number/confirm/v1"
 
