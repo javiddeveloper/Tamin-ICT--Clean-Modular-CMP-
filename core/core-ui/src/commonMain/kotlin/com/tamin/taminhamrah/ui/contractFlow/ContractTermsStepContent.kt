@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -29,6 +28,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoPR
 import com.tamin.taminhamrah.ui.components.IconPosition
+import com.tamin.taminhamrah.ui.components.TaminCheckBox
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
@@ -65,7 +65,7 @@ fun ContractTermsStepContent(
             .padding(Spacing.lg),
         verticalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
-        // Info Banner
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -90,7 +90,7 @@ fun ContractTermsStepContent(
             )
         }
 
-        // View Rules Outlined Button
+
         TaminOutlinedButton(
             text = stringResource(Res.string.contract_terms_view_rules_btn),
             onClick = onShowRules,
@@ -103,14 +103,14 @@ fun ContractTermsStepContent(
 
         Spacer(modifier = Modifier.height(Spacing.xs))
 
-        // Commitment Header
+
         Text(
             text = stringResource(Res.string.contract_terms_commitment_header),
             style = MaterialTheme.typography.labelLarge,
             color = colors.textMuted,
         )
 
-        // Commitment Checkbox and Text
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -118,6 +118,10 @@ fun ContractTermsStepContent(
             verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
+            TaminCheckBox(
+                checked = isRulesConfirmed,
+                onCheckedChange = onRulesConfirmedChange,
+            )
             Text(
                 text = buildCommitmentText(fullName = info.fullName),
                 style = MaterialTheme.typography.bodySmall.copy(lineHeight = MaterialTheme.typography.bodyMedium.lineHeight),
@@ -126,10 +130,7 @@ fun ContractTermsStepContent(
                     .weight(1f)
                     .padding(top = Spacing.xs),
             )
-            Checkbox(
-                checked = isRulesConfirmed,
-                onCheckedChange = onRulesConfirmedChange,
-            )
+
         }
     }
 }

@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +28,7 @@ import com.tamin.taminhamrah.model.contractFlow.FreelanceContractResultPR
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.TaminCheckBox
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
@@ -110,15 +109,10 @@ fun SubmitContractStepContent(
             verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            Checkbox(
+            TaminCheckBox(
                 checked = isAgreementConfirmed,
                 onCheckedChange = { if (!isSubmitting && submittedContract == null) onAgreementConfirmedChange(it) },
                 enabled = !isSubmitting && submittedContract == null,
-                colors = CheckboxDefaults.colors(
-                    checkedColor = colors.blueText,
-                    uncheckedColor = colors.border,
-                    checkmarkColor = colors.bgSurface,
-                ),
             )
             TaminText(
                 text = buildAgreementText(
