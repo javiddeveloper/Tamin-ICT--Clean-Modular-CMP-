@@ -17,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
@@ -58,6 +59,9 @@ fun <T> SelectableField(
     onRetry: (() -> Unit)? = null,
     sheetType: TaminBottomSheetType = TaminBottomSheetType.CUSTOM,
     showSearch: Boolean = true,
+    selectedSubtitle: String? = null,
+    icon: ImageVector? = null,
+    showChevron: Boolean = false,
 ) {
     val colors = LocalTaminColors.current
     var sheetOpen by remember { mutableStateOf(false) }
@@ -82,7 +86,9 @@ fun <T> SelectableField(
             text = selectedName.ifBlank { placeholder },
             isPlaceholder = selectedName.isBlank(),
             isError = errorMessage != null,
-            showChevron = false,
+            icon = icon,
+            showChevron = showChevron,
+            subtitle = selectedSubtitle?.takeIf { selectedName.isNotBlank() },
             onClick = { if (enabled) sheetOpen = true },
         )
 

@@ -99,6 +99,7 @@ data class ContractFlowUiState(
                         (contractApplicantType == ContractApplicantType.GUARDIAN && guardianForm.isValid)
                 ContractStep.STEP_SELECT_BRANCH -> branchSelection.isValid
                 ContractStep.STEP_UPLOAD_IMAGE -> !isUploadingDocument
+                ContractStep.STEP_JOB_TITLE -> selectedFreeJobCode != null
                 ContractStep.STEP_TREATMENT_SUPPORT ->
                     treatmentSupportCode == TREATMENT_SUPPORT_WITHOUT ||
                         (treatmentSupportCode == TREATMENT_SUPPORT_WITH && isTreatmentCommitmentConfirmed)
