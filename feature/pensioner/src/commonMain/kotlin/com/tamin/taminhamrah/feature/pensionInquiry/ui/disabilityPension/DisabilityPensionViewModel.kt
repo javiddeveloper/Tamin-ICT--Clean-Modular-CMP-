@@ -8,13 +8,17 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contrac
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionUiState
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionUiState.PartialState
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.LandlinePhoneError
+import com.tamin.taminhamrah.mapper.pension.toPresentation
 import com.tamin.taminhamrah.mapper.personal.toPresentation
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.addDependent.RefreshDependentsUseCase
+import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
 import com.tamin.taminhamrah.useCases.pension.GetDisabilityPersonalInfoUseCase
+import com.tamin.taminhamrah.useCases.pension.GetMedicalCommissionPdfUseCase
+import com.tamin.taminhamrah.useCases.pension.GetRegisteredMedicalCommissionUseCase
 import com.tamin.taminhamrah.useCases.pension.GetUserAgeUseCase
 import com.tamin.taminhamrah.useCases.personal.GetDisabilityDependentInfoUseCase
 import kotlinx.collections.immutable.toImmutableList
@@ -29,6 +33,9 @@ class DisabilityPensionViewModel(
     private val getDisabilityDependentInfoUseCase: GetDisabilityDependentInfoUseCase,
     private val refreshDependentsUseCase: RefreshDependentsUseCase,
     private val getUserAgeUseCase: GetUserAgeUseCase,
+    private val getTalfighInfosUseCase: GetTalfighInfosUseCase,
+    private val getRegisteredMedicalCommissionUseCase: GetRegisteredMedicalCommissionUseCase,
+    private val getMedicalCommissionPdfUseCase: GetMedicalCommissionPdfUseCase,
 ) : BaseViewModel<DisabilityPensionUiState, PartialState, DisabilityPensionEvent, DisabilityPensionIntent>(
     initialState = DisabilityPensionUiState()
 ) {
@@ -113,6 +120,27 @@ class DisabilityPensionViewModel(
                     emit(PartialState.WorkshopConfirmationErrorChanged(false))
                 }
             }
+            is DisabilityPensionIntent.CommissionObjectionChanged -> {
+                emit(PartialState.CommissionObjectionChanged(intent.hasObjection))
+            }
+            DisabilityPensionIntent.HistoryObjectionLinkClicked -> {
+                sendEvent(DisabilityPensionEvent.ShowToast(HISTORY_OBJECTION_COMING_SOON_MESSAGE))
+            }
+            DisabilityPensionIntent.ShowRegisteredRequestsClicked -> {
+                emit(PartialState.RegisteredRequestsSheetVisibilityChanged(true))
+                loadRegisteredRequests()
+            }
+            DisabilityPensionIntent.DismissRegisteredRequestsSheet -> {
+                emit(PartialState.RegisteredRequestsSheetVisibilityChanged(false))
+            }
+            DisabilityPensionIntent.ShowMedicalCommissionPdfViewerClicked -> {
+                emit(PartialState.MedicalCommissionPdfViewerVisibilityChanged(true))
+            }
+            DisabilityPensionIntent.DownloadMedicalCommissionPdfClicked -> downloadMedicalCommissionPdf()
+            DisabilityPensionIntent.DismissMedicalCommissionPdfViewer -> {
+                emit(PartialState.MedicalCommissionPdfViewerVisibilityChanged(false))
+                emit(PartialState.MedicalCommissionPdfChanged(null))
+            }
         }
     }
 
@@ -137,6 +165,7 @@ class DisabilityPensionViewModel(
             }
             DisabilityPensionStep.IdentityContact -> handleIdentityContactNextStep()
             DisabilityPensionStep.Workshop -> handleWorkshopNextStep()
+            DisabilityPensionStep.CommissionRecord -> handleCommissionRecordNextStep()
         }
     }
 
@@ -168,10 +197,16 @@ class DisabilityPensionViewModel(
 
         if (state.isWorkshopConfirmed) {
             emit(PartialState.WorkshopConfirmationErrorChanged(false))
-            // TODO(EM-2619): navigate to step 5 once its design is delivered.
+            emit(PartialState.StepChanged(DisabilityPensionStep.CommissionRecord))
+            loadInsuranceRecord()
         } else {
             emit(PartialState.WorkshopConfirmationErrorChanged(true))
         }
+    }
+
+    private suspend fun FlowCollector<PartialState>.handleCommissionRecordNextStep() {
+        if (uiState.value.hasCommissionObjection == true) return
+        // TODO(EM-2619): navigate to step 6 once its design is delivered.
     }
 
     private suspend fun FlowCollector<PartialState>.handlePreviousStepClicked() {
@@ -179,6 +214,7 @@ class DisabilityPensionViewModel(
             DisabilityPensionStep.Dependents -> emit(PartialState.StepChanged(DisabilityPensionStep.Terms))
             DisabilityPensionStep.IdentityContact -> emit(PartialState.StepChanged(DisabilityPensionStep.Dependents))
             DisabilityPensionStep.Workshop -> emit(PartialState.StepChanged(DisabilityPensionStep.IdentityContact))
+            DisabilityPensionStep.CommissionRecord -> emit(PartialState.StepChanged(DisabilityPensionStep.Workshop))
             DisabilityPensionStep.Terms -> Unit
         }
     }
@@ -261,10 +297,39 @@ class DisabilityPensionViewModel(
         is PartialState.WorkshopConfirmationErrorChanged -> currentState.copy(
             showWorkshopConfirmationError = partialState.show,
         )
+        is PartialState.InsuranceRecordLoading -> currentState.copy(isInsuranceRecordLoading = partialState.isLoading)
+        is PartialState.InsuranceRecordLoaded -> currentState.copy(
+            isInsuranceRecordLoading = false,
+            insuranceRecordDays = partialState.days,
+            insuranceRecordMonths = partialState.months,
+            insuranceRecordYears = partialState.years,
+            insuranceRecordTotalDays = partialState.totalDays,
+        )
+        is PartialState.CommissionObjectionChanged -> currentState.copy(hasCommissionObjection = partialState.hasObjection)
+        is PartialState.RegisteredRequestsSheetVisibilityChanged -> currentState.copy(
+            showRegisteredRequestsSheet = partialState.show,
+        )
+        is PartialState.RegisteredRequestsLoading -> currentState.copy(isRegisteredRequestsLoading = partialState.isLoading)
+        is PartialState.RegisteredRequestsLoaded -> currentState.copy(
+            isRegisteredRequestsLoading = false,
+            registeredRequests = partialState.requests,
+        )
+        is PartialState.MedicalCommissionPdfViewerVisibilityChanged -> currentState.copy(
+            showMedicalCommissionPdfViewer = partialState.show,
+        )
+        is PartialState.MedicalCommissionPdfChanged -> currentState.copy(
+            medicalCommissionPdf = partialState.pdf,
+            medicalCommissionPdfDownloadFailed = false,
+        )
+        is PartialState.MedicalCommissionPdfDownloadFailed -> currentState.copy(
+            medicalCommissionPdfDownloadFailed = true,
+        )
         is PartialState.Error -> currentState.copy(
             isProfileLoading = false,
             isDependentsLoading = false,
             isRefreshingDependents = false,
+            isInsuranceRecordLoading = false,
+            isRegisteredRequestsLoading = false,
             error = partialState.message,
         )
     }
@@ -313,6 +378,43 @@ class DisabilityPensionViewModel(
         }
     }
 
+    private suspend fun FlowCollector<PartialState>.loadInsuranceRecord() {
+        emit(PartialState.InsuranceRecordLoading(true))
+        val record = getTalfighInfosUseCase().list?.firstOrNull()
+        emit(
+            PartialState.InsuranceRecordLoaded(
+                days = record?.historyDays?.toString() ?: "-",
+                months = record?.historyMonths?.toString() ?: "-",
+                years = record?.historyYears?.toString() ?: "-",
+                totalDays = record?.sumHistoryYears?.toString() ?: "-",
+            ),
+        )
+    }
+
+    private suspend fun FlowCollector<PartialState>.loadRegisteredRequests() {
+        emit(PartialState.RegisteredRequestsLoading(true))
+        getRegisteredMedicalCommissionUseCase().collect { requests ->
+            val disabilityRequests = requests
+                .filter { it.demandTypeCode == DISABILITY_DEMAND_TYPE_CODE }
+                .map { it.toPresentation() }
+                .toImmutableList()
+            emit(PartialState.RegisteredRequestsLoaded(disabilityRequests))
+        }
+    }
+
+    private suspend fun FlowCollector<PartialState>.downloadMedicalCommissionPdf() {
+        emit(PartialState.MedicalCommissionPdfChanged(null))
+        try {
+            val workshopId = uiState.value.identityInfo?.work?.workshopId.orEmpty()
+            getMedicalCommissionPdfUseCase(workshopId).collect { pdf ->
+                emit(PartialState.MedicalCommissionPdfChanged(pdf.toPresentation()))
+            }
+        } catch (e: Exception) {
+            emit(PartialState.MedicalCommissionPdfDownloadFailed)
+            sendEvent(DisabilityPensionEvent.ShowToast(e.toSingleLineMessage()))
+        }
+    }
+
     private fun validateLandlinePhone(value: String): LandlinePhoneError? = when {
         value.isBlank() -> LandlinePhoneError.Blank
         !value.startsWith("0") -> LandlinePhoneError.InvalidPrefix
@@ -332,6 +434,8 @@ class DisabilityPensionViewModel(
         const val FEMALE_TITLE = "خانم"
         const val LANDLINE_PHONE_LENGTH = 11
         const val MIN_ADDRESS_LENGTH = 10
+        const val DISABILITY_DEMAND_TYPE_CODE = "01"
+        const val HISTORY_OBJECTION_COMING_SOON_MESSAGE = "این امکان به‌زودی فعال می‌شود."
         val INVALID_ADDRESS_CHARACTERS = Regex("[a-zA-Z$&+:;=?@#|/'<>.^*()%!\\\\]")
     }
 }

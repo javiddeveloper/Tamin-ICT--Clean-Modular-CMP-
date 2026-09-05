@@ -15,6 +15,8 @@ import com.tamin.taminhamrah.model.pension.installment.*
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDN
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestPR
 import com.tamin.taminhamrah.model.pension.retirement.*
+import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.RegisteredMedicalCommissionDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.RegisteredMedicalCommissionPR
 import com.tamin.taminhamrah.ui.orDash
 import com.tamin.taminhamrah.ui.orZero
 
@@ -263,5 +265,13 @@ fun RetirementDocumentPR.toDomain(): RetirementDocumentDN {
 fun InquirePensionCertificateDN.toPresentation(): InquirePensionCertificatePR {
     return InquirePensionCertificatePR(
         message = message ?: ""
+    )
+}
+
+fun RegisteredMedicalCommissionDN.toPresentation(): RegisteredMedicalCommissionPR {
+    return RegisteredMedicalCommissionPR(
+        demandInfoId = demandInfoId ?: 0L,
+        demandSaveDate = demandSaveDate,
+        verdictDescription = commissionPollDesc.orDash(),
     )
 }

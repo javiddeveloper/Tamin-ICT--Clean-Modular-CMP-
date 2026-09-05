@@ -27,6 +27,11 @@ import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityRequestRe
 import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveDocumentDN
 import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoDN
 import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.RegisteredMedicalCommissionDN
+import com.tamin.taminhamrah.model.history.DastmozdInfoDN
+import com.tamin.taminhamrah.model.history.HistoryCertificateType
+import com.tamin.taminhamrah.model.history.HistoryJobInfoDN
+import com.tamin.taminhamrah.model.history.TalfighInfoDN
+import com.tamin.taminhamrah.model.history.UserInfoDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequestDN
 import com.tamin.taminhamrah.model.pension.retirement.RetirementPersonalDN
@@ -50,11 +55,15 @@ import com.tamin.taminhamrah.model.personal.survivorDependent.SurvivorDependentD
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.repository.HistoryRepository
 import com.tamin.taminhamrah.repository.addDependent.AddDependentRepository
 import com.tamin.taminhamrah.repository.pension.PensionRepository
 import com.tamin.taminhamrah.repository.personal.PersonalRepository
 import com.tamin.taminhamrah.useCases.addDependent.RefreshDependentsUseCase
+import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
 import com.tamin.taminhamrah.useCases.pension.GetDisabilityPersonalInfoUseCase
+import com.tamin.taminhamrah.useCases.pension.GetMedicalCommissionPdfUseCase
+import com.tamin.taminhamrah.useCases.pension.GetRegisteredMedicalCommissionUseCase
 import com.tamin.taminhamrah.useCases.pension.GetUserAgeUseCase
 import com.tamin.taminhamrah.useCases.personal.GetDisabilityDependentInfoUseCase
 import kotlinx.coroutines.CompletableDeferred
@@ -82,6 +91,7 @@ class DisabilityPensionViewModelTest {
     private lateinit var pensionRepository: FakeDisabilityPensionRepository
     private lateinit var personalRepository: FakeDisabilityPersonalRepository
     private lateinit var addDependentRepository: FakeDisabilityAddDependentRepository
+    private lateinit var historyRepository: FakeDisabilityHistoryRepository
     private lateinit var viewModel: DisabilityPensionViewModel
 
     @BeforeTest
@@ -90,6 +100,7 @@ class DisabilityPensionViewModelTest {
         pensionRepository = FakeDisabilityPensionRepository()
         personalRepository = FakeDisabilityPersonalRepository()
         addDependentRepository = FakeDisabilityAddDependentRepository()
+        historyRepository = FakeDisabilityHistoryRepository()
     }
 
     @AfterTest
@@ -102,6 +113,9 @@ class DisabilityPensionViewModelTest {
         getDisabilityDependentInfoUseCase = GetDisabilityDependentInfoUseCase(personalRepository),
         refreshDependentsUseCase = RefreshDependentsUseCase(addDependentRepository),
         getUserAgeUseCase = GetUserAgeUseCase(pensionRepository),
+        getTalfighInfosUseCase = GetTalfighInfosUseCase(historyRepository),
+        getRegisteredMedicalCommissionUseCase = GetRegisteredMedicalCommissionUseCase(pensionRepository),
+        getMedicalCommissionPdfUseCase = GetMedicalCommissionPdfUseCase(pensionRepository),
     )
 
     @Test
@@ -474,5 +488,20 @@ private class FakeDisabilityAddDependentRepository : AddDependentRepository {
     override fun uploadImage(imageBytes: ByteArray, fileName: String, mimeType: String): Flow<UploadImageDN> =
         error("not used in DisabilityPensionViewModel")
     override fun addNewDependent(request: RequestAddDependentDN): Flow<GeneralResultDN> =
+        error("not used in DisabilityPensionViewModel")
+}
+
+private class FakeDisabilityHistoryRepository : HistoryRepository {
+    var talfighInfosResult: TalfighInfoDN = TalfighInfoDN(list = emptyList(), total = 0)
+
+    override suspend fun getTalfighInfos(filters: List<ApiFilterDN>): TalfighInfoDN = talfighInfosResult
+
+    override suspend fun getDastmozdInfos(filters: List<ApiFilterDN>): DastmozdInfoDN =
+        error("not used in DisabilityPensionViewModel")
+    override suspend fun getUserInfos(): UserInfoDN =
+        error("not used in DisabilityPensionViewModel")
+    override suspend fun sendToInstitution(selectedTypes: Set<HistoryCertificateType>): Unit =
+        error("not used in DisabilityPensionViewModel")
+    override suspend fun getHistoryJobInfos(filters: List<ApiFilterDN>): Flow<HistoryJobInfoDN> =
         error("not used in DisabilityPensionViewModel")
 }

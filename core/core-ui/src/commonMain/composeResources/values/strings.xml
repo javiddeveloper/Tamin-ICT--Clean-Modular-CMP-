@@ -2024,4 +2024,24 @@
     <string name="disability_pension_workshop_address_error">لطفاً آدرس کارگاه را وارد کنید.</string>
     <string name="disability_pension_workshop_confirm_label">اطلاعات شعبه و کارگاه فوق را تایید می‌نمایم.</string>
     <string name="disability_pension_workshop_confirm_error">لطفاً اطلاعات شعبه و کارگاه را تایید کنید.</string>
+    <string name="disability_pension_step_commission_record_title">سوابق و رأی کمیسیون</string>
+    <string name="disability_pension_step_commission_record_subtitle">سابقهٔ بیمه‌ای شما و وضعیت اعتراض به رأی کمیسیون پزشکی.</string>
+    <string name="disability_pension_insurance_record_title">سابقهٔ بیمه‌ای شما</string>
+    <string name="disability_pension_insurance_record_day">روز</string>
+    <string name="disability_pension_insurance_record_month">ماه</string>
+    <string name="disability_pension_insurance_record_year">سال</string>
+    <string name="disability_pension_insurance_record_total_days_label">مجموع روزهای سابقهٔ پرداخت حق بیمه</string>
+    <string name="disability_pension_history_objection_link">اعتراض به سوابق</string>
+    <string name="disability_pension_commission_opinion_title">نظر کمیسیون پزشکی</string>
+    <string name="disability_pension_commission_question">آیا به رای کمیسیون پزشکی معترض هستید؟</string>
+    <string name="disability_pension_commission_objection_yes">بله، معترض هستم</string>
+    <string name="disability_pension_commission_objection_no">خیر، معترض نیستم</string>
+    <string name="disability_pension_commission_objection_warning">ثبت اعتراض به رای کمیسیون پزشکی از این مسیر امکان‌پذیر نیست. برای پیگیری اعتراض به شعبهٔ تأمین اجتماعی مراجعه نمایید.</string>
+    <string name="disability_pension_registered_requests_button">درخواست‌های ثبت‌شده</string>
+    <string name="disability_pension_view_file_button">مشاهده فایل</string>
+    <string name="disability_pension_registered_requests_sheet_title">درخواست‌های ثبت شده کمیسیون پزشکی</string>
+    <string name="disability_pension_registered_requests_empty">درخواستی برای کمیسیون پزشکی ثبت نشده است.</string>
+    <string name="disability_pension_registered_request_item_title">کمیسیون پزشکی</string>
+    <string name="disability_pension_registered_request_verdict_prefix">رای: %1$s</string>
+    <string name="disability_pension_commission_pdf_title">رأی کمیسیون پزشکی</string>
 </resources>

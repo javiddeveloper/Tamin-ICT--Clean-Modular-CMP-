@@ -3,6 +3,8 @@ package com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contra
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.personal.DisabilityDependentPR
 import com.tamin.taminhamrah.model.personal.DisabilityPersonalInfoPR
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
+import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.RegisteredMedicalCommissionPR
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
@@ -13,6 +15,7 @@ enum class DisabilityPensionStep {
     Dependents,
     IdentityContact,
     Workshop,
+    CommissionRecord,
 }
 
 enum class LandlinePhoneError {
@@ -60,6 +63,18 @@ data class DisabilityPensionUiState(
     val workshopAddressError: Boolean = false,
     val isWorkshopConfirmed: Boolean = false,
     val showWorkshopConfirmationError: Boolean = false,
+    val isInsuranceRecordLoading: Boolean = false,
+    val insuranceRecordDays: String = "",
+    val insuranceRecordMonths: String = "",
+    val insuranceRecordYears: String = "",
+    val insuranceRecordTotalDays: String = "",
+    val hasCommissionObjection: Boolean? = null,
+    val showRegisteredRequestsSheet: Boolean = false,
+    val isRegisteredRequestsLoading: Boolean = false,
+    val registeredRequests: ImmutableList<RegisteredMedicalCommissionPR> = persistentListOf(),
+    val showMedicalCommissionPdfViewer: Boolean = false,
+    val medicalCommissionPdf: PdfDownloadPR? = null,
+    val medicalCommissionPdfDownloadFailed: Boolean = false,
     val error: String? = null,
 ) {
     sealed interface PartialState {
@@ -89,6 +104,20 @@ data class DisabilityPensionUiState(
         data class WorkshopAddressChanged(val value: String, val error: Boolean) : PartialState
         data class WorkshopConfirmedChanged(val accepted: Boolean) : PartialState
         data class WorkshopConfirmationErrorChanged(val show: Boolean) : PartialState
+        data class InsuranceRecordLoading(val isLoading: Boolean) : PartialState
+        data class InsuranceRecordLoaded(
+            val days: String,
+            val months: String,
+            val years: String,
+            val totalDays: String,
+        ) : PartialState
+        data class CommissionObjectionChanged(val hasObjection: Boolean?) : PartialState
+        data class RegisteredRequestsSheetVisibilityChanged(val show: Boolean) : PartialState
+        data class RegisteredRequestsLoading(val isLoading: Boolean) : PartialState
+        data class RegisteredRequestsLoaded(val requests: ImmutableList<RegisteredMedicalCommissionPR>) : PartialState
+        data class MedicalCommissionPdfViewerVisibilityChanged(val show: Boolean) : PartialState
+        data class MedicalCommissionPdfChanged(val pdf: PdfDownloadPR?) : PartialState
+        data object MedicalCommissionPdfDownloadFailed : PartialState
         data class Error(val message: String?) : PartialState
     }
 }
@@ -116,6 +145,13 @@ sealed interface DisabilityPensionIntent {
     data class EmployerNameChanged(val value: String) : DisabilityPensionIntent
     data class WorkshopAddressChanged(val value: String) : DisabilityPensionIntent
     data class WorkshopConfirmedChanged(val accepted: Boolean) : DisabilityPensionIntent
+    data class CommissionObjectionChanged(val hasObjection: Boolean) : DisabilityPensionIntent
+    data object HistoryObjectionLinkClicked : DisabilityPensionIntent
+    data object ShowRegisteredRequestsClicked : DisabilityPensionIntent
+    data object DismissRegisteredRequestsSheet : DisabilityPensionIntent
+    data object ShowMedicalCommissionPdfViewerClicked : DisabilityPensionIntent
+    data object DownloadMedicalCommissionPdfClicked : DisabilityPensionIntent
+    data object DismissMedicalCommissionPdfViewer : DisabilityPensionIntent
 }
 
 sealed interface DisabilityPensionEvent {

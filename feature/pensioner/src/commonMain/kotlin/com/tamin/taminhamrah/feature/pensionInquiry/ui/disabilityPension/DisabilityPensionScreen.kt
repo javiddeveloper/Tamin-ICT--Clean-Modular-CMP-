@@ -31,8 +31,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.components.DisabilityPensionCommissionRecordStep
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.components.DisabilityPensionDependentsStep
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.components.DisabilityPensionIdentityContactStep
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.components.DisabilityPensionRegisteredRequestsSheet
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.components.DisabilityPensionRulesDialog
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.components.DisabilityPensionTermsStep
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.components.DisabilityPensionWorkshopStep
@@ -49,6 +51,7 @@ import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminHeroStepProgress
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
+import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.buttons.SquareIconButton
@@ -65,9 +68,12 @@ import taminx.core.core_ui.action_cancel
 import taminx.core.core_ui.action_confirm
 import taminx.core.core_ui.back_content_description
 import taminx.core.core_ui.close_content_description
+import taminx.core.core_ui.disability_pension_commission_pdf_title
 import taminx.core.core_ui.disability_pension_next_step
 import taminx.core.core_ui.disability_pension_refresh_confirm_message
 import taminx.core.core_ui.disability_pension_refresh_confirm_title
+import taminx.core.core_ui.disability_pension_step_commission_record_subtitle
+import taminx.core.core_ui.disability_pension_step_commission_record_title
 import taminx.core.core_ui.disability_pension_step_dependents_subtitle
 import taminx.core.core_ui.disability_pension_step_dependents_title
 import taminx.core.core_ui.disability_pension_step_identity_subtitle
@@ -159,6 +165,25 @@ fun DisabilityPensionScreen(
             onDismissRequest = { viewModel.sendIntent(DisabilityPensionIntent.DismissRefreshConfirm) },
         )
     }
+
+    if (state.showRegisteredRequestsSheet) {
+        DisabilityPensionRegisteredRequestsSheet(
+            isLoading = state.isRegisteredRequestsLoading,
+            requests = state.registeredRequests,
+            onDismiss = { viewModel.sendIntent(DisabilityPensionIntent.DismissRegisteredRequestsSheet) },
+        )
+    }
+
+    if (state.showMedicalCommissionPdfViewer) {
+        TaminPdfViewer(
+            fileName = "disability_pension_medical_commission_${state.identityInfo?.insuranceId.orEmpty()}.pdf",
+            pdf = state.medicalCommissionPdf,
+            downloadFailed = state.medicalCommissionPdfDownloadFailed,
+            onRequestDownload = { viewModel.sendIntent(DisabilityPensionIntent.DownloadMedicalCommissionPdfClicked) },
+            onDismiss = { viewModel.sendIntent(DisabilityPensionIntent.DismissMedicalCommissionPdfViewer) },
+            title = stringResource(Res.string.disability_pension_commission_pdf_title),
+        )
+    }
 }
 
 @Composable
@@ -187,22 +212,26 @@ private fun DisabilityPensionContent(
     val dependentsTitle = stringResource(Res.string.disability_pension_step_dependents_title)
     val identityTitle = stringResource(Res.string.disability_pension_step_identity_title)
     val workshopTitle = stringResource(Res.string.disability_pension_step_workshop_title)
+    val commissionRecordTitle = stringResource(Res.string.disability_pension_step_commission_record_title)
     val termsSubtitle = stringResource(Res.string.disability_pension_step_subtitle)
     val dependentsSubtitle = stringResource(Res.string.disability_pension_step_dependents_subtitle)
     val identitySubtitle = stringResource(Res.string.disability_pension_step_identity_subtitle)
     val workshopSubtitle = stringResource(Res.string.disability_pension_step_workshop_subtitle)
+    val commissionRecordSubtitle = stringResource(Res.string.disability_pension_step_commission_record_subtitle)
     val currentStepIndex = state.currentStep.ordinal + 1
     val stepTitle = when (state.currentStep) {
         DisabilityPensionStep.Terms -> termsTitle
         DisabilityPensionStep.Dependents -> dependentsTitle
         DisabilityPensionStep.IdentityContact -> identityTitle
         DisabilityPensionStep.Workshop -> workshopTitle
+        DisabilityPensionStep.CommissionRecord -> commissionRecordTitle
     }
     val stepSubtitle = when (state.currentStep) {
         DisabilityPensionStep.Terms -> termsSubtitle
         DisabilityPensionStep.Dependents -> dependentsSubtitle
         DisabilityPensionStep.IdentityContact -> identitySubtitle
         DisabilityPensionStep.Workshop -> workshopSubtitle
+        DisabilityPensionStep.CommissionRecord -> commissionRecordSubtitle
     }
 
     Scaffold(
@@ -289,6 +318,10 @@ private fun DisabilityPensionContent(
                         state = state,
                         onIntent = onIntent,
                     )
+                    DisabilityPensionStep.CommissionRecord -> DisabilityPensionCommissionRecordStep(
+                        state = state,
+                        onIntent = onIntent,
+                    )
                 }
             }
         }
@@ -310,6 +343,7 @@ private fun DisabilityPensionBottomBar(
         DisabilityPensionStep.Dependents,
         DisabilityPensionStep.IdentityContact,
         DisabilityPensionStep.Workshop,
+        DisabilityPensionStep.CommissionRecord,
         -> {
             TaminBottomBar(
                 modifier = Modifier.navigationBarsPadding().imePadding(),
@@ -325,7 +359,9 @@ private fun DisabilityPensionBottomBar(
                     LoadingButton(
                         text = stringResource(Res.string.disability_pension_next_step),
                         onClick = { onIntent(DisabilityPensionIntent.NextStepClicked) },
-                        enabled = !state.isRefreshingDependents && !state.isDependentsLoading,
+                        enabled = !state.isRefreshingDependents &&
+                            !state.isDependentsLoading &&
+                            state.hasCommissionObjection != true,
                         isLoading = state.isRefreshingDependents,
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
                         iconPosition = LoadingButtonIconPosition.TRAILING,
