@@ -17,6 +17,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,7 +30,7 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contrac
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionIntent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionUiState
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.LandlinePhoneError
-import com.tamin.taminhamrah.ui.components.TaminTextField
+import com.tamin.taminhamrah.ui.components.TaminStyledTextField
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
@@ -43,6 +44,7 @@ import taminx.core.core_ui.disability_pension_identity_address_error_blank
 import taminx.core.core_ui.disability_pension_identity_address_error_invalid
 import taminx.core.core_ui.disability_pension_identity_address_error_length
 import taminx.core.core_ui.disability_pension_identity_address_label
+import taminx.core.core_ui.disability_pension_identity_field_placeholder
 import taminx.core.core_ui.disability_pension_identity_age
 import taminx.core.core_ui.disability_pension_identity_age_years
 import taminx.core.core_ui.disability_pension_identity_confirm_error
@@ -141,12 +143,17 @@ fun DisabilityPensionIdentityContactStep(
             )
         }
 
-        TaminTextField(
+        val fieldPlaceholder = stringResource(Res.string.disability_pension_identity_field_placeholder)
+
+        TaminStyledTextField(
             value = state.landlinePhone,
             onValueChange = { onIntent(DisabilityPensionIntent.LandlinePhoneChanged(it)) },
             label = stringResource(Res.string.disability_pension_identity_phone_label),
-            keyboardType = KeyboardType.Phone,
-            errorMessage = state.landlinePhoneError?.let {
+            placeholder = fieldPlaceholder,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+            isRequired = true,
+            isValid = if (state.landlinePhoneError != null) false else null,
+            errorText = state.landlinePhoneError?.let {
                 stringResource(
                     when (it) {
                         LandlinePhoneError.Blank -> Res.string.disability_pension_identity_phone_error_blank
@@ -157,11 +164,14 @@ fun DisabilityPensionIdentityContactStep(
             },
         )
 
-        TaminTextField(
+        TaminStyledTextField(
             value = state.address,
             onValueChange = { onIntent(DisabilityPensionIntent.AddressChanged(it)) },
             label = stringResource(Res.string.disability_pension_identity_address_label),
-            errorMessage = state.addressError?.let {
+            placeholder = fieldPlaceholder,
+            isRequired = true,
+            isValid = if (state.addressError != null) false else null,
+            errorText = state.addressError?.let {
                 stringResource(
                     when (it) {
                         AddressError.Blank -> Res.string.disability_pension_identity_address_error_blank
@@ -175,7 +185,7 @@ fun DisabilityPensionIdentityContactStep(
         Column {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Checkbox(
                     checked = state.isIdentityConfirmed,

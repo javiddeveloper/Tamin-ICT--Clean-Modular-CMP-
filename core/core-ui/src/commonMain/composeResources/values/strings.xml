@@ -2009,4 +2009,5 @@
     <string name="disability_pension_identity_address_error_invalid">آدرس واردشده معتبر نیست.</string>
     <string name="disability_pension_identity_confirm_label">اطلاعات هویتی و تماس فوق را تایید می‌نمایم.</string>
     <string name="disability_pension_identity_confirm_error">لطفاً اطلاعات هویتی و تماس را تایید کنید.</string>
+    <string name="disability_pension_identity_field_placeholder">وارد کنید</string>
 </resources>
