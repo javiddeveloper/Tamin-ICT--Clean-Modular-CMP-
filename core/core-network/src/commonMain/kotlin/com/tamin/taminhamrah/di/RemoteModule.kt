@@ -80,7 +80,8 @@ val remoteModule = module {
             userApiService = get(),
 //            httpClient = get(named("mainHttpClient")),
             errorParser = get(),
-            queryBuilder = get()
+            queryBuilder = get(),
+            json = get()
         )
     }
 
@@ -97,6 +98,7 @@ val remoteModule = module {
         AuthRemoteDataSourceImpl(
             userApiService = get(named("authUserApiService")),
             errorParser = get(),
+            developerOptionsRepository = get()
         )
     }
 

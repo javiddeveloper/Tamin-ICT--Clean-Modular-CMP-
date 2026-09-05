@@ -50,7 +50,8 @@ import com.tamin.taminhamrah.apiService.employerInfo.EmployerInfoApiService
 import com.tamin.taminhamrah.apiService.employerInfo.createEmployerInfoApiService
 import com.tamin.taminhamrah.apiService.inquiryEducation.InquiryEducationApiService
 import com.tamin.taminhamrah.apiService.inquiryEducation.createInquiryEducationApiService
-import com.tamin.taminhamrah.util.NetworkConstants
+import com.tamin.taminhamrah.model.BaseUrlKey
+import com.tamin.taminhamrah.repository.DeveloperOptionsRepository
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
 import org.koin.core.qualifier.named
@@ -82,7 +83,7 @@ val ApiClientsModule = module {
     // Health Ktorfit instance (uses HTTP base IP 172.16.14.115:5700)
     single(named("healthKtorfit")) {
         Ktorfit.Builder()
-            .baseUrl(NetworkConstants.BASE_URL_HEALTH_PROFILE)
+            .baseUrl(get<DeveloperOptionsRepository>().getEffectiveBaseUrl(BaseUrlKey.HEALTH_PROFILE))
             .httpClient(get<HttpClient>(named("healthHttpClient")))
             .build()
     }
