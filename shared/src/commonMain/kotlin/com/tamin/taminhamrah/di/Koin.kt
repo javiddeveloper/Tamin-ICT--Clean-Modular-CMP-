@@ -62,8 +62,7 @@ val sharedModules: List<Module>
         changeMobileModule,
         myInboxModule,
         securityModule,
-        developerOptionsModule
-        securityModule,
+        developerOptionsModule,
         addDependentModule,
         pensionStatusInquiryModule,
         settingsModule,

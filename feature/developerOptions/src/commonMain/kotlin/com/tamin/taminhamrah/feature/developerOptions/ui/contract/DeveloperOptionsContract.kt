@@ -5,7 +5,6 @@ import com.tamin.taminhamrah.model.BaseUrlKey
 
 data class BaseUrlItemUi(
     val key: BaseUrlKey,
-    val displayName: String,
     val currentUrl: String,
     val isOverridden: Boolean,
     val requiresRestart: Boolean

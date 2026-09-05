@@ -68,6 +68,23 @@ REQUEST_TIMEOUT_60_SEC = 60_000L   REQUEST_TIMEOUT_5_MIN = 300_000L
 
 ⚠️ Endpoints are declared in **two places**: this file, and the `buildConfigField` entries in `androidApp/build.gradle.kts`. The `flavorTest` flavor overrides the build-config values but `NetworkConstants` does not see that. When an endpoint changes, check both. See [[Build-and-Run]].
 
+### Developer-options base URL overrides (debug builds only)
+
+The four base URLs above (`MAIN`, `ACCOUNT`, `HEALTH_PROFILE`, `AI` — via `BaseUrlKey`) are not
+purely compile-time constants: `DeveloperOptionsRepository.getEffectiveBaseUrl(key)` is what every
+HTTP client and auth use case actually calls (`NetworkKoinModule`, `AuthRemoteDataSourceImpl`,
+`AuthAuthorizeUrlUseCaseImpl`, `GetSignOutUrlUseCase`), and it returns a per-device override saved
+by the debug-only "Developer Options" screen (`feature:developerOptions`) instead of the
+`NetworkConstants` default when one is set.
+
+This only ever takes effect in debug builds — `getEffectiveBaseUrl` ignores any stored override
+outside `AppConfig.isDebug`, and the screen's nav route is only registered when `AppConfig.isDebug`
+is true — so a release build always uses the compiled-in `NetworkConstants` values.
+
+`MAIN`, `HEALTH_PROFILE`, and `AI` are baked into `HttpClient`/Ktorfit singletons built once by
+Koin, so overriding them only takes effect after the app process restarts; `ACCOUNT` is read fresh
+on every call and applies immediately (see `BaseUrlPresets.requiresRestart`).
+
 ### The `shortterm-request` family
 
 `GET shortterm-request/getRequestInsuredMainInfo[/{type}]` is one backend endpoint shared by

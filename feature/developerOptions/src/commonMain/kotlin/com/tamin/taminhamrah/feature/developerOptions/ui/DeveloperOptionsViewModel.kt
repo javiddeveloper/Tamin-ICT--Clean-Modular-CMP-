@@ -75,7 +75,6 @@ class DeveloperOptionsViewModel(
         BaseUrlKey.entries.map { key ->
             BaseUrlItemUi(
                 key = key,
-                displayName = BaseUrlPresets.displayNames.getValue(key),
                 currentUrl = overrides[key] ?: key.defaultValue,
                 isOverridden = overrides.containsKey(key),
                 requiresRestart = BaseUrlPresets.requiresRestart.getValue(key)

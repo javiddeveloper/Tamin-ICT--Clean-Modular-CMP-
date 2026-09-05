@@ -114,6 +114,7 @@ import com.tamin.taminhamrah.feature.security.SecurityRoute
 import com.tamin.taminhamrah.feature.security.securityScreen
 import com.tamin.taminhamrah.feature.developerOptions.DeveloperOptionsRoute
 import com.tamin.taminhamrah.feature.developerOptions.developerOptionsScreen
+import com.tamin.taminhamrah.util.AppConfig
 import com.tamin.taminhamrah.feature.settings.SettingsRoute
 import com.tamin.taminhamrah.feature.settings.settingsScreen
 import com.tamin.taminhamrah.feature.userRequest.UserRequestRoute
@@ -522,7 +523,9 @@ internal fun TaminHamrahNavGraph(
 
                 securityScreen(onNavigateBack = { navController.popBackStack() })
 
-                developerOptionsScreen(onNavigateBack = { navController.popBackStack() })
+                if (AppConfig.isDebug) {
+                    developerOptionsScreen(onNavigateBack = { navController.popBackStack() })
+                }
 
                 orotezProtezScreen(onBack = { navController.popBackStack() })
 

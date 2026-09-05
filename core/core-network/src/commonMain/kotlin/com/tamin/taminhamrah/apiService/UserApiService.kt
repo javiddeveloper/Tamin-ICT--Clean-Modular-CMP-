@@ -71,7 +71,7 @@ internal interface UserApiService {
     @GET
     suspend fun signOut(
         @Header(HeaderConstant.AUTHORIZATION) token: String,
-        @Url url: String = "${NetworkConstants.BASE_URL_ACCOUNT}signout",
+        @Url url: String,
         @Query("redirect_uri") redirectUrl: String = "https://eservices.tamin.ir/view/index.html?redirect_uri=https://eservices.tamin.ir/auth/access",
         @Query("response_type") responseType: String = "assertion",
         @Query("client_id") clientId: String = NetworkConstants.CLIENT_ID
@@ -80,7 +80,7 @@ internal interface UserApiService {
     @FormUrlEncoded
     @POST
     suspend fun revokeToken(
-        @Url url: String = "${NetworkConstants.BASE_URL_ACCOUNT}revoke",
+        @Url url: String,
         @Header(HeaderConstant.AUTHORIZATION) accessToken: String?,
         @Field("refresh_token") refreshToken: String?
     )

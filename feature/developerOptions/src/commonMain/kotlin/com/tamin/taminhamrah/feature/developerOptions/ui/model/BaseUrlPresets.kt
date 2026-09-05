@@ -1,21 +1,29 @@
 package com.tamin.taminhamrah.feature.developerOptions.ui.model
 
+import androidx.compose.runtime.Composable
 import com.tamin.taminhamrah.model.BaseUrlKey
+import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.developer_options_service_account
+import taminx.core.core_ui.developer_options_service_ai
+import taminx.core.core_ui.developer_options_service_health_profile
+import taminx.core.core_ui.developer_options_service_main
 
 data class BaseUrlPreset(val label: String, val url: String)
+
+@Composable
+fun BaseUrlKey.displayName(): String = when (this) {
+    BaseUrlKey.MAIN -> stringResource(Res.string.developer_options_service_main)
+    BaseUrlKey.ACCOUNT -> stringResource(Res.string.developer_options_service_account)
+    BaseUrlKey.HEALTH_PROFILE -> stringResource(Res.string.developer_options_service_health_profile)
+    BaseUrlKey.AI -> stringResource(Res.string.developer_options_service_ai)
+}
 
 /**
  * Known named base URLs collected from this project's build config and from
  * old_android/'s Constants.kt (legacy, read-only reference — see docs/vault/Reference-old-android.md).
  */
 object BaseUrlPresets {
-
-    val displayNames: Map<BaseUrlKey, String> = mapOf(
-        BaseUrlKey.MAIN to "آدرس اصلی سرویس‌ها",
-        BaseUrlKey.ACCOUNT to "سرویس احراز هویت",
-        BaseUrlKey.HEALTH_PROFILE to "پرونده سلامت من",
-        BaseUrlKey.AI to "دستیار هوشمند"
-    )
 
     /**
      * MAIN / HEALTH_PROFILE / AI are baked into HttpClient/Ktorfit singletons built once by Koin,
@@ -40,7 +48,7 @@ object BaseUrlPresets {
             BaseUrlPreset("Old Android Test", "http://s-naghavi.tamin.org:7002/auth/")
         ),
         BaseUrlKey.HEALTH_PROFILE to listOf(
-            BaseUrlPreset("پرونده سلامت من", "http://172.16.14.115:5700/api/")
+            BaseUrlPreset("Test", "http://172.16.14.115:5700/api/")
         ),
         BaseUrlKey.AI to listOf(
             BaseUrlPreset("Production", "https://sw.tamin.ir/api/"),

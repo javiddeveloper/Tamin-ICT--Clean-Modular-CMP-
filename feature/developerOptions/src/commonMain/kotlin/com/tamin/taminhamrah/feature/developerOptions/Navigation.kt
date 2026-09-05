@@ -1,8 +1,8 @@
 package com.tamin.taminhamrah.feature.developerOptions
 
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.composable
 import com.tamin.taminhamrah.feature.developerOptions.ui.DeveloperOptionsScreen
+import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -11,7 +11,7 @@ object DeveloperOptionsRoute
 fun NavGraphBuilder.developerOptionsScreen(
     onNavigateBack: () -> Unit
 ) {
-    composable<DeveloperOptionsRoute> {
+    composableWithFadeTransitions<DeveloperOptionsRoute> {
         DeveloperOptionsScreen(
             onNavigateBack = onNavigateBack
         )

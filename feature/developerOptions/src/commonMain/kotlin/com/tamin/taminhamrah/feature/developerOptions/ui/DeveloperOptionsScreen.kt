@@ -40,6 +40,7 @@ import com.tamin.taminhamrah.feature.developerOptions.ui.contract.DeveloperOptio
 import com.tamin.taminhamrah.feature.developerOptions.ui.contract.DeveloperOptionsIntent
 import com.tamin.taminhamrah.feature.developerOptions.ui.contract.DeveloperOptionsUiState
 import com.tamin.taminhamrah.feature.developerOptions.ui.model.BaseUrlPresets
+import com.tamin.taminhamrah.feature.developerOptions.ui.model.displayName
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.ListGroupView
 import com.tamin.taminhamrah.ui.components.ListItemColors
@@ -63,7 +64,7 @@ import taminx.core.core_ui.action_save
 import taminx.core.core_ui.developer_options_custom_url_hint
 import taminx.core.core_ui.developer_options_dialog_title
 import taminx.core.core_ui.developer_options_reset_to_default
-import taminx.core.core_ui.developer_options_restart_notice
+import taminx.core.core_ui.developer_options_restart_notice_item
 import taminx.core.core_ui.developer_options_title
 import taminx.core.core_ui.ic_tamin_chevron_back
 
@@ -143,20 +144,12 @@ private fun DeveloperOptionsContent(
                     .fillMaxWidth()
                     .padding(horizontal = Spacing.page)
             ) {
-                Text(
-                    text = stringResource(Res.string.developer_options_restart_notice),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = taminColors.textSecondary
-                )
-
-                Spacer(modifier = Modifier.height(Spacing.lg))
-
                 ListGroupView(
                     containerBorder = defaultBorder,
                     items = persistentListOf(
                         *state.items.map { item ->
                             ListItemData(
-                                title = item.displayName,
+                                title = item.key.displayName(),
                                 subtitle = item.currentUrl,
                                 leadingIconPainter = rememberVectorPainter(Icons.Rounded.Code),
                                 colors = ListItemColors(
@@ -199,7 +192,7 @@ private fun EditBaseUrlDialog(
     val presets = BaseUrlPresets.presets[item.key].orEmpty()
 
     TaminConfirmationDialog(
-        title = item.displayName,
+        title = item.key.displayName(),
         description = stringResource(Res.string.developer_options_dialog_title),
         onDismissRequest = onDismiss,
         confirmButton = {
@@ -264,6 +257,15 @@ private fun EditBaseUrlDialog(
                     label = { Text(stringResource(Res.string.developer_options_custom_url_hint)) },
                     singleLine = true
                 )
+
+                if (item.requiresRestart) {
+                    Spacer(modifier = Modifier.height(Spacing.sm))
+                    Text(
+                        text = stringResource(Res.string.developer_options_restart_notice_item),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = taminColors.textSecondary
+                    )
+                }
 
                 if (item.isOverridden) {
                     Spacer(modifier = Modifier.height(Spacing.sm))

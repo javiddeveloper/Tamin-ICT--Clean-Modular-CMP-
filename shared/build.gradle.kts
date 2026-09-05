@@ -57,7 +57,6 @@ kotlin {
             api(project(":feature:pensionSurvivor"))
             api(project(":feature:inquiryEducation"))
             api(project(":feature:developerOptions"))
-//            api(project(":feature:feature-settings"))
             api(libs.androidx.lifecycle.viewmodel)
             implementation(libs.ktor.client.core)
             implementation(libs.kotlinx.serialization.json)
