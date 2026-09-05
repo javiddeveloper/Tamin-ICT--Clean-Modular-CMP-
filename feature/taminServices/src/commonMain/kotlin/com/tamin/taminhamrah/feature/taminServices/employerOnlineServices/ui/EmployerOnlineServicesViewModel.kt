@@ -13,10 +13,15 @@ import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contra
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.mapper.toAgreementDocumentPR
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.mapper.toIdentityCardPR
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.mapper.toRowPR
+import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.model.EmployerAgreementSearch
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
+import com.tamin.taminhamrah.model.paging.PageDN
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmissionDN
-import com.tamin.taminhamrah.model.workshop.WORKSHOP_FULL_PAGE_SIZE
+import com.tamin.taminhamrah.model.workshop.WORKSHOP_PAGE_SIZE
 import com.tamin.taminhamrah.model.workshop.WorkshopListQuery
+import com.tamin.taminhamrah.paging.PaginationConfig
+import com.tamin.taminhamrah.paging.Paginator
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.content.GetLegalDocumentUseCase
 import com.tamin.taminhamrah.useCases.user.GetUserProfileUseCase
@@ -31,6 +36,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
@@ -66,14 +72,45 @@ class EmployerOnlineServicesViewModel(
     /** Bumped on every successful (re)send so the code screen's countdown restarts. */
     private var ticketNonce = 0
 
+    /** The کد شعبه / کد کارگاه filter currently applied to the agreements list, if any. */
+    private var agreementsSearch: EmployerAgreementSearch = EmployerAgreementSearch()
+
+    /**
+     * The server's grand total for [agreementsSearch], read alongside each page it returns.
+     * [Paginator] doesn't carry this itself (it only needs `total` to know when it has reached the
+     * end), so it is captured here for the count tile.
+     */
+    private var agreementsTotal: Int = 0
+
+    /** One server-paged window at a time — the same engine [MyInboxViewModel] uses for its inbox. */
+    private val agreementsPaginator = Paginator<EmployerAgreementDN>(
+        config = PaginationConfig(pageSize = WORKSHOP_PAGE_SIZE),
+        loadPage = { query ->
+            val page = getEmployerAgreementsUseCase(
+                WorkshopListQuery(
+                    workshopId = agreementsSearch.workshopCode.ifBlank { null },
+                    branchCode = agreementsSearch.branchCode.ifBlank { null },
+                    page = query.page,
+                    pageSize = query.limit,
+                ),
+            )
+            agreementsTotal = page.total
+            PageDN(items = page.items, total = page.total)
+        },
+    )
+
     init {
         sendIntent(EmployerOnlineServicesIntent.Load)
     }
 
     override fun handleIntent(intent: EmployerOnlineServicesIntent): Flow<PartialState> = when (intent) {
-        EmployerOnlineServicesIntent.Load -> merge(loadIdentity(), loadAgreements())
-            .onStart { emit(PartialState.Loading(true)) }
-            .onCompletion { emit(PartialState.Loading(false)) }
+        EmployerOnlineServicesIntent.Load -> merge(
+            loadIdentity()
+                .onStart { emit(PartialState.Loading(true)) }
+                .onCompletion { emit(PartialState.Loading(false)) },
+            observeAgreementsPaging(),
+            flow<PartialState> { agreementsPaginator.loadNext() },
+        )
 
         is EmployerOnlineServicesIntent.RetrySource -> retry(intent.source)
             .onStart {
@@ -81,6 +118,21 @@ class EmployerOnlineServicesViewModel(
                 emit(PartialState.Loading(true))
             }
             .onCompletion { emit(PartialState.Loading(false)) }
+
+        EmployerOnlineServicesIntent.LoadMoreAgreements ->
+            flow<PartialState> { agreementsPaginator.loadNext() }
+
+        is EmployerOnlineServicesIntent.SearchAgreements -> flow<PartialState> {
+            agreementsSearch = intent.criteria
+            emit(PartialState.AgreementsSearchChanged(intent.criteria))
+            agreementsPaginator.refresh()
+        }
+
+        EmployerOnlineServicesIntent.ClearAgreementsSearch -> flow<PartialState> {
+            agreementsSearch = EmployerAgreementSearch()
+            emit(PartialState.AgreementsSearchChanged(EmployerAgreementSearch()))
+            agreementsPaginator.refresh()
+        }
 
         EmployerOnlineServicesIntent.OpenAgreementRequest -> flow<PartialState> {
             emit(PartialState.RequestWizardOpened)
@@ -128,7 +180,7 @@ class EmployerOnlineServicesViewModel(
 
         EmployerOnlineServicesIntent.DismissAgreementSuccess -> flow<PartialState> {
             emit(PartialState.RequestWizardClosed)
-            emitAll(loadAgreements())
+            agreementsPaginator.refresh()
         }
             .onStart { emit(PartialState.Loading(true)) }
             .onCompletion { emit(PartialState.Loading(false)) }
@@ -155,7 +207,7 @@ class EmployerOnlineServicesViewModel(
 
     private fun retry(source: EmployerOnlineServicesErrorSource): Flow<PartialState> = when (source) {
         EmployerOnlineServicesErrorSource.IDENTITY -> loadIdentity()
-        EmployerOnlineServicesErrorSource.AGREEMENTS -> loadAgreements()
+        EmployerOnlineServicesErrorSource.AGREEMENTS -> flow<PartialState> { agreementsPaginator.retry() }
         EmployerOnlineServicesErrorSource.CONTRACT_ROWS -> uiState.value.contractRows.let {
             loadContractRows(it.workshopId, it.branchCode)
         }
@@ -176,12 +228,21 @@ class EmployerOnlineServicesViewModel(
         emit(PartialState.Error(e.toSingleLineMessage(), EmployerOnlineServicesErrorSource.IDENTITY))
     }
 
-    private fun loadAgreements(): Flow<PartialState> = flow<PartialState> {
-        // No paging on this screen yet — pull one wide window and show all of it.
-        val page = getEmployerAgreementsUseCase(WorkshopListQuery(pageSize = WORKSHOP_FULL_PAGE_SIZE))
-        emit(PartialState.AgreementsLoaded(page.items.map { it.toRowPR() }, page.total))
-    }.catch { e ->
-        emit(PartialState.Error(e.toSingleLineMessage(), EmployerOnlineServicesErrorSource.AGREEMENTS))
+    /**
+     * Reflects [agreementsPaginator]'s state into the UI forever — started once from [Load] and kept
+     * alive by [BaseViewModel]'s `flatMapMerge`, exactly like `MyInboxViewModel.observePaging()`.
+     * [LoadMoreAgreements] / [EmployerOnlineServicesIntent.SearchAgreements] / retry only ever poke the
+     * paginator; this is the one collector that turns its state into [PartialState]s.
+     */
+    private fun observeAgreementsPaging(): Flow<PartialState> = agreementsPaginator.state.map { paging ->
+        PartialState.AgreementsPagingChanged(
+            agreements = paging.items.map { it.toRowPR() },
+            total = agreementsTotal,
+            isLoadingFirstPage = paging.isLoadingFirstPage,
+            isLoadingNextPage = paging.isLoadingNextPage,
+            endReached = paging.endReached,
+            error = paging.error?.toSingleLineMessage(),
+        )
     }
 
     private fun loadContractRows(workshopId: String, branchCode: String): Flow<PartialState> = flow<PartialState> {
@@ -284,12 +345,26 @@ class EmployerOnlineServicesViewModel(
             profileEmail = partialState.email,
         )
 
-        is PartialState.AgreementsLoaded -> currentState.copy(
+        is PartialState.AgreementsPagingChanged -> currentState.copy(
             agreementsList = currentState.agreementsList.copy(
                 agreements = partialState.agreements,
                 agreementCount = partialState.total,
+                isLoadingFirstPage = partialState.isLoadingFirstPage,
+                isLoadingNextPage = partialState.isLoadingNextPage,
+                endReached = partialState.endReached,
+                // A next-page failure (list already has rows) is a footer error, not a fatal one —
+                // only an empty-list failure blocks the whole screen behind `errors[AGREEMENTS]`.
+                paginationError = partialState.error.takeIf { partialState.agreements.isNotEmpty() },
             ),
-            errors = currentState.errors - EmployerOnlineServicesErrorSource.AGREEMENTS,
+            errors = if (partialState.error != null && partialState.agreements.isEmpty()) {
+                currentState.errors + (EmployerOnlineServicesErrorSource.AGREEMENTS to partialState.error)
+            } else {
+                currentState.errors - EmployerOnlineServicesErrorSource.AGREEMENTS
+            },
+        )
+
+        is PartialState.AgreementsSearchChanged -> currentState.copy(
+            agreementsList = currentState.agreementsList.copy(searchCriteria = partialState.criteria),
         )
 
         PartialState.RequestWizardOpened -> currentState.copy(

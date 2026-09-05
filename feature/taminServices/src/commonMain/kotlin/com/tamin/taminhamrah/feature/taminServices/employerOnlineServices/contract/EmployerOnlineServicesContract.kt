@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contr
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.model.AgreementDocumentPR
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.model.EmployerAgreementRowPR
+import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.model.EmployerAgreementSearch
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.model.IdentityCardPR
 import com.tamin.taminhamrah.model.workshop.WorkshopContractRowPR
 import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractPR
@@ -66,13 +67,25 @@ enum class EmployerOnlineServicesErrorSource {
     SUBMIT,
 }
 
-/** State of the landing agreements-list screen. */
+/**
+ * State of the landing agreements-list screen.
+ *
+ * The list is a real server-paged window, not a single wide fetch: [searchCriteria] is sent to the
+ * server as a filter (see `WorkShopsRepositoryImpl.getEmployerAgreements`), and [isLoadingNextPage]
+ * / [endReached] / [paginationError] mirror `MyInboxUiState`'s paging fields — the same
+ * `Paginator`/`OnLoadMore`/`PagingFooter` machinery drives both lists.
+ */
 @Immutable
 data class AgreementsListUiState(
     val identity: IdentityCardPR = IdentityCardPR(),
     val agreements: List<EmployerAgreementRowPR> = emptyList(),
-    /** The server's grand total — what the count tile shows, independent of how many rows loaded. */
+    /** The server's total *for the current search* — what the count tile shows. */
     val agreementCount: Int = 0,
+    val searchCriteria: EmployerAgreementSearch = EmployerAgreementSearch(),
+    val isLoadingFirstPage: Boolean = false,
+    val isLoadingNextPage: Boolean = false,
+    val endReached: Boolean = false,
+    val paginationError: String? = null,
 )
 
 /**
@@ -155,10 +168,17 @@ data class EmployerOnlineServicesUiState(
         data class Loading(val isLoading: Boolean) : PartialState
         data class ScreenChanged(val screen: EmployerOnlineServicesScreen) : PartialState
         data class IdentityLoaded(val identity: IdentityCardPR) : PartialState
-        data class AgreementsLoaded(
+        data class AgreementsPagingChanged(
             val agreements: List<EmployerAgreementRowPR>,
             val total: Int,
+            val isLoadingFirstPage: Boolean,
+            val isLoadingNextPage: Boolean,
+            val endReached: Boolean,
+            val error: String?,
         ) : PartialState
+
+        /** Search applied/cleared — resets the list to its first page under the new criteria. */
+        data class AgreementsSearchChanged(val criteria: EmployerAgreementSearch) : PartialState
 
         /** The workshop a "ردیف‌های پیمان" tap targets — sets the header before its rows load. */
         data class ContractRowsTarget(
@@ -223,6 +243,15 @@ sealed interface EmployerOnlineServicesIntent {
 
     /** Retries only the single call behind [source]'s error. */
     data class RetrySource(val source: EmployerOnlineServicesErrorSource) : EmployerOnlineServicesIntent
+
+    /** Scrolled near the end of the agreements list — fetches the next server page. */
+    data object LoadMoreAgreements : EmployerOnlineServicesIntent
+
+    /** "جستجو" on the search sheet — re-queries the server with this criteria from page one. */
+    data class SearchAgreements(val criteria: EmployerAgreementSearch) : EmployerOnlineServicesIntent
+
+    /** "حذف" filter chip / "پاک کردن" on the search sheet — back to the unfiltered list. */
+    data object ClearAgreementsSearch : EmployerOnlineServicesIntent
 
     /** "+ ثبت درخواست تعهدنامه" — opens the agreement-request wizard at its first step. */
     data object OpenAgreementRequest : EmployerOnlineServicesIntent

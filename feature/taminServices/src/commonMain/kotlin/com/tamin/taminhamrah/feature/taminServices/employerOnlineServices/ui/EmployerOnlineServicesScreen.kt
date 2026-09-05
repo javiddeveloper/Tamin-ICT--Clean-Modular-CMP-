@@ -69,6 +69,8 @@ import com.tamin.taminhamrah.ui.components.toast.AppToastHost
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.Toast
 import com.tamin.taminhamrah.ui.components.toast.error
+import com.tamin.taminhamrah.ui.paging.OnLoadMore
+import com.tamin.taminhamrah.ui.paging.PagingFooter
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminNavy300
@@ -152,21 +154,12 @@ internal fun EmployerAgreementsListScreen(
     uiState: EmployerOnlineServicesUiState,
     onIntent: (EmployerOnlineServicesIntent) -> Unit,
     onBackClicked: () -> Unit,
-    initialSearchCriteria: EmployerAgreementSearch = EmployerAgreementSearch(),
 ) {
     val taminColors = LocalTaminColors.current
     var showSearchSheet by remember { mutableStateOf(false) }
-    var searchCriteria by remember { mutableStateOf(initialSearchCriteria) }
 
     val list = uiState.agreementsList
     val agreementsError = uiState.errors[EmployerOnlineServicesErrorSource.AGREEMENTS]
-
-    // Client-side filter over the already-loaded list — exactly inspection's search: nothing is
-    // re-fetched, the criteria just narrows what the list shows.
-    val visibleAgreements = remember(list.agreements, searchCriteria) {
-        if (searchCriteria.isEmpty) list.agreements
-        else list.agreements.filter { searchCriteria.matches(it) }
-    }
 
     // Folds the header's icon + subtitle from the list's own drag, snapping to open/closed on
     // release — the identity card below it stays fully shown, pinned above the list. The drag
@@ -181,6 +174,14 @@ internal fun EmployerAgreementsListScreen(
         )
     }
     val listState = rememberLazyListState()
+
+    // کد شعبه / کد کارگاه is a server-side filter now (see docs/vault/Pagination.md) — scrolling near
+    // the end of whatever window is currently loaded (filtered or not) asks for the next page of it.
+    listState.OnLoadMore(
+        enabled = !list.endReached && list.paginationError == null,
+    ) {
+        onIntent(EmployerOnlineServicesIntent.LoadMoreAgreements)
+    }
 
     Box(
         modifier = Modifier
@@ -211,7 +212,7 @@ internal fun EmployerAgreementsListScreen(
             }
 
             when {
-                uiState.isLoading && list.agreements.isEmpty() -> item {
+                list.isLoadingFirstPage && list.agreements.isEmpty() -> item {
                     EmployerOnlineServicesListSkeleton()
                 }
 
@@ -231,6 +232,12 @@ internal fun EmployerAgreementsListScreen(
                     )
                 }
 
+                list.agreements.isEmpty() && !list.searchCriteria.isEmpty -> item {
+                    EmployerOnlineServicesSearchEmptyState(
+                        modifier = Modifier.padding(horizontal = Spacing.lg),
+                    )
+                }
+
                 list.agreements.isEmpty() -> item {
                     EmptyStateMessage(
                         icon = Icons.Outlined.Description,
@@ -245,26 +252,18 @@ internal fun EmployerAgreementsListScreen(
                 }
 
                 else -> {
-                    if (!searchCriteria.isEmpty) {
+                    if (!list.searchCriteria.isEmpty) {
                         item {
                             EmployerOnlineServicesFilterChipRow(
-                                criteria = searchCriteria,
-                                onClear = { searchCriteria = EmployerAgreementSearch() },
-                                modifier = Modifier.padding(horizontal = Spacing.lg),
-                            )
-                        }
-                    }
-
-                    if (visibleAgreements.isEmpty()) {
-                        item {
-                            EmployerOnlineServicesSearchEmptyState(
+                                criteria = list.searchCriteria,
+                                onClear = { onIntent(EmployerOnlineServicesIntent.ClearAgreementsSearch) },
                                 modifier = Modifier.padding(horizontal = Spacing.lg),
                             )
                         }
                     }
 
                     itemsIndexed(
-                        visibleAgreements,
+                        list.agreements,
                         key = { index, item -> "${item.workshopId}-${item.branchCode}-$index" },
                     ) { _, item ->
                         EmployerAgreementCard(
@@ -279,6 +278,15 @@ internal fun EmployerAgreementsListScreen(
                                     ),
                                 )
                             },
+                            modifier = Modifier.padding(horizontal = Spacing.lg),
+                        )
+                    }
+
+                    item {
+                        PagingFooter(
+                            isLoadingNextPage = list.isLoadingNextPage,
+                            error = list.paginationError,
+                            onRetry = { onIntent(EmployerOnlineServicesIntent.LoadMoreAgreements) },
                             modifier = Modifier.padding(horizontal = Spacing.lg),
                         )
                     }
@@ -298,21 +306,23 @@ internal fun EmployerAgreementsListScreen(
                 .reportTopAreaHeight(topArea),
         )
 
-        if (uiState.isLoading && list.agreements.isNotEmpty()) {
+        // Identity re-loading, or a search re-query while the previous window is still on screen —
+        // either way, something is refreshing content the user can already see.
+        if ((uiState.isLoading || list.isLoadingFirstPage) && list.agreements.isNotEmpty()) {
             LoadingStateOverlay()
         }
     }
 
     if (showSearchSheet) {
         EmployerOnlineServicesSearchSheet(
-            initial = searchCriteria,
+            initial = list.searchCriteria,
             onDismiss = { showSearchSheet = false },
             onApply = { criteria ->
-                searchCriteria = criteria
+                onIntent(EmployerOnlineServicesIntent.SearchAgreements(criteria))
                 showSearchSheet = false
             },
             onClear = {
-                searchCriteria = EmployerAgreementSearch()
+                onIntent(EmployerOnlineServicesIntent.ClearAgreementsSearch)
                 showSearchSheet = false
             },
         )
@@ -513,7 +523,9 @@ private fun EmployerOnlineServicesScreenLoadingPreview() {
     PreviewRtlThemeContent(darkTheme = true) {
         AppToastHost {
             EmployerAgreementsListScreen(
-                uiState = EmployerOnlineServicesUiState(isLoading = true),
+                uiState = EmployerOnlineServicesUiState(
+                    agreementsList = AgreementsListUiState(isLoadingFirstPage = true),
+                ),
                 onIntent = {},
                 onBackClicked = {},
             )
@@ -523,16 +535,22 @@ private fun EmployerOnlineServicesScreenLoadingPreview() {
 
 private val PreviewNoMatchSearchCriteria = EmployerAgreementSearch(workshopCode = "00000000000")
 
+private val PreviewNoMatchState = EmployerOnlineServicesUiState(
+    agreementsList = AgreementsListUiState(
+        identity = PreviewIdentity,
+        searchCriteria = PreviewNoMatchSearchCriteria,
+    ),
+)
+
 @PreviewRtlTheme
 @Composable
 private fun EmployerOnlineServicesScreenSearchEmptyPreviewLight() {
     PreviewRtlThemeContent {
         AppToastHost {
             EmployerAgreementsListScreen(
-                uiState = PreviewLoadedState,
+                uiState = PreviewNoMatchState,
                 onIntent = {},
                 onBackClicked = {},
-                initialSearchCriteria = PreviewNoMatchSearchCriteria,
             )
         }
     }
@@ -544,10 +562,9 @@ private fun EmployerOnlineServicesScreenSearchEmptyPreviewDark() {
     PreviewRtlThemeContent(darkTheme = true) {
         AppToastHost {
             EmployerAgreementsListScreen(
-                uiState = PreviewLoadedState,
+                uiState = PreviewNoMatchState,
                 onIntent = {},
                 onBackClicked = {},
-                initialSearchCriteria = PreviewNoMatchSearchCriteria,
             )
         }
     }

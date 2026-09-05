@@ -36,6 +36,10 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         private set
     var lastSubmission: EmployerAgreementSubmissionDN? = null
         private set
+    var lastAgreementsQuery: WorkshopListQuery? = null
+        private set
+    var agreementsQueryCount: Int = 0
+        private set
 
     enum class Call { AGREEMENTS, CONTACT_INFO, WORKSHOPS_WITHOUT_CONTRACT, CONTRACT_ROWS, TICKET, SUBMIT }
 
@@ -43,9 +47,34 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         if (failing == call) throw RuntimeException("boom: $call")
     }
 
+    /**
+     * Filters and slices [agreements] the way the real service would: `workshopId`/`branchCode`
+     * narrow the set, then `page`/`pageSize` window it — so a test can drive a real search + a real
+     * "load more" through the ViewModel's [com.tamin.taminhamrah.paging.Paginator], not just assert on
+     * a canned single response.
+     *
+     * When unfiltered, [PagedListDN.total] on [agreements] is honoured as-is (a test may set it above
+     * `items.size` to simulate more server-side rows than were stubbed); a filtered query reports the
+     * filtered count instead, matching what a real search would answer.
+     */
     override suspend fun getEmployerAgreements(query: WorkshopListQuery): PagedListDN<EmployerAgreementDN> {
         failIf(Call.AGREEMENTS)
-        return agreements
+        lastAgreementsQuery = query
+        agreementsQueryCount++
+
+        val isFiltered = !query.workshopId.isNullOrBlank() || !query.branchCode.isNullOrBlank()
+        val filtered = agreements.items.filter { item ->
+            (query.workshopId.isNullOrBlank() || item.workshop.workshopId == query.workshopId) &&
+                (query.branchCode.isNullOrBlank() || item.workshop.branchCode == query.branchCode)
+        }
+
+        val fromIndex = (query.page * query.pageSize).coerceIn(0, filtered.size)
+        val toIndex = (fromIndex + query.pageSize).coerceIn(fromIndex, filtered.size)
+
+        return PagedListDN(
+            items = filtered.subList(fromIndex, toIndex),
+            total = if (isFiltered) filtered.size else agreements.total,
+        )
     }
 
     override suspend fun requestEmployerAgreementTicket(mobile: String, email: String): String {

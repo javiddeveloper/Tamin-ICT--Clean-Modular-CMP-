@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contra
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contract.EmployerOnlineServicesIntent
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contract.EmployerOnlineServicesScreen
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.EmployerOnlineServicesViewModel
+import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.model.EmployerAgreementSearch
 import com.tamin.taminhamrah.feature.taminServices.inspection.FakeUserRepository
 import com.tamin.taminhamrah.model.user.UserProfileDN
 import com.tamin.taminhamrah.model.util.PagedListDN
@@ -128,6 +129,83 @@ class EmployerOnlineServicesViewModelTest {
         val retried = viewModel.uiState.value
         assertTrue(retried.errors.isEmpty())
         assertEquals(1, retried.agreementsList.agreements.size)
+    }
+
+    // -------------------------------------------------------------------- agreements search & paging
+
+    @Test
+    fun searchAgreements_reQueriesTheServerFilteredFromPageOne() = runTest(testDispatcher) {
+        workshops.agreements = PagedListDN(
+            items = listOf(agreementDN("1071410004", "123"), agreementDN("9999999999", "456")),
+            total = 2,
+        )
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+        assertEquals(2, viewModel.uiState.value.agreementsList.agreements.size)
+
+        viewModel.sendIntent(
+            EmployerOnlineServicesIntent.SearchAgreements(
+                EmployerAgreementSearch(workshopCode = "9999999999", branchCode = "456"),
+            ),
+        )
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertEquals("9999999999", workshops.lastAgreementsQuery?.workshopId)
+        assertEquals("456", workshops.lastAgreementsQuery?.branchCode)
+        assertEquals(0, workshops.lastAgreementsQuery?.page)
+        assertEquals(1, state.agreementsList.agreements.size)
+        assertEquals("9999999999", state.agreementsList.agreements.first().workshopId)
+        // The count tile reflects the filtered total, not the two-row unfiltered grand total.
+        assertEquals(1, state.agreementsList.agreementCount)
+        assertEquals("9999999999", state.agreementsList.searchCriteria.workshopCode)
+    }
+
+    @Test
+    fun clearAgreementsSearch_returnsToTheUnfilteredFirstPage() = runTest(testDispatcher) {
+        workshops.agreements = PagedListDN(
+            items = listOf(agreementDN("1071410004", "123"), agreementDN("9999999999", "456")),
+            total = 2,
+        )
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        viewModel.sendIntent(
+            EmployerOnlineServicesIntent.SearchAgreements(EmployerAgreementSearch(workshopCode = "9999999999")),
+        )
+        advanceUntilIdle()
+        assertEquals(1, viewModel.uiState.value.agreementsList.agreements.size)
+
+        viewModel.sendIntent(EmployerOnlineServicesIntent.ClearAgreementsSearch)
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertNull(workshops.lastAgreementsQuery?.workshopId)
+        assertEquals(2, state.agreementsList.agreements.size)
+        assertTrue(state.agreementsList.searchCriteria.isEmpty)
+    }
+
+    @Test
+    fun loadMoreAgreements_appendsTheNextPageInsteadOfReplacingTheFirst() = runTest(testDispatcher) {
+        // 15 rows so the default 10-row page leaves a second page to fetch.
+        workshops.agreements = PagedListDN(
+            items = (1..15).map { agreementDN(it.toString().padStart(10, '0'), "1") },
+            total = 15,
+        )
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        val firstPage = viewModel.uiState.value.agreementsList
+        assertEquals(10, firstPage.agreements.size)
+        assertEquals(false, firstPage.endReached)
+
+        viewModel.sendIntent(EmployerOnlineServicesIntent.LoadMoreAgreements)
+        advanceUntilIdle()
+
+        val afterLoadMore = viewModel.uiState.value.agreementsList
+        assertEquals(15, afterLoadMore.agreements.size)
+        assertEquals(true, afterLoadMore.endReached)
+        assertEquals(1, workshops.lastAgreementsQuery?.page)
     }
 
     // -------------------------------------------------------------------- contract rows drill-down
