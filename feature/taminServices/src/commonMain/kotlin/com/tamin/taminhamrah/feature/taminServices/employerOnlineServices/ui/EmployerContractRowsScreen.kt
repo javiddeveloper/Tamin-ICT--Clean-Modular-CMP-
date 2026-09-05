@@ -49,6 +49,7 @@ import com.tamin.taminhamrah.ui.paging.OnLoadMore
 import com.tamin.taminhamrah.ui.paging.PagingFooter
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.employer_online_services_contract_rows_empty_subtitle
@@ -183,7 +184,7 @@ internal fun EmployerContractRowsScreen(
 
 // ----------------------------------------------------------------------- previews
 
-private val PreviewRows = listOf(
+private val PreviewRows = persistentListOf(
     WorkshopContractRowPR(
         contractRow = "۰۰۱",
         fullName = "حسین توکلی کرمانی",
@@ -256,7 +257,7 @@ private fun EmployerContractRowsScreenEmptyPreview() {
         AppToastHost {
             EmployerContractRowsScreen(
                 uiState = PreviewLoadedState.copy(
-                    contractRows = PreviewLoadedState.contractRows.copy(rows = emptyList()),
+                    contractRows = PreviewLoadedState.contractRows.copy(rows = persistentListOf()),
                 ),
                 onIntent = {},
                 onBackClicked = {},
@@ -273,7 +274,7 @@ private fun EmployerContractRowsScreenLoadingPreview() {
             EmployerContractRowsScreen(
                 uiState = PreviewLoadedState.copy(
                     isLoading = true,
-                    contractRows = PreviewLoadedState.contractRows.copy(rows = emptyList()),
+                    contractRows = PreviewLoadedState.contractRows.copy(rows = persistentListOf()),
                 ),
                 onIntent = {},
                 onBackClicked = {},

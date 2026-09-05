@@ -8,6 +8,10 @@ import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.mod
 import com.tamin.taminhamrah.model.workshop.WorkshopContractRowPR
 import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractPR
 import com.tamin.taminhamrah.util.ValidationUtils
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 
 /**
  * MVI contract for خدمات غیرحضوری کارفرمایان (Employer → Online Services).
@@ -16,7 +20,8 @@ import com.tamin.taminhamrah.util.ValidationUtils
  * inspection wizard uses. Each screen owns its own slice of state ([AgreementsListUiState],
  * [ContractRowsUiState], [AgreementRequestUiState]); [EmployerOnlineServicesUiState.currentScreen]
  * selects which one is on screen. "ثبت درخواست تعهدنامه" opens [EmployerOnlineServicesScreen.REQUEST_WIZARD],
- * whose step 2 (پذیرش تعهدنامه) is a placeholder until its design lands.
+ * whose two steps are [AgreementRequestStep.VALIDATION] (OTP) and [AgreementRequestStep.ACCEPT_AGREEMENT]
+ * (کارگاه‌های بدون تعهدنامه + متن تعهدنامه + submit).
  */
 
 /** Which screen of the flow is currently shown. */
@@ -40,7 +45,7 @@ enum class AgreementRequestStep {
     /** اعتبارسنجی — request the security ticket, then verify the code. */
     VALIDATION,
 
-    /** پذیرش تعهدنامه — accept the rules and submit. Design pending; a placeholder for now. */
+    /** پذیرش تعهدنامه — review کارگاه‌های بدون تعهدنامه + the legal text, then submit. */
     ACCEPT_AGREEMENT,
 }
 
@@ -78,7 +83,7 @@ enum class EmployerOnlineServicesErrorSource {
 @Immutable
 data class AgreementsListUiState(
     val identity: IdentityCardPR = IdentityCardPR(),
-    val agreements: List<EmployerAgreementRowPR> = emptyList(),
+    val agreements: ImmutableList<EmployerAgreementRowPR> = persistentListOf(),
     /** The server's total *for the current search* — what the count tile shows. */
     val agreementCount: Int = 0,
     val searchCriteria: EmployerAgreementSearch = EmployerAgreementSearch(),
@@ -102,7 +107,7 @@ data class ContractRowsUiState(
     /** Raw identity — the query parameters the rows are fetched with, and what a retry re-uses. */
     val workshopId: String = "",
     val branchCode: String = "",
-    val rows: List<WorkshopContractRowPR> = emptyList(),
+    val rows: ImmutableList<WorkshopContractRowPR> = persistentListOf(),
     /** Where "ردیف‌های پیمان" was opened from — [EmployerOnlineServicesIntent.CloseContractRows] returns here. */
     val originScreen: EmployerOnlineServicesScreen = EmployerOnlineServicesScreen.AGREEMENTS_LIST,
     val isLoadingNextPage: Boolean = false,
@@ -140,7 +145,7 @@ data class AgreementRequestUiState(
      * inside the card (it sits in a plain scrolling `Column`, not a `LazyColumn`, so there is no
      * scroll position to drive `OnLoadMore` from).
      */
-    val workshopsWithoutContract: List<WorkshopWithoutContractPR> = emptyList(),
+    val workshopsWithoutContract: ImmutableList<WorkshopWithoutContractPR> = persistentListOf(),
     /** The server's total for [workshopsWithoutContract] — what the card's count badge shows. */
     val workshopsWithoutContractTotal: Int = 0,
     val workshopsWithoutContractLoadingNextPage: Boolean = false,
@@ -176,7 +181,7 @@ data class EmployerOnlineServicesUiState(
     val profileMobile: String = "",
     val profileEmail: String = "",
     /** One fatal, retryable message per still-failed call; empty once everything loaded. */
-    val errors: Map<EmployerOnlineServicesErrorSource, String> = emptyMap(),
+    val errors: ImmutableMap<EmployerOnlineServicesErrorSource, String> = persistentMapOf(),
 ) {
     val hasAnyError: Boolean get() = errors.isNotEmpty()
 
@@ -185,7 +190,7 @@ data class EmployerOnlineServicesUiState(
         data class ScreenChanged(val screen: EmployerOnlineServicesScreen) : PartialState
         data class IdentityLoaded(val identity: IdentityCardPR) : PartialState
         data class AgreementsPagingChanged(
-            val agreements: List<EmployerAgreementRowPR>,
+            val agreements: ImmutableList<EmployerAgreementRowPR>,
             val total: Int,
             val isLoadingFirstPage: Boolean,
             val isLoadingNextPage: Boolean,
@@ -206,7 +211,7 @@ data class EmployerOnlineServicesUiState(
         ) : PartialState
 
         data class ContractRowsPagingChanged(
-            val rows: List<WorkshopContractRowPR>,
+            val rows: ImmutableList<WorkshopContractRowPR>,
             val isLoadingNextPage: Boolean,
             val endReached: Boolean,
             val error: String?,
@@ -243,7 +248,7 @@ data class EmployerOnlineServicesUiState(
 
         data class Step2ContentLoading(val loading: Boolean) : PartialState
         data class WorkshopsWithoutContractPagingChanged(
-            val workshops: List<WorkshopWithoutContractPR>,
+            val workshops: ImmutableList<WorkshopWithoutContractPR>,
             val total: Int,
             val isLoadingNextPage: Boolean,
             val endReached: Boolean,

@@ -34,6 +34,8 @@ import com.tamin.taminhamrah.useCases.workshops.GetWorkshopsWithoutContractUseCa
 import com.tamin.taminhamrah.useCases.workshops.RequestEmployerAgreementTicketUseCase
 import com.tamin.taminhamrah.useCases.workshops.SubmitEmployerAgreementUseCase
 import com.tamin.taminhamrah.util.LegalDocumentIds
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
@@ -287,7 +289,7 @@ class EmployerOnlineServicesViewModel(
      */
     private fun observeAgreementsPaging(): Flow<PartialState> = agreementsPaginator.state.map { paging ->
         PartialState.AgreementsPagingChanged(
-            agreements = paging.items.map { it.toRowPR() },
+            agreements = paging.items.map { it.toRowPR() }.toImmutableList(),
             total = agreementsTotal,
             isLoadingFirstPage = paging.isLoadingFirstPage,
             isLoadingNextPage = paging.isLoadingNextPage,
@@ -300,7 +302,7 @@ class EmployerOnlineServicesViewModel(
     private fun contractRowsPagingPartialState(): PartialState.ContractRowsPagingChanged {
         val paging = contractRowsPaginator.state.value
         return PartialState.ContractRowsPagingChanged(
-            rows = paging.items.map { it.toPresentation() },
+            rows = paging.items.map { it.toPresentation() }.toImmutableList(),
             isLoadingNextPage = paging.isLoadingNextPage,
             endReached = paging.endReached,
             error = paging.error?.toSingleLineMessage(),
@@ -349,7 +351,7 @@ class EmployerOnlineServicesViewModel(
     private fun workshopsWithoutContractPagingPartialState(): PartialState.WorkshopsWithoutContractPagingChanged {
         val paging = workshopsWithoutContractPaginator.state.value
         return PartialState.WorkshopsWithoutContractPagingChanged(
-            workshops = paging.items.map { it.toPresentation() },
+            workshops = paging.items.map { it.toPresentation() }.toImmutableList(),
             total = workshopsWithoutContractTotal,
             isLoadingNextPage = paging.isLoadingNextPage,
             endReached = paging.endReached,
@@ -394,7 +396,7 @@ class EmployerOnlineServicesViewModel(
                 branchCode = partialState.branchCode,
                 originScreen = partialState.originScreen,
             ),
-            errors = currentState.errors - EmployerOnlineServicesErrorSource.CONTRACT_ROWS,
+            errors = (currentState.errors - EmployerOnlineServicesErrorSource.CONTRACT_ROWS).toImmutableMap(),
         )
 
         is PartialState.ContractRowsPagingChanged -> currentState.copy(
@@ -410,12 +412,12 @@ class EmployerOnlineServicesViewModel(
                 currentState.errors + (EmployerOnlineServicesErrorSource.CONTRACT_ROWS to partialState.error)
             } else {
                 currentState.errors - EmployerOnlineServicesErrorSource.CONTRACT_ROWS
-            },
+            }.toImmutableMap(),
         )
 
         is PartialState.IdentityLoaded -> currentState.copy(
             agreementsList = currentState.agreementsList.copy(identity = partialState.identity),
-            errors = currentState.errors - EmployerOnlineServicesErrorSource.IDENTITY,
+            errors = (currentState.errors - EmployerOnlineServicesErrorSource.IDENTITY).toImmutableMap(),
         )
 
         is PartialState.ContactPrefillLoaded -> currentState.copy(
@@ -438,7 +440,7 @@ class EmployerOnlineServicesViewModel(
                 currentState.errors + (EmployerOnlineServicesErrorSource.AGREEMENTS to partialState.error)
             } else {
                 currentState.errors - EmployerOnlineServicesErrorSource.AGREEMENTS
-            },
+            }.toImmutableMap(),
         )
 
         is PartialState.AgreementsSearchChanged -> currentState.copy(
@@ -450,17 +452,21 @@ class EmployerOnlineServicesViewModel(
                 mobile = currentState.profileMobile,
                 email = currentState.profileEmail,
             ),
-            errors = currentState.errors -
-                EmployerOnlineServicesErrorSource.REQUEST_TICKET -
-                EmployerOnlineServicesErrorSource.VERIFY_CODE,
+            errors = (
+                currentState.errors -
+                    EmployerOnlineServicesErrorSource.REQUEST_TICKET -
+                    EmployerOnlineServicesErrorSource.VERIFY_CODE
+                ).toImmutableMap(),
         )
 
         PartialState.RequestWizardClosed -> currentState.copy(
             currentScreen = EmployerOnlineServicesScreen.AGREEMENTS_LIST,
             agreementRequest = AgreementRequestUiState(),
-            errors = currentState.errors -
-                EmployerOnlineServicesErrorSource.REQUEST_TICKET -
-                EmployerOnlineServicesErrorSource.VERIFY_CODE,
+            errors = (
+                currentState.errors -
+                    EmployerOnlineServicesErrorSource.REQUEST_TICKET -
+                    EmployerOnlineServicesErrorSource.VERIFY_CODE
+                ).toImmutableMap(),
         )
 
         is PartialState.RequestMobileUpdated -> currentState.copy(
@@ -481,7 +487,7 @@ class EmployerOnlineServicesViewModel(
                 ticketNonce = partialState.nonce,
                 code = "",
             ),
-            errors = currentState.errors - EmployerOnlineServicesErrorSource.REQUEST_TICKET,
+            errors = (currentState.errors - EmployerOnlineServicesErrorSource.REQUEST_TICKET).toImmutableMap(),
         )
 
         PartialState.RequestContactEditing -> currentState.copy(
@@ -490,7 +496,7 @@ class EmployerOnlineServicesViewModel(
                 ticketRequested = false,
                 code = "",
             ),
-            errors = currentState.errors - EmployerOnlineServicesErrorSource.VERIFY_CODE,
+            errors = (currentState.errors - EmployerOnlineServicesErrorSource.VERIFY_CODE).toImmutableMap(),
         )
 
         is PartialState.RequestSubmitting -> currentState.copy(
@@ -507,7 +513,7 @@ class EmployerOnlineServicesViewModel(
                 accepted = false,
                 isSubmitted = false,
             ),
-            errors = currentState.errors - EmployerOnlineServicesErrorSource.VERIFY_CODE,
+            errors = (currentState.errors - EmployerOnlineServicesErrorSource.VERIFY_CODE).toImmutableMap(),
         )
 
         is PartialState.Step2ContentLoading -> currentState.copy(
@@ -529,7 +535,8 @@ class EmployerOnlineServicesViewModel(
             // legal-document load (loadAgreementDocument), so a clean fetch here must not clear an
             // error the *other* loader set — only an explicit retry (ErrorCleared) does that.
             errors = if (partialState.error != null && partialState.workshops.isEmpty()) {
-                currentState.errors + (EmployerOnlineServicesErrorSource.STEP2_CONTENT to partialState.error)
+                (currentState.errors + (EmployerOnlineServicesErrorSource.STEP2_CONTENT to partialState.error))
+                    .toImmutableMap()
             } else {
                 currentState.errors
             },
@@ -545,15 +552,15 @@ class EmployerOnlineServicesViewModel(
 
         PartialState.AgreementSubmitted -> currentState.copy(
             agreementRequest = currentState.agreementRequest.copy(isSubmitted = true),
-            errors = currentState.errors - EmployerOnlineServicesErrorSource.SUBMIT,
+            errors = (currentState.errors - EmployerOnlineServicesErrorSource.SUBMIT).toImmutableMap(),
         )
 
         is PartialState.Error -> currentState.copy(
-            errors = currentState.errors + (partialState.source to partialState.message),
+            errors = (currentState.errors + (partialState.source to partialState.message)).toImmutableMap(),
         )
 
         is PartialState.ErrorCleared -> currentState.copy(
-            errors = currentState.errors - partialState.source,
+            errors = (currentState.errors - partialState.source).toImmutableMap(),
         )
     }
 

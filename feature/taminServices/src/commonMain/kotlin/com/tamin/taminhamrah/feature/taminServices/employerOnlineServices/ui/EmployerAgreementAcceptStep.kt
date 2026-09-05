@@ -63,6 +63,7 @@ import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.toPersianDigits
+import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
@@ -554,7 +555,7 @@ private val PreviewAcceptRequest = AgreementRequestUiState(
     employerNationalCode = "۴۴۷۹۸۹۰۸۸۲",
     currentMobile = "09153214478",
     currentEmail = "h.tavakoli@gmail.com",
-    workshopsWithoutContract = listOf(
+    workshopsWithoutContract = persistentListOf(
         WorkshopWithoutContractPR(
             name = "درمانگاه دندان‌پزشکی دکتر محمدجعفری جبلی",
             codeLabel = "۰۰۱۶۳۱۸۹۴۱",

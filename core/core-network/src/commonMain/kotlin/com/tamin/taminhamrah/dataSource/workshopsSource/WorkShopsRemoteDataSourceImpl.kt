@@ -46,7 +46,6 @@ import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
 import com.tamin.taminhamrah.tools.readPdfChannel
-import com.tamin.taminhamrah.tools.extractMessage
 
 /** `serviceName` the `request-ticket` endpoint expects for the Employer → Online Services flow. */
 private const val EMPLOYER_ESERVICES_AGREEMENT = "employerEservicesAgreement"

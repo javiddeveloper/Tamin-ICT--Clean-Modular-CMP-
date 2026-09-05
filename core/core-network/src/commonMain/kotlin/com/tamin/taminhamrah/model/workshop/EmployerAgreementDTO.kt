@@ -41,7 +41,7 @@ data class EmployerWorkshopDTO(
      * card's شعبه cell comes out empty.
      */
     @SerialName("branch") val branch: WorkshopBranchDTO? = null,
-    @SerialName("branchTitle") val branchTitle:String? = null,
+    @SerialName("branchTitle") val branchTitle: String? = null,
     @SerialName("brhCode") val brhCode: String? = null,
     @SerialName("character") val character: WorkshopCharacterDTO? = null,
     @SerialName("workshopType") val workshopType: WorkshopTypeDTO? = null,

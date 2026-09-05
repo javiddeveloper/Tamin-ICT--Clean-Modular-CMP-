@@ -80,6 +80,7 @@ import com.tamin.taminhamrah.ui.toparea.driveTopArea
 import com.tamin.taminhamrah.ui.toparea.rememberMeasuredTopAreaState
 import com.tamin.taminhamrah.ui.toparea.reportTopAreaHeight
 import com.tamin.taminhamrah.ui.toparea.topAreaContentPadding
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
@@ -442,7 +443,7 @@ private val PreviewIdentity = IdentityCardPR(
     nationalCode = "۴۴۷۹۸۹۰۸۸۲",
 )
 
-private val PreviewAgreements = listOf(
+private val PreviewAgreements = persistentListOf(
     EmployerAgreementRowPR(
         workshopId = "0081631829",
         branchCode = "1202",
