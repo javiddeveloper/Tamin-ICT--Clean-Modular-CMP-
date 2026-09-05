@@ -17,7 +17,7 @@ class DeveloperOptionsRepositoryImplTest {
     @Test
     fun `setOverride then clearOverride restores the compiled-in default`() {
         val settings = MapSettings()
-        val repository = DeveloperOptionsRepositoryImpl(settings)
+        val repository = DeveloperOptionsRepositoryImpl(settings, isDebug = true)
 
         repository.setOverride(BaseUrlKey.MAIN, "https://custom.example.com/api/")
         assertEquals("https://custom.example.com/api/", repository.getEffectiveBaseUrl(BaseUrlKey.MAIN))
@@ -31,9 +31,9 @@ class DeveloperOptionsRepositoryImplTest {
     @Test
     fun `clearOverride also removes the value from a freshly loaded repository`() {
         val settings = MapSettings()
-        DeveloperOptionsRepositoryImpl(settings).setOverride(BaseUrlKey.ACCOUNT, "https://custom.example.com/auth/")
+        DeveloperOptionsRepositoryImpl(settings, isDebug = true).setOverride(BaseUrlKey.ACCOUNT, "https://custom.example.com/auth/")
 
-        val repository = DeveloperOptionsRepositoryImpl(settings)
+        val repository = DeveloperOptionsRepositoryImpl(settings, isDebug = true)
         repository.clearOverride(BaseUrlKey.ACCOUNT)
 
         assertEquals(BaseUrlKey.ACCOUNT.defaultValue, repository.getEffectiveBaseUrl(BaseUrlKey.ACCOUNT))
@@ -42,7 +42,7 @@ class DeveloperOptionsRepositoryImplTest {
     @Test
     fun `setOverride appends a trailing slash when the input is missing one`() {
         val settings = MapSettings()
-        val repository = DeveloperOptionsRepositoryImpl(settings)
+        val repository = DeveloperOptionsRepositoryImpl(settings, isDebug = true)
 
         repository.setOverride(BaseUrlKey.AI, "http://172.16.15.54:9001")
 
@@ -52,10 +52,35 @@ class DeveloperOptionsRepositoryImplTest {
     @Test
     fun `setOverride trims whitespace and keeps an existing trailing slash intact`() {
         val settings = MapSettings()
-        val repository = DeveloperOptionsRepositoryImpl(settings)
+        val repository = DeveloperOptionsRepositoryImpl(settings, isDebug = true)
 
         repository.setOverride(BaseUrlKey.HEALTH_PROFILE, "  http://172.16.14.115:5700/api/  ")
 
         assertEquals("http://172.16.14.115:5700/api/", repository.getEffectiveBaseUrl(BaseUrlKey.HEALTH_PROFILE))
+    }
+
+    @Test
+    fun `in release builds overrides are ignored and compiled-in default is always returned`() {
+        val settings = MapSettings()
+        val repository = DeveloperOptionsRepositoryImpl(settings, isDebug = false)
+
+        repository.setOverride(BaseUrlKey.MAIN, "https://custom.example.com/api/")
+
+        assertEquals(BaseUrlKey.MAIN.defaultValue, repository.getEffectiveBaseUrl(BaseUrlKey.MAIN))
+    }
+
+    @Test
+    fun `datastoreModule resolves DeveloperOptionsRepository from Koin`() {
+        val koinApp = org.koin.dsl.koinApplication {
+            modules(
+                com.tamin.taminhamrah.core.datastore.di.datastoreModule,
+                org.koin.dsl.module {
+                    single<com.russhwolf.settings.Settings> { MapSettings() }
+                },
+            )
+        }
+        val repository = koinApp.koin.getOrNull<com.tamin.taminhamrah.repository.DeveloperOptionsRepository>()
+        kotlin.test.assertNotNull(repository)
+        koinApp.close()
     }
 }
