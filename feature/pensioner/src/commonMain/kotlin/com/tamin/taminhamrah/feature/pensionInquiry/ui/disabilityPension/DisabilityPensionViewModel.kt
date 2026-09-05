@@ -95,6 +95,24 @@ class DisabilityPensionViewModel(
                     emit(PartialState.IdentityConfirmationErrorChanged(false))
                 }
             }
+            is DisabilityPensionIntent.WorkshopNameChanged -> {
+                emit(PartialState.WorkshopNameChanged(intent.value, error = false))
+            }
+            is DisabilityPensionIntent.ActivityTypeChanged -> {
+                emit(PartialState.ActivityTypeChanged(intent.value))
+            }
+            is DisabilityPensionIntent.EmployerNameChanged -> {
+                emit(PartialState.EmployerNameChanged(intent.value))
+            }
+            is DisabilityPensionIntent.WorkshopAddressChanged -> {
+                emit(PartialState.WorkshopAddressChanged(intent.value, error = false))
+            }
+            is DisabilityPensionIntent.WorkshopConfirmedChanged -> {
+                emit(PartialState.WorkshopConfirmedChanged(intent.accepted))
+                if (intent.accepted) {
+                    emit(PartialState.WorkshopConfirmationErrorChanged(false))
+                }
+            }
         }
     }
 
@@ -118,6 +136,7 @@ class DisabilityPensionViewModel(
                 }
             }
             DisabilityPensionStep.IdentityContact -> handleIdentityContactNextStep()
+            DisabilityPensionStep.Workshop -> handleWorkshopNextStep()
         }
     }
 
@@ -132,9 +151,26 @@ class DisabilityPensionViewModel(
 
         if (state.isIdentityConfirmed) {
             emit(PartialState.IdentityConfirmationErrorChanged(false))
-            // TODO(EM-2619): navigate to step 4 once its design is delivered.
+            emit(PartialState.StepChanged(DisabilityPensionStep.Workshop))
         } else {
             emit(PartialState.IdentityConfirmationErrorChanged(true))
+        }
+    }
+
+    private suspend fun FlowCollector<PartialState>.handleWorkshopNextStep() {
+        val state = uiState.value
+        val nameError = state.workshopName.isBlank()
+        val addressError = state.workshopAddress.isBlank()
+        emit(PartialState.WorkshopNameChanged(state.workshopName, nameError))
+        emit(PartialState.WorkshopAddressChanged(state.workshopAddress, addressError))
+
+        if (nameError || addressError) return
+
+        if (state.isWorkshopConfirmed) {
+            emit(PartialState.WorkshopConfirmationErrorChanged(false))
+            // TODO(EM-2619): navigate to step 5 once its design is delivered.
+        } else {
+            emit(PartialState.WorkshopConfirmationErrorChanged(true))
         }
     }
 
@@ -142,6 +178,7 @@ class DisabilityPensionViewModel(
         when (uiState.value.currentStep) {
             DisabilityPensionStep.Dependents -> emit(PartialState.StepChanged(DisabilityPensionStep.Terms))
             DisabilityPensionStep.IdentityContact -> emit(PartialState.StepChanged(DisabilityPensionStep.Dependents))
+            DisabilityPensionStep.Workshop -> emit(PartialState.StepChanged(DisabilityPensionStep.IdentityContact))
             DisabilityPensionStep.Terms -> Unit
         }
     }
@@ -209,6 +246,20 @@ class DisabilityPensionViewModel(
         is PartialState.IdentityConfirmedChanged -> currentState.copy(isIdentityConfirmed = partialState.accepted)
         is PartialState.IdentityConfirmationErrorChanged -> currentState.copy(
             showIdentityConfirmationError = partialState.show,
+        )
+        is PartialState.WorkshopNameChanged -> currentState.copy(
+            workshopName = partialState.value,
+            workshopNameError = partialState.error,
+        )
+        is PartialState.ActivityTypeChanged -> currentState.copy(activityType = partialState.value)
+        is PartialState.EmployerNameChanged -> currentState.copy(employerName = partialState.value)
+        is PartialState.WorkshopAddressChanged -> currentState.copy(
+            workshopAddress = partialState.value,
+            workshopAddressError = partialState.error,
+        )
+        is PartialState.WorkshopConfirmedChanged -> currentState.copy(isWorkshopConfirmed = partialState.accepted)
+        is PartialState.WorkshopConfirmationErrorChanged -> currentState.copy(
+            showWorkshopConfirmationError = partialState.show,
         )
         is PartialState.Error -> currentState.copy(
             isProfileLoading = false,

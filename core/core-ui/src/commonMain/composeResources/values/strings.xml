@@ -2010,4 +2010,18 @@
     <string name="disability_pension_identity_confirm_label">اطلاعات هویتی و تماس فوق را تایید می‌نمایم.</string>
     <string name="disability_pension_identity_confirm_error">لطفاً اطلاعات هویتی و تماس را تایید کنید.</string>
     <string name="disability_pension_identity_field_placeholder">وارد کنید</string>
+    <string name="disability_pension_step_workshop_title">اطلاعات کارگاه و شعبه</string>
+    <string name="disability_pension_step_workshop_subtitle">اطلاعات آخرین کارگاه و شعبهٔ خود را کامل و تأیید کنید.</string>
+    <string name="disability_pension_workshop_province">نام استان</string>
+    <string name="disability_pension_workshop_branch_code">کد آخرین شعبه</string>
+    <string name="disability_pension_workshop_branch_name">نام آخرین شعبه</string>
+    <string name="disability_pension_workshop_number">شماره کارگاه</string>
+    <string name="disability_pension_workshop_name_label">نام کارگاه</string>
+    <string name="disability_pension_workshop_name_error">لطفاً نام کارگاه را وارد کنید.</string>
+    <string name="disability_pension_workshop_activity_label">نوع فعالیت (اختیاری)</string>
+    <string name="disability_pension_workshop_employer_label">نام کارفرما (اختیاری)</string>
+    <string name="disability_pension_workshop_address_label">آدرس کارگاه</string>
+    <string name="disability_pension_workshop_address_error">لطفاً آدرس کارگاه را وارد کنید.</string>
+    <string name="disability_pension_workshop_confirm_label">اطلاعات شعبه و کارگاه فوق را تایید می‌نمایم.</string>
+    <string name="disability_pension_workshop_confirm_error">لطفاً اطلاعات شعبه و کارگاه را تایید کنید.</string>
 </resources>

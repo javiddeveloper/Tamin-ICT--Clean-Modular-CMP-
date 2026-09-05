@@ -12,6 +12,7 @@ enum class DisabilityPensionStep {
     Terms,
     Dependents,
     IdentityContact,
+    Workshop,
 }
 
 enum class LandlinePhoneError {
@@ -51,6 +52,14 @@ data class DisabilityPensionUiState(
     val addressError: AddressError? = null,
     val isIdentityConfirmed: Boolean = false,
     val showIdentityConfirmationError: Boolean = false,
+    val workshopName: String = "",
+    val workshopNameError: Boolean = false,
+    val activityType: String = "",
+    val employerName: String = "",
+    val workshopAddress: String = "",
+    val workshopAddressError: Boolean = false,
+    val isWorkshopConfirmed: Boolean = false,
+    val showWorkshopConfirmationError: Boolean = false,
     val error: String? = null,
 ) {
     sealed interface PartialState {
@@ -74,6 +83,12 @@ data class DisabilityPensionUiState(
         data class AddressChanged(val value: String, val error: AddressError?) : PartialState
         data class IdentityConfirmedChanged(val accepted: Boolean) : PartialState
         data class IdentityConfirmationErrorChanged(val show: Boolean) : PartialState
+        data class WorkshopNameChanged(val value: String, val error: Boolean) : PartialState
+        data class ActivityTypeChanged(val value: String) : PartialState
+        data class EmployerNameChanged(val value: String) : PartialState
+        data class WorkshopAddressChanged(val value: String, val error: Boolean) : PartialState
+        data class WorkshopConfirmedChanged(val accepted: Boolean) : PartialState
+        data class WorkshopConfirmationErrorChanged(val show: Boolean) : PartialState
         data class Error(val message: String?) : PartialState
     }
 }
@@ -96,6 +111,11 @@ sealed interface DisabilityPensionIntent {
     data class LandlinePhoneChanged(val value: String) : DisabilityPensionIntent
     data class AddressChanged(val value: String) : DisabilityPensionIntent
     data class IdentityConfirmedChanged(val accepted: Boolean) : DisabilityPensionIntent
+    data class WorkshopNameChanged(val value: String) : DisabilityPensionIntent
+    data class ActivityTypeChanged(val value: String) : DisabilityPensionIntent
+    data class EmployerNameChanged(val value: String) : DisabilityPensionIntent
+    data class WorkshopAddressChanged(val value: String) : DisabilityPensionIntent
+    data class WorkshopConfirmedChanged(val accepted: Boolean) : DisabilityPensionIntent
 }
 
 sealed interface DisabilityPensionEvent {
