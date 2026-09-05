@@ -87,6 +87,8 @@ data class ContractRowsUiState(
     val workshopId: String = "",
     val branchCode: String = "",
     val rows: List<WorkshopContractRowPR> = emptyList(),
+    /** Where "ردیف‌های پیمان" was opened from — [EmployerOnlineServicesIntent.CloseContractRows] returns here. */
+    val originScreen: EmployerOnlineServicesScreen = EmployerOnlineServicesScreen.AGREEMENTS_LIST,
 )
 
 /**
@@ -164,6 +166,7 @@ data class EmployerOnlineServicesUiState(
             val workshopCodeLabel: String,
             val workshopId: String,
             val branchCode: String,
+            val originScreen: EmployerOnlineServicesScreen,
         ) : PartialState
 
         data class ContractRowsLoaded(val rows: List<WorkshopContractRowPR>) : PartialState
@@ -249,8 +252,17 @@ sealed interface EmployerOnlineServicesIntent {
     /** "متوجه شدم" on the success dialog — leaves the wizard and refreshes the landing list. */
     data object DismissAgreementSuccess : EmployerOnlineServicesIntent
 
-    /** A card's "ردیف‌های پیمان" chip — opens [EmployerOnlineServicesScreen.CONTRACT_ROWS] for that workshop. */
-    data class OpenContractRows(val row: EmployerAgreementRowPR) : EmployerOnlineServicesIntent
+    /**
+     * A "ردیف‌های پیمان" tap — opens [EmployerOnlineServicesScreen.CONTRACT_ROWS] for that workshop.
+     * Fired from an agreement card on the landing list *or* a workshop row in step 2 of the request
+     * wizard; [EmployerOnlineServicesScreen.CONTRACT_ROWS] returns to whichever one opened it.
+     */
+    data class OpenContractRows(
+        val workshopName: String,
+        val workshopCodeLabel: String,
+        val workshopId: String,
+        val branchCode: String,
+    ) : EmployerOnlineServicesIntent
 
     /** Back out of the contract-rows drill-down to the landing list. */
     data object CloseContractRows : EmployerOnlineServicesIntent

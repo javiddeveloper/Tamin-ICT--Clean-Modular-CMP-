@@ -79,6 +79,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.employer_online_services_request_code_card_title
+import taminx.core.core_ui.employer_online_services_request_code_expired
 import taminx.core.core_ui.employer_online_services_request_code_sent_to
 import taminx.core.core_ui.employer_online_services_request_code_ttl_caption
 import taminx.core.core_ui.employer_online_services_request_contact_hint
@@ -353,6 +354,7 @@ private fun CodeEntryStep(
             secondsLeft -= 1
         }
     }
+    val isTicketExpired = secondsLeft <= 0
 
     Scaffold(
         modifier = Modifier.fillMaxSize().imePadding(),
@@ -362,7 +364,7 @@ private fun CodeEntryStep(
             TaminBottomActionBar(
                 primaryText = stringResource(Res.string.employer_online_services_request_verify),
                 onPrimaryClick = { onIntent(EmployerOnlineServicesIntent.VerifyAgreementCode) },
-                primaryEnabled = request.isCodeComplete && !request.isSubmitting,
+                primaryEnabled = request.isCodeComplete && !request.isSubmitting && !isTicketExpired,
                 isPrimaryLoading = request.isSubmitting,
                 showChevron = false,
                 secondaryText = stringResource(Res.string.employer_online_services_request_edit_contact),
@@ -453,9 +455,17 @@ private fun CodeEntryStep(
                         value = request.code,
                         onValueChange = { onIntent(EmployerOnlineServicesIntent.UpdateRequestCode(it)) },
                         length = AgreementRequestUiState.CODE_LENGTH,
-                        enabled = !request.isSubmitting,
+                        enabled = !request.isSubmitting && !isTicketExpired,
                         error = !error.isNullOrBlank(),
                         errorMessage = error,
+                    )
+                }
+
+                if (isTicketExpired) {
+                    Text(
+                        text = stringResource(Res.string.employer_online_services_request_code_expired),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = colors.dangerText,
                     )
                 }
             }

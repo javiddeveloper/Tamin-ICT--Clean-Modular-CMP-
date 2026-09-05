@@ -1503,6 +1503,7 @@
     <string name="employer_online_services_request_code_ttl_caption">زمان باقی مانده تا انقضای بلیت امنیتی</string>
     <string name="employer_online_services_request_code_label">کد اعتبارسنجی</string>
     <string name="employer_online_services_request_code_placeholder">- - - - -</string>
+    <string name="employer_online_services_request_code_expired">فرصت ارسال بلیت امنیتی به پایان رسید، لطفاً دوباره تلاش کنید.</string>
     <string name="employer_online_services_request_verify">تأیید و مشاهدهٔ تعهدنامه</string>
     <string name="employer_online_services_request_edit_contact">ویرایش اطلاعات</string>
     <string name="employer_online_services_request_edit_hint">برای بازگشت و اصلاح داده‌ها، دکمهٔ ویرایش اطلاعات را بزنید.</string>

@@ -134,23 +134,23 @@ class EmployerOnlineServicesViewModel(
             .onCompletion { emit(PartialState.Loading(false)) }
 
         is EmployerOnlineServicesIntent.OpenContractRows -> flow<PartialState> {
-            val row = intent.row
             emit(
                 PartialState.ContractRowsTarget(
-                    workshopName = row.workshopName,
-                    workshopCodeLabel = row.workshopCodeLabel,
-                    workshopId = row.workshopId,
-                    branchCode = row.branchCode,
+                    workshopName = intent.workshopName,
+                    workshopCodeLabel = intent.workshopCodeLabel,
+                    workshopId = intent.workshopId,
+                    branchCode = intent.branchCode,
+                    originScreen = uiState.value.currentScreen,
                 ),
             )
             emit(PartialState.ScreenChanged(EmployerOnlineServicesScreen.CONTRACT_ROWS))
-            emitAll(loadContractRows(row.workshopId, row.branchCode))
+            emitAll(loadContractRows(intent.workshopId, intent.branchCode))
         }
             .onStart { emit(PartialState.Loading(true)) }
             .onCompletion { emit(PartialState.Loading(false)) }
 
         EmployerOnlineServicesIntent.CloseContractRows ->
-            flow<PartialState> { emit(PartialState.ScreenChanged(EmployerOnlineServicesScreen.AGREEMENTS_LIST)) }
+            flow<PartialState> { emit(PartialState.ScreenChanged(uiState.value.contractRows.originScreen)) }
     }
 
     private fun retry(source: EmployerOnlineServicesErrorSource): Flow<PartialState> = when (source) {
@@ -264,6 +264,7 @@ class EmployerOnlineServicesViewModel(
                 workshopCodeLabel = partialState.workshopCodeLabel,
                 workshopId = partialState.workshopId,
                 branchCode = partialState.branchCode,
+                originScreen = partialState.originScreen,
             ),
             errors = currentState.errors - EmployerOnlineServicesErrorSource.CONTRACT_ROWS,
         )

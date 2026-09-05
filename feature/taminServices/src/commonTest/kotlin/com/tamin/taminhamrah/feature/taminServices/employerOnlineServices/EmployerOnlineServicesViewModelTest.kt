@@ -5,7 +5,6 @@ import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contra
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contract.EmployerOnlineServicesIntent
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contract.EmployerOnlineServicesScreen
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.EmployerOnlineServicesViewModel
-import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.model.EmployerAgreementRowPR
 import com.tamin.taminhamrah.feature.taminServices.inspection.FakeUserRepository
 import com.tamin.taminhamrah.model.user.UserProfileDN
 import com.tamin.taminhamrah.model.util.PagedListDN
@@ -146,12 +145,10 @@ class EmployerOnlineServicesViewModelTest {
 
         viewModel.sendIntent(
             EmployerOnlineServicesIntent.OpenContractRows(
-                EmployerAgreementRowPR(
-                    workshopId = "0968210170",
-                    branchCode = "0960",
-                    workshopName = "کارگاه الف",
-                    workshopCodeLabel = "۰۹۶۸۲۱۰۱۷۰",
-                ),
+                workshopId = "0968210170",
+                branchCode = "0960",
+                workshopName = "کارگاه الف",
+                workshopCodeLabel = "۰۹۶۸۲۱۰۱۷۰",
             ),
         )
         advanceUntilIdle()
@@ -162,6 +159,53 @@ class EmployerOnlineServicesViewModelTest {
         assertEquals("کارگاه الف", state.contractRows.workshopName)
         assertEquals(1, state.contractRows.rows.size)
         assertEquals(Triple("0968210170", "0960", 0), workshops.lastContractRowsArgs)
+
+        // Closing returns to wherever it was opened from — the landing list, here.
+        viewModel.sendIntent(EmployerOnlineServicesIntent.CloseContractRows)
+        advanceUntilIdle()
+        assertEquals(EmployerOnlineServicesScreen.AGREEMENTS_LIST, viewModel.uiState.value.currentScreen)
+    }
+
+    @Test
+    fun openContractRows_fromStep2_closingReturnsToTheWizardNotTheLandingList() = runTest(testDispatcher) {
+        workshops.workshopsWithoutContract = PagedListDN(
+            items = listOf(WorkshopWithoutContractDN(workshopId = "5", branchCode = "6", name = "بدون تعهدنامه")),
+            total = 1,
+        )
+        workshops.contractRows = PagedListDN(
+            items = listOf(
+                WorkshopContractRowDN(contractRow = "02100014", firstName = "علی", lastName = "پیمانکار"),
+            ),
+            total = 1,
+        )
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        // Get to step 2 of the wizard first.
+        viewModel.sendIntent(EmployerOnlineServicesIntent.OpenAgreementRequest)
+        viewModel.sendIntent(EmployerOnlineServicesIntent.UpdateRequestCode("654321"))
+        viewModel.sendIntent(EmployerOnlineServicesIntent.VerifyAgreementCode)
+        advanceUntilIdle()
+        assertEquals(EmployerOnlineServicesScreen.REQUEST_WIZARD, viewModel.uiState.value.currentScreen)
+
+        // Tap a workshop row from within step 2.
+        viewModel.sendIntent(
+            EmployerOnlineServicesIntent.OpenContractRows(
+                workshopId = "5",
+                branchCode = "6",
+                workshopName = "بدون تعهدنامه",
+                workshopCodeLabel = "۵",
+            ),
+        )
+        advanceUntilIdle()
+        assertEquals(EmployerOnlineServicesScreen.CONTRACT_ROWS, viewModel.uiState.value.currentScreen)
+
+        // Closing must land back on the wizard (still at پذیرش تعهدنامه), not the landing list.
+        viewModel.sendIntent(EmployerOnlineServicesIntent.CloseContractRows)
+        advanceUntilIdle()
+        val state = viewModel.uiState.value
+        assertEquals(EmployerOnlineServicesScreen.REQUEST_WIZARD, state.currentScreen)
+        assertEquals(AgreementRequestStep.ACCEPT_AGREEMENT, state.agreementRequest.step)
     }
 
     // -------------------------------------------------------------------- request wizard
@@ -217,6 +261,93 @@ class EmployerOnlineServicesViewModelTest {
         assertEquals("boss@example.com", workshops.lastSubmission?.email)
         assertEquals("654321", workshops.lastSubmission?.ticketCode)
         assertTrue(viewModel.uiState.value.agreementRequest.isSubmitted)
+    }
+
+    @Test
+    fun submitAgreement_failure_doesNotShowSuccessAndAllowsRetryWithoutRedoingValidation() = runTest(testDispatcher) {
+        workshops.contactInfo = EmployerContactInfoDN(
+            firstName = "رضا",
+            lastName = "کارفرما",
+            nationalCode = "0012345678",
+            currentMobile = "09120000000",
+        )
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        viewModel.sendIntent(EmployerOnlineServicesIntent.OpenAgreementRequest)
+        viewModel.sendIntent(EmployerOnlineServicesIntent.RequestAgreementTicket)
+        viewModel.sendIntent(EmployerOnlineServicesIntent.UpdateRequestCode("654321"))
+        viewModel.sendIntent(EmployerOnlineServicesIntent.VerifyAgreementCode)
+        viewModel.sendIntent(EmployerOnlineServicesIntent.SetAgreementAccepted(true))
+        advanceUntilIdle()
+
+        // The submit call itself fails.
+        workshops.failing = FakeWorkShopsRepository.Call.SUBMIT
+        viewModel.sendIntent(EmployerOnlineServicesIntent.SubmitAgreement)
+        advanceUntilIdle()
+
+        val failed = viewModel.uiState.value
+        // No false "ثبت شد" — the success dialog must not appear on a failed submit.
+        assertEquals(false, failed.agreementRequest.isSubmitted)
+        assertTrue(failed.errors.containsKey(EmployerOnlineServicesErrorSource.SUBMIT))
+        // The user stays exactly where they were — still on step 2, still accepted, code intact.
+        assertEquals(AgreementRequestStep.ACCEPT_AGREEMENT, failed.agreementRequest.step)
+        assertTrue(failed.agreementRequest.accepted)
+        assertEquals("654321", failed.agreementRequest.code)
+
+        // Retrying resubmits directly — no RequestAgreementTicket/VerifyAgreementCode intent is sent
+        // again, i.e. the user is not forced back through OTP to recover from a failed submit.
+        workshops.failing = null
+        viewModel.sendIntent(EmployerOnlineServicesIntent.SubmitAgreement)
+        advanceUntilIdle()
+
+        val retried = viewModel.uiState.value
+        assertTrue(retried.agreementRequest.isSubmitted)
+        assertTrue(retried.errors.isEmpty())
+        assertEquals("654321", workshops.lastSubmission?.ticketCode)
+    }
+
+    @Test
+    fun resendCode_clearsThePreviouslyEnteredCode() = runTest(testDispatcher) {
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        viewModel.sendIntent(EmployerOnlineServicesIntent.OpenAgreementRequest)
+        viewModel.sendIntent(EmployerOnlineServicesIntent.RequestAgreementTicket)
+        advanceUntilIdle()
+        viewModel.sendIntent(EmployerOnlineServicesIntent.UpdateRequestCode("111111"))
+        advanceUntilIdle()
+        assertEquals("111111", viewModel.uiState.value.agreementRequest.code)
+        val firstNonce = viewModel.uiState.value.agreementRequest.ticketNonce
+
+        // "ارسال مجدد کد" re-issues the ticket — the stale code must not linger to be mistakenly verified.
+        viewModel.sendIntent(EmployerOnlineServicesIntent.RequestAgreementTicket)
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertEquals("", state.agreementRequest.code)
+        assertTrue(state.agreementRequest.ticketNonce > firstNonce)
+    }
+
+    @Test
+    fun editContact_clearsCodeAndTicketRequestedState() = runTest(testDispatcher) {
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        viewModel.sendIntent(EmployerOnlineServicesIntent.OpenAgreementRequest)
+        viewModel.sendIntent(EmployerOnlineServicesIntent.RequestAgreementTicket)
+        viewModel.sendIntent(EmployerOnlineServicesIntent.UpdateRequestCode("222222"))
+        advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.agreementRequest.ticketRequested)
+
+        // "ویرایش اطلاعات" backs out to the contact form — the old ticket/code must not survive it.
+        viewModel.sendIntent(EmployerOnlineServicesIntent.EditAgreementContact)
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertEquals(AgreementRequestStep.VALIDATION, state.agreementRequest.step)
+        assertEquals(false, state.agreementRequest.ticketRequested)
+        assertEquals("", state.agreementRequest.code)
     }
 
     @Test

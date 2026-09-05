@@ -76,6 +76,7 @@ import taminx.core.core_ui.employer_online_services_request_success_dismiss
 import taminx.core.core_ui.employer_online_services_request_success_title
 import taminx.core.core_ui.employer_online_services_request_workshops_without_contract
 import taminx.core.core_ui.ic_tamin_chevron_down
+import taminx.core.core_ui.ic_tamin_chevron_forward
 
 /**
  * Step 2 — «پذیرش تعهدنامه». A collapsible identity recap, a collapsible list of the employer's
@@ -137,7 +138,19 @@ internal fun AcceptAgreementStep(
 
                 else -> {
                     IdentityRecapCard(request = request)
-                    WorkshopsWithoutContractCard(workshops = request.workshopsWithoutContract)
+                    WorkshopsWithoutContractCard(
+                        workshops = request.workshopsWithoutContract,
+                        onWorkshopClicked = { workshop ->
+                            onIntent(
+                                EmployerOnlineServicesIntent.OpenContractRows(
+                                    workshopName = workshop.name,
+                                    workshopCodeLabel = workshop.codeLabel,
+                                    workshopId = workshop.workshopId,
+                                    branchCode = workshop.branchCode,
+                                ),
+                            )
+                        },
+                    )
                     RulesCard(document = request.document)
                     ConsentRow(
                         text = request.document.acknowledgement,
@@ -265,7 +278,10 @@ private fun ContactCell(
 // -------------------------------------------------------- workshops without contract
 
 @Composable
-private fun WorkshopsWithoutContractCard(workshops: List<WorkshopWithoutContractPR>) {
+private fun WorkshopsWithoutContractCard(
+    workshops: List<WorkshopWithoutContractPR>,
+    onWorkshopClicked: (WorkshopWithoutContractPR) -> Unit,
+) {
     val colors = LocalTaminColors.current
     var expanded by remember { mutableStateOf(false) }
 
@@ -291,30 +307,45 @@ private fun WorkshopsWithoutContractCard(workshops: List<WorkshopWithoutContract
                 verticalArrangement = Arrangement.spacedBy(Spacing.sm),
             ) {
                 workshops.forEach { workshop ->
-                    Column(
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(CornerRadius.chip))
                             .border(1.dp, colors.border, RoundedCornerShape(CornerRadius.chip))
+                            .clickable(enabled = workshop.hasIdentity) { onWorkshopClicked(workshop) }
                             .padding(Spacing.md),
-                        verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                     ) {
-                        Text(
-                            text = workshop.name,
-                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                            color = colors.textPrimary,
-                        )
-                        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
+                        ) {
                             Text(
-                                text = workshop.branchOfficeName,
-                                style = MaterialTheme.typography.labelMedium,
-                                color = colors.textMuted,
+                                text = workshop.name,
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                color = colors.textPrimary,
                             )
-                            Text(text = "·", style = MaterialTheme.typography.labelMedium, color = colors.textMuted)
-                            NumericText(
-                                text = workshop.codeLabel,
-                                style = MaterialTheme.typography.labelMedium,
-                                color = colors.textMuted,
+                            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                                Text(
+                                    text = workshop.branchOfficeName,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = colors.textMuted,
+                                )
+                                Text(text = "·", style = MaterialTheme.typography.labelMedium, color = colors.textMuted)
+                                NumericText(
+                                    text = workshop.codeLabel,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = colors.textMuted,
+                                )
+                            }
+                        }
+                        if (workshop.hasIdentity) {
+                            Icon(
+                                imageVector = vectorResource(Res.drawable.ic_tamin_chevron_forward),
+                                contentDescription = null,
+                                tint = colors.textMuted,
+                                modifier = Modifier.size(14.dp),
                             )
                         }
                     }

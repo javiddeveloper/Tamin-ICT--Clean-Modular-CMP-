@@ -270,7 +270,14 @@ internal fun EmployerAgreementsListScreen(
                         EmployerAgreementCard(
                             item = item,
                             onContractRowsClicked = {
-                                onIntent(EmployerOnlineServicesIntent.OpenContractRows(item))
+                                onIntent(
+                                    EmployerOnlineServicesIntent.OpenContractRows(
+                                        workshopName = item.workshopName,
+                                        workshopCodeLabel = item.workshopCodeLabel,
+                                        workshopId = item.workshopId,
+                                        branchCode = item.branchCode,
+                                    ),
+                                )
                             },
                             modifier = Modifier.padding(horizontal = Spacing.lg),
                         )
