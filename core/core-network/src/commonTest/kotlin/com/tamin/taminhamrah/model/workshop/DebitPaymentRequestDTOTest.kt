@@ -10,7 +10,7 @@ import kotlin.test.assertTrue
  * The body of `pay-normal-debit`, which the service is particular about.
  *
  * Both of these were sent wrongly once and answered with `ProxyRuntimeException`, so the shape is
- * pinned here rather than left to the defaults: this client serialises with `encodeDefaults` off,
+ * pinned here rather than left to the defaults: this client serializes with `encodeDefaults` off,
  * which silently drops any value that happens to equal its declared default.
  */
 class DebitPaymentRequestDTOTest {
@@ -24,8 +24,8 @@ class DebitPaymentRequestDTOTest {
                 branchCode = "6310",
                 workshopId = "9028212823",
                 debitNumber = "6310030089235",
-                deposit = "0",
                 agreementRow = "09600002",
+                deposit = "0",
             )
         )
 
@@ -34,17 +34,18 @@ class DebitPaymentRequestDTOTest {
     }
 
     @Test
-    fun `a debt with no agreement row carries no peymanSequence at all`() {
+    fun `a debt with no agreement row still carries an empty peymanSequence`() {
         val body = json.encodeToString(
             DebitPaymentRequestDTO(
                 branchCode = "6310",
                 workshopId = "9028212823",
                 debitNumber = "6310030089235",
+                agreementRow = "",
                 deposit = "0",
             )
         )
 
-        assertFalse(body.contains("peymanSequence"), "the field must be absent, not blank: $body")
+        assertTrue(body.contains(""""peymanSequence":""""), "the key must be present: $body")
         assertTrue(body.contains(""""seporde":"0""""), body)
     }
 
@@ -55,6 +56,7 @@ class DebitPaymentRequestDTOTest {
                 branchCode = "6310",
                 workshopId = "9028212823",
                 debitNumber = "6310030089235",
+                agreementRow = "09600002",
                 deposit = "1",
             )
         )

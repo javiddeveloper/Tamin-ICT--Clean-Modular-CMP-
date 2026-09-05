@@ -104,12 +104,12 @@ class WorkshopDebitViewModelTest {
         }
 
     /**
-     * A debt whose agreement row the service reports as `null` must not be paid for with an empty
-     * one: the list answers `"peymanSequence": null`, the old client omits the field entirely, and
-     * sending `""` instead was answered with `ProxyRuntimeException`.
+     * A debt the service reports `"peymanSequence": null` for is still paid for with the key
+     * present and empty — the old client coalesces the null before building its request, and the
+     * service refuses a body that leaves the key out.
      */
     @Test
-    fun `a debt with no agreement row sends none`() = runTest(testDispatcher) {
+    fun `a debt with no agreement row sends an empty one`() = runTest(testDispatcher) {
         repository.workshopDebits = PagedListDN(
             items = listOf(
                 WorkShopDebtDN(debitNumber = RAW_DEBIT_NUMBER, agreementRow = ""),

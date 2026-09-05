@@ -18,24 +18,26 @@ data class DebitPaymentPreCheckDTO(
 /**
  * Body of `POST debit-online-payment/pay-normal-debit`.
  *
- * Two fields are spelled the way the service expects rather than the way Kotlin would default to,
- * and both were answered with `ProxyRuntimeException` when they were not:
+ * Every field is declared without a default, so every field is written. That is deliberate: this
+ * client serializes with `encodeDefaults` off, which silently drops any value equal to its declared
+ * default — a default on [deposit] once removed `seporde` from the body altogether, and the service
+ * answered `ProxyRuntimeException`.
  *
- * - [deposit] is a string of `"1"` or `"0"`, never `"true"`/`"false"`. It carries no default, so it
- *   is always written — `encodeDefaults` is off for this client, and a value equal to its default
- *   would be dropped from the body entirely.
- * - [agreementRow] is absent rather than blank when the debt has none. The list answers
- *   `"peymanSequence": null` for such a debt, and the old client — which omits nulls — sends no
- *   such field at all. Null here is dropped for the same `encodeDefaults` reason, which is what is
- *   wanted.
+ * The shape matches the old client exactly, which sends all five keys on every request:
+ *
+ * - [deposit] is `"1"` or `"0"`, never `"true"`/`"false"`.
+ * - [agreementRow] is present but **empty** for a debt that has none. The list answers
+ *   `"peymanSequence": null` for such a debt and the old client coalesces that to `""` before the
+ *   request is built, so the key is always on the wire. Omitting it is not the same thing, and is
+ *   refused.
  */
 @Serializable
 data class DebitPaymentRequestDTO(
     @SerialName("branchCode") val branchCode: String,
     @SerialName("workshopId") val workshopId: String,
     @SerialName("debitNumber") val debitNumber: String,
+    @SerialName("peymanSequence") val agreementRow: String,
     @SerialName("seporde") val deposit: String,
-    @SerialName("peymanSequence") val agreementRow: String? = null,
 )
 
 /**
