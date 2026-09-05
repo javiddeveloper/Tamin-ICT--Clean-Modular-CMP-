@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
+import com.tamin.taminhamrah.model.user.CurrentUserDN
 import com.tamin.taminhamrah.model.user.UserProfileDN
 import com.tamin.taminhamrah.model.user.EditMobileResponseDN
 import com.tamin.taminhamrah.model.certificate.RecipientDN
@@ -31,6 +32,7 @@ class FakeUserRepository : UserRepository {
     var electronicFilePages: List<List<ElectronicFileDN>> = emptyList()
     var userProfileResult: UserProfileDN? = null
     var statusCertificateReportResult: String = ""
+    var wageCertificateReportResult: String = ""
     var recipientsResult: List<RecipientDN> = emptyList()
 
     var shouldThrowError = false
@@ -104,6 +106,12 @@ class FakeUserRepository : UserRepository {
         emit(verifyChangeMobileResult)
     }
 
+    var currentUserResult: CurrentUserDN = CurrentUserDN()
+
+    override suspend fun getCurrentUser(): Flow<CurrentUserDN> = flow {
+        emit(currentUserResult)
+    }
+
     override suspend fun getUserProfile(): Flow<UserProfileDN> = flow {
         if (shouldThrowError) throw error
         userProfileResult?.let { emit(it) }
@@ -125,6 +133,11 @@ class FakeUserRepository : UserRepository {
     override suspend fun getStatusCertificateReport(filters: List<ApiFilterDN>): Flow<String> = flow {
         if (shouldThrowError) throw error
         emit(statusCertificateReportResult)
+    }
+
+    override suspend fun getWageCertificateReport(filters: List<ApiFilterDN>): Flow<String> = flow {
+        if (shouldThrowError) throw error
+        emit(wageCertificateReportResult)
     }
 
     override suspend fun getRecipients(filters: List<ApiFilterDN>): Flow<List<RecipientDN>> = flow {

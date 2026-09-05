@@ -19,6 +19,8 @@ import com.tamin.taminhamrah.model.bankAccount.BankAccountDN
 import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
 import com.tamin.taminhamrah.repository.UserRepository
+import com.tamin.taminhamrah.model.user.CurrentUserDN
+import com.tamin.taminhamrah.model.user.toUserProfile
 import com.tamin.taminhamrah.model.user.UserProfileDN
 import com.tamin.taminhamrah.data.mapper.user.toDomain
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
@@ -27,6 +29,7 @@ import com.tamin.taminhamrah.util.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import com.tamin.taminhamrah.model.bankAccount.BankAccountRequestDTO
 
 internal class UserRepositoryImpl(
@@ -130,9 +133,17 @@ internal class UserRepositoryImpl(
     override suspend fun downloadDocument(url: String): PdfDownloadDN =
         userRemoteDataSource.downloadDocument(url).toDomain()
 
-    override suspend fun getUserProfile(): Flow<UserProfileDN> = flow {
-        val result = userRemoteDataSource.getUserProfile()
-        emit(result!!.toDomain())
+    /**
+     * Narrowed from the complete account rather than fetched separately, so the two views can
+     * never disagree about who is signed in.
+     */
+    override suspend fun getUserProfile(): Flow<UserProfileDN> =
+        getCurrentUser().map { it.toUserProfile() }
+
+    override suspend fun getCurrentUser(): Flow<CurrentUserDN> = flow {
+        val result = userRemoteDataSource.getCurrentUser()
+            ?: throw IllegalStateException("users/current-user returned no data")
+        emit(result.toDomain())
     }
 
     override fun checkUserIsNew(nationalId: String): Flow<Boolean> = flow {
@@ -163,6 +174,12 @@ internal class UserRepositoryImpl(
     override suspend fun getStatusCertificateReport(filters: List<ApiFilterDN>): Flow<String> =
         flow {
             val remoteData = userRemoteDataSource.getStatusCertificateReport(filters)
+            emit(remoteData ?: "")
+        }
+
+    override suspend fun getWageCertificateReport(filters: List<ApiFilterDN>): Flow<String> =
+        flow {
+            val remoteData = userRemoteDataSource.getWageCertificateReport(filters)
             emit(remoteData ?: "")
         }
 

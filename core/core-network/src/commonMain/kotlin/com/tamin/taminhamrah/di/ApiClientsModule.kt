@@ -22,14 +22,34 @@ import com.tamin.taminhamrah.apiService.health.HealthApiService
 import com.tamin.taminhamrah.apiService.health.createHealthApiService
 import com.tamin.taminhamrah.apiService.inbox.PersonalInboxApiService
 import com.tamin.taminhamrah.apiService.inbox.createPersonalInboxApiService
+import com.tamin.taminhamrah.apiService.orotezProtez.OrotezProtezApiService
+import com.tamin.taminhamrah.apiService.orotezProtez.createOrotezProtezApiService
+import com.tamin.taminhamrah.apiService.requestPaymentForIllDays.RequestPaymentForIllDaysApiService
+import com.tamin.taminhamrah.apiService.requestPaymentForIllDays.createRequestPaymentForIllDaysApiService
+import com.tamin.taminhamrah.apiService.pregnancyPay.PregnancyPayApiService
+import com.tamin.taminhamrah.apiService.pregnancyPay.createPregnancyPayApiService
 import com.tamin.taminhamrah.apiService.pension.PensionApiService
 import com.tamin.taminhamrah.apiService.pension.createPensionApiService
 import com.tamin.taminhamrah.apiService.personal.PersonalApiService
 import com.tamin.taminhamrah.apiService.personal.createPersonalApiService
+import com.tamin.taminhamrah.apiService.historyObjection.HistoryObjectionApiService
+import com.tamin.taminhamrah.apiService.historyObjection.createHistoryObjectionApiService
 import com.tamin.taminhamrah.apiService.userRequest.createUserRequestApiService
 import com.tamin.taminhamrah.apiService.treatment.TreatmentApiService
 import com.tamin.taminhamrah.apiService.treatment.createTreatmentApiService
 import com.tamin.taminhamrah.apiService.userRequest.UserRequestApiService
+import com.tamin.taminhamrah.apiService.addDependent.AddDependentApiService
+import com.tamin.taminhamrah.apiService.addDependent.createAddDependentApiService
+import com.tamin.taminhamrah.apiService.calculateWagePension.CalculateWagePensionApiService
+import com.tamin.taminhamrah.apiService.calculateWagePension.createCalculateWagePensionApiService
+import com.tamin.taminhamrah.apiService.inspection.InspectionApiService
+import com.tamin.taminhamrah.apiService.inspection.createInspectionApiService
+import com.tamin.taminhamrah.apiService.occurrence.OccurrenceApiService
+import com.tamin.taminhamrah.apiService.occurrence.createOccurrenceApiService
+import com.tamin.taminhamrah.apiService.employerInfo.EmployerInfoApiService
+import com.tamin.taminhamrah.apiService.employerInfo.createEmployerInfoApiService
+import com.tamin.taminhamrah.apiService.inquiryEducation.InquiryEducationApiService
+import com.tamin.taminhamrah.apiService.inquiryEducation.createInquiryEducationApiService
 import com.tamin.taminhamrah.model.BaseUrlKey
 import com.tamin.taminhamrah.repository.DeveloperOptionsRepository
 import de.jensklingenberg.ktorfit.Ktorfit
@@ -103,6 +123,11 @@ val ApiClientsModule = module {
         ktorfit.createHistoryApiServices()
     }
 
+    single<CalculateWagePensionApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createCalculateWagePensionApiService()
+    }
+
     single<WorkShopsApiService> {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.createWorkShopsApiService()
@@ -111,6 +136,11 @@ val ApiClientsModule = module {
     single<UserRequestApiService>(named("requestApiService")) {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.createUserRequestApiService()
+    }
+
+    single<HistoryObjectionApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createHistoryObjectionApiService()
     }
 
     single<PersonalInboxApiService>(named("personalInboxApiService")) {
@@ -122,6 +152,10 @@ val ApiClientsModule = module {
         val ktorfit: Ktorfit = get(named("healthKtorfit"))
         ktorfit.createHealthApiService()
     }
+    single<AddDependentApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createAddDependentApiService()
+    }
     single<ContractsApiService>(named("contractsApiService")) {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.createContractsApiService()
@@ -132,4 +166,38 @@ val ApiClientsModule = module {
         ktorfit.createAgentApiService()
     }
 
+    single<OrotezProtezApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createOrotezProtezApiService()
+    }
+
+    single<RequestPaymentForIllDaysApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createRequestPaymentForIllDaysApiService()
+    }
+
+    single<OccurrenceApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createOccurrenceApiService()
+    }
+    single<InspectionApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createInspectionApiService()
+    }
+
+    single<EmployerInfoApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createEmployerInfoApiService()
+    }
+    single<PregnancyPayApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createPregnancyPayApiService()
+    }
+
+
+    single<InquiryEducationApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createInquiryEducationApiService()
+    }
 }
+

@@ -14,7 +14,10 @@ Read the relevant page there before searching the codebase:
 | Which module owns what? | `docs/vault/Modules.md` |
 | How is a ViewModel written? | `docs/vault/MVI-Pattern.md` |
 | How do I add a screen or feature? | `docs/vault/Adding-a-Feature.md` |
+| Persian digits / typography | `docs/vault/Typography.md` |
+| Theme tokens (color, size, copy) | `docs/vault/Theme.md` |
 | Navigation | `docs/vault/Navigation.md` |
+| Scroll-driven collapsing headers (fold/unfold on drag) | `docs/vault/TopArea-System.md` |
 | DI and Koin | `docs/vault/Dependency-Injection.md` |
 | Networking, tokens, endpoints | `docs/vault/Networking.md` |
 | Database and schemas | `docs/vault/Database.md` |

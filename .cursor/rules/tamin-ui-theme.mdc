@@ -1,0 +1,22 @@
+---
+description: Use Tamin theme tokens in Compose UI — no hardcoded colors, sizes, or strings
+globs: feature/**/ui/**/*.kt,core/core-ui/src/**/*.kt
+alwaysApply: false
+---
+
+# Tamin UI tokens
+
+No hardcoded `Color(…)`, `.dp`/`.sp`, or UI copy in Compose.
+
+- Colors: `LocalTaminColors.current` (`SemanticColors.kt`)
+- Sizes: `Spacing`, `CornerRadius`, `IconSize`, `Elevation`, `Thickness`, `ButtonDimens`, `HeaderDecoration` (`Shape.kt`)
+- Copy: `stringResource(Res.string.*)` in `core-ui/.../values/strings.xml`
+- Missing token → add it to the theme, do not inline a literal
+- Search `core-ui/ui/components/` before creating a widget
+
+```kotlin
+// ❌ Modifier.size(18.dp); RoundedCornerShape(20.dp); Text("ارسال گواهی")
+// ✅ Modifier.size(ButtonDimens.loadingIndicatorSize)
+// ✅ RoundedCornerShape(CornerRadius.cardCompact)
+// ✅ Text(stringResource(Res.string.active_relation_send_certificate))
+```

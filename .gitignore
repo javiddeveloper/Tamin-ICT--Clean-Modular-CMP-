@@ -34,6 +34,13 @@ Thumbs.db
 ## AI Tools
 .claude/settings.local.json
 
+## Local agent / WIP artifacts (keep on disk, never commit)
+.cursor/skills/jira-time-log/
+.cursor/skills/tamin-legacy-feature-port/
+.superpowers/
+docs/superpowers/
+feature/pensionSurvivor/
+
 ## Signing
 *.jks
 *.keystore
@@ -54,9 +61,17 @@ old_android/
 *.tmp
 progress.txt
 test.txt
-/core/core-database/schemas/com.tamin.taminhamrah.data.local.TaminXDatabase/
+
+## Local-only pension survivor API mocks (never commit / push)
+feature/pensionSurvivor/src/localMocks/
 
 ## Code review working files (local only)
 review/
 docs/vault/Code-Review.md
+/claude-all-changes.patch
+/.cursor/rules/codebase-memory.mdc
+/.agents/skills/tamin-kmp-feature-builder/SKILL.md
+/.claude/skills/tamin-kmp-feature-builder/SKILL.md
 CLAUDE.local.md
+/core/core-database/schemas/com.tamin.taminhamrah.data.local.TaminXDatabase/2.json
+/core/core-database/schemas/com.tamin.taminhamrah.data.local.TaminXDatabase/4.json

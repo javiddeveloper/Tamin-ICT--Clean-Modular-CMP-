@@ -77,5 +77,3 @@ fun Long?.formatAmount(): String {
 /** Convenience for Int amounts. */
 fun Int?.formatAmount(): String = this?.toLong().formatAmount()
 
-/** Falls back to a dash for null/blank values so KeyValue rows stay aligned. */
-fun String?.orDash(): String = if (isNullOrBlank()) "-" else this

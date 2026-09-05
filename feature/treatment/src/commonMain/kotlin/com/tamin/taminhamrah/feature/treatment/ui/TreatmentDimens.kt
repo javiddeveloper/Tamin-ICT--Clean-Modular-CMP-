@@ -8,6 +8,31 @@ import androidx.compose.ui.unit.dp
  * sizes) live in core-ui's theme; these are layout numbers that only the treatment screens need.
  */
 internal object TreatmentDimens {
+    /** Timeline action buttons, and the placeholders the record detail reserves for a PDF. */
+    val timelineActionSize = 38.dp
+    val recordsFooterSpacer = 100.dp
+    val detailPdfPlaceholderTall = 120.dp
+    val detailPdfPlaceholderShort = 80.dp
+
+    /** The advanced-search sheet: inputs sized to the design rather than Material's 56dp floor. */
+    val searchFieldHeight = 40.dp
+    val searchFieldCorner = 13.dp
+    val searchActionHeight = 52.dp
+    val searchActionCorner = 14.dp
+    val searchChipPaddingHorizontal = 18.dp
+    val searchChipPaddingVertical = 10.dp
+    val searchHandleIconSize = 32.dp
+    val searchHandleGlyphSize = 18.dp
+
+    /**
+     * How far every card in the feature sits off the page.
+     *
+     * One number for all of them on purpose: a list where cards lift by different amounts reads as
+     * a mistake rather than a hierarchy. Deep enough to cast a real shadow, not so deep that a
+     * scrolling list looks like it is peeling away.
+     */
+    val cardElevation = 12.dp
+
     /** Header collapse scroll distance. */
     val headerCollapseDistance = 96.dp
 
@@ -25,6 +50,11 @@ internal object TreatmentDimens {
     val cardLoadingHeight = 160.dp
     val pageIndicatorDotSize = 6.dp
     val pageIndicatorSelectedWidth = 16.dp
+    val pageIndicatorPaddingHorizontal = 12.dp
+    val pageIndicatorPaddingVertical = 7.dp
+
+    /** Past this the strip scrolls rather than growing the pill off the card. */
+    val pageIndicatorMaxWidth = 140.dp
     const val cardDecorAlpha = 0.07f
 
     /** A card's share of the carousel viewport; the rest is the neighbors peeking. */
@@ -49,7 +79,13 @@ internal object TreatmentDimens {
     const val certificateSkeletonRows = 4
 
     /** A quarter turn: the disclosure chevron points back when closed, down when open. */
+    /**
+     * The disclosure chevron. The asset points along the reading direction, so it has to be turned
+     * a quarter-turn down when closed and up when open -- leaving the closed state at 0 degrees
+     * shows a forward arrow, which reads as "navigates away" rather than "expands".
+     */
     const val chevronOpenDegrees = -90f
+    const val chevronClosedDegrees = 90f
 
     // Category tiles & badges
     val categoryTileIconSize = 40.dp

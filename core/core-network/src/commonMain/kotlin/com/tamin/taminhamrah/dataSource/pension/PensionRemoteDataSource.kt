@@ -33,6 +33,7 @@ interface PensionRemoteDataSource {
     ): AgeDTO
 
     suspend fun pensionerPayRollPDF(filter: List<ApiFilterDN>): PdfDownloadDTO
+    suspend fun getEdictReportPDF(filter: List<ApiFilterDN>): PdfDownloadDTO
     suspend fun getAuthenticationCode(): AuthenticationTicketDTO
 
     suspend fun getRetirementRequestInfo(filter: List<ApiFilterDN>) :ListData<RetirementRequestDTO>
@@ -48,6 +49,10 @@ interface PensionRemoteDataSource {
         authenticationsCode: Long
     ): RetirementPersonalDTO
     suspend fun sendEdictPensionerToMyInbox(
+        filter: List<ApiFilterDN>
+    ): String?
+
+    suspend fun sendPayRollToInbox(
         filter: List<ApiFilterDN>
     ): String?
 }

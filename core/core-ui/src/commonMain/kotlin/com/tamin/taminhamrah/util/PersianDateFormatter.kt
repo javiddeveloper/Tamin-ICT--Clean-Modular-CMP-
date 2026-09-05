@@ -6,14 +6,23 @@ import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.daysUntil
 import kotlinx.datetime.toLocalDateTime
 
 private const val PERSIAN_ZERO = '۰'
 
 /**
- * Converts the ASCII digits in this string to Persian-Indic digits, leaving every
- * other character untouched. Shared by the date and price formatters so both render
- * numerals the same way.
+ * Converts the ASCII digits in this string to Persian-Indic digits (`U+06F0`–`U+06F9`),
+ * leaving every other character untouched. Shared by the date and price formatters so
+ * both produce numerals the same way.
+ *
+ * Use this when the characters themselves must be Persian — share/copy payloads,
+ * notifications, and any surface that does not inherit
+ * [com.tamin.taminhamrah.ui.theme.taminHamrahTypography].
+ * Compose UI that uses the theme typography already paints ASCII digits as Persian
+ * via Vazirmatn `ss01`; converting here as well is harmless but not required.
+ *
+ * See `DEFAULT_FONT_FEATURES` in `Type.kt` for the render-time mechanism.
  */
 fun String.toPersianDigits(): String = map { char ->
     if (char in '0'..'9') PERSIAN_ZERO + (char - '0') else char
@@ -50,6 +59,50 @@ fun currentTime(): String {
     return time.toPersianDigits()
 }
 
+/**
+ * Renders a Jalali date as `۱۴۰۵/۰۱/۳۱`.
+ *
+ * Several endpoints return dates unseparated (`14050131`, confirmed against a live
+ * `commission-confrimation` payload), so showing the raw value gives an unreadable run of digits.
+ * Values that already carry separators, and values that are a placeholder rather than a date, are
+ * passed through with only their digits converted.
+ */
+fun String.toJalaliDateLabel(): String {
+    val parts = toJalaliParts() ?: return toPersianDigits()
+    val (year, month, day) = parts
+    val monthText = month.toString().padStart(2, '0')
+    val dayText = day.toString().padStart(2, '0')
+    return "$year/$monthText/$dayText".toPersianDigits()
+}
+
+/**
+ * Splits a Jalali date into year/month/day.
+ *
+ * Handles both shapes the API sends: `1404/02/15` and the unseparated `14050131`.
+ */
+fun String.toJalaliParts(): Triple<Int, Int, Int>? {
+    val digits = filter { it.isDigit() }
+    return when {
+        contains("/") -> {
+            val parts = split("/")
+            val y = parts.getOrNull(0)?.toIntOrNull() ?: return null
+            val m = parts.getOrNull(1)?.toIntOrNull() ?: return null
+            val d = parts.getOrNull(2)?.toIntOrNull() ?: 1
+            Triple(y, m, d)
+        }
+
+        digits.length == COMPACT_DATE_LENGTH -> Triple(
+            digits.substring(0, 4).toInt(),
+            digits.substring(4, 6).toInt(),
+            digits.substring(6, 8).toInt(),
+        )
+
+        else -> null
+    }
+}
+
+private const val COMPACT_DATE_LENGTH = 8
+
 object PersianDateFormatter {
 
     fun formatTimestamp(timestamp: Long?): String {
@@ -81,6 +134,13 @@ object PersianDateFormatter {
         val dateTime = Instant.fromEpochMilliseconds(currentTimeMillis())
             .toLocalDateTime(TimeZone.currentSystemDefault())
         return gregorianToJalali(dateTime.year, dateTime.monthNumber, dateTime.dayOfMonth)
+    }
+
+    /** The current wall-clock time as hour/minute, for time pickers' default selection. */
+    fun now(): Pair<Int, Int> {
+        val dateTime = Instant.fromEpochMilliseconds(currentTimeMillis())
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+        return dateTime.hour to dateTime.minute
     }
 
     /** Days in a Jalali month: 31 for the first six, 30 for the next five, 29/30 for اسفند. */
@@ -129,6 +189,31 @@ object PersianDateFormatter {
     fun toEpochMillisUtc(jy: Int, jm: Int, jd: Int): Long =
         startOfDay(jy, jm, jd, TimeZone.UTC)
 
+    /**
+     * Whole calendar days between two epoch-millis instants in the device's zone, for range/
+     * deadline checks (e.g. "end date must be at least N days before today"). Converts through
+     * [LocalDate] rather than dividing the millis difference so a DST transition between the two
+     * instants can't shift the count by a day.
+     */
+    fun daysBetween(startMillis: Long, endMillis: Long): Int {
+        val start = Instant.fromEpochMilliseconds(startMillis).toLocalDateTime(TimeZone.currentSystemDefault()).date
+        val end = Instant.fromEpochMilliseconds(endMillis).toLocalDateTime(TimeZone.currentSystemDefault()).date
+        return start.daysUntil(end)
+    }
+
+    /**
+     * Whole days from [date] to today, or null when [date] is not a Jalali date.
+     *
+     * Both shapes the services send are accepted (`14050131` and `1405/01/31`). Used for the
+     * filing deadlines that are decided on the device rather than by a `diff-days` endpoint; a
+     * negative result means the date is in the future.
+     */
+    fun daysSince(date: String): Int? {
+        val (year, month, day) = date.toJalaliParts() ?: return null
+        val (todayYear, todayMonth, todayDay) = today()
+        return dayNumber(todayYear, todayMonth, todayDay) - dayNumber(year, month, day)
+    }
+
     /** Formats a Jalali date the way the API and the UI both spell it: `1404/02/15`. */
     fun format(jy: Int, jm: Int, jd: Int): String =
         "${jy.toPersianDigits()}/${jm.toTwoDigitPersian()}/${jd.toTwoDigitPersian()}"
@@ -143,44 +228,25 @@ object PersianDateFormatter {
 
     /** Days elapsed since the Jalali epoch, the quantity [jalaliToGregorian] is built on. */
     private fun dayNumber(jy: Int, jm: Int, jd: Int): Int {
-        val jy1 = jy - 979
-        val jm1 = jm - 1
-        return 365 * jy1 + (jy1 / 33) * 8 + ((jy1 % 33) + 3) / 4 +
-            (if (jm1 < 6) 31 * jm1 else 186 + 30 * (jm1 - 6)) + (jd - 1)
+        val monthIndex = jm - 1
+        return yearStartDayNumber(jy - JALALI_EPOCH_YEAR) +
+            (if (monthIndex < 6) 31 * monthIndex else FIRST_HALF_DAYS + 30 * (monthIndex - 6)) +
+            (jd - 1)
     }
 
-    /** Inverse of [gregorianToJalali], using the same day-count arithmetic. */
-    private fun jalaliToGregorian(jy: Int, jm: Int, jd: Int): Triple<Int, Int, Int> {
-        val dayCount = dayNumber(jy, jm, jd)
-        // 78 pairs with the 355660 above; the two directions must agree or a picked date comes
-        // back a day different from what was tapped.
-        var gDayNo = dayCount + 78
-        var gy = 1600 + 400 * (gDayNo / 146097)
-        gDayNo %= 146097
-        var leap = true
-        if (gDayNo >= 36525) {
-            gDayNo--
-            gy += 100 * (gDayNo / 36524)
-            gDayNo %= 36524
-            if (gDayNo >= 365) gDayNo++ else leap = false
-        }
-        gy += 4 * (gDayNo / 1461)
-        gDayNo %= 1461
-        if (gDayNo >= 366) {
-            leap = false
-            gDayNo--
-            gy += gDayNo / 365
-            gDayNo %= 365
-        }
-        val monthLengths = intArrayOf(
-            31, if (leap) 29 else 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31,
+    /**
+     * Both directions run through [dayNumber], so they are inverses by construction.
+     *
+     * They used to be two independent pieces of arithmetic with two different leap rules, which
+     * disagreed around 1403's Nowruz — one placed 2024-03-20 in 1403, the other in 1402. The
+     * Gregorian side is now `kotlinx.datetime`'s proleptic calendar rather than hand-rolled
+     * 146097/36524/1461 cycle stepping, leaving exactly one leap rule in this file: [dayNumber]'s.
+     */
+    internal fun jalaliToGregorian(jy: Int, jm: Int, jd: Int): Triple<Int, Int, Int> {
+        val date = LocalDate.fromEpochDays(
+            GREGORIAN_ANCHOR_EPOCH_DAYS + dayNumber(jy, jm, jd) + JALALI_GREGORIAN_DAY_OFFSET,
         )
-        var gm = 0
-        while (gm < 12 && gDayNo >= monthLengths[gm]) {
-            gDayNo -= monthLengths[gm]
-            gm++
-        }
-        return Triple(gy, gm + 1, gDayNo + 1)
+        return Triple(date.year, date.monthNumber, date.dayOfMonth)
     }
 
     private fun Int.toTwoDigitPersian(): String {
@@ -191,25 +257,45 @@ object PersianDateFormatter {
         return toString().toPersianDigits()
     }
 
-    private fun gregorianToJalali(gy: Int, gm: Int, gd: Int): Triple<Int, Int, Int> {
-        val gDaysInMonth = intArrayOf(0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334)
-        val gy2 = if (gm > 2) gy + 1 else gy
-        // 355660, not 355666: the larger constant shifted every converted date six days late, so
-        // Nowruz 1404 (2025-03-20) formatted as 1404/01/07. Verified against four known Nowruz
-        // dates in PersianDateFormatterTest.
-        var days = 355660 + (365 * gy) + ((gy2 + 3) / 4) - ((gy2 + 99) / 100) + ((gy2 + 399) / 400) + gd + gDaysInMonth[gm - 1]
-        var jy = -1595 + (33 * (days / 12053))
-        days %= 12053
-        jy += 979 * (days / 36524)
-        days %= 36524
-        if (days >= 365) {
-            jy += (days - 1) / 365
-            days = (days - 1) % 365
-        }
-        val jm = if (days < 186) 1 + days / 31 else 7 + (days - 186) / 30
-        val jd = 1 + if (days < 186) days % 31 else (days - 186) % 30
-        return Triple(jy, jm, jd)
+    /** The exact inverse of [jalaliToGregorian]. */
+    internal fun gregorianToJalali(gy: Int, gm: Int, gd: Int): Triple<Int, Int, Int> {
+        val dayCount = LocalDate(gy, gm, gd).toEpochDays() -
+            GREGORIAN_ANCHOR_EPOCH_DAYS - JALALI_GREGORIAN_DAY_OFFSET
+        return fromDayNumber(dayCount)
     }
+
+    /** Inverse of [dayNumber]: which Jalali date sits [dayCount] days after 979/01/01. */
+    private fun fromDayNumber(dayCount: Int): Triple<Int, Int, Int> {
+        // Years are 365 or 366 days, so dividing by 366 never overshoots; step up from there.
+        var yearsSinceEpoch = dayCount / 366
+        while (yearStartDayNumber(yearsSinceEpoch + 1) <= dayCount) yearsSinceEpoch++
+
+        val dayOfYear = dayCount - yearStartDayNumber(yearsSinceEpoch)
+        val month =
+            if (dayOfYear < FIRST_HALF_DAYS) 1 + dayOfYear / 31
+            else 7 + (dayOfYear - FIRST_HALF_DAYS) / 30
+        val day =
+            1 + if (dayOfYear < FIRST_HALF_DAYS) dayOfYear % 31
+            else (dayOfYear - FIRST_HALF_DAYS) % 30
+        return Triple(yearsSinceEpoch + JALALI_EPOCH_YEAR, month, day)
+    }
+
+    /** Days from 979/01/01 to the first of فروردین [yearsSinceEpoch] years later. */
+    private fun yearStartDayNumber(yearsSinceEpoch: Int): Int =
+        365 * yearsSinceEpoch + (yearsSinceEpoch / 33) * 8 + ((yearsSinceEpoch % 33) + 3) / 4
+
+    /** فروردین through شهریور, the six 31-day months the month arithmetic splits on. */
+    private const val FIRST_HALF_DAYS = 186
+
+    /** [dayNumber] counts from the first of فروردین 979. */
+    private const val JALALI_EPOCH_YEAR = 979
+
+    /**
+     * Where the two calendars are pinned to each other. Verified against real Nowruz dates in
+     * JalaliConversionTest — retuning this shifts every converted date, in both directions.
+     */
+    private const val JALALI_GREGORIAN_DAY_OFFSET = 79
+    private val GREGORIAN_ANCHOR_EPOCH_DAYS = LocalDate(1600, 1, 1).toEpochDays()
 
     private const val DAYS_IN_LEAP_YEAR = 366
 }

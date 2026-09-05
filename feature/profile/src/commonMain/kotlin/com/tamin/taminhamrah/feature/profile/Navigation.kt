@@ -22,6 +22,8 @@ import org.koin.compose.viewmodel.koinViewModel
 
 import com.tamin.taminhamrah.feature.profile.ui.contactUs.ContactUsRoute
 import com.tamin.taminhamrah.feature.profile.ui.contactUs.ContactUsViewModel
+import com.tamin.taminhamrah.feature.profile.ui.dependents.DependentsListRoute
+import com.tamin.taminhamrah.feature.profile.ui.dependents.DependentsListViewModel
 import com.tamin.taminhamrah.feature.profile.ui.versionHistory.VersionHistoryRoute
 import com.tamin.taminhamrah.feature.profile.ui.versionHistory.VersionHistoryViewModel
 
@@ -50,6 +52,12 @@ sealed interface ProfileRoute {
 
     @Serializable
     data object ContactUs : ProfileRoute
+
+    @Serializable
+    data object DependentsList : ProfileRoute
+
+    @Serializable
+    data object UserRequests : ProfileRoute
 }
 
 fun NavGraphBuilder.profileGraph(
@@ -60,6 +68,9 @@ fun NavGraphBuilder.profileGraph(
     onNavigateToChangeMobile: () -> Unit,
     onNavigateToSecurity: () -> Unit,
     onNavigateToDeveloperOptions: () -> Unit,
+    onNavigateToSettings: () -> Unit,
+    onNavigateToAddDependent: () -> Unit,
+    onNavigateToUserRequests: () -> Unit,
     onOpenUrl: (String) -> Unit,
     onBack: () -> Unit
 ) {
@@ -81,6 +92,9 @@ fun NavGraphBuilder.profileGraph(
                 onNavigateToContactUs = { navController.navigate(ProfileRoute.ContactUs) },
                 onNavigateToSecurity = onNavigateToSecurity,
                 onNavigateToDeveloperOptions = onNavigateToDeveloperOptions,
+                onNavigateToDependentsList = {navController.navigate(ProfileRoute.DependentsList)},
+                onNavigateToSettings = onNavigateToSettings,
+                onNavigateToUserRequests = onNavigateToUserRequests,
                 onOpenUrl = onOpenUrl,
                 onBackClicked = onBack
             )
@@ -112,6 +126,25 @@ fun NavGraphBuilder.profileGraph(
                 onBackClicked = { navController.popBackStack() }
             )
         }
+
+        composable<ProfileRoute.DependentsList> {
+            val viewModel = koinViewModel<DependentsListViewModel>()
+            DependentsListRoute(
+                viewModel = viewModel,
+                onNavigateToAddDependent = onNavigateToAddDependent,
+                onBackClicked = { navController.popBackStack() }
+            )
+        }
+
+        composable<ProfileRoute.DependentsList> {
+            val viewModel = koinViewModel<com.tamin.taminhamrah.feature.profile.ui.dependents.DependentsListViewModel>()
+            com.tamin.taminhamrah.feature.profile.ui.dependents.DependentsListRoute(
+                viewModel = viewModel,
+                onNavigateToAddDependent = onNavigateToAddDependent,
+                onBackClicked = { navController.popBackStack() }
+            )
+        }
+
 
         composableWithFadeTransitions<ProfileRoute.BankAccount> {
             val viewModel = koinViewModel<BankAccountViewModel>()

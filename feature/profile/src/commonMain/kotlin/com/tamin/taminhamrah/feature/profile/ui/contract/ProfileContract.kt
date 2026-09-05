@@ -17,6 +17,10 @@ data class ProfileUiState(
     val imageRequestResult: String? = null,
     val isImageRequestLoading: Boolean = false,
     val imageRequestError: String? = null,
+    val dependentsCount: Int = 0,
+    val activeRelationCount: Int = 0,
+    val inactiveRelationCount: Int = 0,
+    val isActiveRelationLoading: Boolean = true,
 ) {
     sealed class PartialState {
         data class Loading(val isLoading: Boolean) : PartialState()
@@ -25,6 +29,8 @@ data class ProfileUiState(
         data class ProfileImageLoaded(val image: String?) : PartialState()
         data class IdentityInfoLoaded(val info: IdentityInfoPR?) : PartialState()
         data class TaminRelationLoaded(val relation: TaminRelationPR?) : PartialState()
+        data class DependentsCountLoaded(val count: Int) : PartialState()
+        data class ActiveRelationStatusLoaded(val activeCount: Int, val inactiveCount: Int) : PartialState()
         data class ImageRequestLoading(val isLoading: Boolean) : PartialState()
         data class ImageRequestResult(val result: String) : PartialState()
         data class ImageRequestError(val message: String) : PartialState()
@@ -42,7 +48,7 @@ sealed class ProfileIntent {
     data class OnItemClick(val item: ProfileMenuItem) : ProfileIntent()
     data class SendImageRequest(val branchCode: String, val filter: String) : ProfileIntent()
 
-    data object LoadSubDominants : ProfileIntent()
+    data object NavigateToDependentsList : ProfileIntent()
     data class ToggleTheme(val isDark: Boolean) : ProfileIntent()
 }
 
@@ -53,13 +59,17 @@ sealed interface ProfileEvent {
     data object NavigateToIdentity : ProfileEvent
     data object NavigateToVersionHistory : ProfileEvent
     data object NavigateToMyInbox : ProfileEvent
-    data class OpenUrl(val url: String) : ProfileEvent
-    data class ShowToast(val message: String) : ProfileEvent
     data object NavigateToChangeMobile : ProfileEvent
     data object NavigateToContactUs : ProfileEvent
+    data object NavigateToDependentsList : ProfileEvent
     data object NavigateToElectronicFile : ProfileEvent
+    data object NavigateToUserContracts : ProfileEvent
+    data class OpenUrl(val url: String) : ProfileEvent
+    data class ShowToast(val message: String) : ProfileEvent
     data object NavigateToBankAccount : ProfileEvent
     data object NavigateToSecurity : ProfileEvent
     data object NavigateToDeveloperOptions : ProfileEvent
+    data class ShareAppLink(val appLink: String) : ProfileEvent
+    data class Support(val phone: String) : ProfileEvent
 }
 

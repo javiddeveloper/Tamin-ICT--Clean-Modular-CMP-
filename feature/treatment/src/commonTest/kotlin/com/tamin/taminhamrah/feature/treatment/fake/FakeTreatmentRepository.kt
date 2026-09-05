@@ -7,9 +7,12 @@ import com.tamin.taminhamrah.model.treatment.TreatmentCostDN
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDN
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDetailDN
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPriceDN
+import com.tamin.taminhamrah.model.treatment.MedicalConfirmationDN
 import com.tamin.taminhamrah.repository.treatment.TreatmentRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Configurable fake [TreatmentRepository] for the dashboard ViewModel tests.
@@ -33,6 +36,7 @@ class FakeTreatmentRepository : TreatmentRepository {
     var treatmentCostsResult: List<TreatmentCostDN> = emptyList()
     var treatmentCostsPdfResult: PdfDownloadDN = TreatmentTestData.pdf()
     var sendToInboxResult: String = "SUCCESS"
+    var medicalConfirmationsResult: List<MedicalConfirmationDN> = emptyList()
 
     private fun <T> result(value: T): Flow<T> = flow {
         if (shouldThrowError) throw error
@@ -42,10 +46,21 @@ class FakeTreatmentRepository : TreatmentRepository {
     override suspend fun getDeservedTreatment(nationalCode: String): Flow<List<DeservedTreatmentDN>> =
         result(deservedResult)
 
+    /**
+     * Per-category answers and how slow each one is, for driving two searches that resolve out of
+     * order. Empty by default, so every existing test keeps getting [prescriptionListResult].
+     */
+    var prescriptionListResultByType: Map<String, List<ElectronicPrescriptionDN>> = emptyMap()
+    var prescriptionListDelayByType: Map<String, Long> = emptyMap()
+
     override suspend fun getElectronicPrescriptionList(
         requestTypeId: String, nationalCode: String, patientNationalCode: String,
         startDate: String, endDate: String
-    ): Flow<List<ElectronicPrescriptionDN>> = result(prescriptionListResult)
+    ): Flow<List<ElectronicPrescriptionDN>> = flow {
+        if (shouldThrowError) throw error
+        prescriptionListDelayByType[requestTypeId]?.let { delay(it.milliseconds) }
+        emit(prescriptionListResultByType[requestTypeId] ?: prescriptionListResult)
+    }
 
     override suspend fun getElectronicPrescriptionDetail(
         noteHeadID: String, nationalCode: String, patientNationalCode: String,
@@ -75,4 +90,14 @@ class FakeTreatmentRepository : TreatmentRepository {
 
     override suspend fun sendToInboxTreatmentCosts(repId: String): Flow<String> =
         result(sendToInboxResult)
+
+    override suspend fun getMedicalConfirmations(): Flow<List<MedicalConfirmationDN>> =
+        result(medicalConfirmationsResult)
+
+    override suspend fun getMedicalConfirmationPdf(repId: String): Flow<PdfDownloadDN> =
+        result(treatmentCostsPdfResult)
+
+    override suspend fun sendToInboxMedicalConfirmation(repId: String): Flow<String> =
+        result(sendToInboxResult)
 }
+

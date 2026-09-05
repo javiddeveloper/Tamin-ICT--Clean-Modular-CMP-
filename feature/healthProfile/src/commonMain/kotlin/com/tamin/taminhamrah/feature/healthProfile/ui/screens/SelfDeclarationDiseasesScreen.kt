@@ -31,11 +31,13 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.components.CardsListShimme
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthIrritateNavigationBar
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthTopAppBar
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.InfoBanner
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.InteractiveChoiceChips
+import com.tamin.taminhamrah.ui.components.InteractiveChoiceChips
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthProfileErrorWrapper
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.SegmentedControl
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.BottomSheetType
-import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.HealthBottomSheet
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheet
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetConfig
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetItem
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetType
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.bottomSheet.findGroup
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.DiseasesStepState
 import com.tamin.taminhamrah.feature.healthProfile.ui.contract.HealthProfileIntent
@@ -71,10 +73,10 @@ fun SelfDeclarationDiseasesScreen(
     )
 
     // Filter groups via Enum type mapping
-    val riskFactorGroup = illnessGroups.findGroup(BottomSheetType.RISK_FACTOR)
-    val chronicGroup = illnessGroups.findGroup(BottomSheetType.ILLNESS_HISTORY)
-    val mentalGroup = illnessGroups.findGroup(BottomSheetType.MENTAL)
-    val cancerGroup = illnessGroups.findGroup(BottomSheetType.CANCER)
+    val riskFactorGroup = illnessGroups.findGroup(TaminBottomSheetType.RISK_FACTOR)
+    val chronicGroup = illnessGroups.findGroup(TaminBottomSheetType.ILLNESS_HISTORY)
+    val mentalGroup = illnessGroups.findGroup(TaminBottomSheetType.MENTAL)
+    val cancerGroup = illnessGroups.findGroup(TaminBottomSheetType.CANCER)
 
     Scaffold(
         topBar = {
@@ -150,7 +152,7 @@ fun SelfDeclarationDiseasesScreen(
                         val selectedIds = indices.map { group.illnesses[it].id }.toSet()
                         onIntent(
                             HealthProfileIntent.UpdateDiseaseSelections(
-                                BottomSheetType.RISK_FACTOR,
+                                TaminBottomSheetType.RISK_FACTOR,
                                 selectedIds
                             )
                         )
@@ -167,7 +169,7 @@ fun SelfDeclarationDiseasesScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         IconBox(
                             painter = painterResource(Res.drawable.ic_health_disease),
-                            backgroundColor = LocalTaminColors.current.hawkesBlue.copy(alpha = 0.6f),
+                            backgroundColor = LocalTaminColors.current.blueBorder.copy(alpha = 0.6f),
                             contentDescription = null,
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -181,7 +183,7 @@ fun SelfDeclarationDiseasesScreen(
                         options = optionsYesNo,
                         selectedIndex = if (state.hasChronicDisease == true) 0 else 1,
                         onOptionSelected = { idx ->
-                            onIntent(HealthProfileIntent.SetDiseaseAnswer(BottomSheetType.ILLNESS_HISTORY, idx == 0))
+                            onIntent(HealthProfileIntent.SetDiseaseAnswer(TaminBottomSheetType.ILLNESS_HISTORY, idx == 0))
                         }
                     )
                 }
@@ -195,7 +197,7 @@ fun SelfDeclarationDiseasesScreen(
                             .clickable {
                                 onIntent(
                                     HealthProfileIntent.OpenDiseaseBottomSheet(
-                                        BottomSheetType.ILLNESS_HISTORY
+                                        TaminBottomSheetType.ILLNESS_HISTORY
                                     )
                                 )
                             },
@@ -272,7 +274,7 @@ fun SelfDeclarationDiseasesScreen(
                         options = optionsYesNo,
                         selectedIndex = if (state.hasMentalIllness == true) 0 else 1,
                         onOptionSelected = { idx ->
-                            onIntent(HealthProfileIntent.SetDiseaseAnswer(BottomSheetType.MENTAL, idx == 0))
+                            onIntent(HealthProfileIntent.SetDiseaseAnswer(TaminBottomSheetType.MENTAL, idx == 0))
                         }
                     )
                 }
@@ -286,7 +288,7 @@ fun SelfDeclarationDiseasesScreen(
                             .clickable {
                                 onIntent(
                                     HealthProfileIntent.OpenDiseaseBottomSheet(
-                                        BottomSheetType.MENTAL
+                                        TaminBottomSheetType.MENTAL
                                     )
                                 )
                             },
@@ -363,7 +365,7 @@ fun SelfDeclarationDiseasesScreen(
                         options = optionsYesNo,
                         selectedIndex = if (state.hasCancer == true) 0 else 1,
                         onOptionSelected = { idx ->
-                            onIntent(HealthProfileIntent.SetDiseaseAnswer(BottomSheetType.CANCER, idx == 0))
+                            onIntent(HealthProfileIntent.SetDiseaseAnswer(TaminBottomSheetType.CANCER, idx == 0))
                         }
                     )
                 }
@@ -376,7 +378,7 @@ fun SelfDeclarationDiseasesScreen(
                             .clickable {
                                 onIntent(
                                     HealthProfileIntent.OpenDiseaseBottomSheet(
-                                        BottomSheetType.CANCER
+                                        TaminBottomSheetType.CANCER
                                     )
                                 )
                             },
@@ -437,7 +439,7 @@ fun SelfDeclarationDiseasesScreen(
     state.activeBottomSheet?.let { type ->
         val config = state.buildBottomSheetConfig(type, illnessGroups)
         if (config != null) {
-            HealthBottomSheet(
+            TaminBottomSheet(
                 config = config,
                 onDismissRequest = { onIntent(HealthProfileIntent.CloseDiseaseBottomSheet) },
                 onSubmit = { result ->

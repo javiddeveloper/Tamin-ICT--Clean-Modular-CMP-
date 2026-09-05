@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileIntent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState.PartialState
 import com.tamin.taminhamrah.feature.profile.ui.model.ProfileMenuItem
+import com.tamin.taminhamrah.mapper.activeRelation.toUiModelList
 import com.tamin.taminhamrah.mapper.identity.toPresentation
 import com.tamin.taminhamrah.mapper.relation.toPresentation
 import com.tamin.taminhamrah.model.DarkThemeConfig
@@ -25,6 +26,7 @@ import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
 import com.tamin.taminhamrah.useCases.user.VerifyChangeMobileUseCase
 import com.tamin.taminhamrah.util.HeaderConstant
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
@@ -57,7 +59,7 @@ class ProfileViewModel(
                 intent.branchCode,
                 intent.filter
             )
-            is ProfileIntent.LoadSubDominants -> handleLoadSubDominants()
+            is ProfileIntent.NavigateToDependentsList -> handleNavigateToDependentsList()
             is ProfileIntent.ToggleTheme -> handleToggleTheme(intent.isDark)
         }
     }
@@ -92,8 +94,24 @@ class ProfileViewModel(
                 )
             }
         }
+        val dependentsCountFlow = flow {
+            subdominantUseCase().collect { subdominant ->
+                emit(PartialState.DependentsCountLoaded(subdominant.list?.size ?: 0))
+            }
+        }
+        val activeRelationFlow = flow {
+            getRelationTaminAllUseCase.invoke().collect { relations ->
+                val uiItems = relations.toUiModelList()
+                emit(
+                    PartialState.ActiveRelationStatusLoaded(
+                        activeCount = uiItems.count { it.isActive },
+                        inactiveCount = uiItems.count { !it.isActive }
+                    )
+                )
+            }
+        }
 
-        merge(userIdFlow, imageFlow, identityFlow, taminRelationFlow).collect {
+        merge(userIdFlow, imageFlow, identityFlow, taminRelationFlow, dependentsCountFlow, activeRelationFlow).collect {
             emit(it)
         }
     }
@@ -131,6 +149,9 @@ class ProfileViewModel(
             ProfileMenuItem.PERSONAL_INBOX -> sendEvent(ProfileEvent.NavigateToMyInbox)
             ProfileMenuItem.SECURITY -> sendEvent(ProfileEvent.NavigateToSecurity)
             ProfileMenuItem.DEVELOPER_OPTIONS -> sendEvent(ProfileEvent.NavigateToDeveloperOptions)
+            ProfileMenuItem.SHARE -> sendEvent(ProfileEvent.ShareAppLink("https://hamrah.tamin.ir/"))
+            ProfileMenuItem.SUPPORT -> sendEvent(ProfileEvent.Support("1420"))
+            ProfileMenuItem.REQUESTS -> sendEvent(ProfileEvent.NavigateToUserContracts)
             else -> sendEvent(ProfileEvent.ShowToast("به زودی: ${item.name}"))
         }
         return emptyFlow()
@@ -144,14 +165,10 @@ class ProfileViewModel(
             }
     }
 
-    //todo it should removed from here this is only test
-    private fun handleLoadSubDominants(): Flow<PartialState> {
+
+    private fun handleNavigateToDependentsList(): Flow<PartialState> {
         return flow {
-            emit(PartialState.ScreenStateChanged.Loading)
-            subdominantUseCase.invoke(
-            ).collect {
-                emit(PartialState.ScreenStateChanged.Success)
-            }
+            sendEvent(ProfileEvent.NavigateToDependentsList)
         }
     }
 
@@ -209,6 +226,16 @@ class ProfileViewModel(
 
         is PartialState.TaminRelationLoaded -> currentState.copy(
             taminRelation = partialState.relation
+        )
+
+        is PartialState.DependentsCountLoaded -> currentState.copy(
+            dependentsCount = partialState.count
+        )
+
+        is PartialState.ActiveRelationStatusLoaded -> currentState.copy(
+            activeRelationCount = partialState.activeCount,
+            inactiveRelationCount = partialState.inactiveCount,
+            isActiveRelationLoading = false
         )
 
         is PartialState.ImageRequestLoading -> currentState.copy(

@@ -3,8 +3,11 @@ package com.tamin.taminhamrah.feature.treatment.ui.model
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPR
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPricePR
+import com.tamin.taminhamrah.util.containsFoldedWords
 import com.tamin.taminhamrah.util.currentTimeMillis
+import com.tamin.taminhamrah.util.foldForSearch
 import com.tamin.taminhamrah.util.getOneMonthAgoTimestamp
+import com.tamin.taminhamrah.util.toFoldedWords
 
 /**
  * What the advanced search asks for.
@@ -70,12 +73,26 @@ data class RecordSearchCriteria(
         prices: Map<String, ElectronicPrescriptionPricePR> = emptyMap(),
     ): Boolean = matchesName(record) && matchesAmount(record, prices)
 
+    /**
+     * The typed name reduced to the words a record has to contain.
+     *
+     * Folded once per criteria object rather than once per record: [matches] runs over the whole
+     * list, and the query is the same for every row of that pass.
+     */
+    private val nameWords: List<String> by lazy(LazyThreadSafetyMode.PUBLICATION) {
+        nameQuery.toFoldedWords()
+    }
+
+    /**
+     * Matched on folded text, so a name spelled with Arabic ي/ك, joined by a نیم‌فاصله, or typed
+     * with a stray double space still finds its record. See [foldForSearch].
+     */
     private fun matchesName(record: ElectronicPrescriptionPR): Boolean {
-        if (nameQuery.isBlank()) return true
-        val needle = nameQuery.trim()
-        return record.docName.contains(needle, ignoreCase = true) ||
-            record.location.contains(needle, ignoreCase = true) ||
-            record.specDesc.contains(needle, ignoreCase = true)
+        val words = nameWords
+        if (words.isEmpty()) return true
+        return record.docName.containsFoldedWords(words) ||
+            record.location.containsFoldedWords(words) ||
+            record.specDesc.containsFoldedWords(words)
     }
 
     /**

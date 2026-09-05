@@ -47,6 +47,12 @@ enum class FilterProperty(val key: String) {
     @SerialName("cityCode") CITY_CODE("cityCode"),
     @SerialName("cityName") CITY_NAME("cityName"),
     @SerialName("provinceCode") PROVINCE_CODE("provinceCode"),
+    // Lower-case 'c' on purpose: proxy/models/city names the field `provincecode`, which is also
+    // why CityDto's @SerialName is spelled that way. Correcting it stops the filter working.
+    // Also used for special-insured-services/cities, which expects the same lowercase casing —
+    // do not add a second enum entry for it, kotlinx.serialization forbids duplicate SerialNames
+    // within one enum class.
+    @SerialName("provincecode") PROVINCE_CODE_CITY("provincecode"),
     @SerialName("pensionerId") PENSIONER_ID("pensionerId"),
     @SerialName("startDate") START_DATE("startDate"),
     @SerialName("operation") OPERATION("operation"),
@@ -59,6 +65,14 @@ enum class FilterProperty(val key: String) {
     @SerialName("workshop.workshopStatus.workshopStatusCode") WORKSHOP_STATUS_CODE("workshop.workshopStatus.workshopStatusCode"),
     @SerialName("workshopId") PAYMENT_WORKSHOP_ID("workshopId"),
     @SerialName("branchCode") PAYMENT_BRANCH_CODE("branchCode"),
+    @SerialName("workshopCode") WORKSHOP_CODE("workshopCode"),
+    @SerialName("nationalCode") NATIONAL_CODE("nationalCode"),
+    // The employer-info ticket endpoints name the contact fields this way; `mobile` above is
+    // a different filter on a different service and is not interchangeable with it.
+    @SerialName("mobileNumber") MOBILE_NUMBER("mobileNumber"),
+    @SerialName("email") EMAIL("email"),
+    @SerialName("serviceName") SERVICE_NAME("serviceName"),
+    @SerialName("birthDate") BIRTH_DATE("birthDate"),
     @SerialName("payIdFrom") PAY_ID_FROM("payIdFrom"),
     @SerialName("payIdTo") PAY_ID_TO("payIdTo"),
     @SerialName("docDateFrom") DOC_DATE_FROM("docDateFrom"),
@@ -73,7 +87,33 @@ enum class FilterProperty(val key: String) {
     @SerialName("branchName") BRANCH_NAME("branchName"),
     @SerialName("target") TARGET("target"),
     @SerialName("statusCode") STATUS_CODE("statusCode"),
+    @SerialName("request.id") REQUEST_ID("request.id"),
+    @SerialName("requestType") REQUEST_TYPE("requestType"),
+    @SerialName("requestStatus") REQUEST_STATUS("requestStatus"),
+    @SerialName("isPublic") IS_PUBLIC("isPublic"),
+    @SerialName("dependencyDesc") DEPENDENCY_DESC("dependencyDesc"),
+    @SerialName("type") TYPE("type"),
+    @SerialName("status") STATUS("status"),
+    @SerialName("jobDescription") JOB_DESCRIPTION("jobDescription"),
+    @SerialName("bankName") BANK_NAME("bankName"),
+    @SerialName("insuranceTypeDesc") INSURANCE_TYPE_DESC("insuranceTypeDesc"),
+
+    // Workshop member / stakeholder / absentee-registration lists. Each list addresses the same
+    // two people-columns under a different prefix, which is why there is one entry per list
+    // rather than a shared "nationalId".
+    @SerialName("insurance.id") INSURANCE_ID("insurance.id"),
+    @SerialName("insurance.nationalId") INSURANCE_NATIONAL_ID("insurance.nationalId"),
+    @SerialName("personal.nationalId") PERSONAL_NATIONAL_ID("personal.nationalId"),
+    @SerialName("personal.request.status.requestCode")
+    PERSONAL_REQUEST_STATUS_CODE("personal.request.status.requestCode"),
+
+    /** The branch, on the `employers` list only — every other workshop list calls it a branch code. */
+    @SerialName("organizationId") ORGANIZATION_ID("organizationId"),
+
+    @SerialName("debitNumber") DEBIT_NUMBER("debitNumber"),
+    @SerialName("peymanSequence") PEYMAN_SEQUENCE("peymanSequence"),
 }
+
 
 @Serializable
 data class ApiFilterDN(

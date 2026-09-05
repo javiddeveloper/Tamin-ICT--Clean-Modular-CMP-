@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -69,9 +70,12 @@ import com.tamin.taminhamrah.ui.motion.rememberMotionSnapFlingBehavior
 import com.tamin.taminhamrah.ui.motion.rememberScrollMotionState
 import com.tamin.taminhamrah.ui.theme.DarkTaminColors
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.ShimmerBlock
+import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
 import com.tamin.taminhamrah.util.AppConfig
+import com.tamin.taminhamrah.ui.util.ExternalAppLauncher
 import com.tamin.taminhamrah.util.toPersianDigits
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
@@ -120,6 +124,10 @@ import taminx.core.core_ui.profile_support
 import taminx.core.core_ui.profile_support_section
 import taminx.core.core_ui.profile_title
 import taminx.core.core_ui.profile_version_history
+import taminx.core.core_ui.active_relation_header_status_error
+import taminx.core.core_ui.active_relation_header_status_ok
+import taminx.core.core_ui.validation_status_badge_invalid
+import taminx.core.core_ui.validation_status_badge_valid
 import androidx.compose.ui.unit.lerp as dpLerp
 
 @Composable
@@ -130,10 +138,13 @@ fun ProfileScreen(
     onNavigateToElectronicFile: () -> Unit = {},
     onNavigateToVersionHistory: () -> Unit = {},
     onNavigateToActiveRelation: () -> Unit = {},
+    onNavigateToDependentsList: () -> Unit = {},
     onNavigateToChangeMobile: () -> Unit = {},
     onNavigateToBankAccount: () -> Unit = {},
     onNavigateToContactUs: () -> Unit = {},
     onNavigateToMyInbox: () -> Unit = {},
+    onNavigateToSettings: () -> Unit = {},
+    onNavigateToUserRequests: () -> Unit = {},
     onOpenUrl: (String) -> Unit = {},
     onNavigateToSecurity: () -> Unit = {},
     onNavigateToDeveloperOptions: () -> Unit = {},
@@ -165,6 +176,9 @@ fun ProfileScreen(
         onNavigateToMyInbox = onNavigateToMyInbox,
         onNavigateToSecurity = onNavigateToSecurity,
         onNavigateToDeveloperOptions = onNavigateToDeveloperOptions,
+        onNavigateToDependentsList = onNavigateToDependentsList,
+        onNavigateToSettings = onNavigateToSettings,
+        onNavigateToUserRequests = onNavigateToUserRequests,
         onOpenUrl = onOpenUrl,
         onBackClicked = onBackClicked
     )
@@ -187,24 +201,30 @@ fun HandleProfileEvents(
     onNavigateToElectronicFile: () -> Unit,
     onNavigateToVersionHistory: () -> Unit,
     onNavigateToActiveRelation: () -> Unit,
+    onNavigateToDependentsList: () -> Unit,
     onNavigateToChangeMobile: () -> Unit,
     onNavigateToBankAccount: () -> Unit,
     onNavigateToContactUs: () -> Unit,
     onNavigateToMyInbox: () -> Unit,
+    onNavigateToSettings: () -> Unit,
+    onNavigateToUserRequests: () -> Unit,
     onNavigateToSecurity: () -> Unit,
     onNavigateToDeveloperOptions: () -> Unit,
     onOpenUrl: (String) -> Unit,
     onBackClicked: () -> Unit
 ) {
+
+    val launcher = remember { ExternalAppLauncher() }
+
     events.collectWithLifecycleAware {
         when (it) {
             ProfileEvent.NavigateBack -> {
                 onBackClicked()
             }
 
-            // Settings has no destination yet; the row is still shown, so the event is
-            // swallowed rather than removed from the contract.
-            ProfileEvent.NavigateToSettings -> Unit
+            ProfileEvent.NavigateToSettings -> {
+                onNavigateToSettings()
+            }
 
             ProfileEvent.NavigateToIdentity -> {
                 onNavigateToIdentity()
@@ -220,6 +240,10 @@ fun HandleProfileEvents(
 
             ProfileEvent.NavigateToActiveRelation -> {
                 onNavigateToActiveRelation()
+            }
+
+            ProfileEvent.NavigateToDependentsList -> {
+                onNavigateToDependentsList()
             }
 
             ProfileEvent.NavigateToChangeMobile -> {
@@ -238,6 +262,10 @@ fun HandleProfileEvents(
                 onNavigateToMyInbox()
             }
 
+            ProfileEvent.NavigateToUserContracts ->{
+                onNavigateToUserRequests()
+            }
+
             is ProfileEvent.OpenUrl -> {
                 onOpenUrl(it.url)
             }
@@ -245,12 +273,21 @@ fun HandleProfileEvents(
             is ProfileEvent.ShowToast -> {
                 // Handle toast
             }
+
             ProfileEvent.NavigateToSecurity -> {
                 onNavigateToSecurity()
             }
 
             ProfileEvent.NavigateToDeveloperOptions -> {
                 onNavigateToDeveloperOptions()
+            }
+
+            is ProfileEvent.ShareAppLink -> {
+                launcher.shareText(it.appLink)
+            }
+
+            is ProfileEvent.Support -> {
+                onOpenUrl("tel:${it.phone}")
             }
         }
     }
@@ -352,19 +389,32 @@ fun ProfileContent(
                                     model = state.profileImage,
                                     isLoading = state.isProfileImageLoading
                                 )
-                                Column {
-                                    Text(
-                                        text = state.identityInfo?.fullName ?: "تست تست تست",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = taminColors.txtNameProfile
-                                    )
-                                    NumericText(
-                                        text = state.identityInfo?.nationalId
-                                            ?.toPersianDigits()
-                                            .orEmpty(),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = taminColors.txtNatProfile
-                                    )
+                                Column(verticalArrangement = Arrangement.spacedBy(Spacing.xxs)) {
+                                    if (state.identityInfo == null) {
+                                        ShimmerBlock(
+                                            modifier = Modifier
+                                                .width(ShimmerSize.titleWidth)
+                                                .height(ShimmerSize.titleHeight)
+                                        )
+                                        ShimmerBlock(
+                                            modifier = Modifier
+                                                .width(ShimmerSize.valueWidth)
+                                                .height(ShimmerSize.valueHeight)
+                                        )
+                                    } else {
+                                        Text(
+                                            text = state.identityInfo?.fullName ?: "",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = taminColors.txtNameProfile
+                                        )
+                                        NumericText(
+                                            text = state.identityInfo?.nationalId
+                                                ?.toPersianDigits()
+                                                .orEmpty(),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = taminColors.txtNatProfile
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -372,15 +422,23 @@ fun ProfileContent(
                     }
                     Spacer(modifier = Modifier.height(dpLerp(Spacing.xxxl, 35.dp, headerProgress)))
                 }
+                val isRelationValid = state.activeRelationCount > 0
                 ValidationStatusCard(
                     hazeState = hazeState,
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(horizontal = Spacing.lg),
-                    title = "نام نویسی شده تست",
-                    subtitle = "حساب شما تأیید و فعال است تست",
-                    badgeText = "معتبر تست ",
-                    isValid = true
+                    title = stringResource(Res.string.profile_active_relation),
+                    subtitle = stringResource(
+                        if (isRelationValid) Res.string.active_relation_header_status_ok
+                        else Res.string.active_relation_header_status_error
+                    ),
+                    badgeText = stringResource(
+                        if (isRelationValid) Res.string.validation_status_badge_valid
+                        else Res.string.validation_status_badge_invalid
+                    ),
+                    isValid = isRelationValid,
+                    isLoading = state.isActiveRelationLoading
                 )
             }
         }
@@ -424,13 +482,15 @@ fun ProfileContent(
                                     leadingIconTintColor = taminColors.bgIconProfile,
                                     leadingIconBackgroundGradient = taminColors.iconGradientPrimary
                                 ),
-                                badge = ListItemBadge(
-                                    text = stringResource(Res.string.profile_dependents_badge_test),
-                                    backgroundColor = taminColors.blueBg,
-                                    textColor = taminColors.blueText
-                                ),
+                                badge = state.dependentsCount.takeIf { it > 0 }?.let { count ->
+                                    ListItemBadge(
+                                        text = "$count نفر ",
+                                        backgroundColor = taminColors.blueBg,
+                                        textColor = taminColors.blueText
+                                    )
+                                },
                                 showArrow = true,
-                                onClick = { onIntent(ProfileIntent.LoadSubDominants) }
+                                onClick = { onIntent(ProfileIntent.NavigateToDependentsList) }
                             ),
                             ListItemData(
                                 title = stringResource(Res.string.profile_active_relation),

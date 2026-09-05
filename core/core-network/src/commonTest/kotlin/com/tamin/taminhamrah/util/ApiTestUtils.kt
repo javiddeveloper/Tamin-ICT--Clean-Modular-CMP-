@@ -58,6 +58,33 @@ object PersonalTestData {
 
     val requestSummarySuccess: String
         get() = readResourceFile("mocks/request_summary_success.json")
+
+    /** Legacy-shaped `survivor-request/personal` payload for girl survivor. */
+    val girlSurvivorPersonalSuccess: String
+        get() = readResourceFile("mocks/girl_survivor_personal_success.json")
+
+    /**
+     * Live-shaped `survivor-request/personal` payload (includes nested
+     * `relationWithTamins` objects with Jackson-style int identity refs).
+     */
+    val survivorRequestPersonalLiveSuccess: String
+        get() = readResourceFile("mocks/survivor_request_personal_live_success.json")
+
+    val girlSurvivorConditionSuccess: String
+        get() = readResourceFile("mocks/girl_survivor_condition_success.json")
+
+    val girlSurvivorConditionIneligible: String
+        get() = readResourceFile("mocks/girl_survivor_condition_ineligible.json")
+
+    val girlSurvivorConfirmSuccess: String
+        get() = readResourceFile("mocks/girl_survivor_confirm_success.json")
+
+    val girlSurvivorConfirmNullData: String
+        get() = readResourceFile("mocks/girl_survivor_confirm_null_data.json")
+
+    /** Minimal PDF header bytes used for `survivor-request/report` streaming tests. */
+    val girlSurvivorReportPdfBytes: ByteArray =
+        ("%PDF-1.4 girl-survivor-commitment").encodeToByteArray()
 }
 
 object UserRequestTestData {
@@ -66,7 +93,93 @@ object UserRequestTestData {
 
     val requestTypesSuccess: String
         get() = readResourceFile("mocks/request_types_success.json")
+
+    val requestErrorsSuccess: String
+        get() = """
+            {
+                "total": 1,
+                "list": [
+                    {
+                        "id": 101,
+                        "errorMassage": "نقص مدارک شناسایی",
+                        "errorType": "VALIDATION",
+                        "errorStatus": "FAILED",
+                        "creationTime": 1700000000000
+                    }
+                ]
+            }
+        """.trimIndent()
+
+    val smartGuideSuccess: String
+        get() = """
+            {
+                "total": 1,
+                "list": [
+                    {
+                        "id": 201,
+                        "question": "شرایط ثبت درخواست چیست؟",
+                        "reply": "برای ثبت درخواست داشتن سابقه بیمه حداقل یک سال الزامی است.",
+                        "requestCode": "0018",
+                        "requestDesc": "درخواست راهنما",
+                        "isPublic": true,
+                        "title": "راهنمای هوشمند",
+                        "description": "توضیحات تکمیلی"
+                    }
+                ]
+            }
+        """.trimIndent()
+
+    val salaryDeductionCertificateSuccess: String
+        get() = """
+            {
+                "status": 200,
+                "family": "SUCCESSFUL",
+                "reason": "OK",
+                "traceId": "a57c8114-781e-4b42-9731-950960a5bf9c",
+                "data": {
+                    "list": [
+                        {
+                            "id": 491371155,
+                            "operation": null,
+                            "createdBy": "6319889391",
+                            "creationTime": 1785215695428,
+                            "lastModifiedBy": null,
+                            "lastModificationTime": 1785215798065,
+                            "refCode": "1075558440",
+                            "userName": "6319889391",
+                            "status": {
+                                "operation": null,
+                                "requestCode": "0018",
+                                "requestDesc": "مختومه-تاييد نهايي"
+                            },
+                            "title": "درخواست گواهي کسر از حقوق",
+                            "comment": null,
+                            "template": null,
+                            "requestType": {
+                                "operation": null,
+                                "createdBy": null,
+                                "creationTime": null,
+                                "lastModifiedBy": null,
+                                "lastModificationTime": null,
+                                "id": 22,
+                                "title": "درخواست گواهي کسر از حقوق",
+                                "description": "درخواست گواهي کسر از حقوق"
+                            },
+                            "deliverCode": null,
+                            "refrenceid": null,
+                            "requestDetails": null,
+                            "requestChid": null,
+                            "fullName": null,
+                            "createByName": "سيدرحمت اله ميرفضلي"
+                        }
+                    ],
+                    "total": 1
+                }
+            }
+        """.trimIndent()
 }
+
+
 
 object PersonalInboxTestData {
     val inboxItemsSuccess: String
@@ -213,3 +326,67 @@ object WorkshopTestData {
     val workshopStackholdersSuccess: String
         get() = readResourceFile("mocks/workshop_stackholders_success.json")
 }
+
+object OccurrenceTestData {
+    val personalInfoSuccess: String
+        get() = readResourceFile("mocks/occurrence/personal_info_success.json")
+
+    val allWorkshopsSuccess: String
+        get() = readResourceFile("mocks/occurrence/all_workshops_success.json")
+
+    val workshopSpecSuccess: String
+        get() = readResourceFile("mocks/occurrence/workshop_spec_success.json")
+
+    val insuredRelationSuccess: String
+        get() = readResourceFile("mocks/occurrence/insured_relation_success.json")
+
+    val documentTypesSuccess: String
+        get() = readResourceFile("mocks/occurrence/document_types_success.json")
+
+    val uploadImageSuccess: String
+        get() = readResourceFile("mocks/occurrence/upload_image_success.json")
+
+    val submitOccurrenceSuccess: String
+        get() = readResourceFile("mocks/occurrence/submit_occurrence_success.json")
+}
+
+object HistoryTestData {
+    val dastmozdInfosSuccess: String
+        get() = readResourceFile("mocks/history/dastmozd_infos_success.json")
+
+    val dastmozdInfosEmpty: String
+        get() = readResourceFile("mocks/history/dastmozd_infos_empty.json")
+
+    val talfighInfosSuccess: String
+        get() = readResourceFile("mocks/history/talfigh_infos_success.json")
+
+    val talfighInfosEmpty: String
+        get() = readResourceFile("mocks/history/talfigh_infos_empty.json")
+
+    val userInfoSuccess: String
+        get() = readResourceFile("mocks/history/user_info_success.json")
+
+    val historyJobInfosSuccess: String
+        get() = readResourceFile("mocks/history/history_job_infos_success.json")
+
+    val historyJobInfosEmpty: String
+        get() = readResourceFile("mocks/history/history_job_infos_empty.json")
+
+    val sendToInstitutionSuccess: String
+        get() = readResourceFile("mocks/history/send_to_institution_success.json")
+}
+
+object InspectionTestData {
+    val inspectionPerformedListSuccess: String
+        get() = readResourceFile("mocks/inspection_performed_list_success.json")
+
+    val inspectionBranchesListSuccess: String
+        get() = readResourceFile("mocks/inspection_branches_list_success.json")
+
+    val inspectionJobsListSuccess: String
+        get() = readResourceFile("mocks/inspection_jobs_list_success.json")
+
+    val inspectionSubmitSuccess: String
+        get() = readResourceFile("mocks/inspection_submit_success.json")
+}
+

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -23,8 +22,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
@@ -42,14 +39,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordSearchCriteria
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
+import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.PersianDateFormatter
@@ -76,6 +72,13 @@ import taminx.core.core_ui.search_title
 import taminx.core.core_ui.search_to_placeholder
 import taminx.core.core_ui.search_to_prefix
 import taminx.core.core_ui.tab_pharmacy
+import com.tamin.taminhamrah.ui.theme.TaminOnAccentInk
+import com.tamin.taminhamrah.ui.theme.Thickness
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.input.VisualTransformation
 
 /** Which date field the picker is currently filling, if any. */
 private enum class DateField { NONE, FROM, TO }
@@ -130,7 +133,7 @@ fun RecordSearchSheet(
                 .padding(bottom = Spacing.xl),
             verticalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
-            // Header Row: Title on right (first child in RTL), Cross icon without background container on left (second child in RTL)
+            // Header row: title on the right (first child under RTL), close button on the left.
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -145,17 +148,15 @@ fun RecordSearchSheet(
                     color = colors.textPrimary,
                 )
 
-                IconButton(
+                // The app's one icon button, recolored for a sheet: same 36dp chip and touch
+                // target every other icon button in the app gets, rather than a bare glyph.
+                TaminTopAppBarButton(
+                    icon = vectorResource(Res.drawable.ic_tamin_cross),
+                    contentDescription = stringResource(Res.string.btn_close),
                     onClick = onDismiss,
-                    modifier = Modifier.size(32.dp),
-                ) {
-                    Icon(
-                        imageVector = vectorResource(Res.drawable.ic_tamin_cross),
-                        contentDescription = stringResource(Res.string.btn_close),
-                        tint = colors.textSecondary,
-                        modifier = Modifier.size(18.dp),
-                    )
-                }
+                    containerColor = colors.bgPage,
+                    contentColor = colors.textSecondary,
+                )
             }
 
             // Section 1: Service Type (نوع خدمت)
@@ -218,19 +219,10 @@ fun RecordSearchSheet(
 
             // Section 3: Doctor or Center Name (نام پزشک یا مرکز)
             SectionHeader(text = stringResource(Res.string.search_doctor_or_center))
-            OutlinedTextField(
+            SearchTextField(
                 value = criteria.nameQuery,
                 onValueChange = { criteria = criteria.copy(nameQuery = it) },
-                placeholder = {
-                    Text(
-                        text = stringResource(Res.string.search_doctor_hint),
-                        color = colors.textMuted,
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                },
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp),
-                colors = textFieldColors(),
+                placeholder = stringResource(Res.string.search_doctor_hint),
                 modifier = Modifier.fillMaxWidth(),
             )
 
@@ -240,36 +232,18 @@ fun RecordSearchSheet(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             ) {
-                OutlinedTextField(
+                SearchTextField(
                     value = criteria.minAmount,
                     onValueChange = { criteria = criteria.copy(minAmount = it) },
-                    placeholder = {
-                        Text(
-                            text = stringResource(Res.string.search_min),
-                            color = colors.textMuted,
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    },
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    colors = textFieldColors(),
+                    placeholder = stringResource(Res.string.search_min),
+                    digitsOnly = true,
                     modifier = Modifier.weight(1f),
                 )
-                OutlinedTextField(
+                SearchTextField(
                     value = criteria.maxAmount,
                     onValueChange = { criteria = criteria.copy(maxAmount = it) },
-                    placeholder = {
-                        Text(
-                            text = stringResource(Res.string.search_max),
-                            color = colors.textMuted,
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    },
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    colors = textFieldColors(),
+                    placeholder = stringResource(Res.string.search_max),
+                    digitsOnly = true,
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -285,11 +259,11 @@ fun RecordSearchSheet(
             ) {
                 OutlinedButton(
                     onClick = { criteria = RecordSearchCriteria() },
-                    shape = RoundedCornerShape(14.dp),
-                    border = BorderStroke(1.dp, colors.border),
+                    shape = RoundedCornerShape(TreatmentDimens.searchActionCorner),
+                    border = BorderStroke(Thickness.border, colors.border),
                     modifier = Modifier
                         .weight(1f)
-                        .height(52.dp),
+                        .height(TreatmentDimens.searchActionHeight),
                 ) {
                     Text(
                         text = stringResource(Res.string.search_clear),
@@ -302,8 +276,8 @@ fun RecordSearchSheet(
                 Box(
                     modifier = Modifier
                         .weight(1.5f)
-                        .height(52.dp)
-                        .clip(RoundedCornerShape(14.dp))
+                        .height(TreatmentDimens.searchActionHeight)
+                        .clip(RoundedCornerShape(TreatmentDimens.searchActionCorner))
                         .background(colors.medicalGradient)
                         .clickable { onApply(criteria) },
                     contentAlignment = Alignment.Center,
@@ -312,7 +286,7 @@ fun RecordSearchSheet(
                         text = stringResource(Res.string.search_apply),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White,
+                        color = TaminOnAccentInk,
                     )
                 }
             }
@@ -366,17 +340,17 @@ private fun ServiceTypeChip(
                 if (isSelected) Modifier.background(colors.medicalGradient)
                 else Modifier
                     .background(colors.bgSurface)
-                    .border(1.dp, colors.border, CircleShape),
+                    .border(Thickness.border, colors.border, CircleShape),
             )
             .clickable(onClick = onClick)
-            .padding(horizontal = 18.dp, vertical = 10.dp),
+            .padding(horizontal = TreatmentDimens.searchChipPaddingHorizontal, vertical = TreatmentDimens.searchChipPaddingVertical),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelLarge,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-            color = if (isSelected) Color.White else colors.textSecondary,
+            color = if (isSelected) TaminOnAccentInk else colors.textSecondary,
         )
     }
 }
@@ -402,10 +376,10 @@ private fun DateFieldButton(
 
     Box(
         modifier = modifier
-            .height(56.dp)
-            .clip(RoundedCornerShape(12.dp))
+            .height(TreatmentDimens.searchFieldHeight)
+            .clip(RoundedCornerShape(TreatmentDimens.searchFieldCorner))
             .background(colors.bgSurface)
-            .border(1.dp, colors.border, RoundedCornerShape(12.dp))
+            .border(Thickness.border, colors.border, RoundedCornerShape(TreatmentDimens.searchFieldCorner))
             .clickable(onClick = onClick)
             .padding(horizontal = Spacing.md),
         contentAlignment = Alignment.CenterStart,
@@ -417,6 +391,79 @@ private fun DateFieldButton(
             textAlign = TextAlign.Start,
         )
     }
+}
+
+// The design's inputs compute to roughly 36-40px against Material's 56dp floor. One height for
+// every control in the sheet -- the two date buttons included -- so the rows line up.
+
+/**
+ * A search input short enough for the design.
+ *
+ * [OutlinedTextField] floors itself at 56dp and keeps 16dp of vertical padding, so forcing a
+ * smaller height clips its own placeholder — which is why the hints had stopped showing. Driving
+ * [OutlinedTextFieldDefaults.DecorationBox] directly lets the padding shrink with the field.
+ *
+ * [digitsOnly] filters at the source rather than trusting the number keyboard: a paste, a hardware
+ * keyboard or a third-party IME can all put letters in a numeric field.
+ */
+@Composable
+private fun SearchTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    modifier: Modifier = Modifier,
+    digitsOnly: Boolean = false,
+) {
+    val colors = LocalTaminColors.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val shape = RoundedCornerShape(TreatmentDimens.searchFieldCorner)
+    val fieldColors = textFieldColors()
+
+    BasicTextField(
+        value = value,
+        onValueChange = { raw ->
+            onValueChange(if (digitsOnly) raw.filter(Char::isDigit) else raw)
+        },
+        modifier = modifier.height(TreatmentDimens.searchFieldHeight),
+        textStyle = MaterialTheme.typography.bodyMedium.copy(color = colors.textPrimary),
+        singleLine = true,
+        cursorBrush = SolidColor(colors.teal),
+        keyboardOptions = if (digitsOnly) {
+            KeyboardOptions(keyboardType = KeyboardType.Number)
+        } else {
+            KeyboardOptions.Default
+        },
+        interactionSource = interactionSource,
+        decorationBox = { innerTextField ->
+            OutlinedTextFieldDefaults.DecorationBox(
+                value = value,
+                innerTextField = innerTextField,
+                enabled = true,
+                singleLine = true,
+                visualTransformation = VisualTransformation.None,
+                interactionSource = interactionSource,
+                isError = false,
+                placeholder = {
+                    Text(
+                        text = placeholder,
+                        color = colors.textMuted,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                },
+                colors = fieldColors,
+                contentPadding = PaddingValues(horizontal = Spacing.md),
+                container = {
+                    OutlinedTextFieldDefaults.Container(
+                        enabled = true,
+                        isError = false,
+                        interactionSource = interactionSource,
+                        colors = fieldColors,
+                        shape = shape,
+                    )
+                },
+            )
+        },
+    )
 }
 
 @Composable

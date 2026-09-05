@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -48,16 +49,16 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.SectionLabel
 import com.tamin.taminhamrah.ui.components.StatTile
+import com.tamin.taminhamrah.ui.components.StatTileStyle
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminBottomBar
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
-import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -65,6 +66,10 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
 import kotlinx.collections.immutable.ImmutableList
+import com.tamin.taminhamrah.ui.theme.TaminOnAccentBorder
+import com.tamin.taminhamrah.ui.theme.TaminOnAccentFill
+import com.tamin.taminhamrah.ui.theme.TaminOnAccentInk
+import com.tamin.taminhamrah.ui.theme.Thickness
 
 /**
  * Components for the medical-records timeline: the record card and its date-group
@@ -94,7 +99,7 @@ fun MedicalRecordCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .taminSurface(CornerRadius.card)
+            .raisedCard(CornerRadius.card)
             .accentStripe(accentColor)
             .clickable(onClick = onClick)
             .padding(Spacing.lg),
@@ -134,11 +139,17 @@ fun MedicalRecordCard(
 }
 
 /**
- * Paints the 4dp category stripe down the card's leading edge — the right side under
+ * Paints the category stripe down the card's leading edge — the right side under
  * the app's right-to-left layout, the left side if it is ever rendered left-to-right.
+ *
+ * [width] defaults to the records card's 4dp; the design draws a narrower 3dp stripe on the
+ * confirmations cards, so the caller decides rather than every card sharing one number.
  */
-internal fun Modifier.accentStripe(color: Color): Modifier = drawBehind {
-    val barWidth = TreatmentDimens.accentBarWidth.toPx()
+internal fun Modifier.accentStripe(
+    color: Color,
+    width: Dp = TreatmentDimens.accentBarWidth,
+): Modifier = drawBehind {
+    val barWidth = width.toPx()
     val x = if (layoutDirection == LayoutDirection.Rtl) size.width - barWidth else 0f
     drawRect(
         color = color,
@@ -201,13 +212,13 @@ private fun MedicalRecordFooter(shareAmount: String?) {
             Text(
                 text = stringResource(Res.string.records_details),
                 style = MaterialTheme.typography.labelMedium,
-                color = Color.White,
+                color = TaminOnAccentInk,
             )
             // Points toward the detail screen; autoMirrored, so it sits on the left in RTL.
             Icon(
                 imageVector = vectorResource(Res.drawable.ic_tamin_chevron_forward),
                 contentDescription = null,
-                tint = Color.White,
+                tint = TaminOnAccentInk,
                 modifier = Modifier.size(IconSize.small),
             )
         }
@@ -243,7 +254,7 @@ fun TreatmentFilterChip(
             .clip(CircleShape)
             .then(
                 if (selected) Modifier.background(colors.medicalGradient)
-                else Modifier.background(colors.bgSurface).border(1.dp, colors.border, CircleShape)
+                else Modifier.background(colors.bgSurface).border(Thickness.border, colors.border, CircleShape)
             )
             .clickable(onClick = onClick)
             .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
@@ -251,7 +262,7 @@ fun TreatmentFilterChip(
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
-            color = if (selected) Color.White else colors.textSecondary,
+            color = if (selected) TaminOnAccentInk else colors.textSecondary,
         )
     }
 }
@@ -313,9 +324,10 @@ fun TimelineFilterBar(
     personExpanded: Boolean = false,
     dateExpanded: Boolean = false,
     // Each chooser's menu is composed beside the chip that opens it, so the menu anchors there
-    // instead of floating somewhere the trigger has no relationship with.
-    personMenu: @Composable () -> Unit = {},
-    dateMenu: @Composable () -> Unit = {},
+    // instead of floating somewhere the trigger has no relationship with. The chip's own width is
+    // handed over so the menu can be sized against it.
+    personMenu: @Composable (anchorWidth: Dp) -> Unit = {},
+    dateMenu: @Composable (anchorWidth: Dp) -> Unit = {},
 ) {
     Row(
         modifier = modifier
@@ -324,7 +336,10 @@ fun TimelineFilterBar(
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(modifier = Modifier.weight(1f)) {
+        // BoxWithConstraints rather than onSizeChanged: the chip's width is already fixed by the
+        // weight, so it can be read during composition instead of written back as state after
+        // layout — which would cost a recomposition and a frame every time the bar is laid out.
+        BoxWithConstraints(modifier = Modifier.weight(1f)) {
             FilterTrigger(
                 label = personLabel,
                 leadingIcon = vectorResource(Res.drawable.ic_tamin_user),
@@ -333,9 +348,9 @@ fun TimelineFilterBar(
                 modifier = Modifier.fillMaxWidth(),
                 expanded = personExpanded,
             )
-            personMenu()
+            personMenu(maxWidth)
         }
-        Box(modifier = Modifier.weight(1f)) {
+        BoxWithConstraints(modifier = Modifier.weight(1f)) {
             FilterTrigger(
                 label = dateLabel,
                 leadingIcon = vectorResource(Res.drawable.ic_tamin_calendar),
@@ -344,20 +359,20 @@ fun TimelineFilterBar(
                 modifier = Modifier.fillMaxWidth(),
                 expanded = dateExpanded,
             )
-            dateMenu()
+            dateMenu(maxWidth)
         }
         Box(
             modifier = Modifier
-                .size(38.dp)
+                .size(TreatmentDimens.timelineActionSize)
                 .clip(RoundedCornerShape(CornerRadius.lg))
-                .background(Color.White.copy(alpha = 0.1f))
+                .background(TaminOnAccentFill)
                 .clickable(onClick = onSearchClick),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 imageVector = searchIcon,
                 contentDescription = stringResource(Res.string.search_advanced_cd),
-                tint = Color.White,
+                tint = TaminOnAccentInk,
                 modifier = Modifier.size(IconSize.small),
             )
         }
@@ -383,10 +398,10 @@ private fun FilterTrigger(
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(CornerRadius.lg))
-            .background(Color.White.copy(alpha = 0.1f))
+            .background(TaminOnAccentFill)
             .border(
-                width = 1.dp,
-                color = Color.White.copy(alpha = 0.18f),
+                width = Thickness.border,
+                color = TaminOnAccentBorder,
                 shape = RoundedCornerShape(CornerRadius.lg),
             )
             .clickable(onClick = onClick)
@@ -398,14 +413,14 @@ private fun FilterTrigger(
             Icon(
                 imageVector = leadingIcon,
                 contentDescription = null,
-                tint = Color.White,
+                tint = TaminOnAccentInk,
                 modifier = Modifier.size(IconSize.small),
             )
         }
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
-            color = Color.White,
+            color = TaminOnAccentInk,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
@@ -413,7 +428,7 @@ private fun FilterTrigger(
         Icon(
             imageVector = trailingIcon,
             contentDescription = null,
-            tint = Color.White,
+            tint = TaminOnAccentInk,
             modifier = Modifier
                 .size(IconSize.small)
                 .rotate(chevronRotation),
@@ -440,30 +455,69 @@ fun CostTotalsBar(
     totalAmount: String?,
     modifier: Modifier = Modifier,
 ) {
-    val colors = LocalTaminColors.current
     TaminBottomBar(modifier = modifier) {
-        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-            StatTile(
-                label = insuredShareLabel,
-                amount = insuredShareAmount,
-                containerColor = colors.greenBg,
-                contentColor = colors.greenText,
-                modifier = Modifier.weight(1f),
-            )
-            StatTile(
-                label = organizationShareLabel,
-                amount = organizationShareAmount,
-                containerColor = colors.blueBg,
-                contentColor = colors.blueText,
-                modifier = Modifier.weight(1f),
-            )
-            StatTile(
-                label = totalLabel,
-                amount = totalAmount,
-                containerColor = colors.orangeBg,
-                contentColor = colors.orangeText,
-                modifier = Modifier.weight(1f),
-            )
-        }
+        CostSplitTiles(
+            insuredShareLabel = insuredShareLabel,
+            insuredShareAmount = insuredShareAmount,
+            organizationShareLabel = organizationShareLabel,
+            organizationShareAmount = organizationShareAmount,
+            totalLabel = totalLabel,
+            totalAmount = totalAmount,
+        )
+    }
+}
+
+/**
+ * The three-figure cost split — insured share, organization share, total — as one row of tiles.
+ *
+ * One definition for all three places it appears: pinned under the timeline, as the detail
+ * screen's total, and [dense] inside a single prescribed item. The colors carry the meaning, so
+ * they must not drift between those: green is what the person pays, blue what the organization
+ * pays, orange the two added up.
+ *
+ * Under the app's right-to-left layout the first child renders rightmost, so the order below reads
+ * on screen as total, organization, insured — left to right.
+ */
+@Composable
+fun CostSplitTiles(
+    insuredShareLabel: String,
+    /** `null` for a figure still being fetched; that tile shimmers on its own. */
+    insuredShareAmount: String?,
+    organizationShareLabel: String,
+    organizationShareAmount: String?,
+    totalLabel: String,
+    totalAmount: String?,
+    modifier: Modifier = Modifier,
+    dense: Boolean = false,
+) {
+    val colors = LocalTaminColors.current
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(if (dense) Spacing.xs else Spacing.sm),
+    ) {
+        StatTile(
+            label = insuredShareLabel,
+            amount = insuredShareAmount,
+            containerColor = colors.greenBg,
+            contentColor = colors.greenText,
+            modifier = Modifier.weight(1f),
+            style = if (dense) StatTileStyle.Dense else StatTileStyle.Standard,
+        )
+        StatTile(
+            label = organizationShareLabel,
+            amount = organizationShareAmount,
+            containerColor = colors.blueBg,
+            contentColor = colors.blueText,
+            modifier = Modifier.weight(1f),
+            style = if (dense) StatTileStyle.Dense else StatTileStyle.Standard,
+        )
+        StatTile(
+            label = totalLabel,
+            amount = totalAmount,
+            containerColor = colors.orangeBg,
+            contentColor = colors.orangeText,
+            modifier = Modifier.weight(1f),
+            style = if (dense) StatTileStyle.Dense else StatTileStyle.Standard,
+        )
     }
 }

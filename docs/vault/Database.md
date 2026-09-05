@@ -37,9 +37,7 @@ com.tamin.taminhamrah.data.local.AppDatabase / MyDatabase / TestDatabase
 com.omooooori… / com.riox432…                          ← leftovers from the original template
 ```
 
-⚠️ Any Entity change generates the next version's JSON in the schema folder, and that file must be committed. The active schema is currently at `TaminXDatabase/2.json`.
-
-⚠️ Inconsistency worth fixing: that path is listed in `.gitignore`, but the file is already tracked — so the ignore rule has no effect and the file keeps showing up as modified. Either drop it from `.gitignore` (schemas should be committed) or untrack it with `git rm --cached`.
+⚠️ Any Entity change generates the next version's JSON in the schema folder, and that file must be committed. The active schema is currently at `TaminXDatabase/2.json` (`TaminXDatabase` `@Database version = 2`). Do not ignore `core/core-database/schemas/` — Room schema files belong in git.
 
 ## What the database is for
 

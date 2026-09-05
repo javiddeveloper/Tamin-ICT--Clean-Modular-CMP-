@@ -16,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlin.test.AfterTest
@@ -51,6 +52,39 @@ class PrescriptionsViewModelTest {
 
     @AfterTest
     fun tearDown() = Dispatchers.resetMain()
+
+    /**
+     * The bug the list pipeline was rebuilt to fix.
+     *
+     * `BaseViewModel` merges intents, so before the rewrite each `LoadList` ran its own request
+     * and whichever finished last wrote the state — switching tabs quickly could leave the first
+     * tab's records under the second tab's heading. The pipeline is now a single `flatMapLatest`
+     * over a query flow, which cancels the superseded request.
+     *
+     * The first search is made the slow one deliberately: with the fix its result never arrives,
+     * and without it, it arrives last and wins.
+     */
+    @Test
+    fun testLoadList_whenASecondSearchOvertakesTheFirst_onlyTheSecondSurvives() = runTest(testDispatcher) {
+        val slowType = "1"
+        val fastType = "2"
+        repository.prescriptionListResultByType = mapOf(
+            slowType to listOf(TreatmentTestData.prescription()),
+            fastType to listOf(TreatmentTestData.prescription(), TreatmentTestData.prescription()),
+        )
+        repository.prescriptionListDelayByType = mapOf(slowType to 1_000L)
+
+        viewModel.sendIntent(
+            PrescriptionsIntent.LoadList(nationalCode, requestTypeIds = listOf(slowType)),
+        )
+        viewModel.sendIntent(
+            PrescriptionsIntent.LoadList(nationalCode, requestTypeIds = listOf(fastType)),
+        )
+        advanceUntilIdle()
+
+        // Two records is the second search's answer; one would be the first search winning the race.
+        assertEquals(2, viewModel.uiState.value.prescriptionList.size)
+    }
 
     @Test
     fun testLoadList_populatesPrescriptions() = runTest(testDispatcher) {

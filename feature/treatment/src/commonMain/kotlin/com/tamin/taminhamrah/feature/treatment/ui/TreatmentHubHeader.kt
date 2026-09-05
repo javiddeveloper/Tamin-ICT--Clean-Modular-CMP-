@@ -8,6 +8,9 @@ import androidx.compose.ui.Modifier
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.rideUpIntoHeader
 import com.tamin.taminhamrah.ui.theme.Spacing
+import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.tab_treatment
 
 /**
  * The hub header: the gradient bar keeps its colors and title in place while the insured-person
@@ -25,7 +28,7 @@ internal fun TreatmentHubHeader(
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         TaminTopAppBar(
-            title = "درمان",
+            title = stringResource(Res.string.tab_treatment),
             centerTitle = false,
             bottomPadding = TreatmentDimens.cardOverlap + Spacing.xl,
         )

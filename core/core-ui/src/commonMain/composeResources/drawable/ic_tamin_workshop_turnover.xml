@@ -1,0 +1,23 @@
+<!--
+  Traced verbatim from the design's own SVG for the کارگاه action list: stroked outlines
+  on a 24-unit grid, 1.7 wide, round caps. The stroke colour is a placeholder — every use
+  tints it with the action's own tone.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:pathData="M4.5 18 V9.5 M9.8 18 V5.5 M15.1 18 v-6 M20.4 18 V8.5"
+        android:strokeWidth="1.7"
+        android:strokeColor="#FF000000"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M3 21 h18"
+        android:strokeWidth="1.7"
+        android:strokeColor="#FF000000"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

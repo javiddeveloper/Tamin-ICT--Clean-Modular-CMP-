@@ -3,10 +3,14 @@ package com.tamin.taminhamrah.ui.util
 import platform.Foundation.NSCharacterSet
 import platform.Foundation.NSURL
 import platform.Foundation.URLQueryAllowedCharacterSet
+import platform.UIKit.UIActivityViewController
 import platform.UIKit.UIApplication
+import platform.UIKit.UIPopoverPresentationController
 import platform.Foundation.NSString
 import platform.Foundation.create
 import platform.Foundation.stringByAddingPercentEncodingWithAllowedCharacters
+import platform.UIKit.UIActivityViewController
+import platform.UIKit.popoverPresentationController
 
 actual class ExternalAppLauncher actual constructor() {
 
@@ -33,11 +37,27 @@ actual class ExternalAppLauncher actual constructor() {
 
     actual fun openWhatsApp(phone: String) {
         val phoneNumber = phone.filter { it.isDigit() }
-        val urlString = "https://wa.me/$phoneNumber"
-        val url = NSURL.URLWithString(urlString) ?: return
+        openUrl("https://wa.me/$phoneNumber")
+    }
 
-        if (UIApplication.sharedApplication.canOpenURL(url)) {
-            UIApplication.sharedApplication.openURL(url)
+    actual fun openUrl(url: String) {
+        val nsUrl = NSURL.URLWithString(url) ?: return
+        if (UIApplication.sharedApplication.canOpenURL(nsUrl)) {
+            UIApplication.sharedApplication.openURL(nsUrl)
         }
+    }
+
+    actual fun shareText(text: String) {
+        val activityViewController = UIActivityViewController(
+            activityItems = listOf(text),
+            applicationActivities = null
+        )
+
+        val rootViewController = UIApplication.sharedApplication.keyWindow?.rootViewController
+        rootViewController?.presentViewController(
+            activityViewController,
+            animated = true,
+            completion = null
+        )
     }
 }

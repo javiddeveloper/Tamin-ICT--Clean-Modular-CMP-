@@ -58,4 +58,10 @@ interface TreatmentRepository {
 
     /** Queues the certificate for the person's inbox; emits the service's acknowledgement. */
     suspend fun sendToInboxTreatmentCosts(repId: String): Flow<String>
+
+    suspend fun getMedicalConfirmations(): Flow<List<MedicalConfirmationDN>>
+
+    suspend fun getMedicalConfirmationPdf(repId: String): Flow<PdfDownloadDN>
+
+    suspend fun sendToInboxMedicalConfirmation(repId: String): Flow<String>
 }

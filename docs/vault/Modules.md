@@ -32,6 +32,10 @@ mapper/         DN → PR mappers
 
 Search `core-ui/ui/components/` before building any new component — the odds are good it already exists.
 
+Typography / Persian digits: [[Typography]] — theme `ss01` is visual; `toPersianDigits()` changes the string.
+
+Colors, spacing, radius: [[Theme]] — never hardcode `Color`, `.dp`, or UI copy in features.
+
 ## feature
 
 ⚠️ Folder names do not match package names. Translation table:
@@ -52,6 +56,11 @@ Search `core-ui/ui/components/` before building any new component — the odds a
 | `:feature:change-mobile` | `feature/change-mobile` | `…feature.changemobile` ⚠️ |
 | `:feature:my-inbox` | `feature/my-inbox` | `…feature.myinbox` ⚠️ |
 | `:feature:addDependent` | `feature/addDependent` | `…feature.addDependent` |
+| `:feature:orotez-protez` | `feature/orotez-protez` | `…feature.orotezprotez` |
+| `:feature:deferredInstallment` | `feature/deferredInstallment` | `…feature.deferredInstallment` |
+| `:feature:pensionStatusInquiry` | `feature/pensionStatusInquiry` | `…feature.pensionStatusInquiry` |
+| `:feature:girlSurvivor` | `feature/girlSurvivor` | `…feature.girlSurvivor` |
+| `:feature:pensionSurvivor` | `feature/pensionSurvivor` | `…feature.pensionSurvivor` |
 
 ### Layout of a feature module
 

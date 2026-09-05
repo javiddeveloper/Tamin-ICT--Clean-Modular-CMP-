@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
@@ -37,6 +38,12 @@ fun FloatingGlassNavigationBar(
     selectedIndex: Int = 0,
     itemCount: Int = 4,
     isBlurEnabled: Boolean = true,
+    /**
+     * Optional button rendered as a sibling of the glass pill rather than inside it, so the pill's
+     * own tab layout and highlight maths are unaffected by its presence. When absent the pill
+     * simply takes the full width back.
+     */
+    trailingButton: (@Composable () -> Unit)? = null,
     content: @Composable RowScope.() -> Unit
 ) {
     val glassShape = RoundedCornerShape(24.dp) // Deeply rounded pill shape
@@ -69,9 +76,13 @@ fun FloatingGlassNavigationBar(
         MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
     }
 
+    Row(
+        modifier = modifier.padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = bottomPadding),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
     Box(
-        modifier = modifier
-            .padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = bottomPadding)
+        modifier = Modifier
+            .weight(1f)
             .shadow(
                 elevation = 8.dp,
                 shape = glassShape,
@@ -147,5 +158,11 @@ fun FloatingGlassNavigationBar(
             windowInsets = WindowInsets(0, 0, 0, 0), // Remove bottom padding to keep it tight
             content = content
         )
+    }
+
+        if (trailingButton != null) {
+            Spacer(modifier = Modifier.width(12.dp))
+            trailingButton()
+        }
     }
 }

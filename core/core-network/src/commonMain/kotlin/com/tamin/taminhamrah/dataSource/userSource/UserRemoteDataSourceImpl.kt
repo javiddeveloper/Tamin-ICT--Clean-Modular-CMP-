@@ -28,6 +28,7 @@ import com.tamin.taminhamrah.model.subDominant.SubDominantResponseDTO
 import com.tamin.taminhamrah.model.subDominant.insuredActiveBranch.InsuredActiveBranchDTO
 import com.tamin.taminhamrah.model.user.EditMobileResponseDto
 import com.tamin.taminhamrah.model.user.TaminRelationDTO
+import com.tamin.taminhamrah.model.user.CurrentUserDto
 import com.tamin.taminhamrah.model.user.UserProfileDto
 import com.tamin.taminhamrah.model.user.VerifyMobileRequest
 import com.tamin.taminhamrah.model.utils.ListData
@@ -235,6 +236,16 @@ internal class UserRemoteDataSourceImpl(
             throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
+    override suspend fun getCurrentUser(): CurrentUserDto? {
+        return try {
+            userApiService.getCurrentUser().extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
     override suspend fun checkUserIsNew(nationalId: String): Boolean {
         return try {
             val response = userApiService.checkUserIsNew(nationalId)
@@ -264,6 +275,17 @@ internal class UserRemoteDataSourceImpl(
     override suspend fun getStatusCertificateReport(filter: List<ApiFilterDN>): String? {
         return try {
             val response = userApiService.getStatusCertificateReport(queryBuilder.buildFilterJson(filter))
+            response.extractMessage()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun getWageCertificateReport(filter: List<ApiFilterDN>): String? {
+        return try {
+            val response = userApiService.getWageCertificateReport(queryBuilder.buildFilterJson(filter))
             response.extractMessage()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)

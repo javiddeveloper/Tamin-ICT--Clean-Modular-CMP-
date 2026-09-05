@@ -23,8 +23,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.Dp
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.theme.ButtonDimens
@@ -34,6 +37,12 @@ import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 
+
+enum class LoadingButtonIconPosition {
+    LEADING,
+    TRAILING
+}
+
 @Composable
 fun LoadingButton(
     text: String,
@@ -42,27 +51,32 @@ fun LoadingButton(
     enabled: Boolean = true,
     isLoading: Boolean = false,
     icon: ImageVector? = null,
+    iconPosition: LoadingButtonIconPosition = LoadingButtonIconPosition.LEADING,
+    background: Brush? = null,
+    contentColor: Color? = null,
+    height: Dp = ButtonDimens.height,
+    shape: Shape = RoundedCornerShape(CornerRadius.xl),
 ) {
     val taminColors = LocalTaminColors.current
-    val backgroundBrush = if (enabled) {
+    val backgroundBrush = background ?: if (enabled) {
         taminColors.buttonGradient
     } else {
         taminColors.buttonDisabledGradient
     }
-    val contentColor = if (enabled) Color.White else Color.White.copy(alpha = 0.6f)
-    val shadowColor = if (enabled) taminColors.shadowPrimary else Color.Transparent
+    val contentColor = contentColor ?: if (enabled) Color.White else Color.White.copy(alpha = 0.6f)
+    val shadowColor = if (background == null && enabled) taminColors.shadowPrimary else Color.Transparent
 
     Box(
         modifier = modifier
             .fillMaxWidth()
             .shadow(
                 elevation = if (enabled) Elevation.button else Elevation.none,
-                shape = RoundedCornerShape(CornerRadius.xl),
+                shape = shape,
                 ambientColor = shadowColor,
                 spotColor = shadowColor
             )
-            .height(ButtonDimens.height)
-            .clip(RoundedCornerShape(CornerRadius.xl))
+            .height(height)
+            .clip(shape)
             .background(backgroundBrush)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
@@ -76,29 +90,44 @@ fun LoadingButton(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm, Alignment.CenterHorizontally)
         ) {
-            Box(modifier = Modifier.size(IconSize.medium), contentAlignment = Alignment.Center) {
-                Crossfade(targetState = isLoading, animationSpec = tween(300)) { loading ->
-                    if (loading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(ButtonDimens.loadingIndicatorSize),
-                            color = contentColor,
-                            strokeWidth = ButtonDimens.loadingIndicatorStroke
-                        )
-                    } else if (icon != null) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                            tint = contentColor,
-                            modifier = Modifier.size(IconSize.medium)
-                        )
+            val label = @Composable {
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = contentColor
+                )
+            }
+            val indicator = @Composable {
+                Box(modifier = Modifier.size(IconSize.medium), contentAlignment = Alignment.Center) {
+                    Crossfade(targetState = isLoading, animationSpec = tween(300)) { loading ->
+                        if (loading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(ButtonDimens.loadingIndicatorSize),
+                                color = contentColor,
+                                strokeWidth = ButtonDimens.loadingIndicatorStroke
+                            )
+                        } else if (icon != null) {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = null,
+                                tint = contentColor,
+                                modifier = Modifier.size(IconSize.medium)
+                            )
+                        }
                     }
                 }
             }
-            Text(
-                text = text,
-                style = MaterialTheme.typography.titleMedium,
-                color = contentColor
-            )
+            // Reserving the indicator's slot when there's nothing to show in it (no icon, not
+            // loading) pushes the label off-center — the whole point of centering the button's
+            // text. Only give it space once there's actually an icon or spinner to draw.
+            val showIndicator = isLoading || icon != null
+            if (iconPosition == LoadingButtonIconPosition.LEADING) {
+                if (showIndicator) indicator()
+                label()
+            } else {
+                label()
+                if (showIndicator) indicator()
+            }
         }
     }
 }

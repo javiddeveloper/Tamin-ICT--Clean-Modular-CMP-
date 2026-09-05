@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.model.pension.InquirePensionCertificateDN
 import com.tamin.taminhamrah.model.pension.PensionIdDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
 import com.tamin.taminhamrah.model.pension.PayRollDN
+import com.tamin.taminhamrah.model.pension.PayRollInboxDN
 import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDN
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDN
@@ -70,6 +71,12 @@ class PensionRepositoryImpl(
             emit(remoteData.toDomain())
         }
 
+    override suspend fun getEdictReportPDF(filters: List<ApiFilterDN>): Flow<com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN> =
+        flow {
+            val remoteData = pensionRemoteDataSource.getEdictReportPDF(filters)
+            emit(remoteData.toDomain())
+        }
+
     override suspend fun getRetirementRequestInfo(filters: List<ApiFilterDN>): Flow<List<RetirementRequestDN>> = flow {
         val remoteData = pensionRemoteDataSource.getRetirementRequestInfo(filters)
         emit(remoteData.list?.map { it.toDomain() } ?: emptyList())
@@ -104,6 +111,12 @@ class PensionRepositoryImpl(
         flow {
             val remoteData = pensionRemoteDataSource.sendEdictPensionerToMyInbox(filters)
             emit(EdictPensionerInboxDN(message = remoteData))
+        }
+
+    override suspend fun sendPayRollToInbox(filters: List<ApiFilterDN>): Flow<PayRollInboxDN> =
+        flow {
+            val remoteData = pensionRemoteDataSource.sendPayRollToInbox(filters)
+            emit(PayRollInboxDN(message = remoteData))
         }
 
     override suspend fun sendRequestInquirePensionCertificate(filters: List<ApiFilterDN>): Flow<InquirePensionCertificateDN> =

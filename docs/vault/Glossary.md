@@ -31,14 +31,14 @@ Domain: insurance and social security. Maps the Persian term used by the busines
 | بیمه‌ی اختیاری | optional insurance | `OPTIONAL_INSURANCE` |
 | بیمه‌ی مشاغل آزاد | freelance insurance | `FREELANCE_INSURANCE` |
 | بیمه‌ی زنان خانه‌دار | housewives' insurance | `HOUSEWIFE_INSURANCE` |
-| استعلام مستمری | pension inquiry | `PENSION_INQUIRY`, `feature:pensioner` (package `pensionInquiry`) |
+| استعلام مستمری | pension inquiry | `PENSION_INQUIRY`, `feature:pensionStatusInquiry` |
 | محاسبه‌ی مستمری | pension calculation | `CALCULATE_WAGE_PENSION` |
 | فیش حقوقی | payslip | `PAY_ROLL` |
 | حکم مستمری | pension decree | `EDICT_PENSIONER` |
 | گواهی کسر اقساط | deferred installment certificate | `DEFERRED_INSTALLMENT_CERTIFICATE` |
 | گواهی حقوق | wage certificate | `ISSUANCE_WAGE_CERTIFICATE` |
 | مستمری ازکارافتادگی | disability pension | `DISABILITY_PENSION` |
-| دختر بازمانده | surviving daughter | `GIRL_SURVIVOR` |
+| دختر بازمانده / تعهدنامه فرزندان دختر | surviving daughter commitment | `GIRL_SURVIVOR`, `feature:girlSurvivor` |
 | درخواست مستمری بازماندگان | survivor pension request | `REQUEST_PENSION_BY_SURVIVOR_112` |
 | بازمانده / وراث | survivor / beneficiary | `survivor`, `Beneficiary`, `Recipient` |
 | نسخه‌ی الکترونیک | e-prescription | `PRESCRIPTION` |
