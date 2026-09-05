@@ -16,6 +16,7 @@ import com.tamin.taminhamrah.model.personal.DisabilityWorkDN
 import com.tamin.taminhamrah.model.personal.DisabilityWorkPR
 import com.tamin.taminhamrah.model.personal.GirlSurvivorConditionDN
 import com.tamin.taminhamrah.model.personal.GirlSurvivorConditionPR
+import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorPR
 import com.tamin.taminhamrah.model.personal.survivorList.RequestModelDN
@@ -70,7 +71,7 @@ fun DisabilityDependentDN.toPresentation(): DisabilityDependentPR {
         firstName = firstName ?: "",
         lastName = lastName ?: "",
         nationalId = nationalId ?: "",
-        dateOfBirth = dateOfBirth?.toString() ?: "",
+        dateOfBirth = PersianDateFormatter.formatTimestamp(dateOfBirth),
         fatherName = fatherName ?: "",
         genderCode = genderCode ?: "",
         genderDesc = genderDesc ?: "",

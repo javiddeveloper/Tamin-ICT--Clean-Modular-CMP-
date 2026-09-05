@@ -98,6 +98,19 @@ sibling/ancestor level's key, verify against a working reference model in the sa
 family before trusting it — don't assume a matching `data class` shape means a matching JSON
 key.
 
+### Fixed: birth date rendered as a raw epoch-millis number
+
+`DisabilityDependentDN.toPresentation()` (`core-ui/.../mapper/personal/PersonalMapper.kt`) used
+to do `dateOfBirth?.toString() ?: ""`, i.e. stringify the raw Long timestamp — showing something
+like `316310400000` instead of a date. Fixed by routing it through the already-shared
+`PersianDateFormatter.formatTimestamp(...)` (`core-ui/.../util/PersianDateFormatter.kt`), the same
+helper `SubdominantUiMapper.kt` already uses for the identical shape
+(`SubdominantItemPR.birthDateJalali`). `DisabilityPersonalDN`/`SurvivorDependentDN` in the same
+file still have the same `dateOfBirth?.toString()` pattern — not fixed here since neither is
+consumed by a screen that displays the raw string yet (survivor's only feeds an age
+calculation), but apply the same `PersianDateFormatter.formatTimestamp` fix there the moment
+either one is.
+
 New model package (both core-network DTOs and core-domain DN share the same package
 path, per this repo's convention): `com.tamin.taminhamrah.model.pension.disabilityRequest`
 (+ `.medicalCommission` subpackage for the commission-list DTO/DN, ~50 fields incl. two
