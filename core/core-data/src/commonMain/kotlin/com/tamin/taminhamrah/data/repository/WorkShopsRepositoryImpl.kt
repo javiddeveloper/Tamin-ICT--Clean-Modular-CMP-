@@ -285,14 +285,6 @@ class WorkShopsRepositoryImpl(
             .getEmployerWorkshopContractList(workshopId, branchCode, pageQuery(page))
             .toDomainPage { it.toDomain() }
 
-    override suspend fun getEmployerAgreementsByWorkshop(
-        workshopId: String,
-        branchCode: String,
-        page: Int,
-    ): PagedListDN<EmployerAgreementByWorkshopDN> =
-        remoteDataSource.getEmployerAgreementByWorkshop(workshopId, branchCode, pageQuery(page))
-            .toDomainPage { it.toDomain() }
-
     override suspend fun submitEmployerAgreement(request: EmployerAgreementSubmissionDN): String =
         remoteDataSource.submitEmployerAgreement(request.toDto())
 

@@ -182,13 +182,6 @@ interface WorkShopsRepository {
         page: Int = 0,
     ): PagedListDN<WorkshopContractRowDN>
 
-    /** Management side — employer-agreements already registered against one workshop. */
-    suspend fun getEmployerAgreementsByWorkshop(
-        workshopId: String,
-        branchCode: String,
-        page: Int = 0,
-    ): PagedListDN<EmployerAgreementByWorkshopDN>
-
     /** Step 3 — submit the final agreement. Returns the backend's bare success message. */
     suspend fun submitEmployerAgreement(request: EmployerAgreementSubmissionDN): String
 }

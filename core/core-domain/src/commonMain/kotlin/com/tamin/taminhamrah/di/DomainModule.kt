@@ -210,7 +210,6 @@ import com.tamin.taminhamrah.useCases.workshops.RequestEmployerAgreementTicketUs
 import com.tamin.taminhamrah.useCases.workshops.GetEmployerAgreementContactInfoUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopsWithoutContractUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopContractRowsUseCase
-import com.tamin.taminhamrah.useCases.workshops.GetEmployerAgreementsByWorkshopUseCase
 import com.tamin.taminhamrah.useCases.workshops.SubmitEmployerAgreementUseCase
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.bind
@@ -439,7 +438,6 @@ val domainModule = module {
     factoryOf(::GetEmployerAgreementContactInfoUseCase)
     factoryOf(::GetWorkshopsWithoutContractUseCase)
     factoryOf(::GetWorkshopContractRowsUseCase)
-    factoryOf(::GetEmployerAgreementsByWorkshopUseCase)
     factoryOf(::SubmitEmployerAgreementUseCase)
     factoryOf(::GetLegalDocumentUseCase)
     factoryOf(::GetTreatmentCostsUseCase)

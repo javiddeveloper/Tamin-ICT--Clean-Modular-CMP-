@@ -124,12 +124,6 @@ class FakeWorkShopsRepository : WorkShopsRepository {
 
     private fun notUsed(): Nothing = error("not used by EmployerOnlineServicesViewModel tests")
 
-    override suspend fun getEmployerAgreementsByWorkshop(
-        workshopId: String,
-        branchCode: String,
-        page: Int,
-    ): PagedListDN<EmployerAgreementByWorkshopDN> = notUsed()
-
     override suspend fun getPaymentSheets(query: PaymentSheetQuery): PagedListDN<PaymentSheetDN> = notUsed()
     override suspend fun getDebitReasons(page: Int): PagedListDN<DebitReasonDN> = notUsed()
     override suspend fun getWorkshopDebits(workshopId: String, branchCode: String, page: Int): PagedListDN<WorkShopDebtDN> = notUsed()

@@ -98,27 +98,6 @@ class EmployerOnlineServicesUseCasesTest : BaseUseCaseTest() {
         assertEquals(Triple("0968210170", "0960", 1), repository.lastContractRowsArgs)
     }
 
-    @Test
-    fun `agreements-by-workshop use case scopes the query by workshop, branch and page`() = runTest {
-        repository.employerAgreementsByWorkshop = PagedListDN(
-            items = listOf(
-                EmployerAgreementByWorkshopDN(
-                    paymentSequence = "7",
-                    workshop = WorkshopSummaryDN(workshopId = "0968210170", branchCode = "0960"),
-                ),
-            ),
-            total = 1,
-        )
-
-        val page = GetEmployerAgreementsByWorkshopUseCase(repository)(
-            workshopId = "0968210170",
-            branchCode = "0960",
-            page = 3,
-        )
-
-        assertEquals("7", page.items.first().paymentSequence)
-        assertEquals(Triple("0968210170", "0960", 3), repository.lastAgreementsByWorkshopArgs)
-    }
 
     // ------------------------------------------------------------ step 3 — submit
 

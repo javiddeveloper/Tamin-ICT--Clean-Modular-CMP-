@@ -185,28 +185,6 @@ class WorkShopsApiServiceTest : BaseApiTest() {
     }
 
     @Test
-    fun `agreement-by-workshop deserializes the lower-case wire keys`() = runTest {
-        val ktorfit = createMockKtorfit(
-            ApiTestUtils.createJsonResponse(dataJson = WorkshopTestData.employerAgreementByWorkshopSuccess)
-        )
-        val apiService = ktorfit.createWorkShopsApiService()
-
-        val response = apiService.getEmployerAgreementByWorkshop(
-            workshopId = "1071410004",
-            branchCode = "123",
-            queries = emptyMap(),
-        )
-
-        val row: EmployerAgreementByWorkshopDTO = assertNotNull(response.data).list.orEmpty().first()
-        assertEquals("7", row.paymentSequence)
-        assertEquals("14030101", row.startDate)
-        assertEquals("14030102", row.commitmentDate)
-        assertEquals("boss@example.com", row.email)
-        assertEquals("09120000000", row.mobile)
-        assertEquals("1071410004", row.workshop?.workshopId)
-    }
-
-    @Test
     fun `request-ticket surfaces the backend confirmation message`() = runTest {
         val ktorfit = createMockKtorfit(
             ApiTestUtils.createJsonResponse(dataJson = WorkshopTestData.employerRequestTicketSuccess)

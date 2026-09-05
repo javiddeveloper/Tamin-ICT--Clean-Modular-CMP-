@@ -268,15 +268,6 @@ internal class WorkShopsRemoteDataSourceImpl(
             .extractData()
     }
 
-    override suspend fun getEmployerAgreementByWorkshop(
-        workshopId: String,
-        branchCode: String,
-        query: ApiQueryParamDN
-    ): ListData<EmployerAgreementByWorkshopDTO> = call {
-        apiService.getEmployerAgreementByWorkshop(workshopId, branchCode, query.toQueries())
-            .extractData()
-    }
-
     override suspend fun submitEmployerAgreement(
         request: EmployerAgreementSubmitRequestDTO,
     ): String = call {

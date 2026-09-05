@@ -265,15 +265,6 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         workshopContractRows
     }
 
-    override suspend fun getEmployerAgreementsByWorkshop(
-        workshopId: String,
-        branchCode: String,
-        page: Int,
-    ): PagedListDN<EmployerAgreementByWorkshopDN> = answer {
-        lastAgreementsByWorkshopArgs = Triple(workshopId, branchCode, page)
-        employerAgreementsByWorkshop
-    }
-
     override suspend fun submitEmployerAgreement(request: EmployerAgreementSubmissionDN): String =
         answer {
             lastEmployerAgreementSubmission = request

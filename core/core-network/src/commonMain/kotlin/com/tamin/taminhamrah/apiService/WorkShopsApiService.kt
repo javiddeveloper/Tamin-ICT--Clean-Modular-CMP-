@@ -324,20 +324,6 @@ internal interface WorkShopsApiService {
     ): BaseDTO<ListData<WorkshopContractRowDTO>>
 
     /**
-     * تعهدهای ثبت‌شده‌ی یک کارگاه.
-     *
-     * Management side: every employer-agreement already registered against a single workshop,
-     * opened from the registered-agreements list (`getAllEmployerAgreementByNationalId`) by
-     * selecting a workshop. Paged.
-     */
-    @GET("workshop-services/get-employer-agreement-by-workshop-id-and-branch-code/{workshopId}/{branchCode}")
-    suspend fun getEmployerAgreementByWorkshop(
-        @Path("workshopId") workshopId: String,
-        @Path("branchCode") branchCode: String,
-        @QueryMap queries: Map<String, String>,
-    ): BaseDTO<ListData<EmployerAgreementByWorkshopDTO>>
-
-    /**
      * Step 3 — ثبت نهایی تعهد خدمات غیرحضوری کارفرما.
      *
      * Posted from the last stepper page once the employer ticks the قوانین checkbox. Returns a

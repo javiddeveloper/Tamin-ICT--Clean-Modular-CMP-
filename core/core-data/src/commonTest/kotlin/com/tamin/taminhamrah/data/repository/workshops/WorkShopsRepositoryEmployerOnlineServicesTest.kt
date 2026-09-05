@@ -64,24 +64,6 @@ class WorkShopsRepositoryEmployerOnlineServicesTest {
     }
 
     @Test
-    fun `agreements-by-workshop forward path args and map the list`() = runTest {
-        remote.agreementsByWorkshop = ListData(
-            total = 1,
-            list = listOf(
-                EmployerAgreementByWorkshopDTO(
-                    paymentSequence = "7",
-                    workshop = EmployerWorkshopDTO(workshopId = "1071410004", branchCode = "123"),
-                ),
-            ),
-        )
-
-        val page = repository.getEmployerAgreementsByWorkshop(workshopId = "1071410004", branchCode = "123", page = 0)
-
-        assertEquals("7", page.items.first().paymentSequence)
-        assertEquals("1071410004" to "123", remote.lastAgreementsByWorkshopPath)
-    }
-
-    @Test
     fun `contact info forwards the verification code and maps the identity block`() = runTest {
         remote.commitmentInfo = EmployerCommitmentInfoDTO(
             firstName = "رضا",
@@ -167,16 +149,6 @@ class WorkShopsRepositoryEmployerOnlineServicesTest {
             failure?.let { throw it }
             lastContractRowsPath = workshopId to branchCode
             return contractRows
-        }
-
-        override suspend fun getEmployerAgreementByWorkshop(
-            workshopId: String,
-            branchCode: String,
-            query: ApiQueryParamDN,
-        ): ListData<EmployerAgreementByWorkshopDTO> {
-            failure?.let { throw it }
-            lastAgreementsByWorkshopPath = workshopId to branchCode
-            return agreementsByWorkshop
         }
 
         override suspend fun getEmployerAgreementUserInfo(verificationCode: String): EmployerCommitmentInfoDTO {

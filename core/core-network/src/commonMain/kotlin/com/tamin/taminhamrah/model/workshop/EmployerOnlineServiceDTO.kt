@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * ([WorkShopsApiService.getAllEmployerAgreementByNationalId] / [EmployerAgreementDTO]); drilling
  * into one agreement opens the contract rows and the per-workshop agreement list:
  *   -> [WorkShopsApiService.getEmployerWorkshopContractList]
- *   -> [WorkShopsApiService.getEmployerAgreementByWorkshop]
  *
  * Only the columns a screen can actually show are modelled; `ignoreUnknownKeys` drops the rest.
  * Lower-case wire names (`emailaddr`, `mobileno`, `startdate`, `wokshopId`) are the server's own

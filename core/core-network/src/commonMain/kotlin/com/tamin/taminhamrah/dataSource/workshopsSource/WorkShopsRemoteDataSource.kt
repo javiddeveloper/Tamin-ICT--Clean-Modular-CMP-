@@ -180,13 +180,6 @@ interface WorkShopsRemoteDataSource {
         query: ApiQueryParamDN
     ): ListData<WorkshopContractRowDTO>
 
-    /** Management side — employer-agreements already registered against one workshop. */
-    suspend fun getEmployerAgreementByWorkshop(
-        workshopId: String,
-        branchCode: String,
-        query: ApiQueryParamDN
-    ): ListData<EmployerAgreementByWorkshopDTO>
-
     /** Step 3 — submit the final agreement. Returns the backend's bare success message. */
     suspend fun submitEmployerAgreement(
         request: EmployerAgreementSubmitRequestDTO,
