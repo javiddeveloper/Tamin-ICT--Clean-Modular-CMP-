@@ -204,10 +204,10 @@ fun DebitPaymentRequestDN.toDto(): DebitPaymentRequestDTO = DebitPaymentRequestD
     branchCode = branchCode,
     workshopId = workshopId,
     debitNumber = debitNumber,
-    // Empty rather than absent when the debt has no agreement row — see [DebitPaymentRequestDTO].
-    agreementRow = agreementRow,
-    // "1"/"0", not "true"/"false".
+    // "1"/"0", not "true"/"false" — see [DebitPaymentRequestDTO].
     deposit = if (deposit) DEPOSIT_YES else DEPOSIT_NO,
+    // A debt with no agreement row leaves the field out rather than sending it empty.
+    agreementRow = agreementRow.takeIf { it.isNotBlank() },
 )
 
 private const val DEPOSIT_YES = "1"

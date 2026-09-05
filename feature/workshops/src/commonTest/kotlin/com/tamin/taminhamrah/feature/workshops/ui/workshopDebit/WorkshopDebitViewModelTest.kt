@@ -104,9 +104,9 @@ class WorkshopDebitViewModelTest {
         }
 
     /**
-     * A debt the service reports `"peymanSequence": null` for is still paid for with the key
-     * present and empty — the old client coalesces the null before building its request, and the
-     * service refuses a body that leaves the key out.
+     * A debt whose agreement row the service reports as null/blank passes an empty agreementRow
+     * in the domain request, which the data mapper drops before serializing to prevent
+     * ProxyRuntimeException from the service.
      */
     @Test
     fun `a debt with no agreement row sends an empty one`() = runTest(testDispatcher) {
