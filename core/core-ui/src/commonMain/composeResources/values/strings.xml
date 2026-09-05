@@ -1953,4 +1953,30 @@
     <string name="ill_days_submit_btn">ثبت درخواست</string>
     <string name="ill_days_submit_missing_data">اطلاعات لازم برای ثبت درخواست کامل نیست.</string>
     <string name="ill_days_submit_success_fallback">درخواست با موفقیت ثبت شد.</string>
+
+    <!-- Disability Pension -->
+    <string name="disability_pension_title">مستمری از کارافتادگی</string>
+    <string name="disability_pension_step_terms_title">شرایط و تعهدنامه</string>
+    <string name="disability_pension_step_subtitle">ضوابط برقراری مستمری را ببینید و تعهدنامه را تأیید کنید.</string>
+    <string name="disability_pension_info_notice">تایید این مرحله به منزله مطالعه و پذیرش شرایط برقراری مستمری ازکارافتادگی می‌باشد.</string>
+    <string name="disability_pension_show_rules">مشاهده شرایط</string>
+    <string name="disability_pension_commitment_label">تعهدنامه</string>
+    <string name="disability_pension_commitment_text">اینجانب %1$s %2$s با آگاهی کامل و در صحت عقلی، شرایط فوق را مطالعه و تایید میکنم مشمول این شرایط می‌باشم؛ در غیر اینصورت کلیه تبعات و مسئولیت‌های آن متوجه اینجانب بوده و سازمان تأمین‌اجتماعی در این خصوص مسئولیتی نخواهد داشت.</string>
+    <string name="disability_pension_terms_validation_error">لطفاً تعهدنامه را مطالعه و تایید کنید.</string>
+    <string name="disability_pension_next_step">مرحلهٔ بعدی</string>
+    <string name="disability_pension_rules_title">مقررات و ضوابط</string>
+    <string name="disability_pension_rules_page_of_total">%1$s از %2$s</string>
+    <string name="disability_pension_rules_heading">شرایط دریافت انواع مستمری ازکارافتادگی:</string>
+    <string name="disability_pension_rules_intro">بیمه‌شدگانی که طبق نظر پزشک معالج غیرقابل علاج تشخیص داده می‌شوند، پس از انجام خدمات توان‌بخشی و اعلام نتیجهٔ توان‌بخشی یا اشتغال، چنانچه طبق نظر کمیسیون‌های پزشکی مادهٔ ۹۱ قانون تأمین اجتماعی توانایی خود را کلاً یا بعضاً از دست داده باشند، در گروه‌های ذیل قرار خواهند گرفت.</string>
+    <string name="disability_pension_rules_item_1">۱. هرگاه درجهٔ کاهش قدرت کار بیمه‌شده شصت و شش درصد و بیشتر باشد، ازکارافتادهٔ کلی شناخته می‌شود.</string>
+    <string name="disability_pension_rules_item_2">۲. چنانچه میزان کاهش قدرت کار بیمه‌شده بین سی و سه تا شصت و شش درصد و به علت حادثهٔ ناشی از کار باشد، ازکارافتادهٔ جزئی شناخته می‌شود.</string>
+    <string name="disability_pension_rules_item_3">۳. اگر درجهٔ کاهش قدرت کار بیمه‌شده بین ده تا سی و سه درصد بوده و موجب آن حادثهٔ ناشی از کار باشد، استحقاق دریافت غرامت نقص مقطوع را خواهد داشت.</string>
+    <string name="disability_pension_rules_para_1">بیمه‌شده‌ای که در اثر حادثهٔ ناشی از کار یا بیماری حرفه‌ای ازکارافتادهٔ کلی شناخته شود، بدون در نظر گرفتن مدت پرداخت حق بیمه، استحقاق دریافت مستمری ازکارافتادگی کلی ناشی از کار را خواهد داشت.</string>
+    <string name="disability_pension_rules_para_2">بیمه‌شده‌ای که ظرف ده سال قبل از وقوع حادثهٔ غیرناشی از کار یا ابتلا به بیماری، حداقل بیمهٔ یک سال کار را که متضمن نود روز کار بیمه ظرف یک سال قبل از وقوع حادثه یا بیماری منجر به ازکارافتادگی باشد پرداخت نموده باشد، در صورت ازکارافتادگی کلی غیرناشی از کار، استفاده از مستمری ازکارافتادگی کلی غیرناشی از کار را خواهد داشت.</string>
+    <string name="disability_pension_rules_docs_heading">مدارک و مستندات موردنیاز:</string>
+    <string name="disability_pension_rules_doc_1">۱. نظریهٔ کمیسیون پزشکی بدوی (در صورتی که نظریهٔ مزبور قبل از تاریخ ۰۱/۰۱/۱۳۹۷ صادر شده است)</string>
+    <string name="disability_pension_rules_doc_2">۲. نظریهٔ کمیسیون پزشکی تجدیدنظر (در صورت وجود و چنانچه نظریهٔ مزبور قبل از تاریخ ۰۱/۰۱/۱۳۹۷ صادر شده است)</string>
+    <string name="disability_pension_rules_doc_3">۳. گزارش حادثه، اعلام‌شده از سوی کارفرما یا فرد حادثه‌دیده</string>
+    <string name="disability_pension_rules_doc_4">۴. گزارش بازرسی کار پیرامون بررسی و تشخیص علل وقوع حادثه یا بروز بیماری ناشی از کار</string>
+    <string name="disability_pension_rules_doc_5">۵. آراء قطعی مراجع قضایی در رابطه با حادثه یا بروز بیماری ناشی از کار (در صورت وجود)</string>
 </resources>

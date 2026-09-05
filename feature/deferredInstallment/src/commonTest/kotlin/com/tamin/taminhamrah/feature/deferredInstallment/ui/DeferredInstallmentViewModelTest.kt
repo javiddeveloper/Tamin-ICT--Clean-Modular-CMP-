@@ -318,6 +318,16 @@ private class FakeDeferredInstallmentPensionRepository : PensionRepository {
         error("not used")
     override suspend fun sendPayRollToInbox(filters: List<ApiFilterDN>): Flow<PayRollInboxDN> =
         error("not used")
+    override suspend fun saveDisabilityUserInfo(body: com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoDN): Flow<com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityRequestRefDN?> =
+        error("not used")
+    override suspend fun finalConfirmDisabilityRequest(requestId: Long, body: com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityFinalConfirmDN): Flow<String?> =
+        error("not used")
+    override suspend fun saveDocumentDisability(requestId: Long, body: com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveDocumentDN): Flow<String?> =
+        error("not used")
+    override suspend fun getMedicalCommissionPdf(lastWorkshop: String): Flow<PdfDownloadDN> =
+        error("not used")
+    override suspend fun getRegisteredMedicalCommission(filters: List<ApiFilterDN>): Flow<List<com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.RegisteredMedicalCommissionDN>> =
+        error("not used")
 }
 
 private class FakeDeferredInstallmentCommonRepository : CommonRepository {
