@@ -26,6 +26,8 @@ data class PersonalDTO(
     @SerialName("nationalId") val nationalId: String? = null,
     @SerialName("createdBy") val createdBy: String? = null,
     @SerialName("idCardNumber") val idCardNumber: String? = null,
-    @SerialName("relationWithTamins") val relationWithTamins: List<Int>? = null,
+    // Live `survivor-request/personal` returns relationWithTamins as a list of nested
+    // PersonalInfo-shaped objects (Jackson identity refs like `"personal": 2`), not List<Int>.
+    // Legacy used Any?; we omit it so ignoreUnknownKeys skips the graph. Add a DTO later if needed.
     @SerialName("contacts") val contacts: List<ContactDTO>? = null,
 )

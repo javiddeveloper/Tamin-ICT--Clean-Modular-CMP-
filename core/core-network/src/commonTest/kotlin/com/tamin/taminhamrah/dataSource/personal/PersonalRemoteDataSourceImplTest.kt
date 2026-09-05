@@ -13,6 +13,7 @@ import com.tamin.taminhamrah.model.personal.girlSurvivor.ConfirmGirlSurvivorRequ
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.DependencyTypeRequest
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoRequest
 import com.tamin.taminhamrah.model.personal.submitFinalSurvivorPension.SubmitFinalSurvivorPensionRequest
+import com.tamin.taminhamrah.model.personal.survivorDependent.SurvivorDependentDTO
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseDTO
@@ -294,6 +295,11 @@ private class FakePersonalApiService : PersonalApiService {
     override suspend fun getDisabilityDependentInfo(
         parameters: Map<String, String>
     ): BaseDTO<ListData<DisabilityDependentDTO>> {
+        shouldThrowException?.let { throw it }
+        error("Not stubbed")
+    }
+
+    override suspend fun getSurvivorList(id: String): BaseDTO<ListData<SurvivorDependentDTO>> {
         shouldThrowException?.let { throw it }
         error("Not stubbed")
     }

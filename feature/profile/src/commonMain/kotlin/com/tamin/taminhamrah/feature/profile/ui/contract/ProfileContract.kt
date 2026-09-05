@@ -17,6 +17,10 @@ data class ProfileUiState(
     val imageRequestResult: String? = null,
     val isImageRequestLoading: Boolean = false,
     val imageRequestError: String? = null,
+    val dependentsCount: Int = 0,
+    val activeRelationCount: Int = 0,
+    val inactiveRelationCount: Int = 0,
+    val isActiveRelationLoading: Boolean = true,
 ) {
     sealed class PartialState {
         data class Loading(val isLoading: Boolean) : PartialState()
@@ -25,6 +29,8 @@ data class ProfileUiState(
         data class ProfileImageLoaded(val image: String?) : PartialState()
         data class IdentityInfoLoaded(val info: IdentityInfoPR?) : PartialState()
         data class TaminRelationLoaded(val relation: TaminRelationPR?) : PartialState()
+        data class DependentsCountLoaded(val count: Int) : PartialState()
+        data class ActiveRelationStatusLoaded(val activeCount: Int, val inactiveCount: Int) : PartialState()
         data class ImageRequestLoading(val isLoading: Boolean) : PartialState()
         data class ImageRequestResult(val result: String) : PartialState()
         data class ImageRequestError(val message: String) : PartialState()

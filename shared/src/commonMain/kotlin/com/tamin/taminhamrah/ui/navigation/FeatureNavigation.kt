@@ -4,17 +4,21 @@ import androidx.navigation.NavController
 import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.history.navigateToHistory
 import com.tamin.taminhamrah.feature.history.navigateToHistoryJobInfo
+import com.tamin.taminhamrah.feature.historyobjection.navigateToHistoryObjection
 import com.tamin.taminhamrah.feature.deferredInstallment.navigateToDeferredInstallment
 import com.tamin.taminhamrah.feature.orotezprotez.navigateToOrotezProtez
+import com.tamin.taminhamrah.feature.requestPaymentForIllDays.navigateToRequestPaymentForIllDays
+import com.tamin.taminhamrah.feature.pregnancyPay.navigateToPregnancyPay
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToCalculatePension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeservedTreatment
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDisabilityPension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToEdict
 import com.tamin.taminhamrah.feature.girlSurvivor.navigateToGirlSurvivor
+import com.tamin.taminhamrah.feature.inquiryEducation.navigateToInquiryEducation
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToIssuanceCertificate
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPayRoll
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.navigateToPensionStatusInquiry
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionSurvivor
+import com.tamin.taminhamrah.feature.pensionSurvivor.navigateToPensionSurvivor
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPrescription
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToFreelanceInsuranceContract
 import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToHousewifeInsuranceContract
@@ -25,12 +29,16 @@ import com.tamin.taminhamrah.feature.taminServices.navigateToInspection
 import com.tamin.taminhamrah.feature.taminServices.navigateToSendInsuranceHistoryToInstitutions
 import com.tamin.taminhamrah.feature.taminServices.navigateToWorkersPaymentInfo
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
+import com.tamin.taminhamrah.feature.workshops.navigateToCompleteEmployerInfo
+import com.tamin.taminhamrah.feature.workshops.navigateToLegalRepresentativeWorkshops
 import com.tamin.taminhamrah.model.common.FeatureFlag
 
 fun NavController.navigateToFeature(flag: FeatureFlag) {
     when (flag) {
         FeatureFlag.MERGE_HISTORY -> navigateToHistory()
         FeatureFlag.WORKSHOPS -> navigateToWorkshops()
+        FeatureFlag.COMPLETE_WORKSHOP_INFO -> navigateToCompleteEmployerInfo()
+        FeatureFlag.STACK_HOLDER_LIST -> navigateToLegalRepresentativeWorkshops()
         FeatureFlag.CONTRACTS -> navigateToContracts()
         FeatureFlag.STUDENT_INSURANCE -> navigateToStudentInsuranceContract()
         FeatureFlag.FREELANCE_INSURANCE -> navigateToFreelanceInsuranceContract()
@@ -45,14 +53,19 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
         FeatureFlag.ISSUANCE_WAGE_CERTIFICATE -> navigateToIssuanceCertificate()
         FeatureFlag.DEFERRED_INSTALLMENT_CERTIFICATE -> navigateToDeferredInstallment()
         FeatureFlag.GIRL_SURVIVOR -> navigateToGirlSurvivor()
+        FeatureFlag.REQUEST_PENSION_BY_SURVIVOR,
         FeatureFlag.REQUEST_PENSION_BY_SURVIVOR_112 -> navigateToPensionSurvivor()
         FeatureFlag.DISABILITY_PENSION -> navigateToDisabilityPension()
         FeatureFlag.VIEW_TITLE_JOB -> navigateToHistoryJobInfo()
         FeatureFlag.SEND_INSURANCE_HISTORY_TO_INSTITUTION -> navigateToSendInsuranceHistoryToInstitutions()
         FeatureFlag.OROTEZ_PROTEZ -> navigateToOrotezProtez()
+        FeatureFlag.REQUEST_PAYMENT_FOR_ILL_DAYS -> navigateToRequestPaymentForIllDays()
         FeatureFlag.OCCURRENCE -> navigateToOccurrence()
         FeatureFlag.WORKERS_PAYMENT_INFO -> navigateToWorkersPaymentInfo()
         FeatureFlag.LIST_OF_INSPECTIONS_PERFORMED -> navigateToInspection()
+        FeatureFlag.OBJECTION_NON_EXISTENT_HISTORY -> navigateToHistoryObjection()
+        FeatureFlag.INQUIRY_EDUCATION -> navigateToInquiryEducation()
+        FeatureFlag.REQUEST_FOR_PREGNANCY_PAY -> navigateToPregnancyPay()
         else -> Unit
     }
 }

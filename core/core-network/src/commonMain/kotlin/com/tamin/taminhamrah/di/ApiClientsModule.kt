@@ -24,10 +24,16 @@ import com.tamin.taminhamrah.apiService.inbox.PersonalInboxApiService
 import com.tamin.taminhamrah.apiService.inbox.createPersonalInboxApiService
 import com.tamin.taminhamrah.apiService.orotezProtez.OrotezProtezApiService
 import com.tamin.taminhamrah.apiService.orotezProtez.createOrotezProtezApiService
+import com.tamin.taminhamrah.apiService.requestPaymentForIllDays.RequestPaymentForIllDaysApiService
+import com.tamin.taminhamrah.apiService.requestPaymentForIllDays.createRequestPaymentForIllDaysApiService
+import com.tamin.taminhamrah.apiService.pregnancyPay.PregnancyPayApiService
+import com.tamin.taminhamrah.apiService.pregnancyPay.createPregnancyPayApiService
 import com.tamin.taminhamrah.apiService.pension.PensionApiService
 import com.tamin.taminhamrah.apiService.pension.createPensionApiService
 import com.tamin.taminhamrah.apiService.personal.PersonalApiService
 import com.tamin.taminhamrah.apiService.personal.createPersonalApiService
+import com.tamin.taminhamrah.apiService.historyObjection.HistoryObjectionApiService
+import com.tamin.taminhamrah.apiService.historyObjection.createHistoryObjectionApiService
 import com.tamin.taminhamrah.apiService.userRequest.createUserRequestApiService
 import com.tamin.taminhamrah.apiService.treatment.TreatmentApiService
 import com.tamin.taminhamrah.apiService.treatment.createTreatmentApiService
@@ -42,6 +48,10 @@ import com.tamin.taminhamrah.apiService.occurrence.OccurrenceApiService
 import com.tamin.taminhamrah.apiService.occurrence.createOccurrenceApiService
 import com.tamin.taminhamrah.apiService.workersPayment.WorkersPaymentApiService
 import com.tamin.taminhamrah.apiService.workersPayment.createWorkersPaymentApiService
+import com.tamin.taminhamrah.apiService.employerInfo.EmployerInfoApiService
+import com.tamin.taminhamrah.apiService.employerInfo.createEmployerInfoApiService
+import com.tamin.taminhamrah.apiService.inquiryEducation.InquiryEducationApiService
+import com.tamin.taminhamrah.apiService.inquiryEducation.createInquiryEducationApiService
 import com.tamin.taminhamrah.util.NetworkConstants
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
@@ -129,6 +139,11 @@ val ApiClientsModule = module {
         ktorfit.createUserRequestApiService()
     }
 
+    single<HistoryObjectionApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createHistoryObjectionApiService()
+    }
+
     single<PersonalInboxApiService>(named("personalInboxApiService")) {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.createPersonalInboxApiService()
@@ -157,6 +172,10 @@ val ApiClientsModule = module {
         ktorfit.createOrotezProtezApiService()
     }
 
+    single<RequestPaymentForIllDaysApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createRequestPaymentForIllDaysApiService()
+    }
 
     single<OccurrenceApiService> {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
@@ -165,6 +184,21 @@ val ApiClientsModule = module {
     single<InspectionApiService> {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.createInspectionApiService()
+    }
+
+    single<EmployerInfoApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createEmployerInfoApiService()
+    }
+    single<PregnancyPayApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createPregnancyPayApiService()
+    }
+
+
+    single<InquiryEducationApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createInquiryEducationApiService()
     }
 
     single<WorkersPaymentApiService> {

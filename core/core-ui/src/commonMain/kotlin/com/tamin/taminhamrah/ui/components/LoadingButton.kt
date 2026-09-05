@@ -23,10 +23,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.Dp
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.theme.ButtonDimens
@@ -50,29 +51,32 @@ fun LoadingButton(
     enabled: Boolean = true,
     isLoading: Boolean = false,
     icon: ImageVector? = null,
-    /** Defaults to every existing caller's expectation: icon before text. */
     iconPosition: LoadingButtonIconPosition = LoadingButtonIconPosition.LEADING,
+    background: Brush? = null,
+    contentColor: Color? = null,
+    height: Dp = ButtonDimens.height,
+    shape: Shape = RoundedCornerShape(CornerRadius.xl),
 ) {
     val taminColors = LocalTaminColors.current
-    val backgroundBrush = if (enabled) {
+    val backgroundBrush = background ?: if (enabled) {
         taminColors.buttonGradient
     } else {
         taminColors.buttonDisabledGradient
     }
-    val contentColor = if (enabled) Color.White else Color.White.copy(alpha = 0.6f)
-    val shadowColor = if (enabled) taminColors.shadowPrimary else Color.Transparent
+    val contentColor = contentColor ?: if (enabled) Color.White else Color.White.copy(alpha = 0.6f)
+    val shadowColor = if (background == null && enabled) taminColors.shadowPrimary else Color.Transparent
 
     Box(
         modifier = modifier
             .fillMaxWidth()
             .shadow(
                 elevation = if (enabled) Elevation.button else Elevation.none,
-                shape = RoundedCornerShape(CornerRadius.xl),
+                shape = shape,
                 ambientColor = shadowColor,
                 spotColor = shadowColor
             )
-            .height(ButtonDimens.height)
-            .clip(RoundedCornerShape(CornerRadius.xl))
+            .height(height)
+            .clip(shape)
             .background(backgroundBrush)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },

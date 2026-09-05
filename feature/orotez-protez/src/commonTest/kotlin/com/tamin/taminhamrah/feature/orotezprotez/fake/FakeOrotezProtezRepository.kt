@@ -17,7 +17,11 @@ class FakeOrotezProtezRepository : OrotezProtezRepository {
     var saveError: Throwable = RuntimeException("save failed")
     var lastSaveRequest: SaveShortTermOrthosisRequestDN? = null
 
+    var shouldThrowOnLoad = false
+    var loadError: Throwable = RuntimeException("load failed")
+
     override fun getRequestInsuredMainInfo(): Flow<RequestInsuredMainInfoDN?> = flow {
+        if (shouldThrowOnLoad) throw loadError
         emit(mainInfoResult)
     }
 

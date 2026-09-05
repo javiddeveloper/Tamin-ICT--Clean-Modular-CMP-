@@ -6,6 +6,7 @@ import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.daysUntil
 import kotlinx.datetime.toLocalDateTime
 
 private const val PERSIAN_ZERO = '۰'
@@ -187,6 +188,31 @@ object PersianDateFormatter {
      */
     fun toEpochMillisUtc(jy: Int, jm: Int, jd: Int): Long =
         startOfDay(jy, jm, jd, TimeZone.UTC)
+
+    /**
+     * Whole calendar days between two epoch-millis instants in the device's zone, for range/
+     * deadline checks (e.g. "end date must be at least N days before today"). Converts through
+     * [LocalDate] rather than dividing the millis difference so a DST transition between the two
+     * instants can't shift the count by a day.
+     */
+    fun daysBetween(startMillis: Long, endMillis: Long): Int {
+        val start = Instant.fromEpochMilliseconds(startMillis).toLocalDateTime(TimeZone.currentSystemDefault()).date
+        val end = Instant.fromEpochMilliseconds(endMillis).toLocalDateTime(TimeZone.currentSystemDefault()).date
+        return start.daysUntil(end)
+    }
+
+    /**
+     * Whole days from [date] to today, or null when [date] is not a Jalali date.
+     *
+     * Both shapes the services send are accepted (`14050131` and `1405/01/31`). Used for the
+     * filing deadlines that are decided on the device rather than by a `diff-days` endpoint; a
+     * negative result means the date is in the future.
+     */
+    fun daysSince(date: String): Int? {
+        val (year, month, day) = date.toJalaliParts() ?: return null
+        val (todayYear, todayMonth, todayDay) = today()
+        return dayNumber(todayYear, todayMonth, todayDay) - dayNumber(year, month, day)
+    }
 
     /** Formats a Jalali date the way the API and the UI both spell it: `1404/02/15`. */
     fun format(jy: Int, jm: Int, jd: Int): String =

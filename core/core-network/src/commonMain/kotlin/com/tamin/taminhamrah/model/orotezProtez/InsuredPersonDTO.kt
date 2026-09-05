@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.model.orotezProtez
 
+import com.tamin.taminhamrah.tools.ErrorCarrier
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -7,7 +8,9 @@ import kotlinx.serialization.Serializable
 data class InsuredPersonListDTO(
     @SerialName("total") val total: String? = null,
     @SerialName("list") val list: List<InsuredPersonDTO>? = null,
-)
+    @SerialName("message") override val message: String? = null,
+    @SerialName("cause") override val cause: String? = null,
+) : ErrorCarrier
 
 @Serializable
 data class InsuredPersonDTO(

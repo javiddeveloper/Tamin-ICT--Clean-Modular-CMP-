@@ -83,14 +83,15 @@ import com.tamin.taminhamrah.feature.pensionInquiry.deservedTreatmentScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.disabilityPensionScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.edictScreen
 import com.tamin.taminhamrah.feature.girlSurvivor.girlSurvivorScreen
+import com.tamin.taminhamrah.feature.inquiryEducation.inquiryEducationScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.issuanceCertificateScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeservedTreatment
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDisabilityPension
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPensionSurvivor
+import com.tamin.taminhamrah.feature.pensionSurvivor.navigateToPensionSurvivor
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPrescription
 import com.tamin.taminhamrah.feature.pensionInquiry.payrollScreen
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.pensionStatusInquiryGraph
-import com.tamin.taminhamrah.feature.pensionInquiry.pensionSurvivorScreen
+import com.tamin.taminhamrah.feature.pensionSurvivor.pensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.prescriptionScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
@@ -106,6 +107,7 @@ import com.tamin.taminhamrah.feature.taminServices.taminServicesScreen
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
 import com.tamin.taminhamrah.feature.treatment.treatmentGraph
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
+import com.tamin.taminhamrah.feature.workshops.completeEmployerInfoScreen
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
 import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
@@ -115,7 +117,11 @@ import com.tamin.taminhamrah.feature.settings.SettingsRoute
 import com.tamin.taminhamrah.feature.settings.settingsScreen
 import com.tamin.taminhamrah.feature.userRequest.UserRequestRoute
 import com.tamin.taminhamrah.feature.userRequest.userRequestGraph
+import com.tamin.taminhamrah.feature.historyobjection.historyObjectionScreen
+import com.tamin.taminhamrah.feature.historyobjection.historyObjectionStepperScreen
 import com.tamin.taminhamrah.feature.orotezprotez.orotezProtezScreen
+import com.tamin.taminhamrah.feature.requestPaymentForIllDays.requestPaymentForIllDaysScreen
+import com.tamin.taminhamrah.feature.pregnancyPay.pregnancyPayScreen
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
@@ -148,6 +154,7 @@ import taminx.core.core_ui.login_to_tamin_man
 import taminx.core.core_ui.please_login_to_your_account
 import taminx.core.core_ui.retry
 import taminx.core.core_ui.select_group
+import taminx.core.core_ui.tab_agent
 import taminx.core.core_ui.tab_home
 import taminx.core.core_ui.tab_profile
 import taminx.core.core_ui.tab_services
@@ -185,8 +192,6 @@ internal fun TaminHamrahNavGraph(
     val isProfileSelected = currentDestination?.hasRoute<ProfileRoute.Main>() == true
     val isHomeSelected = currentDestination?.hasRoute<Route.Home>() == true
 
-val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
-
     // بررسی Feature Flag سراسری Agent برای کنترل نمایش FAB
     val featureManager: FeatureManager = koinInject()
     val isAgentEnabled by featureManager
@@ -195,6 +200,7 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
         .collectAsState(initial = false)
     val currentTab = currentDestination.toBottomTab()
     val isBottomBarVisible = currentTab != BottomTab.OTHER
+    val agentLabel = stringResource(Res.string.tab_agent)
 
     val navigationItems = listOf(
         NavigationTab(
@@ -253,17 +259,9 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
     val hazeState = remember { HazeState(initialBlurEnabled = true) }
     val snackbarHostState = remember { SnackbarHostState() }
     val snackbarScope = rememberCoroutineScope()
-    Scaffold(contentWindowInsets = WindowInsets(0),
+    Scaffold(
+        contentWindowInsets = WindowInsets(0),
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        floatingActionButton = {
-            AnimatedVisibility(
-                visible = isHomeRoute && isAgentEnabled,
-                enter = androidx.compose.animation.scaleIn(),
-                exit = androidx.compose.animation.scaleOut()
-            ) {
-                AgentFab(onClick = { navController.navigateToAgent() })
-            }
-        },
         bottomBar = {
             AnimatedVisibility(
                 visible = isBottomBarVisible,
@@ -279,12 +277,22 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                         .fillMaxWidth()
                         .background(brush = AppBarScrim.bottomGradient)
                 ) {
-                    val selectedIndex = remember(currentTab) { navigationItems.indexOfFirst { it.isSelected }.coerceAtLeast(0) }
+                    val selectedIndex = remember(currentTab) {
+                        navigationItems.indexOfFirst { it.isSelected }.coerceAtLeast(0)
+                    }
                     FloatingGlassNavigationBar(
                         hazeState = hazeState,
                         selectedIndex = selectedIndex,
                         itemCount = navigationItems.size,
-                        isBlurEnabled = isBottomBarVisible
+                        isBlurEnabled = isBottomBarVisible,
+                        trailingButton = if (isAgentEnabled) {
+                            {
+                                AgentOrbButton(
+                                    onClick = { navController.navigateToAgent() },
+                                    contentDescription = agentLabel,
+                                )
+                            }
+                        } else null,
                     ) {
 
                         navigationItems.forEach { navigationItem ->
@@ -455,14 +463,19 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                     onBack = { navController.popBackStack() },
                     onGoHome = {
                         navController.navigate(Route.Home) {
-                            popUpTo(navController.graph.findStartDestination().id) { inclusive = false }
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                inclusive = false
+                            }
                             launchSingleTop = true
                         }
                     }
                 )
                 deferredInstallmentScreen(onBack = { navController.popBackStack() })
                 girlSurvivorScreen(onBack = { navController.popBackStack() })
-                pensionSurvivorScreen(onBack = { navController.popBackStack() })
+                inquiryEducationScreen(onBack = { navController.popBackStack() })
+                pensionSurvivorScreen(
+                    navController = navController,
+                    onBack = { navController.popBackStack() })
                 disabilityPensionScreen(onBack = { navController.popBackStack() })
 
                 historyScreen()
@@ -476,7 +489,8 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                     onOpenUrl = { url -> openUrl(url) }
                 )
 
-                workshopsScreen(navController)
+                workshopsScreen(navController, onOpenUrl = { url -> openUrl(url) })
+                completeEmployerInfoScreen(navController)
 
                 myInboxScreen(onNavigateBack = { navController.popBackStack() })
 
@@ -509,6 +523,19 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                 securityScreen(onNavigateBack = { navController.popBackStack() })
 
                 orotezProtezScreen(onBack = { navController.popBackStack() })
+
+                historyObjectionScreen(
+                    navController = navController,
+                    onBack = { navController.popBackStack() })
+
+                historyObjectionStepperScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateHome = { navController.popBackStack(Route.Home, inclusive = false) },
+                )
+
+                requestPaymentForIllDaysScreen(onBack = { navController.popBackStack() })
+
+                pregnancyPayScreen(onBack = { navController.popBackStack() })
 
                 healthProfileScreen(onBack = { navController.popBackStack() })
             }
@@ -766,63 +793,4 @@ fun HomeScreen(
         }
     }
 }
-@Composable
-private fun AgentFab(onClick: () -> Unit) {
-    val infiniteTransition = androidx.compose.animation.core.rememberInfiniteTransition(label = "fab_pulse")
-    val glowAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.4f,
-        targetValue = 0.9f,
-        animationSpec = androidx.compose.animation.core.infiniteRepeatable(
-            animation = androidx.compose.animation.core.tween(1200),
-            repeatMode = androidx.compose.animation.core.RepeatMode.Reverse
-        ),
-        label = "glow"
-    )
-    val scale by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 1.08f,
-        animationSpec = androidx.compose.animation.core.infiniteRepeatable(
-            animation = androidx.compose.animation.core.tween(1200),
-            repeatMode = androidx.compose.animation.core.RepeatMode.Reverse
-        ),
-        label = "scale"
-    )
 
-    androidx.compose.ui.layout.Layout(
-        content = {
-            androidx.compose.foundation.Canvas(modifier = Modifier.size(72.dp)) {
-                drawCircle(
-                    color = Color(0xFF1A73E8).copy(alpha = glowAlpha * 0.4f),
-                    radius = size.minDimension / 2f * 1.3f
-                )
-            }
-            FloatingActionButton(
-                onClick = onClick,
-                modifier = Modifier.size(56.dp),
-                containerColor = Color(0xFF1A73E8),
-                contentColor = Color.White,
-                elevation = FloatingActionButtonDefaults.elevation(
-                    defaultElevation = 8.dp,
-                    pressedElevation = 4.dp
-                )
-            ) {
-                Text(
-                    text = "AI",
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                        color = Color.White
-                    )
-                )
-            }
-        }
-    ) { measurables, constraints ->
-        val glow = measurables[0].measure(constraints)
-        val fab = measurables[1].measure(constraints)
-        val w = maxOf(glow.width, fab.width)
-        val h = maxOf(glow.height, fab.height)
-        layout(w, h) {
-            glow.placeRelative((w - glow.width) / 2, (h - glow.height) / 2)
-            fab.placeRelative((w - fab.width) / 2, (h - fab.height) / 2)
-        }
-    }
-}

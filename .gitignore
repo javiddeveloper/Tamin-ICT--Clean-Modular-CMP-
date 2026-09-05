@@ -34,6 +34,13 @@ Thumbs.db
 ## AI Tools
 .claude/settings.local.json
 
+## Local agent / WIP artifacts (keep on disk, never commit)
+.cursor/skills/jira-time-log/
+.cursor/skills/tamin-legacy-feature-port/
+.superpowers/
+docs/superpowers/
+feature/pensionSurvivor/
+
 ## Signing
 *.jks
 *.keystore
@@ -54,6 +61,9 @@ old_android/
 *.tmp
 progress.txt
 test.txt
+
+## Local-only pension survivor API mocks (never commit / push)
+feature/pensionSurvivor/src/localMocks/
 
 ## Code review working files (local only)
 review/

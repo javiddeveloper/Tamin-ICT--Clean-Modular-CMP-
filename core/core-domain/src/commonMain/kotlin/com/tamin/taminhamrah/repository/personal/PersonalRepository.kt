@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.model.personal.InsuredDocDN
 import com.tamin.taminhamrah.model.personal.NewInsuredSummaryDN
 import com.tamin.taminhamrah.model.personal.PersonalInfoDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
+import com.tamin.taminhamrah.model.personal.survivorDependent.SurvivorDependentDN
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
 import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionDN
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoDN
@@ -21,6 +22,7 @@ interface PersonalRepository {
     fun getDeceasedInfo(nationalId: String): Flow<DeceasedInfoDN>
     fun getAge(birthDate: Long): Flow<AgeDN>
     fun getDisabilityDependentInfo(filters: List<ApiFilterDN>): Flow<List<DisabilityDependentDN>>
+    fun getSurvivorList(deceasedNationalId: String): Flow<List<SurvivorDependentDN>>
     fun checkGirlSurvivorConditions(nationalCode: String, pensionerId: String): Flow<GirlSurvivorConditionDN>
     fun getConfirmSurvivorsList(filters: List<ApiFilterDN>): Flow<List<ConfirmSurvivorDN>>
     fun submitFinalSurvivorPension(requestId: Int, body: SubmitFinalSurvivorPensionDN): Flow<String?>

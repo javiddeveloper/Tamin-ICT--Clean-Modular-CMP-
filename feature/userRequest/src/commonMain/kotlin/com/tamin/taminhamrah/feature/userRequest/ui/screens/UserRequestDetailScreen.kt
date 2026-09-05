@@ -59,17 +59,59 @@ import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.ui.theme.TaminHamrahShapes
 import com.tamin.taminhamrah.ui.toPriceFormat
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
-import taminx.feature.userrequest.generated.resources.Res as UserRequestRes
-import taminx.feature.userrequest.generated.resources.*
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.unit_rial
+import taminx.feature.userrequest.generated.resources.user_request_detail_account_number
+import taminx.feature.userrequest.generated.resources.user_request_detail_amount
+import taminx.feature.userrequest.generated.resources.user_request_detail_answer_date
+import taminx.feature.userrequest.generated.resources.user_request_detail_article_sixteen_date
+import taminx.feature.userrequest.generated.resources.user_request_detail_article_sixteen_defect
+import taminx.feature.userrequest.generated.resources.user_request_detail_article_sixteen_info
+import taminx.feature.userrequest.generated.resources.user_request_detail_article_sixteen_result
+import taminx.feature.userrequest.generated.resources.user_request_detail_bank_institution
+import taminx.feature.userrequest.generated.resources.user_request_detail_birth_date
+import taminx.feature.userrequest.generated.resources.user_request_detail_borrower
+import taminx.feature.userrequest.generated.resources.user_request_detail_branch_name
+import taminx.feature.userrequest.generated.resources.user_request_detail_childbearing_date
+import taminx.feature.userrequest.generated.resources.user_request_detail_doctor_id
+import taminx.feature.userrequest.generated.resources.user_request_detail_doctor_name
+import taminx.feature.userrequest.generated.resources.user_request_detail_end_date
+import taminx.feature.userrequest.generated.resources.user_request_detail_expert_explanation
+import taminx.feature.userrequest.generated.resources.user_request_detail_full_name
+import taminx.feature.userrequest.generated.resources.user_request_detail_guarantee_amount_label
+import taminx.feature.userrequest.generated.resources.user_request_detail_installment_amount_label
+import taminx.feature.userrequest.generated.resources.user_request_detail_installment_count_label
+import taminx.feature.userrequest.generated.resources.user_request_detail_insurance_number
+import taminx.feature.userrequest.generated.resources.user_request_detail_investigation_result
+import taminx.feature.userrequest.generated.resources.user_request_detail_loan_details
+import taminx.feature.userrequest.generated.resources.user_request_detail_mobile
+import taminx.feature.userrequest.generated.resources.user_request_detail_national_id
+import taminx.feature.userrequest.generated.resources.user_request_detail_objection_date
+import taminx.feature.userrequest.generated.resources.user_request_detail_objection_info
+import taminx.feature.userrequest.generated.resources.user_request_detail_objection_reason
+import taminx.feature.userrequest.generated.resources.user_request_detail_pension_number
+import taminx.feature.userrequest.generated.resources.user_request_detail_pensioner_guarantor
+import taminx.feature.userrequest.generated.resources.user_request_detail_placeholder_dash
+import taminx.feature.userrequest.generated.resources.user_request_detail_pregnancy_status
+import taminx.feature.userrequest.generated.resources.user_request_detail_pregnancy_type
+import taminx.feature.userrequest.generated.resources.user_request_detail_repayment_amount
+import taminx.feature.userrequest.generated.resources.user_request_detail_request_info
+import taminx.feature.userrequest.generated.resources.user_request_detail_rest_days
+import taminx.feature.userrequest.generated.resources.user_request_detail_start_date
+import taminx.feature.userrequest.generated.resources.user_request_detail_user_desc
+import taminx.feature.userrequest.generated.resources.user_request_detail_user_info
+import taminx.feature.userrequest.generated.resources.user_request_document_fallback_title
+import taminx.feature.userrequest.generated.resources.user_request_document_preview_close
+import taminx.feature.userrequest.generated.resources.user_request_document_view_action
+import taminx.feature.userrequest.generated.resources.user_request_documents_section_title
+import taminx.feature.userrequest.generated.resources.user_request_reject_reason_label
+import taminx.feature.userrequest.generated.resources.Res as UserRequestRes
 
 // Request type IDs — same values as RequestTypeEnumClass in my-tamin-droid
 private const val REQUEST_TYPE_FOLLOW_UP_OBJECTION = UserRequestTypeIds.FOLLOW_UP_OBJECTION
@@ -77,7 +119,7 @@ private const val REQUEST_TYPE_ILL_DAY = UserRequestTypeIds.ILL_DAY
 private const val REQUEST_TYPE_PREGNANCY = UserRequestTypeIds.PREGNANCY
 private const val REQUEST_TYPE_ORTHOTICS_PROSTHESIS = UserRequestTypeIds.ORTHOTICS_PROSTHESIS
 private const val REQUEST_TYPE_DEFERRED_INSTALLMENT_CERTIFICATE = UserRequestTypeIds.DEFERRED_INSTALLMENT
-private const val REQUEST_TYPE_ARTICLE16 = UserRequestTypeIds.ARTICLE16
+private const val REQUEST_TYPE_ARTICLE_SIXTEEN = UserRequestTypeIds.ARTICLE_SIXTEEN
 
 // ── Route ────────────────────────────────────────────────────────────────────
 
@@ -543,8 +585,8 @@ fun UserRequestDetailScreen(
                             }
                         }
 
-                        REQUEST_TYPE_ARTICLE16 -> {
-                            val article16Details = details?.article16
+                        REQUEST_TYPE_ARTICLE_SIXTEEN -> {
+                            val articleSixteenDetails = details?.articleSixteen
                             item {
                                 DetailSectionCard(
                                     title = stringResource(UserRequestRes.string.user_request_detail_pensioner_guarantor),
@@ -563,24 +605,24 @@ fun UserRequestDetailScreen(
                                     modifier = Modifier.padding(horizontal = Spacing.page)
                                 )
                             }
-                            if (article16Details != null) {
+                            if (articleSixteenDetails != null) {
                                 item {
                                     DetailSectionCard(
-                                        title = stringResource(UserRequestRes.string.user_request_detail_article16_info),
+                                        title = stringResource(UserRequestRes.string.user_request_detail_article_sixteen_info),
                                         items = listOf(
                                             Triple(
-                                                stringResource(UserRequestRes.string.user_request_detail_article16_date),
-                                                article16Details.meetingDate ?: placeholder,
+                                                stringResource(UserRequestRes.string.user_request_detail_article_sixteen_date),
+                                                articleSixteenDetails.meetingDate ?: placeholder,
                                                 null
                                             ),
                                             Triple(
-                                                stringResource(UserRequestRes.string.user_request_detail_article16_result),
-                                                article16Details.result ?: article16Details.defectDesc ?: placeholder,
+                                                stringResource(UserRequestRes.string.user_request_detail_article_sixteen_result),
+                                                articleSixteenDetails.result ?: articleSixteenDetails.defectDesc ?: placeholder,
                                                 null
                                             ),
                                             Triple(
-                                                stringResource(UserRequestRes.string.user_request_detail_article16_defect),
-                                                article16Details.defectDesc ?: placeholder,
+                                                stringResource(UserRequestRes.string.user_request_detail_article_sixteen_defect),
+                                                articleSixteenDetails.defectDesc ?: placeholder,
                                                 null
                                             ),
                                         ),
@@ -761,7 +803,7 @@ private fun RequestSummaryCard(
                 }
             }
 
-            if (rejectReason != null && rejectReason.isNotBlank()) {
+            if (!rejectReason.isNullOrBlank()) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,

@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.workshops.ui
 
 import com.tamin.taminhamrah.model.common.CityDN
+import com.tamin.taminhamrah.model.common.CityListResultDN
 import com.tamin.taminhamrah.model.common.ProvinceDN
 import com.tamin.taminhamrah.model.contracts.BranchDN
 import com.tamin.taminhamrah.model.contracts.ContractDN
@@ -18,17 +19,40 @@ import com.tamin.taminhamrah.model.contracts.PremiumRateDN
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDN
 import com.tamin.taminhamrah.model.contracts.SaveContactRequestDN
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
-import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeContractListDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeListDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeRequestDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeWorkshopListDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
-import com.tamin.taminhamrah.model.workshop.EmployerAgreementListDN
-import com.tamin.taminhamrah.model.workshop.PaymentSheetListDN
-import com.tamin.taminhamrah.model.workshop.WorkShopDebtListDN
-import com.tamin.taminhamrah.model.workshop.WorkshopDebitListDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
+import com.tamin.taminhamrah.model.util.PagedListDN
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtQuery
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestInfoDN
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveRequestDN
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveResultDN
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoDN
+import com.tamin.taminhamrah.model.workshop.DebitObjectionRequestDN
+import com.tamin.taminhamrah.model.workshop.DebitObjectionResultDN
+import com.tamin.taminhamrah.model.workshop.DebitPaymentDN
+import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDN
+import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDN
+import com.tamin.taminhamrah.model.workshop.DebitReasonDN
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
+import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
+import com.tamin.taminhamrah.model.workshop.PaymentSheetQuery
+import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN
-import com.tamin.taminhamrah.model.workshop.WorkshopMemberListDN
-import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberListDN
-import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderListDN
-import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListDN
+import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDN
+import com.tamin.taminhamrah.model.workshop.WorkshopListQuery
+import com.tamin.taminhamrah.model.workshop.WorkshopMemberDN
+import com.tamin.taminhamrah.model.workshop.WorkshopMemberQuery
+import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDN
+import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberQuery
+import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDN
+import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderQuery
+import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
 import com.tamin.taminhamrah.repository.CityProvinceRepository
 import com.tamin.taminhamrah.repository.WorkShopsRepository
 import com.tamin.taminhamrah.repository.contracts.ContractsRepository
@@ -64,6 +88,7 @@ internal class FakeCascadeCityProvinceRepository : CityProvinceRepository {
 
     override fun getCity(cityId: String): Flow<CityDN> = flowOf()
     override fun getProvince(provinceId: String): Flow<ProvinceDN> = flowOf()
+    override fun getCitiesByProvince(provinceCode: String): Flow<CityListResultDN> = unused()
 }
 
 internal class FakeCascadeContractsRepository : ContractsRepository {
@@ -113,36 +138,70 @@ internal class FakeCascadeContractsRepository : ContractsRepository {
 }
 
 internal class FakeCascadeWorkShopsRepository : WorkShopsRepository {
-    override suspend fun getAllEmployerAgreementByNationalId(
-        filters: List<ApiFilterDN>
-    ): EmployerAgreementListDN = EmployerAgreementListDN(list = emptyList(), total = 0)
-
-    override suspend fun getPaymentSheets(filters: List<ApiFilterDN>): PaymentSheetListDN? = unusedValue()
-    override suspend fun getWorkshopDebit(
+    override suspend fun getEmployerAgreements(query: WorkshopListQuery): PagedListDN<EmployerAgreementDN> = unusedValue()
+    override suspend fun getPaymentSheets(query: PaymentSheetQuery): PagedListDN<PaymentSheetDN> = unusedValue()
+    override suspend fun getDebitReasons(page: Int): PagedListDN<DebitReasonDN> = unusedValue()
+    override suspend fun getWorkshopDebits(
         workshopId: String,
-        branchCode: String
-    ): WorkshopDebitListDN? = unusedValue()
+        branchCode: String,
+        page: Int
+    ): PagedListDN<WorkShopDebtDN> = unusedValue()
+    override suspend fun getDemandDocuments(
+        debitNumber: String,
+        branchCode: String,
+        page: Int
+    ): PagedListDN<WorkshopDemandDocDN> = unusedValue()
+    override suspend fun getDebitTurnoverPdf(debitNumber: String, branchCode: String): PdfDownloadDN = unusedValue()
+    override suspend fun checkDebitPayment(debitNumber: String, branchCode: String): DebitPaymentPreCheckDN = unusedValue()
+    override suspend fun payWorkshopDebit(request: DebitPaymentRequestDN): DebitPaymentDN = unusedValue()
     override suspend fun getWorkshopDebtInquiry(
         workshopId: String,
         branchCode: String
-    ): WorkshopDebtInquiryDN? = unusedValue()
-    override fun getWorkshopObjectionableDebitList(
-        workshopNumber: String,
-        branchCode: String,
-        filters: List<ApiFilterDN>
-    ): Flow<WorkShopDebtListDN?> = unused()
-    override fun getWorkshopRecentlyAddedMembers(
-        filters: List<ApiFilterDN>
-    ): Flow<WorkshopNewMemberListDN?> = unused()
-    override fun getWorkshopsDebtsList(
+    ): WorkshopDebtInquiryDN = unusedValue()
+    override suspend fun getObjectionableDebits(
         workshopId: String,
-        branchId: String,
-        filters: List<ApiFilterDN>
-    ): Flow<WorkshopsDebtListDN?> = unused()
-    override fun getWorkshopMembers(filters: List<ApiFilterDN>): Flow<WorkshopMemberListDN?> = unused()
-    override fun getWorkshopStackHolders(
-        filters: List<ApiFilterDN>
-    ): Flow<WorkshopStackHolderListDN?> = unused()
+        branchCode: String,
+        page: Int
+    ): PagedListDN<WorkShopDebtDN> = unusedValue()
+    override suspend fun getObjectionElapsedDays(orderRecipeDate: String): Int = unusedValue()
+    override suspend fun saveDebitObjection(request: DebitObjectionRequestDN): DebitObjectionResultDN = unusedValue()
+    override suspend fun getDebitObjectionPdf(seqNo: Long): PdfDownloadDN = unusedValue()
+    override suspend fun getRecentlyAddedMembers(
+        query: WorkshopNewMemberQuery
+    ): PagedListDN<WorkshopNewMemberDN> = unusedValue()
+    override suspend fun confirmRecentlyAddedMember(requestId: Long): String = unusedValue()
+    override suspend fun deleteRecentlyAddedMember(personalId: Long): Unit = unusedValue()
+    override suspend fun checkNewMemberIsNew(nationalId: String): Boolean = unusedValue()
+    override suspend fun createNewMemberRegistration(
+        request: NewMemberRegistrationDN
+    ): NewMemberRegistrationResultDN = unusedValue()
+    override suspend fun getArticleSixteenDebts(
+        query: ArticleSixteenDebtQuery
+    ): PagedListDN<WorkshopsDebtListModelDN> = unusedValue()
+    override suspend fun getArticleSixteenWorkshopInfo(
+        workshopId: String,
+        branchCode: String
+    ): ArticleSixteenWorkshopInfoDN = unusedValue()
+    override suspend fun getArticleSixteenRequestInfo(objectionNumber: Long): ArticleSixteenRequestInfoDN = unusedValue()
+    override suspend fun saveArticleSixteenRequest(request: ArticleSixteenSaveRequestDN): ArticleSixteenSaveResultDN = unusedValue()
+    override suspend fun getArticleSixteenReportPdf(seqNo: Long): PdfDownloadDN = unusedValue()
+    override suspend fun getWorkshopMembers(query: WorkshopMemberQuery): PagedListDN<WorkshopMemberDN> = unusedValue()
+    override suspend fun getWorkshopStackHolders(
+        query: WorkshopStackHolderQuery
+    ): PagedListDN<WorkshopStackHolderDN> = unusedValue()
+    override fun getLegalRepresentativeWorkshops(): Flow<LegalRepresentativeWorkshopListDN?> = unused()
+    override fun getLegalRepresentatives(
+        workshopId: String,
+        branchCode: String
+    ): Flow<LegalRepresentativeListDN?> = unused()
+    override fun getLegalRepresentativeWorkshopContracts(
+        workshopId: String,
+        branchCode: String
+    ): Flow<LegalRepresentativeContractListDN?> = unused()
+    override suspend fun requestLegalRepresentativeTicket(nationalCode: String?): Unit = unusedValue()
+    override suspend fun verifyLegalRepresentativeTicket(ticket: String): Unit = unusedValue()
+    override suspend fun submitLegalRepresentative(ticket: String, request: LegalRepresentativeRequestDN): Unit = unusedValue()
+    override suspend fun deleteLegalRepresentative(ticket: String, stakeId: Long): Unit = unusedValue()
 }
 
 private fun <T> unused(): Flow<T> =
