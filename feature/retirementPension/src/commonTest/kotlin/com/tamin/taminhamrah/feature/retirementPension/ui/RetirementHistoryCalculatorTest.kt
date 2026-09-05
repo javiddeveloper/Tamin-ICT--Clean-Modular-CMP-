@@ -72,10 +72,13 @@ class RetirementHistoryCalculatorTest {
     }
 
     @Test
-    fun estimatedPensionStopsCreditingPastThirtyFiveYears() {
-        val atCap = RetirementHistoryCalculator.estimatedPension(30_000_000L, 35 * 365)
-        val wellPast = RetirementHistoryCalculator.estimatedPension(30_000_000L, 45 * 365)
-        assertEquals(atCap, wellPast)
+    fun estimatedPensionContinuesCreditingPastThirtyFiveYears() {
+        val at35 = RetirementHistoryCalculator.estimatedPension(30_000_000L, 35 * 365)
+        val at40 = RetirementHistoryCalculator.estimatedPension(30_000_000L, 40 * 365)
+        // Matching old_android Utility.calculateDayAndWageOfHistory, service years past 35 are not capped.
+        assertEquals(35_000_000L, at35)
+        assertEquals(40_000_000L, at40)
+        assertTrue(at40 > at35)
     }
 
     @Test

@@ -17,9 +17,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamPR
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
+import com.tamin.taminhamrah.ui.components.TaminPdfViewer
+import io.ktor.utils.io.ByteReadChannel
 import com.tamin.taminhamrah.feature.retirementPension.ui.components.RetirementAuthStep
 import com.tamin.taminhamrah.feature.retirementPension.ui.components.RetirementDialogHost
 import com.tamin.taminhamrah.feature.retirementPension.ui.components.RetirementDocumentsStep
@@ -79,6 +86,8 @@ import taminx.core.core_ui.retirement_pension_request_creation_failed
 import taminx.core.core_ui.retirement_pension_start_request
 import taminx.core.core_ui.retirement_pension_step_authentication_hint
 import taminx.core.core_ui.retirement_pension_step_authentication_title
+import taminx.core.core_ui.retirement_pension_dialog_rules_title
+import taminx.core.core_ui.retirement_pension_rules_unavailable
 import taminx.core.core_ui.retirement_pension_step_final_hint
 import taminx.core.core_ui.retirement_pension_step_final_title
 import taminx.core.core_ui.retirement_pension_step_history_title
@@ -100,6 +109,10 @@ import kotlin.time.Duration.Companion.milliseconds
 /** How long the success card on step 2 is left up before the wizard moves itself on. */
 private const val AUTH_ADVANCE_DELAY_MILLIS = 700L
 
+/** Legacy asset: rulesAndRegulationsHtmlFile/rules_retirement.pdf */
+private const val RULES_PDF_RESOURCE_PATH = "files/rules_retirement.pdf"
+private const val RULES_PDF_FILE_NAME = "rules_retirement.pdf"
+
 private val HeroShape = RoundedCornerShape(
     bottomStart = CornerRadius.x3l,
     bottomEnd = CornerRadius.x3l,
@@ -111,17 +124,54 @@ fun RetirementPensionRoute(
     viewModel: RetirementPensionViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val toaster = LocalToaster.current
+    val rulesUnavailableMessage = stringResource(Res.string.retirement_pension_rules_unavailable)
+    val scope = rememberCoroutineScope()
+    var showRulesPdfViewer by remember { mutableStateOf(false) }
+    var rulesPdf by remember { mutableStateOf<PdfDownloadPR?>(null) }
+    var rulesPdfLoadFailed by remember { mutableStateOf(false) }
 
     HandleRetirementPensionEvents(
         events = viewModel.events,
         onNavigateBack = onBack,
         onAuthenticationSucceeded = { viewModel.sendIntent(RetirementPensionIntent.NextStep) },
+        onOpenRulesDocument = {
+            scope.launch {
+                try {
+                    val bytes = Res.readBytes(RULES_PDF_RESOURCE_PATH)
+                    rulesPdf = PdfDownloadPR(InputStreamPR(ByteReadChannel(bytes)))
+                    rulesPdfLoadFailed = false
+                    showRulesPdfViewer = true
+                } catch (_: Exception) {
+                    rulesPdf = null
+                    rulesPdfLoadFailed = true
+                    toaster.error(rulesUnavailableMessage)
+                }
+            }
+        },
     )
 
     RetirementPensionScreen(
         state = state,
         onIntent = viewModel::sendIntent,
     )
+
+    // The viewer is an overlay over the whole service, and the bytes it reads are a Route concern:
+    // keeping it here leaves RetirementPensionScreen stateless, as pension-survivor does.
+    if (showRulesPdfViewer) {
+        TaminPdfViewer(
+            fileName = RULES_PDF_FILE_NAME,
+            pdf = rulesPdf,
+            downloadFailed = rulesPdfLoadFailed,
+            onRequestDownload = {},
+            onDismiss = {
+                showRulesPdfViewer = false
+                rulesPdf = null
+                rulesPdfLoadFailed = false
+            },
+            title = stringResource(Res.string.retirement_pension_dialog_rules_title),
+        )
+    }
 }
 
 @Composable
@@ -129,6 +179,7 @@ private fun HandleRetirementPensionEvents(
     events: Flow<RetirementPensionEvent>,
     onNavigateBack: () -> Unit,
     onAuthenticationSucceeded: () -> Unit,
+    onOpenRulesDocument: () -> Unit,
 ) {
     val toaster = LocalToaster.current
     val creationFailed = stringResource(Res.string.retirement_pension_request_creation_failed)
@@ -140,6 +191,7 @@ private fun HandleRetirementPensionEvents(
             RetirementPensionEvent.RequestCreationFailed -> toaster.error(creationFailed)
             RetirementPensionEvent.CameraPermissionDenied -> toaster.error(cameraDenied)
             RetirementPensionEvent.NavigateBack -> onNavigateBack()
+            RetirementPensionEvent.OpenRulesDocument -> onOpenRulesDocument()
             // Left up long enough to be read, then the wizard moves on by itself.
             RetirementPensionEvent.AuthenticationSucceeded -> {
                 delay(AUTH_ADVANCE_DELAY_MILLIS.milliseconds)
@@ -240,6 +292,7 @@ internal fun RetirementPensionScreen(
             onLeaveConfirmed = { onIntent(RetirementPensionIntent.LeaveConfirmed) },
         )
     }
+
 }
 
 @Composable
@@ -322,7 +375,7 @@ private fun RetirementFormBody(
                 consentAccepted = state.consentAccepted,
                 error = error,
                 onViewRules = {
-                    onIntent(RetirementPensionIntent.ShowDialog(RetirementDialog.Rules))
+                    onIntent(RetirementPensionIntent.ViewRules)
                 },
                 onConsentChange = { onIntent(RetirementPensionIntent.ConsentChanged(it)) },
             )

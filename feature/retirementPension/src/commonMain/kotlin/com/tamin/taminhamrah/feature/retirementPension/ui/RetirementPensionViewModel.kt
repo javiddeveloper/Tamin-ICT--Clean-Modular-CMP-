@@ -116,6 +116,9 @@ class RetirementPensionViewModel(
             is RetirementPensionIntent.ConsentChanged ->
                 emitEdit(PartialState.ConsentChanged(intent.accepted))
 
+            RetirementPensionIntent.ViewRules ->
+                sendEvent(RetirementPensionEvent.OpenRulesDocument)
+
             RetirementPensionIntent.RequestOtp -> requestOtp()
 
             is RetirementPensionIntent.OtpChanged -> onOtpChanged(intent.value)
@@ -667,41 +670,45 @@ class RetirementPensionViewModel(
 
     override fun createErrorState(message: String): PartialState = PartialState.Error
 
-    // ---------------------------------------------------------------- helpers
-
-    private fun RetirementPensionUiState.toForm() = RetirementRequestFormDN(
-        activityType = activityType,
-        address = address.trim(),
-        age = rawAge,
-        birthDate = identity?.birthDateEpoch ?: 0L,
-        branchCode = branch?.branchCode.orEmpty(),
-        fatherName = identity?.fatherName.orEmpty(),
-        firstName = identity?.firstName.orEmpty(),
-        gender = identity?.genderCode.orEmpty(),
-        idNumber = identity?.idNumber.orEmpty(),
-        insuranceNumber = insured?.insuranceNumber.orEmpty(),
-        issuePlace = identity?.issuePlace.orEmpty(),
-        lastName = identity?.lastName.orEmpty(),
-        managerName = employerName,
-        mobileNumber = otpMobile.ifBlank { identity?.mobileNumber.orEmpty() },
-        nationalCode = identity?.nationalCode.orEmpty(),
-        phoneNumber = phoneNumber,
-        status = RETIREMENT_REQUEST_STATUS_CREATED,
-        workshopAddress = workshopAddress.trim(),
-        workshopCode = workshopCode,
-        workshopName = workshopName,
-    )
-
     private companion object {
         const val OTP_LENGTH = 6
 
-        /** Statutory minimum, below which the service refuses the request. */
-        const val MIN_RETIREMENT_AGE_YEARS = 50
+        /**
+         * Statutory minimum age (42 years), below which the service refuses the request.
+         *
+         * Matches `old_android`'s `RetirementPensionFragment.kt:480` (`if (yearsAge < 42)`), which
+         * accommodates early and special retirement categories under Iranian Social Security law
+         * (e.g., hazardous and arduous jobs, or women with at least 20 years of service).
+         */
+        const val MIN_RETIREMENT_AGE_YEARS = 42
 
         /** What `verificationResult` says when the code does not match a live ticket. */
         const val TICKET_NOT_FOUND = "ticketNotFound"
     }
 }
+
+internal fun RetirementPensionUiState.toForm() = RetirementRequestFormDN(
+    activityType = activityType,
+    address = address.trim(),
+    age = rawAge,
+    birthDate = identity?.birthDateEpoch ?: 0L,
+    branchCode = branch?.branchCode.orEmpty(),
+    fatherName = identity?.fatherName.orEmpty(),
+    firstName = identity?.firstName.orEmpty(),
+    gender = identity?.genderCode.orEmpty(),
+    idNumber = identity?.idNumber.orEmpty(),
+    insuranceNumber = insured?.insuranceNumber.orEmpty(),
+    issuePlace = identity?.issuePlace.orEmpty(),
+    lastName = identity?.lastName.orEmpty(),
+    managerName = employerName,
+    mobileNumber = otpMobile.ifBlank { identity?.mobileNumber.orEmpty() },
+    nationalCode = identity?.nationalCode.orEmpty(),
+    phoneNumber = phoneNumber,
+    status = RETIREMENT_REQUEST_STATUS_CREATED,
+    workshopAddress = workshopAddress.trim(),
+    workshopCode = workshopCode,
+    workshopName = workshopName,
+)
 
 private fun RetirementPersonalDN.toVerified(ticketCode: Long) =
     PartialState.OtpVerified(

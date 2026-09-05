@@ -68,6 +68,7 @@ enum class RetirementFormError {
     PhoneLength,
     AddressRequired,
     AddressShort,
+    AddressInvalid,
     IdentityConfirm,
     WorkshopName,
     WorkshopCode,
@@ -265,6 +266,7 @@ sealed interface RetirementPensionIntent {
     data object NextStep : RetirementPensionIntent
 
     data class ConsentChanged(val accepted: Boolean) : RetirementPensionIntent
+    data object ViewRules : RetirementPensionIntent
     data object RequestOtp : RetirementPensionIntent
     data class OtpChanged(val value: String) : RetirementPensionIntent
 
@@ -315,6 +317,7 @@ sealed interface RetirementPensionEvent {
     data object RequestCreationFailed : RetirementPensionEvent
 
     data object NavigateBack : RetirementPensionEvent
+    data object OpenRulesDocument : RetirementPensionEvent
 
     /** Step 2 verified: the wizard moves on after a beat so the success card is actually seen. */
     data object AuthenticationSucceeded : RetirementPensionEvent

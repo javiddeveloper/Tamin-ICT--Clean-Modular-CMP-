@@ -127,4 +127,5 @@ private val PHONE_ERRORS = setOf(
 private val ADDRESS_ERRORS = setOf(
     RetirementFormError.AddressRequired,
     RetirementFormError.AddressShort,
+    RetirementFormError.AddressInvalid,
 )

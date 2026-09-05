@@ -1992,6 +1992,7 @@
     <string name="retirement_pension_error_phone_length">شمارهٔ تلفن ثابت باید حداقل ۱۱ رقم باشد.</string>
     <string name="retirement_pension_error_address_required">لطفاً نشانی محل سکونت را وارد کنید.</string>
     <string name="retirement_pension_error_address_short">نشانی واردشده کوتاه است؛ نشانی کامل را بنویسید.</string>
+    <string name="retirement_pension_error_address_invalid">آدرس شامل کاراکتر غیر مجاز است</string>
     <string name="retirement_pension_error_identity_confirm">برای ادامه، صحت اطلاعات هویتی را تأیید کنید.</string>
     <string name="retirement_pension_error_workshop_name">لطفاً نام کارگاه را وارد کنید.</string>
     <string name="retirement_pension_error_workshop_code">کد کارگاه باید ۱۰ رقم باشد.</string>
@@ -2004,6 +2005,7 @@
     <!-- Dialogs -->
     <string name="retirement_pension_dialog_rules_title">ضوابط و مقررات</string>
     <string name="retirement_pension_dialog_rules_body">برقراری مستمری بازنشستگی مشمول شرایط سنی و سابقهٔ مقرر در قانون تأمین اجتماعی است. پس از ثبت درخواست، مدارک و سوابق شما در شعبه بررسی و در صورت احراز شرایط، حکم بازنشستگی صادر می‌شود. متن کامل مقررات در سامانهٔ قوانین و مقررات در دسترس است.</string>
+    <string name="retirement_pension_rules_unavailable">فایل ضوابط و مقررات هنوز در این نسخه متصل نشده است.</string>
     <string name="retirement_pension_dialog_objection_title">اعتراض به سوابق</string>
     <string name="retirement_pension_dialog_objection_body">برای ثبت اعتراض به سوابق، از بخش خدمات سرویس «اعتراض سابقه ناموجود» را انتخاب کنید. تا زمان رسیدگی به اعتراض، ادامهٔ ثبت درخواست بازنشستگی امکان‌پذیر است.</string>
     <string name="retirement_pension_dialog_age_gate_title">انجام درخواست امکان‌پذیر نیست</string>

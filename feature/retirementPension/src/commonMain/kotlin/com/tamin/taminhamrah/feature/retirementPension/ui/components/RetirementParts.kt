@@ -39,6 +39,7 @@ import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_alert_circle
 import taminx.core.core_ui.ic_tamin_check
+import taminx.core.core_ui.retirement_pension_error_address_invalid
 import taminx.core.core_ui.retirement_pension_error_address_required
 import taminx.core.core_ui.retirement_pension_error_address_short
 import taminx.core.core_ui.retirement_pension_error_authentication
@@ -66,6 +67,7 @@ internal fun RetirementFormError.text(): String = stringResource(
         RetirementFormError.PhoneLength -> Res.string.retirement_pension_error_phone_length
         RetirementFormError.AddressRequired -> Res.string.retirement_pension_error_address_required
         RetirementFormError.AddressShort -> Res.string.retirement_pension_error_address_short
+        RetirementFormError.AddressInvalid -> Res.string.retirement_pension_error_address_invalid
         RetirementFormError.IdentityConfirm -> Res.string.retirement_pension_error_identity_confirm
         RetirementFormError.WorkshopName -> Res.string.retirement_pension_error_workshop_name
         RetirementFormError.WorkshopCode -> Res.string.retirement_pension_error_workshop_code

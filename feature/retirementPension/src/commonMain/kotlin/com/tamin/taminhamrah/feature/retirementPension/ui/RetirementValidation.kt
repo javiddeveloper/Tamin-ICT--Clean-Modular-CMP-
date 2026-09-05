@@ -15,6 +15,14 @@ internal const val WORKSHOP_CODE_LENGTH = 10
 internal const val MIN_ADDRESS_LENGTH = 10
 
 /**
+ * Characters rejected in addresses, matching `old_android`'s `Utility.checkInputIsValidAddress`.
+ * Rejects Latin alphabet letters and special characters (`$&+:;=?@#|/'<>.^*()%!`).
+ */
+private val INVALID_ADDRESS_CHARS_REGEX = Regex("""[a-zA-Z$&+:;=\\?@#|/'<>.^*()%!]""")
+
+internal fun isValidAddress(address: String): Boolean = !INVALID_ADDRESS_CHARS_REGEX.containsMatchIn(address)
+
+/**
  * The first thing wrong with the current step, or `null` when it is complete.
  *
  * A pure function of the state so the rules can be tested without a ViewModel, and so the reducer
@@ -57,6 +65,7 @@ private fun RetirementPensionUiState.identityError(): RetirementFormError? {
         phoneNumber.length < PHONE_LENGTH -> RetirementFormError.PhoneLength
         trimmedAddress.isEmpty() -> RetirementFormError.AddressRequired
         trimmedAddress.length < MIN_ADDRESS_LENGTH -> RetirementFormError.AddressShort
+        !isValidAddress(trimmedAddress) -> RetirementFormError.AddressInvalid
         !identityConfirmed -> RetirementFormError.IdentityConfirm
         else -> null
     }

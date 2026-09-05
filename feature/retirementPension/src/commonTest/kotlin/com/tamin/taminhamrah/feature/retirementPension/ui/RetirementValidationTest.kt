@@ -71,9 +71,43 @@ class RetirementValidationTest {
             validIdentity.copy(address = "تهران").stepError(),
         )
         assertEquals(
+            RetirementFormError.AddressInvalid,
+            validIdentity.copy(address = "تهران خیابان ولیعصر No 12").stepError(),
+        )
+        assertEquals(
+            RetirementFormError.AddressInvalid,
+            validIdentity.copy(address = "تهران، خیابان ولیعصر پلاک ۱۲$").stepError(),
+        )
+        assertEquals(
             RetirementFormError.IdentityConfirm,
             validIdentity.copy(identityConfirmed = false).stepError(),
         )
+    }
+
+    @Test
+    fun addressValidityRejectsLatinCharactersAndProhibitedSymbols() {
+        // Valid Persian address passes
+        assertNull(validIdentity.copy(address = "تهران، خیابان آزادی، کوچه مریم، پلاک ۵").stepError())
+
+        // Latin letters
+        assertEquals(
+            RetirementFormError.AddressInvalid,
+            validIdentity.copy(address = "Tehran Azadi Street No 10").stepError(),
+        )
+        assertEquals(
+            RetirementFormError.AddressInvalid,
+            validIdentity.copy(address = "تهران خیابان آزادی street 10").stepError(),
+        )
+
+        // Prohibited symbols: $&+:;=?@#|/'<>.^*()%!
+        val symbols = listOf("$", "&", "+", ":", ";", "=", "?", "@", "#", "|", "/", "'", "<", ">", ".", "^", "*", "(", ")", "%", "!")
+        for (sym in symbols) {
+            assertEquals(
+                RetirementFormError.AddressInvalid,
+                validIdentity.copy(address = "تهران، خیابان آزادی پلاک ۱۰ $sym").stepError(),
+                "Symbol '$sym' must be rejected in address",
+            )
+        }
     }
 
     @Test

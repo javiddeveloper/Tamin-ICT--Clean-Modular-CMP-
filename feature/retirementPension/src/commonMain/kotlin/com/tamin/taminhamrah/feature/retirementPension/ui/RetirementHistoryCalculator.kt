@@ -2,7 +2,6 @@ package com.tamin.taminhamrah.feature.retirementPension.ui
 
 import com.tamin.taminhamrah.model.history.DastmozdInfoItemDN
 import kotlin.math.ceil
-import kotlin.math.min
 
 /**
  * The insurance-history figures step 5 shows, worked out the way the legacy app does it
@@ -30,9 +29,6 @@ internal object RetirementHistoryCalculator {
 
     /** A month, for turning a daily rate into a monthly one. */
     private const val DAYS_PER_MONTH = 30
-
-    /** Contribution years past which extra service no longer raises the multiplier. */
-    private const val MAX_CREDITED_YEARS = 35.0
 
     /** Contribution years below which the floor is prorated rather than applied whole. */
     private const val FULL_FLOOR_YEARS = 20.0
@@ -82,8 +78,11 @@ internal object RetirementHistoryCalculator {
     }
 
     /**
-     * Estimated monthly pension: the daily wage times the credited years, floored at the legal
+     * Estimated monthly pension: the daily wage times the contribution years, floored at the legal
      * minimum.
+     *
+     * In accordance with `old_android` (`Utility.calculateDayAndWageOfHistory`), credited service years
+     * are not capped at 35.
      *
      * Below [FULL_FLOOR_YEARS] the floor is scaled by `years / 30` rather than applied whole. That
      * divisor is the legacy app's, and it is not a month count — it is reproduced here verbatim
@@ -92,12 +91,11 @@ internal object RetirementHistoryCalculator {
     fun estimatedPension(averageWage: Long, totalHistoryDays: Int): Long {
         if (averageWage <= 0L) return 0L
         val contributionYears = totalHistoryDays / DAYS_PER_YEAR
-        val creditedYears = min(contributionYears, MAX_CREDITED_YEARS)
         // Rounded to the nearest thousand, the way the design prints it: an estimate carrying
         // single rials claims a precision this calculation does not have. The floor below is left
         // exact — it is a legal figure, not an estimate, and must not be rounded past.
         val estimate =
-            roundToThousand(ceil(averageWage.toDouble() / DAYS_PER_MONTH * creditedYears).toLong())
+            roundToThousand(ceil(averageWage.toDouble() / DAYS_PER_MONTH * contributionYears).toLong())
 
         val floor = if (contributionYears >= FULL_FLOOR_YEARS) {
             MINIMUM_MONTHLY_PENSION
