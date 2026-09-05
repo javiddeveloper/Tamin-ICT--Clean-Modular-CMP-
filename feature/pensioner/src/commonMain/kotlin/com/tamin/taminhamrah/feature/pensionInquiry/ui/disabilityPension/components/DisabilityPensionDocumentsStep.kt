@@ -9,10 +9,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityDocumentChecklist
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityDocumentState
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionIntent
@@ -62,10 +65,12 @@ fun DisabilityPensionDocumentsStep(
         DisabilityDocumentChecklist.forEach { document ->
             val documentState = state.documents[document.id] ?: DisabilityDocumentState.Empty
             val isUploaded = documentState is DisabilityDocumentState.Uploaded
+            val thumbnailBase64 = rememberBase64Thumbnail(documentState.bytesOrNull())
             TaminDocumentUploadCard(
                 title = stringResource(document.titleRes),
                 state = documentState.toUploadState(),
                 statusText = documentState.statusText(),
+                thumbnailBase64 = thumbnailBase64,
                 onCardClick = { onIntent(DisabilityPensionIntent.DocumentCardClicked(document.id)) },
                 onPreviewClick = if (isUploaded) {
                     { previewDocumentId = document.id }
@@ -100,19 +105,34 @@ fun DisabilityPensionDocumentsStep(
     }
 }
 
-@OptIn(ExperimentalEncodingApi::class)
 @Composable
 private fun DisabilityPensionDocumentPreviewDialog(
     title: String,
     bytes: ByteArray,
     onDismiss: () -> Unit,
 ) {
-    val base64 = remember(bytes) { Base64.encode(bytes) }
-    TaminImageViewer(
-        title = title,
-        url = base64,
-        onDismiss = onDismiss,
-    )
+    val base64 = rememberBase64Thumbnail(bytes)
+    if (base64 != null) {
+        TaminImageViewer(
+            title = title,
+            url = base64,
+            onDismiss = onDismiss,
+        )
+    }
+}
+
+/**
+ * Encodes off the composition/main thread — a multi-MB camera photo would otherwise block the
+ * main thread while the card is composing. Returns null (card shows its non-thumbnail state)
+ * until the encode finishes.
+ */
+@OptIn(ExperimentalEncodingApi::class)
+@Composable
+private fun rememberBase64Thumbnail(bytes: ByteArray?): String? {
+    val state = produceState<String?>(initialValue = null, bytes) {
+        value = bytes?.let { withContext(Dispatchers.Default) { Base64.Default.encode(it) } }
+    }
+    return state.value
 }
 
 private fun DisabilityDocumentState.toUploadState(): TaminDocumentUploadState = when (this) {
