@@ -1,9 +1,14 @@
 package com.tamin.taminhamrah.feature.taminServices.employerOnlineServices
 
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeContractListDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeListDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeRequestDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeWorkshopListDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.model.workshop.*
 import com.tamin.taminhamrah.repository.WorkShopsRepository
+import kotlinx.coroutines.flow.Flow
 
 /**
  * A [WorkShopsRepository] scoped to what [com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.EmployerOnlineServicesViewModel]
@@ -110,4 +115,12 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     override suspend fun getArticleSixteenReportPdf(seqNo: Long): PdfDownloadDN = notUsed()
     override suspend fun getWorkshopMembers(query: WorkshopMemberQuery): PagedListDN<WorkshopMemberDN> = notUsed()
     override suspend fun getWorkshopStackHolders(query: WorkshopStackHolderQuery): PagedListDN<WorkshopStackHolderDN> = notUsed()
+
+    override fun getLegalRepresentativeWorkshops(): Flow<LegalRepresentativeWorkshopListDN?> = notUsed()
+    override fun getLegalRepresentatives(workshopId: String, branchCode: String): Flow<LegalRepresentativeListDN?> = notUsed()
+    override fun getLegalRepresentativeWorkshopContracts(workshopId: String, branchCode: String): Flow<LegalRepresentativeContractListDN?> = notUsed()
+    override suspend fun requestLegalRepresentativeTicket(nationalCode: String?) = notUsed()
+    override suspend fun verifyLegalRepresentativeTicket(ticket: String) = notUsed()
+    override suspend fun submitLegalRepresentative(ticket: String, request: LegalRepresentativeRequestDN) = notUsed()
+    override suspend fun deleteLegalRepresentative(ticket: String, stakeId: Long) = notUsed()
 }

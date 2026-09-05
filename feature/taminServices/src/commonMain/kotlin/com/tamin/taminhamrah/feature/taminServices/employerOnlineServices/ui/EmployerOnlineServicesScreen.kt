@@ -265,7 +265,7 @@ internal fun EmployerAgreementsListScreen(
 
                     itemsIndexed(
                         visibleAgreements,
-                        key = { _, item -> item.workshopId + "-" + item.branchCode },
+                        key = { index, item -> "${item.workshopId}-${item.branchCode}-$index" },
                     ) { _, item ->
                         EmployerAgreementCard(
                             item = item,
