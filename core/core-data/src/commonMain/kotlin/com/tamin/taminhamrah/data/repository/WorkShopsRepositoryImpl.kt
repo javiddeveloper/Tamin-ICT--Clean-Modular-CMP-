@@ -31,7 +31,6 @@ import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmissionDN
 import com.tamin.taminhamrah.model.workshop.EmployerContactInfoDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetQuery
-import com.tamin.taminhamrah.model.workshop.WORKSHOP_FULL_PAGE_SIZE
 import com.tamin.taminhamrah.model.workshop.WORKSHOP_PAGE_SIZE
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN
@@ -271,12 +270,10 @@ class WorkShopsRepositoryImpl(
     ): EmployerContactInfoDN =
         remoteDataSource.getEmployerAgreementUserInfo(verificationCode).toDomain()
 
-    // Neither list has real paging wired yet — ask for one wide window and render all of it.
-
     override suspend fun getWorkshopsWithoutContract(
         page: Int,
     ): PagedListDN<WorkshopWithoutContractDN> =
-        remoteDataSource.getEmployerWorkshopsWithoutContract(pageQuery(page, WORKSHOP_FULL_PAGE_SIZE))
+        remoteDataSource.getEmployerWorkshopsWithoutContract(pageQuery(page))
             .toDomainPage { it.toDomain() }
 
     override suspend fun getWorkshopContractRows(
@@ -285,7 +282,7 @@ class WorkShopsRepositoryImpl(
         page: Int,
     ): PagedListDN<WorkshopContractRowDN> =
         remoteDataSource
-            .getEmployerWorkshopContractList(workshopId, branchCode, pageQuery(page, WORKSHOP_FULL_PAGE_SIZE))
+            .getEmployerWorkshopContractList(workshopId, branchCode, pageQuery(page))
             .toDomainPage { it.toDomain() }
 
     override suspend fun getEmployerAgreementsByWorkshop(

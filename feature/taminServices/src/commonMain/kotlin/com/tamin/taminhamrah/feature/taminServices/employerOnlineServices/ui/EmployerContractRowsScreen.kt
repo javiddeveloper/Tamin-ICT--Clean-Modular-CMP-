@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.runtime.Composable
@@ -44,6 +45,8 @@ import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.reservedHeight
 import com.tamin.taminhamrah.ui.components.toast.AppToastHost
+import com.tamin.taminhamrah.ui.paging.OnLoadMore
+import com.tamin.taminhamrah.ui.paging.PagingFooter
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import org.jetbrains.compose.resources.stringResource
@@ -72,6 +75,13 @@ internal fun EmployerContractRowsScreen(
 
     val rows = uiState.contractRows
     val error = uiState.errors[EmployerOnlineServicesErrorSource.CONTRACT_ROWS]
+    val listState = rememberLazyListState()
+
+    listState.OnLoadMore(
+        enabled = !rows.endReached && rows.paginationError == null,
+    ) {
+        onIntent(EmployerOnlineServicesIntent.LoadMoreContractRows)
+    }
 
     Box(
         modifier = Modifier
@@ -79,6 +89,7 @@ internal fun EmployerContractRowsScreen(
             .background(taminColors.bgPage),
     ) {
         LazyColumn(
+            state = listState,
             overscrollEffect = rememberJellyOverscroll(),
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
@@ -125,14 +136,25 @@ internal fun EmployerContractRowsScreen(
                     )
                 }
 
-                else -> itemsIndexed(
-                    rows.rows,
-                    key = { index, item -> item.contractRow + "-" + index },
-                ) { _, item ->
-                    EmployerContractRowCard(
-                        item = item,
-                        modifier = Modifier.padding(horizontal = Spacing.lg),
-                    )
+                else -> {
+                    itemsIndexed(
+                        rows.rows,
+                        key = { index, item -> item.contractRow + "-" + index },
+                    ) { _, item ->
+                        EmployerContractRowCard(
+                            item = item,
+                            modifier = Modifier.padding(horizontal = Spacing.lg),
+                        )
+                    }
+
+                    item {
+                        PagingFooter(
+                            isLoadingNextPage = rows.isLoadingNextPage,
+                            error = rows.paginationError,
+                            onRetry = { onIntent(EmployerOnlineServicesIntent.LoadMoreContractRows) },
+                            modifier = Modifier.padding(horizontal = Spacing.lg),
+                        )
+                    }
                 }
             }
         }

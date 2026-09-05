@@ -91,6 +91,9 @@ data class AgreementsListUiState(
 /**
  * State of the "ردیف‌های پیمان کارگاه" drill-down. The workshop identity is carried over from the
  * card that opened it (so the header renders instantly, before the rows arrive).
+ *
+ * A real server-paged window, like [AgreementsListUiState] — [isLoadingNextPage] / [endReached] /
+ * [paginationError] drive the same `OnLoadMore`/`PagingFooter` pair.
  */
 @Immutable
 data class ContractRowsUiState(
@@ -102,6 +105,9 @@ data class ContractRowsUiState(
     val rows: List<WorkshopContractRowPR> = emptyList(),
     /** Where "ردیف‌های پیمان" was opened from — [EmployerOnlineServicesIntent.CloseContractRows] returns here. */
     val originScreen: EmployerOnlineServicesScreen = EmployerOnlineServicesScreen.AGREEMENTS_LIST,
+    val isLoadingNextPage: Boolean = false,
+    val endReached: Boolean = false,
+    val paginationError: String? = null,
 )
 
 /**
@@ -128,8 +134,18 @@ data class AgreementRequestUiState(
     /** The employer's *currently registered* contact, shown on step 2 against the newly requested one. */
     val currentMobile: String = "",
     val currentEmail: String = "",
-    /** Step 2 lists the employer's workshops that have no registered agreement yet. */
+    /**
+     * Step 2 lists the employer's workshops that have no registered agreement yet — a real
+     * server-paged window like [AgreementsListUiState], loaded a page at a time via "بارگذاری بیشتر"
+     * inside the card (it sits in a plain scrolling `Column`, not a `LazyColumn`, so there is no
+     * scroll position to drive `OnLoadMore` from).
+     */
     val workshopsWithoutContract: List<WorkshopWithoutContractPR> = emptyList(),
+    /** The server's total for [workshopsWithoutContract] — what the card's count badge shows. */
+    val workshopsWithoutContractTotal: Int = 0,
+    val workshopsWithoutContractLoadingNextPage: Boolean = false,
+    val workshopsWithoutContractEndReached: Boolean = false,
+    val workshopsWithoutContractPaginationError: String? = null,
     /** The تعهدنامه wording, already personalised — see [AgreementDocumentPR]. */
     val document: AgreementDocumentPR = AgreementDocumentPR(),
     val isStep2Loading: Boolean = false,
@@ -189,7 +205,12 @@ data class EmployerOnlineServicesUiState(
             val originScreen: EmployerOnlineServicesScreen,
         ) : PartialState
 
-        data class ContractRowsLoaded(val rows: List<WorkshopContractRowPR>) : PartialState
+        data class ContractRowsPagingChanged(
+            val rows: List<WorkshopContractRowPR>,
+            val isLoadingNextPage: Boolean,
+            val endReached: Boolean,
+            val error: String?,
+        ) : PartialState
 
         /** Profile mobile + email, side-loaded with the identity — seeds the request wizard. */
         data class ContactPrefillLoaded(val mobile: String, val email: String) : PartialState
@@ -221,7 +242,13 @@ data class EmployerOnlineServicesUiState(
         ) : PartialState
 
         data class Step2ContentLoading(val loading: Boolean) : PartialState
-        data class WorkshopsWithoutContractLoaded(val workshops: List<WorkshopWithoutContractPR>) : PartialState
+        data class WorkshopsWithoutContractPagingChanged(
+            val workshops: List<WorkshopWithoutContractPR>,
+            val total: Int,
+            val isLoadingNextPage: Boolean,
+            val endReached: Boolean,
+            val error: String?,
+        ) : PartialState
         data class AgreementDocumentLoaded(val document: AgreementDocumentPR) : PartialState
         data class AgreementAcceptedChanged(val accepted: Boolean) : PartialState
 
@@ -272,6 +299,9 @@ sealed interface EmployerOnlineServicesIntent {
     /** "تأیید و مشاهدهٔ تعهدنامه" — verifies the entered code and advances to پذیرش تعهدنامه. */
     data object VerifyAgreementCode : EmployerOnlineServicesIntent
 
+    /** "بارگذاری بیشتر" inside the step-2 کارگاه‌های بدون تعهدنامه card — fetches its next server page. */
+    data object LoadMoreWorkshopsWithoutContract : EmployerOnlineServicesIntent
+
     /** Step 2 consent checkbox. */
     data class SetAgreementAccepted(val accepted: Boolean) : EmployerOnlineServicesIntent
 
@@ -295,6 +325,9 @@ sealed interface EmployerOnlineServicesIntent {
 
     /** Back out of the contract-rows drill-down to the landing list. */
     data object CloseContractRows : EmployerOnlineServicesIntent
+
+    /** Scrolled near the end of the contract-rows list — fetches the next server page. */
+    data object LoadMoreContractRows : EmployerOnlineServicesIntent
 }
 
 sealed interface EmployerOnlineServicesEvent {

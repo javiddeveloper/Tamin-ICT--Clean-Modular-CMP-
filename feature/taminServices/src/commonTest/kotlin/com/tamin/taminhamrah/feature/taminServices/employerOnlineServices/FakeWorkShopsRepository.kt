@@ -40,6 +40,8 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         private set
     var agreementsQueryCount: Int = 0
         private set
+    var lastWorkshopsWithoutContractPage: Int? = null
+        private set
 
     enum class Call { AGREEMENTS, CONTACT_INFO, WORKSHOPS_WITHOUT_CONTRACT, CONTRACT_ROWS, TICKET, SUBMIT }
 
@@ -91,7 +93,8 @@ class FakeWorkShopsRepository : WorkShopsRepository {
 
     override suspend fun getWorkshopsWithoutContract(page: Int): PagedListDN<WorkshopWithoutContractDN> {
         failIf(Call.WORKSHOPS_WITHOUT_CONTRACT)
-        return workshopsWithoutContract
+        lastWorkshopsWithoutContractPage = page
+        return workshopsWithoutContract.page(page)
     }
 
     override suspend fun getWorkshopContractRows(
@@ -101,7 +104,14 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     ): PagedListDN<WorkshopContractRowDN> {
         lastContractRowsArgs = Triple(workshopId, branchCode, page)
         failIf(Call.CONTRACT_ROWS)
-        return contractRows
+        return contractRows.page(page)
+    }
+
+    /** Slices [items] into [WORKSHOP_PAGE_SIZE] windows like a real service would, keeping [total] as set. */
+    private fun <T> PagedListDN<T>.page(page: Int): PagedListDN<T> {
+        val fromIndex = (page * WORKSHOP_PAGE_SIZE).coerceIn(0, items.size)
+        val toIndex = (fromIndex + WORKSHOP_PAGE_SIZE).coerceIn(fromIndex, items.size)
+        return PagedListDN(items = items.subList(fromIndex, toIndex), total = total)
     }
 
     override suspend fun submitEmployerAgreement(request: EmployerAgreementSubmissionDN): String {

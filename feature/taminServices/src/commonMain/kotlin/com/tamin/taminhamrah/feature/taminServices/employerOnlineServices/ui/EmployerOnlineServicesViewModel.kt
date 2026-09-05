@@ -19,7 +19,9 @@ import com.tamin.taminhamrah.model.paging.PageDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmissionDN
 import com.tamin.taminhamrah.model.workshop.WORKSHOP_PAGE_SIZE
+import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDN
 import com.tamin.taminhamrah.model.workshop.WorkshopListQuery
+import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDN
 import com.tamin.taminhamrah.paging.PaginationConfig
 import com.tamin.taminhamrah.paging.Paginator
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
@@ -98,6 +100,41 @@ class EmployerOnlineServicesViewModel(
             PageDN(items = page.items, total = page.total)
         },
     )
+
+    /** Which workshop [contractRowsPaginator] is currently scoped to — set by [OpenContractRows]. */
+    private var contractRowsWorkshopId: String = ""
+    private var contractRowsBranchCode: String = ""
+
+    /**
+     * Unlike [agreementsPaginator], this is *not* observed as a live stream (see
+     * [observeAgreementsPaging]): "ردیف‌های پیمان" can be opened for a different workshop many times
+     * per ViewModel lifetime, and a persistent collector started fresh from each
+     * [EmployerOnlineServicesIntent.OpenContractRows] would leak one every time. Instead each call —
+     * open, [EmployerOnlineServicesIntent.LoadMoreContractRows], retry — awaits its
+     * suspend fun, then reads [Paginator.state] once via [contractRowsPagingPartialState].
+     */
+    private val contractRowsPaginator = Paginator<WorkshopContractRowDN>(
+        config = PaginationConfig(pageSize = WORKSHOP_PAGE_SIZE),
+        loadPage = { query ->
+            val page = getWorkshopContractRowsUseCase(contractRowsWorkshopId, contractRowsBranchCode, query.page)
+            PageDN(items = page.items, total = page.total)
+        },
+    )
+
+    /**
+     * Step 2's کارگاه‌های بدون تعهدنامه card — read one-shot like [contractRowsPaginator], since step 2
+     * is (re-)entered fresh on every verify, not observed continuously.
+     */
+    private val workshopsWithoutContractPaginator = Paginator<WorkshopWithoutContractDN>(
+        config = PaginationConfig(pageSize = WORKSHOP_PAGE_SIZE),
+        loadPage = { query ->
+            val page = getWorkshopsWithoutContractUseCase(query.page)
+            workshopsWithoutContractTotal = page.total
+            PageDN(items = page.items, total = page.total)
+        },
+    )
+
+    private var workshopsWithoutContractTotal: Int = 0
 
     init {
         sendIntent(EmployerOnlineServicesIntent.Load)
@@ -196,20 +233,34 @@ class EmployerOnlineServicesViewModel(
                 ),
             )
             emit(PartialState.ScreenChanged(EmployerOnlineServicesScreen.CONTRACT_ROWS))
-            emitAll(loadContractRows(intent.workshopId, intent.branchCode))
+            contractRowsWorkshopId = intent.workshopId
+            contractRowsBranchCode = intent.branchCode
+            contractRowsPaginator.refresh()
+            emit(contractRowsPagingPartialState())
         }
             .onStart { emit(PartialState.Loading(true)) }
             .onCompletion { emit(PartialState.Loading(false)) }
 
         EmployerOnlineServicesIntent.CloseContractRows ->
             flow<PartialState> { emit(PartialState.ScreenChanged(uiState.value.contractRows.originScreen)) }
+
+        EmployerOnlineServicesIntent.LoadMoreContractRows -> flow<PartialState> {
+            contractRowsPaginator.loadNext()
+            emit(contractRowsPagingPartialState())
+        }
+
+        EmployerOnlineServicesIntent.LoadMoreWorkshopsWithoutContract -> flow<PartialState> {
+            workshopsWithoutContractPaginator.loadNext()
+            emit(workshopsWithoutContractPagingPartialState())
+        }
     }
 
     private fun retry(source: EmployerOnlineServicesErrorSource): Flow<PartialState> = when (source) {
         EmployerOnlineServicesErrorSource.IDENTITY -> loadIdentity()
         EmployerOnlineServicesErrorSource.AGREEMENTS -> flow<PartialState> { agreementsPaginator.retry() }
-        EmployerOnlineServicesErrorSource.CONTRACT_ROWS -> uiState.value.contractRows.let {
-            loadContractRows(it.workshopId, it.branchCode)
+        EmployerOnlineServicesErrorSource.CONTRACT_ROWS -> flow<PartialState> {
+            contractRowsPaginator.retry()
+            emit(contractRowsPagingPartialState())
         }
         EmployerOnlineServicesErrorSource.REQUEST_TICKET -> requestTicket()
         EmployerOnlineServicesErrorSource.VERIFY_CODE -> verifyCode()
@@ -245,12 +296,15 @@ class EmployerOnlineServicesViewModel(
         )
     }
 
-    private fun loadContractRows(workshopId: String, branchCode: String): Flow<PartialState> = flow<PartialState> {
-        // Not paged — the repository fetches one wide window for this list.
-        val page = getWorkshopContractRowsUseCase(workshopId, branchCode)
-        emit(PartialState.ContractRowsLoaded(page.items.map { it.toPresentation() }))
-    }.catch { e ->
-        emit(PartialState.Error(e.toSingleLineMessage(), EmployerOnlineServicesErrorSource.CONTRACT_ROWS))
+    /** [contractRowsPaginator]'s current state, translated for the reducer — see its own kdoc. */
+    private fun contractRowsPagingPartialState(): PartialState.ContractRowsPagingChanged {
+        val paging = contractRowsPaginator.state.value
+        return PartialState.ContractRowsPagingChanged(
+            rows = paging.items.map { it.toPresentation() },
+            isLoadingNextPage = paging.isLoadingNextPage,
+            endReached = paging.endReached,
+            error = paging.error?.toSingleLineMessage(),
+        )
     }
 
     private fun requestTicket(): Flow<PartialState> = flow<PartialState> {
@@ -282,12 +336,25 @@ class EmployerOnlineServicesViewModel(
             .onStart { emit(PartialState.Step2ContentLoading(true)) }
             .onCompletion { emit(PartialState.Step2ContentLoading(false)) }
 
+    /**
+     * Refreshes to page one — called both on a fresh entry to step 2 and on an
+     * [EmployerOnlineServicesErrorSource.STEP2_CONTENT] retry.
+     */
     private fun loadWorkshopsWithoutContract(): Flow<PartialState> = flow<PartialState> {
-        // Not paged — the repository fetches one wide window for this list.
-        val page = getWorkshopsWithoutContractUseCase()
-        emit(PartialState.WorkshopsWithoutContractLoaded(page.items.map { it.toPresentation() }))
-    }.catch { e ->
-        emit(PartialState.Error(e.toSingleLineMessage(), EmployerOnlineServicesErrorSource.STEP2_CONTENT))
+        workshopsWithoutContractPaginator.refresh()
+        emit(workshopsWithoutContractPagingPartialState())
+    }
+
+    /** [workshopsWithoutContractPaginator]'s current state, translated for the reducer. */
+    private fun workshopsWithoutContractPagingPartialState(): PartialState.WorkshopsWithoutContractPagingChanged {
+        val paging = workshopsWithoutContractPaginator.state.value
+        return PartialState.WorkshopsWithoutContractPagingChanged(
+            workshops = paging.items.map { it.toPresentation() },
+            total = workshopsWithoutContractTotal,
+            isLoadingNextPage = paging.isLoadingNextPage,
+            endReached = paging.endReached,
+            error = paging.error?.toSingleLineMessage(),
+        )
     }
 
     private fun loadAgreementDocument(name: String, nationalCode: String): Flow<PartialState> = flow<PartialState> {
@@ -330,9 +397,20 @@ class EmployerOnlineServicesViewModel(
             errors = currentState.errors - EmployerOnlineServicesErrorSource.CONTRACT_ROWS,
         )
 
-        is PartialState.ContractRowsLoaded -> currentState.copy(
-            contractRows = currentState.contractRows.copy(rows = partialState.rows),
-            errors = currentState.errors - EmployerOnlineServicesErrorSource.CONTRACT_ROWS,
+        is PartialState.ContractRowsPagingChanged -> currentState.copy(
+            contractRows = currentState.contractRows.copy(
+                rows = partialState.rows,
+                isLoadingNextPage = partialState.isLoadingNextPage,
+                endReached = partialState.endReached,
+                // A next-page failure (rows already showing) is a footer error, not a fatal one —
+                // only an empty-list failure blocks the whole screen behind `errors[CONTRACT_ROWS]`.
+                paginationError = partialState.error.takeIf { partialState.rows.isNotEmpty() },
+            ),
+            errors = if (partialState.error != null && partialState.rows.isEmpty()) {
+                currentState.errors + (EmployerOnlineServicesErrorSource.CONTRACT_ROWS to partialState.error)
+            } else {
+                currentState.errors - EmployerOnlineServicesErrorSource.CONTRACT_ROWS
+            },
         )
 
         is PartialState.IdentityLoaded -> currentState.copy(
@@ -436,10 +514,25 @@ class EmployerOnlineServicesViewModel(
             agreementRequest = currentState.agreementRequest.copy(isStep2Loading = partialState.loading),
         )
 
-        is PartialState.WorkshopsWithoutContractLoaded -> currentState.copy(
+        is PartialState.WorkshopsWithoutContractPagingChanged -> currentState.copy(
             agreementRequest = currentState.agreementRequest.copy(
                 workshopsWithoutContract = partialState.workshops,
+                workshopsWithoutContractTotal = partialState.total,
+                workshopsWithoutContractLoadingNextPage = partialState.isLoadingNextPage,
+                workshopsWithoutContractEndReached = partialState.endReached,
+                // A next-page failure (rows already showing) is a footer error under the card, not a
+                // fatal one — only an empty-list failure blocks step 2 behind `errors[STEP2_CONTENT]`.
+                workshopsWithoutContractPaginationError =
+                    partialState.error.takeIf { partialState.workshops.isNotEmpty() },
             ),
+            // Additive only, like the plain `Error` branch below: STEP2_CONTENT is shared with the
+            // legal-document load (loadAgreementDocument), so a clean fetch here must not clear an
+            // error the *other* loader set — only an explicit retry (ErrorCleared) does that.
+            errors = if (partialState.error != null && partialState.workshops.isEmpty()) {
+                currentState.errors + (EmployerOnlineServicesErrorSource.STEP2_CONTENT to partialState.error)
+            } else {
+                currentState.errors
+            },
         )
 
         is PartialState.AgreementDocumentLoaded -> currentState.copy(

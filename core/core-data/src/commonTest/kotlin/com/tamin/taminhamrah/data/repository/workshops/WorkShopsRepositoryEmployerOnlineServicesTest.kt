@@ -32,7 +32,7 @@ class WorkShopsRepositoryEmployerOnlineServicesTest {
     }
 
     @Test
-    fun `workshops-without-contract folds ListData into a page and asks for one wide window`() = runTest {
+    fun `workshops-without-contract folds ListData into a page and asks for a real page window`() = runTest {
         remote.workshopsWithoutContract = ListData(
             total = 42,
             list = listOf(
@@ -45,10 +45,9 @@ class WorkShopsRepositoryEmployerOnlineServicesTest {
         assertEquals(42, page.total)
         assertEquals(1, page.items.size)
         assertEquals("1071410004", page.items.first().workshopId)
-        // This list has no paging wired yet -> one wide window: start 0, limit 100.
         assertEquals(0, remote.lastWorkshopsQuery?.page)
         assertEquals(0, remote.lastWorkshopsQuery?.start)
-        assertEquals(WORKSHOP_FULL_PAGE_SIZE, remote.lastWorkshopsQuery?.limit)
+        assertEquals(WORKSHOP_PAGE_SIZE, remote.lastWorkshopsQuery?.limit)
     }
 
     @Test

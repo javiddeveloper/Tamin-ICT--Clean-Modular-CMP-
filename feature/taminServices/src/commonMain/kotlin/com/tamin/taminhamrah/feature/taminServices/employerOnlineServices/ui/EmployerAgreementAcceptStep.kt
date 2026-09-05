@@ -40,6 +40,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contract.AgreementRequestStep
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contract.AgreementRequestUiState
@@ -57,6 +58,7 @@ import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.components.toast.AppToastHost
+import com.tamin.taminhamrah.ui.paging.PagingFooter
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -64,6 +66,7 @@ import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.action_load_more
 import taminx.core.core_ui.employer_online_services_national_code
 import taminx.core.core_ui.employer_online_services_request_current_email
 import taminx.core.core_ui.employer_online_services_request_current_mobile
@@ -140,6 +143,11 @@ internal fun AcceptAgreementStep(
                     IdentityRecapCard(request = request)
                     WorkshopsWithoutContractCard(
                         workshops = request.workshopsWithoutContract,
+                        total = request.workshopsWithoutContractTotal,
+                        isLoadingNextPage = request.workshopsWithoutContractLoadingNextPage,
+                        endReached = request.workshopsWithoutContractEndReached,
+                        paginationError = request.workshopsWithoutContractPaginationError,
+                        onLoadMore = { onIntent(EmployerOnlineServicesIntent.LoadMoreWorkshopsWithoutContract) },
                         onWorkshopClicked = { workshop ->
                             onIntent(
                                 EmployerOnlineServicesIntent.OpenContractRows(
@@ -280,6 +288,11 @@ private fun ContactCell(
 @Composable
 private fun WorkshopsWithoutContractCard(
     workshops: List<WorkshopWithoutContractPR>,
+    total: Int,
+    isLoadingNextPage: Boolean,
+    endReached: Boolean,
+    paginationError: String?,
+    onLoadMore: () -> Unit,
     onWorkshopClicked: (WorkshopWithoutContractPR) -> Unit,
 ) {
     val colors = LocalTaminColors.current
@@ -297,7 +310,7 @@ private fun WorkshopsWithoutContractCard(
                 color = colors.textPrimary,
                 modifier = Modifier.weight(1f),
             )
-            CountBadge(count = workshops.size)
+            CountBadge(count = total)
             ExpandChevron(expanded = expanded)
         }
 
@@ -348,6 +361,30 @@ private fun WorkshopsWithoutContractCard(
                                 modifier = Modifier.size(14.dp),
                             )
                         }
+                    }
+                }
+
+                // No LazyColumn here to drive an OnLoadMore scroll trigger — this card sits inside
+                // the wizard's own scrolling Column — so the next page is fetched on tap instead.
+                if (!endReached) {
+                    if (isLoadingNextPage || paginationError != null) {
+                        PagingFooter(
+                            isLoadingNextPage = isLoadingNextPage,
+                            error = paginationError,
+                            onRetry = onLoadMore,
+                        )
+                    } else {
+                        Text(
+                            text = stringResource(Res.string.action_load_more),
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                            color = colors.blueText,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(CornerRadius.chip))
+                                .clickable(onClick = onLoadMore)
+                                .padding(vertical = Spacing.sm),
+                        )
                     }
                 }
             }
@@ -529,6 +566,7 @@ private val PreviewAcceptRequest = AgreementRequestUiState(
             branchOfficeName = "شعبهٔ ۲ مشهد",
         ),
     ),
+    workshopsWithoutContractTotal = 2,
     document = PreviewDocument,
 )
 

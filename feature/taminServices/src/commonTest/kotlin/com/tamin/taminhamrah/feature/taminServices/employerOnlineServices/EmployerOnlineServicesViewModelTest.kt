@@ -286,6 +286,39 @@ class EmployerOnlineServicesViewModelTest {
         assertEquals(AgreementRequestStep.ACCEPT_AGREEMENT, state.agreementRequest.step)
     }
 
+    @Test
+    fun loadMoreContractRows_appendsTheNextPageInsteadOfReplacingTheFirst() = runTest(testDispatcher) {
+        // 15 rows so the default 10-row page leaves a second page to fetch.
+        workshops.contractRows = PagedListDN(
+            items = (1..15).map { WorkshopContractRowDN(contractRow = it.toString().padStart(3, '0')) },
+            total = 15,
+        )
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        viewModel.sendIntent(
+            EmployerOnlineServicesIntent.OpenContractRows(
+                workshopId = "0968210170",
+                branchCode = "0960",
+                workshopName = "کارگاه الف",
+                workshopCodeLabel = "۰۹۶۸۲۱۰۱۷۰",
+            ),
+        )
+        advanceUntilIdle()
+
+        val firstPage = viewModel.uiState.value.contractRows
+        assertEquals(10, firstPage.rows.size)
+        assertEquals(false, firstPage.endReached)
+
+        viewModel.sendIntent(EmployerOnlineServicesIntent.LoadMoreContractRows)
+        advanceUntilIdle()
+
+        val afterLoadMore = viewModel.uiState.value.contractRows
+        assertEquals(15, afterLoadMore.rows.size)
+        assertEquals(true, afterLoadMore.endReached)
+        assertEquals(Triple("0968210170", "0960", 1), workshops.lastContractRowsArgs)
+    }
+
     // -------------------------------------------------------------------- request wizard
 
     @Test
@@ -339,6 +372,38 @@ class EmployerOnlineServicesViewModelTest {
         assertEquals("boss@example.com", workshops.lastSubmission?.email)
         assertEquals("654321", workshops.lastSubmission?.ticketCode)
         assertTrue(viewModel.uiState.value.agreementRequest.isSubmitted)
+    }
+
+    @Test
+    fun loadMoreWorkshopsWithoutContract_appendsTheNextPageInsideStep2() = runTest(testDispatcher) {
+        // 12 rows so the default 10-row page leaves a second page to fetch.
+        workshops.workshopsWithoutContract = PagedListDN(
+            items = (1..12).map {
+                WorkshopWithoutContractDN(workshopId = it.toString(), branchCode = "1", name = "کارگاه $it")
+            },
+            total = 12,
+        )
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        viewModel.sendIntent(EmployerOnlineServicesIntent.OpenAgreementRequest)
+        viewModel.sendIntent(EmployerOnlineServicesIntent.UpdateRequestCode("654321"))
+        viewModel.sendIntent(EmployerOnlineServicesIntent.VerifyAgreementCode)
+        advanceUntilIdle()
+
+        val firstPage = viewModel.uiState.value.agreementRequest
+        assertEquals(10, firstPage.workshopsWithoutContract.size)
+        // The card's count badge shows the server total, not just what has loaded so far.
+        assertEquals(12, firstPage.workshopsWithoutContractTotal)
+        assertEquals(false, firstPage.workshopsWithoutContractEndReached)
+
+        viewModel.sendIntent(EmployerOnlineServicesIntent.LoadMoreWorkshopsWithoutContract)
+        advanceUntilIdle()
+
+        val afterLoadMore = viewModel.uiState.value.agreementRequest
+        assertEquals(12, afterLoadMore.workshopsWithoutContract.size)
+        assertEquals(true, afterLoadMore.workshopsWithoutContractEndReached)
+        assertEquals(1, workshops.lastWorkshopsWithoutContractPage)
     }
 
     @Test
