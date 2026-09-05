@@ -2,28 +2,40 @@ package com.tamin.taminhamrah.feature.workshops.ui.objectionStatus.components
 
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionStatus
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionType
+import org.jetbrains.compose.resources.StringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.objection_state_approved
+import taminx.core.core_ui.objection_state_board_review
+import taminx.core.core_ui.objection_state_calculation_review
+import taminx.core.core_ui.objection_state_recalculated
+import taminx.core.core_ui.objection_state_submitted
+import taminx.core.core_ui.objection_state_time_allocated
+import taminx.core.core_ui.objection_state_unknown
+import taminx.core.core_ui.objection_type_article_sixteen
+import taminx.core.core_ui.objection_type_estimate
+import taminx.core.core_ui.objection_type_primary_vote
+import taminx.core.core_ui.objection_type_unknown
 
 /**
- * Display text for پیگیری وضعیت اعتراض's two code-driven enums.
- *
- * Purely code-driven — the service sends a status/type *code*, not a label — so, like
- * `PaymentSheetStatus.labelRes` in `PaymentSheetsScreen.kt`, the text lives in the UI layer rather
- * than the PR. Plain strings here rather than `stringResource` because both the list card and the
- * summary header (list, sms, document packages) need them outside any one screen's composable.
+ * String resource for پیگیری وضعیت اعتراض's two code-driven enums — the service sends a
+ * status/type *code*, not a label, so the text lives in the UI layer rather than the PR, matching
+ * `PaymentSheetStatus.labelRes` in `PaymentSheetsScreen.kt`.
  */
-internal fun WorkShopObjectionStatus.label(): String = when (this) {
-    WorkShopObjectionStatus.SUBMITTED -> "ثبت درخواست"
-    WorkShopObjectionStatus.CALCULATION_REVIEW -> "بازنگری محاسبات"
-    WorkShopObjectionStatus.BOARD_REVIEW -> "طرح در هیئت"
-    WorkShopObjectionStatus.RECALCULATED -> "تجدید محاسبه شده"
-    WorkShopObjectionStatus.TIME_ALLOCATED -> "تخصیص زمان"
-    WorkShopObjectionStatus.APPROVED -> "تایید رای"
-    WorkShopObjectionStatus.UNKNOWN -> "نامشخص"
-}
+internal val WorkShopObjectionStatus.labelRes: StringResource
+    get() = when (this) {
+        WorkShopObjectionStatus.SUBMITTED -> Res.string.objection_state_submitted
+        WorkShopObjectionStatus.CALCULATION_REVIEW -> Res.string.objection_state_calculation_review
+        WorkShopObjectionStatus.BOARD_REVIEW -> Res.string.objection_state_board_review
+        WorkShopObjectionStatus.RECALCULATED -> Res.string.objection_state_recalculated
+        WorkShopObjectionStatus.TIME_ALLOCATED -> Res.string.objection_state_time_allocated
+        WorkShopObjectionStatus.APPROVED -> Res.string.objection_state_approved
+        WorkShopObjectionStatus.UNKNOWN -> Res.string.objection_state_unknown
+    }
 
-internal fun WorkShopObjectionType.label(): String = when (this) {
-    WorkShopObjectionType.ESTIMATE -> "اعتراض به بدهی برآوردی"
-    WorkShopObjectionType.PRIMARY_VOTE -> "اعتراض به رای هیئت بدوی"
-    WorkShopObjectionType.ARTICLE_SIXTEEN -> "درخواست رسیدگی به بدهی قطعی (مادهٔ ۱۶)"
-    WorkShopObjectionType.UNKNOWN -> "نوع نامشخص"
-}
+internal val WorkShopObjectionType.labelRes: StringResource
+    get() = when (this) {
+        WorkShopObjectionType.ESTIMATE -> Res.string.objection_type_estimate
+        WorkShopObjectionType.PRIMARY_VOTE -> Res.string.objection_type_primary_vote
+        WorkShopObjectionType.ARTICLE_SIXTEEN -> Res.string.objection_type_article_sixteen
+        WorkShopObjectionType.UNKNOWN -> Res.string.objection_type_unknown
+    }

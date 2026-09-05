@@ -44,7 +44,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.feature.workshops.ui.objectionStatus.components.label
+import com.tamin.taminhamrah.feature.workshops.ui.objectionStatus.components.labelRes
 import com.tamin.taminhamrah.feature.workshops.ui.components.DashedEmptyStateCard
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopListScaffold
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopTextField
@@ -192,7 +192,7 @@ fun ObjectionStatusContent(
                     }
                 }
             },
-        ) { objection ->
+        ) { _, objection ->
             ObjectionRow(
                 objection = objection,
                 onOpenSms = onOpenSms,
@@ -533,14 +533,14 @@ private fun ObjectionRow(
             verticalAlignment = Alignment.Top,
         ) {
             Text(
-                text = objection.objectionType.label(),
+                text = stringResource(objection.objectionType.labelRes),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
                 color = colors.textPrimary,
                 modifier = Modifier.weight(1f),
             )
             StatusPill(
-                text = objection.status.label(),
+                text = stringResource(objection.status.labelRes),
                 containerColor = pillBackground,
                 contentColor = pillForeground,
                 fontWeight = FontWeight.ExtraBold,
@@ -595,7 +595,7 @@ private fun ObjectionRow(
                 )
                 DetailRow(
                     label = stringResource(Res.string.objection_status_field_type),
-                    value = objection.objectionType.label(),
+                    value = stringResource(objection.objectionType.labelRes),
                     numeric = false,
                 )
             }

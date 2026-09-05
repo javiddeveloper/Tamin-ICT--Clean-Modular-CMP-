@@ -53,8 +53,7 @@ fun <T> WorkshopListScaffold(
     emptyContent: (@Composable () -> Unit)? = null,
     key: ((T) -> Any)? = null,
     header: (@Composable () -> Unit)? = null,
-    indexedRow: (@Composable (index: Int, item: T) -> Unit)? = null,
-    row: (@Composable (T) -> Unit)? = null,
+    row: @Composable (index: Int, item: T) -> Unit,
 ) {
     if (state.isFirstLoad) {
         WorkshopListSkeleton(
@@ -110,7 +109,7 @@ fun <T> WorkshopListScaffold(
             // caller's key meaningful while making a collision impossible, and these lists only
             // ever grow at the end, so an item's index — and therefore its identity — is stable.
             key = key?.let { keyOf -> { index, item -> "$index:${keyOf(item)}" } },
-        ) { index, item -> indexedRow?.invoke(index, item) ?: row?.invoke(item) }
+        ) { index, item -> row(index, item) }
 
         if (state.isLoadingMore) {
             item(key = WorkshopConstants.FOOTER_KEY) {

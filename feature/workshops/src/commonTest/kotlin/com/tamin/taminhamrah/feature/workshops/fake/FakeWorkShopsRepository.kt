@@ -99,6 +99,10 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         private set
     var lastObjectionSmsSeqNo: Long? = null
         private set
+    var lastDebitObjectionPdfSeqNo: Long? = null
+        private set
+    var lastArticleSixteenReportPdfSeqNo: Long? = null
+        private set
 
     override suspend fun getEmployerAgreements(
         query: WorkshopListQuery,
@@ -161,7 +165,17 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         request: DebitObjectionRequestDN,
     ): DebitObjectionResultDN = answer { objectionResult }
 
-    override suspend fun getDebitObjectionPdf(seqNo: Long): PdfDownloadDN = answer { pdf }
+    var debitObjectionPdfCallCount: Int = 0
+        private set
+    var debitObjectionPdfGate: kotlinx.coroutines.CompletableDeferred<Unit>? = null
+
+    override suspend fun getDebitObjectionPdf(seqNo: Long): PdfDownloadDN {
+        error?.let { throw it }
+        lastDebitObjectionPdfSeqNo = seqNo
+        debitObjectionPdfCallCount++
+        debitObjectionPdfGate?.await()
+        return pdf
+    }
 
     override suspend fun getRecentlyAddedMembers(
         query: WorkshopNewMemberQuery,
@@ -206,7 +220,10 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         request: ArticleSixteenSaveRequestDN,
     ): ArticleSixteenSaveResultDN = answer { articleSixteenSaveResult }
 
-    override suspend fun getArticleSixteenReportPdf(seqNo: Long): PdfDownloadDN = answer { pdf }
+    override suspend fun getArticleSixteenReportPdf(seqNo: Long): PdfDownloadDN = answer {
+        lastArticleSixteenReportPdfSeqNo = seqNo
+        pdf
+    }
 
     override suspend fun getWorkshopMembers(
         query: WorkshopMemberQuery,

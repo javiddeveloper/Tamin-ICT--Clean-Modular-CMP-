@@ -1982,6 +1982,17 @@
     <string name="objection_status_action_document_article16">گزارش کمیتهٔ رسیدگی</string>
     <string name="objection_status_action_no_document">سند در دسترس نیست</string>
     <string name="objection_status_action_sms">پیامک‌ها</string>
+    <string name="objection_state_submitted">ثبت درخواست</string>
+    <string name="objection_state_calculation_review">بازنگری محاسبات</string>
+    <string name="objection_state_board_review">طرح در هیئت</string>
+    <string name="objection_state_recalculated">تجدید محاسبه شده</string>
+    <string name="objection_state_time_allocated">تخصیص زمان</string>
+    <string name="objection_state_approved">تایید رای</string>
+    <string name="objection_state_unknown">نامشخص</string>
+    <string name="objection_type_estimate">اعتراض به بدهی برآوردی</string>
+    <string name="objection_type_primary_vote">اعتراض به رای هیئت بدوی</string>
+    <string name="objection_type_article_sixteen">درخواست رسیدگی به بدهی قطعی (مادهٔ ۱۶)</string>
+    <string name="objection_type_unknown">نوع نامشخص</string>
 
     <string name="objection_sms_title">پیامک‌ها</string>
     <string name="objection_sms_section_title">پیامک‌های ارسال‌شده</string>

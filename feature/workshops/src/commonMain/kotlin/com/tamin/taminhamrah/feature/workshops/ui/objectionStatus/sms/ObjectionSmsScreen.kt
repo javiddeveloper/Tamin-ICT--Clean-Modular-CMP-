@@ -30,7 +30,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopListScaffol
 import com.tamin.taminhamrah.feature.workshops.ui.components.colors
 import com.tamin.taminhamrah.feature.workshops.ui.components.tint
 import com.tamin.taminhamrah.feature.workshops.ui.objectionStatus.components.ObjectionSummaryHeader
-import com.tamin.taminhamrah.feature.workshops.ui.objectionStatus.components.label
+import com.tamin.taminhamrah.feature.workshops.ui.objectionStatus.components.labelRes
 import com.tamin.taminhamrah.model.workshop.SmsMessagePR
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionStatus
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionType
@@ -140,7 +140,7 @@ fun ObjectionSmsContent(
                     )
                 }
             },
-            indexedRow = { index, sms -> SmsTimelineItem(index = index + 1, sms = sms) },
+            row = { index, sms -> SmsTimelineItem(index = index + 1, sms = sms) },
         )
     }
 }
@@ -198,7 +198,7 @@ private fun SmsTimelineItem(index: Int, sms: SmsMessagePR, modifier: Modifier = 
                     .padding(horizontal = Spacing.sm, vertical = Spacing.xxs),
             ) {
                 Text(
-                    text = sms.status.label(),
+                    text = stringResource(sms.status.labelRes),
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
                     color = pillForeground,

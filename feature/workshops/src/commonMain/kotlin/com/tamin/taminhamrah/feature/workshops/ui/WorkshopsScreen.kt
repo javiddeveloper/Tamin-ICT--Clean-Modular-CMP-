@@ -187,7 +187,7 @@ fun WorkshopsScreen(
                     )
                 }
             },
-        ) { workshop ->
+        ) { _, workshop ->
             WorkshopCard(
                 workshop = workshop,
                 onOpenDetails = { onIntent(WorkshopsIntent.DetailRequested(workshop)) },

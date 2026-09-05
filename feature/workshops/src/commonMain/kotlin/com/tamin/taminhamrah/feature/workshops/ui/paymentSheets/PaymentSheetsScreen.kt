@@ -186,7 +186,7 @@ fun PaymentSheetsContent(
                     )
                 }
             },
-        ) { sheet ->
+        ) { _, sheet ->
             PaymentSheetCard(sheet = sheet)
         }
     }

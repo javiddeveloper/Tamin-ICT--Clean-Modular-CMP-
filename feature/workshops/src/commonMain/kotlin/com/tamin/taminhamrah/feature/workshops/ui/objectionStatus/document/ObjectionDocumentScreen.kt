@@ -32,7 +32,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.workshops.ui.objectionStatus.components.ObjectionSummaryHeader
-import com.tamin.taminhamrah.feature.workshops.ui.objectionStatus.components.label
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionStatus
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionType
 import com.tamin.taminhamrah.ui.PreviewRtlTheme

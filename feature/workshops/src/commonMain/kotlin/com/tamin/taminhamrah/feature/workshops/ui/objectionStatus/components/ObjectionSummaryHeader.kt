@@ -29,6 +29,9 @@ import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.Spacing
+import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.objection_status_objection_number
 
 /**
  * The card every سند اعتراض / پیامک‌ها screen shows right under its own toolbar: which objection
@@ -72,7 +75,7 @@ fun ObjectionSummaryHeader(
 
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Spacing.xxs)) {
             Text(
-                text = objectionType.label(),
+                text = stringResource(objectionType.labelRes),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
@@ -80,7 +83,7 @@ fun ObjectionSummaryHeader(
             )
             Row(horizontalArrangement = Arrangement.spacedBy(Spacing.xs), verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "شمارهٔ اعتراض",
+                    text = stringResource(Res.string.objection_status_objection_number),
                     style = MaterialTheme.typography.labelSmall,
                     color = Color.White.copy(alpha = 0.65f),
                 )
@@ -98,7 +101,7 @@ fun ObjectionSummaryHeader(
                 .padding(horizontal = Spacing.sm, vertical = Spacing.xxs),
         ) {
             Text(
-                text = status.label(),
+                text = stringResource(status.labelRes),
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
