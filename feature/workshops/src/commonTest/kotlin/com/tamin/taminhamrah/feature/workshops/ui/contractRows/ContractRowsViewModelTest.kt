@@ -161,9 +161,16 @@ class ContractRowsViewModelTest {
         }
     }
 
-    /** The branch is optional — the service accepts the workshop on its own. */
+    /**
+     * کد شعبه is required, despite reading like a filter.
+     *
+     * It is a path segment: submitting blank builds
+     * `…/get-employer-agreement-by-workshop-id-and-branch-code/6318210573/` and the live service
+     * answers **404**, which the list then renders as "no rows" rather than as a failure. Verified
+     * against the real backend on 2026-09-05; the old app refused to fetch without it too.
+     */
     @Test
-    fun `a blank branch code is accepted`() = runTest(testDispatcher) {
+    fun `a blank branch code is rejected and makes no request`() = runTest(testDispatcher) {
         repository.contractRowsWithAgreement = PagedListDN(listOf(agreementRow("1")), total = 1)
 
         val vm = viewModel()
@@ -172,9 +179,122 @@ class ContractRowsViewModelTest {
 
         vm.uiState.test {
             val state = awaitItem()
-            assertNotNull(state.applied)
-            assertEquals("", state.applied.branchCode)
+            assertNull(state.applied)
+            assertTrue(state.showBranchCodeError)
             assertFalse(state.showWorkshopIdError)
+        }
+        assertNull(repository.lastContractRowQuery)
+    }
+
+    /** Both messages appear at once when both fields are empty — neither tap is swallowed. */
+    @Test
+    fun `applying with both codes blank flags both fields`() = runTest(testDispatcher) {
+        val vm = viewModel()
+        vm.sendIntent(ContractRowsIntent.ApplyPicker)
+
+        vm.uiState.test {
+            val state = awaitItem()
+            assertTrue(state.showWorkshopIdError)
+            assertTrue(state.showBranchCodeError)
+        }
+        assertNull(repository.lastContractRowQuery)
+    }
+
+    @Test
+    fun `editing the branch code clears its error`() = runTest(testDispatcher) {
+        val vm = viewModel()
+        vm.sendIntent(ContractRowsIntent.ApplyPicker)
+        vm.sendIntent(ContractRowsIntent.DraftBranchCodeChanged("6310"))
+
+        vm.uiState.test {
+            assertFalse(awaitItem().showBranchCodeError)
+        }
+    }
+
+    /** A drill-down that arrives with half an identity must ask, not send `…/{workshopId}/`. */
+    @Test
+    fun `opening with a blank branch code raises the picker and requests nothing`() =
+        runTest(testDispatcher) {
+            val vm = viewModel()
+            vm.sendIntent(ContractRowsIntent.Open("9028212822", ""))
+
+            vm.uiState.test {
+                val state = awaitItem()
+                assertTrue(state.isPickerOpen)
+                assertNull(state.applied)
+            }
+            assertNull(repository.lastContractRowQuery)
+        }
+
+    // ------------------------------------------------------------- tab auto-fallback
+
+    /**
+     * A workshop is in exactly one category, so the screen tries the other rather than showing an
+     * empty list whose own copy tells the user to go and try it by hand.
+     */
+    @Test
+    fun `an empty first tab falls back to the other one`() = runTest(testDispatcher) {
+        repository.contractRowsWithAgreement = PagedListDN(emptyList(), total = 0)
+        repository.contractRowsWithoutAgreement = PagedListDN(listOf(leanRow("3")), total = 1)
+
+        val vm = viewModel()
+        vm.sendIntent(ContractRowsIntent.Open("9028212822", "0210"))
+
+        vm.uiState.test {
+            val state = awaitItem()
+            assertEquals(ContractRowTab.WITHOUT_AGREEMENT, state.tab)
+            assertEquals(1, state.list.items.size)
+            assertTrue(state.didAutoSwitchTab)
+        }
+    }
+
+    /** Two empty services settle on the empty state instead of ping-ponging between tabs. */
+    @Test
+    fun `both services empty settles without switching back`() = runTest(testDispatcher) {
+        repository.contractRowsWithAgreement = PagedListDN(emptyList(), total = 0)
+        repository.contractRowsWithoutAgreement = PagedListDN(emptyList(), total = 0)
+
+        val vm = viewModel()
+        vm.sendIntent(ContractRowsIntent.Open("9028212822", "0210"))
+
+        vm.uiState.test {
+            val state = awaitItem()
+            assertTrue(state.list.items.isEmpty())
+            assertTrue(state.list.isEmpty)
+        }
+    }
+
+    /** A tab the user picked is final — an empty result there is not overridden. */
+    @Test
+    fun `a deliberate tab choice does not fall back`() = runTest(testDispatcher) {
+        repository.contractRowsWithAgreement = PagedListDN(listOf(agreementRow("6")), total = 1)
+        repository.contractRowsWithoutAgreement = PagedListDN(emptyList(), total = 0)
+
+        val vm = viewModel()
+        vm.sendIntent(ContractRowsIntent.Open("9028212822", "0210"))
+        vm.sendIntent(ContractRowsIntent.TabSelected(ContractRowTab.WITHOUT_AGREEMENT))
+
+        vm.uiState.test {
+            val state = awaitItem()
+            assertEquals(ContractRowTab.WITHOUT_AGREEMENT, state.tab)
+            assertTrue(state.list.items.isEmpty())
+            assertFalse(state.didAutoSwitchTab)
+        }
+    }
+
+    /** The same workshop arrives once per agreement it holds; the picker must offer it once. */
+    @Test
+    fun `the quick pick list drops duplicate workshops`() = runTest(testDispatcher) {
+        repository.employerAgreements = PagedListDN(
+            listOf(agreementRow("1"), agreementRow("2"), agreementRow("3")),
+            total = 3,
+        )
+
+        val vm = viewModel()
+        vm.sendIntent(ContractRowsIntent.PickerOpenChanged(isOpen = true))
+
+        vm.uiState.test {
+            assertEquals(1, awaitItem().myWorkshops.size)
         }
     }
 

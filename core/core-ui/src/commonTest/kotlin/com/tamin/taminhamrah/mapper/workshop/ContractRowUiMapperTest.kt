@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.model.workshop.WorkshopContractDN
 import com.tamin.taminhamrah.model.workshop.WorkshopSummaryDN
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 /**
@@ -18,6 +19,11 @@ class ContractRowUiMapperTest {
     private val agreement = EmployerAgreementDN(
         contractRow = "6",
         startDate = "14040407",
+        // Deliberately different from startDate. The card's «تاریخ تعهد» tile reads `startdate`,
+        // matching the old app's own binding — `list_item_employer_workshop.xml` binds
+        // `label_date_of_commitment` to `item.getLocalDate(item.startdate)`, not to `letDate`.
+        // Setting both is what makes the assertion below able to tell them apart.
+        commitmentDate = "13990101",
         email = "karan.school@mail.com",
         mobile = "09143018372",
         workshop = WorkshopSummaryDN(
@@ -37,6 +43,9 @@ class ContractRowUiMapperTest {
         assertEquals("۶", row.rowLabel)
         assertEquals("۹۰۲۸۲۱۲۸۲۲", row.workshopCodeLabel)
         assertEquals("۱۴۰۴/۰۴/۰۷", row.commitmentDate)
+        // Not letDate — see the fixture comment. On the live payload the two carry the same value,
+        // so only a fixture that differs can pin the choice.
+        assertNotEquals("۱۳۹۹/۰۱/۰۱", row.commitmentDate)
         assertEquals("۰۹۱۴۳۰۱۸۳۷۲", row.mobile)
         assertEquals("karan.school@mail.com", row.email)
         assertEquals("دبستان کارن ۲", row.name)

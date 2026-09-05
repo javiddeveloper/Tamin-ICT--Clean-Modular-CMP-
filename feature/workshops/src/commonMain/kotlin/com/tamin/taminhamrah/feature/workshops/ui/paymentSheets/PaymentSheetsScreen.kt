@@ -156,6 +156,7 @@ fun PaymentSheetsContent(
         WorkshopListScaffold(
             state = state.list,
             onLoadMore = { onIntent(PaymentSheetsIntent.LoadMore) },
+            onRetry = { onIntent(PaymentSheetsIntent.Load) },
             key = { it.debitNumber + it.agreementRow },
             header = {
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {

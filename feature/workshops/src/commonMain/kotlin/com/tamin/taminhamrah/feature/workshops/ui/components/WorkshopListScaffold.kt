@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
@@ -29,7 +30,9 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.retry
 import taminx.core.core_ui.workshop_empty_list
+import taminx.core.core_ui.workshop_error_receive_data
 
 /**
  * The list every screen under کارگاه‌های کارفرما draws.
@@ -61,6 +64,11 @@ fun <T> WorkshopListScaffold(
      * differently.
      */
     empty: (@Composable () -> Unit)? = null,
+    /**
+     * Offered beside the failure message. Null — the default — states the failure without one,
+     * which is what a caller with no cheap way to re-run the request should do.
+     */
+    onRetry: (() -> Unit)? = null,
     row: @Composable (T) -> Unit,
 ) {
     // The three states share one set of insets: a header that keeps the page margins while the
@@ -71,6 +79,28 @@ fun <T> WorkshopListScaffold(
             contentPadding = contentPadding,
             header = header,
         )
+        return
+    }
+
+    // Before the empty branch, because a failed list is not an empty one. Without this the list
+    // fell through to the LazyColumn with nothing in it and drew a blank page — a 404 and a
+    // workshop with no rows looked identical.
+    if (state.isFailed) {
+        Column(
+            modifier = modifier.fillMaxSize().padding(contentPadding),
+            verticalArrangement = Arrangement.spacedBy(Spacing.md),
+        ) {
+            header?.invoke()
+            EmptyStateMessage(
+                icon = Icons.Outlined.Warning,
+                // The service's own words when it gave any, the generic line when it did not.
+                title = state.error?.takeIf { it.isNotBlank() }
+                    ?: stringResource(Res.string.workshop_error_receive_data),
+                actionLabel = onRetry?.let { stringResource(Res.string.retry) },
+                onAction = onRetry,
+                showIconTile = true,
+            )
+        }
         return
     }
 

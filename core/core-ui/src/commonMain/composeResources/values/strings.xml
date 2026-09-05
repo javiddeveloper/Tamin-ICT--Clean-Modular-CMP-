@@ -1989,7 +1989,9 @@
     <string name="contract_rows_empty_none_body">برای این کارگاه در این دسته ردیف پیمانی ثبت نشده است. دستهٔ دیگر یا کد کارگاه دیگری را بررسی کنید.</string>
     <string name="contract_rows_pick_workshop">انتخاب کارگاه</string>
     <string name="contract_rows_pick_workshop_hint">ردیف پیمان‌ها بر اساس کارگاه و شعبه نمایش داده می‌شود.</string>
-    <string name="contract_rows_branch_code_optional">کد شعبه (اختیاری)</string>
+    <string name="workshop_action_missing_identity">کد کارگاه یا کد شعبهٔ این کارگاه کامل نیست.</string>
+    <string name="contract_rows_tab_switched">این کارگاه در دستهٔ دیگری ثبت شده است.</string>
+    <string name="contract_rows_branch_code_required_hint">لطفاً کد شعبه را وارد کنید.</string>
     <string name="contract_rows_four_digits">۴ رقم</string>
     <string name="contract_rows_workshop_code_required">لطفاً کد کارگاه را وارد کنید.</string>
     <string name="contract_rows_my_workshops">کارگاه‌های شما</string>

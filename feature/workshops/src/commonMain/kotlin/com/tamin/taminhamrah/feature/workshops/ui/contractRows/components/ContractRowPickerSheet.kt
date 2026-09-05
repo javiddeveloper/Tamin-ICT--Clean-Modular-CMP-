@@ -3,6 +3,8 @@ package com.tamin.taminhamrah.feature.workshops.ui.contractRows.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,7 +45,7 @@ import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.contract_rows_apply
-import taminx.core.core_ui.contract_rows_branch_code_optional
+import taminx.core.core_ui.contract_rows_branch_code_required_hint
 import taminx.core.core_ui.contract_rows_four_digits
 import taminx.core.core_ui.contract_rows_my_workshops
 import taminx.core.core_ui.contract_rows_pick_workshop
@@ -51,6 +53,7 @@ import taminx.core.core_ui.contract_rows_pick_workshop_hint
 import taminx.core.core_ui.contract_rows_reset
 import taminx.core.core_ui.contract_rows_workshop_code_required
 import taminx.core.core_ui.workshop_code
+import taminx.core.core_ui.workshop_branch_code
 import taminx.core.core_ui.workshop_ten_digits
 
 /**
@@ -70,6 +73,8 @@ fun ContractRowPickerSheet(
     workshopId: String,
     branchCode: String,
     showWorkshopIdError: Boolean,
+    showBranchCodeError: Boolean,
+    isApplying: Boolean,
     myWorkshops: ImmutableList<WorkshopPR>,
     canReset: Boolean,
     onWorkshopIdChange: (String) -> Unit,
@@ -89,6 +94,8 @@ fun ContractRowPickerSheet(
             workshopId = workshopId,
             branchCode = branchCode,
             showWorkshopIdError = showWorkshopIdError,
+            showBranchCodeError = showBranchCodeError,
+            isApplying = isApplying,
             myWorkshops = myWorkshops,
             canReset = canReset,
             onWorkshopIdChange = onWorkshopIdChange,
@@ -111,6 +118,8 @@ fun ContractRowPickerContent(
     workshopId: String,
     branchCode: String,
     showWorkshopIdError: Boolean,
+    showBranchCodeError: Boolean,
+    isApplying: Boolean,
     myWorkshops: ImmutableList<WorkshopPR>,
     canReset: Boolean,
     onWorkshopIdChange: (String) -> Unit,
@@ -124,6 +133,11 @@ fun ContractRowPickerContent(
     Column(
         modifier = modifier
             .fillMaxWidth()
+            // کارگاه‌های شما is up to a full page of workshops, and on a short screen that pushed
+            // «مشاهدهٔ ردیف پیمان‌ها» past the bottom edge with no way to reach it — the sheet had
+            // no scroll of its own. Bounded at one page, so a plain scroll is right here; a lazy
+            // list inside a sheet that already scrolls would nest two scrollers.
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = Spacing.page)
             .padding(
                 top = Spacing.smd,
@@ -178,11 +192,17 @@ fun ContractRowPickerContent(
                 modifier = Modifier.weight(WorkshopDimens.contractRowWorkshopFieldWeight),
             )
             WorkshopTextField(
-                label = stringResource(Res.string.contract_rows_branch_code_optional),
+                label = stringResource(Res.string.workshop_branch_code),
                 value = branchCode,
                 onValueChange = { onBranchCodeChange(it.digitsOnly()) },
                 placeholder = stringResource(Res.string.contract_rows_four_digits),
                 maxLength = WorkshopConstants.CONTRACT_ROW_BRANCH_CODE_LENGTH,
+                // Required, despite reading like a filter: it is a path segment, and a blank one
+                // addresses `…/{workshopId}/`, which the service answers with 404.
+                isRequired = true,
+                isValid = if (showBranchCodeError) false else null,
+                errorText = stringResource(Res.string.contract_rows_branch_code_required_hint)
+                    .takeIf { showBranchCodeError },
                 modifier = Modifier.weight(WorkshopDimens.contractRowBranchFieldWeight),
             )
         }
@@ -223,6 +243,9 @@ fun ContractRowPickerContent(
             TaminPrimaryButton(
                 text = stringResource(Res.string.contract_rows_apply),
                 onClick = onApply,
+                // The ViewModel drops an apply that arrives while a page is in flight. Disabling
+                // the button is that same guard made visible, so the tap does not read as dead.
+                enabled = !isApplying,
                 background = colors.buttonGradient,
                 height = WorkshopDimens.panelButtonHeight,
                 modifier = Modifier.weight(1f),

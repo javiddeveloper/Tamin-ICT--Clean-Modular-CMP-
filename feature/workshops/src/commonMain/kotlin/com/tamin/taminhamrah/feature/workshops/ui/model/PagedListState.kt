@@ -12,8 +12,7 @@ import kotlinx.collections.immutable.toImmutableList
  *
  * All eight of them page the same way and show the same four states, so the shape is declared once
  * and each screen's own state holds one of these plus whatever is particular to it. Being a
- * separate `@Immutable` value also means a row list changing does not invalidate the fields around
- * it — the search text, the open sheet — and vice versa.
+ * separate `@Immutable` value also means a row list changing does not invalidate the surrounding fields *  — the search text, the open sheet — and vice versa.
  */
 @Immutable
 data class PagedListState<T>(
@@ -36,6 +35,16 @@ data class PagedListState<T>(
 
     /** The service answered, and answered with nothing. */
     val isEmpty: Boolean get() = !isLoading && error == null && items.isEmpty()
+
+    /**
+     * The request failed and there is nothing to fall back on.
+     *
+     * The third state, and the one that had no branch: neither [isFirstLoad] nor [isEmpty] matches
+     * it, so the list used to render zero rows — a blank page that reads as "no results" rather
+     * than as a failure. A failure *with* rows already on screen is deliberately not this: the
+     * earlier pages stay, and only the footer stops.
+     */
+    val isFailed: Boolean get() = !isLoading && error != null && items.isEmpty()
 
     /** Which page to ask for next, derived from what the service has sent. */
     val nextPage: Int get() = receivedCount / WORKSHOP_PAGE_SIZE

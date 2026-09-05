@@ -48,6 +48,7 @@ import taminx.core.core_ui.contract_rows_filter_workshop
 import taminx.core.core_ui.contract_rows_filter_workshop_and_branch
 import taminx.core.core_ui.contract_rows_pick_workshop
 import taminx.core.core_ui.contract_rows_subtitle
+import taminx.core.core_ui.contract_rows_tab_switched
 import taminx.core.core_ui.contract_rows_title
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_search
@@ -156,6 +157,10 @@ fun ContractRowsContent(
                             Res.string.contract_rows_count,
                             list.items.size.toString().toPersianDigits(),
                         ),
+                        // Only after the screen moved the user itself; a tab they chose needs no
+                        // explanation.
+                        notice = stringResource(Res.string.contract_rows_tab_switched)
+                            .takeIf { state.didAutoSwitchTab },
                         onChange = {
                             onIntent(ContractRowsIntent.PickerOpenChanged(isOpen = true))
                         },
@@ -167,6 +172,7 @@ fun ContractRowsContent(
         WorkshopListScaffold(
             state = list,
             onLoadMore = { onIntent(ContractRowsIntent.LoadMore) },
+            onRetry = { onIntent(ContractRowsIntent.Retry) },
             // Neither service guarantees a unique field: one workshop holds several rows, and the
             // row number repeats across workshops. The scaffold prefixes the index, which is what
             // makes this safe as an identity rather than merely as a hint.
@@ -207,6 +213,8 @@ fun ContractRowsContent(
             workshopId = state.draftWorkshopId,
             branchCode = state.draftBranchCode,
             showWorkshopIdError = state.showWorkshopIdError,
+            showBranchCodeError = state.showBranchCodeError,
+            isApplying = list.isLoading,
             myWorkshops = state.myWorkshops,
             canReset = applied != null,
             onWorkshopIdChange = { onIntent(ContractRowsIntent.DraftWorkshopIdChanged(it)) },

@@ -108,6 +108,8 @@ fun ContractRowFilterBar(
     countText: String,
     onChange: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Why the visible tab is not the one that was asked for. Null when the user chose it. */
+    notice: String? = null,
 ) {
     val colors = LocalTaminColors.current
     Column(
@@ -151,6 +153,16 @@ fun ContractRowFilterBar(
                         horizontal = WorkshopDimens.chipHorizontalPadding,
                         vertical = WorkshopDimens.chipVerticalPadding,
                     ),
+            )
+        }
+
+        if (notice != null) {
+            Text(
+                text = notice,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                color = colors.blueText,
+                modifier = Modifier.fillMaxWidth(),
             )
         }
 

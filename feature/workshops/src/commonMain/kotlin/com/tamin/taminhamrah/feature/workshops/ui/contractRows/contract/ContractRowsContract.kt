@@ -17,7 +17,7 @@ import taminx.core.core_ui.contract_rows_tab_without_agreement_hint
  * Which of the two ردیف پیمان services the list is reading.
  *
  * Declaration order is the order the tabs sit in. Label, hint and the endpoint behind them are
- * columns of this one table, so a tab cannot end up labelled for one service while fetching the
+ * columns of this one table, so a tab cannot end up labeled for one service while fetching the
  * other — which is exactly what the two near-duplicate screens in the old app allowed.
  */
 enum class ContractRowTab(val label: StringResource, val hint: StringResource) {
@@ -60,12 +60,26 @@ data class ContractRowsUiState(
     val applied: ContractRowFilter? = null,
     val isPickerOpen: Boolean = false,
     /**
-     * Whether کد کارگاه has been submitted blank.
+     * Whether each code has been submitted blank.
      *
-     * A flag rather than a message: resolving a `StringResource` inside the ViewModel is unreliable
-     * under the unit-test runtime, so the UI turns this into the copy at the field it names.
+     * Flags rather than messages: resolving a `StringResource` inside the ViewModel is unreliable
+     * under the unit-test runtime, so the UI turns each into the copy at the field it names.
+     *
+     * Both codes are required. کد شعبه looks optional — the service accepts an agreement list
+     * without it elsewhere — but on *these two* endpoints it is a path segment: submitting blank
+     * produced `…/get-employer-agreement-by-workshop-id-and-branch-code/6318210573/` and the
+     * service answered **404**, verified against the live backend.
      */
     val showWorkshopIdError: Boolean = false,
+    val showBranchCodeError: Boolean = false,
+    /**
+     * Set when the list was moved to the other tab because the chosen one held nothing.
+     *
+     * A workshop is in exactly one of the two categories, so making the user discover that by
+     * hand — which is what the empty state's «دستهٔ دیگر … را بررسی کنید» asks — is work the screen
+     * can do itself. Cleared as soon as the user picks a tab deliberately.
+     */
+    val didAutoSwitchTab: Boolean = false,
     /** کارگاه‌های شما — the quick-pick rows, fetched the first time the sheet opens. */
     val myWorkshops: ImmutableList<WorkshopPR> = persistentListOf(),
 ) {
@@ -84,6 +98,8 @@ data class ContractRowsUiState(
         data object Cleared : PartialState
         data class PickerOpenChanged(val isOpen: Boolean) : PartialState
         data class WorkshopIdErrorChanged(val isVisible: Boolean) : PartialState
+        data class BranchCodeErrorChanged(val isVisible: Boolean) : PartialState
+        data class AutoSwitchedTab(val tab: ContractRowTab) : PartialState
         data class MyWorkshopsLoaded(val workshops: ImmutableList<WorkshopPR>) : PartialState
     }
 }
@@ -99,6 +115,9 @@ sealed interface ContractRowsIntent {
 
     data class TabSelected(val tab: ContractRowTab) : ContractRowsIntent
     data object LoadMore : ContractRowsIntent
+
+    /** Re-runs the applied filter after a failure, without reopening the picker. */
+    data object Retry : ContractRowsIntent
     data class PickerOpenChanged(val isOpen: Boolean) : ContractRowsIntent
     data class DraftWorkshopIdChanged(val value: String) : ContractRowsIntent
     data class DraftBranchCodeChanged(val value: String) : ContractRowsIntent

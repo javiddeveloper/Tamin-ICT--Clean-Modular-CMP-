@@ -41,6 +41,8 @@ class ContractRowsViewModel(
         is ContractRowsIntent.Open -> open(intent)
         is ContractRowsIntent.TabSelected -> selectTab(intent.tab)
         ContractRowsIntent.LoadMore -> loadMore()
+        // The same first-page load the filter originally triggered, fallback included.
+        ContractRowsIntent.Retry -> loadPage(page = 0, allowFallback = true)
         is ContractRowsIntent.PickerOpenChanged -> setPickerOpen(intent.isOpen)
         is ContractRowsIntent.DraftWorkshopIdChanged -> flow {
             emit(PartialState.DraftChanged(workshopId = intent.value))
@@ -48,8 +50,10 @@ class ContractRowsViewModel(
             emit(PartialState.WorkshopIdErrorChanged(isVisible = false))
         }
 
-        is ContractRowsIntent.DraftBranchCodeChanged ->
-            flow { emit(PartialState.DraftChanged(branchCode = intent.value)) }
+        is ContractRowsIntent.DraftBranchCodeChanged -> flow {
+            emit(PartialState.DraftChanged(branchCode = intent.value))
+            emit(PartialState.BranchCodeErrorChanged(isVisible = false))
+        }
 
         is ContractRowsIntent.QuickPicked -> flow {
             emit(
@@ -59,6 +63,7 @@ class ContractRowsViewModel(
                 )
             )
             emit(PartialState.WorkshopIdErrorChanged(isVisible = false))
+            emit(PartialState.BranchCodeErrorChanged(isVisible = false))
         }
 
         ContractRowsIntent.ApplyPicker -> applyPicker()
@@ -75,7 +80,10 @@ class ContractRowsViewModel(
      */
     private fun open(intent: ContractRowsIntent.Open): Flow<PartialState> = flow {
         val state = uiState.value
-        if (intent.workshopId.isBlank()) {
+        // Either half missing is the same situation as arriving from the grid: there is no route
+        // to request. A drill-down from a workshop that lost one of its codes lands here too, and
+        // must ask rather than send `…/{workshopId}/` and take the 404.
+        if (intent.workshopId.isBlank() || intent.branchCode.isBlank()) {
             // Through the same path the search button takes, not a bare open: that is what also
             // fetches کارگاه‌های شما, and raising the sheet without it leaves the grid entry with
             // two empty fields and no shortcut.
@@ -87,7 +95,7 @@ class ContractRowsViewModel(
 
         emit(PartialState.DraftChanged(intent.workshopId, intent.branchCode))
         emit(PartialState.Applied(filter))
-        emitAll(loadPage(page = 0, filter = filter))
+        emitAll(loadPage(page = 0, filter = filter, allowFallback = true))
     }
 
     /**
@@ -100,13 +108,31 @@ class ContractRowsViewModel(
         if (state.tab == tab) return@flow
         emit(PartialState.TabChanged(tab))
         val filter = state.applied ?: return@flow
-        emitAll(loadPage(page = 0, filter = filter, tab = tab))
+        // A deliberate switch is final — no falling back out of the tab the user just chose.
+        emitAll(loadPage(page = 0, filter = filter, tab = tab, allowFallback = false))
     }
 
+    /** The service that is *not* the one given. A workshop is in exactly one of the two. */
+    private fun ContractRowTab.other(): ContractRowTab = when (this) {
+        ContractRowTab.WITH_AGREEMENT -> ContractRowTab.WITHOUT_AGREEMENT
+        ContractRowTab.WITHOUT_AGREEMENT -> ContractRowTab.WITH_AGREEMENT
+    }
+
+    /**
+     * One page of whichever service [tab] names.
+     *
+     * [allowFallback] covers the guess the screen would otherwise push onto the user: a workshop
+     * either has a تعهدنامه or it does not, so one of the two tabs is always empty, and the design's
+     * own empty state tells the user to go and try the other one. When a *first* page arrives empty
+     * and the tab was not chosen by hand, the other service is read instead and the tab follows.
+     * Only ever once per filter — the fallback load passes `false`, so two empty services settle on
+     * the empty state rather than ping-ponging.
+     */
     private fun loadPage(
         page: Int,
         filter: ContractRowFilter? = uiState.value.applied,
         tab: ContractRowTab = uiState.value.tab,
+        allowFallback: Boolean = false,
     ): Flow<PartialState> = flow {
         if (filter == null) return@flow
         emit(if (page == 0) PartialState.Loading else PartialState.LoadingMore)
@@ -127,6 +153,11 @@ class ContractRowsViewModel(
                 uiState.value.list.loaded(getWithoutAgreement(query), isFirstPage = page == 0) {
                     it.toContractRow()
                 }
+        }
+        if (allowFallback && page == 0 && list.items.isEmpty()) {
+            emitAll(loadPage(page = 0, filter = filter, tab = tab.other(), allowFallback = false))
+            emit(PartialState.AutoSwitchedTab(tab.other()))
+            return@flow
         }
         emit(PartialState.Loaded(list))
     }.catch { emit(PartialState.Error(it.toSingleLineMessage())) }
@@ -150,12 +181,21 @@ class ContractRowsViewModel(
             emit(PartialState.DraftChanged(it.workshopId, it.branchCode))
         }
         emit(PartialState.WorkshopIdErrorChanged(isVisible = false))
+        emit(PartialState.BranchCodeErrorChanged(isVisible = false))
         if (state.myWorkshops.isNotEmpty()) return@flow
 
         val workshops = getMyWorkshops(WorkshopListQuery(page = 0))
         emit(
             PartialState.MyWorkshopsLoaded(
-                workshops.items.map { it.toPresentation() }.toImmutableList()
+                workshops.items
+                    .map { it.toPresentation() }
+                    // One workshop reaches this list once per agreement it holds, so the same
+                    // کارگاه arrives two or three times — seen on device, where «دبستان غیر دولتي
+                    // کارن» was offered twice. The paged list this comes from dedupes rows for the
+                    // same reason; here the rows are mapped straight through, so it is done here.
+                    // Keyed on the identity the pick actually uses, not on the whole card.
+                    .distinctBy { it.workshopId to it.branchCode }
+                    .toImmutableList()
             )
         )
     }.catch {
@@ -174,17 +214,20 @@ class ContractRowsViewModel(
         val state = uiState.value
         if (state.list.isLoading) return@flow
 
+        // Both codes are required, because both are path segments. A blank کد شعبه does not widen
+        // the search — it addresses `…/{workshopId}/`, which the live service answers with 404, and
+        // the list then renders empty rather than as an error. The old app refused to fetch until
+        // both were present, on both of its equivalent screens.
         val workshopId = state.draftWorkshopId.trim()
-        if (workshopId.isBlank()) {
-            emit(PartialState.WorkshopIdErrorChanged(isVisible = true))
-            return@flow
-        }
+        val branchCode = state.draftBranchCode.trim()
+        emit(PartialState.WorkshopIdErrorChanged(isVisible = workshopId.isBlank()))
+        emit(PartialState.BranchCodeErrorChanged(isVisible = branchCode.isBlank()))
+        if (workshopId.isBlank() || branchCode.isBlank()) return@flow
 
-        val filter = ContractRowFilter(workshopId, state.draftBranchCode.trim())
-        emit(PartialState.WorkshopIdErrorChanged(isVisible = false))
+        val filter = ContractRowFilter(workshopId, branchCode)
         emit(PartialState.Applied(filter))
         emit(PartialState.PickerOpenChanged(isOpen = false))
-        emitAll(loadPage(page = 0, filter = filter))
+        emitAll(loadPage(page = 0, filter = filter, allowFallback = true))
     }
 
     /** «حذف» drops the filter and the rows with it — the list has no meaning without a workshop. */
@@ -199,6 +242,7 @@ class ContractRowsViewModel(
     ): ContractRowsUiState = when (partialState) {
         is PartialState.TabChanged -> currentState.copy(
             tab = partialState.tab,
+            didAutoSwitchTab = false,
             // The other service's rows are not this tab's rows; keeping them would show the
             // previous tab's list under the new tab's heading until the request lands.
             list = PagedListState(),
@@ -215,9 +259,11 @@ class ContractRowsViewModel(
             draftBranchCode = partialState.branchCode ?: currentState.draftBranchCode,
         )
 
-        is PartialState.Applied -> currentState.copy(applied = partialState.filter)
+        is PartialState.Applied ->
+            currentState.copy(applied = partialState.filter, didAutoSwitchTab = false)
         PartialState.Cleared -> currentState.copy(
             applied = null,
+            didAutoSwitchTab = false,
             draftWorkshopId = "",
             draftBranchCode = "",
             list = PagedListState(),
@@ -226,6 +272,14 @@ class ContractRowsViewModel(
         is PartialState.PickerOpenChanged -> currentState.copy(isPickerOpen = partialState.isOpen)
         is PartialState.WorkshopIdErrorChanged ->
             currentState.copy(showWorkshopIdError = partialState.isVisible)
+
+        is PartialState.BranchCodeErrorChanged ->
+            currentState.copy(showBranchCodeError = partialState.isVisible)
+
+        // The rows for the new tab are already in state — the fallback load emitted them before
+        // this — so only the tab and its notice move.
+        is PartialState.AutoSwitchedTab ->
+            currentState.copy(tab = partialState.tab, didAutoSwitchTab = true)
 
         is PartialState.MyWorkshopsLoaded ->
             currentState.copy(myWorkshops = partialState.workshops)
