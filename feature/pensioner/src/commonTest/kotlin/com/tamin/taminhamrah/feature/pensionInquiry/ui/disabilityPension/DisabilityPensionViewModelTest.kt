@@ -13,6 +13,22 @@ import com.tamin.taminhamrah.model.addDependent.GeneralResultDN
 import com.tamin.taminhamrah.model.addDependent.RegistryDataDN
 import com.tamin.taminhamrah.model.addDependent.RequestAddDependentDN
 import com.tamin.taminhamrah.model.addDependent.UploadImageDN
+import com.tamin.taminhamrah.model.contracts.BranchDN as ContractsBranchDN
+import com.tamin.taminhamrah.model.contracts.ContractDN
+import com.tamin.taminhamrah.model.contracts.FreeJobDN
+import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
+import com.tamin.taminhamrah.model.contracts.FreelanceContractByGuardianParams
+import com.tamin.taminhamrah.model.contracts.FreelanceContractResultDN
+import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractParams
+import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDN
+import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
+import com.tamin.taminhamrah.model.contracts.InsurancePaymentDN
+import com.tamin.taminhamrah.model.contracts.InsurancePaymentParamsDN
+import com.tamin.taminhamrah.model.contracts.OptionalContractByGuardianParams
+import com.tamin.taminhamrah.model.contracts.PremiumRateDN
+import com.tamin.taminhamrah.model.contracts.RegistrationInfoDN
+import com.tamin.taminhamrah.model.contracts.SaveContactRequestDN
+import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
 import com.tamin.taminhamrah.model.pension.EdictPensionerDN
 import com.tamin.taminhamrah.model.pension.EdictPensionerInboxDN
 import com.tamin.taminhamrah.model.pension.InquirePensionCertificateDN
@@ -57,9 +73,11 @@ import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.HistoryRepository
 import com.tamin.taminhamrah.repository.addDependent.AddDependentRepository
+import com.tamin.taminhamrah.repository.contracts.ContractsRepository
 import com.tamin.taminhamrah.repository.pension.PensionRepository
 import com.tamin.taminhamrah.repository.personal.PersonalRepository
 import com.tamin.taminhamrah.useCases.addDependent.RefreshDependentsUseCase
+import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
 import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
 import com.tamin.taminhamrah.useCases.pension.GetDisabilityPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.GetMedicalCommissionPdfUseCase
@@ -92,6 +110,7 @@ class DisabilityPensionViewModelTest {
     private lateinit var personalRepository: FakeDisabilityPersonalRepository
     private lateinit var addDependentRepository: FakeDisabilityAddDependentRepository
     private lateinit var historyRepository: FakeDisabilityHistoryRepository
+    private lateinit var contractsRepository: FakeDisabilityContractsRepository
     private lateinit var viewModel: DisabilityPensionViewModel
 
     @BeforeTest
@@ -101,6 +120,7 @@ class DisabilityPensionViewModelTest {
         personalRepository = FakeDisabilityPersonalRepository()
         addDependentRepository = FakeDisabilityAddDependentRepository()
         historyRepository = FakeDisabilityHistoryRepository()
+        contractsRepository = FakeDisabilityContractsRepository()
     }
 
     @AfterTest
@@ -116,6 +136,7 @@ class DisabilityPensionViewModelTest {
         getTalfighInfosUseCase = GetTalfighInfosUseCase(historyRepository),
         getRegisteredMedicalCommissionUseCase = GetRegisteredMedicalCommissionUseCase(pensionRepository),
         getMedicalCommissionPdfUseCase = GetMedicalCommissionPdfUseCase(pensionRepository),
+        uploadImageUseCase = UploadImageUseCase(contractsRepository),
     )
 
     @Test
@@ -503,5 +524,57 @@ private class FakeDisabilityHistoryRepository : HistoryRepository {
     override suspend fun sendToInstitution(selectedTypes: Set<HistoryCertificateType>): Unit =
         error("not used in DisabilityPensionViewModel")
     override suspend fun getHistoryJobInfos(filters: List<ApiFilterDN>): Flow<HistoryJobInfoDN> =
+        error("not used in DisabilityPensionViewModel")
+}
+
+/**
+ * Only [uploadImage] is exercised by [com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase]
+ * — the rest of [ContractsRepository] is unrelated to disability pension and stubbed to satisfy the interface.
+ */
+private class FakeDisabilityContractsRepository : ContractsRepository {
+    var uploadImageResult: String = "uploaded-guid"
+    var shouldThrowOnUpload = false
+    var uploadError: Throwable = RuntimeException("upload failed")
+
+    override fun uploadImage(request: UploadImageRequestDN): Flow<String> = flow {
+        if (shouldThrowOnUpload) throw uploadError
+        emit(uploadImageResult)
+    }
+
+    override fun getContracts(query: ApiQueryParamDN?): Flow<List<ContractDN>> =
+        error("not used in DisabilityPensionViewModel")
+    override fun getContractsByPremiumType(premiumTypeCode: String): Flow<List<ContractDN>> =
+        error("not used in DisabilityPensionViewModel")
+    override fun getStudentInsuranceContracts(): Flow<List<ContractDN>> =
+        error("not used in DisabilityPensionViewModel")
+    override fun getRegistrationInfo(): Flow<RegistrationInfoDN> =
+        error("not used in DisabilityPensionViewModel")
+    override fun getBranches(cityCode: String): Flow<List<ContractsBranchDN>> =
+        error("not used in DisabilityPensionViewModel")
+    override fun getSpcPremiumRates(): Flow<List<PremiumRateDN>> =
+        error("not used in DisabilityPensionViewModel")
+    override fun getFreeJobWages(): Flow<List<FreeJobDN>> =
+        error("not used in DisabilityPensionViewModel")
+    override fun getFreelancePremiumRange(params: FreelancePremiumRangeParams): Flow<FreelancePremiumRangeDN> =
+        error("not used in DisabilityPensionViewModel")
+    override fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Flow<Long> =
+        error("not used in DisabilityPensionViewModel")
+    override fun calculateOptionalSalary(premiumRateCode: String): Flow<Long> =
+        error("not used in DisabilityPensionViewModel")
+    override fun makeFreelanceContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN> =
+        error("not used in DisabilityPensionViewModel")
+    override fun makeContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN> =
+        error("not used in DisabilityPensionViewModel")
+    override fun makeFreelanceContractByGuardian(
+        params: FreelanceContractByGuardianParams,
+    ): Flow<FreelanceContractResultDN> = error("not used in DisabilityPensionViewModel")
+    override fun makeOptionalContractByGuardian(
+        params: OptionalContractByGuardianParams,
+    ): Flow<FreelanceContractResultDN> = error("not used in DisabilityPensionViewModel")
+    override fun getInsurancePayment(params: InsurancePaymentParamsDN): Flow<InsurancePaymentDN> =
+        error("not used in DisabilityPensionViewModel")
+    override fun checkInsurancePaymentStatus(systemType: String): Flow<Any?> =
+        error("not used in DisabilityPensionViewModel")
+    override fun saveContact(request: SaveContactRequestDN): Flow<Any?> =
         error("not used in DisabilityPensionViewModel")
 }

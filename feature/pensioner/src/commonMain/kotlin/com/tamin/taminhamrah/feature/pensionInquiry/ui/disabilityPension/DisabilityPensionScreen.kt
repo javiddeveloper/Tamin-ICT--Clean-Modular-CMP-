@@ -24,6 +24,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -33,11 +34,15 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.components.DisabilityPensionCommissionRecordStep
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.components.DisabilityPensionDependentsStep
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.components.DisabilityPensionDocumentsStep
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.components.DisabilityPensionIdentityContactStep
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.components.DisabilityPensionRegisteredRequestsSheet
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.components.DisabilityPensionRulesDialog
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.components.DisabilityPensionTermsStep
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.components.DisabilityPensionWorkshopStep
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityDocumentChecklist
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityDocumentImageSource
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityDocumentState
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionEvent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionIntent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionStep
@@ -55,11 +60,20 @@ import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.buttons.SquareIconButton
+import com.tamin.taminhamrah.ui.components.document.TaminDocumentSourceSheet
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.util.CameraPermission
+import com.tamin.taminhamrah.util.rememberCameraPermission
+import io.github.vinceglb.filekit.PlatformFile
+import io.github.vinceglb.filekit.dialogs.FileKitType
+import io.github.vinceglb.filekit.dialogs.compose.rememberCameraPickerLauncher
+import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -69,6 +83,8 @@ import taminx.core.core_ui.action_confirm
 import taminx.core.core_ui.back_content_description
 import taminx.core.core_ui.close_content_description
 import taminx.core.core_ui.disability_pension_commission_pdf_title
+import taminx.core.core_ui.disability_pension_documents_confirm_message
+import taminx.core.core_ui.disability_pension_documents_confirm_title
 import taminx.core.core_ui.disability_pension_next_step
 import taminx.core.core_ui.disability_pension_refresh_confirm_message
 import taminx.core.core_ui.disability_pension_refresh_confirm_title
@@ -76,6 +92,8 @@ import taminx.core.core_ui.disability_pension_step_commission_record_subtitle
 import taminx.core.core_ui.disability_pension_step_commission_record_title
 import taminx.core.core_ui.disability_pension_step_dependents_subtitle
 import taminx.core.core_ui.disability_pension_step_dependents_title
+import taminx.core.core_ui.disability_pension_step_documents_subtitle
+import taminx.core.core_ui.disability_pension_step_documents_title
 import taminx.core.core_ui.disability_pension_step_identity_subtitle
 import taminx.core.core_ui.disability_pension_step_identity_title
 import taminx.core.core_ui.disability_pension_step_subtitle
@@ -86,6 +104,7 @@ import taminx.core.core_ui.disability_pension_title
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.ic_tamin_cross
+import taminx.core.core_ui.orotez_protez_document_camera_permission_error
 
 private const val DISABILITY_PENSION_TOTAL_STEPS = 7
 
@@ -99,6 +118,24 @@ fun DisabilityPensionScreen(
     val toaster = LocalToaster.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var refreshDependentsOnResume by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    var pendingDocumentId by remember { mutableStateOf<String?>(null) }
+    val cameraPermission = rememberCameraPermission()
+    val cameraPermissionDeniedMessage = stringResource(Res.string.orotez_protez_document_camera_permission_error)
+    val galleryLauncher = rememberFilePickerLauncher(type = FileKitType.Image) { file: PlatformFile? ->
+        val documentId = pendingDocumentId
+        pendingDocumentId = null
+        if (documentId != null && file != null) {
+            viewModel.sendIntent(DisabilityPensionIntent.DocumentImagePicked(documentId, file))
+        }
+    }
+    val cameraLauncher = rememberCameraPickerLauncher { file: PlatformFile? ->
+        val documentId = pendingDocumentId
+        pendingDocumentId = null
+        if (documentId != null && file != null) {
+            viewModel.sendIntent(DisabilityPensionIntent.DocumentImagePicked(documentId, file))
+        }
+    }
 
     DisposableEffect(lifecycleOwner, state.currentStep, refreshDependentsOnResume) {
         val observer = LifecycleEventObserver { _, event ->
@@ -119,11 +156,23 @@ fun DisabilityPensionScreen(
 
     HandleDisabilityPensionEvents(
         events = viewModel.events,
+        cameraPermission = cameraPermission,
+        cameraPermissionDeniedMessage = cameraPermissionDeniedMessage,
+        scope = scope,
         onShowToast = { toaster.error(it) },
         onNavigateToAddDependent = {
             refreshDependentsOnResume = true
             onNavigateToAddDependent()
         },
+        onLaunchGallery = { documentId ->
+            pendingDocumentId = documentId
+            galleryLauncher.launch()
+        },
+        onLaunchCamera = { documentId ->
+            pendingDocumentId = documentId
+            cameraLauncher.launch()
+        },
+        onIntent = viewModel::sendIntent,
     )
 
     DisabilityPensionContent(
@@ -184,18 +233,87 @@ fun DisabilityPensionScreen(
             title = stringResource(Res.string.disability_pension_commission_pdf_title),
         )
     }
+
+    if (state.showDocumentSourceSheet) {
+        val activeDocumentId = state.activeDocumentId
+        val activeDocument = DisabilityDocumentChecklist.find { it.id == activeDocumentId }
+        if (activeDocumentId != null && activeDocument != null) {
+            TaminDocumentSourceSheet(
+                title = stringResource(activeDocument.titleRes),
+                showRemoveOption = state.documents[activeDocumentId] is DisabilityDocumentState.Uploaded,
+                onSelectCamera = {
+                    viewModel.sendIntent(
+                        DisabilityPensionIntent.DocumentSourceSelected(activeDocumentId, DisabilityDocumentImageSource.CAMERA),
+                    )
+                },
+                onSelectGallery = {
+                    viewModel.sendIntent(
+                        DisabilityPensionIntent.DocumentSourceSelected(activeDocumentId, DisabilityDocumentImageSource.GALLERY),
+                    )
+                },
+                onRemove = { viewModel.sendIntent(DisabilityPensionIntent.DocumentRemoveClicked(activeDocumentId)) },
+                onDismiss = { viewModel.sendIntent(DisabilityPensionIntent.DismissDocumentSourceSheet) },
+            )
+        }
+    }
+
+    if (state.showDocumentsConfirmDialog) {
+        TaminConfirmationDialog(
+            title = stringResource(Res.string.disability_pension_documents_confirm_title),
+            description = stringResource(Res.string.disability_pension_documents_confirm_message),
+            confirmButton = {
+                TaminFilledButton(
+                    text = stringResource(Res.string.action_confirm),
+                    onClick = { viewModel.sendIntent(DisabilityPensionIntent.ConfirmDocumentsSubmission) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            },
+            dismissButton = {
+                TaminOutlinedButton(
+                    text = stringResource(Res.string.action_cancel),
+                    onClick = { viewModel.sendIntent(DisabilityPensionIntent.DismissDocumentsConfirmDialog) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            },
+            onDismissRequest = { viewModel.sendIntent(DisabilityPensionIntent.DismissDocumentsConfirmDialog) },
+        )
+    }
 }
 
 @Composable
 private fun HandleDisabilityPensionEvents(
     events: Flow<DisabilityPensionEvent>,
+    cameraPermission: CameraPermission,
+    cameraPermissionDeniedMessage: String,
+    scope: CoroutineScope,
     onShowToast: (String) -> Unit,
     onNavigateToAddDependent: () -> Unit,
+    onLaunchGallery: (documentId: String) -> Unit,
+    onLaunchCamera: (documentId: String) -> Unit,
+    onIntent: (DisabilityPensionIntent) -> Unit,
 ) {
     events.collectWithLifecycleAware { event ->
         when (event) {
             is DisabilityPensionEvent.ShowToast -> onShowToast(event.message)
             DisabilityPensionEvent.NavigateToAddDependent -> onNavigateToAddDependent()
+            is DisabilityPensionEvent.LaunchImagePicker -> when (event.source) {
+                DisabilityDocumentImageSource.GALLERY -> onLaunchGallery(event.documentId)
+                DisabilityDocumentImageSource.CAMERA -> {
+                    if (cameraPermission.granted) {
+                        onLaunchCamera(event.documentId)
+                    } else {
+                        cameraPermission.request { granted ->
+                            scope.launch {
+                                if (granted) {
+                                    onLaunchCamera(event.documentId)
+                                } else {
+                                    onIntent(DisabilityPensionIntent.DocumentImagePickFailed(cameraPermissionDeniedMessage))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -213,11 +331,13 @@ private fun DisabilityPensionContent(
     val identityTitle = stringResource(Res.string.disability_pension_step_identity_title)
     val workshopTitle = stringResource(Res.string.disability_pension_step_workshop_title)
     val commissionRecordTitle = stringResource(Res.string.disability_pension_step_commission_record_title)
+    val documentsTitle = stringResource(Res.string.disability_pension_step_documents_title)
     val termsSubtitle = stringResource(Res.string.disability_pension_step_subtitle)
     val dependentsSubtitle = stringResource(Res.string.disability_pension_step_dependents_subtitle)
     val identitySubtitle = stringResource(Res.string.disability_pension_step_identity_subtitle)
     val workshopSubtitle = stringResource(Res.string.disability_pension_step_workshop_subtitle)
     val commissionRecordSubtitle = stringResource(Res.string.disability_pension_step_commission_record_subtitle)
+    val documentsSubtitle = stringResource(Res.string.disability_pension_step_documents_subtitle)
     val currentStepIndex = state.currentStep.ordinal + 1
     val stepTitle = when (state.currentStep) {
         DisabilityPensionStep.Terms -> termsTitle
@@ -225,6 +345,7 @@ private fun DisabilityPensionContent(
         DisabilityPensionStep.IdentityContact -> identityTitle
         DisabilityPensionStep.Workshop -> workshopTitle
         DisabilityPensionStep.CommissionRecord -> commissionRecordTitle
+        DisabilityPensionStep.Documents -> documentsTitle
     }
     val stepSubtitle = when (state.currentStep) {
         DisabilityPensionStep.Terms -> termsSubtitle
@@ -232,6 +353,7 @@ private fun DisabilityPensionContent(
         DisabilityPensionStep.IdentityContact -> identitySubtitle
         DisabilityPensionStep.Workshop -> workshopSubtitle
         DisabilityPensionStep.CommissionRecord -> commissionRecordSubtitle
+        DisabilityPensionStep.Documents -> documentsSubtitle
     }
 
     Scaffold(
@@ -322,6 +444,10 @@ private fun DisabilityPensionContent(
                         state = state,
                         onIntent = onIntent,
                     )
+                    DisabilityPensionStep.Documents -> DisabilityPensionDocumentsStep(
+                        state = state,
+                        onIntent = onIntent,
+                    )
                 }
             }
         }
@@ -344,6 +470,7 @@ private fun DisabilityPensionBottomBar(
         DisabilityPensionStep.IdentityContact,
         DisabilityPensionStep.Workshop,
         DisabilityPensionStep.CommissionRecord,
+        DisabilityPensionStep.Documents,
         -> {
             TaminBottomBar(
                 modifier = Modifier.navigationBarsPadding().imePadding(),
@@ -361,6 +488,7 @@ private fun DisabilityPensionBottomBar(
                         onClick = { onIntent(DisabilityPensionIntent.NextStepClicked) },
                         enabled = !state.isRefreshingDependents &&
                             !state.isDependentsLoading &&
+                            !state.isAnyDocumentUploading &&
                             state.hasCommissionObjection != true,
                         isLoading = state.isRefreshingDependents,
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),

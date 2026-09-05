@@ -5,9 +5,12 @@ import com.tamin.taminhamrah.model.personal.DisabilityDependentPR
 import com.tamin.taminhamrah.model.personal.DisabilityPersonalInfoPR
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
 import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.RegisteredMedicalCommissionPR
+import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.persistentSetOf
 
 enum class DisabilityPensionStep {
@@ -16,6 +19,7 @@ enum class DisabilityPensionStep {
     IdentityContact,
     Workshop,
     CommissionRecord,
+    Documents,
 }
 
 enum class LandlinePhoneError {
@@ -75,8 +79,16 @@ data class DisabilityPensionUiState(
     val showMedicalCommissionPdfViewer: Boolean = false,
     val medicalCommissionPdf: PdfDownloadPR? = null,
     val medicalCommissionPdfDownloadFailed: Boolean = false,
+    val documents: ImmutableMap<String, DisabilityDocumentState> = persistentMapOf(),
+    val activeDocumentId: String? = null,
+    val showDocumentSourceSheet: Boolean = false,
+    val documentPickError: String? = null,
+    val showDocumentsConfirmDialog: Boolean = false,
     val error: String? = null,
 ) {
+    val isAnyDocumentUploading: Boolean
+        get() = documents.values.any { it is DisabilityDocumentState.Uploading }
+
     sealed interface PartialState {
         data class ProfileLoading(val isProfileLoading: Boolean) : PartialState
         data class ApplicantInfoLoaded(val genderTitle: String, val fullName: String) : PartialState
@@ -118,6 +130,11 @@ data class DisabilityPensionUiState(
         data class MedicalCommissionPdfViewerVisibilityChanged(val show: Boolean) : PartialState
         data class MedicalCommissionPdfChanged(val pdf: PdfDownloadPR?) : PartialState
         data object MedicalCommissionPdfDownloadFailed : PartialState
+        data class DocumentSourceRequested(val documentId: String) : PartialState
+        data object DocumentSourceSheetDismissed : PartialState
+        data class DocumentStateChanged(val documentId: String, val state: DisabilityDocumentState) : PartialState
+        data class DocumentPickRejected(val message: String) : PartialState
+        data class DocumentsConfirmDialogVisibilityChanged(val show: Boolean) : PartialState
         data class Error(val message: String?) : PartialState
     }
 }
@@ -152,9 +169,24 @@ sealed interface DisabilityPensionIntent {
     data object ShowMedicalCommissionPdfViewerClicked : DisabilityPensionIntent
     data object DownloadMedicalCommissionPdfClicked : DisabilityPensionIntent
     data object DismissMedicalCommissionPdfViewer : DisabilityPensionIntent
+    data class DocumentCardClicked(val documentId: String) : DisabilityPensionIntent
+    data class DocumentSourceSelected(
+        val documentId: String,
+        val source: DisabilityDocumentImageSource,
+    ) : DisabilityPensionIntent
+    data class DocumentRemoveClicked(val documentId: String) : DisabilityPensionIntent
+    data class DocumentImagePicked(val documentId: String, val file: PlatformFile) : DisabilityPensionIntent
+    data class DocumentImagePickFailed(val message: String) : DisabilityPensionIntent
+    data object DismissDocumentSourceSheet : DisabilityPensionIntent
+    data object ConfirmDocumentsSubmission : DisabilityPensionIntent
+    data object DismissDocumentsConfirmDialog : DisabilityPensionIntent
 }
 
 sealed interface DisabilityPensionEvent {
     data class ShowToast(val message: String) : DisabilityPensionEvent
     data object NavigateToAddDependent : DisabilityPensionEvent
+    data class LaunchImagePicker(
+        val documentId: String,
+        val source: DisabilityDocumentImageSource,
+    ) : DisabilityPensionEvent
 }

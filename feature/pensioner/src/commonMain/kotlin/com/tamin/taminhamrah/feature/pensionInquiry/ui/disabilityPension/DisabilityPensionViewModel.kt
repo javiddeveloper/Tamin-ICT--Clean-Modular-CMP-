@@ -2,6 +2,9 @@ package com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension
 
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.AddressError
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityDocumentState
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.bytesOrNull
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.platformFileOrNull
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionEvent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionIntent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionStep
@@ -10,23 +13,41 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contrac
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.LandlinePhoneError
 import com.tamin.taminhamrah.mapper.pension.toPresentation
 import com.tamin.taminhamrah.mapper.personal.toPresentation
+import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.addDependent.RefreshDependentsUseCase
+import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
 import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
 import com.tamin.taminhamrah.useCases.pension.GetDisabilityPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.GetMedicalCommissionPdfUseCase
 import com.tamin.taminhamrah.useCases.pension.GetRegisteredMedicalCommissionUseCase
 import com.tamin.taminhamrah.useCases.pension.GetUserAgeUseCase
 import com.tamin.taminhamrah.useCases.personal.GetDisabilityDependentInfoUseCase
+import io.github.vinceglb.filekit.PlatformFile
+import io.github.vinceglb.filekit.delete
+import io.github.vinceglb.filekit.name
+import io.github.vinceglb.filekit.readBytes
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.collections.immutable.toPersistentSet
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.orotez_protez_document_duplicate_error
+import taminx.core.core_ui.orotez_protez_document_format_error
+import taminx.core.core_ui.orotez_protez_document_pick_read_error
+import taminx.core.core_ui.orotez_protez_document_upload_error
 
 class DisabilityPensionViewModel(
     private val getDisabilityPersonalInfoUseCase: GetDisabilityPersonalInfoUseCase,
@@ -36,6 +57,7 @@ class DisabilityPensionViewModel(
     private val getTalfighInfosUseCase: GetTalfighInfosUseCase,
     private val getRegisteredMedicalCommissionUseCase: GetRegisteredMedicalCommissionUseCase,
     private val getMedicalCommissionPdfUseCase: GetMedicalCommissionPdfUseCase,
+    private val uploadImageUseCase: UploadImageUseCase,
 ) : BaseViewModel<DisabilityPensionUiState, PartialState, DisabilityPensionEvent, DisabilityPensionIntent>(
     initialState = DisabilityPensionUiState()
 ) {
@@ -141,6 +163,104 @@ class DisabilityPensionViewModel(
                 emit(PartialState.MedicalCommissionPdfViewerVisibilityChanged(false))
                 emit(PartialState.MedicalCommissionPdfChanged(null))
             }
+            is DisabilityPensionIntent.DocumentCardClicked -> {
+                emit(PartialState.DocumentSourceRequested(intent.documentId))
+            }
+            is DisabilityPensionIntent.DocumentSourceSelected -> {
+                emit(PartialState.DocumentSourceSheetDismissed)
+                sendEvent(DisabilityPensionEvent.LaunchImagePicker(intent.documentId, intent.source))
+            }
+            is DisabilityPensionIntent.DocumentRemoveClicked -> handleDocumentRemoveClicked(intent.documentId)
+            is DisabilityPensionIntent.DocumentImagePicked -> handleDocumentImagePicked(intent.documentId, intent.file)
+            is DisabilityPensionIntent.DocumentImagePickFailed -> {
+                emit(PartialState.DocumentPickRejected(intent.message))
+            }
+            DisabilityPensionIntent.DismissDocumentSourceSheet -> {
+                emit(PartialState.DocumentSourceSheetDismissed)
+            }
+            DisabilityPensionIntent.ConfirmDocumentsSubmission -> {
+                emit(PartialState.DocumentsConfirmDialogVisibilityChanged(false))
+                // TODO(EM-2619): navigate to step 7 once its design is delivered.
+            }
+            DisabilityPensionIntent.DismissDocumentsConfirmDialog -> {
+                emit(PartialState.DocumentsConfirmDialogVisibilityChanged(false))
+            }
+        }
+    }
+
+    private suspend fun FlowCollector<PartialState>.handleDocumentImagePicked(
+        documentId: String,
+        file: PlatformFile,
+    ) {
+        val fileName = file.name
+        if (!isJpegFileName(fileName)) {
+            deleteFileQuietly(file)
+            emitDocumentRejection(documentId, getString(Res.string.orotez_protez_document_format_error))
+            return
+        }
+
+        val bytes = try {
+            file.readBytes()
+        } catch (e: Exception) {
+            deleteFileQuietly(file)
+            emitDocumentRejection(documentId, getString(Res.string.orotez_protez_document_pick_read_error))
+            return
+        }
+
+        if (bytes.size > MAX_DOCUMENT_SIZE_BYTES) {
+            deleteFileQuietly(file)
+            emitDocumentRejection(documentId, getString(Res.string.orotez_protez_document_format_error))
+            return
+        }
+
+        val duplicateOfId = findDuplicateDocumentId(excludeId = documentId, bytes = bytes)
+        if (duplicateOfId != null) {
+            deleteFileQuietly(file)
+            emitDocumentRejection(documentId, getString(Res.string.orotez_protez_document_duplicate_error))
+            return
+        }
+
+        uiState.value.documents[documentId]?.platformFileOrNull()?.let { deleteFileQuietly(it) }
+
+        emit(PartialState.DocumentStateChanged(documentId, DisabilityDocumentState.Uploading(file, bytes)))
+        try {
+            val guid = uploadImageUseCase(UploadImageRequestDN(fileName = fileName, bytes = bytes)).first()
+            emit(PartialState.DocumentStateChanged(documentId, DisabilityDocumentState.Uploaded(guid, file, bytes)))
+        } catch (e: Exception) {
+            val message = e.toSingleLineMessage().ifBlank { getString(Res.string.orotez_protez_document_upload_error) }
+            emit(PartialState.DocumentStateChanged(documentId, DisabilityDocumentState.Failed(message, file, bytes)))
+        }
+    }
+
+    private suspend fun FlowCollector<PartialState>.emitDocumentRejection(documentId: String, message: String) {
+        emit(PartialState.DocumentStateChanged(documentId, DisabilityDocumentState.Failed(message)))
+    }
+
+    private suspend fun FlowCollector<PartialState>.handleDocumentRemoveClicked(documentId: String) {
+        uiState.value.documents[documentId]?.platformFileOrNull()?.let { deleteFileQuietly(it) }
+        emit(PartialState.DocumentStateChanged(documentId, DisabilityDocumentState.Empty))
+    }
+
+    private fun findDuplicateDocumentId(excludeId: String, bytes: ByteArray): String? =
+        uiState.value.documents.entries.firstOrNull { (id, state) ->
+            id != excludeId && state.bytesOrNull()?.contentEquals(bytes) == true
+        }?.key
+
+    private suspend fun deleteFileQuietly(file: PlatformFile) {
+        runCatching { file.delete(mustExist = false) }
+    }
+
+    private fun isJpegFileName(fileName: String): Boolean {
+        val lower = fileName.lowercase()
+        return lower.endsWith(".jpg") || lower.endsWith(".jpeg")
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        val filesToDelete = uiState.value.documents.values.mapNotNull { it.platformFileOrNull() }
+        if (filesToDelete.isEmpty()) return
+        CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
+            filesToDelete.forEach { file -> runCatching { file.delete(mustExist = false) } }
         }
     }
 
@@ -166,6 +286,7 @@ class DisabilityPensionViewModel(
             DisabilityPensionStep.IdentityContact -> handleIdentityContactNextStep()
             DisabilityPensionStep.Workshop -> handleWorkshopNextStep()
             DisabilityPensionStep.CommissionRecord -> handleCommissionRecordNextStep()
+            DisabilityPensionStep.Documents -> handleDocumentsNextStep()
         }
     }
 
@@ -206,7 +327,11 @@ class DisabilityPensionViewModel(
 
     private suspend fun FlowCollector<PartialState>.handleCommissionRecordNextStep() {
         if (uiState.value.hasCommissionObjection == true) return
-        // TODO(EM-2619): navigate to step 6 once its design is delivered.
+        emit(PartialState.StepChanged(DisabilityPensionStep.Documents))
+    }
+
+    private suspend fun FlowCollector<PartialState>.handleDocumentsNextStep() {
+        emit(PartialState.DocumentsConfirmDialogVisibilityChanged(true))
     }
 
     private suspend fun FlowCollector<PartialState>.handlePreviousStepClicked() {
@@ -215,6 +340,7 @@ class DisabilityPensionViewModel(
             DisabilityPensionStep.IdentityContact -> emit(PartialState.StepChanged(DisabilityPensionStep.Dependents))
             DisabilityPensionStep.Workshop -> emit(PartialState.StepChanged(DisabilityPensionStep.IdentityContact))
             DisabilityPensionStep.CommissionRecord -> emit(PartialState.StepChanged(DisabilityPensionStep.Workshop))
+            DisabilityPensionStep.Documents -> emit(PartialState.StepChanged(DisabilityPensionStep.CommissionRecord))
             DisabilityPensionStep.Terms -> Unit
         }
     }
@@ -323,6 +449,22 @@ class DisabilityPensionViewModel(
         )
         is PartialState.MedicalCommissionPdfDownloadFailed -> currentState.copy(
             medicalCommissionPdfDownloadFailed = true,
+        )
+        is PartialState.DocumentSourceRequested -> currentState.copy(
+            showDocumentSourceSheet = true,
+            activeDocumentId = partialState.documentId,
+        )
+        is PartialState.DocumentSourceSheetDismissed -> currentState.copy(
+            showDocumentSourceSheet = false,
+            activeDocumentId = null,
+        )
+        is PartialState.DocumentStateChanged -> currentState.copy(
+            documents = currentState.documents.toPersistentMap().put(partialState.documentId, partialState.state),
+            documentPickError = null,
+        )
+        is PartialState.DocumentPickRejected -> currentState.copy(documentPickError = partialState.message)
+        is PartialState.DocumentsConfirmDialogVisibilityChanged -> currentState.copy(
+            showDocumentsConfirmDialog = partialState.show,
         )
         is PartialState.Error -> currentState.copy(
             isProfileLoading = false,
@@ -436,6 +578,7 @@ class DisabilityPensionViewModel(
         const val MIN_ADDRESS_LENGTH = 10
         const val DISABILITY_DEMAND_TYPE_CODE = "01"
         const val HISTORY_OBJECTION_COMING_SOON_MESSAGE = "این امکان به‌زودی فعال می‌شود."
+        const val MAX_DOCUMENT_SIZE_BYTES = 2 * 1024 * 1024
         val INVALID_ADDRESS_CHARACTERS = Regex("[a-zA-Z$&+:;=?@#|/'<>.^*()%!\\\\]")
     }
 }

@@ -2044,4 +2044,13 @@
     <string name="disability_pension_registered_request_item_title">کمیسیون پزشکی</string>
     <string name="disability_pension_registered_request_verdict_prefix">رای: %1$s</string>
     <string name="disability_pension_commission_pdf_title">رأی کمیسیون پزشکی</string>
+    <string name="disability_pension_step_documents_title">مدارک لازم</string>
+    <string name="disability_pension_step_documents_subtitle">در صورت وجود، مدارک مربوط به کمیسیون پزشکی و حادثه را بارگذاری کنید.</string>
+    <string name="disability_pension_document_primary_commission_opinion">نظریه کمیسیون پزشکی بدوی</string>
+    <string name="disability_pension_document_appeal_commission_opinion">نظریه کمیسیون پزشکی تجدیدنظر</string>
+    <string name="disability_pension_document_incident_report">گزارش حادثه</string>
+    <string name="disability_pension_document_work_inspection_report">گزارش بازرسی کار</string>
+    <string name="disability_pension_document_judicial_ruling">آراء قطعی مراجع قضایی</string>
+    <string name="disability_pension_documents_confirm_title">تایید مدارک</string>
+    <string name="disability_pension_documents_confirm_message">مدارک مورد نیاز را بارگذاری کرده‌ام یا نیازی به ارسال مدارک و مستندات وجود ندارد.</string>
 </resources>
