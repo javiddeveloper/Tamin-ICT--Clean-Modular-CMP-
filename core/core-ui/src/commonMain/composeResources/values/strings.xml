@@ -1979,4 +1979,16 @@
     <string name="disability_pension_rules_doc_3">۳. گزارش حادثه، اعلام‌شده از سوی کارفرما یا فرد حادثه‌دیده</string>
     <string name="disability_pension_rules_doc_4">۴. گزارش بازرسی کار پیرامون بررسی و تشخیص علل وقوع حادثه یا بروز بیماری ناشی از کار</string>
     <string name="disability_pension_rules_doc_5">۵. آراء قطعی مراجع قضایی در رابطه با حادثه یا بروز بیماری ناشی از کار (در صورت وجود)</string>
+    <string name="disability_pension_step_dependents_title">افراد تحت تکفل</string>
+    <string name="disability_pension_step_dependents_subtitle">فهرست افراد تبعی خود را بررسی و در صورت نیاز تکمیل کنید.</string>
+    <string name="disability_pension_dependents_info_banner">کاربر گرامی، اگر در لیست فرد تبعی مورد نظر را ثبت نکرده‌اید با دکمهٔ «افزودن تبعی جدید» آن را ثبت کنید؛ در صورت وجود، آخرین تغییرات را با «بروزرسانی» دریافت نمایید.</string>
+    <string name="disability_pension_dependents_empty">فرد تبعی برای شما ثبت نشده است.</string>
+    <string name="disability_pension_dependents_show_details">نمایش جزئیات</string>
+    <string name="disability_pension_dependents_collapse">بستن</string>
+    <string name="disability_pension_add_dependent">افزودن تبعی جدید</string>
+    <string name="disability_pension_refresh_dependents">بروزرسانی افراد تبعی تحت تکفل</string>
+    <string name="disability_pension_dependents_confirm_label">لیست افراد تبعی را مشاهده نمودم و مورد تایید من است.</string>
+    <string name="disability_pension_dependents_confirm_error">لطفاً فهرست افراد تبعی را تایید کنید.</string>
+    <string name="disability_pension_refresh_confirm_title">بروزرسانی افراد تبعی تحت تکفل</string>
+    <string name="disability_pension_refresh_confirm_message">اطلاعات افراد تحت کفالت شما در آخرین شعبه درج خواهد شد. آیا مطمئن هستید؟</string>
 </resources>

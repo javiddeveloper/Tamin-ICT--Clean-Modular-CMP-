@@ -233,6 +233,7 @@ import com.tamin.taminhamrah.useCases.addDependent.GetFamilyRelationshipsFromPro
 import com.tamin.taminhamrah.useCases.addDependent.GetFamilyRelationshipsUseCase
 import com.tamin.taminhamrah.useCases.addDependent.InquiryEducationCodeUseCase
 import com.tamin.taminhamrah.useCases.addDependent.InquiryRegistryUseCase
+import com.tamin.taminhamrah.useCases.addDependent.RefreshDependentsUseCase
 import com.tamin.taminhamrah.useCases.addDependent.UploadDependentImageUseCase
 import com.tamin.taminhamrah.useCases.user.mockUseCases.MockSubdominantUseCase
 import com.tamin.taminhamrah.useCases.versionHistory.GetVersionHistoryUseCase
@@ -484,6 +485,7 @@ val domainModule = module {
     factoryOf(::InquiryEducationCodeUseCase)
     factoryOf(::UploadDependentImageUseCase)
     factoryOf(::AddNewDependentUseCase)
+    factoryOf(::RefreshDependentsUseCase)
 
     // Employer Info UseCases
     factoryOf(::GetLegalWorkshopUseCase)

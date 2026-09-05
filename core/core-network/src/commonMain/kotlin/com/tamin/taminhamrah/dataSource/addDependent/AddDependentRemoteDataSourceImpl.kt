@@ -102,4 +102,9 @@ class AddDependentRemoteDataSourceImpl(
         errorParser.safeCall("addNewDependent") {
             apiService.addNewDependent(request).extractData()
         }
+
+    override suspend fun refreshDependents(): GeneralResponseDTO =
+        errorParser.safeCall("refreshDependents") {
+            apiService.refreshDependents().extractData()
+        }
 }

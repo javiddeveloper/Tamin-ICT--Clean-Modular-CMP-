@@ -22,6 +22,7 @@ class FakeAddDependentRepository : AddDependentRepository {
     var educationCodeResult: String = ""
     var uploadImageResult: UploadImageDN = UploadImageDN()
     var addNewDependentResult: GeneralResultDN = GeneralResultDN()
+    var refreshDependentsResult: GeneralResultDN = GeneralResultDN()
 
     var shouldThrowError: Boolean = false
     var error: Throwable = RuntimeException("Fake error")
@@ -89,5 +90,10 @@ class FakeAddDependentRepository : AddDependentRepository {
         if (shouldThrowError) throw error
         lastAddedRequest = request
         emit(addNewDependentResult)
+    }
+
+    override fun refreshDependents(): Flow<GeneralResultDN> = flow {
+        if (shouldThrowError) throw error
+        emit(refreshDependentsResult)
     }
 }

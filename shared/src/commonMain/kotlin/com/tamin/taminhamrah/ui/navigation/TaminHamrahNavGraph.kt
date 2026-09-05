@@ -471,7 +471,10 @@ internal fun TaminHamrahNavGraph(
                 pensionSurvivorScreen(
                     navController = navController,
                     onBack = { navController.popBackStack() })
-                disabilityPensionScreen(onBack = { navController.popBackStack() })
+                disabilityPensionScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToAddDependent = { navController.navigate(AddDependentRoute) },
+                )
 
                 historyScreen()
                 historyJobInfoScreen(onBack = { navController.popBackStack() })

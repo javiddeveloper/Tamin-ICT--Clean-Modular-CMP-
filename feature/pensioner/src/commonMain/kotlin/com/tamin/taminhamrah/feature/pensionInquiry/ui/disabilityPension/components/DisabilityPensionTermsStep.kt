@@ -59,8 +59,8 @@ fun DisabilityPensionTermsStep(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(colors.blueBg)
                 .taminSurface(CornerRadius.chip)
+                .background(colors.blueBg)
                 .clickable(onClick = onShowRules)
                 .padding(Spacing.md),
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm, Alignment.CenterHorizontally),

@@ -18,7 +18,7 @@ reference on this machine). Old app screen:
 `FeatureFlag` value exists here; if the two variants turn out to need different
 request shapes, that will surface when the UI/ViewModel work starts.
 
-## Status: network → domain → usecase layer complete, UI/ViewModel not started
+## Status: network → domain → usecase layer complete; UI steps 1-2 of 7 implemented
 
 | Old-app endpoint | Status | Where |
 |---|---|---|
@@ -30,7 +30,32 @@ request shapes, that will surface when the UI/ViewModel work starts.
 | `PUT disability-request/{requestId}` (save documents) | ✅ done | `SaveDocumentDisabilityUseCase` — same path as final confirm, different body/method name, both valid Ktorfit methods on `PensionApiService` |
 | `GET disability-request/report` (medical commission PDF) | ✅ done | `GetMedicalCommissionPdfUseCase` |
 | `GET medical-committee-demand/get-last-demand-details` (registered commission list) | ✅ done | `GetRegisteredMedicalCommissionUseCase` — user explicitly confirmed including this in scope despite being a larger, semi-shared DTO |
-| Screen/ViewModel/Contract | ❌ not started | `feature/pensioner/.../ui/disabilityPension/*` — stub only |
+| `POST subdominants/transfer` (refresh/transfer dependents) | ✅ done | Added on `AddDependentApiService`/`AddDependentRepository` (not a new module — same `subdominants/*` resource family as `getActiveBranches`/`addNewDependent`) → `RefreshDependentsUseCase`. Legacy endpoint path used verbatim per explicit user decision (no request body, returns a `GeneralRes`-equivalent) |
+| Screen/ViewModel/Contract | 🚧 steps 1-2 of 7 done | `feature/pensioner/.../ui/disabilityPension/*` — see below |
+
+### UI progress
+
+`DisabilityPensionContract` now tracks `currentStep: DisabilityPensionStep` (`Terms`, `Dependents`),
+mirroring `PensionSurvivorContract`'s `PensionSurvivorStep` enum + `AnimatedContent` + bottom-bar
+convention (full-width button on step 1, `SquareIconButton` previous + primary `Row` from step 2
+on) instead of the old bare `Int` step constant.
+
+- **Step 1 (Terms)** — unchanged from the prior session: `DisabilityPensionTermsStep.kt`.
+- **Step 2 (Dependents, "افراد تحت تکفل")** — `DisabilityPensionDependentsStep.kt`. Loads via
+  `GetDisabilityDependentInfoUseCase`, each card expand/collapse locally (own `Column`, not the
+  `feature/profile` `DependentCard` — no cross-feature import per architecture rules). "افزودن
+  تبعی جدید" navigates to the existing, already-wired `:feature:addDependent` wizard via a new
+  `onNavigateToAddDependent` callback threaded through `Navigation.kt` →
+  `TaminHamrahNavGraph.kt` (reuses the existing `AddDependentRoute`, no new route) — the Figma
+  mock drew this as an inline bottom sheet, but `feature/profile`'s `DependentsListScreen` already
+  established the "navigate to the full wizard" convention for the identical concept, so that was
+  followed instead of a hand-built simplified form. On return, the list refreshes via an
+  `ON_RESUME` lifecycle hook (`DependentsResumed` intent), mirroring
+  `PensionSurvivorScreen`'s `refreshSurvivorsOnResume` pattern. "بروزرسانی افراد تبعی تحت تکفل"
+  shows a `TaminConfirmationDialog` before calling `RefreshDependentsUseCase` (guarded by
+  `isRefreshingDependents` against double-submit, per [[MVI-Pattern]]). A confirmation checkbox
+  gates `NextStepClicked` the same way step 1's terms checkbox does.
+- **Steps 3-7** — still `TODO(EM-2619)`, no design delivered yet.
 
 New model package (both core-network DTOs and core-domain DN share the same package
 path, per this repo's convention): `com.tamin.taminhamrah.model.pension.disabilityRequest`
