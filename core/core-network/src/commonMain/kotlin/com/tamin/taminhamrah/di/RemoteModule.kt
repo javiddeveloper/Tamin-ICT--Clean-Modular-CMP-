@@ -62,10 +62,6 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
 import com.tamin.taminhamrah.dataSource.inquiryEducation.InquiryEducationRemoteDataSource
 import com.tamin.taminhamrah.dataSource.inquiryEducation.InquiryEducationRemoteDataSourceImpl
-import com.tamin.taminhamrah.dataSource.inspection.InspectionRemoteDataSource
-import com.tamin.taminhamrah.dataSource.inspection.InspectionRemoteDataSourceImpl
-import com.tamin.taminhamrah.dataSource.occurrence.OccurrenceRemoteDataSource
-import com.tamin.taminhamrah.dataSource.occurrence.OccurrenceRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.workersPayment.WorkersPaymentRemoteDataSource
 import com.tamin.taminhamrah.dataSource.workersPayment.WorkersPaymentRemoteDataSourceImpl
 import org.koin.core.module.dsl.bind
