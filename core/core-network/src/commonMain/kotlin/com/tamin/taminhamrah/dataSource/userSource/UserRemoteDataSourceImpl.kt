@@ -12,6 +12,9 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
+import com.tamin.taminhamrah.tools.extractTypedData
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import com.tamin.taminhamrah.apiService.UserApiService
 import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDTO
 import com.tamin.taminhamrah.model.bankAccount.BankAccountDTO
@@ -38,7 +41,8 @@ import com.tamin.taminhamrah.model.bankAccount.BankAccountRequestDTO
 internal class UserRemoteDataSourceImpl(
     private val userApiService: UserApiService,
     private val queryBuilder: ApiQueryBuilder,
-    private val errorParser: ErrorParser
+    private val errorParser: ErrorParser,
+    private val json: Json
 ) : UserRemoteDataSource {
 
     override suspend fun getIdentityInfo(): IdentityInfoDto {
@@ -195,7 +199,7 @@ internal class UserRemoteDataSourceImpl(
                 url = NetworkConstants.EDIT_MOBILE_URL,
                 mobile = mobile
             )
-            response.extractData()
+            response.extractTypedData(json, EditMobileResponseDto.serializer())
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
@@ -212,7 +216,7 @@ internal class UserRemoteDataSourceImpl(
                 url = NetworkConstants.VERIFY_EDIT_MOBILE_URL,
                 loginRequest = request
             )
-            response.extractData()
+            response.extractTypedData(json, String.serializer())
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {

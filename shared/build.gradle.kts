@@ -57,6 +57,7 @@ kotlin {
             api(project(":feature:requestPaymentForIllDays"))
             api(project(":feature:pensionSurvivor"))
             api(project(":feature:inquiryEducation"))
+            api(project(":feature:developerOptions"))
             api(libs.androidx.lifecycle.viewmodel)
             implementation(libs.ktor.client.core)
             implementation(libs.kotlinx.serialization.json)

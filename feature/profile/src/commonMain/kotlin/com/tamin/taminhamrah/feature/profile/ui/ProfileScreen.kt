@@ -3,6 +3,8 @@ package com.tamin.taminhamrah.feature.profile.ui
 
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Code
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +39,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.dp
@@ -71,6 +74,7 @@ import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
+import com.tamin.taminhamrah.util.AppConfig
 import com.tamin.taminhamrah.ui.util.ExternalAppLauncher
 import com.tamin.taminhamrah.util.toPersianDigits
 import dev.chrisbanes.haze.HazeState
@@ -105,6 +109,7 @@ import taminx.core.core_ui.profile_cartable
 import taminx.core.core_ui.profile_change_mobile
 import taminx.core.core_ui.profile_dependents
 import taminx.core.core_ui.profile_dependents_badge_test
+import taminx.core.core_ui.profile_developer_options
 import taminx.core.core_ui.profile_electronic_file
 import taminx.core.core_ui.profile_identity_info
 import taminx.core.core_ui.profile_logout
@@ -142,6 +147,7 @@ fun ProfileScreen(
     onNavigateToUserRequests: () -> Unit = {},
     onOpenUrl: (String) -> Unit = {},
     onNavigateToSecurity: () -> Unit = {},
+    onNavigateToDeveloperOptions: () -> Unit = {},
     onBackClicked: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -169,6 +175,7 @@ fun ProfileScreen(
         onNavigateToContactUs = onNavigateToContactUs,
         onNavigateToMyInbox = onNavigateToMyInbox,
         onNavigateToSecurity = onNavigateToSecurity,
+        onNavigateToDeveloperOptions = onNavigateToDeveloperOptions,
         onNavigateToDependentsList = onNavigateToDependentsList,
         onNavigateToSettings = onNavigateToSettings,
         onNavigateToUserRequests = onNavigateToUserRequests,
@@ -202,6 +209,7 @@ fun HandleProfileEvents(
     onNavigateToSettings: () -> Unit,
     onNavigateToUserRequests: () -> Unit,
     onNavigateToSecurity: () -> Unit,
+    onNavigateToDeveloperOptions: () -> Unit,
     onOpenUrl: (String) -> Unit,
     onBackClicked: () -> Unit
 ) {
@@ -268,6 +276,10 @@ fun HandleProfileEvents(
 
             ProfileEvent.NavigateToSecurity -> {
                 onNavigateToSecurity()
+            }
+
+            ProfileEvent.NavigateToDeveloperOptions -> {
+                onNavigateToDeveloperOptions()
             }
 
             is ProfileEvent.ShareAppLink -> {
@@ -653,6 +665,27 @@ fun ProfileContent(
                             )
                         )
                     )
+                }
+            }
+            if (AppConfig.isDebug) {
+                item {
+                    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.lg)) {
+                        ListGroupView(
+                            containerBorder = defaultBorder,
+                            items = persistentListOf(
+                                ListItemData(
+                                    title = stringResource(Res.string.profile_developer_options),
+                                    leadingIconPainter = rememberVectorPainter(Icons.Rounded.Code),
+                                    colors = ListItemColors(
+                                        leadingIconTintColor = taminColors.bgIconProfile,
+                                        leadingIconBackgroundGradient = taminColors.iconGradientNeutral
+                                    ),
+                                    showArrow = true,
+                                    onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.DEVELOPER_OPTIONS)) }
+                                )
+                            )
+                        )
+                    }
                 }
             }
             item {
