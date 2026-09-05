@@ -297,7 +297,7 @@ private fun WorkshopsWithoutContractCard(
     onWorkshopClicked: (WorkshopWithoutContractPR) -> Unit,
 ) {
     val colors = LocalTaminColors.current
-    var expanded by remember { mutableStateOf(true) }
+    var expanded by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxWidth().taminSurface().padding(Spacing.lg)) {
         Row(
