@@ -18,5 +18,5 @@ val datastoreModule = module {
     singleOf(::UserPreferencesRepositoryImpl) bind UserPreferencesRepository::class
     singleOf(::TokenStoreManagerImpl) bind TokenStoreManager::class
     singleOf(::InMemoryBiometricSessionState) bind BiometricSessionState::class
-    singleOf(::DeveloperOptionsRepositoryImpl) bind DeveloperOptionsRepository::class
+    single<DeveloperOptionsRepository> { DeveloperOptionsRepositoryImpl(get()) }
 }
