@@ -28,7 +28,7 @@ val mockMenuData = listOf(
     MainServiceDto(id = 23, name = "نحوه محاسبه مبلغ مستمری", showRole = listOf(1, 2), icon = "calc", status = MenuServiceStatus.ACTIVE),
     MainServiceDto(id = 25, name = "وضعیت حمایت درمانی", showRole = listOf(1), icon = "first-aid-kit", status = MenuServiceStatus.ACTIVE),
     MainServiceDto(id = 26, name = "نسخ الکترونیک", showRole = listOf(1, 2), icon = "folder", status = MenuServiceStatus.ACTIVE),
-    MainServiceDto(id = 33, name = "بیمه صاحبان حرف و مشاغل آزاد", showRole = listOf(1), icon = "agreement-freelance", status = MenuServiceStatus.TEMPORARY_DISABLED, message = "سرویس موقتاً در دسترس نیست"),
+    MainServiceDto(id = 33, name = "بیمه صاحبان حرف و مشاغل آزاد", showRole = listOf(1), icon = "agreement-freelance", status = MenuServiceStatus.ACTIVE, message = "سرویس موقتاً در دسترس نیست"),
     MainServiceDto(id = 34, name = "بیمه دانشجویی", showRole = listOf(1), icon = "student", status = MenuServiceStatus.ACTIVE),
     MainServiceDto(id = 35, name = "امور قراردادها و پرداخت", showRole = listOf(1), icon = "contract_payment", status = MenuServiceStatus.ENABLED_WITH_ERROR, message = "ارتباط با سامانه با کندی مواجه است"),
     MainServiceDto(id = 36, name = "بیمه زنان خانه‌دار", showRole = listOf(1), icon = "woman_agreement-freelance", status = MenuServiceStatus.DISABLED, message = "شما شرایط ثبت‌نام را ندارید"),
