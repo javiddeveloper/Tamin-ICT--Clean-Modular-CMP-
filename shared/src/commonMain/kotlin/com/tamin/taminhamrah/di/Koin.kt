@@ -31,7 +31,7 @@ import com.tamin.taminhamrah.feature.workshops.di.workshopsModule
 import com.tamin.taminhamrah.feature.changemobile.di.changeMobileModule
 
 import com.tamin.taminhamrah.feature.security.di.securityModule
-
+import com.tamin.taminhamrah.feature.developerOptions.di.developerOptionsModule
 import com.tamin.taminhamrah.feature.settings.di.settingsModule
 
 import com.tamin.taminhamrah.feature.addDependent.di.addDependentModule
@@ -50,6 +50,7 @@ import com.tamin.taminhamrah.feature.pensionSurvivor.di.pensionSurvivorModule
 
 import com.tamin.taminhamrah.feature.deferredInstallment.di.deferredInstallmentModule
 import com.tamin.taminhamrah.feature.inquiryEducation.di.inquiryEducationModule
+import com.tamin.taminhamrah.feature.requestPaymentForIllDays.di.requestPaymentForIllDaysModule
 import com.tamin.taminhamrah.feature.pregnancyPay.di.pregnancyPayModule
 
 import com.tamin.taminhamrah.plugin.di.pluginModule
@@ -111,7 +112,7 @@ val sharedModules: List<Module>
         myInboxModule,
 
         securityModule,
-
+        developerOptionsModule,
         addDependentModule,
 
         pensionStatusInquiryModule,
@@ -127,7 +128,7 @@ val sharedModules: List<Module>
         deferredInstallmentModule,
 
         historyObjectionModule,
-
+        requestPaymentForIllDaysModule,
         pensionSurvivorModule,
 
         pregnancyPayModule,
