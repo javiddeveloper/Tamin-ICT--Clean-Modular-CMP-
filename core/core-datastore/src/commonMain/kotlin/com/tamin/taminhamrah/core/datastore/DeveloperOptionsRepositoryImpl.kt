@@ -10,7 +10,10 @@ import kotlinx.coroutines.flow.asStateFlow
 
 private const val PREF_KEY_PREFIX = "dev_opt_base_url_"
 
-class DeveloperOptionsRepositoryImpl(private val settings: Settings) : DeveloperOptionsRepository {
+class DeveloperOptionsRepositoryImpl(
+    private val settings: Settings,
+    private val isDebug: Boolean = AppConfig.isDebug
+) : DeveloperOptionsRepository {
 
     private val _overrides = MutableStateFlow(loadOverrides())
 
@@ -27,7 +30,7 @@ class DeveloperOptionsRepositoryImpl(private val settings: Settings) : Developer
      * previous debug install sharing the same app storage or written some other way.
      */
     override fun getEffectiveBaseUrl(key: BaseUrlKey): String =
-        if (AppConfig.isDebug) _overrides.value[key] ?: key.defaultValue else key.defaultValue
+        if (isDebug) _overrides.value[key] ?: key.defaultValue else key.defaultValue
 
     override fun observeOverrides(): Flow<Map<BaseUrlKey, String>> = _overrides.asStateFlow()
 
