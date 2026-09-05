@@ -72,8 +72,9 @@ fun DisabilityDependentDN.toPresentation(): DisabilityDependentPR {
         nationalId = nationalId ?: "",
         dateOfBirth = dateOfBirth?.toString() ?: "",
         fatherName = fatherName ?: "",
+        genderCode = genderCode ?: "",
         genderDesc = genderDesc ?: "",
-        relation = relation ?: "",
+        tendencyCode = tendencyCode ?: "",
         tendencyDescription = tendencyDescription ?: ""
     )
 }

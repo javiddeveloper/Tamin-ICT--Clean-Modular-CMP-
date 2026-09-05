@@ -95,8 +95,9 @@ fun DisabilityDependentDTO.toDomain(): DisabilityDependentDN {
         nationalId = personal?.nationalId,
         dateOfBirth = personal?.dateOfBirth,
         fatherName = personal?.fatherName,
+        genderCode = personal?.gender?.genderCode,
         genderDesc = personal?.gender?.genderDesc,
-        relation = personal?.relation,
+        tendencyCode = tendency?.tendencyCode,
         tendencyDescription = tendency?.tendencyDescription
     )
 }

@@ -108,8 +108,9 @@ class DisabilityPensionViewModelTest {
                 nationalId = "0073160997",
                 dateOfBirth = null,
                 fatherName = null,
+                genderCode = "02",
                 genderDesc = "زن",
-                relation = "همسر",
+                tendencyCode = "100",
                 tendencyDescription = null,
             )
         )
@@ -127,7 +128,7 @@ class DisabilityPensionViewModelTest {
 
             assertEquals(DisabilityPensionStep.Dependents, state.currentStep)
             assertEquals(1, state.dependents.size)
-            assertEquals("همسر", state.dependents.first().relation)
+            assertEquals("100", state.dependents.first().tendencyCode)
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -202,8 +203,9 @@ class DisabilityPensionViewModelTest {
                 nationalId = "0052213341",
                 dateOfBirth = null,
                 fatherName = null,
+                genderCode = "02",
                 genderDesc = "زن",
-                relation = "فرزند دختر",
+                tendencyCode = "102",
                 tendencyDescription = null,
             )
         )

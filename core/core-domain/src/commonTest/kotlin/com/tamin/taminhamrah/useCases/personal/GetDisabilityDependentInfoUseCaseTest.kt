@@ -29,8 +29,9 @@ class GetDisabilityDependentInfoUseCaseTest : BaseUseCaseTest() {
                 nationalId = "1234567890",
                 dateOfBirth = 123456789L,
                 fatherName = "Father",
+                genderCode = "01",
                 genderDesc = "Male",
-                relation = "Son",
+                tendencyCode = "101",
                 tendencyDescription = "Tendency"
             )
         )

@@ -57,6 +57,47 @@ on) instead of the old bare `Int` step constant.
   gates `NextStepClicked` the same way step 1's terms checkbox does.
 - **Steps 3-7** — still `TODO(EM-2619)`, no design delivered yet.
 
+### Gotcha: the dependent's relation label is not a server field — it's computed from `tendencyCode`
+
+`personal.relation` on the `disability-request/subdominant` payload (`PersonaDTO.relation`) is
+**not actually populated by the backend** — confirmed by the user testing the same account
+against both apps: legacy correctly shows "همسر" (spouse), this app showed "-" when the UI first
+read `DisabilityDependentDN.relation` directly. The legacy app never reads that field for
+display either — `DisabilityPensionFragment.onDependentInfoResponse` computes the label
+client-side via `Utility.getTendencyResId(tendencyCode, genderCode)`, a lookup table keyed on
+`relationWithTamin.tendencyInfo.baseTendency.tendencyCode` (+ `personal.gender.genderCode` for
+the gender-ambiguous codes), and only then writes the computed string into that same field name
+for convenience — that's why it looked like a real API field.
+
+Fixed by: removing `DisabilityDependentDN`/`PR`'s bogus `relation: String?` field and replacing
+it with the raw `tendencyCode`/`genderCode` pair (mirroring `SurvivorDependentDN`/`PR`'s existing
+identical shape), then adding `feature/pensioner/.../ui/disabilityPension/relation/DisabilityRelationClassifier.kt`
+— a small port of the same lookup table `feature/pensionSurvivor`'s `SurvivorRelationClassifier.relationTitleRes`
+already implements (can't import it directly — cross-feature imports are disallowed — so this
+duplicates just the `relationTitleRes` function, reusing the same shared `pension_survivor_relation_*`
+string resources rather than duplicating strings too). If a third feature ever needs this same
+lookup, it should be promoted to a shared location (`core-ui` or `core-domain`) instead of a third
+copy-paste.
+
+**That alone didn't fix it** — the user re-tested and still saw "-". The deeper bug: the whole
+`tendencyCode`/`tendencyDescription` chain was **never deserializing at all**, on top of the
+above. `TendencyInfoDTO.baseTendency`
+(`core-network/.../model/personal/disabilityRequest/TendencyInfoDTO.kt`) was annotated
+`@SerialName("relationWithTamin")` instead of `@SerialName("baseTendency")` — a copy-paste of
+the outer nesting level's key. Confirmed against the reference-correct sibling model
+(`core-network/.../model/subDominant/SubRelationWithTamin.kt`, used by the already-working
+`feature/profile` dependents list): the real JSON nests `relationWithTamin.relationWithTamin.baseTendency.{tendencyCode,tendencyDescription}`
+— three `relationWithTamin` keys is correct up to that point, but the field *inside* that JSON
+key is `"baseTendency"`, not another `"relationWithTamin"`. Because of the wrong key,
+`tendencyCode`/`tendencyDescription` silently deserialized to `null` for every dependent,
+regardless of what the UI did with them. No existing test caught it — `getDisabilityDependentInfo`
+had zero JSON-fixture coverage in `PersonalApiServiceTest.kt` before this; a regression test
+(`getDisabilityDependentInfo should parse tendencyCode and genderCode from nested baseTendency`)
+was added there. **Lesson**: when a nested DTO's `@SerialName` looks suspiciously identical to a
+sibling/ancestor level's key, verify against a working reference model in the same package
+family before trusting it — don't assume a matching `data class` shape means a matching JSON
+key.
+
 New model package (both core-network DTOs and core-domain DN share the same package
 path, per this repo's convention): `com.tamin.taminhamrah.model.pension.disabilityRequest`
 (+ `.medicalCommission` subpackage for the commission-list DTO/DN, ~50 fields incl. two

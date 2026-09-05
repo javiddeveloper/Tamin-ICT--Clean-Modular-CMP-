@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionIntent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionUiState
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.relation.DisabilityRelationClassifier
 import com.tamin.taminhamrah.model.personal.DisabilityDependentPR
 import com.tamin.taminhamrah.ui.components.BannerCard
 import com.tamin.taminhamrah.ui.components.BannerType
@@ -177,6 +178,12 @@ private fun DependentCard(
     val fullName = listOf(dependent.firstName, dependent.lastName)
         .filter(String::isNotBlank)
         .joinToString(" ")
+    val relationRes = DisabilityRelationClassifier.relationTitleRes(
+        tendencyCode = dependent.tendencyCode,
+        genderCode = dependent.genderCode,
+    )
+    val relationLabel = relationRes?.let { stringResource(it) }
+        ?: dependent.tendencyDescription.ifBlank { "-" }
 
     Column(
         modifier = modifier
@@ -199,7 +206,7 @@ private fun DependentCard(
                 color = colors.textPrimary,
             )
             StatusPill(
-                text = dependent.relation.ifBlank { "-" },
+                text = relationLabel,
                 containerColor = colors.blueBg,
                 contentColor = colors.blueText,
             )

@@ -11,7 +11,8 @@ data class DisabilityDependentPR(
     val nationalId: String,
     val dateOfBirth: String,
     val fatherName: String,
+    val genderCode: String,
     val genderDesc: String,
-    val relation: String,
+    val tendencyCode: String,
     val tendencyDescription: String,
 )

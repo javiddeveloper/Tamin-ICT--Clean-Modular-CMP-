@@ -64,6 +64,50 @@ class PersonalApiServiceTest : BaseApiTest() {
         }
 
     @Test
+    fun `getDisabilityDependentInfo should parse tendencyCode and genderCode from nested baseTendency`() = runTest {
+        val jsonResponse = """
+            {
+                "status": 200,
+                "family": "SUCCESS",
+                "reason": "OK",
+                "data": {
+                    "list": [
+                        {
+                            "relationWithTamin": {
+                                "personal": {
+                                    "firstName": "منصوره",
+                                    "lastName": "آزادی",
+                                    "nationalId": "0073160997",
+                                    "gender": {
+                                        "genderCode": "02",
+                                        "genderDesc": "زن"
+                                    }
+                                },
+                                "relationWithTamin": {
+                                    "baseTendency": {
+                                        "tendencyCode": "100",
+                                        "tendencyDescription": "همسر"
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        """.trimIndent()
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createPersonalApiService()
+
+        val response = apiService.getDisabilityDependentInfo(emptyMap())
+
+        val dependent = response.data?.list?.firstOrNull()?.relationWithTamin
+        assertEquals("منصوره", dependent?.personal?.firstName)
+        assertEquals("02", dependent?.personal?.gender?.genderCode)
+        assertEquals("100", dependent?.tendencyInfo?.baseTendency?.tendencyCode)
+        assertEquals("همسر", dependent?.tendencyInfo?.baseTendency?.tendencyDescription)
+    }
+
+    @Test
     fun `checkGirlSurvivorConditions should surface bare Persian 500 body`() = runTest {
         val message = "اطلاعاتی از حکم مستمری یا فوت فرد مورد نظر شما یافت نشد."
         val ktorfit = createMockKtorfit(
