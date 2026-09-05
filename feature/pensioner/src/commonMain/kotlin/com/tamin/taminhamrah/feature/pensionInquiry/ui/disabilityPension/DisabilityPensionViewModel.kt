@@ -1,15 +1,21 @@
 package com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension
 
 import com.tamin.taminhamrah.base.BaseViewModel
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.AddressError
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionEvent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionIntent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionStep
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionUiState
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionUiState.PartialState
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.LandlinePhoneError
 import com.tamin.taminhamrah.mapper.personal.toPresentation
+import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.FilterOperator
+import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.addDependent.RefreshDependentsUseCase
 import com.tamin.taminhamrah.useCases.pension.GetDisabilityPersonalInfoUseCase
+import com.tamin.taminhamrah.useCases.pension.GetUserAgeUseCase
 import com.tamin.taminhamrah.useCases.personal.GetDisabilityDependentInfoUseCase
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentSet
@@ -22,6 +28,7 @@ class DisabilityPensionViewModel(
     private val getDisabilityPersonalInfoUseCase: GetDisabilityPersonalInfoUseCase,
     private val getDisabilityDependentInfoUseCase: GetDisabilityDependentInfoUseCase,
     private val refreshDependentsUseCase: RefreshDependentsUseCase,
+    private val getUserAgeUseCase: GetUserAgeUseCase,
 ) : BaseViewModel<DisabilityPensionUiState, PartialState, DisabilityPensionEvent, DisabilityPensionIntent>(
     initialState = DisabilityPensionUiState()
 ) {
@@ -48,9 +55,7 @@ class DisabilityPensionViewModel(
             DisabilityPensionIntent.ShowRulesClicked -> emit(PartialState.RulesVisibilityChanged(true))
             DisabilityPensionIntent.DismissRules -> emit(PartialState.RulesVisibilityChanged(false))
             DisabilityPensionIntent.NextStepClicked -> handleNextStepClicked()
-            DisabilityPensionIntent.PreviousStepClicked -> {
-                emit(PartialState.StepChanged(DisabilityPensionStep.Terms))
-            }
+            DisabilityPensionIntent.PreviousStepClicked -> handlePreviousStepClicked()
             is DisabilityPensionIntent.DependentCardToggled -> {
                 emit(PartialState.DependentCardToggled(intent.id))
             }
@@ -75,6 +80,21 @@ class DisabilityPensionViewModel(
                     loadDependents()
                 }
             }
+            DisabilityPensionIntent.ToggleIdentityDetails -> {
+                emit(PartialState.IdentityDetailsExpandedChanged(!uiState.value.isIdentityDetailsExpanded))
+            }
+            is DisabilityPensionIntent.LandlinePhoneChanged -> {
+                emit(PartialState.LandlinePhoneChanged(intent.value, null))
+            }
+            is DisabilityPensionIntent.AddressChanged -> {
+                emit(PartialState.AddressChanged(intent.value, null))
+            }
+            is DisabilityPensionIntent.IdentityConfirmedChanged -> {
+                emit(PartialState.IdentityConfirmedChanged(intent.accepted))
+                if (intent.accepted) {
+                    emit(PartialState.IdentityConfirmationErrorChanged(false))
+                }
+            }
         }
     }
 
@@ -92,11 +112,37 @@ class DisabilityPensionViewModel(
             DisabilityPensionStep.Dependents -> {
                 if (uiState.value.isDependentsListConfirmed) {
                     emit(PartialState.DependentsConfirmationErrorChanged(false))
-                    // TODO(EM-2619): navigate to step 3 once its design is delivered.
+                    emit(PartialState.StepChanged(DisabilityPensionStep.IdentityContact))
                 } else {
                     emit(PartialState.DependentsConfirmationErrorChanged(true))
                 }
             }
+            DisabilityPensionStep.IdentityContact -> handleIdentityContactNextStep()
+        }
+    }
+
+    private suspend fun FlowCollector<PartialState>.handleIdentityContactNextStep() {
+        val state = uiState.value
+        val phoneError = validateLandlinePhone(state.landlinePhone)
+        val addressError = validateAddress(state.address)
+        emit(PartialState.LandlinePhoneChanged(state.landlinePhone, phoneError))
+        emit(PartialState.AddressChanged(state.address, addressError))
+
+        if (phoneError != null || addressError != null) return
+
+        if (state.isIdentityConfirmed) {
+            emit(PartialState.IdentityConfirmationErrorChanged(false))
+            // TODO(EM-2619): navigate to step 4 once its design is delivered.
+        } else {
+            emit(PartialState.IdentityConfirmationErrorChanged(true))
+        }
+    }
+
+    private suspend fun FlowCollector<PartialState>.handlePreviousStepClicked() {
+        when (uiState.value.currentStep) {
+            DisabilityPensionStep.Dependents -> emit(PartialState.StepChanged(DisabilityPensionStep.Terms))
+            DisabilityPensionStep.IdentityContact -> emit(PartialState.StepChanged(DisabilityPensionStep.Dependents))
+            DisabilityPensionStep.Terms -> Unit
         }
     }
 
@@ -147,6 +193,23 @@ class DisabilityPensionViewModel(
         is PartialState.RefreshingDependentsChanged -> currentState.copy(
             isRefreshingDependents = partialState.isRefreshing,
         )
+        is PartialState.IdentityLoaded -> currentState.copy(identityInfo = partialState.info)
+        is PartialState.IdentityAgeLoaded -> currentState.copy(identityAgeYears = partialState.years)
+        is PartialState.IdentityDetailsExpandedChanged -> currentState.copy(
+            isIdentityDetailsExpanded = partialState.expanded,
+        )
+        is PartialState.LandlinePhoneChanged -> currentState.copy(
+            landlinePhone = partialState.value,
+            landlinePhoneError = partialState.error,
+        )
+        is PartialState.AddressChanged -> currentState.copy(
+            address = partialState.value,
+            addressError = partialState.error,
+        )
+        is PartialState.IdentityConfirmedChanged -> currentState.copy(isIdentityConfirmed = partialState.accepted)
+        is PartialState.IdentityConfirmationErrorChanged -> currentState.copy(
+            showIdentityConfirmationError = partialState.show,
+        )
         is PartialState.Error -> currentState.copy(
             isProfileLoading = false,
             isDependentsLoading = false,
@@ -170,7 +233,26 @@ class DisabilityPensionViewModel(
                 MALE_TITLE
             }
             emit(PartialState.ApplicantInfoLoaded(genderTitle = genderTitle, fullName = fullName))
+            emit(PartialState.IdentityLoaded(info.toPresentation()))
+            emit(PartialState.IdentityAgeLoaded(loadAgeYears(personal?.dateOfBirth)))
         }
+    }
+
+    private suspend fun loadAgeYears(birthDate: Long?): String {
+        if (birthDate == null) return ""
+        var years = ""
+        getUserAgeUseCase(
+            listOf(
+                ApiFilterDN(
+                    property = FilterProperty.BIRTH_DATE,
+                    value = birthDate.toString(),
+                    operator = FilterOperator.EQUAL,
+                ),
+            ),
+        ).collect { age ->
+            years = age.age?.split(",")?.getOrNull(0)?.trim().orEmpty()
+        }
+        return years
     }
 
     private suspend fun FlowCollector<PartialState>.loadDependents() {
@@ -180,8 +262,25 @@ class DisabilityPensionViewModel(
         }
     }
 
+    private fun validateLandlinePhone(value: String): LandlinePhoneError? = when {
+        value.isBlank() -> LandlinePhoneError.Blank
+        !value.startsWith("0") -> LandlinePhoneError.InvalidPrefix
+        value.length != LANDLINE_PHONE_LENGTH -> LandlinePhoneError.InvalidLength
+        else -> null
+    }
+
+    private fun validateAddress(value: String): AddressError? = when {
+        value.isBlank() -> AddressError.Blank
+        value.length < MIN_ADDRESS_LENGTH -> AddressError.TooShort
+        INVALID_ADDRESS_CHARACTERS.containsMatchIn(value) -> AddressError.InvalidCharacters
+        else -> null
+    }
+
     private companion object {
         const val MALE_TITLE = "آقای"
         const val FEMALE_TITLE = "خانم"
+        const val LANDLINE_PHONE_LENGTH = 11
+        const val MIN_ADDRESS_LENGTH = 10
+        val INVALID_ADDRESS_CHARACTERS = Regex("[a-zA-Z$&+:;=?@#|/'<>.^*()%!\\\\]")
     }
 }

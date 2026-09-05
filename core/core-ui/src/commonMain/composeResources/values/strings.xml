@@ -1991,4 +1991,22 @@
     <string name="disability_pension_dependents_confirm_error">لطفاً فهرست افراد تبعی را تایید کنید.</string>
     <string name="disability_pension_refresh_confirm_title">بروزرسانی افراد تبعی تحت تکفل</string>
     <string name="disability_pension_refresh_confirm_message">اطلاعات افراد تحت کفالت شما در آخرین شعبه درج خواهد شد. آیا مطمئن هستید؟</string>
+    <string name="disability_pension_step_identity_title">اطلاعات هویتی و تماس</string>
+    <string name="disability_pension_step_identity_subtitle">اطلاعات ثبت‌شده را بازبینی و تلفن ثابت و نشانی را اصلاح کنید.</string>
+    <string name="disability_pension_identity_full_name">نام و نام خانوادگی</string>
+    <string name="disability_pension_identity_insurance_id">شماره بیمه</string>
+    <string name="disability_pension_identity_mobile">موبایل</string>
+    <string name="disability_pension_identity_issue_place">محل صدور</string>
+    <string name="disability_pension_identity_age">سن</string>
+    <string name="disability_pension_identity_age_years">%1$s سال</string>
+    <string name="disability_pension_identity_phone_label">تلفن ثابت</string>
+    <string name="disability_pension_identity_phone_error_blank">لطفاً تلفن ثابت را وارد کنید.</string>
+    <string name="disability_pension_identity_phone_error_prefix">شمارهٔ تلفن ثابت معتبر نیست.</string>
+    <string name="disability_pension_identity_phone_error_length">طول شمارهٔ تلفن ثابت صحیح نیست.</string>
+    <string name="disability_pension_identity_address_label">آدرس</string>
+    <string name="disability_pension_identity_address_error_blank">لطفاً آدرس را وارد کنید.</string>
+    <string name="disability_pension_identity_address_error_length">آدرس واردشده کوتاه است.</string>
+    <string name="disability_pension_identity_address_error_invalid">آدرس واردشده معتبر نیست.</string>
+    <string name="disability_pension_identity_confirm_label">اطلاعات هویتی و تماس فوق را تایید می‌نمایم.</string>
+    <string name="disability_pension_identity_confirm_error">لطفاً اطلاعات هویتی و تماس را تایید کنید.</string>
 </resources>

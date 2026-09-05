@@ -32,6 +32,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.components.DisabilityPensionDependentsStep
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.components.DisabilityPensionIdentityContactStep
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.components.DisabilityPensionRulesDialog
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.components.DisabilityPensionTermsStep
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionEvent
@@ -68,6 +69,8 @@ import taminx.core.core_ui.disability_pension_refresh_confirm_message
 import taminx.core.core_ui.disability_pension_refresh_confirm_title
 import taminx.core.core_ui.disability_pension_step_dependents_subtitle
 import taminx.core.core_ui.disability_pension_step_dependents_title
+import taminx.core.core_ui.disability_pension_step_identity_subtitle
+import taminx.core.core_ui.disability_pension_step_identity_title
 import taminx.core.core_ui.disability_pension_step_subtitle
 import taminx.core.core_ui.disability_pension_step_terms_title
 import taminx.core.core_ui.disability_pension_title
@@ -179,16 +182,20 @@ private fun DisabilityPensionContent(
     val headerBrush = Brush.horizontalGradient(taminColors.profileGradientStops)
     val termsTitle = stringResource(Res.string.disability_pension_step_terms_title)
     val dependentsTitle = stringResource(Res.string.disability_pension_step_dependents_title)
+    val identityTitle = stringResource(Res.string.disability_pension_step_identity_title)
     val termsSubtitle = stringResource(Res.string.disability_pension_step_subtitle)
     val dependentsSubtitle = stringResource(Res.string.disability_pension_step_dependents_subtitle)
+    val identitySubtitle = stringResource(Res.string.disability_pension_step_identity_subtitle)
     val currentStepIndex = state.currentStep.ordinal + 1
     val stepTitle = when (state.currentStep) {
         DisabilityPensionStep.Terms -> termsTitle
         DisabilityPensionStep.Dependents -> dependentsTitle
+        DisabilityPensionStep.IdentityContact -> identityTitle
     }
     val stepSubtitle = when (state.currentStep) {
         DisabilityPensionStep.Terms -> termsSubtitle
         DisabilityPensionStep.Dependents -> dependentsSubtitle
+        DisabilityPensionStep.IdentityContact -> identitySubtitle
     }
 
     Scaffold(
@@ -267,6 +274,10 @@ private fun DisabilityPensionContent(
                         state = state,
                         onIntent = onIntent,
                     )
+                    DisabilityPensionStep.IdentityContact -> DisabilityPensionIdentityContactStep(
+                        state = state,
+                        onIntent = onIntent,
+                    )
                 }
             }
         }
@@ -285,7 +296,7 @@ private fun DisabilityPensionBottomBar(
                 onPrimaryClick = { onIntent(DisabilityPensionIntent.NextStepClicked) },
             )
         }
-        DisabilityPensionStep.Dependents -> {
+        DisabilityPensionStep.Dependents, DisabilityPensionStep.IdentityContact -> {
             TaminBottomBar(
                 modifier = Modifier.navigationBarsPadding().imePadding(),
             ) {

@@ -18,7 +18,7 @@ reference on this machine). Old app screen:
 `FeatureFlag` value exists here; if the two variants turn out to need different
 request shapes, that will surface when the UI/ViewModel work starts.
 
-## Status: network → domain → usecase layer complete; UI steps 1-2 of 7 implemented
+## Status: network → domain → usecase layer complete; UI steps 1-3 of 7 implemented
 
 | Old-app endpoint | Status | Where |
 |---|---|---|
@@ -31,7 +31,7 @@ request shapes, that will surface when the UI/ViewModel work starts.
 | `GET disability-request/report` (medical commission PDF) | ✅ done | `GetMedicalCommissionPdfUseCase` |
 | `GET medical-committee-demand/get-last-demand-details` (registered commission list) | ✅ done | `GetRegisteredMedicalCommissionUseCase` — user explicitly confirmed including this in scope despite being a larger, semi-shared DTO |
 | `POST subdominants/transfer` (refresh/transfer dependents) | ✅ done | Added on `AddDependentApiService`/`AddDependentRepository` (not a new module — same `subdominants/*` resource family as `getActiveBranches`/`addNewDependent`) → `RefreshDependentsUseCase`. Legacy endpoint path used verbatim per explicit user decision (no request body, returns a `GeneralRes`-equivalent) |
-| Screen/ViewModel/Contract | 🚧 steps 1-2 of 7 done | `feature/pensioner/.../ui/disabilityPension/*` — see below |
+| Screen/ViewModel/Contract | 🚧 steps 1-3 of 7 done | `feature/pensioner/.../ui/disabilityPension/*` — see below |
 
 ### UI progress
 
@@ -55,7 +55,26 @@ on) instead of the old bare `Int` step constant.
   shows a `TaminConfirmationDialog` before calling `RefreshDependentsUseCase` (guarded by
   `isRefreshingDependents` against double-submit, per [[MVI-Pattern]]). A confirmation checkbox
   gates `NextStepClicked` the same way step 1's terms checkbox does.
-- **Steps 3-7** — still `TODO(EM-2619)`, no design delivered yet.
+- **Step 3 (Identity & contact, "اطلاعات هویتی و تماس")** — `DisabilityPensionIdentityContactStep.kt`.
+  Reuses the `DisabilityPersonalInfoDN`/`PR` already fetched by `GetDisabilityPersonalInfoUseCase`
+  at `Init` (for step 1's commitment text) instead of re-fetching on step transition — one network
+  call now backs both step 1's applicant name/gender and step 3's whole read-only info grid.
+  Age ("سن") is resolved by chaining the previously-unused `GetUserAgeUseCase` (`pension-request/age`,
+  shared with retirement) right after that load and parsing its comma-separated `"years,months,days"`
+  response — same technique `feature/pensionSurvivor`'s `PensionSurvivorViewModel.toPresentationAgeParts`
+  already uses for the identical shape (can't share the code directly — feature-local/private — so
+  this is a smaller, years-only port, since the design only shows years). Two collapsible read-only
+  info grids (4 fields collapsed, 6 more when "نمایش جزئیات" is expanded) plus two **editable**
+  fields — تلفن ثابت / آدرس — validated on `NextStepClicked` against the exact legacy rules
+  (`DisabilityPensionFragment.checkValidEnterStepIdentityInfo`: phone non-blank + starts with "0" +
+  11 digits; address non-blank + ≥10 chars + no Latin letters/symbols) via `LandlinePhoneError`/
+  `AddressError` enums in state — the enum-in-state-then-`stringResource`-in-Composable pattern
+  (not a ViewModel-side `getString()`) is deliberate, see [[ui-design-system]]'s `getString()`-in-
+  ViewModel test hazard. A confirmation checkbox gates `NextStepClicked` the same way steps 1-2 do.
+  **Also fixed in this pass**: `DisabilityPersonalDN.toPresentation()`'s `dateOfBirth` had the exact
+  same raw-epoch-millis-as-string bug already fixed on `DisabilityDependentDN` — routed through
+  `PersianDateFormatter.formatTimestamp` now that step 3 is the first screen to actually display it.
+- **Steps 4-7** — still `TODO(EM-2619)`, no design delivered yet.
 
 ### Gotcha: the dependent's relation label is not a server field — it's computed from `tendencyCode`
 

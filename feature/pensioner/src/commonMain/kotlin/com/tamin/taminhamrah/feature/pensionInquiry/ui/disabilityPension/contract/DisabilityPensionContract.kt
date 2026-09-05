@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contra
 
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.personal.DisabilityDependentPR
+import com.tamin.taminhamrah.model.personal.DisabilityPersonalInfoPR
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
@@ -10,6 +11,19 @@ import kotlinx.collections.immutable.persistentSetOf
 enum class DisabilityPensionStep {
     Terms,
     Dependents,
+    IdentityContact,
+}
+
+enum class LandlinePhoneError {
+    Blank,
+    InvalidPrefix,
+    InvalidLength,
+}
+
+enum class AddressError {
+    Blank,
+    TooShort,
+    InvalidCharacters,
 }
 
 @Immutable
@@ -28,6 +42,15 @@ data class DisabilityPensionUiState(
     val showDependentsConfirmationError: Boolean = false,
     val showRefreshConfirmDialog: Boolean = false,
     val isRefreshingDependents: Boolean = false,
+    val identityInfo: DisabilityPersonalInfoPR? = null,
+    val identityAgeYears: String = "",
+    val isIdentityDetailsExpanded: Boolean = false,
+    val landlinePhone: String = "",
+    val landlinePhoneError: LandlinePhoneError? = null,
+    val address: String = "",
+    val addressError: AddressError? = null,
+    val isIdentityConfirmed: Boolean = false,
+    val showIdentityConfirmationError: Boolean = false,
     val error: String? = null,
 ) {
     sealed interface PartialState {
@@ -44,6 +67,13 @@ data class DisabilityPensionUiState(
         data class DependentsConfirmationErrorChanged(val show: Boolean) : PartialState
         data class RefreshConfirmDialogVisibilityChanged(val show: Boolean) : PartialState
         data class RefreshingDependentsChanged(val isRefreshing: Boolean) : PartialState
+        data class IdentityLoaded(val info: DisabilityPersonalInfoPR) : PartialState
+        data class IdentityAgeLoaded(val years: String) : PartialState
+        data class IdentityDetailsExpandedChanged(val expanded: Boolean) : PartialState
+        data class LandlinePhoneChanged(val value: String, val error: LandlinePhoneError?) : PartialState
+        data class AddressChanged(val value: String, val error: AddressError?) : PartialState
+        data class IdentityConfirmedChanged(val accepted: Boolean) : PartialState
+        data class IdentityConfirmationErrorChanged(val show: Boolean) : PartialState
         data class Error(val message: String?) : PartialState
     }
 }
@@ -62,6 +92,10 @@ sealed interface DisabilityPensionIntent {
     data object ConfirmRefreshDependents : DisabilityPensionIntent
     data object DismissRefreshConfirm : DisabilityPensionIntent
     data object DependentsResumed : DisabilityPensionIntent
+    data object ToggleIdentityDetails : DisabilityPensionIntent
+    data class LandlinePhoneChanged(val value: String) : DisabilityPensionIntent
+    data class AddressChanged(val value: String) : DisabilityPensionIntent
+    data class IdentityConfirmedChanged(val accepted: Boolean) : DisabilityPensionIntent
 }
 
 sealed interface DisabilityPensionEvent {

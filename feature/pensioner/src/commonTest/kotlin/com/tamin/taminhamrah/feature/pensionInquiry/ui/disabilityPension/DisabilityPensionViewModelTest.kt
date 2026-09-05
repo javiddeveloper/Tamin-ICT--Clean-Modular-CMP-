@@ -1,9 +1,11 @@
 package com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension
 
 import app.cash.turbine.test
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.AddressError
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionEvent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionIntent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionStep
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.LandlinePhoneError
 import com.tamin.taminhamrah.model.addDependent.BranchDN
 import com.tamin.taminhamrah.model.addDependent.DependentInfoDN
 import com.tamin.taminhamrah.model.addDependent.FamilyRelationshipDN
@@ -32,6 +34,7 @@ import com.tamin.taminhamrah.model.pension.retirement.RetirementSaveDocumentDN
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDN
 import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
+import com.tamin.taminhamrah.model.personal.DisabilityPersonalDN
 import com.tamin.taminhamrah.model.personal.DisabilityPersonalInfoDN
 import com.tamin.taminhamrah.model.personal.GirlSurvivorConditionDN
 import com.tamin.taminhamrah.model.personal.InsuredDocDN
@@ -52,6 +55,7 @@ import com.tamin.taminhamrah.repository.pension.PensionRepository
 import com.tamin.taminhamrah.repository.personal.PersonalRepository
 import com.tamin.taminhamrah.useCases.addDependent.RefreshDependentsUseCase
 import com.tamin.taminhamrah.useCases.pension.GetDisabilityPersonalInfoUseCase
+import com.tamin.taminhamrah.useCases.pension.GetUserAgeUseCase
 import com.tamin.taminhamrah.useCases.personal.GetDisabilityDependentInfoUseCase
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -97,6 +101,7 @@ class DisabilityPensionViewModelTest {
         getDisabilityPersonalInfoUseCase = GetDisabilityPersonalInfoUseCase(pensionRepository),
         getDisabilityDependentInfoUseCase = GetDisabilityDependentInfoUseCase(personalRepository),
         refreshDependentsUseCase = RefreshDependentsUseCase(addDependentRepository),
+        getUserAgeUseCase = GetUserAgeUseCase(pensionRepository),
     )
 
     @Test
@@ -240,6 +245,103 @@ class DisabilityPensionViewModelTest {
 
         assertEquals(1, addDependentRepository.refreshDependentsCallCount)
     }
+
+    @Test
+    fun whenInitLoads_identityInfoAndAgeAreResolvedFromPersonalInfoAndUserAgeUseCase() = runTest(testDispatcher) {
+        pensionRepository.disabilityPersonalInfoResult = DisabilityPersonalInfoDN(
+            branch = null,
+            branchName = null,
+            confirmed = null,
+            insuranceId = "0019273648",
+            mobileNumber = "09143018372",
+            personal = DisabilityPersonalDN(
+                firstName = "رضا",
+                lastName = "دریکوند",
+                nationalId = "4060434061",
+                fatherName = "علی‌محمد",
+                idCardNumber = "158",
+                cityOfIssue = "مشهد",
+                dateOfBirth = 400000000000L,
+                genderDesc = "مرد",
+            ),
+            provinceName = null,
+            work = null,
+            yearsAge = null,
+            monthsAge = null,
+            daysAge = null,
+            strAge = null,
+        )
+        pensionRepository.userAgeResult = AgeDN(age = "42,3,10", birthDate = null)
+        viewModel = buildViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertEquals("0019273648", state.identityInfo?.insuranceId)
+        assertEquals("رضا", state.identityInfo?.personal?.firstName)
+        assertEquals("42", state.identityAgeYears)
+    }
+
+    @Test
+    fun whenIdentityContactNextClickedWithBlankFields_showsValidationErrorsAndDoesNotConfirm() = runTest(testDispatcher) {
+        viewModel = buildViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+        advanceToIdentityContactStep()
+
+        viewModel.uiState.test {
+            viewModel.sendIntent(DisabilityPensionIntent.NextStepClicked)
+            var state = awaitItem()
+            while (state.landlinePhoneError == null) state = awaitItem()
+
+            assertEquals(LandlinePhoneError.Blank, state.landlinePhoneError)
+            assertEquals(AddressError.Blank, state.addressError)
+            assertFalse(state.showIdentityConfirmationError)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenIdentityContactFieldsValidButNotConfirmed_showsConfirmationError() = runTest(testDispatcher) {
+        viewModel = buildViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+        advanceToIdentityContactStep()
+        viewModel.sendIntent(DisabilityPensionIntent.LandlinePhoneChanged("05832245678"))
+        viewModel.sendIntent(DisabilityPensionIntent.AddressChanged("مشهد، بلوار وکیل‌آباد، نبش وکیل‌آباد ۵۲"))
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.uiState.test {
+            viewModel.sendIntent(DisabilityPensionIntent.NextStepClicked)
+            var state = awaitItem()
+            while (!state.showIdentityConfirmationError) state = awaitItem()
+
+            assertEquals(null, state.landlinePhoneError)
+            assertEquals(null, state.addressError)
+            assertTrue(state.showIdentityConfirmationError)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenToggleIdentityDetails_flipsExpandedState() = runTest(testDispatcher) {
+        viewModel = buildViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.sendIntent(DisabilityPensionIntent.ToggleIdentityDetails)
+        testDispatcher.scheduler.advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.isIdentityDetailsExpanded)
+
+        viewModel.sendIntent(DisabilityPensionIntent.ToggleIdentityDetails)
+        testDispatcher.scheduler.advanceUntilIdle()
+        assertFalse(viewModel.uiState.value.isIdentityDetailsExpanded)
+    }
+
+    private suspend fun advanceToIdentityContactStep() {
+        viewModel.sendIntent(DisabilityPensionIntent.TermsAcceptedChanged(true))
+        viewModel.sendIntent(DisabilityPensionIntent.NextStepClicked)
+        testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.sendIntent(DisabilityPensionIntent.DependentsListConfirmedChanged(true))
+        viewModel.sendIntent(DisabilityPensionIntent.NextStepClicked)
+        testDispatcher.scheduler.advanceUntilIdle()
+    }
 }
 
 private class FakeDisabilityPensionRepository : PensionRepository {
@@ -258,6 +360,9 @@ private class FakeDisabilityPensionRepository : PensionRepository {
         strAge = null,
     )
 
+    var userAgeResult: AgeDN = AgeDN(age = "42,3,10", birthDate = null)
+    var lastUserAgeFilters: List<ApiFilterDN>? = null
+
     override suspend fun getDisabilityPersonalInfo(): Flow<DisabilityPersonalInfoDN> = flow {
         emit(disabilityPersonalInfoResult)
     }
@@ -272,8 +377,10 @@ private class FakeDisabilityPensionRepository : PensionRepository {
         error("not used in DisabilityPensionViewModel")
     override suspend fun getPensionerPayRoll(filters: List<ApiFilterDN>): Flow<List<PayRollDN>> =
         error("not used in DisabilityPensionViewModel")
-    override suspend fun getUserAge(filters: List<ApiFilterDN>): Flow<AgeDN> =
-        error("not used in DisabilityPensionViewModel")
+    override suspend fun getUserAge(filters: List<ApiFilterDN>): Flow<AgeDN> = flow {
+        lastUserAgeFilters = filters
+        emit(userAgeResult)
+    }
     override suspend fun pensionerPayRollPDF(filters: List<ApiFilterDN>): Flow<PdfDownloadDN> =
         error("not used in DisabilityPensionViewModel")
     override suspend fun getEdictReportPDF(filters: List<ApiFilterDN>): Flow<PdfDownloadDN> =
