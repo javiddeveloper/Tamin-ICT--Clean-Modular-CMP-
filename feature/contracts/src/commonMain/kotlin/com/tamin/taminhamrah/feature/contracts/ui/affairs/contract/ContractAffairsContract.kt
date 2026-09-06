@@ -135,9 +135,12 @@ sealed interface ContractAffairsIntent {
     data object RetryNextPage : ContractAffairsIntent
     data object RefreshContracts : ContractAffairsIntent
 
-    data class OnSearchContractNumberChanged(val value: String) : ContractAffairsIntent
-    data class OnSearchFilterChanged(val filter: ContractSearchFilter) : ContractAffairsIntent
-    data object ApplySearch : ContractAffairsIntent
+    /** جستجو — the criteria the sheet holds locally, applied only when the button is tapped. */
+    data class ApplySearch(
+        val contractNumber: String,
+        val filter: ContractSearchFilter,
+    ) : ContractAffairsIntent
+
     data object ClearSearch : ContractAffairsIntent
 
     data class OnNewContractServiceClick(val service: MainServiceDN) : ContractAffairsIntent

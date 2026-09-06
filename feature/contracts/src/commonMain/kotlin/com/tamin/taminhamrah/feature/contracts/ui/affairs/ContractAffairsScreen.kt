@@ -36,10 +36,14 @@ import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractAff
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractAffairsHeader
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractAffairsItemCard
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractAffairsListSkeleton
+import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractSearchEmptyState
+import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractSearchFilterChipRow
+import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractSearchSheet
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.contract.ContractAffairsEvent
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.contract.ContractAffairsIntent
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.contract.ContractAffairsUiState
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.contract.ContractOperation
+import com.tamin.taminhamrah.feature.contracts.ui.affairs.contract.ContractSearchFilter
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
@@ -133,6 +137,7 @@ internal fun ContractAffairsScreen(
     }
     val listState = rememberLazyListState()
     var showNewContractSheet by remember { mutableStateOf(false) }
+    var showSearchSheet by remember { mutableStateOf(false) }
 
     val staggerState = rememberStaggeredEntranceState(key = uiState.contracts.size)
 
@@ -169,6 +174,12 @@ internal fun ContractAffairsScreen(
                     ContractAffairsListSkeleton()
                 }
 
+                uiState.contracts.isEmpty() && uiState.isSearchActive -> item {
+                    ContractSearchEmptyState(
+                        modifier = Modifier.padding(horizontal = Spacing.lg),
+                    )
+                }
+
                 uiState.contracts.isEmpty() -> item {
                     EmptyStateMessage(
                         icon = Icons.Outlined.Description,
@@ -182,38 +193,51 @@ internal fun ContractAffairsScreen(
                     )
                 }
 
-                else -> itemsIndexed(
-                    uiState.contracts,
-                    key = { _, contract -> contract.contractNumber },
-                ) { index, contract ->
-                    ContractAffairsItemCard(
-                        item = contract,
-                        onOperationsClicked = {
-                            onIntent(ContractAffairsIntent.ShowContractOperations(contract))
-                        },
-                        onPrimaryActionClicked = {
-                            onIntent(
-                                ContractAffairsIntent.OnOperationClick(
-                                    contract = contract,
-                                    operation = primaryOperationFor(contract),
-                                ),
+                else -> {
+                    if (uiState.isSearchActive) {
+                        item {
+                            ContractSearchFilterChipRow(
+                                contractNumber = uiState.searchContractNumber,
+                                filter = uiState.searchFilter,
+                                onClear = { onIntent(ContractAffairsIntent.ClearSearch) },
+                                modifier = Modifier.padding(horizontal = Spacing.lg),
                             )
-                        },
-                        modifier = Modifier
-                            .padding(horizontal = Spacing.lg)
-                            .staggeredItemEntrance(
-                                index = index,
-                                key = contract.contractNumber,
-                                state = staggerState,
-                            ),
-                    )
+                        }
+                    }
+
+                    itemsIndexed(
+                        uiState.contracts,
+                        key = { _, contract -> contract.contractNumber },
+                    ) { index, contract ->
+                        ContractAffairsItemCard(
+                            item = contract,
+                            onOperationsClicked = {
+                                onIntent(ContractAffairsIntent.ShowContractOperations(contract))
+                            },
+                            onPrimaryActionClicked = {
+                                onIntent(
+                                    ContractAffairsIntent.OnOperationClick(
+                                        contract = contract,
+                                        operation = primaryOperationFor(contract),
+                                    ),
+                                )
+                            },
+                            modifier = Modifier
+                                .padding(horizontal = Spacing.lg)
+                                .staggeredItemEntrance(
+                                    index = index,
+                                    key = contract.contractNumber,
+                                    state = staggerState,
+                                ),
+                        )
+                    }
                 }
             }
         }
 
         ContractAffairsHeader(
             onBackClicked = onBackClicked,
-            onSearchClicked = { /* TODO(ui): open جستجوی قرارداد sheet in a later step */ },
+            onSearchClicked = { showSearchSheet = true },
             topAreaState = topArea,
             modifier = Modifier
                 .align(Alignment.TopCenter)
@@ -229,6 +253,22 @@ internal fun ContractAffairsScreen(
                 showNewContractSheet = false
             },
             onDismiss = { showNewContractSheet = false },
+        )
+    }
+
+    if (showSearchSheet) {
+        ContractSearchSheet(
+            contractNumber = uiState.searchContractNumber,
+            filter = uiState.searchFilter,
+            onApply = { number, selectedFilter ->
+                onIntent(ContractAffairsIntent.ApplySearch(number, selectedFilter))
+                showSearchSheet = false
+            },
+            onClear = {
+                onIntent(ContractAffairsIntent.ClearSearch)
+                showSearchSheet = false
+            },
+            onDismiss = { showSearchSheet = false },
         )
     }
 }
@@ -342,6 +382,43 @@ private fun PreviewContractAffairsScreenEmpty() {
         AppToastHost {
             ContractAffairsScreen(
                 uiState = ContractAffairsUiState(contracts = persistentListOf()),
+                onIntent = {},
+                onBackClicked = {},
+            )
+        }
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PreviewContractAffairsScreenSearchNoResult() {
+    PreviewRtlThemeContent {
+        AppToastHost {
+            ContractAffairsScreen(
+                uiState = ContractAffairsUiState(
+                    contracts = persistentListOf(),
+                    isSearchActive = true,
+                    searchContractNumber = "0000000000",
+                    searchFilter = ContractSearchFilter.OPTIONAL,
+                ),
+                onIntent = {},
+                onBackClicked = {},
+            )
+        }
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PreviewContractAffairsScreenSearchResults() {
+    PreviewRtlThemeContent(darkTheme = true) {
+        AppToastHost {
+            ContractAffairsScreen(
+                uiState = ContractAffairsUiState(
+                    contracts = PreviewMockContracts,
+                    isSearchActive = true,
+                    searchFilter = ContractSearchFilter.FREELANCE,
+                ),
                 onIntent = {},
                 onBackClicked = {},
             )

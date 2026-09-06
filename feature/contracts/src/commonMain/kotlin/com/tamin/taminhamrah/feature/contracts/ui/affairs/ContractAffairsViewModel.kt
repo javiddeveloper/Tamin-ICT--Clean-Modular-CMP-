@@ -77,13 +77,7 @@ class ContractAffairsViewModel(
             ContractAffairsIntent.RetryNextPage -> flow { paginator.retry() }
             ContractAffairsIntent.RefreshContracts -> refreshContracts()
 
-            is ContractAffairsIntent.OnSearchContractNumberChanged ->
-                flowOf(PartialState.SearchChanged(intent.value, uiState.value.searchFilter))
-
-            is ContractAffairsIntent.OnSearchFilterChanged ->
-                flowOf(PartialState.SearchChanged(uiState.value.searchContractNumber, intent.filter))
-
-            ContractAffairsIntent.ApplySearch -> applySearch()
+            is ContractAffairsIntent.ApplySearch -> applySearch(intent)
             ContractAffairsIntent.ClearSearch -> clearSearch()
 
             is ContractAffairsIntent.OnNewContractServiceClick ->
@@ -158,11 +152,12 @@ class ContractAffairsViewModel(
 
     // ---- جستجوی قرارداد ----
 
-    private fun applySearch(): Flow<PartialState> = flow {
-        val s = uiState.value
-        val active = s.searchContractNumber.isNotBlank() || s.searchFilter != ContractSearchFilter.ALL
+    private fun applySearch(intent: ContractAffairsIntent.ApplySearch): Flow<PartialState> = flow {
+        val contractNumber = intent.contractNumber.trim()
+        val active = contractNumber.isNotBlank() || intent.filter != ContractSearchFilter.ALL
+        emit(PartialState.SearchChanged(contractNumber, intent.filter))
         emit(PartialState.SearchApplied(active))
-        paginator.refresh(currentQuery())
+        paginator.refresh(queryFor(contractNumber, intent.filter))
     }
 
     private fun clearSearch(): Flow<PartialState> = flow {
@@ -171,13 +166,15 @@ class ContractAffairsViewModel(
         paginator.refresh(defaultQuery())
     }
 
-    private fun currentQuery(): ApiQueryParamDN {
-        val s = uiState.value
+    private fun currentQuery(): ApiQueryParamDN =
+        queryFor(uiState.value.searchContractNumber, uiState.value.searchFilter)
+
+    private fun queryFor(contractNumber: String, filter: ContractSearchFilter): ApiQueryParamDN {
         val filters = buildList {
-            s.searchContractNumber.trim().takeIf { it.isNotEmpty() }?.let {
+            contractNumber.trim().takeIf { it.isNotEmpty() }?.let {
                 add(ApiFilterDN(FilterProperty.CONTRACT_NUMBER, it, FilterOperator.EQ))
             }
-            s.searchFilter.premiumTypeCode?.let {
+            filter.premiumTypeCode?.let {
                 add(ApiFilterDN(FilterProperty.PREMIUM_TYPE_CODE, it, FilterOperator.EQ))
             }
         }

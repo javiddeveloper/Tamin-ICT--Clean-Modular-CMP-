@@ -2056,7 +2056,7 @@
     <string name="contract_affairs_empty_subtitle">قراردادی برای شما ثبت نشده است</string>
     <string name="contract_affairs_new_contract_sheet_title">انتخاب نوع قرارداد</string>
     <string name="contract_affairs_request_date">تاریخ درخواست</string>
-    <string name="contract_affairs_contract_code">کد قرارداد</string>
+    <string name="contract_affairs_contract_code">شماره قرارداد</string>
     <string name="contract_affairs_premium_rate">نرخ حق بیمه</string>
     <string name="contract_affairs_monthly_wage">دستمزد ماهانه</string>
     <string name="contract_affairs_treatment_support">حمایت درمان</string>
@@ -2068,4 +2068,19 @@
     <string name="contract_affairs_pay_premium">پرداخت حق بیمه</string>
     <string name="contract_affairs_view_contract">مشاهدهٔ قرارداد</string>
     <string name="contract_affairs_deferred_debt">بدهی معوق %1$s دارید؛ این مبلغ به اولین پرداخت اضافه می‌شود.</string>
+    <string name="contract_affairs_search_subtitle">شمارهٔ قرارداد را وارد کنید یا نوع بیمه را انتخاب کنید؛ می‌توانید هر دو را با هم به کار ببرید.</string>
+    <string name="contract_affairs_search_number_label">شمارهٔ قرارداد</string>
+    <string name="contract_affairs_search_number_hint">مثلاً ۴۸۳۲۲۲۲۶۸۶</string>
+    <string name="contract_affairs_search_type_label">نوع بیمه</string>
+    <string name="contract_affairs_search_type_all">همهٔ قراردادها</string>
+    <string name="contract_affairs_search_type_freelance">حرف و مشاغل آزاد</string>
+    <string name="contract_affairs_search_type_optional">اختیاری</string>
+    <string name="contract_affairs_search_type_fraction">تکمیل سوابق کسری از ماه</string>
+    <string name="contract_affairs_search_submit">جستجو</string>
+    <string name="contract_affairs_search_clear">پاک کردن</string>
+    <string name="contract_affairs_search_empty_title">قراردادی پیدا نشد</string>
+    <string name="contract_affairs_search_empty_subtitle">قراردادی با مشخصات واردشده وجود ندارد. شماره یا نوع بیمه را تغییر دهید.</string>
+    <string name="contract_affairs_filter_label">فیلتر:</string>
+    <string name="contract_affairs_filter_clear">حذف فیلتر</string>
+    <string name="contract_affairs_filter_number">شماره</string>
 </resources>
