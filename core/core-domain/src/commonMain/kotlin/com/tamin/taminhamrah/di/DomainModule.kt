@@ -96,6 +96,9 @@ import com.tamin.taminhamrah.useCases.common.GetJobTitleUseCase
 import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetContractsUseCase
 import com.tamin.taminhamrah.useCases.contracts.CalculateFreelanceSalaryUseCase
+import com.tamin.taminhamrah.useCases.contracts.GetOptionalPremiumRangeUseCase
+import com.tamin.taminhamrah.useCases.contracts.CheckRedCrossStatusUseCase
+import com.tamin.taminhamrah.useCases.contracts.CheckMedicalStudentUseCase
 import com.tamin.taminhamrah.useCases.contracts.CalculateOptionalSalaryUseCase
 import com.tamin.taminhamrah.useCases.contracts.CheckInsurancePaymentStatusUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetFreelancePremiumRangeUseCase
@@ -106,7 +109,6 @@ import com.tamin.taminhamrah.useCases.contracts.GetSpcPremiumRatesUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeFreelanceContractByGuardianUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeOptionalContractByGuardianUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeContractUseCase
-import com.tamin.taminhamrah.useCases.contracts.MakeFreelanceContractUseCase
 import com.tamin.taminhamrah.useCases.contracts.SaveContactUseCase
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetHistoryJobInfosUseCase
@@ -356,9 +358,11 @@ val domainModule = module {
     factoryOf(::GetBranchesUseCase)
     factoryOf(::GetSpcPremiumRatesUseCase)
     factoryOf(::GetFreelancePremiumRangeUseCase)
+    factoryOf(::GetOptionalPremiumRangeUseCase)
+    factoryOf(::CheckRedCrossStatusUseCase)
+    factoryOf(::CheckMedicalStudentUseCase)
     factoryOf(::CalculateFreelanceSalaryUseCase)
     factoryOf(::CalculateOptionalSalaryUseCase)
-    factoryOf(::MakeFreelanceContractUseCase)
     factoryOf(::MakeContractUseCase)
     factoryOf(::MakeFreelanceContractByGuardianUseCase)
     factoryOf(::MakeOptionalContractByGuardianUseCase)

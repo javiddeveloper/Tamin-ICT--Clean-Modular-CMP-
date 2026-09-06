@@ -9,6 +9,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import org.jetbrains.compose.resources.StringResource
 
+
 /**
  * State of the کارگاه‌های کارفرما list.
  */
