@@ -3,27 +3,10 @@ package com.tamin.taminhamrah.feature.workshops.ui
 import com.tamin.taminhamrah.model.common.CityDN
 import com.tamin.taminhamrah.model.common.CityListResultDN
 import com.tamin.taminhamrah.model.common.ProvinceDN
-import com.tamin.taminhamrah.model.contracts.BranchDN
-import com.tamin.taminhamrah.model.contracts.ContractDN
-import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
-import com.tamin.taminhamrah.model.contracts.FreelanceContractByGuardianParams
-import com.tamin.taminhamrah.model.contracts.FreelanceContractResultDN
-import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractParams
-import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDN
-import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
-import com.tamin.taminhamrah.model.contracts.FreeJobDN
-import com.tamin.taminhamrah.model.contracts.InsurancePaymentDN
-import com.tamin.taminhamrah.model.contracts.InsurancePaymentParamsDN
-import com.tamin.taminhamrah.model.contracts.OptionalContractByGuardianParams
-import com.tamin.taminhamrah.model.contracts.PremiumRateDN
-import com.tamin.taminhamrah.model.contracts.RegistrationInfoDN
-import com.tamin.taminhamrah.model.contracts.SaveContactRequestDN
-import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeContractListDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeListDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeRequestDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeWorkshopListDN
-import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtQuery
@@ -59,7 +42,6 @@ import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDN
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
 import com.tamin.taminhamrah.repository.CityProvinceRepository
 import com.tamin.taminhamrah.repository.WorkShopsRepository
-import com.tamin.taminhamrah.repository.contracts.ContractsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -93,63 +75,6 @@ internal class FakeCascadeCityProvinceRepository : CityProvinceRepository {
     override fun getCity(cityId: String): Flow<CityDN> = flowOf()
     override fun getProvince(provinceId: String): Flow<ProvinceDN> = flowOf()
     override fun getCitiesByProvince(provinceCode: String): Flow<CityListResultDN> = unused()
-}
-
-internal class FakeCascadeContractsRepository : ContractsRepository {
-    var lastRequestedCityCode: String? = null
-
-    override fun getBranches(cityCode: String): Flow<List<BranchDN>> = flow {
-        lastRequestedCityCode = cityCode
-        emit(
-            listOf(
-                BranchDN(
-                    code = "123",
-                    name = "شعبه ۱ تهران",
-                    branchAddress = "خیابان ولیعصر",
-                    cityCode = cityCode,
-                    minCode = null,
-                    maxCode = null,
-                ),
-            ),
-        )
-    }
-
-    override fun getContracts(query: ApiQueryParamDN?): Flow<List<ContractDN>> = unused()
-    override fun getContractsByPremiumType(premiumTypeCode: String): Flow<List<ContractDN>> = unused()
-    override fun getStudentInsuranceContracts(): Flow<List<ContractDN>> = unused()
-    override fun getRegistrationInfo(): Flow<RegistrationInfoDN> = unused()
-    override fun getSpcPremiumRates(): Flow<List<PremiumRateDN>> = unused()
-    override fun getFreeJobWages(
-        page: Int,
-        searchQuery: String?
-    ): Flow<PagedListDN<FreeJobDN>> = unused()
-
-    override fun getFreelancePremiumRange(
-        params: FreelancePremiumRangeParams
-    ): Flow<FreelancePremiumRangeDN> = unused()
-
-    override fun getOptionalPremiumRange(): Flow<FreelancePremiumRangeDN> = unused()
-
-    override fun checkRedCrossStatus(): Flow<String> = unused()
-
-    override fun checkMedicalStudent(): Flow<String> = unused()
-
-    override fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Flow<Long> = unused()
-    override fun calculateOptionalSalary(premiumRateCode: String): Flow<Long> = unused()
-    override fun makeFreelanceContract(
-        params: FreelanceMakeContractParams
-    ): Flow<FreelanceContractResultDN> = unused()
-    override fun makeContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN> = unused()
-    override fun makeFreelanceContractByGuardian(
-        params: FreelanceContractByGuardianParams
-    ): Flow<FreelanceContractResultDN> = unused()
-    override fun makeOptionalContractByGuardian(
-        params: OptionalContractByGuardianParams
-    ): Flow<FreelanceContractResultDN> = unused()
-    override fun getInsurancePayment(params: InsurancePaymentParamsDN): Flow<InsurancePaymentDN> = unused()
-    override fun checkInsurancePaymentStatus(systemType: String): Flow<Any?> = unused()
-    override fun uploadImage(request: UploadImageRequestDN): Flow<String> = unused()
-    override fun saveContact(request: SaveContactRequestDN): Flow<Any?> = unused()
 }
 
 internal class FakeCascadeWorkShopsRepository : WorkShopsRepository {
