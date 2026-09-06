@@ -25,7 +25,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,12 +46,6 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.active_relation_search_placeholder
 import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.no_items_found
-
-@Immutable
-data class TaminOptionSheetItem(
-    val id: String,
-    val label: String,
-)
 
 /**
  * Modal sheet for picking one labeled option from a (possibly long) list.

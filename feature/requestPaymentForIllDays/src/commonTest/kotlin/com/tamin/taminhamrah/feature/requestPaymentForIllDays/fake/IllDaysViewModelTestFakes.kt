@@ -24,6 +24,7 @@ import com.tamin.taminhamrah.model.requestPaymentForIllDays.CovidResultDN
 import com.tamin.taminhamrah.model.requestPaymentForIllDays.IllDaysBranchWorkshopDN
 import com.tamin.taminhamrah.model.requestPaymentForIllDays.IllDaysInsuredMainInfoDN
 import com.tamin.taminhamrah.model.requestPaymentForIllDays.SaveShortTermIllnessRequestDN
+import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.repository.CityProvinceRepository
 import com.tamin.taminhamrah.repository.contracts.ContractsRepository
 import com.tamin.taminhamrah.repository.requestPaymentForIllDays.RequestPaymentForIllDaysRepository
@@ -117,8 +118,18 @@ class FakeIllDaysContractsRepository : ContractsRepository {
     override fun getStudentInsuranceContracts(): Flow<List<ContractDN>> = flowOf(emptyList())
     override fun getRegistrationInfo(): Flow<RegistrationInfoDN> = flowOf()
     override fun getSpcPremiumRates(): Flow<List<PremiumRateDN>> = flowOf(emptyList())
-    override fun getFreeJobWages(): Flow<List<FreeJobDN>> = flowOf(emptyList())
+    override fun getFreeJobWages(
+        page: Int,
+        searchQuery: String?
+    ): Flow<PagedListDN<FreeJobDN>>  = flowOf()
+
     override fun getFreelancePremiumRange(params: FreelancePremiumRangeParams): Flow<FreelancePremiumRangeDN> = flowOf()
+    override fun getOptionalPremiumRange(): Flow<FreelancePremiumRangeDN> = flowOf()
+
+    override fun checkRedCrossStatus(): Flow<String> = flowOf()
+
+    override fun checkMedicalStudent(): Flow<String> = flowOf()
+
     override fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Flow<Long> = flowOf(0L)
     override fun calculateOptionalSalary(premiumRateCode: String): Flow<Long> = flowOf(0L)
     override fun makeFreelanceContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN> = flowOf()

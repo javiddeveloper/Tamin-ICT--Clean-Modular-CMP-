@@ -115,10 +115,21 @@ internal class FakeCascadeContractsRepository : ContractsRepository {
     override fun getStudentInsuranceContracts(): Flow<List<ContractDN>> = unused()
     override fun getRegistrationInfo(): Flow<RegistrationInfoDN> = unused()
     override fun getSpcPremiumRates(): Flow<List<PremiumRateDN>> = unused()
-    override fun getFreeJobWages(): Flow<List<FreeJobDN>> = unused()
+    override fun getFreeJobWages(
+        page: Int,
+        searchQuery: String?
+    ): Flow<PagedListDN<FreeJobDN>> = unused()
+
     override fun getFreelancePremiumRange(
         params: FreelancePremiumRangeParams
     ): Flow<FreelancePremiumRangeDN> = unused()
+
+    override fun getOptionalPremiumRange(): Flow<FreelancePremiumRangeDN> = unused()
+
+    override fun checkRedCrossStatus(): Flow<String> = unused()
+
+    override fun checkMedicalStudent(): Flow<String> = unused()
+
     override fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Flow<Long> = unused()
     override fun calculateOptionalSalary(premiumRateCode: String): Flow<Long> = unused()
     override fun makeFreelanceContract(
