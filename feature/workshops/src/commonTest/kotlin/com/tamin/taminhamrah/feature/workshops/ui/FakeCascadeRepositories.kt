@@ -38,6 +38,8 @@ import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDN
 import com.tamin.taminhamrah.model.workshop.DebitReasonDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmissionDN
+import com.tamin.taminhamrah.model.workshop.EmployerContactInfoDN
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
@@ -52,6 +54,8 @@ import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDN
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDN
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderQuery
+import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDN
+import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDN
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
 import com.tamin.taminhamrah.repository.CityProvinceRepository
 import com.tamin.taminhamrah.repository.WorkShopsRepository
@@ -213,6 +217,15 @@ internal class FakeCascadeWorkShopsRepository : WorkShopsRepository {
     override suspend fun verifyLegalRepresentativeTicket(ticket: String): Unit = unusedValue()
     override suspend fun submitLegalRepresentative(ticket: String, request: LegalRepresentativeRequestDN): Unit = unusedValue()
     override suspend fun deleteLegalRepresentative(ticket: String, stakeId: Long): Unit = unusedValue()
+    override suspend fun requestEmployerAgreementTicket(mobile: String, email: String): String = unusedValue()
+    override suspend fun getEmployerAgreementContactInfo(verificationCode: String): EmployerContactInfoDN = unusedValue()
+    override suspend fun getWorkshopsWithoutContract(page: Int): PagedListDN<WorkshopWithoutContractDN> = unusedValue()
+    override suspend fun getWorkshopContractRows(
+        workshopId: String,
+        branchCode: String,
+        page: Int
+    ): PagedListDN<WorkshopContractRowDN> = unusedValue()
+    override suspend fun submitEmployerAgreement(request: EmployerAgreementSubmissionDN): String = unusedValue()
 }
 
 private fun <T> unused(): Flow<T> =
