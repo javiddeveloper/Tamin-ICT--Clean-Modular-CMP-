@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
@@ -26,9 +27,7 @@ import androidx.compose.material.icons.outlined.Assignment
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -37,8 +36,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -66,10 +63,8 @@ import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminText
-import com.tamin.taminhamrah.ui.components.rememberCollapsingHeaderState
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
-import com.tamin.taminhamrah.ui.components.reservedHeight
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
 import com.tamin.taminhamrah.ui.components.toast.AppToastHost
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
@@ -91,8 +86,10 @@ import taminx.core.core_ui.occurrence_exit_confirmation_confirm
 import taminx.core.core_ui.occurrence_exit_confirmation_desc
 import taminx.core.core_ui.occurrence_exit_confirmation_dismiss
 import taminx.core.core_ui.occurrence_exit_confirmation_title
-
-private val HeaderCollapseDistance = 160.dp
+import com.tamin.taminhamrah.ui.toparea.driveTopArea
+import com.tamin.taminhamrah.ui.toparea.rememberMeasuredTopAreaState
+import com.tamin.taminhamrah.ui.toparea.reportTopAreaHeight
+import com.tamin.taminhamrah.ui.toparea.topAreaContentPadding
 
 /** Steps with unsaved input that warrant an "are you sure?" before closing the wizard — mirrors occurrence's set (everything but the first step). */
 private val STEPS_REQUIRING_EXIT_CONFIRMATION = setOf(
@@ -198,10 +195,18 @@ internal fun InspectionScreen(
 ) {
     val taminColors = LocalTaminColors.current
 
-    val collapse = rememberCollapsingHeaderState(HeaderCollapseDistance)
-    var headerHeightPx by remember { mutableIntStateOf(0) }
-    var viewingInspectionNo by remember { mutableStateOf<String?>(null) }
     var showSearchSheet by remember { mutableStateOf(false) }
+
+    val topArea = rememberMeasuredTopAreaState { state ->
+        InspectionHeader(
+            topAreaState = state,
+            onBackClicked = onBackClicked,
+            onSearchClicked = { showSearchSheet = true }
+        )
+    }
+    val listState = rememberLazyListState()
+
+    var viewingInspectionNo by remember { mutableStateOf<String?>(null) }
     var searchCriteria by remember { mutableStateOf(initialSearchCriteria) }
 
     val visibleInspections = remember(uiState.inspections, searchCriteria) {
@@ -219,24 +224,26 @@ internal fun InspectionScreen(
             .background(taminColors.bgPage),
     ) {
         LazyColumn(
+            state = listState,
             overscrollEffect = rememberJellyOverscroll(),
             modifier = Modifier
                 .fillMaxSize()
-                .nestedScroll(collapse.nestedScrollConnection),
-            contentPadding = PaddingValues(
-                bottom = WindowInsets.navigationBars.asPaddingValues()
-                    .calculateBottomPadding() + Spacing.lg,
+                .driveTopArea(topArea, listState),
+            contentPadding = topAreaContentPadding(
+                state = topArea,
+                rest = PaddingValues(
+                    bottom = WindowInsets.navigationBars.asPaddingValues()
+                        .calculateBottomPadding() + Spacing.lg,
+                )
             ),
             verticalArrangement = Arrangement.spacedBy(Spacing.lg),
         ) {
-            item {
-                Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
-            }
 
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth()
-                        .padding(horizontal = 16.dp),
+                        .padding(horizontal = 16.dp)
+                        .padding(top = Spacing.lg),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -360,11 +367,11 @@ internal fun InspectionScreen(
         }
 
         InspectionHeader(
-            collapseProgress = collapse.progressProvider,
+            topAreaState = topArea,
             onBackClicked = onBackClicked,
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .onSizeChanged { headerHeightPx = it.height },
+                .reportTopAreaHeight(topArea),
             onSearchClicked = { showSearchSheet = true },
         )
 

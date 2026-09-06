@@ -80,7 +80,7 @@ internal fun IdentityContactStep(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = padding.calculateTopPadding())
+                    .padding(padding)
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = Spacing.lg),
             ) {
@@ -176,7 +176,6 @@ internal fun IdentityContactStep(
                 }
 
                 Spacer(Modifier.height(Spacing.lg))
-                Spacer(Modifier.height(padding.calculateBottomPadding()))
             }
         }
     }

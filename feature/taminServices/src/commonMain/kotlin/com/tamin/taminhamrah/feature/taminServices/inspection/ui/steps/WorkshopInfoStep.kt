@@ -126,7 +126,7 @@ internal fun WorkshopInfoStep(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = padding.calculateTopPadding())
+                .padding(padding)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = Spacing.lg),
         ) {
@@ -284,7 +284,6 @@ internal fun WorkshopInfoStep(
             )
 
             Spacer(Modifier.height(Spacing.lg))
-            Spacer(Modifier.height(padding.calculateBottomPadding()))
         }
         }
     }

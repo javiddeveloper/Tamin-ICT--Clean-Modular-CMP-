@@ -25,10 +25,10 @@ import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import com.tamin.taminhamrah.ui.components.collapseAway
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.toparea.topAreaHide
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
@@ -42,7 +42,7 @@ import taminx.core.core_ui.inspection_title
 internal fun InspectionHeader(
     onBackClicked: () -> Unit,
     modifier: Modifier = Modifier,
-    collapseProgress: () -> Float = { 0f },
+    topAreaState: com.tamin.taminhamrah.ui.toparea.TopAreaState,
     onSearchClicked: () -> Unit = {},
 ) {
     val taminColors = LocalTaminColors.current
@@ -75,19 +75,23 @@ internal fun InspectionHeader(
                 )
             }
         ) {
-            Box(modifier = Modifier.fillMaxWidth()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .topAreaHide(topAreaState)
+            ) {
+                DecorativeBackgroundCircle(
+                    size = 190.dp,
+                    xOffset = 450.dp,
+                    yOffset = (-150).dp
+                )
+                
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .collapseAway(collapseProgress)
                         .padding(horizontal = Spacing.page, vertical = Spacing.smPlus),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    DecorativeBackgroundCircle(
-                        size = 190.dp,
-                        xOffset = 450.dp,
-                        yOffset = (-150).dp
-                    )
                     AnimatedRingHeaderIcon(icon = Icons.Outlined.Assignment)
                     Spacer(Modifier.height(Spacing.sm))
                     Text(
@@ -108,6 +112,7 @@ private fun InspectionHeaderPreviewLight() {
     PreviewRtlThemeContent {
         InspectionHeader(
             onBackClicked = {},
+            topAreaState = com.tamin.taminhamrah.ui.toparea.rememberTopAreaState(224.dp, 64.dp)
         )
     }
 }
@@ -118,6 +123,7 @@ private fun InspectionHeaderPreviewDark() {
     PreviewRtlThemeContent(darkTheme = true) {
         InspectionHeader(
             onBackClicked = {},
+            topAreaState = com.tamin.taminhamrah.ui.toparea.rememberTopAreaState(224.dp, 64.dp)
         )
     }
 }
