@@ -2045,4 +2045,9 @@
     <string name="ill_days_submit_btn">ثبت درخواست</string>
     <string name="ill_days_submit_missing_data">اطلاعات لازم برای ثبت درخواست کامل نیست.</string>
     <string name="ill_days_submit_success_fallback">درخواست با موفقیت ثبت شد.</string>
+
+    <!-- ===================== Contract Affairs Screen ===================== -->
+    <string name="contract_affairs_title">امور قراردادها و پرداخت</string>
+    <string name="contract_affairs_subtitle">لیست قراردادهای بیمه‌شده با سازمان تأمین اجتماعی</string>
+    <string name="contract_affairs_search_title">جستجوی قرارداد</string>
 </resources>
