@@ -2094,6 +2094,16 @@
     <string name="contract_optional_formula_footer">دستمزد ماهیانه مبنای حق بیمه شما بر اساس میزان حق بیمه انتخابی با فرمول «حق بیمه ماهانه انتخابی × ۱۰۰ تقسیم بر ۲۷» محاسبه می‌شود.</string>
     <string name="contract_optional_premium_decrease">کاهش حق بیمه</string>
     <string name="contract_optional_premium_increase">افزایش حق بیمه</string>
+    <string name="contract_optional_hero_reg_confirmed">مشخصات هویتی و شرایط شما برای بیمه اختیاری تأیید شد.</string>
+    <string name="contract_optional_info_definition">بیمه اختیاری ویژه افرادی است که بدون کارفرما و بدون شغل مشخص، می‌خواهند پوشش بازنشستگی، ازکارافتادگی، فوت و درمان را ادامه دهند.</string>
+    <string name="contract_optional_info_treatment_in_rate">در بیمه اختیاری، حمایت درمان داخل نرخ ۲۷٪ است؛ انتخاب جداگانه یا پرداخت سرانه درمان لازم نیست.</string>
+    <string name="contract_optional_eligibility_ok">متقاضی محترم، شما دارای شرایط لازم برای عقد قرارداد بیمه اختیاری هستید.</string>
+    <string name="contract_optional_check_age">سن شما %1$s سال است و در بازه مجاز %2$s تا %3$s سال قرار دارد.</string>
+    <string name="contract_optional_check_age_fallback">سن شما در بازه مجاز %1$s تا %2$s سال قرار دارد.</string>
+    <string name="contract_optional_check_no_active">قرارداد بیمه اختیاری فعالی به نام شما ثبت نشده است.</string>
+    <string name="contract_optional_check_history">سابقه بیمه‌پردازی شما برای انعقاد این قرارداد کافی است.</string>
+    <string name="contract_optional_age_min">۱۸</string>
+    <string name="contract_optional_age_max">۵۰</string>
 
     <string name="contract_step_registration">نام نویسی</string>
     <string name="contract_step_authorization">احراز شرایط انعقاد قرارداد</string>
