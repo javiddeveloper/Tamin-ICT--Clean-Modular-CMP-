@@ -27,6 +27,7 @@ import com.tamin.taminhamrah.feature.taminServices.navigateToOccurrence
 import com.tamin.taminhamrah.feature.taminServices.navigateToInspection
 import com.tamin.taminhamrah.feature.taminServices.navigateToEmployerOnlineServices
 import com.tamin.taminhamrah.feature.taminServices.navigateToSendInsuranceHistoryToInstitutions
+import com.tamin.taminhamrah.feature.workshops.navigateToContractRows
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.navigateToCompleteEmployerInfo
 import com.tamin.taminhamrah.feature.workshops.navigateToLegalRepresentativeWorkshops
@@ -36,6 +37,8 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
     when (flag) {
         FeatureFlag.MERGE_HISTORY -> navigateToHistory()
         FeatureFlag.WORKSHOPS -> navigateToWorkshops()
+        // «اطلاعات پیمان» in the server menu; the screen it opens is titled «ردیف‌های پیمان».
+        FeatureFlag.CONTRACT_INFO -> navigateToContractRows()
         FeatureFlag.COMPLETE_WORKSHOP_INFO -> navigateToCompleteEmployerInfo()
         FeatureFlag.STACK_HOLDER_LIST -> navigateToLegalRepresentativeWorkshops()
         FeatureFlag.CONTRACTS -> navigateToContracts()

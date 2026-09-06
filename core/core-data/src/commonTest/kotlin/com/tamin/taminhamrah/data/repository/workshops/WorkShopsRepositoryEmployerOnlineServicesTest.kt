@@ -174,6 +174,8 @@ class WorkShopsRepositoryEmployerOnlineServicesTest {
         private fun notUsed(): Nothing = error("not exercised by the employer online-services repository tests")
 
         override suspend fun getAllEmployerAgreementByNationalId(query: ApiQueryParamDN): ListData<EmployerAgreementDTO> = notUsed()
+        override suspend fun getEmployerAgreementsByWorkshop(workshopId: String, branchCode: String, query: ApiQueryParamDN): ListData<EmployerAgreementDTO> = notUsed()
+        override suspend fun getWorkshopContracts(workshopId: String, branchCode: String, query: ApiQueryParamDN): ListData<WorkshopContractDTO> = notUsed()
         override suspend fun getWorkshopPaymentSheets(query: ApiQueryParamDN): ListData<PaymentSheetDTO> = notUsed()
         override suspend fun getDebitReasons(query: ApiQueryParamDN): ListData<DebitReasonDTO> = notUsed()
         override suspend fun getWorkshopDebitList(workshopId: String, branchCode: String, query: ApiQueryParamDN): ListData<WorkShopDebtDTO> = notUsed()

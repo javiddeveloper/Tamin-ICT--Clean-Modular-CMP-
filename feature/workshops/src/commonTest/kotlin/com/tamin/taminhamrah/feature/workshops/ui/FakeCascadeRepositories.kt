@@ -20,6 +20,7 @@ import com.tamin.taminhamrah.model.workshop.DebitPaymentDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDN
 import com.tamin.taminhamrah.model.workshop.DebitReasonDN
+import com.tamin.taminhamrah.model.workshop.ContractRowQuery
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmissionDN
 import com.tamin.taminhamrah.model.workshop.EmployerContactInfoDN
@@ -28,6 +29,7 @@ import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetQuery
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
+import com.tamin.taminhamrah.model.workshop.WorkshopContractDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDN
 import com.tamin.taminhamrah.model.workshop.WorkshopListQuery
@@ -79,6 +81,12 @@ internal class FakeCascadeCityProvinceRepository : CityProvinceRepository {
 
 internal class FakeCascadeWorkShopsRepository : WorkShopsRepository {
     override suspend fun getEmployerAgreements(query: WorkshopListQuery): PagedListDN<EmployerAgreementDN> = unusedValue()
+    override suspend fun getContractRowsWithAgreement(
+        query: ContractRowQuery
+    ): PagedListDN<EmployerAgreementDN> = unusedValue()
+    override suspend fun getContractRowsWithoutAgreement(
+        query: ContractRowQuery
+    ): PagedListDN<WorkshopContractDN> = unusedValue()
     override suspend fun getPaymentSheets(query: PaymentSheetQuery): PagedListDN<PaymentSheetDN> = unusedValue()
     override suspend fun getDebitReasons(page: Int): PagedListDN<DebitReasonDN> = unusedValue()
     override suspend fun getWorkshopDebits(
