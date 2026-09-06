@@ -191,6 +191,46 @@ class PagedListStateTest {
         assertTrue(state.items.isEmpty())
         assertTrue(state.isEmpty)
     }
+
+    // --------------------------------------------------------------- failure state
+
+    /**
+     * A failed list is not an empty one.
+     *
+     * These two were indistinguishable before `isFailed` existed: neither `isFirstLoad` nor
+     * `isEmpty` matched a failure with no rows, so the list rendered zero items and the page came
+     * out blank — a 404 looked exactly like a workshop that genuinely has no rows.
+     */
+    @Test
+    fun `a failure with no rows is failed and not empty`() {
+        val state = PagedListState<String>().loading().failed("boom")
+
+        assertTrue(state.isFailed)
+        assertFalse(state.isEmpty)
+        assertFalse(state.isFirstLoad)
+    }
+
+    @Test
+    fun `an empty success is empty and not failed`() {
+        val state = PagedListState<String>()
+            .loading()
+            .loaded(PagedListDN<String>(emptyList(), total = 0), isFirstPage = true) { it }
+
+        assertTrue(state.isEmpty)
+        assertFalse(state.isFailed)
+    }
+
+    /** A failed *next* page keeps what already arrived — only the footer stops. */
+    @Test
+    fun `a failure with rows already shown is not failed`() {
+        val loaded = PagedListState<String>()
+            .loading()
+            .loaded(PagedListDN(listOf("a", "b"), total = 99), isFirstPage = true) { it }
+        val state = loaded.loadingMore().failed("boom")
+
+        assertFalse(state.isFailed)
+        assertEquals(2, state.items.size)
+    }
 }
 
 private fun <T> List<T>.toImmutable() = toImmutableList()

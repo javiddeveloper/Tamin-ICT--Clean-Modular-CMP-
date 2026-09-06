@@ -173,6 +173,8 @@ import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenReportPdfUseCas
 import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenRequestInfoUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenWorkshopInfoUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetDebitObjectionPdfUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetContractRowsWithAgreementUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetContractRowsWithoutAgreementUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetDebitReasonsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetDebitTurnoverPdfUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetDemandDocumentsUseCase
@@ -407,6 +409,8 @@ val domainModule = module {
     factoryOf(::CheckUserIsNewUseCase)
     // کارگاه‌های کارفرما — the list, then one group per action it launches
     factoryOf(::GetEmployerAgreementsUseCase)
+    factoryOf(::GetContractRowsWithAgreementUseCase)
+    factoryOf(::GetContractRowsWithoutAgreementUseCase)
     factoryOf(::GetPaymentSheetsUseCase)
     factoryOf(::GetDebitReasonsUseCase)
     factoryOf(::GetWorkshopDebitsUseCase)
