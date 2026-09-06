@@ -600,6 +600,7 @@ private fun DisabilityPensionBottomBar(
                         enabled = !state.isSubmitting,
                         isLoading = state.isSubmitting,
                         modifier = Modifier.weight(1f),
+                        background = LocalTaminColors.current.successGradient
                     )
                 }
             }

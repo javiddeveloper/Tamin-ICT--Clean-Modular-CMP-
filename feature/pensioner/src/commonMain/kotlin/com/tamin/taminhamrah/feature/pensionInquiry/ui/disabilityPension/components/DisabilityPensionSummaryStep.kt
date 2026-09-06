@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -193,16 +194,16 @@ private fun SummaryReviewRow(
             .clip(RoundedCornerShape(CornerRadius.lg))
             .background(colors.bgPage)
             .clickable(onClick = onClick)
-            .padding(horizontal = Spacing.smd, vertical = Spacing.sm),
+            .padding(horizontal = Spacing.smd, vertical = Spacing.smPlus),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
 
         Box(
             modifier = Modifier
-                .size(IconSize.medium - Spacing.xs)
-                .clip(RoundedCornerShape(CornerRadius.md))
-                .background(colors.greenText),
+                .size(IconSize.medium)
+                .clip(RoundedCornerShape(CornerRadius.full))
+                .background(colors.successGradient),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
