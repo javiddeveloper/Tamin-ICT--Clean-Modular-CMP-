@@ -144,7 +144,7 @@ fun DisabilityPensionDependentsStep(
 
             if (state.showDependentsConfirmationError) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
                     horizontalArrangement = Arrangement.spacedBy(Spacing.xs, Alignment.Start),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {

@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionUiState
 import com.tamin.taminhamrah.ui.components.BannerCard
 import com.tamin.taminhamrah.ui.components.BannerType
@@ -107,7 +108,7 @@ fun DisabilityPensionTermsStep(
 
             if (state.showTermsValidationError) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(top = Spacing.xs),
                     horizontalArrangement = Arrangement.spacedBy(Spacing.xs, Alignment.Start),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
