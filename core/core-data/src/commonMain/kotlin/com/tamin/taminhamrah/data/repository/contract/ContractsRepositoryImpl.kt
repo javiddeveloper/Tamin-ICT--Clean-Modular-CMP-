@@ -6,8 +6,13 @@ import com.tamin.taminhamrah.data.local.dao.RegistrationInfoDao
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toDto
 import com.tamin.taminhamrah.data.mapper.toEntity
+import com.tamin.taminhamrah.data.mapper.toRequestDto
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSource
 import com.tamin.taminhamrah.model.contracts.BranchDN
+import com.tamin.taminhamrah.model.contracts.CancelContractParamsDN
+import com.tamin.taminhamrah.model.contracts.ContractPaymentHistoryItemDN
+import com.tamin.taminhamrah.model.contracts.ContractPremiumType
+import com.tamin.taminhamrah.model.contracts.ContractStateDN
 import com.tamin.taminhamrah.model.contracts.FreelanceContractByGuardianParams
 import com.tamin.taminhamrah.model.contracts.OptionalContractByGuardianParams
 import com.tamin.taminhamrah.model.contracts.ContractDN
@@ -23,6 +28,8 @@ import com.tamin.taminhamrah.model.contracts.PremiumRateDN
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDN
 import com.tamin.taminhamrah.model.contracts.SaveContactRequestDN
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
+import com.tamin.taminhamrah.model.paging.PageDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.FilterOperator
@@ -67,6 +74,40 @@ class ContractsRepositoryImpl(
                 }
             )
         }.distinctUntilChanged()
+
+    override fun getContractsPage(query: ApiQueryParamDN): Flow<PageDN<ContractDN>> = flow {
+        val response = contractsRemoteDataSource.getContracts(query)
+        emit(
+            PageDN(
+                items = response.list.orEmpty().map { it.toDomain() },
+                total = response.total,
+            ),
+        )
+    }
+
+    override fun getContractStates(): Flow<List<ContractStateDN>> = flow {
+        val response = contractsRemoteDataSource.getContractStates(contractStatesQuery())
+        emit(response.list.orEmpty().map { it.toDomain() })
+    }
+
+    override fun cancelContract(params: CancelContractParamsDN): Flow<Unit> = flow {
+        contractsRemoteDataSource.cancelContract(
+            premiumType = params.premiumType,
+            stateCode = params.stateCode,
+            request = params.toRequestDto(),
+        )
+        emit(Unit)
+    }
+
+    override fun getContractPaymentHistory(
+        contractNumber: String,
+    ): Flow<List<ContractPaymentHistoryItemDN>> = flow {
+        emit(contractsRemoteDataSource.getContractPaymentHistory(contractNumber).map { it.toDomain() })
+    }
+
+    override fun downloadContractReport(premiumType: ContractPremiumType): Flow<PdfDownloadDN> = flow {
+        emit(contractsRemoteDataSource.downloadContractReport(premiumType).toDomain())
+    }
 
     override fun getContractsByPremiumType(premiumTypeCode: String): Flow<List<ContractDN>> =
         getContracts(contractListQuery(premiumTypeCode))
@@ -229,6 +270,14 @@ class ContractsRepositoryImpl(
 
     private fun freeJobWagesQuery(): ApiQueryParamDN = ApiQueryParamDN(
         page = 1,
+        start = 0,
+        limit = 100,
+    )
+
+    // list-self-contract-state is itself paged (total ~24); ask for a page large enough to hold
+    // every termination reason in one round-trip, matching how the picker consumes it.
+    private fun contractStatesQuery(): ApiQueryParamDN = ApiQueryParamDN(
+        page = 0,
         start = 0,
         limit = 100,
     )

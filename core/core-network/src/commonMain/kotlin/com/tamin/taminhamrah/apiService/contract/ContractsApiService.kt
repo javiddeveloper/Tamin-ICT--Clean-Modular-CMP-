@@ -1,8 +1,10 @@
 package com.tamin.taminhamrah.apiService.contract
 
 import com.tamin.taminhamrah.model.contracts.BranchDTO
+import com.tamin.taminhamrah.model.contracts.CancelContractRequestDTO
 import com.tamin.taminhamrah.model.contracts.ContractDTO
 import com.tamin.taminhamrah.model.contracts.ContractByGuardianRequestDTO
+import com.tamin.taminhamrah.model.contracts.ContractStateDTO
 import com.tamin.taminhamrah.model.contracts.FreelanceContractResultDTO
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractRequestDTO
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDTO
@@ -18,10 +20,14 @@ import com.tamin.taminhamrah.tools.BaseDTO
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.POST
+import de.jensklingenberg.ktorfit.http.PUT
 import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.Query
 import de.jensklingenberg.ktorfit.http.QueryMap
+import de.jensklingenberg.ktorfit.http.Streaming
 import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.statement.HttpStatement
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 
 interface ContractsApiService {
@@ -116,4 +122,53 @@ interface ContractsApiService {
     suspend fun saveContact(
         @Body request: SaveContactRequestDTO,
     ): BaseDTO<JsonElement>
+
+    // ---- امور قراردادها و پرداخت (contract operations) ----
+
+    /** علت خاتمه قرارداد — reasons list shown before cancelling a contract. */
+    @GET("special-insured-services/list-self-contract-state")
+    suspend fun getContractStates(
+        @QueryMap parameters: Map<String, String>,
+    ): BaseDTO<ListData<ContractStateDTO>>
+
+    /** غیرفعال کردن قرارداد for a بیمه اختیاری contract. Path segment is the reason code. */
+    @PUT("special-insured-services/update-self-contract-state/{stateCode}")
+    suspend fun cancelOptionalContract(
+        @Path("stateCode") stateCode: Int,
+        @Body request: CancelContractRequestDTO,
+    ): BaseDTO<JsonElement>
+
+    /** غیرفعال کردن قرارداد for a حرف و مشاغل آزاد contract. Path segment is the reason code. */
+    @PUT("special-insured-services/freelance-update-self-contract-state/{stateCode}")
+    suspend fun cancelFreelanceContract(
+        @Path("stateCode") stateCode: Int,
+        @Body request: CancelContractRequestDTO,
+    ): BaseDTO<JsonElement>
+
+    /** مشاهده پرداخت‌ها — payment history head for one contract (rows are positional arrays). */
+    @GET("special-insured-services/freelance-payment-history-head-with-contractNumber/{contractNumber}")
+    suspend fun getContractPaymentHistory(
+        @Path("contractNumber") contractNumber: String,
+    ): BaseDTO<ListData<JsonArray>>
+
+    /** مشاهده قرارداد PDF — بیمه اختیاری. `timestamp` is a cache-busting path segment. */
+    @Streaming
+    @GET("special-insured-services/contract-report/{timestamp}")
+    suspend fun getOptionalContractReport(
+        @Path("timestamp") timestamp: Long,
+    ): HttpStatement
+
+    /** مشاهده قرارداد PDF — حرف و مشاغل آزاد. */
+    @Streaming
+    @GET("special-insured-services/freelance-contract-report/{timestamp}")
+    suspend fun getFreelanceContractReport(
+        @Path("timestamp") timestamp: Long,
+    ): HttpStatement
+
+    /** مشاهده قرارداد PDF — تکمیل سوابق کسری از ماه. */
+    @Streaming
+    @GET("fraction-special-insured-services/contract-report/{timestamp}")
+    suspend fun getFractionContractReport(
+        @Path("timestamp") timestamp: Long,
+    ): HttpStatement
 }

@@ -95,6 +95,11 @@ import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.common.GetJobTitleUseCase
 import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetContractsUseCase
+import com.tamin.taminhamrah.useCases.contracts.GetContractsPageUseCase
+import com.tamin.taminhamrah.useCases.contracts.GetContractStatesUseCase
+import com.tamin.taminhamrah.useCases.contracts.CancelContractUseCase
+import com.tamin.taminhamrah.useCases.contracts.GetContractPaymentHistoryUseCase
+import com.tamin.taminhamrah.useCases.contracts.DownloadContractReportUseCase
 import com.tamin.taminhamrah.useCases.contracts.CalculateFreelanceSalaryUseCase
 import com.tamin.taminhamrah.useCases.contracts.CalculateOptionalSalaryUseCase
 import com.tamin.taminhamrah.useCases.contracts.CheckInsurancePaymentStatusUseCase
@@ -350,6 +355,11 @@ val domainModule = module {
     factoryOf(::DeleteMyRequestUseCase)
     factoryOf(::InboxInquiryLicenseUseCase)
     factoryOf(::GetContractsUseCase)
+    factoryOf(::GetContractsPageUseCase)
+    factoryOf(::GetContractStatesUseCase)
+    factoryOf(::CancelContractUseCase)
+    factoryOf(::GetContractPaymentHistoryUseCase)
+    factoryOf(::DownloadContractReportUseCase)
     factoryOf(::GetRegistrationInfoUseCase)
     factoryOf(::GetBranchesUseCase)
     factoryOf(::GetSpcPremiumRatesUseCase)

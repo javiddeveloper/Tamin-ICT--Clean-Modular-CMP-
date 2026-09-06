@@ -2,8 +2,12 @@ package com.tamin.taminhamrah.dataSource.contracts
 
 import com.tamin.taminhamrah.apiService.contract.ContractsApiService
 import com.tamin.taminhamrah.model.contracts.BranchDTO
+import com.tamin.taminhamrah.model.contracts.CancelContractRequestDTO
 import com.tamin.taminhamrah.model.contracts.ContractDTO
 import com.tamin.taminhamrah.model.contracts.ContractByGuardianRequestDTO
+import com.tamin.taminhamrah.model.contracts.ContractPaymentHistoryItemDTO
+import com.tamin.taminhamrah.model.contracts.ContractPremiumType
+import com.tamin.taminhamrah.model.contracts.ContractStateDTO
 import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
 import com.tamin.taminhamrah.model.contracts.FreelanceContractResultDTO
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractRequestDTO
@@ -16,6 +20,8 @@ import com.tamin.taminhamrah.model.contracts.OptionalContractByGuardianRequestDT
 import com.tamin.taminhamrah.model.contracts.PremiumRateDTO
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDTO
 import com.tamin.taminhamrah.model.contracts.SaveContactRequestDTO
+import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
@@ -24,12 +30,18 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
-import kotlinx.serialization.json.JsonElement
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
+import io.ktor.util.date.getTimeMillis
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.doubleOrNull
+import kotlinx.serialization.json.jsonPrimitive
 
 class ContractsRemoteDataSourceImpl(
     private val contractsApiService: ContractsApiService,
@@ -296,4 +308,111 @@ class ContractsRemoteDataSourceImpl(
             )
         }
     }
+
+    override suspend fun getContractStates(query: ApiQueryParamDN): ListData<ContractStateDTO> {
+        return try {
+            contractsApiService.getContractStates(apiQueryBuilder.buildQuery(query)).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
+            )
+        }
+    }
+
+    override suspend fun cancelContract(
+        premiumType: ContractPremiumType,
+        stateCode: Int,
+        request: CancelContractRequestDTO,
+    ) {
+        try {
+            val response = if (premiumType == ContractPremiumType.OPTIONAL) {
+                contractsApiService.cancelOptionalContract(stateCode, request)
+            } else {
+                contractsApiService.cancelFreelanceContract(stateCode, request)
+            }
+            if (response.status !in 200..299) {
+                throw TaminErrorUriException(
+                    ErrorUri.fromString("CLIENT_ERROR: ${response.reason}"),
+                )
+            }
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
+            )
+        }
+    }
+
+    override suspend fun getContractPaymentHistory(
+        contractNumber: String,
+    ): List<ContractPaymentHistoryItemDTO> {
+        return try {
+            val rows = contractsApiService.getContractPaymentHistory(contractNumber)
+                .extractData().list.orEmpty()
+            rows.map { it.toPaymentHistoryItem() }
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
+            )
+        }
+    }
+
+    override suspend fun downloadContractReport(premiumType: ContractPremiumType): PdfDownloadDTO {
+        return try {
+            // `old_android` sends `System.currentTimeMillis()` as a cache-busting path segment;
+            // the backend resolves the contract from the authenticated session.
+            val timestamp = getTimeMillis()
+            val statement = when (premiumType) {
+                ContractPremiumType.OPTIONAL ->
+                    contractsApiService.getOptionalContractReport(timestamp)
+
+                ContractPremiumType.FRACTION ->
+                    contractsApiService.getFractionContractReport(timestamp)
+
+                ContractPremiumType.FREELANCE ->
+                    contractsApiService.getFreelanceContractReport(timestamp)
+            }
+            PdfDownloadDTO(pdf = InputStreamDTO(pdf = statement.body()))
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
+            )
+        }
+    }
+
+    /**
+     * `freelance-payment-history-head-with-contractNumber` answers with positional arrays; the
+     * index each field lives at is mirrored from `old_android`'s
+     * `ServiceRepository.getContractsPaymentsListFreelance`.
+     */
+    private fun JsonArray.toPaymentHistoryItem(): ContractPaymentHistoryItemDTO =
+        ContractPaymentHistoryItemDTO(
+            nationalId = stringAt(1),
+            insuranceId = stringAt(2),
+            debtNumber = stringAt(3),
+            startTermPayment = stringAt(5),
+            endTermPayment = stringAt(6),
+            totalDebt = doubleAt(7),
+            paymentDeadline = stringAt(8),
+            amountPayment = doubleAt(9),
+            datePayment = stringAt(10),
+            statusContract = stringAt(11),
+            statusRecipient = stringAt(12),
+        )
+
+    private fun JsonArray.cellAt(index: Int): JsonElement? =
+        getOrNull(index)?.takeUnless { it is JsonNull }
+
+    private fun JsonArray.stringAt(index: Int): String? =
+        cellAt(index)?.jsonPrimitive?.contentOrNull
+
+    private fun JsonArray.doubleAt(index: Int): Double? =
+        cellAt(index)?.jsonPrimitive?.doubleOrNull
 }

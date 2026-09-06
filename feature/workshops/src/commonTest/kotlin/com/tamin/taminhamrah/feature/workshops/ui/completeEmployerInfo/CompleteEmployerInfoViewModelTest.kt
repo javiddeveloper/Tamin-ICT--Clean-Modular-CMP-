@@ -505,6 +505,16 @@ private class FakeTestContractsRepo : ContractsRepository {
     override fun checkInsurancePaymentStatus(systemType: String): Flow<Any?> = flowOf(null)
     override fun uploadImage(request: UploadImageRequestDN): Flow<String> = flowOf("img1")
     override fun saveContact(request: SaveContactRequestDN): Flow<Any?> = flowOf(null)
+    override fun getContractsPage(
+        query: ApiQueryParamDN,
+    ): Flow<com.tamin.taminhamrah.model.paging.PageDN<ContractDN>> =
+        flowOf(com.tamin.taminhamrah.model.paging.PageDN(emptyList(), 0))
+    override fun getContractStates(): Flow<List<com.tamin.taminhamrah.model.contracts.ContractStateDN>> = flowOf(emptyList())
+    override fun cancelContract(params: com.tamin.taminhamrah.model.contracts.CancelContractParamsDN): Flow<Unit> = flowOf(Unit)
+    override fun getContractPaymentHistory(contractNumber: String): Flow<List<com.tamin.taminhamrah.model.contracts.ContractPaymentHistoryItemDN>> = flowOf(emptyList())
+    override fun downloadContractReport(premiumType: com.tamin.taminhamrah.model.contracts.ContractPremiumType): Flow<PdfDownloadDN> = flowOf(
+        PdfDownloadDN(null)
+    )
 }
 
 /** One agreement in the shape the merged model uses. */

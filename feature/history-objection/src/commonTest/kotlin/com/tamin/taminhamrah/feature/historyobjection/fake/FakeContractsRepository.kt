@@ -1,7 +1,11 @@
 package com.tamin.taminhamrah.feature.historyobjection.fake
 
 import com.tamin.taminhamrah.model.contracts.BranchDN
+import com.tamin.taminhamrah.model.contracts.CancelContractParamsDN
 import com.tamin.taminhamrah.model.contracts.ContractDN
+import com.tamin.taminhamrah.model.contracts.ContractPaymentHistoryItemDN
+import com.tamin.taminhamrah.model.contracts.ContractPremiumType
+import com.tamin.taminhamrah.model.contracts.ContractStateDN
 import com.tamin.taminhamrah.model.contracts.FreeJobDN
 import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
 import com.tamin.taminhamrah.model.contracts.FreelanceContractByGuardianParams
@@ -16,6 +20,8 @@ import com.tamin.taminhamrah.model.contracts.PremiumRateDN
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDN
 import com.tamin.taminhamrah.model.contracts.SaveContactRequestDN
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
+import com.tamin.taminhamrah.model.paging.PageDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.contracts.ContractsRepository
 import kotlinx.coroutines.flow.Flow
@@ -51,4 +57,9 @@ class FakeContractsRepository : ContractsRepository {
     override fun checkInsurancePaymentStatus(systemType: String): Flow<Any?> = flow { emit(null) }
     override fun uploadImage(request: UploadImageRequestDN): Flow<String> = flow { emit("") }
     override fun saveContact(request: SaveContactRequestDN): Flow<Any?> = flow { emit(null) }
+    override fun getContractsPage(query: ApiQueryParamDN, ): Flow<PageDN<ContractDN>> = flow { emit(PageDN(emptyList(), 0)) }
+    override fun getContractStates(): Flow<List<ContractStateDN>> = flow { emit(emptyList()) }
+    override fun cancelContract(params: CancelContractParamsDN): Flow<Unit> = flow { emit(Unit) }
+    override fun getContractPaymentHistory(contractNumber: String): Flow<List<ContractPaymentHistoryItemDN>> = flow { emit(emptyList()) }
+    override fun downloadContractReport(premiumType: ContractPremiumType): Flow<PdfDownloadDN> = flow { emit(PdfDownloadDN(null)) }
 }

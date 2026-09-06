@@ -8,8 +8,12 @@ import com.tamin.taminhamrah.data.local.entity.ContractEntity
 import com.tamin.taminhamrah.data.local.entity.RegistrationInfoEntity
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSource
 import com.tamin.taminhamrah.model.contracts.BranchDTO
+import com.tamin.taminhamrah.model.contracts.CancelContractRequestDTO
 import com.tamin.taminhamrah.model.contracts.ContractByGuardianRequestDTO
 import com.tamin.taminhamrah.model.contracts.ContractDTO
+import com.tamin.taminhamrah.model.contracts.ContractPaymentHistoryItemDTO
+import com.tamin.taminhamrah.model.contracts.ContractPremiumType
+import com.tamin.taminhamrah.model.contracts.ContractStateDTO
 import com.tamin.taminhamrah.model.contracts.FreeJobDTO
 import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
 import com.tamin.taminhamrah.model.contracts.FreelanceContractResultDTO
@@ -23,6 +27,7 @@ import com.tamin.taminhamrah.model.contracts.PremiumRateDTO
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDTO
 import com.tamin.taminhamrah.model.contracts.SaveContactRequestDTO
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.FilterOperator
@@ -209,6 +214,10 @@ private class FakeContractsRemoteDataSource(
     override suspend fun checkInsurancePaymentStatus(systemType: String): Any? = unused()
     override suspend fun uploadImage(request: UploadImageRequestDN): String? = unused()
     override suspend fun saveContact(request: SaveContactRequestDTO): Any? = unused()
+    override suspend fun getContractStates(query: ApiQueryParamDN, ): ListData<ContractStateDTO> = unused()
+    override suspend fun cancelContract(premiumType: ContractPremiumType, stateCode: Int, request: CancelContractRequestDTO, ) = unused<Unit>()
+    override suspend fun getContractPaymentHistory(contractNumber: String, ): List<ContractPaymentHistoryItemDTO> = unused()
+    override suspend fun downloadContractReport(premiumType: ContractPremiumType, ): PdfDownloadDTO = unused()
 }
 
 private class FakeContractDao : ContractDao {

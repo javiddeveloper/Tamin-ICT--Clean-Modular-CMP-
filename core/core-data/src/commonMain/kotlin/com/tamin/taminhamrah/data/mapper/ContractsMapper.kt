@@ -1,8 +1,14 @@
 package com.tamin.taminhamrah.data.mapper
 
 import com.tamin.taminhamrah.data.local.entity.ContractEntity
+import com.tamin.taminhamrah.model.contracts.CancelContractParamsDN
+import com.tamin.taminhamrah.model.contracts.CancelContractRequestDTO
 import com.tamin.taminhamrah.model.contracts.ContractDN
 import com.tamin.taminhamrah.model.contracts.ContractDTO
+import com.tamin.taminhamrah.model.contracts.ContractPaymentHistoryItemDN
+import com.tamin.taminhamrah.model.contracts.ContractPaymentHistoryItemDTO
+import com.tamin.taminhamrah.model.contracts.ContractStateDN
+import com.tamin.taminhamrah.model.contracts.ContractStateDTO
 import com.tamin.taminhamrah.model.contracts.ContractStatusObjectDN
 import com.tamin.taminhamrah.model.contracts.ContractStatusObjectDTO
 import com.tamin.taminhamrah.model.contracts.FreeJobDN
@@ -70,6 +76,31 @@ fun ContractStatusObjectDTO.toDomain(): ContractStatusObjectDN {
         selfIsuContStatCode = selfIsuContStatCode
     )
 }
+
+fun ContractStateDTO.toDomain(): ContractStateDN = ContractStateDN(
+    code = selfIsuContStatCode,
+    description = selfIsuContStatDesc,
+)
+
+fun ContractPaymentHistoryItemDTO.toDomain(): ContractPaymentHistoryItemDN =
+    ContractPaymentHistoryItemDN(
+        nationalId = nationalId,
+        insuranceId = insuranceId,
+        debtNumber = debtNumber,
+        startTermPayment = startTermPayment,
+        endTermPayment = endTermPayment,
+        totalDebt = totalDebt,
+        paymentDeadline = paymentDeadline,
+        amountPayment = amountPayment,
+        datePayment = datePayment,
+        statusContract = statusContract,
+        statusRecipient = statusRecipient,
+    )
+
+fun CancelContractParamsDN.toRequestDto(): CancelContractRequestDTO = CancelContractRequestDTO(
+    canceldesc = description,
+    contractStatus = stateChange.value,
+)
 
 fun PremiumTypeDTO.toDomain(): PremiumTypeDN {
     return PremiumTypeDN(

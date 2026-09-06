@@ -4,7 +4,11 @@ import com.tamin.taminhamrah.model.common.CityDN
 import com.tamin.taminhamrah.model.common.CityListResultDN
 import com.tamin.taminhamrah.model.common.ProvinceDN
 import com.tamin.taminhamrah.model.contracts.BranchDN
+import com.tamin.taminhamrah.model.contracts.CancelContractParamsDN
 import com.tamin.taminhamrah.model.contracts.ContractDN
+import com.tamin.taminhamrah.model.contracts.ContractPaymentHistoryItemDN
+import com.tamin.taminhamrah.model.contracts.ContractPremiumType
+import com.tamin.taminhamrah.model.contracts.ContractStateDN
 import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
 import com.tamin.taminhamrah.model.contracts.FreelanceContractByGuardianParams
 import com.tamin.taminhamrah.model.contracts.FreelanceContractResultDN
@@ -23,6 +27,7 @@ import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeContra
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeListDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeRequestDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeWorkshopListDN
+import com.tamin.taminhamrah.model.paging.PageDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.util.PagedListDN
@@ -139,6 +144,11 @@ internal class FakeCascadeContractsRepository : ContractsRepository {
     override fun checkInsurancePaymentStatus(systemType: String): Flow<Any?> = unused()
     override fun uploadImage(request: UploadImageRequestDN): Flow<String> = unused()
     override fun saveContact(request: SaveContactRequestDN): Flow<Any?> = unused()
+    override fun getContractsPage(query: ApiQueryParamDN, ): Flow<PageDN<ContractDN>> = unused()
+    override fun getContractStates(): Flow<List<ContractStateDN>> = unused()
+    override fun cancelContract(params: CancelContractParamsDN): Flow<Unit> = unused()
+    override fun getContractPaymentHistory(contractNumber: String): Flow<List<ContractPaymentHistoryItemDN>> = unused()
+    override fun downloadContractReport(premiumType: ContractPremiumType): Flow<PdfDownloadDN> = unused()
 }
 
 internal class FakeCascadeWorkShopsRepository : WorkShopsRepository {

@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.ui.navigation
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -97,6 +98,7 @@ import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
 import com.tamin.taminhamrah.feature.addDependent.addDependentGraph
 import com.tamin.taminhamrah.feature.addDependent.AddDependentRoute
+import com.tamin.taminhamrah.feature.contracts.contractAffairsScreen
 import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceContractScreen
 import com.tamin.taminhamrah.feature.taminServices.TaminServicesRoute
 import com.tamin.taminhamrah.feature.taminServices.occurrenceScreen
@@ -269,10 +271,10 @@ internal fun TaminHamrahNavGraph(
             AnimatedVisibility(
                 visible = isBottomBarVisible,
                 enter = fadeIn(
-                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300),
+                    animationSpec = tween(durationMillis = 300),
                 ),
                 exit = fadeOut(
-                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300),
+                    animationSpec = tween(durationMillis = 300),
                 ),
             ) {
                 Box(
@@ -495,6 +497,14 @@ internal fun TaminHamrahNavGraph(
                     onOpenUrl = { url -> openUrl(url) }
                 )
 
+                contractAffairsScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToService = { flag ->
+                    navController.navigateToFeature(flag)
+                },
+                    onOpenUrl =  { url -> openUrl(url) }
+                )
+
                 workshopsScreen(navController, onOpenUrl = { url -> openUrl(url) })
                 completeEmployerInfoScreen(navController)
 
@@ -553,10 +563,10 @@ internal fun TaminHamrahNavGraph(
             AnimatedVisibility(
                 visible = isBottomBarVisible,
                 enter = fadeIn(
-                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300)
+                    animationSpec = tween(durationMillis = 300)
                 ),
                 exit = fadeOut(
-                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300)
+                    animationSpec = tween(durationMillis = 300)
                 ),
                 modifier = Modifier.align(Alignment.TopCenter)
             ) {

@@ -4,7 +4,11 @@ import com.tamin.taminhamrah.model.common.CityDN
 import com.tamin.taminhamrah.model.common.CityListResultDN
 import com.tamin.taminhamrah.model.common.ProvinceDN
 import com.tamin.taminhamrah.model.contracts.BranchDN
+import com.tamin.taminhamrah.model.contracts.CancelContractParamsDN
 import com.tamin.taminhamrah.model.contracts.ContractDN
+import com.tamin.taminhamrah.model.contracts.ContractPaymentHistoryItemDN
+import com.tamin.taminhamrah.model.contracts.ContractPremiumType
+import com.tamin.taminhamrah.model.contracts.ContractStateDN
 import com.tamin.taminhamrah.model.contracts.FreeJobDN
 import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
 import com.tamin.taminhamrah.model.contracts.FreelanceContractByGuardianParams
@@ -19,6 +23,8 @@ import com.tamin.taminhamrah.model.contracts.PremiumRateDN
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDN
 import com.tamin.taminhamrah.model.contracts.SaveContactRequestDN
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
+import com.tamin.taminhamrah.model.paging.PageDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.requestPaymentForIllDays.CovidResultDN
 import com.tamin.taminhamrah.model.requestPaymentForIllDays.IllDaysBranchWorkshopDN
@@ -128,4 +134,9 @@ class FakeIllDaysContractsRepository : ContractsRepository {
     override fun getInsurancePayment(params: InsurancePaymentParamsDN): Flow<InsurancePaymentDN> = flowOf()
     override fun checkInsurancePaymentStatus(systemType: String): Flow<Any?> = flowOf(null)
     override fun saveContact(request: SaveContactRequestDN): Flow<Any?> = flowOf(null)
+    override fun getContractsPage(query: ApiQueryParamDN, ): Flow<PageDN<ContractDN>> = flowOf(PageDN(emptyList(), 0))
+    override fun getContractStates(): Flow<List<ContractStateDN>> = flowOf(emptyList())
+    override fun cancelContract(params: CancelContractParamsDN): Flow<Unit> = flowOf(Unit)
+    override fun getContractPaymentHistory(contractNumber: String): Flow<List<ContractPaymentHistoryItemDN>> = flowOf(emptyList())
+    override fun downloadContractReport(premiumType: ContractPremiumType): Flow<PdfDownloadDN> = flowOf(PdfDownloadDN(null))
 }
