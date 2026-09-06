@@ -215,17 +215,6 @@ internal fun ActiveRelationScreen(
 
 @PreviewRtlTheme
 @Composable
-private fun PreviewActiveRelationScreenLoading() {
-    PreviewRtlThemeContent {
-        ActiveRelationScreen(
-            uiState = ActiveRelationUiState(isLoading = true),
-            onIntent = {},
-        )
-    }
-}
-
-@PreviewRtlTheme
-@Composable
 private fun PreviewActiveRelationScreenLight() {
     PreviewRtlThemeContent {
         ActiveRelationScreen(
