@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +15,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Description
@@ -24,14 +24,11 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -52,15 +49,17 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.TaminText
-import com.tamin.taminhamrah.ui.components.rememberCollapsingHeaderState
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
-import com.tamin.taminhamrah.ui.components.reservedHeight
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
 import com.tamin.taminhamrah.ui.components.toast.AppToastHost
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.toparea.driveTopArea
+import com.tamin.taminhamrah.ui.toparea.rememberMeasuredTopAreaState
+import com.tamin.taminhamrah.ui.toparea.reportTopAreaHeight
+import com.tamin.taminhamrah.ui.toparea.topAreaContentPadding
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
@@ -69,8 +68,6 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.contract_affairs_empty_subtitle
 import taminx.core.core_ui.contract_affairs_empty_title
 import taminx.core.core_ui.contract_affairs_new_contract_sheet_title
-
-private val HeaderCollapseDistance = 160.dp
 
 /**
  * امور قراردادها و پرداخت.
@@ -128,8 +125,13 @@ internal fun ContractAffairsScreen(
 ) {
     val taminColors = LocalTaminColors.current
 
-    val collapse = rememberCollapsingHeaderState(HeaderCollapseDistance)
-    var headerHeightPx by remember { mutableIntStateOf(0) }
+    // Drag budget is measured from the real header at both extremes — same collapsing behaviour as
+    // ActiveRelationScreen. Only read inside the header's layout/draw lambdas, so the fold never
+    // recomposes the screen.
+    val topArea = rememberMeasuredTopAreaState { state ->
+        ContractAffairsHeader(onBackClicked = {}, onSearchClicked = {}, topAreaState = state)
+    }
+    val listState = rememberLazyListState()
     var showNewContractSheet by remember { mutableStateOf(false) }
 
     val staggerState = rememberStaggeredEntranceState(key = uiState.contracts.size)
@@ -140,22 +142,23 @@ internal fun ContractAffairsScreen(
             .background(taminColors.bgPage),
     ) {
         LazyColumn(
+            state = listState,
             overscrollEffect = rememberJellyOverscroll(),
             modifier = Modifier
                 .fillMaxSize()
-                .nestedScroll(collapse.nestedScrollConnection),
-            contentPadding = PaddingValues(
-                bottom = WindowInsets.navigationBars.asPaddingValues()
-                    .calculateBottomPadding() + Spacing.lg,
+                .driveTopArea(topArea, listState),
+            contentPadding = topAreaContentPadding(
+                state = topArea,
+                rest = PaddingValues(
+                    bottom = WindowInsets.navigationBars.asPaddingValues()
+                        .calculateBottomPadding() + Spacing.lg,
+                ),
             ),
             verticalArrangement = Arrangement.spacedBy(Spacing.lg),
         ) {
             item {
-                Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
-            }
-
-            item {
                 ContractAffairsActionRow(
+                    modifier = Modifier.padding(top = Spacing.xs),
                     contractCount = uiState.contracts.size,
                     onNewContractClicked = { showNewContractSheet = true },
                 )
@@ -209,12 +212,12 @@ internal fun ContractAffairsScreen(
         }
 
         ContractAffairsHeader(
-            collapseProgress = collapse.progressProvider,
             onBackClicked = onBackClicked,
             onSearchClicked = { /* TODO(ui): open جستجوی قرارداد sheet in a later step */ },
+            topAreaState = topArea,
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .onSizeChanged { headerHeightPx = it.height },
+                .reportTopAreaHeight(topArea),
         )
     }
 
