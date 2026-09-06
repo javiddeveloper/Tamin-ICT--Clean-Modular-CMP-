@@ -194,6 +194,7 @@ class DisabilityPensionViewModel(
             }
             DisabilityPensionIntent.ConfirmDocumentsSubmission -> {
                 emit(PartialState.DocumentsConfirmDialogVisibilityChanged(false))
+                emit(PartialState.EditingFromSummaryChanged(false))
                 emit(PartialState.StepChanged(DisabilityPensionStep.Summary))
             }
             DisabilityPensionIntent.DismissDocumentsConfirmDialog -> {
@@ -206,6 +207,7 @@ class DisabilityPensionViewModel(
                 }
             }
             is DisabilityPensionIntent.EditSummarySectionClicked -> {
+                emit(PartialState.EditingFromSummaryChanged(true))
                 emit(PartialState.StepChanged(intent.step))
             }
             DisabilityPensionIntent.SubmitSuccessAcknowledged -> {
@@ -302,8 +304,12 @@ class DisabilityPensionViewModel(
             DisabilityPensionStep.Terms -> {
                 if (uiState.value.isTermsAccepted) {
                     emit(PartialState.TermsValidationErrorChanged(false))
-                    emit(PartialState.StepChanged(DisabilityPensionStep.Dependents))
-                    loadDependents()
+                    if (uiState.value.isEditingFromSummary) {
+                        returnToSummary()
+                    } else {
+                        emit(PartialState.StepChanged(DisabilityPensionStep.Dependents))
+                        loadDependents()
+                    }
                 } else {
                     emit(PartialState.TermsValidationErrorChanged(true))
                 }
@@ -311,7 +317,11 @@ class DisabilityPensionViewModel(
             DisabilityPensionStep.Dependents -> {
                 if (uiState.value.isDependentsListConfirmed) {
                     emit(PartialState.DependentsConfirmationErrorChanged(false))
-                    emit(PartialState.StepChanged(DisabilityPensionStep.IdentityContact))
+                    if (uiState.value.isEditingFromSummary) {
+                        returnToSummary()
+                    } else {
+                        emit(PartialState.StepChanged(DisabilityPensionStep.IdentityContact))
+                    }
                 } else {
                     emit(PartialState.DependentsConfirmationErrorChanged(true))
                 }
@@ -322,6 +332,12 @@ class DisabilityPensionViewModel(
             DisabilityPensionStep.Documents -> handleDocumentsNextStep()
             DisabilityPensionStep.Summary -> handleFinalSubmit()
         }
+    }
+
+    /** Jumps straight back to [DisabilityPensionStep.Summary], clearing edit-from-summary mode. */
+    private suspend fun FlowCollector<PartialState>.returnToSummary() {
+        emit(PartialState.EditingFromSummaryChanged(false))
+        emit(PartialState.StepChanged(DisabilityPensionStep.Summary))
     }
 
     private suspend fun FlowCollector<PartialState>.handleIdentityContactNextStep() {
@@ -335,7 +351,11 @@ class DisabilityPensionViewModel(
 
         if (state.isIdentityConfirmed) {
             emit(PartialState.IdentityConfirmationErrorChanged(false))
-            emit(PartialState.StepChanged(DisabilityPensionStep.Workshop))
+            if (state.isEditingFromSummary) {
+                returnToSummary()
+            } else {
+                emit(PartialState.StepChanged(DisabilityPensionStep.Workshop))
+            }
         } else {
             emit(PartialState.IdentityConfirmationErrorChanged(true))
         }
@@ -352,21 +372,30 @@ class DisabilityPensionViewModel(
 
         if (state.isWorkshopConfirmed) {
             emit(PartialState.WorkshopConfirmationErrorChanged(false))
-            emit(PartialState.StepChanged(DisabilityPensionStep.CommissionRecord))
-            loadInsuranceRecord()
+            if (state.isEditingFromSummary) {
+                returnToSummary()
+            } else {
+                emit(PartialState.StepChanged(DisabilityPensionStep.CommissionRecord))
+                loadInsuranceRecord()
+            }
         } else {
             emit(PartialState.WorkshopConfirmationErrorChanged(true))
         }
     }
 
     private suspend fun FlowCollector<PartialState>.handleCommissionRecordNextStep() {
-        val hasObjection = uiState.value.hasCommissionObjection
+        val state = uiState.value
+        val hasObjection = state.hasCommissionObjection
         if (hasObjection == null) {
             emit(PartialState.CommissionValidationErrorChanged(true))
             return
         }
         if (hasObjection) return
-        emit(PartialState.StepChanged(DisabilityPensionStep.Documents))
+        if (state.isEditingFromSummary) {
+            returnToSummary()
+        } else {
+            emit(PartialState.StepChanged(DisabilityPensionStep.Documents))
+        }
     }
 
     private suspend fun FlowCollector<PartialState>.handleDocumentsNextStep() {
@@ -431,6 +460,10 @@ class DisabilityPensionViewModel(
     )
 
     private suspend fun FlowCollector<PartialState>.handlePreviousStepClicked() {
+        if (uiState.value.isEditingFromSummary) {
+            returnToSummary()
+            return
+        }
         when (uiState.value.currentStep) {
             DisabilityPensionStep.Dependents -> emit(PartialState.StepChanged(DisabilityPensionStep.Terms))
             DisabilityPensionStep.IdentityContact -> emit(PartialState.StepChanged(DisabilityPensionStep.Dependents))
@@ -577,6 +610,9 @@ class DisabilityPensionViewModel(
         )
         is PartialState.ExitConfirmDialogVisibilityChanged -> currentState.copy(
             showExitConfirmDialog = partialState.show,
+        )
+        is PartialState.EditingFromSummaryChanged -> currentState.copy(
+            isEditingFromSummary = partialState.editing,
         )
         is PartialState.Error -> currentState.copy(
             isProfileLoading = false,

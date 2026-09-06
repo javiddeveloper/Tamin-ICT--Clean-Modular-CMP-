@@ -91,6 +91,7 @@ data class DisabilityPensionUiState(
     val isSubmitting: Boolean = false,
     val submitTrackingCode: String? = null,
     val showExitConfirmDialog: Boolean = false,
+    val isEditingFromSummary: Boolean = false,
     val error: String? = null,
 ) {
     val isAnyDocumentUploading: Boolean
@@ -148,6 +149,7 @@ data class DisabilityPensionUiState(
         data class SubmittingChanged(val isSubmitting: Boolean) : PartialState
         data class SubmitSucceeded(val trackingCode: String) : PartialState
         data class ExitConfirmDialogVisibilityChanged(val show: Boolean) : PartialState
+        data class EditingFromSummaryChanged(val editing: Boolean) : PartialState
         data class Error(val message: String?) : PartialState
     }
 }

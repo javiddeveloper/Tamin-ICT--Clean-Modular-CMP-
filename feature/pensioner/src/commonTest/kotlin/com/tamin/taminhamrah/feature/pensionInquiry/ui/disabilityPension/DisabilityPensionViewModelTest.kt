@@ -510,6 +510,79 @@ class DisabilityPensionViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
     }
+
+    @Test
+    fun whenEditSummarySectionClicked_jumpsToStepAndMarksEditingFromSummary() = runTest(testDispatcher) {
+        viewModel = buildViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+        advanceToSummaryStep()
+
+        viewModel.sendIntent(DisabilityPensionIntent.EditSummarySectionClicked(DisabilityPensionStep.Workshop))
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertEquals(DisabilityPensionStep.Workshop, state.currentStep)
+        assertTrue(state.isEditingFromSummary)
+    }
+
+    @Test
+    fun whenEditingWorkshopFromSummaryAndNextClicked_returnsDirectlyToSummaryInsteadOfCommissionRecord() = runTest(testDispatcher) {
+        viewModel = buildViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+        advanceToSummaryStep()
+        viewModel.sendIntent(DisabilityPensionIntent.EditSummarySectionClicked(DisabilityPensionStep.Workshop))
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.uiState.test {
+            viewModel.sendIntent(DisabilityPensionIntent.NextStepClicked)
+            var state = awaitItem()
+            while (state.currentStep == DisabilityPensionStep.Workshop) state = awaitItem()
+
+            assertEquals(DisabilityPensionStep.Summary, state.currentStep)
+            assertFalse(state.isEditingFromSummary)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenEditingIdentityContactFromSummaryAndPreviousClicked_returnsDirectlyToSummaryInsteadOfDependents() = runTest(testDispatcher) {
+        viewModel = buildViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+        advanceToSummaryStep()
+        viewModel.sendIntent(DisabilityPensionIntent.EditSummarySectionClicked(DisabilityPensionStep.IdentityContact))
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.uiState.test {
+            viewModel.sendIntent(DisabilityPensionIntent.PreviousStepClicked)
+            var state = awaitItem()
+            while (state.currentStep == DisabilityPensionStep.IdentityContact) state = awaitItem()
+
+            assertEquals(DisabilityPensionStep.Summary, state.currentStep)
+            assertFalse(state.isEditingFromSummary)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenEditingCommissionRecordFromSummaryAndBlockedByObjection_previousClickedStillReturnsToSummary() = runTest(testDispatcher) {
+        viewModel = buildViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+        advanceToSummaryStep()
+        viewModel.sendIntent(DisabilityPensionIntent.EditSummarySectionClicked(DisabilityPensionStep.CommissionRecord))
+        testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.sendIntent(DisabilityPensionIntent.CommissionObjectionChanged(true))
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.uiState.test {
+            viewModel.sendIntent(DisabilityPensionIntent.PreviousStepClicked)
+            var state = awaitItem()
+            while (state.currentStep == DisabilityPensionStep.CommissionRecord) state = awaitItem()
+
+            assertEquals(DisabilityPensionStep.Summary, state.currentStep)
+            assertFalse(state.isEditingFromSummary)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
 }
 
 private class FakeDisabilityPensionRepository : PensionRepository {

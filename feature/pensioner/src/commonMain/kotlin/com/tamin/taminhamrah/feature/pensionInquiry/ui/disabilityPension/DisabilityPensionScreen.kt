@@ -522,13 +522,32 @@ private fun DisabilityPensionBottomBar(
             TaminBottomBar(
                 modifier = Modifier.navigationBarsPadding().imePadding(),
             ) {
-                LoadingButton(
-                    text = stringResource(Res.string.disability_pension_next_step),
-                    onClick = { onIntent(DisabilityPensionIntent.NextStepClicked) },
-                    icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
-                    iconPosition = LoadingButtonIconPosition.TRAILING,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                if (state.isEditingFromSummary) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.smd),
+                    ) {
+                        SquareIconButton(
+                            icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                            onClick = { onIntent(DisabilityPensionIntent.PreviousStepClicked) },
+                        )
+                        LoadingButton(
+                            text = stringResource(Res.string.disability_pension_next_step),
+                            onClick = { onIntent(DisabilityPensionIntent.NextStepClicked) },
+                            icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
+                            iconPosition = LoadingButtonIconPosition.TRAILING,
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                } else {
+                    LoadingButton(
+                        text = stringResource(Res.string.disability_pension_next_step),
+                        onClick = { onIntent(DisabilityPensionIntent.NextStepClicked) },
+                        icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
+                        iconPosition = LoadingButtonIconPosition.TRAILING,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             }
         }
         DisabilityPensionStep.Dependents,
