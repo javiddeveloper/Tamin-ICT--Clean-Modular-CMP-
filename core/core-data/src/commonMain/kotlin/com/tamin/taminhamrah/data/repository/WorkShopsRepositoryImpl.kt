@@ -24,17 +24,24 @@ import com.tamin.taminhamrah.model.workshop.DebitObjectionResultDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDN
+import com.tamin.taminhamrah.model.workshop.ContractRowQuery
 import com.tamin.taminhamrah.model.workshop.DebitReasonDN
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmissionDN
+import com.tamin.taminhamrah.model.workshop.EmployerContactInfoDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetQuery
 import com.tamin.taminhamrah.model.workshop.WORKSHOP_PAGE_SIZE
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
+import com.tamin.taminhamrah.model.workshop.WorkshopContractDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDN
 import com.tamin.taminhamrah.model.workshop.WorkshopListQuery
+import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDN
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDN
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberQuery
+import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDN
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDN
@@ -76,6 +83,31 @@ class WorkShopsRepositoryImpl(
             .getAllEmployerAgreementByNationalId(pageQuery(query.page, query.pageSize, filters))
             .toDomainPage { it.toDomain() }
     }
+
+    // ------------------------------------------------------------------ ردیف‌های پیمان
+
+    /*
+     * Both contract-row calls take the workshop and branch as path segments, so neither builds a
+     * filter — the query carries page and size only.
+     */
+
+    override suspend fun getContractRowsWithAgreement(
+        query: ContractRowQuery,
+    ): PagedListDN<EmployerAgreementDN> =
+        remoteDataSource.getEmployerAgreementsByWorkshop(
+            workshopId = query.workshopId,
+            branchCode = query.branchCode,
+            query = pageQuery(query.page, query.pageSize),
+        ).toDomainPage { it.toDomain() }
+
+    override suspend fun getContractRowsWithoutAgreement(
+        query: ContractRowQuery,
+    ): PagedListDN<WorkshopContractDN> =
+        remoteDataSource.getWorkshopContracts(
+            workshopId = query.workshopId,
+            branchCode = query.branchCode,
+            query = pageQuery(query.page, query.pageSize),
+        ).toDomainPage { it.toDomain() }
 
     // -------------------------------------------------------------------- برگ پرداخت‌ها
 
@@ -254,6 +286,34 @@ class WorkShopsRepositoryImpl(
             .getWorkshopStackHolders(pageQuery(query.page, query.pageSize, filters))
             .toDomainPage { it.toDomain() }
     }
+
+    // ------------------------------------------------- خدمات غیرحضوری کارفرما (employerEservicesAgreement)
+
+    override suspend fun requestEmployerAgreementTicket(mobile: String, email: String): String =
+        remoteDataSource.requestEmployerAgreementTicket(mobileNumber = mobile, email = email)
+
+    override suspend fun getEmployerAgreementContactInfo(
+        verificationCode: String,
+    ): EmployerContactInfoDN =
+        remoteDataSource.getEmployerAgreementUserInfo(verificationCode).toDomain()
+
+    override suspend fun getWorkshopsWithoutContract(
+        page: Int,
+    ): PagedListDN<WorkshopWithoutContractDN> =
+        remoteDataSource.getEmployerWorkshopsWithoutContract(pageQuery(page))
+            .toDomainPage { it.toDomain() }
+
+    override suspend fun getWorkshopContractRows(
+        workshopId: String,
+        branchCode: String,
+        page: Int,
+    ): PagedListDN<WorkshopContractRowDN> =
+        remoteDataSource
+            .getEmployerWorkshopContractList(workshopId, branchCode, pageQuery(page))
+            .toDomainPage { it.toDomain() }
+
+    override suspend fun submitEmployerAgreement(request: EmployerAgreementSubmissionDN): String =
+        remoteDataSource.submitEmployerAgreement(request.toDto())
 
     private fun pageQuery(
         page: Int,

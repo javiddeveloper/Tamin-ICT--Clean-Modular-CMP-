@@ -96,6 +96,9 @@ import com.tamin.taminhamrah.useCases.common.GetJobTitleUseCase
 import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetContractsUseCase
 import com.tamin.taminhamrah.useCases.contracts.CalculateFreelanceSalaryUseCase
+import com.tamin.taminhamrah.useCases.contracts.GetOptionalPremiumRangeUseCase
+import com.tamin.taminhamrah.useCases.contracts.CheckRedCrossStatusUseCase
+import com.tamin.taminhamrah.useCases.contracts.CheckMedicalStudentUseCase
 import com.tamin.taminhamrah.useCases.contracts.CalculateOptionalSalaryUseCase
 import com.tamin.taminhamrah.useCases.contracts.CheckInsurancePaymentStatusUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetFreelancePremiumRangeUseCase
@@ -106,7 +109,6 @@ import com.tamin.taminhamrah.useCases.contracts.GetSpcPremiumRatesUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeFreelanceContractByGuardianUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeOptionalContractByGuardianUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeContractUseCase
-import com.tamin.taminhamrah.useCases.contracts.MakeFreelanceContractUseCase
 import com.tamin.taminhamrah.useCases.contracts.SaveContactUseCase
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetHistoryJobInfosUseCase
@@ -171,6 +173,8 @@ import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenReportPdfUseCas
 import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenRequestInfoUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenWorkshopInfoUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetDebitObjectionPdfUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetContractRowsWithAgreementUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetContractRowsWithoutAgreementUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetDebitReasonsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetDebitTurnoverPdfUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetDemandDocumentsUseCase
@@ -206,6 +210,11 @@ import com.tamin.taminhamrah.useCases.workshops.RequestLegalRepresentativeTicket
 import com.tamin.taminhamrah.useCases.workshops.VerifyLegalRepresentativeTicketUseCase
 import com.tamin.taminhamrah.useCases.workshops.SubmitLegalRepresentativeUseCase
 import com.tamin.taminhamrah.useCases.workshops.DeleteLegalRepresentativeUseCase
+import com.tamin.taminhamrah.useCases.workshops.RequestEmployerAgreementTicketUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetEmployerAgreementContactInfoUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetWorkshopsWithoutContractUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetWorkshopContractRowsUseCase
+import com.tamin.taminhamrah.useCases.workshops.SubmitEmployerAgreementUseCase
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -232,6 +241,7 @@ import com.tamin.taminhamrah.useCases.addDependent.UploadDependentImageUseCase
 import com.tamin.taminhamrah.useCases.user.mockUseCases.MockSubdominantUseCase
 import com.tamin.taminhamrah.useCases.versionHistory.GetVersionHistoryUseCase
 import com.tamin.taminhamrah.useCases.contactUs.GetContactUsUseCase
+import com.tamin.taminhamrah.useCases.content.GetLegalDocumentUseCase
 
 val domainModule = module {
     // Add Dependent UseCases
@@ -348,9 +358,11 @@ val domainModule = module {
     factoryOf(::GetBranchesUseCase)
     factoryOf(::GetSpcPremiumRatesUseCase)
     factoryOf(::GetFreelancePremiumRangeUseCase)
+    factoryOf(::GetOptionalPremiumRangeUseCase)
+    factoryOf(::CheckRedCrossStatusUseCase)
+    factoryOf(::CheckMedicalStudentUseCase)
     factoryOf(::CalculateFreelanceSalaryUseCase)
     factoryOf(::CalculateOptionalSalaryUseCase)
-    factoryOf(::MakeFreelanceContractUseCase)
     factoryOf(::MakeContractUseCase)
     factoryOf(::MakeFreelanceContractByGuardianUseCase)
     factoryOf(::MakeOptionalContractByGuardianUseCase)
@@ -397,6 +409,8 @@ val domainModule = module {
     factoryOf(::CheckUserIsNewUseCase)
     // کارگاه‌های کارفرما — the list, then one group per action it launches
     factoryOf(::GetEmployerAgreementsUseCase)
+    factoryOf(::GetContractRowsWithAgreementUseCase)
+    factoryOf(::GetContractRowsWithoutAgreementUseCase)
     factoryOf(::GetPaymentSheetsUseCase)
     factoryOf(::GetDebitReasonsUseCase)
     factoryOf(::GetWorkshopDebitsUseCase)
@@ -427,6 +441,13 @@ val domainModule = module {
     factoryOf(::VerifyLegalRepresentativeTicketUseCase)
     factoryOf(::SubmitLegalRepresentativeUseCase)
     factoryOf(::DeleteLegalRepresentativeUseCase)
+    // خدمات غیرحضوری کارفرما — the employerEservicesAgreement stepper + management drill-downs
+    factoryOf(::RequestEmployerAgreementTicketUseCase)
+    factoryOf(::GetEmployerAgreementContactInfoUseCase)
+    factoryOf(::GetWorkshopsWithoutContractUseCase)
+    factoryOf(::GetWorkshopContractRowsUseCase)
+    factoryOf(::SubmitEmployerAgreementUseCase)
+    factoryOf(::GetLegalDocumentUseCase)
     factoryOf(::GetTreatmentCostsUseCase)
     factoryOf(::GetTreatmentCostsPDFUseCase)
     factoryOf(::SendToInboxTreatmentCostsUseCase)

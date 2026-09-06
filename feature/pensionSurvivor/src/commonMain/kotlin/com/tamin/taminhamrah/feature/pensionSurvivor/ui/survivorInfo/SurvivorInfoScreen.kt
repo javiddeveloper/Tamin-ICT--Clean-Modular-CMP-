@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -56,6 +57,7 @@ import com.tamin.taminhamrah.ui.components.TaminImageViewer
 import com.tamin.taminhamrah.ui.components.TaminTextField
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
 import com.tamin.taminhamrah.ui.components.buttons.SquareIconButton
 import com.tamin.taminhamrah.ui.components.document.TaminDocumentSourceSheet
 import com.tamin.taminhamrah.ui.components.document.TaminDocumentUploadCard
@@ -202,10 +204,15 @@ private fun SurvivorInfoContent(
     val survivor = state.survivor
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colors.bgPage),
+        containerColor = colors.bgPage,
+        contentWindowInsets = WindowInsets(0),
         topBar = {
             TaminTopAppBar(
                 title = stringResource(Res.string.pension_survivor_title),
+                background = taminTopAppBarGradient(colors.profileGradientStops),
                 bottomPadding = Spacing.xl,
                 shape = RoundedCornerShape(
                     bottomStart = CornerRadius.x3l,
