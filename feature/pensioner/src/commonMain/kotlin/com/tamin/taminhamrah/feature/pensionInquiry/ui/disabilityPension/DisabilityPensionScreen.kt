@@ -430,6 +430,7 @@ private fun DisabilityPensionContent(
                         stepTitle = stepTitle,
                         currentStep = currentStepIndex,
                         totalSteps = DISABILITY_PENSION_TOTAL_STEPS,
+                        isEditingSingleStep = state.isEditingFromSummary,
                     )
                     Text(
                         text = stepSubtitle,

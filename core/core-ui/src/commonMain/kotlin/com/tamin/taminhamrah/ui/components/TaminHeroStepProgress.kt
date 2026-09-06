@@ -50,6 +50,11 @@ private const val HeroStepSegmentFillDurationMs = 420
  * changed with no other screen affected.
  *
  * Intended for [TaminTopAppBar]'s `content` slot on a blue/gradient hero.
+ *
+ * [isEditingSingleStep] switches off the cumulative fill for the case where the user jumped back
+ * into one already-completed step from a review/summary screen: every other segment (before *and*
+ * after [currentStep]) stays filled since that data was already confirmed, and only [currentStep]
+ * itself renders empty to mark the one step currently being edited.
  */
 @Composable
 fun TaminHeroStepProgress(
@@ -57,6 +62,7 @@ fun TaminHeroStepProgress(
     currentStep: Int,
     totalSteps: Int,
     modifier: Modifier = Modifier,
+    isEditingSingleStep: Boolean = false,
 ) {
     require(totalSteps > 0) { "totalSteps must be > 0" }
     val clampedStep = currentStep.coerceIn(1, totalSteps)
@@ -95,7 +101,13 @@ fun TaminHeroStepProgress(
         ) {
             for (index in 1..totalSteps) {
                 val fillFraction by animateFloatAsState(
-                    targetValue = if (index <= clampedStep) 1f else 0f,
+                    targetValue = if (isEditingSingleStep) {
+                        if (index == clampedStep) 0f else 1f
+                    } else if (index <= clampedStep) {
+                        1f
+                    } else {
+                        0f
+                    },
                     animationSpec = tween(HeroStepSegmentFillDurationMs, easing = FastOutSlowInEasing),
                 )
                 Box(
