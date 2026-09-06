@@ -18,6 +18,19 @@ data class WorkshopListQuery(
     val pageSize: Int = WORKSHOP_PAGE_SIZE,
 )
 
+/**
+ * What one page of a ردیف پیمان list is asked for.
+ *
+ * The workshop and branch are *path segments* on both contract-row endpoints, not filter entries —
+ * which is why this carries no filter fields at all, unlike every other query here.
+ */
+data class ContractRowQuery(
+    val workshopId: String,
+    val branchCode: String,
+    val page: Int = 0,
+    val pageSize: Int = WORKSHOP_PAGE_SIZE,
+)
+
 /** Filters of the برگ پرداخت‌ها search sheet. All optional, all matched exactly. */
 data class PaymentSheetQuery(
     val workshopId: String,

@@ -140,6 +140,51 @@ object WorkshopDimens {
     /** `width:36px; height:36px` on the tile inside the gradient bar. */
     val identityIconTile = 36.dp
 
+    // ----------------------------------------------------------- ردیف‌های پیمان
+    /*
+     * The contract-row card is its own shape in the design — a grid of filled tiles rather than the
+     * divided label/value stack every other کارگاه card uses — so its measurements sit apart from
+     * the `card*` block above rather than being folded into it.
+     */
+
+    /** `padding:11px 13px` inside the card, over the shared 18px corner. */
+    val contractRowCardHorizontalPadding = 13.dp
+    val contractRowCardVerticalPadding = 11.dp
+
+    /** `padding:3px 8px` on the «ردیف N» badge. */
+    val contractRowBadgeVerticalPadding = 3.dp
+
+    /** One tile: `gap:7px` between them, `padding:7px 9px` inside. */
+    val contractRowTileGap = 7.dp
+    val contractRowTileHorizontalPadding = 9.dp
+    val contractRowTileVerticalPadding = 7.dp
+
+    /** The tab strip: `padding:4px; gap:4px; border-radius:16px`, each tab `min-height:44px`. */
+    val contractRowTabStripPadding = 4.dp
+    val contractRowTabGap = 4.dp
+    val contractRowTabHeight = 44.dp
+
+    /**
+     * «حذف» on the picker sheet — `flex:none; min-width:92px`.
+     *
+     * A fixed width, not a weight: `TaminOutlinedButton` applies `fillMaxWidth()` after the
+     * caller's modifier, so left to size itself it swallows the row and squeezes the primary
+     * button to nothing.
+     */
+    val contractRowResetButtonWidth = 92.dp
+
+    /** The picker sheet's grabber — `width:44px; height:4px`. */
+    val contractRowGrabberWidth = 44.dp
+    val contractRowGrabberHeight = 4.dp
+
+    /**
+     * How wide کد کارگاه sits against کد شعبه — `flex:1.4` against `flex:1`.
+     *
+     * A ten-digit code beside a four-digit one, so the split is not even.
+     */
+    const val contractRowWorkshopFieldWeight = 1.4f
+    const val contractRowBranchFieldWeight = 1f
+
     // ---------------------------------------------------------------- list states
     /** Card-shaped blocks standing in for rows that have not arrived, and the paging spinner. */
     val skeletonRowHeight = 132.dp
