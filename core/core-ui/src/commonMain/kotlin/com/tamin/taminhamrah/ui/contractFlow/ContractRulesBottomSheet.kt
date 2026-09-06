@@ -22,6 +22,7 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,6 +35,36 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.contract_rules_sheet_freelance_p1
+import taminx.core.core_ui.contract_rules_sheet_freelance_section1_item1
+import taminx.core.core_ui.contract_rules_sheet_freelance_section1_item2
+import taminx.core.core_ui.contract_rules_sheet_freelance_section1_item3
+import taminx.core.core_ui.contract_rules_sheet_freelance_section1_item4
+import taminx.core.core_ui.contract_rules_sheet_freelance_section1_title
+import taminx.core.core_ui.contract_rules_sheet_freelance_section2_item1
+import taminx.core.core_ui.contract_rules_sheet_freelance_section2_item2
+import taminx.core.core_ui.contract_rules_sheet_freelance_section2_item3
+import taminx.core.core_ui.contract_rules_sheet_freelance_section2_title
+import taminx.core.core_ui.contract_rules_sheet_housewife_p1
+import taminx.core.core_ui.contract_rules_sheet_housewife_section1_item1
+import taminx.core.core_ui.contract_rules_sheet_housewife_section1_item2
+import taminx.core.core_ui.contract_rules_sheet_housewife_section1_item3
+import taminx.core.core_ui.contract_rules_sheet_housewife_section1_item4
+import taminx.core.core_ui.contract_rules_sheet_housewife_section1_title
+import taminx.core.core_ui.contract_rules_sheet_housewife_section2_item1
+import taminx.core.core_ui.contract_rules_sheet_housewife_section2_item2
+import taminx.core.core_ui.contract_rules_sheet_housewife_section2_item3
+import taminx.core.core_ui.contract_rules_sheet_housewife_section2_title
+import taminx.core.core_ui.contract_rules_sheet_optional_p1
+import taminx.core.core_ui.contract_rules_sheet_optional_section1_item1
+import taminx.core.core_ui.contract_rules_sheet_optional_section1_item2
+import taminx.core.core_ui.contract_rules_sheet_optional_section1_item3
+import taminx.core.core_ui.contract_rules_sheet_optional_section1_item4
+import taminx.core.core_ui.contract_rules_sheet_optional_section1_title
+import taminx.core.core_ui.contract_rules_sheet_optional_section2_item1
+import taminx.core.core_ui.contract_rules_sheet_optional_section2_item2
+import taminx.core.core_ui.contract_rules_sheet_optional_section2_item3
+import taminx.core.core_ui.contract_rules_sheet_optional_section2_title
 import taminx.core.core_ui.contract_rules_sheet_page_counter
 import taminx.core.core_ui.contract_rules_sheet_student_p1
 import taminx.core.core_ui.contract_rules_sheet_student_section1_item1
@@ -45,14 +76,133 @@ import taminx.core.core_ui.contract_rules_sheet_student_section2_item1
 import taminx.core.core_ui.contract_rules_sheet_student_section2_item2
 import taminx.core.core_ui.contract_rules_sheet_student_section2_item3
 import taminx.core.core_ui.contract_rules_sheet_student_section2_title
+import taminx.core.core_ui.contract_rules_sheet_title_freelance
+import taminx.core.core_ui.contract_rules_sheet_title_housewife
+import taminx.core.core_ui.contract_rules_sheet_title_optional
 import taminx.core.core_ui.contract_rules_sheet_title_student
 import taminx.core.core_ui.contract_rules_sheet_understood
+
+@Immutable
+data class ContractRulesSection(
+    val title: String,
+    val items: List<String>,
+)
+
+@Immutable
+data class ContractRulesContent(
+    val title: String,
+    val intro: String,
+    val sections: List<ContractRulesSection>,
+)
+
+enum class ContractRulesVariant {
+    STUDENT,
+    FREELANCE,
+    HOUSEWIFE,
+    OPTIONAL,
+}
+
+@Composable
+fun contractRulesContent(variant: ContractRulesVariant): ContractRulesContent = when (variant) {
+    ContractRulesVariant.STUDENT -> ContractRulesContent(
+        title = stringResource(Res.string.contract_rules_sheet_title_student),
+        intro = stringResource(Res.string.contract_rules_sheet_student_p1),
+        sections = listOf(
+            ContractRulesSection(
+                title = stringResource(Res.string.contract_rules_sheet_student_section1_title),
+                items = listOf(
+                    stringResource(Res.string.contract_rules_sheet_student_section1_item1),
+                    stringResource(Res.string.contract_rules_sheet_student_section1_item2),
+                    stringResource(Res.string.contract_rules_sheet_student_section1_item3),
+                    stringResource(Res.string.contract_rules_sheet_student_section1_item4),
+                ),
+            ),
+            ContractRulesSection(
+                title = stringResource(Res.string.contract_rules_sheet_student_section2_title),
+                items = listOf(
+                    stringResource(Res.string.contract_rules_sheet_student_section2_item1),
+                    stringResource(Res.string.contract_rules_sheet_student_section2_item2),
+                    stringResource(Res.string.contract_rules_sheet_student_section2_item3),
+                ),
+            ),
+        ),
+    )
+    ContractRulesVariant.FREELANCE -> ContractRulesContent(
+        title = stringResource(Res.string.contract_rules_sheet_title_freelance),
+        intro = stringResource(Res.string.contract_rules_sheet_freelance_p1),
+        sections = listOf(
+            ContractRulesSection(
+                title = stringResource(Res.string.contract_rules_sheet_freelance_section1_title),
+                items = listOf(
+                    stringResource(Res.string.contract_rules_sheet_freelance_section1_item1),
+                    stringResource(Res.string.contract_rules_sheet_freelance_section1_item2),
+                    stringResource(Res.string.contract_rules_sheet_freelance_section1_item3),
+                    stringResource(Res.string.contract_rules_sheet_freelance_section1_item4),
+                ),
+            ),
+            ContractRulesSection(
+                title = stringResource(Res.string.contract_rules_sheet_freelance_section2_title),
+                items = listOf(
+                    stringResource(Res.string.contract_rules_sheet_freelance_section2_item1),
+                    stringResource(Res.string.contract_rules_sheet_freelance_section2_item2),
+                    stringResource(Res.string.contract_rules_sheet_freelance_section2_item3),
+                ),
+            ),
+        ),
+    )
+    ContractRulesVariant.HOUSEWIFE -> ContractRulesContent(
+        title = stringResource(Res.string.contract_rules_sheet_title_housewife),
+        intro = stringResource(Res.string.contract_rules_sheet_housewife_p1),
+        sections = listOf(
+            ContractRulesSection(
+                title = stringResource(Res.string.contract_rules_sheet_housewife_section1_title),
+                items = listOf(
+                    stringResource(Res.string.contract_rules_sheet_housewife_section1_item1),
+                    stringResource(Res.string.contract_rules_sheet_housewife_section1_item2),
+                    stringResource(Res.string.contract_rules_sheet_housewife_section1_item3),
+                    stringResource(Res.string.contract_rules_sheet_housewife_section1_item4),
+                ),
+            ),
+            ContractRulesSection(
+                title = stringResource(Res.string.contract_rules_sheet_housewife_section2_title),
+                items = listOf(
+                    stringResource(Res.string.contract_rules_sheet_housewife_section2_item1),
+                    stringResource(Res.string.contract_rules_sheet_housewife_section2_item2),
+                    stringResource(Res.string.contract_rules_sheet_housewife_section2_item3),
+                ),
+            ),
+        ),
+    )
+    ContractRulesVariant.OPTIONAL -> ContractRulesContent(
+        title = stringResource(Res.string.contract_rules_sheet_title_optional),
+        intro = stringResource(Res.string.contract_rules_sheet_optional_p1),
+        sections = listOf(
+            ContractRulesSection(
+                title = stringResource(Res.string.contract_rules_sheet_optional_section1_title),
+                items = listOf(
+                    stringResource(Res.string.contract_rules_sheet_optional_section1_item1),
+                    stringResource(Res.string.contract_rules_sheet_optional_section1_item2),
+                    stringResource(Res.string.contract_rules_sheet_optional_section1_item3),
+                    stringResource(Res.string.contract_rules_sheet_optional_section1_item4),
+                ),
+            ),
+            ContractRulesSection(
+                title = stringResource(Res.string.contract_rules_sheet_optional_section2_title),
+                items = listOf(
+                    stringResource(Res.string.contract_rules_sheet_optional_section2_item1),
+                    stringResource(Res.string.contract_rules_sheet_optional_section2_item2),
+                    stringResource(Res.string.contract_rules_sheet_optional_section2_item3),
+                ),
+            ),
+        ),
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContractRulesBottomSheet(
+    content: ContractRulesContent,
     onDismiss: () -> Unit,
-    title: String = stringResource(Res.string.contract_rules_sheet_title_student),
     pageCounter: String = stringResource(Res.string.contract_rules_sheet_page_counter),
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
 ) {
@@ -71,14 +221,13 @@ fun ContractRulesBottomSheet(
                 .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
             verticalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
-            // Header Row: Title & Page Counter Badge
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    text = title,
+                    text = content.title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = colors.textPrimary,
@@ -100,7 +249,6 @@ fun ContractRulesBottomSheet(
                 }
             }
 
-            // Scrollable Content Box
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -113,70 +261,32 @@ fun ContractRulesBottomSheet(
                 verticalArrangement = Arrangement.spacedBy(Spacing.md),
             ) {
                 Text(
-                    text = stringResource(Res.string.contract_rules_sheet_student_p1),
+                    text = content.intro,
                     style = MaterialTheme.typography.bodyMedium,
                     color = colors.textSecondary,
                 )
 
-                // Section 1: Conditions
-                Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-                    Text(
-                        text = stringResource(Res.string.contract_rules_sheet_student_section1_title),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = colors.textPrimary,
-                    )
-                    Text(
-                        text = stringResource(Res.string.contract_rules_sheet_student_section1_item1),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = colors.textSecondary,
-                    )
-                    Text(
-                        text = stringResource(Res.string.contract_rules_sheet_student_section1_item2),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = colors.textSecondary,
-                    )
-                    Text(
-                        text = stringResource(Res.string.contract_rules_sheet_student_section1_item3),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = colors.textSecondary,
-                    )
-                    Text(
-                        text = stringResource(Res.string.contract_rules_sheet_student_section1_item4),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = colors.textSecondary,
-                    )
-                }
-
-                // Section 2: Premium rates & Medical exemptions
-                Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-                    Text(
-                        text = stringResource(Res.string.contract_rules_sheet_student_section2_title),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = colors.textPrimary,
-                    )
-                    Text(
-                        text = stringResource(Res.string.contract_rules_sheet_student_section2_item1),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = colors.textSecondary,
-                    )
-                    Text(
-                        text = stringResource(Res.string.contract_rules_sheet_student_section2_item2),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = colors.textSecondary,
-                    )
-                    Text(
-                        text = stringResource(Res.string.contract_rules_sheet_student_section2_item3),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = colors.textSecondary,
-                    )
+                content.sections.forEach { section ->
+                    Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                        Text(
+                            text = section.title,
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = colors.textPrimary,
+                        )
+                        section.items.forEach { item ->
+                            Text(
+                                text = item,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = colors.textSecondary,
+                            )
+                        }
+                    }
                 }
             }
 
             Spacer(modifier = Modifier.height(Spacing.xs))
 
-            // Action Button
             TaminFilledButton(
                 text = stringResource(Res.string.contract_rules_sheet_understood),
                 onClick = onDismiss,
@@ -186,15 +296,12 @@ fun ContractRulesBottomSheet(
     }
 }
 
-// -------------------------------------------------------------------------
-// Previews
-// -------------------------------------------------------------------------
-
 @com.tamin.taminhamrah.ui.PreviewRtlTheme
 @Composable
 private fun ContractRulesBottomSheetContentPreview() {
     com.tamin.taminhamrah.ui.PreviewRtlThemeContent {
         ContractRulesBottomSheet(
+            content = contractRulesContent(ContractRulesVariant.FREELANCE),
             onDismiss = {},
         )
     }

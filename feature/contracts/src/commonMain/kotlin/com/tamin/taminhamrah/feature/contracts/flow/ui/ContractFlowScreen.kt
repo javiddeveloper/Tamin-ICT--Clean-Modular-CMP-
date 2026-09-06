@@ -58,6 +58,8 @@ import com.tamin.taminhamrah.ui.contractFlow.ContractApplicantStepContent
 import com.tamin.taminhamrah.ui.contractFlow.ContractFlowScreenShimmerSkeleton
 import com.tamin.taminhamrah.ui.contractFlow.ContractRegistrationStepContent
 import com.tamin.taminhamrah.ui.contractFlow.ContractRulesBottomSheet
+import com.tamin.taminhamrah.ui.contractFlow.ContractRulesVariant
+import com.tamin.taminhamrah.ui.contractFlow.contractRulesContent
 import com.tamin.taminhamrah.ui.contractFlow.ContractSubmitResult
 import com.tamin.taminhamrah.ui.contractFlow.ContractSubmitResultDialog
 import com.tamin.taminhamrah.ui.contractFlow.ContractSummaryRowPR
@@ -160,7 +162,9 @@ fun ContractFlowScreen(
     )
 
     if (showRulesSheet) {
+        val rulesVariant = state.config?.rulesVariant ?: ContractRulesVariant.FREELANCE
         ContractRulesBottomSheet(
+            content = contractRulesContent(rulesVariant),
             onDismiss = { showRulesSheet = false },
         )
     }

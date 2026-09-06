@@ -133,14 +133,17 @@ class FakeContractsRepository : ContractsRepository {
         )
     }
 
+    var redCrossStatusResult: String = "ok"
+    var medicalStudentStatusResult: String = "ok14"
+
     override fun checkRedCrossStatus(): Flow<String> = flow {
         if (shouldThrowError) throw error
-        emit("ok")
+        emit(redCrossStatusResult)
     }
 
     override fun checkMedicalStudent(): Flow<String> = flow {
         if (shouldThrowError) throw error
-        emit("ok14")
+        emit(medicalStudentStatusResult)
     }
 
     override fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Flow<Long> = flow {

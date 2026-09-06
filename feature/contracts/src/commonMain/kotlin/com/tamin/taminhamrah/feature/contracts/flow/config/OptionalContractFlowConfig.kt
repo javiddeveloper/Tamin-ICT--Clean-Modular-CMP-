@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.feature.contracts.flow.config.ContractFlowConfig
 import com.tamin.taminhamrah.feature.contracts.flow.config.OPTIONAL_FLOW_STEPS
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.contracts.ContractPremiumTypeCode
+import com.tamin.taminhamrah.ui.contractFlow.ContractRulesVariant
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.contract_optional_insurance_type
 import taminx.core.core_ui.contract_optional_screen_title
@@ -22,6 +23,7 @@ class OptionalContractFlowConfig : ContractFlowConfig {
     override val hasTreatmentSupportStep = false
     override val hasPremiumRateStep = false
     override val rulesPdfPath = "rules2.pdf"
+    override val rulesVariant = ContractRulesVariant.OPTIONAL
     override val requiresFemaleGender = false
     override val fixedFreeJobCode = null
     override val allowsOnlinePaymentAfterSubmit = true
