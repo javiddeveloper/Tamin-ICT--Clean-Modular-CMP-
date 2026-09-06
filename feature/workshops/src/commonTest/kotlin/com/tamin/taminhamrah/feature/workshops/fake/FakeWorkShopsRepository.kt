@@ -19,7 +19,6 @@ import com.tamin.taminhamrah.model.workshop.DebitPaymentDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDN
 import com.tamin.taminhamrah.model.workshop.DebitReasonDN
-import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmissionDN
 import com.tamin.taminhamrah.model.workshop.EmployerContactInfoDN
@@ -63,7 +62,6 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     var recentlyAddedMembers: PagedListDN<WorkshopNewMemberDN> = PagedListDN()
     var workshopsWithoutContract: PagedListDN<WorkshopWithoutContractDN> = PagedListDN()
     var workshopContractRows: PagedListDN<WorkshopContractRowDN> = PagedListDN()
-    var employerAgreementsByWorkshop: PagedListDN<EmployerAgreementByWorkshopDN> = PagedListDN()
 
     var debtInquiry: WorkshopDebtInquiryDN = WorkshopDebtInquiryDN()
     var paymentPreCheck: DebitPaymentPreCheckDN = DebitPaymentPreCheckDN()
@@ -242,12 +240,6 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         branchCode: String,
         page: Int,
     ): PagedListDN<WorkshopContractRowDN> = answer { workshopContractRows }
-
-    override suspend fun getEmployerAgreementsByWorkshop(
-        workshopId: String,
-        branchCode: String,
-        page: Int,
-    ): PagedListDN<EmployerAgreementByWorkshopDN> = answer { employerAgreementsByWorkshop }
 
     override suspend fun submitEmployerAgreement(request: EmployerAgreementSubmissionDN): String =
         answer {
