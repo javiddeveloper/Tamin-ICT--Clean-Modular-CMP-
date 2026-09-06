@@ -105,6 +105,13 @@ fun ContractRowsContent(
     val list = state.list
     val applied = state.applied
 
+    // Rows fade and rise in as they arrive; a new tab or a new workshop plays the entrance again,
+    // paging further into one does not. Held in a remember because building it inline would hand
+    // the scaffold a fresh value every recomposition.
+    val entranceKey = remember(tab, applied) {
+        "$tab|${applied?.workshopId}|${applied?.branchCode}"
+    }
+
     Column(modifier = modifier.fillMaxSize()) {
         TaminTopAppBar(
             title = stringResource(Res.string.contract_rows_title),
@@ -176,6 +183,7 @@ fun ContractRowsContent(
             state = list,
             onLoadMore = { onIntent(ContractRowsIntent.LoadMore) },
             onRetry = { onIntent(ContractRowsIntent.Retry) },
+            entranceKey = entranceKey,
             // Neither service guarantees a unique field: one workshop holds several rows, and the
             // row number repeats across workshops. The scaffold prefixes the index, which is what
             // makes this safe as an identity rather than merely as a hint.
@@ -206,8 +214,12 @@ fun ContractRowsContent(
                     showIconTile = true,
                 )
             },
-        ) { row ->
-            ContractRowCard(row = row, showContact = tab == ContractRowTab.WITH_AGREEMENT)
+        ) { row, itemModifier ->
+            ContractRowCard(
+                row = row,
+                showContact = tab == ContractRowTab.WITH_AGREEMENT,
+                modifier = itemModifier,
+            )
         }
     }
 

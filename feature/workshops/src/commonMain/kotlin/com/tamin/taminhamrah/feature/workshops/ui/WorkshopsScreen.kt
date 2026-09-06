@@ -189,10 +189,11 @@ fun WorkshopsScreen(
                     )
                 }
             },
-        ) { workshop ->
+        ) { workshop, itemModifier ->
             WorkshopCard(
                 workshop = workshop,
                 onOpenDetails = { onIntent(WorkshopsIntent.DetailRequested(workshop)) },
+                modifier = itemModifier,
             )
         }
     }

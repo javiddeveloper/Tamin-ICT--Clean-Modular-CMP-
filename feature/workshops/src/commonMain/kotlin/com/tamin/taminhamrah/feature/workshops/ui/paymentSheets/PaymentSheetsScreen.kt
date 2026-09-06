@@ -187,8 +187,8 @@ fun PaymentSheetsContent(
                     )
                 }
             },
-        ) { sheet ->
-            PaymentSheetCard(sheet = sheet)
+        ) { sheet, itemModifier ->
+            PaymentSheetCard(sheet = sheet, modifier = itemModifier)
         }
     }
 

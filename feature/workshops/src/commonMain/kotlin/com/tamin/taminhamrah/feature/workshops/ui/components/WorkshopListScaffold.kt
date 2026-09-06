@@ -1,5 +1,8 @@
 package com.tamin.taminhamrah.feature.workshops.ui.components
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -22,8 +25,11 @@ import com.tamin.taminhamrah.feature.workshops.ui.WorkshopConstants
 import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
+import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
+import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.Duration
 import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -69,7 +75,24 @@ fun <T> WorkshopListScaffold(
      * which is what a caller with no cheap way to re-run the request should do.
      */
     onRetry: (() -> Unit)? = null,
-    row: @Composable (T) -> Unit,
+    /**
+     * Turns on the staggered entrance the rest of the app uses for list rows, and doubles as the
+     * value that resets it.
+     *
+     * Null — the default every existing caller takes — leaves rows appearing instantly, as before.
+     * Pass whatever identifies the current dataset (the tab, the applied filter) so a new result
+     * animates in rather than the second one arriving already faded up.
+     *
+     * Typed `String?` rather than `Any?` deliberately: the Compose compiler reads `Any?` as
+     * unstable, which costs this whole scaffold its ability to skip on every recomposition of the
+     * screen above it. Build the value in a `remember` at the call site.
+     */
+    entranceKey: String? = null,
+    /**
+     * One row. The [Modifier] handed in carries the entrance animation and must be applied to the
+     * row's own root — a wrapper laid around it here would be a layout node per row for nothing.
+     */
+    row: @Composable (T, Modifier) -> Unit,
 ) {
     // The three states share one set of insets: a header that keeps the page margins while the
     // list is loading, then loses them once the rows arrive, reads as the page jumping sideways.
@@ -129,6 +152,10 @@ fun <T> WorkshopListScaffold(
             .collect { onLoadMore() }
     }
 
+    // Keyed on the dataset, so switching tab or workshop plays the entrance again while scrolling
+    // through one result does not — the state remembers which rows have already arrived.
+    val staggerState = rememberStaggeredEntranceState(key = entranceKey)
+
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         state = listState,
@@ -147,7 +174,26 @@ fun <T> WorkshopListScaffold(
             // caller's key meaningful while making a collision impossible, and these lists only
             // ever grow at the end, so an item's index — and therefore its identity — is stable.
             key = key?.let { keyOf -> { index, item -> "$index:${keyOf(item)}" } },
-        ) { _, item -> row(item) }
+        ) { index, item ->
+            row(
+                item,
+                if (entranceKey == null) {
+                    Modifier
+                } else {
+                    Modifier
+                        .animateItem(
+                            fadeInSpec = null,
+                            fadeOutSpec = tween(Duration.fast),
+                            placementSpec = spring(stiffness = Spring.StiffnessLow),
+                        )
+                        .staggeredItemEntrance(
+                            index = index,
+                            key = key?.invoke(item) ?: index,
+                            state = staggerState,
+                        )
+                },
+            )
+        }
 
         if (state.isLoadingMore) {
             item(key = WorkshopConstants.FOOTER_KEY) {
