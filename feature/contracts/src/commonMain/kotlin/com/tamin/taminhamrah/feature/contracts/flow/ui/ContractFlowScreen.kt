@@ -522,14 +522,13 @@ fun ContractFlowScreenContent(
                                             calculatedMonthlySalary = state.calculatedMonthlySalary,
                                             isLoading = state.isPremiumRangeLoading,
                                             isCalculating = state.isCalculatingPremium,
+                                            isPremiumCalculated = state.isPremiumCalculated,
                                             onPremiumChange = {
                                                 onIntent(ContractFlowIntent.SelectMonthlyPremium(it))
                                             },
                                             onCalculate = {
                                                 onIntent(ContractFlowIntent.CalculateMonthlyPremium)
                                             },
-                                            showPremiumSlider = !state.hidePremiumSlider &&
-                                                (state.config?.usesFreelancePremiumRange == true || state.config?.isOptionalInsurance == true),
                                         )
                                     }
 

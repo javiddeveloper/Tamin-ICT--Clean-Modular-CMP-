@@ -763,7 +763,8 @@ class ContractFlowViewModel(
             getOptionalPremiumRangeUseCase().collect { range ->
                 val presentation = range.toPremiumRangePresentation()
                 emit(PartialState.PremiumRangeLoaded(presentation))
-                emit(PartialState.SelectedMonthlyPremiumChanged(presentation.lowPremium))
+                val midPremium = (presentation.lowPremium + presentation.highPremium) / 2L
+                emit(PartialState.SelectedMonthlyPremiumChanged(midPremium))
             }
         } catch (e: Exception) {
             emitError(e.message)
@@ -903,11 +904,11 @@ class ContractFlowViewModel(
 
     private fun buildMakeContractParams(): FreelanceMakeContractParams? {
         val flowConfig = uiState.value.config ?: config
-        val selectedSalary = if (flowConfig.isOptionalInsurance) {
-            uiState.value.calculatedMonthlySalary
-        } else {
-            uiState.value.selectedMonthlyPremium
-        } ?: return null
+        // Optional legacy submits the selected monthly premium (seekbar), not the calculated base wage.
+        val selectedSalary = uiState.value.selectedMonthlyPremium ?: return null
+        if (flowConfig.isOptionalInsurance && uiState.value.calculatedMonthlySalary == null) {
+            return null
+        }
         val premiumRateCode = if (flowConfig.isOptionalInsurance) {
             ""
         } else {
