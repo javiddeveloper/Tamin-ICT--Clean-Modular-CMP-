@@ -19,15 +19,20 @@ import com.tamin.taminhamrah.model.workshop.DebitPaymentDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDN
 import com.tamin.taminhamrah.model.workshop.DebitReasonDN
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmissionDN
+import com.tamin.taminhamrah.model.workshop.EmployerContactInfoDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetQuery
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDN
 import com.tamin.taminhamrah.model.workshop.WorkshopListQuery
+import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDN
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDN
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberQuery
+import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDN
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDN
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDN
@@ -59,6 +64,9 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     var members: PagedListDN<WorkshopMemberDN> = PagedListDN()
     var stackHolders: PagedListDN<WorkshopStackHolderDN> = PagedListDN()
     var recentlyAddedMembers: PagedListDN<WorkshopNewMemberDN> = PagedListDN()
+    var workshopsWithoutContract: PagedListDN<WorkshopWithoutContractDN> = PagedListDN()
+    var workshopContractRows: PagedListDN<WorkshopContractRowDN> = PagedListDN()
+    var employerAgreementsByWorkshop: PagedListDN<EmployerAgreementByWorkshopDN> = PagedListDN()
     var workShopObjections: PagedListDN<WorkShopObjectionDN> = PagedListDN()
     var objectionSms: PagedListDN<SmsMessageDN> = PagedListDN()
 
@@ -72,6 +80,21 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     var articleSixteenSaveResult: ArticleSixteenSaveResultDN = ArticleSixteenSaveResultDN()
     var pdf: PdfDownloadDN = PdfDownloadDN()
     var confirmReferenceCode: String = ""
+    var employerContactInfo: EmployerContactInfoDN = EmployerContactInfoDN()
+    var ticketRequestMessage: String = ""
+    var employerAgreementSubmitMessage: String = ""
+    var lastEmployerAgreementSubmission: EmployerAgreementSubmissionDN? = null
+        private set
+    var lastTicketRequest: Pair<String, String>? = null
+        private set
+    var lastContactInfoCode: String? = null
+        private set
+    var lastWorkshopsWithoutContractPage: Int? = null
+        private set
+    var lastContractRowsArgs: Triple<String, String, Int>? = null
+        private set
+    var lastAgreementsByWorkshopArgs: Triple<String, String, Int>? = null
+        private set
 
     /** Set to make the next call throw instead of answering. */
     var error: Throwable? = null
@@ -221,6 +244,41 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         lastStackHolderQuery = query
         stackHolders
     }
+
+    override suspend fun requestEmployerAgreementTicket(mobile: String, email: String): String =
+        answer {
+            lastTicketRequest = mobile to email
+            ticketRequestMessage
+        }
+
+    override suspend fun getEmployerAgreementContactInfo(
+        verificationCode: String,
+    ): EmployerContactInfoDN = answer {
+        lastContactInfoCode = verificationCode
+        employerContactInfo
+    }
+
+    override suspend fun getWorkshopsWithoutContract(
+        page: Int,
+    ): PagedListDN<WorkshopWithoutContractDN> = answer {
+        lastWorkshopsWithoutContractPage = page
+        workshopsWithoutContract
+    }
+
+    override suspend fun getWorkshopContractRows(
+        workshopId: String,
+        branchCode: String,
+        page: Int,
+    ): PagedListDN<WorkshopContractRowDN> = answer {
+        lastContractRowsArgs = Triple(workshopId, branchCode, page)
+        workshopContractRows
+    }
+
+    override suspend fun submitEmployerAgreement(request: EmployerAgreementSubmissionDN): String =
+        answer {
+            lastEmployerAgreementSubmission = request
+            employerAgreementSubmitMessage
+        }
 
     override suspend fun getWorkShopObjections(
         query: WorkShopObjectionQuery,

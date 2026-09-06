@@ -8,7 +8,11 @@ import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoDN
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoPR
 import com.tamin.taminhamrah.model.workshop.DebitReasonDN
 import com.tamin.taminhamrah.model.workshop.DebitReasonPR
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopDN
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopPR
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
+import com.tamin.taminhamrah.model.workshop.EmployerContactInfoDN
+import com.tamin.taminhamrah.model.workshop.EmployerContactInfoPR
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeContractPR
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativePR
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopPR
@@ -26,8 +30,12 @@ import com.tamin.taminhamrah.model.workshop.WorkshopMemberPR
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDN
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberPR
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
+import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDN
+import com.tamin.taminhamrah.model.workshop.WorkshopContractRowPR
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDN
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderPR
+import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDN
+import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractPR
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionPR
@@ -68,6 +76,56 @@ fun EmployerAgreementDN.toPresentation(): WorkshopPR = with(workshop) {
         approveDate = approveDate.orDashDate(),
     )
 }
+
+// ---------------------------------------------- خدمات غیرحضوری کارفرما (employerEservicesAgreement)
+
+fun EmployerContactInfoDN.toPresentation(): EmployerContactInfoPR = EmployerContactInfoPR(
+    fullName = fullName.orDash(),
+    nationalCode = nationalCode.orDashDigits(),
+    currentMobile = currentMobile.orDashDigits(),
+    currentEmail = currentEmail.orDash(),
+)
+
+fun WorkshopWithoutContractDN.toPresentation(): WorkshopWithoutContractPR = WorkshopWithoutContractPR(
+    workshopId = workshopId,
+    branchCode = branchCode,
+    hasIdentity = hasIdentity,
+    name = name.orDash(),
+    codeLabel = workshopId.orDashDigits(),
+    nationalId = nationalId.orDashDigits(),
+    postalCode = postalCode.orDashDigits(),
+    tel = tel.orDashDigits(),
+    address = address.orDash(),
+    branchOfficeName = branchOfficeName.orDash(),
+)
+
+fun WorkshopContractRowDN.toPresentation(): WorkshopContractRowPR = WorkshopContractRowPR(
+    contractRow = contractRow.orDashDigits(),
+    fullName = fullName.orDash(),
+    nationalCode = nationalCode.orDashDigits(),
+    mobile = mobile.orDashDigits(),
+    email = email.orDash(),
+    tel = tel.orDashDigits(),
+    postalCode = postalCode.orDashDigits(),
+    startDate = startDate.orDashDate(),
+    endDate = endDate.orDashDate(),
+    workshopName = workshop.name.orDash(),
+    workshopCodeLabel = workshop.workshopId.orDashDigits(),
+)
+
+fun EmployerAgreementByWorkshopDN.toPresentation(): EmployerAgreementByWorkshopPR =
+    EmployerAgreementByWorkshopPR(
+        workshopId = workshop.workshopId,
+        branchCode = workshop.branchCode,
+        paymentSequence = paymentSequence.orDashDigits(),
+        workshopName = workshop.name.orDash(),
+        workshopCodeLabel = workshop.workshopId.orDashDigits(),
+        address = workshop.address.orDash(),
+        startDate = startDate.orDashDate(),
+        commitmentDate = commitmentDate.orDashDate(),
+        mobile = mobile.orDashDigits(),
+        email = email.orDash(),
+    )
 
 // -------------------------------------------------------------------------- برگ پرداخت‌ها
 

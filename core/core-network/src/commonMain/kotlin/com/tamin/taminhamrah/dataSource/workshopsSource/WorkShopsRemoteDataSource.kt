@@ -13,19 +13,24 @@ import com.tamin.taminhamrah.model.workshop.DebitPaymentDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDTO
 import com.tamin.taminhamrah.model.workshop.DebitReasonDTO
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeContractDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeRequestDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopDTO
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmitRequestDTO
+import com.tamin.taminhamrah.model.workshop.EmployerCommitmentInfoDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberConfirmResultDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDTO
 import com.tamin.taminhamrah.model.workshop.SmsMessageDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDTO
@@ -147,6 +152,40 @@ interface WorkShopsRemoteDataSource {
     suspend fun submitLegalRepresentative(ticket: String, request: LegalRepresentativeRequestDTO)
 
     suspend fun deleteLegalRepresentative(ticket: String, stackId: Long)
+
+    // ------------------------------------------------- خدمات غیرحضوری کارفرما (employerEservicesAgreement)
+
+    /**
+     * Step 1 — request the OTP ticket for registering an employer online-services agreement.
+     * Builds the `mobileNumber` / `email` / `serviceName` filter internally. Returns the backend's
+     * bare confirmation message.
+     */
+    suspend fun requestEmployerAgreementTicket(
+        mobileNumber: String,
+        email: String,
+    ): String
+
+    /** Step 2 — exchange the entered OTP for the employer's identity block. */
+    suspend fun getEmployerAgreementUserInfo(
+        verificationCode: String,
+    ): EmployerCommitmentInfoDTO
+
+    /** Step 2 — paged list of the employer's workshops that have no contract yet. */
+    suspend fun getEmployerWorkshopsWithoutContract(
+        query: ApiQueryParamDN
+    ): ListData<WorkshopWithoutContractDTO>
+
+    /** Contract / پیمانکار rows of one workshop (by workshop + branch code). */
+    suspend fun getEmployerWorkshopContractList(
+        workshopId: String,
+        branchCode: String,
+        query: ApiQueryParamDN
+    ): ListData<WorkshopContractRowDTO>
+
+    /** Step 3 — submit the final agreement. Returns the backend's bare success message. */
+    suspend fun submitEmployerAgreement(
+        request: EmployerAgreementSubmitRequestDTO,
+    ): String
 
     suspend fun getWorkShopObjections(query: ApiQueryParamDN): ListData<WorkShopObjectionDTO>
 

@@ -1,8 +1,13 @@
 package com.tamin.taminhamrah.apiService
 
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
+import com.tamin.taminhamrah.model.workshop.EmployerCommitmentInfoDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDTO
+import com.tamin.taminhamrah.tools.extractMessage
 import com.tamin.taminhamrah.util.ApiTestUtils
 import com.tamin.taminhamrah.util.WorkshopTestData
 import kotlinx.coroutines.test.runTest
@@ -110,5 +115,84 @@ class WorkShopsApiServiceTest : BaseApiTest() {
         val inquiry = assertNotNull(response.data)
         // Strings, not numbers: the service answers some inquiries with words instead of figures.
         assertNotNull(inquiry.definitiveDebt)
+    }
+
+    // ------------------------------------------- خدمات غیرحضوری کارفرما (employerEservicesAgreement)
+    //
+    // These payloads spell several keys the way the legacy backend does — `wokshopId` (a typo),
+    // `mobileNo`, and the all-lowercase `pymseq`/`startdate`/`letDate`/`emailaddr`/`mobileno`.
+    // Correcting any of them in the DTO stops that field deserializing, so it is pinned here.
+
+    @Test
+    fun `employer-info returns the identity block step 2 shows`() = runTest {
+        val ktorfit = createMockKtorfit(
+            ApiTestUtils.createJsonResponse(dataJson = WorkshopTestData.employerCommitmentInfoSuccess)
+        )
+        val apiService = ktorfit.createWorkShopsApiService()
+
+        val response = apiService.getEmployerAgreementUserInfo(verificationCode = "123456")
+
+        val info: EmployerCommitmentInfoDTO = assertNotNull(response.data)
+        assertEquals("رضا", info.firstName)
+        assertEquals("کارفرما", info.lastName)
+        assertEquals("0012345678", info.nationalCode)
+        // `mobile`/`email` here are the *currently registered* contact values.
+        assertEquals("09120000000", info.mobile)
+        assertEquals("boss@example.com", info.email)
+    }
+
+    @Test
+    fun `workshops-without-contract deserializes the wokshopId typo and nested organization`() = runTest {
+        val ktorfit = createMockKtorfit(
+            ApiTestUtils.createJsonResponse(dataJson = WorkshopTestData.employerWorkshopsWithoutContractSuccess)
+        )
+        val apiService = ktorfit.createWorkShopsApiService()
+
+        val response = apiService.getEmployerWorkshopsWithoutContract(queries = emptyMap())
+
+        val listData = assertNotNull(response.data)
+        assertEquals(1, listData.total)
+        val row: WorkshopWithoutContractDTO = listData.list.orEmpty().first()
+        // The property is `workshopId`; the wire key it reads is the misspelled `wokshopId`.
+        assertEquals("1071410004", row.workshopId)
+        assertEquals("123", row.branchCode)
+        assertEquals("کارگاه تولیدی الف", row.workshopName)
+        assertEquals("شعبه یک تهران", row.organization?.organizationName)
+        assertEquals("0960", row.organization?.code)
+    }
+
+    @Test
+    fun `contract rows deserialize mobileNo and the nested workshop`() = runTest {
+        val ktorfit = createMockKtorfit(
+            ApiTestUtils.createJsonResponse(dataJson = WorkshopTestData.employerWorkshopContractRowsSuccess)
+        )
+        val apiService = ktorfit.createWorkShopsApiService()
+
+        val response = apiService.getEmployerWorkshopContractList(
+            workshopId = "1071410004",
+            branchCode = "123",
+            queries = emptyMap(),
+        )
+
+        val row: WorkshopContractRowDTO = assertNotNull(response.data).list.orEmpty().first()
+        assertEquals("02100014", row.contractRow)
+        assertEquals("14030101", row.startDate)
+        // `mobileNo` on the wire -> `mobile` on the DTO.
+        assertEquals("09123334444", row.mobile)
+        assertEquals("0021234567", row.nationalCode)
+        assertEquals("1071410004", row.workshop?.workshopId)
+        assertEquals("کارگاه الف", row.workshop?.workshopName)
+    }
+
+    @Test
+    fun `request-ticket surfaces the backend confirmation message`() = runTest {
+        val ktorfit = createMockKtorfit(
+            ApiTestUtils.createJsonResponse(dataJson = WorkshopTestData.employerRequestTicketSuccess)
+        )
+        val apiService = ktorfit.createWorkShopsApiService()
+
+        val response = apiService.requestEmployerAgreementTicket(filter = "[]")
+
+        assertEquals("کد تایید ارسال شد", response.extractMessage())
     }
 }

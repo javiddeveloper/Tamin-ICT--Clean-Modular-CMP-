@@ -69,6 +69,9 @@ enum class FilterProperty(val key: String) {
     @SerialName("nationalCode") NATIONAL_CODE("nationalCode"),
     // The employer-info ticket endpoints name the contact fields this way; `mobile` above is
     // a different filter on a different service and is not interchangeable with it.
+    // خدمات غیرحضوری کارفرما — the `workshop-services/request-ticket` filter for the
+    // employerEservicesAgreement flow addresses these three columns (see
+    // WorkShopsRemoteDataSourceImpl.requestEmployerAgreementTicket).
     @SerialName("mobileNumber") MOBILE_NUMBER("mobileNumber"),
     @SerialName("email") EMAIL("email"),
     @SerialName("serviceName") SERVICE_NAME("serviceName"),
