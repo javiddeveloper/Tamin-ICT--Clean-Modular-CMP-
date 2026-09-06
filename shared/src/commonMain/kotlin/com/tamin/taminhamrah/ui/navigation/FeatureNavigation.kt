@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.feature.history.navigateToHistoryJobInfo
 import com.tamin.taminhamrah.feature.historyobjection.navigateToHistoryObjection
 import com.tamin.taminhamrah.feature.deferredInstallment.navigateToDeferredInstallment
 import com.tamin.taminhamrah.feature.orotezprotez.navigateToOrotezProtez
+import com.tamin.taminhamrah.feature.requestPaymentForIllDays.navigateToRequestPaymentForIllDays
 import com.tamin.taminhamrah.feature.pregnancyPay.navigateToPregnancyPay
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToCalculatePension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeservedTreatment
@@ -26,6 +27,7 @@ import com.tamin.taminhamrah.feature.taminServices.navigateToInspection
 import com.tamin.taminhamrah.feature.taminServices.navigateToSendInsuranceHistoryToInstitutions
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.navigateToCompleteEmployerInfo
+import com.tamin.taminhamrah.feature.workshops.navigateToLegalRepresentativeWorkshops
 import com.tamin.taminhamrah.model.common.FeatureFlag
 
 fun NavController.navigateToFeature(flag: FeatureFlag) {
@@ -33,6 +35,7 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
         FeatureFlag.MERGE_HISTORY -> navigateToHistory()
         FeatureFlag.WORKSHOPS -> navigateToWorkshops()
         FeatureFlag.COMPLETE_WORKSHOP_INFO -> navigateToCompleteEmployerInfo()
+        FeatureFlag.STACK_HOLDER_LIST -> navigateToLegalRepresentativeWorkshops()
         FeatureFlag.CONTRACTS -> navigateToContracts()
         FeatureFlag.STUDENT_INSURANCE -> navigateToContractFlow(ContractType.STUDENT)
         FeatureFlag.FREELANCE_INSURANCE -> navigateToContractFlow(ContractType.FREELANCE)
@@ -47,11 +50,13 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
         FeatureFlag.ISSUANCE_WAGE_CERTIFICATE -> navigateToIssuanceCertificate()
         FeatureFlag.DEFERRED_INSTALLMENT_CERTIFICATE -> navigateToDeferredInstallment()
         FeatureFlag.GIRL_SURVIVOR -> navigateToGirlSurvivor()
+        FeatureFlag.REQUEST_PENSION_BY_SURVIVOR,
         FeatureFlag.REQUEST_PENSION_BY_SURVIVOR_112 -> navigateToPensionSurvivor()
         FeatureFlag.DISABILITY_PENSION -> navigateToDisabilityPension()
         FeatureFlag.VIEW_TITLE_JOB -> navigateToHistoryJobInfo()
         FeatureFlag.SEND_INSURANCE_HISTORY_TO_INSTITUTION -> navigateToSendInsuranceHistoryToInstitutions()
         FeatureFlag.OROTEZ_PROTEZ -> navigateToOrotezProtez()
+        FeatureFlag.REQUEST_PAYMENT_FOR_ILL_DAYS -> navigateToRequestPaymentForIllDays()
         FeatureFlag.OCCURRENCE -> navigateToOccurrence()
         FeatureFlag.LIST_OF_INSPECTIONS_PERFORMED -> navigateToInspection()
         FeatureFlag.OBJECTION_NON_EXISTENT_HISTORY -> navigateToHistoryObjection()

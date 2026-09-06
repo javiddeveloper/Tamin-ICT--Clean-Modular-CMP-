@@ -163,3 +163,8 @@ object ShimmerSize {
     val sliderTrackHeight = 4.dp
     val stepperButtonSize = 40.dp
 }
+
+/** Scrollable list area inside modal option sheets (city / branch pickers). */
+object SheetDimens {
+    val listMaxHeight = 300.dp
+}
