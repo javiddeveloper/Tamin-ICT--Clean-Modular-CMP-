@@ -414,11 +414,11 @@ class DisabilityPensionViewModel(
             val requestRef = saveDisabilityUserInfoUseCase(buildSaveInfoRequest()).first()
             val requestId = requireNotNull(requestRef?.id)
             saveDocumentDisabilityUseCase(requestId, buildSaveDocumentRequest()).first()
-            finalConfirmDisabilityRequestUseCase(
+            val finalConfirmRef = finalConfirmDisabilityRequestUseCase(
                 requestId,
                 DisabilityFinalConfirmDN(id = requestId, status = FINAL_CONFIRM_STATUS),
             ).first()
-            emit(PartialState.SubmitSucceeded(requestRef?.refCode ?: requestId.toString()))
+            emit(PartialState.SubmitSucceeded(finalConfirmRef?.refCode ?: requestId.toString()))
         } catch (e: Exception) {
             emit(PartialState.SubmittingChanged(false))
             sendEvent(DisabilityPensionEvent.ShowToast(e.toSingleLineMessage()))
@@ -437,7 +437,7 @@ class DisabilityPensionViewModel(
             branchCode = info?.branch,
             fatherName = personal?.fatherName,
             firstName = personal?.firstName,
-            gender = personal?.genderDesc,
+            gender = personal?.genderCode,
             idNumber = personal?.idCardNumber,
             insuranceNumber = info?.insuranceId,
             issuePlace = personal?.cityOfIssue,
@@ -697,8 +697,8 @@ class DisabilityPensionViewModel(
     private suspend fun FlowCollector<PartialState>.downloadMedicalCommissionPdf() {
         emit(PartialState.MedicalCommissionPdfChanged(null))
         try {
-            val workshopId = uiState.value.identityInfo?.work?.workshopId.orEmpty()
-            getMedicalCommissionPdfUseCase(workshopId).collect { pdf ->
+            val workshopName = uiState.value.workshopName
+            getMedicalCommissionPdfUseCase(workshopName).collect { pdf ->
                 emit(PartialState.MedicalCommissionPdfChanged(pdf.toPresentation()))
             }
         } catch (e: Exception) {

@@ -642,23 +642,24 @@ private class FakeDisabilityPensionRepository : PensionRepository {
         error("not used in DisabilityPensionViewModel")
     override suspend fun sendRequestInquirePensionCertificate(filters: List<ApiFilterDN>): Flow<InquirePensionCertificateDN> =
         error("not used in DisabilityPensionViewModel")
-    var saveDisabilityUserInfoResult: DisabilityRequestRefDN? = DisabilityRequestRefDN(id = 555L, refCode = "3829147205")
+    var saveDisabilityUserInfoResult: DisabilityRequestRefDN? = DisabilityRequestRefDN(id = 555L, refCode = "9999999999")
     var saveDisabilityUserInfoError: Throwable? = null
     var lastSaveDisabilityUserInfoBody: DisabilitySaveInfoDN? = null
     var lastSaveDocumentDisabilityRequestId: Long? = null
     var lastSaveDocumentDisabilityBody: DisabilitySaveDocumentDN? = null
     var lastFinalConfirmRequestId: Long? = null
     var lastFinalConfirmBody: DisabilityFinalConfirmDN? = null
+    var finalConfirmResult: DisabilityRequestRefDN? = DisabilityRequestRefDN(id = 555L, refCode = "3829147205")
 
     override suspend fun saveDisabilityUserInfo(body: DisabilitySaveInfoDN): Flow<DisabilityRequestRefDN?> = flow {
         lastSaveDisabilityUserInfoBody = body
         saveDisabilityUserInfoError?.let { throw it }
         emit(saveDisabilityUserInfoResult)
     }
-    override suspend fun finalConfirmDisabilityRequest(requestId: Long, body: DisabilityFinalConfirmDN): Flow<String?> = flow {
+    override suspend fun finalConfirmDisabilityRequest(requestId: Long, body: DisabilityFinalConfirmDN): Flow<DisabilityRequestRefDN?> = flow {
         lastFinalConfirmRequestId = requestId
         lastFinalConfirmBody = body
-        emit(null)
+        emit(finalConfirmResult)
     }
     override suspend fun saveDocumentDisability(requestId: Long, body: DisabilitySaveDocumentDN): Flow<String?> = flow {
         lastSaveDocumentDisabilityRequestId = requestId

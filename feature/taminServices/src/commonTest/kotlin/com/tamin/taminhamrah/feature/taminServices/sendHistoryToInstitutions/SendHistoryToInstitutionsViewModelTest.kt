@@ -284,7 +284,7 @@ class SendHistoryToInstitutionsViewModelTest {
 
         override suspend fun sendRequestInquirePensionCertificate(filters: List<ApiFilterDN>) = flow<com.tamin.taminhamrah.model.pension.InquirePensionCertificateDN> { TODO() }
         override suspend fun saveDisabilityUserInfo(body: com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoDN) = flow<com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityRequestRefDN?> { TODO() }
-        override suspend fun finalConfirmDisabilityRequest(requestId: Long, body: com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityFinalConfirmDN) = flow<String?> { TODO() }
+        override suspend fun finalConfirmDisabilityRequest(requestId: Long, body: com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityFinalConfirmDN) = flow<com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityRequestRefDN?> { TODO() }
         override suspend fun saveDocumentDisability(requestId: Long, body: com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveDocumentDN) = flow<String?> { TODO() }
         override suspend fun getMedicalCommissionPdf(lastWorkshop: String) = flow<PdfDownloadDN> { TODO() }
         override suspend fun getRegisteredMedicalCommission(filters: List<ApiFilterDN>) = flow<List<com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.RegisteredMedicalCommissionDN>> { TODO() }

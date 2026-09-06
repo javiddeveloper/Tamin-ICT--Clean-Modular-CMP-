@@ -4,7 +4,7 @@ import androidx.compose.runtime.Immutable
 
 @Immutable
 data class RegisteredMedicalCommissionPR(
-    val demandInfoId: Long,
+    val demandInfoId: String,
     val demandSaveDate: Long?,
     val verdictDescription: String,
 )

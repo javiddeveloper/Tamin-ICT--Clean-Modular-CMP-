@@ -200,7 +200,7 @@ private class FakePensionApiService(
     override suspend fun finalConfirmDisabilityRequest(
         requestId: Long,
         body: DisabilityFinalConfirmRequest
-    ): BaseDTO<JsonElement?> =
+    ): BaseDTO<DisabilitySaveInfoResponseDTO> =
         error("not used in PensionRemoteDataSourceImplTest")
 
     override suspend fun saveDocumentDisability(

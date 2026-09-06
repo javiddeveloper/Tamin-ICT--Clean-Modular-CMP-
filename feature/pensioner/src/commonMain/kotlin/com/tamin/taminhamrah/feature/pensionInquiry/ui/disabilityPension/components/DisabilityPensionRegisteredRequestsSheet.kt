@@ -142,7 +142,7 @@ private fun DisabilityPensionRegisteredRequestsSheetPreview() {
             isLoading = false,
             requests = persistentListOf(
                 RegisteredMedicalCommissionPR(
-                    demandInfoId = 1L,
+                    demandInfoId = "1",
                     demandSaveDate = 1720000000000L,
                     verdictDescription = "ازکارافتادگی کلی ناشی از کار",
                 ),

@@ -9,6 +9,8 @@ import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.C
 import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.CommitteeDemandInfoDocumentDTO
 import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.CommitteeRequestInfoDN
 import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.CommitteeRequestInfoDTO
+import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.CommitteeRequestInfoDocumentDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.CommitteeRequestInfoDocumentDTO
 import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.RegisteredMedicalCommissionDN
 import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.RegisteredMedicalCommissionDTO
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
@@ -353,26 +355,49 @@ fun RegisteredMedicalCommissionDTO.toDomain(): RegisteredMedicalCommissionDN {
 
 fun CommitteeRequestInfoDTO.toDomain(): CommitteeRequestInfoDN {
     return CommitteeRequestInfoDN(
-        id = id,
-        demandInfoId = demandInfoId,
-        lastJobDesc = lastJobDesc,
-        lastJobCode = lastJobCode,
-        jobHistoryDesc = jobHistoryDesc,
-        hasDrivingCertificate = hasDrivingCertificate,
-        hasVisitBeforeJob = hasVisitBeforeJob,
-        hasVisitInJob = hasVisitInJob,
-        hasHealthyCertificate = hasHealthyCertificate,
-        hasContract = hasContract,
-        hasExpertJob = hasExpertJob,
-        historyConfirm = historyConfirm,
-        militaryStatusCode = militaryStatusCode
+        requestInfoId = requestInfoId,
+        requestNumber = requestNumber,
+        committeeDemandInfo = committeeDemandInfo,
+        doctorInfoId = doctorInfoId,
+        requestSaveDate = requestSaveDate,
+        hasDrugUsage = hasDrugUsage,
+        hasSurgery = hasSurgery,
+        hasHospitalization = hasHospitalization,
+        hasOtherDoctor = hasOtherDoctor,
+        hasOtherDarman = hasOtherDarman,
+        otherDarmanDesc = otherDarmanDesc,
+        hasCommissionOtherOrgan = hasCommissionOtherOrgan,
+        hasCommissionTaminOrgan = hasCommissionTaminOrgan,
+        commissionOtherOrganDesc = commissionOtherOrganDesc,
+        hasSupportOrgan = hasSupportOrgan,
+        supportOrganDesc = supportOrganDesc,
+        bookletTypeCode = bookletTypeCode,
+        refrenceReasonCode = refrenceReasonCode,
+        darmanDocument = darmanDocument,
+        illnessDesc = illnessDesc,
+        mainDoctorFirstName = mainDoctorFirstName,
+        mainDoctorLastName = mainDoctorLastName,
+        mainDoctorSpeciality = mainDoctorSpeciality,
+        hasDrugUsageBoolean = hasDrugUsageBoolean,
+        hasSurgeryBoolean = hasSurgeryBoolean,
+        hasOtherDarmanBoolean = hasOtherDarmanBoolean,
+        committeeRequestInfoDocumentList = committeeRequestInfoDocumentList?.map { it.toDomain() },
+    )
+}
+
+fun CommitteeRequestInfoDocumentDTO.toDomain(): CommitteeRequestInfoDocumentDN {
+    return CommitteeRequestInfoDocumentDN(
+        documentId = documentId,
+        committeeRequestInfo = committeeRequestInfo,
+        documentTypeId = documentTypeId,
+        documentFileId = documentFileId
     )
 }
 
 fun CommitteeDemandInfoDocumentDTO.toDomain(): CommitteeDemandInfoDocumentDN {
     return CommitteeDemandInfoDocumentDN(
         documentId = documentId,
-        ownerId = ownerId,
+        committeeDemandInfo = committeeDemandInfo,
         documentTypeId = documentTypeId,
         documentFileId = documentFileId
     )

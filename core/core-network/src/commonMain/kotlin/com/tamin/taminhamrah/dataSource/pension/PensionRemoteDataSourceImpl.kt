@@ -198,8 +198,8 @@ class PensionRemoteDataSourceImpl(
     override suspend fun finalConfirmDisabilityRequest(
         requestId: Long,
         body: DisabilityFinalConfirmRequest
-    ): String? = errorParser.safeCall("finalConfirmDisabilityRequest", ErrorUri.UNKNOWN) {
-        pensionApiService.finalConfirmDisabilityRequest(requestId, body).extractMessage()
+    ): DisabilitySaveInfoResponseDTO = errorParser.safeCall("finalConfirmDisabilityRequest", ErrorUri.UNKNOWN) {
+        pensionApiService.finalConfirmDisabilityRequest(requestId, body).extractData()
     }
 
     override suspend fun saveDocumentDisability(

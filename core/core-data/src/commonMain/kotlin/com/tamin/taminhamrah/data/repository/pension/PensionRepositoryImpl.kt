@@ -139,9 +139,9 @@ class PensionRepositoryImpl(
     override suspend fun finalConfirmDisabilityRequest(
         requestId: Long,
         body: DisabilityFinalConfirmDN
-    ): Flow<String?> = flow {
+    ): Flow<DisabilityRequestRefDN?> = flow {
         val remoteData = pensionRemoteDataSource.finalConfirmDisabilityRequest(requestId, body.toDTO())
-        emit(remoteData)
+        emit(remoteData.toDomain())
     }
 
     override suspend fun saveDocumentDisability(

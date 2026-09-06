@@ -184,7 +184,7 @@ class FakePensionRepository : PensionRepository {
     override suspend fun finalConfirmDisabilityRequest(
         requestId: Long,
         body: DisabilityFinalConfirmDN
-    ): Flow<String?> = error("not used in this test")
+    ): Flow<DisabilityRequestRefDN?> = error("not used in this test")
 
     override suspend fun saveDocumentDisability(
         requestId: Long,

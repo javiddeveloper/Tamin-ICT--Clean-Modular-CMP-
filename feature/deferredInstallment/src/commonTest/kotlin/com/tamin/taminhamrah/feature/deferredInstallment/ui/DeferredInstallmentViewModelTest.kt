@@ -320,7 +320,7 @@ private class FakeDeferredInstallmentPensionRepository : PensionRepository {
         error("not used")
     override suspend fun saveDisabilityUserInfo(body: com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoDN): Flow<com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityRequestRefDN?> =
         error("not used")
-    override suspend fun finalConfirmDisabilityRequest(requestId: Long, body: com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityFinalConfirmDN): Flow<String?> =
+    override suspend fun finalConfirmDisabilityRequest(requestId: Long, body: com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityFinalConfirmDN): Flow<com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityRequestRefDN?> =
         error("not used")
     override suspend fun saveDocumentDisability(requestId: Long, body: com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveDocumentDN): Flow<String?> =
         error("not used")

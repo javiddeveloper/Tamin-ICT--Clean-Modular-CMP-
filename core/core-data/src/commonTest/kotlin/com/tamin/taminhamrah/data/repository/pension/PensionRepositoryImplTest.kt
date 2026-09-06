@@ -181,7 +181,7 @@ private class FakePensionRemoteDataSource(
     override suspend fun finalConfirmDisabilityRequest(
         requestId: Long,
         body: DisabilityFinalConfirmRequest
-    ): String? =
+    ): DisabilitySaveInfoResponseDTO =
         error("not used in PensionRepositoryImplTest")
 
     override suspend fun saveDocumentDisability(

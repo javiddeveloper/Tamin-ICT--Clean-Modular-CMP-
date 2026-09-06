@@ -131,7 +131,7 @@ interface PensionApiService {
     suspend fun finalConfirmDisabilityRequest(
         @Path("requestId") requestId: Long,
         @Body body: DisabilityFinalConfirmRequest
-    ): BaseDTO<JsonElement?>
+    ): BaseDTO<DisabilitySaveInfoResponseDTO>
 
     @Headers("Content-Type: application/json")
     @PUT("disability-request/{requestId}")

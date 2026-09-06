@@ -95,7 +95,7 @@ interface PensionRepository {
     suspend fun finalConfirmDisabilityRequest(
         requestId: Long,
         body: DisabilityFinalConfirmDN
-    ): Flow<String?>
+    ): Flow<DisabilityRequestRefDN?>
 
     suspend fun saveDocumentDisability(
         requestId: Long,

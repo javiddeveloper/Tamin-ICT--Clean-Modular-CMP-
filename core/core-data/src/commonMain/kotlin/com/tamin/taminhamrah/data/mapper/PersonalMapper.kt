@@ -147,7 +147,8 @@ fun DisabilityPersonalDTO.toDomain(): DisabilityPersonalDN {
         idCardNumber = idCardNumber,
         cityOfIssue = cityOfIssue?.description,
         dateOfBirth = dateOfBirth,
-        genderDesc = gender?.genderDesc
+        genderDesc = gender?.genderDesc,
+        genderCode = gender?.genderCode
     )
 }
 

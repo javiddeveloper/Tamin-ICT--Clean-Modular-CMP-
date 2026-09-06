@@ -62,7 +62,7 @@ interface PensionRemoteDataSource {
     ): String?
 
     suspend fun saveDisabilityUserInfo(body: DisabilitySaveInfoRequest): DisabilitySaveInfoResponseDTO
-    suspend fun finalConfirmDisabilityRequest(requestId: Long, body: DisabilityFinalConfirmRequest): String?
+    suspend fun finalConfirmDisabilityRequest(requestId: Long, body: DisabilityFinalConfirmRequest): DisabilitySaveInfoResponseDTO
     suspend fun saveDocumentDisability(requestId: Long, body: DisabilitySaveDocumentRequest): String?
     suspend fun getMedicalCommissionPdf(lastWorkshop: String): PdfDownloadDTO
     suspend fun getRegisteredMedicalCommission(query: ApiQueryParamDN): ListData<RegisteredMedicalCommissionDTO>

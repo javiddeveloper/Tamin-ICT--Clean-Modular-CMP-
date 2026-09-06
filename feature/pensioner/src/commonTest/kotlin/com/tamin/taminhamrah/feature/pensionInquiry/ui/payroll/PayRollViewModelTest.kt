@@ -384,7 +384,7 @@ private class FakePayRollPensionRepository : PensionRepository {
         error("not used in PayRollViewModel")
     override suspend fun saveDisabilityUserInfo(body: DisabilitySaveInfoDN): Flow<DisabilityRequestRefDN?> =
         error("not used in PayRollViewModel")
-    override suspend fun finalConfirmDisabilityRequest(requestId: Long, body: DisabilityFinalConfirmDN): Flow<String?> =
+    override suspend fun finalConfirmDisabilityRequest(requestId: Long, body: DisabilityFinalConfirmDN): Flow<DisabilityRequestRefDN?> =
         error("not used in PayRollViewModel")
     override suspend fun saveDocumentDisability(requestId: Long, body: DisabilitySaveDocumentDN): Flow<String?> =
         error("not used in PayRollViewModel")

@@ -106,7 +106,8 @@ fun DisabilityPersonalDN.toPresentation(): DisabilityPersonalPR {
         idCardNumber = idCardNumber ?: "",
         cityOfIssue = cityOfIssue ?: "",
         dateOfBirth = PersianDateFormatter.formatTimestamp(dateOfBirth),
-        genderDesc = genderDesc ?: ""
+        genderDesc = genderDesc ?: "",
+        genderCode = genderCode ?: ""
     )
 }
 

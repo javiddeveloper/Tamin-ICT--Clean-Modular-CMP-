@@ -270,7 +270,7 @@ fun InquirePensionCertificateDN.toPresentation(): InquirePensionCertificatePR {
 
 fun RegisteredMedicalCommissionDN.toPresentation(): RegisteredMedicalCommissionPR {
     return RegisteredMedicalCommissionPR(
-        demandInfoId = demandInfoId ?: 0L,
+        demandInfoId = demandInfoId.orEmpty(),
         demandSaveDate = demandSaveDate,
         verdictDescription = commissionPollDesc.orDash(),
     )
