@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +29,8 @@ import com.tamin.taminhamrah.model.certificate.RecipientPR
 import com.tamin.taminhamrah.ui.components.CustomSearchBar
 import com.tamin.taminhamrah.ui.components.TaminEmptyState
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.ShimmerBlock
+import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.stringResource
@@ -39,7 +40,7 @@ import taminx.core.core_ui.issuance_certificate_search_placeholder
 import taminx.core.core_ui.issuance_certificate_select_recipient_title
 
 private val ListHeight = 400.dp
-private val LoadingHeight = 200.dp
+private const val SKELETON_RECIPIENT_ROWS = 6
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,12 +91,7 @@ internal fun IssuanceCertificateRecipientSheet(
             Spacer(modifier = Modifier.height(Spacing.sm))
 
             when {
-                isLoading -> Box(
-                    modifier = Modifier.fillMaxWidth().height(LoadingHeight),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator(color = taminColors.blueText)
-                }
+                isLoading -> RecipientsListShimmer()
 
                 recipients.isEmpty() -> TaminEmptyState(
                     message = stringResource(Res.string.issuance_certificate_recipients_empty),
@@ -121,6 +117,28 @@ internal fun IssuanceCertificateRecipientSheet(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun RecipientsListShimmer(modifier: Modifier = Modifier) {
+    val colors = LocalTaminColors.current
+    Column(modifier = modifier.fillMaxWidth()) {
+        repeat(SKELETON_RECIPIENT_ROWS) {
+            ShimmerBlock(
+                modifier = Modifier
+                    .padding(horizontal = Spacing.lg, vertical = Spacing.md)
+                    .fillMaxWidth(0.55f)
+                    .height(ShimmerSize.valueHeight),
+                colorBase = colors.border,
+                colorHighlight = colors.divider,
+            )
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = Spacing.lg),
+                thickness = 0.5.dp,
+                color = colors.border,
+            )
         }
     }
 }

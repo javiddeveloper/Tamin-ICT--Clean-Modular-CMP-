@@ -109,7 +109,7 @@ import com.tamin.taminhamrah.feature.security.SecurityRoute
 import com.tamin.taminhamrah.feature.security.securityScreen
 import com.tamin.taminhamrah.feature.settings.SettingsRoute
 import com.tamin.taminhamrah.feature.settings.settingsScreen
-import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceContractScreen
+import com.tamin.taminhamrah.feature.contracts.contractFlowScreen
 import com.tamin.taminhamrah.feature.taminServices.TaminServicesRoute
 import com.tamin.taminhamrah.feature.taminServices.inspectionScreen
 import com.tamin.taminhamrah.feature.taminServices.occurrenceScreen
@@ -506,7 +506,7 @@ internal fun TaminHamrahNavGraph(
 
                 userRequestGraph(navController = navController)
 
-                studentInsuranceContractScreen(onBack = { navController.popBackStack() })
+                contractFlowScreen(onBack = { navController.popBackStack() })
 
                 // Maps the assistant's destination ids to real routes. Ids come from
                 // AgentDestination; anything unmapped is ignored rather than crashing.
