@@ -52,6 +52,7 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contrac
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionStep
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionUiState
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.TaminBottomBar
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.LoadingButton
@@ -145,6 +146,10 @@ fun DisabilityPensionScreen(
         if (documentId != null && file != null) {
             viewModel.sendIntent(DisabilityPensionIntent.DocumentImagePicked(documentId, file))
         }
+    }
+
+    BackHandler {
+        viewModel.sendIntent(DisabilityPensionIntent.CloseClicked)
     }
 
     DisposableEffect(lifecycleOwner, state.currentStep, refreshDependentsOnResume) {
