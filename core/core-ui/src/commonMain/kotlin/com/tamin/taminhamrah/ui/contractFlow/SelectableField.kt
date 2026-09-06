@@ -22,7 +22,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.PickerRow
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetType
-import com.tamin.taminhamrah.ui.components.bottomsheet.TaminSearchableListSheet
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminSearchableOptionSheet
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import org.jetbrains.compose.resources.stringResource
@@ -35,7 +35,7 @@ import taminx.core.core_ui.retry
 /**
  * A labelled field that opens a searchable sheet to choose one of [options].
  *
- * Built from [PickerRow] and [TaminSearchableListSheet] so it reads as the same control as every other
+ * Built from [PickerRow] and [TaminSearchableOptionSheet] so it reads as the same control as every other
  * chooser in the app, and so a failed lookup can report itself the way a bad input does — through
  * `PickerRow`'s error border rather than by blanking the screen behind it.
  *
@@ -92,14 +92,14 @@ fun <T> SelectableField(
     }
 
     if (sheetOpen) {
-        TaminSearchableListSheet(
+        TaminSearchableOptionSheet(
             title = label,
             items = options,
             itemLabel = optionName,
             itemKey = { optionCode(it) },
             showSearch = showSearch,
             isLoading = isLoading,
-            onItemSelected = { selectedOption ->
+            onSelect = { selectedOption ->
                 onSelected(selectedOption)
                 sheetOpen = false
             },

@@ -3,7 +3,7 @@ package com.tamin.taminhamrah.feature.profile.ui.activeRelation.components
 import androidx.compose.runtime.Composable
 import com.tamin.taminhamrah.feature.profile.ui.activeRelation.contract.ActiveRelationUiState
 import com.tamin.taminhamrah.model.certificate.RecipientPR
-import com.tamin.taminhamrah.ui.components.bottomsheet.TaminSearchableListSheet
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminSearchableOptionSheet
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.active_relation_search_placeholder
@@ -17,12 +17,12 @@ internal fun RecipientsBottomSheet(
     onRecipientSelected: (RecipientPR) -> Unit,
     onDismiss: () -> Unit
 ) {
-    TaminSearchableListSheet(
+    TaminSearchableOptionSheet(
         title = stringResource(Res.string.active_relation_select_recipient_title),
         items = state.filteredRecipients,
         itemLabel = { it.name },
         itemKey = { it.code },
-        onItemSelected = onRecipientSelected,
+        onSelect = onRecipientSelected,
         onDismiss = onDismiss,
         searchQuery = state.searchQuery,
         onSearchQueryChange = onSearchQueryChange,

@@ -2,7 +2,7 @@ package com.tamin.taminhamrah.feature.pensionInquiry.ui.issuanceCertificate.comp
 
 import androidx.compose.runtime.Composable
 import com.tamin.taminhamrah.model.certificate.RecipientPR
-import com.tamin.taminhamrah.ui.components.bottomsheet.TaminSearchableListSheet
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminSearchableOptionSheet
 import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
@@ -19,12 +19,12 @@ internal fun IssuanceCertificateRecipientSheet(
     onRecipientSelected: (RecipientPR) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    TaminSearchableListSheet(
+    TaminSearchableOptionSheet(
         title = stringResource(Res.string.issuance_certificate_select_recipient_title),
         items = recipients,
         itemLabel = { it.name },
         itemKey = { it.code },
-        onItemSelected = onRecipientSelected,
+        onSelect = onRecipientSelected,
         onDismiss = onDismiss,
         searchQuery = searchQuery,
         onSearchQueryChange = onSearchQueryChange,

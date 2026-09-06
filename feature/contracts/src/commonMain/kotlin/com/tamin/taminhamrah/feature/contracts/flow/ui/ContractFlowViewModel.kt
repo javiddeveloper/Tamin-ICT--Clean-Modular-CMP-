@@ -4,6 +4,10 @@ import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.contracts.flow.config.ContractFlowConfig
 import com.tamin.taminhamrah.feature.contracts.flow.preflight.ContractPreflightBlock
 import com.tamin.taminhamrah.feature.contracts.flow.preflight.resolvePreflightBlock
+import com.tamin.taminhamrah.feature.contracts.flow.specialjob.SpecialFreeJobDecision
+import com.tamin.taminhamrah.feature.contracts.flow.specialjob.SpecialFreeJobRejectReason
+import com.tamin.taminhamrah.feature.contracts.flow.specialjob.resolveMedicalStudentSelection
+import com.tamin.taminhamrah.feature.contracts.flow.specialjob.resolveRedCrescentSelection
 import com.tamin.taminhamrah.model.contracts.ContractDN
 import com.tamin.taminhamrah.model.contracts.FreelanceSpecialJobCode
 import com.tamin.taminhamrah.feature.contracts.flow.ui.contract.ContractFlowEvent
@@ -59,6 +63,7 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.contract_error_medical_student_not_allowed
@@ -606,25 +611,23 @@ class ContractFlowViewModel(
             FreelanceSpecialJobCode.RED_CRESCENT_CODE -> {
                 try {
                     val (_, _, jalaliDay) = PersianDateFormatter.today()
-                    if (jalaliDay > RED_CRESCENT_DAY_LIMIT) {
-                        emitError(getString(Res.string.contract_error_red_crescent_day_limit))
-                        return@flow
-                    }
                     val status = checkRedCrossStatusUseCase().first()
-                    if (!isRedCrossEligible(status)) {
-                        emitError(getString(Res.string.contract_error_red_crescent_not_eligible))
-                        return@flow
+                    when (val decision = resolveRedCrescentSelection(jalaliDay, status)) {
+                        is SpecialFreeJobDecision.Rejected -> {
+                            emitError(getString(decision.reason.toStringRes()))
+                            return@flow
+                        }
+                        is SpecialFreeJobDecision.Accepted -> emitAll(
+                            specialFreeJobSelected(
+                                jobCode = jobCode,
+                                jobName = jobName,
+                                forceTreatmentSupport = decision.forceTreatmentSupport,
+                                lockedPremiumRate = decision.lockedPremiumRate,
+                                hidePremiumSlider = decision.hidePremiumSlider,
+                                allowsPayment = decision.allowsPayment,
+                            ),
+                        )
                     }
-                    emitAll(
-                        specialFreeJobSelected(
-                            jobCode = jobCode,
-                            jobName = jobName,
-                            forceTreatmentSupport = true,
-                            lockedPremiumRate = FreelanceSpecialJobCode.RED_CRESCENT_PREMIUM_RATE,
-                            hidePremiumSlider = true,
-                            allowsPayment = false,
-                        ),
-                    )
                 } catch (e: Exception) {
                     emitError(e.message)
                 }
@@ -632,20 +635,22 @@ class ContractFlowViewModel(
             FreelanceSpecialJobCode.MEDICAL_STUDENT_CODE -> {
                 try {
                     val status = checkMedicalStudentUseCase().first()
-                    if (status != FreelanceSpecialJobCode.MEDICAL_STUDENT_OK_STATUS) {
-                        emitError(getString(Res.string.contract_error_medical_student_not_allowed))
-                        return@flow
+                    when (val decision = resolveMedicalStudentSelection(status)) {
+                        is SpecialFreeJobDecision.Rejected -> {
+                            emitError(getString(decision.reason.toStringRes()))
+                            return@flow
+                        }
+                        is SpecialFreeJobDecision.Accepted -> emitAll(
+                            specialFreeJobSelected(
+                                jobCode = jobCode,
+                                jobName = jobName,
+                                forceTreatmentSupport = decision.forceTreatmentSupport,
+                                lockedPremiumRate = decision.lockedPremiumRate,
+                                hidePremiumSlider = decision.hidePremiumSlider,
+                                allowsPayment = decision.allowsPayment,
+                            ),
+                        )
                     }
-                    emitAll(
-                        specialFreeJobSelected(
-                            jobCode = jobCode,
-                            jobName = jobName,
-                            forceTreatmentSupport = false,
-                            lockedPremiumRate = FreelanceSpecialJobCode.MEDICAL_STUDENT_PREMIUM_RATE,
-                            hidePremiumSlider = true,
-                            allowsPayment = false,
-                        ),
-                    )
                 } catch (e: Exception) {
                     emitError(e.message)
                 }
@@ -654,10 +659,14 @@ class ContractFlowViewModel(
         }
     }
 
-    private fun isRedCrossEligible(status: String): Boolean =
-        status.equals(FreelanceSpecialJobCode.RED_CRESCENT_ELIGIBLE_STATUS, ignoreCase = true) ||
-            status.equals("true", ignoreCase = true) ||
-            status == "1"
+    private fun SpecialFreeJobRejectReason.toStringRes(): StringResource = when (this) {
+        SpecialFreeJobRejectReason.RED_CRESCENT_DAY_LIMIT ->
+            Res.string.contract_error_red_crescent_day_limit
+        SpecialFreeJobRejectReason.RED_CRESCENT_NOT_ELIGIBLE ->
+            Res.string.contract_error_red_crescent_not_eligible
+        SpecialFreeJobRejectReason.MEDICAL_STUDENT_NOT_ALLOWED ->
+            Res.string.contract_error_medical_student_not_allowed
+    }
 
     private fun specialFreeJobSelected(
         jobCode: String,
@@ -892,7 +901,6 @@ class ContractFlowViewModel(
     }
 
     private companion object {
-        const val RED_CRESCENT_DAY_LIMIT = 20
         const val DEFAULT_IMAGE_GUID = "00"
         const val DEFAULT_IMAGE_GUID_NAME = "00"
     }
