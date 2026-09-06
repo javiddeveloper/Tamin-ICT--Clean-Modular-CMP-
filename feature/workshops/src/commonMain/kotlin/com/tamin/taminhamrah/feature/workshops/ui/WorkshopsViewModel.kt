@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.workshops.ui
 
 import com.tamin.taminhamrah.base.BaseViewModel
+import com.tamin.taminhamrah.feature.FeatureManager
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WORKSHOP_STATS_PAGE_SIZE
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopSearch
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopStats
@@ -15,21 +16,42 @@ import com.tamin.taminhamrah.model.workshop.WorkshopListQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.workshops.GetEmployerAgreementsUseCase
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.workshop_action_missing_identity
 import taminx.core.core_ui.workshop_error_receive_data
 
 class WorkshopsViewModel(
     private val getEmployerAgreements: GetEmployerAgreementsUseCase,
+    private val featureManager: FeatureManager,
 ) : BaseViewModel<WorkshopsUiState, PartialState, WorkshopsEvent, WorkshopsIntent>(
     initialState = WorkshopsUiState()
 ) {
 
     init {
         sendIntent(WorkshopsIntent.Load)
+        resolveAvailableActions()
+    }
+
+    /**
+     * Drops the services the server has switched off.
+     *
+     * Read once when the screen is created rather than per action row: `isFeatureEnabled` suspends,
+     * and a composable cannot wait on it without drawing the row first and removing it after.
+     */
+    private fun resolveAvailableActions() = doAsyncTask {
+        val actions = WorkshopAction.entries.filter { action ->
+            val flag = action.featureFlag ?: return@filter true
+            runCatching { featureManager.isFeatureEnabled(flag) }
+                // A flag that cannot be read is not a flag that is off — the menu the user came
+                // through already let them in here.
+                .getOrDefault(true)
+        }
+        sendIntent(WorkshopsIntent.AvailableActionsResolved(actions.toImmutableList()))
     }
 
     override fun handleIntent(intent: WorkshopsIntent): Flow<PartialState> = when (intent) {
@@ -53,6 +75,8 @@ class WorkshopsViewModel(
         is WorkshopsIntent.DetailRequested -> openDetail(intent.workshop)
         WorkshopsIntent.DetailDismissed -> flow { emit(PartialState.DetailForChanged(null)) }
         is WorkshopsIntent.ActionSelected -> selectAction(intent.action, intent.workshop)
+        is WorkshopsIntent.AvailableActionsResolved ->
+            flow { emit(PartialState.ActionsResolved(intent.actions)) }
     }
 
     private fun loadPage(
@@ -143,6 +167,14 @@ class WorkshopsViewModel(
         action: WorkshopAction,
         workshop: WorkshopPR,
     ): Flow<PartialState> = flow {
+        // Every one of these services takes workshopId/branchCode as *path segments*. Half an
+        // identity does not narrow the request, it addresses a route that does not exist — the
+        // service answers 404 and the destination shows an empty list it cannot explain. Say so
+        // here instead, where the missing half is still visible.
+        if (!workshop.hasIdentity) {
+            sendEvent(WorkshopsEvent.ShowMessage(Res.string.workshop_action_missing_identity))
+            return@flow
+        }
         sendEvent(workshop.navigationEvent(action))
     }
 
@@ -176,6 +208,9 @@ class WorkshopsViewModel(
             currentState.copy(isFilterSheetOpen = partialState.isOpen)
 
         is PartialState.StatsLoaded -> currentState.copy(stats = partialState.stats)
+        is PartialState.ActionsResolved ->
+            currentState.copy(availableActions = partialState.actions)
+
         is PartialState.DetailForChanged -> currentState.copy(detailFor = partialState.workshop)
 
     }
