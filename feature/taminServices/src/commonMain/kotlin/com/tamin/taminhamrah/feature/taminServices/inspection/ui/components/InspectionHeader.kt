@@ -32,9 +32,7 @@ import com.tamin.taminhamrah.ui.toparea.topAreaHide
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.edict_search_title
 import taminx.core.core_ui.ic_tamin_chevron_back
-import taminx.core.core_ui.ic_tamin_search
 import taminx.core.core_ui.inspection_subtitle
 import taminx.core.core_ui.inspection_title
 
@@ -43,7 +41,6 @@ internal fun InspectionHeader(
     onBackClicked: () -> Unit,
     modifier: Modifier = Modifier,
     topAreaState: com.tamin.taminhamrah.ui.toparea.TopAreaState,
-    onSearchClicked: () -> Unit = {},
 ) {
     val taminColors = LocalTaminColors.current
     val gradient = remember(taminColors.profileGradientStops) {
@@ -65,13 +62,6 @@ internal fun InspectionHeader(
                     icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                     contentDescription = null,
                     onClick = onBackClicked,
-                )
-            },
-            action = {
-                TaminTopAppBarButton(
-                    icon = vectorResource(Res.drawable.ic_tamin_search),
-                    contentDescription = stringResource(Res.string.edict_search_title),
-                    onClick = onSearchClicked,
                 )
             }
         ) {

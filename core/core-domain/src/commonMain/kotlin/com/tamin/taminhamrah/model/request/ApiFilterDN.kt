@@ -95,6 +95,9 @@ enum class FilterProperty(val key: String) {
     @SerialName("type") TYPE("type"),
     @SerialName("status") STATUS("status"),
     @SerialName("jobDescription") JOB_DESCRIPTION("jobDescription"),
+    // proxy/models/branch names its label column `name` (not `branchName`, which is a
+    // different filter on other list endpoints).
+    @SerialName("name") NAME("name"),
     @SerialName("bankName") BANK_NAME("bankName"),
     @SerialName("insuranceTypeDesc") INSURANCE_TYPE_DESC("insuranceTypeDesc"),
 

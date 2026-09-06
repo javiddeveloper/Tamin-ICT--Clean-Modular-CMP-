@@ -108,7 +108,7 @@ internal fun WorkshopInfoStep(
         onSecondaryClick = onBack,
     ) { padding ->
         InspectionRequestErrorWrapper(
-            isLoading = uiState.isLoading,
+            isLoading = uiState.isRequestStep2Loading,
             error = error,
             onRetry = {
                 // Re-issue only the call(s) that actually failed, not both — branches and jobs load
@@ -299,11 +299,19 @@ internal fun WorkshopInfoStep(
                 )
             },
             selectedId = step.branchCode.ifBlank { null },
+            query = uiState.branchQuery,
+            onQueryChange = { onIntent(InspectionIntent.SearchBranches(it)) },
             onSelect = { option ->
                 update { it.copy(branchCode = option.id, branchName = option.title) }
                 showBranchSheet = false
             },
             onDismiss = { showBranchSheet = false },
+            onLoadMore = { onIntent(InspectionIntent.LoadNextBranches) },
+            onRetry = { onIntent(InspectionIntent.RetryNextBranches) },
+            isLoadingFirstPage = uiState.isLoadingBranches,
+            isLoadingNextPage = uiState.isLoadingNextBranches,
+            endReached = uiState.branchesEndReached,
+            pagingError = uiState.branchesPagingError,
             searchPlaceholder = searchHint,
         )
     }
@@ -319,11 +327,19 @@ internal fun WorkshopInfoStep(
                 )
             },
             selectedId = step.jobCode.ifBlank { null },
+            query = uiState.jobQuery,
+            onQueryChange = { onIntent(InspectionIntent.SearchJobs(it)) },
             onSelect = { option ->
                 update { it.copy(jobCode = option.id, jobTitle = option.title) }
                 showJobSheet = false
             },
             onDismiss = { showJobSheet = false },
+            onLoadMore = { onIntent(InspectionIntent.LoadNextJobs) },
+            onRetry = { onIntent(InspectionIntent.RetryNextJobs) },
+            isLoadingFirstPage = uiState.isLoadingJobs,
+            isLoadingNextPage = uiState.isLoadingNextJobs,
+            endReached = uiState.jobsEndReached,
+            pagingError = uiState.jobsPagingError,
             searchPlaceholder = searchHint,
         )
     }

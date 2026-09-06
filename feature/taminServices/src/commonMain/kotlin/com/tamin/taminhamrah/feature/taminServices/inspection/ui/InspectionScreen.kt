@@ -40,18 +40,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.steps.InspectionRequestScreen
-import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionFilterChipRow
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionHeader
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionItemCard
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionListSkeleton
-import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionSearchEmptyState
-import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionSearchSheet
 import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionEvent
 import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionIntent
 import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionRequestStep
 import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionUiState
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.model.InspectionPerformedPR
-import com.tamin.taminhamrah.feature.taminServices.inspection.ui.model.InspectionSearchValidation
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
@@ -70,10 +66,14 @@ import com.tamin.taminhamrah.ui.components.toast.AppToastHost
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.Toast
 import com.tamin.taminhamrah.ui.components.toast.error
+import com.tamin.taminhamrah.ui.paging.OnLoadMore
+import com.tamin.taminhamrah.ui.paging.PagingFooter
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminNavy300
 import com.tamin.taminhamrah.ui.theme.TaminNavy900
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
@@ -96,6 +96,8 @@ private val STEPS_REQUIRING_EXIT_CONFIRMATION = setOf(
     InspectionRequestStep.WORKSHOP_INFO,
     InspectionRequestStep.REQUEST_DESCRIPTION,
 )
+
+private const val PAGING_FOOTER_KEY = "inspection_paging_footer"
 
 @Composable
 fun InspectionRoute(
@@ -191,32 +193,28 @@ internal fun InspectionScreen(
     uiState: InspectionUiState,
     onIntent: (InspectionIntent) -> Unit,
     onBackClicked: () -> Unit,
-    initialSearchCriteria: InspectionSearchValidation = InspectionSearchValidation(),
 ) {
     val taminColors = LocalTaminColors.current
-
-    var showSearchSheet by remember { mutableStateOf(false) }
 
     val topArea = rememberMeasuredTopAreaState { state ->
         InspectionHeader(
             topAreaState = state,
             onBackClicked = onBackClicked,
-            onSearchClicked = { showSearchSheet = true }
         )
     }
     val listState = rememberLazyListState()
 
     var viewingInspectionNo by remember { mutableStateOf<String?>(null) }
-    var searchCriteria by remember { mutableStateOf(initialSearchCriteria) }
 
-    val visibleInspections = remember(uiState.inspections, searchCriteria) {
-        if (searchCriteria.isEmpty) {
-            uiState.inspections
-        } else {
-            uiState.inspections.filter { searchCriteria.matches(it) }
-        }
+    val staggerState = rememberStaggeredEntranceState(key = uiState.inspections.size)
+
+    listState.OnLoadMore(
+        enabled = !uiState.inspectionsEndReached &&
+            uiState.inspectionsPagingError == null &&
+            uiState.inspections.isNotEmpty(),
+    ) {
+        onIntent(InspectionIntent.LoadNextInspections)
     }
-    val staggerState = rememberStaggeredEntranceState(key = visibleInspections.size)
 
     Box(
         modifier = Modifier
@@ -294,7 +292,7 @@ internal fun InspectionScreen(
                             .padding(horizontal = 12.dp)
                     ) {
                         TaminText(
-                            text = uiState.inspections?.size?.toString() ?: "0",
+                            text = uiState.inspections.size.toString(),
                             color = taminColors.textPrimary
                         )
                         TaminText(
@@ -306,12 +304,21 @@ internal fun InspectionScreen(
                 }
             }
 
-            if (uiState.isLoading && uiState.inspections.isEmpty()) {
-                item {
+            when {
+                uiState.isLoadingInspections && uiState.inspections.isEmpty() -> item {
                     InspectionListSkeleton()
                 }
-            } else if (uiState.inspections.isEmpty()) {
-                item {
+
+                uiState.inspections.isEmpty() && uiState.inspectionsPagingError != null -> item {
+                    PagingFooter(
+                        isLoadingNextPage = false,
+                        error = uiState.inspectionsPagingError,
+                        onRetry = { onIntent(InspectionIntent.RetryNextInspections) },
+                        modifier = Modifier.padding(horizontal = Spacing.lg),
+                    )
+                }
+
+                uiState.inspections.isEmpty() -> item {
                     EmptyStateMessage(
                         icon = Icons.Outlined.Assignment,
                         title = stringResource(Res.string.inspection_empty_title),
@@ -323,45 +330,37 @@ internal fun InspectionScreen(
                             .padding(horizontal = Spacing.xlg),
                     )
                 }
-            } else {
-                if (!searchCriteria.isEmpty) {
-                    item {
-                        InspectionFilterChipRow(
-                            criteria = searchCriteria,
-                            onClear = { searchCriteria = InspectionSearchValidation() },
-                            modifier = Modifier.padding(horizontal = Spacing.lg),
+
+                else -> {
+                    itemsIndexed(
+                        uiState.inspections,
+                        key = { _, item -> item.inspectionNo }) { index, item ->
+                        InspectionItemCard(
+                            item = item,
+                            onSubmitObjectionClicked = {
+                                onIntent(InspectionIntent.OpenRequestFlow(item = item))
+                            },
+                            onDownloadReportClicked = { inspectionNo ->
+                                viewingInspectionNo = inspectionNo
+                                onIntent(InspectionIntent.DownloadReportPdf(inspectionNo))
+                            },
+                            modifier = Modifier
+                                .padding(horizontal = Spacing.lg)
+                                .staggeredItemEntrance(
+                                    index = index,
+                                    key = item.inspectionNo,
+                                    state = staggerState
+                                ),
                         )
                     }
-                }
 
-                if (visibleInspections.isEmpty()) {
-                    item {
-                        InspectionSearchEmptyState(
-                            modifier = Modifier.padding(horizontal = Spacing.lg),
+                    item(key = PAGING_FOOTER_KEY) {
+                        PagingFooter(
+                            isLoadingNextPage = uiState.isLoadingNextInspections,
+                            error = uiState.inspectionsPagingError,
+                            onRetry = { onIntent(InspectionIntent.RetryNextInspections) },
                         )
                     }
-                }
-
-                itemsIndexed(
-                    visibleInspections,
-                    key = { _, item -> item.inspectionNo }) { index, item ->
-                    InspectionItemCard(
-                        item = item,
-                        onSubmitObjectionClicked = {
-                            onIntent(InspectionIntent.OpenRequestFlow(item = item))
-                        },
-                        onDownloadReportClicked = { inspectionNo ->
-                            viewingInspectionNo = inspectionNo
-                            onIntent(InspectionIntent.DownloadReportPdf(inspectionNo))
-                        },
-                        modifier = Modifier
-                            .padding(horizontal = Spacing.lg)
-                            .staggeredItemEntrance(
-                                index = index,
-                                key = item.inspectionNo,
-                                state = staggerState
-                            ),
-                    )
                 }
             }
         }
@@ -372,7 +371,6 @@ internal fun InspectionScreen(
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .reportTopAreaHeight(topArea),
-            onSearchClicked = { showSearchSheet = true },
         )
 
         if (uiState.isLoading && uiState.inspections.isNotEmpty()) {
@@ -393,21 +391,6 @@ internal fun InspectionScreen(
             },
         )
     }
-
-    if (showSearchSheet) {
-        InspectionSearchSheet(
-            initial = searchCriteria,
-            onDismiss = { showSearchSheet = false },
-            onApply = { criteria ->
-                searchCriteria = criteria
-                showSearchSheet = false
-            },
-            onClear = {
-                searchCriteria = InspectionSearchValidation()
-                showSearchSheet = false
-            },
-        )
-    }
 }
 
 @PreviewRtlTheme
@@ -416,7 +399,7 @@ private fun PreviewInspectionScreenLight() {
     PreviewRtlThemeContent {
         AppToastHost {
             InspectionScreen(
-                uiState = InspectionUiState(inspections = PreviewMockInspections),
+                uiState = InspectionUiState(inspections = PreviewMockInspections.toImmutableList()),
                 onIntent = {},
                 onBackClicked = {},
             )
@@ -430,7 +413,7 @@ private fun PreviewInspectionScreenDark() {
     PreviewRtlThemeContent(darkTheme = true) {
         AppToastHost {
             InspectionScreen(
-                uiState = InspectionUiState(inspections = PreviewMockInspections),
+                uiState = InspectionUiState(inspections = PreviewMockInspections.toImmutableList()),
                 onIntent = {},
                 onBackClicked = {},
             )
@@ -444,45 +427,13 @@ private fun PreviewInspectionScreenEmpty() {
     PreviewRtlThemeContent {
         AppToastHost {
             InspectionScreen(
-                uiState = InspectionUiState(inspections = emptyList()),
+                uiState = InspectionUiState(inspections = persistentListOf()),
                 onIntent = {},
                 onBackClicked = {},
             )
         }
     }
 }
-
-@PreviewRtlTheme
-@Composable
-private fun PreviewInspectionScreenSearchEmptyLight() {
-    PreviewRtlThemeContent {
-        AppToastHost {
-            InspectionScreen(
-                uiState = InspectionUiState(inspections = PreviewMockInspections),
-                onIntent = {},
-                onBackClicked = {},
-                initialSearchCriteria = PreviewNoMatchSearchCriteria,
-            )
-        }
-    }
-}
-
-@PreviewRtlTheme
-@Composable
-private fun PreviewInspectionScreenSearchEmptyDark() {
-    PreviewRtlThemeContent(darkTheme = true) {
-        AppToastHost {
-            InspectionScreen(
-                uiState = InspectionUiState(inspections = PreviewMockInspections),
-                onIntent = {},
-                onBackClicked = {},
-                initialSearchCriteria = PreviewNoMatchSearchCriteria,
-            )
-        }
-    }
-}
-
-private val PreviewNoMatchSearchCriteria = InspectionSearchValidation(inspectionNo = "00000000000")
 
 private val PreviewMockInspections = listOf(
     InspectionPerformedPR(
