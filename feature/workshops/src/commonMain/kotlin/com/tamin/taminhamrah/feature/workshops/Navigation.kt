@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.WorkshopsRoute
 import com.tamin.taminhamrah.feature.workshops.ui.contractRows.ContractRowsScreen
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
 import com.tamin.taminhamrah.feature.workshops.ui.paymentSheets.PaymentSheetsScreen
+import com.tamin.taminhamrah.feature.workshops.ui.workshopDebtInquiry.WorkshopDebtInquiryScreen
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import androidx.navigation.toRoute
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.workshops.LegalRepresentativeWorkshopsScreen
@@ -73,6 +74,13 @@ data class AddLegalRepresentativeRoute(
  */
 @Serializable
 data class ContractRowsRoute(val workshopId: String = "", val branchCode: String = "")
+
+@Serializable
+data class WorkshopDebtInquiryRoute(
+    val workshopId: String,
+    val branchCode: String,
+    val workshopName: String = "",
+)
 
 fun NavController.navigateToWorkshops() {
     navigate(WorkshopsListRoute)
@@ -230,6 +238,16 @@ fun NavGraphBuilder.workshopsScreen(
             onSubmitted = { navController.popBackStack() },
         )
     }
+
+    composableWithFadeTransitions<WorkshopDebtInquiryRoute> { entry ->
+        val route = entry.toRoute<WorkshopDebtInquiryRoute>()
+        WorkshopDebtInquiryScreen(
+            workshopId = route.workshopId,
+            branchCode = route.branchCode,
+            workshopName = route.workshopName,
+            onBack = { navController.popBackStack() },
+        )
+    }
 }
 
 /**
@@ -245,4 +263,6 @@ private fun WorkshopAction.route(
 ): Any = when (this) {
     WorkshopAction.PAYMENT_SHEETS -> PaymentSheetsRoute(workshopId, branchCode, workshopName)
     WorkshopAction.CONTRACT_ROWS -> ContractRowsRoute(workshopId, branchCode)
+    WorkshopAction.DEBT_INQUIRY ->
+        WorkshopDebtInquiryRoute(workshopId, branchCode, workshopName)
 }

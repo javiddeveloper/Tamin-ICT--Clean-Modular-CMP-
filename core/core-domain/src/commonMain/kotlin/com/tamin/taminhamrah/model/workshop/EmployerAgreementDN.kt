@@ -36,6 +36,7 @@ data class WorkshopSummaryDN(
     val contractRow: String = "",
     /** The branch *office* code, which is what the card labels کد شعبه — not [branchCode]. */
     val branchOfficeCode: String = "",
+    val branchTitle: String = "",
     val branchOfficeName: String = "",
     /**
      * `01` حقیقی / `02` حقوقی.

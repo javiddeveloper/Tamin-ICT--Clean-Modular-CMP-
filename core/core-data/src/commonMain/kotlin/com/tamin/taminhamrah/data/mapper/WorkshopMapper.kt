@@ -34,10 +34,16 @@ import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDTO
 import com.tamin.taminhamrah.model.workshop.DebitReasonDN
 import com.tamin.taminhamrah.model.workshop.DebitReasonDTO
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopDN
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopContractDN
 import com.tamin.taminhamrah.model.workshop.WorkshopContractDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmissionDN
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmitRequestDTO
+import com.tamin.taminhamrah.model.workshop.EmployerCommitmentInfoDTO
+import com.tamin.taminhamrah.model.workshop.EmployerContactInfoDN
 import com.tamin.taminhamrah.model.workshop.EmployerWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeContractDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeDTO
@@ -61,9 +67,13 @@ import com.tamin.taminhamrah.model.workshop.WorkshopMemberDN
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDN
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDN
+import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDN
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopSummaryDN
+import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDN
+import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDTO
 import com.tamin.taminhamrah.model.workshop.withTypeSlots
@@ -111,7 +121,60 @@ fun EmployerWorkshopDTO.toDomain(): WorkshopSummaryDN = WorkshopSummaryDN(
     workshopTypeDescription = workshopType?.workshopTypeDesc.orEmpty(),
     statusCode = workshopStatus?.workshopStatusCode.orEmpty(),
     statusDescription = workshopStatus?.workshopStatusDesc.orEmpty(),
+    branchTitle = branchTitle.orEmpty()
 )
+
+// ---------------------------------------------- خدمات غیرحضوری کارفرما (employerEservicesAgreement)
+
+fun EmployerCommitmentInfoDTO.toDomain(): EmployerContactInfoDN = EmployerContactInfoDN(
+    firstName = firstName.orEmpty(),
+    lastName = lastName.orEmpty(),
+    nationalCode = nationalCode.orEmpty(),
+    currentMobile = mobile.orEmpty(),
+    currentEmail = email.orEmpty(),
+)
+
+fun WorkshopWithoutContractDTO.toDomain(): WorkshopWithoutContractDN = WorkshopWithoutContractDN(
+    workshopId = workshopId.orEmpty(),
+    branchCode = branchCode.orEmpty(),
+    name = workshopName.orEmpty(),
+    nationalId = nationalId.orEmpty(),
+    postalCode = postalCode.orEmpty(),
+    tel = tel.orEmpty(),
+    address = address.orEmpty(),
+    branchOfficeName = organization?.organizationName.orEmpty(),
+    branchOfficeCode = organization?.code.orEmpty(),
+)
+
+fun WorkshopContractRowDTO.toDomain(): WorkshopContractRowDN = WorkshopContractRowDN(
+    contractRow = contractRow.orEmpty(),
+    startDate = startDate.orEmpty(),
+    endDate = endDate.orEmpty(),
+    firstName = firstName.orEmpty(),
+    lastName = lastName.orEmpty(),
+    mobile = mobile.orEmpty(),
+    email = email.orEmpty(),
+    nationalCode = nationalCode.orEmpty(),
+    tel = tel.orEmpty(),
+    postalCode = postalCode.orEmpty(),
+    workshop = workshop?.toDomain() ?: WorkshopSummaryDN(),
+)
+
+fun EmployerAgreementByWorkshopDTO.toDomain(): EmployerAgreementByWorkshopDN = EmployerAgreementByWorkshopDN(
+    paymentSequence = paymentSequence.orEmpty(),
+    startDate = startDate.orEmpty(),
+    commitmentDate = commitmentDate.orEmpty(),
+    email = email.orEmpty(),
+    mobile = mobile.orEmpty(),
+    workshop = workshop?.toDomain() ?: WorkshopSummaryDN(),
+)
+
+fun EmployerAgreementSubmissionDN.toDto(): EmployerAgreementSubmitRequestDTO =
+    EmployerAgreementSubmitRequestDTO(
+        mobile = mobile,
+        email = email,
+        ticketCode = ticketCode,
+    )
 
 // ------------------------------------------------------------------------ ردیف‌های پیمان
 

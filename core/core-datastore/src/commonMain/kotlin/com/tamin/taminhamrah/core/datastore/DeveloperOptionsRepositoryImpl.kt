@@ -12,7 +12,7 @@ private const val PREF_KEY_PREFIX = "dev_opt_base_url_"
 
 class DeveloperOptionsRepositoryImpl(
     private val settings: Settings,
-    private val isDebug: Boolean = AppConfig.isDebug
+    private val isDebug: Boolean = AppConfig.isDebug,
 ) : DeveloperOptionsRepository {
 
     private val _overrides = MutableStateFlow(loadOverrides())
