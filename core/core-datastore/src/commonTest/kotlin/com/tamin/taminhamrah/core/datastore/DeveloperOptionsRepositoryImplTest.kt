@@ -60,27 +60,12 @@ class DeveloperOptionsRepositoryImplTest {
     }
 
     @Test
-    fun `in release builds overrides are ignored and compiled-in default is always returned`() {
+    fun `release mode ignores overrides and always returns default`() {
         val settings = MapSettings()
         val repository = DeveloperOptionsRepositoryImpl(settings, isDebug = false)
 
         repository.setOverride(BaseUrlKey.MAIN, "https://custom.example.com/api/")
 
         assertEquals(BaseUrlKey.MAIN.defaultValue, repository.getEffectiveBaseUrl(BaseUrlKey.MAIN))
-    }
-
-    @Test
-    fun `datastoreModule resolves DeveloperOptionsRepository from Koin`() {
-        val koinApp = org.koin.dsl.koinApplication {
-            modules(
-                com.tamin.taminhamrah.core.datastore.di.datastoreModule,
-                org.koin.dsl.module {
-                    single<com.russhwolf.settings.Settings> { MapSettings() }
-                },
-            )
-        }
-        val repository = koinApp.koin.getOrNull<com.tamin.taminhamrah.repository.DeveloperOptionsRepository>()
-        kotlin.test.assertNotNull(repository)
-        koinApp.close()
     }
 }

@@ -101,6 +101,7 @@ import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceCo
 import com.tamin.taminhamrah.feature.taminServices.TaminServicesRoute
 import com.tamin.taminhamrah.feature.taminServices.occurrenceScreen
 import com.tamin.taminhamrah.feature.taminServices.inspectionScreen
+import com.tamin.taminhamrah.feature.taminServices.employerOnlineServicesScreen
 import com.tamin.taminhamrah.feature.taminServices.sendInsuranceHistoryToInstitutionsScreen
 import com.tamin.taminhamrah.feature.taminServices.taminServicesScreen
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
@@ -444,6 +445,10 @@ internal fun TaminHamrahNavGraph(
                 )
 
                 inspectionScreen(
+                    onBack = { navController.popBackStack() }
+                )
+
+                employerOnlineServicesScreen(
                     onBack = { navController.popBackStack() }
                 )
 
