@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,8 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +27,7 @@ import com.tamin.taminhamrah.model.personal.DisabilityPersonalPR
 import com.tamin.taminhamrah.model.personal.DisabilityWorkPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.TaminCheckbox
 import com.tamin.taminhamrah.ui.components.TaminStyledTextField
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -132,14 +132,13 @@ fun DisabilityPensionWorkshopStep(
 
         Column {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onIntent(DisabilityPensionIntent.WorkshopConfirmedChanged(!state.isWorkshopConfirmed)) },
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Checkbox(
-                    checked = state.isWorkshopConfirmed,
-                    onCheckedChange = { onIntent(DisabilityPensionIntent.WorkshopConfirmedChanged(it)) },
-                    colors = CheckboxDefaults.colors(checkedColor = colors.blueText),
-                )
+                TaminCheckbox(checked = state.isWorkshopConfirmed)
                 Text(
                     text = stringResource(Res.string.disability_pension_workshop_confirm_label),
                     style = MaterialTheme.typography.bodySmall,

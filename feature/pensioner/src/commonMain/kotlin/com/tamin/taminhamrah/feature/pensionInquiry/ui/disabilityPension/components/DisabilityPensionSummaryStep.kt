@@ -13,8 +13,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -38,6 +36,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.SectionLabel
+import com.tamin.taminhamrah.ui.components.TaminCheckbox
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
@@ -139,14 +138,14 @@ fun DisabilityPensionSummaryStep(
 
         Column {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(top = Spacing.xs),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = Spacing.xs)
+                    .clickable { onIntent(DisabilityPensionIntent.FinalConfirmedChanged(!state.isFinalConfirmed)) },
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Checkbox(
-                    checked = state.isFinalConfirmed,
-                    onCheckedChange = { onIntent(DisabilityPensionIntent.FinalConfirmedChanged(it)) },
-                    colors = CheckboxDefaults.colors(checkedColor = colors.blueText),
-                )
+                TaminCheckbox(checked = state.isFinalConfirmed)
                 Text(
                     text = stringResource(Res.string.disability_pension_summary_confirm_label, state.applicantFullName),
                     style = MaterialTheme.typography.bodySmall,

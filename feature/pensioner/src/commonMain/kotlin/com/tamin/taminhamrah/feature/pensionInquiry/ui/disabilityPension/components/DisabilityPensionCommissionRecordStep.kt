@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ListAlt
 import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -46,6 +47,7 @@ import taminx.core.core_ui.disability_pension_commission_objection_warning
 import taminx.core.core_ui.disability_pension_commission_objection_yes
 import taminx.core.core_ui.disability_pension_commission_opinion_title
 import taminx.core.core_ui.disability_pension_commission_question
+import taminx.core.core_ui.disability_pension_commission_validation_error
 import taminx.core.core_ui.disability_pension_history_objection_link
 import taminx.core.core_ui.disability_pension_insurance_record_day
 import taminx.core.core_ui.disability_pension_insurance_record_month
@@ -174,6 +176,26 @@ fun DisabilityPensionCommissionRecordStep(
                     onClick = { onIntent(DisabilityPensionIntent.CommissionObjectionChanged(true)) },
                     modifier = Modifier.weight(1f),
                 )
+            }
+
+            if (state.showCommissionValidationError) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.xs, Alignment.Start),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Info,
+                        contentDescription = null,
+                        tint = colors.dangerText,
+                        modifier = Modifier.size(IconSize.small),
+                    )
+                    Text(
+                        text = stringResource(Res.string.disability_pension_commission_validation_error),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = colors.dangerText,
+                    )
+                }
             }
 
             if (state.hasCommissionObjection == true) {

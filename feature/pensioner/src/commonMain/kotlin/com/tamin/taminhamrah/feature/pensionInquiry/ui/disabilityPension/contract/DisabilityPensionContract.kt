@@ -74,6 +74,7 @@ data class DisabilityPensionUiState(
     val insuranceRecordYears: String = "",
     val insuranceRecordTotalDays: String = "",
     val hasCommissionObjection: Boolean? = null,
+    val showCommissionValidationError: Boolean = false,
     val showRegisteredRequestsSheet: Boolean = false,
     val isRegisteredRequestsLoading: Boolean = false,
     val registeredRequests: ImmutableList<RegisteredMedicalCommissionPR> = persistentListOf(),
@@ -129,6 +130,7 @@ data class DisabilityPensionUiState(
             val totalDays: String,
         ) : PartialState
         data class CommissionObjectionChanged(val hasObjection: Boolean?) : PartialState
+        data class CommissionValidationErrorChanged(val show: Boolean) : PartialState
         data class RegisteredRequestsSheetVisibilityChanged(val show: Boolean) : PartialState
         data class RegisteredRequestsLoading(val isLoading: Boolean) : PartialState
         data class RegisteredRequestsLoaded(val requests: ImmutableList<RegisteredMedicalCommissionPR>) : PartialState

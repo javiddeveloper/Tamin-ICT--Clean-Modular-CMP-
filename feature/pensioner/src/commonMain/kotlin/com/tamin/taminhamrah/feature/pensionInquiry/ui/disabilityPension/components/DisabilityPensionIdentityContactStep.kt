@@ -13,8 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.foundation.text.KeyboardOptions
@@ -30,6 +28,7 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contrac
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionIntent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionUiState
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.LandlinePhoneError
+import com.tamin.taminhamrah.ui.components.TaminCheckbox
 import com.tamin.taminhamrah.ui.components.TaminStyledTextField
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -184,14 +183,13 @@ fun DisabilityPensionIdentityContactStep(
 
         Column {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onIntent(DisabilityPensionIntent.IdentityConfirmedChanged(!state.isIdentityConfirmed)) },
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Checkbox(
-                    checked = state.isIdentityConfirmed,
-                    onCheckedChange = { onIntent(DisabilityPensionIntent.IdentityConfirmedChanged(it)) },
-                    colors = CheckboxDefaults.colors(checkedColor = colors.blueText),
-                )
+                TaminCheckbox(checked = state.isIdentityConfirmed)
                 Text(
                     text = stringResource(Res.string.disability_pension_identity_confirm_label),
                     style = MaterialTheme.typography.bodySmall,

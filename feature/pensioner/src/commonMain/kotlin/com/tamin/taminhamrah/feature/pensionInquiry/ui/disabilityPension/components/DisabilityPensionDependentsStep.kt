@@ -17,8 +17,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +36,7 @@ import com.tamin.taminhamrah.ui.components.BannerType
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.IconPosition
 import com.tamin.taminhamrah.ui.components.StatusPill
+import com.tamin.taminhamrah.ui.components.TaminCheckbox
 import com.tamin.taminhamrah.ui.components.TaminEmptyState
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
@@ -126,16 +125,15 @@ fun DisabilityPensionDependentsStep(
 
         Column {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        onIntent(DisabilityPensionIntent.DependentsListConfirmedChanged(!state.isDependentsListConfirmed))
+                    },
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Checkbox(
-                    checked = state.isDependentsListConfirmed,
-                    onCheckedChange = {
-                        onIntent(DisabilityPensionIntent.DependentsListConfirmedChanged(it))
-                    },
-                    colors = CheckboxDefaults.colors(checkedColor = colors.blueText),
-                )
+                TaminCheckbox(checked = state.isDependentsListConfirmed)
                 Text(
                     text = stringResource(Res.string.disability_pension_dependents_confirm_label),
                     style = MaterialTheme.typography.bodySmall,

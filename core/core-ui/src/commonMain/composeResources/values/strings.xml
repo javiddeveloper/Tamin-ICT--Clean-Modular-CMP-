@@ -1965,6 +1965,7 @@
     <string name="disability_pension_terms_validation_error">لطفاً تعهدنامه را مطالعه و تایید کنید.</string>
     <string name="disability_pension_next_step">مرحلهٔ بعدی</string>
     <string name="disability_pension_rules_title">مقررات و ضوابط</string>
+    <string name="disability_pension_rules_acknowledge">متوجه شدم</string>
     <string name="disability_pension_rules_page_of_total">%1$s از %2$s</string>
     <string name="disability_pension_rules_heading">شرایط دریافت انواع مستمری ازکارافتادگی:</string>
     <string name="disability_pension_rules_intro">بیمه‌شدگانی که طبق نظر پزشک معالج غیرقابل علاج تشخیص داده می‌شوند، پس از انجام خدمات توان‌بخشی و اعلام نتیجهٔ توان‌بخشی یا اشتغال، چنانچه طبق نظر کمیسیون‌های پزشکی مادهٔ ۹۱ قانون تأمین اجتماعی توانایی خود را کلاً یا بعضاً از دست داده باشند، در گروه‌های ذیل قرار خواهند گرفت.</string>
@@ -2034,6 +2035,7 @@
     <string name="disability_pension_history_objection_link">اعتراض به سوابق</string>
     <string name="disability_pension_commission_opinion_title">نظر کمیسیون پزشکی</string>
     <string name="disability_pension_commission_question">آیا به رای کمیسیون پزشکی معترض هستید؟</string>
+    <string name="disability_pension_commission_validation_error">لطفاً یکی از گزینه‌های بله یا خیر را انتخاب کنید.</string>
     <string name="disability_pension_commission_objection_yes">بله، معترض هستم</string>
     <string name="disability_pension_commission_objection_no">خیر، معترض نیستم</string>
     <string name="disability_pension_commission_objection_warning">ثبت اعتراض به رای کمیسیون پزشکی از این مسیر امکان‌پذیر نیست. برای پیگیری اعتراض به شعبهٔ تأمین اجتماعی مراجعه نمایید.</string>

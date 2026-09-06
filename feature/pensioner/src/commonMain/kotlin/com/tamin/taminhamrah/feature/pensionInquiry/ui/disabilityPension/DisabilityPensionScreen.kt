@@ -50,7 +50,6 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contrac
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionStep
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionUiState
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
-import com.tamin.taminhamrah.ui.components.TaminBottomActionBar
 import com.tamin.taminhamrah.ui.components.TaminBottomBar
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.LoadingButton
@@ -488,10 +487,17 @@ private fun DisabilityPensionBottomBar(
 ) {
     when (state.currentStep) {
         DisabilityPensionStep.Terms -> {
-            TaminBottomActionBar(
-                primaryText = stringResource(Res.string.disability_pension_next_step),
-                onPrimaryClick = { onIntent(DisabilityPensionIntent.NextStepClicked) },
-            )
+            TaminBottomBar(
+                modifier = Modifier.navigationBarsPadding().imePadding(),
+            ) {
+                LoadingButton(
+                    text = stringResource(Res.string.disability_pension_next_step),
+                    onClick = { onIntent(DisabilityPensionIntent.NextStepClicked) },
+                    icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
+                    iconPosition = LoadingButtonIconPosition.TRAILING,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
         }
         DisabilityPensionStep.Dependents,
         DisabilityPensionStep.IdentityContact,
@@ -516,7 +522,7 @@ private fun DisabilityPensionBottomBar(
                         enabled = !state.isRefreshingDependents &&
                             !state.isDependentsLoading &&
                             !state.isAnyDocumentUploading &&
-                            state.hasCommissionObjection != true,
+                            (state.currentStep != DisabilityPensionStep.CommissionRecord || state.hasCommissionObjection == false),
                         isLoading = state.isRefreshingDependents,
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
                         iconPosition = LoadingButtonIconPosition.TRAILING,

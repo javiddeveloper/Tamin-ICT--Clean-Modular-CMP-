@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.InsertDriveFile
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,6 +20,7 @@ import androidx.compose.ui.Modifier
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionUiState
 import com.tamin.taminhamrah.ui.components.BannerCard
 import com.tamin.taminhamrah.ui.components.BannerType
+import com.tamin.taminhamrah.ui.components.TaminCheckbox
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
@@ -86,14 +85,14 @@ fun DisabilityPensionTermsStep(
                 color = colors.textSecondary,
             )
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = Spacing.sm)
+                    .clickable { onTermsAcceptedChange(!state.isTermsAccepted) },
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                verticalAlignment = Alignment.Top,
             ) {
-                Checkbox(
-
-                    checked = state.isTermsAccepted,
-                    onCheckedChange = onTermsAcceptedChange,
-                    colors = CheckboxDefaults.colors(checkedColor = colors.blueText),
-                )
+                TaminCheckbox(checked = state.isTermsAccepted)
                 Text(
                     text = stringResource(
                         Res.string.disability_pension_commitment_text,

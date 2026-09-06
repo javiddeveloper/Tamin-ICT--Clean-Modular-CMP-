@@ -2,33 +2,33 @@ package com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.compon
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
-import com.tamin.taminhamrah.ui.components.TaminTopAppBar
-import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.back_content_description
-import taminx.core.core_ui.close_content_description
+import taminx.core.core_ui.disability_pension_rules_acknowledge
 import taminx.core.core_ui.disability_pension_rules_docs_heading
 import taminx.core.core_ui.disability_pension_rules_doc_1
 import taminx.core.core_ui.disability_pension_rules_doc_2
@@ -44,47 +44,39 @@ import taminx.core.core_ui.disability_pension_rules_page_of_total
 import taminx.core.core_ui.disability_pension_rules_para_1
 import taminx.core.core_ui.disability_pension_rules_para_2
 import taminx.core.core_ui.disability_pension_rules_title
-import taminx.core.core_ui.ic_tamin_chevron_back
-import taminx.core.core_ui.ic_tamin_cross
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DisabilityPensionRulesDialog(onDismiss: () -> Unit) {
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false),
-    ) {
-        val colors = LocalTaminColors.current
-        val headerBrush = Brush.horizontalGradient(colors.profileGradientStops)
+    val colors = LocalTaminColors.current
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-        Scaffold(
-            modifier = Modifier.fillMaxSize().background(colors.bgPage),
-            topBar = {
-                TaminTopAppBar(
-                    title = stringResource(Res.string.disability_pension_rules_title),
-                    background = headerBrush,
-                    navigationIcon = {
-                        TaminTopAppBarButton(
-                            icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                            contentDescription = stringResource(Res.string.back_content_description),
-                            onClick = onDismiss,
-                            bordered = true,
-                        )
-                    },
-                    action = {
-                        TaminTopAppBarButton(
-                            icon = vectorResource(Res.drawable.ic_tamin_cross),
-                            contentDescription = stringResource(Res.string.close_content_description),
-                            onClick = onDismiss,
-                            bordered = true,
-                        )
-                    },
-                )
-            },
-        ) { padding ->
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = colors.bgPage,
+        shape = RoundedCornerShape(topStart = CornerRadius.sheet, topEnd = CornerRadius.sheet),
+        dragHandle = {
+            Box(
+                modifier = Modifier
+                    .padding(vertical = Spacing.md)
+                    .size(width = 32.dp, height = 4.dp)
+                    .background(colors.border, RoundedCornerShape(50)),
+            )
+        },
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = stringResource(Res.string.disability_pension_rules_title),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = colors.textPrimary,
+                modifier = Modifier.padding(horizontal = Spacing.lg),
+            )
+
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
+                    .weight(1f, fill = false)
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = Spacing.lg, vertical = Spacing.md),
                 verticalArrangement = Arrangement.spacedBy(Spacing.md),
@@ -160,6 +152,19 @@ fun DisabilityPensionRulesDialog(onDismiss: () -> Unit) {
                         )
                     }
                 }
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(horizontal = Spacing.lg, vertical = Spacing.md),
+            ) {
+                LoadingButton(
+                    text = stringResource(Res.string.disability_pension_rules_acknowledge),
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         }
     }

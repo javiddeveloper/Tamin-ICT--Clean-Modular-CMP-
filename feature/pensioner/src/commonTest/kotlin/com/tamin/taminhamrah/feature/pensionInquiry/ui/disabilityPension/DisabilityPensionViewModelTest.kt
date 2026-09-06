@@ -448,7 +448,7 @@ class DisabilityPensionViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
     }
 
-    private suspend fun advanceToSummaryStep() {
+    private suspend fun advanceToCommissionRecordStep() {
         advanceToIdentityContactStep()
         viewModel.sendIntent(DisabilityPensionIntent.LandlinePhoneChanged("05832245678"))
         viewModel.sendIntent(DisabilityPensionIntent.AddressChanged("مشهد، بلوار وکیل‌آباد، نبش وکیل‌آباد ۵۲"))
@@ -461,7 +461,11 @@ class DisabilityPensionViewModelTest {
         viewModel.sendIntent(DisabilityPensionIntent.WorkshopConfirmedChanged(true))
         viewModel.sendIntent(DisabilityPensionIntent.NextStepClicked)
         testDispatcher.scheduler.advanceUntilIdle()
+    }
 
+    private suspend fun advanceToSummaryStep() {
+        advanceToCommissionRecordStep()
+        viewModel.sendIntent(DisabilityPensionIntent.CommissionObjectionChanged(false))
         viewModel.sendIntent(DisabilityPensionIntent.NextStepClicked)
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -469,6 +473,42 @@ class DisabilityPensionViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
         viewModel.sendIntent(DisabilityPensionIntent.ConfirmDocumentsSubmission)
         testDispatcher.scheduler.advanceUntilIdle()
+    }
+
+    @Test
+    fun whenCommissionRecordNextClickedWithoutAnswer_showsValidationErrorAndStaysOnStep() = runTest(testDispatcher) {
+        viewModel = buildViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+        advanceToCommissionRecordStep()
+
+        viewModel.uiState.test {
+            viewModel.sendIntent(DisabilityPensionIntent.NextStepClicked)
+            var state = awaitItem()
+            while (!state.showCommissionValidationError) state = awaitItem()
+
+            assertTrue(state.showCommissionValidationError)
+            assertEquals(DisabilityPensionStep.CommissionRecord, state.currentStep)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenCommissionRecordAnsweredNo_advancesToDocumentsStep() = runTest(testDispatcher) {
+        viewModel = buildViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+        advanceToCommissionRecordStep()
+        viewModel.sendIntent(DisabilityPensionIntent.CommissionObjectionChanged(false))
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.uiState.test {
+            viewModel.sendIntent(DisabilityPensionIntent.NextStepClicked)
+            var state = awaitItem()
+            while (state.currentStep != DisabilityPensionStep.Documents) state = awaitItem()
+
+            assertEquals(DisabilityPensionStep.Documents, state.currentStep)
+            assertFalse(state.showCommissionValidationError)
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 }
 

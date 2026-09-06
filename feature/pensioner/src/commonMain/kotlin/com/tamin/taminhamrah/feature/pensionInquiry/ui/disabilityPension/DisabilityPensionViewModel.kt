@@ -157,6 +157,7 @@ class DisabilityPensionViewModel(
             }
             is DisabilityPensionIntent.CommissionObjectionChanged -> {
                 emit(PartialState.CommissionObjectionChanged(intent.hasObjection))
+                emit(PartialState.CommissionValidationErrorChanged(false))
             }
             DisabilityPensionIntent.HistoryObjectionLinkClicked -> {
                 sendEvent(DisabilityPensionEvent.ShowToast(HISTORY_OBJECTION_COMING_SOON_MESSAGE))
@@ -349,7 +350,12 @@ class DisabilityPensionViewModel(
     }
 
     private suspend fun FlowCollector<PartialState>.handleCommissionRecordNextStep() {
-        if (uiState.value.hasCommissionObjection == true) return
+        val hasObjection = uiState.value.hasCommissionObjection
+        if (hasObjection == null) {
+            emit(PartialState.CommissionValidationErrorChanged(true))
+            return
+        }
+        if (hasObjection) return
         emit(PartialState.StepChanged(DisabilityPensionStep.Documents))
     }
 
@@ -513,6 +519,9 @@ class DisabilityPensionViewModel(
             insuranceRecordTotalDays = partialState.totalDays,
         )
         is PartialState.CommissionObjectionChanged -> currentState.copy(hasCommissionObjection = partialState.hasObjection)
+        is PartialState.CommissionValidationErrorChanged -> currentState.copy(
+            showCommissionValidationError = partialState.show,
+        )
         is PartialState.RegisteredRequestsSheetVisibilityChanged -> currentState.copy(
             showRegisteredRequestsSheet = partialState.show,
         )
