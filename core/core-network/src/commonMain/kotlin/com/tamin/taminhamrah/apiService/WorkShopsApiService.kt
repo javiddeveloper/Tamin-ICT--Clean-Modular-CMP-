@@ -17,7 +17,10 @@ import com.tamin.taminhamrah.model.workshop.DebitPaymentDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDTO
 import com.tamin.taminhamrah.model.workshop.DebitReasonDTO
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmitRequestDTO
+import com.tamin.taminhamrah.model.workshop.EmployerCommitmentInfoDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberConfirmResultDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeContractDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeDTO
@@ -27,7 +30,9 @@ import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDTO
@@ -259,5 +264,73 @@ internal interface WorkShopsApiService {
     suspend fun deleteLegalRepresentative(
         @Path("ticket") ticket: String,
         @Path("stackId") stackId: Long,
+    ): BaseDTO<JsonElement?>
+
+    // ------------------------------------------------- خدمات غیرحضوری کارفرما (employerEservicesAgreement)
+    //
+    // Employer → Online Services. A three-step stepper (request ticket -> verify code -> confirm
+    // agreement) plus two management-side drill-downs. See EmployerOnlineServiceDTO.kt for the flow.
+
+    /**
+     * Step 1 — درخواست کد تایید (تیکت) برای ثبت تعهد خدمات غیرحضوری.
+     *
+     * The employer enters the mobile/email they want registered; the backend sends an OTP and
+     * this returns a bare confirmation message. Called from the first stepper page when the
+     * requested contact details differ from the current ones.
+     *
+     * [filter] is the `[{property,value,operator}]` JSON array built in
+     * [com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSource.requestEmployerAgreementTicket]
+     * (`mobileNumber`, `email`, `serviceName=employerEservicesAgreement`).
+     */
+    @GET("workshop-services/request-ticket")
+    suspend fun requestEmployerAgreementTicket(
+        @Query("filter") filter: String,
+    ): BaseDTO<JsonElement?>
+
+    /**
+     * Step 2 — تایید کد و دریافت مشخصات هویتی کارفرما.
+     *
+     * Exchanges the OTP the employer typed for their identity block (نام، کد ملی، موبایل/ایمیل
+     * فعلی), which the second stepper page shows next to the newly requested values before the
+     * employer accepts the rules.
+     */
+    @GET("workshop-services/employer-info/{verificationCode}")
+    suspend fun getEmployerAgreementUserInfo(
+        @Path("verificationCode") verificationCode: String,
+    ): BaseDTO<EmployerCommitmentInfoDTO>
+
+    /**
+     * Step 2 — لیست کارگاه‌های بدون قرارداد کارفرما.
+     *
+     * Paged list shown on the second stepper page while the employer confirms the agreement.
+     * Tapping a row opens [getEmployerWorkshopContractList] for that workshop.
+     */
+    @GET("workshop-services/employer-workshops-info-with-out-contract")
+    suspend fun getEmployerWorkshopsWithoutContract(
+        @QueryMap queries: Map<String, String>,
+    ): BaseDTO<ListData<WorkshopWithoutContractDTO>>
+
+    /**
+     * پیمانکاران / قراردادهای یک کارگاه.
+     *
+     * Opened when the employer drills into a workshop — from the without-contract list (step 2)
+     * or from a registered agreement on the management side. Paged.
+     */
+    @GET("workshop-services/contract-employer-workshop-info-with-workshop-and-branch-code/{workshopId}/{branchCode}")
+    suspend fun getEmployerWorkshopContractList(
+        @Path("workshopId") workshopId: String,
+        @Path("branchCode") branchCode: String,
+        @QueryMap queries: Map<String, String>,
+    ): BaseDTO<ListData<WorkshopContractRowDTO>>
+
+    /**
+     * Step 3 — ثبت نهایی تعهد خدمات غیرحضوری کارفرما.
+     *
+     * Posted from the last stepper page once the employer ticks the قوانین checkbox. Returns a
+     * bare success message; the screen navigates back on success.
+     */
+    @POST("workshop-services/employer-agreement")
+    suspend fun submitEmployerAgreement(
+        @Body request: EmployerAgreementSubmitRequestDTO,
     ): BaseDTO<JsonElement?>
 }

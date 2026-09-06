@@ -206,6 +206,11 @@ import com.tamin.taminhamrah.useCases.workshops.RequestLegalRepresentativeTicket
 import com.tamin.taminhamrah.useCases.workshops.VerifyLegalRepresentativeTicketUseCase
 import com.tamin.taminhamrah.useCases.workshops.SubmitLegalRepresentativeUseCase
 import com.tamin.taminhamrah.useCases.workshops.DeleteLegalRepresentativeUseCase
+import com.tamin.taminhamrah.useCases.workshops.RequestEmployerAgreementTicketUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetEmployerAgreementContactInfoUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetWorkshopsWithoutContractUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetWorkshopContractRowsUseCase
+import com.tamin.taminhamrah.useCases.workshops.SubmitEmployerAgreementUseCase
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -232,6 +237,7 @@ import com.tamin.taminhamrah.useCases.addDependent.UploadDependentImageUseCase
 import com.tamin.taminhamrah.useCases.user.mockUseCases.MockSubdominantUseCase
 import com.tamin.taminhamrah.useCases.versionHistory.GetVersionHistoryUseCase
 import com.tamin.taminhamrah.useCases.contactUs.GetContactUsUseCase
+import com.tamin.taminhamrah.useCases.content.GetLegalDocumentUseCase
 
 val domainModule = module {
     // Add Dependent UseCases
@@ -427,6 +433,13 @@ val domainModule = module {
     factoryOf(::VerifyLegalRepresentativeTicketUseCase)
     factoryOf(::SubmitLegalRepresentativeUseCase)
     factoryOf(::DeleteLegalRepresentativeUseCase)
+    // خدمات غیرحضوری کارفرما — the employerEservicesAgreement stepper + management drill-downs
+    factoryOf(::RequestEmployerAgreementTicketUseCase)
+    factoryOf(::GetEmployerAgreementContactInfoUseCase)
+    factoryOf(::GetWorkshopsWithoutContractUseCase)
+    factoryOf(::GetWorkshopContractRowsUseCase)
+    factoryOf(::SubmitEmployerAgreementUseCase)
+    factoryOf(::GetLegalDocumentUseCase)
     factoryOf(::GetTreatmentCostsUseCase)
     factoryOf(::GetTreatmentCostsPDFUseCase)
     factoryOf(::SendToInboxTreatmentCostsUseCase)
