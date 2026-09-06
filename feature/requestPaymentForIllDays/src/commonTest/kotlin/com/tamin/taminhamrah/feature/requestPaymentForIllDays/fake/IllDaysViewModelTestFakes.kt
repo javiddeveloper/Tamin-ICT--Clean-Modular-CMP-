@@ -119,6 +119,12 @@ class FakeIllDaysContractsRepository : ContractsRepository {
     override fun getSpcPremiumRates(): Flow<List<PremiumRateDN>> = flowOf(emptyList())
     override fun getFreeJobWages(): Flow<List<FreeJobDN>> = flowOf(emptyList())
     override fun getFreelancePremiumRange(params: FreelancePremiumRangeParams): Flow<FreelancePremiumRangeDN> = flowOf()
+    override fun getOptionalPremiumRange(): Flow<FreelancePremiumRangeDN> = flowOf()
+
+    override fun checkRedCrossStatus(): Flow<String> = flowOf()
+
+    override fun checkMedicalStudent(): Flow<String> = flowOf()
+
     override fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Flow<Long> = flowOf(0L)
     override fun calculateOptionalSalary(premiumRateCode: String): Flow<Long> = flowOf(0L)
     override fun makeFreelanceContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN> = flowOf()

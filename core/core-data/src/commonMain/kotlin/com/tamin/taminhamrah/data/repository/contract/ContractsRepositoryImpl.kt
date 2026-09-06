@@ -115,6 +115,18 @@ class ContractsRepositoryImpl(
         emit(contractsRemoteDataSource.getFreelancePremiumRange(params).toDomain())
     }
 
+    override fun getOptionalPremiumRange(): Flow<FreelancePremiumRangeDN> = flow {
+        emit(contractsRemoteDataSource.getOptionalPremiumRange().toDomain())
+    }
+
+    override fun checkRedCrossStatus(): Flow<String> = flow {
+        emit(contractsRemoteDataSource.checkRedCrossStatus())
+    }
+
+    override fun checkMedicalStudent(): Flow<String> = flow {
+        emit(contractsRemoteDataSource.checkMedicalStudent())
+    }
+
     override fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Flow<Long> = flow {
         emit(contractsRemoteDataSource.calculateFreelanceSalary(params))
     }

@@ -56,6 +56,15 @@ interface ContractsApiService {
         @Path("spcRateCode") spcRateCode: String,
     ): BaseDTO<Long>
 
+    @GET("special-insured-services/get-low-high-premium")
+    suspend fun getOptionalPremiumRange(): BaseDTO<FreelancePremiumRangeDTO>
+
+    @GET("special-insured-services/check-red-cross-status")
+    suspend fun checkRedCrossStatus(): BaseDTO<String>
+
+    @GET("special-insured-services/check-medical-student")
+    suspend fun checkMedicalStudent(): BaseDTO<String>
+
     @GET("special-insured-services/check-and-calc-salary/{premiumRate}")
     suspend fun calculateOptionalSalary(
         @Path("premiumRate") premiumRate: String,

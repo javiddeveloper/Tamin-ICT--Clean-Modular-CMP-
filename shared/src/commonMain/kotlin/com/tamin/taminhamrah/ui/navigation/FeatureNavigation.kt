@@ -20,10 +20,8 @@ import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPayRoll
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.navigateToPensionStatusInquiry
 import com.tamin.taminhamrah.feature.pensionSurvivor.navigateToPensionSurvivor
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPrescription
-import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToFreelanceInsuranceContract
-import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToHousewifeInsuranceContract
-import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToOptionalInsuranceContract
-import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToStudentInsuranceContract
+import com.tamin.taminhamrah.feature.contracts.navigateToContractFlow
+import com.tamin.taminhamrah.feature.contracts.flow.ContractType
 import com.tamin.taminhamrah.feature.taminServices.navigateToOccurrence
 import com.tamin.taminhamrah.feature.taminServices.navigateToInspection
 import com.tamin.taminhamrah.feature.taminServices.navigateToEmployerOnlineServices
@@ -40,10 +38,10 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
         FeatureFlag.COMPLETE_WORKSHOP_INFO -> navigateToCompleteEmployerInfo()
         FeatureFlag.STACK_HOLDER_LIST -> navigateToLegalRepresentativeWorkshops()
         FeatureFlag.CONTRACTS -> navigateToContracts()
-        FeatureFlag.STUDENT_INSURANCE -> navigateToStudentInsuranceContract()
-        FeatureFlag.FREELANCE_INSURANCE -> navigateToFreelanceInsuranceContract()
-        FeatureFlag.OPTIONAL_INSURANCE -> navigateToOptionalInsuranceContract()
-        FeatureFlag.HOUSEWIFE_INSURANCE -> navigateToHousewifeInsuranceContract()
+        FeatureFlag.STUDENT_INSURANCE -> navigateToContractFlow(ContractType.STUDENT)
+        FeatureFlag.FREELANCE_INSURANCE -> navigateToContractFlow(ContractType.FREELANCE)
+        FeatureFlag.OPTIONAL_INSURANCE -> navigateToContractFlow(ContractType.OPTIONAL)
+        FeatureFlag.HOUSEWIFE_INSURANCE -> navigateToContractFlow(ContractType.HOUSEWIFE)
         FeatureFlag.PENSION_INQUIRY -> navigateToPensionStatusInquiry()
         FeatureFlag.CALCULATE_WAGE_PENSION -> navigateToCalculatePension()
         FeatureFlag.PRESCRIPTION -> navigateToPrescription()
