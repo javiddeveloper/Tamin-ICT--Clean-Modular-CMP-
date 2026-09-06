@@ -20,6 +20,7 @@ enum class DisabilityPensionStep {
     Workshop,
     CommissionRecord,
     Documents,
+    Summary,
 }
 
 enum class LandlinePhoneError {
@@ -84,6 +85,10 @@ data class DisabilityPensionUiState(
     val showDocumentSourceSheet: Boolean = false,
     val documentPickError: String? = null,
     val showDocumentsConfirmDialog: Boolean = false,
+    val isFinalConfirmed: Boolean = false,
+    val showFinalConfirmationError: Boolean = false,
+    val isSubmitting: Boolean = false,
+    val submitTrackingCode: String? = null,
     val error: String? = null,
 ) {
     val isAnyDocumentUploading: Boolean
@@ -135,6 +140,10 @@ data class DisabilityPensionUiState(
         data class DocumentStateChanged(val documentId: String, val state: DisabilityDocumentState) : PartialState
         data class DocumentPickRejected(val message: String) : PartialState
         data class DocumentsConfirmDialogVisibilityChanged(val show: Boolean) : PartialState
+        data class FinalConfirmedChanged(val accepted: Boolean) : PartialState
+        data class FinalConfirmationErrorChanged(val show: Boolean) : PartialState
+        data class SubmittingChanged(val isSubmitting: Boolean) : PartialState
+        data class SubmitSucceeded(val trackingCode: String) : PartialState
         data class Error(val message: String?) : PartialState
     }
 }
@@ -180,11 +189,15 @@ sealed interface DisabilityPensionIntent {
     data object DismissDocumentSourceSheet : DisabilityPensionIntent
     data object ConfirmDocumentsSubmission : DisabilityPensionIntent
     data object DismissDocumentsConfirmDialog : DisabilityPensionIntent
+    data class FinalConfirmedChanged(val accepted: Boolean) : DisabilityPensionIntent
+    data class EditSummarySectionClicked(val step: DisabilityPensionStep) : DisabilityPensionIntent
+    data object SubmitSuccessAcknowledged : DisabilityPensionIntent
 }
 
 sealed interface DisabilityPensionEvent {
     data class ShowToast(val message: String) : DisabilityPensionEvent
     data object NavigateToAddDependent : DisabilityPensionEvent
+    data object NavigateBack : DisabilityPensionEvent
     data class LaunchImagePicker(
         val documentId: String,
         val source: DisabilityDocumentImageSource,

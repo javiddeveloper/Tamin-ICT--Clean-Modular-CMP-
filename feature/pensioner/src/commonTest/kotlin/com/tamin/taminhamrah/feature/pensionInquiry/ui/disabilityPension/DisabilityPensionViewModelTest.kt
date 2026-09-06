@@ -79,10 +79,13 @@ import com.tamin.taminhamrah.repository.personal.PersonalRepository
 import com.tamin.taminhamrah.useCases.addDependent.RefreshDependentsUseCase
 import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
 import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
+import com.tamin.taminhamrah.useCases.pension.FinalConfirmDisabilityRequestUseCase
 import com.tamin.taminhamrah.useCases.pension.GetDisabilityPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.GetMedicalCommissionPdfUseCase
 import com.tamin.taminhamrah.useCases.pension.GetRegisteredMedicalCommissionUseCase
 import com.tamin.taminhamrah.useCases.pension.GetUserAgeUseCase
+import com.tamin.taminhamrah.useCases.pension.SaveDisabilityUserInfoUseCase
+import com.tamin.taminhamrah.useCases.pension.SaveDocumentDisabilityUseCase
 import com.tamin.taminhamrah.useCases.personal.GetDisabilityDependentInfoUseCase
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -137,6 +140,9 @@ class DisabilityPensionViewModelTest {
         getRegisteredMedicalCommissionUseCase = GetRegisteredMedicalCommissionUseCase(pensionRepository),
         getMedicalCommissionPdfUseCase = GetMedicalCommissionPdfUseCase(pensionRepository),
         uploadImageUseCase = UploadImageUseCase(contractsRepository),
+        saveDisabilityUserInfoUseCase = SaveDisabilityUserInfoUseCase(pensionRepository),
+        saveDocumentDisabilityUseCase = SaveDocumentDisabilityUseCase(pensionRepository),
+        finalConfirmDisabilityRequestUseCase = FinalConfirmDisabilityRequestUseCase(pensionRepository),
     )
 
     @Test
@@ -369,12 +375,99 @@ class DisabilityPensionViewModelTest {
         assertFalse(viewModel.uiState.value.isIdentityDetailsExpanded)
     }
 
+    @Test
+    fun whenSummaryNotConfirmedAndSubmitClicked_showsConfirmationErrorAndStaysOnSummary() = runTest(testDispatcher) {
+        viewModel = buildViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+        advanceToSummaryStep()
+
+        viewModel.uiState.test {
+            viewModel.sendIntent(DisabilityPensionIntent.NextStepClicked)
+            var state = awaitItem()
+            while (!state.showFinalConfirmationError) state = awaitItem()
+
+            assertTrue(state.showFinalConfirmationError)
+            assertEquals(DisabilityPensionStep.Summary, state.currentStep)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenSummaryConfirmedAndSubmitClicked_runsThreeCallChainAndShowsTrackingCode() = runTest(testDispatcher) {
+        viewModel = buildViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+        advanceToSummaryStep()
+        viewModel.sendIntent(DisabilityPensionIntent.FinalConfirmedChanged(true))
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.uiState.test {
+            viewModel.sendIntent(DisabilityPensionIntent.NextStepClicked)
+            var state = awaitItem()
+            while (state.submitTrackingCode == null) state = awaitItem()
+
+            assertEquals("3829147205", state.submitTrackingCode)
+            assertFalse(state.isSubmitting)
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        assertEquals(555L, pensionRepository.lastSaveDocumentDisabilityRequestId)
+        assertEquals(555L, pensionRepository.lastFinalConfirmRequestId)
+        assertEquals("0", pensionRepository.lastFinalConfirmBody?.status)
+
+        viewModel.events.test {
+            viewModel.sendIntent(DisabilityPensionIntent.SubmitSuccessAcknowledged)
+            val event = awaitItem()
+            assertIs<DisabilityPensionEvent.NavigateBack>(event)
+        }
+    }
+
+    @Test
+    fun whenSaveDisabilityUserInfoFails_showsToastAndStopsSubmitting() = runTest(testDispatcher) {
+        viewModel = buildViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+        advanceToSummaryStep()
+        viewModel.sendIntent(DisabilityPensionIntent.FinalConfirmedChanged(true))
+        testDispatcher.scheduler.advanceUntilIdle()
+        pensionRepository.saveDisabilityUserInfoError = RuntimeException("save failed")
+
+        viewModel.events.test {
+            viewModel.sendIntent(DisabilityPensionIntent.NextStepClicked)
+            val event = awaitItem()
+            assertIs<DisabilityPensionEvent.ShowToast>(event)
+        }
+        assertFalse(viewModel.uiState.value.isSubmitting)
+        assertEquals(null, viewModel.uiState.value.submitTrackingCode)
+    }
+
     private suspend fun advanceToIdentityContactStep() {
         viewModel.sendIntent(DisabilityPensionIntent.TermsAcceptedChanged(true))
         viewModel.sendIntent(DisabilityPensionIntent.NextStepClicked)
         testDispatcher.scheduler.advanceUntilIdle()
         viewModel.sendIntent(DisabilityPensionIntent.DependentsListConfirmedChanged(true))
         viewModel.sendIntent(DisabilityPensionIntent.NextStepClicked)
+        testDispatcher.scheduler.advanceUntilIdle()
+    }
+
+    private suspend fun advanceToSummaryStep() {
+        advanceToIdentityContactStep()
+        viewModel.sendIntent(DisabilityPensionIntent.LandlinePhoneChanged("05832245678"))
+        viewModel.sendIntent(DisabilityPensionIntent.AddressChanged("مشهد، بلوار وکیل‌آباد، نبش وکیل‌آباد ۵۲"))
+        viewModel.sendIntent(DisabilityPensionIntent.IdentityConfirmedChanged(true))
+        viewModel.sendIntent(DisabilityPensionIntent.NextStepClicked)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.sendIntent(DisabilityPensionIntent.WorkshopNameChanged("کارگاه تست"))
+        viewModel.sendIntent(DisabilityPensionIntent.WorkshopAddressChanged("مشهد، شهرک صنعتی توس"))
+        viewModel.sendIntent(DisabilityPensionIntent.WorkshopConfirmedChanged(true))
+        viewModel.sendIntent(DisabilityPensionIntent.NextStepClicked)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.sendIntent(DisabilityPensionIntent.NextStepClicked)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.sendIntent(DisabilityPensionIntent.NextStepClicked)
+        testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.sendIntent(DisabilityPensionIntent.ConfirmDocumentsSubmission)
         testDispatcher.scheduler.advanceUntilIdle()
     }
 }
@@ -436,12 +529,29 @@ private class FakeDisabilityPensionRepository : PensionRepository {
         error("not used in DisabilityPensionViewModel")
     override suspend fun sendRequestInquirePensionCertificate(filters: List<ApiFilterDN>): Flow<InquirePensionCertificateDN> =
         error("not used in DisabilityPensionViewModel")
-    override suspend fun saveDisabilityUserInfo(body: DisabilitySaveInfoDN): Flow<DisabilityRequestRefDN?> =
-        error("not used in DisabilityPensionViewModel")
-    override suspend fun finalConfirmDisabilityRequest(requestId: Long, body: DisabilityFinalConfirmDN): Flow<String?> =
-        error("not used in DisabilityPensionViewModel")
-    override suspend fun saveDocumentDisability(requestId: Long, body: DisabilitySaveDocumentDN): Flow<String?> =
-        error("not used in DisabilityPensionViewModel")
+    var saveDisabilityUserInfoResult: DisabilityRequestRefDN? = DisabilityRequestRefDN(id = 555L, refCode = "3829147205")
+    var saveDisabilityUserInfoError: Throwable? = null
+    var lastSaveDisabilityUserInfoBody: DisabilitySaveInfoDN? = null
+    var lastSaveDocumentDisabilityRequestId: Long? = null
+    var lastSaveDocumentDisabilityBody: DisabilitySaveDocumentDN? = null
+    var lastFinalConfirmRequestId: Long? = null
+    var lastFinalConfirmBody: DisabilityFinalConfirmDN? = null
+
+    override suspend fun saveDisabilityUserInfo(body: DisabilitySaveInfoDN): Flow<DisabilityRequestRefDN?> = flow {
+        lastSaveDisabilityUserInfoBody = body
+        saveDisabilityUserInfoError?.let { throw it }
+        emit(saveDisabilityUserInfoResult)
+    }
+    override suspend fun finalConfirmDisabilityRequest(requestId: Long, body: DisabilityFinalConfirmDN): Flow<String?> = flow {
+        lastFinalConfirmRequestId = requestId
+        lastFinalConfirmBody = body
+        emit(null)
+    }
+    override suspend fun saveDocumentDisability(requestId: Long, body: DisabilitySaveDocumentDN): Flow<String?> = flow {
+        lastSaveDocumentDisabilityRequestId = requestId
+        lastSaveDocumentDisabilityBody = body
+        emit(null)
+    }
     override suspend fun getMedicalCommissionPdf(lastWorkshop: String): Flow<PdfDownloadDN> =
         error("not used in DisabilityPensionViewModel")
     override suspend fun getRegisteredMedicalCommission(filters: List<ApiFilterDN>): Flow<List<RegisteredMedicalCommissionDN>> =

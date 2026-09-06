@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contrac
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityDocumentState
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.bytesOrNull
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.platformFileOrNull
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.toDisabilityDocumentDNs
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionEvent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionIntent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionStep
@@ -14,6 +15,9 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contrac
 import com.tamin.taminhamrah.mapper.pension.toPresentation
 import com.tamin.taminhamrah.mapper.personal.toPresentation
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityFinalConfirmDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveDocumentDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
@@ -21,10 +25,13 @@ import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.addDependent.RefreshDependentsUseCase
 import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
 import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
+import com.tamin.taminhamrah.useCases.pension.FinalConfirmDisabilityRequestUseCase
 import com.tamin.taminhamrah.useCases.pension.GetDisabilityPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.GetMedicalCommissionPdfUseCase
 import com.tamin.taminhamrah.useCases.pension.GetRegisteredMedicalCommissionUseCase
 import com.tamin.taminhamrah.useCases.pension.GetUserAgeUseCase
+import com.tamin.taminhamrah.useCases.pension.SaveDisabilityUserInfoUseCase
+import com.tamin.taminhamrah.useCases.pension.SaveDocumentDisabilityUseCase
 import com.tamin.taminhamrah.useCases.personal.GetDisabilityDependentInfoUseCase
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.delete
@@ -58,9 +65,15 @@ class DisabilityPensionViewModel(
     private val getRegisteredMedicalCommissionUseCase: GetRegisteredMedicalCommissionUseCase,
     private val getMedicalCommissionPdfUseCase: GetMedicalCommissionPdfUseCase,
     private val uploadImageUseCase: UploadImageUseCase,
+    private val saveDisabilityUserInfoUseCase: SaveDisabilityUserInfoUseCase,
+    private val saveDocumentDisabilityUseCase: SaveDocumentDisabilityUseCase,
+    private val finalConfirmDisabilityRequestUseCase: FinalConfirmDisabilityRequestUseCase,
 ) : BaseViewModel<DisabilityPensionUiState, PartialState, DisabilityPensionEvent, DisabilityPensionIntent>(
     initialState = DisabilityPensionUiState()
 ) {
+
+    /** Raw epoch millis for [DisabilitySaveInfoDN.birthDate] — the presentation model only exposes a formatted string. */
+    private var applicantBirthDate: Long? = null
 
     init {
         sendIntent(DisabilityPensionIntent.Init)
@@ -180,10 +193,22 @@ class DisabilityPensionViewModel(
             }
             DisabilityPensionIntent.ConfirmDocumentsSubmission -> {
                 emit(PartialState.DocumentsConfirmDialogVisibilityChanged(false))
-                // TODO(EM-2619): navigate to step 7 once its design is delivered.
+                emit(PartialState.StepChanged(DisabilityPensionStep.Summary))
             }
             DisabilityPensionIntent.DismissDocumentsConfirmDialog -> {
                 emit(PartialState.DocumentsConfirmDialogVisibilityChanged(false))
+            }
+            is DisabilityPensionIntent.FinalConfirmedChanged -> {
+                emit(PartialState.FinalConfirmedChanged(intent.accepted))
+                if (intent.accepted) {
+                    emit(PartialState.FinalConfirmationErrorChanged(false))
+                }
+            }
+            is DisabilityPensionIntent.EditSummarySectionClicked -> {
+                emit(PartialState.StepChanged(intent.step))
+            }
+            DisabilityPensionIntent.SubmitSuccessAcknowledged -> {
+                sendEvent(DisabilityPensionEvent.NavigateBack)
             }
         }
     }
@@ -284,6 +309,7 @@ class DisabilityPensionViewModel(
             DisabilityPensionStep.Workshop -> handleWorkshopNextStep()
             DisabilityPensionStep.CommissionRecord -> handleCommissionRecordNextStep()
             DisabilityPensionStep.Documents -> handleDocumentsNextStep()
+            DisabilityPensionStep.Summary -> handleFinalSubmit()
         }
     }
 
@@ -331,6 +357,63 @@ class DisabilityPensionViewModel(
         emit(PartialState.DocumentsConfirmDialogVisibilityChanged(true))
     }
 
+    private suspend fun FlowCollector<PartialState>.handleFinalSubmit() {
+        if (uiState.value.isSubmitting) return
+        if (!uiState.value.isFinalConfirmed) {
+            emit(PartialState.FinalConfirmationErrorChanged(true))
+            return
+        }
+        emit(PartialState.FinalConfirmationErrorChanged(false))
+        emit(PartialState.SubmittingChanged(true))
+        try {
+            val requestRef = saveDisabilityUserInfoUseCase(buildSaveInfoRequest()).first()
+            val requestId = requireNotNull(requestRef?.id)
+            saveDocumentDisabilityUseCase(requestId, buildSaveDocumentRequest()).first()
+            finalConfirmDisabilityRequestUseCase(
+                requestId,
+                DisabilityFinalConfirmDN(id = requestId, status = FINAL_CONFIRM_STATUS),
+            ).first()
+            emit(PartialState.SubmitSucceeded(requestRef?.refCode ?: requestId.toString()))
+        } catch (e: Exception) {
+            emit(PartialState.SubmittingChanged(false))
+            sendEvent(DisabilityPensionEvent.ShowToast(e.toSingleLineMessage()))
+        }
+    }
+
+    private fun buildSaveInfoRequest(): DisabilitySaveInfoDN {
+        val state = uiState.value
+        val info = state.identityInfo
+        val personal = info?.personal
+        return DisabilitySaveInfoDN(
+            activityType = state.activityType,
+            address = state.address,
+            age = info?.strAge,
+            birthDate = applicantBirthDate,
+            branchCode = info?.branch,
+            fatherName = personal?.fatherName,
+            firstName = personal?.firstName,
+            gender = personal?.genderDesc,
+            idNumber = personal?.idCardNumber,
+            insuranceNumber = info?.insuranceId,
+            issuePlace = personal?.cityOfIssue,
+            lastName = personal?.lastName,
+            managerName = state.employerName,
+            mobileNumber = info?.mobileNumber,
+            nationalCode = personal?.nationalId,
+            pensionRequestDocList = emptyList(),
+            phoneNumber = state.landlinePhone,
+            status = SAVE_INFO_STATUS,
+            workshopAddress = state.workshopAddress,
+            workshopCode = info?.work?.workshopId,
+            workshopName = state.workshopName,
+        )
+    }
+
+    private fun buildSaveDocumentRequest(): DisabilitySaveDocumentDN = DisabilitySaveDocumentDN(
+        pensionRequestDocList = uiState.value.documents.toDisabilityDocumentDNs(),
+        status = SAVE_DOCUMENT_STATUS,
+    )
+
     private suspend fun FlowCollector<PartialState>.handlePreviousStepClicked() {
         when (uiState.value.currentStep) {
             DisabilityPensionStep.Dependents -> emit(PartialState.StepChanged(DisabilityPensionStep.Terms))
@@ -338,6 +421,7 @@ class DisabilityPensionViewModel(
             DisabilityPensionStep.Workshop -> emit(PartialState.StepChanged(DisabilityPensionStep.IdentityContact))
             DisabilityPensionStep.CommissionRecord -> emit(PartialState.StepChanged(DisabilityPensionStep.Workshop))
             DisabilityPensionStep.Documents -> emit(PartialState.StepChanged(DisabilityPensionStep.CommissionRecord))
+            DisabilityPensionStep.Summary -> emit(PartialState.StepChanged(DisabilityPensionStep.Documents))
             DisabilityPensionStep.Terms -> Unit
         }
     }
@@ -463,12 +547,22 @@ class DisabilityPensionViewModel(
         is PartialState.DocumentsConfirmDialogVisibilityChanged -> currentState.copy(
             showDocumentsConfirmDialog = partialState.show,
         )
+        is PartialState.FinalConfirmedChanged -> currentState.copy(isFinalConfirmed = partialState.accepted)
+        is PartialState.FinalConfirmationErrorChanged -> currentState.copy(
+            showFinalConfirmationError = partialState.show,
+        )
+        is PartialState.SubmittingChanged -> currentState.copy(isSubmitting = partialState.isSubmitting)
+        is PartialState.SubmitSucceeded -> currentState.copy(
+            isSubmitting = false,
+            submitTrackingCode = partialState.trackingCode,
+        )
         is PartialState.Error -> currentState.copy(
             isProfileLoading = false,
             isDependentsLoading = false,
             isRefreshingDependents = false,
             isInsuranceRecordLoading = false,
             isRegisteredRequestsLoading = false,
+            isSubmitting = false,
             error = partialState.message,
         )
     }
@@ -479,6 +573,7 @@ class DisabilityPensionViewModel(
         emit(PartialState.ProfileLoading(true))
         getDisabilityPersonalInfoUseCase().collect { info ->
             val personal = info.personal
+            applicantBirthDate = personal?.dateOfBirth
             val fullName = listOfNotNull(personal?.firstName, personal?.lastName)
                 .joinToString(" ")
                 .ifBlank { "-" }
@@ -576,6 +671,9 @@ class DisabilityPensionViewModel(
         const val DISABILITY_DEMAND_TYPE_CODE = "01"
         const val HISTORY_OBJECTION_COMING_SOON_MESSAGE = "این امکان به‌زودی فعال می‌شود."
         const val MAX_DOCUMENT_SIZE_BYTES = 2 * 1024 * 1024
+        const val SAVE_INFO_STATUS = "3"
+        const val SAVE_DOCUMENT_STATUS = "4"
+        const val FINAL_CONFIRM_STATUS = "0"
         val INVALID_ADDRESS_CHARACTERS = Regex("[a-zA-Z$&+:;=?@#|/'<>.^*()%!\\\\]")
     }
 }

@@ -38,6 +38,9 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.compone
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.components.DisabilityPensionIdentityContactStep
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.components.DisabilityPensionRegisteredRequestsSheet
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.components.DisabilityPensionRulesDialog
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.components.DisabilityPensionSubmitSuccessDialog
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.components.DisabilityPensionSubmittingDialog
+import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.components.DisabilityPensionSummaryStep
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.components.DisabilityPensionTermsStep
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.components.DisabilityPensionWorkshopStep
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityDocumentChecklist
@@ -96,9 +99,12 @@ import taminx.core.core_ui.disability_pension_step_documents_title
 import taminx.core.core_ui.disability_pension_step_identity_subtitle
 import taminx.core.core_ui.disability_pension_step_identity_title
 import taminx.core.core_ui.disability_pension_step_subtitle
+import taminx.core.core_ui.disability_pension_step_summary_subtitle
+import taminx.core.core_ui.disability_pension_step_summary_title
 import taminx.core.core_ui.disability_pension_step_terms_title
 import taminx.core.core_ui.disability_pension_step_workshop_subtitle
 import taminx.core.core_ui.disability_pension_step_workshop_title
+import taminx.core.core_ui.disability_pension_submit_button
 import taminx.core.core_ui.disability_pension_title
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_chevron_forward
@@ -159,6 +165,7 @@ fun DisabilityPensionScreen(
         cameraPermissionDeniedMessage = cameraPermissionDeniedMessage,
         scope = scope,
         onShowToast = { toaster.error(it) },
+        onNavigateBack = onBack,
         onNavigateToAddDependent = {
             refreshDependentsOnResume = true
             onNavigateToAddDependent()
@@ -276,6 +283,18 @@ fun DisabilityPensionScreen(
             onDismissRequest = { viewModel.sendIntent(DisabilityPensionIntent.DismissDocumentsConfirmDialog) },
         )
     }
+
+    if (state.isSubmitting) {
+        DisabilityPensionSubmittingDialog()
+    }
+
+    val trackingCode = state.submitTrackingCode
+    if (trackingCode != null) {
+        DisabilityPensionSubmitSuccessDialog(
+            trackingCode = trackingCode,
+            onAcknowledged = { viewModel.sendIntent(DisabilityPensionIntent.SubmitSuccessAcknowledged) },
+        )
+    }
 }
 
 @Composable
@@ -285,6 +304,7 @@ private fun HandleDisabilityPensionEvents(
     cameraPermissionDeniedMessage: String,
     scope: CoroutineScope,
     onShowToast: (String) -> Unit,
+    onNavigateBack: () -> Unit,
     onNavigateToAddDependent: () -> Unit,
     onLaunchGallery: (documentId: String) -> Unit,
     onLaunchCamera: (documentId: String) -> Unit,
@@ -293,6 +313,7 @@ private fun HandleDisabilityPensionEvents(
     events.collectWithLifecycleAware { event ->
         when (event) {
             is DisabilityPensionEvent.ShowToast -> onShowToast(event.message)
+            DisabilityPensionEvent.NavigateBack -> onNavigateBack()
             DisabilityPensionEvent.NavigateToAddDependent -> onNavigateToAddDependent()
             is DisabilityPensionEvent.LaunchImagePicker -> when (event.source) {
                 DisabilityDocumentImageSource.GALLERY -> onLaunchGallery(event.documentId)
@@ -330,12 +351,14 @@ private fun DisabilityPensionContent(
     val workshopTitle = stringResource(Res.string.disability_pension_step_workshop_title)
     val commissionRecordTitle = stringResource(Res.string.disability_pension_step_commission_record_title)
     val documentsTitle = stringResource(Res.string.disability_pension_step_documents_title)
+    val summaryTitle = stringResource(Res.string.disability_pension_step_summary_title)
     val termsSubtitle = stringResource(Res.string.disability_pension_step_subtitle)
     val dependentsSubtitle = stringResource(Res.string.disability_pension_step_dependents_subtitle)
     val identitySubtitle = stringResource(Res.string.disability_pension_step_identity_subtitle)
     val workshopSubtitle = stringResource(Res.string.disability_pension_step_workshop_subtitle)
     val commissionRecordSubtitle = stringResource(Res.string.disability_pension_step_commission_record_subtitle)
     val documentsSubtitle = stringResource(Res.string.disability_pension_step_documents_subtitle)
+    val summarySubtitle = stringResource(Res.string.disability_pension_step_summary_subtitle)
     val currentStepIndex = state.currentStep.ordinal + 1
     val stepTitle = when (state.currentStep) {
         DisabilityPensionStep.Terms -> termsTitle
@@ -344,6 +367,7 @@ private fun DisabilityPensionContent(
         DisabilityPensionStep.Workshop -> workshopTitle
         DisabilityPensionStep.CommissionRecord -> commissionRecordTitle
         DisabilityPensionStep.Documents -> documentsTitle
+        DisabilityPensionStep.Summary -> summaryTitle
     }
     val stepSubtitle = when (state.currentStep) {
         DisabilityPensionStep.Terms -> termsSubtitle
@@ -352,6 +376,7 @@ private fun DisabilityPensionContent(
         DisabilityPensionStep.Workshop -> workshopSubtitle
         DisabilityPensionStep.CommissionRecord -> commissionRecordSubtitle
         DisabilityPensionStep.Documents -> documentsSubtitle
+        DisabilityPensionStep.Summary -> summarySubtitle
     }
 
     Scaffold(
@@ -446,6 +471,10 @@ private fun DisabilityPensionContent(
                         state = state,
                         onIntent = onIntent,
                     )
+                    DisabilityPensionStep.Summary -> DisabilityPensionSummaryStep(
+                        state = state,
+                        onIntent = onIntent,
+                    )
                 }
             }
         }
@@ -491,6 +520,28 @@ private fun DisabilityPensionBottomBar(
                         isLoading = state.isRefreshingDependents,
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
                         iconPosition = LoadingButtonIconPosition.TRAILING,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+        }
+        DisabilityPensionStep.Summary -> {
+            TaminBottomBar(
+                modifier = Modifier.navigationBarsPadding().imePadding(),
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.smd),
+                ) {
+                    SquareIconButton(
+                        icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                        onClick = { if (!state.isSubmitting) onIntent(DisabilityPensionIntent.PreviousStepClicked) },
+                    )
+                    LoadingButton(
+                        text = stringResource(Res.string.disability_pension_submit_button),
+                        onClick = { onIntent(DisabilityPensionIntent.NextStepClicked) },
+                        enabled = !state.isSubmitting,
+                        isLoading = state.isSubmitting,
                         modifier = Modifier.weight(1f),
                     )
                 }

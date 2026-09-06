@@ -2053,4 +2053,26 @@
     <string name="disability_pension_document_judicial_ruling">آراء قطعی مراجع قضایی</string>
     <string name="disability_pension_documents_confirm_title">تایید مدارک</string>
     <string name="disability_pension_documents_confirm_message">مدارک مورد نیاز را بارگذاری کرده‌ام یا نیازی به ارسال مدارک و مستندات وجود ندارد.</string>
+    <string name="disability_pension_step_summary_title">ثبت نهایی</string>
+    <string name="disability_pension_step_summary_subtitle">خلاصهٔ اطلاعات را ببینید و درخواست را ثبت کنید.</string>
+    <string name="disability_pension_summary_section_title">خلاصهٔ اطلاعات ثبت‌شده</string>
+    <string name="disability_pension_summary_edit_content_description">ویرایش</string>
+    <string name="disability_pension_summary_terms_row_title">شرایط و تعهدنامه</string>
+    <string name="disability_pension_summary_terms_value">تأیید شد</string>
+    <string name="disability_pension_summary_dependents_row_title">افراد تحت تکفل</string>
+    <string name="disability_pension_summary_dependents_value">%1$s نفر</string>
+    <string name="disability_pension_summary_identity_row_title">اطلاعات هویتی و تماس</string>
+    <string name="disability_pension_summary_workshop_row_title">اطلاعات کارگاه و شعبه</string>
+    <string name="disability_pension_summary_commission_row_title">سوابق و رأی کمیسیون</string>
+    <string name="disability_pension_summary_commission_value_objection">معترض</string>
+    <string name="disability_pension_summary_commission_value_no_objection">بدون اعتراض</string>
+    <string name="disability_pension_summary_documents_row_title">مدارک بارگذاری‌شده</string>
+    <string name="disability_pension_summary_documents_value">%1$s از %2$s</string>
+    <string name="disability_pension_summary_confirm_label">اینجانب %1$s صحت اطلاعات فوق را تایید و درخواست ثبت نهایی مستمری ازکارافتادگی را می‌نمایم.</string>
+    <string name="disability_pension_summary_confirm_error">لطفاً برای ثبت نهایی، تاییدیهٔ بالا را علامت بزنید.</string>
+    <string name="disability_pension_submit_button">ثبت نهایی درخواست</string>
+    <string name="disability_pension_submitting_message">در حال ثبت درخواست…</string>
+    <string name="disability_pension_submit_success_title">درخواست شما ثبت شد</string>
+    <string name="disability_pension_submit_success_description">درخواست شما با کد پیگیری زیر با موفقیت ثبت شد؛ با مراجعه به صفحهٔ درخواست‌های من می‌توانید از وضعیت درخواست مطلع شوید.</string>
+    <string name="disability_pension_submit_success_dismiss_button">متوجه شدم</string>
 </resources>

@@ -1,8 +1,10 @@
 package com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract
 
 import androidx.compose.runtime.Immutable
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityDocumentDN
 import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.StringResource
 import taminx.core.core_ui.Res
@@ -84,3 +86,11 @@ fun DisabilityDocumentState.bytesOrNull(): ByteArray? = when (this) {
     is DisabilityDocumentState.Failed -> bytes
     DisabilityDocumentState.Empty -> null
 }
+
+/** Only [DisabilityDocumentState.Uploaded] entries carry a guid the backend can accept. */
+fun ImmutableMap<String, DisabilityDocumentState>.toDisabilityDocumentDNs(): List<DisabilityDocumentDN> =
+    mapNotNull { (documentType, state) ->
+        (state as? DisabilityDocumentState.Uploaded)?.let {
+            DisabilityDocumentDN(documentType = documentType, guid = it.guid)
+        }
+    }
