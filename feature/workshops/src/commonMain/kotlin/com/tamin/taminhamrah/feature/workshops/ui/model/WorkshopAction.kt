@@ -4,7 +4,10 @@ import com.tamin.taminhamrah.feature.workshops.ui.components.StatusTint
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_tamin_workshop_inquiry
 import taminx.core.core_ui.ic_tamin_workshop_payment
+import taminx.core.core_ui.workshop_action_debt_inquiry
+import taminx.core.core_ui.workshop_action_debt_inquiry_desc
 import taminx.core.core_ui.workshop_action_payment_sheets
 import taminx.core.core_ui.workshop_action_payment_sheets_desc
 
@@ -30,5 +33,11 @@ enum class WorkshopAction(
         description = Res.string.workshop_action_payment_sheets_desc,
         icon = Res.drawable.ic_tamin_workshop_payment,
         tint = StatusTint.INFO,
+    ),
+    DEBT_INQUIRY(
+        label = Res.string.workshop_action_debt_inquiry,
+        description = Res.string.workshop_action_debt_inquiry_desc,
+        icon = Res.drawable.ic_tamin_workshop_inquiry,
+        tint = StatusTint.MINT,
     ),
 }
