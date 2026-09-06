@@ -430,6 +430,21 @@ fun ContractFlowScreenContent(
                                             selectedFreeJobCode = state.selectedFreeJobCode,
                                             selectedFreeJobName = state.selectedFreeJobName,
                                             isFreeJobsLoading = state.isFreeJobsLoading,
+                                            searchQuery = state.freeJobsSearchQuery,
+                                            onSearchQueryChange = {
+                                                onIntent(ContractFlowIntent.SearchFreeJobs(it))
+                                            },
+                                            canLoadMore = state.hasMoreFreeJobs &&
+                                                !state.isFreeJobsLoading &&
+                                                !state.isFreeJobsLoadingMore,
+                                            isLoadingMore = state.isFreeJobsLoadingMore,
+                                            loadMoreError = state.freeJobsLoadMoreError,
+                                            onLoadMore = {
+                                                onIntent(ContractFlowIntent.LoadMoreFreeJobs)
+                                            },
+                                            onRetryLoadMore = {
+                                                onIntent(ContractFlowIntent.LoadMoreFreeJobs)
+                                            },
                                             onFreeJobSelected = {
                                                 onIntent(ContractFlowIntent.SelectFreeJob(it))
                                             },

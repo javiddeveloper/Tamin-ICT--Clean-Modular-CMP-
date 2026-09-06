@@ -28,6 +28,13 @@ fun JobTitleStepContent(
     isFreeJobsLoading: Boolean,
     onFreeJobSelected: (FreeJobDN) -> Unit,
     modifier: Modifier = Modifier,
+    searchQuery: String = "",
+    onSearchQueryChange: (String) -> Unit = {},
+    canLoadMore: Boolean = false,
+    isLoadingMore: Boolean = false,
+    loadMoreError: String? = null,
+    onLoadMore: () -> Unit = {},
+    onRetryLoadMore: () -> Unit = {},
 ) {
     val jobCodeSubtitle = selectedFreeJobCode
         ?.takeIf { it.isNotBlank() }
@@ -53,6 +60,14 @@ fun JobTitleStepContent(
             selectedSubtitle = jobCodeSubtitle,
             icon = vectorResource(Res.drawable.ic_tamin_search),
             showChevron = true,
+            searchQuery = searchQuery,
+            onSearchQueryChange = onSearchQueryChange,
+            canLoadMore = canLoadMore,
+            isLoadingMore = isLoadingMore,
+            loadMoreError = loadMoreError,
+            onLoadMore = onLoadMore,
+            onRetryLoadMore = onRetryLoadMore,
+            searchDebounceMs = 300L,
             onSelected = onFreeJobSelected,
         )
     }

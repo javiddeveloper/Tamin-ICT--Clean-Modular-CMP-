@@ -62,6 +62,14 @@ fun <T> SelectableField(
     selectedSubtitle: String? = null,
     icon: ImageVector? = null,
     showChevron: Boolean = false,
+    searchQuery: String? = null,
+    onSearchQueryChange: ((String) -> Unit)? = null,
+    canLoadMore: Boolean = false,
+    isLoadingMore: Boolean = false,
+    loadMoreError: String? = null,
+    onLoadMore: (() -> Unit)? = null,
+    onRetryLoadMore: (() -> Unit)? = null,
+    searchDebounceMs: Long = 0L,
 ) {
     val colors = LocalTaminColors.current
     var sheetOpen by remember { mutableStateOf(false) }
@@ -105,6 +113,14 @@ fun <T> SelectableField(
             itemKey = { optionCode(it) },
             showSearch = showSearch,
             isLoading = isLoading,
+            searchQuery = searchQuery,
+            onSearchQueryChange = onSearchQueryChange,
+            canLoadMore = canLoadMore,
+            isLoadingMore = isLoadingMore,
+            loadMoreError = loadMoreError,
+            onLoadMore = onLoadMore,
+            onRetryLoadMore = onRetryLoadMore,
+            searchDebounceMs = searchDebounceMs,
             onItemSelected = { selectedOption ->
                 onSelected(selectedOption)
                 sheetOpen = false

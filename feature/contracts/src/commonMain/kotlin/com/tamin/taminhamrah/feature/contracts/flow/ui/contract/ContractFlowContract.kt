@@ -38,6 +38,11 @@ data class ContractFlowUiState(
     val selectedFreeJobCode: String? = null,
     val selectedFreeJobName: String? = null,
     val isFreeJobsLoading: Boolean = false,
+    val isFreeJobsLoadingMore: Boolean = false,
+    val hasMoreFreeJobs: Boolean = false,
+    val freeJobsSearchQuery: String = "",
+    val freeJobsReceivedCount: Int = 0,
+    val freeJobsLoadMoreError: String? = null,
     val contractApplicantType: ContractApplicantType = ContractApplicantType.PERSONAL,
     val guardianForm: GuardianFormPR = GuardianFormPR(),
     val branchSelection: BranchSelectionFormPR = BranchSelectionFormPR(),
@@ -143,7 +148,15 @@ data class ContractFlowUiState(
         data class BranchesLoading(val isLoading: Boolean) : PartialState()
         data class BranchesLoaded(val branches: List<BranchPR>) : PartialState()
         data class FreeJobsLoading(val isLoading: Boolean) : PartialState()
-        data class FreeJobsLoaded(val freeJobs: List<FreeJobDN>) : PartialState()
+        data class FreeJobsSearchStarted(val searchQuery: String) : PartialState()
+        data class FreeJobsLoadingMore(val isLoading: Boolean) : PartialState()
+        data class FreeJobsLoaded(
+            val freeJobs: List<FreeJobDN>,
+            val total: Int,
+            val append: Boolean,
+            val searchQuery: String,
+        ) : PartialState()
+        data class FreeJobsLoadMoreError(val message: String?) : PartialState()
         data class FreeJobSelected(val jobCode: String, val jobName: String) : PartialState()
         data class ContractApplicantTypeChanged(val type: ContractApplicantType) : PartialState()
         data class BranchSelectionChanged(val branchSelection: BranchSelectionFormPR) : PartialState()
@@ -209,6 +222,8 @@ sealed class ContractFlowIntent {
     data object ClearUploadedDocument : ContractFlowIntent()
     data class SelectPremiumRate(val rate: SpcPremiumRateOptionPR) : ContractFlowIntent()
     data class SelectFreeJob(val job: FreeJobDN) : ContractFlowIntent()
+    data class SearchFreeJobs(val query: String) : ContractFlowIntent()
+    data object LoadMoreFreeJobs : ContractFlowIntent()
     data class SelectMonthlyPremium(val amount: Long) : ContractFlowIntent()
     data object CalculateMonthlyPremium : ContractFlowIntent()
     data class SetAgreementConfirmed(val confirmed: Boolean) : ContractFlowIntent()

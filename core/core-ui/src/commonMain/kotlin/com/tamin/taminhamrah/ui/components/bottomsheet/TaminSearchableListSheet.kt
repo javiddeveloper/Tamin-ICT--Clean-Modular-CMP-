@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,6 +24,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,9 +39,12 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.CustomSearchBar
 import com.tamin.taminhamrah.ui.components.TaminEmptyState
 import com.tamin.taminhamrah.ui.components.TaminText
+import com.tamin.taminhamrah.ui.paging.OnLoadMore
+import com.tamin.taminhamrah.ui.paging.PagingFooter
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.active_relation_search_placeholder
@@ -47,6 +52,7 @@ import taminx.core.core_ui.no_items_found
 
 private val DefaultListHeight = 400.dp
 private val DefaultLoadingHeight = 200.dp
+private const val DefaultSearchDebounceMs = 0L
 
 /**
  * Simple key-value model for sheet items when a custom domain model is not used.
@@ -85,6 +91,12 @@ fun <T> TaminSearchableListSheet(
     emptyMessage: String = stringResource(Res.string.no_items_found),
     listHeight: Dp = DefaultListHeight,
     loadingHeight: Dp = DefaultLoadingHeight,
+    canLoadMore: Boolean = false,
+    isLoadingMore: Boolean = false,
+    loadMoreError: String? = null,
+    onLoadMore: (() -> Unit)? = null,
+    onRetryLoadMore: (() -> Unit)? = null,
+    searchDebounceMs: Long = DefaultSearchDebounceMs,
 ) {
     val taminColors = LocalTaminColors.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -114,6 +126,12 @@ fun <T> TaminSearchableListSheet(
             listHeight = listHeight,
             loadingHeight = loadingHeight,
             showDragHandle = false,
+            canLoadMore = canLoadMore,
+            isLoadingMore = isLoadingMore,
+            loadMoreError = loadMoreError,
+            onLoadMore = onLoadMore,
+            onRetryLoadMore = onRetryLoadMore,
+            searchDebounceMs = searchDebounceMs,
         )
     }
 }
@@ -176,13 +194,33 @@ fun <T> SearchableListSheetContent(
     listHeight: Dp = DefaultListHeight,
     loadingHeight: Dp = DefaultLoadingHeight,
     showDragHandle: Boolean = false,
+    canLoadMore: Boolean = false,
+    isLoadingMore: Boolean = false,
+    loadMoreError: String? = null,
+    onLoadMore: (() -> Unit)? = null,
+    onRetryLoadMore: (() -> Unit)? = null,
+    searchDebounceMs: Long = DefaultSearchDebounceMs,
 ) {
     val taminColors = LocalTaminColors.current
-    var localQuery by remember { mutableStateOf("") }
-    val currentQuery = searchQuery ?: localQuery
+    var localQuery by remember { mutableStateOf(searchQuery.orEmpty()) }
+    val listState = rememberLazyListState()
+    val usesServerSearch = onSearchQueryChange != null
+    val currentQuery = if (usesServerSearch) localQuery else (searchQuery ?: localQuery)
 
-    val filteredItems = remember(items, currentQuery, showSearch, onSearchQueryChange) {
-        if (!showSearch || currentQuery.isBlank() || onSearchQueryChange != null) {
+    LaunchedEffect(searchQuery, usesServerSearch) {
+        if (!usesServerSearch && searchQuery != null) {
+            localQuery = searchQuery
+        }
+    }
+
+    LaunchedEffect(localQuery, usesServerSearch, searchDebounceMs) {
+        if (!usesServerSearch) return@LaunchedEffect
+        if (searchDebounceMs > 0) delay(searchDebounceMs)
+        onSearchQueryChange?.invoke(localQuery)
+    }
+
+    val filteredItems = remember(items, currentQuery, showSearch, usesServerSearch) {
+        if (!showSearch || currentQuery.isBlank() || usesServerSearch) {
             items
         } else {
             items.filter { itemLabel(it).contains(currentQuery, ignoreCase = true) }
@@ -213,7 +251,11 @@ fun <T> SearchableListSheetContent(
                 query = currentQuery,
                 onQueryChange = { newQuery ->
                     localQuery = newQuery
-                    onSearchQueryChange?.invoke(newQuery)
+                    if (!usesServerSearch) {
+                        onSearchQueryChange?.invoke(newQuery)
+                    } else if (searchDebounceMs <= 0) {
+                        onSearchQueryChange?.invoke(newQuery)
+                    }
                 },
                 placeHolder = searchPlaceholder,
                 modifier = Modifier.padding(horizontal = Spacing.lg),
@@ -222,7 +264,7 @@ fun <T> SearchableListSheetContent(
         }
 
         when {
-            isLoading -> Box(
+            isLoading && filteredItems.isEmpty() -> Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(loadingHeight),
@@ -235,25 +277,43 @@ fun <T> SearchableListSheetContent(
                 message = emptyMessage,
             )
 
-            else -> LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(listHeight),
-                contentPadding = PaddingValues(bottom = Spacing.xxl),
-            ) {
-                items(
-                    items = filteredItems,
-                    key = itemKey?.let { keyFn -> { item: T -> keyFn(item) } },
-                ) { item ->
-                    SearchableListItemRow(
-                        label = itemLabel(item),
-                        onClick = { onItemSelected(item) },
+            else -> {
+                if (onLoadMore != null) {
+                    listState.OnLoadMore(
+                        enabled = canLoadMore,
+                        onLoadMore = onLoadMore,
                     )
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = Spacing.lg),
-                        thickness = 0.5.dp,
-                        color = taminColors.border,
-                    )
+                }
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(listHeight),
+                    state = listState,
+                    contentPadding = PaddingValues(bottom = Spacing.xxl),
+                ) {
+                    items(
+                        items = filteredItems,
+                        key = itemKey?.let { keyFn -> { item: T -> keyFn(item) } },
+                    ) { item ->
+                        SearchableListItemRow(
+                            label = itemLabel(item),
+                            onClick = { onItemSelected(item) },
+                        )
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = Spacing.lg),
+                            thickness = 0.5.dp,
+                            color = taminColors.border,
+                        )
+                    }
+                    if (isLoadingMore || loadMoreError != null) {
+                        item(key = "paging_footer") {
+                            PagingFooter(
+                                isLoadingNextPage = isLoadingMore,
+                                error = loadMoreError,
+                                onRetry = { onRetryLoadMore?.invoke() ?: onLoadMore?.invoke() },
+                            )
+                        }
+                    }
                 }
             }
         }
