@@ -195,7 +195,7 @@ class DisabilityPensionViewModel(
         val fileName = file.name
         if (!isJpegFileName(fileName)) {
             deleteFileQuietly(file)
-            emitDocumentRejection(documentId, getString(Res.string.orotez_protez_document_format_error))
+            emit(PartialState.DocumentPickRejected(getString(Res.string.orotez_protez_document_format_error)))
             return
         }
 
@@ -203,20 +203,20 @@ class DisabilityPensionViewModel(
             file.readBytes()
         } catch (e: Exception) {
             deleteFileQuietly(file)
-            emitDocumentRejection(documentId, getString(Res.string.orotez_protez_document_pick_read_error))
+            emit(PartialState.DocumentPickRejected(getString(Res.string.orotez_protez_document_pick_read_error)))
             return
         }
 
         if (bytes.size > MAX_DOCUMENT_SIZE_BYTES) {
             deleteFileQuietly(file)
-            emitDocumentRejection(documentId, getString(Res.string.orotez_protez_document_format_error))
+            emit(PartialState.DocumentPickRejected(getString(Res.string.orotez_protez_document_format_error)))
             return
         }
 
         val duplicateOfId = findDuplicateDocumentId(excludeId = documentId, bytes = bytes)
         if (duplicateOfId != null) {
             deleteFileQuietly(file)
-            emitDocumentRejection(documentId, getString(Res.string.orotez_protez_document_duplicate_error))
+            emit(PartialState.DocumentPickRejected(getString(Res.string.orotez_protez_document_duplicate_error)))
             return
         }
 
@@ -232,13 +232,10 @@ class DisabilityPensionViewModel(
         }
     }
 
-    private suspend fun FlowCollector<PartialState>.emitDocumentRejection(documentId: String, message: String) {
-        emit(PartialState.DocumentStateChanged(documentId, DisabilityDocumentState.Failed(message)))
-    }
-
     private suspend fun FlowCollector<PartialState>.handleDocumentRemoveClicked(documentId: String) {
         uiState.value.documents[documentId]?.platformFileOrNull()?.let { deleteFileQuietly(it) }
         emit(PartialState.DocumentStateChanged(documentId, DisabilityDocumentState.Empty))
+        emit(PartialState.DocumentSourceSheetDismissed)
     }
 
     private fun findDuplicateDocumentId(excludeId: String, bytes: ByteArray): String? =

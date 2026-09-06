@@ -71,7 +71,11 @@ fun DisabilityPensionDocumentsStep(
                 state = documentState.toUploadState(),
                 statusText = documentState.statusText(),
                 thumbnailBase64 = thumbnailBase64,
-                onCardClick = { onIntent(DisabilityPensionIntent.DocumentCardClicked(document.id)) },
+                onCardClick = if (documentState is DisabilityDocumentState.Uploading || isUploaded) {
+                    null
+                } else {
+                    { onIntent(DisabilityPensionIntent.DocumentCardClicked(document.id)) }
+                },
                 onPreviewClick = if (isUploaded) {
                     { previewDocumentId = document.id }
                 } else {

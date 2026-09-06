@@ -42,7 +42,6 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.compone
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.components.DisabilityPensionWorkshopStep
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityDocumentChecklist
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityDocumentImageSource
-import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityDocumentState
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionEvent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionIntent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionStep
@@ -240,7 +239,7 @@ fun DisabilityPensionScreen(
         if (activeDocumentId != null && activeDocument != null) {
             TaminDocumentSourceSheet(
                 title = stringResource(activeDocument.titleRes),
-                showRemoveOption = state.documents[activeDocumentId] is DisabilityDocumentState.Uploaded,
+                showRemoveOption = false,
                 onSelectCamera = {
                     viewModel.sendIntent(
                         DisabilityPensionIntent.DocumentSourceSelected(activeDocumentId, DisabilityDocumentImageSource.CAMERA),
@@ -251,7 +250,6 @@ fun DisabilityPensionScreen(
                         DisabilityPensionIntent.DocumentSourceSelected(activeDocumentId, DisabilityDocumentImageSource.GALLERY),
                     )
                 },
-                onRemove = { viewModel.sendIntent(DisabilityPensionIntent.DocumentRemoveClicked(activeDocumentId)) },
                 onDismiss = { viewModel.sendIntent(DisabilityPensionIntent.DismissDocumentSourceSheet) },
             )
         }
