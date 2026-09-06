@@ -58,6 +58,11 @@ class FakeContractsRepository : ContractsRepository {
     override fun getFreelancePremiumRange(params: FreelancePremiumRangeParams): Flow<FreelancePremiumRangeDN> = flow {
         emit(FreelancePremiumRangeDN(paymentTabayi = 0L, lowPremium = 0L, history = 0, highPremium = 0L))
     }
+    override fun getOptionalPremiumRange(): Flow<FreelancePremiumRangeDN> = flow {
+        emit(FreelancePremiumRangeDN(paymentTabayi = 0L, lowPremium = 0L, history = 0, highPremium = 0L))
+    }
+    override fun checkRedCrossStatus(): Flow<String> = flow { emit("ok") }
+    override fun checkMedicalStudent(): Flow<String> = flow { emit("ok14") }
     override fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Flow<Long> = flow { emit(0L) }
     override fun calculateOptionalSalary(premiumRateCode: String): Flow<Long> = flow { emit(0L) }
     override fun makeFreelanceContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN> = flow {

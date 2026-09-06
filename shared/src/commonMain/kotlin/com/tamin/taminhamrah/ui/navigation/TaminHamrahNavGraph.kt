@@ -97,10 +97,11 @@ import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
 import com.tamin.taminhamrah.feature.addDependent.addDependentGraph
 import com.tamin.taminhamrah.feature.addDependent.AddDependentRoute
-import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceContractScreen
+import com.tamin.taminhamrah.feature.contracts.contractFlowScreen
 import com.tamin.taminhamrah.feature.taminServices.TaminServicesRoute
 import com.tamin.taminhamrah.feature.taminServices.occurrenceScreen
 import com.tamin.taminhamrah.feature.taminServices.inspectionScreen
+import com.tamin.taminhamrah.feature.taminServices.employerOnlineServicesScreen
 import com.tamin.taminhamrah.feature.taminServices.sendInsuranceHistoryToInstitutionsScreen
 import com.tamin.taminhamrah.feature.taminServices.taminServicesScreen
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
@@ -112,6 +113,9 @@ import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
 import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
 import com.tamin.taminhamrah.feature.security.SecurityRoute
 import com.tamin.taminhamrah.feature.security.securityScreen
+import com.tamin.taminhamrah.feature.developerOptions.DeveloperOptionsRoute
+import com.tamin.taminhamrah.feature.developerOptions.developerOptionsScreen
+import com.tamin.taminhamrah.util.AppConfig
 import com.tamin.taminhamrah.feature.settings.SettingsRoute
 import com.tamin.taminhamrah.feature.settings.settingsScreen
 import com.tamin.taminhamrah.feature.userRequest.UserRequestRoute
@@ -393,6 +397,9 @@ internal fun TaminHamrahNavGraph(
                     onNavigateToSecurity = {
                         navController.navigate(SecurityRoute)
                     },
+                    onNavigateToDeveloperOptions = {
+                        navController.navigate(DeveloperOptionsRoute)
+                    },
                     onNavigateToAddDependent = {
                         navController.navigate(AddDependentRoute)
                     },
@@ -438,6 +445,10 @@ internal fun TaminHamrahNavGraph(
                 )
 
                 inspectionScreen(
+                    onBack = { navController.popBackStack() }
+                )
+
+                employerOnlineServicesScreen(
                     onBack = { navController.popBackStack() }
                 )
 
@@ -496,7 +507,7 @@ internal fun TaminHamrahNavGraph(
 
                 userRequestGraph(navController = navController)
 
-                studentInsuranceContractScreen(onBack = { navController.popBackStack() })
+                contractFlowScreen(onBack = { navController.popBackStack() })
 
                 // Maps the assistant's destination ids to real routes. Ids come from
                 // AgentDestination; anything unmapped is ignored rather than crashing.
@@ -519,6 +530,10 @@ internal fun TaminHamrahNavGraph(
                 )
 
                 securityScreen(onNavigateBack = { navController.popBackStack() })
+
+                if (AppConfig.isDebug) {
+                    developerOptionsScreen(onNavigateBack = { navController.popBackStack() })
+                }
 
                 orotezProtezScreen(onBack = { navController.popBackStack() })
 

@@ -36,6 +36,7 @@ class MakeContractUseCaseTest : BaseUseCaseTest() {
         }
 
         assertEquals(params, repository.lastMakeContractParams)
+        assertTrue(repository.makeFreelanceContractCalled)
         assertFalse(repository.makeContractCalled)
     }
 
@@ -52,6 +53,7 @@ class MakeContractUseCaseTest : BaseUseCaseTest() {
 
         assertEquals(params, repository.lastMakeContractParams)
         assertTrue(repository.makeContractCalled)
+        assertFalse(repository.makeFreelanceContractCalled)
     }
 
     private fun sampleParams() = FreelanceMakeContractParams(
