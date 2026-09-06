@@ -82,13 +82,36 @@ data class ContractRowsUiState(
     val didAutoSwitchTab: Boolean = false,
     /** کارگاه‌های شما — the quick-pick rows, fetched the first time the sheet opens. */
     val myWorkshops: ImmutableList<WorkshopPR> = persistentListOf(),
+    /**
+     * How many workshops the employer actually holds, against how many the quick-pick lists.
+     *
+     * The sheet asks for one page, so an employer with more than fits never sees the rest. The two
+     * fields still reach any workshop by number, so the cap is stated rather than paged away —
+     * a silent partial list is the part that misleads.
+     */
+    val myWorkshopsTotal: Int = 0,
 ) {
     sealed interface PartialState {
         data class TabChanged(val tab: ContractRowTab) : PartialState
         data object Loading : PartialState
         data object LoadingMore : PartialState
-        data class Error(val message: String?) : PartialState
-        data class Loaded(val list: PagedListState<ContractRowPR>) : PartialState
+        /**
+         * [tab] is the tab the request was made *for*, and null for the pipeline's own catch-all.
+         *
+         * `BaseViewModel` runs intents through `flatMapMerge`, so two tab loads can be in flight at
+         * once and the slower one can land last. Carrying the tab lets the reducer drop a result
+         * that no longer belongs to the tab on screen, instead of painting one service's rows under
+         * the other's heading.
+         */
+        data class Error(
+            val message: String?,
+            val tab: ContractRowTab? = null,
+        ) : PartialState
+
+        data class Loaded(
+            val list: PagedListState<ContractRowPR>,
+            val tab: ContractRowTab,
+        ) : PartialState
         data class DraftChanged(
             val workshopId: String? = null,
             val branchCode: String? = null,
@@ -100,7 +123,10 @@ data class ContractRowsUiState(
         data class WorkshopIdErrorChanged(val isVisible: Boolean) : PartialState
         data class BranchCodeErrorChanged(val isVisible: Boolean) : PartialState
         data class AutoSwitchedTab(val tab: ContractRowTab) : PartialState
-        data class MyWorkshopsLoaded(val workshops: ImmutableList<WorkshopPR>) : PartialState
+        data class MyWorkshopsLoaded(
+            val workshops: ImmutableList<WorkshopPR>,
+            val total: Int,
+        ) : PartialState
     }
 }
 

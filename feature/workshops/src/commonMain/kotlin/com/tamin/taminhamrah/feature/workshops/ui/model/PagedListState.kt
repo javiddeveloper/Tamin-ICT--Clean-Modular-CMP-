@@ -29,6 +29,15 @@ data class PagedListState<T>(
      * repeats something, it would never advance at all.
      */
     val receivedCount: Int = 0,
+    /**
+     * The server's own grand total, as opposed to how much of it has been paged in.
+     *
+     * [items] only ever holds what has arrived, so a count built from it climbs as the user
+     * scrolls and reads as though the first number was wrong. The services already send this —
+     * `hasMoreAfter` has always used it to decide whether another page exists — it simply was
+     * never carried out of the page envelope.
+     */
+    val total: Int = 0,
 ) {
     /** Nothing has arrived yet — the skeleton stands in for the list. */
     val isFirstLoad: Boolean get() = isLoading && items.isEmpty()
@@ -70,6 +79,7 @@ data class PagedListState<T>(
             isLoading = false,
             isLoadingMore = false,
             error = null,
+            total = page.total,
             // The same workshop reaches these lists under more than one agreement, and none of
             // them carries a field unique enough to tell the copies apart — so a row that renders
             // identically to one already shown is the same row, and only the first is kept.

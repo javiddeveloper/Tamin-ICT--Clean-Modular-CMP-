@@ -1995,6 +1995,7 @@
     <string name="contract_rows_four_digits">۴ رقم</string>
     <string name="contract_rows_workshop_code_required">لطفاً کد کارگاه را وارد کنید.</string>
     <string name="contract_rows_my_workshops">کارگاه‌های شما</string>
+    <string name="contract_rows_my_workshops_partial">%1$s کارگاه از %2$s نمایش داده شده — بقیه را با شمارهٔ کارگاه جست‌وجو کنید.</string>
     <string name="contract_rows_apply">مشاهدهٔ ردیف پیمان‌ها</string>
     <string name="contract_rows_reset">حذف</string>
 </resources>

@@ -153,9 +153,12 @@ fun ContractRowsContent(
                             Res.string.contract_rows_filter_workshop,
                             applied.workshopId.toPersianDigits(),
                         ),
+                        // The service's own total, not how much of it has been paged in. The
+                        // design's chip counts the whole result too, and a number that climbs
+                        // while the user scrolls reads as the first one having been wrong.
                         countText = stringResource(
                             Res.string.contract_rows_count,
-                            list.items.size.toString().toPersianDigits(),
+                            list.total.toString().toPersianDigits(),
                         ),
                         // Only after the screen moved the user itself; a tab they chose needs no
                         // explanation.
@@ -216,6 +219,7 @@ fun ContractRowsContent(
             showBranchCodeError = state.showBranchCodeError,
             isApplying = list.isLoading,
             myWorkshops = state.myWorkshops,
+            myWorkshopsTotal = state.myWorkshopsTotal,
             canReset = applied != null,
             onWorkshopIdChange = { onIntent(ContractRowsIntent.DraftWorkshopIdChanged(it)) },
             onBranchCodeChange = { onIntent(ContractRowsIntent.DraftBranchCodeChanged(it)) },

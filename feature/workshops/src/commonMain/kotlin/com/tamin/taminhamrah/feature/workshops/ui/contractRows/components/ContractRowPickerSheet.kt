@@ -37,6 +37,7 @@ import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.digitsOnly
+import com.tamin.taminhamrah.util.toPersianDigits
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -48,6 +49,7 @@ import taminx.core.core_ui.contract_rows_apply
 import taminx.core.core_ui.contract_rows_branch_code_required_hint
 import taminx.core.core_ui.contract_rows_four_digits
 import taminx.core.core_ui.contract_rows_my_workshops
+import taminx.core.core_ui.contract_rows_my_workshops_partial
 import taminx.core.core_ui.contract_rows_pick_workshop
 import taminx.core.core_ui.contract_rows_pick_workshop_hint
 import taminx.core.core_ui.contract_rows_reset
@@ -76,6 +78,7 @@ fun ContractRowPickerSheet(
     showBranchCodeError: Boolean,
     isApplying: Boolean,
     myWorkshops: ImmutableList<WorkshopPR>,
+    myWorkshopsTotal: Int,
     canReset: Boolean,
     onWorkshopIdChange: (String) -> Unit,
     onBranchCodeChange: (String) -> Unit,
@@ -97,6 +100,7 @@ fun ContractRowPickerSheet(
             showBranchCodeError = showBranchCodeError,
             isApplying = isApplying,
             myWorkshops = myWorkshops,
+            myWorkshopsTotal = myWorkshopsTotal,
             canReset = canReset,
             onWorkshopIdChange = onWorkshopIdChange,
             onBranchCodeChange = onBranchCodeChange,
@@ -121,6 +125,7 @@ fun ContractRowPickerContent(
     showBranchCodeError: Boolean,
     isApplying: Boolean,
     myWorkshops: ImmutableList<WorkshopPR>,
+    myWorkshopsTotal: Int,
     canReset: Boolean,
     onWorkshopIdChange: (String) -> Unit,
     onBranchCodeChange: (String) -> Unit,
@@ -219,6 +224,21 @@ fun ContractRowPickerContent(
                     .fillMaxWidth()
                     .padding(top = Spacing.smd, bottom = Spacing.sm),
             )
+            // Only when the service holds more than one page's worth. Said out loud, because the
+            // two fields above still reach any workshop by number and a list that silently stops
+            // at ten looks complete.
+            if (myWorkshopsTotal > myWorkshops.size) {
+                Text(
+                    text = stringResource(
+                        Res.string.contract_rows_my_workshops_partial,
+                        myWorkshops.size.toString().toPersianDigits(),
+                        myWorkshopsTotal.toString().toPersianDigits(),
+                    ),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = colors.textMuted,
+                    modifier = Modifier.fillMaxWidth().padding(bottom = Spacing.sm),
+                )
+            }
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(WorkshopDimens.contractRowTileGap),

@@ -155,12 +155,14 @@ class ContractRowsViewModel(
                 }
         }
         if (allowFallback && page == 0 && list.items.isEmpty()) {
-            emitAll(loadPage(page = 0, filter = filter, tab = tab.other(), allowFallback = false))
+            // The move goes first: the fallback's own rows are tagged with the tab they were
+            // fetched for, and the reducer drops a result whose tab is not the one on screen.
             emit(PartialState.AutoSwitchedTab(tab.other()))
+            emitAll(loadPage(page = 0, filter = filter, tab = tab.other(), allowFallback = false))
             return@flow
         }
-        emit(PartialState.Loaded(list))
-    }.catch { emit(PartialState.Error(it.toSingleLineMessage())) }
+        emit(PartialState.Loaded(list, tab))
+    }.catch { emit(PartialState.Error(it.toSingleLineMessage(), tab)) }
 
     private fun loadMore(): Flow<PartialState> {
         val list = uiState.value.list
@@ -195,14 +197,15 @@ class ContractRowsViewModel(
                     // same reason; here the rows are mapped straight through, so it is done here.
                     // Keyed on the identity the pick actually uses, not on the whole card.
                     .distinctBy { it.workshopId to it.branchCode }
-                    .toImmutableList()
+                    .toImmutableList(),
+                total = workshops.total,
             )
         )
     }.catch {
         // کارگاه‌های شما is a convenience above two fields that already work. Failing to fetch it
         // must not put an error on the list the user has not asked for yet, so it is swallowed and
         // the section simply does not appear.
-        emit(PartialState.MyWorkshopsLoaded(uiState.value.myWorkshops))
+        emit(PartialState.MyWorkshopsLoaded(uiState.value.myWorkshops, uiState.value.myWorkshopsTotal))
     }
 
     /**
@@ -250,10 +253,24 @@ class ContractRowsViewModel(
 
         PartialState.Loading -> currentState.copy(list = currentState.list.loading())
         PartialState.LoadingMore -> currentState.copy(list = currentState.list.loadingMore())
-        is PartialState.Error ->
-            currentState.copy(list = currentState.list.failed(partialState.message))
+        // A result for a tab the user has already left is discarded rather than painted under the
+        // new tab's heading — the request it came from was never canceled, only superseded.
+        is PartialState.Loaded ->
+            if (partialState.tab == currentState.tab) {
+                currentState.copy(list = partialState.list)
+            } else {
+                currentState
+            }
 
-        is PartialState.Loaded -> currentState.copy(list = partialState.list)
+        // Same rule for a failure: a tab the user has left must not put its error on the one they
+        // are looking at. A null tab is the pipeline's own catch-all and always applies.
+        is PartialState.Error ->
+            if (partialState.tab == null || partialState.tab == currentState.tab) {
+                currentState.copy(list = currentState.list.failed(partialState.message))
+            } else {
+                currentState
+            }
+
         is PartialState.DraftChanged -> currentState.copy(
             draftWorkshopId = partialState.workshopId ?: currentState.draftWorkshopId,
             draftBranchCode = partialState.branchCode ?: currentState.draftBranchCode,
@@ -281,8 +298,10 @@ class ContractRowsViewModel(
         is PartialState.AutoSwitchedTab ->
             currentState.copy(tab = partialState.tab, didAutoSwitchTab = true)
 
-        is PartialState.MyWorkshopsLoaded ->
-            currentState.copy(myWorkshops = partialState.workshops)
+        is PartialState.MyWorkshopsLoaded -> currentState.copy(
+            myWorkshops = partialState.workshops,
+            myWorkshopsTotal = partialState.total,
+        )
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)

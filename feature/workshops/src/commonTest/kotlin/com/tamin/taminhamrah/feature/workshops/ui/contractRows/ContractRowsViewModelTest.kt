@@ -12,6 +12,9 @@ import com.tamin.taminhamrah.model.workshop.WorkshopSummaryDN
 import com.tamin.taminhamrah.useCases.workshops.GetContractRowsWithAgreementUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetContractRowsWithoutAgreementUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetEmployerAgreementsUseCase
+import com.tamin.taminhamrah.model.workshop.ContractRowQuery
+import com.tamin.taminhamrah.repository.WorkShopsRepository
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -434,6 +437,125 @@ class ContractRowsViewModelTest {
             assertEquals(1, awaitItem().list.items.size)
         }
         assertEquals(0, repository.lastContractRowQuery?.page)
+    }
+
+    // ------------------------------------------------- concurrent tab loads (item 7)
+
+    /**
+     * Holds the دارای تعهدنامه call open until released, so both tabs' requests are genuinely in
+     * flight at once — the condition `flatMapMerge` allows and `flatMapLatest` would not.
+     */
+    private class GatedRepository(
+        private val delegate: FakeWorkShopsRepository,
+        val gate: CompletableDeferred<Unit>,
+    ) : WorkShopsRepository by delegate {
+        override suspend fun getContractRowsWithAgreement(
+            query: ContractRowQuery,
+        ): PagedListDN<EmployerAgreementDN> {
+            gate.await()
+            return delegate.getContractRowsWithAgreement(query)
+        }
+    }
+
+    /**
+     * A result for a tab the user has already left must not be painted under the new tab.
+     *
+     * `BaseViewModel` dispatches through `flatMapMerge`, so the first request is not canceled by
+     * the second — it lands late. Each result carries the tab it was fetched for, and the reducer
+     * drops it when that is no longer the tab on screen.
+     */
+    @Test
+    fun `a result for the tab the user left is discarded`() = runTest(testDispatcher) {
+        repository.contractRowsWithAgreement = PagedListDN(listOf(agreementRow("6")), total = 1)
+        repository.contractRowsWithoutAgreement = PagedListDN(listOf(leanRow("3")), total = 1)
+        val gate = CompletableDeferred<Unit>()
+        val gated = GatedRepository(repository, gate)
+
+        val vm = ContractRowsViewModel(
+            getWithAgreement = GetContractRowsWithAgreementUseCase(gated),
+            getWithoutAgreement = GetContractRowsWithoutAgreementUseCase(gated),
+            getMyWorkshops = GetEmployerAgreementsUseCase(gated),
+        )
+
+        // Starts the دارای تعهدنامه load, which now blocks on the gate.
+        vm.sendIntent(ContractRowsIntent.Open("9028212822", "0210"))
+        // The user switches before it returns; the lean service answers immediately.
+        vm.sendIntent(ContractRowsIntent.TabSelected(ContractRowTab.WITHOUT_AGREEMENT))
+        assertEquals("۳", vm.uiState.value.list.items.single().rowLabel)
+
+        // The abandoned request finally lands.
+        gate.complete(Unit)
+
+        vm.uiState.test {
+            val state = awaitItem()
+            assertEquals(ContractRowTab.WITHOUT_AGREEMENT, state.tab)
+            // Still the lean service's row — the late result was dropped, not painted.
+            assertEquals("۳", state.list.items.single().rowLabel)
+        }
+    }
+
+    /** The same guard on the failure path: an abandoned tab's error stays off the current one. */
+    @Test
+    fun `an error for the tab the user left is discarded`() = runTest(testDispatcher) {
+        repository.contractRowsWithoutAgreement = PagedListDN(listOf(leanRow("3")), total = 1)
+        val gate = CompletableDeferred<Unit>()
+        val gated = object : WorkShopsRepository by repository {
+            override suspend fun getContractRowsWithAgreement(
+                query: ContractRowQuery,
+            ): PagedListDN<EmployerAgreementDN> {
+                gate.await()
+                throw IllegalStateException("boom")
+            }
+        }
+
+        val vm = ContractRowsViewModel(
+            getWithAgreement = GetContractRowsWithAgreementUseCase(gated),
+            getWithoutAgreement = GetContractRowsWithoutAgreementUseCase(gated),
+            getMyWorkshops = GetEmployerAgreementsUseCase(gated),
+        )
+
+        vm.sendIntent(ContractRowsIntent.Open("9028212822", "0210"))
+        vm.sendIntent(ContractRowsIntent.TabSelected(ContractRowTab.WITHOUT_AGREEMENT))
+        gate.complete(Unit)
+
+        vm.uiState.test {
+            val state = awaitItem()
+            assertNull(state.list.error)
+            assertEquals("۳", state.list.items.single().rowLabel)
+        }
+    }
+
+    // ----------------------------------------------------- counts and caps (items 8, 9)
+
+    /** The chip counts what the service holds, not what has been paged in so far. */
+    @Test
+    fun `the list carries the servers total not the loaded count`() = runTest(testDispatcher) {
+        val firstPage = List(WORKSHOP_PAGE_SIZE) { agreementRow(row = "${it + 1}") }
+        repository.contractRowsWithAgreement = PagedListDN(firstPage, total = 37)
+
+        val vm = viewModel()
+        vm.sendIntent(ContractRowsIntent.Open("9028212822", "0210"))
+
+        vm.uiState.test {
+            val state = awaitItem()
+            assertEquals(WORKSHOP_PAGE_SIZE, state.list.items.size)
+            assertEquals(37, state.list.total)
+        }
+    }
+
+    /** The quick-pick states its cap rather than stopping silently at one page. */
+    @Test
+    fun `the quick pick reports how many workshops it is not showing`() = runTest(testDispatcher) {
+        repository.employerAgreements = PagedListDN(listOf(agreementRow("1")), total = 24)
+
+        val vm = viewModel()
+        vm.sendIntent(ContractRowsIntent.PickerOpenChanged(isOpen = true))
+
+        vm.uiState.test {
+            val state = awaitItem()
+            assertEquals(1, state.myWorkshops.size)
+            assertEquals(24, state.myWorkshopsTotal)
+        }
     }
 
     /**
