@@ -105,7 +105,7 @@ class ActiveRelationViewModel(
         emit(PartialState.SetLoading(true))
         getRelationTaminAllUseCase.invoke()
             .map { relations ->
-                val uiItems = relations.toUiModelList()
+                val uiItems = relations.toUiModelList().sortedByDescending { it.isActive }.toImmutableList()
                 val activeCount = uiItems.count { it.isActive }
                 val inactiveCount = uiItems.count { !it.isActive }
 
