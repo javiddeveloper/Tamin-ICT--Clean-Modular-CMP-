@@ -28,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.tamin.taminhamrah.contractFlow.ContractApplicantType
@@ -45,6 +46,7 @@ import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
 import com.tamin.taminhamrah.ui.components.TaminBottomBar
 import com.tamin.taminhamrah.ui.components.TaminHeroStepProgress
 import com.tamin.taminhamrah.ui.components.TaminText
+import com.tamin.taminhamrah.ui.components.TaminSingleLineAutoSizeText
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.buttons.SquareIconButton
@@ -69,6 +71,7 @@ import com.tamin.taminhamrah.ui.contractFlow.TreatmentSupportStepContent
 import com.tamin.taminhamrah.ui.contractFlow.UploadImageStepContent
 import com.tamin.taminhamrah.ui.contractFlow.UserInfoStepContent
 import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminOnAccentInkSoft
 import com.tamin.taminhamrah.ui.toPriceFormat
@@ -201,6 +204,15 @@ fun ContractFlowScreenContent(
                     bottomStart = CornerRadius.x3l,
                     bottomEnd = CornerRadius.x3l,
                 ),
+                titleContent = {
+                    TaminSingleLineAutoSizeText(
+                        text = screenTitle,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = LocalTaminColors.current.onGradient,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                },
                 navigationIcon = {
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),

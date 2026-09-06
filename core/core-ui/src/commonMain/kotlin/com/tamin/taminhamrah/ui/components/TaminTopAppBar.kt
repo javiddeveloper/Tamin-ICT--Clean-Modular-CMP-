@@ -60,7 +60,7 @@ private val HEADER_BUTTON_ICON_SIZE = 18.dp
  * It draws behind the status bar, so the host must not consume the top window inset —
  * otherwise the bar is pushed down and the system strip is left showing the page color.
  *
- * Colors default to the theme's top-app-bar stops, which already differ between light
+ * Colors default to the theme's profile gradient stops, which already differ between light
  * and dark, so screens normally pass none of them.
  */
 @Composable
@@ -138,7 +138,7 @@ fun TaminTopAppBar(
                     Text(
                         text = title,
                         style = MaterialTheme.typography.titleLarge,
-                        color = Color.White,
+                        color = LocalTaminColors.current.onGradient,
                         textAlign = if (centerTitle) TextAlign.Center else TextAlign.Start,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -165,8 +165,9 @@ fun TaminTopAppBar(
 }
 
 /**
- * The bar's wash, sweeping left to right. Stops come from the theme, so it follows light
- * and dark without the caller choosing colors.
+ * The bar's wash, sweeping left to right. Stops default to [TaminColors.profileGradientStops]
+ * (navy in light, hero teal in dark) so general screens match the rest of the app. Medical /
+ * treatment callers that need the teal wash pass [TaminColors.topAppBarStops] explicitly.
  *
  * Deliberately *not* direction-aware: the bar runs the opposite way to the cards beneath
  * it, which do follow the reading direction. Routing this through `startToEndGradient`
@@ -174,7 +175,7 @@ fun TaminTopAppBar(
  */
 @Composable
 fun taminTopAppBarGradient(
-    stops: List<Color> = LocalTaminColors.current.topAppBarStops,
+    stops: List<Color> = LocalTaminColors.current.profileGradientStops,
 ): Brush = Brush.horizontalGradient(stops)
 
 /**
@@ -182,9 +183,10 @@ fun taminTopAppBarGradient(
  * The design gives every one of these the same container, so the bar owns it rather than
  * leaving each caller to rebuild it.
  *
- * The colors default to the treatment header's white-on-teal. A caller placing one of these on a
- * plain surface — a sheet's close button, say — overrides them rather than hand-rolling a second
- * kind of icon button, so the size, shape and touch target stay the app's single answer.
+ * Defaults to [TaminColors.onGradient] so content stays readable on the brand wash in both
+ * themes. A caller placing one of these on a plain surface — a sheet's close button, say —
+ * overrides them rather than hand-rolling a second kind of icon button, so the size, shape
+ * and touch target stay the app's single answer.
  */
 @Composable
 fun TaminTopAppBarButton(
@@ -194,9 +196,9 @@ fun TaminTopAppBarButton(
     modifier: Modifier = Modifier,
     bordered: Boolean = false,
     shape: Shape = RoundedCornerShape(CornerRadius.chip),
-    containerColor: Color = Color.White.copy(alpha = 0.125f),
-    contentColor: Color = Color.White,
-    borderColor: Color = Color.White.copy(alpha = 0.2f),
+    containerColor: Color = LocalTaminColors.current.onGradient.copy(alpha = 0.125f),
+    contentColor: Color = LocalTaminColors.current.onGradient,
+    borderColor: Color = LocalTaminColors.current.onGradient.copy(alpha = 0.2f),
 ) {
 
     Box(
