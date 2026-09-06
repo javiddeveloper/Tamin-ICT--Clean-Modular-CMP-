@@ -4,7 +4,6 @@ import androidx.compose.runtime.Immutable
 import kotlinx.serialization.Serializable
 
 @Immutable
-@Serializable
 data class ContractPR(
     val contractNumber: String,
     val statusDesc: String,
@@ -22,6 +21,14 @@ data class ContractPR(
     val statusCode: Int?,
     /** `cntFreeJobCode` — used to gate پرداخت حق بیمه / غیرفعال کردن for special job codes. */
     val freeJobCode: String,
+    /** نرخ حق بیمه as a standalone percentage label, e.g. "۲۷ درصد" — from `premiumRate.insurDpercent`. */
+    val premiumRatePercentLabel: String = "",
+    /**
+     * بدهی معوق banner text for an active card, already formatted with «ریال». `null` when there is
+     * no outstanding debt — `list-contracts-mobile` does not currently carry it, so this stays null
+     * today and a later step fills it from the دیون endpoint.
+     */
+    val deferredDebtLabel: String? = null,
 )
 
 /** One selectable علت خاتمه قرارداد row. [code] is sent as the cancel request path segment. */

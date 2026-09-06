@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.model.contracts.ContractPaymentHistoryItemPR
 import com.tamin.taminhamrah.model.contracts.ContractStateDN
 import com.tamin.taminhamrah.model.contracts.ContractStatePR
 import com.tamin.taminhamrah.util.PersianDateFormatter
+import com.tamin.taminhamrah.util.toPersianDigits
 import kotlin.jvm.JvmName
 
 fun ContractDN.toPresentation(): ContractPR {
@@ -35,6 +36,13 @@ fun ContractDN.toPresentation(): ContractPR {
             ?: "",
         statusCode = contractStatusObject?.selfIsuContStatCode,
         freeJobCode = cntFreeJobCode ?: "",
+        premiumRatePercentLabel = premiumRate?.insurDpercent
+            ?.takeIf { it.isNotBlank() }
+            ?.let { "${it.toPersianDigits()} درصد" }
+            ?: "",
+        // TODO(data): list-contracts-mobile carries no outstanding-debt figure; wire from the دیون
+        //  endpoint in a later step so the بدهی معوق banner can render on active cards.
+        deferredDebtLabel = null,
     )
 }
 

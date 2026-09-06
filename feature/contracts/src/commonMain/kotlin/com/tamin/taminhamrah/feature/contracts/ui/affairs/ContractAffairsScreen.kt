@@ -1,8 +1,10 @@
 package com.tamin.taminhamrah.feature.contracts.ui.affairs
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -13,26 +15,37 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Description
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractAffairsActionRow
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractAffairsHeader
+import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractAffairsItemCard
+import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractAffairsListSkeleton
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.contract.ContractAffairsEvent
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.contract.ContractAffairsIntent
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.contract.ContractAffairsUiState
+import com.tamin.taminhamrah.feature.contracts.ui.affairs.contract.ContractOperation
 import com.tamin.taminhamrah.model.common.FeatureFlag
+import com.tamin.taminhamrah.model.common.MainServiceDN
+import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.model.contracts.ContractPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
@@ -41,22 +54,30 @@ import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.rememberCollapsingHeaderState
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
+import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.reservedHeight
+import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
+import com.tamin.taminhamrah.ui.components.toast.AppToastHost
+import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
+import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.contract_affairs_empty_subtitle
+import taminx.core.core_ui.contract_affairs_empty_title
+import taminx.core.core_ui.contract_affairs_new_contract_sheet_title
 
 private val HeaderCollapseDistance = 160.dp
 
 /**
  * امور قراردادها و پرداخت.
  *
- * Built up step by step — the collapsing gradient header is in place; the real body (search sheet,
- * contract cards, انعقاد قرارداد جدید button, امور قرارداد bottom sheet, cancel flow,
- * payment-history list, PDF viewer) lands in later steps. Everything the body needs already lives
- * on [ContractAffairsViewModel] / [ContractAffairsUiState].
+ * Route → Events → Screen, matching `InspectionScreen`. The per-contract امور قرارداد bottom sheet,
+ * غیرفعال کردن flow, مشاهده پرداخت‌ها list and PDF viewer are separate sheets wired in a later step;
+ * their state already lives on [ContractAffairsUiState].
  */
 @Composable
 fun ContractAffairsRoute(
@@ -109,6 +130,9 @@ internal fun ContractAffairsScreen(
 
     val collapse = rememberCollapsingHeaderState(HeaderCollapseDistance)
     var headerHeightPx by remember { mutableIntStateOf(0) }
+    var showNewContractSheet by remember { mutableStateOf(false) }
+
+    val staggerState = rememberStaggeredEntranceState(key = uiState.contracts.size)
 
     Box(
         modifier = Modifier
@@ -130,21 +154,23 @@ internal fun ContractAffairsScreen(
                 Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
             }
 
+            item {
+                ContractAffairsActionRow(
+                    contractCount = uiState.contracts.size,
+                    onNewContractClicked = { showNewContractSheet = true },
+                )
+            }
+
             when {
                 uiState.isLoading && uiState.contracts.isEmpty() -> item {
-                    Box(
-                        modifier = Modifier.fillMaxWidth().height(320.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        CircularProgressIndicator()
-                    }
+                    ContractAffairsListSkeleton()
                 }
 
                 uiState.contracts.isEmpty() -> item {
                     EmptyStateMessage(
                         icon = Icons.Outlined.Description,
-                        title = "قراردادی یافت نشد",
-                        subtitle = "قراردادی برای شما ثبت نشده است",
+                        title = stringResource(Res.string.contract_affairs_empty_title),
+                        subtitle = stringResource(Res.string.contract_affairs_empty_subtitle),
                         showIconTile = true,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -153,13 +179,30 @@ internal fun ContractAffairsScreen(
                     )
                 }
 
-                else -> items(uiState.contracts, key = { it.contractNumber }) { contract ->
-                    // TODO(ui): replace with the real ContractAffairsItemCard in a later step.
-                    TaminText(
-                        text = "${contract.contractNumber} — ${contract.statusDesc}",
+                else -> itemsIndexed(
+                    uiState.contracts,
+                    key = { _, contract -> contract.contractNumber },
+                ) { index, contract ->
+                    ContractAffairsItemCard(
+                        item = contract,
+                        onOperationsClicked = {
+                            onIntent(ContractAffairsIntent.ShowContractOperations(contract))
+                        },
+                        onPrimaryActionClicked = {
+                            onIntent(
+                                ContractAffairsIntent.OnOperationClick(
+                                    contract = contract,
+                                    operation = primaryOperationFor(contract),
+                                ),
+                            )
+                        },
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = Spacing.lg),
+                            .padding(horizontal = Spacing.lg)
+                            .staggeredItemEntrance(
+                                index = index,
+                                key = contract.contractNumber,
+                                state = staggerState,
+                            ),
                     )
                 }
             }
@@ -174,17 +217,90 @@ internal fun ContractAffairsScreen(
                 .onSizeChanged { headerHeightPx = it.height },
         )
     }
+
+    if (showNewContractSheet) {
+        NewContractSheet(
+            options = uiState.newContractOptions,
+            onServiceClick = {
+                onIntent(ContractAffairsIntent.OnNewContractServiceClick(it))
+                showNewContractSheet = false
+            },
+            onDismiss = { showNewContractSheet = false },
+        )
+    }
+}
+
+/** پرداخت حق بیمه for every type but تکمیل/کسری (fraction), whose only action is مشاهدهٔ قرارداد. */
+private fun primaryOperationFor(contract: ContractPR): ContractOperation =
+    if (contract.premiumTypeCode == "38") ContractOperation.VIEW_CONTRACT
+    else ContractOperation.PAY_PREMIUM
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun NewContractSheet(
+    options: List<MainServiceDN>,
+    onServiceClick: (MainServiceDN) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val colors = LocalTaminColors.current
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = colors.bgSurface,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.page)
+                .padding(bottom = Spacing.xlg),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+        ) {
+            TaminText(
+                text = stringResource(Res.string.contract_affairs_new_contract_sheet_title),
+                color = colors.textPrimary,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(vertical = Spacing.md),
+            )
+
+            options.forEach { service ->
+                val disabled = service.status == MenuServiceStatusDN.DISABLED ||
+                    service.status == MenuServiceStatusDN.TEMPORARY_DISABLED ||
+                    service.status == MenuServiceStatusDN.COMPLETELY_DISABLED
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(enabled = !disabled) { onServiceClick(service) }
+                        .background(colors.bgPage, RoundedCornerShape(CornerRadius.lg))
+                        .padding(horizontal = Spacing.lg, vertical = Spacing.md),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
+                ) {
+                    TaminText(
+                        text = service.name.orEmpty(),
+                        color = if (disabled) colors.textMuted else colors.textPrimary,
+                    )
+                    if (!service.message.isNullOrBlank()) {
+                        TaminText(text = service.message!!, color = colors.dangerText)
+                    }
+                }
+            }
+        }
+    }
 }
 
 @PreviewRtlTheme
 @Composable
 private fun PreviewContractAffairsScreenLight() {
     PreviewRtlThemeContent {
-        ContractAffairsScreen(
-            uiState = ContractAffairsUiState(contracts = PreviewMockContracts),
-            onIntent = {},
-            onBackClicked = {},
-        )
+        AppToastHost {
+            ContractAffairsScreen(
+                uiState = ContractAffairsUiState(contracts = PreviewMockContracts),
+                onIntent = {},
+                onBackClicked = {},
+            )
+        }
     }
 }
 
@@ -192,11 +308,27 @@ private fun PreviewContractAffairsScreenLight() {
 @Composable
 private fun PreviewContractAffairsScreenDark() {
     PreviewRtlThemeContent(darkTheme = true) {
-        ContractAffairsScreen(
-            uiState = ContractAffairsUiState(contracts = PreviewMockContracts),
-            onIntent = {},
-            onBackClicked = {},
-        )
+        AppToastHost {
+            ContractAffairsScreen(
+                uiState = ContractAffairsUiState(contracts = PreviewMockContracts),
+                onIntent = {},
+                onBackClicked = {},
+            )
+        }
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PreviewContractAffairsScreenLoading() {
+    PreviewRtlThemeContent {
+        AppToastHost {
+            ContractAffairsScreen(
+                uiState = ContractAffairsUiState(isLoading = true, contracts = persistentListOf()),
+                onIntent = {},
+                onBackClicked = {},
+            )
+        }
     }
 }
 
@@ -204,43 +336,64 @@ private fun PreviewContractAffairsScreenDark() {
 @Composable
 private fun PreviewContractAffairsScreenEmpty() {
     PreviewRtlThemeContent {
-        ContractAffairsScreen(
-            uiState = ContractAffairsUiState(contracts = persistentListOf()),
-            onIntent = {},
-            onBackClicked = {},
-        )
+        AppToastHost {
+            ContractAffairsScreen(
+                uiState = ContractAffairsUiState(contracts = persistentListOf()),
+                onIntent = {},
+                onBackClicked = {},
+            )
+        }
     }
 }
 
 private val PreviewMockContracts = listOf(
     ContractPR(
         contractNumber = "4832222686",
-        statusDesc = "فعال",
+        statusDesc = "فعال بعلت تنظیم قرارداد",
         isActive = true,
         requestDate = "۱۴۰۵/۰۴/۰۱",
         insuranceType = "بیمهٔ اختیاری",
-        monthlyPremiumLabel = "۲٬۳۵۰٬۰۰۰ ریال",
-        monthlyIncome = "۷٬۰۰۰٬۰۰۰ ریال",
-        treatmentSupportText = "با احتساب درمان",
+        monthlyPremiumLabel = "بیمه اختیاری ۲۷ درصد",
+        monthlyIncome = "199506600",
+        treatmentSupportText = "حمایت درمان دارد",
         hasTreatmentSupport = true,
-        jobTitle = "کارگر ساختمانی",
+        jobTitle = "",
         premiumTypeCode = "02",
         statusCode = 1,
         freeJobCode = "",
+        premiumRatePercentLabel = "۲۷ درصد",
     ),
     ContractPR(
-        contractNumber = "4832221501",
-        statusDesc = "خاتمه‌یافته",
-        isActive = false,
-        requestDate = "۱۴۰۳/۱۱/۱۵",
-        insuranceType = "بیمهٔ حرف و مشاغل آزاد",
-        monthlyPremiumLabel = "۱٬۹۸۰٬۰۰۰ ریال",
-        monthlyIncome = "۶٬۰۰۰٬۰۰۰ ریال",
-        treatmentSupportText = "بدون درمان",
-        hasTreatmentSupport = false,
-        jobTitle = "رانندهٔ درون‌شهری",
+        contractNumber = "4811907432",
+        statusDesc = "فعال",
+        isActive = true,
+        requestDate = "۱۴۰۴/۱۱/۱۲",
+        insuranceType = "حرف و مشاغل آزاد",
+        monthlyPremiumLabel = "حرف و مشاغل ۱۸ درصد",
+        monthlyIncome = "104250000",
+        treatmentSupportText = "حمایت درمان دارد",
+        hasTreatmentSupport = true,
+        jobTitle = "رانندهٔ تاکسی شهری",
         premiumTypeCode = "01",
-        statusCode = 0,
+        statusCode = 1,
         freeJobCode = "",
+        premiumRatePercentLabel = "۱۸ درصد",
+        deferredDebtLabel = "۵۵٬۶۶۲٬۳۴۱ ریال",
+    ),
+    ContractPR(
+        contractNumber = "4841110073",
+        statusDesc = "در انتظار بررسی",
+        isActive = true,
+        requestDate = "۱۴۰۵/۰۵/۱۸",
+        insuranceType = "بیمهٔ زنان خانه‌دار",
+        monthlyPremiumLabel = "زنان خانه‌دار ۱۴ درصد",
+        monthlyIncome = "110000000",
+        treatmentSupportText = "حمایت درمان ندارد",
+        hasTreatmentSupport = false,
+        jobTitle = "",
+        premiumTypeCode = "05",
+        statusCode = null,
+        freeJobCode = "",
+        premiumRatePercentLabel = "۱۴ درصد",
     ),
 ).toImmutableList()

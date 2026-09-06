@@ -2050,4 +2050,22 @@
     <string name="contract_affairs_title">امور قراردادها و پرداخت</string>
     <string name="contract_affairs_subtitle">لیست قراردادهای بیمه‌شده با سازمان تأمین اجتماعی</string>
     <string name="contract_affairs_search_title">جستجوی قرارداد</string>
+    <string name="contract_affairs_new_contract">انعقاد قرارداد جدید</string>
+    <string name="contract_affairs_count_label">قرارداد</string>
+    <string name="contract_affairs_empty_title">قراردادی یافت نشد</string>
+    <string name="contract_affairs_empty_subtitle">قراردادی برای شما ثبت نشده است</string>
+    <string name="contract_affairs_new_contract_sheet_title">انتخاب نوع قرارداد</string>
+    <string name="contract_affairs_request_date">تاریخ درخواست</string>
+    <string name="contract_affairs_contract_code">کد قرارداد</string>
+    <string name="contract_affairs_premium_rate">نرخ حق بیمه</string>
+    <string name="contract_affairs_monthly_wage">دستمزد ماهانه</string>
+    <string name="contract_affairs_treatment_support">حمایت درمان</string>
+    <string name="contract_affairs_job">شغل</string>
+    <string name="contract_affairs_treatment_has">دارد</string>
+    <string name="contract_affairs_treatment_none">ندارد</string>
+    <string name="contract_affairs_status_active">فعال</string>
+    <string name="contract_affairs_operations">امور قرارداد</string>
+    <string name="contract_affairs_pay_premium">پرداخت حق بیمه</string>
+    <string name="contract_affairs_view_contract">مشاهدهٔ قرارداد</string>
+    <string name="contract_affairs_deferred_debt">بدهی معوق %1$s دارید؛ این مبلغ به اولین پرداخت اضافه می‌شود.</string>
 </resources>
