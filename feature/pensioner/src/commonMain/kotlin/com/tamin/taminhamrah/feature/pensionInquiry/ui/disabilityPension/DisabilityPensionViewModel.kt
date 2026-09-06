@@ -211,6 +211,16 @@ class DisabilityPensionViewModel(
             DisabilityPensionIntent.SubmitSuccessAcknowledged -> {
                 sendEvent(DisabilityPensionEvent.NavigateBack)
             }
+            DisabilityPensionIntent.CloseClicked -> {
+                emit(PartialState.ExitConfirmDialogVisibilityChanged(true))
+            }
+            DisabilityPensionIntent.DismissExitConfirmDialog -> {
+                emit(PartialState.ExitConfirmDialogVisibilityChanged(false))
+            }
+            DisabilityPensionIntent.ConfirmExitClicked -> {
+                emit(PartialState.ExitConfirmDialogVisibilityChanged(false))
+                sendEvent(DisabilityPensionEvent.NavigateBack)
+            }
         }
     }
 
@@ -564,6 +574,9 @@ class DisabilityPensionViewModel(
         is PartialState.SubmitSucceeded -> currentState.copy(
             isSubmitting = false,
             submitTrackingCode = partialState.trackingCode,
+        )
+        is PartialState.ExitConfirmDialogVisibilityChanged -> currentState.copy(
+            showExitConfirmDialog = partialState.show,
         )
         is PartialState.Error -> currentState.copy(
             isProfileLoading = false,

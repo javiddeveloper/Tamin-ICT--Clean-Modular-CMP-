@@ -2077,4 +2077,8 @@
     <string name="disability_pension_submit_success_title">درخواست شما ثبت شد</string>
     <string name="disability_pension_submit_success_description">درخواست شما با کد پیگیری زیر با موفقیت ثبت شد؛ با مراجعه به صفحهٔ درخواست‌های من می‌توانید از وضعیت درخواست مطلع شوید.</string>
     <string name="disability_pension_submit_success_dismiss_button">متوجه شدم</string>
+    <string name="disability_pension_exit_confirm_title">رها کردن مستمری از کارافتادگی؟</string>
+    <string name="disability_pension_exit_confirm_message">اطلاعاتی که تا این مرحله در فرم مستمری از کارافتادگی وارد کرده‌اید ذخیره نمی‌شود و در صورت خروج، باید درخواست را از ابتدا تکمیل کنید.</string>
+    <string name="disability_pension_exit_confirm_leave">رها می‌کنم</string>
+    <string name="disability_pension_exit_confirm_continue">ادامهٔ تکمیل فرم</string>
 </resources>

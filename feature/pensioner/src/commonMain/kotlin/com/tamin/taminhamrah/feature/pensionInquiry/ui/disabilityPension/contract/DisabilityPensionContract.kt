@@ -90,6 +90,7 @@ data class DisabilityPensionUiState(
     val showFinalConfirmationError: Boolean = false,
     val isSubmitting: Boolean = false,
     val submitTrackingCode: String? = null,
+    val showExitConfirmDialog: Boolean = false,
     val error: String? = null,
 ) {
     val isAnyDocumentUploading: Boolean
@@ -146,6 +147,7 @@ data class DisabilityPensionUiState(
         data class FinalConfirmationErrorChanged(val show: Boolean) : PartialState
         data class SubmittingChanged(val isSubmitting: Boolean) : PartialState
         data class SubmitSucceeded(val trackingCode: String) : PartialState
+        data class ExitConfirmDialogVisibilityChanged(val show: Boolean) : PartialState
         data class Error(val message: String?) : PartialState
     }
 }
@@ -194,6 +196,9 @@ sealed interface DisabilityPensionIntent {
     data class FinalConfirmedChanged(val accepted: Boolean) : DisabilityPensionIntent
     data class EditSummarySectionClicked(val step: DisabilityPensionStep) : DisabilityPensionIntent
     data object SubmitSuccessAcknowledged : DisabilityPensionIntent
+    data object CloseClicked : DisabilityPensionIntent
+    data object DismissExitConfirmDialog : DisabilityPensionIntent
+    data object ConfirmExitClicked : DisabilityPensionIntent
 }
 
 sealed interface DisabilityPensionEvent {
