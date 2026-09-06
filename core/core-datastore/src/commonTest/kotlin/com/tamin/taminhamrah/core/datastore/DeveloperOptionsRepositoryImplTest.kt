@@ -60,7 +60,7 @@ class DeveloperOptionsRepositoryImplTest {
     }
 
     @Test
-    fun `when isDebug is false, getEffectiveBaseUrl always returns defaultValue even if override is set`() {
+    fun `release mode ignores overrides and always returns default`() {
         val settings = MapSettings()
         val repository = DeveloperOptionsRepositoryImpl(settings, isDebug = false)
 

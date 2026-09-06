@@ -47,9 +47,8 @@ Colors, spacing, radius: [[Theme]] — never hardcode `Color`, `.dp`, or UI copy
 | `:feature:pensioner` | `feature/pensioner` | `…feature.pensionInquiry` ⚠️ |
 | `:feature:cartable` | `feature/cartable` | `…feature.cartable` |
 | `:feature:history` | `feature/history` | `…feature.history` |
-| `:feature:contracts` | `feature/contracts` | `…feature.contracts` |
+| `:feature:contracts` | `feature/contracts` | `…feature.contracts` — list, create/edit flows (`flow/` package) |
 | `:feature:workshops` | `feature/workshops` | `…feature.workshops` |
-| `:feature:studentInsuranceContract` | `feature/studentInsuranceContract` | `…feature.studentInsuranceContract` |
 | `:feature:agent` | `feature/agent` | `…feature.agent` |
 | `:feature:healthProfile` | `feature/healthProfile` | `…feature.healthProfile` |
 | `:feature:taminServices` | `feature/taminServices` | `…feature.taminServices` |

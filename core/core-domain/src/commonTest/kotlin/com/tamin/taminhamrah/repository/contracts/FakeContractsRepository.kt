@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.repository.contracts
 
 import com.tamin.taminhamrah.model.contracts.BranchDN
+import com.tamin.taminhamrah.model.contracts.ContractPremiumTypeCode
 import com.tamin.taminhamrah.model.contracts.FreelanceContractByGuardianParams
 import com.tamin.taminhamrah.model.contracts.OptionalContractByGuardianParams
 import com.tamin.taminhamrah.model.contracts.ContractDN
@@ -34,6 +35,7 @@ class FakeContractsRepository : ContractsRepository {
     var makeContractResult: FreelanceContractResultDN? = null
     var lastMakeContractParams: FreelanceMakeContractParams? = null
     var makeContractCalled = false
+    var makeFreelanceContractCalled = false
     var lastMakeFreelanceContractByGuardianParams: FreelanceContractByGuardianParams? = null
     var makeFreelanceContractByGuardianCalled = false
     var lastMakeOptionalContractByGuardianParams: OptionalContractByGuardianParams? = null
@@ -44,7 +46,6 @@ class FakeContractsRepository : ContractsRepository {
     var paymentStatusResult: JsonElement? = JsonPrimitive(true)
     var lastQuery: ApiQueryParamDN? = null
     var lastBranchCityCode: String? = null
-    var studentInsuranceContractsCalled = false
 
     var lastUploadImageRequest: UploadImageRequestDN? = null
     var uploadImageResult: String = "a4769aa8-b9af-4183-83b9-367dc9f52511"
@@ -71,11 +72,8 @@ class FakeContractsRepository : ContractsRepository {
         emit(contractsResult)
     }
 
-    override fun getStudentInsuranceContracts(): Flow<List<ContractDN>> = flow {
-        studentInsuranceContractsCalled = true
-        if (shouldThrowError) throw error
-        emit(contractsResult)
-    }
+    override fun getStudentInsuranceContracts(): Flow<List<ContractDN>> =
+        getContractsByPremiumType(ContractPremiumTypeCode.STUDENT)
 
     override fun getRegistrationInfo(): Flow<RegistrationInfoDN> = flow {
         if (shouldThrowError) throw error
@@ -117,6 +115,28 @@ class FakeContractsRepository : ContractsRepository {
         )
     }
 
+    override fun getOptionalPremiumRange(): Flow<FreelancePremiumRangeDN> = flow {
+        if (shouldThrowError) throw error
+        emit(
+            freelancePremiumRangeResult ?: FreelancePremiumRangeDN(
+                paymentTabayi = 0L,
+                lowPremium = 0L,
+                history = 0,
+                highPremium = 0L,
+            ),
+        )
+    }
+
+    override fun checkRedCrossStatus(): Flow<String> = flow {
+        if (shouldThrowError) throw error
+        emit("ok")
+    }
+
+    override fun checkMedicalStudent(): Flow<String> = flow {
+        if (shouldThrowError) throw error
+        emit("ok14")
+    }
+
     override fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Flow<Long> = flow {
         lastFreelanceCalculateParams = params
         if (shouldThrowError) throw error
@@ -131,6 +151,7 @@ class FakeContractsRepository : ContractsRepository {
 
     override fun makeFreelanceContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN> = flow {
         lastMakeContractParams = params
+        makeFreelanceContractCalled = true
         makeContractCalled = false
         if (shouldThrowError) throw error
         emit(
@@ -144,6 +165,7 @@ class FakeContractsRepository : ContractsRepository {
     override fun makeContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN> = flow {
         lastMakeContractParams = params
         makeContractCalled = true
+        makeFreelanceContractCalled = false
         if (shouldThrowError) throw error
         emit(
             makeContractResult ?: FreelanceContractResultDN(

@@ -3,7 +3,10 @@ package com.tamin.taminhamrah.dataSource.workshopsSource
 import com.tamin.taminhamrah.apiService.WorkShopsApiService
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
+import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.request.FilterOperator
+import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestInfoDTO
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveRequestDTO
@@ -15,7 +18,10 @@ import com.tamin.taminhamrah.model.workshop.DebitPaymentDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDTO
 import com.tamin.taminhamrah.model.workshop.DebitReasonDTO
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmitRequestDTO
+import com.tamin.taminhamrah.model.workshop.EmployerCommitmentInfoDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeContractDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeRequestDTO
@@ -23,9 +29,11 @@ import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberConfirmResultDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDTO
@@ -36,8 +44,11 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
-import com.tamin.taminhamrah.tools.readPdfChannel
 import com.tamin.taminhamrah.tools.extractMessage
+import com.tamin.taminhamrah.tools.readPdfChannel
+
+/** `serviceName` the `request-ticket` endpoint expects for the Employer → Online Services flow. */
+private const val EMPLOYER_ESERVICES_AGREEMENT = "employerEservicesAgreement"
 
 internal class WorkShopsRemoteDataSourceImpl(
     private val apiService: WorkShopsApiService,
@@ -218,6 +229,49 @@ internal class WorkShopsRemoteDataSourceImpl(
         query: ApiQueryParamDN
     ): ListData<WorkshopStackHolderDTO> = call {
         apiService.getWorkshopStackHolders(query.toQueries()).extractData()
+    }
+
+    // ------------------------------------------------- خدمات غیرحضوری کارفرما (employerEservicesAgreement)
+
+    override suspend fun requestEmployerAgreementTicket(
+        mobileNumber: String,
+        email: String,
+    ): String = call {
+        val filter = queryBuilder.buildFilterJson(
+            listOf(
+                ApiFilterDN(FilterProperty.MOBILE_NUMBER, mobileNumber, FilterOperator.EQ),
+                ApiFilterDN(FilterProperty.EMAIL, email, FilterOperator.EQ),
+                ApiFilterDN(FilterProperty.SERVICE_NAME, EMPLOYER_ESERVICES_AGREEMENT, FilterOperator.EQ),
+            )
+        )
+        apiService.requestEmployerAgreementTicket(filter).extractMessage()
+    }
+
+    override suspend fun getEmployerAgreementUserInfo(
+        verificationCode: String,
+    ): EmployerCommitmentInfoDTO = call {
+        apiService.getEmployerAgreementUserInfo(verificationCode).extractData()
+    }
+
+    override suspend fun getEmployerWorkshopsWithoutContract(
+        query: ApiQueryParamDN
+    ): ListData<WorkshopWithoutContractDTO> = call {
+        apiService.getEmployerWorkshopsWithoutContract(query.toQueries()).extractData()
+    }
+
+    override suspend fun getEmployerWorkshopContractList(
+        workshopId: String,
+        branchCode: String,
+        query: ApiQueryParamDN
+    ): ListData<WorkshopContractRowDTO> = call {
+        apiService.getEmployerWorkshopContractList(workshopId, branchCode, query.toQueries())
+            .extractData()
+    }
+
+    override suspend fun submitEmployerAgreement(
+        request: EmployerAgreementSubmitRequestDTO,
+    ): String = call {
+        apiService.submitEmployerAgreement(request).extractMessage()
     }
 
     private fun ApiQueryParamDN.toQueries(): Map<String, String> = queryBuilder.buildQuery(this)
