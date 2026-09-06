@@ -27,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -152,12 +153,14 @@ fun DisabilityPensionScreen(
         viewModel.sendIntent(DisabilityPensionIntent.CloseClicked)
     }
 
-    DisposableEffect(lifecycleOwner, state.currentStep, refreshDependentsOnResume) {
+    val currentStepForResume by rememberUpdatedState(state.currentStep)
+    val refreshDependentsOnResumeState by rememberUpdatedState(refreshDependentsOnResume)
+    DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (
                 event == Lifecycle.Event.ON_RESUME &&
-                refreshDependentsOnResume &&
-                state.currentStep == DisabilityPensionStep.Dependents
+                refreshDependentsOnResumeState &&
+                currentStepForResume == DisabilityPensionStep.Dependents
             ) {
                 refreshDependentsOnResume = false
                 viewModel.sendIntent(DisabilityPensionIntent.DependentsResumed)
@@ -376,38 +379,24 @@ private fun DisabilityPensionContent(
 ) {
     val taminColors = LocalTaminColors.current
     val headerBrush = Brush.horizontalGradient(taminColors.profileGradientStops)
-    val termsTitle = stringResource(Res.string.disability_pension_step_terms_title)
-    val dependentsTitle = stringResource(Res.string.disability_pension_step_dependents_title)
-    val identityTitle = stringResource(Res.string.disability_pension_step_identity_title)
-    val workshopTitle = stringResource(Res.string.disability_pension_step_workshop_title)
-    val commissionRecordTitle = stringResource(Res.string.disability_pension_step_commission_record_title)
-    val documentsTitle = stringResource(Res.string.disability_pension_step_documents_title)
-    val summaryTitle = stringResource(Res.string.disability_pension_step_summary_title)
-    val termsSubtitle = stringResource(Res.string.disability_pension_step_subtitle)
-    val dependentsSubtitle = stringResource(Res.string.disability_pension_step_dependents_subtitle)
-    val identitySubtitle = stringResource(Res.string.disability_pension_step_identity_subtitle)
-    val workshopSubtitle = stringResource(Res.string.disability_pension_step_workshop_subtitle)
-    val commissionRecordSubtitle = stringResource(Res.string.disability_pension_step_commission_record_subtitle)
-    val documentsSubtitle = stringResource(Res.string.disability_pension_step_documents_subtitle)
-    val summarySubtitle = stringResource(Res.string.disability_pension_step_summary_subtitle)
     val currentStepIndex = state.currentStep.ordinal + 1
     val stepTitle = when (state.currentStep) {
-        DisabilityPensionStep.Terms -> termsTitle
-        DisabilityPensionStep.Dependents -> dependentsTitle
-        DisabilityPensionStep.IdentityContact -> identityTitle
-        DisabilityPensionStep.Workshop -> workshopTitle
-        DisabilityPensionStep.CommissionRecord -> commissionRecordTitle
-        DisabilityPensionStep.Documents -> documentsTitle
-        DisabilityPensionStep.Summary -> summaryTitle
+        DisabilityPensionStep.Terms -> stringResource(Res.string.disability_pension_step_terms_title)
+        DisabilityPensionStep.Dependents -> stringResource(Res.string.disability_pension_step_dependents_title)
+        DisabilityPensionStep.IdentityContact -> stringResource(Res.string.disability_pension_step_identity_title)
+        DisabilityPensionStep.Workshop -> stringResource(Res.string.disability_pension_step_workshop_title)
+        DisabilityPensionStep.CommissionRecord -> stringResource(Res.string.disability_pension_step_commission_record_title)
+        DisabilityPensionStep.Documents -> stringResource(Res.string.disability_pension_step_documents_title)
+        DisabilityPensionStep.Summary -> stringResource(Res.string.disability_pension_step_summary_title)
     }
     val stepSubtitle = when (state.currentStep) {
-        DisabilityPensionStep.Terms -> termsSubtitle
-        DisabilityPensionStep.Dependents -> dependentsSubtitle
-        DisabilityPensionStep.IdentityContact -> identitySubtitle
-        DisabilityPensionStep.Workshop -> workshopSubtitle
-        DisabilityPensionStep.CommissionRecord -> commissionRecordSubtitle
-        DisabilityPensionStep.Documents -> documentsSubtitle
-        DisabilityPensionStep.Summary -> summarySubtitle
+        DisabilityPensionStep.Terms -> stringResource(Res.string.disability_pension_step_subtitle)
+        DisabilityPensionStep.Dependents -> stringResource(Res.string.disability_pension_step_dependents_subtitle)
+        DisabilityPensionStep.IdentityContact -> stringResource(Res.string.disability_pension_step_identity_subtitle)
+        DisabilityPensionStep.Workshop -> stringResource(Res.string.disability_pension_step_workshop_subtitle)
+        DisabilityPensionStep.CommissionRecord -> stringResource(Res.string.disability_pension_step_commission_record_subtitle)
+        DisabilityPensionStep.Documents -> stringResource(Res.string.disability_pension_step_documents_subtitle)
+        DisabilityPensionStep.Summary -> stringResource(Res.string.disability_pension_step_summary_subtitle)
     }
 
     Scaffold(
