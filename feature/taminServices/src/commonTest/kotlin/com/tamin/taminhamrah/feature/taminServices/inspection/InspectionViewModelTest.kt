@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.feature.taminServices.inspection
 import app.cash.turbine.test
 import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionEvent
 import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionIntent
+import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionRequestErrorSource
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.InspectionViewModel
 import com.tamin.taminhamrah.model.inspection.BranchDN
 import com.tamin.taminhamrah.model.inspection.InspectionPerformedDN
@@ -11,6 +12,7 @@ import com.tamin.taminhamrah.model.inspection.SubmitInspectionRequestDN
 import com.tamin.taminhamrah.model.inspection.SubmitInspectionRequestResultDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.FilterProperty
+import com.tamin.taminhamrah.model.user.UserProfileDN
 import com.tamin.taminhamrah.useCases.inspection.GetBranchPageUseCase
 import com.tamin.taminhamrah.useCases.inspection.GetInspectionReportPDFUseCase
 import com.tamin.taminhamrah.useCases.inspection.GetInsurancePageUseCase
@@ -141,6 +143,131 @@ class InspectionViewModelTest {
         )
         assertEquals("*پانزده*", filters.last().value)
         assertEquals("پانزده", viewModel.uiState.value.branchQuery)
+    }
+
+    @Test
+    fun searchJobs_blankQuery_sendsMatchAllLikeFilter() = runTest(testDispatcher) {
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+        viewModel.sendIntent(InspectionIntent.OpenRequestFlow())
+        advanceUntilIdle()
+
+        viewModel.sendIntent(InspectionIntent.SearchJobs("   "))
+        advanceUntilIdle()
+
+        val filters = repository.lastJobQuery?.filters.orEmpty()
+        assertEquals(listOf(FilterProperty.JOB_DESCRIPTION), filters.map { it.property })
+        // blank query -> match-all wildcard, never an absent filter
+        // (ported from SubmitInspectionRequestViewModel.getJob: the job endpoint returns
+        //  nothing at all without a jobDescription filter)
+        assertEquals("*", filters.single().value)
+        assertEquals("   ", viewModel.uiState.value.jobQuery)
+    }
+
+    @Test
+    fun searchJobs_nonBlankQuery_wrapsQueryInLikeWildcards() = runTest(testDispatcher) {
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+        viewModel.sendIntent(InspectionIntent.OpenRequestFlow())
+        advanceUntilIdle()
+
+        viewModel.sendIntent(InspectionIntent.SearchJobs("کارگر"))
+        advanceUntilIdle()
+
+        val filters = repository.lastJobQuery?.filters.orEmpty()
+        assertEquals(listOf(FilterProperty.JOB_DESCRIPTION), filters.map { it.property })
+        assertEquals("*کارگر*", filters.single().value)
+        assertEquals("کارگر", viewModel.uiState.value.jobQuery)
+    }
+
+    @Test
+    fun retrySource_branches_clearsOnlyBranchErrorAndLeavesJobError() = runTest(testDispatcher) {
+        repository.shouldThrowError = true
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        viewModel.sendIntent(InspectionIntent.OpenRequestFlow())
+        advanceUntilIdle()
+
+        // both pickers failed their first page with nothing to show -> both tagged
+        var errors = viewModel.uiState.value.requestErrors
+        assertTrue(InspectionRequestErrorSource.BRANCHES in errors)
+        assertTrue(InspectionRequestErrorSource.JOBS in errors)
+
+        repository.shouldThrowError = false
+        repository.branchPageResult = listOf(
+            BranchDN(
+                operation = "", code = "0010", name = "یک تهران",
+                minCode = "", maxCode = "", type = "", branchAddress = "",
+                cityCode = "", status = ""
+            )
+        )
+
+        viewModel.sendIntent(InspectionIntent.RetrySource(InspectionRequestErrorSource.BRANCHES))
+        advanceUntilIdle()
+
+        errors = viewModel.uiState.value.requestErrors
+        assertTrue(InspectionRequestErrorSource.BRANCHES !in errors) // retried source recovered
+        assertTrue(InspectionRequestErrorSource.JOBS in errors)      // untouched picker still errored
+        assertEquals("یک تهران", viewModel.uiState.value.branches.single().name)
+    }
+
+    @Test
+    fun retrySource_jobs_clearsOnlyJobErrorAndLeavesBranchError() = runTest(testDispatcher) {
+        repository.shouldThrowError = true
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        viewModel.sendIntent(InspectionIntent.OpenRequestFlow())
+        advanceUntilIdle()
+
+        var errors = viewModel.uiState.value.requestErrors
+        assertTrue(InspectionRequestErrorSource.BRANCHES in errors)
+        assertTrue(InspectionRequestErrorSource.JOBS in errors)
+
+        repository.shouldThrowError = false
+        repository.jobPageResult = listOf(
+            JobDN(operation = "", jobCode = "2035", jobDescription = "قرص ساز", status = "", statusDate = "")
+        )
+
+        viewModel.sendIntent(InspectionIntent.RetrySource(InspectionRequestErrorSource.JOBS))
+        advanceUntilIdle()
+
+        errors = viewModel.uiState.value.requestErrors
+        assertTrue(InspectionRequestErrorSource.JOBS !in errors)
+        assertTrue(InspectionRequestErrorSource.BRANCHES in errors)
+        assertEquals("قرص ساز", viewModel.uiState.value.jobs.single().jobDescription)
+    }
+
+    @Test
+    fun retrySource_userInfo_clearsOnlyUserInfoErrorAndLeavesPickerErrors() = runTest(testDispatcher) {
+        repository.shouldThrowError = true
+        userRepository.shouldThrowError = true
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        viewModel.sendIntent(InspectionIntent.OpenRequestFlow())
+        advanceUntilIdle()
+
+        var errors = viewModel.uiState.value.requestErrors
+        assertTrue(InspectionRequestErrorSource.USER_INFO in errors)
+        assertTrue(InspectionRequestErrorSource.BRANCHES in errors)
+        assertTrue(InspectionRequestErrorSource.JOBS in errors)
+
+        userRepository.shouldThrowError = false
+        userRepository.userProfileResult = UserProfileDN(
+            entityId = null, login = null, firstName = "علی", lastName = "رضایی",
+            email = null, nationalCode = "0012345678", mobile = "09120000000"
+        )
+
+        viewModel.sendIntent(InspectionIntent.RetrySource(InspectionRequestErrorSource.USER_INFO))
+        advanceUntilIdle()
+
+        errors = viewModel.uiState.value.requestErrors
+        assertTrue(InspectionRequestErrorSource.USER_INFO !in errors)
+        assertTrue(InspectionRequestErrorSource.BRANCHES in errors)
+        assertTrue(InspectionRequestErrorSource.JOBS in errors)
+        assertEquals("علی رضایی", viewModel.uiState.value.identityContact.fullName)
     }
 
     @Test

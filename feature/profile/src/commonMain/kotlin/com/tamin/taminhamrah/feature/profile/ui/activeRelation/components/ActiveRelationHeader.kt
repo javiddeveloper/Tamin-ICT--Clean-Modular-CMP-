@@ -72,10 +72,6 @@ internal fun ActiveRelationHeader(
         LineHeightStyle(alignment = LineHeightStyle.Alignment.Center, trim = LineHeightStyle.Trim.Both)
     }
 
-    // Title fades out and the status text fades in over the same title-row spot, so
-    // scrolling reads as the status taking over the title's place rather than two
-    // unrelated labels swapping. Sequential (not overlapping) so the RTL glyphs never
-    // sit half-opaque on top of each other mid-fade.
     val title = stringResource(Res.string.profile_active_relation)
     val statusText = if (activeCount > 0) stringResource(Res.string.active_relation_header_status_ok) else stringResource(Res.string.active_relation_header_status_error)
     val statusColor =
