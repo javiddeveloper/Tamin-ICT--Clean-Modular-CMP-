@@ -72,6 +72,7 @@ data class ContractAffairsUiState(
 
     // مشاهده قرارداد (PDF)
     val showPdfViewer: Boolean = false,
+    val pdfContract: ContractPR? = null,
     val pdfDownload: PdfDownloadPR? = null,
     val isPdfLoading: Boolean = false,
     val pdfDownloadFailed: Boolean = false,
@@ -110,7 +111,10 @@ data class ContractAffairsUiState(
         data class CancelDescriptionChanged(val description: String) : PartialState
         data class Cancelling(val inProgress: Boolean) : PartialState
 
-        data class PdfViewerVisibility(val visible: Boolean) : PartialState
+        data class PdfViewerVisibility(
+            val visible: Boolean,
+            val contract: ContractPR? = null,
+        ) : PartialState
         data class PdfLoading(val loading: Boolean) : PartialState
         data class PdfLoaded(val pdf: PdfDownloadPR?) : PartialState
         data class PdfFailed(val failed: Boolean) : PartialState
@@ -147,6 +151,7 @@ sealed interface ContractAffairsIntent {
     data object ConfirmCancelContract : ContractAffairsIntent
 
     // مشاهده قرارداد
+    data object RetryPdfDownload : ContractAffairsIntent
     data object DismissPdfViewer : ContractAffairsIntent
 }
 

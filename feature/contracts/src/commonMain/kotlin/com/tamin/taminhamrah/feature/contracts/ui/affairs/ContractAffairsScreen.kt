@@ -45,6 +45,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
+import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
@@ -62,6 +63,8 @@ import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.contract_affairs_empty_subtitle
 import taminx.core.core_ui.contract_affairs_empty_title
+import taminx.core.core_ui.contract_affairs_report_filename_format
+import taminx.core.core_ui.contract_affairs_view_contract
 
 /**
  * امور قراردادها و پرداخت.
@@ -267,6 +270,22 @@ internal fun ContractAffairsScreen(
             },
             onDismiss = { onIntent(ContractAffairsIntent.DismissContractOperations) },
         )
+    }
+
+    if (uiState.showPdfViewer) {
+        uiState.pdfContract?.let { pdfContract ->
+            TaminPdfViewer(
+                fileName = stringResource(
+                    Res.string.contract_affairs_report_filename_format,
+                    pdfContract.contractNumber,
+                ),
+                pdf = uiState.pdfDownload,
+                downloadFailed = uiState.pdfDownloadFailed,
+                title = stringResource(Res.string.contract_affairs_view_contract),
+                onRequestDownload = { onIntent(ContractAffairsIntent.RetryPdfDownload) },
+                onDismiss = { onIntent(ContractAffairsIntent.DismissPdfViewer) },
+            )
+        }
     }
 
     if (showSearchSheet) {

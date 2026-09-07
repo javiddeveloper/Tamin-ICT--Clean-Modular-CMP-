@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -94,7 +95,8 @@ private const val FRACTION_PREMIUM_TYPE_CODE = "38"
  * an optional بدهی معوق banner, then the footer actions.
  *
  * Footer variants:
- *  - not operable (pending / cancelled) → a single full-width «امور قرارداد».
+ *  - not operable (pending / cancelled) → no footer at all; the امور قرارداد sheet only exists for
+ *    فعال contracts.
  *  - operable + تکمیل سوابق (fraction) → «امور قرارداد» + «مشاهدهٔ قرارداد».
  *  - operable, any other type → «امور قرارداد» + «پرداخت حق بیمه».
  */
@@ -173,12 +175,16 @@ internal fun ContractAffairsItemCard(
             item.deferredDebtLabel?.let { DeferredDebtBanner(it) }
         }
 
-        Footer(
-            operable = operable,
-            isFraction = isFraction,
-            onOperationsClicked = onOperationsClicked,
-            onPrimaryActionClicked = onPrimaryActionClicked,
-        )
+        // Only فعال contracts expose امور قرارداد; pending / ابطال cards end at the details grid.
+        if (operable) {
+            Footer(
+                isFraction = isFraction,
+                onOperationsClicked = onOperationsClicked,
+                onPrimaryActionClicked = onPrimaryActionClicked,
+            )
+        } else {
+            Spacer(Modifier.height(Spacing.lg))
+        }
     }
 }
 
@@ -399,7 +405,6 @@ private fun DeferredDebtBanner(text: String) {
 
 @Composable
 private fun Footer(
-    operable: Boolean,
     isFraction: Boolean,
     onOperationsClicked: () -> Unit,
     onPrimaryActionClicked: () -> Unit,
@@ -414,21 +419,19 @@ private fun Footer(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
-        if (operable) {
-            TaminFilledButton(
-                text = stringResource(
-                    if (isFraction) Res.string.contract_affairs_view_contract
-                    else Res.string.contract_affairs_pay_premium,
-                ),
-                onClick = onPrimaryActionClicked,
-                height = 48.dp,
-                textStyle = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                icon = if (isFraction) Icons.Outlined.Description else Icons.Outlined.CreditCard,
-                iconPosition = IconPosition.End,
-                background = if (isFraction) colors.heroGradient else colors.successGradient,
-                modifier = Modifier.weight(1.8f),
-            )
-        }
+        TaminFilledButton(
+            text = stringResource(
+                if (isFraction) Res.string.contract_affairs_view_contract
+                else Res.string.contract_affairs_pay_premium,
+            ),
+            onClick = onPrimaryActionClicked,
+            height = 48.dp,
+            textStyle = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+            icon = if (isFraction) Icons.Outlined.Description else Icons.Outlined.CreditCard,
+            iconPosition = IconPosition.End,
+            background = if (isFraction) colors.heroGradient else colors.successGradient,
+            modifier = Modifier.weight(1.8f),
+        )
         TaminOutlinedButton(
             text = stringResource(Res.string.contract_affairs_operations),
             onClick = onOperationsClicked,

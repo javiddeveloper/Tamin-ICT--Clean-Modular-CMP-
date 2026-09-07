@@ -2098,6 +2098,7 @@
     <string name="contract_affairs_view_payments">مشاهدهٔ پرداخت‌ها</string>
     <string name="contract_affairs_edit_contract">ویرایش قرارداد</string>
     <string name="contract_affairs_deactivate_contract">غیرفعال کردن قرارداد</string>
+    <string name="contract_affairs_report_filename_format">contract_report_%1$s.pdf</string>
     <string name="contract_payment_history_title">سوابق پرداخت</string>
     <string name="contract_payment_history_number_prefix">شمارهٔ</string>
     <string name="contract_payment_history_summary_total">جمع پرداخت‌های موفق</string>

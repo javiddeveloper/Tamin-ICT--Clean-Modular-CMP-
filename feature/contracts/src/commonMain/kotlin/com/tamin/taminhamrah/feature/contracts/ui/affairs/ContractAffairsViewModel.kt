@@ -35,6 +35,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -103,6 +104,9 @@ class ContractAffairsViewModel(
                 flowOf(PartialState.CancelDescriptionChanged(intent.value))
 
             ContractAffairsIntent.ConfirmCancelContract -> confirmCancelContract()
+
+            ContractAffairsIntent.RetryPdfDownload ->
+                uiState.value.pdfContract?.let(::downloadContractReport) ?: emptyFlow()
 
             ContractAffairsIntent.DismissPdfViewer -> flow {
                 emit(PartialState.PdfViewerVisibility(false))
@@ -179,8 +183,8 @@ class ContractAffairsViewModel(
     // ---- امور قرارداد ----
 
     private fun operationsFor(contract: ContractPR): List<ContractOperation> {
-        // Not-yet-active (در انتظار بررسی / cancelled) contracts can only be viewed — the امور
-        // قرارداد sheet still opens, with مشاهدهٔ قرارداد and an explanatory note.
+        // Only فعال contracts expose امور قرارداد at all — [ContractAffairsItemCard] hides the
+        // button otherwise. This guard stays as a defensive fallback for the non-active case.
         if (contract.statusCode != ACTIVE_CONTRACT_STATUS_CODE) {
             return listOf(ContractOperation.VIEW_CONTRACT)
         }
@@ -235,7 +239,7 @@ class ContractAffairsViewModel(
         val premiumType = ContractPremiumType.fromCode(contract.premiumTypeCode)
             ?: ContractPremiumType.OPTIONAL
         emit(PartialState.OperationsSheetHidden)
-        emit(PartialState.PdfViewerVisibility(true))
+        emit(PartialState.PdfViewerVisibility(visible = true, contract = contract))
         emit(PartialState.PdfFailed(false))
         emit(PartialState.PdfLoading(true))
         try {
@@ -388,6 +392,11 @@ class ContractAffairsViewModel(
 
         is PartialState.PdfViewerVisibility -> currentState.copy(
             showPdfViewer = partialState.visible,
+            pdfContract = if (partialState.visible) {
+                partialState.contract ?: currentState.pdfContract
+            } else {
+                null
+            },
             pdfDownload = if (partialState.visible) currentState.pdfDownload else null,
             pdfDownloadFailed = if (partialState.visible) currentState.pdfDownloadFailed else false,
         )
