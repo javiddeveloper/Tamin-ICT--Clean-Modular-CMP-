@@ -18,16 +18,21 @@ data class DebitPaymentPreCheckDTO(
 /**
  * Body of `POST debit-online-payment/pay-normal-debit`.
  *
- * Two fields are spelled the way the service expects rather than the way Kotlin would default to,
- * and both were answered with `ProxyRuntimeException` when they were not:
+ * Every field is non-null and carries no default, so all five keys are always written:
+ * `encodeDefaults` is off for this client, and a property equal to its declared default would be
+ * dropped from the body entirely.
  *
- * - [deposit] is a string of `"1"` or `"0"`, never `"true"`/`"false"`. It carries no default, so it
- *   is always written — `encodeDefaults` is off for this client, and a value equal to its default
- *   would be dropped from the body entirely.
- * - [agreementRow] is absent rather than blank when the debt has none. The list answers
- *   `"peymanSequence": null` for such a debt. When an empty string `""` is sent, Oracle OSB fails
- *   with `ProxyRuntimeException` during type conversion/validation. Null here with default `null`
- *   ensures the field is omitted from the JSON body when absent.
+ * - [deposit] is a string of `"1"` or `"0"`, never `"true"`/`"false"` — the service answers
+ *   `ProxyRuntimeException` for the boolean spelling.
+ * - [agreementRow] is sent as an empty string, not omitted, when the debt has no agreement row.
+ *   The list answers `"peymanSequence": null` for such a debt, and the old client coalesces that
+ *   null before building its request (`item.peymanSequence ?: ""`), so the key is on the wire
+ *   there too.
+ *
+ * Serialized through this client's `Json`, the body matches the old client's byte for byte apart
+ * from whitespace. A `ProxyRuntimeException` still seen on some debts is therefore not explained
+ * by this shape — do not "fix" it by omitting a key without a capture of both clients paying the
+ * same debt.
  */
 @Serializable
 data class DebitPaymentRequestDTO(
