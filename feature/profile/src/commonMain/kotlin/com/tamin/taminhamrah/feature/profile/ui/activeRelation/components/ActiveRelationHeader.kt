@@ -33,6 +33,8 @@ import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.DarkTaminColors
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.ShimmerBlock
+import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toparea.TopAreaState
 import com.tamin.taminhamrah.ui.toparea.topAreaAlpha
@@ -58,6 +60,7 @@ internal fun ActiveRelationHeader(
     onBackClicked: () -> Unit,
     topAreaState: TopAreaState,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
 ) {
     val taminColors = LocalTaminColors.current
     val isDark = taminColors == DarkTaminColors
@@ -158,36 +161,54 @@ internal fun ActiveRelationHeader(
                 icon = vectorResource(Res.drawable.ic_communication),
                 animated = !topAreaState.isMeasureProbe
             )
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
+            if (isLoading) {
+                ShimmerBlock(
                     modifier = Modifier
-                        .size(8.dp)
-                        .background(
-                            if (activeCount > 0) taminColors.springGreenText else taminColors.textMuted,
-                            RoundedCornerShape(50)
-                        )
+                        .width(ShimmerSize.titleWidth)
+                        .height(ShimmerSize.titleHeight),
+                    colorBase = taminColors.glassIconTileBg,
+                    colorHighlight = taminColors.glassA1,
                 )
-                Spacer(Modifier.width(4.dp))
+                Spacer(modifier = Modifier.height(Spacing.sm))
+                ShimmerBlock(
+                    modifier = Modifier
+                        .width(ShimmerSize.helperLineWidth)
+                        .height(ShimmerSize.subtitleHeight),
+                    colorBase = taminColors.glassIconTileBg,
+                    colorHighlight = taminColors.glassA1,
+                )
+            } else {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .background(
+                                if (activeCount > 0) taminColors.springGreenText else taminColors.textMuted,
+                                RoundedCornerShape(50)
+                            )
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = statusText,
+                        style = MaterialTheme.typography.titleMedium.copy(lineHeightStyle = trimmedLineHeight),
+                        fontWeight = FontWeight.Bold,
+                        color = statusColor
+                    )
+                }
+
+                val activeText = stringResource(Res.string.active_relation_header_active_count, activeCount.toString().toPersianDigits())
+                val inactiveText = stringResource(Res.string.active_relation_header_inactive_count, inactiveCount.toString().toPersianDigits())
+                val checkTimeText = stringResource(Res.string.active_relation_header_check_time, lastCheckTime)
+                Spacer(modifier = Modifier.height(Spacing.sm))
+
                 Text(
-                    text = statusText,
-                    style = MaterialTheme.typography.titleMedium.copy(lineHeightStyle = trimmedLineHeight),
-                    fontWeight = FontWeight.Bold,
-                    color = statusColor
+                    text = "$activeText · $inactiveText · $checkTimeText",
+                    style = MaterialTheme.typography.bodySmall.copy(lineHeightStyle = trimmedLineHeight),
+                    color = taminColors.txtNatProfile
                 )
             }
-
-            val activeText = stringResource(Res.string.active_relation_header_active_count, activeCount.toString().toPersianDigits())
-            val inactiveText = stringResource(Res.string.active_relation_header_inactive_count, inactiveCount.toString().toPersianDigits())
-            val checkTimeText = stringResource(Res.string.active_relation_header_check_time, lastCheckTime)
-            Spacer(modifier = Modifier.height(Spacing.sm))
-
-            Text(
-                text = "$activeText · $inactiveText · $checkTimeText",
-                style = MaterialTheme.typography.bodySmall.copy(lineHeightStyle = trimmedLineHeight),
-                color = taminColors.txtNatProfile
-            )
         }
 
         // Zero height while expanded, growing to CollapsedBottomSpace as the header folds --

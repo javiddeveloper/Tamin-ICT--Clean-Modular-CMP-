@@ -18,6 +18,7 @@ import com.tamin.taminhamrah.model.workshop.DebitObjectionResultDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDN
+import com.tamin.taminhamrah.model.workshop.ContractRowQuery
 import com.tamin.taminhamrah.model.workshop.DebitReasonDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
@@ -26,6 +27,7 @@ import com.tamin.taminhamrah.model.workshop.EmployerContactInfoDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetQuery
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
+import com.tamin.taminhamrah.model.workshop.WorkshopContractDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDN
 import com.tamin.taminhamrah.model.workshop.WorkshopListQuery
@@ -54,6 +56,18 @@ import com.tamin.taminhamrah.model.workshop.SmsMessageDN
 interface WorkShopsRepository {
 
     suspend fun getEmployerAgreements(query: WorkshopListQuery): PagedListDN<EmployerAgreementDN>
+
+    // ------------------------------------------------------------------------ ردیف‌های پیمان
+
+    /** ردیف پیمان‌های one workshop that has a تعهدنامه — seven fields per row. */
+    suspend fun getContractRowsWithAgreement(
+        query: ContractRowQuery,
+    ): PagedListDN<EmployerAgreementDN>
+
+    /** ردیف پیمان‌های one workshop with no تعهدنامه — four fields per row, a different model. */
+    suspend fun getContractRowsWithoutAgreement(
+        query: ContractRowQuery,
+    ): PagedListDN<WorkshopContractDN>
 
     // -------------------------------------------------------------------------- برگ پرداخت‌ها
 

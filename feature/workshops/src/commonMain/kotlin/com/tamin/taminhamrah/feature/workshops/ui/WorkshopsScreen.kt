@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.workshops.ui
+﻿package com.tamin.taminhamrah.feature.workshops.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -92,6 +92,7 @@ fun WorkshopsScreen(
         BackHandler { onIntent(WorkshopsIntent.DetailDismissed) }
         WorkshopDetailScreen(
             workshop = workshop,
+            actions = state.availableActions,
             onBack = { onIntent(WorkshopsIntent.DetailDismissed) },
             onAction = { action -> onIntent(WorkshopsIntent.ActionSelected(action, workshop)) },
             modifier = modifier,
@@ -163,6 +164,7 @@ fun WorkshopsScreen(
         WorkshopListScaffold(
             state = state.list,
             onLoadMore = { onIntent(WorkshopsIntent.LoadMore) },
+            onRetry = { onIntent(WorkshopsIntent.Load) },
             key = { it.workshopId + it.branchCode },
             header = {
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.lg)) {
@@ -187,10 +189,11 @@ fun WorkshopsScreen(
                     )
                 }
             },
-        ) { _, workshop ->
+        ) { workshop, itemModifier ->
             WorkshopCard(
                 workshop = workshop,
                 onOpenDetails = { onIntent(WorkshopsIntent.DetailRequested(workshop)) },
+                modifier = itemModifier,
             )
         }
     }

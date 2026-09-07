@@ -2045,6 +2045,167 @@
     <string name="ill_days_submit_btn">ثبت درخواست</string>
     <string name="ill_days_submit_missing_data">اطلاعات لازم برای ثبت درخواست کامل نیست.</string>
     <string name="ill_days_submit_success_fallback">درخواست با موفقیت ثبت شد.</string>
+
+    <!-- Home campaigns carousel -->
+    <string name="campaigns_title">کمپین‌ها</string>
+    <string name="campaigns_swipe_hint">با کشیدن انگشت ببینید</string>
+    <string name="campaign_housewife_badge">کمپین بیمهٔ زنان خانه‌دار</string>
+    <string name="campaign_housewife_title">سابقهٔ بیمه برای خانم‌های خانه‌دار</string>
+    <string name="campaign_housewife_body">با پرداخت ماهانه، سابقه بسازید و شرایط بازنشستگی را به‌دست آورید.</string>
+    <string name="campaign_housewife_cta">انعقاد قرارداد</string>
+    <string name="campaign_housewife_caption">بدون مراجعه به شعبه</string>
+    <string name="campaign_freelance_badge">کمپین مشاغل آزاد</string>
+    <string name="campaign_freelance_title">حرف و مشاغل آزاد</string>
+    <string name="campaign_freelance_body">صاحبان کسب‌وکار خُرد می‌توانند قرارداد بیمه را از اپ ثبت کنند.</string>
+    <string name="campaign_freelance_cta">شروع ثبت</string>
+    <string name="campaign_freelance_caption">مناسب کسب‌وکار خانگی</string>
+    <string name="campaign_student_badge">کمپین بیمهٔ دانشجویی</string>
+    <string name="campaign_student_title">سال‌های تحصیل، سابقهٔ بیمه</string>
+    <string name="campaign_student_body">دانشجویان می‌توانند مدت تحصیل را به سابقهٔ بیمه تبدیل کنند.</string>
+    <string name="campaign_student_cta">اطلاعات بیشتر</string>
+    <string name="campaign_student_caption">ویژهٔ دانشجویان</string>
+    <!-- ردیف‌های پیمان (Contract rows) -->
+    <string name="contract_rows_title">ردیف‌های پیمان</string>
+    <string name="contract_rows_subtitle">لیست ردیف پیمان‌های کارگاه</string>
+    <string name="contract_rows_action_desc">ردیف پیمان‌های ثبت‌شدهٔ کارگاه</string>
+    <string name="contract_rows_tab_with_agreement">دارای تعهدنامه</string>
+    <string name="contract_rows_tab_with_agreement_hint">اطلاعات کامل تماس</string>
+    <string name="contract_rows_tab_without_agreement">بدون تعهدنامه</string>
+    <string name="contract_rows_tab_without_agreement_hint">اطلاعات پایه</string>
+    <string name="contract_rows_read_only">این فهرست فقط برای مشاهده است.</string>
+    <string name="contract_rows_count">%1$s ردیف پیمان</string>
+    <string name="contract_rows_filter_workshop">کد کارگاه %1$s</string>
+    <string name="contract_rows_filter_workshop_and_branch">کد کارگاه %1$s · کد شعبه %2$s</string>
+    <string name="contract_rows_filter_change">تغییر</string>
+    <string name="contract_rows_badge">ردیف %1$s</string>
+    <string name="contract_rows_workshop_number">شمارهٔ کارگاه</string>
+    <string name="contract_rows_commitment_date">تاریخ تعهد</string>
+    <string name="contract_rows_mobile">شمارهٔ تلفن همراه</string>
+    <string name="contract_rows_email">پست الکترونیک</string>
+    <string name="contract_rows_address">محل اقامت</string>
+    <string name="contract_rows_empty_no_workshop_title">هنوز کارگاهی انتخاب نشده</string>
+    <string name="contract_rows_empty_no_workshop_body">کد کارگاه و کد شعبه را وارد کنید تا ردیف پیمان‌های آن نمایش داده شود.</string>
+    <string name="contract_rows_empty_none_title">ردیف پیمانی یافت نشد</string>
+    <string name="contract_rows_empty_none_body">برای این کارگاه در این دسته ردیف پیمانی ثبت نشده است. دستهٔ دیگر یا کد کارگاه دیگری را بررسی کنید.</string>
+    <string name="contract_rows_pick_workshop">انتخاب کارگاه</string>
+    <string name="contract_rows_pick_workshop_hint">ردیف پیمان‌ها بر اساس کارگاه و شعبه نمایش داده می‌شود.</string>
+    <string name="workshop_action_missing_identity">کد کارگاه یا کد شعبهٔ این کارگاه کامل نیست.</string>
+    <string name="contract_rows_tab_switched">این کارگاه در دستهٔ دیگری ثبت شده است.</string>
+    <string name="contract_rows_branch_code_required_hint">لطفاً کد شعبه را وارد کنید.</string>
+    <string name="contract_rows_four_digits">۴ رقم</string>
+    <string name="contract_rows_workshop_code_required">لطفاً کد کارگاه را وارد کنید.</string>
+    <string name="contract_rows_my_workshops">کارگاه‌های شما</string>
+    <string name="contract_rows_my_workshops_partial">%1$s کارگاه از %2$s نمایش داده شده — بقیه را با شمارهٔ کارگاه جست‌وجو کنید.</string>
+    <string name="contract_rows_apply">مشاهدهٔ ردیف پیمان‌ها</string>
+    <string name="contract_rows_reset">حذف</string>
+    <!-- Contract flow -->
+    <string name="contract_list_title">لیست قراردادها</string>
+    <string name="contract_new_contract">انعقاد قرارداد جدید</string>
+    <string name="contract_empty_list">قراردادی یافت نشد</string>
+    <string name="contract_field_number">شماره قرارداد</string>
+    <string name="contract_field_request_date">تاریخ درخواست</string>
+    <string name="contract_field_insurance_type">نوع حق بیمه</string>
+    <string name="contract_field_monthly_premium">مبلغ حق بیمه ماهانه</string>
+    <string name="contract_field_monthly_income">درآمد ماهانه</string>
+    <string name="contract_field_treatment_support">حمایت درمان</string>
+    <string name="contract_field_job">شغل</string>
+    <string name="contract_value_dash">—</string>
+
+    <string name="contract_student_screen_title">انعقاد قرارداد بیمه دانشجویی</string>
+    <string name="contract_student_insurance_type">بیمه دانشجویی</string>
+    <string name="contract_freelance_screen_title">انعقاد قرارداد بیمه صاحبان حرف و مشاغل آزاد</string>
+    <string name="contract_freelance_insurance_type">بیمه صاحبان حرف و مشاغل آزاد</string>
+    <string name="contract_housewife_screen_title">انعقاد قرارداد بیمه زنان خانه‌دار</string>
+    <string name="contract_housewife_insurance_type">بیمه زنان خانه‌دار</string>
+    <string name="contract_optional_screen_title">انعقاد قرارداد بیمه اختیاری</string>
+    <string name="contract_optional_insurance_type">بیمه اختیاری</string>
+
+    <string name="contract_step_registration">نام نویسی</string>
+    <string name="contract_step_authorization">احراز شرایط انعقاد قرارداد</string>
+    <string name="contract_step_contract_terms">مقررات و ضوابط انعقاد قرارداد</string>
+    <string name="contract_step_user_info">اطلاعات کاربر</string>
+    <string name="contract_step_contract_applicant">متقاضی قرارداد</string>
+    <string name="contract_step_select_branch">انتخاب شعبه تأمین اجتماعی</string>
+    <string name="contract_step_upload_image">بارگذاری مدارک</string>
+    <string name="contract_step_treatment_support">حمایت درمانی</string>
+    <string name="contract_step_insurance_premium">تعیین حق بیمه ماهانه</string>
+    <string name="contract_step_salary">محاسبه حق بیمه</string>
+    <string name="contract_step_submit_contract">ثبت قرارداد</string>
+
+    <string name="contract_applicant_personal">متقاضی شخصا قرارداد منعقد می نماید</string>
+    <string name="contract_applicant_guardian">قیم متقاضی قرارداد منعقد می نماید</string>
+
+    <string name="contract_flow_national_id">کد ملی: %1$s</string>
+    <string name="contract_flow_birth_date">تاریخ تولد: %1$s</string>
+    <string name="contract_flow_registration_message">متقاضی محترم، نام‌نویسی شما با شماره بیمه تأمین اجتماعی %1$s انجام شده است.</string>
+    <string name="contract_flow_step_not_implemented">این مرحله هنوز پیاده‌سازی نشده است.</string>
+    <string name="contract_flow_step_previous">مرحله قبل</string>
+    <string name="contract_flow_step_next">مرحله بعد</string>
+    <string name="contract_flow_submit_contract">انعقاد قرارداد</string>
+
+    <string name="contract_user_info_edit_hint">متقاضی محترم، در صورت نادرست بودن اطلاعات، می‌توانید از طریق فرم زیر نسبت به ویرایش اطلاعات خود اقدام نمایید.</string>
+    <string name="contract_field_address">آدرس محل سکونت</string>
+    <string name="contract_field_phone">شماره تلفن</string>
+
+    <string name="contract_branch_notice_1">متقاضی محترم، پس از ثبت قرارداد، امکان تغییر شعبه وجود ندارد؛ لطفا در انتخاب شعبه دقت نمایید.</string>
+    <string name="contract_branch_notice_2">در صورت عدم ارائه خدمات الکترونیکی، ممکن است نیاز به مراجعه حضوری به شعبه انتخابی داشته باشید.</string>
+
+    <string name="contract_upload_format_hint">تصویر می‌بایست در قالب (jpeg) بوده و اندازه آن حداکثر ۲ مگابایت باشد.</string>
+    <string name="contract_upload_description_label">شرح تصویر</string>
+    <string name="contract_upload_image_content_description">تصویر بارگذاری شده</string>
+    <string name="contract_upload_remove_image">حذف تصویر</string>
+    <string name="contract_upload_add_documents">افزودن مدارک</string>
+    <string name="contract_upload_read_error">خطا در خواندن فایل</string>
+    <string name="contract_upload_jpeg_only_error">فقط تصاویر با فرمت JPEG مجاز هستند.</string>
+    <string name="contract_upload_failed_error">خطا در بارگذاری تصویر</string>
+
+    <string name="contract_terms_confirm_hint">تایید این مرحله به منزله مطالعه و پذیرش مقررات و ضوابط انعقاد قرارداد می‌باشد.</string>
+    <string name="contract_terms_view_rules">مشاهده ضوابط و مقررات</string>
+    <string name="contract_rules_unavailable">فایل ضوابط و مقررات در دسترس نیست.</string>
+    <string name="contract_terms_commitment_title">تعهدنامه</string>
+    <string name="contract_terms_commitment_prefix">اینجانب %1$s </string>
+    <string name="contract_terms_commitment_suffix"> با آگاهی کامل و در صحت عقلی، شرایط و مقررات فوق را مطالعه و خود را در هنگام قرارداد و در ادامه بیمه پردازی ملزم به رعایت آن می‌دانم در غیر اینصورت کلیه تبعات و مسئولیت‌های آن متوجه اینجانب بوده و سازمان تأمین اجتماعی در این خصوص مسئولیتی نخواهد داشت.</string>
+
+    <string name="contract_premium_range_unavailable">محدوده حق بیمه در دسترس نیست.</string>
+    <string name="contract_premium_calc_unavailable">محاسبه حق بیمه در دسترس نیست.</string>
+    <string name="contract_premium_range_min_max">حداقل: %1$s — حداکثر: %2$s</string>
+    <string name="contract_premium_selected_amount">مبلغ انتخابی: %1$s ریال</string>
+    <string name="contract_premium_calculate_monthly">محاسبه حق بیمه ماهانه</string>
+    <string name="contract_premium_monthly_salary">دستمزد ماهانه شما بر اساس حق بیمه انتخابی %1$s ریال می‌باشد</string>
+    <string name="contract_premium_rate_not_found">نرخ حق بیمه‌ای یافت نشد.</string>
+
+    <string name="contract_submit_agreement">اینجانب %1$s به شماره ملی %2$s درخواست انعقاد قرارداد %3$s %4$s با دستمزد مبنا %5$s ریال را دارم.</string>
+    <string name="contract_submit_success">قرارداد با شماره %1$s در تاریخ %2$s ثبت شد.</string>
+
+    <string name="contract_eligibility_eligible">متقاضی محترم، شما به علت: %1$s دارای شرایط لازم برای عقد قرارداد %2$s هستید.</string>
+    <string name="contract_eligibility_ineligible">متقاضی محترم، شما به علت: %1$s فاقد شرایط لازم برای عقد قرارداد %2$s هستید.</string>
+    <string name="contract_eligibility_reason_min_history">داشتن حداقل ۱۰ سال سابقه پرداخت حق بیمه نزد سازمان تأمین اجتماعی</string>
+    <string name="contract_eligibility_reason_age_under_50">سن کمتر از ۵۰ سال</string>
+    <string name="contract_eligibility_reason_zero_history">داشتن ۰ روز سابقه و سن در زمان تقاضا</string>
+    <string name="contract_eligibility_reason_max_two_contracts">داشتن حداکثر دو قرارداد حرف و مشاغل</string>
+    <string name="contract_eligibility_reason_not_met">عدم احراز شرایط سن و سابقه</string>
+    <string name="contract_eligibility_reason_history_age">داشتن %1$s روز سابقه و سن %2$s در زمان تقاضا</string>
+
+    <string name="contract_gender_honorific_male">آقای</string>
+    <string name="contract_gender_honorific_female">خانم</string>
+    <string name="contract_female_only_service">این خدمت مختص بانوان است.</string>
+    <string name="contract_error_red_crescent_day_limit">امکان انتخاب این شغل تنها تا روز ۲۰ هر ماه وجود دارد.</string>
+    <string name="contract_error_red_crescent_not_eligible">امکان انتخاب شغل هلال احمر برای شما وجود ندارد.</string>
+    <string name="contract_error_medical_student_not_allowed">امکان انتخاب این شغل برای شما وجود ندارد.</string>
+    <string name="contract_preflight_not_registered">شما هنوز نام‌نویسی نشده‌اید و امکان انعقاد قرارداد وجود ندارد.</string>
+    <string name="contract_preflight_active_contract">شما در حال حاضر قرارداد فعال دارید.</string>
+    <string name="contract_preflight_under_age">سن شما کمتر از ۱۸ سال است.</string>
+    <string name="contract_preflight_cancelled_20_days">قرارداد قبلی شما بیش از ۲۰ روز پیش ابطال شده است.</string>
+    <string name="contract_preflight_cancelled_3_months">قرارداد قبلی شما بیش از سه ماه پیش ابطال شده است.</string>
+    <string name="contract_preflight_other_contract">شما قرارداد فعال دیگری دارید که با این نوع بیمه تداخل دارد.</string>
+    <string name="contract_preflight_contracts_load_failed">بارگذاری لیست قراردادها ناموفق بود. لطفاً دوباره تلاش کنید.</string>
+    <string name="contract_payment_dialog_title">ثبت قرارداد</string>
+    <string name="contract_payment_dialog_message">قرارداد با شماره %1$s ثبت شد.</string>
+    <string name="contract_payment_dialog_pay">پرداخت حق بیمه</string>
+    <string name="contract_payment_dialog_dismiss">متوجه شدم</string>
+    <string name="contract_treatment_support_yes">حمایت درمان دارد</string>
+    <string name="contract_treatment_support_no">حمایت درمان ندارد</string>
+
     <!-- پیگیری وضعیت اعتراض به بدهی -->
     <string name="objection_status_title">پیگیری وضعیت اعتراض به بدهی</string>
     <string name="objection_status_subtitle">وضعیت اعتراض‌های ثبت‌شدهٔ شما</string>

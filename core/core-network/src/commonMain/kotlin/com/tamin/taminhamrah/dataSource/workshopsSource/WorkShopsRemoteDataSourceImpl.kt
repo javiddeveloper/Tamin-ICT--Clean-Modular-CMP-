@@ -39,6 +39,7 @@ import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopContractDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDTO
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
@@ -64,6 +65,25 @@ internal class WorkShopsRemoteDataSourceImpl(
         query: ApiQueryParamDN
     ): ListData<EmployerAgreementDTO> = call {
         apiService.getAllEmployerAgreementByNationalId(query.toQueries()).extractData()
+    }
+
+    // ------------------------------------------------------------------- ردیف‌های پیمان
+
+    override suspend fun getEmployerAgreementsByWorkshop(
+        workshopId: String,
+        branchCode: String,
+        query: ApiQueryParamDN,
+    ): ListData<EmployerAgreementDTO> = call {
+        apiService.getEmployerAgreementsByWorkshop(workshopId, branchCode, query.toQueries())
+            .extractData()
+    }
+
+    override suspend fun getWorkshopContracts(
+        workshopId: String,
+        branchCode: String,
+        query: ApiQueryParamDN,
+    ): ListData<WorkshopContractDTO> = call {
+        apiService.getWorkshopContracts(workshopId, branchCode, query.toQueries()).extractData()
     }
 
     // -------------------------------------------------------------------------- برگ پرداخت‌ها

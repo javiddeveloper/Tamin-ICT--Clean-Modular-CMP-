@@ -44,6 +44,11 @@ class FakeContractsRepository : ContractsRepository {
             ),
         )
     }
+    override fun getOptionalPremiumRange(): Flow<FreelancePremiumRangeDN> = flow {
+        emit(FreelancePremiumRangeDN(paymentTabayi = 0L, lowPremium = 0L, history = 0, highPremium = 0L))
+    }
+    override fun checkRedCrossStatus(): Flow<String> = flow { emit("ok") }
+    override fun checkMedicalStudent(): Flow<String> = flow { emit("ok14") }
     override fun getBranches(cityCode: String): Flow<List<BranchDN>> = flow { emit(emptyList()) }
     override fun getSpcPremiumRates(): Flow<List<PremiumRateDN>> = flow { emit(emptyList()) }
     override fun getFreeJobWages(): Flow<List<FreeJobDN>> = flow { emit(emptyList()) }
