@@ -4,6 +4,15 @@ import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeContra
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeWorkshopDN
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtPR
+import com.tamin.taminhamrah.model.workshop.AssignerContractDN
+import com.tamin.taminhamrah.model.workshop.AssignerContractPR
+import com.tamin.taminhamrah.model.workshop.AssignerPartyDN
+import com.tamin.taminhamrah.model.workshop.AssignerPartyPR
+import com.tamin.taminhamrah.model.workshop.BaseDocumentCategory
+import com.tamin.taminhamrah.model.workshop.BaseDocumentDN
+import com.tamin.taminhamrah.model.workshop.BaseDocumentPR
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseDN
+import com.tamin.taminhamrah.model.workshop.ComputationalBasePR
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoDN
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoPR
 import com.tamin.taminhamrah.model.workshop.ContractRowPR
@@ -44,6 +53,7 @@ import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.util.toPersianDigits
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.toJalaliDateLabel
+import kotlinx.collections.immutable.toImmutableList
 
 /**
  * Domain → presentation for کارگاه‌های کارفرما.
@@ -105,6 +115,66 @@ fun WorkshopContractDN.toContractRow(): ContractRowPR = ContractRowPR(
     rowLabel = contractRow.orDashDigits(),
     workshopCodeLabel = workshopId.orDashDigits(),
     commitmentDate = startDate.orDashDate(),
+)
+
+// ---------------------------------------------------------------------------- واگذارندگان
+
+/**
+ * One پیمان, and the card the list draws it as.
+ *
+ * The card is built from the **پیمانکار** side, never the واگذارنده: the واگذارنده is the
+ * signed-in employer themselves, so a card built from it would show the user their own workshop
+ * on every row.
+ *
+ * [ContractRowPR.mobile] and [ContractRowPR.email] stay blank rather than dashed. This endpoint
+ * sends no contact columns at all — dashing them would draw two permanent «—» tiles and claim the
+ * service answered "none", when it was never asked. The card drops the whole row when both are
+ * blank, which is what the design does too.
+ */
+fun AssignerContractDN.toPresentation(): AssignerContractPR = AssignerContractPR(
+    card = ContractRowPR(
+        workshopId = employer.workshopId,
+        branchCode = employer.branchCode,
+        name = employer.workshopName.orDash(),
+        rowLabel = contractRow.orDashDigits(),
+        workshopCodeLabel = employer.workshopId.orDashDigits(),
+        commitmentDate = contractDate.orDashDate(),
+        // Blank, not dashed — the card drops the tile rather than drawing a dash across it.
+        address = employer.address,
+    ),
+    // Raw ASCII: these two are query values, not labels. Persian digits here would address a
+    // contract the service has never heard of.
+    contractRow = contractRow,
+    contractSequence = contractSequence,
+    contractNumber = contractNumber.orDashDigits(),
+    contractDate = contractDate.orDashDate(),
+    contractSubject = contractSubject.orDash(),
+    assigner = assigner.toPresentation(),
+    employer = employer.toPresentation(),
+)
+
+fun AssignerPartyDN.toPresentation(): AssignerPartyPR = AssignerPartyPR(
+    workshopName = workshopName.orDash(),
+    workshopCode = workshopId.orDashDigits(),
+    nationalId = nationalId.orDashDigits(),
+    branchName = branchName.orDash(),
+    address = address.orDash(),
+)
+
+fun ComputationalBaseDN.toPresentation(): ComputationalBasePR = ComputationalBasePR(
+    letterNumber = letterNumber.orDashDigits(),
+    sendDate = sendDate.orDashTimestamp(),
+    amount = amount.orDashAmount(),
+    // Zero is a real answer here and prints as ۰, unlike an amount: the row says «۰ سند» and the
+    // detail screen's documents section is then legitimately empty.
+    documentCount = documents.size.toString().toPersianDigits(),
+    documents = documents.map { it.toPresentation() }.toImmutableList(),
+)
+
+fun BaseDocumentDN.toPresentation(): BaseDocumentPR = BaseDocumentPR(
+    documentId = documentId,
+    kind = kind,
+    category = BaseDocumentCategory.fromCode(categoryCode),
 )
 
 // ---------------------------------------------- خدمات غیرحضوری کارفرما (employerEservicesAgreement)
