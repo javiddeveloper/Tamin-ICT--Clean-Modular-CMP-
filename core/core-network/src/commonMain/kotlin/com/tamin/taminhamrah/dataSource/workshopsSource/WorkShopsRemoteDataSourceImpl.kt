@@ -12,13 +12,14 @@ import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestInfoDTO
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveRequestDTO
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveResultDTO
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoDTO
+import com.tamin.taminhamrah.model.workshop.AssignerContractDTO
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseDTO
 import com.tamin.taminhamrah.model.workshop.DebitObjectionSaveRequestDTO
 import com.tamin.taminhamrah.model.workshop.DebitObjectionSaveResultDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDTO
 import com.tamin.taminhamrah.model.workshop.DebitReasonDTO
-import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmitRequestDTO
 import com.tamin.taminhamrah.model.workshop.EmployerCommitmentInfoDTO
@@ -27,18 +28,18 @@ import com.tamin.taminhamrah.model.workshop.LegalRepresentativeDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeRequestDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberConfirmResultDTO
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopContractDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDTO
-import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDTO
-import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
-import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDTO
-import com.tamin.taminhamrah.model.workshop.WorkshopContractDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDTO
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
@@ -82,6 +83,41 @@ internal class WorkShopsRemoteDataSourceImpl(
         query: ApiQueryParamDN,
     ): ListData<WorkshopContractDTO> = call {
         apiService.getWorkshopContracts(workshopId, branchCode, query.toQueries()).extractData()
+    }
+
+    // ---------------------------------------------------------------------------- واگذارندگان
+
+    override suspend fun getAssignerContracts(
+        query: ApiQueryParamDN,
+    ): ListData<AssignerContractDTO> = call {
+        apiService.getAssignerContracts(query.toQueries()).extractData()
+    }
+
+    override suspend fun getComputationalBases(
+        workshopId: String,
+        contractRow: String,
+        brchCode: String,
+        contractSequence: String,
+        query: ApiQueryParamDN,
+    ): ListData<ComputationalBaseDTO> = call {
+        apiService.getComputationalBases(
+            workshopId = workshopId,
+            contractRow = contractRow,
+            // Abbreviated on purpose — the published parameter is `brchCode`, not `branchCode`.
+            brchCode = brchCode,
+            contractSequence = contractSequence,
+            queries = query.toQueries(),
+        ).extractData()
+    }
+
+    override suspend fun getComputationalBasePdf(documentId: String): PdfDownloadDTO = call {
+        PdfDownloadDTO(
+            pdf = InputStreamDTO(
+                // Drained inside `execute`; `body<ByteReadChannel>()` hands back a channel the
+                // response has already finalized and reads as an empty file.
+                pdf = apiService.getComputationalBasePdf(documentId).readPdfChannel()
+            )
+        )
     }
 
     // -------------------------------------------------------------------------- برگ پرداخت‌ها
