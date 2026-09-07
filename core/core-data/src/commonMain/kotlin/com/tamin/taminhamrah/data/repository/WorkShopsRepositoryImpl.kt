@@ -15,6 +15,10 @@ import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtQuery
+import com.tamin.taminhamrah.model.workshop.AssignerContractDN
+import com.tamin.taminhamrah.model.workshop.AssignerContractQuery
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseDN
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseQuery
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestInfoDN
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveRequestDN
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveResultDN
@@ -108,6 +112,47 @@ class WorkShopsRepositoryImpl(
             branchCode = query.branchCode,
             query = pageQuery(query.page, query.pageSize),
         ).toDomainPage { it.toDomain() }
+
+    // ---------------------------------------------------------------------------- واگذارندگان
+
+    /**
+     * The one workshop list whose identity travels as a *filter*, not as path segments.
+     *
+     * The old client builds exactly these three clauses — `workshop.workshopId`,
+     * `workshop.branchCode`, `contractRow` — and omits any that is blank. `FilterBuilder` already
+     * drops blanks, so an optional کد شعبه simply widens the search here instead of addressing a
+     * route that does not exist, which is what the same blank does on ردیف‌های پیمان.
+     */
+    override suspend fun getAssignerContracts(
+        query: AssignerContractQuery,
+    ): PagedListDN<AssignerContractDN> {
+        val filters = buildFilters {
+            add(FilterProperty.WORKSHOP_ID, query.workshopId)
+            add(FilterProperty.WORKSHOP_BRANCH_CODE, query.branchCode)
+            add(FilterProperty.CONTRACT_ROW, query.contractRow)
+        }
+        return remoteDataSource
+            .getAssignerContracts(pageQuery(query.page, query.pageSize, filters))
+            .toDomainPage { it.toDomain() }
+    }
+
+    /**
+     * The four identity keys go as plain query parameters, not as a filter array — the only
+     * workshop call that mixes the two styles. `brchCode` is the service's own abbreviation.
+     */
+    override suspend fun getComputationalBases(
+        query: ComputationalBaseQuery,
+    ): PagedListDN<ComputationalBaseDN> =
+        remoteDataSource.getComputationalBases(
+            workshopId = query.workshopId,
+            contractRow = query.contractRow,
+            brchCode = query.branchCode,
+            contractSequence = query.contractSequence,
+            query = pageQuery(query.page, query.pageSize),
+        ).toDomainPage { it.toDomain() }
+
+    override suspend fun getComputationalBasePdf(documentId: String): PdfDownloadDN =
+        remoteDataSource.getComputationalBasePdf(documentId).toDomain()
 
     // -------------------------------------------------------------------- برگ پرداخت‌ها
 
