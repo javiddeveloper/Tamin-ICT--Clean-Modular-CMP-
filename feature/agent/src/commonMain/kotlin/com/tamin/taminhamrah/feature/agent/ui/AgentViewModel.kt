@@ -47,6 +47,7 @@ import com.tamin.taminhamrah.useCases.agent.SaveCachedMessageUseCase
 import com.tamin.taminhamrah.useCases.agent.SendAgentPromptUseCase
 import com.tamin.taminhamrah.useCases.agent.StartAgentSessionUseCase
 import com.tamin.taminhamrah.useCases.agent.UpdateAgentSessionUseCase
+import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.Flow
@@ -54,6 +55,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.transformWhile
 import java.util.UUID
@@ -88,7 +90,8 @@ class AgentViewModel(
     private val saveCachedMessageUseCase: SaveCachedMessageUseCase,
     private val getCachedMessagesUseCase: GetCachedMessagesUseCase,
     private val deletePendingAgentMessagesUseCase: DeletePendingAgentMessagesUseCase,
-    private val updateAgentSessionUseCase: UpdateAgentSessionUseCase
+    private val updateAgentSessionUseCase: UpdateAgentSessionUseCase,
+    private val identityInfoUseCase: IdentityInfoUseCase
 ) : BaseViewModel<AgentUiState, PartialState, AgentEvent, AgentIntent>(
     initialState = AgentUiState()
 ) {
@@ -220,6 +223,15 @@ class AgentViewModel(
         if (uiState.value.activeSessionId == null) {
             startEmptySession().forEach { emit(it) }
         }
+
+        // ── Step 4: Personalize the empty-state greeting ──────────────────────
+        // Best-effort: identity is cached, but a failure here must not block the
+        // rest of the screen — the greeting simply falls back to no name.
+        val firstName = runCatching { identityInfoUseCase().firstOrNull()?.firstName }.getOrNull()
+        emit(PartialState.IdentityLoaded(firstName))
+
+        // ── Step 5: Session count for the history icon's badge ────────────────
+        emitAll(loadSessions())
     }
 
     private fun handleSendPrompt(
@@ -267,12 +279,12 @@ class AgentViewModel(
                         requestId = pollingState.requestId,
                         etaSeconds = pollingState.etaSeconds
                     ))
-                    
+
                     val steps = listOf(
                         "درحال بررسی درخواست...",
                         "درحال ارسال درخواست (${pollingState.attempt}/${pollingState.maxAttempts})"
                     )
-                    
+
                     emit(PartialState.ProcessingStateUpdated(
                         AgentProcessingState(
                             steps = steps,
@@ -353,7 +365,7 @@ class AgentViewModel(
                         emit(PartialState.NewChatItems(listOf(item)))
                         cacheBubble(item)
                         sendEvent(AgentEvent.ScrollToBottom)
-                        
+
                         // Calculate how long this bubble takes to animate
                         val typingDuration = when (val content = item.content) {
                             is ChatBubbleContent.Text -> {
@@ -368,7 +380,7 @@ class AgentViewModel(
                             }
                             else -> 500L
                         }
-                        
+
                         // Wait for this bubble to finish before emitting the next
                         kotlinx.coroutines.delay(typingDuration + 200L)
                     }
@@ -385,7 +397,7 @@ class AgentViewModel(
                     emit(PartialState.NewChatItems(listOf(errorItem)))
                     sendEvent(AgentEvent.ShowError(pollingState.message))
                 }
-                
+
                 is AgentPollingState.Cancelled -> {
                     emit(PartialState.GenerationCancelled)
                     emit(PartialState.ProcessingStateUpdated(null))
@@ -883,8 +895,8 @@ class AgentViewModel(
 
         is PartialState.UpdateChatItem -> {
             currentState.copy(
-                chatItems = currentState.chatItems.map { 
-                    if (it.id == partialState.item.id) partialState.item else it 
+                chatItems = currentState.chatItems.map {
+                    if (it.id == partialState.item.id) partialState.item else it
                 }
             )
         }
@@ -915,6 +927,9 @@ class AgentViewModel(
 
         is PartialState.SessionsLoaded ->
             currentState.copy(sessions = partialState.sessions)
+
+        is PartialState.IdentityLoaded ->
+            currentState.copy(userFirstName = partialState.firstName)
 
         is PartialState.HistoryVisibilityChanged ->
             currentState.copy(isHistoryVisible = partialState.isVisible)

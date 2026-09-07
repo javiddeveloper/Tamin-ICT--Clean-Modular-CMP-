@@ -53,7 +53,9 @@ data class AgentUiState(
     /** Total length (ms) of that clip, for the pinned player's progress. */
     val voicePlaybackDurationMs: Int = 0,
     /** Whether that clip is actually sounding, as opposed to paused mid-way. */
-    val isVoicePlaying: Boolean = false
+    val isVoicePlaying: Boolean = false,
+    /** Logged-in user's first name, for the empty-state greeting. Null while unresolved. */
+    val userFirstName: String? = null
 ) {
     sealed interface PartialState {
         data class Loading(val isGenerating: Boolean) : PartialState
@@ -90,6 +92,7 @@ data class AgentUiState(
             val durationMs: Int = 0,
             val isPlaying: Boolean = false
         ) : PartialState
+        data class IdentityLoaded(val firstName: String?) : PartialState
     }
 }
 
