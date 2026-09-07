@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
@@ -83,12 +82,7 @@ fun DisabilityPensionIdentityContactStep(
         verticalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
         if (state.identityInfo == null) {
-            Box(
-                modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.xxl),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator()
-            }
+            DisabilityPensionInfoGridSkeleton()
         } else {
             IdentityInfoGrid(
                 tiles = listOf(

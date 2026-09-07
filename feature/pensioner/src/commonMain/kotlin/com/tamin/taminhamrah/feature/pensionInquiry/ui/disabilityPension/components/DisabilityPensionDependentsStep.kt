@@ -17,7 +17,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -80,12 +79,7 @@ fun DisabilityPensionDependentsStep(
 
         when {
             state.isDependentsLoading && state.dependents.isEmpty() -> {
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.xxl),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator()
-                }
+                DisabilityPensionDependentsListSkeleton()
             }
             state.dependents.isEmpty() -> {
                 TaminEmptyState(message = stringResource(Res.string.disability_pension_dependents_empty))
