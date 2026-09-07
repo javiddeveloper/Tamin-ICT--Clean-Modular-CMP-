@@ -161,9 +161,13 @@ fun ContractFlowScreen(
     )
 
     if (showRulesSheet) {
-        ContractRulesBottomSheet(
-            onDismiss = { showRulesSheet = false },
-        )
+        val rulesCopy = state.config?.rulesCopy
+        if (rulesCopy != null) {
+            ContractRulesBottomSheet(
+                rulesCopy = rulesCopy,
+                onDismiss = { showRulesSheet = false },
+            )
+        }
     }
 }
 
