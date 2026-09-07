@@ -29,6 +29,8 @@ import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractAff
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractAffairsHeader
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractAffairsItemCard
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractAffairsListSkeleton
+import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractCancelScreen
+import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractCancelSuccessDialog
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractOperationsSheet
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractSearchEmptyState
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractSearchFilterChipRow
@@ -269,6 +271,31 @@ internal fun ContractAffairsScreen(
                 )
             },
             onDismiss = { onIntent(ContractAffairsIntent.DismissContractOperations) },
+        )
+    }
+
+    if (uiState.showCancelSheet) {
+        uiState.cancelContract?.let { cancelContract ->
+            ContractCancelScreen(
+                contract = cancelContract,
+                reasons = uiState.cancelReasons,
+                isReasonsLoading = uiState.isCancelReasonsLoading,
+                selectedReason = uiState.selectedCancelReason,
+                description = uiState.cancelDescription,
+                isSubmitting = uiState.isCancelling,
+                onReasonSelected = { onIntent(ContractAffairsIntent.OnCancelReasonSelected(it)) },
+                onDescriptionChanged = {
+                    onIntent(ContractAffairsIntent.OnCancelDescriptionChanged(it))
+                },
+                onConfirm = { onIntent(ContractAffairsIntent.ConfirmCancelContract) },
+                onBack = { onIntent(ContractAffairsIntent.DismissCancelSheet) },
+            )
+        }
+    }
+
+    if (uiState.showCancelSuccess) {
+        ContractCancelSuccessDialog(
+            onDismiss = { onIntent(ContractAffairsIntent.DismissCancelSuccess) },
         )
     }
 

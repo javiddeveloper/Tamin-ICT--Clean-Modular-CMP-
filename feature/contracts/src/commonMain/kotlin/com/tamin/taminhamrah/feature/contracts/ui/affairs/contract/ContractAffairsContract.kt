@@ -69,6 +69,8 @@ data class ContractAffairsUiState(
     val selectedCancelReason: ContractStatePR? = null,
     val cancelDescription: String = "",
     val isCancelling: Boolean = false,
+    /** «قرارداد غیرفعال شد» — shown after a successful cancel request, cleared by the user. */
+    val showCancelSuccess: Boolean = false,
 
     // مشاهده قرارداد (PDF)
     val showPdfViewer: Boolean = false,
@@ -110,6 +112,8 @@ data class ContractAffairsUiState(
         data class CancelReasonSelected(val reason: ContractStatePR) : PartialState
         data class CancelDescriptionChanged(val description: String) : PartialState
         data class Cancelling(val inProgress: Boolean) : PartialState
+        data object CancelSucceeded : PartialState
+        data object CancelSuccessDismissed : PartialState
 
         data class PdfViewerVisibility(
             val visible: Boolean,
@@ -149,6 +153,7 @@ sealed interface ContractAffairsIntent {
     data class OnCancelReasonSelected(val reason: ContractStatePR) : ContractAffairsIntent
     data class OnCancelDescriptionChanged(val value: String) : ContractAffairsIntent
     data object ConfirmCancelContract : ContractAffairsIntent
+    data object DismissCancelSuccess : ContractAffairsIntent
 
     // مشاهده قرارداد
     data object RetryPdfDownload : ContractAffairsIntent

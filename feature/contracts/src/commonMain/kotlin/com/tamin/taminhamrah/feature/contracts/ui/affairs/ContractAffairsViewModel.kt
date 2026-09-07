@@ -105,6 +105,9 @@ class ContractAffairsViewModel(
 
             ContractAffairsIntent.ConfirmCancelContract -> confirmCancelContract()
 
+            ContractAffairsIntent.DismissCancelSuccess ->
+                flowOf(PartialState.CancelSuccessDismissed)
+
             ContractAffairsIntent.RetryPdfDownload ->
                 uiState.value.pdfContract?.let(::downloadContractReport) ?: emptyFlow()
 
@@ -299,6 +302,7 @@ class ContractAffairsViewModel(
                 ),
             ).collect()
             emit(PartialState.CancelSheetHidden)
+            emit(PartialState.CancelSucceeded)
             sendEvent(ContractAffairsEvent.ContractCancelled)
             refreshContracts().collect { emit(it) }
         } catch (e: Exception) {
@@ -389,6 +393,10 @@ class ContractAffairsViewModel(
             currentState.copy(cancelDescription = partialState.description)
 
         is PartialState.Cancelling -> currentState.copy(isCancelling = partialState.inProgress)
+
+        PartialState.CancelSucceeded -> currentState.copy(showCancelSuccess = true)
+
+        PartialState.CancelSuccessDismissed -> currentState.copy(showCancelSuccess = false)
 
         is PartialState.PdfViewerVisibility -> currentState.copy(
             showPdfViewer = partialState.visible,
