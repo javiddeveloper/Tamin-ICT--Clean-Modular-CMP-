@@ -2226,4 +2226,67 @@
     <string name="contract_treatment_support_yes">حمایت درمان دارد</string>
     <string name="contract_treatment_support_no">حمایت درمان ندارد</string>
 
+    <!-- Shared payment flow (feature:payment) -->
+    <string name="payment_title">پرداخت</string>
+    <string name="payment_currency_unit">ریال</string>
+    <string name="payment_amount_label">مبلغ قابل پرداخت</string>
+    <string name="payment_settled_amount_label">مبلغ تراکنش</string>
+    <string name="payment_id_label">شناسه پرداخت</string>
+    <string name="payment_reason_label">بابت</string>
+    <string name="payment_remaining_time_label">مهلت پرداخت</string>
+    <string name="payment_payer_section_title">پرداخت‌کننده</string>
+    <string name="payment_payer_section_description">مشخص کنید این پرداخت به نام چه کسی ثبت شود.</string>
+    <string name="payment_payer_current_user">خودم</string>
+    <string name="payment_payer_other_person">شخص حقیقی دیگر</string>
+    <string name="payment_payer_legal_entity">شخص حقوقی</string>
+    <string name="payment_payer_foreign_national">اتباع خارجی</string>
+    <string name="payment_payer_national_code_label">کد ملی پرداخت‌کننده</string>
+    <string name="payment_payer_legal_id_label">شناسه ملی شخص حقوقی</string>
+    <string name="payment_payer_foreign_id_label">کد اتباع</string>
+    <string name="payment_payer_national_code_error">کد ملی وارد شده معتبر نیست.</string>
+    <string name="payment_payer_legal_id_error">شناسه ملی باید ۱۱ رقم باشد.</string>
+    <string name="payment_payer_foreign_id_error">کد اتباع باید بین ۱۰ تا ۱۶ رقم باشد.</string>
+    <string name="payment_pay_action">پرداخت</string>
+    <string name="payment_ticket_missing">اطلاعات این تراکنش در دسترس نیست.</string>
+    <string name="payment_not_payable">این تراکنش دیگر قابل پرداخت نیست.</string>
+    <string name="payment_link_failed">امکان اتصال به درگاه پرداخت وجود ندارد.</string>
+    <string name="payment_expired_message">مهلت پرداخت این تراکنش به پایان رسید. لطفاً دوباره تلاش کنید.</string>
+    <string name="payment_cancel_confirm_title">لغو پرداخت</string>
+    <string name="payment_cancel_confirm_message">با بازگشت از این صفحه، تراکنش لغو می‌شود. ادامه می‌دهید؟</string>
+    <string name="payment_cancel_confirm_accept">بله، لغو کن</string>
+    <string name="payment_cancel_confirm_reject">ادامه پرداخت</string>
+    <string name="payment_result_title">نتیجه پرداخت</string>
+    <string name="payment_result_pending">در حال بررسی نتیجه پرداخت…</string>
+    <string name="payment_result_success_title">پرداخت با موفقیت انجام شد</string>
+    <string name="payment_result_verifying_message">تراکنش شما انجام شده و تسویه نهایی آن نزد درگاه در حال بررسی است.</string>
+    <string name="payment_result_failed_title">پرداخت انجام نشد</string>
+    <string name="payment_result_failed_message">مبلغی از حساب شما کسر نشده است. می‌توانید دوباره تلاش کنید.</string>
+    <string name="payment_result_expired_title">مهلت پرداخت به پایان رسید</string>
+    <string name="payment_result_unconfirmed_title">پرداخت انجام شد اما تأیید نهایی ثبت نشد</string>
+    <string name="payment_result_unconfirmed_message">مبلغ از حساب شما کسر شده است. شماره پیگیری زیر را نزد خود نگه دارید و در صورت باقی ماندن بدهی با شعبه تماس بگیرید.</string>
+    <string name="payment_reference_number_label">شماره پیگیری</string>
+    <string name="payment_trace_number_label">شماره مرجع</string>
+    <string name="payment_result_check_again">بررسی مجدد</string>
+    <string name="payment_result_done">بازگشت</string>
+
+    <!-- Developer options: payment gateway mock -->
+    <string name="developer_options_service_tfh">درگاه پرداخت</string>
+    <string name="developer_options_payment_mock_title">شبیه‌سازی درگاه پرداخت</string>
+    <string name="developer_options_payment_mock_description">وقتی درگاه واقعی در دسترس نیست، کل فلوی پرداخت با پاسخ ساختگی اجرا می‌شود.</string>
+    <string name="developer_options_payment_mock_disabled">غیرفعال (درگاه واقعی)</string>
+    <string name="developer_options_payment_mock_success">پاسخ موفق</string>
+    <string name="developer_options_payment_mock_failure">پاسخ ناموفق</string>
+    <string name="developer_options_test_payment_entry">سناریوهای پرداخت آزمایشی</string>
+
+    <!-- Debug-only payment sandbox (feature:payment) -->
+    <string name="payment_sandbox_title">سناریوهای پرداخت</string>
+    <string name="payment_sandbox_description">هر مورد یک تیکت تازه می‌سازد و کل فلوی پرداخت را با درگاه شبیه‌سازی‌شده اجرا می‌کند. نتیجه (موفق یا ناموفق) از حالت انتخاب‌شده در بالای همین صفحه پیروی می‌کند.</string>
+    <string name="payment_sandbox_scenario_workshop_debt">بدهی کارگاه (پرداخت غیرحضوری)</string>
+    <string name="payment_sandbox_scenario_debt_installment">قسط بدهی کارفرما</string>
+    <string name="payment_sandbox_scenario_construction_premium">حق‌بیمه ساختمان</string>
+    <string name="payment_sandbox_scenario_construction_workers">حق‌بیمه کارگران ساختمانی</string>
+    <string name="payment_sandbox_scenario_freelance">بیمه مشاغل آزاد</string>
+    <string name="payment_sandbox_scenario_optional">بیمه اختیاری</string>
+    <string name="payment_sandbox_scenario_student">بیمه دانشجویی</string>
+    <string name="payment_sandbox_scenario_unconfirmed">پرداخت موفق، تأیید ناموفق سرویس</string>
 </resources>

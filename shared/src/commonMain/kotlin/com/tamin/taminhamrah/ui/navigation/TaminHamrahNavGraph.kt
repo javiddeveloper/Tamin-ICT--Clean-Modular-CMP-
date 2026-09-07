@@ -100,6 +100,9 @@ import com.tamin.taminhamrah.feature.pensionInquiry.issuanceCertificateScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeservedTreatment
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDisabilityPension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPrescription
+import com.tamin.taminhamrah.feature.payment.PaymentRoute
+import com.tamin.taminhamrah.feature.payment.paymentGraph
+import com.tamin.taminhamrah.feature.payment.paymentSandboxScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.payrollScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.prescriptionScreen
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.pensionStatusInquiryGraph
@@ -485,6 +488,14 @@ internal fun TaminHamrahNavGraph(
                 deferredInstallmentScreen(onBack = { navController.popBackStack() })
                 girlSurvivorScreen(onBack = { navController.popBackStack() })
                 inquiryEducationScreen(onBack = { navController.popBackStack() })
+
+                // The shared payment flow. Any feature that has been handed a gateway ticket
+                // enters it with navController.navigateToPayment(request); finishing pops back to
+                // whichever screen started the payment.
+                paymentGraph(
+                    navController = navController,
+                    onFinished = { navController.popBackStack() },
+                )
                 pensionSurvivorScreen(
                     navController = navController,
                     onBack = { navController.popBackStack() })
@@ -538,7 +549,12 @@ internal fun TaminHamrahNavGraph(
                     developerOptionsScreen(
                         onNavigateBack = { navController.popBackStack() },
                         onNavigateToDebugLogin = { navController.navigate(DebugLoginRoute) },
-                        onNavigateToTokenManager = { navController.navigate(TokenManagerRoute) }
+                        onNavigateToTokenManager = { navController.navigate(TokenManagerRoute) },
+                        onStartTestPayment = { navController.navigate(PaymentRoute.Sandbox) }
+                    )
+                    paymentSandboxScreen(
+                        navController = navController,
+                        onNavigateBack = { navController.popBackStack() }
                     )
                     debugLoginScreen(onNavigateBack = { navController.popBackStack() })
                     tokenManagerScreen(onNavigateBack = { navController.popBackStack() })

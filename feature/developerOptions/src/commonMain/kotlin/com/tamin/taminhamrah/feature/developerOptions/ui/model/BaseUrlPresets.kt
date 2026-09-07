@@ -8,6 +8,7 @@ import taminx.core.core_ui.developer_options_service_account
 import taminx.core.core_ui.developer_options_service_ai
 import taminx.core.core_ui.developer_options_service_health_profile
 import taminx.core.core_ui.developer_options_service_main
+import taminx.core.core_ui.developer_options_service_tfh
 
 data class BaseUrlPreset(val label: String, val url: String)
 
@@ -17,6 +18,7 @@ fun BaseUrlKey.displayName(): String = when (this) {
     BaseUrlKey.ACCOUNT -> stringResource(Res.string.developer_options_service_account)
     BaseUrlKey.HEALTH_PROFILE -> stringResource(Res.string.developer_options_service_health_profile)
     BaseUrlKey.AI -> stringResource(Res.string.developer_options_service_ai)
+    BaseUrlKey.TFH -> stringResource(Res.string.developer_options_service_tfh)
 }
 
 /**
@@ -44,7 +46,8 @@ object BaseUrlPresets {
         BaseUrlKey.MAIN to true,
         BaseUrlKey.ACCOUNT to false,
         BaseUrlKey.HEALTH_PROFILE to true,
-        BaseUrlKey.AI to true
+        BaseUrlKey.AI to true,
+        BaseUrlKey.TFH to true
     )
 
     /**

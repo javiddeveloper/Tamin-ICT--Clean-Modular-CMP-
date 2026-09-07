@@ -19,13 +19,21 @@ object TokenManagerRoute
 fun NavGraphBuilder.developerOptionsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToDebugLogin: () -> Unit,
-    onNavigateToTokenManager: () -> Unit
+    onNavigateToTokenManager: () -> Unit,
+    /**
+     * Starts the shared payment flow on a throwaway ticket.
+     *
+     * Passed in as a callback rather than imported: `:feature:payment` is another feature, and
+     * feature modules do not depend on each other.
+     */
+    onStartTestPayment: () -> Unit
 ) {
     composableWithFadeTransitions<DeveloperOptionsRoute> {
         DeveloperOptionsScreen(
             onNavigateBack = onNavigateBack,
             onNavigateToDebugLogin = onNavigateToDebugLogin,
-            onNavigateToTokenManager = onNavigateToTokenManager
+            onNavigateToTokenManager = onNavigateToTokenManager,
+            onStartTestPayment = onStartTestPayment
         )
     }
 }

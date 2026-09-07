@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.core.datastore
 
 import com.russhwolf.settings.Settings
 import com.tamin.taminhamrah.model.BaseUrlKey
+import com.tamin.taminhamrah.model.payment.PaymentMockMode
 import com.tamin.taminhamrah.repository.DeveloperOptionsRepository
 import com.tamin.taminhamrah.util.AppConfig
 import kotlinx.coroutines.flow.Flow
@@ -9,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 private const val PREF_KEY_PREFIX = "dev_opt_base_url_"
+private const val PREF_KEY_PAYMENT_MOCK_MODE = "dev_opt_payment_mock_mode"
 
 class DeveloperOptionsRepositoryImpl(
     private val settings: Settings,
@@ -16,6 +18,7 @@ class DeveloperOptionsRepositoryImpl(
 ) : DeveloperOptionsRepository {
 
     private val _overrides = MutableStateFlow(loadOverrides())
+    private val _paymentMockMode = MutableStateFlow(loadPaymentMockMode())
 
     private fun loadOverrides(): Map<BaseUrlKey, String> =
         BaseUrlKey.entries.mapNotNull { key ->
@@ -43,5 +46,24 @@ class DeveloperOptionsRepositoryImpl(
     override fun clearOverride(key: BaseUrlKey) {
         settings.remove(prefKey(key))
         _overrides.value = _overrides.value - key
+    }
+
+    private fun loadPaymentMockMode(): PaymentMockMode =
+        settings.getStringOrNull(PREF_KEY_PAYMENT_MOCK_MODE)
+            ?.let { stored -> PaymentMockMode.entries.firstOrNull { it.name == stored } }
+            ?: PaymentMockMode.DISABLED
+
+    /**
+     * Guarded exactly like [getEffectiveBaseUrl]: a release build must never answer a payment call
+     * from a fake, whatever a previous debug install left in shared app storage.
+     */
+    override fun getPaymentMockMode(): PaymentMockMode =
+        if (AppConfig.isDebug) _paymentMockMode.value else PaymentMockMode.DISABLED
+
+    override fun observePaymentMockMode(): Flow<PaymentMockMode> = _paymentMockMode.asStateFlow()
+
+    override fun setPaymentMockMode(mode: PaymentMockMode) {
+        settings.putString(PREF_KEY_PAYMENT_MOCK_MODE, mode.name)
+        _paymentMockMode.value = mode
     }
 }
