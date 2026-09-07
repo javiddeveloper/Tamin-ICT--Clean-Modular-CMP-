@@ -22,7 +22,6 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,179 +34,25 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.contract_rules_sheet_freelance_p1
-import taminx.core.core_ui.contract_rules_sheet_freelance_section1_item1
-import taminx.core.core_ui.contract_rules_sheet_freelance_section1_item2
-import taminx.core.core_ui.contract_rules_sheet_freelance_section1_item3
-import taminx.core.core_ui.contract_rules_sheet_freelance_section1_item4
-import taminx.core.core_ui.contract_rules_sheet_freelance_section1_title
-import taminx.core.core_ui.contract_rules_sheet_freelance_section2_item1
-import taminx.core.core_ui.contract_rules_sheet_freelance_section2_item2
-import taminx.core.core_ui.contract_rules_sheet_freelance_section2_item3
-import taminx.core.core_ui.contract_rules_sheet_freelance_section2_title
-import taminx.core.core_ui.contract_rules_sheet_housewife_p1
-import taminx.core.core_ui.contract_rules_sheet_housewife_section1_item1
-import taminx.core.core_ui.contract_rules_sheet_housewife_section1_item2
-import taminx.core.core_ui.contract_rules_sheet_housewife_section1_item3
-import taminx.core.core_ui.contract_rules_sheet_housewife_section1_item4
-import taminx.core.core_ui.contract_rules_sheet_housewife_section1_title
-import taminx.core.core_ui.contract_rules_sheet_housewife_section2_item1
-import taminx.core.core_ui.contract_rules_sheet_housewife_section2_item2
-import taminx.core.core_ui.contract_rules_sheet_housewife_section2_item3
-import taminx.core.core_ui.contract_rules_sheet_housewife_section2_title
-import taminx.core.core_ui.contract_rules_sheet_optional_p1
-import taminx.core.core_ui.contract_rules_sheet_optional_section1_item1
-import taminx.core.core_ui.contract_rules_sheet_optional_section1_item2
-import taminx.core.core_ui.contract_rules_sheet_optional_section1_item3
-import taminx.core.core_ui.contract_rules_sheet_optional_section1_item4
-import taminx.core.core_ui.contract_rules_sheet_optional_section1_title
-import taminx.core.core_ui.contract_rules_sheet_optional_section2_item1
-import taminx.core.core_ui.contract_rules_sheet_optional_section2_item2
-import taminx.core.core_ui.contract_rules_sheet_optional_section2_item3
-import taminx.core.core_ui.contract_rules_sheet_optional_section2_title
 import taminx.core.core_ui.contract_rules_sheet_page_counter
-import taminx.core.core_ui.contract_rules_sheet_student_p1
-import taminx.core.core_ui.contract_rules_sheet_student_section1_item1
-import taminx.core.core_ui.contract_rules_sheet_student_section1_item2
-import taminx.core.core_ui.contract_rules_sheet_student_section1_item3
-import taminx.core.core_ui.contract_rules_sheet_student_section1_item4
-import taminx.core.core_ui.contract_rules_sheet_student_section1_title
-import taminx.core.core_ui.contract_rules_sheet_student_section2_item1
-import taminx.core.core_ui.contract_rules_sheet_student_section2_item2
-import taminx.core.core_ui.contract_rules_sheet_student_section2_item3
-import taminx.core.core_ui.contract_rules_sheet_student_section2_title
-import taminx.core.core_ui.contract_rules_sheet_title_freelance
-import taminx.core.core_ui.contract_rules_sheet_title_housewife
-import taminx.core.core_ui.contract_rules_sheet_title_optional
-import taminx.core.core_ui.contract_rules_sheet_title_student
 import taminx.core.core_ui.contract_rules_sheet_understood
-
-@Immutable
-data class ContractRulesSection(
-    val title: String,
-    val items: List<String>,
-)
-
-@Immutable
-data class ContractRulesContent(
-    val title: String,
-    val intro: String,
-    val sections: List<ContractRulesSection>,
-)
-
-enum class ContractRulesVariant {
-    STUDENT,
-    FREELANCE,
-    HOUSEWIFE,
-    OPTIONAL,
-}
-
-@Composable
-fun contractRulesContent(variant: ContractRulesVariant): ContractRulesContent = when (variant) {
-    ContractRulesVariant.STUDENT -> ContractRulesContent(
-        title = stringResource(Res.string.contract_rules_sheet_title_student),
-        intro = stringResource(Res.string.contract_rules_sheet_student_p1),
-        sections = listOf(
-            ContractRulesSection(
-                title = stringResource(Res.string.contract_rules_sheet_student_section1_title),
-                items = listOf(
-                    stringResource(Res.string.contract_rules_sheet_student_section1_item1),
-                    stringResource(Res.string.contract_rules_sheet_student_section1_item2),
-                    stringResource(Res.string.contract_rules_sheet_student_section1_item3),
-                    stringResource(Res.string.contract_rules_sheet_student_section1_item4),
-                ),
-            ),
-            ContractRulesSection(
-                title = stringResource(Res.string.contract_rules_sheet_student_section2_title),
-                items = listOf(
-                    stringResource(Res.string.contract_rules_sheet_student_section2_item1),
-                    stringResource(Res.string.contract_rules_sheet_student_section2_item2),
-                    stringResource(Res.string.contract_rules_sheet_student_section2_item3),
-                ),
-            ),
-        ),
-    )
-    ContractRulesVariant.FREELANCE -> ContractRulesContent(
-        title = stringResource(Res.string.contract_rules_sheet_title_freelance),
-        intro = stringResource(Res.string.contract_rules_sheet_freelance_p1),
-        sections = listOf(
-            ContractRulesSection(
-                title = stringResource(Res.string.contract_rules_sheet_freelance_section1_title),
-                items = listOf(
-                    stringResource(Res.string.contract_rules_sheet_freelance_section1_item1),
-                    stringResource(Res.string.contract_rules_sheet_freelance_section1_item2),
-                    stringResource(Res.string.contract_rules_sheet_freelance_section1_item3),
-                    stringResource(Res.string.contract_rules_sheet_freelance_section1_item4),
-                ),
-            ),
-            ContractRulesSection(
-                title = stringResource(Res.string.contract_rules_sheet_freelance_section2_title),
-                items = listOf(
-                    stringResource(Res.string.contract_rules_sheet_freelance_section2_item1),
-                    stringResource(Res.string.contract_rules_sheet_freelance_section2_item2),
-                    stringResource(Res.string.contract_rules_sheet_freelance_section2_item3),
-                ),
-            ),
-        ),
-    )
-    ContractRulesVariant.HOUSEWIFE -> ContractRulesContent(
-        title = stringResource(Res.string.contract_rules_sheet_title_housewife),
-        intro = stringResource(Res.string.contract_rules_sheet_housewife_p1),
-        sections = listOf(
-            ContractRulesSection(
-                title = stringResource(Res.string.contract_rules_sheet_housewife_section1_title),
-                items = listOf(
-                    stringResource(Res.string.contract_rules_sheet_housewife_section1_item1),
-                    stringResource(Res.string.contract_rules_sheet_housewife_section1_item2),
-                    stringResource(Res.string.contract_rules_sheet_housewife_section1_item3),
-                    stringResource(Res.string.contract_rules_sheet_housewife_section1_item4),
-                ),
-            ),
-            ContractRulesSection(
-                title = stringResource(Res.string.contract_rules_sheet_housewife_section2_title),
-                items = listOf(
-                    stringResource(Res.string.contract_rules_sheet_housewife_section2_item1),
-                    stringResource(Res.string.contract_rules_sheet_housewife_section2_item2),
-                    stringResource(Res.string.contract_rules_sheet_housewife_section2_item3),
-                ),
-            ),
-        ),
-    )
-    ContractRulesVariant.OPTIONAL -> ContractRulesContent(
-        title = stringResource(Res.string.contract_rules_sheet_title_optional),
-        intro = stringResource(Res.string.contract_rules_sheet_optional_p1),
-        sections = listOf(
-            ContractRulesSection(
-                title = stringResource(Res.string.contract_rules_sheet_optional_section1_title),
-                items = listOf(
-                    stringResource(Res.string.contract_rules_sheet_optional_section1_item1),
-                    stringResource(Res.string.contract_rules_sheet_optional_section1_item2),
-                    stringResource(Res.string.contract_rules_sheet_optional_section1_item3),
-                    stringResource(Res.string.contract_rules_sheet_optional_section1_item4),
-                ),
-            ),
-            ContractRulesSection(
-                title = stringResource(Res.string.contract_rules_sheet_optional_section2_title),
-                items = listOf(
-                    stringResource(Res.string.contract_rules_sheet_optional_section2_item1),
-                    stringResource(Res.string.contract_rules_sheet_optional_section2_item2),
-                    stringResource(Res.string.contract_rules_sheet_optional_section2_item3),
-                ),
-            ),
-        ),
-    )
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContractRulesBottomSheet(
-    content: ContractRulesContent,
+    rulesCopy: ContractRulesCopy,
     onDismiss: () -> Unit,
     pageCounter: String = stringResource(Res.string.contract_rules_sheet_page_counter),
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
 ) {
     val colors = LocalTaminColors.current
     val cardShape = RoundedCornerShape(CornerRadius.card)
+    val title = stringResource(rulesCopy.titleRes)
+    val intro = stringResource(rulesCopy.introRes)
+    val section1Title = stringResource(rulesCopy.section1TitleRes)
+    val section1Items = rulesCopy.section1ItemRes.map { stringResource(it) }
+    val section2Title = stringResource(rulesCopy.section2TitleRes)
+    val section2Items = rulesCopy.section2ItemRes.map { stringResource(it) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -227,7 +72,7 @@ fun ContractRulesBottomSheet(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    text = content.title,
+                    text = title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = colors.textPrimary,
@@ -261,26 +106,40 @@ fun ContractRulesBottomSheet(
                 verticalArrangement = Arrangement.spacedBy(Spacing.md),
             ) {
                 Text(
-                    text = content.intro,
+                    text = intro,
                     style = MaterialTheme.typography.bodyMedium,
                     color = colors.textSecondary,
                 )
 
-                content.sections.forEach { section ->
-                    Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                    Text(
+                        text = section1Title,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = colors.textPrimary,
+                    )
+                    section1Items.forEach { item ->
                         Text(
-                            text = section.title,
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = colors.textPrimary,
+                            text = item,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = colors.textSecondary,
                         )
-                        section.items.forEach { item ->
-                            Text(
-                                text = item,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = colors.textSecondary,
-                            )
-                        }
+                    }
+                }
+
+                Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                    Text(
+                        text = section2Title,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = colors.textPrimary,
+                    )
+                    section2Items.forEach { item ->
+                        Text(
+                            text = item,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = colors.textSecondary,
+                        )
                     }
                 }
             }
@@ -301,7 +160,7 @@ fun ContractRulesBottomSheet(
 private fun ContractRulesBottomSheetContentPreview() {
     com.tamin.taminhamrah.ui.PreviewRtlThemeContent {
         ContractRulesBottomSheet(
-            content = contractRulesContent(ContractRulesVariant.FREELANCE),
+            rulesCopy = ContractRulesCopies.Student,
             onDismiss = {},
         )
     }

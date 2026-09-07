@@ -7,7 +7,7 @@ import com.tamin.taminhamrah.contractFlow.isLastStep
 import com.tamin.taminhamrah.contractFlow.nextStep
 import com.tamin.taminhamrah.contractFlow.previousStep
 import com.tamin.taminhamrah.model.common.FeatureFlag
-import com.tamin.taminhamrah.ui.contractFlow.ContractRulesVariant
+import com.tamin.taminhamrah.ui.contractFlow.ContractRulesCopy
 import org.jetbrains.compose.resources.StringResource
 
 interface ContractFlowConfig {
@@ -24,7 +24,7 @@ interface ContractFlowConfig {
     val hasTreatmentSupportStep: Boolean
     val hasPremiumRateStep: Boolean
     val rulesPdfPath: String
-    val rulesVariant: ContractRulesVariant
+    val rulesCopy: ContractRulesCopy
     val requiresFemaleGender: Boolean
     val fixedFreeJobCode: String?
     val allowsOnlinePaymentAfterSubmit: Boolean
