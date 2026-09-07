@@ -82,7 +82,6 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.components.NumericText
-import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.coloredShadow
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.History
@@ -252,10 +251,10 @@ private fun ChatLayout(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        // Full-bleed backdrop, behind the top bar too — otherwise its glass blur has
-        // nothing colorful to sample and washes out to the page's plain background.
+        // Full-bleed backdrop (Figma 90:14), behind the top bar too — otherwise its
+        // glass blur has nothing colorful to sample and washes out to the plain page.
         if (isEmptyState) {
-            EmptyStateBackground(
+            AgentBackground(
                 modifier = Modifier
                     .fillMaxSize()
                     .safeHazeSource(state = hazeState)
@@ -1837,39 +1836,6 @@ private fun InputBarGlassButton(
 }
 
 // ─── Empty State ──────────────────────────────────────────────────────────────
-
-/**
- * Full-bleed backdrop for the empty state — spans the *entire* screen (behind the top bar
- * and input bar too), not just the content area. The top bar's glass blur samples whatever
- * sits behind it via the shared [HazeState]; confining this gradient to the content area
- * left the bar with nothing colorful to blur, so it washed out to the page's plain
- * background instead of reading as glass over purple.
- */
-@Composable
-private fun EmptyStateBackground(modifier: Modifier = Modifier) {
-    val taminColors = LocalTaminColors.current
-    Box(
-        modifier = modifier.background(taminColors.aiAssistantGradient)
-    ) {
-        // Decorative blurred blobs, matching the Figma welcome screen backdrop.
-        DecorativeBackgroundCircle(
-            size = 260.dp, xOffset = 150.dp, yOffset = (-30).dp,
-            color = Color.White.copy(alpha = 0.10f)
-        )
-        DecorativeBackgroundCircle(
-            size = 220.dp, xOffset = (-110).dp, yOffset = 420.dp,
-            color = taminColors.aiAssistantTint.copy(alpha = 0.35f)
-        )
-        DecorativeBackgroundCircle(
-            size = 200.dp, xOffset = 90.dp, yOffset = 260.dp,
-            color = Color(0xFF3F5BD9).copy(alpha = 0.30f)
-        )
-        DecorativeBackgroundCircle(
-            size = 160.dp, xOffset = (-30).dp, yOffset = 90.dp,
-            color = Color.White.copy(alpha = 0.08f)
-        )
-    }
-}
 
 @Composable
 private fun EmptyState(
