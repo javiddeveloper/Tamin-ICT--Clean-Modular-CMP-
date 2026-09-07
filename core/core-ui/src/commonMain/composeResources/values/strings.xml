@@ -2054,7 +2054,8 @@
     <string name="contract_affairs_count_label">قرارداد</string>
     <string name="contract_affairs_empty_title">قراردادی یافت نشد</string>
     <string name="contract_affairs_empty_subtitle">قراردادی برای شما ثبت نشده است</string>
-    <string name="contract_affairs_new_contract_sheet_title">انتخاب نوع قرارداد</string>
+    <string name="contract_affairs_new_contract_sheet_title">نوع قرارداد را انتخاب کنید</string>
+    <string name="contract_affairs_new_contract_sheet_description">هر نوع قرارداد شرایط و نرخ حق بیمهٔ خودش را دارد؛ پس از انتخاب، فرم انعقاد همان قرارداد باز می‌شود</string>
     <string name="contract_affairs_request_date">تاریخ درخواست</string>
     <string name="contract_affairs_contract_code">شماره قرارداد</string>
     <string name="contract_affairs_premium_rate">نرخ حق بیمه</string>
@@ -2083,4 +2084,12 @@
     <string name="contract_affairs_filter_label">فیلتر:</string>
     <string name="contract_affairs_filter_clear">حذف فیلتر</string>
     <string name="contract_affairs_filter_number">شماره</string>
+    <string name="contract_type_student_title">قرارداد بیمهٔ دانشجویی</string>
+    <string name="contract_type_student_desc">برای دانشجویان شاغل به تحصیل در دانشگاه‌های مورد تأیید</string>
+    <string name="contract_type_housewife_title">قرارداد بیمهٔ زنان خانه‌دار</string>
+    <string name="contract_type_housewife_desc">بانوان خانه‌دار و دختران مجرد بدون پوشش بیمهٔ اجباری</string>
+    <string name="contract_type_freelance_title">قرارداد صاحبان حرف و مشاغل آزاد</string>
+    <string name="contract_type_freelance_desc">شاغلان مشاغل آزاد با کد شغلی مشخص</string>
+    <string name="contract_type_optional_title">قرارداد بیمهٔ اختیاری</string>
+    <string name="contract_type_optional_desc">ادامهٔ بیمه با حداقل ۳۰ ماه سابقهٔ قبلی</string>
 </resources>

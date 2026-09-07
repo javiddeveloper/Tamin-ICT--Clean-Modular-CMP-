@@ -1,10 +1,8 @@
 package com.tamin.taminhamrah.feature.contracts.ui.affairs
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -16,12 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Description
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractAffairsActionRow
@@ -39,25 +32,22 @@ import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractAff
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractSearchEmptyState
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractSearchFilterChipRow
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractSearchSheet
+import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.NewContractSheet
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.contract.ContractAffairsEvent
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.contract.ContractAffairsIntent
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.contract.ContractAffairsUiState
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.contract.ContractOperation
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.contract.ContractSearchFilter
 import com.tamin.taminhamrah.model.common.FeatureFlag
-import com.tamin.taminhamrah.model.common.MainServiceDN
-import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.model.contracts.ContractPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
-import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
 import com.tamin.taminhamrah.ui.components.toast.AppToastHost
-import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toparea.driveTopArea
@@ -71,7 +61,6 @@ import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.contract_affairs_empty_subtitle
 import taminx.core.core_ui.contract_affairs_empty_title
-import taminx.core.core_ui.contract_affairs_new_contract_sheet_title
 
 /**
  * امور قراردادها و پرداخت.
@@ -247,9 +236,8 @@ internal fun ContractAffairsScreen(
 
     if (showNewContractSheet) {
         NewContractSheet(
-            options = uiState.newContractOptions,
-            onServiceClick = {
-                onIntent(ContractAffairsIntent.OnNewContractServiceClick(it))
+            onServiceClick = { flag ->
+                onIntent(ContractAffairsIntent.OnNewContractOptionClick(flag))
                 showNewContractSheet = false
             },
             onDismiss = { showNewContractSheet = false },
@@ -277,61 +265,6 @@ internal fun ContractAffairsScreen(
 private fun primaryOperationFor(contract: ContractPR): ContractOperation =
     if (contract.premiumTypeCode == "38") ContractOperation.VIEW_CONTRACT
     else ContractOperation.PAY_PREMIUM
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun NewContractSheet(
-    options: List<MainServiceDN>,
-    onServiceClick: (MainServiceDN) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    val colors = LocalTaminColors.current
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = colors.bgSurface,
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = Spacing.page)
-                .padding(bottom = Spacing.xlg),
-            verticalArrangement = Arrangement.spacedBy(Spacing.xs),
-        ) {
-            TaminText(
-                text = stringResource(Res.string.contract_affairs_new_contract_sheet_title),
-                color = colors.textPrimary,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(vertical = Spacing.md),
-            )
-
-            options.forEach { service ->
-                val disabled = service.status == MenuServiceStatusDN.DISABLED ||
-                    service.status == MenuServiceStatusDN.TEMPORARY_DISABLED ||
-                    service.status == MenuServiceStatusDN.COMPLETELY_DISABLED
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable(enabled = !disabled) { onServiceClick(service) }
-                        .background(colors.bgPage, RoundedCornerShape(CornerRadius.lg))
-                        .padding(horizontal = Spacing.lg, vertical = Spacing.md),
-                    verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
-                ) {
-                    TaminText(
-                        text = service.name.orEmpty(),
-                        color = if (disabled) colors.textMuted else colors.textPrimary,
-                    )
-                    if (!service.message.isNullOrBlank()) {
-                        TaminText(text = service.message!!, color = colors.dangerText)
-                    }
-                }
-            }
-        }
-    }
-}
 
 @PreviewRtlTheme
 @Composable

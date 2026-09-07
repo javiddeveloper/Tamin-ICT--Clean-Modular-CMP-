@@ -143,7 +143,7 @@ sealed interface ContractAffairsIntent {
 
     data object ClearSearch : ContractAffairsIntent
 
-    data class OnNewContractServiceClick(val service: MainServiceDN) : ContractAffairsIntent
+    data class OnNewContractOptionClick(val flag: FeatureFlag) : ContractAffairsIntent
 
     data class ShowContractOperations(val contract: ContractPR) : ContractAffairsIntent
     data object DismissContractOperations : ContractAffairsIntent

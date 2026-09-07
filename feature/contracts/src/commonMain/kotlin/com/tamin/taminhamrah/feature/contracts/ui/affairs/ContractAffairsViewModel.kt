@@ -80,8 +80,8 @@ class ContractAffairsViewModel(
             is ContractAffairsIntent.ApplySearch -> applySearch(intent)
             ContractAffairsIntent.ClearSearch -> clearSearch()
 
-            is ContractAffairsIntent.OnNewContractServiceClick ->
-                handleNewContractServiceClick(intent.service)
+            is ContractAffairsIntent.OnNewContractOptionClick ->
+                handleNewContractOptionClick(intent.flag)
 
             is ContractAffairsIntent.ShowContractOperations -> flowOf(
                 PartialState.OperationsSheetShown(
@@ -315,8 +315,7 @@ class ContractAffairsViewModel(
 
     // ---- انعقاد قرارداد جدید ----
 
-    private fun handleNewContractServiceClick(service: MainServiceDN): Flow<PartialState> = flow {
-        val flag = FeatureFlag.fromId(service.id) ?: return@flow
+    private fun handleNewContractOptionClick(flag: FeatureFlag): Flow<PartialState> = flow {
         when (val status = featureManager.getFeatureStatus(flag).first()) {
             is FeatureStatus.Enabled -> sendEvent(ContractAffairsEvent.NavigateToService(flag))
             is FeatureStatus.Disabled ->
