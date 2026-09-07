@@ -31,6 +31,39 @@ data class ContractRowQuery(
     val pageSize: Int = WORKSHOP_PAGE_SIZE,
 )
 
+/**
+ * What one page of the واگذارندگان list is asked for.
+ *
+ * All three are **filter clauses**, not path segments — the opposite of [ContractRowQuery]. A blank
+ * one is left out of the filter array and widens the result rather than addressing another route,
+ * which is why only [workshopId] is required, and required by the *design* rather than by the
+ * service: an employer with many پیمان would otherwise open the screen onto an unbounded list.
+ */
+data class AssignerContractQuery(
+    val workshopId: String,
+    val branchCode: String? = null,
+    val contractRow: String? = null,
+    val page: Int = 0,
+    val pageSize: Int = WORKSHOP_PAGE_SIZE,
+)
+
+/**
+ * What one page of a پیمان's مبانی محاسباتی is asked for.
+ *
+ * Four keys, all non-null, and all four are needed: the service treats a missing one as "no
+ * filter on that column" and answers with bases belonging to other contracts of the same workshop.
+ * The old app reads all four off the tapped row — workshop and branch from the **پیمانکار** side —
+ * and so does [com.tamin.taminhamrah.model.workshop.AssignerContractDN].
+ */
+data class ComputationalBaseQuery(
+    val workshopId: String,
+    val branchCode: String,
+    val contractRow: String,
+    val contractSequence: String,
+    val page: Int = 0,
+    val pageSize: Int = WORKSHOP_PAGE_SIZE,
+)
+
 /** Filters of the برگ پرداخت‌ها search sheet. All optional, all matched exactly. */
 data class PaymentSheetQuery(
     val workshopId: String,
