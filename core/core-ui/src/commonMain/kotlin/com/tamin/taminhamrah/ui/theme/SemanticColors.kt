@@ -135,6 +135,13 @@ data class TaminColors(
      * content on them does not follow the page.
      */
     val onGradient: Color,
+
+    /**
+     * The unselected page dot under the home campaigns carousel. The selected one is [blueText],
+     * which the design names directly (`--tm-blue-text`); only the idle tone needed a token of its
+     * own, because it sits on the page rather than on a card and so has to follow the theme.
+     */
+    val campaignDotIdle: Color,
 )
 
 val LightTaminColors = TaminColors(
@@ -260,6 +267,7 @@ val LightTaminColors = TaminColors(
     verifiedIconBg = TaminLightSurface,
     verifiedIconTint = TaminLightSuccess, // greenText
     onGradient = Color.White,
+    campaignDotIdle = CampaignDotIdle,
 )
 
 val DarkTaminColors = TaminColors(
@@ -391,5 +399,8 @@ val DarkTaminColors = TaminColors(
     verifiedIconBg = TaminDarkGreenBg, // greenBg
     verifiedIconTint = TaminDarkSuccess, // greenText
     onGradient = Color.White,
+    // The design has no dark variant for this section; the page's own chevron gray is the closest
+    // token that stays legible against the dark page.
+    campaignDotIdle = TaminDarkChevron,
 )
 
