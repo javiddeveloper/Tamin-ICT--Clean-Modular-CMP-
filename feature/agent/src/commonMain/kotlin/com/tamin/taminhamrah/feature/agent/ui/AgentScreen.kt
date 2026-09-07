@@ -22,7 +22,16 @@ import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.CreditCard
+import androidx.compose.material.icons.filled.Redeem
+import androidx.compose.material.icons.filled.MedicalServices
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import kotlinx.coroutines.delay
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -35,6 +44,9 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.blur
@@ -65,6 +77,11 @@ import com.tamin.taminhamrah.ui.blur.AppBarScrim
 import com.tamin.taminhamrah.ui.blur.safeHazeEffect
 import com.tamin.taminhamrah.ui.blur.safeHazeSource
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
+import com.tamin.taminhamrah.ui.components.coloredShadow
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Share
@@ -163,7 +180,8 @@ fun AgentScreen(
             uiState = uiState,
             listState = listState,
             onIntent = { viewModel.sendIntent(it) },
-            onRequestScroll = requestScrollToBottom
+            onRequestScroll = requestScrollToBottom,
+            onNavigateBack = onNavigateBack
         )
     }
 }
@@ -173,12 +191,19 @@ private fun AgentContent(
     uiState: AgentUiState,
     listState: LazyListState,
     onIntent: (AgentIntent) -> Unit,
-    onRequestScroll: () -> Unit
+    onRequestScroll: () -> Unit,
+    onNavigateBack: () -> Unit
 ) {
     when {
         uiState.isCheckingPermission -> PermissionCheckingIndicator()
         uiState.isNotAllowed        -> NotAllowedMessage(message = uiState.notAllowedMessage)
-        else -> ChatLayout(uiState = uiState, listState = listState, onIntent = onIntent, onRequestScroll = onRequestScroll)
+        else -> ChatLayout(
+            uiState = uiState,
+            listState = listState,
+            onIntent = onIntent,
+            onRequestScroll = onRequestScroll,
+            onNavigateBack = onNavigateBack
+        )
     }
 
     // Saved conversations. Rendered here rather than inside ChatLayout so it stays
@@ -201,7 +226,8 @@ private fun ChatLayout(
     uiState: AgentUiState,
     listState: LazyListState,
     onIntent: (AgentIntent) -> Unit,
-    onRequestScroll: () -> Unit
+    onRequestScroll: () -> Unit,
+    onNavigateBack: () -> Unit
 ) {
     val hazeState = remember { HazeState() }
     val density = LocalDensity.current
@@ -218,13 +244,27 @@ private fun ChatLayout(
         layoutScope.launch { listState.animateScrollToItem(index) }
     }
 
+    val isEmptyState = uiState.chatItems.isEmpty() && !uiState.isGenerating
+
     Box(
         modifier = Modifier
             .fillMaxSize()
     ) {
+        // Full-bleed backdrop, behind the top bar too — otherwise its glass blur has
+        // nothing colorful to sample and washes out to the page's plain background.
+        if (isEmptyState) {
+            EmptyStateBackground(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .safeHazeSource(state = hazeState)
+            )
+        }
+
         // ── Scrolling content: the haze source, sitting behind both bars ──
-        if (uiState.chatItems.isEmpty() && !uiState.isGenerating) {
+        if (isEmptyState) {
             EmptyState(
+                userFirstName = uiState.userFirstName,
+                onSuggestionClick = { onIntent(AgentIntent.SendTextPrompt(it)) },
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(top = topPad, bottom = bottomPad)
@@ -319,8 +359,11 @@ private fun ChatLayout(
         // ── Top toolbar: blurred, overlays the content, seen-through from the top ──
         AgentTopBar(
             isGenerating = uiState.isGenerating,
+            isOffline = uiState.isOffline,
+            sessionsCount = uiState.sessions.size,
             hazeState = hazeState,
             onIntent = onIntent,
+            onNavigateBack = onNavigateBack,
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .onSizeChanged { topBarHeightPx = it.height }
@@ -381,115 +424,259 @@ private fun ChatLayout(
     }
 }
 
+// Exact values pulled from the Figma node (90:87 "Background+Border+Shadow+OverlayBlur") —
+// this card has no equivalent in the shared TaminColors palette, so its glass/gradient/shadow
+// colors are reproduced literally rather than approximated from existing tokens.
+private val TopBarCardShape = RoundedCornerShape(22.dp)
+private val TopBarTileShape = RoundedCornerShape(13.dp)
+private val TopBarIconTint = Color(0xFFD5E1FA)
+private val TopBarSubtitleColor = Color(0xFFA9BDE6)
+private val TopBarShadowColor = Color(0xFF040A1E)
+private val TopBarAvatarGlow = Color(0xFF7850F0)
+private val TopBarBadgeGradient = Brush.linearGradient(listOf(Color(0xFF7C5CFF), Color(0xFF3B6FD4)))
+private val TopBarAvatarSweep = Brush.sweepGradient(
+    listOf(Color(0xFF5B46E4), Color(0xFFBA6CFF), Color(0xFF1B3A8A), Color(0xFFB6D0FF), Color(0xFF5B46E4))
+)
+private val TopBarOnlineDotColor = Color(0xFF3DDC84)
+
+/**
+ * Rich persona header replacing the old plain title bar: assistant name + online status on
+ * one side, history (with a saved-conversation-count badge) and new-chat actions on the
+ * other, and a back chevron at the far edge — matches the Figma "یارا" top bar card
+ * (node 90:87), reproduced at 1:1 spacing/color fidelity rather than approximated.
+ */
 @Composable
 private fun AgentTopBar(
     isGenerating: Boolean,
+    isOffline: Boolean,
+    sessionsCount: Int,
     hazeState: HazeState,
     onIntent: (AgentIntent) -> Unit,
+    onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val taminColors = LocalTaminColors.current
-    // Single tint color derived from the theme's AI-assistant gradient family (its first stop).
-    val topBarTint = taminColors.aiAssistantTint
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .safeHazeEffect(
-                state = hazeState,
-                style = HazeStyle(
-                    blurRadius = 28.dp,
-                    noiseFactor = 0.03f,
-                    tint = HazeTint(
-                        color = topBarTint.copy(alpha = 0.55f)
-                    )
-                ),
-                fallbackColor = topBarTint.copy(alpha = 0.9f)
-            )
+            .windowInsetsPadding(WindowInsets.statusBars)
+            .padding(horizontal = 14.dp, vertical = 5.dp)
     ) {
-        // Gradient overlay on top of the blur — reuse the theme token so it stays
-        // consistent across light/dark. Alpha lets the blur show through.
         Box(
             modifier = Modifier
-                .matchParentSize()
-                .alpha(0.55f)
-                .background(taminColors.aiAssistantGradient)
-        )
-        TopAppBar(
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.Transparent,
-                titleContentColor = Color.White,
-                actionIconContentColor = Color.White,
-                navigationIconContentColor = Color.White
-            ),
-            title = {
-                Column {
-                    Text(
-                        text = "دستیار هوشمند تأمین",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
+                .fillMaxWidth()
+                .height(67.dp)
+                .shadow(
+                    elevation = 20.dp,
+                    shape = TopBarCardShape,
+                    ambientColor = TopBarShadowColor.copy(alpha = 0.4f),
+                    spotColor = TopBarShadowColor.copy(alpha = 0.4f)
+                )
+                .clip(TopBarCardShape)
+                .safeHazeEffect(
+                    state = hazeState,
+                    style = HazeStyle(
+                        blurRadius = 26.dp,
+                        noiseFactor = 0.03f,
+                        tint = HazeTint(color = Color.White.copy(alpha = 0.08f))
+                    ),
+                    fallbackColor = LocalTaminColors.current.aiAssistantTint.copy(alpha = 0.85f)
+                )
+                .border(1.dp, Color.White.copy(alpha = 0.18f), TopBarCardShape)
+        ) {
+            // The card's own subtle glass sheen — 16% white fading to 5%, diagonal.
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(
+                        Brush.linearGradient(
+                            listOf(Color.White.copy(alpha = 0.16f), Color.White.copy(alpha = 0.05f))
                         )
                     )
-                    AnimatedVisibility(visible = isGenerating) {
-                        Text(
-                            text = "در حال پردازش...",
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                color = Color.White.copy(alpha = 0.85f)
-                            )
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                // Two groups pinned to the two edges — not one flat spacedBy row. The Figma
+                // frame's fixed 10dp gaps only sum to exactly the card width at its own
+                // reference size; on a real device's width, spacedBy alone would just pack
+                // every icon to one side and leave a stray gap at the other (the "empty
+                // space next to the history icon" bug) instead of distributing it. Pinning
+                // the two logical clusters to opposite edges puts any leftover width where
+                // the design already shows the one flexible-looking gap: between the persona
+                // block and the add button.
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Right-edge cluster (RTL start): chevron, avatar, persona block.
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    // Chevron (back) — rightmost under RTL, matching the Figma layout exactly.
+                    TopBarGlassTile(
+                        icon = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "بازگشت",
+                        onClick = onNavigateBack
+                    )
+
+                    // Avatar — conic sweep + a soft top-left glare, glowing purple shadow.
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .coloredShadow(color = TopBarAvatarGlow.copy(alpha = 0.5f), borderRadius = 20.dp, blurRadius = 16.dp, offsetY = 6.dp)
+                            .clip(CircleShape)
+                            .background(TopBarAvatarSweep)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .drawBehind {
+                                    // Glossy top-left highlight — center matches the Figma radial
+                                    // gradient's handle position (0.32, 0.28) within the avatar.
+                                    drawCircle(
+                                        brush = Brush.radialGradient(
+                                            colors = listOf(Color.White.copy(alpha = 0.55f), Color.Transparent),
+                                            center = Offset(size.width * 0.32f, size.height * 0.28f),
+                                            radius = size.minDimension
+                                        ),
+                                        radius = size.minDimension / 2f,
+                                        center = Offset(size.width / 2f, size.height / 2f)
+                                    )
+                                }
                         )
                     }
+
+                    // Persona block: name + "AI" pill, then the online-status row beneath it.
+                    Column(horizontalAlignment = Alignment.Start, verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(7.dp)
+                        ) {
+                            Text(
+                                text = "یارا",
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = Color.White
+                                )
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .background(Color(0xFFA78BFA).copy(alpha = 0.22f), CircleShape)
+                                    .border(1.dp, Color(0xFFA78BFA).copy(alpha = 0.40f), CircleShape)
+                                    .padding(horizontal = 7.dp, vertical = 3.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "AI",
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontSize = 8.5.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        letterSpacing = 0.5.sp,
+                                        color = Color(0xFFD8CFFF)
+                                    )
+                                )
+                            }
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(5.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(6.dp)
+                                    .coloredShadow(
+                                        color = (if (isOffline) Color.White.copy(alpha = 0.4f) else TopBarOnlineDotColor).copy(alpha = 0.9f),
+                                        borderRadius = 3.dp,
+                                        blurRadius = 8.dp
+                                    )
+                                    .clip(CircleShape)
+                                    .background(if (isOffline) Color.White.copy(alpha = 0.4f) else TopBarOnlineDotColor)
+                            )
+                            Text(
+                                text = if (isGenerating) "در حال پردازش..."
+                                       else if (isOffline) "دستیار هوشمند · آفلاین"
+                                       else "دستیار هوشمند · آنلاین",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontSize = 11.sp,
+                                    color = TopBarSubtitleColor
+                                )
+                            )
+                        }
+                    }
                 }
-            },
-            navigationIcon = {
-                PulsingAgentIcon(isActive = isGenerating)
-            },
-            actions = {
-                IconButton(onClick = { onIntent(AgentIntent.OpenChatHistory) }) {
-                    Icon(
-                        Icons.Outlined.History,
-                        contentDescription = "گفتگوهای من",
-                        tint = Color.White.copy(alpha = 0.9f)
-                    )
-                }
-                IconButton(onClick = { onIntent(AgentIntent.StartNewSession) }) {
-                    Icon(
-                        Icons.Default.Add,
+
+                // Left-edge cluster (RTL end): new chat, history+badge.
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    TopBarGlassTile(
+                        icon = Icons.Default.Add,
                         contentDescription = "گفتگوی جدید",
-                        tint = Color.White.copy(alpha = 0.9f)
+                        onClick = { onIntent(AgentIntent.StartNewSession) }
                     )
+
+                    // History — leftmost under RTL, with the saved-conversation-count badge.
+                    Box {
+                        TopBarGlassTile(
+                            icon = Icons.Outlined.History,
+                            contentDescription = "گفتگوهای من",
+                            onClick = { onIntent(AgentIntent.OpenChatHistory) }
+                        )
+                        if (sessionsCount > 0) {
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .offset(x = 3.dp, y = (-3).dp)
+                                    .size(16.dp)
+                                    .clip(CircleShape)
+                                    .background(TopBarBadgeGradient)
+                                    .border(1.dp, Color.White.copy(alpha = 0.35f), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                NumericText(
+                                    text = (if (sessionsCount > 9) "9+" else sessionsCount.toString()).toPersianDigits(),
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.ExtraBold
+                                ),
+                                color = Color.White
+                            )
+                        }
+                    }
                 }
             }
-        )
+        }
+    }
     }
 }
 
+/** One 34dp glass icon tile — the history/new-chat/back buttons on the top bar card. */
 @Composable
-private fun PulsingAgentIcon(isActive: Boolean) {
-    // Only run the infinite clock while active — avoids a permanently-running
-    // animation (and its recompositions) when the agent is idle.
-    val alpha = if (isActive) {
-        val infiniteTransition = rememberInfiniteTransition(label = "agent_pulse")
-        val animated by infiniteTransition.animateFloat(
-            initialValue = 0.5f,
-            targetValue = 1f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(1000),
-                repeatMode = RepeatMode.Reverse
-            ),
-            label = "pulse_alpha"
-        )
-        animated
-    } else 1f
+private fun TopBarGlassTile(
+    icon: ImageVector,
+    contentDescription: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Box(
-        modifier = Modifier
-            .padding(start = 12.dp)
-            .size(36.dp)
-            .alpha(alpha)
-            .clip(CircleShape)
-            .background(Color.White.copy(alpha = 0.18f)),
+        modifier = modifier
+            .size(34.dp)
+            .clip(TopBarTileShape)
+            .background(Color.White.copy(alpha = 0.10f))
+            .border(1.dp, Color.White.copy(alpha = 0.18f), TopBarTileShape)
+            .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Text(text = "AI", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            tint = TopBarIconTint,
+            modifier = Modifier.size(18.dp)
+        )
     }
 }
 
@@ -1477,9 +1664,8 @@ private fun AgentInputBar(
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-
 
                 // Text field
                 BasicTextField(
@@ -1501,7 +1687,7 @@ private fun AgentInputBar(
                     decorationBox = { innerTextField ->
                         if (text.isEmpty()) {
                             Text(
-                                text = "هر چیزی بپرسید...",
+                                text = "پیام خود را بنویسید...",
                                 style = MaterialTheme.typography.bodyMedium.copy(color = taminColors.textMuted)
                             )
                         }
@@ -1509,7 +1695,30 @@ private fun AgentInputBar(
                     }
                 )
 
-                // Send/Mic button
+                // Image attach — matches the Figma layout; no attach flow exists yet, so it
+                // is decorative only (not clickable) rather than a button that does nothing.
+                IconButton(onClick = {}, enabled = false) {
+                    Icon(
+                        imageVector = Icons.Default.Image,
+                        contentDescription = null,
+                        tint = taminColors.textMuted
+                    )
+                }
+
+                // Mic — always available on its own, independent of the send button.
+                IconButton(
+                    onClick = onStartVoice,
+                    enabled = !isGenerating && isEnabled
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Mic,
+                        contentDescription = "ضبط صدا",
+                        tint = if (!isGenerating && isEnabled) taminColors.textPrimary else taminColors.textMuted
+                    )
+                }
+
+                // Send/Cancel button — only reacts once there is text to send or a
+                // request to cancel; otherwise it sits disabled beside the mic.
                 val isTyping = text.isNotBlank()
                 IconButton(
                     onClick = {
@@ -1518,10 +1727,9 @@ private fun AgentInputBar(
                         } else if (isTyping) {
                             onSend(text.trim())
                             text = ""
-                        } else {
-                            onStartVoice()
                         }
                     },
+                    enabled = isGenerating || isTyping,
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape)
@@ -1532,17 +1740,16 @@ private fun AgentInputBar(
                         )
                 ) {
                     AnimatedContent(
-                        targetState = when {
-                            isGenerating -> 2
-                            isTyping -> 1
-                            else -> 0
-                        },
-                        label = "send_mic_anim"
+                        targetState = if (isGenerating) 2 else 1,
+                        label = "send_cancel_anim"
                     ) { state ->
                         when (state) {
                             2 -> Icon(Icons.Default.Close, contentDescription = "توقف", tint = MaterialTheme.colorScheme.error)
-                            1 -> Icon(Icons.Default.ArrowUpward, contentDescription = "ارسال", tint = Color.White)
-                            0 -> Icon(Icons.Default.Mic, contentDescription = "ضبط صدا", tint = MaterialTheme.colorScheme.onSurface)
+                            else -> Icon(
+                                Icons.Default.ArrowUpward,
+                                contentDescription = "ارسال",
+                                tint = if (isTyping) Color.White else taminColors.textMuted
+                            )
                         }
                     }
                 }
@@ -1553,73 +1760,192 @@ private fun AgentInputBar(
 
 // ─── Empty State ──────────────────────────────────────────────────────────────
 
+/**
+ * Full-bleed backdrop for the empty state — spans the *entire* screen (behind the top bar
+ * and input bar too), not just the content area. The top bar's glass blur samples whatever
+ * sits behind it via the shared [HazeState]; confining this gradient to the content area
+ * left the bar with nothing colorful to blur, so it washed out to the page's plain
+ * background instead of reading as glass over purple.
+ */
 @Composable
-private fun EmptyState(modifier: Modifier = Modifier) {
+private fun EmptyStateBackground(modifier: Modifier = Modifier) {
     val taminColors = LocalTaminColors.current
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+    Box(
+        modifier = modifier.background(taminColors.aiAssistantGradient)
     ) {
-        Box(
-            modifier = Modifier
-                .size(80.dp)
-                .clip(CircleShape)
-                .background(taminColors.aiAssistantGradient),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("AI", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold)
-        }
-        Spacer(Modifier.height(20.dp))
-        Text(
-            text = "دستیار هوشمند تأمین",
-            style = MaterialTheme.typography.titleLarge.copy(
-                color = taminColors.textPrimary,
-                fontWeight = FontWeight.Bold
-            )
+        // Decorative blurred blobs, matching the Figma welcome screen backdrop.
+        DecorativeBackgroundCircle(
+            size = 260.dp, xOffset = 150.dp, yOffset = (-30).dp,
+            color = Color.White.copy(alpha = 0.10f)
         )
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = "سوالات خود درباره بیمه، سوابق و حقوق بازنشستگی را بپرسید",
-            style = MaterialTheme.typography.bodyMedium.copy(
-                color = taminColors.textSecondary,
-                textAlign = TextAlign.Center
-            ),
-            modifier = Modifier.padding(horizontal = 32.dp)
+        DecorativeBackgroundCircle(
+            size = 220.dp, xOffset = (-110).dp, yOffset = 420.dp,
+            color = taminColors.aiAssistantTint.copy(alpha = 0.35f)
         )
-        Spacer(Modifier.height(28.dp))
-        AgentSuggestions()
+        DecorativeBackgroundCircle(
+            size = 200.dp, xOffset = 90.dp, yOffset = 260.dp,
+            color = Color(0xFF3F5BD9).copy(alpha = 0.30f)
+        )
+        DecorativeBackgroundCircle(
+            size = 160.dp, xOffset = (-30).dp, yOffset = 90.dp,
+            color = Color.White.copy(alpha = 0.08f)
+        )
     }
 }
 
 @Composable
-private fun AgentSuggestions() {
-    val suggestions = listOf(
-        "تاریخچه بیمه‌ام را نشان بده",
-        "حقوق بازنشستگی ماهانه‌ام",
-        "آخرین نسخه پزشکی من",
-        "قوانین بازنشستگی پیش از موعد"
-    )
+private fun EmptyState(
+    userFirstName: String?,
+    onSuggestionClick: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val taminColors = LocalTaminColors.current
+    Box(modifier = modifier) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = Spacing.lg, vertical = Spacing.xl),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(140.dp)
+                    .coloredShadow(color = taminColors.aiAssistantTint, borderRadius = 70.dp, blurRadius = 40.dp)
+                    .clip(CircleShape)
+                    .background(taminColors.aiAssistantGradient)
+            )
+            Spacer(Modifier.height(Spacing.xl))
+            Text(
+                text = if (userFirstName.isNullOrBlank()) {
+                    "سلام، من یارا هستم"
+                } else {
+                    "سلام $userFirstName، من یارا هستم"
+                },
+                style = MaterialTheme.typography.titleLarge.copy(
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+            )
+            Spacer(Modifier.height(Spacing.sm))
+            Text(
+                text = "دستیار هوشمند سازمان تأمین اجتماعی. دربارهٔ سوابق بیمه، مستمری، درمان و خدمات از من بپرسید.",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = Color.White.copy(alpha = 0.75f),
+                    textAlign = TextAlign.Center
+                ),
+                modifier = Modifier.padding(horizontal = Spacing.lg)
+            )
+            Spacer(Modifier.height(Spacing.xl))
+            AgentSuggestions(onSuggestionClick = onSuggestionClick)
+        }
+    }
+}
+
+/** One welcome-screen suggestion: its prompt text and the colored icon badge beside it. */
+private data class AgentSuggestion(
+    val text: String,
+    val icon: ImageVector,
+    val iconTint: Color,
+    val iconBackground: Color
+)
+
+@Composable
+private fun AgentSuggestions(
+    onSuggestionClick: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val taminColors = LocalTaminColors.current
+    val suggestions = remember(taminColors) {
+        listOf(
+            AgentSuggestion(
+                text = "سابقهٔ بیمهٔ من چقدر است؟",
+                icon = Icons.Default.Description,
+                iconTint = taminColors.blueText,
+                iconBackground = taminColors.blueBg
+            ),
+            AgentSuggestion(
+                text = "مستمری این ماه چه زمانی واریز می‌شود؟",
+                icon = Icons.Default.CreditCard,
+                iconTint = taminColors.teal,
+                iconBackground = taminColors.tealBg
+            ),
+            AgentSuggestion(
+                text = "شرایط دریافت هدیهٔ ازدواج چیست؟",
+                icon = Icons.Default.Redeem,
+                iconTint = taminColors.fuchsiaBlue,
+                iconBackground = taminColors.fuchsiaBlueBg
+            ),
+            AgentSuggestion(
+                text = "آخرین نسخهٔ الکترونیک من",
+                icon = Icons.Default.MedicalServices,
+                iconTint = taminColors.greenText,
+                iconBackground = taminColors.greenBg
+            )
+        )
+    }
     Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm)
     ) {
         suggestions.forEach { suggestion ->
-            Surface(
-                shape = RoundedCornerShape(20.dp),
-                color = MaterialTheme.colorScheme.primaryContainer,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
-                modifier = Modifier.clickable { /* onIntent */ }
-            ) {
-                Text(
-                    text = suggestion,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                )
-            }
+            AgentSuggestionRow(
+                suggestion = suggestion,
+                onClick = { onSuggestionClick(suggestion.text) }
+            )
         }
+    }
+}
+
+@Composable
+private fun AgentSuggestionRow(
+    suggestion: AgentSuggestion,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val shape = RoundedCornerShape(CornerRadius.xl)
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(Color.White.copy(alpha = 0.08f))
+            .border(1.dp, Color.White.copy(alpha = 0.14f), shape)
+            .clickable(onClick = onClick)
+            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(suggestion.iconBackground),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = suggestion.icon,
+                contentDescription = null,
+                tint = suggestion.iconTint,
+                modifier = Modifier.size(18.dp)
+            )
+        }
+        Text(
+            text = suggestion.text,
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.bodyMedium.copy(
+                color = Color.White,
+                fontWeight = FontWeight.ExtraBold,
+                textAlign = TextAlign.Start
+            )
+        )
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = Color.White.copy(alpha = 0.5f),
+            modifier = Modifier.size(18.dp)
+        )
     }
 }
 
