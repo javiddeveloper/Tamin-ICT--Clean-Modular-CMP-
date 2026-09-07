@@ -2045,6 +2045,25 @@
     <string name="ill_days_submit_btn">ثبت درخواست</string>
     <string name="ill_days_submit_missing_data">اطلاعات لازم برای ثبت درخواست کامل نیست.</string>
     <string name="ill_days_submit_success_fallback">درخواست با موفقیت ثبت شد.</string>
+
+    <!-- Home campaigns carousel -->
+    <string name="campaigns_title">کمپین‌ها</string>
+    <string name="campaigns_swipe_hint">با کشیدن انگشت ببینید</string>
+    <string name="campaign_housewife_badge">کمپین بیمهٔ زنان خانه‌دار</string>
+    <string name="campaign_housewife_title">سابقهٔ بیمه برای خانم‌های خانه‌دار</string>
+    <string name="campaign_housewife_body">با پرداخت ماهانه، سابقه بسازید و شرایط بازنشستگی را به‌دست آورید.</string>
+    <string name="campaign_housewife_cta">انعقاد قرارداد</string>
+    <string name="campaign_housewife_caption">بدون مراجعه به شعبه</string>
+    <string name="campaign_freelance_badge">کمپین مشاغل آزاد</string>
+    <string name="campaign_freelance_title">حرف و مشاغل آزاد</string>
+    <string name="campaign_freelance_body">صاحبان کسب‌وکار خُرد می‌توانند قرارداد بیمه را از اپ ثبت کنند.</string>
+    <string name="campaign_freelance_cta">شروع ثبت</string>
+    <string name="campaign_freelance_caption">مناسب کسب‌وکار خانگی</string>
+    <string name="campaign_student_badge">کمپین بیمهٔ دانشجویی</string>
+    <string name="campaign_student_title">سال‌های تحصیل، سابقهٔ بیمه</string>
+    <string name="campaign_student_body">دانشجویان می‌توانند مدت تحصیل را به سابقهٔ بیمه تبدیل کنند.</string>
+    <string name="campaign_student_cta">اطلاعات بیشتر</string>
+    <string name="campaign_student_caption">ویژهٔ دانشجویان</string>
     <!-- ردیف‌های پیمان (Contract rows) -->
     <string name="contract_rows_title">ردیف‌های پیمان</string>
     <string name="contract_rows_subtitle">لیست ردیف پیمان‌های کارگاه</string>
