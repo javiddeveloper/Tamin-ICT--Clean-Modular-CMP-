@@ -2206,4 +2206,71 @@
     <string name="contract_treatment_support_yes">حمایت درمان دارد</string>
     <string name="contract_treatment_support_no">حمایت درمان ندارد</string>
 
+    <!-- واگذارندگان (assigner contracts) -->
+    <string name="assigner_contracts_title">واگذارندگان</string>
+    <string name="assigner_contracts_subtitle">لیست ردیف پیمان‌های کارگاه</string>
+    <string name="assigner_contracts_action_desc">پیمان‌هایی که واگذارندهٔ آن‌ها هستید</string>
+    <string name="assigner_contract_detail_title">جزئیات پیمان</string>
+    <string name="assigner_bases_title">مبانی محاسباتی</string>
+    <string name="assigner_base_detail_title">جزئیات مبنا</string>
+
+    <!-- Screen A — the searched list -->
+    <string name="assigner_empty_no_search_title">کارگاهی جست‌وجو نشده است</string>
+    <string name="assigner_empty_no_search_body">برای مشاهدهٔ ردیف پیمان‌ها، کد کارگاه را جست‌وجو کنید.</string>
+    <string name="assigner_empty_not_found_title">نتیجه‌ای یافت نشد</string>
+    <string name="assigner_empty_not_found_body">کد کارگاه یا فیلترها را بررسی کنید و دوباره جست‌وجو کنید.</string>
+    <string name="assigner_search_workshop">جست‌وجوی کارگاه</string>
+    <string name="assigner_filter_label">جست‌وجو</string>
+    <string name="assigner_filter_workshop">کد کارگاه %1$s</string>
+    <string name="assigner_filter_branch">کد شعبه %1$s</string>
+    <string name="assigner_filter_row">ردیف %1$s</string>
+    <string name="assigner_filter_clear">حذف</string>
+    <string name="assigner_contract_date">تاریخ قرارداد</string>
+    <string name="assigner_contract_subtitle">%1$s · ردیف %2$s</string>
+    <string name="assigner_count">%1$s پیمان</string>
+
+    <!-- Search sheet -->
+    <string name="assigner_search_branch_code_optional">کد شعبه (اختیاری)</string>
+    <string name="assigner_search_contract_row_optional">ردیف پیمان (اختیاری)</string>
+    <string name="assigner_search_workshop_hint">شمارهٔ ۱۰ رقمی کارگاه</string>
+    <string name="assigner_search_branch_hint">مثلاً ۱۲</string>
+    <string name="assigner_search_row_hint">مثلاً ۳</string>
+
+    <!-- Action sheet -->
+    <string name="assigner_action_title">انتخاب کنید</string>
+    <string name="assigner_action_view_detail">مشاهدهٔ جزئیات پیمان</string>
+    <string name="assigner_action_view_bases">مشاهدهٔ مبانی محاسباتی</string>
+    <string name="assigner_action_bases_unavailable">این پیمان شناسهٔ کامل ندارد و مبانی محاسباتی آن قابل نمایش نیست.</string>
+
+    <!-- Screen B — جزئیات پیمان -->
+    <string name="assigner_group_contract">اطلاعات پیمان</string>
+    <string name="assigner_group_assigner">اطلاعات واگذارنده (کارگاه شما)</string>
+    <string name="assigner_group_contractor">اطلاعات پیمانکار</string>
+    <string name="assigner_field_contract_row">ردیف پیمان</string>
+    <string name="assigner_field_contract_number">شمارهٔ قرارداد</string>
+    <string name="assigner_field_contract_subject">موضوع پیمان</string>
+    <string name="assigner_field_workshop_name">نام کارگاه</string>
+    <string name="assigner_field_national_id">کد ملی/شناسهٔ ملی</string>
+    <string name="assigner_field_branch">شعبه</string>
+    <string name="assigner_field_address">نشانی</string>
+
+    <!-- Screen C — مبانی محاسباتی -->
+    <string name="assigner_base_letter_number">شمارهٔ سند %1$s</string>
+    <string name="assigner_base_summary">%1$s · %2$s سند</string>
+    <string name="assigner_bases_empty_title">مبنای محاسباتی ثبت نشده است</string>
+    <string name="assigner_bases_empty_body">برای این پیمان هنوز مبنای محاسباتی ارسال نشده است.</string>
+
+    <!-- Screen D — جزئیات مبنا -->
+    <string name="assigner_base_detail_subtitle">شمارهٔ سند %1$s · %2$s</string>
+    <string name="assigner_documents_title">مستندات پیوست‌شده</string>
+    <string name="assigner_documents_empty">مستندی پیوست نشده است</string>
+    <string name="assigner_document_open_failed">دریافت سند ناموفق بود</string>
+    <string name="assigner_doc_category_letter">مدارک تصاویر نامه</string>
+    <string name="assigner_doc_category_subcontractor">مدارک پیمانکاری فرعی</string>
+    <string name="assigner_doc_category_supplement">مدارک الحاقیه افزایش مدت یا مبلغ قرارداد</string>
+    <string name="assigner_doc_category_final_status">مدارک صورت وضعیت قطعی</string>
+    <string name="assigner_doc_category_other">سایر مدارک</string>
+    <string name="assigner_doc_kind_image">تصویر</string>
+    <string name="assigner_doc_kind_pdf">PDF</string>
+
 </resources>
