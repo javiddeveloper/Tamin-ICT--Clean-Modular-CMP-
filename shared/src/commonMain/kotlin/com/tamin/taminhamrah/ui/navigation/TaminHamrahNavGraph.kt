@@ -106,8 +106,6 @@ import com.tamin.taminhamrah.feature.pensionSurvivor.pensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pregnancyPay.pregnancyPayScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
-import com.tamin.taminhamrah.feature.addDependent.addDependentGraph
-import com.tamin.taminhamrah.feature.addDependent.AddDependentRoute
 import com.tamin.taminhamrah.feature.contractaffair.contractAffairsScreen
 import com.tamin.taminhamrah.feature.contractaffair.contractPaymentHistoryScreen
 import com.tamin.taminhamrah.feature.contractaffair.contractPaymentCalcDetailScreen
@@ -115,7 +113,6 @@ import com.tamin.taminhamrah.feature.contractaffair.contractPremiumPaymentScreen
 import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPaymentCalcDetail
 import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPaymentHistory
 import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPremiumPayment
-import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceContractScreen
 import com.tamin.taminhamrah.feature.requestPaymentForIllDays.requestPaymentForIllDaysScreen
 import com.tamin.taminhamrah.feature.security.SecurityRoute
 import com.tamin.taminhamrah.feature.security.securityScreen
