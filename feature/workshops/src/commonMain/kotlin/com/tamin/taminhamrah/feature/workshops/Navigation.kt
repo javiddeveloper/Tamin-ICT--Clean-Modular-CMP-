@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.WorkshopsRoute
 import com.tamin.taminhamrah.feature.workshops.ui.contractRows.ContractRowsScreen
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
 import com.tamin.taminhamrah.feature.workshops.ui.paymentSheets.PaymentSheetsScreen
+import com.tamin.taminhamrah.feature.workshops.ui.objectionableDebit.ObjectionableDebitScreen
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebtInquiry.WorkshopDebtInquiryScreen
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import androidx.navigation.toRoute
@@ -77,6 +78,13 @@ data class ContractRowsRoute(val workshopId: String = "", val branchCode: String
 
 @Serializable
 data class WorkshopDebtInquiryRoute(
+    val workshopId: String,
+    val branchCode: String,
+    val workshopName: String = "",
+)
+
+@Serializable
+data class ObjectionableDebitRoute(
     val workshopId: String,
     val branchCode: String,
     val workshopName: String = "",
@@ -248,6 +256,15 @@ fun NavGraphBuilder.workshopsScreen(
             onBack = { navController.popBackStack() },
         )
     }
+    composableWithFadeTransitions<ObjectionableDebitRoute> { entry ->
+        val route = entry.toRoute<ObjectionableDebitRoute>()
+        ObjectionableDebitScreen(
+            workshopId = route.workshopId,
+            branchCode = route.branchCode,
+            workshopName = route.workshopName,
+            onBack = { navController.popBackStack() },
+        )
+    }
 }
 
 /**
@@ -265,4 +282,6 @@ private fun WorkshopAction.route(
     WorkshopAction.CONTRACT_ROWS -> ContractRowsRoute(workshopId, branchCode)
     WorkshopAction.DEBT_INQUIRY ->
         WorkshopDebtInquiryRoute(workshopId, branchCode, workshopName)
+    WorkshopAction.OBJECTION ->
+        ObjectionableDebitRoute(workshopId, branchCode, workshopName)
 }
