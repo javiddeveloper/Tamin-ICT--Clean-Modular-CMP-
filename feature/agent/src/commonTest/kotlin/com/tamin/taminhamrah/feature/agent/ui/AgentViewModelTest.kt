@@ -204,6 +204,7 @@ class AgentViewModelTest {
     private lateinit var checkChatAllowedUseCase: CheckChatAllowedUseCase
     private lateinit var sendAgentPromptUseCase: SendAgentPromptUseCase
     private lateinit var fakeCacheRepository: FakeAgentChatCacheRepository
+    private lateinit var fakeTokenStore: FakeAgentTokenStore
 
     // A single StandardTestDispatcher shared between Dispatchers.Main (viewModelScope)
     // and the runTest scope, so advanceUntilIdle() drains ALL pending coroutines.
@@ -220,8 +221,9 @@ class AgentViewModelTest {
         actionDispatcher = AgentActionDispatcher(registry, fakeFeatureManager, json)
 
         fakeAgentRepository = FakeAgentRepository()
+        fakeTokenStore = FakeAgentTokenStore()
         fakeCacheRepository = FakeAgentChatCacheRepository()
-        checkChatAllowedUseCase = CheckChatAllowedUseCase(fakeAgentRepository)
+        checkChatAllowedUseCase = CheckChatAllowedUseCase(fakeAgentRepository, fakeTokenStore)
         sendAgentPromptUseCase = SendAgentPromptUseCase(fakeAgentRepository)
     }
 
