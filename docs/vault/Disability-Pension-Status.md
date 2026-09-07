@@ -318,7 +318,7 @@ Each `Mock*Repository` decorates the real repository via Kotlin's `by` delegatio
 `DisabilityPensionMockModule.kt`, and remove its line from `sharedModules`. First attempt at this
 subclassed the `UseCase` classes instead (requiring `open` on 4 production files) — rejected by
 the user in favor of this decorator approach specifically because it touches zero production
-files; see [[feedback_temporary_mock_data_no_prod_edits]] if adding mocks for steps 6-7 later.
+files; see [[Mock-Data-Pattern]] if adding mocks for a future feature.
 
 Step 5 extended `MockDisabilityPensionRepository` with a `getRegisteredMedicalCommission` fake
 (plain list data, easy to fake) but deliberately left `getMedicalCommissionPdf` un-mocked — faking
