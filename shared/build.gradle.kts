@@ -59,6 +59,7 @@ kotlin {
             api(project(":feature:developerOptions"))
             api(libs.androidx.lifecycle.viewmodel)
             implementation(libs.ktor.client.core)
+            implementation(libs.kotlinx.collections.immutable)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.koin.core)
             implementation(libs.koin.core.viewmodel)

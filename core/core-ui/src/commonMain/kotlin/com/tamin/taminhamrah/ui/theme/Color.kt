@@ -340,3 +340,42 @@ val TaminOnAccentFill = TaminOnAccentInk.copy(alpha = 0.10f)
 val TaminOnAccentFillStrong = TaminOnAccentInk.copy(alpha = 0.16f)
 val TaminOnAccentBorder = TaminOnAccentInk.copy(alpha = 0.18f)
 
+/* ---- Home campaigns carousel ------------------------------------------------------------------ */
+
+/**
+ * The three promo gradients on the home page's campaign cards, plus the shadow each one casts and
+ * the dark tone its white CTA pill prints in.
+ *
+ * Brand-fixed: every card is a dark gradient in both themes, so these do not live on
+ * [com.tamin.taminhamrah.ui.theme.TaminColors] and do not follow the page. They are consumed only
+ * through [com.tamin.taminhamrah.model.campaign.CampaignKind], which keeps a gradient and its CTA
+ * tone in one row so the two cannot drift apart.
+ */
+val CampaignHousewifeStart = TaminNavy700           // #1F4FA3
+val CampaignHousewifeMid = Color(0xFF3B6FE8)
+val CampaignHousewifeEnd = Color(0xFF1FB6D8)
+val CampaignHousewifeShadow = Color(0x47173D7E)     // rgba(23,61,126,.28)
+
+val CampaignFreelanceStart = Color(0xFF0E5F66)
+val CampaignFreelanceMid = Color(0xFF0E7C82)
+val CampaignFreelanceEnd = Color(0xFF5FD8D2)
+val CampaignFreelanceShadow = Color(0x470E5F66)     // rgba(14,95,102,.28)
+
+val CampaignStudentStart = Color(0xFF4B2E86)
+val CampaignStudentMid = Color(0xFF7C5CFF)
+val CampaignStudentEnd = Color(0xFF22B8D6)
+val CampaignStudentShadow = Color(0x474B2E86)       // rgba(75,46,134,.28)
+
+/** The idle page dot under the carousel; the active one is `blueText`. */
+val CampaignDotIdle = Color(0xFFD7E0EC)
+
+/** The two aria-hidden decoration circles every campaign card carries. */
+val CampaignGlowCore = TaminOnAccentInk.copy(alpha = 0.22f)
+val CampaignBubbleFill = TaminOnAccentInk.copy(alpha = 0.07f)
+
+/** The card's own ink: badge fill and hairline, body copy, and the footer caption. */
+val CampaignBadgeFill = TaminOnAccentInk.copy(alpha = 0.18f)
+val CampaignBadgeBorder = TaminOnAccentInk.copy(alpha = 0.26f)
+val CampaignBodyInk = TaminOnAccentInk.copy(alpha = 0.82f)
+val CampaignCaptionInk = TaminOnAccentInk.copy(alpha = 0.55f)
+
