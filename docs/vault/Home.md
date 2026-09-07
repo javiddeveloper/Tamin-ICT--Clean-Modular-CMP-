@@ -18,6 +18,7 @@ tags: [moc]
 - [[Dependency-Injection]] — Koin modules and registration order
 - [[Networking]] — Ktor, the five HTTP clients, auth and token refresh
 - [[Database]] — Room KMP, DAOs, schemas
+- [[Payments]] — the one payment flow every feature uses, and its mock gateway
 
 ## Conventions
 

@@ -186,6 +186,10 @@ import com.tamin.taminhamrah.useCases.workshops.GetPaymentSheetsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetRecentlyAddedMembersUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebitsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebtInquiryUseCase
+import com.tamin.taminhamrah.useCases.payment.CancelPaymentUseCase
+import com.tamin.taminhamrah.useCases.payment.CreatePaymentLinkUseCase
+import com.tamin.taminhamrah.useCases.payment.GetPaymentPreviewUseCase
+import com.tamin.taminhamrah.useCases.payment.VerifyPaymentUseCase
 import com.tamin.taminhamrah.useCases.workshops.PayWorkshopDebitUseCase
 import com.tamin.taminhamrah.useCases.workshops.SaveArticleSixteenRequestUseCase
 import com.tamin.taminhamrah.useCases.workshops.SaveDebitObjectionUseCase
@@ -420,6 +424,14 @@ val domainModule = module {
     factoryOf(::GetDemandDocumentsUseCase)
     factoryOf(::GetDebitTurnoverPdfUseCase)
     factoryOf(::PayWorkshopDebitUseCase)
+
+    // Shared payment flow. VerifyPaymentUseCase collects every PaymentVerifier registered by any
+    // feature module — getAll() is what lets a feature contribute one without core-domain, or this
+    // list, having to know that the feature exists.
+    factoryOf(::GetPaymentPreviewUseCase)
+    factoryOf(::CreatePaymentLinkUseCase)
+    factoryOf(::CancelPaymentUseCase)
+    factory { VerifyPaymentUseCase(repository = get(), verifiers = getAll()) }
     factoryOf(::GetWorkshopDebtInquiryUseCase)
     factoryOf(::GetObjectionableDebitsUseCase)
     factoryOf(::CheckObjectionDeadlineUseCase)

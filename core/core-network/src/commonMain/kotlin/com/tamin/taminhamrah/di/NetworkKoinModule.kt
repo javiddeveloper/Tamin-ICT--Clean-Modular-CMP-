@@ -123,6 +123,18 @@ val networkModule = module {
         )
     }
 
+    // Payment gateway HTTP Client (TFH — its own host, bearer-authenticated like the main API)
+    single(named("tfhHttpClient")) {
+        createHttpClient(
+            engine = get(),
+            authRepository = get<AuthRepository>(),
+            authTokenInvalidator = get(),
+            json = get<Json>(),
+            timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_60_SEC,
+            baseUrl = get<DeveloperOptionsRepository>().getEffectiveBaseUrl(BaseUrlKey.TFH)
+        )
+    }
+
     // AI HTTP Client
     single(named("aiHttpClient")) {
         val aiBaseUrl = get<DeveloperOptionsRepository>().getEffectiveBaseUrl(BaseUrlKey.AI)
