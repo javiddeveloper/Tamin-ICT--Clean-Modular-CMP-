@@ -78,12 +78,6 @@ class FakeWorkShopsRepository : WorkShopsRepository {
             total = if (isFiltered) filtered.size else agreements.total,
         )
     }
-    override suspend fun getContractRowsWithAgreement(query: ContractRowQuery): PagedListDN<EmployerAgreementDN> =
-        PagedListDN()
-
-    override suspend fun getContractRowsWithoutAgreement(query: ContractRowQuery): PagedListDN<WorkshopContractDN> = PagedListDN()
-
-
     override suspend fun requestEmployerAgreementTicket(mobile: String, email: String): String {
         lastTicketRequest = mobile to email
         failIf(Call.TICKET)
