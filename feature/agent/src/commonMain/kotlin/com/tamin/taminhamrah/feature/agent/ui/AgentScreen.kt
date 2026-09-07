@@ -1843,7 +1843,6 @@ private fun EmptyState(
     onSuggestionClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val taminColors = LocalTaminColors.current
     Box(modifier = modifier) {
         Column(
             modifier = Modifier
@@ -1853,14 +1852,9 @@ private fun EmptyState(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .size(140.dp)
-                    .coloredShadow(color = taminColors.aiAssistantTint, borderRadius = 70.dp, blurRadius = 40.dp)
-                    .clip(CircleShape)
-                    .background(taminColors.aiAssistantGradient)
-            )
-            Spacer(Modifier.height(Spacing.xl))
+            // Figma 90:40 - the sphere carries its own 16 dp bottom margin.
+            AgentOrb()
+            Spacer(Modifier.height(Spacing.xxl))
             Text(
                 text = if (userFirstName.isNullOrBlank()) {
                     "سلام، من یارا هستم"
