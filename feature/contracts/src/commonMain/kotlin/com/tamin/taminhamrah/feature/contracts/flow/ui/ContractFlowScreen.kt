@@ -86,6 +86,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.contract_flow_submit_contract
 import taminx.core.core_ui.contract_hero_step_job_title
+import taminx.core.core_ui.contract_housewife_hero_reg_confirmed
 import taminx.core.core_ui.contract_next_step
 import taminx.core.core_ui.contract_optional_hero_reg_confirmed
 import taminx.core.core_ui.contract_rules_pdf_title
@@ -204,16 +205,17 @@ fun ContractFlowScreenContent(
     val totalSteps = steps.size.coerceAtLeast(1)
     val screenTitle = state.config?.screenTitleRes?.let { stringResource(it) }.orEmpty()
     val stepTitle = stringResource(state.currentStep.titleRes)
-    val isOptionalRegistrationConfirmed =
-        state.config?.isOptionalInsurance == true &&
-            state.currentStep == ContractStep.STEP_REGISTRATION &&
+    val isRegistrationConfirmed =
+        state.currentStep == ContractStep.STEP_REGISTRATION &&
             state.genderGateError == null &&
             state.preflightGateError == null &&
             (state.eligibility == null || state.eligibility.isEligible)
-    val stepSubtitle = if (isOptionalRegistrationConfirmed) {
-        stringResource(Res.string.contract_optional_hero_reg_confirmed)
-    } else {
-        stringResource(state.currentStep.descRes)
+    val stepSubtitle = when {
+        isRegistrationConfirmed && state.config?.isOptionalInsurance == true ->
+            stringResource(Res.string.contract_optional_hero_reg_confirmed)
+        isRegistrationConfirmed && state.config?.usesChecklistRegistration == true ->
+            stringResource(Res.string.contract_housewife_hero_reg_confirmed)
+        else -> stringResource(state.currentStep.descRes)
     }
 
     val handleNavigateBack: () -> Unit = {
@@ -351,6 +353,7 @@ fun ContractFlowScreenContent(
                                             genderGateError = state.genderGateError,
                                             preflightGateError = state.preflightGateError,
                                             isOptionalInsurance = state.config?.isOptionalInsurance == true,
+                                            usesChecklistRegistration = state.config?.usesChecklistRegistration == true,
                                         )
                                     }
 

@@ -31,6 +31,8 @@ interface ContractFlowConfig {
     val requiresFemaleGender: Boolean
     val fixedFreeJobCode: String?
     val allowsOnlinePaymentAfterSubmit: Boolean
+    /** Two-card registration with eligibility checklist (housewife); not optional-insurance semantics. */
+    val usesChecklistRegistration: Boolean get() = false
 
     fun nextStep(current: ContractStep): ContractStep? = steps.nextStep(current)
 

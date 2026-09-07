@@ -41,6 +41,10 @@ import taminx.core.core_ui.contract_field_birth_date
 import taminx.core.core_ui.contract_field_contract_type
 import taminx.core.core_ui.contract_field_full_name
 import taminx.core.core_ui.contract_field_national_id
+import taminx.core.core_ui.contract_housewife_check_no_active
+import taminx.core.core_ui.contract_housewife_check_no_compulsory
+import taminx.core.core_ui.contract_housewife_eligibility_ok
+import taminx.core.core_ui.contract_housewife_info_rates_treatment
 import taminx.core.core_ui.contract_optional_age_max
 import taminx.core.core_ui.contract_optional_age_min
 import taminx.core.core_ui.contract_optional_check_age
@@ -62,6 +66,7 @@ fun ContractRegistrationStepContent(
     preflightGateError: String? = null,
     isLoading: Boolean = false,
     isOptionalInsurance: Boolean = false,
+    usesChecklistRegistration: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     if (isLoading) {
@@ -69,8 +74,8 @@ fun ContractRegistrationStepContent(
         return
     }
 
-    if (isOptionalInsurance) {
-        OptionalRegistrationStepContent(
+    when {
+        isOptionalInsurance -> OptionalRegistrationStepContent(
             info = info,
             insuranceTypeLabel = insuranceTypeLabel,
             eligibility = eligibility,
@@ -78,8 +83,15 @@ fun ContractRegistrationStepContent(
             preflightGateError = preflightGateError,
             modifier = modifier,
         )
-    } else {
-        SharedRegistrationStepContent(
+        usesChecklistRegistration -> HousewifeRegistrationStepContent(
+            info = info,
+            insuranceTypeLabel = insuranceTypeLabel,
+            eligibility = eligibility,
+            genderGateError = genderGateError,
+            preflightGateError = preflightGateError,
+            modifier = modifier,
+        )
+        else -> SharedRegistrationStepContent(
             info = info,
             insuranceTypeLabel = insuranceTypeLabel,
             eligibility = eligibility,
@@ -163,6 +175,136 @@ private fun OptionalRegistrationStepContent(
             preflightGateError = preflightGateError,
             hasBlockingError = hasBlockingError,
             ageYears = PersianDateFormatter.ageYearsFromBirthEpoch(info.dateOfBirthEpoch),
+        )
+    }
+}
+
+@Composable
+private fun HousewifeRegistrationStepContent(
+    info: RegistrationInfoPR,
+    insuranceTypeLabel: String,
+    eligibility: ContractEligibilityPR?,
+    genderGateError: String?,
+    preflightGateError: String?,
+    modifier: Modifier = Modifier,
+) {
+    val hasBlockingError = genderGateError != null ||
+        preflightGateError != null ||
+        (eligibility != null && !eligibility.isEligible)
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(Spacing.md),
+    ) {
+        HousewifeRegistrationIdentityCard(
+            info = info,
+            insuranceTypeLabel = insuranceTypeLabel,
+        )
+        HousewifeRegistrationEligibilityCard(
+            insuranceTypeLabel = insuranceTypeLabel,
+            eligibility = eligibility,
+            genderGateError = genderGateError,
+            preflightGateError = preflightGateError,
+            hasBlockingError = hasBlockingError,
+            ageYears = PersianDateFormatter.ageYearsFromBirthEpoch(info.dateOfBirthEpoch),
+        )
+    }
+}
+
+@Composable
+private fun HousewifeRegistrationIdentityCard(
+    info: RegistrationInfoPR,
+    insuranceTypeLabel: String,
+) {
+    val colors = LocalTaminColors.current
+    val cardShape = RoundedCornerShape(CornerRadius.x2l)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(cardShape)
+            .background(colors.bgSurface)
+            .border(Thickness.border, colors.border, cardShape)
+            .padding(Spacing.lg),
+        verticalArrangement = Arrangement.spacedBy(Spacing.md),
+    ) {
+        RegistrationBannerCard(insuranceId = info.insuranceId)
+        RegistrationIdentityGrid(
+            info = info,
+            insuranceTypeLabel = insuranceTypeLabel,
+        )
+    }
+}
+
+@Composable
+private fun HousewifeRegistrationEligibilityCard(
+    insuranceTypeLabel: String,
+    eligibility: ContractEligibilityPR?,
+    genderGateError: String?,
+    preflightGateError: String?,
+    hasBlockingError: Boolean,
+    ageYears: Int?,
+) {
+    val colors = LocalTaminColors.current
+    val cardShape = RoundedCornerShape(CornerRadius.x2l)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(cardShape)
+            .background(colors.bgSurface)
+            .border(Thickness.border, colors.border, cardShape)
+            .padding(Spacing.lg),
+        verticalArrangement = Arrangement.spacedBy(Spacing.md),
+    ) {
+        if (hasBlockingError) {
+            val errorMsg = genderGateError
+                ?: preflightGateError
+                ?: eligibility?.eligibilityMessage(insuranceTypeLabel).orEmpty()
+            BannerCard(
+                message = errorMsg,
+                type = BannerType.Error,
+            )
+        } else {
+            BannerCard(
+                message = stringResource(Res.string.contract_housewife_eligibility_ok),
+                type = BannerType.Success,
+            )
+            HousewifeEligibilityChecklist(ageYears = ageYears)
+            BannerCard(
+                message = stringResource(Res.string.contract_housewife_info_rates_treatment),
+                type = BannerType.Info,
+            )
+        }
+    }
+}
+
+@Composable
+private fun HousewifeEligibilityChecklist(ageYears: Int?) {
+    val ageMin = stringResource(Res.string.contract_optional_age_min)
+    val ageMax = stringResource(Res.string.contract_optional_age_max)
+    val ageCheck = if (ageYears != null) {
+        stringResource(
+            Res.string.contract_optional_check_age,
+            ageYears.toString().toPersianDigits(),
+            ageMin,
+            ageMax,
+        )
+    } else {
+        stringResource(
+            Res.string.contract_optional_check_age_fallback,
+            ageMin,
+            ageMax,
+        )
+    }
+
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+        OptionalEligibilityCheckRow(text = ageCheck)
+        OptionalEligibilityCheckRow(
+            text = stringResource(Res.string.contract_housewife_check_no_active),
+        )
+        OptionalEligibilityCheckRow(
+            text = stringResource(Res.string.contract_housewife_check_no_compulsory),
         )
     }
 }
@@ -570,6 +712,35 @@ private fun ContractRegistrationStepContentIneligiblePreview() {
                 isEligible = false,
                 reason = com.tamin.taminhamrah.contractFlow.ContractEligibilityReason.AGE_HISTORY_NOT_MET,
             ),
+        )
+    }
+}
+
+@com.tamin.taminhamrah.ui.PreviewRtlTheme
+@Composable
+private fun HousewifeContractRegistrationStepContentPreview() {
+    com.tamin.taminhamrah.ui.PreviewRtlThemeContent {
+        ContractRegistrationStepContent(
+            info = RegistrationInfoPR(
+                fullName = "زهرا دریکوند",
+                nationalId = "0924558130",
+                birthDateFormatted = "1369/11/03",
+                insuranceId = "0043819250",
+                genderCode = "02",
+                address = "تهران",
+                zipCode = "1234567890",
+                phoneNumber = "02166001234",
+                mobileNumber = "09121234567",
+                hasMobile = true,
+                dateOfBirthEpoch = 665_280_000_000L,
+            ),
+            insuranceTypeLabel = "زنان خانه‌دار",
+            eligibility = ContractEligibilityPR(
+                statusCode = 2,
+                isEligible = true,
+                reason = com.tamin.taminhamrah.contractFlow.ContractEligibilityReason.AGE_UNDER_FIFTY,
+            ),
+            usesChecklistRegistration = true,
         )
     }
 }
