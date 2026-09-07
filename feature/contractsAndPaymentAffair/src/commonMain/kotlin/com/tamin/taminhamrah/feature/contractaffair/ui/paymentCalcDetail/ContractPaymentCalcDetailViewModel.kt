@@ -32,16 +32,22 @@ class ContractPaymentCalcDetailViewModel(
     private var premiumType: ContractPremiumType = ContractPremiumType.FREELANCE
     private var startDate: Long = 0L
     private var endDate: Long = 0L
+    private var hasLoaded = false
 
     override fun handleIntent(
         intent: ContractPaymentCalcDetailIntent,
     ): Flow<PartialState> = when (intent) {
         is ContractPaymentCalcDetailIntent.Load -> {
-            premiumType = ContractPremiumType.fromCode(intent.premiumTypeCode)
-                ?: ContractPremiumType.FREELANCE
-            startDate = intent.startDate
-            endDate = intent.endDate
-            load(seedHeader = true)
+            if (hasLoaded) {
+                emptyFlow()
+            } else {
+                hasLoaded = true
+                premiumType = ContractPremiumType.fromCode(intent.premiumTypeCode)
+                    ?: ContractPremiumType.FREELANCE
+                startDate = intent.startDate
+                endDate = intent.endDate
+                load(seedHeader = true)
+            }
         }
 
         ContractPaymentCalcDetailIntent.Retry -> load(seedHeader = false)

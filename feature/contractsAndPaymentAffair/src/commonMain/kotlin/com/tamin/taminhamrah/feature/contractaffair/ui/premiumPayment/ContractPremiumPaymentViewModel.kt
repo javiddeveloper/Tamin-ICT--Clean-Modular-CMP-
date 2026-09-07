@@ -30,10 +30,17 @@ class ContractPremiumPaymentViewModel(
 ) {
 
     private var premiumType: ContractPremiumType = ContractPremiumType.FREELANCE
+    private var hasLoaded = false
 
     override fun handleIntent(intent: ContractPremiumPaymentIntent): Flow<PartialState> =
         when (intent) {
-            is ContractPremiumPaymentIntent.Load -> load(intent)
+            is ContractPremiumPaymentIntent.Load ->
+                if (hasLoaded) {
+                    emptyFlow()
+                } else {
+                    hasLoaded = true
+                    load(intent)
+                }
             ContractPremiumPaymentIntent.Retry -> loadLastPayment()
 
             ContractPremiumPaymentIntent.IncrementMonths ->

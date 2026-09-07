@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.contractaffair.ui.paymentHistory.components.ContractPaymentHistoryHeader
+import com.tamin.taminhamrah.feature.contractaffair.ui.paymentHistory.components.ContractPaymentHistorySkeleton
 import com.tamin.taminhamrah.feature.contractaffair.ui.paymentHistory.components.PaymentHistoryItemCard
 import com.tamin.taminhamrah.feature.contractaffair.ui.paymentHistory.components.PaymentHistorySummaryCard
 import com.tamin.taminhamrah.feature.contractaffair.ui.paymentHistory.contract.ContractPaymentHistoryEvent
@@ -31,7 +32,6 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
-import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.toast.AppToastHost
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -97,7 +97,7 @@ internal fun ContractPaymentHistoryScreen(
             )
 
             when {
-                uiState.isLoading && uiState.items.isEmpty() -> LoadingStateOverlay()
+                uiState.isLoading && uiState.items.isEmpty() -> ContractPaymentHistorySkeleton()
 
                 uiState.items.isEmpty() -> EmptyStateMessage(
                     icon = Icons.Outlined.ReceiptLong,

@@ -23,11 +23,18 @@ class ContractPaymentHistoryViewModel(
 
     private var contractNumber: String = ""
 
+    private var hasLoaded = false
+
     override fun handleIntent(intent: ContractPaymentHistoryIntent): Flow<PartialState> =
         when (intent) {
             is ContractPaymentHistoryIntent.Load -> {
-                contractNumber = intent.contractNumber
-                loadHistory(seed = intent)
+                if (hasLoaded) {
+                    emptyFlow()
+                } else {
+                    hasLoaded = true
+                    contractNumber = intent.contractNumber
+                    loadHistory(seed = intent)
+                }
             }
 
             ContractPaymentHistoryIntent.Retry -> loadHistory(seed = null)

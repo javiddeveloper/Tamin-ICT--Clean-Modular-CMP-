@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.contractaffair.ui.paymentCalcDetail.components.ContractPaymentCalcDetailHeader
+import com.tamin.taminhamrah.feature.contractaffair.ui.paymentCalcDetail.components.ContractPaymentCalcDetailSkeleton
 import com.tamin.taminhamrah.feature.contractaffair.ui.paymentCalcDetail.components.PaymentCalcDetailRow
 import com.tamin.taminhamrah.feature.contractaffair.ui.paymentCalcDetail.contract.ContractPaymentCalcDetailEvent
 import com.tamin.taminhamrah.feature.contractaffair.ui.paymentCalcDetail.contract.ContractPaymentCalcDetailIntent
@@ -43,7 +44,6 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
-import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
@@ -112,7 +112,7 @@ internal fun ContractPaymentCalcDetailScreen(
             )
 
             when {
-                uiState.isLoading && uiState.rows.isEmpty() -> LoadingStateOverlay()
+                uiState.isLoading && uiState.rows.isEmpty() -> ContractPaymentCalcDetailSkeleton()
 
                 uiState.rows.isEmpty() -> EmptyStateMessage(
                     icon = Icons.Outlined.ReceiptLong,

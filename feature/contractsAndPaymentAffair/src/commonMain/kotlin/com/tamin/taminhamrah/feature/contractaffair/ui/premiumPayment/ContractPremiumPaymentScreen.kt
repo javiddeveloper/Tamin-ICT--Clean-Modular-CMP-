@@ -28,7 +28,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.contractaffair.ui.premiumPayment.components.ContractDebitResultCard
+import com.tamin.taminhamrah.feature.contractaffair.ui.premiumPayment.components.ContractDebitResultCardSkeleton
 import com.tamin.taminhamrah.feature.contractaffair.ui.premiumPayment.components.ContractPremiumPaymentHeader
+import com.tamin.taminhamrah.feature.contractaffair.ui.premiumPayment.components.ContractPremiumPaymentInitSkeleton
 import com.tamin.taminhamrah.feature.contractaffair.ui.premiumPayment.components.DashedDivider
 import com.tamin.taminhamrah.feature.contractaffair.ui.premiumPayment.components.MonthStepper
 import com.tamin.taminhamrah.feature.contractaffair.ui.premiumPayment.components.PremiumPaymentInfoCard
@@ -40,7 +42,6 @@ import com.tamin.taminhamrah.model.contractAffair.ContractLastPaymentPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
-import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.components.toast.AppToastHost
@@ -135,7 +136,7 @@ internal fun ContractPremiumPaymentScreen(
                     )
             ) {
                 if (uiState.isInitLoading && uiState.lastPayment == null) {
-                    LoadingStateOverlay()
+                    ContractPremiumPaymentInitSkeleton()
                 } else {
                     Column(
                         modifier = Modifier
@@ -170,8 +171,11 @@ internal fun ContractPremiumPaymentScreen(
                             onClick = { onIntent(ContractPremiumPaymentIntent.Calculate) },
                         )
 
-                        uiState.debit?.let { debit ->
-                            ContractDebitResultCard(
+                        val debit = uiState.debit
+                        when {
+                            uiState.isCalculating -> ContractDebitResultCardSkeleton()
+
+                            debit != null -> ContractDebitResultCard(
                                 debit = debit,
                                 months = uiState.months,
                                 onOpenDetails = {
