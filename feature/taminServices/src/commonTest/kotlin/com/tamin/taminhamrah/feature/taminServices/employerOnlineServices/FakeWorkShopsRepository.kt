@@ -84,6 +84,10 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         failIf(Call.TICKET)
         return ticketMessage
     }
+    override suspend fun getContractRowsWithAgreement(query: ContractRowQuery): PagedListDN<EmployerAgreementDN> =
+        PagedListDN()
+
+    override suspend fun getContractRowsWithoutAgreement(query: ContractRowQuery): PagedListDN<WorkshopContractDN> = PagedListDN()
 
     override suspend fun getEmployerAgreementContactInfo(verificationCode: String): EmployerContactInfoDN {
         lastVerificationCode = verificationCode
