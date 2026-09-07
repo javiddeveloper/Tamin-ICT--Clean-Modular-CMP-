@@ -115,6 +115,7 @@ enum class FilterProperty(val key: String) {
 
     @SerialName("debitNumber") DEBIT_NUMBER("debitNumber"),
     @SerialName("peymanSequence") PEYMAN_SEQUENCE("peymanSequence"),
+    @SerialName("contractRow") CONTRACT_ROW("contractRow"),
 }
 
 
