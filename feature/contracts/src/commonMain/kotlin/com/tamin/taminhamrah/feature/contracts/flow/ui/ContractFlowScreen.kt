@@ -28,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.tamin.taminhamrah.contractFlow.ContractApplicantType
@@ -45,6 +46,7 @@ import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
 import com.tamin.taminhamrah.ui.components.TaminBottomBar
 import com.tamin.taminhamrah.ui.components.TaminHeroStepProgress
 import com.tamin.taminhamrah.ui.components.TaminText
+import com.tamin.taminhamrah.ui.components.TaminSingleLineAutoSizeText
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.buttons.SquareIconButton
@@ -61,6 +63,7 @@ import com.tamin.taminhamrah.ui.contractFlow.ContractSubmitResultDialog
 import com.tamin.taminhamrah.ui.contractFlow.ContractSummaryRowPR
 import com.tamin.taminhamrah.ui.contractFlow.ContractTermsStepContent
 import com.tamin.taminhamrah.ui.contractFlow.InsurancePremiumStepContent
+import com.tamin.taminhamrah.ui.contractFlow.JobTitleStepContent
 import com.tamin.taminhamrah.ui.contractFlow.PremiumSalaryStepContent
 import com.tamin.taminhamrah.ui.contractFlow.SelectBranchStepContent
 import com.tamin.taminhamrah.ui.contractFlow.SubmitContractStepContent
@@ -68,6 +71,7 @@ import com.tamin.taminhamrah.ui.contractFlow.TreatmentSupportStepContent
 import com.tamin.taminhamrah.ui.contractFlow.UploadImageStepContent
 import com.tamin.taminhamrah.ui.contractFlow.UserInfoStepContent
 import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminOnAccentInkSoft
 import com.tamin.taminhamrah.ui.toPriceFormat
@@ -78,6 +82,7 @@ import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.contract_flow_submit_contract
+import taminx.core.core_ui.contract_hero_step_job_title
 import taminx.core.core_ui.contract_next_step
 import taminx.core.core_ui.contract_save_edit
 import taminx.core.core_ui.contract_step_contract_applicant
@@ -203,6 +208,15 @@ fun ContractFlowScreenContent(
                     bottomStart = CornerRadius.x3l,
                     bottomEnd = CornerRadius.x3l,
                 ),
+                titleContent = {
+                    TaminSingleLineAutoSizeText(
+                        text = screenTitle,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = LocalTaminColors.current.onGradient,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                },
                 navigationIcon = {
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
@@ -426,6 +440,33 @@ fun ContractFlowScreenContent(
                                         )
                                     }
 
+                                    ContractStep.STEP_JOB_TITLE -> {
+                                        JobTitleStepContent(
+                                            freeJobs = state.freeJobs,
+                                            selectedFreeJobCode = state.selectedFreeJobCode,
+                                            selectedFreeJobName = state.selectedFreeJobName,
+                                            isFreeJobsLoading = state.isFreeJobsLoading,
+                                            searchQuery = state.freeJobsSearchQuery,
+                                            onSearchQueryChange = {
+                                                onIntent(ContractFlowIntent.SearchFreeJobs(it))
+                                            },
+                                            canLoadMore = state.hasMoreFreeJobs &&
+                                                !state.isFreeJobsLoading &&
+                                                !state.isFreeJobsLoadingMore,
+                                            isLoadingMore = state.isFreeJobsLoadingMore,
+                                            loadMoreError = state.freeJobsLoadMoreError,
+                                            onLoadMore = {
+                                                onIntent(ContractFlowIntent.LoadMoreFreeJobs)
+                                            },
+                                            onRetryLoadMore = {
+                                                onIntent(ContractFlowIntent.LoadMoreFreeJobs)
+                                            },
+                                            onFreeJobSelected = {
+                                                onIntent(ContractFlowIntent.SelectFreeJob(it))
+                                            },
+                                        )
+                                    }
+
                                     ContractStep.STEP_TREATMENT_SUPPORT -> {
                                         TreatmentSupportStepContent(
                                             treatmentSupportCode = state.treatmentSupportCode,
@@ -460,14 +501,6 @@ fun ContractFlowScreenContent(
                                             isRateSelectionEnabled = state.lockedPremiumRateCode == null,
                                             onRateSelected = {
                                                 onIntent(ContractFlowIntent.SelectPremiumRate(it))
-                                            },
-                                            showFreeJobSelector = state.config?.requiresFreeJob == true,
-                                            freeJobs = state.freeJobs,
-                                            selectedFreeJobCode = state.selectedFreeJobCode,
-                                            selectedFreeJobName = state.selectedFreeJobName,
-                                            isFreeJobsLoading = state.isFreeJobsLoading,
-                                            onFreeJobSelected = {
-                                                onIntent(ContractFlowIntent.SelectFreeJob(it))
                                             },
                                             premiumRange = state.premiumRange,
                                             selectedPremium = state.selectedMonthlyPremium,
@@ -636,6 +669,9 @@ private fun isStepValid(state: ContractFlowUiState): Boolean {
         ContractStep.STEP_UPLOAD_IMAGE -> {
             !state.isUploadingDocument
         }
+        ContractStep.STEP_JOB_TITLE -> {
+            state.selectedFreeJobCode != null
+        }
         ContractStep.STEP_TREATMENT_SUPPORT -> {
             state.treatmentSupportCode == ContractFlowUiState.TREATMENT_SUPPORT_WITHOUT ||
                 (
@@ -680,6 +716,7 @@ private fun summaryTitleFor(step: ContractStep): String? = when (step) {
     ContractStep.STEP_CONTRACT_APPLICANT -> stringResource(Res.string.contract_step_contract_applicant)
     ContractStep.STEP_SELECT_BRANCH -> stringResource(Res.string.contract_summary_branch)
     ContractStep.STEP_UPLOAD_IMAGE -> stringResource(Res.string.contract_summary_documents)
+    ContractStep.STEP_JOB_TITLE -> stringResource(Res.string.contract_hero_step_job_title)
     ContractStep.STEP_TREATMENT_SUPPORT -> stringResource(Res.string.contract_step_treatment_support)
     ContractStep.STEP_INSURANCE_PREMIUM,
     ContractStep.STEP_SALARY,
@@ -701,6 +738,7 @@ private fun summaryValueFor(state: ContractFlowUiState, step: ContractStep): Str
         } else {
             state.documentDescription
         }
+    ContractStep.STEP_JOB_TITLE -> state.selectedFreeJobName.orEmpty()
     ContractStep.STEP_TREATMENT_SUPPORT ->
         if (state.treatmentSupportCode == ContractFlowUiState.TREATMENT_SUPPORT_WITH) {
             stringResource(Res.string.contract_summary_treatment_with)

@@ -18,6 +18,7 @@ import com.tamin.taminhamrah.model.contracts.RegistrationInfoDN
 import com.tamin.taminhamrah.model.contracts.SaveContactRequestDN
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.util.PagedListDN
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.json.JsonElement
@@ -61,6 +62,9 @@ class FakeContractsRepository : ContractsRepository {
 
     var lastPremiumTypeCode: String? = null
     var freeJobWagesResult: List<FreeJobDN> = emptyList()
+    var freeJobWagesTotal: Int = 0
+    var lastFreeJobWagesPage: Int? = null
+    var lastFreeJobWagesSearchQuery: String? = null
     var calculatedOptionalSalaryResult: Long? = null
     var lastPremiumRateCode: String? = null
     var lastFreelanceCalculateParams: FreelanceCalculateSalaryParams? = null
@@ -97,9 +101,11 @@ class FakeContractsRepository : ContractsRepository {
         emit(spcPremiumRatesResult)
     }
 
-    override fun getFreeJobWages(): Flow<List<FreeJobDN>> = flow {
+    override fun getFreeJobWages(page: Int, searchQuery: String?): Flow<PagedListDN<FreeJobDN>> = flow {
+        lastFreeJobWagesPage = page
+        lastFreeJobWagesSearchQuery = searchQuery
         if (shouldThrowError) throw error
-        emit(freeJobWagesResult)
+        emit(PagedListDN(items = freeJobWagesResult, total = freeJobWagesTotal.coerceAtLeast(freeJobWagesResult.size)))
     }
 
     override fun getFreelancePremiumRange(params: FreelancePremiumRangeParams): Flow<FreelancePremiumRangeDN> = flow {
@@ -127,14 +133,17 @@ class FakeContractsRepository : ContractsRepository {
         )
     }
 
+    var redCrossStatusResult: String = "ok"
+    var medicalStudentStatusResult: String = "ok14"
+
     override fun checkRedCrossStatus(): Flow<String> = flow {
         if (shouldThrowError) throw error
-        emit("ok")
+        emit(redCrossStatusResult)
     }
 
     override fun checkMedicalStudent(): Flow<String> = flow {
         if (shouldThrowError) throw error
-        emit("ok14")
+        emit(medicalStudentStatusResult)
     }
 
     override fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Flow<Long> = flow {

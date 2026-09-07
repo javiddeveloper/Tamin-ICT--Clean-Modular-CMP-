@@ -4,10 +4,10 @@ import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.contracts.flow.config.ContractFlowConfig
 import com.tamin.taminhamrah.feature.contracts.flow.preflight.ContractPreflightBlock
 import com.tamin.taminhamrah.feature.contracts.flow.preflight.resolvePreflightBlock
-import com.tamin.taminhamrah.feature.contracts.flow.specialjob.SpecialFreeJobDecision
+import com.tamin.taminhamrah.feature.contracts.flow.specialjob.RED_CRESCENT_DAY_LIMIT
+import com.tamin.taminhamrah.feature.contracts.flow.specialjob.SpecialFreeJobOutcome
 import com.tamin.taminhamrah.feature.contracts.flow.specialjob.SpecialFreeJobRejectReason
-import com.tamin.taminhamrah.feature.contracts.flow.specialjob.resolveMedicalStudentSelection
-import com.tamin.taminhamrah.feature.contracts.flow.specialjob.resolveRedCrescentSelection
+import com.tamin.taminhamrah.feature.contracts.flow.specialjob.resolveSpecialFreeJob
 import com.tamin.taminhamrah.model.contracts.ContractDN
 import com.tamin.taminhamrah.model.contracts.FreelanceSpecialJobCode
 import com.tamin.taminhamrah.feature.contracts.flow.ui.contract.ContractFlowEvent
@@ -34,6 +34,7 @@ import com.tamin.taminhamrah.model.contractFlow.UploadImagePR
 import com.tamin.taminhamrah.model.contractFlow.UserInfoFormPR
 import com.tamin.taminhamrah.model.contracts.BranchPR
 import com.tamin.taminhamrah.model.contracts.FreeJobDN
+import com.tamin.taminhamrah.model.contracts.FreeJobWagesPaging
 import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractParams
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractRequestDN
@@ -63,7 +64,6 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
-import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.contract_error_medical_student_not_allowed
@@ -133,6 +133,8 @@ class ContractFlowViewModel(
             ContractFlowIntent.ClearUploadedDocument -> handleClearUploadedDocument()
             is ContractFlowIntent.SelectPremiumRate -> handleSelectPremiumRate(intent.rate)
             is ContractFlowIntent.SelectFreeJob -> handleSelectFreeJob(intent.job)
+            is ContractFlowIntent.SearchFreeJobs -> handleSearchFreeJobs(intent.query)
+            ContractFlowIntent.LoadMoreFreeJobs -> handleLoadMoreFreeJobs()
             is ContractFlowIntent.SelectMonthlyPremium -> handleSelectMonthlyPremium(intent.amount)
             ContractFlowIntent.CalculateMonthlyPremium -> handleCalculateMonthlyPremium()
             is ContractFlowIntent.SetAgreementConfirmed -> handleSetAgreementConfirmed(intent.confirmed)
@@ -153,17 +155,64 @@ class ContractFlowViewModel(
         loadFreeJobsIfNeeded(),
     )
 
-    private fun loadFreeJobsIfNeeded(): Flow<PartialState> = flow {
-        if (!config.requiresFreeJob) return@flow
-        emit(PartialState.FreeJobsLoading(true))
+    private fun loadFreeJobsIfNeeded(): Flow<PartialState> {
+        if (!config.requiresFreeJob) return flow { }
+        return loadFreeJobs(page = 1, searchQuery = "", append = false)
+    }
+
+    private fun handleSearchFreeJobs(query: String): Flow<PartialState> {
+        if (!config.requiresFreeJob) return flow { }
+        val state = uiState.value
+        if (query == state.freeJobsSearchQuery && (state.freeJobs.isNotEmpty() || state.isFreeJobsLoading)) {
+            return flow { }
+        }
+        return loadFreeJobs(page = 1, searchQuery = query, append = false)
+    }
+
+    private fun handleLoadMoreFreeJobs(): Flow<PartialState> {
+        val state = uiState.value
+        if (!config.requiresFreeJob || !state.hasMoreFreeJobs || state.isFreeJobsLoading || state.isFreeJobsLoadingMore) {
+            return flow { }
+        }
+        val nextPage = FreeJobWagesPaging.nextPage(state.freeJobsReceivedCount)
+        return loadFreeJobs(page = nextPage, searchQuery = state.freeJobsSearchQuery, append = true)
+    }
+
+    private fun loadFreeJobs(
+        page: Int,
+        searchQuery: String,
+        append: Boolean,
+    ): Flow<PartialState> = flow {
+        if (append) {
+            emit(PartialState.FreeJobsLoadingMore(true))
+        } else {
+            emit(PartialState.FreeJobsSearchStarted(searchQuery))
+        }
         try {
-            getFreeJobWagesUseCase().collect { jobs ->
-                emit(PartialState.FreeJobsLoaded(jobs))
+            getFreeJobWagesUseCase(
+                page = page,
+                searchQuery = searchQuery.takeIf { it.isNotBlank() },
+            ).collect { result ->
+                emit(
+                    PartialState.FreeJobsLoaded(
+                        freeJobs = result.items,
+                        total = result.total,
+                        append = append,
+                        searchQuery = searchQuery,
+                    ),
+                )
             }
         } catch (e: Exception) {
-            emitError(e.message)
+            if (append) {
+                emit(PartialState.FreeJobsLoadMoreError(e.message))
+            } else {
+                emitError(e.message)
+                emit(PartialState.FreeJobsLoading(false))
+            }
         } finally {
-            emit(PartialState.FreeJobsLoading(false))
+            if (append) {
+                emit(PartialState.FreeJobsLoadingMore(false))
+            }
         }
     }
 
@@ -611,22 +660,35 @@ class ContractFlowViewModel(
             FreelanceSpecialJobCode.RED_CRESCENT_CODE -> {
                 try {
                     val (_, _, jalaliDay) = PersianDateFormatter.today()
-                    val status = checkRedCrossStatusUseCase().first()
-                    when (val decision = resolveRedCrescentSelection(jalaliDay, status)) {
-                        is SpecialFreeJobDecision.Rejected -> {
-                            emitError(getString(decision.reason.toStringRes()))
-                            return@flow
+                    val redCrossStatus =
+                        if (jalaliDay > RED_CRESCENT_DAY_LIMIT) {
+                            ""
+                        } else {
+                            checkRedCrossStatusUseCase().first()
                         }
-                        is SpecialFreeJobDecision.Accepted -> emitAll(
-                            specialFreeJobSelected(
-                                jobCode = jobCode,
-                                jobName = jobName,
-                                forceTreatmentSupport = decision.forceTreatmentSupport,
-                                lockedPremiumRate = decision.lockedPremiumRate,
-                                hidePremiumSlider = decision.hidePremiumSlider,
-                                allowsPayment = decision.allowsPayment,
-                            ),
+                    when (
+                        val outcome = resolveSpecialFreeJob(
+                            jobCode = jobCode,
+                            jalaliDay = jalaliDay,
+                            redCrossStatus = redCrossStatus,
+                            medicalStudentStatus = "",
                         )
+                    ) {
+                        is SpecialFreeJobOutcome.Rejected ->
+                            emitError(getString(outcome.reason.toMessageRes()))
+                        is SpecialFreeJobOutcome.Accepted ->
+                            emitAll(
+                                specialFreeJobSelected(
+                                    jobCode = jobCode,
+                                    jobName = jobName,
+                                    forceTreatmentSupport = outcome.forceTreatmentSupport,
+                                    lockedPremiumRate = outcome.lockedPremiumRate,
+                                    hidePremiumSlider = outcome.hidePremiumSlider,
+                                    allowsPayment = outcome.allowsPayment,
+                                ),
+                            )
+                        SpecialFreeJobOutcome.Regular ->
+                            emitAll(regularFreeJobSelected(jobCode, jobName))
                     }
                 } catch (e: Exception) {
                     emitError(e.message)
@@ -634,22 +696,30 @@ class ContractFlowViewModel(
             }
             FreelanceSpecialJobCode.MEDICAL_STUDENT_CODE -> {
                 try {
-                    val status = checkMedicalStudentUseCase().first()
-                    when (val decision = resolveMedicalStudentSelection(status)) {
-                        is SpecialFreeJobDecision.Rejected -> {
-                            emitError(getString(decision.reason.toStringRes()))
-                            return@flow
-                        }
-                        is SpecialFreeJobDecision.Accepted -> emitAll(
-                            specialFreeJobSelected(
-                                jobCode = jobCode,
-                                jobName = jobName,
-                                forceTreatmentSupport = decision.forceTreatmentSupport,
-                                lockedPremiumRate = decision.lockedPremiumRate,
-                                hidePremiumSlider = decision.hidePremiumSlider,
-                                allowsPayment = decision.allowsPayment,
-                            ),
+                    val medicalStudentStatus = checkMedicalStudentUseCase().first()
+                    when (
+                        val outcome = resolveSpecialFreeJob(
+                            jobCode = jobCode,
+                            jalaliDay = 1,
+                            redCrossStatus = "",
+                            medicalStudentStatus = medicalStudentStatus,
                         )
+                    ) {
+                        is SpecialFreeJobOutcome.Rejected ->
+                            emitError(getString(outcome.reason.toMessageRes()))
+                        is SpecialFreeJobOutcome.Accepted ->
+                            emitAll(
+                                specialFreeJobSelected(
+                                    jobCode = jobCode,
+                                    jobName = jobName,
+                                    forceTreatmentSupport = outcome.forceTreatmentSupport,
+                                    lockedPremiumRate = outcome.lockedPremiumRate,
+                                    hidePremiumSlider = outcome.hidePremiumSlider,
+                                    allowsPayment = outcome.allowsPayment,
+                                ),
+                            )
+                        SpecialFreeJobOutcome.Regular ->
+                            emitAll(regularFreeJobSelected(jobCode, jobName))
                     }
                 } catch (e: Exception) {
                     emitError(e.message)
@@ -659,7 +729,7 @@ class ContractFlowViewModel(
         }
     }
 
-    private fun SpecialFreeJobRejectReason.toStringRes(): StringResource = when (this) {
+    private fun SpecialFreeJobRejectReason.toMessageRes() = when (this) {
         SpecialFreeJobRejectReason.RED_CRESCENT_DAY_LIMIT ->
             Res.string.contract_error_red_crescent_day_limit
         SpecialFreeJobRejectReason.RED_CRESCENT_NOT_ELIGIBLE ->
@@ -971,10 +1041,44 @@ class ContractFlowViewModel(
         )
         is PartialState.FreeJobsLoading -> currentState.copy(
             isFreeJobsLoading = partialState.isLoading,
+            freeJobsLoadMoreError = null,
         )
-        is PartialState.FreeJobsLoaded -> currentState.copy(
-            isFreeJobsLoading = false,
-            freeJobs = partialState.freeJobs,
+        is PartialState.FreeJobsSearchStarted -> currentState.copy(
+            freeJobsSearchQuery = partialState.searchQuery,
+            isFreeJobsLoading = true,
+            isFreeJobsLoadingMore = false,
+            hasMoreFreeJobs = false,
+            freeJobsLoadMoreError = null,
+        )
+        is PartialState.FreeJobsLoadingMore -> currentState.copy(
+            isFreeJobsLoadingMore = partialState.isLoading,
+            freeJobsLoadMoreError = if (partialState.isLoading) null else currentState.freeJobsLoadMoreError,
+        )
+        is PartialState.FreeJobsLoaded -> {
+            if (partialState.searchQuery != currentState.freeJobsSearchQuery) {
+                currentState.copy(isFreeJobsLoadingMore = false)
+            } else {
+                val merged = FreeJobWagesPaging.mergePage(
+                    existing = currentState.freeJobs,
+                    priorReceivedCount = currentState.freeJobsReceivedCount,
+                    pageItems = partialState.freeJobs,
+                    append = partialState.append,
+                    total = partialState.total,
+                )
+                currentState.copy(
+                    isFreeJobsLoading = false,
+                    isFreeJobsLoadingMore = false,
+                    freeJobs = merged.items,
+                    freeJobsReceivedCount = merged.receivedCount,
+                    hasMoreFreeJobs = merged.hasMore,
+                    freeJobsSearchQuery = partialState.searchQuery,
+                    freeJobsLoadMoreError = null,
+                )
+            }
+        }
+        is PartialState.FreeJobsLoadMoreError -> currentState.copy(
+            isFreeJobsLoadingMore = false,
+            freeJobsLoadMoreError = partialState.message,
         )
         is PartialState.FreeJobSelected -> currentState.copy(
             selectedFreeJobCode = partialState.jobCode,

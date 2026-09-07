@@ -2109,6 +2109,12 @@
     <string name="contract_field_monthly_income">درآمد ماهانه</string>
     <string name="contract_field_treatment_support">حمایت درمان</string>
     <string name="contract_field_job">شغل</string>
+    <string name="contract_field_job_title">عنوان شغل</string>
+    <string name="contract_field_job_title_required">عنوان شغل *</string>
+    <string name="contract_job_code_label">کد شغل: %1$s</string>
+    <string name="contract_job_title_info">عنوان شغل، نرخ حق بیمه و دامنه دستمزد مبنای شما را تعیین می‌کند. نزدیک‌ترین عنوان به فعالیت خود را انتخاب نمایید.</string>
+    <string name="contract_hero_step_job_title">عنوان شغل</string>
+    <string name="contract_hero_step_job_title_desc">عنوان شغل خود را از فهرست مشاغل آزاد انتخاب کنید.</string>
     <string name="contract_value_dash">—</string>
 
     <string name="contract_student_screen_title">انعقاد قرارداد بیمه دانشجویی</string>
@@ -2298,8 +2304,8 @@
 
     <string name="contract_rules_sheet_title_student">مقررات و ضوابط انعقاد قرارداد بیمۀ دانشجویی</string>
     <string name="contract_rules_sheet_title_freelance">مقررات و ضوابط انعقاد قرارداد بیمه صاحبان حرف و مشاغل آزاد</string>
-    <string name="contract_rules_sheet_title_housewife">مقررات و ضوابط انعقاد قرارداد بیمه زنان خانه‌دار</string>
-    <string name="contract_rules_sheet_title_optional">مقررات و ضوابط انعقاد قرارداد بیمه اختیاری</string>
+    <string name="contract_rules_sheet_title_housewife">مقررات و ضوابط انعقاد قرارداد بیمۀ زنان خانه‌دار</string>
+    <string name="contract_rules_sheet_title_optional">مقررات و ضوابط انعقاد قرارداد بیمۀ اختیاری</string>
     <string name="contract_rules_sheet_page_counter">۱ از ۱</string>
     <string name="contract_rules_sheet_student_p1">بیمۀ دانشجویی از انواع بیمه‌های خودپرداز سازمان تأمین اجتماعی است. دانشجویانی که تحت پوشش هیچ‌یک از بیمه‌های اجباری قرار ندارند، می‌توانند با انعقاد قرارداد و پرداخت حق بیمۀ ماهانه از حمایت‌های قانونی سازمان بهره‌مند شوند.</string>
     <string name="contract_rules_sheet_student_section1_title">شرایط انعقاد قرارداد:</string>
@@ -2321,7 +2327,7 @@
     <string name="contract_rules_sheet_freelance_section2_item1">۱. با انتخاب نرخ ۱۲ درصد از معاینات پزشکی معاف می‌باشید. این نرخ شامل حمایت بازنشستگی و فوت پس از بازنشستگی است.</string>
     <string name="contract_rules_sheet_freelance_section2_item2">۲. با انتخاب نرخ ۱۴ درصد، با داشتن حداقل ۱ سال سابقهٔ بیمه‌پردازی، از معاینات پزشکی معاف می‌باشید. این نرخ شامل حمایت بازنشستگی و فوت است.</string>
     <string name="contract_rules_sheet_freelance_section2_item3">۳. با انتخاب نرخ ۱۸ درصد، در صورتی که در ۱۰ سال قبل از انعقاد قرارداد حداقل ۱ سال و در ۱ سال قبل از انعقاد قرارداد حداقل ۹۰ روز سابقهٔ بیمه‌پردازی داشته باشید، از معاینات پزشکی معاف می‌باشید. این نرخ شامل حمایت بازنشستگی، فوت و ازکارافتادگی است.</string>
-    <string name="contract_rules_sheet_housewife_p1">بیمه زنان خانه‌دار از انواع بیمه‌های خودپرداز سازمان تأمین اجتماعی است. زنان خانه‌داری که تحت پوشش هیچ‌یک از بیمه‌های اجباری قرار ندارند، می‌توانند با انعقاد قرارداد و پرداخت حق بیمۀ ماهانه از حمایت‌های قانونی سازمان بهره‌مند شوند.</string>
+    <string name="contract_rules_sheet_housewife_p1">بیمۀ زنان خانه‌دار از انواع بیمه‌های خودپرداز سازمان تأمین اجتماعی است. زنان خانه‌داری که تحت پوشش هیچ‌یک از بیمه‌های اجباری قرار ندارند، می‌توانند با انعقاد قرارداد و پرداخت حق بیمۀ ماهانه از حمایت‌های قانونی سازمان بهره‌مند شوند.</string>
     <string name="contract_rules_sheet_housewife_section1_title">شرایط انعقاد قرارداد:</string>
     <string name="contract_rules_sheet_housewife_section1_item1">۱. این خدمت صرفاً برای متقاضیان زن قابل استفاده است.</string>
     <string name="contract_rules_sheet_housewife_section1_item2">۲. سن متقاضی در زمان انعقاد قرارداد نباید کمتر از ۱۸ سال و بیشتر از ۵۰ سال تمام باشد.</string>
@@ -2331,7 +2337,7 @@
     <string name="contract_rules_sheet_housewife_section2_item1">۱. با انتخاب نرخ ۱۲ درصد از معاینات پزشکی معاف می‌باشید. این نرخ شامل حمایت بازنشستگی و فوت پس از بازنشستگی است.</string>
     <string name="contract_rules_sheet_housewife_section2_item2">۲. با انتخاب نرخ ۱۴ درصد، با داشتن حداقل ۱ سال سابقهٔ بیمه‌پردازی، از معاینات پزشکی معاف می‌باشید. این نرخ شامل حمایت بازنشستگی و فوت است.</string>
     <string name="contract_rules_sheet_housewife_section2_item3">۳. با انتخاب نرخ ۱۸ درصد، در صورتی که در ۱۰ سال قبل از انعقاد قرارداد حداقل ۱ سال و در ۱ سال قبل از انعقاد قرارداد حداقل ۹۰ روز سابقهٔ بیمه‌پردازی داشته باشید، از معاینات پزشکی معاف می‌باشید. این نرخ شامل حمایت بازنشستگی، فوت و ازکارافتادگی است.</string>
-    <string name="contract_rules_sheet_optional_p1">بیمه اختیاری از انواع بیمه‌های خودپرداز سازمان تأمین اجتماعی است. افرادی که سابقهٔ بیمه‌پردازی دارند و تحت پوشش بیمه اجباری نیستند، می‌توانند با انعقاد قرارداد و پرداخت حق بیمۀ ماهانه از حمایت‌های قانونی سازمان بهره‌مند شوند.</string>
+    <string name="contract_rules_sheet_optional_p1">بیمۀ اختیاری از انواع بیمه‌های خودپرداز سازمان تأمین اجتماعی است. افرادی که سابقهٔ بیمه‌پردازی دارند و تحت پوشش بیمۀ اجباری نیستند، می‌توانند با انعقاد قرارداد و پرداخت حق بیمۀ ماهانه از حمایت‌های قانونی سازمان بهره‌مند شوند.</string>
     <string name="contract_rules_sheet_optional_section1_title">شرایط انعقاد قرارداد:</string>
     <string name="contract_rules_sheet_optional_section1_item1">۱. متقاضی باید دارای حداقل سابقهٔ بیمه‌پردازی مورد نیاز سازمان باشد.</string>
     <string name="contract_rules_sheet_optional_section1_item2">۲. سن متقاضی در زمان انعقاد قرارداد نباید کمتر از ۱۸ سال و بیشتر از ۵۰ سال تمام باشد.</string>

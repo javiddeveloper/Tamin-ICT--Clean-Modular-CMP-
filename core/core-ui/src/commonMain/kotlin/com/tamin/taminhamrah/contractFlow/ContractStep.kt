@@ -35,6 +35,10 @@ enum class ContractStep(
         titleRes = Res.string.contract_hero_step_6_title,
         descRes = Res.string.contract_hero_step_6_desc,
     ),
+    STEP_JOB_TITLE(
+        titleRes = Res.string.contract_hero_step_job_title,
+        descRes = Res.string.contract_hero_step_job_title_desc,
+    ),
     STEP_TREATMENT_SUPPORT(
         titleRes = Res.string.contract_step_treatment_support,
         descRes = Res.string.contract_hero_step_treatment_desc,
@@ -67,6 +71,20 @@ enum class ContractStep(
             STEP_SUBMIT_CONTRACT,
         )
 
+        /** Freelance: dedicated job-title step before treatment (design: step 7 of 10). */
+        val FREELANCE_STEPS: List<ContractStep> = listOf(
+            STEP_REGISTRATION,
+            STEP_CONTRACT_TERMS,
+            STEP_USER_INFO,
+            STEP_CONTRACT_APPLICANT,
+            STEP_SELECT_BRANCH,
+            STEP_UPLOAD_IMAGE,
+            STEP_JOB_TITLE,
+            STEP_TREATMENT_SUPPORT,
+            STEP_INSURANCE_PREMIUM,
+            STEP_SUBMIT_CONTRACT,
+        )
+
         val OPTIONAL_STEPS: List<ContractStep> = listOf(
             STEP_REGISTRATION,
             STEP_CONTRACT_TERMS,
@@ -82,10 +100,12 @@ enum class ContractStep(
             includeTreatmentSupport: Boolean,
             includePremiumRate: Boolean,
             includeAuthorizationSeparate: Boolean = false,
+            includeJobTitle: Boolean = false,
         ): List<ContractStep> = entries.filter { step ->
             when (step) {
                 STEP_AUTHORIZATION -> includeAuthorizationSeparate
                 STEP_UPLOAD_IMAGE -> includeUploadImage
+                STEP_JOB_TITLE -> includeJobTitle
                 STEP_TREATMENT_SUPPORT -> includeTreatmentSupport
                 STEP_INSURANCE_PREMIUM -> includePremiumRate
                 else -> true
@@ -120,6 +140,7 @@ fun ContractStep.isEditableFromSummary(): Boolean = when (this) {
     ContractStep.STEP_CONTRACT_APPLICANT,
     ContractStep.STEP_SELECT_BRANCH,
     ContractStep.STEP_UPLOAD_IMAGE,
+    ContractStep.STEP_JOB_TITLE,
     ContractStep.STEP_TREATMENT_SUPPORT,
     ContractStep.STEP_INSURANCE_PREMIUM,
     ContractStep.STEP_SALARY,
