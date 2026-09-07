@@ -34,8 +34,8 @@ data class DebitPaymentRequestDTO(
     @SerialName("branchCode") val branchCode: String,
     @SerialName("workshopId") val workshopId: String,
     @SerialName("debitNumber") val debitNumber: String,
+    @SerialName("peymanSequence") val agreementRow: String,
     @SerialName("seporde") val deposit: String,
-    @SerialName("peymanSequence") val agreementRow: String? = null,
 )
 
 /**

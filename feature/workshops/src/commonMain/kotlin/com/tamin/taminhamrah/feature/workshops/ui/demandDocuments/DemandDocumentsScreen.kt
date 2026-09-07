@@ -97,6 +97,7 @@ fun DemandDocumentsContent(
         WorkshopListScaffold(
             state = state.list,
             onLoadMore = { onIntent(DemandDocumentsIntent.LoadMore) },
+            onRetry = { onIntent(DemandDocumentsIntent.Retry) },
             key = { it.docNumber },
             header = {
                 WorkshopSectionHeader(
@@ -105,10 +106,11 @@ fun DemandDocumentsContent(
                     copyValue = debitNumber,
                 )
             },
-        ) { document ->
+        ) { document, rowModifier ->
             DemandDocumentCard(
                 document = document,
                 onShowCalculation = { isViewerOpen = true },
+                modifier = rowModifier,
             )
         }
     }

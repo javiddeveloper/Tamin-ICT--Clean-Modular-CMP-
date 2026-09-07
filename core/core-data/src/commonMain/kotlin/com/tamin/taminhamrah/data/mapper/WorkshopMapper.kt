@@ -124,7 +124,7 @@ fun EmployerWorkshopDTO.toDomain(): WorkshopSummaryDN = WorkshopSummaryDN(
     branchTitle = branchTitle.orEmpty()
 )
 
-// ---------------------------------------------- خدمات غیرحضوری کارفرما (employerEservicesAgreement)
+// ---------------------------------------------- خدمات غیرحضوری کارفرما (employerServicesAgreement)
 
 fun EmployerCommitmentInfoDTO.toDomain(): EmployerContactInfoDN = EmployerContactInfoDN(
     firstName = firstName.orEmpty(),
@@ -284,10 +284,11 @@ fun DebitPaymentRequestDN.toDto(): DebitPaymentRequestDTO = DebitPaymentRequestD
     branchCode = branchCode,
     workshopId = workshopId,
     debitNumber = debitNumber,
-    // "1"/"0", not "true"/"false" — see [DebitPaymentRequestDTO].
+    // Empty rather than absent when the debt has none: the old client coalesces the service's
+    // null before building its request, so the key is always on the wire.
+    agreementRow = agreementRow,
+    // "1"/"0", not "true"/"false".
     deposit = if (deposit) DEPOSIT_YES else DEPOSIT_NO,
-    // A debt with no agreement row leaves the field out rather than sending it empty.
-    agreementRow = agreementRow.takeIf { it.isNotBlank() },
 )
 
 private const val DEPOSIT_YES = "1"

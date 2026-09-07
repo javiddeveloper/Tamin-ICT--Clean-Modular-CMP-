@@ -96,6 +96,7 @@ fun WorkshopDebitContent(
         WorkshopListScaffold(
             state = state.list,
             onLoadMore = { onIntent(WorkshopDebitIntent.LoadMore) },
+            onRetry = { onIntent(WorkshopDebitIntent.Retry) },
             key = { it.debitNumber },
             header = {
                 WorkshopSectionHeader(
@@ -103,11 +104,12 @@ fun WorkshopDebitContent(
                     count = state.list.items.size,
                 )
             },
-        ) { debt ->
+        ) { debt, rowModifier ->
             WorkshopDebtCard(
                 debt = debt,
                 onDocuments = { onOpenDocuments(debt.debitNumber) },
                 onPay = { onIntent(WorkshopDebitIntent.PayDebit(debt)) },
+                modifier = rowModifier,
             )
         }
     }
