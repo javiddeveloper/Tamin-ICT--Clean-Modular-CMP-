@@ -7,33 +7,34 @@ import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestInfoDTO
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveRequestDTO
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveResultDTO
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoDTO
+import com.tamin.taminhamrah.model.workshop.AssignerContractDTO
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseDTO
 import com.tamin.taminhamrah.model.workshop.DebitObjectionSaveRequestDTO
 import com.tamin.taminhamrah.model.workshop.DebitObjectionSaveResultDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDTO
 import com.tamin.taminhamrah.model.workshop.DebitReasonDTO
-import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmitRequestDTO
+import com.tamin.taminhamrah.model.workshop.EmployerCommitmentInfoDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeContractDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeRequestDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopDTO
-import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmitRequestDTO
-import com.tamin.taminhamrah.model.workshop.EmployerCommitmentInfoDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberConfirmResultDTO
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopContractDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDTO
-import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDTO
-import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
-import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDTO
-import com.tamin.taminhamrah.model.workshop.WorkshopContractDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDTO
 
 interface WorkShopsRemoteDataSource {
@@ -55,6 +56,35 @@ interface WorkShopsRemoteDataSource {
         branchCode: String,
         query: ApiQueryParamDN,
     ): ListData<WorkshopContractDTO>
+
+    // ---------------------------------------------------------------------------- واگذارندگان
+
+    /**
+     * پیمان‌هایی که کارفرما واگذارندهٔ آن‌هاست.
+     *
+     * Unlike the two calls above, the identity travels in [query]'s filter array rather than in the
+     * path — the repository builds those clauses, so a blank code widens the result instead of
+     * addressing a different route.
+     */
+    suspend fun getAssignerContracts(query: ApiQueryParamDN): ListData<AssignerContractDTO>
+
+    /**
+     * مبانی محاسباتی of one پیمان.
+     *
+     * All four keys are required by the caller, not by the wire: the service answers a partial set
+     * with every base it holds for the workshop, which is a different record than the one the user
+     * tapped. See `ComputationalBaseQuery` for where the four come from.
+     */
+    suspend fun getComputationalBases(
+        workshopId: String,
+        contractRow: String,
+        brchCode: String,
+        contractSequence: String,
+        query: ApiQueryParamDN,
+    ): ListData<ComputationalBaseDTO>
+
+    /** A PDF document attached to a مبنای محاسباتی, drained to bytes before the response closes. */
+    suspend fun getComputationalBasePdf(documentId: String): PdfDownloadDTO
 
     suspend fun getWorkshopPaymentSheets(
         query: ApiQueryParamDN
