@@ -2194,6 +2194,8 @@
     <string name="contract_guardian_national_id_placeholder">۱۰ رقم</string>
     <string name="contract_guardian_letter_no_label">شمارهٔ قیم‌نامه *</string>
     <string name="contract_guardian_letter_no_placeholder">حداقل ۱۰ رقم</string>
+    <string name="contract_guardian_letter_no_error">شمارهٔ قیم‌نامه باید حداقل ۱۰ رقم باشد</string>
+    <string name="contract_guardian_document_description">تصویر قیم نامه</string>
     <string name="contract_guardian_full_name_label">نام و نام خانوادگی قیم *</string>
     <string name="contract_guardian_full_name_placeholder">نام کامل قیم</string>
     <string name="contract_guardian_letter_date_label">تاریخ قیم‌نامه *</string>
