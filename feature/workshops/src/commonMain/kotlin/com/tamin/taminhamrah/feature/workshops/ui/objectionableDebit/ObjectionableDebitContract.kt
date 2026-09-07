@@ -81,7 +81,7 @@ data class ObjectionFormState(
 ) {
     val isBusy: Boolean get() = isUploading || isSubmitting
 
-    /** Which rule is stopping the submit, or null once none is. */
+    /** Which rule is stopping to submit, or null once none is. */
     val error: StringResource?
         get() = when {
             !hasTriedSubmit -> null

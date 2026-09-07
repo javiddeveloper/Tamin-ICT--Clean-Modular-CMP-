@@ -55,7 +55,7 @@ class FakeWorkShopsRepository : WorkShopsRepository {
      * "load more" through the ViewModel's [com.tamin.taminhamrah.paging.Paginator], not just assert on
      * a canned single response.
      *
-     * When unfiltered, [PagedListDN.total] on [agreements] is honoured as-is (a test may set it above
+     * When unfiltered, [PagedListDN.total] on [agreements] is honored as-is (a test may set it above
      * `items.size` to simulate more server-side rows than were stubbed); a filtered query reports the
      * filtered count instead, matching what a real search would answer.
      */
