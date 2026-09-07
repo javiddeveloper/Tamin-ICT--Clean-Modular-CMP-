@@ -11,47 +11,46 @@ import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestInfoDTO
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveRequestDTO
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveResultDTO
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoDTO
+import com.tamin.taminhamrah.model.workshop.AssignerContractDTO
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseDTO
 import com.tamin.taminhamrah.model.workshop.DebitObjectionSaveRequestDTO
 import com.tamin.taminhamrah.model.workshop.DebitObjectionSaveResultDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDTO
 import com.tamin.taminhamrah.model.workshop.DebitReasonDTO
-import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmitRequestDTO
 import com.tamin.taminhamrah.model.workshop.EmployerCommitmentInfoDTO
-import com.tamin.taminhamrah.model.workshop.NewMemberConfirmResultDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeContractDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeRequestDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopDTO
-import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
-import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
-import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
-import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDTO
-import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDTO
-import com.tamin.taminhamrah.model.workshop.WorkshopMemberDTO
-import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDTO
+import com.tamin.taminhamrah.model.workshop.NewMemberConfirmResultDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
-import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDTO
+import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
+import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopContractDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopMemberDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDTO
 import com.tamin.taminhamrah.tools.BaseDTO
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.DELETE
 import de.jensklingenberg.ktorfit.http.GET
-import de.jensklingenberg.ktorfit.http.Header
-import de.jensklingenberg.ktorfit.http.Query
-import de.jensklingenberg.ktorfit.http.QueryMap
 import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.PUT
 import de.jensklingenberg.ktorfit.http.Path
+import de.jensklingenberg.ktorfit.http.Query
+import de.jensklingenberg.ktorfit.http.QueryMap
 import io.ktor.client.statement.HttpStatement
 import kotlinx.serialization.json.JsonElement
-import io.ktor.http.cio.Response
 
 internal interface WorkShopsApiService {
 
@@ -87,6 +86,60 @@ internal interface WorkShopsApiService {
         @Path("branchCode") branchCode: String,
         @QueryMap queries: Map<String, String>,
     ): BaseDTO<ListData<WorkshopContractDTO>>
+
+    // ---------------------------------------------------------------------------- واگذارندگان
+    //
+    // پیمان‌هایی که کارفرمای واردشده «واگذارنده»ی آن‌هاست, plus the computational bases filed under
+    // each and the documents attached to those.
+    //
+    // `requestissuanceinvoices38` is all lower case with no separators. That is the published
+    // route, not a typo — the tidy spelling 404s. Do not let a formatter or a rename touch it.
+
+    /**
+     * لیست پیمان‌های واگذارنده, paged.
+     *
+     * The workshop, branch and ردیف are **filter clauses**, not path segments — they travel inside
+     * the `filter` array `query` already carries (`workshop.workshopId`, `workshop.branchCode`,
+     * `contractRow`). A blank one is simply omitted and widens the result; it does not address a
+     * different route the way it does on the ردیف‌های پیمان endpoints.
+     */
+    @GET("requestissuanceinvoices38/assignersContracts-request-issuance-invoices38")
+    suspend fun getAssignerContracts(
+        @QueryMap queries: Map<String, String>,
+    ): BaseDTO<ListData<AssignerContractDTO>>
+
+    /**
+     * مبانی محاسباتی of one پیمان, paged.
+     *
+     * Four identity parameters, all of them **query** parameters here.
+     *
+     * ⚠️ `brchCode` is spelled exactly that way — abbreviated, and *not* the `branchCode` every
+     * neighboring workshop service uses. It was read off the old app's published interface. A
+     * linter or an IDE rename that "corrects" it leaves the request looking fine while the branch
+     * silently stops narrowing anything.
+     */
+    @GET("requestissuanceinvoices38/det-request-issuance-invoices38")
+    suspend fun getComputationalBases(
+        @Query("workshopId") workshopId: String,
+        @Query("contractRow") contractRow: String,
+        @Query("brchCode") brchCode: String,
+        @Query("contractSequence") contractSequence: String,
+        @QueryMap queries: Map<String, String>,
+    ): BaseDTO<ListData<ComputationalBaseDTO>>
+
+    /**
+     * A document attached to a مبنای محاسباتی, as a PDF byte stream.
+     *
+     * Typed [HttpStatement] so the bytes can be drained inside `execute` — see `readPdfChannel`.
+     */
+    @GET("requestissuanceinvoices38/getPdf-request-issuance-invoices38/{documentId}")
+    suspend fun getComputationalBasePdf(
+        @Path("documentId") documentId: String,
+    ): HttpStatement
+
+    // The image half of the same pair reuses the shared `upload-image` route, which answers with a
+    // base64 payload rather than bytes; `UserRequestApiService.downloadDocument` already declares
+    // it, so nothing is added here for it.
 
     // -------------------------------------------------------------------------- برگ پرداخت‌ها
 
@@ -192,7 +245,7 @@ internal interface WorkShopsApiService {
     ): BaseDTO<JsonElement?>
 
     /**
-     * Whether this national id is someone the organisation has never registered.
+     * Whether this national id is someone the organization has never registered.
      *
      * `relation-tamins/isnew` — the registration asks before it creates, because an existing
      * person is edited rather than added again.
@@ -293,7 +346,7 @@ internal interface WorkShopsApiService {
         @Path("stackId") stackId: Long,
     ): BaseDTO<JsonElement?>
 
-    // ------------------------------------------------- خدمات غیرحضوری کارفرما (employerEservicesAgreement)
+    // ------------------------------------------------- خدمات غیرحضوری کارفرما (employerServicesAgreement)
     //
     // Employer → Online Services. A three-step stepper (request ticket -> verify code -> confirm
     // agreement) plus two management-side drill-downs. See EmployerOnlineServiceDTO.kt for the flow.
