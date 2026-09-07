@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.contracts.ui.paymentHistory
+package com.tamin.taminhamrah.feature.contracts.ui.affairs.paymentHistory
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -20,12 +20,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.tamin.taminhamrah.feature.contracts.ui.paymentHistory.components.ContractPaymentHistoryHeader
-import com.tamin.taminhamrah.feature.contracts.ui.paymentHistory.components.PaymentHistoryItemCard
-import com.tamin.taminhamrah.feature.contracts.ui.paymentHistory.components.PaymentHistorySummaryCard
-import com.tamin.taminhamrah.feature.contracts.ui.paymentHistory.contract.ContractPaymentHistoryEvent
-import com.tamin.taminhamrah.feature.contracts.ui.paymentHistory.contract.ContractPaymentHistoryIntent
-import com.tamin.taminhamrah.feature.contracts.ui.paymentHistory.contract.ContractPaymentHistoryUiState
+import com.tamin.taminhamrah.feature.contracts.ui.affairs.paymentHistory.components.ContractPaymentHistoryHeader
+import com.tamin.taminhamrah.feature.contracts.ui.affairs.paymentHistory.components.PaymentHistoryItemCard
+import com.tamin.taminhamrah.feature.contracts.ui.affairs.paymentHistory.components.PaymentHistorySummaryCard
+import com.tamin.taminhamrah.feature.contracts.ui.affairs.paymentHistory.contract.ContractPaymentHistoryEvent
+import com.tamin.taminhamrah.feature.contracts.ui.affairs.paymentHistory.contract.ContractPaymentHistoryIntent
+import com.tamin.taminhamrah.feature.contracts.ui.affairs.paymentHistory.contract.ContractPaymentHistoryUiState
 import com.tamin.taminhamrah.model.contracts.ContractPaymentHistoryItemPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent

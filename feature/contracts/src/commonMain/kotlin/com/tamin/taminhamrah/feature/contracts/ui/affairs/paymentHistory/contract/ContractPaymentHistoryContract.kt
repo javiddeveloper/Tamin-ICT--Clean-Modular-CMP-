@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.contracts.ui.paymentHistory.contract
+package com.tamin.taminhamrah.feature.contracts.ui.affairs.paymentHistory.contract
 
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.contracts.ContractPaymentHistoryItemPR

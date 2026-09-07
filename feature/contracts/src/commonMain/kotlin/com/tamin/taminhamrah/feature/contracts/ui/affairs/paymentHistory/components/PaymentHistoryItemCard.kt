@@ -1,4 +1,4 @@
-package com.tamin.taminhamrah.feature.contracts.ui.paymentHistory.components
+package com.tamin.taminhamrah.feature.contracts.ui.affairs.paymentHistory.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas

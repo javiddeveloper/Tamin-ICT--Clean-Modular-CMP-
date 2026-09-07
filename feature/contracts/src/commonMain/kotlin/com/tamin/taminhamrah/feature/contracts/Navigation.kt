@@ -11,8 +11,8 @@ import com.tamin.taminhamrah.feature.contracts.ui.affairs.paymentCalcDetail.Cont
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.paymentCalcDetail.ContractPaymentCalcDetailViewModel
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.premiumPayment.ContractPremiumPaymentRoute
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.premiumPayment.ContractPremiumPaymentViewModel
-import com.tamin.taminhamrah.feature.contracts.ui.paymentHistory.ContractPaymentHistoryRoute
-import com.tamin.taminhamrah.feature.contracts.ui.paymentHistory.ContractPaymentHistoryViewModel
+import com.tamin.taminhamrah.feature.contracts.ui.affairs.paymentHistory.ContractPaymentHistoryRoute
+import com.tamin.taminhamrah.feature.contracts.ui.affairs.paymentHistory.ContractPaymentHistoryViewModel
 import org.koin.compose.viewmodel.koinViewModel
 import kotlinx.serialization.Serializable
 

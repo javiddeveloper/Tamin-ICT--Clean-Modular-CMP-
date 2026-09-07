@@ -1,10 +1,10 @@
-package com.tamin.taminhamrah.feature.contracts.ui.paymentHistory
+package com.tamin.taminhamrah.feature.contracts.ui.affairs.paymentHistory
 
 import com.tamin.taminhamrah.base.BaseViewModel
-import com.tamin.taminhamrah.feature.contracts.ui.paymentHistory.contract.ContractPaymentHistoryEvent
-import com.tamin.taminhamrah.feature.contracts.ui.paymentHistory.contract.ContractPaymentHistoryIntent
-import com.tamin.taminhamrah.feature.contracts.ui.paymentHistory.contract.ContractPaymentHistoryUiState
-import com.tamin.taminhamrah.feature.contracts.ui.paymentHistory.contract.ContractPaymentHistoryUiState.PartialState
+import com.tamin.taminhamrah.feature.contracts.ui.affairs.paymentHistory.contract.ContractPaymentHistoryEvent
+import com.tamin.taminhamrah.feature.contracts.ui.affairs.paymentHistory.contract.ContractPaymentHistoryIntent
+import com.tamin.taminhamrah.feature.contracts.ui.affairs.paymentHistory.contract.ContractPaymentHistoryUiState
+import com.tamin.taminhamrah.feature.contracts.ui.affairs.paymentHistory.contract.ContractPaymentHistoryUiState.PartialState
 import com.tamin.taminhamrah.mapper.contracts.toPresentation
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.ui.toRialAmount
