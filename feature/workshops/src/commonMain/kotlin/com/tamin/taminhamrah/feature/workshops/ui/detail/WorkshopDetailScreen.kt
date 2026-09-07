@@ -35,6 +35,8 @@ import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.model.workshop.WorkshopActivityStatus
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.DetailRow
@@ -74,6 +76,8 @@ fun WorkshopDetailScreen(
     onBack: () -> Unit,
     onAction: (WorkshopAction) -> Unit,
     modifier: Modifier = Modifier,
+    /** Already filtered by the server's feature flags — see `WorkshopsViewModel`. */
+    actions: ImmutableList<WorkshopAction> = WorkshopAction.entries.toImmutableList(),
 ) {
     WorkshopScreenShell(
         title = stringResource(Res.string.workshop_detail_title),
@@ -94,7 +98,7 @@ fun WorkshopDetailScreen(
 
             WorkshopDetailCard(workshop = workshop)
 
-            WorkshopActionList(onAction = onAction)
+            WorkshopActionList(actions = actions, onAction = onAction)
         }
     }
 }
@@ -180,6 +184,7 @@ private fun WorkshopDetailCard(
 /** «عملیات این کارگاه» — one tappable card per service, in the enum's own order. */
 @Composable
 private fun WorkshopActionList(
+    actions: ImmutableList<WorkshopAction>,
     onAction: (WorkshopAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -196,7 +201,7 @@ private fun WorkshopActionList(
             modifier = Modifier.padding(bottom = Spacing.xxs),
         )
         // Declaration order is menu order — see WorkshopAction.
-        WorkshopAction.entries.forEach { action ->
+        actions.forEach { action ->
             WorkshopActionRow(action = action, onClick = { onAction(action) })
         }
     }

@@ -24,6 +24,17 @@ object WorkshopConstants {
     /** The service's own cap on the کد کارگاه and کد شعبه the list is searched by. */
     const val WORKSHOP_CODE_MAX_LENGTH = 20
 
+    /**
+     * The tighter caps ردیف‌های پیمان holds its two codes to.
+     *
+     * Shorter than [WORKSHOP_CODE_MAX_LENGTH] on purpose. That is a *search* cap, where an over-long
+     * value simply matches nothing; these two are **path segments** on both contract-row endpoints,
+     * so a value the wrong length does not narrow the request — it addresses a different route. Ten
+     * and four are what the design prints as their placeholders.
+     */
+    const val CONTRACT_ROW_WORKSHOP_CODE_LENGTH = 10
+    const val CONTRACT_ROW_BRANCH_CODE_LENGTH = 4
+
     // ---------------------------------------------------------------------- paging
     /**
      * How many card-shaped blocks stand in for the list until the first page lands.
