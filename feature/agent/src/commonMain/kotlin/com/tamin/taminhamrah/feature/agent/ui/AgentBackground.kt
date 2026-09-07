@@ -87,13 +87,13 @@ private data class Blob(
 
 private val BackgroundBlobs = listOf(
     // 90:16 — 300 dp circle hung off the top-right corner (right -80, top -110).
-    Blob(centerX = 325f / REF_W, centerY = 25f / REF_H, radius = 158.7f / REF_W, color = Color(0x9EBA6CFF)),
+    Blob(centerX = 325f / REF_W, centerY = 25f / REF_H, radius = 178.7f / REF_W, color = Color(0x9EBA6CFF)),
     // 90:17 — 320 dp circle hung off the bottom-left corner (left -110, bottom 60).
     Blob(centerX = 50f / REF_W, centerY = 672f / REF_H, radius = 158.4f / REF_W, color = Color(0x945B46E4)),
     // 90:18 — 250 dp circle a little below centre.
     Blob(centerX = 227.6f / REF_W, centerY = 428.3f / REF_H, radius = 123.8f / REF_W, color = Color(0x991B3A8A)),
     // 90:19 — 210 dp circle on the upper-left edge (left -40, top 12%).
-    Blob(centerX = 65f / REF_W, centerY = 212f / REF_H, radius = 101f / REF_W, color = Color(0x57B6D0FF)),
+    Blob(centerX = 65f / REF_W, centerY = 212f / REF_H, radius = 191f / REF_W, color = Color(0x57B6D0FF)),
 )
 
 /**
