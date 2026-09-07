@@ -33,6 +33,7 @@ private fun Module.contractFlowViewModel(qualifier: String, config: ContractFlow
             makeContractUseCase = get(),
             saveContactUseCase = get(),
             uploadImageUseCase = get(),
+            subdominantUseCase = get(),
         )
     }
 }

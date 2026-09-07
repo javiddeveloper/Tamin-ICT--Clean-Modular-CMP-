@@ -1,54 +1,55 @@
-﻿package com.tamin.taminhamrah.ui.contractFlow
+package com.tamin.taminhamrah.ui.contractFlow
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.unit.dp
-import coil3.compose.SubcomposeAsyncImage
 import com.tamin.taminhamrah.model.contractFlow.UploadImagePR
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.BannerCard
+import com.tamin.taminhamrah.ui.components.BannerType
+import com.tamin.taminhamrah.ui.components.TaminTextField
+import com.tamin.taminhamrah.ui.components.document.TaminDocumentUploadCard
+import com.tamin.taminhamrah.ui.components.document.TaminDocumentUploadState
+import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.Thickness
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.name
 import io.github.vinceglb.filekit.readBytes
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.contract_upload_add_documents
-import taminx.core.core_ui.contract_upload_description_label
+import taminx.core.core_ui.contract_upload_description_empty_error
+import taminx.core.core_ui.contract_upload_description_placeholder
+import taminx.core.core_ui.contract_upload_description_required
 import taminx.core.core_ui.contract_upload_format_hint
-import taminx.core.core_ui.contract_upload_image_content_description
 import taminx.core.core_ui.contract_upload_read_error
-import taminx.core.core_ui.contract_upload_remove_image
+import taminx.core.core_ui.contract_upload_status_uploaded
+import taminx.core.core_ui.contract_upload_status_uploading
 
 @Composable
 fun UploadImageStepContent(
@@ -60,12 +61,32 @@ fun UploadImageStepContent(
     onDescriptionChange: (String) -> Unit,
     onImagePicked: (fileName: String, bytes: ByteArray) -> Unit,
     onClearDocument: () -> Unit,
+    isLoading: Boolean = false,
+    modifier: Modifier = Modifier,
 ) {
+    if (isLoading) {
+        UploadImageStepShimmerSkeleton(modifier = modifier)
+        return
+    }
+
+    val colors = LocalTaminColors.current
+    val cardShape = RoundedCornerShape(CornerRadius.x2l)
     val scope = rememberCoroutineScope()
     var pickError by remember { mutableStateOf<String?>(null) }
-    val hasDocument = previewBytes != null || uploadedDocuments.isNotEmpty()
-    val uploadedImageDescription = stringResource(Res.string.contract_upload_image_content_description)
+    var showDescriptionError by remember { mutableStateOf(false) }
     val readErrorMessage = stringResource(Res.string.contract_upload_read_error)
+    val descriptionEmptyError = stringResource(Res.string.contract_upload_description_empty_error)
+    val uploadedDocument = uploadedDocuments.firstOrNull()
+    val hasDocument = previewBytes != null || uploadedDocument != null
+    val thumbnailBase64 = rememberBase64Thumbnail(previewBytes)
+    val uploadState = when {
+        isUploading -> TaminDocumentUploadState.Uploading
+        uploadError != null && !hasDocument -> TaminDocumentUploadState.Failed
+        hasDocument -> TaminDocumentUploadState.Uploaded
+        else -> TaminDocumentUploadState.Empty
+    }
+    val canPick = !isUploading &&
+        (uploadState == TaminDocumentUploadState.Empty || uploadState == TaminDocumentUploadState.Failed)
 
     val filePickerLauncher = rememberFilePickerLauncher(
         type = FileKitType.Image,
@@ -82,110 +103,92 @@ fun UploadImageStepContent(
         }
     }
 
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(
-            verticalAlignment = Alignment.Top,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Icon(
-                imageVector = Icons.Default.Info,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-            )
-            Text(
-                text = stringResource(Res.string.contract_upload_format_hint),
-                style = MaterialTheme.typography.bodyMedium,
-            )
+    val cardTitle = when (uploadState) {
+        TaminDocumentUploadState.Empty,
+        TaminDocumentUploadState.Failed,
+        -> stringResource(Res.string.contract_upload_add_documents)
+        TaminDocumentUploadState.Uploading,
+        TaminDocumentUploadState.Uploaded,
+        -> description.ifBlank {
+            uploadedDocument?.fileName
+                ?: stringResource(Res.string.contract_upload_add_documents)
         }
+    }
 
-        OutlinedTextField(
-            value = description,
-            onValueChange = onDescriptionChange,
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text(stringResource(Res.string.contract_upload_description_label)) },
-            placeholder = { Text(stringResource(Res.string.contract_upload_description_label)) },
-            enabled = !isUploading,
-            singleLine = false,
+    val statusText = when (uploadState) {
+        TaminDocumentUploadState.Empty -> null
+        TaminDocumentUploadState.Uploading -> stringResource(Res.string.contract_upload_status_uploading)
+        TaminDocumentUploadState.Uploaded -> uploadedDocument?.fileName
+            ?: stringResource(Res.string.contract_upload_status_uploaded)
+        TaminDocumentUploadState.Failed -> uploadError
+    }
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(cardShape)
+            .background(colors.bgSurface)
+            .border(Thickness.border, colors.border, cardShape)
+            .padding(Spacing.lg),
+        verticalArrangement = Arrangement.spacedBy(Spacing.md),
+    ) {
+        BannerCard(
+            message = stringResource(Res.string.contract_upload_format_hint),
+            type = BannerType.Info,
         )
 
-        if (hasDocument) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(16f / 9f)
-                    .clip(RoundedCornerShape(8.dp)),
-            ) {
-                previewBytes?.let { bytes ->
-                    SubcomposeAsyncImage(
-                        model = bytes,
-                        contentDescription = description.ifBlank { uploadedImageDescription },
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop,
-                        loading = {
-                            Box(
-                                modifier = Modifier.fillMaxWidth(),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                CircularProgressIndicator(modifier = Modifier.size(32.dp))
-                            }
-                        },
-                    )
+        TaminTextField(
+            value = description,
+            onValueChange = {
+                if (showDescriptionError && it.isNotBlank()) {
+                    showDescriptionError = false
                 }
+                onDescriptionChange(it)
+            },
+            modifier = Modifier.fillMaxWidth(),
+            label = stringResource(Res.string.contract_upload_description_required),
+            placeholder = stringResource(Res.string.contract_upload_description_placeholder),
+            enabled = !isUploading,
+            singleLine = true,
+            isError = showDescriptionError && description.isBlank(),
+            errorMessage = if (showDescriptionError && description.isBlank()) {
+                descriptionEmptyError
+            } else {
+                null
+            },
+        )
 
-                if (isUploading) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Surface(
-                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
-                            modifier = Modifier.fillMaxSize(),
-                        ) {}
-                        CircularProgressIndicator()
+        TaminDocumentUploadCard(
+            title = cardTitle,
+            state = uploadState,
+            statusText = statusText,
+            thumbnailBase64 = thumbnailBase64,
+            onCardClick = if (canPick) {
+                {
+                    if (description.isBlank()) {
+                        showDescriptionError = true
+                    } else {
+                        showDescriptionError = false
+                        filePickerLauncher.launch()
                     }
                 }
-
-                IconButton(
-                    onClick = {
-                        pickError = null
-                        onClearDocument()
-                    },
-                    enabled = !isUploading,
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(4.dp),
-                ) {
-                    Surface(
-                        shape = RoundedCornerShape(50),
-                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f),
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = stringResource(Res.string.contract_upload_remove_image),
-                            modifier = Modifier.padding(4.dp),
-                        )
-                    }
+            } else {
+                null
+            },
+            onDeleteClick = if (uploadState == TaminDocumentUploadState.Uploaded) {
+                {
+                    pickError = null
+                    onClearDocument()
                 }
-            }
-        } else {
-            Button(
-                onClick = { filePickerLauncher.launch() },
-                enabled = !isUploading && description.isNotBlank(),
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null,
-                    modifier = Modifier.padding(end = 8.dp),
-                )
-                Text(stringResource(Res.string.contract_upload_add_documents))
-            }
-        }
+            } else {
+                null
+            },
+        )
 
-        uploadError?.let { error ->
+        uploadError?.takeIf { uploadState != TaminDocumentUploadState.Failed }?.let { error ->
             Text(
                 text = error,
-                color = MaterialTheme.colorScheme.error,
+                color = colors.dangerText,
                 style = MaterialTheme.typography.bodySmall,
             )
         }
@@ -193,9 +196,131 @@ fun UploadImageStepContent(
         pickError?.let { error ->
             Text(
                 text = error,
-                color = MaterialTheme.colorScheme.error,
+                color = colors.dangerText,
                 style = MaterialTheme.typography.bodySmall,
             )
         }
+    }
+}
+
+@OptIn(ExperimentalEncodingApi::class)
+@Composable
+private fun rememberBase64Thumbnail(bytes: ByteArray?): String? {
+    val state = produceState<String?>(initialValue = null, bytes) {
+        value = bytes?.let { withContext(Dispatchers.Default) { Base64.Default.encode(it) } }
+    }
+    return state.value
+}
+
+// -------------------------------------------------------------------------
+// Previews
+// -------------------------------------------------------------------------
+
+@PreviewRtlTheme
+@Composable
+private fun UploadImageStepContentEmptyPreview() {
+    PreviewRtlThemeContent {
+        UploadImageStepContent(
+            description = "",
+            previewBytes = null,
+            uploadedDocuments = emptyList(),
+            isUploading = false,
+            uploadError = null,
+            onDescriptionChange = {},
+            onImagePicked = { _, _ -> },
+            onClearDocument = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun UploadImageStepContentFilledPreview() {
+    PreviewRtlThemeContent {
+        UploadImageStepContent(
+            description = "گواهی اشتغال به تحصیل ترم جاری",
+            previewBytes = null,
+            uploadedDocuments = emptyList(),
+            isUploading = false,
+            uploadError = null,
+            onDescriptionChange = {},
+            onImagePicked = { _, _ -> },
+            onClearDocument = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun UploadImageStepContentUploadingPreview() {
+    PreviewRtlThemeContent {
+        UploadImageStepContent(
+            description = "گواهی اشتغال به تحصیل",
+            previewBytes = null,
+            uploadedDocuments = emptyList(),
+            isUploading = true,
+            uploadError = null,
+            onDescriptionChange = {},
+            onImagePicked = { _, _ -> },
+            onClearDocument = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun UploadImageStepContentUploadedPreview() {
+    PreviewRtlThemeContent {
+        UploadImageStepContent(
+            description = "گواهی اشتغال به تحصیل",
+            previewBytes = null,
+            uploadedDocuments = listOf(
+                UploadImagePR(
+                    imageId = "doc-1",
+                    fileName = "student_card.jpg",
+                    description = "گواهی اشتغال به تحصیل",
+                ),
+            ),
+            isUploading = false,
+            uploadError = null,
+            onDescriptionChange = {},
+            onImagePicked = { _, _ -> },
+            onClearDocument = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun UploadImageStepContentFailedPreview() {
+    PreviewRtlThemeContent {
+        UploadImageStepContent(
+            description = "گواهی اشتغال به تحصیل",
+            previewBytes = null,
+            uploadedDocuments = emptyList(),
+            isUploading = false,
+            uploadError = "خطا در بارگذاری تصویر",
+            onDescriptionChange = {},
+            onImagePicked = { _, _ -> },
+            onClearDocument = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun UploadImageStepContentShimmerPreview() {
+    PreviewRtlThemeContent {
+        UploadImageStepContent(
+            description = "",
+            previewBytes = null,
+            uploadedDocuments = emptyList(),
+            isUploading = false,
+            uploadError = null,
+            onDescriptionChange = {},
+            onImagePicked = { _, _ -> },
+            onClearDocument = {},
+            isLoading = true,
+        )
     }
 }
