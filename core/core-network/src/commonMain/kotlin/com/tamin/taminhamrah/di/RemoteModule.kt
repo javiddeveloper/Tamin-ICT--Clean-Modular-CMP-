@@ -20,6 +20,8 @@ import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSource
 import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSource
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.contractAffair.ContractAffairRemoteDataSource
+import com.tamin.taminhamrah.dataSource.contractAffair.ContractAffairRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.employerInfo.EmployerInfoRemoteDataSource
 import com.tamin.taminhamrah.dataSource.employerInfo.EmployerInfoRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.historyObjection.HistoryObjectionRemoteDataSource
@@ -190,6 +192,14 @@ val remoteModule = module {
     single<ContractsRemoteDataSource> {
         ContractsRemoteDataSourceImpl(
             contractsApiService = get(named("contractsApiService")),
+            apiQueryBuilder = get(),
+            errorParser = get()
+        )
+    }
+
+    single<ContractAffairRemoteDataSource> {
+        ContractAffairRemoteDataSourceImpl(
+            contractAffairApiService = get(named("contractAffairApiService")),
             apiQueryBuilder = get(),
             errorParser = get()
         )

@@ -1,20 +1,8 @@
 package com.tamin.taminhamrah.data.mapper
 
 import com.tamin.taminhamrah.data.local.entity.ContractEntity
-import com.tamin.taminhamrah.model.contracts.CancelContractParamsDN
-import com.tamin.taminhamrah.model.contracts.CancelContractRequestDTO
 import com.tamin.taminhamrah.model.contracts.ContractDN
 import com.tamin.taminhamrah.model.contracts.ContractDTO
-import com.tamin.taminhamrah.model.contracts.ContractDebitDN
-import com.tamin.taminhamrah.model.contracts.ContractDebitDTO
-import com.tamin.taminhamrah.model.contracts.ContractLastPaymentDN
-import com.tamin.taminhamrah.model.contracts.ContractLastPaymentDTO
-import com.tamin.taminhamrah.model.contracts.ContractPaymentHistoryItemDN
-import com.tamin.taminhamrah.model.contracts.ContractPaymentHistoryItemDTO
-import com.tamin.taminhamrah.model.contracts.PaymentCalculationRowDN
-import com.tamin.taminhamrah.model.contracts.PaymentCalculationRowDTO
-import com.tamin.taminhamrah.model.contracts.ContractStateDN
-import com.tamin.taminhamrah.model.contracts.ContractStateDTO
 import com.tamin.taminhamrah.model.contracts.ContractStatusObjectDN
 import com.tamin.taminhamrah.model.contracts.ContractStatusObjectDTO
 import com.tamin.taminhamrah.model.contracts.FreeJobDN
@@ -82,58 +70,6 @@ fun ContractStatusObjectDTO.toDomain(): ContractStatusObjectDN {
         selfIsuContStatCode = selfIsuContStatCode
     )
 }
-
-fun ContractStateDTO.toDomain(): ContractStateDN = ContractStateDN(
-    code = selfIsuContStatCode,
-    description = selfIsuContStatDesc,
-)
-
-fun ContractPaymentHistoryItemDTO.toDomain(): ContractPaymentHistoryItemDN =
-    ContractPaymentHistoryItemDN(
-        nationalId = nationalId,
-        insuranceId = insuranceId,
-        debtNumber = debtNumber,
-        startTermPayment = startTermPayment,
-        endTermPayment = endTermPayment,
-        totalDebt = totalDebt,
-        paymentDeadline = paymentDeadline,
-        amountPayment = amountPayment,
-        datePayment = datePayment,
-        statusContract = statusContract,
-        statusRecipient = statusRecipient,
-    )
-
-fun ContractDebitDTO.toDomain(): ContractDebitDN = ContractDebitDN(
-    total = total,
-    insurancePremiums = insurancePremiums,
-    previousDebit = previousDebit,
-    startDate = startDate,
-    endDate = endDate,
-    payPremiumDate = payPremiumDate,
-    infoMessage = messageInformation,
-)
-
-fun ContractLastPaymentDTO.toDomain(): ContractLastPaymentDN = ContractLastPaymentDN(
-    lastPaymentTimestamp = lastPaymentTimestamp?.toLongOrNull()?.takeIf { it != 0L },
-    checkReloLap = chekReloLap,
-    medicalResultResend = medicalRsltResend,
-)
-
-fun PaymentCalculationRowDTO.toDomain(): PaymentCalculationRowDN = PaymentCalculationRowDN(
-    year = year,
-    month = month,
-    day = day,
-    description = description,
-    wage = wage,
-    amount = amount,
-)
-
-fun List<PaymentCalculationRowDTO>.toDomain(): List<PaymentCalculationRowDN> = map { it.toDomain() }
-
-fun CancelContractParamsDN.toRequestDto(): CancelContractRequestDTO = CancelContractRequestDTO(
-    canceldesc = description,
-    contractStatus = stateChange.value,
-)
 
 fun PremiumTypeDTO.toDomain(): PremiumTypeDN {
     return PremiumTypeDN(

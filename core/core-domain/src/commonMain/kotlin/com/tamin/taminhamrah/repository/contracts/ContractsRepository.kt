@@ -1,13 +1,6 @@
 package com.tamin.taminhamrah.repository.contracts
 
 import com.tamin.taminhamrah.model.contracts.BranchDN
-import com.tamin.taminhamrah.model.contracts.CancelContractParamsDN
-import com.tamin.taminhamrah.model.contracts.ContractDebitDN
-import com.tamin.taminhamrah.model.contracts.ContractLastPaymentDN
-import com.tamin.taminhamrah.model.contracts.ContractPaymentHistoryItemDN
-import com.tamin.taminhamrah.model.contracts.ContractPremiumType
-import com.tamin.taminhamrah.model.contracts.PaymentCalculationRowDN
-import com.tamin.taminhamrah.model.contracts.ContractStateDN
 import com.tamin.taminhamrah.model.contracts.FreelanceContractByGuardianParams
 import com.tamin.taminhamrah.model.contracts.OptionalContractByGuardianParams
 import com.tamin.taminhamrah.model.contracts.ContractDN
@@ -23,44 +16,11 @@ import com.tamin.taminhamrah.model.contracts.PremiumRateDN
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDN
 import com.tamin.taminhamrah.model.contracts.SaveContactRequestDN
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
-import com.tamin.taminhamrah.model.paging.PageDN
-import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import kotlinx.coroutines.flow.Flow
 
 interface ContractsRepository {
     fun getContracts(query: ApiQueryParamDN?): Flow<List<ContractDN>>
-
-    /**
-     * Page-at-a-time variant of [getContracts] for the امور قراردادها و پرداخت list, which is
-     * network-only (no Room cache) and paginated through [com.tamin.taminhamrah.paging.Paginator].
-     */
-    fun getContractsPage(query: ApiQueryParamDN): Flow<PageDN<ContractDN>>
-
-    /** علت خاتمه قرارداد — reasons offered when cancelling a contract. */
-    fun getContractStates(): Flow<List<ContractStateDN>>
-
-    /** غیرفعال کردن قرارداد. Completes normally on success, throws on failure. */
-    fun cancelContract(params: CancelContractParamsDN): Flow<Unit>
-
-    /** مشاهده پرداخت‌ها for a single contract. */
-    fun getContractPaymentHistory(contractNumber: String): Flow<List<ContractPaymentHistoryItemDN>>
-
-    /** مشاهده قرارداد — the contract report as a downloadable PDF. */
-    fun downloadContractReport(premiumType: ContractPremiumType): Flow<PdfDownloadDN>
-
-    /** محاسبهٔ حق بیمه — payable amount and period for [month] months. */
-    fun getContractDebit(premiumType: ContractPremiumType, month: Int): Flow<ContractDebitDN>
-
-    /** آخرین پرداخت حق بیمه for the contract kind. */
-    fun getContractLastPayment(premiumType: ContractPremiumType): Flow<ContractLastPaymentDN>
-
-    /** جزئیات برگ پرداخت for a calculated payment period. */
-    fun getPaymentCalculationDetails(
-        premiumType: ContractPremiumType,
-        startDate: Long,
-        endDate: Long,
-    ): Flow<List<PaymentCalculationRowDN>>
     fun getContractsByPremiumType(premiumTypeCode: String): Flow<List<ContractDN>>
     fun getStudentInsuranceContracts(): Flow<List<ContractDN>>
     fun getRegistrationInfo(): Flow<RegistrationInfoDN>

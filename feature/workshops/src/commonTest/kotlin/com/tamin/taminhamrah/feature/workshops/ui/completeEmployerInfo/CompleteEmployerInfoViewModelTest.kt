@@ -505,22 +505,6 @@ private class FakeTestContractsRepo : ContractsRepository {
     override fun checkInsurancePaymentStatus(systemType: String): Flow<Any?> = flowOf(null)
     override fun uploadImage(request: UploadImageRequestDN): Flow<String> = flowOf("img1")
     override fun saveContact(request: SaveContactRequestDN): Flow<Any?> = flowOf(null)
-    override fun getContractsPage(
-        query: ApiQueryParamDN,
-    ): Flow<com.tamin.taminhamrah.model.paging.PageDN<ContractDN>> =
-        flowOf(com.tamin.taminhamrah.model.paging.PageDN(emptyList(), 0))
-    override fun getContractStates(): Flow<List<com.tamin.taminhamrah.model.contracts.ContractStateDN>> = flowOf(emptyList())
-    override fun cancelContract(params: com.tamin.taminhamrah.model.contracts.CancelContractParamsDN): Flow<Unit> = flowOf(Unit)
-    override fun getContractPaymentHistory(contractNumber: String): Flow<List<com.tamin.taminhamrah.model.contracts.ContractPaymentHistoryItemDN>> = flowOf(emptyList())
-    override fun downloadContractReport(premiumType: com.tamin.taminhamrah.model.contracts.ContractPremiumType): Flow<PdfDownloadDN> = flowOf(
-        PdfDownloadDN(null)
-    )
-    override fun getContractDebit(premiumType: com.tamin.taminhamrah.model.contracts.ContractPremiumType, month: Int): Flow<com.tamin.taminhamrah.model.contracts.ContractDebitDN> =
-        flowOf(com.tamin.taminhamrah.model.contracts.ContractDebitDN(null, null, null, null, null, null, null))
-    override fun getContractLastPayment(premiumType: com.tamin.taminhamrah.model.contracts.ContractPremiumType): Flow<com.tamin.taminhamrah.model.contracts.ContractLastPaymentDN> =
-        flowOf(com.tamin.taminhamrah.model.contracts.ContractLastPaymentDN(null, null, null))
-    override fun getPaymentCalculationDetails(premiumType: com.tamin.taminhamrah.model.contracts.ContractPremiumType, startDate: Long, endDate: Long): Flow<List<com.tamin.taminhamrah.model.contracts.PaymentCalculationRowDN>> =
-        flowOf(emptyList())
 }
 
 /** One agreement in the shape the merged model uses. */

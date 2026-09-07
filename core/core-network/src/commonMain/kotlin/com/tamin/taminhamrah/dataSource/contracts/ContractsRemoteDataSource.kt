@@ -1,15 +1,8 @@
 package com.tamin.taminhamrah.dataSource.contracts
 
 import com.tamin.taminhamrah.model.contracts.BranchDTO
-import com.tamin.taminhamrah.model.contracts.CancelContractRequestDTO
 import com.tamin.taminhamrah.model.contracts.ContractDTO
 import com.tamin.taminhamrah.model.contracts.ContractByGuardianRequestDTO
-import com.tamin.taminhamrah.model.contracts.ContractDebitDTO
-import com.tamin.taminhamrah.model.contracts.ContractLastPaymentDTO
-import com.tamin.taminhamrah.model.contracts.ContractPaymentHistoryItemDTO
-import com.tamin.taminhamrah.model.contracts.ContractPremiumType
-import com.tamin.taminhamrah.model.contracts.ContractStateDTO
-import com.tamin.taminhamrah.model.contracts.PaymentCalculationRowDTO
 import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
 import com.tamin.taminhamrah.model.contracts.FreelanceContractResultDTO
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractRequestDTO
@@ -23,33 +16,11 @@ import com.tamin.taminhamrah.model.contracts.PremiumRateDTO
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDTO
 import com.tamin.taminhamrah.model.contracts.SaveContactRequestDTO
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
-import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
 
 interface ContractsRemoteDataSource {
     suspend fun getContracts(query: ApiQueryParamDN): ListData<ContractDTO>
-    suspend fun getContractStates(query: ApiQueryParamDN): ListData<ContractStateDTO>
-    suspend fun cancelContract(
-        premiumType: ContractPremiumType,
-        stateCode: Int,
-        request: CancelContractRequestDTO,
-    )
-    suspend fun getContractPaymentHistory(contractNumber: String): List<ContractPaymentHistoryItemDTO>
-    suspend fun downloadContractReport(premiumType: ContractPremiumType): PdfDownloadDTO
-
-    /** محاسبهٔ حق بیمه for [month] months. */
-    suspend fun getContractDebit(premiumType: ContractPremiumType, month: Int): ContractDebitDTO
-
-    /** آخرین پرداخت حق بیمه for the contract kind. */
-    suspend fun getContractLastPayment(premiumType: ContractPremiumType): ContractLastPaymentDTO
-
-    /** جزئیات برگ پرداخت for the calculated payment period. */
-    suspend fun getPaymentCalculationDetails(
-        premiumType: ContractPremiumType,
-        startDate: Long,
-        endDate: Long,
-    ): List<PaymentCalculationRowDTO>
     suspend fun getRegistrationInfo(): RegistrationInfoDTO
     suspend fun getBranches(query: ApiQueryParamDN): ListData<BranchDTO>
     suspend fun getSpcPremiumRates(): ListData<PremiumRateDTO>
