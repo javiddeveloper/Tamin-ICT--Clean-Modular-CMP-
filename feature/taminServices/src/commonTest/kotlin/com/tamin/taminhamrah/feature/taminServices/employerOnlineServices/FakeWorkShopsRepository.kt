@@ -109,11 +109,6 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         failIf(Call.CONTRACT_ROWS)
         return contractRows.page(page)
     }
-    override suspend fun getContractRowsWithAgreement(query: ContractRowQuery): PagedListDN<EmployerAgreementDN> =
-        PagedListDN()
-
-    override suspend fun getContractRowsWithoutAgreement(query: ContractRowQuery): PagedListDN<WorkshopContractDN> = PagedListDN()
-    /** Slices [items] into [WORKSHOP_PAGE_SIZE] windows like a real service would, keeping [total] as set. */
     private fun <T> PagedListDN<T>.page(page: Int): PagedListDN<T> {
         val fromIndex = (page * WORKSHOP_PAGE_SIZE).coerceIn(0, items.size)
         val toIndex = (fromIndex + WORKSHOP_PAGE_SIZE).coerceIn(fromIndex, items.size)
