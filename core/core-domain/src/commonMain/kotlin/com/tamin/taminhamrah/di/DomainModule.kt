@@ -173,6 +173,9 @@ import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenReportPdfUseCas
 import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenRequestInfoUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenWorkshopInfoUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetDebitObjectionPdfUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetAssignerContractsUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetComputationalBasePdfUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetComputationalBasesUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetContractRowsWithAgreementUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetContractRowsWithoutAgreementUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetDebitReasonsUseCase
@@ -410,6 +413,9 @@ val domainModule = module {
     // کارگاه‌های کارفرما — the list, then one group per action it launches
     factoryOf(::GetEmployerAgreementsUseCase)
     factoryOf(::GetContractRowsWithAgreementUseCase)
+    factoryOf(::GetAssignerContractsUseCase)
+    factoryOf(::GetComputationalBasesUseCase)
+    factoryOf(::GetComputationalBasePdfUseCase)
     factoryOf(::GetContractRowsWithoutAgreementUseCase)
     factoryOf(::GetPaymentSheetsUseCase)
     factoryOf(::GetDebitReasonsUseCase)
