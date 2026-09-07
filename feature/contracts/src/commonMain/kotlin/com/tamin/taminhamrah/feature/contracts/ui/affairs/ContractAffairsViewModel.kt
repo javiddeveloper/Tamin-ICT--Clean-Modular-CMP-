@@ -28,7 +28,6 @@ import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
 import com.tamin.taminhamrah.useCases.contracts.CancelContractUseCase
 import com.tamin.taminhamrah.useCases.contracts.DownloadContractReportUseCase
-import com.tamin.taminhamrah.useCases.contracts.GetContractPaymentHistoryUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetContractStatesUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetContractsPageUseCase
 import com.tamin.taminhamrah.util.AppConfig
@@ -53,7 +52,6 @@ class ContractAffairsViewModel(
     private val getContractsPageUseCase: GetContractsPageUseCase,
     private val getContractStatesUseCase: GetContractStatesUseCase,
     private val cancelContractUseCase: CancelContractUseCase,
-    private val getContractPaymentHistoryUseCase: GetContractPaymentHistoryUseCase,
     private val downloadContractReportUseCase: DownloadContractReportUseCase,
     private val getMainMenuUseCase: GetMainMenuUseCase,
     private val featureManager: FeatureManager,
@@ -105,9 +103,6 @@ class ContractAffairsViewModel(
                 flowOf(PartialState.CancelDescriptionChanged(intent.value))
 
             ContractAffairsIntent.ConfirmCancelContract -> confirmCancelContract()
-
-            ContractAffairsIntent.DismissPaymentHistory ->
-                flowOf(PartialState.PaymentHistoryVisibility(false))
 
             ContractAffairsIntent.DismissPdfViewer -> flow {
                 emit(PartialState.PdfViewerVisibility(false))
@@ -220,26 +215,18 @@ class ContractAffairsViewModel(
             flowOf(PartialState.OperationsSheetHidden)
         }
 
-        ContractOperation.VIEW_PAYMENTS -> loadPaymentHistory(contract)
+        ContractOperation.VIEW_PAYMENTS -> {
+            sendEvent(
+                ContractAffairsEvent.NavigateToPaymentHistory(
+                    contractNumber = contract.contractNumber,
+                    insuranceType = contract.insuranceType,
+                ),
+            )
+            flowOf(PartialState.OperationsSheetHidden)
+        }
+
         ContractOperation.VIEW_CONTRACT -> downloadContractReport(contract)
         ContractOperation.DEACTIVATE -> showCancelSheet(contract)
-    }
-
-    // ---- مشاهده پرداخت‌ها ----
-
-    private fun loadPaymentHistory(contract: ContractPR): Flow<PartialState> = flow {
-        emit(PartialState.OperationsSheetHidden)
-        emit(PartialState.PaymentHistoryVisibility(true))
-        emit(PartialState.PaymentHistoryLoading(true))
-        try {
-            val items = getContractPaymentHistoryUseCase(contract.contractNumber).first()
-            emit(PartialState.PaymentHistoryLoaded(items.toPresentation().toImmutableList()))
-        } catch (e: Exception) {
-            sendEvent(ContractAffairsEvent.ShowError(e.toSingleLineMessage()))
-            emit(PartialState.PaymentHistoryVisibility(false))
-        } finally {
-            emit(PartialState.PaymentHistoryLoading(false))
-        }
     }
 
     // ---- مشاهده قرارداد (PDF) ----
@@ -398,17 +385,6 @@ class ContractAffairsViewModel(
             currentState.copy(cancelDescription = partialState.description)
 
         is PartialState.Cancelling -> currentState.copy(isCancelling = partialState.inProgress)
-
-        is PartialState.PaymentHistoryVisibility -> currentState.copy(
-            showPaymentHistory = partialState.visible,
-            paymentHistory = if (partialState.visible) currentState.paymentHistory else persistentListOf(),
-        )
-
-        is PartialState.PaymentHistoryLoading ->
-            currentState.copy(isPaymentHistoryLoading = partialState.loading)
-
-        is PartialState.PaymentHistoryLoaded ->
-            currentState.copy(paymentHistory = partialState.items)
 
         is PartialState.PdfViewerVisibility -> currentState.copy(
             showPdfViewer = partialState.visible,

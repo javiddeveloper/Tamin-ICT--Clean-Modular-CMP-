@@ -4,7 +4,6 @@ import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.contracts.ContractPR
-import com.tamin.taminhamrah.model.contracts.ContractPaymentHistoryItemPR
 import com.tamin.taminhamrah.model.contracts.ContractStatePR
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
 import kotlinx.collections.immutable.ImmutableList
@@ -71,11 +70,6 @@ data class ContractAffairsUiState(
     val cancelDescription: String = "",
     val isCancelling: Boolean = false,
 
-    // مشاهده پرداخت‌ها
-    val showPaymentHistory: Boolean = false,
-    val paymentHistory: ImmutableList<ContractPaymentHistoryItemPR> = persistentListOf(),
-    val isPaymentHistoryLoading: Boolean = false,
-
     // مشاهده قرارداد (PDF)
     val showPdfViewer: Boolean = false,
     val pdfDownload: PdfDownloadPR? = null,
@@ -116,12 +110,6 @@ data class ContractAffairsUiState(
         data class CancelDescriptionChanged(val description: String) : PartialState
         data class Cancelling(val inProgress: Boolean) : PartialState
 
-        data class PaymentHistoryVisibility(val visible: Boolean) : PartialState
-        data class PaymentHistoryLoading(val loading: Boolean) : PartialState
-        data class PaymentHistoryLoaded(
-            val items: ImmutableList<ContractPaymentHistoryItemPR>,
-        ) : PartialState
-
         data class PdfViewerVisibility(val visible: Boolean) : PartialState
         data class PdfLoading(val loading: Boolean) : PartialState
         data class PdfLoaded(val pdf: PdfDownloadPR?) : PartialState
@@ -158,9 +146,6 @@ sealed interface ContractAffairsIntent {
     data class OnCancelDescriptionChanged(val value: String) : ContractAffairsIntent
     data object ConfirmCancelContract : ContractAffairsIntent
 
-    // مشاهده پرداخت‌ها
-    data object DismissPaymentHistory : ContractAffairsIntent
-
     // مشاهده قرارداد
     data object DismissPdfViewer : ContractAffairsIntent
 }
@@ -176,6 +161,12 @@ sealed interface ContractAffairsEvent {
 
     /** ویرایش قرارداد — hand off to the edit-contract flow for this contract. */
     data class NavigateToEditContract(val contract: ContractPR) : ContractAffairsEvent
+
+    /** مشاهدهٔ پرداخت‌ها — open the سوابق پرداخت screen for this contract. */
+    data class NavigateToPaymentHistory(
+        val contractNumber: String,
+        val insuranceType: String,
+    ) : ContractAffairsEvent
 
     data object ContractCancelled : ContractAffairsEvent
 }

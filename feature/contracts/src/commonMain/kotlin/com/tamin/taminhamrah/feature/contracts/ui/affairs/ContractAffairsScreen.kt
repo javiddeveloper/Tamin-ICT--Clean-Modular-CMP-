@@ -67,7 +67,8 @@ import taminx.core.core_ui.contract_affairs_empty_title
  * امور قراردادها و پرداخت.
  *
  * Route → Events → Screen, matching `InspectionScreen`. The per-contract امور قرارداد bottom sheet
- * ([ContractOperationsSheet]) is wired here; the غیرفعال کردن flow, مشاهده پرداخت‌ها list and PDF
+ * ([ContractOperationsSheet]) is wired here, and «مشاهدهٔ پرداخت‌ها» navigates out to the سوابق
+ * پرداخت screen via [ContractAffairsEvent.NavigateToPaymentHistory]. The غیرفعال کردن flow and PDF
  * viewer are separate sheets wired in a later step — their state already lives on
  * [ContractAffairsUiState].
  */
@@ -77,6 +78,7 @@ fun ContractAffairsRoute(
     onBackClicked: () -> Unit,
     onNavigateToService: (FeatureFlag) -> Unit,
     onOpenUrl: (String) -> Unit,
+    onNavigateToPaymentHistory: (contractNumber: String, insuranceType: String) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -84,6 +86,7 @@ fun ContractAffairsRoute(
         events = viewModel.events,
         onNavigateToService = onNavigateToService,
         onNavigateToWeb = onOpenUrl,
+        onNavigateToPaymentHistory = onNavigateToPaymentHistory,
     )
 
     ContractAffairsScreen(
@@ -98,11 +101,15 @@ private fun ContractAffairsEvents(
     events: Flow<ContractAffairsEvent>,
     onNavigateToService: (FeatureFlag) -> Unit,
     onNavigateToWeb: (String) -> Unit,
+    onNavigateToPaymentHistory: (contractNumber: String, insuranceType: String) -> Unit,
 ) {
     events.collectWithLifecycleAware { event ->
         when (event) {
             is ContractAffairsEvent.NavigateToService -> onNavigateToService(event.flag)
             is ContractAffairsEvent.NavigateToWeb -> onNavigateToWeb(event.url)
+            is ContractAffairsEvent.NavigateToPaymentHistory ->
+                onNavigateToPaymentHistory(event.contractNumber, event.insuranceType)
+
             is ContractAffairsEvent.NavigateToPremiumPayment -> Unit // TODO(ui): SEP payment flow
             is ContractAffairsEvent.NavigateToEditContract -> Unit // TODO(ui): edit-contract flow
             is ContractAffairsEvent.ContractCancelled -> Unit // TODO(ui): success confirmation

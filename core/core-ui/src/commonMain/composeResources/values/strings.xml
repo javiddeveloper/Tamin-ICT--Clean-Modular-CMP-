@@ -2098,4 +2098,19 @@
     <string name="contract_affairs_view_payments">مشاهدهٔ پرداخت‌ها</string>
     <string name="contract_affairs_edit_contract">ویرایش قرارداد</string>
     <string name="contract_affairs_deactivate_contract">غیرفعال کردن قرارداد</string>
+    <string name="contract_payment_history_title">سوابق پرداخت</string>
+    <string name="contract_payment_history_number_prefix">شمارهٔ</string>
+    <string name="contract_payment_history_summary_total">جمع پرداخت‌های موفق</string>
+    <string name="contract_payment_history_summary_count_unit">برگ پرداخت</string>
+    <string name="contract_payment_history_payment_date">تاریخ پرداخت</string>
+    <string name="contract_payment_history_debt_number">شمارهٔ بدهی</string>
+    <string name="contract_payment_history_show_details">نمایش جزئیات</string>
+    <string name="contract_payment_history_hide_details">بستن</string>
+    <string name="contract_payment_history_collection_status">وضعیت وصول</string>
+    <string name="contract_payment_history_total_debt">مبلغ کل بدهی</string>
+    <string name="contract_payment_history_term_start">شروع دوره</string>
+    <string name="contract_payment_history_term_end">پایان دوره</string>
+    <string name="contract_payment_history_payment_deadline">مهلت پرداخت</string>
+    <string name="contract_payment_history_empty_title">سابقهٔ پرداختی نیست</string>
+    <string name="contract_payment_history_empty_subtitle">برای این قرارداد هنوز پرداختی ثبت نشده است</string>
 </resources>

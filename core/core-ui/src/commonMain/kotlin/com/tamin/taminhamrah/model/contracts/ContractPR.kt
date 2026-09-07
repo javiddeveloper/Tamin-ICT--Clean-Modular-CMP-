@@ -38,14 +38,25 @@ data class ContractStatePR(
     val title: String,
 )
 
-/** One مشاهده پرداخت‌ها row. */
+/**
+ * One سوابق پرداخت row.
+ *
+ * [amountPayment] / [totalDebt] are raw digit strings (format with `toRialAmount()` at the call
+ * site); the date/term fields already carry Persian digits. [isPaid] drives the row's status icon
+ * and whether it counts toward جمع پرداخت‌های موفق; [statusLabel] is the pill text.
+ */
 @Immutable
 data class ContractPaymentHistoryItemPR(
     val debtNumber: String,
-    val termRange: String,
-    val totalDebt: String,
     val amountPayment: String,
-    val paymentDeadline: String,
     val datePayment: String,
-    val statusContract: String,
+    val totalDebt: String,
+    val paymentDeadline: String,
+    val termStart: String,
+    val termEnd: String,
+    /** وضعیت وصول — e.g. «وصول شده» / «در انتظار». */
+    val collectionStatus: String,
+    val isPaid: Boolean,
+    /** «پرداخت شده» / «پرداخت نشده». */
+    val statusLabel: String,
 )
