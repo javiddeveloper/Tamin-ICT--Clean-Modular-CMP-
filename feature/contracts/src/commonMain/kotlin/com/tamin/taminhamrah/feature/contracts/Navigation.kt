@@ -7,6 +7,10 @@ import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import com.tamin.taminhamrah.feature.contracts.ui.ContractsScreen
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.ContractAffairsRoute
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.ContractAffairsViewModel
+import com.tamin.taminhamrah.feature.contracts.ui.affairs.paymentCalcDetail.ContractPaymentCalcDetailRoute
+import com.tamin.taminhamrah.feature.contracts.ui.affairs.paymentCalcDetail.ContractPaymentCalcDetailViewModel
+import com.tamin.taminhamrah.feature.contracts.ui.affairs.premiumPayment.ContractPremiumPaymentRoute
+import com.tamin.taminhamrah.feature.contracts.ui.affairs.premiumPayment.ContractPremiumPaymentViewModel
 import com.tamin.taminhamrah.feature.contracts.ui.paymentHistory.ContractPaymentHistoryRoute
 import com.tamin.taminhamrah.feature.contracts.ui.paymentHistory.ContractPaymentHistoryViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -27,6 +31,22 @@ data class ContractPaymentHistoryRoute(
     val insuranceType: String,
 )
 
+/** پرداخت حق بیمه — opened from «پرداخت حق بیمه» in the امور قرارداد sheet / card. */
+@Serializable
+data class ContractPremiumPaymentRoute(
+    val contractNumber: String,
+    val premiumTypeCode: String,
+    val insuranceType: String,
+)
+
+/** جزئیات برگ پرداخت — opened from the محاسبهٔ حق بیمه result card. */
+@Serializable
+data class ContractPaymentCalcDetailRoute(
+    val premiumTypeCode: String,
+    val startDate: Long,
+    val endDate: Long,
+)
+
 fun NavController.navigateToContracts() {
     navigate(ContractsRoute)
 }
@@ -40,6 +60,22 @@ fun NavController.navigateToContractPaymentHistory(
     insuranceType: String,
 ) {
     navigate(ContractPaymentHistoryRoute(contractNumber, insuranceType))
+}
+
+fun NavController.navigateToContractPremiumPayment(
+    contractNumber: String,
+    premiumTypeCode: String,
+    insuranceType: String,
+) {
+    navigate(ContractPremiumPaymentRoute(contractNumber, premiumTypeCode, insuranceType))
+}
+
+fun NavController.navigateToContractPaymentCalcDetail(
+    premiumTypeCode: String,
+    startDate: Long,
+    endDate: Long,
+) {
+    navigate(ContractPaymentCalcDetailRoute(premiumTypeCode, startDate, endDate))
 }
 
 fun NavGraphBuilder.contractsScreen(
@@ -61,6 +97,11 @@ fun NavGraphBuilder.contractAffairsScreen(
     onNavigateToService: (FeatureFlag) -> Unit,
     onOpenUrl: (String) -> Unit,
     onNavigateToPaymentHistory: (contractNumber: String, insuranceType: String) -> Unit,
+    onNavigateToPremiumPayment: (
+        contractNumber: String,
+        premiumTypeCode: String,
+        insuranceType: String,
+    ) -> Unit,
 ) {
     composableWithFadeTransitions<ContractAffairsRoute> {
         val viewModel: ContractAffairsViewModel = koinViewModel()
@@ -70,6 +111,7 @@ fun NavGraphBuilder.contractAffairsScreen(
             onNavigateToService = onNavigateToService,
             onOpenUrl = onOpenUrl,
             onNavigateToPaymentHistory = onNavigateToPaymentHistory,
+            onNavigateToPremiumPayment = onNavigateToPremiumPayment,
         )
     }
 }
@@ -84,6 +126,44 @@ fun NavGraphBuilder.contractPaymentHistoryScreen(
             viewModel = viewModel,
             contractNumber = route.contractNumber,
             insuranceType = route.insuranceType,
+            onBackClicked = onBack,
+        )
+    }
+}
+
+fun NavGraphBuilder.contractPremiumPaymentScreen(
+    onBack: () -> Unit,
+    onNavigateToPaymentDetails: (
+        premiumTypeCode: String,
+        startDate: Long,
+        endDate: Long,
+    ) -> Unit,
+) {
+    composableWithFadeTransitions<ContractPremiumPaymentRoute> { backStackEntry ->
+        val route = backStackEntry.toRoute<ContractPremiumPaymentRoute>()
+        val viewModel: ContractPremiumPaymentViewModel = koinViewModel()
+        ContractPremiumPaymentRoute(
+            viewModel = viewModel,
+            contractNumber = route.contractNumber,
+            premiumTypeCode = route.premiumTypeCode,
+            insuranceType = route.insuranceType,
+            onBackClicked = onBack,
+            onNavigateToPaymentDetails = onNavigateToPaymentDetails,
+        )
+    }
+}
+
+fun NavGraphBuilder.contractPaymentCalcDetailScreen(
+    onBack: () -> Unit,
+) {
+    composableWithFadeTransitions<ContractPaymentCalcDetailRoute> { backStackEntry ->
+        val route = backStackEntry.toRoute<ContractPaymentCalcDetailRoute>()
+        val viewModel: ContractPaymentCalcDetailViewModel = koinViewModel()
+        ContractPaymentCalcDetailRoute(
+            viewModel = viewModel,
+            premiumTypeCode = route.premiumTypeCode,
+            startDate = route.startDate,
+            endDate = route.endDate,
             onBackClicked = onBack,
         )
     }

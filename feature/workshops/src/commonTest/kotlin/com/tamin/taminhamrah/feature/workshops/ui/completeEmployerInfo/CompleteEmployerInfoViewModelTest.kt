@@ -515,6 +515,12 @@ private class FakeTestContractsRepo : ContractsRepository {
     override fun downloadContractReport(premiumType: com.tamin.taminhamrah.model.contracts.ContractPremiumType): Flow<PdfDownloadDN> = flowOf(
         PdfDownloadDN(null)
     )
+    override fun getContractDebit(premiumType: com.tamin.taminhamrah.model.contracts.ContractPremiumType, month: Int): Flow<com.tamin.taminhamrah.model.contracts.ContractDebitDN> =
+        flowOf(com.tamin.taminhamrah.model.contracts.ContractDebitDN(null, null, null, null, null, null, null))
+    override fun getContractLastPayment(premiumType: com.tamin.taminhamrah.model.contracts.ContractPremiumType): Flow<com.tamin.taminhamrah.model.contracts.ContractLastPaymentDN> =
+        flowOf(com.tamin.taminhamrah.model.contracts.ContractLastPaymentDN(null, null, null))
+    override fun getPaymentCalculationDetails(premiumType: com.tamin.taminhamrah.model.contracts.ContractPremiumType, startDate: Long, endDate: Long): Flow<List<com.tamin.taminhamrah.model.contracts.PaymentCalculationRowDN>> =
+        flowOf(emptyList())
 }
 
 /** One agreement in the shape the merged model uses. */

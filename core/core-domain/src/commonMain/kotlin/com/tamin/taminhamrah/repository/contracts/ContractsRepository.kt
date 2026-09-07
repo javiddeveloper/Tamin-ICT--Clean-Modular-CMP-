@@ -2,8 +2,11 @@ package com.tamin.taminhamrah.repository.contracts
 
 import com.tamin.taminhamrah.model.contracts.BranchDN
 import com.tamin.taminhamrah.model.contracts.CancelContractParamsDN
+import com.tamin.taminhamrah.model.contracts.ContractDebitDN
+import com.tamin.taminhamrah.model.contracts.ContractLastPaymentDN
 import com.tamin.taminhamrah.model.contracts.ContractPaymentHistoryItemDN
 import com.tamin.taminhamrah.model.contracts.ContractPremiumType
+import com.tamin.taminhamrah.model.contracts.PaymentCalculationRowDN
 import com.tamin.taminhamrah.model.contracts.ContractStateDN
 import com.tamin.taminhamrah.model.contracts.FreelanceContractByGuardianParams
 import com.tamin.taminhamrah.model.contracts.OptionalContractByGuardianParams
@@ -45,6 +48,19 @@ interface ContractsRepository {
 
     /** مشاهده قرارداد — the contract report as a downloadable PDF. */
     fun downloadContractReport(premiumType: ContractPremiumType): Flow<PdfDownloadDN>
+
+    /** محاسبهٔ حق بیمه — payable amount and period for [month] months. */
+    fun getContractDebit(premiumType: ContractPremiumType, month: Int): Flow<ContractDebitDN>
+
+    /** آخرین پرداخت حق بیمه for the contract kind. */
+    fun getContractLastPayment(premiumType: ContractPremiumType): Flow<ContractLastPaymentDN>
+
+    /** جزئیات برگ پرداخت for a calculated payment period. */
+    fun getPaymentCalculationDetails(
+        premiumType: ContractPremiumType,
+        startDate: Long,
+        endDate: Long,
+    ): Flow<List<PaymentCalculationRowDN>>
     fun getContractsByPremiumType(premiumTypeCode: String): Flow<List<ContractDN>>
     fun getStudentInsuranceContracts(): Flow<List<ContractDN>>
     fun getRegistrationInfo(): Flow<RegistrationInfoDN>

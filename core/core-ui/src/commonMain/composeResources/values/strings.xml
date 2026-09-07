@@ -2131,4 +2131,34 @@
     <string name="contract_payment_history_payment_deadline">مهلت پرداخت</string>
     <string name="contract_payment_history_empty_title">سابقهٔ پرداختی نیست</string>
     <string name="contract_payment_history_empty_subtitle">برای این قرارداد هنوز پرداختی ثبت نشده است</string>
+
+    <!-- ===================== Contract Premium Payment (پرداخت حق بیمه) ===================== -->
+    <string name="contract_premium_payment_title">پرداخت حق بیمه</string>
+    <string name="contract_premium_payment_paid_until">حق بیمهٔ شما تا تاریخ %1$s پرداخت شده است.</string>
+    <string name="contract_premium_payment_info_freelance">در این فرم حق بیمهٔ قرارداد صاحبان حرف و مشاغل آزاد شما محاسبه می‌شود.</string>
+    <string name="contract_premium_payment_info_optional">در این فرم حق بیمهٔ قرارداد بیمهٔ اختیاری شما محاسبه می‌شود.</string>
+    <string name="contract_premium_payment_info_deadline">مهلت پرداخت برای قرارداد اول حداکثر ۲۰ روز از تاریخ قرارداد و در پرداخت‌های بعدی حداکثر ۳ ماه و یک روز از تاریخ آخرین پرداخت است.</string>
+    <string name="contract_premium_payment_info_max_month">حداکثر مقدار ماه انتخابی برای پرداخت، تا پایان سال جاری است.</string>
+    <string name="contract_premium_payment_period_label">دورهٔ پرداخت (ماه)</string>
+    <string name="contract_premium_payment_calculate">محاسبهٔ حق بیمه</string>
+    <string name="contract_premium_payment_payable">قابل پرداخت</string>
+    <string name="contract_premium_payment_period_start">شروع دورهٔ پرداخت</string>
+    <string name="contract_premium_payment_period_end">پایان دورهٔ پرداخت</string>
+    <string name="contract_premium_payment_period_premium">حق بیمه دوره (%1$s ماه)</string>
+    <string name="contract_premium_payment_past_debt">بدهی گذشته</string>
+    <string name="contract_premium_payment_deadline">مهلت پرداخت</string>
+    <string name="contract_premium_payment_details_cta">جزئیات برگ پرداخت</string>
+
+    <string name="contract_payment_details_title">جزئیات برگ پرداخت</string>
+    <string name="contract_payment_details_subtitle">ریز محاسبهٔ %1$s ماه حق بیمه</string>
+    <string name="contract_payment_details_period">دورهٔ برگ پرداخت</string>
+    <string name="contract_payment_details_total">جمع کل</string>
+    <string name="contract_payment_details_month_unit">ماه</string>
+    <string name="contract_payment_details_day_unit">%1$s روز</string>
+    <string name="contract_payment_details_net">جمع</string>
+    <string name="contract_payment_details_base_wage">دستمزد مبنا</string>
+    <string name="contract_payment_details_rate">نرخ حق بیمه</string>
+    <string name="contract_payment_details_rate_value">%1$s درصد</string>
+    <string name="contract_payment_details_empty_title">جزئیاتی یافت نشد</string>
+    <string name="contract_payment_details_empty_subtitle">برای این دوره ریز محاسبه‌ای ثبت نشده است</string>
 </resources>

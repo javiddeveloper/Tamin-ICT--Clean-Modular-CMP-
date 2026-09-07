@@ -4,7 +4,9 @@ import com.tamin.taminhamrah.model.contracts.BranchDTO
 import com.tamin.taminhamrah.model.contracts.CancelContractRequestDTO
 import com.tamin.taminhamrah.model.contracts.ContractDTO
 import com.tamin.taminhamrah.model.contracts.ContractByGuardianRequestDTO
+import com.tamin.taminhamrah.model.contracts.ContractDebitDTO
 import com.tamin.taminhamrah.model.contracts.ContractStateDTO
+import com.tamin.taminhamrah.model.contracts.FreelanceLastPaymentDTO
 import com.tamin.taminhamrah.model.contracts.FreelanceContractResultDTO
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractRequestDTO
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDTO
@@ -171,4 +173,50 @@ interface ContractsApiService {
     suspend fun getFractionContractReport(
         @Path("timestamp") timestamp: Long,
     ): HttpStatement
+
+    // ---- پرداخت حق بیمه (محاسبهٔ حق بیمه) ----
+
+    /** محاسبهٔ حق بیمه for [month] months — حرف و مشاغل آزاد. */
+    @GET("special-insured-services/freelance-calc-debit/{month}")
+    suspend fun getFreelanceContractDebit(
+        @Path("month") month: Int,
+    ): BaseDTO<ContractDebitDTO>
+
+    /** محاسبهٔ حق بیمه for [month] months — بیمهٔ اختیاری. */
+    @GET("special-insured-services/calc-debit/{month}")
+    suspend fun getOptionalContractDebit(
+        @Path("month") month: Int,
+    ): BaseDTO<ContractDebitDTO>
+
+    /** آخرین پرداخت — حرف و مشاغل آزاد. */
+    @GET("special-insured-services/freelance-get-last-payment")
+    suspend fun getFreelanceLastPayment(): BaseDTO<FreelanceLastPaymentDTO>
+
+    /** آخرین پرداخت — بیمهٔ اختیاری. `data` is a bare timestamp. */
+    @GET("special-insured-services/get-last-payment")
+    suspend fun getOptionalLastPayment(): BaseDTO<Long>
+
+    /** جزئیات برگ پرداخت — حرف و مشاغل آزاد. Rows are positional arrays. */
+    @GET("special-insured-services/freelance-payment-details")
+    suspend fun getFreelancePaymentDetails(
+        @Query("start-date") startDate: String,
+        @Query("end-date") endDate: String,
+        @Query("page") page: String = "1",
+        @Query("start") start: String = "0",
+        @Query("limit") limit: String = "10",
+        @Query("filter") filter: String = "[]",
+        @Query("sort") sort: String = "[]",
+    ): BaseDTO<ListData<JsonArray>>
+
+    /** جزئیات برگ پرداخت — بیمهٔ اختیاری. Rows are positional arrays. */
+    @GET("special-insured-services/payment-details")
+    suspend fun getOptionalPaymentDetails(
+        @Query("start-date") startDate: String,
+        @Query("end-date") endDate: String,
+        @Query("page") page: String = "1",
+        @Query("start") start: String = "0",
+        @Query("limit") limit: String = "10",
+        @Query("filter") filter: String = "[]",
+        @Query("sort") sort: String = "[]",
+    ): BaseDTO<ListData<JsonArray>>
 }

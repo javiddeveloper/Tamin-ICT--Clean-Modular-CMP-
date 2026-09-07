@@ -218,6 +218,9 @@ private class FakeContractsRemoteDataSource(
     override suspend fun cancelContract(premiumType: ContractPremiumType, stateCode: Int, request: CancelContractRequestDTO, ) = unused<Unit>()
     override suspend fun getContractPaymentHistory(contractNumber: String, ): List<ContractPaymentHistoryItemDTO> = unused()
     override suspend fun downloadContractReport(premiumType: ContractPremiumType, ): PdfDownloadDTO = unused()
+    override suspend fun getContractDebit(premiumType: ContractPremiumType, month: Int): com.tamin.taminhamrah.model.contracts.ContractDebitDTO = unused()
+    override suspend fun getContractLastPayment(premiumType: ContractPremiumType): com.tamin.taminhamrah.model.contracts.ContractLastPaymentDTO = unused()
+    override suspend fun getPaymentCalculationDetails(premiumType: ContractPremiumType, startDate: Long, endDate: Long): List<com.tamin.taminhamrah.model.contracts.PaymentCalculationRowDTO> = unused()
 }
 
 private class FakeContractDao : ContractDao {

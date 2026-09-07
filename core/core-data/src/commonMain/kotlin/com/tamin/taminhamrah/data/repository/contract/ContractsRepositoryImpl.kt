@@ -10,8 +10,11 @@ import com.tamin.taminhamrah.data.mapper.toRequestDto
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSource
 import com.tamin.taminhamrah.model.contracts.BranchDN
 import com.tamin.taminhamrah.model.contracts.CancelContractParamsDN
+import com.tamin.taminhamrah.model.contracts.ContractDebitDN
+import com.tamin.taminhamrah.model.contracts.ContractLastPaymentDN
 import com.tamin.taminhamrah.model.contracts.ContractPaymentHistoryItemDN
 import com.tamin.taminhamrah.model.contracts.ContractPremiumType
+import com.tamin.taminhamrah.model.contracts.PaymentCalculationRowDN
 import com.tamin.taminhamrah.model.contracts.ContractStateDN
 import com.tamin.taminhamrah.model.contracts.FreelanceContractByGuardianParams
 import com.tamin.taminhamrah.model.contracts.OptionalContractByGuardianParams
@@ -107,6 +110,31 @@ class ContractsRepositoryImpl(
 
     override fun downloadContractReport(premiumType: ContractPremiumType): Flow<PdfDownloadDN> = flow {
         emit(contractsRemoteDataSource.downloadContractReport(premiumType).toDomain())
+    }
+
+    override fun getContractDebit(
+        premiumType: ContractPremiumType,
+        month: Int,
+    ): Flow<ContractDebitDN> = flow {
+        emit(contractsRemoteDataSource.getContractDebit(premiumType, month).toDomain())
+    }
+
+    override fun getContractLastPayment(
+        premiumType: ContractPremiumType,
+    ): Flow<ContractLastPaymentDN> = flow {
+        emit(contractsRemoteDataSource.getContractLastPayment(premiumType).toDomain())
+    }
+
+    override fun getPaymentCalculationDetails(
+        premiumType: ContractPremiumType,
+        startDate: Long,
+        endDate: Long,
+    ): Flow<List<PaymentCalculationRowDN>> = flow {
+        emit(
+            contractsRemoteDataSource
+                .getPaymentCalculationDetails(premiumType, startDate, endDate)
+                .toDomain(),
+        )
     }
 
     override fun getContractsByPremiumType(premiumTypeCode: String): Flow<List<ContractDN>> =

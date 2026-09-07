@@ -84,6 +84,11 @@ fun ContractAffairsRoute(
     onNavigateToService: (FeatureFlag) -> Unit,
     onOpenUrl: (String) -> Unit,
     onNavigateToPaymentHistory: (contractNumber: String, insuranceType: String) -> Unit,
+    onNavigateToPremiumPayment: (
+        contractNumber: String,
+        premiumTypeCode: String,
+        insuranceType: String,
+    ) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -92,6 +97,7 @@ fun ContractAffairsRoute(
         onNavigateToService = onNavigateToService,
         onNavigateToWeb = onOpenUrl,
         onNavigateToPaymentHistory = onNavigateToPaymentHistory,
+        onNavigateToPremiumPayment = onNavigateToPremiumPayment,
     )
 
     ContractAffairsScreen(
@@ -107,6 +113,11 @@ private fun ContractAffairsEvents(
     onNavigateToService: (FeatureFlag) -> Unit,
     onNavigateToWeb: (String) -> Unit,
     onNavigateToPaymentHistory: (contractNumber: String, insuranceType: String) -> Unit,
+    onNavigateToPremiumPayment: (
+        contractNumber: String,
+        premiumTypeCode: String,
+        insuranceType: String,
+    ) -> Unit,
 ) {
     events.collectWithLifecycleAware { event ->
         when (event) {
@@ -115,7 +126,12 @@ private fun ContractAffairsEvents(
             is ContractAffairsEvent.NavigateToPaymentHistory ->
                 onNavigateToPaymentHistory(event.contractNumber, event.insuranceType)
 
-            is ContractAffairsEvent.NavigateToPremiumPayment -> Unit // TODO(ui): SEP payment flow
+            is ContractAffairsEvent.NavigateToPremiumPayment -> onNavigateToPremiumPayment(
+                event.contract.contractNumber,
+                event.contract.premiumTypeCode,
+                event.contract.insuranceType,
+            )
+
             is ContractAffairsEvent.NavigateToEditContract -> Unit // TODO(ui): edit-contract flow
             is ContractAffairsEvent.ContractCancelled -> Unit // TODO(ui): success confirmation
             is ContractAffairsEvent.ShowToast -> Unit // TODO(ui): snackbar

@@ -6,9 +6,12 @@ import com.tamin.taminhamrah.model.common.ProvinceDN
 import com.tamin.taminhamrah.model.contracts.BranchDN
 import com.tamin.taminhamrah.model.contracts.CancelContractParamsDN
 import com.tamin.taminhamrah.model.contracts.ContractDN
+import com.tamin.taminhamrah.model.contracts.ContractDebitDN
+import com.tamin.taminhamrah.model.contracts.ContractLastPaymentDN
 import com.tamin.taminhamrah.model.contracts.ContractPaymentHistoryItemDN
 import com.tamin.taminhamrah.model.contracts.ContractPremiumType
 import com.tamin.taminhamrah.model.contracts.ContractStateDN
+import com.tamin.taminhamrah.model.contracts.PaymentCalculationRowDN
 import com.tamin.taminhamrah.model.contracts.FreeJobDN
 import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
 import com.tamin.taminhamrah.model.contracts.FreelanceContractByGuardianParams
@@ -139,4 +142,7 @@ class FakeIllDaysContractsRepository : ContractsRepository {
     override fun cancelContract(params: CancelContractParamsDN): Flow<Unit> = flowOf(Unit)
     override fun getContractPaymentHistory(contractNumber: String): Flow<List<ContractPaymentHistoryItemDN>> = flowOf(emptyList())
     override fun downloadContractReport(premiumType: ContractPremiumType): Flow<PdfDownloadDN> = flowOf(PdfDownloadDN(null))
+    override fun getContractDebit(premiumType: ContractPremiumType, month: Int): Flow<ContractDebitDN> = flowOf(ContractDebitDN(null, null, null, null, null, null, null))
+    override fun getContractLastPayment(premiumType: ContractPremiumType): Flow<ContractLastPaymentDN> = flowOf(ContractLastPaymentDN(null, null, null))
+    override fun getPaymentCalculationDetails(premiumType: ContractPremiumType, startDate: Long, endDate: Long): Flow<List<PaymentCalculationRowDN>> = flowOf(emptyList())
 }

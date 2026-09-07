@@ -2,9 +2,12 @@ package com.tamin.taminhamrah.repository.contracts
 
 import com.tamin.taminhamrah.model.contracts.BranchDN
 import com.tamin.taminhamrah.model.contracts.CancelContractParamsDN
+import com.tamin.taminhamrah.model.contracts.ContractDebitDN
+import com.tamin.taminhamrah.model.contracts.ContractLastPaymentDN
 import com.tamin.taminhamrah.model.contracts.ContractPaymentHistoryItemDN
 import com.tamin.taminhamrah.model.contracts.ContractPremiumType
 import com.tamin.taminhamrah.model.contracts.ContractStateDN
+import com.tamin.taminhamrah.model.contracts.PaymentCalculationRowDN
 import com.tamin.taminhamrah.model.contracts.FreelanceContractByGuardianParams
 import com.tamin.taminhamrah.model.contracts.OptionalContractByGuardianParams
 import com.tamin.taminhamrah.model.contracts.ContractDN
@@ -104,6 +107,56 @@ class FakeContractsRepository : ContractsRepository {
         lastReportPremiumType = premiumType
         if (shouldThrowError) throw error
         emit(contractReportResult)
+    }
+
+    var contractDebitResult: ContractDebitDN = ContractDebitDN(
+        total = 0L,
+        insurancePremiums = 0L,
+        previousDebit = 0L,
+        startDate = 0L,
+        endDate = 0L,
+        payPremiumDate = null,
+        infoMessage = null,
+    )
+    var lastDebitPremiumType: ContractPremiumType? = null
+    var lastDebitMonth: Int? = null
+
+    override fun getContractDebit(
+        premiumType: ContractPremiumType,
+        month: Int,
+    ): Flow<ContractDebitDN> = flow {
+        lastDebitPremiumType = premiumType
+        lastDebitMonth = month
+        if (shouldThrowError) throw error
+        emit(contractDebitResult)
+    }
+
+    var contractLastPaymentResult: ContractLastPaymentDN = ContractLastPaymentDN(
+        lastPaymentTimestamp = null,
+        checkReloLap = null,
+        medicalResultResend = null,
+    )
+    var lastLastPaymentPremiumType: ContractPremiumType? = null
+
+    override fun getContractLastPayment(
+        premiumType: ContractPremiumType,
+    ): Flow<ContractLastPaymentDN> = flow {
+        lastLastPaymentPremiumType = premiumType
+        if (shouldThrowError) throw error
+        emit(contractLastPaymentResult)
+    }
+
+    var paymentCalculationDetailsResult: List<PaymentCalculationRowDN> = emptyList()
+    var lastCalcDetailsArgs: Triple<ContractPremiumType, Long, Long>? = null
+
+    override fun getPaymentCalculationDetails(
+        premiumType: ContractPremiumType,
+        startDate: Long,
+        endDate: Long,
+    ): Flow<List<PaymentCalculationRowDN>> = flow {
+        lastCalcDetailsArgs = Triple(premiumType, startDate, endDate)
+        if (shouldThrowError) throw error
+        emit(paymentCalculationDetailsResult)
     }
 
     var lastPremiumTypeCode: String? = null

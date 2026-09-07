@@ -100,7 +100,11 @@ import com.tamin.taminhamrah.feature.addDependent.addDependentGraph
 import com.tamin.taminhamrah.feature.addDependent.AddDependentRoute
 import com.tamin.taminhamrah.feature.contracts.contractAffairsScreen
 import com.tamin.taminhamrah.feature.contracts.contractPaymentHistoryScreen
+import com.tamin.taminhamrah.feature.contracts.contractPaymentCalcDetailScreen
+import com.tamin.taminhamrah.feature.contracts.contractPremiumPaymentScreen
+import com.tamin.taminhamrah.feature.contracts.navigateToContractPaymentCalcDetail
 import com.tamin.taminhamrah.feature.contracts.navigateToContractPaymentHistory
+import com.tamin.taminhamrah.feature.contracts.navigateToContractPremiumPayment
 import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceContractScreen
 import com.tamin.taminhamrah.feature.taminServices.TaminServicesRoute
 import com.tamin.taminhamrah.feature.taminServices.occurrenceScreen
@@ -508,9 +512,29 @@ internal fun TaminHamrahNavGraph(
                     onNavigateToPaymentHistory = { contractNumber, insuranceType ->
                         navController.navigateToContractPaymentHistory(contractNumber, insuranceType)
                     },
+                    onNavigateToPremiumPayment = { contractNumber, premiumTypeCode, insuranceType ->
+                        navController.navigateToContractPremiumPayment(
+                            contractNumber,
+                            premiumTypeCode,
+                            insuranceType,
+                        )
+                    },
                 )
 
                 contractPaymentHistoryScreen(onBack = { navController.popBackStack() })
+
+                contractPremiumPaymentScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToPaymentDetails = { premiumTypeCode, startDate, endDate ->
+                        navController.navigateToContractPaymentCalcDetail(
+                            premiumTypeCode,
+                            startDate,
+                            endDate,
+                        )
+                    },
+                )
+
+                contractPaymentCalcDetailScreen(onBack = { navController.popBackStack() })
 
                 workshopsScreen(navController, onOpenUrl = { url -> openUrl(url) })
                 completeEmployerInfoScreen(navController)

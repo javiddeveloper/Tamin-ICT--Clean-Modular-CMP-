@@ -100,6 +100,9 @@ import com.tamin.taminhamrah.useCases.contracts.GetContractStatesUseCase
 import com.tamin.taminhamrah.useCases.contracts.CancelContractUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetContractPaymentHistoryUseCase
 import com.tamin.taminhamrah.useCases.contracts.DownloadContractReportUseCase
+import com.tamin.taminhamrah.useCases.contracts.GetContractDebitUseCase
+import com.tamin.taminhamrah.useCases.contracts.GetContractLastPaymentUseCase
+import com.tamin.taminhamrah.useCases.contracts.GetPaymentCalculationDetailsUseCase
 import com.tamin.taminhamrah.useCases.contracts.CalculateFreelanceSalaryUseCase
 import com.tamin.taminhamrah.useCases.contracts.CalculateOptionalSalaryUseCase
 import com.tamin.taminhamrah.useCases.contracts.CheckInsurancePaymentStatusUseCase
@@ -360,6 +363,9 @@ val domainModule = module {
     factoryOf(::CancelContractUseCase)
     factoryOf(::GetContractPaymentHistoryUseCase)
     factoryOf(::DownloadContractReportUseCase)
+    factoryOf(::GetContractDebitUseCase)
+    factoryOf(::GetContractLastPaymentUseCase)
+    factoryOf(::GetPaymentCalculationDetailsUseCase)
     factoryOf(::GetRegistrationInfoUseCase)
     factoryOf(::GetBranchesUseCase)
     factoryOf(::GetSpcPremiumRatesUseCase)

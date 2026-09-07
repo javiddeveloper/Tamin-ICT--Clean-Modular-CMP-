@@ -5,9 +5,12 @@ import com.tamin.taminhamrah.model.contracts.BranchDTO
 import com.tamin.taminhamrah.model.contracts.CancelContractRequestDTO
 import com.tamin.taminhamrah.model.contracts.ContractDTO
 import com.tamin.taminhamrah.model.contracts.ContractByGuardianRequestDTO
+import com.tamin.taminhamrah.model.contracts.ContractDebitDTO
+import com.tamin.taminhamrah.model.contracts.ContractLastPaymentDTO
 import com.tamin.taminhamrah.model.contracts.ContractPaymentHistoryItemDTO
 import com.tamin.taminhamrah.model.contracts.ContractPremiumType
 import com.tamin.taminhamrah.model.contracts.ContractStateDTO
+import com.tamin.taminhamrah.model.contracts.PaymentCalculationRowDTO
 import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
 import com.tamin.taminhamrah.model.contracts.FreelanceContractResultDTO
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractRequestDTO
@@ -387,6 +390,77 @@ class ContractsRemoteDataSourceImpl(
         }
     }
 
+    override suspend fun getContractDebit(
+        premiumType: ContractPremiumType,
+        month: Int,
+    ): ContractDebitDTO {
+        return try {
+            val response = if (premiumType == ContractPremiumType.OPTIONAL) {
+                contractsApiService.getOptionalContractDebit(month)
+            } else {
+                contractsApiService.getFreelanceContractDebit(month)
+            }
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
+            )
+        }
+    }
+
+    override suspend fun getContractLastPayment(
+        premiumType: ContractPremiumType,
+    ): ContractLastPaymentDTO {
+        return try {
+            if (premiumType == ContractPremiumType.OPTIONAL) {
+                val timestamp = contractsApiService.getOptionalLastPayment().data
+                ContractLastPaymentDTO(lastPaymentTimestamp = timestamp?.toString())
+            } else {
+                val data = contractsApiService.getFreelanceLastPayment().data
+                ContractLastPaymentDTO(
+                    lastPaymentTimestamp = data?.lastPaymentDate,
+                    chekReloLap = data?.chekReloLap,
+                    medicalRsltResend = data?.medicalRsltResend,
+                )
+            }
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
+            )
+        }
+    }
+
+    override suspend fun getPaymentCalculationDetails(
+        premiumType: ContractPremiumType,
+        startDate: Long,
+        endDate: Long,
+    ): List<PaymentCalculationRowDTO> {
+        return try {
+            val response = if (premiumType == ContractPremiumType.OPTIONAL) {
+                contractsApiService.getOptionalPaymentDetails(
+                    startDate = startDate.toString(),
+                    endDate = endDate.toString(),
+                )
+            } else {
+                contractsApiService.getFreelancePaymentDetails(
+                    startDate = startDate.toString(),
+                    endDate = endDate.toString(),
+                )
+            }
+            response.extractData().list.orEmpty().map { it.toPaymentCalculationRow() }
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
+            )
+        }
+    }
+
     /**
      * `freelance-payment-history-head-with-contractNumber` answers with positional arrays; the
      * index each field lives at is mirrored from `old_android`'s
@@ -405,6 +479,21 @@ class ContractsRemoteDataSourceImpl(
             datePayment = stringAt(10),
             statusContract = stringAt(11),
             statusRecipient = stringAt(12),
+        )
+
+    /**
+     * `freelance-payment-details` / `payment-details` answer with positional arrays
+     * `[year, month, day, description, wage, amount]`, mirrored from `old_android`'s
+     * `ServiceRepository.getPaymentCalculationDetailList`.
+     */
+    private fun JsonArray.toPaymentCalculationRow(): PaymentCalculationRowDTO =
+        PaymentCalculationRowDTO(
+            year = stringAt(0),
+            month = stringAt(1),
+            day = stringAt(2),
+            description = stringAt(3),
+            wage = doubleAt(4),
+            amount = doubleAt(5),
         )
 
     private fun JsonArray.cellAt(index: Int): JsonElement? =
