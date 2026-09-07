@@ -6,7 +6,38 @@ sealed class FeatureStatus {
     data class TemporaryDisabled(val message: String?) : FeatureStatus()
     data class EnabledWithError(val message: String?) : FeatureStatus()
     data class WebView(val url: String) : FeatureStatus()
+
+    /** True when tapping the service opens something — the only cases that are worth showing. */
+    val opensSomething: Boolean
+        get() = this is Enabled || this is EnabledWithError || this is WebView
 }
+
+/**
+ * How one menu row reads as a feature's state. A `null` receiver means the server did not return
+ * the service at all, which is [FeatureStatus.Disabled] with no message to show.
+ *
+ * Lives here rather than inside `FeatureManagerImpl` so that a caller which already holds the menu
+ * — the home screen holds it to render the service list — can ask the same question without
+ * triggering a second fetch, and cannot answer it differently.
+ */
+fun MainServiceDN?.toFeatureStatus(): FeatureStatus {
+    if (this == null) return FeatureStatus.Disabled(null)
+    if (active == false) return FeatureStatus.Disabled(message)
+
+    return when (status) {
+        MenuServiceStatusDN.ACTIVE -> FeatureStatus.Enabled
+        MenuServiceStatusDN.TEMPORARY_DISABLED -> FeatureStatus.TemporaryDisabled(message)
+        MenuServiceStatusDN.DISABLED -> FeatureStatus.Disabled(message)
+        MenuServiceStatusDN.COMPLETELY_DISABLED -> FeatureStatus.Disabled(message)
+        MenuServiceStatusDN.ENABLED_WITH_ERROR -> FeatureStatus.EnabledWithError(message)
+        MenuServiceStatusDN.WEB_VIEW -> url?.let { FeatureStatus.WebView(it) } ?: FeatureStatus.Enabled
+        null -> FeatureStatus.Enabled
+    }
+}
+
+/** The state of [flag] according to a menu that has already been loaded. */
+fun List<MainServiceDN>.featureStatusOf(flag: FeatureFlag): FeatureStatus =
+    find { it.id == flag.id }.toFeatureStatus()
 
 enum class FeatureFlag(val id: Int) {
     IDENTITY_INFO(1),
