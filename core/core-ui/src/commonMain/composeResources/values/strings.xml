@@ -159,6 +159,26 @@
     <string name="developer_options_service_account">سرویس احراز هویت</string>
     <string name="developer_options_service_health_profile">پرونده سلامت من</string>
     <string name="developer_options_service_ai">دستیار هوشمند</string>
+    <string name="debug_login_title">ورود دیباگ (Back-to-Back)</string>
+    <string name="developer_options_debug_login_entry">ورود دیباگ (Back-to-Back)</string>
+    <string name="developer_options_token_manager_entry">مدیریت توکن‌ها</string>
+    <string name="token_manager_title">مدیریت توکن‌ها</string>
+    <string name="token_manager_slot_user">توکن کاربر (ورود عادی)</string>
+    <string name="token_manager_slot_back_to_back">توکن Back-to-Back (دیباگ)</string>
+    <string name="token_manager_slot_agent">توکن دستیار هوشمند</string>
+    <string name="token_manager_active">فعال</string>
+    <string name="token_manager_activate">فعال‌سازی</string>
+    <string name="token_manager_refresh">رفرش</string>
+    <string name="token_manager_clear">حذف</string>
+    <string name="token_manager_empty">توکنی ذخیره نشده است</string>
+    <string name="token_manager_expired">%1$s دقیقه پیش منقضی شده</string>
+    <string name="token_manager_expires_in">%1$s دقیقه تا انقضا</string>
+    <string name="token_manager_expiry_unknown">زمان انقضا نامشخص</string>
+    <string name="token_manager_agent_hint">این توکن در بدنهٔ درخواست دستیار ارسال می‌شود، نه به‌عنوان توکن اصلی برنامه؛ برای همین قابل فعال‌سازی نیست.</string>
+    <string name="token_manager_back_to_back_hint">این نوع ورود refresh token ندارد؛ دکمهٔ رفرش یک توکن تازه با همان کلاینت می‌گیرد و توکن فعال را عوض نمی‌کند.</string>
+    <string name="debug_login_client_id_hint">Client ID</string>
+    <string name="debug_login_client_secret_hint">Client Secret</string>
+    <string name="debug_login_submit">ورود</string>
     <string name="action_save">ذخیره</string>
     <string name="label_inbox_inquiry_desc">این فرم جهت صدور مجوز استعلام (به اشتراک گذاری) اسناد یا اطلاعات موجود در صندوق شخصی شما تعبیه شده است.\nاطلاعاتی که توسط این فرم به اشتراک گذاشته می شوند از طریق لینک "پنل مخصوص دستگاههای دولتی و مرجع استعلامات رسمی" که در قسمت حاشیه انتهایی سایت (Footer) قرار دارد، توسط مراجع بیرونی قابل استعلام خواهد بود.\nامکان استعلام اسناد شما توسط سایرین فقط به واسطه ارائه کد ملی و رمز صادر شده در زمان به اشتراک گذاری امکان پذیر خواهد بود.\nشما در این فرم می توانید نسبت به صدور مجوز استعلام در خصوص یکی از موارد صندوق شخصی خود به مدت مشخص (شروع از تاریخ روز جاری) اقدام نمایید.\nبدیهی است پس از اتمام مدت تعیین شده مجوز استعلام بصورت اتوماتیک لغو خواهد شد.\nلازم به ذکر است در صورتی که مایل به لغو مجوز استعلام بصورت دستی هستید میتوانید از طریق دکمه "لغو مجوز استعلام" اقدام نمایید.</string>
 

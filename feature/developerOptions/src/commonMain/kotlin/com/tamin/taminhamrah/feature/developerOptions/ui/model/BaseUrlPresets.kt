@@ -49,12 +49,20 @@ object BaseUrlPresets {
 
     /**
      * Built from [BaseUrlKey.defaultValue] rather than repeated as literals, so this list cannot
-     * drift from `NetworkConstants` and cannot grow a non-shipping address by accident.
+     * drift from `NetworkConstants` and cannot grow a non-shipping address by accident — except
+     * for ACCOUNT's "Pilot" entry below, added as an explicit, accepted exception to the rule
+     * above (a public `tamin.ir` subdomain, not an internal host/IP) so the back-to-back debug
+     * login and the PKCE flow can both be pointed at the pilot IDM with one tap.
      */
     val presets: Map<BaseUrlKey, List<BaseUrlPreset>> =
         BaseUrlKey.entries.associateWith { key ->
             listOf(BaseUrlPreset(label = DEFAULT_PRESET_LABEL, url = key.defaultValue))
-        }
+        } + mapOf(
+            BaseUrlKey.ACCOUNT to listOf(
+                BaseUrlPreset(label = DEFAULT_PRESET_LABEL, url = BaseUrlKey.ACCOUNT.defaultValue),
+                BaseUrlPreset(label = "Pilot", url = "https://account-pilot.tamin.ir/auth/")
+            )
+        )
 
     private const val DEFAULT_PRESET_LABEL = "Default"
 }

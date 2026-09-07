@@ -62,16 +62,20 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.action_cancel
 import taminx.core.core_ui.action_save
 import taminx.core.core_ui.developer_options_custom_url_hint
+import taminx.core.core_ui.developer_options_debug_login_entry
 import taminx.core.core_ui.developer_options_dialog_title
 import taminx.core.core_ui.developer_options_reset_to_default
 import taminx.core.core_ui.developer_options_restart_notice_item
 import taminx.core.core_ui.developer_options_title
+import taminx.core.core_ui.developer_options_token_manager_entry
 import taminx.core.core_ui.ic_tamin_chevron_back
 
 @Composable
 fun DeveloperOptionsScreen(
     viewModel: DeveloperOptionsViewModel = koinViewModel(),
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToDebugLogin: () -> Unit,
+    onNavigateToTokenManager: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -83,7 +87,9 @@ fun DeveloperOptionsScreen(
     DeveloperOptionsContent(
         state = uiState,
         onIntent = viewModel::sendIntent,
-        onNavigateBack = onNavigateBack
+        onNavigateBack = onNavigateBack,
+        onNavigateToDebugLogin = onNavigateToDebugLogin,
+        onNavigateToTokenManager = onNavigateToTokenManager
     )
 }
 
@@ -104,7 +110,9 @@ private fun DeveloperOptionsContent(
     modifier: Modifier = Modifier,
     state: DeveloperOptionsUiState,
     onIntent: (DeveloperOptionsIntent) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToDebugLogin: () -> Unit,
+    onNavigateToTokenManager: () -> Unit
 ) {
     val taminColors = LocalTaminColors.current
     val isDark = taminColors == DarkTaminColors
@@ -160,6 +168,34 @@ private fun DeveloperOptionsContent(
                                 onClick = { onIntent(DeveloperOptionsIntent.OnItemClicked(item.key)) }
                             )
                         }.toTypedArray()
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(Spacing.lg))
+
+                ListGroupView(
+                    containerBorder = defaultBorder,
+                    items = persistentListOf(
+                        ListItemData(
+                            title = stringResource(Res.string.developer_options_debug_login_entry),
+                            leadingIconPainter = rememberVectorPainter(Icons.Rounded.Code),
+                            colors = ListItemColors(
+                                leadingIconTintColor = taminColors.bgIconProfile,
+                                leadingIconBackgroundGradient = taminColors.iconGradientNeutral
+                            ),
+                            showArrow = true,
+                            onClick = onNavigateToDebugLogin
+                        ),
+                        ListItemData(
+                            title = stringResource(Res.string.developer_options_token_manager_entry),
+                            leadingIconPainter = rememberVectorPainter(Icons.Rounded.Code),
+                            colors = ListItemColors(
+                                leadingIconTintColor = taminColors.bgIconProfile,
+                                leadingIconBackgroundGradient = taminColors.iconGradientNeutral
+                            ),
+                            showArrow = true,
+                            onClick = onNavigateToTokenManager
+                        )
                     )
                 )
             }
