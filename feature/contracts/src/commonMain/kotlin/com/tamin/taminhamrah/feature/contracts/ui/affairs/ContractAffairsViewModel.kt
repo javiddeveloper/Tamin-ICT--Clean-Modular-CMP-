@@ -184,7 +184,11 @@ class ContractAffairsViewModel(
     // ---- امور قرارداد ----
 
     private fun operationsFor(contract: ContractPR): List<ContractOperation> {
-        if (contract.statusCode != ACTIVE_CONTRACT_STATUS_CODE) return emptyList()
+        // Not-yet-active (در انتظار بررسی / cancelled) contracts can only be viewed — the امور
+        // قرارداد sheet still opens, with مشاهدهٔ قرارداد and an explanatory note.
+        if (contract.statusCode != ACTIVE_CONTRACT_STATUS_CODE) {
+            return listOf(ContractOperation.VIEW_CONTRACT)
+        }
         if (contract.premiumTypeCode == ContractPremiumType.FRACTION.code) {
             return listOf(ContractOperation.VIEW_CONTRACT)
         }

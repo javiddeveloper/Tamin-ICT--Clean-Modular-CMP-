@@ -2092,4 +2092,10 @@
     <string name="contract_type_freelance_desc">شاغلان مشاغل آزاد با کد شغلی مشخص</string>
     <string name="contract_type_optional_title">قرارداد بیمهٔ اختیاری</string>
     <string name="contract_type_optional_desc">ادامهٔ بیمه با حداقل ۳۰ ماه سابقهٔ قبلی</string>
+    <string name="contract_affairs_operations_sheet_title">امور قرارداد %1$s</string>
+    <string name="contract_affairs_operations_pending_note">این قرارداد در انتظار بررسی است؛ تا تأیید نهایی، پرداخت و ویرایش آن ممکن نیست.</string>
+    <string name="contract_affairs_operations_fraction_note">پرداخت حق بیمهٔ قرارداد کسری از ماه تنها یک‌بار و در پایان فرم انعقاد انجام می‌شود.</string>
+    <string name="contract_affairs_view_payments">مشاهدهٔ پرداخت‌ها</string>
+    <string name="contract_affairs_edit_contract">ویرایش قرارداد</string>
+    <string name="contract_affairs_deactivate_contract">غیرفعال کردن قرارداد</string>
 </resources>

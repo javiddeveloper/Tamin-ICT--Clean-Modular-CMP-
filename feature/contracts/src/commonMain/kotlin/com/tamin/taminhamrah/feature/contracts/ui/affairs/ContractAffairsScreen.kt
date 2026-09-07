@@ -29,6 +29,7 @@ import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractAff
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractAffairsHeader
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractAffairsItemCard
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractAffairsListSkeleton
+import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractOperationsSheet
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractSearchEmptyState
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractSearchFilterChipRow
 import com.tamin.taminhamrah.feature.contracts.ui.affairs.components.ContractSearchSheet
@@ -65,9 +66,10 @@ import taminx.core.core_ui.contract_affairs_empty_title
 /**
  * امور قراردادها و پرداخت.
  *
- * Route → Events → Screen, matching `InspectionScreen`. The per-contract امور قرارداد bottom sheet,
- * غیرفعال کردن flow, مشاهده پرداخت‌ها list and PDF viewer are separate sheets wired in a later step;
- * their state already lives on [ContractAffairsUiState].
+ * Route → Events → Screen, matching `InspectionScreen`. The per-contract امور قرارداد bottom sheet
+ * ([ContractOperationsSheet]) is wired here; the غیرفعال کردن flow, مشاهده پرداخت‌ها list and PDF
+ * viewer are separate sheets wired in a later step — their state already lives on
+ * [ContractAffairsUiState].
  */
 @Composable
 fun ContractAffairsRoute(
@@ -241,6 +243,22 @@ internal fun ContractAffairsScreen(
                 showNewContractSheet = false
             },
             onDismiss = { showNewContractSheet = false },
+        )
+    }
+
+    uiState.operationsContract?.let { operationsContract ->
+        ContractOperationsSheet(
+            contract = operationsContract,
+            operations = uiState.operations,
+            onOperationClick = { operation ->
+                onIntent(
+                    ContractAffairsIntent.OnOperationClick(
+                        contract = operationsContract,
+                        operation = operation,
+                    ),
+                )
+            },
+            onDismiss = { onIntent(ContractAffairsIntent.DismissContractOperations) },
         )
     }
 
