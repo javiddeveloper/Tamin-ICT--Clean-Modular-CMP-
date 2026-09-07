@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.model.contractFlow.ContractEligibilityPR
 import com.tamin.taminhamrah.contractFlow.ContractStep
 import com.tamin.taminhamrah.model.contractFlow.FreelanceContractResultPR
 import com.tamin.taminhamrah.model.contractFlow.FreelancePremiumRangePR
+import com.tamin.taminhamrah.model.contractFlow.GuardianFormPR
 import com.tamin.taminhamrah.model.contractFlow.SpcPremiumRateOptionPR
 import com.tamin.taminhamrah.model.contractFlow.UploadImagePR
 import com.tamin.taminhamrah.model.contractFlow.UserInfoFormPR
@@ -17,6 +18,7 @@ import com.tamin.taminhamrah.model.contracts.ContractDN
 import com.tamin.taminhamrah.model.contracts.ContractPR
 import com.tamin.taminhamrah.model.contracts.FreeJobDN
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoPR
+import com.tamin.taminhamrah.model.subdominant.SubdominantItemPR
 
 data class ContractFlowUiState(
     val isLoading: Boolean = false,
@@ -37,6 +39,7 @@ data class ContractFlowUiState(
     val selectedFreeJobName: String? = null,
     val isFreeJobsLoading: Boolean = false,
     val contractApplicantType: ContractApplicantType = ContractApplicantType.PERSONAL,
+    val guardianForm: GuardianFormPR = GuardianFormPR(),
     val branchSelection: BranchSelectionFormPR = BranchSelectionFormPR(),
     val cities: List<CityPR> = emptyList(),
     val branchCities: List<CityPR> = emptyList(),
@@ -66,12 +69,18 @@ data class ContractFlowUiState(
     val uploadDocumentError: String? = null,
     val forceTreatmentSupport: Boolean = false,
     val treatmentSupportCode: String = TREATMENT_SUPPORT_WITH,
+    val isTreatmentCommitmentConfirmed: Boolean = false,
+    val dependents: List<SubdominantItemPR> = emptyList(),
+    val isDependentsLoading: Boolean = false,
+    val hasLoadedDependents: Boolean = false,
+    val dependentsError: String? = null,
     val hidePremiumSlider: Boolean = false,
     val lockedPremiumRateCode: String? = null,
     val genderGateError: String? = null,
     val preflightGateError: String? = null,
     val allowsOnlinePayment: Boolean = false,
     val currentStep: ContractStep = ContractStep.STEP_REGISTRATION,
+    val isEditMode: Boolean = false,
 ) {
     val canGoNext: Boolean
         get() {
@@ -79,25 +88,32 @@ data class ContractFlowUiState(
             return !isSavingContact && when (currentStep) {
                 ContractStep.STEP_REGISTRATION ->
                     registrationInfo != null &&
-                        eligibility != null &&
                         genderGateError == null &&
-                        preflightGateError == null
+                        preflightGateError == null &&
+                        (eligibility == null || eligibility.isEligible)
                 ContractStep.STEP_AUTHORIZATION -> eligibility?.isEligible == true
                 ContractStep.STEP_CONTRACT_TERMS -> isRulesConfirmed
                 ContractStep.STEP_USER_INFO -> isUserInfoStepComplete(userInfo)
                 ContractStep.STEP_CONTRACT_APPLICANT ->
-                    contractApplicantType == ContractApplicantType.PERSONAL
+                    contractApplicantType == ContractApplicantType.PERSONAL ||
+                        (contractApplicantType == ContractApplicantType.GUARDIAN && guardianForm.isValid)
                 ContractStep.STEP_SELECT_BRANCH -> branchSelection.isValid
-                ContractStep.STEP_UPLOAD_IMAGE ->
-                    documentDescription.isNotBlank() && uploadedDocuments.isNotEmpty()
-                ContractStep.STEP_TREATMENT_SUPPORT -> true
+                ContractStep.STEP_UPLOAD_IMAGE -> !isUploadingDocument
+                ContractStep.STEP_TREATMENT_SUPPORT ->
+                    treatmentSupportCode == TREATMENT_SUPPORT_WITHOUT ||
+                        (treatmentSupportCode == TREATMENT_SUPPORT_WITH && isTreatmentCommitmentConfirmed)
                 ContractStep.STEP_INSURANCE_PREMIUM -> {
                     val hasPremiumRate = selectedPremiumRateCode != null || lockedPremiumRateCode != null
                     val hasFreeJob = !flowConfig.requiresFreeJob || selectedFreeJobCode != null
-                    hasPremiumRate && hasFreeJob
+                    val usesCombinedPremiumStep = flowConfig.steps.none { it == ContractStep.STEP_SALARY }
+                    val needsCalculation = usesCombinedPremiumStep &&
+                        !hidePremiumSlider &&
+                        (flowConfig.usesFreelancePremiumRange || flowConfig.isOptionalInsurance)
+                    val calculationComplete = !needsCalculation || (isPremiumCalculated && !isCalculatingPremium)
+                    hasPremiumRate && hasFreeJob && calculationComplete
                 }
                 ContractStep.STEP_SALARY -> isPremiumCalculated
-                ContractStep.STEP_SUBMIT_CONTRACT -> submittedContract != null
+                ContractStep.STEP_SUBMIT_CONTRACT -> isAgreementConfirmed && !isSubmittingContract
             }
         }
 
@@ -150,7 +166,10 @@ data class ContractFlowUiState(
         data class UploadDocumentError(val message: String?) : PartialState()
         data class DocumentUploaded(val document: UploadImagePR) : PartialState()
         data object UploadedDocumentCleared : PartialState()
-        data class StepChanged(val step: ContractStep) : PartialState()
+        data class StepChanged(
+            val step: ContractStep,
+            val isEditMode: Boolean = false,
+        ) : PartialState()
         data class ForceTreatmentSupportChanged(val forced: Boolean) : PartialState()
         data class HidePremiumSliderChanged(val hidden: Boolean) : PartialState()
         data class LockedPremiumRateChanged(val code: String?) : PartialState()
@@ -158,6 +177,14 @@ data class ContractFlowUiState(
         data class PreflightGateError(val message: String?) : PartialState()
         data class PaymentAllowedChanged(val allowed: Boolean) : PartialState()
         data class TreatmentSupportCodeChanged(val code: String) : PartialState()
+        data class TreatmentCommitmentChanged(val confirmed: Boolean) : PartialState()
+        data class DependentsLoading(val isLoading: Boolean) : PartialState()
+        data class DependentsLoaded(val dependents: List<SubdominantItemPR>) : PartialState()
+        data class DependentsError(val message: String?) : PartialState()
+        data class GuardianFormChanged(val form: GuardianFormPR) : PartialState()
+        data class GuardianDocumentUploading(val isUploading: Boolean) : PartialState()
+        data class GuardianDocumentUploaded(val guid: String, val name: String, val bytes: ByteArray) : PartialState()
+        data object GuardianDocumentCleared : PartialState()
     }
 }
 
@@ -165,9 +192,14 @@ sealed class ContractFlowIntent {
     data object LoadInitialData : ContractFlowIntent()
     data object GoToNextStep : ContractFlowIntent()
     data object GoToPreviousStep : ContractFlowIntent()
+    data class EditStep(val step: ContractStep) : ContractFlowIntent()
+    data object SaveEdit : ContractFlowIntent()
     data class SetRulesConfirmed(val confirmed: Boolean) : ContractFlowIntent()
     data class UpdateUserInfo(val userInfo: UserInfoFormPR) : ContractFlowIntent()
     data class SetContractApplicantType(val type: ContractApplicantType) : ContractFlowIntent()
+    data class UpdateGuardianForm(val form: GuardianFormPR) : ContractFlowIntent()
+    data class UploadGuardianImage(val fileName: String, val bytes: ByteArray) : ContractFlowIntent()
+    data object ClearGuardianDocument : ContractFlowIntent()
     data class SelectBranchProvince(val province: ProvincePR) : ContractFlowIntent()
     data class SelectBranchCity(val city: CityPR) : ContractFlowIntent()
     data class SelectBranch(val branch: BranchPR) : ContractFlowIntent()
@@ -179,11 +211,22 @@ sealed class ContractFlowIntent {
     data class SelectMonthlyPremium(val amount: Long) : ContractFlowIntent()
     data object CalculateMonthlyPremium : ContractFlowIntent()
     data class SetAgreementConfirmed(val confirmed: Boolean) : ContractFlowIntent()
+    data class SelectTreatmentSupport(val withSupport: Boolean) : ContractFlowIntent()
+    data class SetTreatmentCommitment(val confirmed: Boolean) : ContractFlowIntent()
+    data object LoadDependents : ContractFlowIntent()
     data object SubmitContract : ContractFlowIntent()
 }
 
 sealed class ContractFlowEvent {
-    data class ShowPaymentOption(val contractNumber: String, val amount: Long) : ContractFlowEvent()
+    data class ShowSubmitSuccess(
+        val contractNumber: String,
+        val contractDate: String,
+        val amount: Long,
+        val canPayOnline: Boolean,
+    ) : ContractFlowEvent()
+
+    data class ShowSubmitFailure(val message: String) : ContractFlowEvent()
+
     data class ShowMessage(val message: String) : ContractFlowEvent()
 }
 
