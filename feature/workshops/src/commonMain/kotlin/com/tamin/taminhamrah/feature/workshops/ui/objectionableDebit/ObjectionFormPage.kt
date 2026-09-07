@@ -68,7 +68,15 @@ fun ObjectionFormPage(
     val periodToLabel = stringResource(Res.string.obj_form_period_to)
     val amountLabel = stringResource(Res.string.workshop_debt_amount)
     val notifyDateLabel = stringResource(Res.string.workshop_debt_notify_date)
-    val debtRows = remember(debt, debtNumberLabel) {
+    val debtRows = remember(
+        debt,
+        debtNumberLabel,
+        agreementRowLabel,
+        periodFromLabel,
+        periodToLabel,
+        amountLabel,
+        notifyDateLabel,
+    ) {
         persistentListOf(
             WorkshopReviewRow(debtNumberLabel, debt.debitNumberLabel),
             WorkshopReviewRow(agreementRowLabel, debt.agreementRow),
