@@ -9,6 +9,10 @@ import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeWorksh
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtQuery
+import com.tamin.taminhamrah.model.workshop.AssignerContractDN
+import com.tamin.taminhamrah.model.workshop.AssignerContractQuery
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseDN
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseQuery
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestInfoDN
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveRequestDN
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveResultDN
@@ -65,6 +69,21 @@ interface WorkShopsRepository {
     suspend fun getContractRowsWithoutAgreement(
         query: ContractRowQuery,
     ): PagedListDN<WorkshopContractDN>
+
+    // ---------------------------------------------------------------------------- واگذارندگان
+
+    /** پیمان‌هایی که کارفرما واگذارندهٔ آن‌هاست, narrowed by کد کارگاه / کد شعبه / ردیف. */
+    suspend fun getAssignerContracts(
+        query: AssignerContractQuery,
+    ): PagedListDN<AssignerContractDN>
+
+    /** مبانی محاسباتی of one پیمان. */
+    suspend fun getComputationalBases(
+        query: ComputationalBaseQuery,
+    ): PagedListDN<ComputationalBaseDN>
+
+    /** A PDF attached to a مبنای محاسباتی. */
+    suspend fun getComputationalBasePdf(documentId: String): PdfDownloadDN
 
     // -------------------------------------------------------------------------- برگ پرداخت‌ها
 
