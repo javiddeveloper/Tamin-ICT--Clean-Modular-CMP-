@@ -11,6 +11,15 @@ import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
 import com.tamin.taminhamrah.model.util.PagedListDN
+import com.tamin.taminhamrah.model.workshop.AssignerContractDTO
+import com.tamin.taminhamrah.model.workshop.AssignerContractDN
+import com.tamin.taminhamrah.model.workshop.AssignerPartyDTO
+import com.tamin.taminhamrah.model.workshop.AssignerPartyDN
+import com.tamin.taminhamrah.model.workshop.BaseDocumentDN
+import com.tamin.taminhamrah.model.workshop.BaseDocumentKind
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseDTO
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseDN
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseDocumentDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenPhotoDTO
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestInfoDN
@@ -188,6 +197,43 @@ fun WorkshopContractDTO.toDomain(): WorkshopContractDN = WorkshopContractDN(
     workshopId = workshop?.workshopId.orEmpty(),
     branchCode = workshop?.branchCode.orEmpty(),
     workshopName = workshop?.workshopName.orEmpty(),
+)
+
+// ---------------------------------------------------------------------------- واگذارندگان
+
+fun AssignerContractDTO.toDomain(): AssignerContractDN = AssignerContractDN(
+    contractRow = contractRow.orEmpty(),
+    contractSequence = contractSequence.orEmpty(),
+    contractNumber = contractNumber.orEmpty(),
+    contractDate = contractDate.orEmpty(),
+    contractSubject = contractSubject.orEmpty(),
+    // Two sides, never folded together: `assigner` is the signed-in employer's own کارگاه and
+    // `employer` is the پیمانکار. Swapping them puts the user's own workshop on every card and
+    // sends the bases call looking for the wrong contract.
+    assigner = assigner?.toDomain() ?: AssignerPartyDN(),
+    employer = employer?.toDomain() ?: AssignerPartyDN(),
+)
+
+fun AssignerPartyDTO.toDomain(): AssignerPartyDN = AssignerPartyDN(
+    workshopId = workshopId.orEmpty(),
+    workshopName = workshopName.orEmpty(),
+    nationalId = nationalId.orEmpty(),
+    address = address.orEmpty(),
+    branchCode = branch?.code.orEmpty(),
+    branchName = branch?.organizationName.orEmpty(),
+)
+
+fun ComputationalBaseDTO.toDomain(): ComputationalBaseDN = ComputationalBaseDN(
+    letterNumber = letterNumber.orEmpty(),
+    sendDate = sendDate,
+    amount = amount,
+    documents = documents.orEmpty().map { it.toDomain() },
+)
+
+fun ComputationalBaseDocumentDTO.toDomain(): BaseDocumentDN = BaseDocumentDN(
+    documentId = documentId.orEmpty(),
+    kind = BaseDocumentKind.fromType(documentType),
+    categoryCode = documentCode.orEmpty(),
 )
 
 // ------------------------------------------------------------------------ برگ پرداخت‌ها
