@@ -29,6 +29,8 @@ import androidx.compose.material.icons.filled.Redeem
 import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -406,6 +408,7 @@ private fun ChatLayout(
                 )
                 else -> AgentInputBar(
                     isGenerating = uiState.isGenerating,
+                    hazeState = hazeState,
                     isEnabled = !uiState.isOffline,
                     onSend = { onIntent(AgentIntent.SendTextPrompt(it)) },
                     onCancel = { onIntent(AgentIntent.CancelGeneration) },
@@ -1621,11 +1624,25 @@ private fun BubbleContentRenderer(
     }
 }
 
-// ─── Input Bar ────────────────────────────────────────────────────────────────
+// ─── Input Bar ──────────────────────────────────────────────────────────────
 
+// Exact values pulled from the Figma node (90:120 "Background+Border+Shadow+OverlayBlur") —
+// same glass-card family as the top bar, reproduced literally rather than approximated.
+private val InputBarCardShape = RoundedCornerShape(26.dp)
+private val InputBarMutedIconTint = Color(0xFFBFD0F0)
+private val InputBarPlaceholderColor = Color(0xFFE2ECFF)
+
+/**
+ * Bottom composer, matching the Figma "یارا" input bar card (node 90:120) at 1:1
+ * spacing/color fidelity: a 60dp glass pill (26dp radius, diagonal white sheen, blurred
+ * background, dark drop shadow) holding a fixed left-pointing send button (42dp, opaque
+ * white glass — not RTL-mirrored, the design always points it left), then mic and image
+ * buttons (38dp, more transparent, muted blue-white icon tint), then the message field.
+ */
 @Composable
 private fun AgentInputBar(
     isGenerating: Boolean,
+    hazeState: HazeState,
     onSend: (String) -> Unit,
     onCancel: () -> Unit,
     onStartVoice: () -> Unit = {},
@@ -1634,46 +1651,64 @@ private fun AgentInputBar(
 ) {
     var text by remember { mutableStateOf("") }
     val taminColors = LocalTaminColors.current
-    val pillShape = RoundedCornerShape(32.dp)
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 8.dp)
+            .padding(start = 14.dp, end = 14.dp, bottom = 16.dp, top = 8.dp)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                // Solid, opaque pill (no blur) so the field reads clearly in light theme.
-                // Soft shadow gives it lift over the scrim; a defined border shapes it.
+                .height(60.dp)
                 .shadow(
-                    elevation = 8.dp,
-                    shape = pillShape,
-                    ambientColor = Color.Black.copy(alpha = 0.10f),
-                    spotColor = Color.Black.copy(alpha = 0.10f)
+                    elevation = 22.dp,
+                    shape = InputBarCardShape,
+                    ambientColor = TopBarShadowColor.copy(alpha = 0.45f),
+                    spotColor = TopBarShadowColor.copy(alpha = 0.45f)
                 )
-                .clip(pillShape)
-                .background(taminColors.bgSurface)
-                .border(
-                    BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
-                    shape = pillShape
+                .clip(InputBarCardShape)
+                .safeHazeEffect(
+                    state = hazeState,
+                    style = HazeStyle(
+                        blurRadius = 26.dp,
+                        noiseFactor = 0.03f,
+                        tint = HazeTint(color = Color.White.copy(alpha = 0.08f))
+                    ),
+                    fallbackColor = taminColors.aiAssistantTint.copy(alpha = 0.85f)
                 )
+                .border(1.dp, Color.White.copy(alpha = 0.18f), InputBarCardShape)
         ) {
+            // The card's own subtle glass sheen — 15% white fading to 5%, diagonal.
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(
+                        Brush.linearGradient(
+                            listOf(Color.White.copy(alpha = 0.15f), Color.White.copy(alpha = 0.05f))
+                        )
+                    )
+            )
+
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                    .fillMaxSize()
+                    .padding(start = 10.dp, end = 15.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                horizontalArrangement = Arrangement.spacedBy(9.dp)
             ) {
 
                 // Text field
                 BasicTextField(
                     value = text,
                     onValueChange = { text = it },
-                    modifier = Modifier.weight(1f).padding(vertical = 12.dp),
+                    modifier = Modifier.weight(1f),
                     enabled = !isGenerating && isEnabled,
-                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = taminColors.textPrimary),
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(
+                        fontSize = 13.5.sp,
+                        color = Color(0xFFE2ECFF),
+                        textAlign = TextAlign.End
+                    ),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
                     keyboardActions = KeyboardActions(
                         onSend = {
@@ -1683,61 +1718,73 @@ private fun AgentInputBar(
                             }
                         }
                     ),
-                    cursorBrush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.primary),
+                    cursorBrush = androidx.compose.ui.graphics.SolidColor(Color.White),
                     decorationBox = { innerTextField ->
-                        if (text.isEmpty()) {
-                            Text(
-                                text = "پیام خود را بنویسید...",
-                                style = MaterialTheme.typography.bodyMedium.copy(color = taminColors.textMuted)
-                            )
+                        Box(modifier = Modifier.fillMaxWidth().padding(start = 10.dp)) {
+                            if (text.isEmpty()) {
+                                Text(
+                                    text = "پیام خود را بنویسید…",
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        fontSize = 13.5.sp,
+                                        color = InputBarPlaceholderColor.copy(alpha = 0.45f)
+                                    ),
+                                    modifier = Modifier.align(Alignment.CenterStart)
+                                )
+                            }
+                            Box(modifier = Modifier.align(Alignment.CenterEnd)) { innerTextField() }
                         }
-                        innerTextField()
                     }
                 )
 
                 // Image attach — matches the Figma layout; no attach flow exists yet, so it
                 // is decorative only (not clickable) rather than a button that does nothing.
-                IconButton(onClick = {}, enabled = false) {
-                    Icon(
-                        imageVector = Icons.Default.Image,
-                        contentDescription = null,
-                        tint = taminColors.textMuted
-                    )
-                }
+                InputBarGlassButton(
+                    icon = Icons.Default.Image,
+                    contentDescription = null,
+                    size = 38.dp,
+                    backgroundAlpha = 0.09f,
+                    borderAlpha = 0.14f,
+                    iconTint = InputBarMutedIconTint,
+                    onClick = null
+                )
 
                 // Mic — always available on its own, independent of the send button.
-                IconButton(
+                InputBarGlassButton(
+                    icon = Icons.Default.Mic,
+                    contentDescription = "ضبط صدا",
+                    size = 38.dp,
+                    backgroundAlpha = 0.09f,
+                    borderAlpha = 0.14f,
+                    iconTint = InputBarMutedIconTint,
                     onClick = onStartVoice,
                     enabled = !isGenerating && isEnabled
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Mic,
-                        contentDescription = "ضبط صدا",
-                        tint = if (!isGenerating && isEnabled) taminColors.textPrimary else taminColors.textMuted
-                    )
-                }
+                )
 
-                // Send/Cancel button — only reacts once there is text to send or a
-                // request to cancel; otherwise it sits disabled beside the mic.
+                // Send/Cancel — a fixed, never-mirrored left arrow (the design's own send
+                // glyph, not a "back" affordance), 42dp — larger and more opaque than the
+                // other two. Only reacts once there is text to send or a request to cancel;
+                // otherwise it sits at the design's neutral idle glass look.
                 val isTyping = text.isNotBlank()
-                IconButton(
-                    onClick = {
-                        if (isGenerating) {
-                            onCancel()
-                        } else if (isTyping) {
-                            onSend(text.trim())
-                            text = ""
-                        }
-                    },
-                    enabled = isGenerating || isTyping,
+                Box(
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(42.dp)
                         .clip(CircleShape)
                         .background(
-                            if (isGenerating) MaterialTheme.colorScheme.error.copy(alpha = 0.15f)
-                            else if (isTyping) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+                            when {
+                                isGenerating -> MaterialTheme.colorScheme.error.copy(alpha = 0.18f)
+                                isTyping -> taminColors.aiAssistantTint
+                                else -> Color.White.copy(alpha = 0.10f)
+                            }
                         )
+                        .border(
+                            1.dp,
+                            if (isGenerating || isTyping) Color.White.copy(alpha = 0.30f) else Color.White.copy(alpha = 0.20f),
+                            CircleShape
+                        )
+                        .clickable(enabled = isGenerating || isTyping) {
+                            if (isGenerating) onCancel() else if (isTyping) { onSend(text.trim()); text = "" }
+                        },
+                    contentAlignment = Alignment.Center
                 ) {
                     AnimatedContent(
                         targetState = if (isGenerating) 2 else 1,
@@ -1746,15 +1793,46 @@ private fun AgentInputBar(
                         when (state) {
                             2 -> Icon(Icons.Default.Close, contentDescription = "توقف", tint = MaterialTheme.colorScheme.error)
                             else -> Icon(
-                                Icons.Default.ArrowUpward,
+                                Icons.Default.ArrowBack,
                                 contentDescription = "ارسال",
-                                tint = if (isTyping) Color.White else taminColors.textMuted
+                                tint = Color.White
                             )
                         }
                     }
                 }
             }
         }
+    }
+}
+
+/** One glass icon button on the input bar — the mic/image buttons (fixed 38dp per spec). */
+@Composable
+private fun InputBarGlassButton(
+    icon: ImageVector,
+    contentDescription: String?,
+    size: Dp,
+    backgroundAlpha: Float,
+    borderAlpha: Float,
+    iconTint: Color,
+    onClick: (() -> Unit)?,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
+) {
+    Box(
+        modifier = modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(Color.White.copy(alpha = backgroundAlpha))
+            .border(1.dp, Color.White.copy(alpha = borderAlpha), CircleShape)
+            .then(if (onClick != null) Modifier.clickable(enabled = enabled, onClick = onClick) else Modifier),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            tint = iconTint,
+            modifier = Modifier.size(18.dp)
+        )
     }
 }
 
