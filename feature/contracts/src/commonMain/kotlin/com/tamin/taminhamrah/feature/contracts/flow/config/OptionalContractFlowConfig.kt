@@ -21,7 +21,7 @@ class OptionalContractFlowConfig : ContractFlowConfig {
     override val hasUploadImageStep = false
     override val hasTreatmentSupportStep = false
     override val hasPremiumRateStep = false
-    override val rulesPdfPath = "rules2.pdf"
+    override val rulesPdfPath = ContractRulesPdf.OPTIONAL
     override val requiresFemaleGender = false
     override val fixedFreeJobCode = null
     override val allowsOnlinePaymentAfterSubmit = true

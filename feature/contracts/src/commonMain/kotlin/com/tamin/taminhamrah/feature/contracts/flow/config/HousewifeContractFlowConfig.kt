@@ -22,7 +22,7 @@ class HousewifeContractFlowConfig : ContractFlowConfig {
     override val hasUploadImageStep = true
     override val hasTreatmentSupportStep = true
     override val hasPremiumRateStep = true
-    override val rulesPdfPath = "rules.pdf"
+    override val rulesPdfPath = ContractRulesPdf.SPECIAL_INSURED
     override val requiresFemaleGender = true
     override val fixedFreeJobCode = ContractFreeJobCode.WOMEN_CONTRACT_CODE
     override val allowsOnlinePaymentAfterSubmit = true

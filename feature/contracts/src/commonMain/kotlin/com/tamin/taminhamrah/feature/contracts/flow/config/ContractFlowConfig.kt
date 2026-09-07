@@ -22,6 +22,11 @@ interface ContractFlowConfig {
     val hasUploadImageStep: Boolean
     val hasTreatmentSupportStep: Boolean
     val hasPremiumRateStep: Boolean
+    /**
+     * Compose-resource file name under `files/` for ضوابط و مقررات.
+     * Legacy: [ContractRulesPdf] — same assets as
+     * `rulesAndRegulationsHtmlFile/{name}` in my-tamin-droid.
+     */
     val rulesPdfPath: String
     val requiresFemaleGender: Boolean
     val fixedFreeJobCode: String?
@@ -36,6 +41,19 @@ interface ContractFlowConfig {
     fun isFirstStep(step: ContractStep): Boolean = steps.isFirstStep(step)
 
     fun isLastStep(step: ContractStep): Boolean = steps.isLastStep(step)
+}
+
+/**
+ * Legacy PDF assets for contract rules (InsuranceContractFragment / OptionalContractFragment).
+ *
+ * | Contract | Legacy fragment | Asset |
+ * |---|---|---|
+ * | Student / Freelance / Housewife | InsuranceContractFragment | rules.pdf |
+ * | Optional | OptionalContractFragment | rules2.pdf |
+ */
+object ContractRulesPdf {
+    const val SPECIAL_INSURED = "rules.pdf"
+    const val OPTIONAL = "rules2.pdf"
 }
 
 val SPECIAL_INSURED_STEPS = ContractStep.STUDENT_STEPS

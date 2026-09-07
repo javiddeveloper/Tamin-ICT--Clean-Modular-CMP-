@@ -36,6 +36,7 @@ import com.tamin.taminhamrah.contractFlow.ContractStep
 import com.tamin.taminhamrah.contractFlow.isEditableFromSummary
 import com.tamin.taminhamrah.contractFlow.isFirstStep
 import com.tamin.taminhamrah.contractFlow.isLastStep
+import com.tamin.taminhamrah.feature.contracts.flow.config.ContractRulesPdf
 import com.tamin.taminhamrah.feature.contracts.flow.ui.contract.ContractFlowEvent
 import com.tamin.taminhamrah.feature.contracts.flow.ui.contract.ContractFlowIntent
 import com.tamin.taminhamrah.feature.contracts.flow.ui.contract.ContractFlowUiState
@@ -45,6 +46,7 @@ import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
 import com.tamin.taminhamrah.ui.components.TaminBottomBar
 import com.tamin.taminhamrah.ui.components.TaminHeroStepProgress
+import com.tamin.taminhamrah.ui.components.TaminLocalPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.TaminSingleLineAutoSizeText
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
@@ -57,7 +59,6 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.contractFlow.ContractApplicantStepContent
 import com.tamin.taminhamrah.ui.contractFlow.ContractFlowScreenShimmerSkeleton
 import com.tamin.taminhamrah.ui.contractFlow.ContractRegistrationStepContent
-import com.tamin.taminhamrah.ui.contractFlow.ContractRulesBottomSheet
 import com.tamin.taminhamrah.ui.contractFlow.ContractSubmitResult
 import com.tamin.taminhamrah.ui.contractFlow.ContractSubmitResultDialog
 import com.tamin.taminhamrah.ui.contractFlow.ContractSummaryRowPR
@@ -76,7 +77,9 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminOnAccentInkSoft
 import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.util.toPersianDigits
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -85,6 +88,7 @@ import taminx.core.core_ui.contract_flow_submit_contract
 import taminx.core.core_ui.contract_hero_step_job_title
 import taminx.core.core_ui.contract_next_step
 import taminx.core.core_ui.contract_optional_hero_reg_confirmed
+import taminx.core.core_ui.contract_rules_pdf_title
 import taminx.core.core_ui.contract_save_edit
 import taminx.core.core_ui.contract_step_contract_applicant
 import taminx.core.core_ui.contract_step_treatment_support
@@ -115,10 +119,23 @@ fun ContractFlowScreen(
     val state by viewModel.uiState.collectAsState()
     val toaster = LocalToaster.current
     var submitResult by remember { mutableStateOf<ContractSubmitResult?>(null) }
-    var showRulesSheet by remember { mutableStateOf(false) }
+    var showRulesPdf by remember { mutableStateOf(false) }
+    var rulesPdfBytes by remember { mutableStateOf<ByteArray?>(null) }
+    val rulesPdfPath = state.config?.rulesPdfPath ?: ContractRulesPdf.SPECIAL_INSURED
 
     LaunchedEffect(Unit) {
         viewModel.sendIntent(ContractFlowIntent.LoadInitialData)
+    }
+
+    LaunchedEffect(showRulesPdf, rulesPdfPath) {
+        if (!showRulesPdf) {
+            rulesPdfBytes = null
+            return@LaunchedEffect
+        }
+        rulesPdfBytes = null
+        rulesPdfBytes = withContext(Dispatchers.Default) {
+            runCatching { Res.readBytes("files/$rulesPdfPath") }.getOrElse { ByteArray(0) }
+        }
     }
 
     HandleContractFlowEvents(
@@ -154,15 +171,17 @@ fun ContractFlowScreen(
         state = state,
         onBack = onBack,
         onShowRules = {
-            showRulesSheet = true
+            showRulesPdf = true
             onShowRules()
         },
         onIntent = viewModel::sendIntent,
     )
 
-    if (showRulesSheet) {
-        ContractRulesBottomSheet(
-            onDismiss = { showRulesSheet = false },
+    if (showRulesPdf) {
+        TaminLocalPdfViewer(
+            pdfBytes = rulesPdfBytes,
+            title = stringResource(Res.string.contract_rules_pdf_title),
+            onDismiss = { showRulesPdf = false },
         )
     }
 }

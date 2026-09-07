@@ -21,7 +21,7 @@ class FreelanceContractFlowConfig : ContractFlowConfig {
     override val hasUploadImageStep = true
     override val hasTreatmentSupportStep = true
     override val hasPremiumRateStep = true
-    override val rulesPdfPath = "rules.pdf"
+    override val rulesPdfPath = ContractRulesPdf.SPECIAL_INSURED
     override val requiresFemaleGender = false
     override val fixedFreeJobCode = null
     override val allowsOnlinePaymentAfterSubmit = true

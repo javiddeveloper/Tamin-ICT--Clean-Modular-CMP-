@@ -2315,6 +2315,7 @@
     <string name="contract_field_phone_required">شمارهٔ تلفن *</string>
     <string name="contract_field_mobile_readonly">تلفن همراه</string>
 
+    <string name="contract_rules_pdf_title">ضوابط و مقررات</string>
     <string name="contract_rules_sheet_title_student">مقررات و ضوابط انعقاد قرارداد بیمۀ دانشجویی</string>
     <string name="contract_rules_sheet_page_counter">۱ از ۱</string>
     <string name="contract_rules_sheet_student_p1">بیمۀ دانشجویی از انواع بیمه‌های خودپرداز سازمان تأمین اجتماعی است. دانشجویانی که تحت پوشش هیچ‌یک از بیمه‌های اجباری قرار ندارند، می‌توانند با انعقاد قرارداد و پرداخت حق بیمۀ ماهانه از حمایت‌های قانونی سازمان بهره‌مند شوند.</string>
