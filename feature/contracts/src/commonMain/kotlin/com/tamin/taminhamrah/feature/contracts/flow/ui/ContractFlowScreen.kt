@@ -540,6 +540,8 @@ fun ContractFlowScreenContent(
                                             isPremiumCalculated = state.isPremiumCalculated,
                                             showPremiumSlider = !state.hidePremiumSlider &&
                                                 (state.config?.usesFreelancePremiumRange == true || state.config?.isOptionalInsurance == true),
+                                            showTreatmentCostHint = state.treatmentSupportCode ==
+                                                ContractFlowUiState.TREATMENT_SUPPORT_WITH,
                                             onPremiumChange = {
                                                 onIntent(ContractFlowIntent.SelectMonthlyPremium(it))
                                             },

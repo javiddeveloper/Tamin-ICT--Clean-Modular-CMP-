@@ -2167,7 +2167,13 @@
     <string name="contract_step_salary">محاسبه حق بیمه</string>
     <string name="contract_premium_rate_label">نرخ حق بیمه ماهانه</string>
     <string name="contract_premium_rate_percent">%1$s درصد</string>
-    <string name="contract_premium_rate_14_info">با انتخاب نرخ ۱۴ درصد با داشتن حداقل ۱ سال سابقه بیمه‌پردازی از معاینات پزشکی معاف می‌باشید. این نرخ شامل حمایت بازنشستگی و فوت است.</string>
+    <string name="contract_premium_rate_12_info">با انتخاب نرخ ۱۲ درصد از معاینات پزشکی معاف می‌باشید.</string>
+    <string name="contract_premium_rate_14_info">با انتخاب نرخ ۱۴ درصد با داشتن حداقل ۱ سال سابقه بیمه‌پردازی از معاینات پزشکی معاف می‌باشید.</string>
+    <string name="contract_premium_rate_18_info">با انتخاب نرخ ۱۸ درصد، در صورتی که در ۱۰ سال قبل از انعقاد قرارداد حداقل ۱ سال و در ۱ سال قبل از انعقاد قرارداد حداقل ۹۰ روز سابقه بیمه‌پردازی داشته باشید، از معاینات پزشکی معاف می‌باشید.</string>
+    <string name="contract_premium_range_hint">شما می‌توانید مبلغ حق بیمه ماهانه در این قرارداد را از ماهانه %1$s ریال تا حداکثر %2$s ریال تعیین و پرداخت نمایید.</string>
+    <string name="contract_premium_formula_hint">دستمزد ماهیانه مبنای حق بیمه شما بر اساس میزان حق بیمه انتخابی با فرمول «حق بیمه ماهانه انتخابی × ۱۰۰ ÷ %1$s» محاسبه می‌شود.</string>
+    <string name="contract_premium_annual_increase">مبلغ حق بیمه انتخابی شما هر ساله متناسب با مصوبه شورای عالی کار (افزایش دستمزدها) به نسبت افزایش خواهد یافت.</string>
+    <string name="contract_premium_treatment_per_person">در صورت استفاده از حمایت درمان ماهانه مبلغ %1$s ریال به ازاء هر نفر محاسبه می‌گردد.</string>
     <string name="contract_premium_base_wage_label">دستمزد مبنای ماهانه</string>
     <string name="contract_premium_payable_label">حق بیمه ماهانه قابل پرداخت</string>
     <string name="contract_premium_decrease">کاهش دستمزد</string>
