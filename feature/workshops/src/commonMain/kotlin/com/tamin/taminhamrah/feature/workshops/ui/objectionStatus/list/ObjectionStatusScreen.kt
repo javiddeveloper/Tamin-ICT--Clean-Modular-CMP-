@@ -192,11 +192,12 @@ fun ObjectionStatusContent(
                     }
                 }
             },
-        ) { _, objection ->
+        ) { objection, itemModifier ->
             ObjectionRow(
                 objection = objection,
                 onOpenSms = onOpenSms,
                 onOpenDocument = onOpenDocument,
+                modifier = itemModifier,
             )
         }
 

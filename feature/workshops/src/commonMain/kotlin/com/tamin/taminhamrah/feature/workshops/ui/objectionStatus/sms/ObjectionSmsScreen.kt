@@ -140,7 +140,13 @@ fun ObjectionSmsContent(
                     )
                 }
             },
-            row = { index, sms -> SmsTimelineItem(index = index + 1, sms = sms) },
+            row = { sms, itemModifier ->
+                SmsTimelineItem(
+                    index = state.list.items.indexOf(sms) + 1,
+                    sms = sms,
+                    modifier = itemModifier,
+                )
+            },
         )
     }
 }
