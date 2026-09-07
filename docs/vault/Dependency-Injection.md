@@ -16,7 +16,7 @@ val sharedModules: List<Module> get() = listOf(
     ApiClientsModule, remoteModule, domainModule, dataKoinModule, dataModule, pluginModule,
     agentModule, profileModule, pensionInquiryModule, pensionStatusInquiryModule, treatmentModule, cartableModule,
     historyModule, contractsModule, TaminServicesModule, workshopsModule,
-    studentInsuranceContractModule, healthProfileModule, changeMobileModule, myInboxModule,
+    studentContractModule, housewifeContractModule, freelanceContractModule, optionalContractModule, healthProfileModule, changeMobileModule, myInboxModule,
     securityModule, addDependentModule, settingsModule, userRequestModule, orotezProtezModule,
     girlSurvivorModule
 )

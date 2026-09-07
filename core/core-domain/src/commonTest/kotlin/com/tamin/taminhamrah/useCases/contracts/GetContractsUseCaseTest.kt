@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.useCases.contracts
 
 import app.cash.turbine.test
 import com.tamin.taminhamrah.model.contracts.ContractDN
+import com.tamin.taminhamrah.model.contracts.ContractPremiumTypeCode
 import com.tamin.taminhamrah.model.contracts.ContractStatusObjectDN
 import com.tamin.taminhamrah.model.contracts.FreeJobDN
 import com.tamin.taminhamrah.model.contracts.PremiumRateDN
@@ -53,16 +54,16 @@ class GetContractsUseCaseTest : BaseUseCaseTest() {
     }
 
     @Test
-    fun `studentInsuranceContracts should delegate to repository`() = runTest {
+    fun `contractsByPremiumType should delegate to repository`() = runTest {
         val expectedList = listOf(sampleContract())
         repository.contractsResult = expectedList
 
-        useCase.studentInsuranceContracts().test {
+        useCase.contractsByPremiumType(ContractPremiumTypeCode.FREELANCE).test {
             assertEquals(expectedList, awaitItem())
             awaitComplete()
         }
 
-        assertEquals(true, repository.studentInsuranceContractsCalled)
+        assertEquals(ContractPremiumTypeCode.FREELANCE, repository.lastPremiumTypeCode)
         assertEquals(null, repository.lastQuery)
     }
 

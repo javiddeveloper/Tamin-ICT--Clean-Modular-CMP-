@@ -1,0 +1,29 @@
+<!--
+  Traced verbatim from the design's own ردیف‌های پیمان glyph: a sheet with a folded corner and
+  two ruled lines, stroked on a 24-unit grid with round caps. Matching the neighbouring workshop
+  action icons, the stroke is 1.7 and the colour a placeholder — every use tints it.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:pathData="M7 3 h7 l4 4 v14 H7 z"
+        android:strokeWidth="1.7"
+        android:strokeColor="#FF000000"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M14 3 v4 h4"
+        android:strokeWidth="1.7"
+        android:strokeColor="#FF000000"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M10 12.5 h6 M10 16 h4"
+        android:strokeWidth="1.7"
+        android:strokeColor="#FF000000"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

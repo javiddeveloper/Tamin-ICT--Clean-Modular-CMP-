@@ -18,6 +18,7 @@ import com.tamin.taminhamrah.model.workshop.DebitObjectionResultDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDN
+import com.tamin.taminhamrah.model.workshop.ContractRowQuery
 import com.tamin.taminhamrah.model.workshop.DebitReasonDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmissionDN
@@ -25,6 +26,7 @@ import com.tamin.taminhamrah.model.workshop.EmployerContactInfoDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetQuery
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
+import com.tamin.taminhamrah.model.workshop.WorkshopContractDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDN
 import com.tamin.taminhamrah.model.workshop.WorkshopListQuery
@@ -51,6 +53,8 @@ import kotlinx.coroutines.flow.flow
 class FakeWorkShopsRepository : WorkShopsRepository {
 
     var employerAgreements: PagedListDN<EmployerAgreementDN> = PagedListDN()
+    var contractRowsWithAgreement: PagedListDN<EmployerAgreementDN> = PagedListDN()
+    var contractRowsWithoutAgreement: PagedListDN<WorkshopContractDN> = PagedListDN()
     var paymentSheets: PagedListDN<PaymentSheetDN> = PagedListDN()
     var debitReasons: PagedListDN<DebitReasonDN> = PagedListDN()
     var workshopDebits: PagedListDN<WorkShopDebtDN> = PagedListDN()
@@ -86,6 +90,8 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         private set
     var lastPaymentSheetQuery: PaymentSheetQuery? = null
         private set
+    var lastContractRowQuery: ContractRowQuery? = null
+        private set
     var lastMemberQuery: WorkshopMemberQuery? = null
         private set
     var lastStackHolderQuery: WorkshopStackHolderQuery? = null
@@ -107,6 +113,20 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     ): PagedListDN<EmployerAgreementDN> = answer {
         lastWorkshopListQuery = query
         employerAgreements
+    }
+
+    override suspend fun getContractRowsWithAgreement(
+        query: ContractRowQuery,
+    ): PagedListDN<EmployerAgreementDN> = answer {
+        lastContractRowQuery = query
+        contractRowsWithAgreement
+    }
+
+    override suspend fun getContractRowsWithoutAgreement(
+        query: ContractRowQuery,
+    ): PagedListDN<WorkshopContractDN> = answer {
+        lastContractRowQuery = query
+        contractRowsWithoutAgreement
     }
 
     override suspend fun getPaymentSheets(query: PaymentSheetQuery): PagedListDN<PaymentSheetDN> =
