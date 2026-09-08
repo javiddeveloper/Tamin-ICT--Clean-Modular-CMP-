@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionUiState
 import com.tamin.taminhamrah.ui.components.BannerCard
 import com.tamin.taminhamrah.ui.components.BannerType
-import com.tamin.taminhamrah.ui.components.TaminCheckbox
+import com.tamin.taminhamrah.ui.components.TaminCheckbox1
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
@@ -93,7 +93,7 @@ fun DisabilityPensionTermsStep(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 verticalAlignment = Alignment.Top,
             ) {
-                TaminCheckbox(checked = state.isTermsAccepted)
+                TaminCheckbox1(checked = state.isTermsAccepted)
                 Text(
                     text = stringResource(
                         Res.string.disability_pension_commitment_text,

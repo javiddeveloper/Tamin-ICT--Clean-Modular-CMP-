@@ -28,7 +28,7 @@ import com.tamin.taminhamrah.ui.theme.Thickness
  * Material3's default, and control the gap to the label with the row's own `Arrangement.spacedBy`.
  */
 @Composable
-fun TaminCheckbox(
+fun TaminCheckbox1(
     checked: Boolean,
     modifier: Modifier = Modifier,
     checkedColor: Color = LocalTaminColors.current.blueText,

@@ -20,7 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -37,7 +36,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.SectionLabel
-import com.tamin.taminhamrah.ui.components.TaminCheckbox
+import com.tamin.taminhamrah.ui.components.TaminCheckbox1
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
@@ -146,7 +145,7 @@ fun DisabilityPensionSummaryStep(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                TaminCheckbox(checked = state.isFinalConfirmed)
+                TaminCheckbox1(checked = state.isFinalConfirmed)
                 Text(
                     text = stringResource(Res.string.disability_pension_summary_confirm_label, state.applicantFullName),
                     style = MaterialTheme.typography.bodySmall,

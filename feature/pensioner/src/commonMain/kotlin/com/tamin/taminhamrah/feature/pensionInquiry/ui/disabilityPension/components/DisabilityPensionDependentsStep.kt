@@ -2,7 +2,6 @@ package com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.compon
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -24,7 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionIntent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionUiState
@@ -32,10 +29,9 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.relatio
 import com.tamin.taminhamrah.model.personal.DisabilityDependentPR
 import com.tamin.taminhamrah.ui.components.BannerCard
 import com.tamin.taminhamrah.ui.components.BannerType
-import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.IconPosition
 import com.tamin.taminhamrah.ui.components.StatusPill
-import com.tamin.taminhamrah.ui.components.TaminCheckbox
+import com.tamin.taminhamrah.ui.components.TaminCheckbox1
 import com.tamin.taminhamrah.ui.components.TaminEmptyState
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
@@ -127,7 +123,7 @@ fun DisabilityPensionDependentsStep(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                TaminCheckbox(checked = state.isDependentsListConfirmed)
+                TaminCheckbox1(checked = state.isDependentsListConfirmed)
                 Text(
                     text = stringResource(Res.string.disability_pension_dependents_confirm_label),
                     style = MaterialTheme.typography.bodySmall,
