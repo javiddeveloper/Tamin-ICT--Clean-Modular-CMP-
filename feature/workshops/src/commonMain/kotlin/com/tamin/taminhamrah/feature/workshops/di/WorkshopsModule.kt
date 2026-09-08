@@ -10,10 +10,6 @@ import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.workshops.
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachmentUploader
 import com.tamin.taminhamrah.feature.workshops.ui.paymentSheets.PaymentSheetsViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebtInquiry.WorkshopDebtInquiryViewModel
-import com.tamin.taminhamrah.repository.WorkShopsRepository
-import com.tamin.taminhamrah.useCases.workshops.GetAssignerContractsUseCase
-import com.tamin.taminhamrah.useCases.workshops.GetComputationalBasePdfUseCase
-import com.tamin.taminhamrah.useCases.workshops.GetComputationalBasesUseCase
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
@@ -31,14 +27,4 @@ val workshopsModule = module {
     viewModelOf(::AddLegalRepresentativeViewModel)
     viewModelOf(::ContractRowsViewModel)
     viewModelOf(::AssignerContractsViewModel)
-
-    // TEMPORARY - delete with AssignerContractsMock.kt before handover.
-    if (USE_ASSIGNER_CONTRACTS_MOCK) {
-        val mock: (org.koin.core.scope.Scope) -> WorkShopsRepository = {
-            MockAssignerContractsRepository(it.get())
-        }
-        factory { GetAssignerContractsUseCase(mock(this)) }
-        factory { GetComputationalBasesUseCase(mock(this)) }
-        factory { GetComputationalBasePdfUseCase(mock(this)) }
-    }
 }
