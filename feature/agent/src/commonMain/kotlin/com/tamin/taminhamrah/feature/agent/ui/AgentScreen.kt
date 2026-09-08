@@ -71,6 +71,8 @@ import com.tamin.taminhamrah.feature.agent.ui.contract.AgentProcessingState
 import com.tamin.taminhamrah.feature.agent.ui.contract.AgentUiState
 import com.tamin.taminhamrah.feature.agent.ui.contract.ChatItem
 import com.tamin.taminhamrah.feature.agent.ui.contract.ChatSender
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.blur.AppBarScrim
 import com.tamin.taminhamrah.ui.blur.safeHazeEffect
 import com.tamin.taminhamrah.ui.blur.safeHazeSource
@@ -95,6 +97,8 @@ import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.feature.agent.generated.resources.Res as AgentRes
+import taminx.feature.agent.generated.resources.ic_star
 import kotlin.math.roundToInt
 
 /**
@@ -474,22 +478,7 @@ private fun AgentTopBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(67.dp)
-                .shadow(
-                    elevation = 20.dp,
-                    shape = TopBarCardShape,
-                    ambientColor = TopBarShadowColor.copy(alpha = 0.4f),
-                    spotColor = TopBarShadowColor.copy(alpha = 0.4f)
-                )
                 .clip(TopBarCardShape)
-                .safeHazeEffect(
-                    state = hazeState,
-                    style = HazeStyle(
-                        blurRadius = 26.dp,
-                        noiseFactor = 0.03f,
-                        tint = HazeTint(color = Color.White.copy(alpha = 0.08f))
-                    ),
-                    fallbackColor = LocalTaminColors.current.aiAssistantTint.copy(alpha = 0.85f)
-                )
                 .border(1.dp, Color.White.copy(alpha = 0.18f), TopBarCardShape)
         ) {
             // The card's own subtle glass sheen — 16% white fading to 5%, diagonal.
@@ -572,6 +561,14 @@ private fun AgentTopBar(
                                     )
                                 }
                         )
+                        Icon(
+                            imageVector = vectorResource(AgentRes.drawable.ic_star),
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .size(16.dp)
+                        )
                     }
 
                     // Persona block: name + "AI" pill, then the online-status row beneath it.
@@ -592,16 +589,14 @@ private fun AgentTopBar(
                                 modifier = Modifier
                                     .background(Color(0xFFA78BFA).copy(alpha = 0.22f), RoundedCornerShape(CornerRadius.lg))
                                     .border(1.dp, Color(0xFFA78BFA).copy(alpha = 0.40f), RoundedCornerShape(CornerRadius.lg))
-                                    .padding(horizontal = 7.dp, vertical = 3.dp),
+                                    .padding(top = 2.dp, bottom = 0.dp, start = 8.dp, end = 7.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
                                     text = "AI",
                                     style = MaterialTheme.typography.labelSmall.copy(
                                         fontSize = 8.5.sp,
-                                        lineHeight = 8.5.sp,
                                         fontWeight = FontWeight.ExtraBold,
-                                        letterSpacing = 0.5.sp,
                                         color = Color(0xFFD8CFFF)
                                     )
                                 )
@@ -1696,22 +1691,7 @@ private fun AgentInputBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
-                .shadow(
-                    elevation = 22.dp,
-                    shape = InputBarCardShape,
-                    ambientColor = TopBarShadowColor.copy(alpha = 0.45f),
-                    spotColor = TopBarShadowColor.copy(alpha = 0.45f)
-                )
                 .clip(InputBarCardShape)
-                .safeHazeEffect(
-                    state = hazeState,
-                    style = HazeStyle(
-                        blurRadius = 26.dp,
-                        noiseFactor = 0.03f,
-                        tint = HazeTint(color = Color.White.copy(alpha = 0.08f))
-                    ),
-                    fallbackColor = taminColors.aiAssistantTint.copy(alpha = 0.85f)
-                )
                 .border(1.dp, Color.White.copy(alpha = 0.18f), InputBarCardShape)
         ) {
             // The card's own subtle glass sheen — 15% white fading to 5%, diagonal.
@@ -1742,7 +1722,7 @@ private fun AgentInputBar(
                     textStyle = MaterialTheme.typography.bodyMedium.copy(
                         fontSize = 13.5.sp,
                         color = Color(0xFFE2ECFF),
-                        textAlign = TextAlign.End
+                        textAlign = TextAlign.Right
                     ),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
                     keyboardActions = KeyboardActions(
@@ -2185,6 +2165,36 @@ private fun extractTextFromItem(item: ChatItem): String {
             }
         }
         else -> ""
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun AgentTopBarOnlinePreview() {
+    PreviewRtlThemeContent {
+        AgentTopBar(
+            isGenerating = false,
+            isOffline = false,
+            sessionsCount = 3,
+            hazeState = remember { HazeState() },
+            onIntent = {},
+            onNavigateBack = {}
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun AgentTopBarOfflinePreview() {
+    PreviewRtlThemeContent {
+        AgentTopBar(
+            isGenerating = true,
+            isOffline = true,
+            sessionsCount = 0,
+            hazeState = remember { HazeState() },
+            onIntent = {},
+            onNavigateBack = {}
+        )
     }
 }
 
