@@ -5,8 +5,11 @@ import com.tamin.taminhamrah.model.common.FeatureFlag
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.assigner_contracts_action_desc
+import taminx.core.core_ui.assigner_contracts_title
 import taminx.core.core_ui.contract_rows_action_desc
 import taminx.core.core_ui.contract_rows_title
+import taminx.core.core_ui.ic_tamin_assigner_contracts
 import taminx.core.core_ui.ic_tamin_workshop_contract_rows
 import taminx.core.core_ui.ic_tamin_workshop_inquiry
 import taminx.core.core_ui.ic_tamin_workshop_payment
@@ -59,5 +62,14 @@ enum class WorkshopAction(
         tint = StatusTint.INFO,
         // «اطلاعات پیمان» in the server menu — the same flag the services-grid tile routes through.
         featureFlag = FeatureFlag.CONTRACT_INFO,
+    ),
+
+    ASSIGNER_CONTRACTS(
+        label = Res.string.assigner_contracts_title,
+        description = Res.string.assigner_contracts_action_desc,
+        icon = Res.drawable.ic_tamin_assigner_contracts,
+        tint = StatusTint.MINT,
+        // 1003 in the server menu, under the same name the screen carries.
+        featureFlag = FeatureFlag.ASSIGNER_CONTRACT,
     ),
 }

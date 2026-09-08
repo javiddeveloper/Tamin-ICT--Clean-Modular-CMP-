@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.workshops.di
 
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopsViewModel
+import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.AssignerContractsViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.contractRows.ContractRowsViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.add.AddLegalRepresentativeViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.list.LegalRepresentativeListViewModel
@@ -25,4 +26,5 @@ val workshopsModule = module {
     viewModelOf(::LegalRepresentativeListViewModel)
     viewModelOf(::AddLegalRepresentativeViewModel)
     viewModelOf(::ContractRowsViewModel)
+    viewModelOf(::AssignerContractsViewModel)
 }

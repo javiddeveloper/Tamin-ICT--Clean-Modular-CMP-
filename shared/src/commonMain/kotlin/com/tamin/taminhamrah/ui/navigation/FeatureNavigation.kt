@@ -26,6 +26,7 @@ import com.tamin.taminhamrah.feature.taminServices.navigateToOccurrence
 import com.tamin.taminhamrah.feature.taminServices.navigateToInspection
 import com.tamin.taminhamrah.feature.taminServices.navigateToEmployerOnlineServices
 import com.tamin.taminhamrah.feature.taminServices.navigateToSendInsuranceHistoryToInstitutions
+import com.tamin.taminhamrah.feature.workshops.navigateToAssignerContracts
 import com.tamin.taminhamrah.feature.workshops.navigateToContractRows
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.navigateToCompleteEmployerInfo
@@ -38,6 +39,8 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
         FeatureFlag.WORKSHOPS -> navigateToWorkshops()
         // «اطلاعات پیمان» in the server menu; the screen it opens is titled «ردیف‌های پیمان».
         FeatureFlag.CONTRACT_INFO -> navigateToContractRows()
+        // «واگذارندگان» (1003) — the پیمان‌ها this employer assigned out.
+        FeatureFlag.ASSIGNER_CONTRACT -> navigateToAssignerContracts()
         FeatureFlag.COMPLETE_WORKSHOP_INFO -> navigateToCompleteEmployerInfo()
         FeatureFlag.STACK_HOLDER_LIST -> navigateToLegalRepresentativeWorkshops()
         FeatureFlag.CONTRACTS -> navigateToContracts()
