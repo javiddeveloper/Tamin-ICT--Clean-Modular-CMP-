@@ -253,6 +253,13 @@ private fun ChatLayout(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            // The app runs edge-to-edge (MainActivity.enableEdgeToEdge()), so the
+            // manifest's windowSoftInputMode="adjustResize" is not honored by the
+            // system — Compose must consume the IME inset itself, same as every other
+            // screen in the app (see the imePadding() usages elsewhere under feature/*).
+            // Without this the keyboard simply overlaps the bottom bar/content instead
+            // of pushing them up.
+            .imePadding()
     ) {
         // Full-bleed backdrop (Figma 90:14), behind the top bar too — otherwise its
         // glass blur has nothing colorful to sample and washes out to the plain page.
@@ -376,11 +383,11 @@ private fun ChatLayout(
         // ── Bottom input: global scrim gradient behind, solid pill on top ──
         // The typing/processing indicator is rendered once inside the LazyColumn above.
         //
-        // Inset handling: the window is resized above the IME by the system, so this bar must
-        // NOT add any `ime` padding itself — doing so applies the keyboard height twice and
-        // pushes the bar a full keyboard above the keyboard. Only the navigation bar is
-        // padded here; while the keyboard is open that inset is 0 (the IME covers it), so the
-        // bar lands directly on top of the keyboard.
+        // Inset handling: the outer Box already consumes the IME inset via imePadding(),
+        // so this bar must NOT add its own `ime` padding — doing so would apply the
+        // keyboard height twice. Only the navigation bar is padded here; while the
+        // keyboard is open that inset is 0 (the IME covers it), so the bar lands
+        // directly on top of the keyboard.
         //
         // onSizeChanged sits before the padding so it reports the bar's *total* occupied
         // height (content + insets); the chat list reserves exactly that much space.
