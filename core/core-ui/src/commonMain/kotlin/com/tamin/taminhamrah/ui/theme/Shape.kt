@@ -117,6 +117,9 @@ object IconSize {
     val stepperConnectorWidth = 44.dp
     /** Segment height for [com.tamin.taminhamrah.ui.components.TaminHeroStepProgress] on hero headers. */
     val heroStepSegmentHeight = 4.dp
+    /** Visual box for [com.tamin.taminhamrah.ui.components.TaminCheckBox]. */
+    val checkbox = 20.dp
+    val checkboxCheck = 14.dp
 }
 
 object Thickness {
@@ -153,6 +156,12 @@ object ShimmerSize {
     val subtitleHeight = 12.dp
     val badgeWidth = 56.dp
     val badgeHeight = 24.dp
+    val uploadCardHeight = 120.dp
+    val bannerHeight = 56.dp
+    val rateChipHeight = 48.dp
+    val wageValueHeight = 28.dp
+    val sliderTrackHeight = 4.dp
+    val stepperButtonSize = 40.dp
 }
 
 /** Scrollable list area inside modal option sheets (city / branch pickers). */

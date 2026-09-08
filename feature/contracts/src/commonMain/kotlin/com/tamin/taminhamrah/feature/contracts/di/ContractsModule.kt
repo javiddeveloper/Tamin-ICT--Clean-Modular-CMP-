@@ -31,8 +31,10 @@ private fun Module.contractFlowViewModel(qualifier: String, config: ContractFlow
             checkRedCrossStatusUseCase = get(),
             checkMedicalStudentUseCase = get(),
             makeContractUseCase = get(),
+            makeOptionalContractByGuardianUseCase = get(),
             saveContactUseCase = get(),
             uploadImageUseCase = get(),
+            subdominantUseCase = get(),
         )
     }
 }
