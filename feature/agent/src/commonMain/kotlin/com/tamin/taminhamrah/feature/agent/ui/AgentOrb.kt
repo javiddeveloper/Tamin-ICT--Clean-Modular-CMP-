@@ -1,9 +1,16 @@
 package com.tamin.taminhamrah.feature.agent.ui
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -11,6 +18,7 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -100,6 +108,13 @@ private const val ORB_SWEEP_STOPS = 72
 private val OrbSweepStops = angularBlurredRamp(OrbCorners, ORB_SWEEP_SIGMA_TURNS, ORB_SWEEP_STOPS)
 
 /**
+ * One full turn of the colour sweep. Slow and linear, so the sphere itself never moves —
+ * only the hues drift smoothly around its centre, like a stirred pot of colour rather than
+ * a spinning object.
+ */
+private const val ORB_ROTATION_DURATION_MS = 12000
+
+/**
  * What the layer blur does to the *middle* of an angular gradient: near the centre the
  * kernel spans the whole sweep, so every hue averages into one colour — `#7A6FDB`, the mean
  * of the four corners. Without this the ramp still converges on a pinwheel pinch at the
@@ -141,6 +156,18 @@ private val OrbRimMask = arrayOf(
  */
 @Composable
 fun AgentOrb(modifier: Modifier = Modifier) {
+    // Rotates only the sweep gradient's angle, not the sphere's position or size — the
+    // orb sits still while its colours circulate through it.
+    val rotation by rememberInfiniteTransition(label = "agent_orb_rotation").animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(ORB_ROTATION_DURATION_MS, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "agent_orb_rotation_angle"
+    )
+
     Box(
         modifier = modifier.size(OrbSize),
         contentAlignment = Alignment.Center,
@@ -173,10 +200,14 @@ fun AgentOrb(modifier: Modifier = Modifier) {
                 }
                 .drawBehind {
                     val radius = size.minDimension / 2f
-                    drawCircle(
-                        brush = Brush.sweepGradient(*OrbSweepStops, center = center),
-                        radius = radius,
-                    )
+                    // Only the sweep needs rotating — the core and rim layers below are
+                    // radially symmetric, so spinning them would be a no-op.
+                    rotate(degrees = rotation) {
+                        drawCircle(
+                            brush = Brush.sweepGradient(*OrbSweepStops, center = center),
+                            radius = radius,
+                        )
+                    }
                     drawCircle(
                         brush = Brush.radialGradient(
                             *OrbCoreStops,

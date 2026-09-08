@@ -45,6 +45,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.shadow
@@ -437,6 +438,11 @@ private val TopBarBadgeGradient = Brush.linearGradient(listOf(Color(0xFF7C5CFF),
 private val TopBarAvatarSweep = Brush.sweepGradient(
     listOf(Color(0xFF5B46E4), Color(0xFFBA6CFF), Color(0xFF1B3A8A), Color(0xFFB6D0FF), Color(0xFF5B46E4))
 )
+
+/** One full turn of the avatar's sweep — matches AgentOrb's rotation speed on the welcome
+ *  screen, so both read as the same "living" assistant color rather than two different ones. */
+private const val TOP_BAR_AVATAR_ROTATION_DURATION_MS = 12000
+
 private val TopBarOnlineDotColor = Color(0xFF3DDC84)
 
 /**
@@ -522,12 +528,27 @@ private fun AgentTopBar(
                     )
 
                     // Avatar — conic sweep + a soft top-left glare, glowing purple shadow.
+                    // The sweep rotates continuously around the avatar's own center, same as
+                    // the welcome-screen AgentOrb; the avatar's position/size never change.
+                    val avatarSweepRotation by rememberInfiniteTransition(label = "top_bar_avatar_rotation").animateFloat(
+                        initialValue = 0f,
+                        targetValue = 360f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(TOP_BAR_AVATAR_ROTATION_DURATION_MS, easing = LinearEasing),
+                            repeatMode = RepeatMode.Restart
+                        ),
+                        label = "top_bar_avatar_rotation_angle"
+                    )
                     Box(
                         modifier = Modifier
                             .size(40.dp)
                             .coloredShadow(color = TopBarAvatarGlow.copy(alpha = 0.5f), borderRadius = 20.dp, blurRadius = 16.dp, offsetY = 6.dp)
                             .clip(CircleShape)
-                            .background(TopBarAvatarSweep)
+                            .drawBehind {
+                                rotate(degrees = avatarSweepRotation) {
+                                    drawCircle(brush = TopBarAvatarSweep)
+                                }
+                            }
                     ) {
                         Box(
                             modifier = Modifier
@@ -535,6 +556,8 @@ private fun AgentTopBar(
                                 .drawBehind {
                                     // Glossy top-left highlight — center matches the Figma radial
                                     // gradient's handle position (0.32, 0.28) within the avatar.
+                                    // Fixed in place (not rotating with the sweep beneath it) so
+                                    // it reads as a light source reflecting off the sphere.
                                     drawCircle(
                                         brush = Brush.radialGradient(
                                             colors = listOf(Color.White.copy(alpha = 0.55f), Color.Transparent),
