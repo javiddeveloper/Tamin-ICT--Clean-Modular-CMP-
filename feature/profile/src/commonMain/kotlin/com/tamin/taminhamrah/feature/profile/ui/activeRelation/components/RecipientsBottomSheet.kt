@@ -1,39 +1,15 @@
 package com.tamin.taminhamrah.feature.profile.ui.activeRelation.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.profile.ui.activeRelation.contract.ActiveRelationUiState
 import com.tamin.taminhamrah.model.certificate.RecipientPR
-import com.tamin.taminhamrah.ui.components.CustomSearchBar
-import com.tamin.taminhamrah.ui.components.TaminText
-import com.tamin.taminhamrah.ui.theme.LocalTaminColors
-import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminSearchableListSheet
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.active_relation_search_placeholder
 import taminx.core.core_ui.active_relation_select_recipient_title
+import taminx.core.core_ui.no_items_found
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun RecipientsBottomSheet(
     state: ActiveRelationUiState,
@@ -41,85 +17,18 @@ internal fun RecipientsBottomSheet(
     onRecipientSelected: (RecipientPR) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val taminColors = LocalTaminColors.current
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = taminColors.bgSurface,
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-        dragHandle = {
-            Box(
-                modifier = Modifier
-                    .padding(vertical = Spacing.md)
-                    .size(width = 32.dp, height = 4.dp)
-                    .background(taminColors.border, RoundedCornerShape(50))
-            )
-        }
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            TaminText(
-                text = stringResource(Res.string.active_relation_select_recipient_title),
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = taminColors.textPrimary,
-                modifier = Modifier.padding(Spacing.lg)
-            )
-
-            CustomSearchBar(
-                query = state.searchQuery,
-                onQueryChange = onSearchQueryChange,
-                placeHolder = stringResource(Res.string.active_relation_search_placeholder),
-                modifier = Modifier.padding(horizontal = Spacing.lg)
-            )
-
-            if (state.isLoadingRecipients) {
-                RecipientsListShimmer()
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(400.dp),
-                    contentPadding = PaddingValues(bottom = Spacing.xxl)
-                ) {
-                    items(state.filteredRecipients) { recipient ->
-                        RecipientItem(
-                            recipient = recipient,
-                            onClick = { onRecipientSelected(recipient) }
-                        )
-                        HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = Spacing.lg),
-                            thickness = 0.5.dp,
-                            color = taminColors.border
-                        )
-                    }
-                }
-            }
-        }
-    }
+    TaminSearchableListSheet(
+        title = stringResource(Res.string.active_relation_select_recipient_title),
+        items = state.filteredRecipients,
+        itemLabel = { it.name },
+        itemKey = { it.code },
+        onItemSelected = onRecipientSelected,
+        onDismiss = onDismiss,
+        searchQuery = state.searchQuery,
+        onSearchQueryChange = onSearchQueryChange,
+        searchPlaceholder = stringResource(Res.string.active_relation_search_placeholder),
+        isLoading = state.isLoadingRecipients,
+        emptyMessage = stringResource(Res.string.no_items_found),
+    )
 }
 
-@Composable
-private fun RecipientItem(
-    recipient: RecipientPR,
-    onClick: () -> Unit
-) {
-    val taminColors = LocalTaminColors.current
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(Spacing.lg),
-        contentAlignment = Alignment.CenterStart
-    ) {
-        TaminText(
-            text = recipient.name,
-            style = MaterialTheme.typography.bodyMedium,
-            color = taminColors.textPrimary
-        )
-    }
-}
