@@ -1,10 +1,6 @@
 package com.tamin.taminhamrah.feature.workshops.ui.contractRows.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,46 +12,42 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopConstants
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopQuickPickList
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopTextField
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
-import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.digitsOnly
-import com.tamin.taminhamrah.util.toPersianDigits
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.ui.theme.Thickness
 import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.contract_rows_apply
 import taminx.core.core_ui.contract_rows_branch_code_required_hint
 import taminx.core.core_ui.contract_rows_four_digits
-import taminx.core.core_ui.contract_rows_my_workshops
-import taminx.core.core_ui.contract_rows_my_workshops_partial
 import taminx.core.core_ui.contract_rows_pick_workshop
 import taminx.core.core_ui.contract_rows_pick_workshop_hint
 import taminx.core.core_ui.contract_rows_reset
 import taminx.core.core_ui.contract_rows_workshop_code_required
-import taminx.core.core_ui.workshop_code
 import taminx.core.core_ui.workshop_branch_code
+import taminx.core.core_ui.workshop_code
 import taminx.core.core_ui.workshop_ten_digits
 
 /**
@@ -212,47 +204,12 @@ fun ContractRowPickerContent(
             )
         }
 
-        // Absent rather than empty: with no workshops to offer, a heading over nothing reads as a
-        // list that failed to load.
-        if (myWorkshops.isNotEmpty()) {
-            Text(
-                text = stringResource(Res.string.contract_rows_my_workshops),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-                color = colors.textSecondary,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = Spacing.smd, bottom = Spacing.sm),
-            )
-            // Only when the service holds more than one page's worth. Said out loud, because the
-            // two fields above still reach any workshop by number and a list that silently stops
-            // at ten looks complete.
-            if (myWorkshopsTotal > myWorkshops.size) {
-                Text(
-                    text = stringResource(
-                        Res.string.contract_rows_my_workshops_partial,
-                        myWorkshops.size.toString().toPersianDigits(),
-                        myWorkshopsTotal.toString().toPersianDigits(),
-                    ),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = colors.textMuted,
-                    modifier = Modifier.fillMaxWidth().padding(bottom = Spacing.sm),
-                )
-            }
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(WorkshopDimens.contractRowTileGap),
-            ) {
-                myWorkshops.forEach { workshop ->
-                    QuickPickRow(
-                        name = workshop.name,
-                        codeLabel = workshop.codeLabel,
-                        isSelected = workshop.workshopId == workshopId,
-                        onPick = { onQuickPick(workshop.workshopId, workshop.branchCode) },
-                    )
-                }
-            }
-        }
+        WorkshopQuickPickList(
+            workshops = myWorkshops,
+            total = myWorkshopsTotal,
+            selectedWorkshopId = workshopId,
+            onPick = onQuickPick,
+        )
 
         Row(
             modifier = Modifier
@@ -284,50 +241,5 @@ fun ContractRowPickerContent(
                 )
             }
         }
-    }
-}
-
-/** One کارگاه‌های شما row: picking it fills both fields at once, branch included. */
-@Composable
-private fun QuickPickRow(
-    name: String,
-    codeLabel: String,
-    isSelected: Boolean,
-    onPick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val colors = LocalTaminColors.current
-    val shape = remember { RoundedCornerShape(CornerRadius.chip) }
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(if (isSelected) colors.blueBg else colors.bgSurface, shape)
-            .border(
-                Thickness.border,
-                if (isSelected) colors.blueBorder else colors.border,
-                shape,
-            )
-            .clickable(onClick = onPick)
-            .padding(
-                horizontal = WorkshopDimens.fieldHorizontalPadding,
-                vertical = WorkshopDimens.fieldVerticalPadding,
-            ),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.smPlus),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = name,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.Bold,
-            color = colors.textPrimary,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f),
-        )
-        NumericText(
-            text = codeLabel,
-            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-            color = colors.textMuted,
-        )
     }
 }

@@ -15,16 +15,20 @@ import com.tamin.taminhamrah.model.userRequest.UserRequestTypeDN
 import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.model.workshop.AssignerContractDN
 import com.tamin.taminhamrah.model.workshop.AssignerPartyDN
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
+import com.tamin.taminhamrah.model.workshop.WorkshopSummaryDN
 import com.tamin.taminhamrah.model.workshop.BaseDocumentDN
 import com.tamin.taminhamrah.model.workshop.BaseDocumentKind
 import com.tamin.taminhamrah.model.workshop.BaseDocumentPR
 import com.tamin.taminhamrah.model.workshop.ComputationalBaseDN
 import com.tamin.taminhamrah.model.workshop.WORKSHOP_PAGE_SIZE
 import com.tamin.taminhamrah.repository.userRequest.UserRequestRepository
+import com.tamin.taminhamrah.tools.errorHandling.TaminApiException
 import com.tamin.taminhamrah.useCases.userRequest.DownloadUserRequestDocumentUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetAssignerContractsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetComputationalBasePdfUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetComputationalBasesUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetEmployerAgreementsUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -73,6 +77,7 @@ class AssignerContractsViewModelTest {
         getBases = GetComputationalBasesUseCase(repository),
         getBasePdf = GetComputationalBasePdfUseCase(repository),
         downloadDocumentImage = DownloadUserRequestDocumentUseCase(documents),
+        getMyWorkshops = GetEmployerAgreementsUseCase(repository),
     )
 
     private fun contract(
@@ -247,24 +252,126 @@ class AssignerContractsViewModelTest {
         }
     }
 
-    // --------------------------------------------------------------- the action sheet + bases
+    // ------------------------------------------------------------------ کارگاه‌های شما
 
-    /** Tapping a card selects it a step early, so جزئیات پیمان has its data before it composes. */
+    private fun myWorkshop(id: String, branch: String = "6310") = EmployerAgreementDN(
+        workshop = WorkshopSummaryDN(workshopId = id, branchCode = branch, name = "کارگاه $id"),
+    )
+
+    /** Typing a ten-digit code from memory is the worst part of the sheet; the list is the fix. */
     @Test
-    fun `tapping a contract records it and raises the action sheet`() = runTest(testDispatcher) {
-        repository.assignerContracts = PagedListDN(listOf(contract("1")), total = 1)
+    fun `opening the search fetches the employers own workshops once`() = runTest(testDispatcher) {
+        repository.employerAgreements = PagedListDN(
+            listOf(myWorkshop("9028212822"), myWorkshop("6318210573")),
+            total = 8,
+        )
 
         val vm = viewModel()
-        vm.sendIntent(AssignerContractsIntent.Open("9028212822", "0210"))
-        val row = vm.uiState.value.list.items.single()
-        vm.sendIntent(AssignerContractsIntent.ContractTapped(row))
+        vm.sendIntent(AssignerContractsIntent.SearchOpenChanged(isOpen = true))
 
         vm.uiState.test {
             val state = awaitItem()
-            assertEquals(row, state.actionSheetFor)
-            assertEquals(row, state.selected)
+            assertEquals(2, state.myWorkshops.size)
+            // The employer's real count, so the sheet can say the list is partial.
+            assertEquals(8, state.myWorkshopsTotal)
+        }
+
+        // Re-opening must not re-fetch: the rows are already in hand. Proven by changing what the
+        // service would answer and showing the state does not move.
+        repository.employerAgreements = PagedListDN(listOf(myWorkshop("1111111111")), total = 1)
+        vm.sendIntent(AssignerContractsIntent.SearchOpenChanged(isOpen = false))
+        vm.sendIntent(AssignerContractsIntent.SearchOpenChanged(isOpen = true))
+
+        assertEquals(2, vm.uiState.value.myWorkshops.size)
+        assertEquals(8, vm.uiState.value.myWorkshopsTotal)
+    }
+
+    /**
+     * One کارگاه reaches this list once per agreement it holds, so the same workshop arrives
+     * more than once. Deduped on the identity the pick actually uses.
+     */
+    @Test
+    fun `the quick-pick list drops repeated workshops`() = runTest(testDispatcher) {
+        repository.employerAgreements = PagedListDN(
+            listOf(myWorkshop("9028212822"), myWorkshop("9028212822"), myWorkshop("6318210573")),
+            total = 3,
+        )
+
+        val vm = viewModel()
+        vm.sendIntent(AssignerContractsIntent.SearchOpenChanged(isOpen = true))
+
+        assertEquals(2, vm.uiState.value.myWorkshops.size)
+    }
+
+    /** Picking a row fills the code *and* its branch, which is the whole point of the list. */
+    @Test
+    fun `picking a workshop fills both codes and clears the error`() = runTest(testDispatcher) {
+        val vm = viewModel()
+        vm.sendIntent(AssignerContractsIntent.SearchOpenChanged(isOpen = true))
+        vm.sendIntent(AssignerContractsIntent.ApplySearch)
+        assertTrue(vm.uiState.value.draft.showWorkshopIdError)
+
+        vm.sendIntent(AssignerContractsIntent.QuickPicked("9028212822", "6310"))
+
+        vm.uiState.test {
+            val draft = awaitItem().draft
+            assertEquals("9028212822", draft.workshopId)
+            assertEquals("6310", draft.branchCode)
+            assertFalse(draft.showWorkshopIdError)
         }
     }
+
+    /**
+     * کارگاه‌های شما is a convenience above three fields that already work.
+     *
+     * Failing to fetch it must not put an error on a list the user has not asked for yet — the
+     * section simply does not appear.
+     */
+    @Test
+    fun `a failed workshop fetch leaves the search usable`() = runTest(testDispatcher) {
+        repository.error = IllegalStateException("no connection")
+
+        val vm = viewModel()
+        vm.sendIntent(AssignerContractsIntent.SearchOpenChanged(isOpen = true))
+
+        vm.uiState.test {
+            val state = awaitItem()
+            assertTrue(state.isSearchOpen)
+            assertTrue(state.myWorkshops.isEmpty())
+            // Nothing was requested for the list itself, so it must not read as failed.
+            assertFalse(state.list.isFailed)
+        }
+    }
+
+    // --------------------------------------------------------------- the action sheet + bases
+
+    /**
+     * The row keeps the raw keys جزئیات پیمان is addressed by.
+     *
+     * That screen has no state of its own: its route carries ردیف and sequence, and it finds the
+     * پیمان back in this list. Persian digits here — or a trimmed sequence — would make it
+     * unfindable, so the pair is pinned as ASCII alongside the label the card prints.
+     */
+    @Test
+    fun `list rows keep the raw keys their detail route is addressed by`() =
+        runTest(testDispatcher) {
+            repository.assignerContracts = PagedListDN(listOf(contract("1")), total = 1)
+
+            val vm = viewModel()
+            vm.sendIntent(AssignerContractsIntent.Open("9028212822", "0210"))
+
+            val row = vm.uiState.value.list.items.single()
+            assertEquals("1", row.contractRow)
+            assertEquals("3", row.contractSequence)
+            // The card still prints the Persian form; the keys are not what is displayed.
+            assertEquals("۱", row.card.rowLabel)
+            assertEquals(
+                row,
+                vm.uiState.value.list.items.firstOrNull {
+                    it.contractRow == "1" && it.contractSequence == "3"
+                },
+            )
+        }
 
     /** A پیمان missing any of the four keys cannot address its own bases, and says so up front. */
     @Test
@@ -312,7 +419,7 @@ class AssignerContractsViewModelTest {
      * A page that lands after the user has moved to another پیمان is dropped.
      *
      * `BaseViewModel` runs intents through `flatMapMerge`, so a slow request is superseded rather
-     * than cancelled and can arrive last. Without the tag it would paint one contract's bases under
+     * than canceled and can arrive last. Without the tag it would paint one contract's bases under
      * another's heading.
      */
     @Test
@@ -360,13 +467,13 @@ class AssignerContractsViewModelTest {
     }
 
     /**
-     * An image the service answered blank never opens the viewer.
+     * An image the service answered blank carries its failure into the viewer.
      *
-     * `TaminImageViewer` has no loading or failure state of its own, so an empty payload would draw
-     * the broken-image placeholder — the failure is reported instead.
+     * `TaminImageViewer` now has the same three states the PDF viewer does, so a failure is shown
+     * where the user is looking rather than only behind them on the row.
      */
     @Test
-    fun `an empty image never opens the viewer`() = runTest(testDispatcher) {
+    fun `an empty image opens the viewer carrying its failure`() = runTest(testDispatcher) {
         documents.document = ""
 
         val vm = viewModel()
@@ -380,10 +487,68 @@ class AssignerContractsViewModelTest {
             val state = awaitItem()
             assertNull(state.preview?.imageData?.ifBlank { null })
             assertNull(state.openingDocumentId)
+            // The viewer stays up and says so, exactly as the PDF one does.
+            assertEquals(true, state.preview?.didFail)
+            // It failed without saying why, so both fall back to their generic line.
+            assertEquals("a1", state.documentFailure?.documentId)
+            assertNull(state.documentFailure?.message)
         }
     }
 
-    /** A PDF raises its viewer before the bytes land, because that viewer has a wait of its own. */
+    /**
+     * The service's own words reach the row.
+     *
+     * `upload-image` answers a missing document with «داده ای با اطلاعات شناسه … یافت نشد.», which
+     * names the id it could not find. Substituting a generic line for that throws away the only
+     * part of the failure worth reading.
+     */
+    @Test
+    fun `a failed document carries the services own reason`() = runTest(testDispatcher) {
+        documents.failure = TaminApiException(
+            title = "داده ای با اطلاعات شناسه img-1 یافت نشد."
+        )
+
+        val vm = viewModel()
+        vm.sendIntent(
+            AssignerContractsIntent.DocumentTapped(
+                BaseDocumentPR(documentId = "img-1", kind = BaseDocumentKind.IMAGE)
+            )
+        )
+
+        vm.uiState.test {
+            val state = awaitItem()
+            assertEquals("img-1", state.documentFailure?.documentId)
+            assertEquals("داده ای با اطلاعات شناسه img-1 یافت نشد", state.documentFailure?.message)
+            // The viewer is up and carrying the failure, the same shape a PDF takes.
+            assertEquals("img-1", state.preview?.documentId)
+            assertEquals(true, state.preview?.didFail)
+            // The row is live again, because tapping it is the retry.
+            assertNull(state.openingDocumentId)
+        }
+    }
+
+    /** Tapping a failed row again clears its reason before trying, so a stale one cannot linger. */
+    @Test
+    fun `retrying a failed document clears its reason`() = runTest(testDispatcher) {
+        documents.failure = TaminApiException(title = "یافت نشد")
+
+        val vm = viewModel()
+        val document = BaseDocumentPR(documentId = "img-1", kind = BaseDocumentKind.IMAGE)
+        vm.sendIntent(AssignerContractsIntent.DocumentTapped(document))
+        assertNotNull(vm.uiState.value.documentFailure)
+
+        documents.failure = null
+        documents.document = "BASE64DATA"
+        vm.sendIntent(AssignerContractsIntent.DocumentTapped(document))
+
+        vm.uiState.test {
+            val state = awaitItem()
+            assertNull(state.documentFailure)
+            assertEquals("BASE64DATA", state.preview?.imageData)
+        }
+    }
+
+    /** Both kinds raise the viewer before the bytes land, so neither tap looks inert. */
     @Test
     fun `a pdf document raises the viewer and then fills it`() = runTest(testDispatcher) {
         val vm = viewModel()
@@ -396,8 +561,8 @@ class AssignerContractsViewModelTest {
         vm.uiState.test {
             val state = awaitItem()
             assertNotNull(state.preview)
-            assertEquals(BaseDocumentKind.PDF, state.preview?.kind)
-            assertEquals("b2", state.preview?.documentId)
+            assertEquals(BaseDocumentKind.PDF, state.preview.kind)
+            assertEquals("b2", state.preview.documentId)
             assertNull(state.openingDocumentId)
         }
         assertEquals("b2", repository.lastPdfDocumentId)
@@ -452,8 +617,12 @@ class AssignerContractsViewModelTest {
         var document: String = ""
         var lastGuid: String? = null
 
+        /** Set to make the next fetch throw, the way a 404 from `upload-image` does. */
+        var failure: Throwable? = null
+
         override suspend fun downloadUserRequestDocument(guid: String): String {
             lastGuid = guid
+            failure?.let { throw it }
             return document
         }
 
@@ -470,6 +639,6 @@ class AssignerContractsViewModelTest {
         override suspend fun getShowRequestInfo(
             referenceId: String,
             requestTypeId: Long,
-        ): UserRequestDetailsDN? = notUsed()
+        ): UserRequestDetailsDN = notUsed()
     }
 }

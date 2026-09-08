@@ -14,14 +14,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopConstants
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFieldError
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopQuickPickList
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopSheetBody
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopTextField
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
+import com.tamin.taminhamrah.model.workshop.WorkshopPR
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.digitsOnly
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.assigner_filter_clear
@@ -43,6 +46,10 @@ import taminx.core.core_ui.workshop_code
  *
  * کد شعبه and ردیف پیمان really are optional here, unlike on ردیف‌های پیمان: all three travel as
  * filter clauses, so a blank one widens the search rather than addressing a route that 404s.
+ *
+ * کارگاه‌های شما sits under the fields, the same list ردیف‌های پیمان offers and drawn by the same
+ * shared composable: picking a row fills the code and its branch, which is the part nobody wants
+ * to type from memory.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,9 +60,12 @@ fun AssignerSearchSheet(
     showWorkshopIdError: Boolean,
     isApplying: Boolean,
     canReset: Boolean,
+    myWorkshops: ImmutableList<WorkshopPR>,
+    myWorkshopsTotal: Int,
     onWorkshopIdChange: (String) -> Unit,
     onBranchCodeChange: (String) -> Unit,
     onContractRowChange: (String) -> Unit,
+    onQuickPick: (String, String) -> Unit,
     onApply: () -> Unit,
     onReset: () -> Unit,
     onDismiss: () -> Unit,
@@ -73,9 +83,12 @@ fun AssignerSearchSheet(
             showWorkshopIdError = showWorkshopIdError,
             isApplying = isApplying,
             canReset = canReset,
+            myWorkshops = myWorkshops,
+            myWorkshopsTotal = myWorkshopsTotal,
             onWorkshopIdChange = onWorkshopIdChange,
             onBranchCodeChange = onBranchCodeChange,
             onContractRowChange = onContractRowChange,
+            onQuickPick = onQuickPick,
             onApply = onApply,
             onReset = onReset,
         )
@@ -96,9 +109,12 @@ fun AssignerSearchSheetContent(
     showWorkshopIdError: Boolean,
     isApplying: Boolean,
     canReset: Boolean,
+    myWorkshops: ImmutableList<WorkshopPR>,
+    myWorkshopsTotal: Int,
     onWorkshopIdChange: (String) -> Unit,
     onBranchCodeChange: (String) -> Unit,
     onContractRowChange: (String) -> Unit,
+    onQuickPick: (String, String) -> Unit,
     onApply: () -> Unit,
     onReset: () -> Unit,
     modifier: Modifier = Modifier,
@@ -147,6 +163,13 @@ fun AssignerSearchSheetContent(
                 modifier = Modifier.weight(1f),
             )
         }
+
+        WorkshopQuickPickList(
+            workshops = myWorkshops,
+            total = myWorkshopsTotal,
+            selectedWorkshopId = workshopId,
+            onPick = onQuickPick,
+        )
 
         // One message under all three, not on the field: the design puts it there, and only one of
         // the three can be wrong.

@@ -7,6 +7,9 @@ import com.tamin.taminhamrah.model.workshop.AssignerContractPR
 import com.tamin.taminhamrah.model.workshop.BaseDocumentKind
 import com.tamin.taminhamrah.model.workshop.BaseDocumentPR
 import com.tamin.taminhamrah.model.workshop.ComputationalBasePR
+import com.tamin.taminhamrah.model.workshop.WorkshopPR
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.StringResource
 
 /** What the visible page of واگذارندگان was fetched with. */
@@ -46,6 +49,16 @@ data class ComputationalBaseKeys(
     val contractSequence: String,
 )
 
+/**
+ * A document that could not be fetched, and the service's own reason.
+ *
+ * [message] is null only when the service failed without saying anything — the row then falls back
+ * to the generic line, exactly as `WorkshopListScaffold` does for a failed list. Keyed by document
+ * so the failure sits on the row that caused it rather than on the whole screen.
+ */
+@Immutable
+data class DocumentFailure(val documentId: String, val message: String?)
+
 /** A document the user has opened, and whichever of the two payloads its kind needs. */
 @Immutable
 data class DocumentPreview(
@@ -69,10 +82,10 @@ data class DocumentPreview(
  * The slices are separate `@Immutable` values on purpose: a page landing in [bases] must not
  * invalidate the search draft, and typing in the draft must not invalidate the list.
  *
- * Nothing here drives navigation, and no screen depends on a state emission having landed before
- * its own destination composes — an ordering between `sendIntent` and `navigate` that nothing
- * guarantees. جزئیات پیمان reads [selected], set a whole tap earlier; مبانی محاسباتی is addressed
- * by its route; جزئیات مبنا finds its مبنا in [bases] by the شمارهٔ سند its route carries.
+ * **No screen here reads a "currently selected" field.** Every drill-down is addressed by its own
+ * route and finds what it draws in [list] or [bases] — جزئیات پیمان by ردیف and sequence, مبانی
+ * محاسباتی by its four keys, جزئیات مبنا by شمارهٔ سند. That removes the one ordering this design
+ * could never guarantee: a state emission landing before the destination that reads it composes.
  */
 @Immutable
 data class AssignerContractsUiState(
@@ -81,17 +94,16 @@ data class AssignerContractsUiState(
     val filter: AssignerContractFilter? = null,
     val draft: AssignerSearchDraft = AssignerSearchDraft(),
     val isSearchOpen: Boolean = false,
-    /** The row whose action sheet is open. Null when no sheet is up. */
-    val actionSheetFor: AssignerContractPR? = null,
+    /** کارگاه‌های شما — the quick-pick rows, fetched the first time the sheet opens. */
+    val myWorkshops: ImmutableList<WorkshopPR> = persistentListOf(),
     /**
-     * The پیمان جزئیات پیمان is showing, set the moment its card is tapped.
+     * How many workshops the employer actually holds, against how many the quick-pick lists.
      *
-     * Held rather than serialized into a route: the detail screen draws both parties and four
-     * contract fields, which is more than belongs in a route, and the list already has them. Set a
-     * whole tap earlier than the screen that reads it, so it cannot be composed against a stale
-     * value. Null only after process death, which the screen states rather than drawing blank cells.
+     * The sheet asks for one page, so an employer with more than fits never sees the rest. The
+     * three fields still reach any workshop by number, so the cap is stated rather than paged
+     * away — a silent partial list is the part that misleads.
      */
-    val selected: AssignerContractPR? = null,
+    val myWorkshopsTotal: Int = 0,
     val bases: PagedListState<ComputationalBasePR> = PagedListState(),
     /** Which پیمان [bases] holds, so returning to a screen already loaded does not refetch. */
     val basesKeys: ComputationalBaseKeys? = null,
@@ -99,6 +111,8 @@ data class AssignerContractsUiState(
     val openingDocumentId: String? = null,
     /** The open viewer, image or PDF. Null when none is open. */
     val preview: DocumentPreview? = null,
+    /** The document whose last fetch failed, and why. Cleared when it is tried again. */
+    val documentFailure: DocumentFailure? = null,
 ) {
     sealed interface PartialState {
         // ------------------------------------------------------------------------ the list
@@ -116,10 +130,12 @@ data class AssignerContractsUiState(
         ) : PartialState
 
         data class WorkshopIdErrorChanged(val isVisible: Boolean) : PartialState
+        data class MyWorkshopsLoaded(
+            val workshops: ImmutableList<WorkshopPR>,
+            val total: Int,
+        ) : PartialState
 
         // ------------------------------------------------------------------ the drill-downs
-        data class ActionSheetChanged(val contract: AssignerContractPR?) : PartialState
-        data class Selected(val contract: AssignerContractPR?) : PartialState
         data class BasesLoading(val keys: ComputationalBaseKeys) : PartialState
         data object BasesLoadingMore : PartialState
 
@@ -143,6 +159,7 @@ data class AssignerContractsUiState(
         // ---------------------------------------------------------------------- documents
         data class DocumentOpening(val documentId: String?) : PartialState
         data class PreviewChanged(val preview: DocumentPreview?) : PartialState
+        data class DocumentFailed(val failure: DocumentFailure?) : PartialState
     }
 }
 
@@ -163,17 +180,10 @@ sealed interface AssignerContractsIntent {
     data class DraftWorkshopIdChanged(val value: String) : AssignerContractsIntent
     data class DraftBranchCodeChanged(val value: String) : AssignerContractsIntent
     data class DraftContractRowChanged(val value: String) : AssignerContractsIntent
+    /** Picking a کارگاه‌های شما row fills the code and its branch at once. */
+    data class QuickPicked(val workshopId: String, val branchCode: String) : AssignerContractsIntent
     data object ApplySearch : AssignerContractsIntent
     data object ClearSearch : AssignerContractsIntent
-
-    /**
-     * Tapping a card raises the action sheet — it does not navigate.
-     *
-     * It also records the پیمان as selected, so whichever action the sheet offers next has its
-     * screen's data in state before that screen is ever composed.
-     */
-    data class ContractTapped(val contract: AssignerContractPR) : AssignerContractsIntent
-    data object ActionSheetDismissed : AssignerContractsIntent
 
     /** Opens مبانی محاسباتی for [keys], unless that پیمان is already the one loaded. */
     data class OpenBases(val keys: ComputationalBaseKeys) : AssignerContractsIntent
@@ -195,12 +205,11 @@ sealed interface AssignerContractsIntent {
 }
 
 /**
- * One-shot effects.
+ * Nothing leaves this screen.
  *
- * Navigation is not one of them: it is the nav graph's, driven by the row that was tapped, so this
- * carries only what has to be *said*. The message is a `StringResource` rather than resolved copy
- * — a ViewModel that resolves one hangs the unit-test runtime.
+ * Navigation is the nav graph's, driven by the row that was tapped. The one thing that has to be
+ * *said* — a document that would not open — is said on the row it belongs to and stays there, which
+ * a toast could not do: it names which of several attachments failed, and it survives long enough
+ * to be read.
  */
-sealed interface AssignerContractsEvent {
-    data class ShowMessage(val message: StringResource) : AssignerContractsEvent
-}
+sealed interface AssignerContractsEvent

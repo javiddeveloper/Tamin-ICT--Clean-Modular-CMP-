@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.Ass
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractsUiState.PartialState
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerSearchDraft
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.ComputationalBaseKeys
+import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.DocumentFailure
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.DocumentPreview
 import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
 import com.tamin.taminhamrah.mapper.personal.toPresentation
@@ -15,18 +16,19 @@ import com.tamin.taminhamrah.mapper.workshop.toPresentation
 import com.tamin.taminhamrah.model.workshop.AssignerContractQuery
 import com.tamin.taminhamrah.model.workshop.BaseDocumentKind
 import com.tamin.taminhamrah.model.workshop.ComputationalBaseQuery
+import com.tamin.taminhamrah.model.workshop.WorkshopListQuery
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.userRequest.DownloadUserRequestDocumentUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetAssignerContractsUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetEmployerAgreementsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetComputationalBasePdfUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetComputationalBasesUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.flow
 import org.jetbrains.compose.resources.StringResource
-import taminx.core.core_ui.Res
-import taminx.core.core_ui.assigner_document_open_failed
 
 /**
  * واگذارندگان — the پیمان‌ها the signed-in employer is the واگذارنده of, and what hangs off each.
@@ -44,6 +46,7 @@ class AssignerContractsViewModel(
     private val getBases: GetComputationalBasesUseCase,
     private val getBasePdf: GetComputationalBasePdfUseCase,
     private val downloadDocumentImage: DownloadUserRequestDocumentUseCase,
+    private val getMyWorkshops: GetEmployerAgreementsUseCase,
 ) : BaseViewModel<AssignerContractsUiState, PartialState, AssignerContractsEvent, AssignerContractsIntent>(
     initialState = AssignerContractsUiState()
 ) {
@@ -66,22 +69,21 @@ class AssignerContractsViewModel(
         is AssignerContractsIntent.DraftContractRowChanged ->
             flow { emit(PartialState.DraftChanged(contractRow = intent.value)) }
 
+        is AssignerContractsIntent.QuickPicked -> flow {
+            emit(
+                PartialState.DraftChanged(
+                    workshopId = intent.workshopId,
+                    branchCode = intent.branchCode,
+                )
+            )
+            emit(PartialState.WorkshopIdErrorChanged(isVisible = false))
+        }
+
         AssignerContractsIntent.ApplySearch -> applySearch()
         AssignerContractsIntent.ClearSearch -> flow {
             emit(PartialState.Cleared)
             emit(PartialState.SearchOpenChanged(isOpen = false))
         }
-
-        // Selecting here rather than when the sheet's row is picked: by the time either action is
-        // tapped the screen it opens already has its data, so no destination can compose ahead of
-        // the state it reads.
-        is AssignerContractsIntent.ContractTapped -> flow {
-            emit(PartialState.Selected(intent.contract))
-            emit(PartialState.ActionSheetChanged(intent.contract))
-        }
-
-        AssignerContractsIntent.ActionSheetDismissed ->
-            flow { emit(PartialState.ActionSheetChanged(null)) }
 
         is AssignerContractsIntent.OpenBases -> openBases(intent.keys)
         AssignerContractsIntent.LoadMoreBases -> loadMoreBases()
@@ -162,15 +164,44 @@ class AssignerContractsViewModel(
         return loadPage(page = list.nextPage)
     }
 
+    /**
+     * Opening the sheet seeds it from what is already applied, so re-opening edits the live search
+     * rather than starting from blank, and fetches کارگاه‌های شما the first time only.
+     */
     private fun setSearchOpen(isOpen: Boolean): Flow<PartialState> = flow {
         emit(PartialState.SearchOpenChanged(isOpen))
         if (!isOpen) return@flow
-        // Seeded from what is already applied, so re-opening the sheet edits the live search
-        // rather than starting from blank.
-        uiState.value.filter?.let {
+
+        val state = uiState.value
+        state.filter?.let {
             emit(PartialState.DraftChanged(it.workshopId, it.branchCode, it.contractRow))
         }
         emit(PartialState.WorkshopIdErrorChanged(isVisible = false))
+        if (state.myWorkshops.isNotEmpty()) return@flow
+
+        val workshops = getMyWorkshops(WorkshopListQuery(page = 0))
+        emit(
+            PartialState.MyWorkshopsLoaded(
+                workshops.items
+                    .map { it.toPresentation() }
+                    // One کارگاه reaches this list once per agreement it holds, so the same
+                    // workshop arrives two or three times. Keyed on the identity the pick actually
+                    // uses, not on the whole card.
+                    .distinctBy { it.workshopId to it.branchCode }
+                    .toImmutableList(),
+                total = workshops.total,
+            )
+        )
+    }.catch {
+        // کارگاه‌های شما is a convenience above three fields that already work. Failing to fetch it
+        // must not put an error on the list the user has not asked for yet, so it is swallowed and
+        // the section simply does not appear.
+        emit(
+            PartialState.MyWorkshopsLoaded(
+                uiState.value.myWorkshops,
+                uiState.value.myWorkshopsTotal,
+            )
+        )
     }
 
     /**
@@ -249,40 +280,47 @@ class AssignerContractsViewModel(
     /**
      * Opens one attachment through whichever of the two routes its kind names.
      *
-     * The two viewers want opposite things, so the two kinds are staged differently rather than
-     * forced through one shape:
+     * Both kinds are staged identically: the viewer goes up first with nothing in it, fills in
+     * when the bytes land, and carries the failure when they do not. That is what `TaminPdfViewer`
+     * already did, and `TaminImageViewer` now does too — so neither kind leaves the tap looking
+     * like it did nothing while a download runs.
      *
-     * - **PDF** — `TaminPdfViewer` has a loading state and a retry of its own, so the viewer goes
-     *   up first with no bytes and fills in, and a failure stays on screen offering another go.
-     * - **image** — `TaminImageViewer` has neither, and an empty model draws the broken-image
-     *   placeholder, so it is raised only once the bytes are in hand and a failure never opens it.
-     *
-     * Either way the wait is visible on the list — every document row disables itself while a
-     * fetch is in flight, which is also what drops a second tap.
+     * A failure also lands on the **row**, carrying the service's own words, so it survives
+     * dismissing the viewer and names which of several attachments is unavailable. `upload-image`
+     * answers a missing document with «داده ای با اطلاعات شناسه … یافت نشد.», which says far more
+     * than any line this screen could write, and `BaseDTO.rawErrorText` already lifts it onto the
+     * exception. Tapping the row again clears the failure and retries.
      */
     private fun openDocument(
         documentId: String,
         title: StringResource,
         kind: BaseDocumentKind,
-    ): Flow<PartialState> = flow {
+    ): Flow<PartialState> {
+        // Built out here so the `catch` below can reach it. Reading it back off `uiState` there
+        // does not work: the emissions above are reduced downstream, so the pending preview is
+        // not in state yet when the failure arrives.
+        val pending = DocumentPreview(documentId = documentId, title = title, kind = kind)
+        return flow {
         if (documentId.isBlank() || uiState.value.openingDocumentId != null) return@flow
 
-        val pending = DocumentPreview(documentId = documentId, title = title, kind = kind)
         emit(PartialState.DocumentOpening(documentId))
-        // On a retry the viewer is already up; re-emitting the pending preview is what clears its
-        // failure state and puts the spinner back.
-        if (kind == BaseDocumentKind.PDF) emit(PartialState.PreviewChanged(pending))
+        // A retry starts clean: the previous reason must not sit under a row that is trying again.
+        emit(PartialState.DocumentFailed(null))
+        // Up front, empty. On a retry this is also what clears the viewer's failure state and
+        // puts its wait back.
+        emit(PartialState.PreviewChanged(pending))
 
         when (kind) {
             BaseDocumentKind.IMAGE -> {
                 // Base64 from the shared upload-image route, handed straight to the async image
                 // loader — the same path درخواست‌های من takes for its attachments.
                 val data = downloadDocumentImage(documentId)
-                // A service that answered with nothing is a failure, not an empty document.
+                // A service that answered with nothing is a failure, not an empty document. It
+                // said nothing about why, so both the viewer and the row fall back to their
+                // generic line.
                 if (data.isBlank()) {
-                    sendEvent(
-                        AssignerContractsEvent.ShowMessage(Res.string.assigner_document_open_failed)
-                    )
+                    emit(PartialState.PreviewChanged(pending.copy(didFail = true)))
+                    emit(PartialState.DocumentFailed(DocumentFailure(documentId, message = null)))
                 } else {
                     emit(PartialState.PreviewChanged(pending.copy(imageData = data)))
                 }
@@ -292,22 +330,25 @@ class AssignerContractsViewModel(
                 val pdf = getBasePdf(documentId).toPresentation()
                 if (pdf.pdf == null) {
                     emit(PartialState.PreviewChanged(pending.copy(didFail = true)))
-                    sendEvent(
-                        AssignerContractsEvent.ShowMessage(Res.string.assigner_document_open_failed)
-                    )
+                    emit(PartialState.DocumentFailed(DocumentFailure(documentId, message = null)))
                 } else {
                     emit(PartialState.PreviewChanged(pending.copy(pdf = pdf)))
                 }
             }
         }
         emit(PartialState.DocumentOpening(null))
-    }.catch {
-        // A PDF viewer already on screen keeps its place and carries the failure, because closing
-        // it silently is indistinguishable from the tap having done nothing. An image never opened
-        // one, so there is only the message.
-        uiState.value.preview?.let { emit(PartialState.PreviewChanged(it.copy(didFail = true))) }
-        emit(PartialState.DocumentOpening(null))
-        sendEvent(AssignerContractsEvent.ShowMessage(Res.string.assigner_document_open_failed))
+        }.catch { error ->
+            // The service's own reason, not ours. The viewer keeps its place and carries the
+            // failure, because closing it silently is indistinguishable from the tap having done
+            // nothing, and the row keeps it too so it survives the viewer being dismissed.
+            emit(PartialState.PreviewChanged(pending.copy(didFail = true)))
+            emit(
+                PartialState.DocumentFailed(
+                    DocumentFailure(documentId, error.toSingleLineMessage())
+                )
+            )
+            emit(PartialState.DocumentOpening(null))
+        }
     }
 
     // ------------------------------------------------------------------------------ reducer
@@ -342,10 +383,10 @@ class AssignerContractsViewModel(
             draft = currentState.draft.copy(showWorkshopIdError = partialState.isVisible)
         )
 
-        is PartialState.ActionSheetChanged ->
-            currentState.copy(actionSheetFor = partialState.contract)
-
-        is PartialState.Selected -> currentState.copy(selected = partialState.contract)
+        is PartialState.MyWorkshopsLoaded -> currentState.copy(
+            myWorkshops = partialState.workshops,
+            myWorkshopsTotal = partialState.total,
+        )
 
         // The keys move with the request, so a page arriving for a پیمان the user has left can be
         // told apart from one for the پیمان on screen.
@@ -373,6 +414,8 @@ class AssignerContractsViewModel(
             currentState.copy(openingDocumentId = partialState.documentId)
 
         is PartialState.PreviewChanged -> currentState.copy(preview = partialState.preview)
+        is PartialState.DocumentFailed ->
+            currentState.copy(documentFailure = partialState.failure)
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)

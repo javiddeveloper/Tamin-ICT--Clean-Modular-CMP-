@@ -2294,10 +2294,7 @@
     <string name="assigner_search_branch_hint">مثلاً ۱۲</string>
     <string name="assigner_search_row_hint">مثلاً ۳</string>
 
-    <!-- Action sheet -->
-    <string name="assigner_action_title">انتخاب کنید</string>
-    <string name="assigner_action_view_detail">مشاهدهٔ جزئیات پیمان</string>
-    <string name="assigner_action_view_bases">مشاهدهٔ مبانی محاسباتی</string>
+    <!-- Card actions -->
     <string name="assigner_action_bases_unavailable">این پیمان شناسهٔ کامل ندارد و مبانی محاسباتی آن قابل نمایش نیست.</string>
 
     <!-- Screen B — جزئیات پیمان -->

@@ -15,39 +15,37 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.AssignerActionSheet
-import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.AssignerActionSheetContent
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.AssignerFilterBar
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.AssignerSearchSheet
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.AssignerSearchSheetContent
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.buildAssignerFilterText
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractFilter
-import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractsEvent
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractsIntent
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractsUiState
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButton
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButtonTone
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopListScaffold
 import com.tamin.taminhamrah.feature.workshops.ui.contractRows.components.ContractRowCard
 import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
 import com.tamin.taminhamrah.model.workshop.AssignerContractPR
 import com.tamin.taminhamrah.model.workshop.ContractRowPR
+import com.tamin.taminhamrah.model.workshop.WorkshopPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import com.tamin.taminhamrah.ui.components.toast.LocalToaster
-import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.coroutines.flow.Flow
-import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.assigner_bases_title
 import taminx.core.core_ui.assigner_contract_date
+import taminx.core.core_ui.assigner_contract_detail_title
 import taminx.core.core_ui.assigner_contracts_subtitle
 import taminx.core.core_ui.assigner_contracts_title
 import taminx.core.core_ui.assigner_empty_no_search_body
@@ -76,7 +74,7 @@ import taminx.core.core_ui.ic_tamin_search
 fun AssignerContractsScreen(
     viewModel: AssignerContractsViewModel,
     onBack: () -> Unit,
-    onOpenDetail: () -> Unit,
+    onOpenDetail: (AssignerContractPR) -> Unit,
     onOpenBases: (AssignerContractPR) -> Unit,
     modifier: Modifier = Modifier,
     workshopId: String = "",
@@ -88,8 +86,6 @@ fun AssignerContractsScreen(
         viewModel.sendIntent(AssignerContractsIntent.Open(workshopId, branchCode))
     }
 
-    HandleAssignerContractsEvents(viewModel.events)
-
     AssignerContractsContent(
         state = state,
         onIntent = viewModel::sendIntent,
@@ -100,31 +96,12 @@ fun AssignerContractsScreen(
     )
 }
 
-/**
- * The one effect the flow raises.
- *
- * Every screen in the flow mounts this, because a document can fail on جزئیات مبنا and a پیمان can
- * refuse its bases on the list; the toaster is the same either way, so whichever screen is
- * composed when the message arrives shows it.
- */
-@Composable
-fun HandleAssignerContractsEvents(events: Flow<AssignerContractsEvent>) {
-    val toaster = LocalToaster.current
-    LaunchedEffect(events, toaster) {
-        events.collect { event ->
-            when (event) {
-                is AssignerContractsEvent.ShowMessage -> toaster.error(getString(event.message))
-            }
-        }
-    }
-}
-
 @Composable
 fun AssignerContractsContent(
     state: AssignerContractsUiState,
     onIntent: (AssignerContractsIntent) -> Unit,
     onBack: () -> Unit,
-    onOpenDetail: () -> Unit,
+    onOpenDetail: (AssignerContractPR) -> Unit,
     onOpenBases: (AssignerContractPR) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -137,7 +114,6 @@ fun AssignerContractsContent(
     // not draw — the list must not rebuild because the search sheet opened.
     val list = state.list
     val filter = state.filter
-    val actionSheetFor = state.actionSheetFor
 
     // Rows fade and rise in as they arrive; a new search plays the entrance again, paging further
     // into one does not. Held in a remember because building it inline would hand the scaffold a
@@ -231,37 +207,36 @@ fun AssignerContractsContent(
                 )
             },
         ) { contract, itemModifier ->
-            // The same card ردیف‌های پیمان draws, tapping opens the action sheet rather than
-            // navigating. `dateLabel` differs because the column does: this endpoint sends
-            // تاریخ قرارداد where that one sends تاریخ تعهد.
+            // The same card ردیف‌های پیمان draws, with its two destinations offered on the card
+            // itself rather than behind a sheet — one tap instead of three, and the same shape
+            // every other کارگاه card here uses. `dateLabel` differs because the column does:
+            // this endpoint sends تاریخ قرارداد where that one sends تاریخ تعهد.
             ContractRowCard(
                 row = contract.card,
                 showContact = true,
                 dateLabel = Res.string.assigner_contract_date,
-                onClick = { onIntent(AssignerContractsIntent.ContractTapped(contract)) },
                 modifier = itemModifier,
+                buttons = {
+                    WorkshopCardButton(
+                        text = stringResource(Res.string.assigner_contract_detail_title),
+                        tone = WorkshopCardButtonTone.PRIMARY,
+                        onClick = { onOpenDetail(contract) },
+                    )
+                    WorkshopCardButton(
+                        text = stringResource(Res.string.assigner_bases_title),
+                        // A پیمان missing any of the four keys cannot address its own bases; the
+                        // button is plainly unavailable and the line below says why, rather than
+                        // opening a screen onto another contract's records.
+                        tone = if (contract.canOpenBases) {
+                            WorkshopCardButtonTone.OUTLINE
+                        } else {
+                            WorkshopCardButtonTone.DISABLED
+                        },
+                        onClick = { onOpenBases(contract) },
+                    )
+                },
             )
         }
-    }
-
-    if (actionSheetFor != null) {
-        AssignerActionSheet(
-            workshopName = actionSheetFor.card.name,
-            rowLabel = actionSheetFor.card.rowLabel,
-            canOpenBases = actionSheetFor.canOpenBases,
-            onViewDetail = {
-                onIntent(AssignerContractsIntent.ActionSheetDismissed)
-                onOpenDetail()
-            },
-            onViewBases = {
-                onIntent(AssignerContractsIntent.ActionSheetDismissed)
-                // The پیمان travels with the callback rather than being read back off state:
-                // dismissing the sheet clears `actionSheetFor`, and on the main dispatcher that can
-                // land *before* this lambda returns — which left the tap doing nothing at all.
-                onOpenBases(actionSheetFor)
-            },
-            onDismiss = { onIntent(AssignerContractsIntent.ActionSheetDismissed) },
-        )
     }
 
     if (state.isSearchOpen) {
@@ -273,9 +248,14 @@ fun AssignerContractsContent(
             showWorkshopIdError = draft.showWorkshopIdError,
             isApplying = list.isLoading,
             canReset = filter != null,
+            myWorkshops = state.myWorkshops,
+            myWorkshopsTotal = state.myWorkshopsTotal,
             onWorkshopIdChange = { onIntent(AssignerContractsIntent.DraftWorkshopIdChanged(it)) },
             onBranchCodeChange = { onIntent(AssignerContractsIntent.DraftBranchCodeChanged(it)) },
             onContractRowChange = { onIntent(AssignerContractsIntent.DraftContractRowChanged(it)) },
+            onQuickPick = { id, branch ->
+                onIntent(AssignerContractsIntent.QuickPicked(id, branch))
+            },
             onApply = { onIntent(AssignerContractsIntent.ApplySearch) },
             onReset = { onIntent(AssignerContractsIntent.ClearSearch) },
             onDismiss = {
@@ -437,23 +417,29 @@ private fun AssignerSearchSheetPreview() = PreviewRtlThemeContent {
             showWorkshopIdError = true,
             isApplying = false,
             canReset = true,
+            myWorkshops = PreviewWorkshops,
+            myWorkshopsTotal = 8,
             onWorkshopIdChange = {},
             onBranchCodeChange = {},
             onContractRowChange = {},
+            onQuickPick = { _, _ -> },
             onApply = {},
             onReset = {},
         )
 }
 
-/** The action sheet, on a پیمان whose bases cannot be addressed. */
-@PreviewRtlTheme
-@Composable
-private fun AssignerActionSheetPreview() = PreviewRtlThemeContent {
-    AssignerActionSheetContent(
-            workshopName = "شرکت راه‌سازی البرز شرق",
-            rowLabel = "۳",
-            canOpenBases = false,
-            onViewDetail = {},
-            onViewBases = {},
-        )
-}
+/** کارگاه‌های شما as the sheet offers them — two of the employer's eight, so the shortfall shows. */
+private val PreviewWorkshops = persistentListOf(
+    WorkshopPR(
+        workshopId = "9028212822",
+        branchCode = "6310",
+        name = "دبستان کارن ۲ مجتبی غلامیان",
+        codeLabel = "۹۰۲۸۲۱۲۸۲۲",
+    ),
+    WorkshopPR(
+        workshopId = "6318210573",
+        branchCode = "6310",
+        name = "دبستان غیر دولتی کارن",
+        codeLabel = "۶۳۱۸۲۱۰۵۷۳",
+    ),
+)

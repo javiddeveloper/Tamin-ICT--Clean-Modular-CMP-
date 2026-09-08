@@ -10,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -50,9 +51,9 @@ import taminx.core.core_ui.workshop_code
  * جزئیات پیمان — three grouped blocks of label/value cells.
  *
  * No request of its own: everything here arrived with the list row, which is why tapping through
- * is instant and why the screen has no loading state. [AssignerContractsUiState.selected] is set
- * when the card is tapped, a step before this destination exists, so it can only be null after
- * process death — which the screen says rather than drawing a page of dashes.
+ * is instant and why the screen has no loading state. The پیمان is found in the list by the ردیف
+ * and sequence its route carries, so this screen can never be composed against a stale selection;
+ * it is null only after process death, which the screen says rather than drawing a page of dashes.
  *
  * The middle group is **your own** کارگاه: the response carries both sides of the پیمان, so the
  * design's hardcoded `agMyWs()` block is real data here, not a profile lookup.
@@ -60,13 +61,25 @@ import taminx.core.core_ui.workshop_code
 @Composable
 fun AssignerContractDetailScreen(
     viewModel: AssignerContractsViewModel,
+    contractRow: String,
+    contractSequence: String,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    HandleAssignerContractsEvents(viewModel.events)
+
+    // Found in the list this screen was opened from, by the two keys its route carries — the same
+    // shape مبانی محاسباتی and جزئیات مبنا use. Null only after process death, when that list was
+    // never fetched in this process.
+    val contracts = state.list.items
+    val contract = remember(contracts, contractRow, contractSequence) {
+        contracts.firstOrNull {
+            it.contractRow == contractRow && it.contractSequence == contractSequence
+        }
+    }
+
     AssignerContractDetailContent(
-        contract = state.selected,
+        contract = contract,
         onBack = onBack,
         modifier = modifier,
     )

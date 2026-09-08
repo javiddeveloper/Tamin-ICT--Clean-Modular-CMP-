@@ -1,32 +1,5 @@
 package com.tamin.taminhamrah.ui.components
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
-import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
-import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
-import com.tamin.taminhamrah.ui.theme.LocalTaminColors
-import io.ktor.utils.io.toByteArray
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import org.jetbrains.compose.resources.vectorResource
-import taminx.core.core_ui.Res
-import taminx.core.core_ui.ic_tamin_cross
-
 /**
  * Full-screen PDF viewer, used wherever a downloaded PDF is shown.
  *
@@ -42,19 +15,42 @@ import taminx.core.core_ui.ic_tamin_cross
  * @param pdf the fetched download, or null until [onRequestDownload] has produced one.
  * @param downloadFailed the requested download came back with nothing, so stop waiting for it.
  */
-import androidx.compose.ui.graphics.Brush
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
+import com.tamin.taminhamrah.ui.looksLikePdf
+import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.shimmer
+import io.ktor.utils.io.toByteArray
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
+import taminx.core.core_ui.Res
 import taminx.core.core_ui.document_viewer_close
 import taminx.core.core_ui.document_viewer_file_unavailable
 import taminx.core.core_ui.document_viewer_title
-
-import com.tamin.taminhamrah.ui.looksLikePdf
-import com.tamin.taminhamrah.ui.theme.CornerRadius
-import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.ui.theme.shimmer
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.draw.clip
+import taminx.core.core_ui.ic_tamin_cross
+import taminx.core.core_ui.ic_warning
 
 @Composable
 fun TaminPdfViewer(
@@ -133,10 +129,14 @@ fun TaminPdfViewer(
                             .clip(RoundedCornerShape(CornerRadius.card))
                             .shimmer(),
                     )
+                    // The app's own empty block, icon tile and all, rather than a line of text
+                    // adrift in the middle of the page.
                     else -> if (ready.isEmpty()) {
-                        Box(Modifier.fillMaxSize(), Alignment.Center) {
-                            Text(text = emptyMessage, color = colors.textSecondary)
-                        }
+                        EmptyStateMessage(
+                            icon = vectorResource(Res.drawable.ic_warning),
+                            title = emptyMessage,
+                            showIconTile = true,
+                        )
                     } else {
                         PdfPagesView(pdfBytes = ready, modifier = Modifier.fillMaxSize())
                     }

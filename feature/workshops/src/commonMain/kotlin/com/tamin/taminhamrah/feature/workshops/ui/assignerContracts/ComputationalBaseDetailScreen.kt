@@ -22,12 +22,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractsIntent
+import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.DocumentFailure
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.DocumentPreview
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopScreenShell
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
@@ -40,6 +45,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.ListGroupView
+import com.tamin.taminhamrah.ui.components.ListItemColors
 import com.tamin.taminhamrah.ui.components.ListItemData
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminImageViewer
@@ -62,6 +68,7 @@ import taminx.core.core_ui.assigner_base_detail_title
 import taminx.core.core_ui.assigner_bases_empty_body
 import taminx.core.core_ui.assigner_bases_empty_title
 import taminx.core.core_ui.assigner_documents_empty
+import taminx.core.core_ui.assigner_document_open_failed
 import taminx.core.core_ui.assigner_documents_title
 import taminx.core.core_ui.ic_tamin_chevron_down
 import taminx.core.core_ui.ic_tamin_computational_base
@@ -82,7 +89,6 @@ fun ComputationalBaseDetailScreen(
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    HandleAssignerContractsEvents(viewModel.events)
 
     // Found in the list this screen was opened from, by the number its route carries. Null only
     // after process death, when that list was never fetched in this process.
@@ -94,6 +100,7 @@ fun ComputationalBaseDetailScreen(
     ComputationalBaseDetailContent(
         base = base,
         openingDocumentId = state.openingDocumentId,
+        failure = state.documentFailure,
         preview = state.preview,
         onIntent = viewModel::sendIntent,
         onBack = onBack,
@@ -105,6 +112,7 @@ fun ComputationalBaseDetailScreen(
 fun ComputationalBaseDetailContent(
     base: ComputationalBasePR?,
     openingDocumentId: String?,
+    failure: DocumentFailure?,
     preview: DocumentPreview?,
     onIntent: (AssignerContractsIntent) -> Unit,
     onBack: () -> Unit,
@@ -137,6 +145,7 @@ fun ComputationalBaseDetailContent(
                 amount = base.amount,
                 documents = base.documents,
                 openingDocumentId = openingDocumentId,
+                failure = failure,
                 onOpenDocument = { onIntent(AssignerContractsIntent.DocumentTapped(it)) },
             )
         }
@@ -164,11 +173,14 @@ private fun BaseSummaryCard(
     amount: String,
     documents: ImmutableList<BaseDocumentPR>,
     openingDocumentId: String?,
+    failure: DocumentFailure?,
     onOpenDocument: (BaseDocumentPR) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    var isExpanded by remember { mutableStateOf(false) }
+    // Open on arrival: the documents are the reason this screen exists, and they arrived with
+    // the row, so collapsing them behind a tap hides the whole point of the page.
+    var isExpanded by remember { mutableStateOf(true) }
 
     Column(
         modifier = modifier
@@ -221,6 +233,7 @@ private fun BaseSummaryCard(
                 DocumentList(
                     documents = documents,
                     openingDocumentId = openingDocumentId,
+                    failure = failure,
                     onOpen = onOpenDocument,
                     modifier = Modifier.padding(top = Spacing.smd),
                 )
@@ -246,6 +259,17 @@ private fun DocumentsToggle(
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onToggle)
+            // `border-top:1px dashed` in the design — the one rule that separates the amount from
+            // its attachments.
+            .drawBehind {
+                drawLine(
+                    color = colors.divider,
+                    start = Offset.Zero,
+                    end = Offset(size.width, 0f),
+                    strokeWidth = DashedRuleWidth.toPx(),
+                    pathEffect = DashedRule,
+                )
+            }
             .padding(top = Spacing.smd),
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
@@ -280,10 +304,12 @@ private fun DocumentsToggle(
 private fun DocumentList(
     documents: ImmutableList<BaseDocumentPR>,
     openingDocumentId: String?,
+    failure: DocumentFailure?,
     onOpen: (BaseDocumentPR) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
+    val genericFailure = stringResource(Res.string.assigner_document_open_failed)
     val imageIcon = painterResource(Res.drawable.ic_tamin_document_image)
     val pdfIcon = painterResource(Res.drawable.ic_tamin_workshop_contract_rows)
     // Resolved outside the loop: `stringResource` in a `forEach` would be a composable call whose
@@ -310,19 +336,33 @@ private fun DocumentList(
     }
 
     val items = remember(
-        documents, titles, openingDocumentId, imageIcon, pdfIcon, imageLabel, pdfLabel, colors, onOpen,
+        documents, titles, openingDocumentId, failure, genericFailure,
+        imageIcon, pdfIcon, imageLabel, pdfLabel, colors, onOpen,
     ) {
         documents.map { document ->
             val isImage = document.kind == BaseDocumentKind.IMAGE
+            val didFail = failure?.documentId == document.documentId
             ListItemData(
                 title = titles.getValue(document.category),
-                subtitle = if (isImage) imageLabel else pdfLabel,
+                // The kind normally; the reason the fetch failed once it has. The service's own
+                // words when it gave any — `upload-image` names the id it could not find — and the
+                // generic line only when it failed without saying why.
+                subtitle = when {
+                    !didFail -> if (isImage) imageLabel else pdfLabel
+                    else -> failure.message?.takeIf { it.isNotBlank() } ?: genericFailure
+                },
                 leadingIconPainter = if (isImage) imageIcon else pdfIcon,
                 leadingIconShape = DocumentIconShape,
                 // Disabled while its own fetch is in flight, and while another one is: two
-                // downloads at once is not a state this screen has anything to say about.
+                // downloads at once is not a state this screen has anything to say about. A row
+                // that failed stays live, because tapping it again is the retry.
                 enabled = openingDocumentId == null,
                 onClick = { onOpen(document) },
+                colors = if (didFail) {
+                    ListItemColors(subtitleColor = colors.dangerText)
+                } else {
+                    ListItemColors()
+                },
             )
         }.toImmutableList()
     }
@@ -345,18 +385,15 @@ private fun DocumentViewer(
 ) {
     val title = stringResource(preview.title)
     when (preview.kind) {
-        // Only raised once the bytes are in hand: this viewer has no loading state of its own, and
-        // an empty model would draw the broken-image placeholder for the length of the download.
-        // The wait is visible on the list instead — every document row is disabled while a fetch
-        // is in flight.
-        BaseDocumentKind.IMAGE -> if (preview.imageData.isNotBlank()) {
-            TaminImageViewer(
-                title = title,
-                // Base64 straight from `upload-image`; the async loader decodes it.
-                url = preview.imageData,
-                onDismiss = onDismiss,
-            )
-        }
+        // Blank while the bytes are still coming, which is what makes the viewer wait rather than
+        // draw a broken-image placeholder — the same three states the PDF viewer has.
+        BaseDocumentKind.IMAGE -> TaminImageViewer(
+            title = title,
+            // Base64 straight from `upload-image`; the async loader decodes it.
+            url = preview.imageData,
+            downloadFailed = preview.didFail,
+            onDismiss = onDismiss,
+        )
 
         BaseDocumentKind.PDF -> TaminPdfViewer(
             fileName = "$PdfFilePrefix${preview.documentId}$PdfFileSuffix",
@@ -373,6 +410,10 @@ private fun DocumentViewer(
 
 /** `transform:rotate(180deg)` once the documents section is open. */
 private const val ChevronOpenDegrees = 180f
+
+/** Hoisted: a path effect allocated per frame is a path effect allocated for nothing. */
+private val DashedRule = PathEffect.dashPathEffect(floatArrayOf(6f, 6f))
+private val DashedRuleWidth = 1.dp
 
 private const val PdfFilePrefix = "computational_base_"
 private const val PdfFileSuffix = ".pdf"
@@ -410,6 +451,7 @@ private fun ComputationalBaseDetailPreview() = PreviewRtlThemeContent {
     ComputationalBaseDetailContent(
         base = PreviewBase,
         openingDocumentId = null,
+        failure = null,
         preview = null,
         onIntent = {},
         onBack = {},
@@ -423,6 +465,7 @@ private fun ComputationalBaseDetailNoDocumentsPreview() = PreviewRtlThemeContent
     ComputationalBaseDetailContent(
         base = PreviewBase.copy(documents = persistentListOf(), documentCount = "۰"),
         openingDocumentId = null,
+        failure = null,
         preview = null,
         onIntent = {},
         onBack = {},
@@ -436,6 +479,7 @@ private fun ComputationalBaseDetailOpeningPreview() = PreviewRtlThemeContent {
     ComputationalBaseDetailContent(
         base = PreviewBase,
         openingDocumentId = "img-1",
+        failure = null,
         preview = null,
         onIntent = {},
         onBack = {},

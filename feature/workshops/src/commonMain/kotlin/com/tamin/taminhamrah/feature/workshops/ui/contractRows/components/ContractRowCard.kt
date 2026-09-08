@@ -1,7 +1,6 @@
 package com.tamin.taminhamrah.feature.workshops.ui.contractRows.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -48,15 +47,17 @@ import taminx.core.core_ui.contract_rows_workshop_number
  *
  * On ردیف‌های پیمان the card is inert — no ripple, no chevron, no click target. The old app wired
  * an `onItemClickListener` into both of its adapters and never called it; that reproduces what the
- * screen actually does rather than what its plumbing implied. واگذارندگان draws the same card and
- * *is* tappable, which is what [onClick] is for; null keeps the inert original.
+ * screen actually does rather than what its plumbing implied. واگذارندگان offers its two
+ * destinations as [buttons] on the card itself, which is what every other کارگاه card here does.
  *
  * [showContact] follows the tab, not the row: only the تعهدنامه‌دار service sends the contact
  * columns, so on the other tab the block is absent rather than dashed.
  *
  * @param dateLabel what the second tile is called. ردیف‌های پیمان reads تاریخ تعهد off the
  *   agreement; واگذارندگان reads تاریخ قرارداد off the پیمان, and they are different columns.
- * @param onClick opens the row. Null — the default — leaves the card inert, ripple included.
+ * @param buttons the card's own actions, laid out in one equal-width row the way
+ *   [com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopRecordCard] lays out its own.
+ *   Null — the default — leaves the card inert, which is what ردیف‌های پیمان wants.
  */
 @Composable
 fun ContractRowCard(
@@ -64,14 +65,13 @@ fun ContractRowCard(
     showContact: Boolean,
     modifier: Modifier = Modifier,
     dateLabel: StringResource = Res.string.contract_rows_commitment_date,
-    onClick: (() -> Unit)? = null,
+    buttons: (@Composable RowScope.() -> Unit)? = null,
 ) {
     val colors = LocalTaminColors.current
     Column(
         modifier = modifier
             .fillMaxWidth()
             .taminSurface(WorkshopDimens.cardCorner)
-            .then(if (onClick == null) Modifier else Modifier.clickable(onClick = onClick))
             .padding(
                 horizontal = WorkshopDimens.contractRowCardHorizontalPadding,
                 vertical = WorkshopDimens.contractRowCardVerticalPadding,
@@ -150,6 +150,16 @@ fun ContractRowCard(
                         .padding(top = WorkshopDimens.contractRowTileGap),
                 )
             }
+        }
+
+        if (buttons != null) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = WorkshopDimens.cardButtonsTopMargin),
+                horizontalArrangement = Arrangement.spacedBy(WorkshopDimens.cardButtonGap),
+                content = buttons,
+            )
         }
     }
 }

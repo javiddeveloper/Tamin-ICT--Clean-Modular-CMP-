@@ -12,6 +12,7 @@ import com.tamin.taminhamrah.model.userRequest.UserRequestDTO
 import com.tamin.taminhamrah.model.userRequest.UserRequestTypeDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseDTO
+import kotlinx.serialization.json.JsonElement
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.QueryMap
@@ -74,9 +75,18 @@ interface UserRequestApiService {
         @Path("referenceId") referenceId: String
     ): BaseDTO<ListData<FollowUpObjectionHistoryDTO>>
 
+    /**
+     * A document's bytes, base64 in `data`.
+     *
+     * Typed `JsonElement` rather than `String` because `data` is **not** always a string: a failure
+     * puts an object there (`{cause, message}`), and a `BaseDTO<String>` cannot deserialize that —
+     * it throws `JsonConvertException` before `extractData` ever sees the envelope, so the caller
+     * reports a transport failure and the service's own «… یافت نشد» is lost. A `JsonElement` holds
+     * both shapes, which is what lets the real reason reach the screen.
+     */
     @GET("upload-image/{guid}/0/0")
     suspend fun downloadDocument(
         @Path("guid") guid: String
-    ): BaseDTO<String>
+    ): BaseDTO<JsonElement>
 }
 

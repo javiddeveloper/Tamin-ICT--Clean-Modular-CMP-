@@ -100,9 +100,18 @@ data object AssignerContractsGraph
 @Serializable
 data class AssignerContractsRoute(val workshopId: String = "", val branchCode: String = "")
 
-/** جزئیات پیمان — reads the پیمان the list recorded when its card was tapped. */
+/**
+ * جزئیات پیمان.
+ *
+ * Carries the two keys that identify a پیمان within the list, and the screen finds it there — the
+ * same shape the other two drill-downs use, so no destination depends on a selection having been
+ * written to state before it composed.
+ */
 @Serializable
-data object AssignerContractDetailRoute
+data class AssignerContractDetailRoute(
+    val contractRow: String,
+    val contractSequence: String,
+)
 
 /**
  * مبانی محاسباتی of one پیمان.
@@ -210,7 +219,14 @@ fun NavGraphBuilder.workshopsScreen(
                 workshopId = route.workshopId,
                 branchCode = route.branchCode,
                 onBack = { navController.popBackStack() },
-                onOpenDetail = { navController.navigate(AssignerContractDetailRoute) },
+                onOpenDetail = { contract ->
+                    navController.navigate(
+                        AssignerContractDetailRoute(
+                            contractRow = contract.contractRow,
+                            contractSequence = contract.contractSequence,
+                        )
+                    )
+                },
                 // The row the sheet was raised for arrives with the callback. The action is
                 // disabled unless all four keys are present, so this cannot address a partial set.
                 onOpenBases = { contract ->
@@ -229,8 +245,11 @@ fun NavGraphBuilder.workshopsScreen(
         }
 
         composableWithFadeTransitions<AssignerContractDetailRoute> { entry ->
+            val route = entry.toRoute<AssignerContractDetailRoute>()
             AssignerContractDetailScreen(
                 viewModel = entry.sharedViewModel(navController),
+                contractRow = route.contractRow,
+                contractSequence = route.contractSequence,
                 onBack = { navController.popBackStack() },
             )
         }

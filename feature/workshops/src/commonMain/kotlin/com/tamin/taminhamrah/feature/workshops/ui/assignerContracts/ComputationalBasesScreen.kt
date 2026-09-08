@@ -75,7 +75,6 @@ fun ComputationalBasesScreen(
     }
     LaunchedEffect(keys) { viewModel.sendIntent(AssignerContractsIntent.OpenBases(keys)) }
 
-    HandleAssignerContractsEvents(viewModel.events)
 
     ComputationalBasesContent(
         bases = state.bases,
