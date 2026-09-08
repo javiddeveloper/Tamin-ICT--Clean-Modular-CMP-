@@ -11,31 +11,35 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tamin.taminhamrah.feature.calculateWagePension.ui.components.CalculateWagePensionBodyShimmer
 import com.tamin.taminhamrah.feature.calculateWagePension.ui.components.CalculateWagePensionDisclaimerBanner
 import com.tamin.taminhamrah.feature.calculateWagePension.ui.components.CalculateWagePensionHeader
 import com.tamin.taminhamrah.feature.calculateWagePension.ui.components.CalculateWagePensionHistoryCard
+import com.tamin.taminhamrah.feature.calculateWagePension.ui.components.CalculateWagePensionInfoSheet
 import com.tamin.taminhamrah.feature.calculateWagePension.ui.components.CalculateWagePensionStatsCard
 import com.tamin.taminhamrah.feature.calculateWagePension.ui.components.CalculateWagePensionWorkshopSwitchCard
 import com.tamin.taminhamrah.feature.calculateWagePension.ui.components.CalculateWagePensionYearDetailSheet
 import com.tamin.taminhamrah.feature.calculateWagePension.ui.contract.CalculateWagePensionEvent
 import com.tamin.taminhamrah.feature.calculateWagePension.ui.contract.CalculateWagePensionIntent
+import com.tamin.taminhamrah.feature.calculateWagePension.ui.contract.CalculateWagePensionUiState
+import com.tamin.taminhamrah.model.calculateWagePension.BASIC_WAGE
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
-import com.tamin.taminhamrah.ui.theme.ButtonDimens
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import org.jetbrains.compose.resources.stringResource
@@ -55,14 +59,29 @@ fun CalculateWagePensionScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val toaster = LocalToaster.current
-    val colors = LocalTaminColors.current
-    val hazeState = remember { HazeState(initialBlurEnabled = true) }
 
     viewModel.events.collectWithLifecycleAware { event ->
         when (event) {
             is CalculateWagePensionEvent.ShowToast -> toaster.error(event.message)
         }
     }
+
+    CalculateWagePensionScreenContent(
+        state = state,
+        onBack = onBack,
+        onIntent = viewModel::sendIntent,
+    )
+}
+
+@Composable
+internal fun CalculateWagePensionScreenContent(
+    state: CalculateWagePensionUiState,
+    onBack: () -> Unit,
+    onIntent: (CalculateWagePensionIntent) -> Unit,
+) {
+    val colors = LocalTaminColors.current
+    val hazeState = remember { HazeState(initialBlurEnabled = true) }
+    val isInitialLoading = state.isLoading && state.calculation == null
 
     Scaffold(
         containerColor = colors.bgPage,
@@ -74,11 +93,9 @@ fun CalculateWagePensionScreen(
                         legalFloorApplied = state.calculation?.legalFloorApplied == true,
                         isMultipleWorkshopsEnabled = state.isMultipleWorkshopsEnabled,
                         onBack = onBack,
-                        onInfoClick = { viewModel.sendIntent(CalculateWagePensionIntent.ShowInfo) },
-                        showInfoDialog = state.showInfoDialog,
-                        onDismissInfo = { viewModel.sendIntent(CalculateWagePensionIntent.DismissInfo) },
+                        onInfoClick = { onIntent(CalculateWagePensionIntent.ShowInfo) },
+                        isLoading = isInitialLoading,
                     )
-                    // Room for the glass stats card to sit on the gradient edge.
                     Spacer(modifier = Modifier.height(Spacing.xxxl))
                 }
 
@@ -86,7 +103,7 @@ fun CalculateWagePensionScreen(
                     hazeState = hazeState,
                     premiumYears = state.calculation?.premiumPaymentHistoryYear ?: 0.0,
                     averageSalary = state.calculation?.averageSalaryLastTwoYears ?: 0L,
-                    isLoading = state.isLoading && state.calculation == null,
+                    isLoading = isInitialLoading,
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(horizontal = Spacing.lg),
@@ -95,18 +112,15 @@ fun CalculateWagePensionScreen(
         },
     ) { padding ->
         when {
-            state.isLoading && state.calculation == null -> {
-                Box(
+            isInitialLoading -> {
+                CalculateWagePensionBodyShimmer(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(padding),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator(
-                        color = colors.blueText,
-                        strokeWidth = ButtonDimens.loadingIndicatorStroke,
-                    )
-                }
+                        .padding(padding)
+                        .navigationBarsPadding()
+                        .padding(horizontal = Spacing.page)
+                        .padding(top = Spacing.lg, bottom = Spacing.lg),
+                )
             }
 
             state.error != null && state.calculation == null -> {
@@ -125,7 +139,7 @@ fun CalculateWagePensionScreen(
                     Spacer(modifier = Modifier.height(Spacing.lg))
                     TaminFilledButton(
                         text = stringResource(Res.string.calculate_wage_pension_retry),
-                        onClick = { viewModel.sendIntent(CalculateWagePensionIntent.Retry) },
+                        onClick = { onIntent(CalculateWagePensionIntent.Retry) },
                     )
                 }
             }
@@ -145,9 +159,7 @@ fun CalculateWagePensionScreen(
                         enabled = state.isMultipleWorkshopsEnabled,
                         isLoading = state.isMultipleWorkshopLoading,
                         onToggle = {
-                            viewModel.sendIntent(
-                                CalculateWagePensionIntent.MultipleWorkshopsToggled(it)
-                            )
+                            onIntent(CalculateWagePensionIntent.MultipleWorkshopsToggled(it))
                         },
                     )
 
@@ -160,15 +172,13 @@ fun CalculateWagePensionScreen(
                             chartItems = state.chartItems,
                             selectedIndex = state.selectedChartYearIndex,
                             onYearSelected = {
-                                viewModel.sendIntent(
-                                    CalculateWagePensionIntent.ChartYearSelected(it)
-                                )
+                                onIntent(CalculateWagePensionIntent.ChartYearSelected(it))
                             },
                         )
                     }
 
                     CalculateWagePensionDisclaimerBanner(
-                        onClick = { viewModel.sendIntent(CalculateWagePensionIntent.ShowInfo) },
+                        onClick = { onIntent(CalculateWagePensionIntent.ShowInfo) },
                     )
                 }
             }
@@ -179,11 +189,19 @@ fun CalculateWagePensionScreen(
         state.chartItems.getOrNull(index)?.let { item ->
             CalculateWagePensionYearDetailSheet(
                 item = item,
-                onDismiss = {
-                    viewModel.sendIntent(CalculateWagePensionIntent.ChartYearSelected(null))
-                },
+                onDismiss = { onIntent(CalculateWagePensionIntent.ChartYearSelected(null)) },
             )
         }
+    }
+
+    if (state.showInfoDialog) {
+        CalculateWagePensionInfoSheet(
+            averageSalary = state.calculation?.averageSalaryLastTwoYears ?: 0L,
+            premiumYears = state.calculation?.premiumPaymentHistoryYear ?: 0.0,
+            basicWage = BASIC_WAGE,
+            estimatedAmount = state.displayedEligibleAmount,
+            onDismiss = { onIntent(CalculateWagePensionIntent.DismissInfo) },
+        )
     }
 
     if (state.showMultipleWorkshopsInfoDialog) {
@@ -194,18 +212,66 @@ fun CalculateWagePensionScreen(
             iconTint = colors.onGradient,
             iconBackgroundBrush = colors.iconGradientPrimary,
             onDismissRequest = {
-                viewModel.sendIntent(CalculateWagePensionIntent.DismissMultipleWorkshopsInfo)
+                onIntent(CalculateWagePensionIntent.DismissMultipleWorkshopsInfo)
             },
             confirmButton = {
                 TaminFilledButton(
                     text = stringResource(Res.string.calculate_wage_pension_info_confirm),
                     onClick = {
-                        viewModel.sendIntent(CalculateWagePensionIntent.DismissMultipleWorkshopsInfo)
+                        onIntent(CalculateWagePensionIntent.DismissMultipleWorkshopsInfo)
                     },
                     modifier = Modifier.fillMaxWidth(),
                 )
             },
             dismissButton = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun CalculateWagePensionScreenLoadedPreview() {
+    PreviewRtlThemeContent {
+        CalculateWagePensionScreenContent(
+            state = CalculateWagePensionPreviewData.loadedState,
+            onBack = {},
+            onIntent = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun CalculateWagePensionScreenLoadingPreview() {
+    PreviewRtlThemeContent {
+        CalculateWagePensionScreenContent(
+            state = CalculateWagePensionPreviewData.loadingState,
+            onBack = {},
+            onIntent = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun CalculateWagePensionScreenErrorPreview() {
+    PreviewRtlThemeContent {
+        CalculateWagePensionScreenContent(
+            state = CalculateWagePensionPreviewData.errorState,
+            onBack = {},
+            onIntent = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun CalculateWagePensionScreenDarkPreview() {
+    PreviewRtlThemeContent(darkTheme = true) {
+        CalculateWagePensionScreenContent(
+            state = CalculateWagePensionPreviewData.loadedState,
+            onBack = {},
+            onIntent = {},
         )
     }
 }

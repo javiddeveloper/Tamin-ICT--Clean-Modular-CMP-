@@ -20,6 +20,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -82,6 +84,17 @@ internal fun CalculateWagePensionDisclaimerBanner(
             contentDescription = null,
             tint = colors.greenText,
             modifier = Modifier.size(IconSize.small),
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun CalculateWagePensionDisclaimerBannerPreview() {
+    PreviewRtlThemeContent {
+        CalculateWagePensionDisclaimerBanner(
+            onClick = {},
+            modifier = Modifier.padding(Spacing.page),
         )
     }
 }

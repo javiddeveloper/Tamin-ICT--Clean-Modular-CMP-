@@ -19,11 +19,15 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import com.tamin.taminhamrah.model.calculateWagePension.WagePensionChartItemPR
+import com.tamin.taminhamrah.feature.calculateWagePension.ui.CalculateWagePensionPreviewData
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.theme.ChartDimens
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -32,6 +36,7 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.toPersianDigits
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringArrayResource
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
@@ -58,22 +63,32 @@ internal fun CalculateWagePensionYearDetailSheet(
     onDismiss: () -> Unit,
 ) {
     val colors = LocalTaminColors.current
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val scope = rememberCoroutineScope()
+    val dismissSheet: () -> Unit = {
+        scope.launch {
+            sheetState.hide()
+        }.invokeOnCompletion {
+            if (!sheetState.isVisible) onDismiss()
+        }
+    }
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        sheetState = sheetState,
         containerColor = colors.bgSurface,
         shape = RoundedCornerShape(topStart = CornerRadius.sheet, topEnd = CornerRadius.sheet),
     ) {
         YearDetailContent(
             item = item,
-            onDismiss = onDismiss,
+            onDismiss = dismissSheet,
             modifier = Modifier.navigationBarsPadding(),
         )
     }
 }
 
 @Composable
-private fun YearDetailContent(
+internal fun YearDetailContent(
     item: WagePensionChartItemPR,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
@@ -263,3 +278,27 @@ private data class Season(
     val tint: Color,
     val monthStart: Int,
 )
+
+@PreviewRtlTheme
+@Composable
+private fun CalculateWagePensionYearDetailContentPreview() {
+    PreviewRtlThemeContent {
+        YearDetailContent(
+            item = CalculateWagePensionPreviewData.chartItems[2],
+            onDismiss = {},
+            modifier = Modifier.padding(Spacing.page),
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun CalculateWagePensionYearDetailPartialPreview() {
+    PreviewRtlThemeContent {
+        YearDetailContent(
+            item = CalculateWagePensionPreviewData.chartItems.first(),
+            onDismiss = {},
+            modifier = Modifier.padding(Spacing.page),
+        )
+    }
+}

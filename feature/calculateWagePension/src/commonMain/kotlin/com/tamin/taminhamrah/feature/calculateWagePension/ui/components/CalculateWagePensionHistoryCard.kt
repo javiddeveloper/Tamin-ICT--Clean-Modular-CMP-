@@ -32,6 +32,9 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import com.tamin.taminhamrah.model.calculateWagePension.WagePensionChartItemPR
+import com.tamin.taminhamrah.feature.calculateWagePension.ui.CalculateWagePensionPreviewData
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.theme.ChartDimens
 import com.tamin.taminhamrah.ui.theme.CornerRadius as TaminCornerRadius
 import com.tamin.taminhamrah.ui.theme.Elevation
@@ -366,5 +369,39 @@ private fun WagePensionBarChart(
                 }
             }
         }
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun CalculateWagePensionHistoryCardPreview() {
+    PreviewRtlThemeContent {
+        CalculateWagePensionHistoryCard(
+            years = 7,
+            months = 4,
+            days = 0,
+            totalDays = 2675,
+            chartItems = CalculateWagePensionPreviewData.chartItems,
+            selectedIndex = null,
+            onYearSelected = {},
+            modifier = Modifier.padding(Spacing.page),
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun CalculateWagePensionHistoryCardDarkPreview() {
+    PreviewRtlThemeContent(darkTheme = true) {
+        CalculateWagePensionHistoryCard(
+            years = 2,
+            months = 0,
+            days = 326,
+            totalDays = 1056,
+            chartItems = CalculateWagePensionPreviewData.chartItems,
+            selectedIndex = 2,
+            onYearSelected = {},
+            modifier = Modifier.padding(Spacing.page),
+        )
     }
 }

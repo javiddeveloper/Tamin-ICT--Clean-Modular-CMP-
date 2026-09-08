@@ -659,6 +659,16 @@
     <string name="calculate_wage_pension_disclaimer">با توجه به غیرقطعی بودن میزان سابقه، مبلغ مستمری محاسبه‌شده قابل استناد در مراجع قانونی نمی‌باشد. </string>
     <string name="calculate_wage_pension_disclaimer_link">نحوه محاسبه و نکته‌ها</string>
     <string name="calculate_wage_pension_info_title">نحوه محاسبه و نکته‌ها</string>
+    <string name="calculate_wage_pension_info_formula_label">فرمول محاسبه</string>
+    <string name="calculate_wage_pension_info_formula">( میانگین دستمزد ۲۴ ماه ÷ ۳۰ ) × سال سابقه</string>
+    <string name="calculate_wage_pension_info_avg_label">میانگین دستمزد ۲۴ ماه آخر</string>
+    <string name="calculate_wage_pension_info_years_label">مدت سابقه (سال)</string>
+    <string name="calculate_wage_pension_info_floor_label">حداقل دستمزد پایه (کف مبلغ)</string>
+    <string name="calculate_wage_pension_info_estimated_label">مبلغ برآوردی ماهانه</string>
+    <string name="calculate_wage_pension_info_note_1">حداقل دستمزد هر سال بر اساس مصوبات شورای عالی کار تعیین و به تبع آن حداکثر دستمزد محاسبه می‌گردد.</string>
+    <string name="calculate_wage_pension_info_note_2">به موجب قانون تأمین‌اجتماعی مبلغ مستمری تا سقف ۳۵ سال پرداخت حق بیمه قابل محاسبه می‌باشد.</string>
+    <string name="calculate_wage_pension_info_note_3">مبلغ مستمری محاسبه‌شده بر اساس قوانین عام سازمان می‌باشد و چنانچه بیمه‌شده از قانون خاصی استفاده نماید، نحوه محاسبه مستمری متفاوت خواهد بود.</string>
+    <string name="calculate_wage_pension_info_note_4">با توجه به غیرقطعی بودن میزان سابقه، مبلغ مستمری محاسبه‌شده قابل استناد در مراجع قانونی نمی‌باشد.</string>
     <string name="calculate_wage_pension_info_body">مبلغ نمایش‌داده‌شده برآوردی و بر پایه سوابق ثبت‌شده در سامانه است و تا زمان قطعی‌شدن سوابق، مبنای تصمیم‌گیری قانونی نیست.</string>
     <string name="calculate_wage_pension_info_confirm">متوجه شدم</string>
     <string name="calculate_wage_pension_multiple_info_title">اطلاع</string>

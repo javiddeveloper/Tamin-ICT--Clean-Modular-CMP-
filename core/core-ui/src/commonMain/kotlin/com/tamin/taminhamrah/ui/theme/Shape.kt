@@ -177,6 +177,8 @@ object ShimmerSize {
 /** Scrollable list area inside modal option sheets (city / branch pickers). */
 object SheetDimens {
     val listMaxHeight = 300.dp
+    /** Max height for long copy inside a modal sheet before the sticky footer. */
+    val contentMaxHeight = 440.dp
 }
 
 /**

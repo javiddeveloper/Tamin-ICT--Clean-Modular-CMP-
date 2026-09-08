@@ -16,12 +16,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.coloredShadow
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.DarkTaminColors
@@ -37,6 +40,7 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.hazeSource
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.calculate_wage_pension_avg_wage_label
@@ -187,4 +191,33 @@ private fun formatPremiumYears(value: Double): String {
     val rounded = round(value * 100.0) / 100.0
     val asLong = rounded.toLong()
     return if (rounded == asLong.toDouble()) asLong.toString() else rounded.toString()
+}
+
+@PreviewRtlTheme
+@Composable
+private fun CalculateWagePensionStatsCardPreview() {
+    PreviewRtlThemeContent {
+        val hazeState = remember { HazeState(initialBlurEnabled = true) }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(LocalTaminColors.current.bgPage)
+                .hazeSource(state = hazeState)
+                .padding(Spacing.page),
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
+                CalculateWagePensionStatsCard(
+                    hazeState = hazeState,
+                    premiumYears = 7.34,
+                    averageSalary = 185_000_000L,
+                )
+                CalculateWagePensionStatsCard(
+                    hazeState = hazeState,
+                    premiumYears = 0.0,
+                    averageSalary = 0L,
+                    isLoading = true,
+                )
+            }
+        }
+    }
 }

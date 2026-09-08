@@ -21,6 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.TaminSwitchButton
 import com.tamin.taminhamrah.ui.theme.ButtonDimens
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -115,6 +117,33 @@ internal fun CalculateWagePensionWorkshopSwitchCard(
                     onCheckedChange = onToggle,
                 )
             }
+        }
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun CalculateWagePensionWorkshopSwitchCardPreview() {
+    PreviewRtlThemeContent {
+        Column(
+            modifier = Modifier.padding(Spacing.page),
+            verticalArrangement = Arrangement.spacedBy(Spacing.md),
+        ) {
+            CalculateWagePensionWorkshopSwitchCard(
+                enabled = false,
+                isLoading = false,
+                onToggle = {},
+            )
+            CalculateWagePensionWorkshopSwitchCard(
+                enabled = true,
+                isLoading = false,
+                onToggle = {},
+            )
+            CalculateWagePensionWorkshopSwitchCard(
+                enabled = false,
+                isLoading = true,
+                onToggle = {},
+            )
         }
     }
 }

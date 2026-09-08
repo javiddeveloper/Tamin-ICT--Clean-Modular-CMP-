@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,12 +18,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.CustomChip
-import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
-import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.ShimmerBlock
+import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.ui.toPriceFormat
@@ -36,9 +40,6 @@ import taminx.core.core_ui.calculate_wage_pension_cd_info
 import taminx.core.core_ui.calculate_wage_pension_chip_estimated
 import taminx.core.core_ui.calculate_wage_pension_chip_legal_floor
 import taminx.core.core_ui.calculate_wage_pension_chip_simultaneous
-import taminx.core.core_ui.calculate_wage_pension_info_body
-import taminx.core.core_ui.calculate_wage_pension_info_confirm
-import taminx.core.core_ui.calculate_wage_pension_info_title
 import taminx.core.core_ui.calculate_wage_pension_title
 import taminx.core.core_ui.ic_info
 import taminx.core.core_ui.ic_tamin_chevron_back
@@ -56,9 +57,8 @@ internal fun CalculateWagePensionHeader(
     isMultipleWorkshopsEnabled: Boolean,
     onBack: () -> Unit,
     onInfoClick: () -> Unit,
-    showInfoDialog: Boolean,
-    onDismissInfo: () -> Unit,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
 ) {
     val colors = LocalTaminColors.current
     val gradient = remember(colors.profileGradientStops) {
@@ -112,67 +112,109 @@ internal fun CalculateWagePensionHeader(
 
             Spacer(modifier = Modifier.height(Spacing.sm))
 
-            Row(
-                verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.Center,
-            ) {
-                Text(
-                    text = eligibleAmount.toPriceFormat().toPersianDigits(),
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = colors.onGradient,
+            if (isLoading) {
+                ShimmerBlock(
+                    modifier = Modifier
+                        .width(ShimmerSize.helperLineWidth)
+                        .height(ShimmerSize.wageValueHeight),
+                    cornerRadius = CornerRadius.md,
+                    colorBase = colors.onGradient.copy(alpha = 0.2f),
+                    colorHighlight = colors.onGradient.copy(alpha = 0.4f),
                 )
-                Text(
-                    text = stringResource(Res.string.unit_rial),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = colors.onGradient.copy(alpha = 0.85f),
-                    modifier = Modifier.padding(start = Spacing.sm, bottom = Spacing.xs),
-                )
+            } else {
+                Row(
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    Text(
+                        text = eligibleAmount.toPriceFormat().toPersianDigits(),
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = colors.onGradient,
+                    )
+                    Text(
+                        text = stringResource(Res.string.unit_rial),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = colors.onGradient.copy(alpha = 0.85f),
+                        modifier = Modifier.padding(start = Spacing.sm, bottom = Spacing.xs),
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(Spacing.lg))
 
-            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                val secondaryLabel = when {
-                    isMultipleWorkshopsEnabled ->
-                        stringResource(Res.string.calculate_wage_pension_chip_simultaneous)
-                    legalFloorApplied ->
-                        stringResource(Res.string.calculate_wage_pension_chip_legal_floor)
-                    else -> null
-                }
-                if (secondaryLabel != null) {
-                    CustomChip(
-                        text = secondaryLabel,
-                        containerColor = colors.onGradient.copy(alpha = 0.12f),
-                        textColor = colors.onGradient,
-                        border = BorderStroke(Thickness.border, colors.onGradient.copy(alpha = 0.35f)),
+            if (isLoading) {
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                    ShimmerBlock(
+                        modifier = Modifier
+                            .width(ShimmerSize.chipWidth)
+                            .height(ShimmerSize.badgeHeight),
+                        cornerRadius = CornerRadius.chip,
+                        colorBase = colors.onGradient.copy(alpha = 0.2f),
+                        colorHighlight = colors.onGradient.copy(alpha = 0.4f),
+                    )
+                    ShimmerBlock(
+                        modifier = Modifier
+                            .width(ShimmerSize.hintWidth)
+                            .height(ShimmerSize.badgeHeight),
+                        cornerRadius = CornerRadius.chip,
+                        colorBase = colors.onGradient.copy(alpha = 0.2f),
+                        colorHighlight = colors.onGradient.copy(alpha = 0.4f),
                     )
                 }
-                CustomChip(
-                    text = stringResource(Res.string.calculate_wage_pension_chip_estimated),
-                    containerColor = colors.onGradient.copy(alpha = 0.18f),
-                    textColor = colors.onGradient,
-                )
+            } else {
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                    val secondaryLabel = when {
+                        isMultipleWorkshopsEnabled ->
+                            stringResource(Res.string.calculate_wage_pension_chip_simultaneous)
+                        legalFloorApplied ->
+                            stringResource(Res.string.calculate_wage_pension_chip_legal_floor)
+                        else -> null
+                    }
+                    if (secondaryLabel != null) {
+                        CustomChip(
+                            text = secondaryLabel,
+                            containerColor = colors.onGradient.copy(alpha = 0.12f),
+                            textColor = colors.onGradient,
+                            border = BorderStroke(Thickness.border, colors.onGradient.copy(alpha = 0.35f)),
+                        )
+                    }
+                    CustomChip(
+                        text = stringResource(Res.string.calculate_wage_pension_chip_estimated),
+                        containerColor = colors.onGradient.copy(alpha = 0.18f),
+                        textColor = colors.onGradient,
+                    )
+                }
             }
         }
     }
+}
 
-    if (showInfoDialog) {
-        TaminConfirmationDialog(
-            title = stringResource(Res.string.calculate_wage_pension_info_title),
-            description = stringResource(Res.string.calculate_wage_pension_info_body),
-            icon = vectorResource(Res.drawable.ic_info),
-            iconTint = colors.onGradient,
-            iconBackgroundBrush = colors.iconGradientPrimary,
-            onDismissRequest = onDismissInfo,
-            confirmButton = {
-                TaminFilledButton(
-                    text = stringResource(Res.string.calculate_wage_pension_info_confirm),
-                    onClick = onDismissInfo,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            },
-            dismissButton = {},
+@PreviewRtlTheme
+@Composable
+private fun CalculateWagePensionHeaderPreview() {
+    PreviewRtlThemeContent {
+        CalculateWagePensionHeader(
+            eligibleAmount = 12_450_000L,
+            legalFloorApplied = true,
+            isMultipleWorkshopsEnabled = false,
+            onBack = {},
+            onInfoClick = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun CalculateWagePensionHeaderLoadingPreview() {
+    PreviewRtlThemeContent {
+        CalculateWagePensionHeader(
+            eligibleAmount = 0L,
+            legalFloorApplied = false,
+            isMultipleWorkshopsEnabled = false,
+            onBack = {},
+            onInfoClick = {},
+            isLoading = true,
         )
     }
 }
