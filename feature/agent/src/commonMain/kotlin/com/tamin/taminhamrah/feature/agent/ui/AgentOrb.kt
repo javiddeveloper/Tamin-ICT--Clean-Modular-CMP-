@@ -6,9 +6,12 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -23,9 +26,12 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import org.jetbrains.compose.resources.painterResource
 import kotlin.math.ceil
 import kotlin.math.exp
 import kotlin.math.roundToInt
+import taminx.feature.agent.generated.resources.Res
+import taminx.feature.agent.generated.resources.robot
 
 // ─── Agent orb ────────────────────────────────────────────────────────────────
 //
@@ -81,6 +87,14 @@ private val DiscSize = 160.dp
 private val DiscBlur = 16.dp
 private val DiscCanvasSize = DiscSize + DiscBlur * 2
 private const val DISC_ALPHA = 0.85f
+
+// ── 90:44, the mascot ─────────────────────────────────────────────────────────
+
+/** Native size of `robot.png`; width is fixed below and height follows this ratio. */
+private const val RobotAspectRatio = 126f / 101f
+
+/** Sized to sit well inside the 160 dp sphere with room for its rim glow to still show. */
+private val RobotWidth = 148.dp
 
 /**
  * The four corners of 90:42's angular fill, in `Brush.sweepGradient` order. Figma's gradient
@@ -226,6 +240,15 @@ fun AgentOrb(modifier: Modifier = Modifier) {
                         blendMode = BlendMode.DstIn,
                     )
                 }
+        )
+
+        // 90:44 — the mascot face, fixed in place on top of the (rotating) sphere.
+        Image(
+            painter = painterResource(Res.drawable.robot),
+            contentDescription = null,
+            modifier = Modifier
+                .width(RobotWidth)
+                .aspectRatio(RobotAspectRatio)
         )
     }
 }
