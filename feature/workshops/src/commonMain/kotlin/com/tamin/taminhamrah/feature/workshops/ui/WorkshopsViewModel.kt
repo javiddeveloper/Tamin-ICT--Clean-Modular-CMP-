@@ -183,6 +183,8 @@ class WorkshopsViewModel(
         workshopId = workshopId,
         branchCode = branchCode,
         workshopName = name,
+        characterCode = characterCode,
+        legalNationalId = legalNationalId,
     )
 
     override fun reduceState(

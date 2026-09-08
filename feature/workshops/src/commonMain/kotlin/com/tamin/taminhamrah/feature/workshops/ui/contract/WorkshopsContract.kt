@@ -111,11 +111,20 @@ sealed interface WorkshopsIntent {
 }
 
 sealed interface WorkshopsEvent {
+    /**
+     * Carries the whole workshop identity rather than a widening list of positional strings: the
+     * payment call needs two more fields than the destination's own route does, and six adjacent
+     * `String` parameters are one transposition away from paying the wrong workshop.
+     */
     data class Navigate(
         val action: WorkshopAction,
         val workshopId: String,
         val branchCode: String,
         val workshopName: String,
+        /** `01` حقیقی / `02` حقوقی — reaches `pay-normal-debit` as `nationalType`. */
+        val characterCode: String,
+        /** The حقوقی workshop's national id; blank for a حقیقی one. */
+        val legalNationalId: String,
     ) : WorkshopsEvent
 
     data class ShowMessage(val message: StringResource) : WorkshopsEvent

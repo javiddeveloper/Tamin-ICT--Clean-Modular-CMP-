@@ -22,11 +22,11 @@ import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopSearchPanel
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopSectionHeader
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopStatsCard
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopStats
+import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsEvent
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsIntent
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState
 import com.tamin.taminhamrah.feature.workshops.ui.detail.WorkshopDetailScreen
 import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
-import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
 import com.tamin.taminhamrah.feature.workshops.ui.sheets.WorkshopFilterSheet
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
@@ -57,7 +57,7 @@ import taminx.core.core_ui.workshops_title
 @Composable
 fun WorkshopsRoute(
     onBack: () -> Unit,
-    onOpenAction: (WorkshopAction, String, String, String) -> Unit,
+    onOpenAction: (WorkshopsEvent.Navigate) -> Unit,
     viewModel: WorkshopsViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
