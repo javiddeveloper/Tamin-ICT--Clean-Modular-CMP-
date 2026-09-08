@@ -443,6 +443,9 @@ private val TopBarAvatarSweep = Brush.sweepGradient(
  *  screen, so both read as the same "living" assistant color rather than two different ones. */
 private const val TOP_BAR_AVATAR_ROTATION_DURATION_MS = 12000
 
+/** One blink half-cycle for the online/offline status dot (fade out, then back in). */
+private const val TOP_BAR_STATUS_DOT_BLINK_DURATION_MS = 900
+
 private val TopBarOnlineDotColor = Color(0xFF3DDC84)
 
 /**
@@ -608,16 +611,27 @@ private fun AgentTopBar(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(5.dp)
                         ) {
+                            val statusDotBlinkAlpha by rememberInfiniteTransition(label = "top_bar_status_dot_blink").animateFloat(
+                                initialValue = 1f,
+                                targetValue = 0.25f,
+                                animationSpec = infiniteRepeatable(
+                                    animation = tween(TOP_BAR_STATUS_DOT_BLINK_DURATION_MS, easing = LinearEasing),
+                                    repeatMode = RepeatMode.Reverse
+                                ),
+                                label = "top_bar_status_dot_blink_alpha"
+                            )
+                            val statusDotColor = if (isOffline) Color.White.copy(alpha = 0.4f) else TopBarOnlineDotColor
                             Box(
                                 modifier = Modifier
                                     .size(6.dp)
+                                    .graphicsLayer { alpha = statusDotBlinkAlpha }
                                     .coloredShadow(
-                                        color = (if (isOffline) Color.White.copy(alpha = 0.4f) else TopBarOnlineDotColor).copy(alpha = 0.9f),
+                                        color = statusDotColor.copy(alpha = 0.9f),
                                         borderRadius = 3.dp,
                                         blurRadius = 8.dp
                                     )
                                     .clip(CircleShape)
-                                    .background(if (isOffline) Color.White.copy(alpha = 0.4f) else TopBarOnlineDotColor)
+                                    .background(statusDotColor)
                             )
                             Text(
                                 text = if (isGenerating) "در حال پردازش..."
