@@ -17,6 +17,9 @@ import com.tamin.taminhamrah.model.workshop.AssignerContractQuery
 import com.tamin.taminhamrah.model.workshop.BaseDocumentKind
 import com.tamin.taminhamrah.model.workshop.ComputationalBaseQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopListQuery
+import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
+import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
+import com.tamin.taminhamrah.tools.errorHandling.asTaminApiException
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.userRequest.DownloadUserRequestDocumentUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetAssignerContractsUseCase
@@ -320,7 +323,12 @@ class AssignerContractsViewModel(
                 // generic line.
                 if (data.isBlank()) {
                     emit(PartialState.PreviewChanged(pending.copy(didFail = true)))
-                    emit(PartialState.DocumentFailed(DocumentFailure(documentId, message = null)))
+                    // Answered, with nothing in it: the document is not there.
+                    emit(
+                        PartialState.DocumentFailed(
+                            DocumentFailure(documentId, message = null, isMissing = true)
+                        )
+                    )
                 } else {
                     emit(PartialState.PreviewChanged(pending.copy(imageData = data)))
                 }
@@ -330,7 +338,11 @@ class AssignerContractsViewModel(
                 val pdf = getBasePdf(documentId).toPresentation()
                 if (pdf.pdf == null) {
                     emit(PartialState.PreviewChanged(pending.copy(didFail = true)))
-                    emit(PartialState.DocumentFailed(DocumentFailure(documentId, message = null)))
+                    emit(
+                        PartialState.DocumentFailed(
+                            DocumentFailure(documentId, message = null, isMissing = true)
+                        )
+                    )
                 } else {
                     emit(PartialState.PreviewChanged(pending.copy(pdf = pdf)))
                 }
@@ -344,7 +356,13 @@ class AssignerContractsViewModel(
             emit(PartialState.PreviewChanged(pending.copy(didFail = true)))
             emit(
                 PartialState.DocumentFailed(
-                    DocumentFailure(documentId, error.toSingleLineMessage())
+                    DocumentFailure(
+                        documentId = documentId,
+                        message = error.toSingleLineMessage(),
+                        // A document the service says is not there will not appear on a second
+                        // ask; anything else might, so only this one closes the row.
+                        isMissing = error.isResourceMissing(),
+                    )
                 )
             )
             emit(PartialState.DocumentOpening(null))
@@ -420,3 +438,13 @@ class AssignerContractsViewModel(
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)
 }
+
+/**
+ * Whether the service said the thing simply is not there.
+ *
+ * Read off the parsed `ErrorUri` rather than the message text, which is localized copy and would
+ * make this a string comparison against words a translator can change. Null-safe on purpose: a
+ * throwable that never reached the parser has no uri, and "unknown" must not read as "missing".
+ */
+private fun Throwable.isResourceMissing(): Boolean =
+    (asTaminApiException().cause as? TaminErrorUriException)?.uri == ErrorUri.RESOURCE_NOT_FOUND

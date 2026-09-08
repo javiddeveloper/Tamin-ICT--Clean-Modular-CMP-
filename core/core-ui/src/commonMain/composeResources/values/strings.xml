@@ -2353,6 +2353,7 @@
     <string name="assigner_base_detail_subtitle">شمارهٔ سند %1$s · %2$s</string>
     <string name="assigner_documents_title">مستندات پیوست‌شده</string>
     <string name="assigner_documents_empty">مستندی پیوست نشده است</string>
+    <string name="assigner_document_unavailable">در دسترس نیست</string>
     <string name="assigner_document_open_failed">دریافت سند ناموفق بود</string>
     <string name="assigner_doc_category_letter">مدارک تصاویر نامه</string>
     <string name="assigner_doc_category_subcontractor">مدارک پیمانکاری فرعی</string>

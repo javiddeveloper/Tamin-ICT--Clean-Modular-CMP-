@@ -45,6 +45,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.ListGroupView
+import com.tamin.taminhamrah.ui.components.ListItemBadge
 import com.tamin.taminhamrah.ui.components.ListItemColors
 import com.tamin.taminhamrah.ui.components.ListItemData
 import com.tamin.taminhamrah.ui.components.NumericText
@@ -69,6 +70,7 @@ import taminx.core.core_ui.assigner_bases_empty_body
 import taminx.core.core_ui.assigner_bases_empty_title
 import taminx.core.core_ui.assigner_documents_empty
 import taminx.core.core_ui.assigner_document_open_failed
+import taminx.core.core_ui.assigner_document_unavailable
 import taminx.core.core_ui.assigner_documents_title
 import taminx.core.core_ui.ic_tamin_chevron_down
 import taminx.core.core_ui.ic_tamin_computational_base
@@ -299,6 +301,9 @@ private fun DocumentsToggle(
  * Drawn through the shared [ListGroupView]: the design's row is an icon tile, a name, a kind under
  * it and a chevron — a list row, not a new component. A row whose fetch is in flight is disabled,
  * which is what stops a second tap and says the first one landed.
+ *
+ * A document that is not there at all is badged «در دسترس نیست» and stops responding, the same
+ * way پروفایل badges its own rows. That is only for the permanent case — see [DocumentFailure].
  */
 @Composable
 private fun DocumentList(
@@ -310,6 +315,7 @@ private fun DocumentList(
 ) {
     val colors = LocalTaminColors.current
     val genericFailure = stringResource(Res.string.assigner_document_open_failed)
+    val unavailableLabel = stringResource(Res.string.assigner_document_unavailable)
     val imageIcon = painterResource(Res.drawable.ic_tamin_document_image)
     val pdfIcon = painterResource(Res.drawable.ic_tamin_workshop_contract_rows)
     // Resolved outside the loop: `stringResource` in a `forEach` would be a composable call whose
@@ -336,27 +342,48 @@ private fun DocumentList(
     }
 
     val items = remember(
-        documents, titles, openingDocumentId, failure, genericFailure,
+        documents, titles, openingDocumentId, failure, genericFailure, unavailableLabel,
         imageIcon, pdfIcon, imageLabel, pdfLabel, colors, onOpen,
     ) {
         documents.map { document ->
             val isImage = document.kind == BaseDocumentKind.IMAGE
             val didFail = failure?.documentId == document.documentId
+            // Two ways to be unavailable, and both are permanent: the base named a document with
+            // no id at all — nothing to ask for, known before any tap — or the service answered
+            // that it does not hold it. Either way another tap can only fail the same way.
+            val isUnavailable =
+                document.documentId.isBlank() || (didFail && failure.isMissing)
             ListItemData(
                 title = titles.getValue(document.category),
                 // The kind normally; the reason the fetch failed once it has. The service's own
                 // words when it gave any — `upload-image` names the id it could not find — and the
-                // generic line only when it failed without saying why.
+                // generic line only when it failed without saying why. An unavailable row says it
+                // in the badge instead, so the line under the name is not saying it twice.
                 subtitle = when {
-                    !didFail -> if (isImage) imageLabel else pdfLabel
-                    else -> failure.message?.takeIf { it.isNotBlank() } ?: genericFailure
+                    isUnavailable -> null
+                    didFail -> failure.message?.takeIf { it.isNotBlank() } ?: genericFailure
+                    else -> if (isImage) imageLabel else pdfLabel
+                },
+                // The same badge the profile hangs off a row: what the row *is*, without making
+                // the user tap it to find out.
+                badge = if (isUnavailable) {
+                    ListItemBadge(
+                        text = unavailableLabel,
+                        backgroundColor = colors.dangerBg,
+                        textColor = colors.dangerText,
+                    )
+                } else {
+                    null
                 },
                 leadingIconPainter = if (isImage) imageIcon else pdfIcon,
                 leadingIconShape = DocumentIconShape,
+                // Nothing to open, so nothing to point at.
+                showArrow = !isUnavailable,
                 // Disabled while its own fetch is in flight, and while another one is: two
                 // downloads at once is not a state this screen has anything to say about. A row
-                // that failed stays live, because tapping it again is the retry.
-                enabled = openingDocumentId == null,
+                // that merely failed stays live, because tapping it again is the retry; one that
+                // is *unavailable* does not, because it cannot succeed.
+                enabled = openingDocumentId == null && !isUnavailable,
                 onClick = { onOpen(document) },
                 colors = if (didFail) {
                     ListItemColors(subtitleColor = colors.dangerText)

@@ -23,7 +23,9 @@ import com.tamin.taminhamrah.model.workshop.BaseDocumentPR
 import com.tamin.taminhamrah.model.workshop.ComputationalBaseDN
 import com.tamin.taminhamrah.model.workshop.WORKSHOP_PAGE_SIZE
 import com.tamin.taminhamrah.repository.userRequest.UserRequestRepository
+import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminApiException
+import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.useCases.userRequest.DownloadUserRequestDocumentUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetAssignerContractsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetComputationalBasePdfUseCase
@@ -525,6 +527,69 @@ class AssignerContractsViewModelTest {
             // The row is live again, because tapping it is the retry.
             assertNull(state.openingDocumentId)
         }
+    }
+
+    /**
+     * A document the service does not hold is marked permanently unavailable.
+     *
+     * The row then badges itself and stops responding, because another ask can only produce the
+     * same 404. Read off the parsed `ErrorUri`, not the message text — that is localized copy.
+     */
+    @Test
+    fun `a not-found document is marked missing`() = runTest(testDispatcher) {
+        documents.failure = TaminApiException(
+            title = "یافت نشد",
+            cause = TaminErrorUriException(ErrorUri.RESOURCE_NOT_FOUND),
+        )
+
+        val vm = viewModel()
+        vm.sendIntent(
+            AssignerContractsIntent.DocumentTapped(
+                BaseDocumentPR(documentId = "img-1", kind = BaseDocumentKind.IMAGE)
+            )
+        )
+
+        assertEquals(true, vm.uiState.value.documentFailure?.isMissing)
+    }
+
+    /**
+     * A fetch that never got through is *not* marked missing.
+     *
+     * Losing that distinction would let one dropped connection close a row for good, on a document
+     * that is perfectly fine.
+     */
+    @Test
+    fun `a connection failure leaves the document retryable`() = runTest(testDispatcher) {
+        documents.failure = TaminApiException(
+            title = "خطای اتصال",
+            cause = TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
+        )
+
+        val vm = viewModel()
+        vm.sendIntent(
+            AssignerContractsIntent.DocumentTapped(
+                BaseDocumentPR(documentId = "img-1", kind = BaseDocumentKind.IMAGE)
+            )
+        )
+
+        val failure = vm.uiState.value.documentFailure
+        assertEquals("img-1", failure?.documentId)
+        assertEquals(false, failure?.isMissing)
+    }
+
+    /** An image the service answered blank is missing too — it answered, with nothing in it. */
+    @Test
+    fun `an empty image is marked missing`() = runTest(testDispatcher) {
+        documents.document = ""
+
+        val vm = viewModel()
+        vm.sendIntent(
+            AssignerContractsIntent.DocumentTapped(
+                BaseDocumentPR(documentId = "a1", kind = BaseDocumentKind.IMAGE)
+            )
+        )
+
+        assertEquals(true, vm.uiState.value.documentFailure?.isMissing)
     }
 
     /** Tapping a failed row again clears its reason before trying, so a stale one cannot linger. */

@@ -55,9 +55,17 @@ data class ComputationalBaseKeys(
  * [message] is null only when the service failed without saying anything — the row then falls back
  * to the generic line, exactly as `WorkshopListScaffold` does for a failed list. Keyed by document
  * so the failure sits on the row that caused it rather than on the whole screen.
+ *
+ * [isMissing] separates "this document is not there" from "the fetch did not get through". Only the
+ * first is permanent: the row is badged unavailable and stops responding, because tapping it again
+ * can only produce the same 404. Everything else stays tappable, because tapping it *is* the retry.
  */
 @Immutable
-data class DocumentFailure(val documentId: String, val message: String?)
+data class DocumentFailure(
+    val documentId: String,
+    val message: String?,
+    val isMissing: Boolean = false,
+)
 
 /** A document the user has opened, and whichever of the two payloads its kind needs. */
 @Immutable
