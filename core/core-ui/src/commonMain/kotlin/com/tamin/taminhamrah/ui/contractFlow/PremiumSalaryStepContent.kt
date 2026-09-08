@@ -1,4 +1,4 @@
-﻿package com.tamin.taminhamrah.ui.contractFlow
+package com.tamin.taminhamrah.ui.contractFlow
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -33,12 +33,9 @@ fun PremiumSalaryStepContent(
     showPremiumSlider: Boolean = true,
 ) {
     when {
-        showPremiumSlider && isLoading && premiumRange == null -> {
-            CircularProgressIndicator()
-        }
-
-        !showPremiumSlider && calculatedMonthlySalary == null && isCalculating -> {
-            CircularProgressIndicator()
+        (showPremiumSlider && isLoading && premiumRange == null) ||
+            (!showPremiumSlider && calculatedMonthlySalary == null && isCalculating) -> {
+            PremiumSalaryStepShimmerSkeleton()
         }
 
         showPremiumSlider && premiumRange == null -> {
@@ -109,5 +106,30 @@ fun PremiumSalaryStepContent(
                 }
             }
         }
+    }
+}
+
+// -------------------------------------------------------------------------
+// Previews
+// -------------------------------------------------------------------------
+
+@com.tamin.taminhamrah.ui.PreviewRtlTheme
+@Composable
+private fun PremiumSalaryStepContentPreview() {
+    com.tamin.taminhamrah.ui.PreviewRtlThemeContent {
+        PremiumSalaryStepContent(
+            premiumRange = FreelancePremiumRangePR(
+                lowPremium = 15000000L,
+                highPremium = 35000000L,
+                paymentTabayi = 0L,
+                history = 0,
+            ),
+            selectedPremium = 20000000L,
+            calculatedMonthlySalary = 20000000L,
+            isLoading = false,
+            isCalculating = false,
+            onPremiumChange = {},
+            onCalculate = {},
+        )
     }
 }

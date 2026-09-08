@@ -23,6 +23,7 @@ import com.tamin.taminhamrah.ui.theme.Primary700
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminOnAccentInk
 import com.tamin.taminhamrah.ui.theme.TaminOnAccentInkFaint
+import com.tamin.taminhamrah.ui.theme.TaminOnAccentInkMuted
 import com.tamin.taminhamrah.ui.theme.TaminOnAccentInkSoft
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
@@ -41,6 +42,7 @@ fun TaminHeroStepProgress(
     currentStep: Int,
     totalSteps: Int,
     modifier: Modifier = Modifier,
+    stepSubtitle: String? = null,
 ) {
     require(totalSteps > 0) { "totalSteps must be > 0" }
     val clampedStep = currentStep.coerceIn(1, totalSteps)
@@ -88,6 +90,15 @@ fun TaminHeroStepProgress(
                         ),
                 )
             }
+        }
+
+        if (stepSubtitle != null) {
+            TaminText(
+                text = stepSubtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = TaminOnAccentInkMuted,
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
     }
 }

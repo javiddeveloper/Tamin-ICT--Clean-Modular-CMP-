@@ -4,6 +4,10 @@ import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.contracts.flow.config.ContractFlowConfig
 import com.tamin.taminhamrah.feature.contracts.flow.preflight.ContractPreflightBlock
 import com.tamin.taminhamrah.feature.contracts.flow.preflight.resolvePreflightBlock
+import com.tamin.taminhamrah.feature.contracts.flow.specialjob.RED_CRESCENT_DAY_LIMIT
+import com.tamin.taminhamrah.feature.contracts.flow.specialjob.SpecialFreeJobOutcome
+import com.tamin.taminhamrah.feature.contracts.flow.specialjob.SpecialFreeJobRejectReason
+import com.tamin.taminhamrah.feature.contracts.flow.specialjob.resolveSpecialFreeJob
 import com.tamin.taminhamrah.model.contracts.ContractDN
 import com.tamin.taminhamrah.model.contracts.FreelanceSpecialJobCode
 import com.tamin.taminhamrah.feature.contracts.flow.ui.contract.ContractFlowEvent
@@ -23,11 +27,14 @@ import com.tamin.taminhamrah.model.common.CityPR
 import com.tamin.taminhamrah.model.common.ProvincePR
 import com.tamin.taminhamrah.contractFlow.ContractApplicantType
 import com.tamin.taminhamrah.contractFlow.ContractStep
+import com.tamin.taminhamrah.contractFlow.isEditableFromSummary
+import com.tamin.taminhamrah.model.contractFlow.GuardianFormPR
 import com.tamin.taminhamrah.model.contractFlow.SpcPremiumRateOptionPR
 import com.tamin.taminhamrah.model.contractFlow.UploadImagePR
 import com.tamin.taminhamrah.model.contractFlow.UserInfoFormPR
 import com.tamin.taminhamrah.model.contracts.BranchPR
 import com.tamin.taminhamrah.model.contracts.FreeJobDN
+import com.tamin.taminhamrah.model.contracts.FreeJobWagesPaging
 import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractParams
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractRequestDN
@@ -49,6 +56,8 @@ import com.tamin.taminhamrah.useCases.contracts.MakeContractUseCase
 import com.tamin.taminhamrah.useCases.contracts.SaveContactUseCase
 import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
+import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
+import com.tamin.taminhamrah.mapper.subdominant.toPresentation
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
@@ -68,6 +77,8 @@ import taminx.core.core_ui.contract_preflight_not_registered
 import taminx.core.core_ui.contract_preflight_other_contract
 import taminx.core.core_ui.contract_preflight_under_age
 import taminx.core.core_ui.contract_preflight_contracts_load_failed
+import taminx.core.core_ui.contract_submit_failure_message_fallback
+import taminx.core.core_ui.contract_treatment_dependents_load_error
 import taminx.core.core_ui.contract_upload_failed_error
 import taminx.core.core_ui.contract_upload_jpeg_only_error
 
@@ -88,6 +99,7 @@ class ContractFlowViewModel(
     private val makeContractUseCase: MakeContractUseCase,
     private val saveContactUseCase: SaveContactUseCase,
     private val uploadImageUseCase: UploadImageUseCase,
+    private val subdominantUseCase: SubdominantUseCase,
 ) : BaseViewModel<
     ContractFlowUiState,
     PartialState,
@@ -105,9 +117,14 @@ class ContractFlowViewModel(
             ContractFlowIntent.LoadInitialData -> handleLoadInitialData()
             ContractFlowIntent.GoToNextStep -> handleGoToNextStep()
             ContractFlowIntent.GoToPreviousStep -> handleGoToPreviousStep()
+            is ContractFlowIntent.EditStep -> handleEditStep(intent.step)
+            ContractFlowIntent.SaveEdit -> handleSaveEdit()
             is ContractFlowIntent.SetRulesConfirmed -> handleSetRulesConfirmed(intent.confirmed)
             is ContractFlowIntent.UpdateUserInfo -> handleUpdateUserInfo(intent.userInfo)
             is ContractFlowIntent.SetContractApplicantType -> handleSetContractApplicantType(intent.type)
+            is ContractFlowIntent.UpdateGuardianForm -> handleUpdateGuardianForm(intent.form)
+            is ContractFlowIntent.UploadGuardianImage -> handleUploadGuardianImage(intent.fileName, intent.bytes)
+            ContractFlowIntent.ClearGuardianDocument -> handleClearGuardianDocument()
             is ContractFlowIntent.SelectBranchProvince -> handleSelectBranchProvince(intent.province)
             is ContractFlowIntent.SelectBranchCity -> handleSelectBranchCity(intent.city)
             is ContractFlowIntent.SelectBranch -> handleSelectBranch(intent.branch)
@@ -116,9 +133,14 @@ class ContractFlowViewModel(
             ContractFlowIntent.ClearUploadedDocument -> handleClearUploadedDocument()
             is ContractFlowIntent.SelectPremiumRate -> handleSelectPremiumRate(intent.rate)
             is ContractFlowIntent.SelectFreeJob -> handleSelectFreeJob(intent.job)
+            is ContractFlowIntent.SearchFreeJobs -> handleSearchFreeJobs(intent.query)
+            ContractFlowIntent.LoadMoreFreeJobs -> handleLoadMoreFreeJobs()
             is ContractFlowIntent.SelectMonthlyPremium -> handleSelectMonthlyPremium(intent.amount)
             ContractFlowIntent.CalculateMonthlyPremium -> handleCalculateMonthlyPremium()
             is ContractFlowIntent.SetAgreementConfirmed -> handleSetAgreementConfirmed(intent.confirmed)
+            is ContractFlowIntent.SelectTreatmentSupport -> handleSelectTreatmentSupport(intent.withSupport)
+            is ContractFlowIntent.SetTreatmentCommitment -> handleSetTreatmentCommitment(intent.confirmed)
+            ContractFlowIntent.LoadDependents -> handleLoadDependents()
             ContractFlowIntent.SubmitContract -> handleSubmitContract()
         }
     }
@@ -133,17 +155,64 @@ class ContractFlowViewModel(
         loadFreeJobsIfNeeded(),
     )
 
-    private fun loadFreeJobsIfNeeded(): Flow<PartialState> = flow {
-        if (!config.requiresFreeJob) return@flow
-        emit(PartialState.FreeJobsLoading(true))
+    private fun loadFreeJobsIfNeeded(): Flow<PartialState> {
+        if (!config.requiresFreeJob) return flow { }
+        return loadFreeJobs(page = 1, searchQuery = "", append = false)
+    }
+
+    private fun handleSearchFreeJobs(query: String): Flow<PartialState> {
+        if (!config.requiresFreeJob) return flow { }
+        val state = uiState.value
+        if (query == state.freeJobsSearchQuery && (state.freeJobs.isNotEmpty() || state.isFreeJobsLoading)) {
+            return flow { }
+        }
+        return loadFreeJobs(page = 1, searchQuery = query, append = false)
+    }
+
+    private fun handleLoadMoreFreeJobs(): Flow<PartialState> {
+        val state = uiState.value
+        if (!config.requiresFreeJob || !state.hasMoreFreeJobs || state.isFreeJobsLoading || state.isFreeJobsLoadingMore) {
+            return flow { }
+        }
+        val nextPage = FreeJobWagesPaging.nextPage(state.freeJobsReceivedCount)
+        return loadFreeJobs(page = nextPage, searchQuery = state.freeJobsSearchQuery, append = true)
+    }
+
+    private fun loadFreeJobs(
+        page: Int,
+        searchQuery: String,
+        append: Boolean,
+    ): Flow<PartialState> = flow {
+        if (append) {
+            emit(PartialState.FreeJobsLoadingMore(true))
+        } else {
+            emit(PartialState.FreeJobsSearchStarted(searchQuery))
+        }
         try {
-            getFreeJobWagesUseCase().collect { jobs ->
-                emit(PartialState.FreeJobsLoaded(jobs))
+            getFreeJobWagesUseCase(
+                page = page,
+                searchQuery = searchQuery.takeIf { it.isNotBlank() },
+            ).collect { result ->
+                emit(
+                    PartialState.FreeJobsLoaded(
+                        freeJobs = result.items,
+                        total = result.total,
+                        append = append,
+                        searchQuery = searchQuery,
+                    ),
+                )
             }
         } catch (e: Exception) {
-            emitError(e.message)
+            if (append) {
+                emit(PartialState.FreeJobsLoadMoreError(e.message))
+            } else {
+                emitError(e.message)
+                emit(PartialState.FreeJobsLoading(false))
+            }
         } finally {
-            emit(PartialState.FreeJobsLoading(false))
+            if (append) {
+                emit(PartialState.FreeJobsLoadingMore(false))
+            }
         }
     }
 
@@ -263,25 +332,38 @@ class ContractFlowViewModel(
         }
     }
 
-    private fun handleSelectBranchProvince(province: ProvincePR): Flow<PartialState> = flow {
-        emit(
-            PartialState.BranchSelectionChanged(
-                uiState.value.branchSelection.copy(
-                    provinceCode = province.provinceCode,
-                    provinceName = province.provinceName,
-                    cityCode = "",
-                    cityName = "",
-                    branchCode = "",
-                    branchName = "",
+    private fun handleSelectBranchProvince(province: ProvincePR): Flow<PartialState> = merge(
+        flow {
+            emit(
+                PartialState.BranchSelectionChanged(
+                    uiState.value.branchSelection.copy(
+                        provinceCode = province.provinceCode,
+                        provinceName = province.provinceName,
+                        cityCode = "",
+                        cityName = "",
+                        branchCode = "",
+                        branchName = "",
+                    ),
                 ),
-            ),
-        )
-        emit(
-            PartialState.BranchCitiesLoaded(
-                uiState.value.cities.filterByProvinceCode(province.provinceCode),
-            ),
-        )
-        emit(PartialState.BranchesLoaded(emptyList()))
+            )
+            emit(PartialState.BranchCitiesLoaded(emptyList()))
+            emit(PartialState.BranchesLoaded(emptyList()))
+        },
+        loadBranchCities(province.provinceCode),
+    )
+
+    private fun loadBranchCities(provinceCode: String): Flow<PartialState> = flow {
+        if (provinceCode.isBlank()) return@flow
+        emit(PartialState.BranchCitiesLoading(true))
+        try {
+            identityInfoUseCase.getCities(provinceCode = provinceCode).collect { cities ->
+                emit(PartialState.BranchCitiesLoaded(cities.toCityPresentation()))
+            }
+        } catch (e: Exception) {
+            emitError(e.message)
+        } finally {
+            emit(PartialState.BranchCitiesLoading(false))
+        }
     }
 
     private fun loadBranches(cityCode: String): Flow<PartialState> = flow {
@@ -369,10 +451,74 @@ class ContractFlowViewModel(
         )
     }
 
-    private fun handleGoToPreviousStep(): Flow<PartialState> = flow {
+    private fun handleGoToPreviousStep(): Flow<PartialState> {
+        if (uiState.value.isEditMode) {
+            return flow {
+                emit(
+                    PartialState.StepChanged(
+                        step = ContractStep.STEP_SUBMIT_CONTRACT,
+                        isEditMode = false,
+                    ),
+                )
+            }
+        }
+        return merge(
+            flow {
+                val flowConfig = uiState.value.config ?: config
+                val previousStep = flowConfig.previousStep(uiState.value.currentStep) ?: return@flow
+                emit(PartialState.StepChanged(previousStep))
+            },
+            flow {
+                val flowConfig = uiState.value.config ?: config
+                val previousStep = flowConfig.previousStep(uiState.value.currentStep) ?: return@flow
+                if (previousStep == ContractStep.STEP_INSURANCE_PREMIUM) {
+                    emitAll(reloadPremiumRangeIfNeeded(flowConfig))
+                }
+            },
+        )
+    }
+
+    private fun handleEditStep(step: ContractStep): Flow<PartialState> {
         val flowConfig = uiState.value.config ?: config
-        val previousStep = flowConfig.previousStep(uiState.value.currentStep) ?: return@flow
-        emit(PartialState.StepChanged(previousStep))
+        if (step !in flowConfig.steps || !step.isEditableFromSummary()) return flow { }
+        return merge(
+            flow { emit(PartialState.StepChanged(step = step, isEditMode = true)) },
+            when (step) {
+                ContractStep.STEP_INSURANCE_PREMIUM,
+                ContractStep.STEP_SALARY,
+                -> reloadPremiumRangeIfNeeded(flowConfig)
+                else -> flow { }
+            },
+        )
+    }
+
+    private fun handleSaveEdit(): Flow<PartialState> {
+        if (!uiState.value.isEditMode || !uiState.value.canGoNext) return flow { }
+        if (uiState.value.currentStep == ContractStep.STEP_USER_INFO && hasContactChanged()) {
+            return saveContactThenAdvance(ContractStep.STEP_SUBMIT_CONTRACT)
+        }
+        return flow {
+            emit(
+                PartialState.StepChanged(
+                    step = ContractStep.STEP_SUBMIT_CONTRACT,
+                    isEditMode = false,
+                ),
+            )
+        }
+    }
+
+    private fun reloadPremiumRangeIfNeeded(flowConfig: ContractFlowConfig): Flow<PartialState> {
+        val state = uiState.value
+        if (state.premiumRange != null || state.isPremiumRangeLoading) return flow { }
+        val hasRate = state.selectedPremiumRateCode != null || state.lockedPremiumRateCode != null
+        if (!hasRate) return flow { }
+        return when {
+            flowConfig.usesFreelancePremiumRange && !state.hidePremiumSlider ->
+                loadFreelancePremiumRange()
+            flowConfig.isOptionalInsurance ->
+                loadOptionalPremiumRange()
+            else -> flow { }
+        }
     }
 
     private fun handleSetRulesConfirmed(confirmed: Boolean): Flow<PartialState> = flow {
@@ -385,6 +531,38 @@ class ContractFlowViewModel(
 
     private fun handleSetContractApplicantType(type: ContractApplicantType): Flow<PartialState> = flow {
         emit(PartialState.ContractApplicantTypeChanged(type))
+    }
+
+    private fun handleUpdateGuardianForm(form: GuardianFormPR): Flow<PartialState> = flow {
+        emit(PartialState.GuardianFormChanged(form))
+    }
+
+    private fun handleUploadGuardianImage(fileName: String, bytes: ByteArray): Flow<PartialState> = flow {
+        if (!isJpegFileName(fileName)) {
+            val errorMsg = getString(Res.string.contract_upload_jpeg_only_error)
+            emit(PartialState.GuardianFormChanged(uiState.value.guardianForm.copy(uploadError = errorMsg)))
+            sendEvent(ContractFlowEvent.ShowMessage(errorMsg))
+            return@flow
+        }
+        emit(PartialState.GuardianDocumentUploading(true))
+        try {
+            val request = UploadImageRequestDN(
+                fileName = fileName,
+                bytes = bytes,
+                description = "تصویر قیم نامه",
+            )
+            uploadImageUseCase(request).collect { imageId ->
+                emit(PartialState.GuardianDocumentUploaded(guid = imageId, name = fileName, bytes = bytes))
+            }
+        } catch (e: Exception) {
+            val message = e.message ?: getString(Res.string.contract_upload_failed_error)
+            emit(PartialState.GuardianFormChanged(uiState.value.guardianForm.copy(uploadError = message, isUploadingDocument = false)))
+            sendEvent(ContractFlowEvent.ShowMessage(message))
+        }
+    }
+
+    private fun handleClearGuardianDocument(): Flow<PartialState> = flow {
+        emit(PartialState.GuardianDocumentCleared)
     }
 
     private fun handleSelectBranchCity(city: CityPR): Flow<PartialState> = merge(
@@ -465,6 +643,13 @@ class ContractFlowViewModel(
     private fun handleSelectPremiumRate(rate: SpcPremiumRateOptionPR): Flow<PartialState> = flow {
         if (uiState.value.lockedPremiumRateCode != null) return@flow
         emit(PartialState.PremiumRateSelected(rate.code))
+        val flowConfig = uiState.value.config ?: config
+        when {
+            flowConfig.usesFreelancePremiumRange && !uiState.value.hidePremiumSlider ->
+                emitAll(loadFreelancePremiumRange(rate.code))
+            flowConfig.isOptionalInsurance ->
+                emitAll(loadOptionalPremiumRange())
+        }
     }
 
     private fun handleSelectFreeJob(job: FreeJobDN): Flow<PartialState> = flow {
@@ -475,46 +660,67 @@ class ContractFlowViewModel(
             FreelanceSpecialJobCode.RED_CRESCENT_CODE -> {
                 try {
                     val (_, _, jalaliDay) = PersianDateFormatter.today()
-                    if (jalaliDay > RED_CRESCENT_DAY_LIMIT) {
-                        emitError(getString(Res.string.contract_error_red_crescent_day_limit))
-                        return@flow
-                    }
-                    val status = checkRedCrossStatusUseCase().first()
-                    if (!isRedCrossEligible(status)) {
-                        emitError(getString(Res.string.contract_error_red_crescent_not_eligible))
-                        return@flow
-                    }
-                    emitAll(
-                        specialFreeJobSelected(
+                    val redCrossStatus =
+                        if (jalaliDay > RED_CRESCENT_DAY_LIMIT) {
+                            ""
+                        } else {
+                            checkRedCrossStatusUseCase().first()
+                        }
+                    when (
+                        val outcome = resolveSpecialFreeJob(
                             jobCode = jobCode,
-                            jobName = jobName,
-                            forceTreatmentSupport = true,
-                            lockedPremiumRate = FreelanceSpecialJobCode.RED_CRESCENT_PREMIUM_RATE,
-                            hidePremiumSlider = true,
-                            allowsPayment = false,
-                        ),
-                    )
+                            jalaliDay = jalaliDay,
+                            redCrossStatus = redCrossStatus,
+                            medicalStudentStatus = "",
+                        )
+                    ) {
+                        is SpecialFreeJobOutcome.Rejected ->
+                            emitError(getString(outcome.reason.toMessageRes()))
+                        is SpecialFreeJobOutcome.Accepted ->
+                            emitAll(
+                                specialFreeJobSelected(
+                                    jobCode = jobCode,
+                                    jobName = jobName,
+                                    forceTreatmentSupport = outcome.forceTreatmentSupport,
+                                    lockedPremiumRate = outcome.lockedPremiumRate,
+                                    hidePremiumSlider = outcome.hidePremiumSlider,
+                                    allowsPayment = outcome.allowsPayment,
+                                ),
+                            )
+                        SpecialFreeJobOutcome.Regular ->
+                            emitAll(regularFreeJobSelected(jobCode, jobName))
+                    }
                 } catch (e: Exception) {
                     emitError(e.message)
                 }
             }
             FreelanceSpecialJobCode.MEDICAL_STUDENT_CODE -> {
                 try {
-                    val status = checkMedicalStudentUseCase().first()
-                    if (status != FreelanceSpecialJobCode.MEDICAL_STUDENT_OK_STATUS) {
-                        emitError(getString(Res.string.contract_error_medical_student_not_allowed))
-                        return@flow
-                    }
-                    emitAll(
-                        specialFreeJobSelected(
+                    val medicalStudentStatus = checkMedicalStudentUseCase().first()
+                    when (
+                        val outcome = resolveSpecialFreeJob(
                             jobCode = jobCode,
-                            jobName = jobName,
-                            forceTreatmentSupport = false,
-                            lockedPremiumRate = FreelanceSpecialJobCode.MEDICAL_STUDENT_PREMIUM_RATE,
-                            hidePremiumSlider = true,
-                            allowsPayment = false,
-                        ),
-                    )
+                            jalaliDay = 1,
+                            redCrossStatus = "",
+                            medicalStudentStatus = medicalStudentStatus,
+                        )
+                    ) {
+                        is SpecialFreeJobOutcome.Rejected ->
+                            emitError(getString(outcome.reason.toMessageRes()))
+                        is SpecialFreeJobOutcome.Accepted ->
+                            emitAll(
+                                specialFreeJobSelected(
+                                    jobCode = jobCode,
+                                    jobName = jobName,
+                                    forceTreatmentSupport = outcome.forceTreatmentSupport,
+                                    lockedPremiumRate = outcome.lockedPremiumRate,
+                                    hidePremiumSlider = outcome.hidePremiumSlider,
+                                    allowsPayment = outcome.allowsPayment,
+                                ),
+                            )
+                        SpecialFreeJobOutcome.Regular ->
+                            emitAll(regularFreeJobSelected(jobCode, jobName))
+                    }
                 } catch (e: Exception) {
                     emitError(e.message)
                 }
@@ -523,10 +729,14 @@ class ContractFlowViewModel(
         }
     }
 
-    private fun isRedCrossEligible(status: String): Boolean =
-        status.equals(FreelanceSpecialJobCode.RED_CRESCENT_ELIGIBLE_STATUS, ignoreCase = true) ||
-            status.equals("true", ignoreCase = true) ||
-            status == "1"
+    private fun SpecialFreeJobRejectReason.toMessageRes() = when (this) {
+        SpecialFreeJobRejectReason.RED_CRESCENT_DAY_LIMIT ->
+            Res.string.contract_error_red_crescent_day_limit
+        SpecialFreeJobRejectReason.RED_CRESCENT_NOT_ELIGIBLE ->
+            Res.string.contract_error_red_crescent_not_eligible
+        SpecialFreeJobRejectReason.MEDICAL_STUDENT_NOT_ALLOWED ->
+            Res.string.contract_error_medical_student_not_allowed
+    }
 
     private fun specialFreeJobSelected(
         jobCode: String,
@@ -540,6 +750,7 @@ class ContractFlowViewModel(
         emit(PartialState.ForceTreatmentSupportChanged(forceTreatmentSupport))
         if (forceTreatmentSupport) {
             emit(PartialState.TreatmentSupportCodeChanged(ContractFlowUiState.TREATMENT_SUPPORT_WITH))
+            emit(PartialState.TreatmentCommitmentChanged(true))
         }
         emit(PartialState.HidePremiumSliderChanged(hidePremiumSlider))
         emit(PartialState.LockedPremiumRateChanged(lockedPremiumRate))
@@ -557,8 +768,8 @@ class ContractFlowViewModel(
         emit(PartialState.PaymentAllowedChanged(config.allowsOnlinePaymentAfterSubmit))
     }
 
-    private fun loadFreelancePremiumRange(): Flow<PartialState> = flow {
-        val params = buildPremiumRangeParams() ?: return@flow
+    private fun loadFreelancePremiumRange(spcRateCodeOverride: String? = null): Flow<PartialState> = flow {
+        val params = buildPremiumRangeParams(spcRateCodeOverride) ?: return@flow
         emit(PartialState.PremiumRangeLoading(true))
         emit(PartialState.PremiumCalculated(false))
         try {
@@ -590,8 +801,9 @@ class ContractFlowViewModel(
         }
     }
 
-    private fun buildPremiumRangeParams(): FreelancePremiumRangeParams? {
-        val spcRateCode = uiState.value.selectedPremiumRateCode
+    private fun buildPremiumRangeParams(spcRateCodeOverride: String? = null): FreelancePremiumRangeParams? {
+        val spcRateCode = spcRateCodeOverride
+            ?: uiState.value.selectedPremiumRateCode
             ?: uiState.value.lockedPremiumRateCode
             ?: return null
         val lookupCode = resolveCntFreeJobCode() ?: return null
@@ -655,6 +867,38 @@ class ContractFlowViewModel(
         emit(PartialState.AgreementConfirmedChanged(confirmed))
     }
 
+    private fun handleSelectTreatmentSupport(withSupport: Boolean): Flow<PartialState> = flow {
+        if (uiState.value.forceTreatmentSupport && !withSupport) return@flow
+        val code = if (withSupport) {
+            ContractFlowUiState.TREATMENT_SUPPORT_WITH
+        } else {
+            ContractFlowUiState.TREATMENT_SUPPORT_WITHOUT
+        }
+        emit(PartialState.TreatmentSupportCodeChanged(code))
+        if (withSupport && uiState.value.forceTreatmentSupport) {
+            emit(PartialState.TreatmentCommitmentChanged(true))
+        }
+    }
+
+    private fun handleSetTreatmentCommitment(confirmed: Boolean): Flow<PartialState> = flow {
+        emit(PartialState.TreatmentCommitmentChanged(confirmed))
+    }
+
+    private fun handleLoadDependents(): Flow<PartialState> = flow {
+        emit(PartialState.DependentsLoading(true))
+        try {
+            subdominantUseCase().collect { result ->
+                emit(PartialState.DependentsLoaded(result.toPresentation().list))
+            }
+        } catch (e: Exception) {
+            emit(
+                PartialState.DependentsError(
+                    e.message ?: getString(Res.string.contract_treatment_dependents_load_error),
+                ),
+            )
+        }
+    }
+
     private fun handleSubmitContract(): Flow<PartialState> = flow {
         val flowConfig = uiState.value.config ?: config
         val params = buildMakeContractParams() ?: return@flow
@@ -663,20 +907,24 @@ class ContractFlowViewModel(
             makeContractUseCase(flowConfig.isOptionalInsurance, params).collect { result ->
                 val presentation = result.toContractResultPresentation()
                 emit(PartialState.ContractSubmitted(presentation))
-                if (uiState.value.allowsOnlinePayment) {
-                    val amount = uiState.value.calculatedMonthlySalary
-                        ?: uiState.value.selectedMonthlyPremium
-                        ?: 0L
-                    sendEvent(
-                        ContractFlowEvent.ShowPaymentOption(
-                            contractNumber = presentation.contractNumber,
-                            amount = amount,
-                        ),
-                    )
-                }
+                val amount = uiState.value.calculatedMonthlySalary
+                    ?: uiState.value.selectedMonthlyPremium
+                    ?: 0L
+                sendEvent(
+                    ContractFlowEvent.ShowSubmitSuccess(
+                        contractNumber = presentation.contractNumber,
+                        contractDate = presentation.contractDate,
+                        amount = amount,
+                        canPayOnline = uiState.value.allowsOnlinePayment,
+                    ),
+                )
             }
         } catch (e: Exception) {
-            emitError(e.message)
+            sendEvent(
+                ContractFlowEvent.ShowSubmitFailure(
+                    e.message ?: getString(Res.string.contract_submit_failure_message_fallback),
+                ),
+            )
         } finally {
             emit(PartialState.SubmittingContract(false))
         }
@@ -723,7 +971,6 @@ class ContractFlowViewModel(
     }
 
     private companion object {
-        const val RED_CRESCENT_DAY_LIMIT = 20
         const val DEFAULT_IMAGE_GUID = "00"
         const val DEFAULT_IMAGE_GUID_NAME = "00"
     }
@@ -767,18 +1014,10 @@ class ContractFlowViewModel(
         is PartialState.CitiesLoading -> currentState.copy(
             isCitiesLoading = partialState.isLoading,
         )
-        is PartialState.CitiesLoaded -> {
-            val cities = partialState.cities
-            currentState.copy(
-                isCitiesLoading = false,
-                cities = cities,
-                branchCities = if (currentState.branchSelection.provinceCode.isNotBlank()) {
-                    cities.filterByProvinceCode(currentState.branchSelection.provinceCode)
-                } else {
-                    currentState.branchCities
-                },
-            )
-        }
+        is PartialState.CitiesLoaded -> currentState.copy(
+            isCitiesLoading = false,
+            cities = partialState.cities,
+        )
         is PartialState.ProvincesLoading -> currentState.copy(
             isProvincesLoading = partialState.isLoading,
         )
@@ -802,10 +1041,44 @@ class ContractFlowViewModel(
         )
         is PartialState.FreeJobsLoading -> currentState.copy(
             isFreeJobsLoading = partialState.isLoading,
+            freeJobsLoadMoreError = null,
         )
-        is PartialState.FreeJobsLoaded -> currentState.copy(
-            isFreeJobsLoading = false,
-            freeJobs = partialState.freeJobs,
+        is PartialState.FreeJobsSearchStarted -> currentState.copy(
+            freeJobsSearchQuery = partialState.searchQuery,
+            isFreeJobsLoading = true,
+            isFreeJobsLoadingMore = false,
+            hasMoreFreeJobs = false,
+            freeJobsLoadMoreError = null,
+        )
+        is PartialState.FreeJobsLoadingMore -> currentState.copy(
+            isFreeJobsLoadingMore = partialState.isLoading,
+            freeJobsLoadMoreError = if (partialState.isLoading) null else currentState.freeJobsLoadMoreError,
+        )
+        is PartialState.FreeJobsLoaded -> {
+            if (partialState.searchQuery != currentState.freeJobsSearchQuery) {
+                currentState.copy(isFreeJobsLoadingMore = false)
+            } else {
+                val merged = FreeJobWagesPaging.mergePage(
+                    existing = currentState.freeJobs,
+                    priorReceivedCount = currentState.freeJobsReceivedCount,
+                    pageItems = partialState.freeJobs,
+                    append = partialState.append,
+                    total = partialState.total,
+                )
+                currentState.copy(
+                    isFreeJobsLoading = false,
+                    isFreeJobsLoadingMore = false,
+                    freeJobs = merged.items,
+                    freeJobsReceivedCount = merged.receivedCount,
+                    hasMoreFreeJobs = merged.hasMore,
+                    freeJobsSearchQuery = partialState.searchQuery,
+                    freeJobsLoadMoreError = null,
+                )
+            }
+        }
+        is PartialState.FreeJobsLoadMoreError -> currentState.copy(
+            isFreeJobsLoadingMore = false,
+            freeJobsLoadMoreError = partialState.message,
         )
         is PartialState.FreeJobSelected -> currentState.copy(
             selectedFreeJobCode = partialState.jobCode,
@@ -817,6 +1090,32 @@ class ContractFlowViewModel(
         )
         is PartialState.ContractApplicantTypeChanged -> currentState.copy(
             contractApplicantType = partialState.type,
+        )
+        is PartialState.GuardianFormChanged -> currentState.copy(
+            guardianForm = partialState.form,
+        )
+        is PartialState.GuardianDocumentUploading -> currentState.copy(
+            guardianForm = currentState.guardianForm.copy(
+                isUploadingDocument = partialState.isUploading,
+                uploadError = null,
+            ),
+        )
+        is PartialState.GuardianDocumentUploaded -> currentState.copy(
+            guardianForm = currentState.guardianForm.copy(
+                documentGuid = partialState.guid,
+                documentName = partialState.name,
+                documentPreviewBytes = partialState.bytes,
+                isUploadingDocument = false,
+                uploadError = null,
+            ),
+        )
+        is PartialState.GuardianDocumentCleared -> currentState.copy(
+            guardianForm = currentState.guardianForm.copy(
+                documentGuid = null,
+                documentName = null,
+                documentPreviewBytes = null,
+                uploadError = null,
+            ),
         )
         is PartialState.BranchSelectionChanged -> currentState.copy(
             branchSelection = partialState.branchSelection,
@@ -830,6 +1129,11 @@ class ContractFlowViewModel(
         )
         is PartialState.PremiumRateSelected -> currentState.copy(
             selectedPremiumRateCode = partialState.code,
+            premiumRange = null,
+            selectedMonthlyPremium = null,
+            calculatedMonthlySalary = null,
+            isPremiumCalculated = false,
+            isPremiumRangeLoading = false,
         )
         is PartialState.PremiumRangeLoading -> currentState.copy(
             isPremiumRangeLoading = partialState.isLoading,
@@ -888,9 +1192,20 @@ class ContractFlowViewModel(
         )
         is PartialState.StepChanged -> currentState.copy(
             currentStep = partialState.step,
+            isEditMode = partialState.isEditMode,
         )
         is PartialState.ForceTreatmentSupportChanged -> currentState.copy(
             forceTreatmentSupport = partialState.forced,
+            treatmentSupportCode = if (partialState.forced) {
+                ContractFlowUiState.TREATMENT_SUPPORT_WITH
+            } else {
+                currentState.treatmentSupportCode
+            },
+            isTreatmentCommitmentConfirmed = if (partialState.forced) {
+                true
+            } else {
+                currentState.isTreatmentCommitmentConfirmed
+            },
         )
         is PartialState.HidePremiumSliderChanged -> currentState.copy(
             hidePremiumSlider = partialState.hidden,
@@ -909,6 +1224,24 @@ class ContractFlowViewModel(
         )
         is PartialState.TreatmentSupportCodeChanged -> currentState.copy(
             treatmentSupportCode = partialState.code,
+        )
+        is PartialState.TreatmentCommitmentChanged -> currentState.copy(
+            isTreatmentCommitmentConfirmed = partialState.confirmed,
+        )
+        is PartialState.DependentsLoading -> currentState.copy(
+            isDependentsLoading = partialState.isLoading,
+            dependentsError = if (partialState.isLoading) null else currentState.dependentsError,
+        )
+        is PartialState.DependentsLoaded -> currentState.copy(
+            isDependentsLoading = false,
+            hasLoadedDependents = true,
+            dependents = partialState.dependents,
+            dependentsError = null,
+        )
+        is PartialState.DependentsError -> currentState.copy(
+            isDependentsLoading = false,
+            hasLoadedDependents = true,
+            dependentsError = partialState.message,
         )
     }
 

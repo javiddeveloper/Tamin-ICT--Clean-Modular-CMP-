@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.contractFlow.isLastStep
 import com.tamin.taminhamrah.contractFlow.nextStep
 import com.tamin.taminhamrah.contractFlow.previousStep
 import com.tamin.taminhamrah.model.common.FeatureFlag
+import com.tamin.taminhamrah.ui.contractFlow.ContractRulesCopy
 import org.jetbrains.compose.resources.StringResource
 
 interface ContractFlowConfig {
@@ -23,6 +24,7 @@ interface ContractFlowConfig {
     val hasTreatmentSupportStep: Boolean
     val hasPremiumRateStep: Boolean
     val rulesPdfPath: String
+    val rulesCopy: ContractRulesCopy
     val requiresFemaleGender: Boolean
     val fixedFreeJobCode: String?
     val allowsOnlinePaymentAfterSubmit: Boolean
@@ -38,10 +40,6 @@ interface ContractFlowConfig {
     fun isLastStep(step: ContractStep): Boolean = steps.isLastStep(step)
 }
 
-val SPECIAL_INSURED_STEPS = ContractStep.stepsFor(
-    includeUploadImage = true,
-    includeTreatmentSupport = false,
-    includePremiumRate = true,
-)
+val SPECIAL_INSURED_STEPS = ContractStep.STUDENT_STEPS
 
 val OPTIONAL_FLOW_STEPS = ContractStep.OPTIONAL_STEPS
