@@ -70,7 +70,7 @@ class ContractAffairRemoteDataSourceImplTest {
     }
 
     @Test
-    fun `cancelContract hits the optional endpoint for بیمه اختیاری`() = runTest {
+    fun `cancelContract hits the optional endpoint for optional insurance`() = runTest {
         val api = FakeApi()
         val request = CancelContractRequestDTO(canceldesc = "توضیحات", contractStatus = 99)
 
@@ -82,7 +82,7 @@ class ContractAffairRemoteDataSourceImplTest {
     }
 
     @Test
-    fun `cancelContract hits the freelance endpoint for حرف و مشاغل آزاد`() = runTest {
+    fun `cancelContract hits the freelance endpoint for freelance`() = runTest {
         val api = FakeApi()
         val request = CancelContractRequestDTO(canceldesc = null, contractStatus = 99)
 
