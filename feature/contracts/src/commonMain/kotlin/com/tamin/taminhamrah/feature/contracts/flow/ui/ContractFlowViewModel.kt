@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.contracts.flow.ui
 
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.contracts.flow.config.ContractFlowConfig
+import com.tamin.taminhamrah.feature.contracts.flow.guardian.buildOptionalContractByGuardianParams
 import com.tamin.taminhamrah.feature.contracts.flow.preflight.ContractPreflightBlock
 import com.tamin.taminhamrah.feature.contracts.flow.preflight.resolvePreflightBlock
 import com.tamin.taminhamrah.feature.contracts.flow.specialjob.RED_CRESCENT_DAY_LIMIT
@@ -29,6 +30,7 @@ import com.tamin.taminhamrah.contractFlow.ContractApplicantType
 import com.tamin.taminhamrah.contractFlow.ContractStep
 import com.tamin.taminhamrah.contractFlow.isEditableFromSummary
 import com.tamin.taminhamrah.model.contractFlow.GuardianFormPR
+import com.tamin.taminhamrah.model.contractFlow.FreelanceContractResultPR
 import com.tamin.taminhamrah.model.contractFlow.SpcPremiumRateOptionPR
 import com.tamin.taminhamrah.model.contractFlow.UploadImagePR
 import com.tamin.taminhamrah.model.contractFlow.UserInfoFormPR
@@ -39,6 +41,7 @@ import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractParams
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractRequestDN
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
+import com.tamin.taminhamrah.model.contracts.OptionalContractByGuardianParams
 import com.tamin.taminhamrah.model.contracts.SaveContactRequestDN
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
 import com.tamin.taminhamrah.useCases.contracts.CalculateFreelanceSalaryUseCase
@@ -53,6 +56,7 @@ import com.tamin.taminhamrah.useCases.contracts.GetOptionalPremiumRangeUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetRegistrationInfoUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetSpcPremiumRatesUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeContractUseCase
+import com.tamin.taminhamrah.useCases.contracts.MakeOptionalContractByGuardianUseCase
 import com.tamin.taminhamrah.useCases.contracts.SaveContactUseCase
 import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
@@ -70,6 +74,7 @@ import taminx.core.core_ui.contract_error_medical_student_not_allowed
 import taminx.core.core_ui.contract_error_red_crescent_day_limit
 import taminx.core.core_ui.contract_error_red_crescent_not_eligible
 import taminx.core.core_ui.contract_female_only_service
+import taminx.core.core_ui.contract_guardian_document_description
 import taminx.core.core_ui.contract_preflight_active_contract
 import taminx.core.core_ui.contract_preflight_cancelled_20_days
 import taminx.core.core_ui.contract_preflight_cancelled_3_months
@@ -97,6 +102,7 @@ class ContractFlowViewModel(
     private val checkRedCrossStatusUseCase: CheckRedCrossStatusUseCase,
     private val checkMedicalStudentUseCase: CheckMedicalStudentUseCase,
     private val makeContractUseCase: MakeContractUseCase,
+    private val makeOptionalContractByGuardianUseCase: MakeOptionalContractByGuardianUseCase,
     private val saveContactUseCase: SaveContactUseCase,
     private val uploadImageUseCase: UploadImageUseCase,
     private val subdominantUseCase: SubdominantUseCase,
@@ -549,7 +555,7 @@ class ContractFlowViewModel(
             val request = UploadImageRequestDN(
                 fileName = fileName,
                 bytes = bytes,
-                description = "تصویر قیم نامه",
+                description = getString(Res.string.contract_guardian_document_description),
             )
             uploadImageUseCase(request).collect { imageId ->
                 emit(PartialState.GuardianDocumentUploaded(guid = imageId, name = fileName, bytes = bytes))
@@ -792,7 +798,8 @@ class ContractFlowViewModel(
             getOptionalPremiumRangeUseCase().collect { range ->
                 val presentation = range.toPremiumRangePresentation()
                 emit(PartialState.PremiumRangeLoaded(presentation))
-                emit(PartialState.SelectedMonthlyPremiumChanged(presentation.lowPremium))
+                val midPremium = (presentation.lowPremium + presentation.highPremium) / 2L
+                emit(PartialState.SelectedMonthlyPremiumChanged(midPremium))
             }
         } catch (e: Exception) {
             emitError(e.message)
@@ -901,23 +908,34 @@ class ContractFlowViewModel(
 
     private fun handleSubmitContract(): Flow<PartialState> = flow {
         val flowConfig = uiState.value.config ?: config
+        val submitAsGuardian =
+            flowConfig.isOptionalInsurance &&
+                uiState.value.contractApplicantType == ContractApplicantType.GUARDIAN
+
+        if (submitAsGuardian) {
+            val guardianParams = buildOptionalGuardianSubmitParams() ?: return@flow
+            emit(PartialState.SubmittingContract(true))
+            try {
+                makeOptionalContractByGuardianUseCase(guardianParams).collect { result ->
+                    emitContractSubmitted(result.toContractResultPresentation())
+                }
+            } catch (e: Exception) {
+                sendEvent(
+                    ContractFlowEvent.ShowSubmitFailure(
+                        e.message ?: getString(Res.string.contract_submit_failure_message_fallback),
+                    ),
+                )
+            } finally {
+                emit(PartialState.SubmittingContract(false))
+            }
+            return@flow
+        }
+
         val params = buildMakeContractParams() ?: return@flow
         emit(PartialState.SubmittingContract(true))
         try {
             makeContractUseCase(flowConfig.isOptionalInsurance, params).collect { result ->
-                val presentation = result.toContractResultPresentation()
-                emit(PartialState.ContractSubmitted(presentation))
-                val amount = uiState.value.calculatedMonthlySalary
-                    ?: uiState.value.selectedMonthlyPremium
-                    ?: 0L
-                sendEvent(
-                    ContractFlowEvent.ShowSubmitSuccess(
-                        contractNumber = presentation.contractNumber,
-                        contractDate = presentation.contractDate,
-                        amount = amount,
-                        canPayOnline = uiState.value.allowsOnlinePayment,
-                    ),
-                )
+                emitContractSubmitted(result.toContractResultPresentation())
             }
         } catch (e: Exception) {
             sendEvent(
@@ -930,13 +948,44 @@ class ContractFlowViewModel(
         }
     }
 
+    private suspend fun kotlinx.coroutines.flow.FlowCollector<PartialState>.emitContractSubmitted(
+        presentation: FreelanceContractResultPR,
+    ) {
+        emit(PartialState.ContractSubmitted(presentation))
+        val amount = uiState.value.calculatedMonthlySalary
+            ?: uiState.value.selectedMonthlyPremium
+            ?: 0L
+        sendEvent(
+            ContractFlowEvent.ShowSubmitSuccess(
+                contractNumber = presentation.contractNumber,
+                contractDate = presentation.contractDate,
+                amount = amount,
+                canPayOnline = uiState.value.allowsOnlinePayment,
+            ),
+        )
+    }
+
+    private suspend fun buildOptionalGuardianSubmitParams(): OptionalContractByGuardianParams? {
+        val selectedSalary = uiState.value.selectedMonthlyPremium ?: return null
+        if (uiState.value.calculatedMonthlySalary == null) return null
+        return buildOptionalContractByGuardianParams(
+            selectedSalary = selectedSalary,
+            branch = uiState.value.branchSelection,
+            treatmentSupportCode = uiState.value.treatmentSupportCode,
+            premiumRateCode = "",
+            guardianForm = uiState.value.guardianForm,
+            wardNationalId = uiState.value.registrationInfo?.nationalId.orEmpty(),
+            documentDescription = getString(Res.string.contract_guardian_document_description),
+        )
+    }
+
     private fun buildMakeContractParams(): FreelanceMakeContractParams? {
         val flowConfig = uiState.value.config ?: config
-        val selectedSalary = if (flowConfig.isOptionalInsurance) {
-            uiState.value.calculatedMonthlySalary
-        } else {
-            uiState.value.selectedMonthlyPremium
-        } ?: return null
+        // Optional legacy submits the selected monthly premium (seekbar), not the calculated base wage.
+        val selectedSalary = uiState.value.selectedMonthlyPremium ?: return null
+        if (flowConfig.isOptionalInsurance && uiState.value.calculatedMonthlySalary == null) {
+            return null
+        }
         val premiumRateCode = if (flowConfig.isOptionalInsurance) {
             ""
         } else {
