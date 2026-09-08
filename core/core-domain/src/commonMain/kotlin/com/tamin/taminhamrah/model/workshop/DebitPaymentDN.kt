@@ -27,11 +27,21 @@ data class DebitPaymentPreCheckDN(
     val days: String = "",
 )
 
-/** Everything `pay-normal-debit` needs, gathered from the debt row and the workshop identity. */
+/**
+ * Everything `pay-normal-debit` needs, gathered from the debt row and the workshop identity.
+ *
+ * [characterCode] and [legalNationalId] are carried raw rather than pre-combined: which of them
+ * reaches the wire, and under which key, is a property of the endpoint, so that choice is made in
+ * the mapper.
+ */
 data class DebitPaymentRequestDN(
     val workshopId: String,
     val branchCode: String,
     val debitNumber: String,
     val agreementRow: String,
     val deposit: Boolean = false,
+    /** `01` حقیقی / `02` حقوقی, straight from the workshop record. */
+    val characterCode: String = "",
+    /** The حقوقی workshop's national id; blank for a حقیقی workshop, which has none. */
+    val legalNationalId: String = "",
 )
