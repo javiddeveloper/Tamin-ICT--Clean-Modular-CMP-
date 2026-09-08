@@ -57,12 +57,16 @@ fun WorkshopDebitScreen(
     onOpenUrl: (String) -> Unit,
     modifier: Modifier = Modifier,
     workshopName: String = "",
+    characterCode: String = "",
+    legalNationalId: String = "",
     viewModel: WorkshopDebitViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(workshopId, branchCode) {
-        viewModel.sendIntent(WorkshopDebitIntent.Open(workshopId, branchCode))
+    LaunchedEffect(workshopId, branchCode, characterCode, legalNationalId) {
+        viewModel.sendIntent(
+            WorkshopDebitIntent.Open(workshopId, branchCode, characterCode, legalNationalId),
+        )
     }
 
     HandleWorkshopDebitEvents(events = viewModel.events, onOpenUrl = onOpenUrl)

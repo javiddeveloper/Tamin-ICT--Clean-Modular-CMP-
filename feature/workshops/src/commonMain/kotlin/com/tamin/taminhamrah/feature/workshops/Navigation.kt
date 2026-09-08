@@ -4,6 +4,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.toRoute
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopsRoute
+import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsEvent
 import com.tamin.taminhamrah.feature.workshops.ui.demandDocuments.DemandDocumentsScreen
 import com.tamin.taminhamrah.feature.workshops.ui.contractRows.ContractRowsScreen
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
@@ -36,6 +37,10 @@ data class WorkshopDebitRoute(
     val workshopId: String,
     val branchCode: String,
     val workshopName: String = "",
+    /** `01` حقیقی / `02` حقوقی. Travels only so the payment body can carry `nationalType`. */
+    val characterCode: String = "",
+    /** The حقوقی workshop's national id, blank for a حقیقی one. Sent as `nationalId`. */
+    val legalNationalId: String = "",
 )
 
 /**
@@ -133,9 +138,7 @@ fun NavGraphBuilder.workshopsScreen(
     composableWithFadeTransitions<WorkshopsListRoute> {
         WorkshopsRoute(
             onBack = { navController.popBackStack() },
-            onOpenAction = { action, workshopId, branchCode, workshopName ->
-                navController.navigate(action.route(workshopId, branchCode, workshopName))
-            },
+            onOpenAction = { navController.navigate(it.route()) },
         )
     }
 
@@ -164,6 +167,8 @@ fun NavGraphBuilder.workshopsScreen(
             workshopId = route.workshopId,
             branchCode = route.branchCode,
             workshopName = route.workshopName,
+            characterCode = route.characterCode,
+            legalNationalId = route.legalNationalId,
             onBack = { navController.popBackStack() },
             onOpenDocuments = { debitNumber, branchCode ->
                 navController.navigate(
@@ -305,13 +310,18 @@ fun NavGraphBuilder.workshopsScreen(
  * One `when` over the enum, so adding an action is a compile error here until it has a
  * destination, rather than a menu row that quietly does nothing.
  */
-private fun WorkshopAction.route(
-    workshopId: String,
-    branchCode: String,
-    workshopName: String,
-): Any = when (this) {
+private fun WorkshopsEvent.Navigate.route(): Any = when (action) {
     WorkshopAction.PAYMENT_SHEETS -> PaymentSheetsRoute(workshopId, branchCode, workshopName)
-    WorkshopAction.DEBIT_TURNOVER -> WorkshopDebitRoute(workshopId, branchCode, workshopName)
+    WorkshopAction.DEBIT_TURNOVER -> WorkshopDebitRoute(
+        workshopId = workshopId,
+        branchCode = branchCode,
+        workshopName = workshopName,
+        // گردش حساب بدهی is the only destination that pays, and paying needs the workshop's
+        // character and legal id — which live on the list row and nowhere downstream.
+        characterCode = characterCode,
+        legalNationalId = legalNationalId,
+    )
+
     WorkshopAction.CONTRACT_ROWS -> ContractRowsRoute(workshopId, branchCode)
     WorkshopAction.DEBT_INQUIRY ->
         WorkshopDebtInquiryRoute(workshopId, branchCode, workshopName)

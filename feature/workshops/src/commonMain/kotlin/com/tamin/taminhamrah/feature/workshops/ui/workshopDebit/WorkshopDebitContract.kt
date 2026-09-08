@@ -10,12 +10,23 @@ import org.jetbrains.compose.resources.StringResource
 data class WorkshopDebitUiState(
     val workshopId: String = "",
     val branchCode: String = "",
+    /**
+     * `01` حقیقی / `02` حقوقی, and the حقوقی workshop's national id — carried from the list row
+     * because `pay-normal-debit` sends both and this screen never loads the workshop itself.
+     */
+    val characterCode: String = "",
+    val legalNationalId: String = "",
     val list: PagedListState<WorkShopDebtPR> = PagedListState(),
     /** The debt whose payment is being arranged; the row shows its own progress. */
     val payingDebitNumber: String? = null,
 ) {
     sealed interface PartialState {
-        data class Opened(val workshopId: String, val branchCode: String) : PartialState
+        data class Opened(
+            val workshopId: String,
+            val branchCode: String,
+            val characterCode: String,
+            val legalNationalId: String,
+        ) : PartialState
         data object Loading : PartialState
         data object LoadingMore : PartialState
         data class Error(val message: String?) : PartialState
@@ -25,7 +36,12 @@ data class WorkshopDebitUiState(
 }
 
 sealed interface WorkshopDebitIntent {
-    data class Open(val workshopId: String, val branchCode: String) : WorkshopDebitIntent
+    data class Open(
+        val workshopId: String,
+        val branchCode: String,
+        val characterCode: String = "",
+        val legalNationalId: String = "",
+    ) : WorkshopDebitIntent
     data object LoadMore : WorkshopDebitIntent
     data object Retry : WorkshopDebitIntent
     data class PayDebit(val debt: WorkShopDebtPR) : WorkshopDebitIntent
