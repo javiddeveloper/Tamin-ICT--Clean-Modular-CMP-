@@ -53,7 +53,6 @@ import com.tamin.taminhamrah.ui.components.TaminTextArea
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminOptionSheetItem
-import com.tamin.taminhamrah.ui.components.bottomsheet.TaminSearchableOptionSheet
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.components.toast.AppToastHost
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -169,7 +168,7 @@ internal fun ContractCancelScreen(
     }
 
     if (showReasonSheet) {
-        TaminSearchableOptionSheet(
+        CancelReasonSheet(
             title = stringResource(Res.string.contract_affairs_cancel_reason_sheet_title),
             items = reasons.map { TaminOptionSheetItem(id = it.code.toString(), label = it.title) },
             selectedId = selectedReason?.code?.toString(),
