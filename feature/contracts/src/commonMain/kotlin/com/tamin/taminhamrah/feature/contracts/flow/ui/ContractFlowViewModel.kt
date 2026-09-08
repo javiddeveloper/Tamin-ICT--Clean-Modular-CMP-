@@ -2,6 +2,8 @@ package com.tamin.taminhamrah.feature.contracts.flow.ui
 
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.contracts.flow.config.ContractFlowConfig
+import com.tamin.taminhamrah.feature.contracts.flow.gender.isFemaleOnlyServiceBlocked
+import com.tamin.taminhamrah.feature.contracts.flow.guardian.buildFreelanceContractByGuardianParams
 import com.tamin.taminhamrah.feature.contracts.flow.guardian.buildOptionalContractByGuardianParams
 import com.tamin.taminhamrah.feature.contracts.flow.preflight.ContractPreflightBlock
 import com.tamin.taminhamrah.feature.contracts.flow.preflight.resolvePreflightBlock
@@ -38,6 +40,7 @@ import com.tamin.taminhamrah.model.contracts.BranchPR
 import com.tamin.taminhamrah.model.contracts.FreeJobDN
 import com.tamin.taminhamrah.model.contracts.FreeJobWagesPaging
 import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
+import com.tamin.taminhamrah.model.contracts.FreelanceContractByGuardianParams
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractParams
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractRequestDN
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
@@ -56,6 +59,7 @@ import com.tamin.taminhamrah.useCases.contracts.GetOptionalPremiumRangeUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetRegistrationInfoUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetSpcPremiumRatesUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeContractUseCase
+import com.tamin.taminhamrah.useCases.contracts.MakeFreelanceContractByGuardianUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeOptionalContractByGuardianUseCase
 import com.tamin.taminhamrah.useCases.contracts.SaveContactUseCase
 import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
@@ -103,6 +107,7 @@ class ContractFlowViewModel(
     private val checkMedicalStudentUseCase: CheckMedicalStudentUseCase,
     private val makeContractUseCase: MakeContractUseCase,
     private val makeOptionalContractByGuardianUseCase: MakeOptionalContractByGuardianUseCase,
+    private val makeFreelanceContractByGuardianUseCase: MakeFreelanceContractByGuardianUseCase,
     private val saveContactUseCase: SaveContactUseCase,
     private val uploadImageUseCase: UploadImageUseCase,
     private val subdominantUseCase: SubdominantUseCase,
@@ -229,7 +234,7 @@ class ContractFlowViewModel(
                 val presentation = info.toPresentation()
                 emit(PartialState.RegistrationInfoLoaded(presentation))
                 emit(PartialState.UserInfoChanged(UserInfoFormPR.fromRegistration(presentation)))
-                if (config.requiresFemaleGender && !presentation.isFemale) {
+                if (isFemaleOnlyServiceBlocked(config.requiresFemaleGender, presentation.isFemale)) {
                     emit(PartialState.GenderGateError(getString(Res.string.contract_female_only_service)))
                 }
                 emitPreflightGateIfReady()
@@ -909,24 +914,41 @@ class ContractFlowViewModel(
     private fun handleSubmitContract(): Flow<PartialState> = flow {
         val flowConfig = uiState.value.config ?: config
         val submitAsGuardian =
-            flowConfig.isOptionalInsurance &&
-                uiState.value.contractApplicantType == ContractApplicantType.GUARDIAN
+            uiState.value.contractApplicantType == ContractApplicantType.GUARDIAN
 
         if (submitAsGuardian) {
-            val guardianParams = buildOptionalGuardianSubmitParams() ?: return@flow
-            emit(PartialState.SubmittingContract(true))
-            try {
-                makeOptionalContractByGuardianUseCase(guardianParams).collect { result ->
-                    emitContractSubmitted(result.toContractResultPresentation())
+            if (flowConfig.isOptionalInsurance) {
+                val guardianParams = buildOptionalGuardianSubmitParams() ?: return@flow
+                emit(PartialState.SubmittingContract(true))
+                try {
+                    makeOptionalContractByGuardianUseCase(guardianParams).collect { result ->
+                        emitContractSubmitted(result.toContractResultPresentation())
+                    }
+                } catch (e: Exception) {
+                    sendEvent(
+                        ContractFlowEvent.ShowSubmitFailure(
+                            e.message ?: getString(Res.string.contract_submit_failure_message_fallback),
+                        ),
+                    )
+                } finally {
+                    emit(PartialState.SubmittingContract(false))
                 }
-            } catch (e: Exception) {
-                sendEvent(
-                    ContractFlowEvent.ShowSubmitFailure(
-                        e.message ?: getString(Res.string.contract_submit_failure_message_fallback),
-                    ),
-                )
-            } finally {
-                emit(PartialState.SubmittingContract(false))
+            } else {
+                val guardianParams = buildFreelanceGuardianSubmitParams() ?: return@flow
+                emit(PartialState.SubmittingContract(true))
+                try {
+                    makeFreelanceContractByGuardianUseCase(guardianParams).collect { result ->
+                        emitContractSubmitted(result.toContractResultPresentation())
+                    }
+                } catch (e: Exception) {
+                    sendEvent(
+                        ContractFlowEvent.ShowSubmitFailure(
+                            e.message ?: getString(Res.string.contract_submit_failure_message_fallback),
+                        ),
+                    )
+                } finally {
+                    emit(PartialState.SubmittingContract(false))
+                }
             }
             return@flow
         }
@@ -973,6 +995,24 @@ class ContractFlowViewModel(
             branch = uiState.value.branchSelection,
             treatmentSupportCode = uiState.value.treatmentSupportCode,
             premiumRateCode = "",
+            guardianForm = uiState.value.guardianForm,
+            wardNationalId = uiState.value.registrationInfo?.nationalId.orEmpty(),
+            documentDescription = getString(Res.string.contract_guardian_document_description),
+        )
+    }
+
+    private suspend fun buildFreelanceGuardianSubmitParams(): FreelanceContractByGuardianParams? {
+        val selectedSalary = uiState.value.selectedMonthlyPremium ?: return null
+        val premiumRateCode = uiState.value.lockedPremiumRateCode
+            ?: uiState.value.selectedPremiumRateCode
+            ?: return null
+        val freeJobCode = resolveCntFreeJobCode() ?: return null
+        return buildFreelanceContractByGuardianParams(
+            selectedSalary = selectedSalary,
+            branch = uiState.value.branchSelection,
+            treatmentSupportCode = uiState.value.treatmentSupportCode,
+            premiumRateCode = premiumRateCode,
+            freeJobCode = freeJobCode,
             guardianForm = uiState.value.guardianForm,
             wardNationalId = uiState.value.registrationInfo?.nationalId.orEmpty(),
             documentDescription = getString(Res.string.contract_guardian_document_description),

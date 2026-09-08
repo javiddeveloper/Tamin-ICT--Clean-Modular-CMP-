@@ -2335,7 +2335,9 @@
     <string name="contract_field_birth_date">تاریخ تولد</string>
     <string name="contract_field_contract_type">نوع قرارداد</string>
 
-    <string name="contract_terms_info_banner">تأیید این مرحله به منزلهٔ مطالعه و پذیرش مقررات و ضوابط انعقاد قرارداد می‌باشد.</string>
+    <string name="contract_terms_info_banner_prefix">تأیید این مرحله به منزلهٔ مطالعه و پذیرش </string>
+    <string name="contract_terms_info_banner_highlight">مقررات و ضوابط انعقاد قرارداد</string>
+    <string name="contract_terms_info_banner_suffix"> می‌باشد.</string>
     <string name="contract_terms_view_rules_btn">مشاهده ضوابط و مقررات</string>
     <string name="contract_terms_commitment_header">تعهدنامه</string>
     <string name="contract_terms_commitment_body_full">اینجانب %1$s با آگاهی کامل و در صحت عقلی، شرایط و مقررات فوق را مطالعه کرده و خود را در هنگام انعقاد قرارداد و در ادامهٔ بیمه‌پردازی ملزم به رعایت آن می‌دانم؛ در غیر اینصورت کلیهٔ تبعات و مسئولیت‌های آن متوجه اینجانب بوده و سازمان تأمین‌اجتماعی در این خصوص مسئولیتی نخواهد داشت.</string>

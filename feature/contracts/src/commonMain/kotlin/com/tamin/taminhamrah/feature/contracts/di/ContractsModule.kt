@@ -32,6 +32,7 @@ private fun Module.contractFlowViewModel(qualifier: String, config: ContractFlow
             checkMedicalStudentUseCase = get(),
             makeContractUseCase = get(),
             makeOptionalContractByGuardianUseCase = get(),
+            makeFreelanceContractByGuardianUseCase = get(),
             saveContactUseCase = get(),
             uploadImageUseCase = get(),
             subdominantUseCase = get(),
