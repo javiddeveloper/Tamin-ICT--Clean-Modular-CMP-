@@ -58,14 +58,14 @@ import taminx.core.core_ui.workshop_code
  * design's hardcoded `agMyWs()` block is real data here, not a profile lookup.
  */
 @Composable
-fun AssignerContractDetailRoute(
+fun AssignerContractDetailScreen(
     viewModel: AssignerContractsViewModel,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     HandleAssignerContractsEvents(viewModel.events)
-    AssignerContractDetailScreen(
+    AssignerContractDetailContent(
         contract = state.selected,
         onBack = onBack,
         modifier = modifier,
@@ -73,7 +73,7 @@ fun AssignerContractDetailRoute(
 }
 
 @Composable
-fun AssignerContractDetailScreen(
+fun AssignerContractDetailContent(
     contract: AssignerContractPR?,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
@@ -250,12 +250,12 @@ private val PreviewContract = AssignerContractPR(
 @PreviewRtlTheme
 @Composable
 private fun AssignerContractDetailPreview() = PreviewRtlThemeContent {
-    AssignerContractDetailScreen(contract = PreviewContract, onBack = {})
+    AssignerContractDetailContent(contract = PreviewContract, onBack = {})
 }
 
 /** After process death, with nothing selected. */
 @PreviewRtlTheme
 @Composable
 private fun AssignerContractDetailEmptyPreview() = PreviewRtlThemeContent {
-    AssignerContractDetailScreen(contract = null, onBack = {})
+    AssignerContractDetailContent(contract = null, onBack = {})
 }
