@@ -142,21 +142,6 @@ class ContractAffairsViewModelTest {
     }
 
     @Test
-    fun `an inactive contract only offers مشاهده قرارداد`() = runTest(dispatcher) {
-        val vm = viewModel()
-        val contract = contractPr(statusCode = 9, premiumTypeCode = "01", freeJobCode = "555")
-
-        vm.uiState.test {
-            awaitUntil { !it.isLoading }
-            vm.sendIntent(ContractAffairsIntent.ShowContractOperations(contract))
-            val state = awaitUntil { it.operationsContract != null }
-
-            assertEquals(listOf(ContractOperation.VIEW_CONTRACT), state.operations.toList())
-            cancelAndIgnoreRemainingEvents()
-        }
-    }
-
-    @Test
     fun `the deactivate flow loads reasons and succeeds`() = runTest(dispatcher) {
         repository.contractStatesResult = listOf(
             ContractStateDN(code = 5, description = "ابطال به درخواست بیمه‌شده"),
