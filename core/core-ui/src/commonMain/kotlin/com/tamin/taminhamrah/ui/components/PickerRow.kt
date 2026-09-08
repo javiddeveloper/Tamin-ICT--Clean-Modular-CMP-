@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -58,6 +59,8 @@ fun PickerRow(
     icon: ImageVector? = null,
     iconTint: Color? = null,
     showChevron: Boolean = false,
+    /** Optional secondary line under [text] (e.g. job code). */
+    subtitle: String? = null,
 ) {
     val colors = LocalTaminColors.current
     Row(
@@ -86,13 +89,21 @@ fun PickerRow(
                 if (icon == null) Modifier.rotate(CHEVRON_DOWN_DEGREES) else Modifier
             ),
         )
-        Text(
-            text = text,
-            // SemiBold is the heaviest face actually imported; 700 and 800 are synthesized.
-            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-            color = if (isPlaceholder) colors.textMuted else colors.textPrimary,
-            modifier = Modifier.weight(1f),
-        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = text,
+                // SemiBold is the heaviest face actually imported; 700 and 800 are synthesized.
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = if (isPlaceholder) colors.textMuted else colors.textPrimary,
+            )
+            if (!subtitle.isNullOrBlank()) {
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = colors.textSecondary,
+                )
+            }
+        }
         if (showChevron && icon != null) {
             Icon(
                 imageVector = vectorResource(Res.drawable.ic_tamin_chevron_back),
