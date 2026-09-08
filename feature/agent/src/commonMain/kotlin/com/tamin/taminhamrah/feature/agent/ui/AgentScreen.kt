@@ -574,7 +574,7 @@ private fun AgentTopBar(
                             tint = Color.White,
                             modifier = Modifier
                                 .align(Alignment.Center)
-                                .size(16.dp)
+                                .size(12.dp)
                         )
                     }
 
