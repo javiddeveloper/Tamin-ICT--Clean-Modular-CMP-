@@ -15,20 +15,15 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Redeem
-import androidx.compose.material.icons.filled.MedicalServices
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -95,7 +90,10 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_tamin_chevron_back
 import kotlin.math.roundToInt
 
 /**
@@ -518,7 +516,7 @@ private fun AgentTopBar(
                 ) {
                     // Chevron (back) — rightmost under RTL, matching the Figma layout exactly.
                     TopBarGlassTile(
-                        icon = Icons.AutoMirrored.Filled.ArrowBack,
+                        icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                         contentDescription = "بازگشت",
                         onClick = onNavigateBack
                     )
@@ -566,8 +564,8 @@ private fun AgentTopBar(
                             )
                             Box(
                                 modifier = Modifier
-                                    .background(Color(0xFFA78BFA).copy(alpha = 0.22f), CircleShape)
-                                    .border(1.dp, Color(0xFFA78BFA).copy(alpha = 0.40f), CircleShape)
+                                    .background(Color(0xFFA78BFA).copy(alpha = 0.22f), RoundedCornerShape(CornerRadius.lg))
+                                    .border(1.dp, Color(0xFFA78BFA).copy(alpha = 0.40f), RoundedCornerShape(CornerRadius.lg))
                                     .padding(horizontal = 7.dp, vertical = 3.dp),
                                 contentAlignment = Alignment.Center
                             ) {
@@ -575,6 +573,7 @@ private fun AgentTopBar(
                                     text = "AI",
                                     style = MaterialTheme.typography.labelSmall.copy(
                                         fontSize = 8.5.sp,
+                                        lineHeight = 8.5.sp,
                                         fontWeight = FontWeight.ExtraBold,
                                         letterSpacing = 0.5.sp,
                                         color = Color(0xFFD8CFFF)
@@ -1885,7 +1884,7 @@ private fun EmptyState(
 /** One welcome-screen suggestion: its prompt text and the colored icon badge beside it. */
 private data class AgentSuggestion(
     val text: String,
-    val icon: ImageVector,
+    val icon: ImageVector?,
     val iconTint: Color,
     val iconBackground: Color
 )
@@ -1900,27 +1899,27 @@ private fun AgentSuggestions(
         listOf(
             AgentSuggestion(
                 text = "سابقهٔ بیمهٔ من چقدر است؟",
-                icon = Icons.Default.Description,
-                iconTint = taminColors.blueText,
-                iconBackground = taminColors.blueBg
+                icon = null,
+                iconTint = Color.Black,
+                iconBackground = taminColors.blueBg.copy(alpha = 0.1f)
             ),
             AgentSuggestion(
                 text = "مستمری این ماه چه زمانی واریز می‌شود؟",
-                icon = Icons.Default.CreditCard,
-                iconTint = taminColors.teal,
-                iconBackground = taminColors.tealBg
+                icon = null,
+                iconTint = Color.Black,
+                iconBackground = taminColors.tealBg.copy(alpha = 0.1f)
             ),
             AgentSuggestion(
                 text = "شرایط دریافت هدیهٔ ازدواج چیست؟",
-                icon = Icons.Default.Redeem,
-                iconTint = taminColors.fuchsiaBlue,
-                iconBackground = taminColors.fuchsiaBlueBg
+                icon = null,
+                iconTint = Color.Black,
+                iconBackground = taminColors.fuchsiaBlueBg.copy(alpha = 0.1f)
             ),
             AgentSuggestion(
                 text = "آخرین نسخهٔ الکترونیک من",
-                icon = Icons.Default.MedicalServices,
-                iconTint = taminColors.greenText,
-                iconBackground = taminColors.greenBg
+                icon = null,
+                iconTint = androidx.compose.ui.graphics.Color.Black,
+                iconBackground = taminColors.greenBg.copy(alpha = 0.1f)
             )
         )
     }
@@ -1958,16 +1957,18 @@ private fun AgentSuggestionRow(
         Box(
             modifier = Modifier
                 .size(36.dp)
-                .clip(CircleShape)
+                .clip(RoundedCornerShape(CornerRadius.lg))
                 .background(suggestion.iconBackground),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = suggestion.icon,
-                contentDescription = null,
-                tint = suggestion.iconTint,
-                modifier = Modifier.size(18.dp)
-            )
+            suggestion.icon?.let {
+                Icon(
+                    imageVector = it,
+                    contentDescription = null,
+                    tint = suggestion.iconTint,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
         }
         Text(
             text = suggestion.text,
