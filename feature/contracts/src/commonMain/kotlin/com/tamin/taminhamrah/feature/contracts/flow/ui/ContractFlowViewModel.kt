@@ -2,8 +2,13 @@ package com.tamin.taminhamrah.feature.contracts.flow.ui
 
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.contracts.flow.config.ContractFlowConfig
+import com.tamin.taminhamrah.feature.contracts.flow.guardian.buildOptionalContractByGuardianParams
 import com.tamin.taminhamrah.feature.contracts.flow.preflight.ContractPreflightBlock
 import com.tamin.taminhamrah.feature.contracts.flow.preflight.resolvePreflightBlock
+import com.tamin.taminhamrah.feature.contracts.flow.specialjob.RED_CRESCENT_DAY_LIMIT
+import com.tamin.taminhamrah.feature.contracts.flow.specialjob.SpecialFreeJobOutcome
+import com.tamin.taminhamrah.feature.contracts.flow.specialjob.SpecialFreeJobRejectReason
+import com.tamin.taminhamrah.feature.contracts.flow.specialjob.resolveSpecialFreeJob
 import com.tamin.taminhamrah.model.contracts.ContractDN
 import com.tamin.taminhamrah.model.contracts.FreelanceSpecialJobCode
 import com.tamin.taminhamrah.feature.contracts.flow.ui.contract.ContractFlowEvent
@@ -25,6 +30,7 @@ import com.tamin.taminhamrah.contractFlow.ContractApplicantType
 import com.tamin.taminhamrah.contractFlow.ContractStep
 import com.tamin.taminhamrah.contractFlow.isEditableFromSummary
 import com.tamin.taminhamrah.model.contractFlow.GuardianFormPR
+import com.tamin.taminhamrah.model.contractFlow.FreelanceContractResultPR
 import com.tamin.taminhamrah.model.contractFlow.SpcPremiumRateOptionPR
 import com.tamin.taminhamrah.model.contractFlow.UploadImagePR
 import com.tamin.taminhamrah.model.contractFlow.UserInfoFormPR
@@ -35,6 +41,7 @@ import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractParams
 import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractRequestDN
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
+import com.tamin.taminhamrah.model.contracts.OptionalContractByGuardianParams
 import com.tamin.taminhamrah.model.contracts.SaveContactRequestDN
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
 import com.tamin.taminhamrah.useCases.contracts.CalculateFreelanceSalaryUseCase
@@ -49,6 +56,7 @@ import com.tamin.taminhamrah.useCases.contracts.GetOptionalPremiumRangeUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetRegistrationInfoUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetSpcPremiumRatesUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeContractUseCase
+import com.tamin.taminhamrah.useCases.contracts.MakeOptionalContractByGuardianUseCase
 import com.tamin.taminhamrah.useCases.contracts.SaveContactUseCase
 import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
@@ -66,6 +74,7 @@ import taminx.core.core_ui.contract_error_medical_student_not_allowed
 import taminx.core.core_ui.contract_error_red_crescent_day_limit
 import taminx.core.core_ui.contract_error_red_crescent_not_eligible
 import taminx.core.core_ui.contract_female_only_service
+import taminx.core.core_ui.contract_guardian_document_description
 import taminx.core.core_ui.contract_preflight_active_contract
 import taminx.core.core_ui.contract_preflight_cancelled_20_days
 import taminx.core.core_ui.contract_preflight_cancelled_3_months
@@ -93,6 +102,7 @@ class ContractFlowViewModel(
     private val checkRedCrossStatusUseCase: CheckRedCrossStatusUseCase,
     private val checkMedicalStudentUseCase: CheckMedicalStudentUseCase,
     private val makeContractUseCase: MakeContractUseCase,
+    private val makeOptionalContractByGuardianUseCase: MakeOptionalContractByGuardianUseCase,
     private val saveContactUseCase: SaveContactUseCase,
     private val uploadImageUseCase: UploadImageUseCase,
     private val subdominantUseCase: SubdominantUseCase,
@@ -545,7 +555,7 @@ class ContractFlowViewModel(
             val request = UploadImageRequestDN(
                 fileName = fileName,
                 bytes = bytes,
-                description = "تصویر قیم نامه",
+                description = getString(Res.string.contract_guardian_document_description),
             )
             uploadImageUseCase(request).collect { imageId ->
                 emit(PartialState.GuardianDocumentUploaded(guid = imageId, name = fileName, bytes = bytes))
@@ -656,46 +666,67 @@ class ContractFlowViewModel(
             FreelanceSpecialJobCode.RED_CRESCENT_CODE -> {
                 try {
                     val (_, _, jalaliDay) = PersianDateFormatter.today()
-                    if (jalaliDay > RED_CRESCENT_DAY_LIMIT) {
-                        emitError(getString(Res.string.contract_error_red_crescent_day_limit))
-                        return@flow
-                    }
-                    val status = checkRedCrossStatusUseCase().first()
-                    if (!isRedCrossEligible(status)) {
-                        emitError(getString(Res.string.contract_error_red_crescent_not_eligible))
-                        return@flow
-                    }
-                    emitAll(
-                        specialFreeJobSelected(
+                    val redCrossStatus =
+                        if (jalaliDay > RED_CRESCENT_DAY_LIMIT) {
+                            ""
+                        } else {
+                            checkRedCrossStatusUseCase().first()
+                        }
+                    when (
+                        val outcome = resolveSpecialFreeJob(
                             jobCode = jobCode,
-                            jobName = jobName,
-                            forceTreatmentSupport = true,
-                            lockedPremiumRate = FreelanceSpecialJobCode.RED_CRESCENT_PREMIUM_RATE,
-                            hidePremiumSlider = true,
-                            allowsPayment = false,
-                        ),
-                    )
+                            jalaliDay = jalaliDay,
+                            redCrossStatus = redCrossStatus,
+                            medicalStudentStatus = "",
+                        )
+                    ) {
+                        is SpecialFreeJobOutcome.Rejected ->
+                            emitError(getString(outcome.reason.toMessageRes()))
+                        is SpecialFreeJobOutcome.Accepted ->
+                            emitAll(
+                                specialFreeJobSelected(
+                                    jobCode = jobCode,
+                                    jobName = jobName,
+                                    forceTreatmentSupport = outcome.forceTreatmentSupport,
+                                    lockedPremiumRate = outcome.lockedPremiumRate,
+                                    hidePremiumSlider = outcome.hidePremiumSlider,
+                                    allowsPayment = outcome.allowsPayment,
+                                ),
+                            )
+                        SpecialFreeJobOutcome.Regular ->
+                            emitAll(regularFreeJobSelected(jobCode, jobName))
+                    }
                 } catch (e: Exception) {
                     emitError(e.message)
                 }
             }
             FreelanceSpecialJobCode.MEDICAL_STUDENT_CODE -> {
                 try {
-                    val status = checkMedicalStudentUseCase().first()
-                    if (status != FreelanceSpecialJobCode.MEDICAL_STUDENT_OK_STATUS) {
-                        emitError(getString(Res.string.contract_error_medical_student_not_allowed))
-                        return@flow
-                    }
-                    emitAll(
-                        specialFreeJobSelected(
+                    val medicalStudentStatus = checkMedicalStudentUseCase().first()
+                    when (
+                        val outcome = resolveSpecialFreeJob(
                             jobCode = jobCode,
-                            jobName = jobName,
-                            forceTreatmentSupport = false,
-                            lockedPremiumRate = FreelanceSpecialJobCode.MEDICAL_STUDENT_PREMIUM_RATE,
-                            hidePremiumSlider = true,
-                            allowsPayment = false,
-                        ),
-                    )
+                            jalaliDay = 1,
+                            redCrossStatus = "",
+                            medicalStudentStatus = medicalStudentStatus,
+                        )
+                    ) {
+                        is SpecialFreeJobOutcome.Rejected ->
+                            emitError(getString(outcome.reason.toMessageRes()))
+                        is SpecialFreeJobOutcome.Accepted ->
+                            emitAll(
+                                specialFreeJobSelected(
+                                    jobCode = jobCode,
+                                    jobName = jobName,
+                                    forceTreatmentSupport = outcome.forceTreatmentSupport,
+                                    lockedPremiumRate = outcome.lockedPremiumRate,
+                                    hidePremiumSlider = outcome.hidePremiumSlider,
+                                    allowsPayment = outcome.allowsPayment,
+                                ),
+                            )
+                        SpecialFreeJobOutcome.Regular ->
+                            emitAll(regularFreeJobSelected(jobCode, jobName))
+                    }
                 } catch (e: Exception) {
                     emitError(e.message)
                 }
@@ -704,10 +735,14 @@ class ContractFlowViewModel(
         }
     }
 
-    private fun isRedCrossEligible(status: String): Boolean =
-        status.equals(FreelanceSpecialJobCode.RED_CRESCENT_ELIGIBLE_STATUS, ignoreCase = true) ||
-            status.equals("true", ignoreCase = true) ||
-            status == "1"
+    private fun SpecialFreeJobRejectReason.toMessageRes() = when (this) {
+        SpecialFreeJobRejectReason.RED_CRESCENT_DAY_LIMIT ->
+            Res.string.contract_error_red_crescent_day_limit
+        SpecialFreeJobRejectReason.RED_CRESCENT_NOT_ELIGIBLE ->
+            Res.string.contract_error_red_crescent_not_eligible
+        SpecialFreeJobRejectReason.MEDICAL_STUDENT_NOT_ALLOWED ->
+            Res.string.contract_error_medical_student_not_allowed
+    }
 
     private fun specialFreeJobSelected(
         jobCode: String,
@@ -873,23 +908,34 @@ class ContractFlowViewModel(
 
     private fun handleSubmitContract(): Flow<PartialState> = flow {
         val flowConfig = uiState.value.config ?: config
+        val submitAsGuardian =
+            flowConfig.isOptionalInsurance &&
+                uiState.value.contractApplicantType == ContractApplicantType.GUARDIAN
+
+        if (submitAsGuardian) {
+            val guardianParams = buildOptionalGuardianSubmitParams() ?: return@flow
+            emit(PartialState.SubmittingContract(true))
+            try {
+                makeOptionalContractByGuardianUseCase(guardianParams).collect { result ->
+                    emitContractSubmitted(result.toContractResultPresentation())
+                }
+            } catch (e: Exception) {
+                sendEvent(
+                    ContractFlowEvent.ShowSubmitFailure(
+                        e.message ?: getString(Res.string.contract_submit_failure_message_fallback),
+                    ),
+                )
+            } finally {
+                emit(PartialState.SubmittingContract(false))
+            }
+            return@flow
+        }
+
         val params = buildMakeContractParams() ?: return@flow
         emit(PartialState.SubmittingContract(true))
         try {
             makeContractUseCase(flowConfig.isOptionalInsurance, params).collect { result ->
-                val presentation = result.toContractResultPresentation()
-                emit(PartialState.ContractSubmitted(presentation))
-                val amount = uiState.value.calculatedMonthlySalary
-                    ?: uiState.value.selectedMonthlyPremium
-                    ?: 0L
-                sendEvent(
-                    ContractFlowEvent.ShowSubmitSuccess(
-                        contractNumber = presentation.contractNumber,
-                        contractDate = presentation.contractDate,
-                        amount = amount,
-                        canPayOnline = uiState.value.allowsOnlinePayment,
-                    ),
-                )
+                emitContractSubmitted(result.toContractResultPresentation())
             }
         } catch (e: Exception) {
             sendEvent(
@@ -900,6 +946,37 @@ class ContractFlowViewModel(
         } finally {
             emit(PartialState.SubmittingContract(false))
         }
+    }
+
+    private suspend fun kotlinx.coroutines.flow.FlowCollector<PartialState>.emitContractSubmitted(
+        presentation: FreelanceContractResultPR,
+    ) {
+        emit(PartialState.ContractSubmitted(presentation))
+        val amount = uiState.value.calculatedMonthlySalary
+            ?: uiState.value.selectedMonthlyPremium
+            ?: 0L
+        sendEvent(
+            ContractFlowEvent.ShowSubmitSuccess(
+                contractNumber = presentation.contractNumber,
+                contractDate = presentation.contractDate,
+                amount = amount,
+                canPayOnline = uiState.value.allowsOnlinePayment,
+            ),
+        )
+    }
+
+    private suspend fun buildOptionalGuardianSubmitParams(): OptionalContractByGuardianParams? {
+        val selectedSalary = uiState.value.selectedMonthlyPremium ?: return null
+        if (uiState.value.calculatedMonthlySalary == null) return null
+        return buildOptionalContractByGuardianParams(
+            selectedSalary = selectedSalary,
+            branch = uiState.value.branchSelection,
+            treatmentSupportCode = uiState.value.treatmentSupportCode,
+            premiumRateCode = "",
+            guardianForm = uiState.value.guardianForm,
+            wardNationalId = uiState.value.registrationInfo?.nationalId.orEmpty(),
+            documentDescription = getString(Res.string.contract_guardian_document_description),
+        )
     }
 
     private fun buildMakeContractParams(): FreelanceMakeContractParams? {
@@ -943,7 +1020,6 @@ class ContractFlowViewModel(
     }
 
     private companion object {
-        const val RED_CRESCENT_DAY_LIMIT = 20
         const val DEFAULT_IMAGE_GUID = "00"
         const val DEFAULT_IMAGE_GUID_NAME = "00"
     }

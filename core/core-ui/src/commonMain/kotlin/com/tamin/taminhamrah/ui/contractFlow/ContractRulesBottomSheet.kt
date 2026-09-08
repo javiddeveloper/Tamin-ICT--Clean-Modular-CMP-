@@ -35,29 +35,24 @@ import com.tamin.taminhamrah.ui.theme.Thickness
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.contract_rules_sheet_page_counter
-import taminx.core.core_ui.contract_rules_sheet_student_p1
-import taminx.core.core_ui.contract_rules_sheet_student_section1_item1
-import taminx.core.core_ui.contract_rules_sheet_student_section1_item2
-import taminx.core.core_ui.contract_rules_sheet_student_section1_item3
-import taminx.core.core_ui.contract_rules_sheet_student_section1_item4
-import taminx.core.core_ui.contract_rules_sheet_student_section1_title
-import taminx.core.core_ui.contract_rules_sheet_student_section2_item1
-import taminx.core.core_ui.contract_rules_sheet_student_section2_item2
-import taminx.core.core_ui.contract_rules_sheet_student_section2_item3
-import taminx.core.core_ui.contract_rules_sheet_student_section2_title
-import taminx.core.core_ui.contract_rules_sheet_title_student
 import taminx.core.core_ui.contract_rules_sheet_understood
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContractRulesBottomSheet(
+    rulesCopy: ContractRulesCopy,
     onDismiss: () -> Unit,
-    title: String = stringResource(Res.string.contract_rules_sheet_title_student),
     pageCounter: String = stringResource(Res.string.contract_rules_sheet_page_counter),
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
 ) {
     val colors = LocalTaminColors.current
     val cardShape = RoundedCornerShape(CornerRadius.card)
+    val title = stringResource(rulesCopy.titleRes)
+    val intro = stringResource(rulesCopy.introRes)
+    val section1Title = stringResource(rulesCopy.section1TitleRes)
+    val section1Items = rulesCopy.section1ItemRes.map { stringResource(it) }
+    val section2Title = stringResource(rulesCopy.section2TitleRes)
+    val section2Items = rulesCopy.section2ItemRes.map { stringResource(it) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -71,7 +66,6 @@ fun ContractRulesBottomSheet(
                 .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
             verticalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
-            // Header Row: Title & Page Counter Badge
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -100,7 +94,6 @@ fun ContractRulesBottomSheet(
                 }
             }
 
-            // Scrollable Content Box
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -113,70 +106,46 @@ fun ContractRulesBottomSheet(
                 verticalArrangement = Arrangement.spacedBy(Spacing.md),
             ) {
                 Text(
-                    text = stringResource(Res.string.contract_rules_sheet_student_p1),
+                    text = intro,
                     style = MaterialTheme.typography.bodyMedium,
                     color = colors.textSecondary,
                 )
 
-                // Section 1: Conditions
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
                     Text(
-                        text = stringResource(Res.string.contract_rules_sheet_student_section1_title),
+                        text = section1Title,
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = colors.textPrimary,
                     )
-                    Text(
-                        text = stringResource(Res.string.contract_rules_sheet_student_section1_item1),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = colors.textSecondary,
-                    )
-                    Text(
-                        text = stringResource(Res.string.contract_rules_sheet_student_section1_item2),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = colors.textSecondary,
-                    )
-                    Text(
-                        text = stringResource(Res.string.contract_rules_sheet_student_section1_item3),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = colors.textSecondary,
-                    )
-                    Text(
-                        text = stringResource(Res.string.contract_rules_sheet_student_section1_item4),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = colors.textSecondary,
-                    )
+                    section1Items.forEach { item ->
+                        Text(
+                            text = item,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = colors.textSecondary,
+                        )
+                    }
                 }
 
-                // Section 2: Premium rates & Medical exemptions
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
                     Text(
-                        text = stringResource(Res.string.contract_rules_sheet_student_section2_title),
+                        text = section2Title,
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = colors.textPrimary,
                     )
-                    Text(
-                        text = stringResource(Res.string.contract_rules_sheet_student_section2_item1),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = colors.textSecondary,
-                    )
-                    Text(
-                        text = stringResource(Res.string.contract_rules_sheet_student_section2_item2),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = colors.textSecondary,
-                    )
-                    Text(
-                        text = stringResource(Res.string.contract_rules_sheet_student_section2_item3),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = colors.textSecondary,
-                    )
+                    section2Items.forEach { item ->
+                        Text(
+                            text = item,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = colors.textSecondary,
+                        )
+                    }
                 }
             }
 
             Spacer(modifier = Modifier.height(Spacing.xs))
 
-            // Action Button
             TaminFilledButton(
                 text = stringResource(Res.string.contract_rules_sheet_understood),
                 onClick = onDismiss,
@@ -186,15 +155,12 @@ fun ContractRulesBottomSheet(
     }
 }
 
-// -------------------------------------------------------------------------
-// Previews
-// -------------------------------------------------------------------------
-
 @com.tamin.taminhamrah.ui.PreviewRtlTheme
 @Composable
 private fun ContractRulesBottomSheetContentPreview() {
     com.tamin.taminhamrah.ui.PreviewRtlThemeContent {
         ContractRulesBottomSheet(
+            rulesCopy = ContractRulesCopies.Student,
             onDismiss = {},
         )
     }

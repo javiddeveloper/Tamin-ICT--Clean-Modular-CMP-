@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.contractFlow.isLastStep
 import com.tamin.taminhamrah.contractFlow.nextStep
 import com.tamin.taminhamrah.contractFlow.previousStep
 import com.tamin.taminhamrah.model.common.FeatureFlag
+import com.tamin.taminhamrah.ui.contractFlow.ContractRulesCopy
 import org.jetbrains.compose.resources.StringResource
 
 interface ContractFlowConfig {
@@ -28,6 +29,7 @@ interface ContractFlowConfig {
      * `rulesAndRegulationsHtmlFile/{name}` in my-tamin-droid.
      */
     val rulesPdfPath: String
+    val rulesCopy: ContractRulesCopy
     val requiresFemaleGender: Boolean
     val fixedFreeJobCode: String?
     val allowsOnlinePaymentAfterSubmit: Boolean

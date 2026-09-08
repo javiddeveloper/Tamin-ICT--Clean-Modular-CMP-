@@ -83,6 +83,7 @@ fun <T> TaminSearchableListSheet(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
     itemKey: ((T) -> Any)? = null,
+    subtitle: String? = null,
     searchQuery: String? = null,
     onSearchQueryChange: ((String) -> Unit)? = null,
     searchPlaceholder: String = stringResource(Res.string.active_relation_search_placeholder),
@@ -117,6 +118,7 @@ fun <T> TaminSearchableListSheet(
             itemLabel = itemLabel,
             onItemSelected = onItemSelected,
             itemKey = itemKey,
+            subtitle = subtitle,
             searchQuery = searchQuery,
             onSearchQueryChange = onSearchQueryChange,
             searchPlaceholder = searchPlaceholder,
@@ -146,6 +148,7 @@ fun TaminSearchableListSheet(
     onItemSelected: (TaminOptionSheetItem) -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
+    subtitle: String? = null,
     searchQuery: String? = null,
     onSearchQueryChange: ((String) -> Unit)? = null,
     searchPlaceholder: String = stringResource(Res.string.active_relation_search_placeholder),
@@ -163,6 +166,7 @@ fun TaminSearchableListSheet(
         onItemSelected = onItemSelected,
         onDismiss = onDismiss,
         modifier = modifier,
+        subtitle = subtitle,
         searchQuery = searchQuery,
         onSearchQueryChange = onSearchQueryChange,
         searchPlaceholder = searchPlaceholder,
@@ -185,6 +189,7 @@ fun <T> SearchableListSheetContent(
     onItemSelected: (T) -> Unit,
     modifier: Modifier = Modifier,
     itemKey: ((T) -> Any)? = null,
+    subtitle: String? = null,
     searchQuery: String? = null,
     onSearchQueryChange: ((String) -> Unit)? = null,
     searchPlaceholder: String = stringResource(Res.string.active_relation_search_placeholder),
@@ -243,8 +248,21 @@ fun <T> SearchableListSheetContent(
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold,
             color = taminColors.textPrimary,
-            modifier = Modifier.padding(Spacing.lg),
+            modifier = Modifier.padding(
+                start = Spacing.lg,
+                end = Spacing.lg,
+                top = Spacing.lg,
+                bottom = if (subtitle.isNullOrBlank()) Spacing.lg else Spacing.xxs,
+            ),
         )
+        if (!subtitle.isNullOrBlank()) {
+            TaminText(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = taminColors.textMuted,
+                modifier = Modifier.padding(horizontal = Spacing.lg, vertical = Spacing.sm),
+            )
+        }
 
         if (showSearch) {
             CustomSearchBar(
