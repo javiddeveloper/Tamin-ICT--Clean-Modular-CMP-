@@ -17,6 +17,7 @@ import com.tamin.taminhamrah.model.contracts.RegistrationInfoDN
 import com.tamin.taminhamrah.model.contracts.SaveContactRequestDN
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.repository.contracts.ContractsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -43,7 +44,8 @@ class FakeContractsRepository : ContractsRepository {
     override fun getStudentInsuranceContracts(): Flow<List<ContractDN>> = flow { emit(emptyList()) }
     override fun getRegistrationInfo(): Flow<RegistrationInfoDN> = flow {}
     override fun getSpcPremiumRates(): Flow<List<PremiumRateDN>> = flow { emit(emptyList()) }
-    override fun getFreeJobWages(): Flow<List<FreeJobDN>> = flow { emit(emptyList()) }
+    override fun getFreeJobWages(page: Int, searchQuery: String?): Flow<PagedListDN<FreeJobDN>> =
+        flow { emit(PagedListDN()) }
     override fun getFreelancePremiumRange(params: FreelancePremiumRangeParams): Flow<FreelancePremiumRangeDN> = flow {}
     override fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Flow<Long> = flow { emit(0L) }
     override fun calculateOptionalSalary(premiumRateCode: String): Flow<Long> = flow { emit(0L) }

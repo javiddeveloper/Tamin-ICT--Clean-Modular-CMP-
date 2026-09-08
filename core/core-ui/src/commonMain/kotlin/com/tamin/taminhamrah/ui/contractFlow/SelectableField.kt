@@ -1,4 +1,4 @@
-﻿package com.tamin.taminhamrah.ui.contractFlow
+package com.tamin.taminhamrah.ui.contractFlow
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,14 +17,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.PickerRow
-import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheet
-import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetConfig
-import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetItem
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetType
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminSearchableListSheet
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import org.jetbrains.compose.resources.stringResource
@@ -37,12 +36,9 @@ import taminx.core.core_ui.retry
 /**
  * A labelled field that opens a searchable sheet to choose one of [options].
  *
- * Built from [PickerRow] and [TaminBottomSheet] so it reads as the same control as every other
+ * Built from [PickerRow] and [TaminSearchableListSheet] so it reads as the same control as every other
  * chooser in the app, and so a failed lookup can report itself the way a bad input does — through
  * `PickerRow`'s error border rather than by blanking the screen behind it.
- *
- * The sheet identifies rows by their position in [options]: the codes these fields carry are
- * strings such as `"07"`, and [TaminBottomSheetItem] keys on `Int`.
  *
  * Pass [errorMessage] when the load behind this field failed. [onRetry], when given, turns the
  * message into a tappable retry so a network blip is not a dead end.
@@ -62,6 +58,18 @@ fun <T> SelectableField(
     errorMessage: String? = null,
     onRetry: (() -> Unit)? = null,
     sheetType: TaminBottomSheetType = TaminBottomSheetType.CUSTOM,
+    showSearch: Boolean = true,
+    selectedSubtitle: String? = null,
+    icon: ImageVector? = null,
+    showChevron: Boolean = false,
+    searchQuery: String? = null,
+    onSearchQueryChange: ((String) -> Unit)? = null,
+    canLoadMore: Boolean = false,
+    isLoadingMore: Boolean = false,
+    loadMoreError: String? = null,
+    onLoadMore: (() -> Unit)? = null,
+    onRetryLoadMore: (() -> Unit)? = null,
+    searchDebounceMs: Long = 0L,
 ) {
     val colors = LocalTaminColors.current
     var sheetOpen by remember { mutableStateOf(false) }
@@ -86,8 +94,10 @@ fun <T> SelectableField(
             text = selectedName.ifBlank { placeholder },
             isPlaceholder = selectedName.isBlank(),
             isError = errorMessage != null,
-            showChevron = false,
-            onClick = { if (enabled && !isLoading) sheetOpen = true },
+            icon = icon,
+            showChevron = showChevron,
+            subtitle = selectedSubtitle?.takeIf { selectedName.isNotBlank() },
+            onClick = { if (enabled) sheetOpen = true },
         )
 
         if (errorMessage != null) {
@@ -96,31 +106,26 @@ fun <T> SelectableField(
     }
 
     if (sheetOpen) {
-        val selectedIndex = options.indexOfFirst { optionCode(it) == selectedCode }
-        TaminBottomSheet(
-            config = TaminBottomSheetConfig(
-                title = label,
-                type = sheetType,
-                // Only the long, searchable lists get a search box.
-                showSearchInput = sheetType.showSearch,
-                searchInputHint = label,
-                singleSelection = true,
-                isLoading = isLoading,
-                items = options.mapIndexed { index, option ->
-                    TaminBottomSheetItem(
-                        id = index,
-                        title = optionName(option),
-                        isSelected = index == selectedIndex,
-                    )
-                },
-            ),
-            onDismissRequest = { sheetOpen = false },
-            onSubmit = { result ->
-                result.selectedItemIds.firstOrNull()
-                    ?.let(options::getOrNull)
-                    ?.let(onSelected)
+        TaminSearchableListSheet(
+            title = label,
+            items = options,
+            itemLabel = optionName,
+            itemKey = { optionCode(it) },
+            showSearch = showSearch,
+            isLoading = isLoading,
+            searchQuery = searchQuery,
+            onSearchQueryChange = onSearchQueryChange,
+            canLoadMore = canLoadMore,
+            isLoadingMore = isLoadingMore,
+            loadMoreError = loadMoreError,
+            onLoadMore = onLoadMore,
+            onRetryLoadMore = onRetryLoadMore,
+            searchDebounceMs = searchDebounceMs,
+            onItemSelected = { selectedOption ->
+                onSelected(selectedOption)
                 sheetOpen = false
             },
+            onDismiss = { sheetOpen = false },
         )
     }
 }
