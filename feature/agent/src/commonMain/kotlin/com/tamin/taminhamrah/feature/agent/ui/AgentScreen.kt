@@ -1753,7 +1753,11 @@ private fun AgentInputBar(
                                     modifier = Modifier.align(Alignment.CenterStart)
                                 )
                             }
-                            Box(modifier = Modifier.align(Alignment.CenterEnd)) { innerTextField() }
+                            // Same anchor as the placeholder above (CenterStart = right edge
+                            // under the app's global RTL) — otherwise the placeholder sits on
+                            // the right but typed text jumps to anchor on the left, appearing
+                            // to start from the middle of the field the moment you type.
+                            Box(modifier = Modifier.align(Alignment.CenterStart)) { innerTextField() }
                         }
                     }
                 )
