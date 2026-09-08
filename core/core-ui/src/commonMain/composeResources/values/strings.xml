@@ -2131,6 +2131,7 @@
     <string name="contract_payment_history_payment_deadline">مهلت پرداخت</string>
     <string name="contract_payment_history_empty_title">سابقهٔ پرداختی نیست</string>
     <string name="contract_payment_history_empty_subtitle">برای این قرارداد هنوز پرداختی ثبت نشده است</string>
+    <string name="contract_affair_cancel_reason">لطفاً علت خاتمهٔ قرارداد را انتخاب کنید</string>
 
     <!-- ===================== Contract Premium Payment (پرداخت حق بیمه) ===================== -->
     <string name="contract_premium_payment_title">پرداخت حق بیمه</string>

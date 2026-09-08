@@ -36,6 +36,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.contractaffair.ui.contract.ContractOperation
 import com.tamin.taminhamrah.model.contractAffair.ContractPR
+import com.tamin.taminhamrah.model.contractAffair.ContractPremiumType
+import com.tamin.taminhamrah.model.contractAffair.SelfInsuredContractStatus
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.NumericText
@@ -60,12 +62,6 @@ import taminx.core.core_ui.contract_affairs_view_contract
 import taminx.core.core_ui.contract_affairs_view_payments
 import taminx.core.core_ui.ic_tamin_chevron_forward
 
-/** `contractStatusObject.selfIsuContStatCode == 1` → the contract is operable. */
-private const val ACTIVE_STATUS_CODE = 1
-
-/** `premiumTypeCode == "38"` → تکمیل/کسری contract; its only per-contract action is مشاهدهٔ قرارداد. */
-private const val FRACTION_PREMIUM_TYPE_CODE = "38"
-
 /**
  * امور قرارداد — the per-contract operations bottom sheet opened from a [ContractAffairsItemCard].
  *
@@ -86,10 +82,10 @@ internal fun ContractOperationsSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val note = when {
-        contract.statusCode != ACTIVE_STATUS_CODE ->
+        contract.statusCode != SelfInsuredContractStatus.ACTIVE ->
             stringResource(Res.string.contract_affairs_operations_pending_note)
 
-        contract.premiumTypeCode == FRACTION_PREMIUM_TYPE_CODE ->
+        contract.premiumTypeCode == ContractPremiumType.FRACTION.code ->
             stringResource(Res.string.contract_affairs_operations_fraction_note)
 
         else -> null

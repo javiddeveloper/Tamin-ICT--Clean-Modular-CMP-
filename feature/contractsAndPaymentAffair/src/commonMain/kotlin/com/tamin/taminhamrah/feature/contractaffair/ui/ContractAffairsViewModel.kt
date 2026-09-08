@@ -12,11 +12,11 @@ import com.tamin.taminhamrah.mapper.contractAffair.toPresentation
 import com.tamin.taminhamrah.mapper.personal.toPresentation
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
-import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.contractAffair.CancelContractParamsDN
 import com.tamin.taminhamrah.model.contractAffair.ContractFreeJobCode
 import com.tamin.taminhamrah.model.contractAffair.ContractPR
 import com.tamin.taminhamrah.model.contractAffair.ContractPremiumType
+import com.tamin.taminhamrah.model.contractAffair.SelfInsuredContractStatus
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.ApiSortDN
@@ -41,6 +41,9 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
+import org.jetbrains.compose.resources.getString
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.contract_affair_cancel_reason
 
 /**
  * امور قراردادها و پرداخت — the special-insured contract list with search, pagination and the
@@ -188,7 +191,7 @@ class ContractAffairsViewModel(
     private fun operationsFor(contract: ContractPR): List<ContractOperation> {
         // Only فعال contracts expose امور قرارداد at all — [ContractAffairsItemCard] hides the
         // button otherwise. This guard stays as a defensive fallback for the non-active case.
-        if (contract.statusCode != ACTIVE_CONTRACT_STATUS_CODE) {
+        if (contract.statusCode != SelfInsuredContractStatus.ACTIVE) {
             return listOf(ContractOperation.VIEW_CONTRACT)
         }
         if (contract.premiumTypeCode == ContractPremiumType.FRACTION.code) {
@@ -286,7 +289,7 @@ class ContractAffairsViewModel(
         val contract = state.cancelContract ?: return@flow
         val reason = state.selectedCancelReason
         if (reason == null) {
-            sendEvent(ContractAffairsEvent.ShowError("لطفاً علت خاتمهٔ قرارداد را انتخاب کنید"))
+            sendEvent(ContractAffairsEvent.ShowError(getString(Res.string.contract_affair_cancel_reason)))
             return@flow
         }
         val premiumType = ContractPremiumType.fromCode(contract.premiumTypeCode)
@@ -423,9 +426,6 @@ class ContractAffairsViewModel(
     private fun defaultQuery(): ApiQueryParamDN = ApiQueryParamDN(sorts = CREATE_DATE_DESC)
 
     companion object {
-        /** `contractStatusObject.selfIsuContStatDode == 1` → contract is currently active. */
-        private const val ACTIVE_CONTRACT_STATUS_CODE = 1
-
         /** Dynamic-menu ids for انعقاد قرارداد جدید (اختیاری / حرف و مشاغل / تکمیل سوابق …). */
         private val NEW_CONTRACT_MENU_IDS = listOf(33, 34, 36, 37, 39)
 

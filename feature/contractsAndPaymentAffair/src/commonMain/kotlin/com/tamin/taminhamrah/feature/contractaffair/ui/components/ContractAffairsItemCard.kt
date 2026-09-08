@@ -44,7 +44,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tamin.taminhamrah.model.contractAffair.ContractFreeJobCode
 import com.tamin.taminhamrah.model.contractAffair.ContractPR
+import com.tamin.taminhamrah.model.contractAffair.ContractPremiumType
+import com.tamin.taminhamrah.model.contractAffair.SelfInsuredContractStatus
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.CopyIconButton
@@ -82,12 +85,6 @@ import taminx.core.core_ui.contract_affairs_treatment_support
 import taminx.core.core_ui.contract_affairs_view_contract
 import androidx.compose.ui.geometry.CornerRadius as GeometryCornerRadius
 
-/** `contractStatusObject.selfIsuContStatCode == 1` → the contract is operable (شغل/pay/deactivate). */
-private const val ACTIVE_STATUS_CODE = 1
-
-/** `premiumTypeCode == "38"` → تکمیل/کسری contract; its only per-contract action is مشاهدهٔ قرارداد. */
-private const val FRACTION_PREMIUM_TYPE_CODE = "38"
-
 /**
  * One امور قراردادها و پرداخت card — mirrors the shape of
  * [com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.components.EmployerAgreementCard]:
@@ -108,8 +105,8 @@ internal fun ContractAffairsItemCard(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    val operable = item.statusCode == ACTIVE_STATUS_CODE
-    val isFraction = item.premiumTypeCode == FRACTION_PREMIUM_TYPE_CODE
+    val operable = item.statusCode == SelfInsuredContractStatus.ACTIVE
+    val isFraction = item.premiumTypeCode == ContractPremiumType.FRACTION.code
 
     Column(
         modifier = modifier
@@ -251,7 +248,7 @@ private fun Header(item: ContractPR) {
                     )
             )
             Icon(
-                imageVector = contractIcon(item.premiumTypeCode, item.insuranceType),
+                imageVector = contractIcon(item.premiumTypeCode, item.freeJobCode),
                 contentDescription = "contract_icons",
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
@@ -449,31 +446,25 @@ private fun Footer(
 
 // ---- helpers ----
 
+// Legacy `ContractListAdapter` is a binary green/red split on `selfIsuContStatCode == 1` — active
+// is green, everything else (pending, ابطال, …) is red. No third state.
 @Composable
 private fun statusContainerColor(item: ContractPR): Color {
     val colors = LocalTaminColors.current
-    return when {
-        item.statusCode == ACTIVE_STATUS_CODE -> colors.greenBg
-        item.statusDesc.contains("ابطال") -> colors.dangerBorder
-        else -> colors.orangeBg
-    }
+    return if (item.statusCode == SelfInsuredContractStatus.ACTIVE) colors.greenBg else colors.dangerBorder
 }
 
 @Composable
 private fun statusContentColor(item: ContractPR): Color {
     val colors = LocalTaminColors.current
-    return when {
-        item.statusCode == ACTIVE_STATUS_CODE -> colors.greenText
-        item.statusDesc.contains("ابطال") -> colors.dangerText
-        else -> colors.orangeText
-    }
+    return if (item.statusCode == SelfInsuredContractStatus.ACTIVE) colors.greenText else colors.dangerText
 }
 
-private fun contractIcon(premiumTypeCode: String, title: String): ImageVector = when {
-    title.contains("خانه‌دار") -> Icons.Outlined.Home
+private fun contractIcon(premiumTypeCode: String, freeJobCode: String): ImageVector = when {
+    freeJobCode == ContractFreeJobCode.WOMEN_CONTRACT_CODE -> Icons.Outlined.Home
     premiumTypeCode == "01" -> Icons.Outlined.WorkOutline
     premiumTypeCode == "02" -> Icons.Outlined.HealthAndSafety
-    premiumTypeCode == FRACTION_PREMIUM_TYPE_CODE -> Icons.Outlined.CalendarMonth
+    premiumTypeCode == ContractPremiumType.FRACTION.code -> Icons.Outlined.CalendarMonth
     else -> Icons.Outlined.Description
 }
 
@@ -597,7 +588,7 @@ private val PreviewHomemakerPending = ContractPR(
     jobTitle = "",
     premiumTypeCode = "05",
     statusCode = null,
-    freeJobCode = "",
+    freeJobCode = "099785",
     premiumRatePercentLabel = "۱۴ درصد",
 )
 

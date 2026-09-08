@@ -33,4 +33,10 @@ enum class ContractPremiumType(val code: String) {
 object ContractFreeJobCode {
     const val RED_CRESCENT_CODE = "113798"
     const val MEDICAL_STUDENT_CODE = "110977"
+
+    /** `cntFreeJobCode` for a زنان خانه‌دار contract (legacy `Constants.WOMEN_CONTRACT_CODE`). */
+    const val WOMEN_CONTRACT_CODE = "099785"
+
+    /** `cntFreeJobCode` for a دانشجو contract (legacy `Constants.STUDENT_CONTRACT_CODE`). */
+    const val STUDENT_CONTRACT_CODE = "099796"
 }

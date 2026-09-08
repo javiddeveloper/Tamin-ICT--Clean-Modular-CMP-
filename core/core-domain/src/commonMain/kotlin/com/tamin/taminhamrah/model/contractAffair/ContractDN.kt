@@ -61,6 +61,11 @@ data class ContractStatusObjectDN(
     val selfIsuContStatCode: Int?,
 )
 
+object SelfInsuredContractStatus {
+    //Contract is currently active
+    const val ACTIVE = 1
+}
+
 data class PremiumTypeDN(
     val insuranceDescription: String?,
     val insuranceKind: String?,
