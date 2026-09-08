@@ -72,7 +72,7 @@ class FakeWorkShopsRepository : WorkShopsRepository {
 
         val fromIndex = (query.page * query.pageSize).coerceIn(0, filtered.size)
         val toIndex = (fromIndex + query.pageSize).coerceIn(fromIndex, filtered.size)
-
+5
         return PagedListDN(
             items = filtered.subList(fromIndex, toIndex),
             total = if (isFiltered) filtered.size else agreements.total,
