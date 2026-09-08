@@ -102,6 +102,8 @@ data class TaminColors(
     // Top app bar. Held as stops rather than a Brush so the bar owns its sweep
     // direction; the strip behind the status bar shares this same wash.
     val topAppBarStops: List<Color>,
+    /** The treatment hub's own wash — the design ends it a shade deeper than [topAppBarStops]. */
+    val treatmentHubStops: List<Color>,
     val profileGradientStops: List<Color>,
     val aiAssistantGradient: Brush,
     val grey900 : Color,
@@ -234,6 +236,7 @@ val LightTaminColors = TaminColors(
     medicalGradient = Brush.linearGradient(listOf(Secondary500, Secondary700)),
     // Same stops as the quick-access card; the bar just sweeps the other way.
     topAppBarStops = listOf(TaminTeal900, TaminTeal500),
+    treatmentHubStops = listOf(TaminTeal900, TaminTeal700),
     profileGradientStops = listOf(TaminNavy900, TaminNavy700),
     aiAssistantGradient = Brush.linearGradient(
         listOf(TaminPurple900, TaminPurple700, Color(0xFF3F5BD9), TaminNavy700)
@@ -366,6 +369,7 @@ val DarkTaminColors = TaminColors(
     // Dark mode overrides every hero to the same teal-to-blue wash, status bar included,
     // so the bar and the strip above it join into one continuous band.
     topAppBarStops = listOf(TaminDarkHeroStart, TaminDarkHeroEnd),
+    treatmentHubStops = listOf(TaminDarkHeroStart, TaminDarkHeroEnd),
     profileGradientStops = listOf(TaminDarkHeroStart, TaminDarkHeroEnd),
     aiAssistantGradient = Brush.linearGradient(
         listOf(TaminPurple900, TaminPurple700, Color(0xFF3F5BD9), TaminNavy700)

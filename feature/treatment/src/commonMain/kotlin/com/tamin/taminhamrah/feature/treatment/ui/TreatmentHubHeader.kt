@@ -7,6 +7,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.rideUpIntoHeader
+import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
@@ -30,6 +32,7 @@ internal fun TreatmentHubHeader(
         TaminTopAppBar(
             title = stringResource(Res.string.tab_treatment),
             centerTitle = false,
+            background = taminTopAppBarGradient(LocalTaminColors.current.treatmentHubStops),
             bottomPadding = TreatmentDimens.cardOverlap + Spacing.xl,
         )
         Box(
