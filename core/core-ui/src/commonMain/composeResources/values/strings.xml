@@ -648,6 +648,12 @@
     <string name="calculate_wage_pension_chart_full_year">سال کامل</string>
     <string name="calculate_wage_pension_chart_partial_year">سال ناقص</string>
     <string name="calculate_wage_pension_chart_tap_hint">روی هر سال بزنید</string>
+    <string name="calculate_wage_pension_year_detail_title">جزئیات سابقه %1$s</string>
+    <string name="calculate_wage_pension_month_leap">%1$s (کبیسه)</string>
+    <string name="calculate_wage_pension_season_spring">بهار</string>
+    <string name="calculate_wage_pension_season_summer">تابستان</string>
+    <string name="calculate_wage_pension_season_autumn">پاییز</string>
+    <string name="calculate_wage_pension_season_winter">زمستان</string>
     <string name="calculate_wage_pension_chart_months_12">۱۲ ماه</string>
     <string name="calculate_wage_pension_chart_months_6">۶ ماه</string>
     <string name="calculate_wage_pension_disclaimer">با توجه به غیرقطعی بودن میزان سابقه، مبلغ مستمری محاسبه‌شده قابل استناد در مراجع قانونی نمی‌باشد. </string>

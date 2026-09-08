@@ -28,7 +28,8 @@ fun MultipleWorkshopResultDN.toPresentation(): MultipleWorkshopResultPR {
 fun WagePensionChartItemDN.toPresentation(): WagePensionChartItemPR {
     return WagePensionChartItemPR(
         hisYear = hisYear,
-        sumYear = sumYear
+        sumYear = sumYear,
+        months = months,
     )
 }
 

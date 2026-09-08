@@ -23,6 +23,7 @@ import com.tamin.taminhamrah.feature.calculateWagePension.ui.components.Calculat
 import com.tamin.taminhamrah.feature.calculateWagePension.ui.components.CalculateWagePensionHistoryCard
 import com.tamin.taminhamrah.feature.calculateWagePension.ui.components.CalculateWagePensionStatsCard
 import com.tamin.taminhamrah.feature.calculateWagePension.ui.components.CalculateWagePensionWorkshopSwitchCard
+import com.tamin.taminhamrah.feature.calculateWagePension.ui.components.CalculateWagePensionYearDetailSheet
 import com.tamin.taminhamrah.feature.calculateWagePension.ui.contract.CalculateWagePensionEvent
 import com.tamin.taminhamrah.feature.calculateWagePension.ui.contract.CalculateWagePensionIntent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
@@ -171,6 +172,17 @@ fun CalculateWagePensionScreen(
                     )
                 }
             }
+        }
+    }
+
+    state.selectedChartYearIndex?.let { index ->
+        state.chartItems.getOrNull(index)?.let { item ->
+            CalculateWagePensionYearDetailSheet(
+                item = item,
+                onDismiss = {
+                    viewModel.sendIntent(CalculateWagePensionIntent.ChartYearSelected(null))
+                },
+            )
         }
     }
 

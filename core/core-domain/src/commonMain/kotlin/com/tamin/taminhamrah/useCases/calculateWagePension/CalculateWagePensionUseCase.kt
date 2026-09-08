@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.model.calculateWagePension.BASIC_WAGE
 import com.tamin.taminhamrah.model.calculateWagePension.DAYS_IN_MONTH
 import com.tamin.taminhamrah.model.calculateWagePension.DAYS_IN_YEAR
 import com.tamin.taminhamrah.model.calculateWagePension.MONTHS_IN_TWO_YEARS
+import com.tamin.taminhamrah.model.calculateWagePension.MONTHS_IN_YEAR
 import com.tamin.taminhamrah.model.calculateWagePension.TWO_YEAR_DAYS
 import com.tamin.taminhamrah.model.calculateWagePension.WagePensionCalculationDN
 import com.tamin.taminhamrah.model.calculateWagePension.WagePensionChartItemDN
@@ -39,7 +40,10 @@ class CalculateWagePensionUseCase {
             chartItems = talfigh.list.orEmpty().map { item ->
                 WagePensionChartItemDN(
                     hisYear = item.hisYear.orEmpty(),
-                    sumYear = item.sumYear ?: 0
+                    sumYear = item.sumYear ?: 0,
+                    months = List(MONTHS_IN_YEAR) { index ->
+                        item.months.getOrNull(index)?.toIntOrNull() ?: 0
+                    },
                 )
             },
             legalFloorApplied = legalFloorApplied,

@@ -23,7 +23,8 @@ data class MultipleWorkshopResultPR(
 @Serializable
 data class WagePensionChartItemPR(
     val hisYear: String,
-    val sumYear: Int
+    val sumYear: Int,
+    val months: List<Int> = emptyList(),
 )
 
 @Immutable
