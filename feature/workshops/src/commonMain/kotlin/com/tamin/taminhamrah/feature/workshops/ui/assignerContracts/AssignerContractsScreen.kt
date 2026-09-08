@@ -37,6 +37,7 @@ import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
+import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.toPersianDigits
@@ -72,7 +73,7 @@ import taminx.core.core_ui.ic_tamin_search
  * the two are deliberately worded apart.
  */
 @Composable
-fun AssignerContractsRoute(
+fun AssignerContractsScreen(
     viewModel: AssignerContractsViewModel,
     onBack: () -> Unit,
     onOpenDetail: () -> Unit,
@@ -89,7 +90,7 @@ fun AssignerContractsRoute(
 
     HandleAssignerContractsEvents(viewModel.events)
 
-    AssignerContractsScreen(
+    AssignerContractsContent(
         state = state,
         onIntent = viewModel::sendIntent,
         onBack = onBack,
@@ -119,7 +120,7 @@ fun HandleAssignerContractsEvents(events: Flow<AssignerContractsEvent>) {
 }
 
 @Composable
-fun AssignerContractsScreen(
+fun AssignerContractsContent(
     state: AssignerContractsUiState,
     onIntent: (AssignerContractsIntent) -> Unit,
     onBack: () -> Unit,
@@ -360,7 +361,7 @@ private val PreviewFilledState = AssignerContractsUiState(
 @PreviewRtlTheme
 @Composable
 private fun AssignerContractsFilledPreview() = PreviewRtlThemeContent {
-    AssignerContractsScreen(
+    AssignerContractsContent(
         state = PreviewFilledState,
         onIntent = {},
         onBack = {},
@@ -373,7 +374,7 @@ private fun AssignerContractsFilledPreview() = PreviewRtlThemeContent {
 @PreviewRtlTheme
 @Composable
 private fun AssignerContractsNoSearchPreview() = PreviewRtlThemeContent {
-    AssignerContractsScreen(
+    AssignerContractsContent(
         state = AssignerContractsUiState(),
         onIntent = {},
         onBack = {},
@@ -386,7 +387,7 @@ private fun AssignerContractsNoSearchPreview() = PreviewRtlThemeContent {
 @PreviewRtlTheme
 @Composable
 private fun AssignerContractsEmptyPreview() = PreviewRtlThemeContent {
-    AssignerContractsScreen(
+    AssignerContractsContent(
         state = PreviewFilledState.copy(list = PagedListState()),
         onIntent = {},
         onBack = {},
@@ -398,7 +399,7 @@ private fun AssignerContractsEmptyPreview() = PreviewRtlThemeContent {
 @PreviewRtlTheme
 @Composable
 private fun AssignerContractsLoadingPreview() = PreviewRtlThemeContent {
-    AssignerContractsScreen(
+    AssignerContractsContent(
         state = PreviewFilledState.copy(list = PagedListState(isLoading = true)),
         onIntent = {},
         onBack = {},
@@ -411,7 +412,7 @@ private fun AssignerContractsLoadingPreview() = PreviewRtlThemeContent {
 @PreviewRtlTheme
 @Composable
 private fun AssignerContractsFailedPreview() = PreviewRtlThemeContent {
-    AssignerContractsScreen(
+    AssignerContractsContent(
         state = PreviewFilledState.copy(
             list = PagedListState(error = "ارتباط با سرویس برقرار نشد."),
         ),

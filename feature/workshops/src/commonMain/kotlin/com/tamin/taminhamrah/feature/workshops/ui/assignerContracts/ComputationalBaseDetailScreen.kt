@@ -75,15 +75,24 @@ import taminx.core.core_ui.ic_tamin_workshop_contract_rows
  * *opening* one fetches, and each kind goes to a different endpoint and a different viewer.
  */
 @Composable
-fun ComputationalBaseDetailRoute(
+fun ComputationalBaseDetailScreen(
     viewModel: AssignerContractsViewModel,
+    letterNumber: String,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     HandleAssignerContractsEvents(viewModel.events)
-    ComputationalBaseDetailScreen(
-        base = state.selectedBase,
+
+    // Found in the list this screen was opened from, by the number its route carries. Null only
+    // after process death, when that list was never fetched in this process.
+    val bases = state.bases.items
+    val base = remember(bases, letterNumber) {
+        bases.firstOrNull { it.letterNumber == letterNumber }
+    }
+
+    ComputationalBaseDetailContent(
+        base = base,
         openingDocumentId = state.openingDocumentId,
         preview = state.preview,
         onIntent = viewModel::sendIntent,
@@ -93,7 +102,7 @@ fun ComputationalBaseDetailRoute(
 }
 
 @Composable
-fun ComputationalBaseDetailScreen(
+fun ComputationalBaseDetailContent(
     base: ComputationalBasePR?,
     openingDocumentId: String?,
     preview: DocumentPreview?,
@@ -155,7 +164,7 @@ private fun BaseSummaryCard(
     amount: String,
     documents: ImmutableList<BaseDocumentPR>,
     openingDocumentId: String?,
-    onOpenDocument: (String) -> Unit,
+    onOpenDocument: (BaseDocumentPR) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
@@ -271,7 +280,7 @@ private fun DocumentsToggle(
 private fun DocumentList(
     documents: ImmutableList<BaseDocumentPR>,
     openingDocumentId: String?,
-    onOpen: (String) -> Unit,
+    onOpen: (BaseDocumentPR) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
@@ -313,7 +322,7 @@ private fun DocumentList(
                 // Disabled while its own fetch is in flight, and while another one is: two
                 // downloads at once is not a state this screen has anything to say about.
                 enabled = openingDocumentId == null,
-                onClick = { onOpen(document.documentId) },
+                onClick = { onOpen(document) },
             )
         }.toImmutableList()
     }
@@ -398,7 +407,7 @@ private val PreviewBase = ComputationalBasePR(
 @PreviewRtlTheme
 @Composable
 private fun ComputationalBaseDetailPreview() = PreviewRtlThemeContent {
-    ComputationalBaseDetailScreen(
+    ComputationalBaseDetailContent(
         base = PreviewBase,
         openingDocumentId = null,
         preview = null,
@@ -411,7 +420,7 @@ private fun ComputationalBaseDetailPreview() = PreviewRtlThemeContent {
 @PreviewRtlTheme
 @Composable
 private fun ComputationalBaseDetailNoDocumentsPreview() = PreviewRtlThemeContent {
-    ComputationalBaseDetailScreen(
+    ComputationalBaseDetailContent(
         base = PreviewBase.copy(documents = persistentListOf(), documentCount = "۰"),
         openingDocumentId = null,
         preview = null,
@@ -424,7 +433,7 @@ private fun ComputationalBaseDetailNoDocumentsPreview() = PreviewRtlThemeContent
 @PreviewRtlTheme
 @Composable
 private fun ComputationalBaseDetailOpeningPreview() = PreviewRtlThemeContent {
-    ComputationalBaseDetailScreen(
+    ComputationalBaseDetailContent(
         base = PreviewBase,
         openingDocumentId = "img-1",
         preview = null,

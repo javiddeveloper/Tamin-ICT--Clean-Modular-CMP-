@@ -54,7 +54,7 @@ import taminx.core.core_ui.ic_tamin_computational_base
  * blank rather than being allowed through to a wrong-looking list.
  */
 @Composable
-fun ComputationalBasesRoute(
+fun ComputationalBasesScreen(
     viewModel: AssignerContractsViewModel,
     workshopId: String,
     branchCode: String,
@@ -63,7 +63,7 @@ fun ComputationalBasesRoute(
     workshopName: String,
     rowLabel: String,
     onBack: () -> Unit,
-    onOpenBaseDetail: () -> Unit,
+    onOpenBaseDetail: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -77,7 +77,7 @@ fun ComputationalBasesRoute(
 
     HandleAssignerContractsEvents(viewModel.events)
 
-    ComputationalBasesScreen(
+    ComputationalBasesContent(
         bases = state.bases,
         workshopName = workshopName,
         rowLabel = rowLabel,
@@ -89,13 +89,13 @@ fun ComputationalBasesRoute(
 }
 
 @Composable
-fun ComputationalBasesScreen(
+fun ComputationalBasesContent(
     bases: PagedListState<ComputationalBasePR>,
     workshopName: String,
     rowLabel: String,
     onIntent: (AssignerContractsIntent) -> Unit,
     onBack: () -> Unit,
-    onOpenBaseDetail: () -> Unit,
+    onOpenBaseDetail: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     WorkshopScreenShell(
@@ -136,12 +136,9 @@ fun ComputationalBasesScreen(
         ) { base, itemModifier ->
             ComputationalBaseRow(
                 base = base,
-                onOpen = {
-                    // Recorded a step before the screen that reads it is opened, so جزئیات مبنا
-                    // can never compose ahead of its own data.
-                    onIntent(AssignerContractsIntent.BaseTapped(base))
-                    onOpenBaseDetail()
-                },
+                // جزئیات مبنا is addressed by شمارهٔ سند and finds its own row in this same list,
+                // so nothing has to be put into state before that screen composes.
+                onOpen = { onOpenBaseDetail(base.letterNumber) },
                 modifier = itemModifier,
             )
         }
@@ -238,7 +235,7 @@ private val PreviewBases = persistentListOf(
 @PreviewRtlTheme
 @Composable
 private fun ComputationalBasesFilledPreview() = PreviewRtlThemeContent {
-    ComputationalBasesScreen(
+    ComputationalBasesContent(
         bases = PagedListState(items = PreviewBases, total = 2),
         workshopName = "دبستان کارن ۲ مجتبی غلامیان",
         rowLabel = "ردیف ۱",
@@ -252,7 +249,7 @@ private fun ComputationalBasesFilledPreview() = PreviewRtlThemeContent {
 @PreviewRtlTheme
 @Composable
 private fun ComputationalBasesEmptyPreview() = PreviewRtlThemeContent {
-    ComputationalBasesScreen(
+    ComputationalBasesContent(
         bases = PagedListState(),
         workshopName = "شرکت راه‌سازی البرز شرق",
         rowLabel = "ردیف ۳",
@@ -265,7 +262,7 @@ private fun ComputationalBasesEmptyPreview() = PreviewRtlThemeContent {
 @PreviewRtlTheme
 @Composable
 private fun ComputationalBasesLoadingPreview() = PreviewRtlThemeContent {
-    ComputationalBasesScreen(
+    ComputationalBasesContent(
         bases = PagedListState(isLoading = true),
         workshopName = "دبستان کارن ۲ مجتبی غلامیان",
         rowLabel = "ردیف ۱",

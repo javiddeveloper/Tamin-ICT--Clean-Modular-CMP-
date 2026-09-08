@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import org.jetbrains.compose.resources.StringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.assigner_document_open_failed
 
@@ -88,12 +89,17 @@ class AssignerContractsViewModel(
             ?.let { loadBasesPage(page = 0, keys = it) }
             ?: flow { }
 
-        is AssignerContractsIntent.BaseTapped ->
-            flow { emit(PartialState.BaseSelected(intent.base)) }
+        is AssignerContractsIntent.DocumentTapped -> openDocument(
+            documentId = intent.document.documentId,
+            title = intent.document.category.title,
+            kind = intent.document.kind,
+        )
 
-        is AssignerContractsIntent.DocumentTapped -> openDocument(intent.documentId)
-        AssignerContractsIntent.RetryDocument ->
-            openDocument(uiState.value.preview?.documentId.orEmpty())
+        // The open preview already carries the three things a refetch needs, so a retry does not
+        // have to find the document again.
+        AssignerContractsIntent.RetryDocument -> uiState.value.preview
+            ?.let { openDocument(it.documentId, it.title, it.kind) }
+            ?: flow { }
 
         AssignerContractsIntent.PreviewDismissed -> flow {
             emit(PartialState.PreviewChanged(null))
@@ -254,23 +260,20 @@ class AssignerContractsViewModel(
      * Either way the wait is visible on the list — every document row disables itself while a
      * fetch is in flight, which is also what drops a second tap.
      */
-    private fun openDocument(documentId: String): Flow<PartialState> = flow {
-        val state = uiState.value
-        if (documentId.isBlank() || state.openingDocumentId != null) return@flow
-        val document = state.selectedBase?.documents?.firstOrNull { it.documentId == documentId }
-            ?: return@flow
+    private fun openDocument(
+        documentId: String,
+        title: StringResource,
+        kind: BaseDocumentKind,
+    ): Flow<PartialState> = flow {
+        if (documentId.isBlank() || uiState.value.openingDocumentId != null) return@flow
 
-        val pending = DocumentPreview(
-            documentId = documentId,
-            title = document.category.title,
-            kind = document.kind,
-        )
+        val pending = DocumentPreview(documentId = documentId, title = title, kind = kind)
         emit(PartialState.DocumentOpening(documentId))
         // On a retry the viewer is already up; re-emitting the pending preview is what clears its
         // failure state and puts the spinner back.
-        if (document.kind == BaseDocumentKind.PDF) emit(PartialState.PreviewChanged(pending))
+        if (kind == BaseDocumentKind.PDF) emit(PartialState.PreviewChanged(pending))
 
-        when (document.kind) {
+        when (kind) {
             BaseDocumentKind.IMAGE -> {
                 // Base64 from the shared upload-image route, handed straight to the async image
                 // loader — the same path درخواست‌های من takes for its attachments.
@@ -349,8 +352,6 @@ class AssignerContractsViewModel(
         is PartialState.BasesLoading -> currentState.copy(
             basesKeys = partialState.keys,
             bases = PagedListState(isLoading = true),
-            // A base of the *previous* پیمان must not stay selected under the new one's list.
-            selectedBase = null,
         )
 
         PartialState.BasesLoadingMore -> currentState.copy(bases = currentState.bases.loadingMore())
@@ -368,7 +369,6 @@ class AssignerContractsViewModel(
                 currentState
             }
 
-        is PartialState.BaseSelected -> currentState.copy(selectedBase = partialState.base)
         is PartialState.DocumentOpening ->
             currentState.copy(openingDocumentId = partialState.documentId)
 

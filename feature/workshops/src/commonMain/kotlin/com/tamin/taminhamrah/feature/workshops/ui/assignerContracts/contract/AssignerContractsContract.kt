@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
 import com.tamin.taminhamrah.model.workshop.AssignerContractPR
 import com.tamin.taminhamrah.model.workshop.BaseDocumentKind
+import com.tamin.taminhamrah.model.workshop.BaseDocumentPR
 import com.tamin.taminhamrah.model.workshop.ComputationalBasePR
 import org.jetbrains.compose.resources.StringResource
 
@@ -68,10 +69,10 @@ data class DocumentPreview(
  * The slices are separate `@Immutable` values on purpose: a page landing in [bases] must not
  * invalidate the search draft, and typing in the draft must not invalidate the list.
  *
- * Nothing here drives navigation. [selected] and [selectedBase] are set when the *row* is tapped,
- * a step before the screen that reads them is opened, so no destination can compose before its own
- * data is in state — which is what an ordering between a state emission and a navigation call
- * could never guarantee.
+ * Nothing here drives navigation, and no screen depends on a state emission having landed before
+ * its own destination composes — an ordering between `sendIntent` and `navigate` that nothing
+ * guarantees. جزئیات پیمان reads [selected], set a whole tap earlier; مبانی محاسباتی is addressed
+ * by its route; جزئیات مبنا finds its مبنا in [bases] by the شمارهٔ سند its route carries.
  */
 @Immutable
 data class AssignerContractsUiState(
@@ -86,15 +87,14 @@ data class AssignerContractsUiState(
      * The پیمان جزئیات پیمان is showing, set the moment its card is tapped.
      *
      * Held rather than serialized into a route: the detail screen draws both parties and four
-     * contract fields, which is more than belongs in a route, and the list already has them. Null
-     * only after process death, which the screen states rather than drawing blank cells.
+     * contract fields, which is more than belongs in a route, and the list already has them. Set a
+     * whole tap earlier than the screen that reads it, so it cannot be composed against a stale
+     * value. Null only after process death, which the screen states rather than drawing blank cells.
      */
     val selected: AssignerContractPR? = null,
     val bases: PagedListState<ComputationalBasePR> = PagedListState(),
     /** Which پیمان [bases] holds, so returning to a screen already loaded does not refetch. */
     val basesKeys: ComputationalBaseKeys? = null,
-    /** The مبنا جزئیات مبنا is showing, set the moment its row is tapped. */
-    val selectedBase: ComputationalBasePR? = null,
     /** Which document is being fetched, so its row can show progress and refuse a second tap. */
     val openingDocumentId: String? = null,
     /** The open viewer, image or PDF. Null when none is open. */
@@ -140,8 +140,6 @@ data class AssignerContractsUiState(
             val keys: ComputationalBaseKeys? = null,
         ) : PartialState
 
-        data class BaseSelected(val base: ComputationalBasePR?) : PartialState
-
         // ---------------------------------------------------------------------- documents
         data class DocumentOpening(val documentId: String?) : PartialState
         data class PreviewChanged(val preview: DocumentPreview?) : PartialState
@@ -182,12 +180,16 @@ sealed interface AssignerContractsIntent {
     data object LoadMoreBases : AssignerContractsIntent
     data object RetryBases : AssignerContractsIntent
 
-    /** Tapping a مبنا records it, a step before جزئیات مبنا is opened. */
-    data class BaseTapped(val base: ComputationalBasePR) : AssignerContractsIntent
+    /**
+     * Opens one attachment.
+     *
+     * Carries the whole document rather than an id to look up: the row that was tapped already
+     * holds it, and a lookup would have to find it through a "currently selected مبنا" the state
+     * would then have to keep in step with navigation.
+     */
+    data class DocumentTapped(val document: BaseDocumentPR) : AssignerContractsIntent
 
-    data class DocumentTapped(val documentId: String) : AssignerContractsIntent
-
-    /** The PDF viewer's own retry button. */
+    /** The PDF viewer's own retry button; the open preview carries everything a refetch needs. */
     data object RetryDocument : AssignerContractsIntent
     data object PreviewDismissed : AssignerContractsIntent
 }
