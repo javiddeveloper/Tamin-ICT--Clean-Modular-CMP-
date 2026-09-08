@@ -100,6 +100,8 @@ enum class FilterProperty(val key: String) {
     @SerialName("jobDescription") JOB_DESCRIPTION("jobDescription"),
     @SerialName("bankName") BANK_NAME("bankName"),
     @SerialName("insuranceTypeDesc") INSURANCE_TYPE_DESC("insuranceTypeDesc"),
+    /** Free-job wage titles (`baseinfo/free-job-wage`); legacy filter property is misspelled. */
+    @SerialName("discrioption") DISCRIOPTION("discrioption"),
 
     // Workshop member / stakeholder / absentee-registration lists. Each list addresses the same
     // two people-columns under a different prefix, which is why there is one entry per list
