@@ -439,7 +439,8 @@ private fun ChatLayout(
 // Exact values pulled from the Figma node (90:87 "Background+Border+Shadow+OverlayBlur") —
 // this card has no equivalent in the shared TaminColors palette, so its glass/gradient/shadow
 // colors are reproduced literally rather than approximated from existing tokens.
-private val TopBarCardShape = RoundedCornerShape(22.dp)
+private val TopBarCardRadius = 22.dp
+private val TopBarCardShape = RoundedCornerShape(TopBarCardRadius)
 private val TopBarTileShape = RoundedCornerShape(13.dp)
 private val TopBarIconTint = Color(0xFFD5E1FA)
 private val TopBarSubtitleColor = Color(0xFFA9BDE6)
@@ -485,6 +486,16 @@ private fun AgentTopBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(67.dp)
+                // Drop shadow from the Figma node ("Background+Border+Shadow+OverlayBlur").
+                // Its color was already captured as TopBarShadowColor but never drawn, so
+                // the card read as flat against the backdrop. Applied before clip() so the
+                // blur spills outside the rounded bounds instead of being cut off by them.
+                .coloredShadow(
+                    color = TopBarShadowColor.copy(alpha = 0.55f),
+                    borderRadius = TopBarCardRadius,
+                    blurRadius = 24.dp,
+                    offsetY = 10.dp
+                )
                 .clip(TopBarCardShape)
                 .border(1.dp, Color.White.copy(alpha = 0.18f), TopBarCardShape)
         ) {
@@ -1698,6 +1709,12 @@ private fun AgentInputBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
+                .coloredShadow(
+                    color = TopBarShadowColor.copy(alpha = 0.55f),
+                    borderRadius = TopBarCardRadius,
+                    blurRadius = 24.dp,
+                    offsetY = 10.dp
+                )
                 .clip(InputBarCardShape)
                 .border(1.dp, Color.White.copy(alpha = 0.18f), InputBarCardShape)
         ) {
