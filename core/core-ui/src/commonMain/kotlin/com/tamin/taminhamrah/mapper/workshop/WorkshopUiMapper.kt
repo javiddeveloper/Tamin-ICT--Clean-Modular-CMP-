@@ -60,6 +60,10 @@ fun EmployerAgreementDN.toPresentation(): WorkshopPR = with(workshop) {
     WorkshopPR(
         workshopId = workshopId,
         branchCode = branchCode,
+        // Raw, like the two identity fields above: these travel into a request body, where a
+        // dash or a Persian digit would be wrong.
+        characterCode = characterCode,
+        legalNationalId = legalNationalId,
         hasIdentity = hasIdentity,
         name = name.orDash(),
         codeLabel = workshopId.orDashDigits(),
@@ -275,7 +279,10 @@ fun WorkshopMemberDN.toPresentation(): WorkshopMemberPR = WorkshopMemberPR(
     relationType = relationTypeDescription.orDash(),
     leavingWorkStatus = leavingWorkStatus.orDash(),
     leavingWorkDate = leavingWorkDate.orDashDate(),
-    isEmployed = leavingWorkDate == null,
+    // Blank, not null: the service sends `leavingWorkDate` nullable but the domain model
+    // flattens it with `orEmpty()`, so a null-check here is always false and marked every
+    // member as having left.
+    isEmployed = leavingWorkDate.isBlank(),
 )
 
 fun WorkshopStackHolderDN.toPresentation(): WorkshopStackHolderPR = WorkshopStackHolderPR(
