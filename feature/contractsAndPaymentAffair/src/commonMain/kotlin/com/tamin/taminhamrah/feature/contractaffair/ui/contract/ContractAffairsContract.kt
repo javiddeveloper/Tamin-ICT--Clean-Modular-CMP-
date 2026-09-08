@@ -177,6 +177,4 @@ sealed interface ContractAffairsEvent {
         val contractNumber: String,
         val insuranceType: String,
     ) : ContractAffairsEvent
-
-    data object ContractCancelled : ContractAffairsEvent
 }

@@ -52,6 +52,9 @@ import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
 import com.tamin.taminhamrah.ui.components.toast.AppToastHost
+import com.tamin.taminhamrah.ui.components.toast.LocalToaster
+import com.tamin.taminhamrah.ui.components.toast.error
+import com.tamin.taminhamrah.ui.components.toast.info
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toparea.driveTopArea
@@ -119,6 +122,7 @@ private fun ContractAffairsEvents(
         insuranceType: String,
     ) -> Unit,
 ) {
+    val toaster = LocalToaster.current
     events.collectWithLifecycleAware { event ->
         when (event) {
             is ContractAffairsEvent.NavigateToService -> onNavigateToService(event.flag)
@@ -133,9 +137,8 @@ private fun ContractAffairsEvents(
             )
 
             is ContractAffairsEvent.NavigateToEditContract -> Unit // TODO(ui): edit-contract flow
-            is ContractAffairsEvent.ContractCancelled -> Unit // TODO(ui): success confirmation
-            is ContractAffairsEvent.ShowToast -> Unit // TODO(ui): snackbar
-            is ContractAffairsEvent.ShowError -> Unit // TODO(ui): error snackbar
+            is ContractAffairsEvent.ShowToast -> toaster.info(event.message)
+            is ContractAffairsEvent.ShowError -> toaster.error(event.message)
         }
     }
 }

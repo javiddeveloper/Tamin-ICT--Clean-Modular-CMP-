@@ -303,7 +303,6 @@ class ContractAffairsViewModel(
             ).collect()
             emit(PartialState.CancelSheetHidden)
             emit(PartialState.CancelSucceeded)
-            sendEvent(ContractAffairsEvent.ContractCancelled)
             refreshContracts().collect { emit(it) }
         } catch (e: Exception) {
             sendEvent(ContractAffairsEvent.ShowError(e.toSingleLineMessage()))
