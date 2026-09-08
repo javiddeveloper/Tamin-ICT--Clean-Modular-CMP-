@@ -76,6 +76,8 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.blur.AppBarScrim
 import com.tamin.taminhamrah.ui.blur.safeHazeEffect
 import com.tamin.taminhamrah.ui.blur.safeHazeSource
+import com.tamin.taminhamrah.ui.components.toast.LocalToaster
+import com.tamin.taminhamrah.ui.components.toast.info
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -1699,6 +1701,7 @@ private fun AgentInputBar(
 ) {
     var text by remember { mutableStateOf("") }
     val taminColors = LocalTaminColors.current
+    val toaster = LocalToaster.current
 
     Box(
         modifier = Modifier
@@ -1780,7 +1783,7 @@ private fun AgentInputBar(
                 )
 
                 // Image attach — matches the Figma layout; no attach flow exists yet, so it
-                // is decorative only (not clickable) rather than a button that does nothing.
+                // just says so rather than being a button that silently does nothing.
                 InputBarGlassButton(
                     icon = Icons.Default.Image,
                     contentDescription = null,
@@ -1788,7 +1791,7 @@ private fun AgentInputBar(
                     backgroundAlpha = 0.09f,
                     borderAlpha = 0.14f,
                     iconTint = InputBarMutedIconTint,
-                    onClick = null
+                    onClick = { toaster.info("این امکان به‌زودی اضافه می‌شود") }
                 )
 
                 // Mic — always available on its own, independent of the send button.
