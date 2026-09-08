@@ -73,6 +73,7 @@ import taminx.core.core_ui.contract_guardian_full_name_label
 import taminx.core.core_ui.contract_guardian_full_name_placeholder
 import taminx.core.core_ui.contract_guardian_letter_date_label
 import taminx.core.core_ui.contract_guardian_letter_date_placeholder
+import taminx.core.core_ui.contract_guardian_letter_no_error
 import taminx.core.core_ui.contract_guardian_letter_no_label
 import taminx.core.core_ui.contract_guardian_letter_no_placeholder
 import taminx.core.core_ui.contract_guardian_national_id_label
@@ -201,6 +202,12 @@ fun ContractApplicantStepContent(
                             label = stringResource(Res.string.contract_guardian_letter_no_label),
                             placeholder = stringResource(Res.string.contract_guardian_letter_no_placeholder),
                             keyboardType = KeyboardType.Number,
+                            isError = guardianForm.letterNumber.isNotEmpty() && !guardianForm.isLetterNumberValid,
+                            errorMessage = if (guardianForm.letterNumber.isNotEmpty() && !guardianForm.isLetterNumberValid) {
+                                stringResource(Res.string.contract_guardian_letter_no_error)
+                            } else {
+                                null
+                            },
                             modifier = Modifier.weight(1f),
                         )
                     }
