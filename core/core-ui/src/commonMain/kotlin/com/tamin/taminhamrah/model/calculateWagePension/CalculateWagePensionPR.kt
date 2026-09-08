@@ -36,5 +36,6 @@ data class WagePensionCalculationPR(
     val historyMonths: Int,
     val historyDays: Int,
     val totalHistoryDays: Int,
-    val chartItems: List<WagePensionChartItemPR>
+    val chartItems: List<WagePensionChartItemPR>,
+    val legalFloorApplied: Boolean = false,
 )

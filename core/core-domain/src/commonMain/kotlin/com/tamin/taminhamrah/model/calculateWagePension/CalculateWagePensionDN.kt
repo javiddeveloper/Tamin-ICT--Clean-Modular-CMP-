@@ -26,7 +26,8 @@ data class WagePensionCalculationDN(
     val historyMonths: Int,
     val historyDays: Int,
     val totalHistoryDays: Int,
-    val chartItems: List<WagePensionChartItemDN>
+    val chartItems: List<WagePensionChartItemDN>,
+    val legalFloorApplied: Boolean = false,
 )
 
 const val MULTIPLE_WORKSHOPS_YES = 1

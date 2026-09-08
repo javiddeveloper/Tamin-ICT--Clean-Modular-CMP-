@@ -85,10 +85,10 @@ import com.tamin.taminhamrah.feature.history.historyScreen
 import com.tamin.taminhamrah.feature.historyobjection.historyObjectionScreen
 import com.tamin.taminhamrah.feature.historyobjection.historyObjectionStepperScreen
 import com.tamin.taminhamrah.feature.inquiryEducation.inquiryEducationScreen
+import com.tamin.taminhamrah.feature.calculateWagePension.calculateWagePensionScreen
 import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
 import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
 import com.tamin.taminhamrah.feature.orotezprotez.orotezProtezScreen
-import com.tamin.taminhamrah.feature.pensionInquiry.calculatePensionScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.deservedTreatmentScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.disabilityPensionScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.edictScreen
@@ -462,7 +462,7 @@ internal fun TaminHamrahNavGraph(
                     onDone = { navController.popBackStack() },
                 )
 
-                calculatePensionScreen(onBack = { navController.popBackStack() })
+                calculateWagePensionScreen(onBack = { navController.popBackStack() })
                 prescriptionScreen(onBack = { navController.popBackStack() })
                 deservedTreatmentScreen(onBack = { navController.popBackStack() })
                 payrollScreen(onBack = { navController.popBackStack() })

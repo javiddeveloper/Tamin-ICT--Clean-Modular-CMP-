@@ -9,7 +9,7 @@ import com.tamin.taminhamrah.feature.deferredInstallment.navigateToDeferredInsta
 import com.tamin.taminhamrah.feature.orotezprotez.navigateToOrotezProtez
 import com.tamin.taminhamrah.feature.requestPaymentForIllDays.navigateToRequestPaymentForIllDays
 import com.tamin.taminhamrah.feature.pregnancyPay.navigateToPregnancyPay
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToCalculatePension
+import com.tamin.taminhamrah.feature.calculateWagePension.navigateToCalculateWagePension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeservedTreatment
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDisabilityPension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToEdict
@@ -46,7 +46,8 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
         FeatureFlag.OPTIONAL_INSURANCE -> navigateToContractFlow(ContractType.OPTIONAL)
         FeatureFlag.HOUSEWIFE_INSURANCE -> navigateToContractFlow(ContractType.HOUSEWIFE)
         FeatureFlag.PENSION_INQUIRY -> navigateToPensionStatusInquiry()
-        FeatureFlag.CALCULATE_WAGE_PENSION -> navigateToCalculatePension()
+        FeatureFlag.CALCULATE_WAGE_PENSION,
+        FeatureFlag.CALCULATE_WAGE_PENSION_109 -> navigateToCalculateWagePension()
         FeatureFlag.PRESCRIPTION -> navigateToPrescription()
         FeatureFlag.DESERVED_TREATMENT_101 -> navigateToDeservedTreatment()
         FeatureFlag.PAY_ROLL -> navigateToPayRoll()

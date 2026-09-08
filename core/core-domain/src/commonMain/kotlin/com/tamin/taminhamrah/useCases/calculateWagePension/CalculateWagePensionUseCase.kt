@@ -23,7 +23,7 @@ class CalculateWagePensionUseCase {
         val premiumPaymentHistoryYear = totalHistoryDays.toDouble() / DAYS_IN_YEAR
         val roundedPremiumYears = roundHalfEvenToTwoDecimals(premiumPaymentHistoryYear)
 
-        val (averageSalary, eligibleAmount) = calculateAmounts(
+        val (averageSalary, eligibleAmount, legalFloorApplied) = calculateAmounts(
             list = dastmozd.list.orEmpty(),
             premiumYears = roundedPremiumYears
         )
@@ -41,14 +41,15 @@ class CalculateWagePensionUseCase {
                     hisYear = item.hisYear.orEmpty(),
                     sumYear = item.sumYear ?: 0
                 )
-            }
+            },
+            legalFloorApplied = legalFloorApplied,
         )
     }
 
     private fun calculateAmounts(
         list: List<DastmozdInfoItemDN>,
         premiumYears: Double
-    ): Pair<Long, Long> {
+    ): Triple<Long, Long, Boolean> {
         val listDays = ArrayList<String>()
         val listWages = ArrayList<String>()
 
@@ -73,16 +74,19 @@ class CalculateWagePensionUseCase {
 
         val averageSalary = ceil(sumWages / MONTHS_IN_TWO_YEARS)
         var eligibleAmount = ceil((averageSalary / DAYS_IN_MONTH) * premiumYears)
+        var legalFloorApplied = false
         if (premiumYears >= 20 && eligibleAmount < BASIC_WAGE) {
             eligibleAmount = BASIC_WAGE.toDouble()
+            legalFloorApplied = true
         }
         if (premiumYears < 20) {
             val minWage = (premiumYears / DAYS_IN_MONTH) * BASIC_WAGE
             if (eligibleAmount < minWage) {
                 eligibleAmount = minWage
+                legalFloorApplied = true
             }
         }
-        return averageSalary.toLong() to eligibleAmount.toLong()
+        return Triple(averageSalary.toLong(), eligibleAmount.toLong(), legalFloorApplied)
     }
 }
 

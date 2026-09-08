@@ -125,6 +125,7 @@ object IconSize {
 object Thickness {
     val border = 1.dp
     val medium = 2.dp
+    val chartBar = 3.dp
 }
 
 /** Decorative wash behind [com.tamin.taminhamrah.ui.components.TaminTopAppBar] hero content. */
@@ -132,6 +133,15 @@ object HeaderDecoration {
     val circleSize = 190.dp
     val circleXOffset = 450.dp
     val circleYOffset = (-150).dp
+}
+
+object ChartDimens {
+    val barChartHeight = 180.dp
+    val barWidth = 32.dp
+    val barGap = 6.dp
+    val barCorner = 10.dp
+    val legendDot = 8.dp
+    val yAxisLabelWidth = 40.dp
 }
 
 /**

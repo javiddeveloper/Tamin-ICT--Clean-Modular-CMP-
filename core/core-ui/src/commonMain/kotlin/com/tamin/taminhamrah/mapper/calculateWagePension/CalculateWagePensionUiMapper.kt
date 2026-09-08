@@ -41,6 +41,7 @@ fun WagePensionCalculationDN.toPresentation(): WagePensionCalculationPR {
         historyMonths = historyMonths,
         historyDays = historyDays,
         totalHistoryDays = totalHistoryDays,
-        chartItems = chartItems.map { it.toPresentation() }
+        chartItems = chartItems.map { it.toPresentation() },
+        legalFloorApplied = legalFloorApplied,
     )
 }
