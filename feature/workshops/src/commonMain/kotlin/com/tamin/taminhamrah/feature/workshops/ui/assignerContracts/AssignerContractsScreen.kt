@@ -77,7 +77,7 @@ fun AssignerContractsScreen(
     viewModel: AssignerContractsViewModel,
     onBack: () -> Unit,
     onOpenDetail: () -> Unit,
-    onOpenBases: () -> Unit,
+    onOpenBases: (AssignerContractPR) -> Unit,
     modifier: Modifier = Modifier,
     workshopId: String = "",
     branchCode: String = "",
@@ -125,7 +125,7 @@ fun AssignerContractsContent(
     onIntent: (AssignerContractsIntent) -> Unit,
     onBack: () -> Unit,
     onOpenDetail: () -> Unit,
-    onOpenBases: () -> Unit,
+    onOpenBases: (AssignerContractPR) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
@@ -255,7 +255,10 @@ fun AssignerContractsContent(
             },
             onViewBases = {
                 onIntent(AssignerContractsIntent.ActionSheetDismissed)
-                onOpenBases()
+                // The پیمان travels with the callback rather than being read back off state:
+                // dismissing the sheet clears `actionSheetFor`, and on the main dispatcher that can
+                // land *before* this lambda returns — which left the tap doing nothing at all.
+                onOpenBases(actionSheetFor)
             },
             onDismiss = { onIntent(AssignerContractsIntent.ActionSheetDismissed) },
         )

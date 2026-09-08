@@ -2,20 +2,26 @@ package com.tamin.taminhamrah.feature.workshops
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopsRoute
+import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.AssignerContractDetailScreen
+import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.AssignerContractsScreen
+import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.AssignerContractsViewModel
+import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.ComputationalBaseDetailScreen
+import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.ComputationalBasesScreen
 import com.tamin.taminhamrah.feature.workshops.ui.contractRows.ContractRowsScreen
+import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.add.AddLegalRepresentativeScreen
+import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.list.LegalRepresentativeListScreen
+import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.otp.LegalRepresentativeOtpScreen
+import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.workshops.LegalRepresentativeWorkshopsScreen
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
 import com.tamin.taminhamrah.feature.workshops.ui.paymentSheets.PaymentSheetsScreen
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebtInquiry.WorkshopDebtInquiryScreen
-import com.tamin.taminhamrah.ui.composableWithFadeTransitions
-import androidx.navigation.toRoute
-import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.workshops.LegalRepresentativeWorkshopsScreen
-import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.otp.LegalRepresentativeOtpScreen
-import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.list.LegalRepresentativeListScreen
-import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.add.AddLegalRepresentativeScreen
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativePR
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopPR
+import com.tamin.taminhamrah.ui.composableWithFadeTransitions
+import com.tamin.taminhamrah.ui.sharedViewModel
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -75,6 +81,57 @@ data class AddLegalRepresentativeRoute(
 @Serializable
 data class ContractRowsRoute(val workshopId: String = "", val branchCode: String = "")
 
+/**
+ * The four واگذارندگان destinations, as one graph.
+ *
+ * The graph is what `sharedViewModel` scopes the ViewModel to, so all four resolve one instance and
+ * the list's rows are still in hand two screens deep.
+ */
+@Serializable
+data object AssignerContractsGraph
+
+/**
+ * واگذارندگان, the second services-grid entry that is also a کارگاه drill-down.
+ *
+ * Both halves default to blank because the grid knows no workshop — the screen then asks for one
+ * through its search sheet. The drill-down from جزئیات کارگاه fills them in and the list loads
+ * at once.
+ */
+@Serializable
+data class AssignerContractsRoute(val workshopId: String = "", val branchCode: String = "")
+
+/** جزئیات پیمان — reads the پیمان the list recorded when its card was tapped. */
+@Serializable
+data object AssignerContractDetailRoute
+
+/**
+ * مبانی محاسباتی of one پیمان.
+ *
+ * Carries all four identity keys rather than reading them off shared state, so the screen refetches
+ * correctly after process death and can never be opened against a پیمان it was not given — the
+ * service answers a partial set with another contract's bases. [workshopName] and [rowLabel] are
+ * the design's own subtitle line, and carrying them keeps this destination self-sufficient.
+ */
+@Serializable
+data class ComputationalBasesRoute(
+    val workshopId: String,
+    val branchCode: String,
+    val contractRow: String,
+    val contractSequence: String,
+    val workshopName: String = "",
+    val rowLabel: String = "",
+)
+
+/**
+ * جزئیات مبنا.
+ *
+ * Carries the شمارهٔ سند the row was drawn with, and the screen finds its مبنا among the bases
+ * already in state — so it never depends on a "currently selected" field having been updated before
+ * this destination composed.
+ */
+@Serializable
+data class ComputationalBaseDetailRoute(val letterNumber: String)
+
 @Serializable
 data class WorkshopDebtInquiryRoute(
     val workshopId: String,
@@ -89,6 +146,16 @@ fun NavController.navigateToWorkshops() {
 /** The `FeatureFlag.CONTRACT_INFO` entry — no workshop yet, so the screen opens its picker. */
 fun NavController.navigateToContractRows() {
     navigate(ContractRowsRoute())
+}
+
+/**
+ * The `FeatureFlag.ASSIGNER_CONTRACT` entry — no workshop yet, so the screen opens its search.
+ *
+ * Navigates to the graph's start destination rather than to the graph, so the same call serves the
+ * drill-down with its two codes filled in.
+ */
+fun NavController.navigateToAssignerContracts() {
+    navigate(AssignerContractsRoute())
 }
 
 fun NavController.navigateToLegalRepresentativeWorkshops() {
@@ -123,6 +190,73 @@ fun NavGraphBuilder.workshopsScreen(
             branchCode = route.branchCode,
             onBack = { navController.popBackStack() },
         )
+    }
+
+    // ─── واگذارندگان ─────────────────────────────────────────────────────────────────
+    //
+    // Four destinations, one graph, one ViewModel. They are a single flow: the list response
+    // already carries what جزئیات پیمان draws, so the drill-down costs no request — which only
+    // works if all four resolve the *same* instance. `sharedViewModel` scopes it to this graph.
+    //
+    // The stack is real navigation rather than a nested state on one screen, so the system back
+    // gesture walks it exactly as the design's own back button does (basedetail → base, base and
+    // detail → list, list → out) with no back handler anywhere.
+    navigation<AssignerContractsGraph>(startDestination = AssignerContractsRoute()) {
+        composableWithFadeTransitions<AssignerContractsRoute> { entry ->
+            val route = entry.toRoute<AssignerContractsRoute>()
+            val viewModel = entry.sharedViewModel<AssignerContractsViewModel>(navController)
+            AssignerContractsScreen(
+                viewModel = viewModel,
+                workshopId = route.workshopId,
+                branchCode = route.branchCode,
+                onBack = { navController.popBackStack() },
+                onOpenDetail = { navController.navigate(AssignerContractDetailRoute) },
+                // The row the sheet was raised for arrives with the callback. The action is
+                // disabled unless all four keys are present, so this cannot address a partial set.
+                onOpenBases = { contract ->
+                    navController.navigate(
+                        ComputationalBasesRoute(
+                            workshopId = contract.card.workshopId,
+                            branchCode = contract.card.branchCode,
+                            contractRow = contract.contractRow,
+                            contractSequence = contract.contractSequence,
+                            workshopName = contract.card.name,
+                            rowLabel = contract.card.rowLabel,
+                        )
+                    )
+                },
+            )
+        }
+
+        composableWithFadeTransitions<AssignerContractDetailRoute> { entry ->
+            AssignerContractDetailScreen(
+                viewModel = entry.sharedViewModel(navController),
+                onBack = { navController.popBackStack() },
+            )
+        }
+
+        composableWithFadeTransitions<ComputationalBasesRoute> { entry ->
+            val route = entry.toRoute<ComputationalBasesRoute>()
+            ComputationalBasesScreen(
+                viewModel = entry.sharedViewModel(navController),
+                workshopId = route.workshopId,
+                branchCode = route.branchCode,
+                contractRow = route.contractRow,
+                contractSequence = route.contractSequence,
+                workshopName = route.workshopName,
+                rowLabel = route.rowLabel,
+                onBack = { navController.popBackStack() },
+                onOpenBaseDetail = { navController.navigate(ComputationalBaseDetailRoute(it)) },
+            )
+        }
+
+        composableWithFadeTransitions<ComputationalBaseDetailRoute> { entry ->
+            ComputationalBaseDetailScreen(
+                viewModel = entry.sharedViewModel(navController),
+                letterNumber = entry.toRoute<ComputationalBaseDetailRoute>().letterNumber,
+                onBack = { navController.popBackStack() },
+            )
+        }
     }
 
     composableWithFadeTransitions<PaymentSheetsRoute> { entry ->
@@ -263,6 +397,7 @@ private fun WorkshopAction.route(
 ): Any = when (this) {
     WorkshopAction.PAYMENT_SHEETS -> PaymentSheetsRoute(workshopId, branchCode, workshopName)
     WorkshopAction.CONTRACT_ROWS -> ContractRowsRoute(workshopId, branchCode)
+    WorkshopAction.ASSIGNER_CONTRACTS -> AssignerContractsRoute(workshopId, branchCode)
     WorkshopAction.DEBT_INQUIRY ->
         WorkshopDebtInquiryRoute(workshopId, branchCode, workshopName)
 }
