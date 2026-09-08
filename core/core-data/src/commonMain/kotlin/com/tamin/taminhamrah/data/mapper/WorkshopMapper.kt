@@ -117,6 +117,7 @@ fun EmployerWorkshopDTO.toDomain(): WorkshopSummaryDN = WorkshopSummaryDN(
     branchOfficeCode = branch?.code ?: brhCode.orEmpty(),
     branchOfficeName = branch?.organizationName ?: branchTitle.orEmpty(),
     characterCode = character?.characterCode.orEmpty(),
+    legalNationalId = legalWorkshop?.nationalId.orEmpty(),
     characterDescription = character?.characterDesc.orEmpty(),
     workshopTypeDescription = workshopType?.workshopTypeDesc.orEmpty(),
     statusCode = workshopStatus?.workshopStatusCode.orEmpty(),
@@ -289,10 +290,17 @@ fun DebitPaymentRequestDN.toDto(): DebitPaymentRequestDTO = DebitPaymentRequestD
     agreementRow = agreementRow,
     // "1"/"0", not "true"/"false".
     deposit = if (deposit) DEPOSIT_YES else DEPOSIT_NO,
+    // Only a حقوقی workshop has one. Blank is not the same as absent here: the service expects
+    // the key present and null, so an empty id becomes null rather than "".
+    nationalId = legalNationalId.takeIf { characterCode == CHARACTER_LEGAL && it.isNotBlank() },
+    nationalType = characterCode,
 )
 
 private const val DEPOSIT_YES = "1"
 private const val DEPOSIT_NO = "0"
+
+/** `02` حقوقی — the only character that carries a national id of its own. */
+private const val CHARACTER_LEGAL = "02"
 
 /**
  * The wire value of `objectionType` on `objection-save` — a Persian label, not a code. The same

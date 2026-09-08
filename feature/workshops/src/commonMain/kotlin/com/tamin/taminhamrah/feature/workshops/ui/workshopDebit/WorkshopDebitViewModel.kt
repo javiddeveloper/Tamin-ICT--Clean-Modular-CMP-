@@ -33,7 +33,14 @@ class WorkshopDebitViewModel(
     private fun open(intent: WorkshopDebitIntent.Open): Flow<PartialState> = flow {
         val state = uiState.value
         if (state.workshopId == intent.workshopId && state.branchCode == intent.branchCode) return@flow
-        emit(PartialState.Opened(intent.workshopId, intent.branchCode))
+        emit(
+            PartialState.Opened(
+                workshopId = intent.workshopId,
+                branchCode = intent.branchCode,
+                characterCode = intent.characterCode,
+                legalNationalId = intent.legalNationalId,
+            )
+        )
         emitAll(loadPage(page = 0, identity = intent.workshopId to intent.branchCode))
     }
 
@@ -76,6 +83,8 @@ class WorkshopDebitViewModel(
                 branchCode = state.branchCode,
                 debitNumber = debt.debitNumber,
                 agreementRow = debt.agreementRow,
+                characterCode = state.characterCode,
+                legalNationalId = state.legalNationalId,
             )
         )
         emit(PartialState.Paying(null))
@@ -115,6 +124,8 @@ class WorkshopDebitViewModel(
         is PartialState.Opened -> currentState.copy(
             workshopId = partialState.workshopId,
             branchCode = partialState.branchCode,
+            characterCode = partialState.characterCode,
+            legalNationalId = partialState.legalNationalId,
         )
 
         PartialState.Loading -> currentState.copy(list = currentState.list.loading())
