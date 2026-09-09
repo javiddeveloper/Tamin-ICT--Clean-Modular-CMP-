@@ -34,6 +34,8 @@ Search `core-ui/ui/components/` before building any new component — the odds a
 
 Typography / Persian digits: [[Typography]] — theme `ss01` is visual; `toPersianDigits()` changes the string.
 
+Colors, spacing, radius: [[Theme]] — never hardcode `Color`, `.dp`, or UI copy in features.
+
 ## feature
 
 ⚠️ Folder names do not match package names. Translation table:
@@ -45,15 +47,19 @@ Typography / Persian digits: [[Typography]] — theme `ss01` is visual; `toPersi
 | `:feature:pensioner` | `feature/pensioner` | `…feature.pensionInquiry` ⚠️ |
 | `:feature:cartable` | `feature/cartable` | `…feature.cartable` |
 | `:feature:history` | `feature/history` | `…feature.history` |
-| `:feature:contracts` | `feature/contracts` | `…feature.contracts` |
+| `:feature:contracts` | `feature/contracts` | `…feature.contracts` — list, create/edit flows (`flow/` package) |
 | `:feature:workshops` | `feature/workshops` | `…feature.workshops` |
-| `:feature:studentInsuranceContract` | `feature/studentInsuranceContract` | `…feature.studentInsuranceContract` |
 | `:feature:agent` | `feature/agent` | `…feature.agent` |
 | `:feature:healthProfile` | `feature/healthProfile` | `…feature.healthProfile` |
 | `:feature:taminServices` | `feature/taminServices` | `…feature.taminServices` |
 | `:feature:change-mobile` | `feature/change-mobile` | `…feature.changemobile` ⚠️ |
 | `:feature:my-inbox` | `feature/my-inbox` | `…feature.myinbox` ⚠️ |
 | `:feature:addDependent` | `feature/addDependent` | `…feature.addDependent` |
+| `:feature:orotez-protez` | `feature/orotez-protez` | `…feature.orotezprotez` |
+| `:feature:deferredInstallment` | `feature/deferredInstallment` | `…feature.deferredInstallment` |
+| `:feature:pensionStatusInquiry` | `feature/pensionStatusInquiry` | `…feature.pensionStatusInquiry` |
+| `:feature:girlSurvivor` | `feature/girlSurvivor` | `…feature.girlSurvivor` |
+| `:feature:pensionSurvivor` | `feature/pensionSurvivor` | `…feature.pensionSurvivor` |
 
 ### Layout of a feature module
 

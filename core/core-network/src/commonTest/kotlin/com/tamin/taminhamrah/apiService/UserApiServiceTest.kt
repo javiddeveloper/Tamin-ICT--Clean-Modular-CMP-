@@ -3,6 +3,8 @@ package com.tamin.taminhamrah.apiService
 import com.tamin.taminhamrah.util.ApiTestUtils
 import com.tamin.taminhamrah.util.UserTestData
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -43,8 +45,9 @@ class UserApiServiceTest : BaseApiTest() {
         )
 
         assertEquals(200, response.status)
-        assertEquals("test-trace-id-123", response.data?.traceId)
-        assertEquals("test-hash-456", response.data?.data?.hash)
+        val data = response.data?.jsonObject
+        assertEquals("test-trace-id-123", data?.get("traceId")?.jsonPrimitive?.content)
+        assertEquals("test-hash-456", data?.get("data")?.jsonObject?.get("hash")?.jsonPrimitive?.content)
     }
 
     @Test
@@ -102,6 +105,20 @@ class UserApiServiceTest : BaseApiTest() {
         val apiService = ktorfit.createUserApiService()
 
         val response = apiService.getStatusCertificateReport("[]")
+
+        assertEquals(200, response.status)
+        assertEquals("SUCCESSFUL", response.family)
+        assertNull(response.data)
+    }
+
+    @Test
+    fun `getWageCertificateReport should return success with null data`() = runTest {
+        val jsonResponse = UserTestData.certificateReportSuccess
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createUserApiService()
+
+        val response = apiService.getWageCertificateReport("[]")
 
         assertEquals(200, response.status)
         assertEquals("SUCCESSFUL", response.family)

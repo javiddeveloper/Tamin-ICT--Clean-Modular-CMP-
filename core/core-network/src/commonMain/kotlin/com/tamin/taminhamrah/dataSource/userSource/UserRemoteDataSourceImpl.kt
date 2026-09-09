@@ -12,6 +12,9 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
+import com.tamin.taminhamrah.tools.extractTypedData
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import com.tamin.taminhamrah.apiService.UserApiService
 import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDTO
 import com.tamin.taminhamrah.model.bankAccount.BankAccountDTO
@@ -25,6 +28,7 @@ import com.tamin.taminhamrah.model.subDominant.SubDominantResponseDTO
 import com.tamin.taminhamrah.model.subDominant.insuredActiveBranch.InsuredActiveBranchDTO
 import com.tamin.taminhamrah.model.user.EditMobileResponseDto
 import com.tamin.taminhamrah.model.user.TaminRelationDTO
+import com.tamin.taminhamrah.model.user.CurrentUserDto
 import com.tamin.taminhamrah.model.user.UserProfileDto
 import com.tamin.taminhamrah.model.user.VerifyMobileRequest
 import com.tamin.taminhamrah.model.utils.ListData
@@ -37,7 +41,8 @@ import com.tamin.taminhamrah.model.bankAccount.BankAccountRequestDTO
 internal class UserRemoteDataSourceImpl(
     private val userApiService: UserApiService,
     private val queryBuilder: ApiQueryBuilder,
-    private val errorParser: ErrorParser
+    private val errorParser: ErrorParser,
+    private val json: Json
 ) : UserRemoteDataSource {
 
     override suspend fun getIdentityInfo(): IdentityInfoDto {
@@ -194,7 +199,7 @@ internal class UserRemoteDataSourceImpl(
                 url = NetworkConstants.EDIT_MOBILE_URL,
                 mobile = mobile
             )
-            response.extractData()
+            response.extractTypedData(json, EditMobileResponseDto.serializer())
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
@@ -211,7 +216,7 @@ internal class UserRemoteDataSourceImpl(
                 url = NetworkConstants.VERIFY_EDIT_MOBILE_URL,
                 loginRequest = request
             )
-            response.extractData()
+            response.extractTypedData(json, String.serializer())
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
@@ -231,6 +236,16 @@ internal class UserRemoteDataSourceImpl(
             throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
+    override suspend fun getCurrentUser(): CurrentUserDto? {
+        return try {
+            userApiService.getCurrentUser().extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
     override suspend fun checkUserIsNew(nationalId: String): Boolean {
         return try {
             val response = userApiService.checkUserIsNew(nationalId)
@@ -260,6 +275,17 @@ internal class UserRemoteDataSourceImpl(
     override suspend fun getStatusCertificateReport(filter: List<ApiFilterDN>): String? {
         return try {
             val response = userApiService.getStatusCertificateReport(queryBuilder.buildFilterJson(filter))
+            response.extractMessage()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun getWageCertificateReport(filter: List<ApiFilterDN>): String? {
+        return try {
+            val response = userApiService.getWageCertificateReport(queryBuilder.buildFilterJson(filter))
             response.extractMessage()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)

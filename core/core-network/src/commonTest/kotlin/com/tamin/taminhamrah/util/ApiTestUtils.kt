@@ -58,6 +58,33 @@ object PersonalTestData {
 
     val requestSummarySuccess: String
         get() = readResourceFile("mocks/request_summary_success.json")
+
+    /** Legacy-shaped `survivor-request/personal` payload for girl survivor. */
+    val girlSurvivorPersonalSuccess: String
+        get() = readResourceFile("mocks/girl_survivor_personal_success.json")
+
+    /**
+     * Live-shaped `survivor-request/personal` payload (includes nested
+     * `relationWithTamins` objects with Jackson-style int identity refs).
+     */
+    val survivorRequestPersonalLiveSuccess: String
+        get() = readResourceFile("mocks/survivor_request_personal_live_success.json")
+
+    val girlSurvivorConditionSuccess: String
+        get() = readResourceFile("mocks/girl_survivor_condition_success.json")
+
+    val girlSurvivorConditionIneligible: String
+        get() = readResourceFile("mocks/girl_survivor_condition_ineligible.json")
+
+    val girlSurvivorConfirmSuccess: String
+        get() = readResourceFile("mocks/girl_survivor_confirm_success.json")
+
+    val girlSurvivorConfirmNullData: String
+        get() = readResourceFile("mocks/girl_survivor_confirm_null_data.json")
+
+    /** Minimal PDF header bytes used for `survivor-request/report` streaming tests. */
+    val girlSurvivorReportPdfBytes: ByteArray =
+        ("%PDF-1.4 girl-survivor-commitment").encodeToByteArray()
 }
 
 object UserRequestTestData {
@@ -298,6 +325,46 @@ object WorkshopTestData {
 
     val workshopStackholdersSuccess: String
         get() = readResourceFile("mocks/workshop_stackholders_success.json")
+
+    // خدمات غیرحضوری کارفرما (employerEservicesAgreement)
+
+    val employerCommitmentInfoSuccess: String
+        get() = readResourceFile("mocks/employer_commitment_info_success.json")
+
+    val employerWorkshopsWithoutContractSuccess: String
+        get() = readResourceFile("mocks/employer_workshops_without_contract_success.json")
+
+    val employerWorkshopContractRowsSuccess: String
+        get() = readResourceFile("mocks/employer_workshop_contract_rows_success.json")
+
+    val employerAgreementByWorkshopSuccess: String
+        get() = readResourceFile("mocks/employer_agreement_by_workshop_success.json")
+
+    val employerRequestTicketSuccess: String
+        get() = readResourceFile("mocks/employer_request_ticket_success.json")
+}
+
+object OccurrenceTestData {
+    val personalInfoSuccess: String
+        get() = readResourceFile("mocks/occurrence/personal_info_success.json")
+
+    val allWorkshopsSuccess: String
+        get() = readResourceFile("mocks/occurrence/all_workshops_success.json")
+
+    val workshopSpecSuccess: String
+        get() = readResourceFile("mocks/occurrence/workshop_spec_success.json")
+
+    val insuredRelationSuccess: String
+        get() = readResourceFile("mocks/occurrence/insured_relation_success.json")
+
+    val documentTypesSuccess: String
+        get() = readResourceFile("mocks/occurrence/document_types_success.json")
+
+    val uploadImageSuccess: String
+        get() = readResourceFile("mocks/occurrence/upload_image_success.json")
+
+    val submitOccurrenceSuccess: String
+        get() = readResourceFile("mocks/occurrence/submit_occurrence_success.json")
 }
 
 object HistoryTestData {
@@ -325,3 +392,18 @@ object HistoryTestData {
     val sendToInstitutionSuccess: String
         get() = readResourceFile("mocks/history/send_to_institution_success.json")
 }
+
+object InspectionTestData {
+    val inspectionPerformedListSuccess: String
+        get() = readResourceFile("mocks/inspection_performed_list_success.json")
+
+    val inspectionBranchesListSuccess: String
+        get() = readResourceFile("mocks/inspection_branches_list_success.json")
+
+    val inspectionJobsListSuccess: String
+        get() = readResourceFile("mocks/inspection_jobs_list_success.json")
+
+    val inspectionSubmitSuccess: String
+        get() = readResourceFile("mocks/inspection_submit_success.json")
+}
+

@@ -62,11 +62,44 @@ BASE_URL_ACCOUNT        = "https://account.tamin.ir/auth/"
 BASE_URL_HEALTH_PROFILE = "http://172.16.14.115:5700/api/"   // internal IP
 AI_BASE_URL             = "https://sw.tamin.ir/api/"
 REDIRECT_URI            = "mytamin://login"
-DEFAULT_AUDIENCE        = "https://es.tamin.ir,https://eservices.tamin.ir"
+DEFAULT_AUDIENCE        = "https://es.tamin.ir,https://eservices.tamin.ir,https://profile-api.tamin.ir"
 REQUEST_TIMEOUT_60_SEC = 60_000L   REQUEST_TIMEOUT_5_MIN = 300_000L
 ```
 
 ⚠️ Endpoints are declared in **two places**: this file, and the `buildConfigField` entries in `androidApp/build.gradle.kts`. The `flavorTest` flavor overrides the build-config values but `NetworkConstants` does not see that. When an endpoint changes, check both. See [[Build-and-Run]].
+
+### Developer-options base URL overrides (debug builds only)
+
+The four base URLs above (`MAIN`, `ACCOUNT`, `HEALTH_PROFILE`, `AI` — via `BaseUrlKey`) are not
+purely compile-time constants: `DeveloperOptionsRepository.getEffectiveBaseUrl(key)` is what every
+HTTP client and auth use case actually calls (`NetworkKoinModule`, `AuthRemoteDataSourceImpl`,
+`AuthAuthorizeUrlUseCaseImpl`, `GetSignOutUrlUseCase`), and it returns a per-device override saved
+by the debug-only "Developer Options" screen (`feature:developerOptions`) instead of the
+`NetworkConstants` default when one is set.
+
+This only ever takes effect in debug builds — `getEffectiveBaseUrl` ignores any stored override
+outside `AppConfig.isDebug`, and the screen's nav route is only registered when `AppConfig.isDebug`
+is true — so a release build always uses the compiled-in `NetworkConstants` values.
+
+`MAIN`, `HEALTH_PROFILE`, and `AI` are baked into `HttpClient`/Ktorfit singletons built once by
+Koin, so overriding them only takes effect after the app process restarts; `ACCOUNT` is read fresh
+on every call and applies immediately (see `BaseUrlPresets.requiresRestart`).
+
+### The `shortterm-request` family
+
+`GET shortterm-request/getRequestInsuredMainInfo[/{type}]` is one backend endpoint shared by
+several "shortterm request" features — it returns the caller's insurance identity plus their
+`branchWorkshop` list, and the path suffix (or its absence) selects which request type's context
+comes back. `:feature:orotez-protez` calls it with `/Orthosis`
+(`OrotezProtezApiService.getRequestInsuredMainInfo`); `:feature:pregnancyPay` calls the same path
+with **no suffix** (`PregnancyPayApiService.getMainInfo`), matching what `old_android`'s
+`ServicesService.getLatestInsuranceInfo` used. Each feature keeps its own DTO/DN copy of this
+response (`RequestInsuredMainInfoDTO` vs `PregnancyMainInfoDTO`) rather than sharing one — that
+matches this repo's existing precedent of near-duplicate "shortterm request info" models kept in
+separate per-domain packages (compare `ShowRequestInfoDTO`). If you're porting another
+`old_android` "shortterm" feature (e.g. sick-leave pay / `requestPaymentForillDays`), check
+`ServicesService.kt` there first for the exact suffix (or lack of one) before assuming it matches
+an existing KMP feature's.
 
 ⚠️ `CLIENT_ID` is hardcoded in `NetworkConstants`, while `androidApp` reads it from `key.properties` / the `OPERATIONAL_API_KEY` environment variable.
 

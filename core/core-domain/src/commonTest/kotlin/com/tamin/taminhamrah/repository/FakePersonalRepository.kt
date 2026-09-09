@@ -8,9 +8,12 @@ import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoDN
 import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionDN
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
+import com.tamin.taminhamrah.model.personal.survivorDependent.SurvivorDependentDN
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
 import com.tamin.taminhamrah.model.personal.InsuredDocDN
 import com.tamin.taminhamrah.model.personal.NewInsuredSummaryDN
+import com.tamin.taminhamrah.model.personal.girlSurvivor.ConfirmGirlSurvivorDN
+import com.tamin.taminhamrah.model.personal.girlSurvivor.GirlSurvivorReportParamsDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.repository.personal.PersonalRepository
 import kotlinx.coroutines.flow.Flow
@@ -23,14 +26,17 @@ class FakePersonalRepository : PersonalRepository {
     var submitFinalSurvivorPensionResult: String? = null
     var pdfDownloadResult: PdfDownloadDN? = null
     var girlSurvivorConditionResult: GirlSurvivorConditionDN? = null
+    var girlSurvivorReportResult: PdfDownloadDN? = null
+    var confirmGirlSurvivorResult: String? = null
     var saveSurvivorInfoResult: String? = null
 
     var shouldThrowError = false
     var disabilityDependentInfoResult: List<DisabilityDependentDN> = emptyList()
+    var survivorListResult: List<SurvivorDependentDN> = emptyList()
     var confirmSurvivorsListResult: List<ConfirmSurvivorDN> = emptyList()
     var error: Throwable = RuntimeException("Personal Repository Error")
 
-    override fun getPersonalInfo(): Flow<PersonalInfoDN?> = flow {
+    override fun getPersonalInfo(refreshRemote: Boolean): Flow<PersonalInfoDN?> = flow {
         if (shouldThrowError) throw error
         emit(personalInfoResult)
     }
@@ -50,6 +56,11 @@ class FakePersonalRepository : PersonalRepository {
             if (shouldThrowError) throw error
             emit(disabilityDependentInfoResult)
         }
+
+    override fun getSurvivorList(deceasedNationalId: String): Flow<List<SurvivorDependentDN>> = flow {
+        if (shouldThrowError) throw error
+        emit(survivorListResult)
+    }
 
     override fun checkGirlSurvivorConditions(
         nationalCode: String,
@@ -75,6 +86,16 @@ class FakePersonalRepository : PersonalRepository {
     override fun getFinalSurvivorPensionPDF(): Flow<PdfDownloadDN> = flow {
         if (shouldThrowError) throw error
         pdfDownloadResult?.let { emit(it) }
+    }
+
+    override fun getGirlSurvivorReport(params: GirlSurvivorReportParamsDN): Flow<PdfDownloadDN> = flow {
+        if (shouldThrowError) throw error
+        girlSurvivorReportResult?.let { emit(it) }
+    }
+
+    override fun confirmGirlSurvivor(body: ConfirmGirlSurvivorDN): Flow<String?> = flow {
+        if (shouldThrowError) throw error
+        emit(confirmGirlSurvivorResult)
     }
 
     override fun saveSurvivorInfo(body: SaveSurvivorInfoDN): Flow<String?> = flow {

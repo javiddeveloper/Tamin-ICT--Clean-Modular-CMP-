@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.data.repository
 
 import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSource
 import com.tamin.taminhamrah.model.common.CityDN
+import com.tamin.taminhamrah.model.common.CityListResultDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.FilterOperator
@@ -13,9 +14,14 @@ import com.tamin.taminhamrah.data.repository.city.CityListQuery
 import com.tamin.taminhamrah.data.repository.city.ProvinceListQuery
 import com.tamin.taminhamrah.model.common.ProvinceDN
 import com.tamin.taminhamrah.repository.CityProvinceRepository
+import com.tamin.taminhamrah.data.repository.city.CityByProvinceQuery
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 
 internal class CityProvinceRepositoryImpl(
     private val commonRemoteDataSource: CommonRemoteDataSource,
@@ -46,7 +52,23 @@ internal class CityProvinceRepositoryImpl(
     }
 
     override fun getCities(cityName: String?, provinceCode: String?): Flow<List<CityDN>> = flow {
-        val response = commonRemoteDataSource.getCityName(CityListQuery.build(cityName))
+        // Same reasoning as getProvinces: show what was cached for this province while the
+        // request is in flight, and keep it if the request fails.
+        val cached = if (provinceCode.isNullOrBlank()) {
+            emptyList()
+        } else {
+            cityProvinceDao.getCitiesByProvinceCode(provinceCode).firstOrNull().orEmpty()
+        }
+        if (cached.isNotEmpty()) {
+            emit(cached.map { it.toDomain() })
+        }
+
+        val response = try {
+            commonRemoteDataSource.getCityName(CityListQuery.build(cityName, provinceCode))
+        } catch (e: Exception) {
+            if (cached.isEmpty()) throw e
+            return@flow
+        }
         response.list.forEach { cityDto ->
             cityProvinceDao.upsertCity(cityDto.toEntity())
         }
@@ -60,19 +82,56 @@ internal class CityProvinceRepositoryImpl(
         )
     }
 
+    override fun getCitiesByProvince(provinceCode: String): Flow<CityListResultDN> = flow {
+        val localCities = cityProvinceDao.getCitiesByProvinceCode(provinceCode).first()
+        emit(CityListResultDN(localCities.map { it.toDomain() }))
+
+        var isStale = false
+        try {
+            val response = commonRemoteDataSource.getCitiesByProvince(CityByProvinceQuery.build(provinceCode))
+            cityProvinceDao.replaceCitiesForProvince(provinceCode, response.list.map { it.toEntity() })
+        } catch (e: Exception) {
+            if (localCities.isEmpty()) throw e
+            isStale = true
+        }
+
+        emitAll(
+            cityProvinceDao.getCitiesByProvinceCode(provinceCode).map { entities ->
+                CityListResultDN(entities.map { it.toDomain() }, isStale = isStale)
+            },
+        )
+    }.distinctUntilChanged()
+
     private fun CityDN.matchesProvinceCode(selectedProvinceCode: String): Boolean {
         val cityProvinceCode = provinceCode ?: return false
         if (cityProvinceCode == selectedProvinceCode) return true
         return cityProvinceCode.trimStart('0') == selectedProvinceCode.trimStart('0')
     }
 
+    /**
+     * Cached provinces first, then whatever the server has.
+     *
+     * `proxy/models/province` is not always up — it answered 503 during testing while other
+     * endpoints were fine. Provinces barely change, so a stale list beats an empty picker, and the
+     * failure is only raised when there is nothing cached to fall back on.
+     */
     override fun getProvinces(): Flow<List<ProvinceDN>> = flow {
-        val response = commonRemoteDataSource.getProvinceName(ProvinceListQuery.build())
-        response.list.forEach { province ->
-            cityProvinceDao.upsertProvince(province.toEntity())
+        val localProvinces = cityProvinceDao.getAllProvinces().first()
+        emit(localProvinces.map { it.toDomain() })
+
+        try {
+            val response = commonRemoteDataSource.getProvinceName(ProvinceListQuery.build())
+            cityProvinceDao.replaceAllProvinces(response.list.map { it.toEntity() })
+        } catch (e: Exception) {
+            if (localProvinces.isEmpty()) throw e
         }
-        emit(response.list.map { it.toDomain() })
-    }
+
+        emitAll(
+            cityProvinceDao.getAllProvinces().map { entities ->
+                entities.map { it.toDomain() }
+            },
+        )
+    }.distinctUntilChanged()
 
     override fun getProvince(provinceId: String): Flow<ProvinceDN> = flow {
 

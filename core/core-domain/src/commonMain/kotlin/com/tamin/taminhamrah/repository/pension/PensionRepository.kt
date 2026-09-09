@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.model.pension.InquirePensionCertificateDN
 import com.tamin.taminhamrah.model.pension.PensionIdDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
 import com.tamin.taminhamrah.model.pension.PayRollDN
+import com.tamin.taminhamrah.model.pension.PayRollInboxDN
 import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDN
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDN
@@ -72,6 +73,10 @@ interface PensionRepository {
     suspend fun sendEdictPensionerToMyInbox(
         filters: List<ApiFilterDN>
     ): Flow<EdictPensionerInboxDN>
+
+    suspend fun sendPayRollToInbox(
+        filters: List<ApiFilterDN>
+    ): Flow<PayRollInboxDN>
 
     suspend fun sendRequestInquirePensionCertificate(
         filters: List<ApiFilterDN>

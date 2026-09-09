@@ -87,6 +87,7 @@ class AuthRepositoryImpl(
         tokenStoreManager.saveToken(null)
         tokenStoreManager.saveRefreshToken(null)
         tokenStoreManager.saveUserId(null)
+        tokenStoreManager.saveUserType(null)
         tokenStoreManager.setTokenValid(false)
         authTokenInvalidator.invalidateAll()
         try {

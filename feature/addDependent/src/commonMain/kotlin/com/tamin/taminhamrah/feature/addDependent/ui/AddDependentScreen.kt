@@ -56,6 +56,7 @@ import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheet
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetResult
+import com.tamin.taminhamrah.ui.components.buttons.SquareIconButton
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.ImmutableList
@@ -178,6 +179,7 @@ fun AddDependentContent(
     val errorMessage = state.error
     val isInitialLoad = state.currentStep == STEP_INQUIRY && state.activeBranches.isEmpty()
     val showBlockingError = errorMessage != null && isInitialLoad
+    val showInitialShimmer = state.isLoading && isInitialLoad
 
     LaunchedEffect(errorMessage) {
         if (errorMessage != null && !showBlockingError) {
@@ -225,7 +227,7 @@ fun AddDependentContent(
             }
         },
         bottomBar = {
-            if (!showBlockingError) {
+            if (!showBlockingError && !showInitialShimmer) {
                 AddDependentBottomBar(
                     state = state,
                     onIntent = onIntent,
@@ -240,7 +242,7 @@ fun AddDependentContent(
                 .padding(padding)
         ) {
             when {
-                state.isLoading && isInitialLoad -> AddDependentShimmer()
+                showInitialShimmer -> AddDependentShimmer()
 
                 errorMessage != null && isInitialLoad -> ErrorStateView(
                     message = errorMessage,

@@ -77,11 +77,13 @@ fun TaminPdfViewer(
     // viewer is the one that asked for a download.
     var awaitingDownload by remember(fileName) { mutableStateOf(false) }
 
-    LaunchedEffect(fileName) {
+    LaunchedEffect(fileName, pdf) {
         val saved = saver.load(fileName)
         if (saved == null) {
             awaitingDownload = true
-            requestDownload()
+            if (pdf == null) {
+                requestDownload()
+            }
         } else {
             bytes = saved
             // Nothing to write — this only reports that the file was downloaded before.

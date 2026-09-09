@@ -99,7 +99,7 @@ private fun OrotezProtezOptionRow(
     val colors = LocalTaminColors.current
     val backgroundColor = if (isSelected) colors.blueBg else colors.bgSurface
     val borderColor = if (isSelected) {
-        colors.hawkesBlue
+        colors.blueBorder
     } else {
         colors.border
     }

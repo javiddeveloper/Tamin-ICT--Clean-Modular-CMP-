@@ -1,8 +1,8 @@
 package com.tamin.taminhamrah.data.mapper
 
 import com.tamin.taminhamrah.data.local.entity.UserRequestEntity
-import com.tamin.taminhamrah.model.userRequest.Article16DetailDTO
-import com.tamin.taminhamrah.model.userRequest.Article16DetailDN
+import com.tamin.taminhamrah.model.userRequest.ArticleSixteenDetailDTO
+import com.tamin.taminhamrah.model.userRequest.ArticleSixteenDetailDN
 import com.tamin.taminhamrah.model.userRequest.DeferredInstallmentDetailDTO
 import com.tamin.taminhamrah.model.userRequest.DeferredInstallmentDetailDN
 import com.tamin.taminhamrah.model.userRequest.FollowUpObjectionDetailDTO
@@ -52,7 +52,7 @@ internal fun parseUserRequestDetails(requestTypeId: Long, jsonString: String?): 
                 .toDomain()
             10L, 12L -> userRequestDetailsJsonParser.decodeFromString<IllDayDetailDTO>(jsonString)
                 .toDomain()
-            26L -> userRequestDetailsJsonParser.decodeFromString<Article16DetailDTO>(jsonString)
+            26L -> userRequestDetailsJsonParser.decodeFromString<ArticleSixteenDetailDTO>(jsonString)
                 .toDomain()
             8L -> userRequestDetailsJsonParser.decodeFromString<FollowUpObjectionDetailDTO>(jsonString)
                 .toDomain()
@@ -90,8 +90,8 @@ internal fun IllDayDetailDTO.toDomain(): UserRequestDetailsDN = UserRequestDetai
     )
 )
 
-internal fun Article16DetailDTO.toDomain(): UserRequestDetailsDN = UserRequestDetailsDN(
-    article16 = Article16DetailDN(
+internal fun ArticleSixteenDetailDTO.toDomain(): UserRequestDetailsDN = UserRequestDetailsDN(
+    articleSixteen = ArticleSixteenDetailDN(
         meetingDate = meetingDate,
         result = result,
     )

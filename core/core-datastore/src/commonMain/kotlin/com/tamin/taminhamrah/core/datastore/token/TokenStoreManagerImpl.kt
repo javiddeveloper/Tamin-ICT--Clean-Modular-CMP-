@@ -20,6 +20,7 @@ class TokenStoreManagerImpl(
     private val tokenKey = "TOKEN"
     private val refreshTokenKey = "REFRESH_TOKEN"
     private val userKey = "USER_KEY"
+    private val userTypeKey = "USER_TYPE"
     private val codeVerifierKey = "CODE_VERIFIER"
     private val tokenValidation = "TOKEN_VALID"
 
@@ -63,6 +64,18 @@ class TokenStoreManagerImpl(
 
     override fun getUserId(): String? {
         return settings.getStringOrNull(userKey)
+    }
+
+    override fun saveUserType(userType: String?) {
+        if (userType == null) {
+            settings.remove(userTypeKey)
+        } else {
+            settings.putString(userTypeKey, userType)
+        }
+    }
+
+    override fun getUserType(): String? {
+        return settings.getStringOrNull(userTypeKey)
     }
 
     override fun saveCodeVerifier(codeVerifier: String?) {

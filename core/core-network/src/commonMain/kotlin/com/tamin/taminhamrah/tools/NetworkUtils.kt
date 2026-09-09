@@ -22,6 +22,7 @@ fun String.looksLikeArabicScript(): Boolean = ARABIC_SCRIPT_REGEX.containsMatchI
  */
 inline fun <T> ErrorParser.safeCall(
     tag: String,
+    fallbackUri: ErrorUri = ErrorUri.NO_CONNECTION_ERROR,
     block: () -> T
 ): T {
     return try {
@@ -34,7 +35,7 @@ inline fun <T> ErrorParser.safeCall(
         throw e
     } catch (e: Exception) {
         Logger.e(tag = tag) { "API call failed: ${e::class.simpleName} - ${e.message}" }
-        throw parseGeneralError(TaminErrorUriException(e.toErrorUri()))
+        throw parseGeneralError(TaminErrorUriException(e.toErrorUri()?:fallbackUri))
     }
 }
 

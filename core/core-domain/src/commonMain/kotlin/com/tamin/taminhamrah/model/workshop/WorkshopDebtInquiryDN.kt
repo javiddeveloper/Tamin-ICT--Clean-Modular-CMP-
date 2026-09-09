@@ -1,13 +1,16 @@
 package com.tamin.taminhamrah.model.workshop
 
+/**
+ * استعلام بدهی کارگاه — a single record, not a list.
+ *
+ * The amounts are parsed from strings that are not guaranteed numeric; a non-numeric answer
+ * arrives here as null rather than throwing inside the mapper, and the screen shows the raw
+ * [result] text the service sent instead.
+ */
 data class WorkshopDebtInquiryDN(
-    val status: String?,
-    val workshopId: String?,
-    val branchCode: String?,
-    val workshopName: String?,
-    val result: String?,
-    val amount1: String?,
-    val sDate: String?,
-    val amount2: String?,
-    val amount3: String?
+    val result: String = "",
+    val date: String = "",
+    val definitiveDebt: Long? = null,
+    val divisibleDebt: Long? = null,
+    val indivisibleDebt: Long? = null,
 )

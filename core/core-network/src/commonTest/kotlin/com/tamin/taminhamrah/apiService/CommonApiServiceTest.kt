@@ -34,4 +34,19 @@ class CommonApiServiceTest : BaseApiTest() {
         val response = apiService.getRegistrationDeclarationForm()
         assertNotNull(response)
     }
+
+    @Test
+    fun `checkInsuredInfo should return the pensioner-detection list`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = """{ "total": 2, "list": ["05", "این سرویس برای شما فعال نیست"], "typeUser": null }"""
+        )
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createCommonApiService()
+
+        val response = apiService.checkInsuredInfo()
+
+        assertEquals(200, response.status)
+        assertEquals(listOf("05", "این سرویس برای شما فعال نیست"), response.data?.list)
+    }
 }

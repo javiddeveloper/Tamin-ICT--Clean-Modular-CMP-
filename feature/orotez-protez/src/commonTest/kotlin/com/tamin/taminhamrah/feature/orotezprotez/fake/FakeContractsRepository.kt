@@ -17,6 +17,7 @@ import com.tamin.taminhamrah.model.contracts.RegistrationInfoDN
 import com.tamin.taminhamrah.model.contracts.SaveContactRequestDN
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.repository.contracts.ContractsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -54,10 +55,16 @@ class FakeContractsRepository : ContractsRepository {
     }
     override fun getBranches(cityCode: String): Flow<List<BranchDN>> = flow { emit(emptyList()) }
     override fun getSpcPremiumRates(): Flow<List<PremiumRateDN>> = flow { emit(emptyList()) }
-    override fun getFreeJobWages(): Flow<List<FreeJobDN>> = flow { emit(emptyList()) }
+    override fun getFreeJobWages(page: Int, searchQuery: String?): Flow<PagedListDN<FreeJobDN>> =
+        flow { emit(PagedListDN()) }
     override fun getFreelancePremiumRange(params: FreelancePremiumRangeParams): Flow<FreelancePremiumRangeDN> = flow {
         emit(FreelancePremiumRangeDN(paymentTabayi = 0L, lowPremium = 0L, history = 0, highPremium = 0L))
     }
+    override fun getOptionalPremiumRange(): Flow<FreelancePremiumRangeDN> = flow {
+        emit(FreelancePremiumRangeDN(paymentTabayi = 0L, lowPremium = 0L, history = 0, highPremium = 0L))
+    }
+    override fun checkRedCrossStatus(): Flow<String> = flow { emit("ok") }
+    override fun checkMedicalStudent(): Flow<String> = flow { emit("ok14") }
     override fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Flow<Long> = flow { emit(0L) }
     override fun calculateOptionalSalary(premiumRateCode: String): Flow<Long> = flow { emit(0L) }
     override fun makeFreelanceContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN> = flow {

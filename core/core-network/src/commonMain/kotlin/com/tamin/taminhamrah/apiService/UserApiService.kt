@@ -14,7 +14,6 @@ import com.tamin.taminhamrah.model.bankAccount.BankAccountDTO
 import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDTO
 import com.tamin.taminhamrah.model.subDominant.SubDominantResponseDTO
 import com.tamin.taminhamrah.model.subDominant.insuredActiveBranch.InsuredActiveBranchDTO
-import com.tamin.taminhamrah.model.user.EditMobileResponseDto
 import com.tamin.taminhamrah.model.user.TaminRelationDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.user.VerifyMobileRequest
@@ -32,6 +31,7 @@ import de.jensklingenberg.ktorfit.http.Query
 import de.jensklingenberg.ktorfit.http.QueryMap
 import de.jensklingenberg.ktorfit.http.Url
 
+import com.tamin.taminhamrah.model.user.CurrentUserDto
 import com.tamin.taminhamrah.model.user.UserProfileDto
 import com.tamin.taminhamrah.model.bankAccount.BankAccountCreatedDTO
 import com.tamin.taminhamrah.model.bankAccount.BankAccountRequestDTO
@@ -64,14 +64,14 @@ internal interface UserApiService {
         @Field("grant_type") grantType: String = "authorization_code",
         @Field("code") codeFromServer: String = "",
         @Field("code_verifier") codeVerifier: String = "",
-        @Field("audience") audience: String = "https://es.tamin.ir,https://eservices.tamin.ir",
+        @Field("audience") audience: String = NetworkConstants.DEFAULT_AUDIENCE,
     ): TokenResponseDto
 
 
     @GET
     suspend fun signOut(
         @Header(HeaderConstant.AUTHORIZATION) token: String,
-        @Url url: String = "${NetworkConstants.BASE_URL_ACCOUNT}signout",
+        @Url url: String,
         @Query("redirect_uri") redirectUrl: String = "https://eservices.tamin.ir/view/index.html?redirect_uri=https://eservices.tamin.ir/auth/access",
         @Query("response_type") responseType: String = "assertion",
         @Query("client_id") clientId: String = NetworkConstants.CLIENT_ID
@@ -80,7 +80,7 @@ internal interface UserApiService {
     @FormUrlEncoded
     @POST
     suspend fun revokeToken(
-        @Url url: String = "${NetworkConstants.BASE_URL_ACCOUNT}revoke",
+        @Url url: String,
         @Header(HeaderConstant.AUTHORIZATION) accessToken: String?,
         @Field("refresh_token") refreshToken: String?
     )
@@ -92,7 +92,7 @@ internal interface UserApiService {
         @Field("grant_type") grantType: String = "refresh_token",
         @Field("refresh_token") refreshToken: String,
         @Field("client_id") clientId: String = NetworkConstants.CLIENT_ID,
-        @Field("audience") audience: String = "https://es.tamin.ir,https://eservices.tamin.ir"
+        @Field("audience") audience: String = NetworkConstants.DEFAULT_AUDIENCE
     ): TokenResponseDto
 
     @GET
@@ -100,14 +100,14 @@ internal interface UserApiService {
 //        @Header("Referer") referer: String,
         @Url url: String,
         @Query("mobile") mobile: String
-    ): BaseDTO<EditMobileResponseDto>
+    ): BaseDTO<JsonElement?>
 
     @POST
     suspend fun verifyChangeMobileCode(
 //        @Header("Referer") referer: String,
         @Url url:String,
         @Body loginRequest: VerifyMobileRequest,
-    ): BaseDTO<String>
+    ): BaseDTO<JsonElement?>
 
 
     @GET("personals/subdominant")
@@ -140,6 +140,15 @@ internal interface UserApiService {
     @GET("users/current-user")
     suspend fun getUserProfile(): BaseDTO<UserProfileDto>
 
+    /**
+     * The same endpoint as [getUserProfile], read in full.
+     *
+     * The کارفرما flows need the roles and organization the narrower model leaves out; everything
+     * [getUserProfile] returns is a subset of this.
+     */
+    @GET("users/current-user")
+    suspend fun getCurrentUser(): BaseDTO<CurrentUserDto>
+
     @GET("relation-tamins/isnew/{nationalId}")
     suspend fun checkUserIsNew(
         @Path("nationalId") nationalId: String
@@ -147,6 +156,11 @@ internal interface UserApiService {
 
     @GET("status-certificate/report")
     suspend fun getStatusCertificateReport(
+        @Query("filter") filter: String
+    ): BaseDTO<JsonElement?>
+
+    @GET("certificate/report")
+    suspend fun getWageCertificateReport(
         @Query("filter") filter: String
     ): BaseDTO<JsonElement?>
 

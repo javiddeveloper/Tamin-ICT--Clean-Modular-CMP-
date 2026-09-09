@@ -42,6 +42,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
@@ -134,7 +135,7 @@ class OrotezProtezViewModel(
         val fileName = file.name
         if (!isJpegFileName(fileName)) {
             deleteFileQuietly(file)
-            emit(PartialState.DocumentPickRejected(getString(Res.string.orotez_protez_document_format_error)))
+            emitDocumentRejection(documentId, getString(Res.string.orotez_protez_document_format_error))
             return@flow
         }
 
@@ -142,20 +143,20 @@ class OrotezProtezViewModel(
             file.readBytes()
         } catch (e: Exception) {
             deleteFileQuietly(file)
-            emit(PartialState.DocumentPickRejected(getString(Res.string.orotez_protez_document_pick_read_error)))
+            emitDocumentRejection(documentId, getString(Res.string.orotez_protez_document_pick_read_error))
             return@flow
         }
 
         if (bytes.size > MAX_DOCUMENT_SIZE_BYTES) {
             deleteFileQuietly(file)
-            emit(PartialState.DocumentPickRejected(getString(Res.string.orotez_protez_document_format_error)))
+            emitDocumentRejection(documentId, getString(Res.string.orotez_protez_document_format_error))
             return@flow
         }
 
         val duplicateOfId = findDuplicateDocumentId(excludeId = documentId, bytes = bytes)
         if (duplicateOfId != null) {
             deleteFileQuietly(file)
-            emit(PartialState.DocumentPickRejected(getString(Res.string.orotez_protez_document_duplicate_error)))
+            emitDocumentRejection(documentId, getString(Res.string.orotez_protez_document_duplicate_error))
             return@flow
         }
 
@@ -169,6 +170,13 @@ class OrotezProtezViewModel(
             val message = e.toSingleLineMessage().ifBlank { getString(Res.string.orotez_protez_document_upload_error) }
             emit(PartialState.DocumentStateChanged(documentId, OrotezProtezDocumentState.Failed(message, file, bytes)))
         }
+    }
+
+    private suspend fun FlowCollector<PartialState>.emitDocumentRejection(
+        documentId: String,
+        message: String,
+    ) {
+        emit(PartialState.DocumentStateChanged(documentId, OrotezProtezDocumentState.Failed(message)))
     }
 
     private fun handleDocumentRemoveClicked(documentId: String): Flow<PartialState> = flow {
@@ -344,7 +352,10 @@ class OrotezProtezViewModel(
         currentState: OrotezProtezUiState,
         partialState: PartialState
     ): OrotezProtezUiState = when (partialState) {
-        is PartialState.Loading -> currentState.copy(isLoading = partialState.isLoading, error = null)
+        is PartialState.Loading -> currentState.copy(
+            isLoading = partialState.isLoading,
+            error = if (partialState.isLoading) null else currentState.error,
+        )
         is PartialState.Error -> currentState.copy(isLoading = false, error = partialState.message)
         is PartialState.DataLoaded -> currentState.copy(
             branch = partialState.branch,

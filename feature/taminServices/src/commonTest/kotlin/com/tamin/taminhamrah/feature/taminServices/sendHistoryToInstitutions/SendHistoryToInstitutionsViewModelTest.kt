@@ -11,6 +11,7 @@ import com.tamin.taminhamrah.model.history.TalfighInfoDN
 import com.tamin.taminhamrah.model.history.UserInfoDN
 import com.tamin.taminhamrah.model.pension.EdictPensionerDN
 import com.tamin.taminhamrah.model.pension.PayRollDN
+import com.tamin.taminhamrah.model.pension.PayRollInboxDN
 import com.tamin.taminhamrah.model.pension.PensionIdDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequestDN
@@ -287,6 +288,8 @@ class SendHistoryToInstitutionsViewModelTest {
         override suspend fun authenticationAndGetPersonalInfo(authenticationsCode: Long) = flow<com.tamin.taminhamrah.model.pension.retirement.RetirementPersonalDN> { TODO() }
         override suspend fun getAuthenticationCode() = flow<com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDN> { TODO() }
         override suspend fun sendEdictPensionerToMyInbox(filters: List<ApiFilterDN>) = flow<com.tamin.taminhamrah.model.pension.EdictPensionerInboxDN> { TODO() }
+        override suspend fun sendPayRollToInbox(filters: List<ApiFilterDN>): Flow<PayRollInboxDN> { TODO() }
+
         override suspend fun sendRequestInquirePensionCertificate(filters: List<ApiFilterDN>) = flow<com.tamin.taminhamrah.model.pension.InquirePensionCertificateDN> { TODO() }
     }
 }

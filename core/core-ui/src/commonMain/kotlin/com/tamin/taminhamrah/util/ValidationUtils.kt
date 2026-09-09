@@ -13,6 +13,16 @@ object ValidationUtils {
     }
 
     /**
+     * Filters input to only digit characters and caps length to 11 digits. Does not force a
+     * `09` prefix while typing — [isMobileNumberValid] is what flags an incomplete/wrong-prefix
+     * number, so the field can show a normal validation error instead of silently rewriting
+     * whatever the user typed.
+     */
+    fun validateMobileNumber(input: String): String {
+        return input.filter { it.isDigit() }.take(11)
+    }
+
+    /**
      * Filters input to only digit characters and caps length to 11 digits.
      */
     fun validateLandline(input: String): String {
@@ -41,6 +51,13 @@ object ValidationUtils {
     }
 
     /**
+     * Returns true if the phone matches an Iranian mobile number (`09` + 9 digits).
+     */
+    fun isMobileNumberValid(phone: String): Boolean {
+        return Regex("^09\\d{9}$").matches(phone)
+    }
+
+    /**
      * Returns true if postcode is empty or exactly 10 digits.
      */
     fun isPostcodeValid(postcode: String): Boolean {
@@ -57,21 +74,14 @@ object ValidationUtils {
     }
 
     /**
-     * Validates Iranian National ID using 10-digit checksum algorithm.
+     * Returns true if [endTimestamp] (epoch millis) is on or after [startTimestamp] — the
+     * general "end date must not be before start date" range check shared across date-range form
+     * fields (e.g. inspection request's employment period). A same-day range is valid (e.g. a
+     * single-day inspection period). Either side being unset (`null`, not yet picked) is treated
+     * as valid so the error only appears once both dates are chosen.
      */
-    fun isNationalIdValid(nationalId: String): Boolean {
-        if (nationalId.length != 10 || !nationalId.all { it.isDigit() }) return false
-        if (nationalId.toSet().size == 1) return false
-
-        val digits = nationalId.map { it.digitToInt() }
-        val checkDigit = digits[9]
-        val sum = (0..8).sumOf { i -> digits[i] * (10 - i) }
-        val remainder = sum % 11
-
-        return if (remainder < 2) {
-            checkDigit == remainder
-        } else {
-            checkDigit == (11 - remainder)
-        }
+    fun isDateRangeValid(startTimestamp: Long?, endTimestamp: Long?): Boolean {
+        if (startTimestamp == null || endTimestamp == null) return true
+        return endTimestamp >= startTimestamp
     }
 }

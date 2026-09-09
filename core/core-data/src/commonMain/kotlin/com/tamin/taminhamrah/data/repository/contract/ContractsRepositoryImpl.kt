@@ -17,6 +17,7 @@ import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractParams
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDN
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
 import com.tamin.taminhamrah.model.contracts.FreeJobDN
+import com.tamin.taminhamrah.model.contracts.FreeJobWagesPaging
 import com.tamin.taminhamrah.model.contracts.InsurancePaymentDN
 import com.tamin.taminhamrah.model.contracts.InsurancePaymentParamsDN
 import com.tamin.taminhamrah.model.contracts.PremiumRateDN
@@ -27,6 +28,7 @@ import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
+import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.repository.contracts.ContractsRepository
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import kotlinx.coroutines.flow.Flow
@@ -80,19 +82,25 @@ class ContractsRepositoryImpl(
 
         try {
             val response = contractsRemoteDataSource.getBranches(branchListQuery(cityCode))
-            val remoteBranches = response.list?:emptyList()
-            branchDao.replaceAllForCity(cityCode, remoteBranches.map { it.toEntity() })
+            val remoteBranches = (response.list ?: emptyList())
+                // `code` is the primary key and is what the picker returns; a row without one
+                // cannot be selected and would collide with every other blank-coded row.
+                .filter { !it.code.isNullOrBlank() }
+            branchDao.replaceAllForCity(cityCode, remoteBranches.map { it.toEntity(cityCode) })
         } catch (e: Exception) {
             if (localBranches.isEmpty()) {
                 throw e
             }
+            // The cached list was already emitted above and is all we can offer.
+            return@flow
         }
 
-        emitAll(
-            branchDao.getBranchesByCityCode(cityCode).map { entities ->
-                entities.map { it.toDomain() }
-            },
-        )
+        // A single read of what was just written, and then the flow **completes**. It used to
+        // `emitAll` the DAO's Flow, which never completes — so a caller that cleared its loading
+        // flag in a `finally` after collecting never cleared it, and the branch picker sat on
+        // "در حال بارگذاری..." forever. Nothing here needs live updates: branches are reference
+        // data fetched once per city.
+        emit(branchDao.getBranchesByCityCode(cityCode).first().map { it.toDomain() })
     }.distinctUntilChanged()
 
     override fun getSpcPremiumRates(): Flow<List<PremiumRateDN>> = flow {
@@ -100,13 +108,26 @@ class ContractsRepositoryImpl(
         emit((response.list?:emptyList()).map { it.toDomain() })
     }
 
-    override fun getFreeJobWages(): Flow<List<FreeJobDN>> = flow {
-        val response = contractsRemoteDataSource.getFreeJobWages(freeJobWagesQuery())
-        emit(response.list.orEmpty().map { it.toDomain() })
+    override fun getFreeJobWages(page: Int, searchQuery: String?): Flow<PagedListDN<FreeJobDN>> = flow {
+        val response = contractsRemoteDataSource.getFreeJobWages(freeJobWagesQuery(page, searchQuery))
+        val items = response.list.orEmpty().map { it.toDomain() }
+        emit(PagedListDN(items = items, total = response.total))
     }
 
     override fun getFreelancePremiumRange(params: FreelancePremiumRangeParams): Flow<FreelancePremiumRangeDN> = flow {
         emit(contractsRemoteDataSource.getFreelancePremiumRange(params).toDomain())
+    }
+
+    override fun getOptionalPremiumRange(): Flow<FreelancePremiumRangeDN> = flow {
+        emit(contractsRemoteDataSource.getOptionalPremiumRange().toDomain())
+    }
+
+    override fun checkRedCrossStatus(): Flow<String> = flow {
+        emit(contractsRemoteDataSource.checkRedCrossStatus())
+    }
+
+    override fun checkMedicalStudent(): Flow<String> = flow {
+        emit(contractsRemoteDataSource.checkMedicalStudent())
     }
 
     override fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Flow<Long> = flow {
@@ -206,21 +227,41 @@ class ContractsRepositoryImpl(
     )
 
     private fun branchListQuery(cityCode: String): ApiQueryParamDN = ApiQueryParamDN(
-        page = 0,
+        // 1, not 0: every other query in this layer and the old client's pager are 1-indexed.
+        page = 1,
         start = 0,
         limit = 100,
         filters = listOf(
             ApiFilterDN(
                 property = FilterProperty.CITY_CODE,
-                operator = FilterOperator.EQ,
+                // EQUAL, not EQ: this is the operator `old_android` sends to
+                // special-insured-services/branches, and the old client owns the wire contract.
+                operator = FilterOperator.EQUAL,
                 value = cityCode,
             ),
         ),
     )
 
-    private fun freeJobWagesQuery(): ApiQueryParamDN = ApiQueryParamDN(
-        page = 1,
-        start = 0,
-        limit = 100,
-    )
+    private fun freeJobWagesQuery(page: Int, searchQuery: String?): ApiQueryParamDN {
+        val safePage = page.coerceAtLeast(1)
+        val start = (safePage - 1) * FreeJobWagesPaging.PAGE_SIZE
+        val filters = searchQuery
+            ?.takeIf { it.isNotBlank() }
+            ?.let {
+                listOf(
+                    ApiFilterDN(
+                        property = FilterProperty.DISCRIOPTION,
+                        operator = FilterOperator.LIKE,
+                        value = "*$it*",
+                    ),
+                )
+            }
+            .orEmpty()
+        return ApiQueryParamDN(
+            page = safePage,
+            start = start,
+            limit = FreeJobWagesPaging.PAGE_SIZE,
+            filters = filters,
+        )
+    }
 }

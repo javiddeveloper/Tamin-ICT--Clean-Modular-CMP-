@@ -276,7 +276,7 @@ fun UserRequestCard(
                             icon = Icons.Outlined.StarBorder,
                             shape = RoundedCornerShape(TaminCornerRadius.xl),
                             height = IconSize.largePlus,
-                            borderColor = taminColors.hawkesBlue,
+                            borderColor = taminColors.blueBorder,
                             contentColor = colorScheme.primary,
                             modifier = Modifier.weight(1f)
                         )
@@ -343,7 +343,7 @@ fun UserRequestCard(
                             icon = Icons.Outlined.StarBorder,
                             shape = RoundedCornerShape(TaminCornerRadius.xl),
                             height = IconSize.largePlus,
-                            borderColor = taminColors.hawkesBlue,
+                            borderColor = taminColors.blueBorder,
                             contentColor = colorScheme.primary,
                             modifier = Modifier.weight(0.8f)
                         )
@@ -366,7 +366,7 @@ fun UserRequestCard(
                         icon = Icons.Outlined.StarBorder,
                         shape = RoundedCornerShape(TaminCornerRadius.xl),
                         height = IconSize.largePlus,
-                        borderColor = taminColors.hawkesBlue,
+                        borderColor = taminColors.blueBorder,
                         contentColor = colorScheme.primary
                     )
                 }

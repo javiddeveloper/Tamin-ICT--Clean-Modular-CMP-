@@ -72,10 +72,10 @@ import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezOption
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezPicker
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.OrotezProtezUiState
 import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.bytesOrNull
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.ErrorStateView
-import com.tamin.taminhamrah.ui.components.IconPosition
 import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.PickerRow
 import com.tamin.taminhamrah.ui.components.StatusPill
@@ -86,7 +86,7 @@ import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminImageViewer
-import com.tamin.taminhamrah.ui.components.TaminJalaliDatePickerBottomSheet
+import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.ButtonDimens
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -105,19 +105,18 @@ import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import org.koin.compose.viewmodel.koinViewModel
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
-import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
-import kotlin.math.PI
-import kotlin.math.sin
+import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_branch
+import taminx.core.core_ui.ic_place
 import taminx.core.core_ui.ic_tamin_calendar
+import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.ic_tamin_user
-import taminx.core.core_ui.ic_home_menu
+import taminx.core.core_ui.ic_warning
 import taminx.core.core_ui.orotez_protez_confirm_and_continue
 import taminx.core.core_ui.orotez_protez_detail_birth_certificate_number
 import taminx.core.core_ui.orotez_protez_detail_birth_date
@@ -126,13 +125,13 @@ import taminx.core.core_ui.orotez_protez_detail_full_name
 import taminx.core.core_ui.orotez_protez_detail_issue_place
 import taminx.core.core_ui.orotez_protez_detail_national_code
 import taminx.core.core_ui.orotez_protez_detail_relation
-import taminx.core.core_ui.orotez_protez_document_ear_mold
-import taminx.core.core_ui.orotez_protez_document_hearing_aid_warranty
-import taminx.core.core_ui.orotez_protez_document_invoice
+import taminx.core.core_ui.orotez_protez_document_camera_permission_error
 import taminx.core.core_ui.orotez_protez_document_optional
 import taminx.core.core_ui.orotez_protez_document_pick_placeholder
-import taminx.core.core_ui.orotez_protez_document_prescription
 import taminx.core.core_ui.orotez_protez_document_required
+import taminx.core.core_ui.orotez_protez_document_status_error_tap_to_retry
+import taminx.core.core_ui.orotez_protez_document_status_uploaded
+import taminx.core.core_ui.orotez_protez_document_status_uploading
 import taminx.core.core_ui.orotez_protez_documents_description
 import taminx.core.core_ui.orotez_protez_documents_title
 import taminx.core.core_ui.orotez_protez_field_branch_placeholder
@@ -157,6 +156,7 @@ import taminx.core.core_ui.orotez_protez_submit_success_title
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
+import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import taminx.core.core_ui.ic_branch
 import taminx.core.core_ui.ic_check
 import taminx.core.core_ui.ic_check_label
@@ -168,6 +168,10 @@ import taminx.core.core_ui.orotez_protez_document_camera_permission_error
 import taminx.core.core_ui.orotez_protez_document_status_error_tap_to_retry
 import taminx.core.core_ui.orotez_protez_document_status_uploaded
 import taminx.core.core_ui.orotez_protez_document_status_uploading
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
+import kotlin.math.PI
+import kotlin.math.sin
 
 @Composable
 fun OrotezProtezScreen(
@@ -370,7 +374,7 @@ private fun OrotezProtezContent(
             }
         }
 
-        OrotezProtezPicker.DATE -> TaminJalaliDatePickerBottomSheet(
+        OrotezProtezPicker.DATE -> TaminJalaliDatePicker(
             title = stringResource(Res.string.orotez_protez_field_prescription_date),
             onDismiss = { onIntent(OrotezProtezIntent.OnPickerDismissed) },
             onConfirm = { year, month, day ->
@@ -636,6 +640,7 @@ private fun OrotezProtezInsuredInfoStep(
             }
         }
 
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -643,7 +648,15 @@ private fun OrotezProtezInsuredInfoStep(
                 .navigationBarsPadding(),
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            OrotezProtezBackStepButton(onClick = onBack)
+            TaminTopAppBarButton(
+                icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                contentDescription = null,
+                onClick = onBack,
+                bordered = true,
+                containerColor = colors.bgSurface,
+                contentColor = colors.textPrimary,
+                borderColor = colors.border,
+            )
             LoadingButton(
                 modifier = Modifier.weight(1f),
                 text = stringResource(Res.string.orotez_protez_confirm_and_continue),
@@ -653,31 +666,6 @@ private fun OrotezProtezInsuredInfoStep(
                 iconPosition = LoadingButtonIconPosition.TRAILING,
             )
         }
-    }
-}
-
-@Composable
-private fun OrotezProtezBackStepButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val colors = LocalTaminColors.current
-    val shape = RoundedCornerShape(CornerRadius.xl)
-
-    Box(
-        modifier = modifier
-            .size(ButtonDimens.height)
-            .clip(shape)
-            .background(colors.bgSurface)
-            .border(Thickness.border, colors.border, shape)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            imageVector = vectorResource(Res.drawable.ic_tamin_chevron_back),
-            contentDescription = null,
-            tint = colors.textPrimary,
-        )
     }
 }
 
@@ -761,7 +749,15 @@ private fun OrotezProtezDocumentsStep(
                 .navigationBarsPadding(),
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            OrotezProtezBackStepButton(onClick = onBack)
+            TaminTopAppBarButton(
+                icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                contentDescription = null,
+                onClick = onBack,
+                bordered = true,
+                containerColor = colors.bgSurface,
+                contentColor = colors.textPrimary,
+                borderColor = colors.border,
+            )
             LoadingButton(
                 modifier = Modifier.weight(1f),
                 text = stringResource(Res.string.orotez_protez_submit_request),
@@ -821,7 +817,7 @@ private fun OrotezProtezDocumentPreviewDialog(
     bytes: ByteArray,
     onDismiss: () -> Unit,
 ) {
-    val base64 = remember(bytes) { Base64.Default.encode(bytes) }
+    val base64 = remember(bytes) { Base64.encode(bytes) }
     TaminImageViewer(
         title = title,
         url = base64,

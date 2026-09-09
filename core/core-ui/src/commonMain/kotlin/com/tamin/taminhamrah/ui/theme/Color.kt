@@ -73,6 +73,13 @@ val TaminLightDangerBorder = Color(0xFFFDECEC)
 val TaminLightIconBgSubtle = Color(0xFFEEF2FB)
 val TaminLightIconTintSubtle = Color(0xFF5E7392)
 
+// Icon-tile tints the کارگاه action list draws, taken from the design's own values.
+val TaminLightMint = Color(0xFF3DA35D)
+val TaminLightMintBg = Color(0xFFE9F7EE)
+val TaminLightTealBg = Color(0xFFEAF7F7)
+val TaminLightBlueBorder = Color(0xFFD7E6FF)
+val TaminLightPurpleBg = Color(0xFFF1EAFB)
+
 // Dark mode collapses every screen's hero onto one teal-to-blue wash.
 val TaminDarkHeroStart = Color(0xFF10AEB9)
 val TaminDarkHeroEnd = Color(0xFF1E6FD0)
@@ -97,6 +104,14 @@ val TaminDarkOrangeText = Color(0xFFFBBF24)
 val TaminDarkDangerBorder = Color(0x38F87171) // rgba(248,113,113,.22)
 val TaminDarkDangerText = Color(0xFFF87171)
 val TaminDarkGreenBg = Color(0x2910B981)     // rgba(16,185,129,.16)
+
+// Dark counterparts of the کارگاه action tints: the same hue laid over the dark surface at .16,
+// which is how every other tinted fill in this palette is built.
+val TaminDarkMint = Color(0xFF6FCB8C)
+val TaminDarkMintBg = Color(0x293DA35D)
+val TaminDarkTealBg = Color(0x245BD8D4)      // rgba(91,216,212,.14)
+val TaminDarkBlueBorder = Color(0x476396FF)  // rgba(99,150,255,.28)
+val TaminDarkPurpleBg = Color(0x297C4BC0)
 
 val Primary50 = Color(0xFFEFF4FF)
 val Primary100 = Color(0xFFD8E4FA)
@@ -145,6 +160,12 @@ val CoreDivider = Color(0xFFF2F4F8)
 
 // Profile Icon Gradients
 val IconGradientBlueStart = Color(0xFF3B6FD4)
+
+// The two card-button gradients the کارگاه screens use beside the blue one.
+val GradientGreenStart = Color(0xFF22A06B)
+val GradientGreenEnd = Color(0xFF03794A)
+val GradientOrangeStart = Color(0xFFF0A83C)
+val GradientOrangeEnd = Color(0xFFC97E0A)
 val IconGradientBlueEnd = Color(0xFF173D7E)
 
 val IconGradientPurpleStart = Color(0xFF8B7CE8)
@@ -304,11 +325,52 @@ val TaminInsuranceCardTrackBg = TaminInsuranceCardInk.copy(alpha = 0.08f)
 val TaminOnAccentInk = Color(0xFFFFFFFF)
 val TaminOnAccentInkSoft = TaminOnAccentInk.copy(alpha = 0.90f)
 val TaminOnAccentInkMuted = TaminOnAccentInk.copy(alpha = 0.80f)
+/** Dimmed white for inactive hero step segments (current-only highlight). */
+val TaminOnAccentInkFaint = TaminOnAccentInk.copy(alpha = 0.35f)
 
 /** Translucent fills and hairlines the same surfaces set on themselves. */
 val TaminOnAccentFill = TaminOnAccentInk.copy(alpha = 0.10f)
 val TaminOnAccentFillStrong = TaminOnAccentInk.copy(alpha = 0.16f)
 val TaminOnAccentBorder = TaminOnAccentInk.copy(alpha = 0.18f)
+
+/* ---- Home campaigns carousel ------------------------------------------------------------------ */
+
+/**
+ * The three promo gradients on the home page's campaign cards, plus the shadow each one casts and
+ * the dark tone its white CTA pill prints in.
+ *
+ * Brand-fixed: every card is a dark gradient in both themes, so these do not live on
+ * [com.tamin.taminhamrah.ui.theme.TaminColors] and do not follow the page. They are consumed only
+ * through [com.tamin.taminhamrah.model.campaign.CampaignKind], which keeps a gradient and its CTA
+ * tone in one row so the two cannot drift apart.
+ */
+val CampaignHousewifeStart = TaminNavy700           // #1F4FA3
+val CampaignHousewifeMid = Color(0xFF3B6FE8)
+val CampaignHousewifeEnd = Color(0xFF1FB6D8)
+val CampaignHousewifeShadow = Color(0x47173D7E)     // rgba(23,61,126,.28)
+
+val CampaignFreelanceStart = Color(0xFF0E5F66)
+val CampaignFreelanceMid = Color(0xFF0E7C82)
+val CampaignFreelanceEnd = Color(0xFF5FD8D2)
+val CampaignFreelanceShadow = Color(0x470E5F66)     // rgba(14,95,102,.28)
+
+val CampaignStudentStart = Color(0xFF4B2E86)
+val CampaignStudentMid = Color(0xFF7C5CFF)
+val CampaignStudentEnd = Color(0xFF22B8D6)
+val CampaignStudentShadow = Color(0x474B2E86)       // rgba(75,46,134,.28)
+
+/** The idle page dot under the carousel; the active one is `blueText`. */
+val CampaignDotIdle = Color(0xFFD7E0EC)
+
+/** The two aria-hidden decoration circles every campaign card carries. */
+val CampaignGlowCore = TaminOnAccentInk.copy(alpha = 0.22f)
+val CampaignBubbleFill = TaminOnAccentInk.copy(alpha = 0.07f)
+
+/** The card's own ink: badge fill and hairline, body copy, and the footer caption. */
+val CampaignBadgeFill = TaminOnAccentInk.copy(alpha = 0.18f)
+val CampaignBadgeBorder = TaminOnAccentInk.copy(alpha = 0.26f)
+val CampaignBodyInk = TaminOnAccentInk.copy(alpha = 0.82f)
+val CampaignCaptionInk = TaminOnAccentInk.copy(alpha = 0.55f)
 
 
 // ─── «کلیه سوابق» ─────────────────────────────────────────────────────────────

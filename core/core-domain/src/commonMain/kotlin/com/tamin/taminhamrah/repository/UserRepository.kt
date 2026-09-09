@@ -11,6 +11,7 @@ import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActive
 import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.model.user.EditMobileResponseDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.user.CurrentUserDN
 import com.tamin.taminhamrah.model.user.UserProfileDN
 import kotlinx.coroutines.flow.Flow
 
@@ -43,7 +44,11 @@ interface UserRepository {
     /** The document's PDF download stream. */
     suspend fun downloadDocument(url: String): PdfDownloadDN
 
+    /** The narrow view — a projection of [getCurrentUser], not a second request. */
     suspend fun getUserProfile(): Flow<UserProfileDN>
+
+    /** The signed-in account in full, including the roles and organization کارفرما flows need. */
+    suspend fun getCurrentUser(): Flow<CurrentUserDN>
 
     fun checkUserIsNew(nationalId: String): Flow<Boolean>
 
@@ -55,6 +60,10 @@ interface UserRepository {
     ): Flow<String?>
 
     suspend fun getStatusCertificateReport(
+        filters: List<ApiFilterDN> = emptyList()
+    ): Flow<String>
+
+    suspend fun getWageCertificateReport(
         filters: List<ApiFilterDN> = emptyList()
     ): Flow<String>
 

@@ -26,9 +26,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
-import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.ShimmerBlock
+import com.tamin.taminhamrah.ui.theme.ShimmerSize
+import com.tamin.taminhamrah.ui.theme.Spacing
 
 @Composable
 internal fun SelectableFieldRow(
@@ -79,30 +81,7 @@ internal fun StepSectionTitle(title: String, modifier: Modifier = Modifier) {
     )
 }
 
-@Composable
-internal fun SquareIconButton(
-    icon: ImageVector,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val colors = LocalTaminColors.current
 
-    Box(
-        modifier = modifier
-            .size(54.dp)
-            .clip(RoundedCornerShape(CornerRadius.lg))
-            .border(1.dp, colors.border, RoundedCornerShape(CornerRadius.lg))
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = colors.textPrimary,
-            modifier = Modifier.size(22.dp)
-        )
-    }
-}
 
 @Composable
 internal fun AddDependentShimmer(modifier: Modifier = Modifier) {
@@ -111,22 +90,60 @@ internal fun AddDependentShimmer(modifier: Modifier = Modifier) {
             .fillMaxSize()
             .padding(Spacing.lg)
     ) {
-        ShimmerBlock(
-            modifier = Modifier
-                .width(200.dp)
-                .height(24.dp),
-            cornerRadius = 4.dp
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            repeat(3) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    ShimmerBlock(
+                        modifier = Modifier.size(IconSize.stepperCircle),
+                        cornerRadius = CornerRadius.full
+                    )
+                    Spacer(modifier = Modifier.height(Spacing.sm))
+                    ShimmerBlock(
+                        modifier = Modifier
+                            .width(ShimmerSize.chipWidth)
+                            .height(ShimmerSize.subtitleHeight)
+                    )
+                }
+            }
+        }
+
         Spacer(modifier = Modifier.height(Spacing.lg))
 
-        repeat(3) {
-            ShimmerBlock(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                cornerRadius = CornerRadius.lg
-            )
-            Spacer(modifier = Modifier.height(Spacing.smd))
-        }
+        ShimmerBlock(
+            modifier = Modifier
+                .width(ShimmerSize.titleWidth)
+                .height(ShimmerSize.badgeHeight)
+        )
+        Spacer(modifier = Modifier.height(Spacing.md))
+        ShimmerBlock(
+            modifier = Modifier
+                .width(ShimmerSize.labelWidth)
+                .height(ShimmerSize.subtitleHeight)
+        )
+        Spacer(modifier = Modifier.height(Spacing.sm))
+        ShimmerBlock(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(ShimmerSize.fieldHeight),
+            cornerRadius = CornerRadius.lg
+        )
+        Spacer(modifier = Modifier.height(Spacing.smd))
+        ShimmerBlock(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(ShimmerSize.fieldHeight),
+            cornerRadius = CornerRadius.lg
+        )
+        Spacer(modifier = Modifier.height(Spacing.smd))
+        ShimmerBlock(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(ShimmerSize.fieldHeight),
+            cornerRadius = CornerRadius.lg
+        )
     }
 }

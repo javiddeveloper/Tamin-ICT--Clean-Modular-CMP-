@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
@@ -45,6 +46,7 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.Thickness
 
 /**
  * Design-system building blocks shared across the app. Everything here takes primitives
@@ -52,6 +54,9 @@ import com.tamin.taminhamrah.ui.theme.Spacing
  */
 
 private val PRIMARY_BUTTON_HEIGHT = 52.dp
+
+/** The design boxes a classified value with `padding:4px 10px`. */
+private val ValueBoxHorizontalPadding = 10.dp
 
 /** The navy cast under the primary button. Public so a caller can tint its own shadow to match. */
 val PrimaryButtonShadow = Color(0x47173D7E)
@@ -100,10 +105,19 @@ fun StatusPill(
     icon: ImageVector? = null,
     fontWeight: FontWeight = FontWeight.Medium,
     verticalPadding: Dp = 5.dp,
+    /** Outlines the pill. Null — the default — leaves it as a plain fill, as before. */
+    borderColor: Color? = null,
 ) {
     Row(
         modifier = modifier
             .background(containerColor, CircleShape)
+            .then(
+                if (borderColor != null) {
+                    Modifier.border(Thickness.border, borderColor, CircleShape)
+                } else {
+                    Modifier
+                },
+            )
             .padding(horizontal = Spacing.md, vertical = verticalPadding),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
@@ -119,7 +133,9 @@ fun StatusPill(
         Text(
             text = text,
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = fontWeight),
-            color = contentColor
+            color = contentColor,
+            maxLines = 1,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
         )
     }
 }
@@ -329,8 +345,15 @@ fun DetailRow(
      * The whole row is the target, not the glyph — the glyph is 16dp and a poor thing to aim at.
      */
     copyValue: String? = null,
+    /**
+     * Draws the value inside the design's bordered box — how it marks out a value that is a
+     * classification rather than a plain reading («نوع فعالیت» on جزئیات کارگاه).
+     */
+    valueBoxed: Boolean = false,
 ) {
     val copy = copyValue?.let { rememberCopyAction(it) }
+    val colors = LocalTaminColors.current
+    val boxShape = RoundedCornerShape(CornerRadius.md)
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -354,10 +377,19 @@ fun DetailRow(
             if (copyValue != null) {
                 CopyIconButton(value = copyValue, label = label, interactive = false)
             }
+            val valueModifier = if (valueBoxed) {
+                Modifier
+                    .background(colors.bgPage, boxShape)
+                    .border(Thickness.border, colors.border, boxShape)
+                    .padding(horizontal = ValueBoxHorizontalPadding, vertical = Spacing.xs)
+            } else {
+                Modifier
+            }
             when {
                 // Number and unit are separate children so the unit stays physically left of the
                 // digits: in the RTL row the number is the right child, the unit the left one.
                 unit != null -> Row(
+                    modifier = valueModifier,
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(Spacing.xxs),
                 ) {
@@ -365,8 +397,19 @@ fun DetailRow(
                     Text(text = unit, style = valueStyle, color = valueColor)
                 }
 
-                numeric -> NumericText(text = value, style = valueStyle, color = valueColor)
-                else -> Text(text = value, style = valueStyle, color = valueColor)
+                numeric -> NumericText(
+                    text = value,
+                    style = valueStyle,
+                    color = valueColor,
+                    modifier = valueModifier,
+                )
+
+                else -> Text(
+                    text = value,
+                    style = valueStyle,
+                    color = valueColor,
+                    modifier = valueModifier,
+                )
             }
         }
     }
@@ -396,6 +439,18 @@ fun TaminPrimaryButton(
      * right in a right-to-left layout. Defaults to the trailing position every existing caller has.
      */
     iconAtStart: Boolean = false,
+    /** Shorter than the page-level default for a button that sits inside a card. */
+    height: Dp = PRIMARY_BUTTON_HEIGHT,
+    shape: Shape = RoundedCornerShape(CornerRadius.iconTile),
+    textStyle: TextStyle = MaterialTheme.typography.titleMedium,
+    /**
+     * Whether the button accepts taps, and reads as though it does.
+     *
+     * Defaults to the always-clickable behavior every existing caller has. Pass false where a
+     * guard already drops the action — a submit that is ignored while a request is in flight looks
+     * exactly like a broken button unless the button says so.
+     */
+    enabled: Boolean = true,
 ) {
     val iconContent: @Composable () -> Unit = {
         if (icon != null) {
@@ -411,18 +466,22 @@ fun TaminPrimaryButton(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(PRIMARY_BUTTON_HEIGHT)
-            .clip(RoundedCornerShape(CornerRadius.iconTile))
+            .height(height)
+            .alpha(if (enabled) 1f else PRIMARY_BUTTON_DISABLED_ALPHA)
+            .clip(shape)
             .background(background)
-            .clickable(onClick = onClick),
+            .clickable(enabled = enabled, onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm, Alignment.CenterHorizontally),
     ) {
         if (iconAtStart) iconContent()
-        Text(text = text, style = MaterialTheme.typography.titleMedium, color = Color.White)
+        Text(text = text, style = textStyle, color = Color.White)
         if (!iconAtStart) iconContent()
     }
 }
+
+/** How far a disabled primary button fades — enough to read as unavailable, not as absent. */
+private const val PRIMARY_BUTTON_DISABLED_ALPHA = 0.5f
 
 @Composable
 fun TaminOutlinedButton(
@@ -442,10 +501,18 @@ fun TaminOutlinedButton(
     disabledContainerColor: Color = Color.Transparent,
     disabledContentColor: Color = LocalTaminColors.current.textMuted,
     textStyle: TextStyle = MaterialTheme.typography.titleMedium,
+    iconPosition: IconPosition? = null,
 ) {
     val currentBorderColor = if (enabled) borderColor else disabledBorderColor
     val currentContainerColor = if (enabled) containerColor else disabledContainerColor
     val currentContentColor = if (enabled) contentColor else disabledContentColor
+
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val showIconBeforeText = when (iconPosition) {
+        null -> true
+        IconPosition.Start -> !isRtl
+        IconPosition.End -> isRtl
+    }
 
     Row(
         modifier = modifier
@@ -464,7 +531,7 @@ fun TaminOutlinedButton(
             Alignment.CenterHorizontally,
         ),
     ) {
-        if (icon != null) {
+        if (icon != null && showIconBeforeText) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
@@ -478,6 +545,15 @@ fun TaminOutlinedButton(
             style = textStyle,
             color = currentContentColor
         )
+
+        if (icon != null && !showIconBeforeText) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = currentContentColor,
+                modifier = Modifier.size(IconSize.medium).then(iconModifier),
+            )
+        }
     }
 }
 
