@@ -68,6 +68,21 @@ internal interface UserApiService {
     ): TokenResponseDto
 
 
+    /**
+     * Debug-only "back-to-back" login: a trusted client authenticates itself with its own
+     * client_id/client_secret instead of the PKCE authorization_code flow. Gated to debug builds
+     * by [com.tamin.taminhamrah.util.AppConfig.isDebug] at the call site (`DebugLoginViewModel`) —
+     * never reachable from a release build's UI.
+     */
+    @FormUrlEncoded
+    @POST
+    suspend fun debugClientCredentialsLogin(
+        @Url url: String,
+        @Field("grant_type") grantType: String = "client_credentials",
+        @Field("client_id") clientId: String,
+        @Field("client_secret") clientSecret: String
+    ): TokenResponseDto
+
     @GET
     suspend fun signOut(
         @Header(HeaderConstant.AUTHORIZATION) token: String,

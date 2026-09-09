@@ -107,7 +107,7 @@ class WorkshopUseCasesTest : BaseUseCaseTest() {
     @Test
     fun `payment is refused when the pre-check says no`() = runTest {
         repository.paymentPreCheck = DebitPaymentPreCheckDN(allowed = false)
-        repository.paymentResult = DebitPaymentDN(succeeded = true, paymentPageUrl = "https://x/1")
+        repository.paymentResult = DebitPaymentDN(succeeded = true, paymentTicket = "ticket-1")
 
         val result = PayWorkshopDebitUseCase(repository)(paymentRequest())
 
@@ -119,10 +119,7 @@ class WorkshopUseCasesTest : BaseUseCaseTest() {
     @Test
     fun `payment goes through once the pre-check agrees`() = runTest {
         repository.paymentPreCheck = DebitPaymentPreCheckDN(allowed = true)
-        repository.paymentResult = DebitPaymentDN(
-            succeeded = true,
-            paymentPageUrl = "https://tfh.tamin.ir/view/#/payment/ticket-1",
-        )
+        repository.paymentResult = DebitPaymentDN(succeeded = true, paymentTicket = "ticket-1")
 
         val result = PayWorkshopDebitUseCase(repository)(paymentRequest())
 
