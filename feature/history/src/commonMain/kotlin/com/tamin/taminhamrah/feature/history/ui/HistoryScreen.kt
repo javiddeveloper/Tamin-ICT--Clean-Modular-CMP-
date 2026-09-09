@@ -67,6 +67,7 @@ import com.tamin.taminhamrah.feature.history.ui.model.monthBars
 import com.tamin.taminhamrah.feature.history.ui.model.pickerMonthRows
 import com.tamin.taminhamrah.feature.history.ui.model.pickerYearRows
 import com.tamin.taminhamrah.feature.history.ui.model.sourceChips
+import com.tamin.taminhamrah.feature.history.ui.model.span
 import com.tamin.taminhamrah.feature.history.ui.model.splitCandidates
 import com.tamin.taminhamrah.feature.history.ui.model.wageMonthBars
 import com.tamin.taminhamrah.feature.history.ui.model.wageYearBars
@@ -295,10 +296,11 @@ fun HistoryContent(
         allChipLabel,
     ) {
         if (scope is HistoryScope.All) {
-            val firstYear = uiState.years.firstOrNull()?.year?.toPersianDigits().orEmpty()
-            val lastYear = uiState.years.lastOrNull()?.year?.toPersianDigits().orEmpty()
-            val pill = if (firstYear.isNotEmpty() && lastYear.isNotEmpty()) {
-                allScopePillFormat.replace(PLACEHOLDER, firstYear).replace(PLACEHOLDER_2, lastYear)
+            val span = uiState.years.span()
+            val pill = if (span != null) {
+                allScopePillFormat
+                    .replace(PLACEHOLDER, span.oldest.toPersianDigits())
+                    .replace(PLACEHOLDER_2, span.newest.toPersianDigits())
             } else {
                 allChipLabel
             }
@@ -580,11 +582,9 @@ fun HistoryContent(
         }
     }
     val yearRange = remember(uiState.years) {
-        if (uiState.years.isEmpty()) {
-            ""
-        } else {
-            "${uiState.years.first().year.toPersianDigits()} – ${uiState.years.last().year.toPersianDigits()}"
-        }
+        uiState.years.span()
+            ?.let { "${it.oldest.toPersianDigits()} – ${it.newest.toPersianDigits()}" }
+            .orEmpty()
     }
     val onQueryChange: (String) -> Unit = remember(onIntent) {
         { query -> onIntent(HistoryIntent.YearQueryChanged(query)) }
@@ -704,13 +704,12 @@ fun HistoryContent(
                         verticalArrangement = Arrangement.spacedBy(Spacing.xs),
                     ) {
                         if (scope is HistoryScope.All) {
-                            val first = uiState.years.firstOrNull()?.year.orEmpty()
-                            val last = uiState.years.lastOrNull()?.year.orEmpty()
-                            if (first.isNotEmpty() && last.isNotEmpty()) {
+                            val span = uiState.years.span()
+                            if (span != null) {
                                 HistorySpanNote(
                                     yearCount = uiState.years.size,
-                                    firstYear = first,
-                                    lastYear = last,
+                                    firstYear = span.oldest,
+                                    lastYear = span.newest,
                                     gapYears = remember(uiState.years) { uiState.years.gapYearCount() },
                                 )
                             }

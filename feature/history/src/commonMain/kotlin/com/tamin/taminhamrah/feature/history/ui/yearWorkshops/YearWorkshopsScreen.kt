@@ -295,8 +295,9 @@ private fun YearWorkshopsHero(year: String, totalDays: Int, onBackClicked: () ->
  */
 private fun Modifier.heroGlow(): Modifier = drawBehind {
     val radius = HistoryDimens.heroGlowSize.toPx()
-    // Sits off the head's start-side top corner, which on an RTL page is the right one.
-    val centre = Offset(size.width - radius * GLOW_INSET, -radius * GLOW_INSET)
+    // Off the physical top-left corner, which is where the design puts it — `left:-50px`, not a
+    // start-relative offset, so it stays on the left on an RTL page.
+    val centre = Offset(-radius * GLOW_INSET, -radius * GLOW_INSET)
     drawCircle(
         brush = Brush.radialGradient(
             colors = listOf(TaminHistoryHeroGlowCore, Color.Transparent),

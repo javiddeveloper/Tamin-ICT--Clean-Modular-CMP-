@@ -14,8 +14,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,7 +27,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.LastBaseline
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.history.ui.HistoryDimens
@@ -39,6 +45,7 @@ import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationCardBgEnd
 import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationCardBgStart
 import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationCardBorder
 import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationFigureLeast
+import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationFigureMajor
 import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationFigureMinor
 import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationNavBg
 import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationNavBorder
@@ -48,9 +55,9 @@ import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationStripeEnd
 import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationStripeStart
 import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationUnit
 import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.Res as CoreRes
 import taminx.core.core_ui.history_step_newer
 import taminx.core.core_ui.history_step_older
-import taminx.core.core_ui.Res as CoreRes
 
 /** Holds the pre-formatted digits and units to avoid formatting inside composition. */
 @Immutable
@@ -127,10 +134,10 @@ fun HistoryDurationCard(
             // Older step button
             Box(modifier = Modifier.collapseAway(collapseProgress)) {
                 NavStepButton(
-                    icon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    enabled = model.hasNewer,
-                    onClick = onStepNewer,
-                    contentDescription = stringResource(CoreRes.string.history_step_newer),
+                    icon = Icons.Filled.KeyboardArrowRight,
+                    enabled = model.hasOlder,
+                    onClick = onStepOlder,
+                    contentDescription = stringResource(CoreRes.string.history_step_older),
                 )
             }
 
@@ -160,8 +167,8 @@ fun HistoryDurationCard(
                     )
                 }
 
-                // Digits row
-                Row(
+                DurationFigures(
+                    model = model,
                     modifier = Modifier
                         .collapsingBottomPadding(
                             progress = collapseProgress,
@@ -169,125 +176,23 @@ fun HistoryDurationCard(
                             collapsed = 0.dp,
                         )
                         // What survives the fold: the person's own record, in one line, smaller.
-                        // One modifier measures the line unbounded (so «۱۷» keeps its ۷), scales it
-                        // as the head folds, and reports the scaled size so the card closes with it.
+                        // Measures unbounded, scales as the head folds, and reports the scaled size
+                        // so the card closes with it.
                         .scaleOnCollapse(
                             progress = collapseProgress,
                             minScale = HistoryDimens.durationFiguresCollapsedScale,
                             rtl = true,
                         ),
-                    // One baseline for all three figures and their units — aligning on the bottom
-                    // edge instead left each piece sitting at its own height.
-                    horizontalArrangement = Arrangement.Center,
-                ) {
-                    // Part 1 (Years / Main)
-                    Text(
-                        text = model.part1.number,
-                        style = MaterialTheme.typography.headlineLarge.copy(
-                            fontSize = HistoryDimens.durationTextLarge,
-                            fontWeight = FontWeight.ExtraBold,
-                            letterSpacing = (-1).sp,
-                            lineHeight = HistoryDimens.durationTextLarge,
-                        ),
-                        color = TaminHistoryDurationNavIcon,
-                        modifier = Modifier.alignByBaseline(),
-                    )
-                    if (model.part1.unit.isNotBlank()) {
-                        Text(
-                            text = model.part1.unit,
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontSize = HistoryDimens.durationUnitLarge,
-                                fontWeight = FontWeight.Bold,
-                            ),
-                            color = TaminHistoryDurationUnit,
-                            maxLines = 1,
-                            softWrap = false,
-                            modifier = Modifier.alignByBaseline().padding(start = 4.dp),
-                        )
-                    }
-
-                    // Part 2 (Months)
-                    model.part2?.let { p2 ->
-                        Text(
-                            text = "·",
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontSize = HistoryDimens.durationSeparator,
-                                fontWeight = FontWeight.Bold,
-                            ),
-                            color = TaminHistoryDurationNavBorder,
-                            modifier = Modifier.alignByBaseline().padding(horizontal = 5.dp),
-                        )
-                        Text(
-                            text = p2.number,
-                            style = MaterialTheme.typography.headlineMedium.copy(
-                                fontSize = HistoryDimens.durationTextMedium,
-                                fontWeight = FontWeight.ExtraBold,
-                                letterSpacing = (-0.5).sp,
-                                lineHeight = HistoryDimens.durationTextMedium,
-                            ),
-                            color = TaminHistoryDurationFigureMinor,
-                            modifier = Modifier.alignByBaseline(),
-                        )
-                        if (p2.unit.isNotBlank()) {
-                            Text(
-                                text = p2.unit,
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    fontSize = HistoryDimens.durationUnitMedium,
-                                    fontWeight = FontWeight.Bold,
-                                ),
-                                color = TaminHistoryDurationUnit,
-                                maxLines = 1,
-                                softWrap = false,
-                            modifier = Modifier.alignByBaseline().padding(start = 4.dp),
-                            )
-                        }
-                    }
-
-                    // Part 3 (Days)
-                    model.part3?.let { p3 ->
-                        Text(
-                            text = "·",
-                            style = MaterialTheme.typography.titleSmall.copy(
-                                fontSize = HistoryDimens.durationSeparator,
-                                fontWeight = FontWeight.Bold,
-                            ),
-                            color = TaminHistoryDurationNavBorder,
-                            modifier = Modifier.alignByBaseline().padding(horizontal = 5.dp),
-                        )
-                        Text(
-                            text = p3.number,
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontSize = HistoryDimens.durationTextSmall,
-                                fontWeight = FontWeight.Bold,
-                                lineHeight = HistoryDimens.durationTextSmall,
-                            ),
-                            color = TaminHistoryDurationFigureLeast,
-                            modifier = Modifier.alignByBaseline(),
-                        )
-                        if (p3.unit.isNotBlank()) {
-                            Text(
-                                text = p3.unit,
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontSize = HistoryDimens.durationUnitSmall,
-                                    fontWeight = FontWeight.SemiBold,
-                                ),
-                                color = TaminHistoryDurationUnit,
-                                maxLines = 1,
-                                softWrap = false,
-                            modifier = Modifier.alignByBaseline().padding(start = 4.dp),
-                            )
-                        }
-                    }
-                }
+                )
             }
 
             // Newer step button
             Box(modifier = Modifier.collapseAway(collapseProgress)) {
                 NavStepButton(
-                    icon = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                    enabled = model.hasOlder,
-                    onClick = onStepOlder,
-                    contentDescription = stringResource(CoreRes.string.history_step_older),
+                    icon = Icons.Filled.KeyboardArrowLeft,
+                    enabled = model.hasNewer,
+                    onClick = onStepNewer,
+                    contentDescription = stringResource(CoreRes.string.history_step_newer),
                 )
             }
         }
@@ -318,4 +223,107 @@ private fun NavStepButton(
             modifier = Modifier.size(HistoryDimens.durationNavIconSize),
         )
     }
+}
+
+/**
+ * «۱۷ سال · ۱۱ ماه · ۳ روز» — one figure assembled from up to eight pieces at three sizes.
+ *
+ * Laid out here rather than by a `Row` for one reason: every piece must be measured at the width it
+ * actually wants. Inside a `Row` each piece is measured against whatever the pieces before it left
+ * over, and a two-digit number that does not fit its share does not shrink — it wraps, so ۱۷ is
+ * drawn as ۱ above ۷. Capping the lines only turns that into ۱۷ clipped to ۱, which is worse: it
+ * silently shows a different number. Measuring each piece with [Constraints] and placing them here
+ * makes both impossible.
+ *
+ * The pieces sit on one shared baseline, which is what makes three different sizes read as a single
+ * line rather than as three labels at three heights. Spacing is each piece's own padding, so the
+ * placement stays a simple left-to-right walk.
+ */
+@Composable
+private fun DurationFigures(model: DurationCardPR, modifier: Modifier = Modifier) {
+    val figureLarge = MaterialTheme.typography.headlineLarge.copy(
+        fontSize = HistoryDimens.durationTextLarge,
+        fontWeight = FontWeight.ExtraBold,
+        lineHeight = HistoryDimens.durationTextLarge,
+    )
+    val figureMedium = MaterialTheme.typography.headlineMedium.copy(
+        fontSize = HistoryDimens.durationTextMedium,
+        fontWeight = FontWeight.ExtraBold,
+        lineHeight = HistoryDimens.durationTextMedium,
+    )
+    val figureSmall = MaterialTheme.typography.titleLarge.copy(
+        fontSize = HistoryDimens.durationTextSmall,
+        fontWeight = FontWeight.Bold,
+        lineHeight = HistoryDimens.durationTextSmall,
+    )
+
+    Layout(
+        modifier = modifier,
+        content = {
+            DurationFigure(model.part1, figureLarge, HistoryDimens.durationUnitLarge, TaminHistoryDurationFigureMajor)
+            model.part2?.let { part ->
+                DurationSeparator()
+                DurationFigure(part, figureMedium, HistoryDimens.durationUnitMedium, TaminHistoryDurationFigureMinor)
+            }
+            model.part3?.let { part ->
+                DurationSeparator()
+                DurationFigure(part, figureSmall, HistoryDimens.durationUnitSmall, TaminHistoryDurationFigureLeast)
+            }
+        },
+    ) { measurables, _ ->
+        // Unbounded, always: a figure is never asked to fit, only ever measured and then placed.
+        val placeables = measurables.map { it.measure(Constraints()) }
+        val baseline = placeables.maxOf { it[LastBaseline] }
+        val below = placeables.maxOf { it.height - it[LastBaseline] }
+        layout(placeables.sumOf { it.width }, baseline + below) {
+            var x = 0
+            placeables.forEach { piece ->
+                piece.placeRelative(x, baseline - piece[LastBaseline])
+                x += piece.width
+            }
+        }
+    }
+}
+
+/** One figure and the unit that follows it, as a single baseline-aligned piece. */
+@Composable
+private fun DurationFigure(
+    part: DurationPart,
+    figureStyle: TextStyle,
+    unitSize: TextUnit,
+    figureColor: Color,
+) {
+    Row {
+        Text(
+            text = part.number,
+            style = figureStyle,
+            color = figureColor,
+            modifier = Modifier.alignByBaseline(),
+        )
+        if (part.unit.isNotBlank()) {
+            Text(
+                text = part.unit,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontSize = unitSize,
+                    fontWeight = FontWeight.Bold,
+                ),
+                color = TaminHistoryDurationUnit,
+                modifier = Modifier.alignByBaseline().padding(start = HistoryDimens.durationUnitGap),
+            )
+        }
+    }
+}
+
+/** The «·» the design sets between two figures. */
+@Composable
+private fun DurationSeparator() {
+    Text(
+        text = "·",
+        style = MaterialTheme.typography.titleMedium.copy(
+            fontSize = HistoryDimens.durationSeparator,
+            fontWeight = FontWeight.Bold,
+        ),
+        color = TaminHistoryDurationNavBorder,
+        modifier = Modifier.padding(horizontal = HistoryDimens.durationSeparatorGap),
+    )
 }

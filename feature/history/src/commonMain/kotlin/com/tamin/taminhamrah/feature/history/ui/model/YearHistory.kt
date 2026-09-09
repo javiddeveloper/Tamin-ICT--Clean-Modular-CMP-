@@ -21,6 +21,25 @@ data class YearHistoryPR(
     val isComplete: Boolean get() = totalDays >= HistoryConstants.FULL_YEAR_DAYS
 }
 
+/**
+ * The span a person's record actually covers, oldest to newest.
+ *
+ * Read off the years themselves rather than the list's two ends. The ends are only the span if the
+ * service returns the years in order, and nothing obliges it to — the same positional assumption
+ * that made the career total read one year's figures instead of the career's. A record that begins
+ * before ۱۳۸۷ then reports the year it really begins at, because the number comes from the data
+ * rather than from where a row happened to land.
+ */
+@Immutable
+data class YearSpanPR(val oldest: String, val newest: String)
+
+/** Null when there is nothing to span — no years, or none that parse as a year. */
+fun List<YearHistoryPR>.span(): YearSpanPR? {
+    val numbers = mapNotNull { it.year.toIntOrNull() }
+    if (numbers.isEmpty()) return null
+    return YearSpanPR(oldest = numbers.min().toString(), newest = numbers.max().toString())
+}
+
 /** How long the person has been insured altogether. */
 @Immutable
 data class CareerTotalPR(

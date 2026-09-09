@@ -68,6 +68,8 @@ object HistoryDimens {
     val durationUnitMedium = 12.sp
     val durationUnitSmall = 11.sp
     val durationSeparator = 14.sp
+    val durationUnitGap = 4.dp
+    val durationSeparatorGap = 5.dp
 
     /** The gap between the app-bar row, the chip strip and the duration card. */
     val heroRowGap = 16.dp
