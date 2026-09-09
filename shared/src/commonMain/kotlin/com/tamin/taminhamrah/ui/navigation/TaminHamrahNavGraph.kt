@@ -110,6 +110,7 @@ import com.tamin.taminhamrah.feature.taminServices.taminServicesScreen
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
 import com.tamin.taminhamrah.feature.treatment.treatmentGraph
 import com.tamin.taminhamrah.feature.userRequest.UserRequestRoute
+import com.tamin.taminhamrah.feature.userRequest.navigateToUserRequestDetail
 import com.tamin.taminhamrah.feature.userRequest.userRequestGraph
 import com.tamin.taminhamrah.feature.workshops.completeEmployerInfoScreen
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
@@ -122,6 +123,7 @@ import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.model.home.HomeServiceSection
+import com.tamin.taminhamrah.model.userRequest.UserRequestPR
 import com.tamin.taminhamrah.openUrl
 import com.tamin.taminhamrah.ui.blur.AppBarScrim
 import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
@@ -133,6 +135,7 @@ import com.tamin.taminhamrah.ui.components.HeaderSuggestionChip
 import com.tamin.taminhamrah.ui.components.HomeAgentAskBar
 import com.tamin.taminhamrah.ui.components.HomeFeaturedSection
 import com.tamin.taminhamrah.ui.components.HomeHeader
+import com.tamin.taminhamrah.ui.components.HomeLastRequestsSection
 import com.tamin.taminhamrah.ui.components.HomeQuickAccessSection
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
@@ -378,6 +381,16 @@ internal fun TaminHamrahNavGraph(
                             }
                         },
                         onNavigateToAgent = { navController.navigateToAgent() },
+                        onNavigateToUserRequests = { navController.navigate(UserRequestRoute.List) },
+                        onNavigateToUserRequestDetail = { requestId, refCode, requestTypeId, title, referenceId ->
+                            navController.navigateToUserRequestDetail(
+                                requestId = requestId,
+                                refCode = refCode,
+                                requestTypeId = requestTypeId,
+                                title = title,
+                                referenceId = referenceId,
+                            )
+                        },
                     )
                 }
 
@@ -650,6 +663,8 @@ fun HomeScreen(
     onShowMessage: (String) -> Unit,
     onNavigateToAllServices: () -> Unit,
     onNavigateToAgent: () -> Unit,
+    onNavigateToUserRequests: () -> Unit,
+    onNavigateToUserRequestDetail: (Long, String, Long, String, String) -> Unit,
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -660,6 +675,13 @@ fun HomeScreen(
                 is HomeEvent.NavigateToService -> onNavigateToService(event.flag)
                 is HomeEvent.NavigateToWeb -> onNavigateToWeb(event.url)
                 is HomeEvent.ShowMessage -> onShowMessage(event.message)
+                is HomeEvent.NavigateToUserRequestDetail -> onNavigateToUserRequestDetail(
+                    event.requestId,
+                    event.refCode,
+                    event.requestTypeId,
+                    event.title,
+                    event.referenceId,
+                )
             }
         }
     }
@@ -668,6 +690,16 @@ fun HomeScreen(
         uiState = uiState,
         onNavigateToAgent = onNavigateToAgent,
         onNavigateToAllServices = onNavigateToAllServices,
+        onNavigateToUserRequests = onNavigateToUserRequests,
+        onRequestClick = { request ->
+            onNavigateToUserRequestDetail(
+                request.id,
+                request.refCode,
+                request.requestTypeId,
+                request.title,
+                request.referenceId,
+            )
+        },
         onCampaignClick = { viewModel.sendIntent(HomeIntent.OnCampaignClick(it)) },
         onSectionSelected = { viewModel.sendIntent(HomeIntent.OnSectionSelected(it)) },
         onServiceClick = { viewModel.sendIntent(HomeIntent.OnServiceClick(it)) },
@@ -680,6 +712,8 @@ private fun HomeScreenContent(
     uiState: HomeUiState,
     onNavigateToAgent: () -> Unit,
     onNavigateToAllServices: () -> Unit,
+    onNavigateToUserRequests: () -> Unit,
+    onRequestClick: (UserRequestPR) -> Unit,
     onCampaignClick: (FeatureFlag) -> Unit,
     onSectionSelected: (HomeServiceSection) -> Unit,
     onServiceClick: (MainServiceDN) -> Unit,
@@ -775,6 +809,13 @@ private fun HomeScreenContent(
                 modifier = Modifier.padding(top = Spacing.md),
             )
 
+            HomeLastRequestsSection(
+                requests = uiState.lastRequests,
+                onSeeAllClick = onNavigateToUserRequests,
+                onRequestClick = onRequestClick,
+                modifier = Modifier.padding(top = Spacing.md),
+            )
+
 
             if (uiState.menuItems.isEmpty() && !uiState.isLoading) {
                 Text(
@@ -802,6 +843,32 @@ private fun previewHomeUiState() = HomeUiState(
     hasDarmanCoverage = true,
     hasActiveRelation = true,
     isAgentEnabled = true,
+    lastRequests = listOf(
+        UserRequestPR(
+            id = 1L,
+            refCode = "1048384001",
+            title = "تأییدیه پزشکی",
+            comment = "",
+            creationTime = "۱۴۰۴/۰۳/۲۸",
+            createByName = "",
+            statusDesc = "تأیید شد",
+            statusCode = "18",
+            requestTypeId = 1L,
+            requestTypeTitle = "تأییدیه پزشکی",
+        ),
+        UserRequestPR(
+            id = 2L,
+            refCode = "1048384002",
+            title = "استعلام سوابق",
+            comment = "",
+            creationTime = "۱۴۰۴/۰۳/۲۵",
+            createByName = "",
+            statusDesc = "در حال بررسی",
+            statusCode = "2",
+            requestTypeId = 2L,
+            requestTypeTitle = "استعلام سوابق",
+        ),
+    ),
 )
 
 @PreviewRtlTheme
@@ -812,6 +879,8 @@ private fun HomeScreenPreview() {
             uiState = previewHomeUiState(),
             onNavigateToAgent = {},
             onNavigateToAllServices = {},
+            onNavigateToUserRequests = {},
+            onRequestClick = {},
             onCampaignClick = {},
             onSectionSelected = {},
             onServiceClick = {},
@@ -828,6 +897,8 @@ private fun HomeScreenPreviewDark() {
             uiState = previewHomeUiState(),
             onNavigateToAgent = {},
             onNavigateToAllServices = {},
+            onNavigateToUserRequests = {},
+            onRequestClick = {},
             onCampaignClick = {},
             onSectionSelected = {},
             onServiceClick = {},

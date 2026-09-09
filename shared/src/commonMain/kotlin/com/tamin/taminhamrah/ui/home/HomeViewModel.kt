@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.feature.FeatureManager
 import com.tamin.taminhamrah.mapper.home.hasActiveRelation
 import com.tamin.taminhamrah.mapper.home.toDarmanCoveredOrNull
 import com.tamin.taminhamrah.mapper.identity.toPresentation
+import com.tamin.taminhamrah.mapper.userRequest.toPresentation
 import com.tamin.taminhamrah.model.campaign.CampaignKind
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
@@ -16,6 +17,7 @@ import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetDeservedTreatmentUseCase
 import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
+import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestsUseCase
 import com.tamin.taminhamrah.util.AppConfig
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -35,6 +37,7 @@ class HomeViewModel(
     private val getDeservedTreatmentUseCase: GetDeservedTreatmentUseCase,
     private val getRelationTaminAllUseCase: GetRelationTaminAllUseCase,
     private val tokenStoreManager: TokenStoreManager,
+    private val getUserRequestsUseCase: GetUserRequestsUseCase,
 ) : BaseViewModel<HomeUiState, HomeUiState.HomePartialState, HomeEvent, HomeIntent>(
     initialState = HomeUiState(isLoading = true)
 ) {
@@ -42,6 +45,7 @@ class HomeViewModel(
     init {
         sendIntent(HomeIntent.LoadMenu)
         sendIntent(HomeIntent.LoadHeader)
+        sendIntent(HomeIntent.LoadLastRequests)
     }
 
     override fun handleIntent(intent: HomeIntent): Flow<HomeUiState.HomePartialState> = flow {
@@ -58,6 +62,9 @@ class HomeViewModel(
                 emitAll(
                     merge(identityFlow(), darmanFlow(), activeRelationFlow(), agentAvailabilityFlow())
                 )
+            }
+            is HomeIntent.LoadLastRequests -> {
+                emitAll(lastRequestsFlow())
             }
             is HomeIntent.OnServiceClick -> {
                 handleServiceClick(intent.service)
@@ -105,6 +112,15 @@ class HomeViewModel(
             .map { status ->
                 HomeUiState.HomePartialState.AgentAvailability(
                     status is FeatureStatus.Enabled || status is FeatureStatus.EnabledWithError
+                )
+            }
+            .catch { }
+
+    private fun lastRequestsFlow(): Flow<HomeUiState.HomePartialState> =
+        getUserRequestsUseCase()
+            .map { requests ->
+                HomeUiState.HomePartialState.LastRequestsLoaded(
+                    requests.take(3).toPresentation()
                 )
             }
             .catch { }
@@ -173,6 +189,9 @@ class HomeViewModel(
         )
         is  HomeUiState.HomePartialState.AgentAvailability -> currentState.copy(
             isAgentEnabled = partialState.enabled
+        )
+        is  HomeUiState.HomePartialState.LastRequestsLoaded -> currentState.copy(
+            lastRequests = partialState.requests
         )
         is  HomeUiState.HomePartialState.Error -> currentState.copy(
             isLoading = false,

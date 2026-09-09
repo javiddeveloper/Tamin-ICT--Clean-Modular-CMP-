@@ -216,6 +216,8 @@
     <string name="home_section_pensioner">مستمری</string>
     <string name="home_section_employer">کارفرما</string>
     <string name="home_section_featured">خدمات ویژه</string>
+    <string name="home_section_last_requests">آخرین درخواست‌ها</string>
+    <string name="home_see_all">همه</string>
     <string name="home_quick_access_all">همهٔ خدمات</string>
 
     <!-- Home header: title, name area, AI ask-bar, status chips, suggestion chips -->

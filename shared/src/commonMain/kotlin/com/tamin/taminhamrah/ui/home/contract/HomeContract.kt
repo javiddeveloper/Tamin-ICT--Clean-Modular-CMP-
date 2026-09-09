@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.model.campaign.CampaignKind
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.home.HomeServiceSection
+import com.tamin.taminhamrah.model.userRequest.UserRequestPR
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -40,6 +41,8 @@ data class HomeUiState(
     val hasActiveRelation: Boolean? = null,
     /** Whether `FeatureFlag.AGENT` is on — gates the ask-bar and suggestion chips in the header. */
     val isAgentEnabled: Boolean = false,
+    /** Recent user requests (up to 3 items) for «آخرین درخواست‌ها» section. */
+    val lastRequests: List<UserRequestPR> = emptyList(),
     val error: String? = null,
 ){
     sealed interface HomePartialState {
@@ -53,6 +56,7 @@ data class HomeUiState(
         data class DarmanCoverageLoaded(val covered: Boolean?) : HomePartialState
         data class ActiveRelationLoaded(val hasActive: Boolean) : HomePartialState
         data class AgentAvailability(val enabled: Boolean) : HomePartialState
+        data class LastRequestsLoaded(val requests: List<UserRequestPR>) : HomePartialState
         data class Error(val message: String?) : HomePartialState
     }
 }
@@ -62,6 +66,7 @@ data class HomeUiState(
 sealed interface HomeIntent {
     object LoadMenu : HomeIntent
     object LoadHeader : HomeIntent
+    object LoadLastRequests : HomeIntent
     data class OnServiceClick(val service: MainServiceDN) : HomeIntent
     data class OnCampaignClick(val flag: FeatureFlag) : HomeIntent
     data class OnSectionSelected(val section: HomeServiceSection) : HomeIntent
@@ -71,4 +76,11 @@ sealed interface HomeEvent {
     data class ShowMessage(val message: String) : HomeEvent
     data class NavigateToWeb(val url: String) : HomeEvent
     data class NavigateToService(val flag: FeatureFlag) : HomeEvent
+    data class NavigateToUserRequestDetail(
+        val requestId: Long,
+        val refCode: String,
+        val requestTypeId: Long,
+        val title: String,
+        val referenceId: String = "",
+    ) : HomeEvent
 }

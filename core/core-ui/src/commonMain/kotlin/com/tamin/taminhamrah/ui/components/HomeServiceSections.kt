@@ -177,7 +177,7 @@ fun HomeFeaturedSection(
 }
 
 @Composable
-private fun SectionHeader(
+internal fun SectionHeader(
     title: String,
     trailing: String? = null,
     onTrailingClick: (() -> Unit)? = null,
