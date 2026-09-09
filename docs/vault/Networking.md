@@ -20,7 +20,7 @@ constant/       HeaderConstant, TimeoutConstant
 
 Every RemoteDataSourceImpl takes an `ErrorParser` (`ErrorParserImpl`, bound in `networkModule`) and converts error responses into internal models. `expectSuccess = false`, so Ktor does not throw on 4xx/5xx — error handling is explicit.
 
-## The five HTTP clients
+## The six HTTP clients
 
 Defined in `core-network/.../di/NetworkKoinModule.kt`, all behind qualifiers:
 
@@ -31,6 +31,10 @@ Defined in `core-network/.../di/NetworkKoinModule.kt`, all behind qualifiers:
 | `healthHttpClient` | `BASE_URL_HEALTH_PROFILE` | ❌ | 60 s |
 | `uploadHttpClient` | `BASE_URL` | ✅ | 5 min |
 | `aiHttpClient` | `AI_BASE_URL` | ✅ + `AiChatTokenPlugin` | 60 s |
+| `tfhHttpClient` | `TFH_BASE_URL` | ✅ bearer + refresh | 60 s |
+
+`tfhHttpClient` / `tfhKtorfit` serve the payment gateway, which lives on its own host. Only
+`PaymentGatewayApiService` uses them — see [[Payments]].
 
 ## Token flow
 
@@ -70,7 +74,7 @@ REQUEST_TIMEOUT_60_SEC = 60_000L   REQUEST_TIMEOUT_5_MIN = 300_000L
 
 ### Developer-options base URL overrides (debug builds only)
 
-The four base URLs above (`MAIN`, `ACCOUNT`, `HEALTH_PROFILE`, `AI` — via `BaseUrlKey`) are not
+The five base URLs above (`MAIN`, `ACCOUNT`, `HEALTH_PROFILE`, `AI`, `TFH` — via `BaseUrlKey`) are not
 purely compile-time constants: `DeveloperOptionsRepository.getEffectiveBaseUrl(key)` is what every
 HTTP client and auth use case actually calls (`NetworkKoinModule`, `AuthRemoteDataSourceImpl`,
 `AuthAuthorizeUrlUseCaseImpl`, `GetSignOutUrlUseCase`), and it returns a per-device override saved
@@ -126,4 +130,4 @@ The `Logging` plugin uses Kermit with tags `KtorClient` / `KtorHealthClient`. Lo
 
 `core-network/src/commonTest/resources/mocks/` and `androidUnitTest/resources/mocks/` hold sample JSON (`certificate/`, `pension/`) used with `ktor-client-mock`.
 
-Related: [[Dependency-Injection]] · [[Database]] · [[Overview]]
+Related: [[Dependency-Injection]] · [[Database]] · [[Overview]] · [[Debug-Tooling]]

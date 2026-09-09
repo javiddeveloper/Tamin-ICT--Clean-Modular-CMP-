@@ -7,6 +7,12 @@ object NetworkConstants {
     const val BASE_URL_HEALTH_PROFILE = "http://172.16.14.115:5700/api/"
     const val AI_BASE_URL = "https://sw.tamin.ir/api/"
 
+    /** The payment gateway (تامین فراهم). Every payment in the app is settled through it. */
+    const val TFH_BASE_URL = "https://tfh.tamin.ir/api/v1.1/payment/"
+
+    /** Where the gateway sends the browser once it is finished, back into the app. */
+    const val PAYMENT_RETURN_URI = "mytamin://payment_callback"
+
     /** The payment gateway, which is its own host — a ticket is confirmed and paid for here. */
     const val BASE_URL_TFH = "https://tfh.tamin.ir/api/v1.1/payment/"
 

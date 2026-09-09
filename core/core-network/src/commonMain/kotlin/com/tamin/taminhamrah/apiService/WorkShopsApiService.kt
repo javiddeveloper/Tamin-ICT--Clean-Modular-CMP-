@@ -31,6 +31,8 @@ import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
 import com.tamin.taminhamrah.model.workshop.PaymentTicketInfoDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDTO
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDTO
+import com.tamin.taminhamrah.model.workshop.SmsMessageDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDTO
@@ -371,4 +373,16 @@ internal interface WorkShopsApiService {
     suspend fun submitEmployerAgreement(
         @Body request: EmployerAgreementSubmitRequestDTO,
     ): BaseDTO<JsonElement?>
+
+    @GET("debit-objection/objection-all")
+    suspend fun getWorkShopObjections(
+        @QueryMap queries: Map<String, String>
+    ): BaseDTO<ListData<WorkShopObjectionDTO>>
+
+    /** پیامک‌های one filed objection. `objectionCode` is the row's own `seqNo`. */
+    @GET("debit-objection/objection-detail/{objectionCode}/")
+    suspend fun getWorkShopObjectionSms(
+        @Path("objectionCode") objectionCode: Long,
+        @QueryMap queries: Map<String, String>
+    ): BaseDTO<ListData<SmsMessageDTO>>
 }

@@ -48,6 +48,9 @@ import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDN
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDN
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionQuery
+import com.tamin.taminhamrah.model.workshop.SmsMessageDN
 import com.tamin.taminhamrah.repository.WorkShopsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -314,6 +317,23 @@ class WorkShopsRepositoryImpl(
 
     override suspend fun submitEmployerAgreement(request: EmployerAgreementSubmissionDN): String =
         remoteDataSource.submitEmployerAgreement(request.toDto())
+
+    override suspend fun getWorkShopObjections(
+        query: WorkShopObjectionQuery,
+    ): PagedListDN<WorkShopObjectionDN> {
+        val filters = buildFilters {
+            add(FilterProperty.PAYMENT_WORKSHOP_ID, query.workshopId)
+            add(FilterProperty.SEQ_NO, query.objectionNumber)
+            add(FilterProperty.DEBIT_NUMBER, query.debitNumber)
+        }
+        return remoteDataSource
+            .getWorkShopObjections(pageQuery(query.page, query.pageSize, filters))
+            .toDomainPage { it.toDomain() }
+    }
+
+    override suspend fun getWorkShopObjectionSms(seqNo: Long, page: Int): PagedListDN<SmsMessageDN> =
+        remoteDataSource.getWorkShopObjectionSms(seqNo, pageQuery(page))
+            .toDomainPage { it.toDomain() }
 
     private fun pageQuery(
         page: Int,

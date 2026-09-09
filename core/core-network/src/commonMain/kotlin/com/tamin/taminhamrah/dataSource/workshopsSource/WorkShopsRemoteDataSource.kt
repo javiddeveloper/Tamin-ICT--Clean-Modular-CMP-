@@ -24,6 +24,8 @@ import com.tamin.taminhamrah.model.workshop.EmployerCommitmentInfoDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberConfirmResultDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDTO
+import com.tamin.taminhamrah.model.workshop.SmsMessageDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDTO
@@ -201,4 +203,11 @@ interface WorkShopsRemoteDataSource {
     suspend fun submitEmployerAgreement(
         request: EmployerAgreementSubmitRequestDTO,
     ): String
+
+    suspend fun getWorkShopObjections(query: ApiQueryParamDN): ListData<WorkShopObjectionDTO>
+
+    suspend fun getWorkShopObjectionSms(
+        objectionCode: Long,
+        query: ApiQueryParamDN,
+    ): ListData<SmsMessageDTO>
 }
