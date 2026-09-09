@@ -17,9 +17,12 @@ data class GuardianFormPR(
     val isUploadingDocument: Boolean = false,
     val uploadError: String? = null,
 ) {
+    val isLetterNumberValid: Boolean
+        get() = letterNumber.length >= 10
+
     val isValid: Boolean
         get() = nationalId.length == 10 &&
-            letterNumber.isNotBlank() &&
+            isLetterNumberValid &&
             fullName.isNotBlank() &&
             letterDateFormatted.isNotBlank() &&
             (documentGuid != null || documentPreviewBytes != null)

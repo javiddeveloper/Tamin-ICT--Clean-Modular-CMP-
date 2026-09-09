@@ -1,6 +1,8 @@
 package com.tamin.taminhamrah.ui.navigation
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -75,8 +77,12 @@ import com.tamin.taminhamrah.feature.contracts.contractsScreen
 import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.deferredInstallment.deferredInstallmentScreen
 import com.tamin.taminhamrah.feature.deferredInstallment.navigateToDeferredInstallment
+import com.tamin.taminhamrah.feature.developerOptions.DebugLoginRoute
 import com.tamin.taminhamrah.feature.developerOptions.DeveloperOptionsRoute
+import com.tamin.taminhamrah.feature.developerOptions.TokenManagerRoute
+import com.tamin.taminhamrah.feature.developerOptions.debugLoginScreen
 import com.tamin.taminhamrah.feature.developerOptions.developerOptionsScreen
+import com.tamin.taminhamrah.feature.developerOptions.tokenManagerScreen
 import com.tamin.taminhamrah.feature.girlSurvivor.girlSurvivorScreen
 import com.tamin.taminhamrah.feature.healthProfile.healthProfileScreen
 import com.tamin.taminhamrah.feature.healthProfile.navigateToHealthProfile
@@ -96,6 +102,9 @@ import com.tamin.taminhamrah.feature.pensionInquiry.issuanceCertificateScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeservedTreatment
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDisabilityPension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPrescription
+import com.tamin.taminhamrah.feature.payment.PaymentRoute
+import com.tamin.taminhamrah.feature.payment.paymentGraph
+import com.tamin.taminhamrah.feature.payment.paymentSandboxScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.payrollScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.prescriptionScreen
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.pensionStatusInquiryGraph
@@ -104,6 +113,13 @@ import com.tamin.taminhamrah.feature.pensionSurvivor.pensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pregnancyPay.pregnancyPayScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
+import com.tamin.taminhamrah.feature.contractaffair.contractAffairsScreen
+import com.tamin.taminhamrah.feature.contractaffair.contractPaymentHistoryScreen
+import com.tamin.taminhamrah.feature.contractaffair.contractPaymentCalcDetailScreen
+import com.tamin.taminhamrah.feature.contractaffair.contractPremiumPaymentScreen
+import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPaymentCalcDetail
+import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPaymentHistory
+import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPremiumPayment
 import com.tamin.taminhamrah.feature.requestPaymentForIllDays.requestPaymentForIllDaysScreen
 import com.tamin.taminhamrah.feature.security.SecurityRoute
 import com.tamin.taminhamrah.feature.security.securityScreen
@@ -271,10 +287,10 @@ internal fun TaminHamrahNavGraph(
             AnimatedVisibility(
                 visible = isBottomBarVisible,
                 enter = fadeIn(
-                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300),
+                    animationSpec = tween(durationMillis = 300),
                 ),
                 exit = fadeOut(
-                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300),
+                    animationSpec = tween(durationMillis = 300),
                 ),
             ) {
                 Box(
@@ -481,6 +497,14 @@ internal fun TaminHamrahNavGraph(
                 deferredInstallmentScreen(onBack = { navController.popBackStack() })
                 girlSurvivorScreen(onBack = { navController.popBackStack() })
                 inquiryEducationScreen(onBack = { navController.popBackStack() })
+
+                // The shared payment flow. Any feature that has been handed a gateway ticket
+                // enters it with navController.navigateToPayment(request); finishing pops back to
+                // whichever screen started the payment.
+                paymentGraph(
+                    navController = navController,
+                    onFinished = { navController.popBackStack() },
+                )
                 pensionSurvivorScreen(
                     navController = navController,
                     onBack = { navController.popBackStack() })
@@ -496,6 +520,39 @@ internal fun TaminHamrahNavGraph(
                     },
                     onOpenUrl = { url -> openUrl(url) }
                 )
+
+                contractAffairsScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToService = { flag ->
+                    navController.navigateToFeature(flag)
+                },
+                    onOpenUrl =  { url -> openUrl(url) },
+                    onNavigateToPaymentHistory = { contractNumber, insuranceType ->
+                        navController.navigateToContractPaymentHistory(contractNumber, insuranceType)
+                    },
+                    onNavigateToPremiumPayment = { contractNumber, premiumTypeCode, insuranceType ->
+                        navController.navigateToContractPremiumPayment(
+                            contractNumber,
+                            premiumTypeCode,
+                            insuranceType,
+                        )
+                    },
+                )
+
+                contractPaymentHistoryScreen(onBack = { navController.popBackStack() })
+
+                contractPremiumPaymentScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToPaymentDetails = { premiumTypeCode, startDate, endDate ->
+                        navController.navigateToContractPaymentCalcDetail(
+                            premiumTypeCode,
+                            startDate,
+                            endDate,
+                        )
+                    },
+                )
+
+                contractPaymentCalcDetailScreen(onBack = { navController.popBackStack() })
 
                 workshopsScreen(navController, onOpenUrl = { url -> openUrl(url) })
                 completeEmployerInfoScreen(navController)
@@ -531,7 +588,18 @@ internal fun TaminHamrahNavGraph(
                 securityScreen(onNavigateBack = { navController.popBackStack() })
 
                 if (AppConfig.isDebug) {
-                    developerOptionsScreen(onNavigateBack = { navController.popBackStack() })
+                    developerOptionsScreen(
+                        onNavigateBack = { navController.popBackStack() },
+                        onNavigateToDebugLogin = { navController.navigate(DebugLoginRoute) },
+                        onNavigateToTokenManager = { navController.navigate(TokenManagerRoute) },
+                        onStartTestPayment = { navController.navigate(PaymentRoute.Sandbox) }
+                    )
+                    paymentSandboxScreen(
+                        navController = navController,
+                        onNavigateBack = { navController.popBackStack() }
+                    )
+                    debugLoginScreen(onNavigateBack = { navController.popBackStack() })
+                    tokenManagerScreen(onNavigateBack = { navController.popBackStack() })
                 }
 
                 orotezProtezScreen(onBack = { navController.popBackStack() })
@@ -555,10 +623,10 @@ internal fun TaminHamrahNavGraph(
             AnimatedVisibility(
                 visible = isBottomBarVisible,
                 enter = fadeIn(
-                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300)
+                    animationSpec = tween(durationMillis = 300)
                 ),
                 exit = fadeOut(
-                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300)
+                    animationSpec = tween(durationMillis = 300)
                 ),
                 modifier = Modifier.align(Alignment.TopCenter)
             ) {
@@ -841,4 +909,3 @@ fun HomeScreen(
         }
     }
 }
-

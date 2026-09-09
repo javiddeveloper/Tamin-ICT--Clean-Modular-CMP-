@@ -84,6 +84,7 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.contract_flow_submit_contract
 import taminx.core.core_ui.contract_hero_step_job_title
 import taminx.core.core_ui.contract_next_step
+import taminx.core.core_ui.contract_optional_hero_reg_confirmed
 import taminx.core.core_ui.contract_save_edit
 import taminx.core.core_ui.contract_step_contract_applicant
 import taminx.core.core_ui.contract_step_treatment_support
@@ -188,7 +189,17 @@ fun ContractFlowScreenContent(
     val totalSteps = steps.size.coerceAtLeast(1)
     val screenTitle = state.config?.screenTitleRes?.let { stringResource(it) }.orEmpty()
     val stepTitle = stringResource(state.currentStep.titleRes)
-    val stepSubtitle = stringResource(state.currentStep.descRes)
+    val isOptionalRegistrationConfirmed =
+        state.config?.isOptionalInsurance == true &&
+            state.currentStep == ContractStep.STEP_REGISTRATION &&
+            state.genderGateError == null &&
+            state.preflightGateError == null &&
+            (state.eligibility == null || state.eligibility.isEligible)
+    val stepSubtitle = if (isOptionalRegistrationConfirmed) {
+        stringResource(Res.string.contract_optional_hero_reg_confirmed)
+    } else {
+        stringResource(state.currentStep.descRes)
+    }
 
     val handleNavigateBack: () -> Unit = {
         when {
@@ -324,6 +335,7 @@ fun ContractFlowScreenContent(
                                             eligibility = state.eligibility,
                                             genderGateError = state.genderGateError,
                                             preflightGateError = state.preflightGateError,
+                                            isOptionalInsurance = state.config?.isOptionalInsurance == true,
                                         )
                                     }
 
@@ -526,14 +538,13 @@ fun ContractFlowScreenContent(
                                             calculatedMonthlySalary = state.calculatedMonthlySalary,
                                             isLoading = state.isPremiumRangeLoading,
                                             isCalculating = state.isCalculatingPremium,
+                                            isPremiumCalculated = state.isPremiumCalculated,
                                             onPremiumChange = {
                                                 onIntent(ContractFlowIntent.SelectMonthlyPremium(it))
                                             },
                                             onCalculate = {
                                                 onIntent(ContractFlowIntent.CalculateMonthlyPremium)
                                             },
-                                            showPremiumSlider = !state.hidePremiumSlider &&
-                                                (state.config?.usesFreelancePremiumRange == true || state.config?.isOptionalInsurance == true),
                                         )
                                     }
 
