@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -16,7 +15,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -31,21 +29,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.tamin.taminhamrah.feature.history.ui.components.ChartAxis
 import com.tamin.taminhamrah.feature.history.ui.components.DashedDivider
+import com.tamin.taminhamrah.feature.history.ui.components.DurationCardPR
+import com.tamin.taminhamrah.feature.history.ui.components.DurationPart
 import com.tamin.taminhamrah.feature.history.ui.components.FilterChipPR
 import com.tamin.taminhamrah.feature.history.ui.components.HistoryActionCards
 import com.tamin.taminhamrah.feature.history.ui.components.HistoryChartCard
-import com.tamin.taminhamrah.feature.history.ui.components.HistoryHero
 import com.tamin.taminhamrah.feature.history.ui.components.HistorySpanNote
+import com.tamin.taminhamrah.feature.history.ui.components.HistoryTopArea
+import com.tamin.taminhamrah.feature.history.ui.components.ManyWorkshopsBanner
 import com.tamin.taminhamrah.feature.history.ui.components.MonthWageBreakdown
 import com.tamin.taminhamrah.feature.history.ui.components.NoWorkshops
 import com.tamin.taminhamrah.feature.history.ui.components.ReportMenuSheet
 import com.tamin.taminhamrah.feature.history.ui.components.WageText
+import com.tamin.taminhamrah.feature.history.ui.components.WorkshopSplitRowPR
 import com.tamin.taminhamrah.feature.history.ui.components.WorkshopSummaryRow
-import com.tamin.taminhamrah.feature.history.ui.components.YearDetailSheet
 import com.tamin.taminhamrah.feature.history.ui.components.YearMonthPickerSheet
 import com.tamin.taminhamrah.feature.history.ui.contract.HistoryEvent
 import com.tamin.taminhamrah.feature.history.ui.contract.HistoryIntent
@@ -55,8 +58,8 @@ import com.tamin.taminhamrah.feature.history.ui.model.HistoryMetric
 import com.tamin.taminhamrah.feature.history.ui.model.HistoryScope
 import com.tamin.taminhamrah.feature.history.ui.model.YearDetailPR
 import com.tamin.taminhamrah.feature.history.ui.model.YearHistoryPR
-import com.tamin.taminhamrah.feature.history.ui.model.careerDurationChips
 import com.tamin.taminhamrah.feature.history.ui.model.detailWith
+import com.tamin.taminhamrah.feature.history.ui.model.displayName
 import com.tamin.taminhamrah.feature.history.ui.model.gapYearCount
 import com.tamin.taminhamrah.feature.history.ui.model.maxMonthWage
 import com.tamin.taminhamrah.feature.history.ui.model.maxYearWage
@@ -64,11 +67,11 @@ import com.tamin.taminhamrah.feature.history.ui.model.monthBars
 import com.tamin.taminhamrah.feature.history.ui.model.pickerMonthRows
 import com.tamin.taminhamrah.feature.history.ui.model.pickerYearRows
 import com.tamin.taminhamrah.feature.history.ui.model.sourceChips
+import com.tamin.taminhamrah.feature.history.ui.model.splitCandidates
 import com.tamin.taminhamrah.feature.history.ui.model.wageMonthBars
 import com.tamin.taminhamrah.feature.history.ui.model.wageYearBars
 import com.tamin.taminhamrah.feature.history.ui.model.yearBars
 import com.tamin.taminhamrah.feature.history.ui.model.yearChips
-import com.tamin.taminhamrah.feature.history.ui.model.yearDurationChips
 import com.tamin.taminhamrah.mapper.history.labelRes
 import com.tamin.taminhamrah.model.history.HistoryCertificateType
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -82,14 +85,15 @@ import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
-import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.rememberCollapsingHeaderState
+import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.reservedHeight
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.ToasterState
 import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.TaminHistoryWorkshopPalette
 import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.ui.toRialAmount
 import com.tamin.taminhamrah.util.PersianDateFormatter
@@ -99,24 +103,24 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res as CoreRes
-import taminx.core.core_ui.action_back
 import taminx.core.core_ui.action_cancel
 import taminx.core.core_ui.btn_understood
+import taminx.core.core_ui.history_legend_no_bar
 import taminx.core.core_ui.history_metric_label
 import taminx.core.core_ui.history_picker_apply_month
 import taminx.core.core_ui.history_picker_apply_none
 import taminx.core.core_ui.history_picker_apply_year
 import taminx.core.core_ui.history_picker_no_history
+import taminx.core.core_ui.history_scope_all_pill
+import taminx.core.core_ui.history_scope_year_pill
 import taminx.core.core_ui.history_series_days
 import taminx.core.core_ui.history_series_max_days
 import taminx.core.core_ui.history_series_max_wage
 import taminx.core.core_ui.history_series_wage
 import taminx.core.core_ui.history_split_chip
 import taminx.core.core_ui.history_split_label
-import taminx.core.core_ui.ic_tamin_download
 import taminx.feature.history.Res as HistoryRes
 import taminx.feature.history.history_action_send_title
 import taminx.feature.history.history_all_title
@@ -138,10 +142,6 @@ import taminx.feature.history.history_detail_pick_year
 import taminx.feature.history.history_detail_year_empty
 import taminx.feature.history.history_month_no_record
 import taminx.feature.history.history_month_wage_total
-import taminx.feature.history.history_orb_caption_all
-import taminx.feature.history.history_orb_caption_year
-import taminx.feature.history.history_orb_days
-import taminx.feature.history.history_report_action
 import taminx.feature.history.history_rial
 import taminx.feature.history.history_scheme_construction
 import taminx.feature.history.history_scheme_optional
@@ -150,6 +150,8 @@ import taminx.feature.history.history_send_confirm_action
 import taminx.feature.history.history_send_confirm_body
 import taminx.feature.history.history_send_success_title
 import taminx.feature.history.history_stat_sources
+import taminx.feature.history.history_year_full
+import taminx.feature.history.history_year_incomplete
 
 /**
  * «کلیه سوابق».
@@ -160,6 +162,7 @@ import taminx.feature.history.history_stat_sources
 @Composable
 fun HistoryScreen(
     onBackClicked: () -> Unit,
+    onOpenYearWorkshops: (year: String) -> Unit,
     viewModel: HistoryViewModel = koinViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -175,6 +178,7 @@ fun HistoryScreen(
         lazyListState = lazyListState,
         onIntent = viewModel::sendIntent,
         onBackClicked = onBackClicked,
+        onOpenYearWorkshops = onOpenYearWorkshops,
     )
 }
 
@@ -197,6 +201,8 @@ fun HistoryContent(
     lazyListState: LazyListState,
     onIntent: (HistoryIntent) -> Unit,
     onBackClicked: () -> Unit,
+    /** «کارگاه‌های سال» — a destination now, so the year travels rather than being held in state. */
+    onOpenYearWorkshops: (year: String) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
@@ -230,11 +236,126 @@ fun HistoryContent(
         days = stringResource(HistoryRes.string.history_combined_stat_days),
         sources = stringResource(HistoryRes.string.history_stat_sources),
     )
-    val durations = remember(scope, uiState.careerTotal, detail, labels) {
+    val allScopePillFormat = stringResource(CoreRes.string.history_scope_all_pill, PLACEHOLDER, PLACEHOLDER_2)
+    val yearScopePillFormat = stringResource(CoreRes.string.history_scope_year_pill, PLACEHOLDER, PLACEHOLDER_2)
+    val allChipLabel = stringResource(HistoryRes.string.history_scope_all)
+
+    val scopeKey = when (scope) {
+        is HistoryScope.All -> "all"
+        is HistoryScope.Year -> scope.year
+    }
+    val recentYears = remember(uiState.years) {
+        uiState.years.map { it.year }.asReversed()
+    }
+    val navSeq = remember(recentYears) {
+        listOf("all") + recentYears
+    }
+    val seqIndex = remember(navSeq, scopeKey) {
+        val idx = navSeq.indexOf(scopeKey)
+        if (idx >= 0) idx else 0
+    }
+    val hasOlder = seqIndex < navSeq.size - 1
+    val hasNewer = seqIndex > 0
+
+    val onStepOlder: () -> Unit = remember(hasOlder, seqIndex, navSeq, onIntent) {
+        {
+            if (hasOlder) {
+                val next = navSeq[seqIndex + 1]
+                if (next == "all") {
+                    onIntent(HistoryIntent.SelectScope(HistoryScope.All))
+                } else {
+                    onIntent(HistoryIntent.SelectScope(HistoryScope.Year(next)))
+                }
+            }
+        }
+    }
+    val onStepNewer: () -> Unit = remember(hasNewer, seqIndex, navSeq, onIntent) {
+        {
+            if (hasNewer) {
+                val prev = navSeq[seqIndex - 1]
+                if (prev == "all") {
+                    onIntent(HistoryIntent.SelectScope(HistoryScope.All))
+                } else {
+                    onIntent(HistoryIntent.SelectScope(HistoryScope.Year(prev)))
+                }
+            }
+        }
+    }
+
+    val durationCardModel = remember(
+        scope,
+        uiState.careerTotal,
+        detail,
+        uiState.years,
+        hasOlder,
+        hasNewer,
+        labels,
+        allScopePillFormat,
+        yearScopePillFormat,
+        allChipLabel,
+    ) {
         if (scope is HistoryScope.All) {
-            careerDurationChips(uiState.careerTotal, labels) { it.toString().toPersianDigits() }
+            val firstYear = uiState.years.firstOrNull()?.year?.toPersianDigits().orEmpty()
+            val lastYear = uiState.years.lastOrNull()?.year?.toPersianDigits().orEmpty()
+            val pill = if (firstYear.isNotEmpty() && lastYear.isNotEmpty()) {
+                allScopePillFormat.replace(PLACEHOLDER, firstYear).replace(PLACEHOLDER_2, lastYear)
+            } else {
+                allChipLabel
+            }
+            DurationCardPR(
+                pillText = pill,
+                part1 = DurationPart(
+                    number = uiState.careerTotal.years.toString().toPersianDigits(),
+                    unit = labels.years,
+                ),
+                part2 = if (uiState.careerTotal.months > 0) {
+                    DurationPart(
+                        number = uiState.careerTotal.months.toString().toPersianDigits(),
+                        unit = labels.months,
+                    )
+                } else null,
+                part3 = if (uiState.careerTotal.days > 0) {
+                    DurationPart(
+                        number = uiState.careerTotal.days.toString().toPersianDigits(),
+                        unit = labels.days,
+                    )
+                } else null,
+                hasOlder = hasOlder,
+                hasNewer = hasNewer,
+            )
         } else {
-            yearDurationChips(detail, labels) { it.toString().toPersianDigits() }
+            val sDays = detail?.totalDays ?: 0
+            val sCount = detail?.workshops?.size ?: 0
+            val pill = if (detail != null) {
+                yearScopePillFormat
+                    .replace(PLACEHOLDER, sCount.toString().toPersianDigits())
+                    .replace(PLACEHOLDER_2, sDays.toString().toPersianDigits())
+            } else {
+                labels.sources
+            }
+            val months = sDays / HistoryConstants.DAYS_IN_MONTH
+            val days = sDays % HistoryConstants.DAYS_IN_MONTH
+            DurationCardPR(
+                pillText = pill,
+                part1 = DurationPart(
+                    number = (scope as HistoryScope.Year).year.toPersianDigits(),
+                    unit = "",
+                ),
+                part2 = if (sDays > 0) {
+                    DurationPart(
+                        number = months.toString().toPersianDigits(),
+                        unit = labels.months,
+                    )
+                } else null,
+                part3 = if (days > 0) {
+                    DurationPart(
+                        number = days.toString().toPersianDigits(),
+                        unit = labels.days,
+                    )
+                } else null,
+                hasOlder = hasOlder,
+                hasNewer = hasNewer,
+            )
         }
     }
 
@@ -260,14 +381,20 @@ fun HistoryContent(
         }
     }
 
-    val wageBars = remember(scope, uiState.years, uiState.wageByYear, scopeWages, uiState.selectedSource, uiState.selectedMonth) {
+    val wageBars = remember(scope, uiState.years, uiState.wageByYear, scopeWages, uiState.selectedSource, uiState.selectedMonth, detail) {
         if (scope is HistoryScope.All) {
             uiState.years.wageYearBars(uiState.wageByYear) { it.toPersianDigits() }
         } else {
+            val year = (scope as HistoryScope.Year).year.toIntOrNull() ?: 0
             scopeWages.wageMonthBars(
                 source = uiState.selectedSource,
                 selectedMonth = uiState.selectedMonth,
                 wageLabel = { wage -> wage.toString().toPriceFormat().toPersianDigits() },
+                isMonthFull = { month ->
+                    val daysInMonth = PersianDateFormatter.daysInMonth(year, month + 1)
+                    val workedDays = detail?.monthDays?.getOrNull(month) ?: 0
+                    workedDays >= daysInMonth
+                },
             )
         }
     }
@@ -342,6 +469,13 @@ fun HistoryContent(
         { source -> onIntent(HistoryIntent.SelectSource(source)) }
     }
     val onSplitClick: () -> Unit = remember(onIntent) { { onIntent(HistoryIntent.ToggleSplit) } }
+
+    // Captures the year, not the state: the callback is handed to rows that must stay skippable,
+    // and the year a row was drawn for cannot change under it.
+    val scopeYear = (scope as? HistoryScope.Year)?.year
+    val openYearWorkshops: () -> Unit = remember(scopeYear, onOpenYearWorkshops) {
+        { scopeYear?.let(onOpenYearWorkshops) ?: Unit }
+    }
     val onMetricClick: (Int) -> Unit = remember(onIntent) {
         { index -> onIntent(HistoryIntent.SelectMetric(HistoryMetric.entries[index])) }
     }
@@ -353,11 +487,55 @@ fun HistoryContent(
             .toImmutableList()
     }
 
-    // Offered only where there is more than one employer to pull apart.
+    /*
+     * «تفکیک کارگاه» — offered wherever there is more than one employer to pull apart.
+     *
+     * In «همه» that means the whole career, not one year: a person with two employers across
+     * nineteen years can split their chart, which is the design's own rule. Reading it off the
+     * open year's detail — which is null in «همه» — is why the chip was missing there.
+     */
+    val splitSources = remember(uiState.wageByYear, scope, optionalScheme, constructionScheme) {
+        splitCandidates(
+            wageByYear = uiState.wageByYear,
+            year = (scope as? HistoryScope.Year)?.year,
+            nameOf = { it.displayName(optionalScheme, constructionScheme) },
+        )
+    }
     val splitLabel = stringResource(CoreRes.string.history_split_chip)
-    val splitChip = remember(splitLabel, uiState.splitBySource, detail) {
-        FilterChipPR(splitLabel, uiState.splitBySource)
-            .takeIf { (detail?.workshops?.size ?: 0) > 1 }
+    val splitChip = remember(splitLabel, uiState.splitBySource, splitSources) {
+        FilterChipPR(splitLabel, uiState.splitBySource).takeIf { splitSources.size > 1 }
+    }
+
+    val splitRows = remember(uiState.splitBySource, detail, dayLabel) {
+        if (!uiState.splitBySource || detail == null || detail.workshops.size <= 1) {
+            persistentListOf()
+        } else {
+            detail.workshops.mapIndexed { index, workshop ->
+                val color = TaminHistoryWorkshopPalette[index % TaminHistoryWorkshopPalette.size]
+                val maxMonthDays = workshop.months.maxOfOrNull { it.days }?.coerceAtLeast(1) ?: 30
+                val opacities = (0 until HistoryConstants.MONTHS_IN_YEAR).map { monthIdx ->
+                    val worked = workshop.months.firstOrNull { it.monthIndex == monthIdx }
+                    if (worked != null && worked.days > 0) {
+                        (0.4f + 0.6f * (worked.days.toFloat() / maxMonthDays.toFloat())).coerceIn(0f, 1f)
+                    } else {
+                        0f
+                    }
+                }.toImmutableList()
+
+                val totalWage = workshop.months.sumOf { it.wage.toLongOrNull() ?: 0L }
+                val daysStr = dayLabel.replace(HistoryConstants.PLACEHOLDER_DAYS, workshop.totalDays.toString().toPersianDigits())
+                val wageStr = if (totalWage > 0L) {
+                    " · ${(totalWage / MILLION).toString().toPriceFormat().toPersianDigits()} م ریال"
+                } else ""
+
+                WorkshopSplitRowPR(
+                    label = workshop.name,
+                    color = color,
+                    totalText = daysStr + wageStr,
+                    monthOpacities = opacities,
+                )
+            }.toImmutableList()
+        }
     }
 
     // ── «انتخاب سال و ماه» ───────────────────────────────────────────────────────
@@ -428,45 +606,42 @@ fun HistoryContent(
         { onIntent(HistoryIntent.DismissYearPicker) }
     }
 
-    val bars = dayBars
-    val dense = scope is HistoryScope.All && bars.size > HistoryConstants.DENSE_BAR_THRESHOLD
-    val scopeDays = if (scope is HistoryScope.All) uiState.careerTotal.totalDays else detail?.totalDays ?: 0
-
-    // The head folds as the body scrolls, the way the treatment hub's card does. The body drives it
-    // through a nested-scroll connection rather than reading the list's offset, so the fold plays
-    // under the finger and works even on a career short enough that the page does not scroll.
     val collapse = rememberCollapsingHeaderState(HistoryDimens.heroCollapseDistance)
     var headerHeightPx by remember { mutableIntStateOf(0) }
 
     Scaffold(modifier = modifier, containerColor = colors.bgPage) { padding ->
-      Box(modifier = Modifier.fillMaxSize().padding(bottom = padding.calculateBottomPadding())) {
-        LazyColumn(
-            state = lazyListState,
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .nestedScroll(collapse.nestedScrollConnection),
-            contentPadding = PaddingValues(bottom = Spacing.xxl),
+                .padding(bottom = padding.calculateBottomPadding()),
         ) {
-            // Stands in for the floating head, at whatever height it currently measures. Read at
-            // layout time, so the body closes up over the fold without recomposing a single item.
-            item(key = HistoryConstants.HERO_KEY) {
-                Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
-            }
+            LazyColumn(
+                state = lazyListState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .nestedScroll(collapse.nestedScrollConnection),
+                contentPadding = PaddingValues(bottom = Spacing.xxl),
+                // The same give the rest of the app scrolls with.
+                overscrollEffect = rememberJellyOverscroll(),
+            ) {
+                // Leading spacer reserving live height of floating header
+                item(key = "header_spacer") {
+                    Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
+                }
 
+                if (uiState.years.isNotEmpty()) {
+                    item(key = HistoryConstants.CHART_KEY) {
+                        HistoryChartCard(
+                            title = when (scope) {
+                                is HistoryScope.All ->
+                                    stringResource(HistoryRes.string.history_chart_title_all)
 
-            if (uiState.years.isNotEmpty()) {
-                item(key = HistoryConstants.CHART_KEY) {
-                    HistoryChartCard(
-                        title = when (scope) {
-                            is HistoryScope.All ->
-                                stringResource(HistoryRes.string.history_chart_title_all)
-
-                            is HistoryScope.Year -> stringResource(
-                                HistoryRes.string.history_chart_title_year,
-                                scope.year.toPersianDigits(),
-                            )
-                        },
-                        hint = stringResource(
+                                is HistoryScope.Year -> stringResource(
+                                    HistoryRes.string.history_chart_title_year,
+                                    scope.year.toPersianDigits(),
+                                )
+                            },
+                            hint = stringResource(
                             if (scope is HistoryScope.All) {
                                 HistoryRes.string.history_chart_hint_all
                             } else {
@@ -476,20 +651,12 @@ fun HistoryContent(
                         series = series,
                         onBarClick = onBarClick,
                         modifier = Modifier
-                            .offset(y = HistoryDimens.chartOverlap)
+                            .padding(top = 14.dp)
                             .padding(horizontal = HistoryDimens.chartSidePadding),
-                        dense = dense,
+                        dense = false,
                         // Twelve full month names never fit side by side; the year labels do.
                         rotateLabels = scope is HistoryScope.Year,
-                        axis = if (dense) {
-                            ChartAxis(
-                                oldest = bars.last().label,
-                                middle = bars[bars.size / 2].label,
-                                newest = bars.first().label,
-                            )
-                        } else {
-                            null
-                        },
+                        axis = null,
                         sourceLabel = stringResource(CoreRes.string.history_split_label),
                         sourceChips = if (uiState.splitBySource) {
                             persistentListOf()
@@ -505,6 +672,10 @@ fun HistoryContent(
                         metricLabel = stringResource(CoreRes.string.history_metric_label),
                         metricChips = metricChips,
                         onMetricClick = onMetricClick,
+                        fullLabel = stringResource(HistoryRes.string.history_year_full),
+                        partialLabel = stringResource(HistoryRes.string.history_year_incomplete),
+                        barHint = stringResource(CoreRes.string.history_legend_no_bar),
+                        splitRows = splitRows,
                         concurrency = detail
                             ?.takeIf { it.hasConcurrency && uiState.selectedSource == null }
                             ?.let {
@@ -528,24 +699,33 @@ fun HistoryContent(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .offset(y = HistoryDimens.chartOverlap)
+                            .padding(top = 10.dp)
                             .padding(horizontal = HistoryDimens.sidePadding),
                         verticalArrangement = Arrangement.spacedBy(Spacing.xs),
                     ) {
                         if (scope is HistoryScope.All) {
-                            HistorySpanNote(
-                                yearCount = uiState.years.size,
-                                firstYear = uiState.years.first().year,
-                                lastYear = uiState.years.last().year,
-                                gapYears = remember(uiState.years) { uiState.years.gapYearCount() },
-                            )
+                            val first = uiState.years.firstOrNull()?.year.orEmpty()
+                            val last = uiState.years.lastOrNull()?.year.orEmpty()
+                            if (first.isNotEmpty() && last.isNotEmpty()) {
+                                HistorySpanNote(
+                                    yearCount = uiState.years.size,
+                                    firstYear = first,
+                                    lastYear = last,
+                                    gapYears = remember(uiState.years) { uiState.years.gapYearCount() },
+                                )
+                            }
                         } else {
+                            if ((detail?.workshops?.size ?: 0) > 1) {
+                                ManyWorkshopsBanner(
+                                    workshopCount = detail?.workshops?.size ?: 0,
+                                    totalDays = detail?.totalDays ?: 0,
+                                    onClick = openYearWorkshops,
+                                )
+                            }
                             detail?.workshops?.forEach { workshop ->
                                 WorkshopSummaryRow(
                                     workshop = workshop,
-                                    onClick = {
-                                        selectedYear?.let { onIntent(HistoryIntent.SelectYear(it)) }
-                                    },
+                                    onClick = openYearWorkshops,
                                 )
                             }
                         }
@@ -586,47 +766,28 @@ fun HistoryContent(
             }
         }
 
-        // On top of the list, not in it: the body passes underneath as it scrolls, which is what
-        // lets the head fold over the content rather than scrolling away with it.
-        HistoryHero(
+        // Floating top area with curved gradient hero and collapsible duration card
+        HistoryTopArea(
             title = stringResource(HistoryRes.string.history_all_title),
             scope = scope,
             yearChips = chips,
-            allChipLabel = stringResource(HistoryRes.string.history_scope_all),
-            orbDays = scopeDays.toString().toPersianDigits(),
-            orbDaysLabel = stringResource(HistoryRes.string.history_orb_days),
-            caption = when (scope) {
-                is HistoryScope.All -> stringResource(HistoryRes.string.history_orb_caption_all)
-                is HistoryScope.Year -> stringResource(
-                    HistoryRes.string.history_orb_caption_year,
-                    scope.year.toPersianDigits(),
-                )
-            },
-            durations = durations,
+            allChipLabel = allChipLabel,
             onScopeChange = { onIntent(HistoryIntent.SelectScope(it)) },
-            navigationIcon = {
-                TaminTopAppBarButton(
-                    icon = Icons.Filled.ChevronRight,
-                    contentDescription = stringResource(CoreRes.string.action_back),
-                    onClick = onBackClicked,
-                    bordered = true,
-                )
-            },
-            action = {
-                TaminTopAppBarButton(
-                    icon = vectorResource(CoreRes.drawable.ic_tamin_download),
-                    contentDescription = stringResource(HistoryRes.string.history_report_action),
-                    onClick = { onIntent(HistoryIntent.ShowReportMenu) },
-                    bordered = true,
-                )
-            },
-            progress = collapse.progressProvider,
+            onSearchClick = { onIntent(HistoryIntent.OpenYearPicker) },
+            onDownloadClick = { onIntent(HistoryIntent.ShowReportMenu) },
+            onMoreClick = { onIntent(HistoryIntent.OpenYearPicker) },
+            onBackClicked = onBackClicked,
+            durationCardModel = durationCardModel,
+            onStepOlder = onStepOlder,
+            onStepNewer = onStepNewer,
+            collapseProgress = collapse.progressProvider,
+            hasYears = uiState.years.isNotEmpty(),
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .onSizeChanged { headerHeightPx = it.height },
         )
-      }
     }
+}
 
     // Outside the list: a failure is the only thing worth attending to while it is up, and a dialog
     // cannot live in a LazyColumn item.
@@ -662,16 +823,6 @@ fun HistoryContent(
             onApply = onApplyPick,
             onAllYears = onPickAllYears,
             onDismiss = onDismissPicker,
-        )
-    }
-
-    // The sheet only ever opens on the year the page is already showing, so it renders the detail
-    // that is already folded rather than folding the same rows a second time.
-    if (uiState.selectedYear != null && detail != null) {
-        YearDetailSheet(
-            detail = detail,
-            wagesUnavailable = uiState.wagesUnavailable,
-            onDismiss = { onIntent(HistoryIntent.DismissYearDetail) },
         )
     }
 
@@ -960,3 +1111,16 @@ private const val MILLION = 1_000_000L
  */
 private const val PLACEHOLDER = "%%1"
 private const val PLACEHOLDER_2 = "%%2"
+
+/**
+ * Offsets the composable vertically by [overlap] and reduces its measured height by the same amount,
+ * behaving like `margin-top: -overlap` without leaving trailing empty layout space.
+ */
+private fun Modifier.overlapTop(overlap: Dp): Modifier = layout { measurable, constraints ->
+    val placeable = measurable.measure(constraints)
+    val overlapPx = overlap.roundToPx()
+    layout(placeable.width, (placeable.height - overlapPx).coerceAtLeast(0)) {
+        placeable.placeRelative(0, -overlapPx)
+    }
+}
+

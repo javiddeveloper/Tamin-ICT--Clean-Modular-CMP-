@@ -61,9 +61,7 @@ class HistoryViewModel(
     override fun handleIntent(intent: HistoryIntent): Flow<PartialState> = when (intent) {
         is HistoryIntent.Load -> load()
 
-        is HistoryIntent.SelectYear -> flow { emit(PartialState.YearSelected(intent.year)) }
 
-        is HistoryIntent.DismissYearDetail -> flow { emit(PartialState.YearSelected(null)) }
 
         // Changing scope clears what was open inside the old one: a month index and a source
         // position mean nothing in another year, and carrying them over would show the wrong wages.
@@ -361,7 +359,10 @@ class HistoryViewModel(
         is PartialState.Loading ->
             currentState.copy(isLoading = partialState.isLoading, error = null)
 
-        is PartialState.HistoryLoaded -> currentState.copy(
+        is PartialState.HistoryLoaded -> run {
+            println("TOTALDBG years=${partialState.years.size} total=${partialState.careerTotal} merged=${partialState.hasCombinedRecords} wage=${partialState.hasWageRecords}")
+            currentState
+        }.copy(
             isLoading = false,
             hasLoadedOnce = true,
             years = partialState.years,
@@ -378,7 +379,6 @@ class HistoryViewModel(
             error = null,
         )
 
-        is PartialState.YearSelected -> currentState.copy(selectedYear = partialState.year)
 
         is PartialState.ScopeChanged -> currentState.copy(scope = partialState.scope)
 

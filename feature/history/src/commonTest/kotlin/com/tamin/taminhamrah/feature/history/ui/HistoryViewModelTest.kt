@@ -5,18 +5,28 @@ import com.tamin.taminhamrah.feature.history.fake.FakeHistoryRepository
 import com.tamin.taminhamrah.feature.history.fake.employerUser
 import com.tamin.taminhamrah.feature.history.ui.contract.HistoryEvent
 import com.tamin.taminhamrah.feature.history.ui.contract.HistoryIntent
+import com.tamin.taminhamrah.feature.history.ui.model.HistoryScope
 import com.tamin.taminhamrah.model.history.DastmozdInfoDN
 import com.tamin.taminhamrah.model.history.DastmozdInfoItemDN
 import com.tamin.taminhamrah.model.history.HistoryCertificateType
 import com.tamin.taminhamrah.model.history.TalfighInfoDN
 import com.tamin.taminhamrah.model.history.TalfighInfoItemDN
 import com.tamin.taminhamrah.model.history.UserRoleDN
+import com.tamin.taminhamrah.model.history.WageDetailDN
 import com.tamin.taminhamrah.useCases.history.DownloadHistoryReportUseCase
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetUserInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetUserRoleUseCase
 import com.tamin.taminhamrah.useCases.history.SendHistoryNoticeUseCase
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -25,14 +35,6 @@ import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
-import com.tamin.taminhamrah.model.history.WageDetailDN
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HistoryViewModelTest {
@@ -357,20 +359,58 @@ class HistoryViewModelTest {
             assertNull(viewModel.uiState.value.selectedReport, "no viewer, no download")
         }
 
+    /**
+     * The picker stages a choice and only [HistoryIntent.ApplyYearPicker] spends it.
+     *
+     * The point of the staging is that a person can land on a year, look at its months and change
+     * their mind without the page moving under them — so what is asserted here is as much what does
+     * *not* happen on the way as what happens at the end.
+     */
     @Test
-    fun selectingAYearCarriesThatYearAndDismissingClearsIt() = runTest(testDispatcher) {
+    fun theYearPickerStagesAChoiceAndOnlyApplyingItMovesThePage() = runTest(testDispatcher) {
         repository.talfighResult = talfigh(year("1402", days = "30"), year("1401", days = "20"))
         viewModel.sendIntent(HistoryIntent.Load)
         advanceUntilIdle()
 
-        val second = viewModel.uiState.value.years[1]
-        viewModel.sendIntent(HistoryIntent.SelectYear(second))
+        viewModel.sendIntent(HistoryIntent.OpenYearPicker)
+        viewModel.sendIntent(HistoryIntent.PickerYearSelected("1401"))
+        viewModel.sendIntent(HistoryIntent.PickerMonthSelected(4))
         advanceUntilIdle()
-        assertEquals("1401", viewModel.uiState.value.selectedYear?.year)
 
-        viewModel.sendIntent(HistoryIntent.DismissYearDetail)
+        assertEquals("1401", viewModel.uiState.value.pickerYear, "staged")
+        assertEquals(4, viewModel.uiState.value.pickerMonth, "staged")
+        assertEquals(
+            HistoryScope.All,
+            viewModel.uiState.value.scope,
+            "the page has not moved while the sheet is open",
+        )
+
+        viewModel.sendIntent(HistoryIntent.ApplyYearPicker)
         advanceUntilIdle()
-        assertNull(viewModel.uiState.value.selectedYear)
+
+        assertEquals(HistoryScope.Year("1401"), viewModel.uiState.value.scope)
+        assertEquals(4, viewModel.uiState.value.selectedMonth)
+        assertFalse(viewModel.uiState.value.yearPickerOpen, "and the sheet is done")
+    }
+
+    /** A year staged after another drops the month staged under the first — ماه ۵ is not the same. */
+    @Test
+    fun stagingADifferentYearClearsTheMonthStagedUnderTheLastOne() = runTest(testDispatcher) {
+        repository.talfighResult = talfigh(year("1402", days = "30"), year("1401", days = "20"))
+        viewModel.sendIntent(HistoryIntent.Load)
+        advanceUntilIdle()
+
+        viewModel.sendIntent(HistoryIntent.OpenYearPicker)
+        viewModel.sendIntent(HistoryIntent.PickerYearSelected("1401"))
+        viewModel.sendIntent(HistoryIntent.PickerMonthSelected(4))
+        advanceUntilIdle()
+        assertEquals(4, viewModel.uiState.value.pickerMonth)
+
+        viewModel.sendIntent(HistoryIntent.PickerYearSelected("1402"))
+        advanceUntilIdle()
+
+        assertEquals("1402", viewModel.uiState.value.pickerYear)
+        assertNull(viewModel.uiState.value.pickerMonth, "the month did not follow the year")
     }
 
     /**

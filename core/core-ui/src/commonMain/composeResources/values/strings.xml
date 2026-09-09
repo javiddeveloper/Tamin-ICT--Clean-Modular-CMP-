@@ -962,6 +962,11 @@
     <string name="history_series_max_days">بیشینه %1$s روز</string>
     <string name="history_split_label">کارگاه</string>
     <string name="history_split_chip">تفکیک کارگاه</string>
+    <string name="history_step_older">سال قدیمی‌تر</string>
+    <string name="history_step_newer">سال جدیدتر</string>
+    <string name="history_legend_no_bar">بدون سابقه، ستونی ندارد</string>
+    <string name="history_scope_all_pill">همهٔ سال‌ها · %1$s تا %2$s</string>
+    <string name="history_scope_year_pill">%1$s منبع · %2$s روز</string>
 
     <!-- «انتخاب سال و ماه» — the year+month picker behind the toolbar's search -->
     <string name="history_picker_action">انتخاب سال و ماه</string>
