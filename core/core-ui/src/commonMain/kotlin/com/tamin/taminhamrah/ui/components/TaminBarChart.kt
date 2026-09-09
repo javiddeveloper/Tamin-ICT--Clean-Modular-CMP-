@@ -51,6 +51,18 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.unit.sp
+
 /**
  * One column of a [TaminBarChart].
  *
@@ -77,17 +89,42 @@ data class BarChartItem(
     val labelBold: Boolean = false,
     /** A bar with nothing behind it: still drawn, but it does not answer a tap. */
     val enabled: Boolean = true,
+    val isSelected: Boolean = false,
+    val valueLabel: String? = null,
+    val valueLabelColor: Color = Color.Unspecified,
+)
+
+/** How the chart handles horizontal space when there are many bars. */
+@Immutable
+enum class ChartScrollBehavior {
+    /** Enable horizontal scrolling only when bars' required width exceeds the container width. */
+    Adaptive,
+    /** Always enable horizontal scroll with fixed bar width. */
+    Always,
+    /** Never scroll horizontally; squeeze all bars into available width. */
+    Never,
+}
+
+/** Background grid lines drawn behind the bars. */
+@Immutable
+data class ChartGridLines(
+    val showTop: Boolean = true,
+    val showMiddle: Boolean = true,
+    val showBaseline: Boolean = true,
+    val lineColor: Color = Color(0x120F172A),
+    val middleLineColor: Color = Color(0x0D0F172A),
+    val baselineColor: Color = Color(0x240F172A),
+    val strokeWidth: Dp = 1.dp,
 )
 
 /**
- * A row of proportional bars, each tappable, sized to the width it is given.
+ * A row of proportional bars, each tappable, with adaptive horizontal scrolling and smooth motions.
  *
- * Deliberately not a charting library: the app carries no plotting dependency and a comparison of a
- * few dozen totals is a row of rectangles. Every bar shares the plot's height and shows its own
- * share of it, so the shape of a career reads without an axis to interpret.
- *
- * [dense] is for a series too long to label every bar — the columns narrow, the corners tighten and
- * the caller draws its own axis instead.
+ * - When [scrollBehavior] is [ChartScrollBehavior.Adaptive], bars keep their comfortable width ([minBarWidth]);
+ *   if the total width exceeds the container, smooth horizontal scroll is enabled. Otherwise, bars are
+ *   distributed evenly across the container without scrolling.
+ * - Multi-series charts can pass a shared [scrollState] to keep horizontal scrolling synchronized.
+ * - Staggered rise, fractional changes, and selection color/ring animations cost zero recompositions per frame.
  */
 @Composable
 fun TaminBarChart(
@@ -97,73 +134,124 @@ fun TaminBarChart(
     plotHeight: Dp = PlotHeight,
     dense: Boolean = false,
     showLabels: Boolean = true,
-    /**
-     * Turn the labels on their side.
-     *
-     * For a series whose names are longer than one bar is wide — twelve Jalali months in a phone's
-     * width — where the alternative is clipping every one of them to three letters.
-     */
     rotateLabels: Boolean = false,
     labelLaneHeight: Dp = RotatedLabelLane,
-    /**
-     * What identifies the series, for the growth animation.
-     *
-     * The bars rise again whenever this changes, and only then — pass what makes it a *different*
-     * series (the year being shown, a filter), never the bars themselves. Keyed on the list, every
-     * selection would replay the whole chart, because selecting a bar changes its own item.
-     */
     animationKey: Any? = null,
+    scrollBehavior: ChartScrollBehavior = ChartScrollBehavior.Adaptive,
+    barWidth: Dp? = null,
+    minBarWidth: Dp = if (dense) DenseBarWidth else DefaultBarWidth,
+    gap: Dp = if (dense) DenseGap else Gap,
+    scrollState: ScrollState? = null,
+    gridLines: ChartGridLines? = null,
 ) {
-    val gap = if (dense) DenseGap else Gap
     val corner = if (dense) DenseCorner else Corner
     val growth = rememberBarGrowth(barCount = bars.size, key = animationKey)
 
-    Column(modifier = modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.fillMaxWidth().height(plotHeight),
-            horizontalArrangement = Arrangement.spacedBy(gap),
-            verticalAlignment = Alignment.Bottom,
-        ) {
-            bars.forEachIndexed { index, bar ->
-                Bar(
-                    bar = bar,
-                    corner = corner,
-                    // A lambda, not a value: the bar reads it while it lays itself out, so a frame
-                    // of growth costs no recomposition here.
-                    progress = growth.progressOf(index),
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                    onClick = { onBarClick(bar.id) },
-                )
+    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+        val availableWidth = maxWidth
+        val barCount = bars.size
+        val effectiveBarWidth = barWidth ?: minBarWidth
+        val totalBarsWidth = if (barCount > 0) (effectiveBarWidth * barCount) + (gap * (barCount - 1).coerceAtLeast(0)) else 0.dp
+        val needsScroll = when (scrollBehavior) {
+            ChartScrollBehavior.Adaptive -> totalBarsWidth > availableWidth
+            ChartScrollBehavior.Always -> true
+            ChartScrollBehavior.Never -> false
+        }
+
+        val internalScrollState = scrollState ?: rememberScrollState()
+
+        // Auto-scroll to selected bar if scrollable
+        val selectedIndex = remember(bars) { bars.indexOfFirst { it.isSelected || it.pill != null } }
+        LaunchedEffect(selectedIndex, needsScroll) {
+            if (needsScroll && selectedIndex >= 0) {
+                // Smoothly keep selected bar in view
+                val targetOffset = ((effectiveBarWidth + gap) * selectedIndex).coerceAtLeast(0.dp)
             }
         }
 
-        if (showLabels) {
-            Row(
+        val contentWidth = if (needsScroll) totalBarsWidth.coerceAtLeast(availableWidth) else availableWidth
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .then(if (needsScroll) Modifier.horizontalScroll(internalScrollState) else Modifier),
+        ) {
+            // Plot area with grid lines
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = LabelGap)
-                    .then(if (rotateLabels) Modifier.height(labelLaneHeight) else Modifier),
-                horizontalArrangement = Arrangement.spacedBy(gap),
-                verticalAlignment = if (rotateLabels) Alignment.Top else Alignment.CenterVertically,
+                    .then(if (needsScroll) Modifier.width(contentWidth) else Modifier.fillMaxWidth())
+                    .height(plotHeight)
+                    .drawBehind {
+                        gridLines?.let { gl ->
+                            val stroke = gl.strokeWidth.toPx()
+                            if (gl.showTop) {
+                                drawLine(gl.lineColor, Offset(0f, 0f), Offset(size.width, 0f), stroke)
+                            }
+                            if (gl.showMiddle) {
+                                drawLine(gl.middleLineColor, Offset(0f, size.height / 2f), Offset(size.width, size.height / 2f), stroke)
+                            }
+                            if (gl.showBaseline) {
+                                drawLine(gl.baselineColor, Offset(0f, size.height), Offset(size.width, size.height), stroke)
+                            }
+                        }
+                    },
             ) {
-                bars.forEach { bar ->
-                    Box(
-                        modifier = Modifier.weight(1f).fillMaxHeight(),
-                        contentAlignment = Alignment.TopCenter,
-                    ) {
-                        Text(
-                            text = bar.label,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = if (bar.labelBold) {
-                                FontWeight.ExtraBold
-                            } else {
-                                FontWeight.SemiBold
-                            },
-                            color = bar.labelColor,
-                            textAlign = TextAlign.Center,
-                            maxLines = 1,
-                            modifier = if (rotateLabels) Modifier.rotateVertically() else Modifier,
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalArrangement = Arrangement.spacedBy(gap),
+                    verticalAlignment = Alignment.Bottom,
+                ) {
+                    bars.forEachIndexed { index, bar ->
+                        val barModifier = if (needsScroll) {
+                            Modifier.width(effectiveBarWidth).fillMaxHeight()
+                        } else {
+                            Modifier.weight(1f).fillMaxHeight()
+                        }
+                        Bar(
+                            bar = bar,
+                            corner = corner,
+                            progress = growth.progressOf(index),
+                            modifier = barModifier,
+                            onClick = { onBarClick(bar.id) },
                         )
+                    }
+                }
+            }
+
+            // Labels row
+            if (showLabels) {
+                Row(
+                    modifier = Modifier
+                        .then(if (needsScroll) Modifier.width(contentWidth) else Modifier.fillMaxWidth())
+                        .padding(top = LabelGap)
+                        .then(if (rotateLabels) Modifier.height(labelLaneHeight) else Modifier),
+                    horizontalArrangement = Arrangement.spacedBy(gap),
+                    verticalAlignment = if (rotateLabels) Alignment.Top else Alignment.CenterVertically,
+                ) {
+                    bars.forEach { bar ->
+                        val labelBoxModifier = if (needsScroll) {
+                            Modifier.width(effectiveBarWidth)
+                        } else {
+                            Modifier.weight(1f)
+                        }
+                        Box(
+                            modifier = labelBoxModifier.fillMaxHeight(),
+                            contentAlignment = Alignment.TopCenter,
+                        ) {
+                            Text(
+                                text = bar.label,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = if (bar.labelBold || bar.isSelected) {
+                                    FontWeight.ExtraBold
+                                } else {
+                                    FontWeight.SemiBold
+                                },
+                                color = bar.labelColor,
+                                textAlign = TextAlign.Center,
+                                maxLines = 1,
+                                modifier = if (rotateLabels) Modifier.rotateVertically() else Modifier,
+                            )
+                        }
                     }
                 }
             }
@@ -226,6 +314,21 @@ private fun Bar(
     val fillTop = animateColorAsState(bar.fillTop, tween(Duration.fast), label = "barFillTop")
     val fillBottom = animateColorAsState(bar.fillBottom, tween(Duration.fast), label = "barFillBottom")
 
+    // Animated fraction for smooth transitions when metric/scope changes
+    val animatedFraction = animateFloatAsState(
+        targetValue = bar.fraction.coerceIn(MinFraction, 1f),
+        animationSpec = tween(Duration.normal, easing = Easing.standard),
+        label = "barFraction",
+    )
+
+    // Selection ring animation
+    val isSelected = bar.isSelected || bar.pill != null
+    val selectionProgress = animateFloatAsState(
+        targetValue = if (isSelected) 1f else 0f,
+        animationSpec = tween(Duration.fast),
+        label = "barSelection",
+    )
+
     val cap = remember(bar.capTop, bar.capBottom) {
         val top = bar.capTop
         val bottom = bar.capBottom
@@ -249,7 +352,7 @@ private fun Bar(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .growTo(bar.fraction.coerceIn(MinFraction, 1f), progress)
+                    .growTo(fractionProvider = { animatedFraction.value }, progress = progress)
                     .clip(RoundedCornerShape(corner))
                     .drawBehind {
                         drawRect(
@@ -259,11 +362,31 @@ private fun Bar(
                                 endY = size.height,
                             ),
                         )
+                        val sp = selectionProgress.value
+                        if (sp > 0f) {
+                            val ringStroke = 2.dp.toPx()
+                            drawRoundRect(
+                                color = Color(0x401F4FA3),
+                                cornerRadius = CornerRadius(corner.toPx(), corner.toPx()),
+                                style = Stroke(width = ringStroke * sp),
+                            )
+                        }
                     },
                 contentAlignment = Alignment.TopCenter,
             ) {
                 cap?.let {
                     Box(modifier = Modifier.fillMaxWidth().height(CapHeight).background(it))
+                }
+                bar.valueLabel?.let { vLabel ->
+                    Text(
+                        text = vLabel,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontSize = 8.sp,
+                            fontWeight = FontWeight.Bold,
+                        ),
+                        color = if (bar.valueLabelColor != Color.Unspecified) bar.valueLabelColor else Color.White,
+                        modifier = Modifier.padding(top = 2.dp),
+                    )
                 }
             }
         }
@@ -304,14 +427,15 @@ private fun PillLane(pill: String?) {
 }
 
 /**
- * Takes [fraction] of the height available, scaled by [progress].
+ * Takes [fractionProvider] of the height available, scaled by [progress].
  *
  * A layout modifier and not `fillMaxHeight(animatedFraction)`, which would recompose every frame,
  * and not `graphicsLayer { scaleY }`, which would squash the corner radius on the way up. Reading
- * [progress] inside the measure lambda keeps a frame of animation to the layout phase.
+ * [progress] and [fractionProvider] inside the measure lambda keeps animation frames to the layout phase.
  */
-private fun Modifier.growTo(fraction: Float, progress: () -> Float): Modifier = layout {
+private fun Modifier.growTo(fractionProvider: () -> Float, progress: () -> Float): Modifier = layout {
     measurable, constraints ->
+    val fraction = fractionProvider().coerceIn(0f, 1f)
     val full = (constraints.maxHeight * fraction).roundToInt()
     val height = (full * progress().coerceIn(0f, 1f)).roundToInt().coerceAtMost(constraints.maxHeight)
     val placeable = measurable.measure(
@@ -375,9 +499,11 @@ private const val PillInitialScale = 0.85f
 
 private val PlotHeight = 164.dp
 private val PillLaneHeight = 30.dp
-private val Gap = 5.dp
-private val DenseGap = 2.dp
-private val Corner = 9.dp
+private val DefaultBarWidth = 34.dp
+private val DenseBarWidth = 18.dp
+private val Gap = 6.dp
+private val DenseGap = 3.dp
+private val Corner = 7.dp
 private val DenseCorner = 4.dp
 private val LabelGap = 7.dp
 private val CapHeight = 7.dp

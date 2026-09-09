@@ -30,13 +30,14 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -87,7 +88,20 @@ fun NumericText(
     modifier: Modifier = Modifier,
 ) {
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-        Text(text = text, style = style, color = color, modifier = modifier)
+        Text(
+            text = text,
+            style = style,
+            color = color,
+            modifier = modifier,
+            // A number is one token: ۱۷ broken across two lines reads as ۱ and ۷, and ۱۷ clipped
+            // to its first digit reads as ۱ — both are a different number, and the second is worse
+            // because nothing about it looks wrong. So it never wraps, and it is allowed to draw
+            // past its bounds rather than lose a digit; the caller sizes the space (see
+            // Modifier.scaleOnCollapse) so that it does not have to.
+            maxLines = 1,
+            softWrap = false,
+            overflow = TextOverflow.Visible,
+        )
     }
 }
 
@@ -135,7 +149,7 @@ fun StatusPill(
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = fontWeight),
             color = contentColor,
             maxLines = 1,
-            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }

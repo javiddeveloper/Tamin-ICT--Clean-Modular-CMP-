@@ -16,6 +16,10 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.ImmutableList
 
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.ui.unit.dp
+
 /**
  * One plotted series inside a [TaminBarChartGroup].
  *
@@ -47,6 +51,8 @@ data class BarChartSeries(
  * either chart means the same thing. Hoist that lambda in the caller — an inline one is a new
  * instance every recomposition and costs the whole group its skippability.
  *
+ * When the series exceed the available width, they share [scrollState] and scroll in synchronized lockstep.
+ *
  * Everything animated lives inside [TaminBarChart], which reads its growth in the draw phase, so a
  * frame of a chart forming costs no recomposition here.
  */
@@ -59,6 +65,12 @@ fun TaminBarChartGroup(
     rotateLabels: Boolean = false,
     /** Labels are drawn once, under the last series — the columns are shared. */
     showLabels: Boolean = true,
+    scrollBehavior: ChartScrollBehavior = ChartScrollBehavior.Adaptive,
+    barWidth: Dp? = null,
+    minBarWidth: Dp = if (dense) 18.dp else 34.dp,
+    gap: Dp = if (dense) 3.dp else 6.dp,
+    gridLines: ChartGridLines? = null,
+    scrollState: ScrollState = rememberScrollState(),
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -77,6 +89,12 @@ fun TaminBarChartGroup(
                 showLabels = showLabels && index == series.lastIndex,
                 rotateLabels = rotateLabels,
                 animationKey = plot.id,
+                scrollBehavior = scrollBehavior,
+                barWidth = barWidth,
+                minBarWidth = minBarWidth,
+                gap = gap,
+                gridLines = gridLines,
+                scrollState = scrollState,
             )
         }
     }

@@ -9,8 +9,6 @@ import com.tamin.taminhamrah.ui.theme.TaminHistoryBarPartialMonthBottom
 import com.tamin.taminhamrah.ui.theme.TaminHistoryBarPartialMonthTop
 import com.tamin.taminhamrah.ui.theme.TaminHistoryBarPartialYearBottom
 import com.tamin.taminhamrah.ui.theme.TaminHistoryBarPartialYearTop
-import com.tamin.taminhamrah.ui.theme.TaminHistoryBarSelectedBottom
-import com.tamin.taminhamrah.ui.theme.TaminHistoryBarSelectedTop
 import com.tamin.taminhamrah.ui.theme.TaminHistoryZeroText
 import com.tamin.taminhamrah.ui.theme.TaminLightTextSecondary
 import com.tamin.taminhamrah.ui.theme.TaminNavy700
@@ -107,6 +105,7 @@ fun List<DastmozdInfoItemPR>?.wageMonthBars(
     source: Int?,
     selectedMonth: Int?,
     wageLabel: (wage: Long) -> String,
+    isMonthFull: (month: Int) -> Boolean = { false },
 ): ImmutableList<BarChartItem> {
     val rows = this ?: return persistentListOf()
     val months = rows.monthWages(source)
@@ -115,16 +114,19 @@ fun List<DastmozdInfoItemPR>?.wageMonthBars(
     return List(HistoryConstants.MONTHS_IN_YEAR) { month ->
         val wage = months[month]
         val selected = month == selectedMonth
+        val full = isMonthFull(month)
         BarChartItem(
             id = month.toString(),
             label = PersianDateFormatter.monthNames[month],
             fraction = if (max == 0L) 0f else wage.toFloat() / max.toFloat(),
             fillTop = when {
-                selected -> TaminHistoryBarSelectedTop
+                selected -> if (full) com.tamin.taminhamrah.ui.theme.TaminHistoryBarFullSelectedTop else com.tamin.taminhamrah.ui.theme.TaminHistoryBarPartialSelectedTop
+                full -> TaminHistoryBarFullTop
                 else -> TaminHistoryBarPartialMonthTop
             },
             fillBottom = when {
-                selected -> TaminHistoryBarSelectedBottom
+                selected -> if (full) com.tamin.taminhamrah.ui.theme.TaminHistoryBarFullSelectedBottom else com.tamin.taminhamrah.ui.theme.TaminHistoryBarPartialSelectedBottom
+                full -> TaminHistoryBarFullBottom
                 else -> TaminHistoryBarPartialMonthBottom
             },
             labelColor = when {

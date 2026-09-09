@@ -501,7 +501,7 @@ internal fun TaminHamrahNavGraph(
                     onBack = { navController.popBackStack() })
                 disabilityPensionScreen(onBack = { navController.popBackStack() })
 
-                historyScreen(onBack = { navController.popBackStack() })
+                historyScreen(navController = navController, onBack = { navController.popBackStack() })
                 historyJobInfoScreen(onBack = { navController.popBackStack() })
 
                 contractsScreen(
