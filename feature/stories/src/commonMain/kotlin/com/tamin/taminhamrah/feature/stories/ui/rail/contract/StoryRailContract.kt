@@ -1,7 +1,7 @@
 package com.tamin.taminhamrah.feature.stories.ui.rail.contract
 
 import androidx.compose.runtime.Immutable
-import com.tamin.taminhamrah.feature.stories.model.StoryChannel
+import com.tamin.taminhamrah.feature.stories.ui.model.StoryChannelPR
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
@@ -18,7 +18,7 @@ import kotlinx.collections.immutable.persistentSetOf
 @Immutable
 data class StoryRailUiState(
     val isLoading: Boolean = true,
-    val channels: ImmutableList<StoryChannel> = persistentListOf(),
+    val channels: ImmutableList<StoryChannelPR> = persistentListOf(),
     /** Keys of the channels already watched; their rings and labels go grey. */
     val seenKeys: ImmutableSet<String> = persistentSetOf(),
     val error: String? = null,
@@ -31,11 +31,11 @@ data class StoryRailUiState(
             else -> StoryRailContent.Empty
         }
 
-    fun isSeen(channel: StoryChannel): Boolean = channel.key in seenKeys
+    fun isSeen(channel: StoryChannelPR): Boolean = channel.key in seenKeys
 
     sealed interface PartialState {
         data class Loading(val isLoading: Boolean) : PartialState
-        data class Channels(val channels: ImmutableList<StoryChannel>) : PartialState
+        data class Channels(val channels: ImmutableList<StoryChannelPR>) : PartialState
         data class Seen(val seenKeys: ImmutableSet<String>) : PartialState
         data class Error(val message: String) : PartialState
     }

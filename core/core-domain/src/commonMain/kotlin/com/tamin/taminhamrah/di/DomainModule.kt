@@ -242,6 +242,12 @@ import com.tamin.taminhamrah.useCases.user.mockUseCases.MockSubdominantUseCase
 import com.tamin.taminhamrah.useCases.versionHistory.GetVersionHistoryUseCase
 import com.tamin.taminhamrah.useCases.contactUs.GetContactUsUseCase
 import com.tamin.taminhamrah.useCases.content.GetLegalDocumentUseCase
+import com.tamin.taminhamrah.useCases.stories.GetStoryChannelsUseCase
+import com.tamin.taminhamrah.useCases.stories.ObserveSeenStoryChannelsUseCase
+import com.tamin.taminhamrah.useCases.stories.MarkStoryChannelSeenUseCase
+import com.tamin.taminhamrah.useCases.stories.ObserveStoryEngagementUseCase
+import com.tamin.taminhamrah.useCases.stories.ToggleStoryLikeUseCase
+import com.tamin.taminhamrah.useCases.stories.ToggleStorySaveUseCase
 
 val domainModule = module {
     // Add Dependent UseCases
@@ -503,5 +509,13 @@ val domainModule = module {
     factoryOf(::SubmitLegalWorkshopInfoUseCase)
     factoryOf(::RequestRealTicketUseCase)
     factoryOf(::SubmitRealWorkshopInfoUseCase)
+
+    // Stories UseCases
+    factoryOf(::GetStoryChannelsUseCase)
+    factoryOf(::ObserveSeenStoryChannelsUseCase)
+    factoryOf(::MarkStoryChannelSeenUseCase)
+    factoryOf(::ObserveStoryEngagementUseCase)
+    factoryOf(::ToggleStoryLikeUseCase)
+    factoryOf(::ToggleStorySaveUseCase)
 }
 

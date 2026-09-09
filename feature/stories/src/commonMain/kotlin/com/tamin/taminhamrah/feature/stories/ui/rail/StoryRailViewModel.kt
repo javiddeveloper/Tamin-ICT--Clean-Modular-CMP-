@@ -1,15 +1,18 @@
 package com.tamin.taminhamrah.feature.stories.ui.rail
 
 import com.tamin.taminhamrah.base.BaseViewModel
-import com.tamin.taminhamrah.feature.stories.data.StoryCatalog
+import com.tamin.taminhamrah.feature.stories.ui.mapper.toPresentation
 import com.tamin.taminhamrah.feature.stories.ui.rail.contract.StoryRailEvent
 import com.tamin.taminhamrah.feature.stories.ui.rail.contract.StoryRailIntent
 import com.tamin.taminhamrah.feature.stories.ui.rail.contract.StoryRailUiState
 import com.tamin.taminhamrah.feature.stories.ui.rail.contract.StoryRailUiState.PartialState
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
-import kotlinx.coroutines.CancellationException
+import com.tamin.taminhamrah.useCases.stories.GetStoryChannelsUseCase
+import com.tamin.taminhamrah.useCases.stories.ObserveSeenStoryChannelsUseCase
+import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -18,58 +21,44 @@ import kotlinx.coroutines.flow.merge
 /**
  * The «تازه‌ها» rail.
  *
- * Owns nothing but the presentation of [StoryCatalog]: the list, whether it is still arriving,
- * whether it failed, and which channels have been watched. Opening one is an event, because the
- * viewer is a destination in the host graph rather than something this feature can navigate to.
+ * Owns nothing but the presentation of two use cases: the channels, and which of them have been
+ * watched. Opening one is an event, because the viewer is a destination in the host graph rather
+ * than somewhere this feature can navigate to.
  */
 class StoryRailViewModel(
-    private val catalog: StoryCatalog,
+    private val getStoryChannelsUseCase: GetStoryChannelsUseCase,
+    private val observeSeenStoryChannelsUseCase: ObserveSeenStoryChannelsUseCase,
 ) : BaseViewModel<StoryRailUiState, PartialState, StoryRailEvent, StoryRailIntent>(
     initialState = StoryRailUiState(),
 ) {
-    /**
-     * Whether the catalogue is already being watched.
-     *
-     * The observation never completes — a `StateFlow` does not — so a second one would be a
-     * second permanent collector rather than a refresh. The catalogue guards the fetch itself;
-     * this guards the subscription, which is the other half of not doing the work twice.
-     */
-    private var observing = false
-
     init {
         sendIntent(StoryRailIntent.Load)
     }
 
     override fun handleIntent(intent: StoryRailIntent): Flow<PartialState> = flow {
         when (intent) {
-            StoryRailIntent.Load -> load(force = false)
-            StoryRailIntent.Retry -> load(force = true)
+            StoryRailIntent.Load -> load(forceRefresh = false)
+
+            // Guarded rather than always allowed: the retry only exists on the error row, and
+            // without this a second tap would leave a second permanent collector behind.
+            StoryRailIntent.Retry -> if (uiState.value.error != null) load(forceRefresh = true)
+
             is StoryRailIntent.OpenChannel -> sendEvent(StoryRailEvent.OpenViewer(intent.index))
         }
     }
 
-    private suspend fun FlowCollector<PartialState>.load(force: Boolean) {
+    private suspend fun FlowCollector<PartialState>.load(forceRefresh: Boolean) {
         emit(PartialState.Loading(true))
-        try {
-            catalog.ensureLoaded(force = force)
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            emit(PartialState.Loading(false))
-            emit(PartialState.Error(e.toSingleLineMessage()))
-            return
-        }
-        emit(PartialState.Loading(false))
-
-        if (observing) return
-        observing = true
-        // Merged rather than combined: the two flows change for unrelated reasons, and combining
-        // them would republish the whole list every time a ring goes grey.
+        // Merged rather than combined: the two change for unrelated reasons, and combining them
+        // would republish the whole list every time a single ring goes grey. Neither completes —
+        // the catalogue keeps answering, and that is what carries a later refresh to the rail.
         emitAll(
             merge(
-                catalog.channels.map { PartialState.Channels(it) },
-                catalog.seenChannels.map { PartialState.Seen(it) },
-            ),
+                getStoryChannelsUseCase(forceRefresh)
+                    .map { PartialState.Channels(it.toPresentation()) },
+                observeSeenStoryChannelsUseCase()
+                    .map { PartialState.Seen(it.toImmutableSet()) },
+            ).catch { emit(PartialState.Error(it.toSingleLineMessage())) },
         )
     }
 
@@ -85,6 +74,7 @@ class StoryRailViewModel(
         )
 
         is PartialState.Channels -> currentState.copy(
+            isLoading = false,
             channels = partialState.channels,
             error = null,
         )

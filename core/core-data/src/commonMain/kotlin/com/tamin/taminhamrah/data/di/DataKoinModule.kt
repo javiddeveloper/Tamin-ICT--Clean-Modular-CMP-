@@ -57,6 +57,8 @@ import com.tamin.taminhamrah.repository.employerInfo.EmployerInfoRepository
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
+import com.tamin.taminhamrah.data.repository.stories.StoryRepositoryImpl
+import com.tamin.taminhamrah.repository.stories.StoryRepository
 
 val dataKoinModule = module {
     singleOf(::FeatureManagerImpl) { bind<FeatureManager>() }
@@ -87,4 +89,5 @@ val dataKoinModule = module {
     singleOf(::EmployerInfoRepositoryImpl) { bind<EmployerInfoRepository>() }
     singleOf(::PregnancyPayRepositoryImpl) { bind<PregnancyPayRepository>() }
     singleOf(::InquiryEducationRepositoryImpl) { bind<InquiryEducationRepository>() }
+    singleOf(::StoryRepositoryImpl) { bind<StoryRepository>() }
 }

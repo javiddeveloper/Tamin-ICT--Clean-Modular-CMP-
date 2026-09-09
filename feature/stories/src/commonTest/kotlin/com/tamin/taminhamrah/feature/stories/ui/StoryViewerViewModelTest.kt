@@ -1,8 +1,12 @@
 package com.tamin.taminhamrah.feature.stories.ui
 
 import app.cash.turbine.test
-import com.tamin.taminhamrah.feature.stories.FakeStorySource
-import com.tamin.taminhamrah.feature.stories.data.StoryCatalog
+import com.tamin.taminhamrah.feature.stories.FakeStoryRepository
+import com.tamin.taminhamrah.useCases.stories.GetStoryChannelsUseCase
+import com.tamin.taminhamrah.useCases.stories.MarkStoryChannelSeenUseCase
+import com.tamin.taminhamrah.useCases.stories.ObserveStoryEngagementUseCase
+import com.tamin.taminhamrah.useCases.stories.ToggleStoryLikeUseCase
+import com.tamin.taminhamrah.useCases.stories.ToggleStorySaveUseCase
 import com.tamin.taminhamrah.feature.stories.testChannel
 import com.tamin.taminhamrah.feature.stories.ui.theme.STORY_DEFAULT_DURATION_MS
 import com.tamin.taminhamrah.feature.stories.ui.viewer.StoryViewerViewModel
@@ -18,6 +22,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.flow.first
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -44,11 +49,18 @@ class StoryViewerViewModelTest {
 
     private fun test(body: suspend TestScope.() -> Unit) = runTest(dispatcher) { body() }
 
-    private fun catalog(vararg channels: com.tamin.taminhamrah.feature.stories.model.StoryChannel) =
-        StoryCatalog(FakeStorySource(channels.toList()))
+    private fun repository(
+        vararg channels: com.tamin.taminhamrah.model.stories.StoryChannelDN,
+    ) = FakeStoryRepository(channels.toList())
 
-    private fun StoryCatalog.viewer(channelIndex: Int = 0): StoryViewerViewModel =
-        StoryViewerViewModel(this).also { it.sendIntent(StoryViewerIntent.Open(channelIndex)) }
+    private fun FakeStoryRepository.viewer(channelIndex: Int = 0): StoryViewerViewModel =
+        StoryViewerViewModel(
+            getStoryChannelsUseCase = GetStoryChannelsUseCase(this),
+            markStoryChannelSeenUseCase = MarkStoryChannelSeenUseCase(this),
+            observeStoryEngagementUseCase = ObserveStoryEngagementUseCase(this),
+            toggleStoryLikeUseCase = ToggleStoryLikeUseCase(this),
+            toggleStorySaveUseCase = ToggleStorySaveUseCase(this),
+        ).also { it.sendIntent(StoryViewerIntent.Open(channelIndex)) }
 
     /** Runs the clock out and lets whatever it scheduled at that instant actually run. */
     private fun TestScope.elapse(millis: Long) {
@@ -60,7 +72,7 @@ class StoryViewerViewModelTest {
 
     @Test
     fun `opens on the first slide of the channel it was given`() = test {
-        val viewModel = catalog(testChannel("a"), testChannel("b")).viewer(channelIndex = 1)
+        val viewModel = repository(testChannel("a"), testChannel("b")).viewer(channelIndex = 1)
 
         val state = viewModel.uiState.value
         assertEquals(1, state.channelIndex)
@@ -71,7 +83,14 @@ class StoryViewerViewModelTest {
 
     @Test
     fun `an empty catalogue closes the viewer rather than showing an empty screen`() = test {
-        val viewModel = StoryViewerViewModel(StoryCatalog(FakeStorySource(emptyList())))
+        val repository = FakeStoryRepository(channels = emptyList())
+        val viewModel = StoryViewerViewModel(
+            getStoryChannelsUseCase = GetStoryChannelsUseCase(repository),
+            markStoryChannelSeenUseCase = MarkStoryChannelSeenUseCase(repository),
+            observeStoryEngagementUseCase = ObserveStoryEngagementUseCase(repository),
+            toggleStoryLikeUseCase = ToggleStoryLikeUseCase(repository),
+            toggleStorySaveUseCase = ToggleStorySaveUseCase(repository),
+        )
 
         viewModel.events.test {
             viewModel.sendIntent(StoryViewerIntent.Open(0))
@@ -81,21 +100,21 @@ class StoryViewerViewModelTest {
 
     @Test
     fun `opening does not refetch a catalogue the rail already loaded`() = test {
-        val source = FakeStorySource(listOf(testChannel("a")))
-        val catalog = StoryCatalog(source)
-        catalog.ensureLoaded()
-        assertEquals(1, source.callCount)
+        val repository = repository(testChannel("a"))
+        // Stand in for the rail: it loaded the catalogue before the viewer was ever opened.
+        GetStoryChannelsUseCase(repository)().first()
+        assertEquals(1, repository.fetchCount)
 
-        catalog.viewer()
+        repository.viewer()
 
-        assertEquals(1, source.callCount)
+        assertEquals(1, repository.fetchCount)
     }
 
     /* ---- Moving forward ------------------------------------------------------------------- */
 
     @Test
     fun `next moves to the following slide`() = test {
-        val viewModel = catalog(testChannel("a")).viewer()
+        val viewModel = repository(testChannel("a")).viewer()
 
         viewModel.sendIntent(StoryViewerIntent.Next)
 
@@ -106,34 +125,34 @@ class StoryViewerViewModelTest {
     @Test
     fun `next past a channel's last slide opens the next channel and marks the finished one seen`() =
         test {
-            val catalog = catalog(testChannel("a", itemCount = 2), testChannel("b"))
-            val viewModel = catalog.viewer()
+            val repository = repository(testChannel("a", itemCount = 2), testChannel("b"))
+            val viewModel = repository.viewer()
 
             repeat(2) { viewModel.sendIntent(StoryViewerIntent.Next) }
 
             val state = viewModel.uiState.value
             assertEquals(1, state.channelIndex)
             assertEquals(0, state.itemIndex)
-            assertTrue("a" in catalog.seenChannels.value)
+            assertTrue("a" in repository.seenChannels)
         }
 
     @Test
     fun `next past the last slide of the last channel closes the viewer`() = test {
-        val catalog = catalog(testChannel("a", itemCount = 1))
-        val viewModel = catalog.viewer()
+        val repository = repository(testChannel("a", itemCount = 1))
+        val viewModel = repository.viewer()
 
         viewModel.events.test {
             viewModel.sendIntent(StoryViewerIntent.Next)
             assertEquals(StoryViewerEvent.Close, awaitItem())
         }
-        assertTrue("a" in catalog.seenChannels.value)
+        assertTrue("a" in repository.seenChannels)
     }
 
     /* ---- Moving back ---------------------------------------------------------------------- */
 
     @Test
     fun `previous steps back a slide`() = test {
-        val viewModel = catalog(testChannel("a")).viewer()
+        val viewModel = repository(testChannel("a")).viewer()
         viewModel.sendIntent(StoryViewerIntent.Next)
 
         viewModel.sendIntent(StoryViewerIntent.Previous)
@@ -143,7 +162,7 @@ class StoryViewerViewModelTest {
 
     @Test
     fun `previous on the very first slide replays it instead of doing nothing`() = test {
-        val viewModel = catalog(testChannel("a")).viewer()
+        val viewModel = repository(testChannel("a")).viewer()
         elapse(2_000)
         val tokenBefore = viewModel.uiState.value.segmentToken
 
@@ -160,7 +179,7 @@ class StoryViewerViewModelTest {
     @Test
     fun `previous on a later channel's first slide lands on the previous channel's last slide`() =
         test {
-            val viewModel = catalog(testChannel("a", itemCount = 3), testChannel("b"))
+            val viewModel = repository(testChannel("a", itemCount = 3), testChannel("b"))
                 .viewer(channelIndex = 1)
 
             viewModel.sendIntent(StoryViewerIntent.Previous)
@@ -174,7 +193,7 @@ class StoryViewerViewModelTest {
 
     @Test
     fun `a slide advances on its own once its time is up`() = test {
-        val viewModel = catalog(testChannel("a")).viewer()
+        val viewModel = repository(testChannel("a")).viewer()
 
         elapse(STORY_DEFAULT_DURATION_MS - 100)
         assertEquals(0, viewModel.uiState.value.itemIndex)
@@ -185,7 +204,7 @@ class StoryViewerViewModelTest {
 
     @Test
     fun `a paused slide stays put however long it is held`() = test {
-        val viewModel = catalog(testChannel("a")).viewer()
+        val viewModel = repository(testChannel("a")).viewer()
         elapse(1_000)
 
         viewModel.sendIntent(StoryViewerIntent.Pause)
@@ -197,7 +216,7 @@ class StoryViewerViewModelTest {
 
     @Test
     fun `pausing reports how far the slide had got`() = test {
-        val viewModel = catalog(testChannel("a")).viewer()
+        val viewModel = repository(testChannel("a")).viewer()
         elapse(2_000)
 
         viewModel.sendIntent(StoryViewerIntent.Pause)
@@ -208,7 +227,7 @@ class StoryViewerViewModelTest {
 
     @Test
     fun `resuming finishes the slide in the time it had left, not a whole one`() = test {
-        val viewModel = catalog(testChannel("a")).viewer()
+        val viewModel = repository(testChannel("a")).viewer()
         elapse(2_000)
         viewModel.sendIntent(StoryViewerIntent.Pause)
         elapse(60_000)
@@ -225,7 +244,7 @@ class StoryViewerViewModelTest {
 
     @Test
     fun `a tap that lands while the clock is running does not advance the story twice`() = test {
-        val viewModel = catalog(testChannel("a", itemCount = 3)).viewer()
+        val viewModel = repository(testChannel("a", itemCount = 3)).viewer()
 
         viewModel.sendIntent(StoryViewerIntent.Next)
         // Whatever was left of the first slide's clock must not fire against the second.
@@ -238,7 +257,7 @@ class StoryViewerViewModelTest {
 
     @Test
     fun `the comment keyboard holds the story while it is up`() = test {
-        val viewModel = catalog(testChannel("a")).viewer()
+        val viewModel = repository(testChannel("a")).viewer()
         elapse(1_000)
 
         viewModel.sendIntent(StoryViewerIntent.CommentFocusChanged(focused = true))
@@ -251,7 +270,7 @@ class StoryViewerViewModelTest {
 
     @Test
     fun `closing the keyboard finishes the slide in the time it had left`() = test {
-        val viewModel = catalog(testChannel("a")).viewer()
+        val viewModel = repository(testChannel("a")).viewer()
         elapse(2_000)
         viewModel.sendIntent(StoryViewerIntent.CommentFocusChanged(focused = true))
         elapse(60_000)
@@ -266,7 +285,7 @@ class StoryViewerViewModelTest {
 
     @Test
     fun `a finger lifting does not restart a story the keyboard is still holding`() = test {
-        val viewModel = catalog(testChannel("a")).viewer()
+        val viewModel = repository(testChannel("a")).viewer()
         viewModel.sendIntent(StoryViewerIntent.CommentFocusChanged(focused = true))
         viewModel.sendIntent(StoryViewerIntent.Pause)
 
@@ -283,7 +302,7 @@ class StoryViewerViewModelTest {
 
     @Test
     fun `closing the keyboard does not restart a story a finger is still on`() = test {
-        val viewModel = catalog(testChannel("a")).viewer()
+        val viewModel = repository(testChannel("a")).viewer()
         viewModel.sendIntent(StoryViewerIntent.Pause)
         viewModel.sendIntent(StoryViewerIntent.CommentFocusChanged(focused = true))
 
@@ -298,7 +317,7 @@ class StoryViewerViewModelTest {
 
     @Test
     fun `typing is kept and sending clears it and lets the story run on`() = test {
-        val viewModel = catalog(testChannel("a")).viewer()
+        val viewModel = repository(testChannel("a")).viewer()
         viewModel.sendIntent(StoryViewerIntent.CommentFocusChanged(focused = true))
 
         viewModel.sendIntent(StoryViewerIntent.CommentChanged("سلام"))
@@ -314,7 +333,7 @@ class StoryViewerViewModelTest {
 
     @Test
     fun `a draft belongs to its own slide`() = test {
-        val viewModel = catalog(testChannel("a")).viewer()
+        val viewModel = repository(testChannel("a")).viewer()
         viewModel.sendIntent(StoryViewerIntent.CommentChanged("نیمه‌کاره"))
 
         viewModel.sendIntent(StoryViewerIntent.Next)
@@ -326,7 +345,7 @@ class StoryViewerViewModelTest {
 
     @Test
     fun `a clip's slide waits for the player instead of running the default time`() = test {
-        val viewModel = catalog(testChannel("a", videoIndices = setOf(0))).viewer()
+        val viewModel = repository(testChannel("a", videoIndices = setOf(0))).viewer()
 
         assertTrue(viewModel.uiState.value.isBuffering)
         assertFalse(viewModel.uiState.value.isPlaying)
@@ -337,7 +356,7 @@ class StoryViewerViewModelTest {
 
     @Test
     fun `a clip's slide runs for exactly as long as the player says it is`() = test {
-        val viewModel = catalog(testChannel("a", videoIndices = setOf(0))).viewer()
+        val viewModel = repository(testChannel("a", videoIndices = setOf(0))).viewer()
 
         viewModel.sendIntent(StoryViewerIntent.MediaReady(durationMs = 3_000))
         val state = viewModel.uiState.value
@@ -352,7 +371,7 @@ class StoryViewerViewModelTest {
 
     @Test
     fun `a player that reports no length gets the ordinary slide time`() = test {
-        val viewModel = catalog(testChannel("a", videoIndices = setOf(0))).viewer()
+        val viewModel = repository(testChannel("a", videoIndices = setOf(0))).viewer()
 
         viewModel.sendIntent(StoryViewerIntent.MediaReady(durationMs = 0))
 
@@ -361,7 +380,7 @@ class StoryViewerViewModelTest {
 
     @Test
     fun `a clip that plays out moves the story on without waiting for the clock`() = test {
-        val viewModel = catalog(testChannel("a", videoIndices = setOf(0))).viewer()
+        val viewModel = repository(testChannel("a", videoIndices = setOf(0))).viewer()
         viewModel.sendIntent(StoryViewerIntent.MediaReady(durationMs = 30_000))
 
         viewModel.sendIntent(StoryViewerIntent.MediaEnded)
@@ -373,7 +392,7 @@ class StoryViewerViewModelTest {
 
     @Test
     fun `media that fails falls back to the ordinary slide time and says so`() = test {
-        val viewModel = catalog(testChannel("a")).viewer()
+        val viewModel = repository(testChannel("a")).viewer()
 
         viewModel.sendIntent(StoryViewerIntent.MediaFailed)
 
@@ -387,7 +406,7 @@ class StoryViewerViewModelTest {
     @Test
     fun `a clip that never reports anything is given up on rather than stalling the viewer`() =
         test {
-            val viewModel = catalog(testChannel("a", videoIndices = setOf(0))).viewer()
+            val viewModel = repository(testChannel("a", videoIndices = setOf(0))).viewer()
 
             // Long enough for the watchdog, short of the slide time that follows it.
             elapse(8_000)
@@ -404,19 +423,19 @@ class StoryViewerViewModelTest {
 
     @Test
     fun `closing marks the channel seen and leaves`() = test {
-        val catalog = catalog(testChannel("a"))
-        val viewModel = catalog.viewer()
+        val repository = repository(testChannel("a"))
+        val viewModel = repository.viewer()
 
         viewModel.events.test {
             viewModel.sendIntent(StoryViewerIntent.Close)
             assertEquals(StoryViewerEvent.Close, awaitItem())
         }
-        assertTrue("a" in catalog.seenChannels.value)
+        assertTrue("a" in repository.seenChannels)
     }
 
     @Test
     fun `a call to action raises its feature for the host to open`() = test {
-        val viewModel = catalog(testChannel("a", ctaIndices = setOf(0))).viewer()
+        val viewModel = repository(testChannel("a", ctaIndices = setOf(0))).viewer()
 
         viewModel.events.test {
             viewModel.sendIntent(StoryViewerIntent.CtaClicked)
@@ -426,7 +445,7 @@ class StoryViewerViewModelTest {
 
     @Test
     fun `a closed viewer's clock stops with it`() = test {
-        val viewModel = catalog(testChannel("a")).viewer()
+        val viewModel = repository(testChannel("a")).viewer()
 
         viewModel.sendIntent(StoryViewerIntent.Close)
         elapse(STORY_DEFAULT_DURATION_MS * 2)
@@ -438,7 +457,7 @@ class StoryViewerViewModelTest {
 
     @Test
     fun `liking a slide counts it and shows on the slide it was made on`() = test {
-        val viewModel = catalog(testChannel("a")).viewer()
+        val viewModel = repository(testChannel("a")).viewer()
         val before = viewModel.uiState.value.likeCount
 
         viewModel.sendIntent(StoryViewerIntent.ToggleLike)
@@ -452,7 +471,7 @@ class StoryViewerViewModelTest {
 
     @Test
     fun `a like stays with its own slide when the story moves on`() = test {
-        val viewModel = catalog(testChannel("a")).viewer()
+        val viewModel = repository(testChannel("a")).viewer()
         viewModel.sendIntent(StoryViewerIntent.ToggleLike)
 
         viewModel.sendIntent(StoryViewerIntent.Next)
@@ -462,7 +481,7 @@ class StoryViewerViewModelTest {
 
     @Test
     fun `bookmarking a slide sticks`() = test {
-        val viewModel = catalog(testChannel("a")).viewer()
+        val viewModel = repository(testChannel("a")).viewer()
 
         viewModel.sendIntent(StoryViewerIntent.ToggleSave)
 

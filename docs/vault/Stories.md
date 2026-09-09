@@ -10,9 +10,11 @@ full-screen viewer that plays a channel's slides in order.
 Module `:feature:stories`, package `…feature.stories`. Registered in `settings.gradle.kts`,
 `shared/build.gradle.kts`, `sharedModules` (`storiesModule`) and the central `NavHost`.
 
-> **Front-end only, on purpose.** There is no stories web service. The catalogue is bundled
-> (`MockStorySource`), and so is the sample media. Nothing here touches `core-network`,
-> `core-domain` or Room — see [[#When the service arrives]].
+> **No web service yet.** The feature is layered exactly as every other one — DN models,
+> repository interface, implementation, use cases, PR models, mapper — but the implementation
+> answers from a bundled catalogue instead of a remote data source. There is deliberately **no
+> route, no DTO and no remote data source**: those are the only pieces the endpoint will add.
+> See [[#When the service arrives]].
 
 ## Where it lives on screen
 
@@ -32,21 +34,47 @@ slide, the 34%/66% tap columns — is read off the user's design bundle
 (`Tamin Man8-9-2026-v2 (1).html` in Downloads, see the `reference-design-bundle-html` memory).
 `StoryDimens` and `StoryPalette` reproduce those numbers rather than normalizing them.
 
-## The pieces
+## The pieces, by layer
 
 ```
-data/StorySource.kt      fun interface — the one seam a real service replaces
-data/MockStorySource.kt  the bundled catalogue; Res.getUri() for the sample media
-data/StoryCatalog.kt     Koin single: cache, in-flight guard, seen/liked/saved sets
-model/StoryModels.kt     StoryChannel / StoryItem / StoryMedia / StoryCta
-ui/theme/StoryTokens.kt  StoryDimens, StoryPalette, storyTextStyles(), the ink constants
-ui/rail/                 StoryRail + StoryRailViewModel + contract
-ui/viewer/               StoryViewerScreen, StoryProgressBar, StoryVideoPlayer (expect/actual)
+core-domain
+  model/stories/StoryChannelDN.kt   StoryChannelDN / StoryItemDN / StoryMediaDN / StoryCtaDN
+                                    / StoryEngagementDN — no colors, no assets, no formatting
+  repository/stories/               StoryRepository (the interface the endpoint will satisfy)
+  useCases/stories/                 GetStoryChannels, ObserveSeenStoryChannels,
+                                    MarkStoryChannelSeen, ObserveStoryEngagement,
+                                    ToggleStoryLike, ToggleStorySave
+
+core-data
+  data/repository/stories/
+    StoryRepositoryImpl.kt          cache, in-flight guard, seen/liked/saved state
+    StoryMockCatalog.kt             the bundled five channels — deleted whole when the API lands
+
+feature/stories
+  ui/model/StoryPR.kt               adds the palette and the icon the domain left out
+  ui/mapper/StoryUiMapper.kt        DN → PR, plus the per-channel look table
+  ui/theme/StoryTokens.kt           StoryDimens, StoryPalette, storyTextStyles(), the ink
+  ui/rail/                          StoryRail + StoryRailViewModel + contract
+  ui/viewer/                        StoryViewerScreen, StoryProgressBar, StoryVideoPlayer
 ```
 
-`StoryCatalog` being a `single` is what makes the two screens agree: the viewer marks a channel
-watched and the ring behind it on the home page goes grey, without either screen knowing about the
-other. It is also why opening the viewer costs no second fetch.
+`StoryRepositoryImpl` is a Koin `single`, and that is what makes the two screens agree: the viewer
+marks a channel watched and the ring behind it on the home page goes grey, without either screen
+knowing about the other. It is also why opening the viewer costs no second fetch — the guard in
+`loadOnce` answers instead.
+
+### Two decisions worth knowing
+
+**The palette and the icon are not in the domain.** A `Color` and a `DrawableResource` are
+presentation, so `StoryChannelDN` carries none. `StoryUiMapper` adds both from the channel `key`
+through one lookup table, and that table **falls back** rather than failing — a channel published
+after this build shipped renders in the default palette instead of crashing the rail.
+
+**`StoryMediaDN.SampleImage` / `SampleVideo` are mock-only variants, not paths.** The mock could
+not name a file in the feature's own asset bundle without core-data knowing about it, so it names
+*what the slide is* and the mapper resolves it (`Res.getUri`, which is an ordinary function, not a
+suspending one — so the mapper stays plain and nothing touches the asset bundle from a unit test).
+Deleting those two variants when the service lands makes the compiler point at every site.
 
 ## The segment clock — the one design decision worth knowing
 
@@ -159,11 +187,21 @@ never been compiled — iOS does not build on Windows. Verify it on a Mac before
 
 ## When the service arrives
 
-1. Implement `StorySource` against the real endpoint and swap the one binding in `StoriesModule`.
-   Nothing else in the feature has to move.
-2. `StoryChannel.icon` becomes the URL the service sends instead of a bundled `DrawableResource`.
-3. Likes, bookmarks and "seen" currently live in `StoryCatalog` in memory for the life of the
-   process. They move out from there.
+The three pieces that were deliberately skipped are exactly the three you add:
+
+1. **Route + DTO + remote data source** in `core-network`, per [[Networking]].
+2. Point `StoryRepositoryImpl` at that data source instead of `mockStoryChannels()`, and delete
+   `StoryMockCatalog.kt`. The interface, the use cases, the mapper, the models and both ViewModels
+   do not move.
+3. Delete `StoryMediaDN.SampleImage` / `SampleVideo` and the bundled files under
+   `composeResources/files/`; the compiler will point at the mapper branches to remove.
+
+Then:
+
+4. `StoryChannelPR.icon` can become a URL the service sends rather than a bundled drawable — the
+   rail loads it the way the viewer already loads a slide's picture.
+5. Likes, bookmarks and "seen" live in `StoryRepositoryImpl` in memory for the life of the process.
+   That is where they stop being local; the interface above them does not change.
 4. ⚠️ **Story media must not be fetched through the app's shared Coil loader.** `mainHttpClient`
    sets `sendWithoutRequest { true }`, so every image Coil fetches through it carries the user's
    access token — fine for the bundled files today, wrong the moment media comes off a CDN. Give
@@ -171,16 +209,10 @@ never been compiled — iOS does not build on Windows. Verify it on a Mac before
 5. The comment field types and sends but goes nowhere — `CommentSubmitted` only clears the draft.
    Give it a destination there.
 
-## A deliberate deviation
-
-`.claude/rules/architecture.md` says feature modules have no local `data/` package. This one does,
-because there is no backend to put a repository in front of and the brief was explicit about not
-inventing one. `StorySource` is the seam that makes undoing it cheap.
-
 ## Tests
 
 `feature/stories/src/commonTest` — 41 tests, `kotlin.test` + Turbine + `runTest`, hand-written
-fakes, no Robolectric and no `getString` in either ViewModel (see [[Typography]] and the
+fakes (`FakeStoryRepository` implements the domain interface), no Robolectric and no `getString` in either ViewModel (see [[Typography]] and the
 `getstring-viewmodel-test-hazard` memory).
 
 ```powershell

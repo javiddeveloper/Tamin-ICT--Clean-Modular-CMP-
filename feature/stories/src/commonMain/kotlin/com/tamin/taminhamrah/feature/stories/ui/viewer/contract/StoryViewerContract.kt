@@ -1,8 +1,8 @@
 package com.tamin.taminhamrah.feature.stories.ui.viewer.contract
 
 import androidx.compose.runtime.Immutable
-import com.tamin.taminhamrah.feature.stories.model.StoryChannel
-import com.tamin.taminhamrah.feature.stories.model.StoryItem
+import com.tamin.taminhamrah.feature.stories.ui.model.StoryChannelPR
+import com.tamin.taminhamrah.feature.stories.ui.model.StoryItemPR
 import com.tamin.taminhamrah.feature.stories.ui.theme.STORY_DEFAULT_DURATION_MS
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import kotlinx.collections.immutable.ImmutableList
@@ -29,7 +29,7 @@ import kotlinx.collections.immutable.persistentSetOf
 @Immutable
 data class StoryViewerUiState(
     val isLoading: Boolean = true,
-    val channels: ImmutableList<StoryChannel> = persistentListOf(),
+    val channels: ImmutableList<StoryChannelPR> = persistentListOf(),
     val channelIndex: Int = 0,
     val itemIndex: Int = 0,
     /** Bumped whenever the fill has to start over. See the class comment. */
@@ -56,9 +56,9 @@ data class StoryViewerUiState(
     val savedItems: ImmutableSet<String> = persistentSetOf(),
     val error: String? = null,
 ) {
-    val channel: StoryChannel? get() = channels.getOrNull(channelIndex)
+    val channel: StoryChannelPR? get() = channels.getOrNull(channelIndex)
 
-    val item: StoryItem? get() = channel?.items?.getOrNull(itemIndex)
+    val item: StoryItemPR? get() = channel?.items?.getOrNull(itemIndex)
 
     val itemCount: Int get() = channel?.items?.size ?: 0
 
@@ -80,7 +80,7 @@ data class StoryViewerUiState(
         data class Loading(val isLoading: Boolean) : PartialState
 
         data class Loaded(
-            val channels: ImmutableList<StoryChannel>,
+            val channels: ImmutableList<StoryChannelPR>,
             val channelIndex: Int,
         ) : PartialState
 

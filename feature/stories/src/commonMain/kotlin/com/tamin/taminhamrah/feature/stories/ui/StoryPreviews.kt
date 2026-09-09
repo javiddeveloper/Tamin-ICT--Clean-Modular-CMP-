@@ -10,10 +10,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.feature.stories.model.StoryChannel
-import com.tamin.taminhamrah.feature.stories.model.StoryCta
-import com.tamin.taminhamrah.feature.stories.model.StoryItem
-import com.tamin.taminhamrah.feature.stories.model.StoryMedia
+import com.tamin.taminhamrah.feature.stories.ui.model.StoryChannelPR
+import com.tamin.taminhamrah.feature.stories.ui.model.StoryCtaPR
+import com.tamin.taminhamrah.feature.stories.ui.model.StoryItemPR
+import com.tamin.taminhamrah.feature.stories.ui.model.StoryMediaPR
 import com.tamin.taminhamrah.feature.stories.ui.rail.StoryRailBody
 import com.tamin.taminhamrah.feature.stories.ui.rail.contract.StoryRailUiState
 import com.tamin.taminhamrah.feature.stories.ui.theme.StoryPalette
@@ -187,7 +187,7 @@ private val PreviewPalette = StoryPalette(
     iconTone = Color(0xFF1F4FA3),
 )
 
-private val PreviewChannel = StoryChannel(
+private val PreviewChannel = StoryChannelPR(
     key = "pr",
     name = "روابط عمومی سازمان",
     shortName = "روابط عمومی",
@@ -195,26 +195,26 @@ private val PreviewChannel = StoryChannel(
     palette = PreviewPalette,
     icon = Res.drawable.ic_story_public_relations,
     items = persistentListOf(
-        StoryItem(
+        StoryItemPR(
             id = "pr:0",
             title = "تأمین‌من به‌روز شد",
             body = "پرداخت حق بیمه، مشاهدهٔ سوابق و دریافت فیش، همه در یک صفحه جمع شده است.",
-            media = StoryMedia.None,
-            cta = StoryCta("دیدن سوابق من", FeatureFlag.WAGE_AND_HISTORY),
+            media = StoryMediaPR.None,
+            cta = StoryCtaPR("دیدن سوابق من", FeatureFlag.WAGE_AND_HISTORY),
             baseLikes = 312,
         ),
-        StoryItem(
+        StoryItemPR(
             id = "pr:1",
             title = "خدمات غیرحضوری",
             body = "بیشتر درخواست‌ها را از همین اپ ثبت کنید؛ مراجعه به شعبه فقط برای موارد ضروری لازم است.",
-            media = StoryMedia.None,
+            media = StoryMediaPR.None,
             baseLikes = 243,
         ),
-        StoryItem(
+        StoryItemPR(
             id = "pr:2",
             title = "ارتباط با ما",
             body = "پاسخ‌گویی تلفنی و پیام‌رسان سازمان، همهٔ روزهای هفته در دسترس شماست.",
-            media = StoryMedia.None,
+            media = StoryMediaPR.None,
             baseLikes = 98,
         ),
     ),

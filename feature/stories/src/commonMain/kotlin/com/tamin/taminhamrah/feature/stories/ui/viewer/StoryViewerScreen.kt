@@ -54,9 +54,9 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.tamin.taminhamrah.feature.stories.model.StoryChannel
-import com.tamin.taminhamrah.feature.stories.model.StoryItem
-import com.tamin.taminhamrah.feature.stories.model.StoryMedia
+import com.tamin.taminhamrah.feature.stories.ui.model.StoryChannelPR
+import com.tamin.taminhamrah.feature.stories.ui.model.StoryItemPR
+import com.tamin.taminhamrah.feature.stories.ui.model.StoryMediaPR
 import com.tamin.taminhamrah.feature.stories.ui.theme.StoryAvatarDot
 import com.tamin.taminhamrah.feature.stories.ui.theme.StoryAvatarRing
 import com.tamin.taminhamrah.feature.stories.ui.theme.StoryBodyInk
@@ -280,7 +280,7 @@ internal fun StoryViewerBody(
 }
 
 /** The channel gradient, plus the soft light the design puts in its upper corner. */
-private fun Modifier.storyBackdrop(channel: StoryChannel): Modifier = this.drawWithCache {
+private fun Modifier.storyBackdrop(channel: StoryChannelPR): Modifier = this.drawWithCache {
     val palette = channel.palette
     val gradient = angledLinearGradient(
         angleDeg = StoryDimens.VIEWER_GRADIENT_ANGLE_DEG,
@@ -319,7 +319,7 @@ private fun Modifier.storyBackdrop(channel: StoryChannel): Modifier = this.drawW
  */
 @Composable
 private fun BoxScope.StoryMediaLayer(
-    item: StoryItem,
+    item: StoryItemPR,
     isPaused: Boolean,
     mediaFailed: Boolean,
     onIntent: (StoryViewerIntent) -> Unit,
@@ -327,9 +327,9 @@ private fun BoxScope.StoryMediaLayer(
     if (mediaFailed) return
 
     when (val media = item.media) {
-        StoryMedia.None -> Unit
+        StoryMediaPR.None -> Unit
 
-        is StoryMedia.Image -> LoadAsyncImage(
+        is StoryMediaPR.Image -> LoadAsyncImage(
             model = media.url,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
@@ -341,7 +341,7 @@ private fun BoxScope.StoryMediaLayer(
             },
         )
 
-        is StoryMedia.Video -> StoryVideoPlayer(
+        is StoryMediaPR.Video -> StoryVideoPlayer(
             url = media.url,
             isPaused = isPaused,
             onReady = { durationMs -> onIntent(StoryViewerIntent.MediaReady(durationMs)) },
@@ -455,7 +455,7 @@ private fun BoxScope.StoryTapZone(
 
 @Composable
 private fun StoryHeader(
-    channel: StoryChannel,
+    channel: StoryChannelPR,
     type: StoryTextStyles,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
@@ -530,8 +530,8 @@ private fun StoryHeader(
 @Composable
 private fun StoryContent(
     state: StoryViewerUiState,
-    channel: StoryChannel,
-    item: StoryItem,
+    channel: StoryChannelPR,
+    item: StoryItemPR,
     type: StoryTextStyles,
     onIntent: (StoryViewerIntent) -> Unit,
     onSubmitComment: () -> Unit,

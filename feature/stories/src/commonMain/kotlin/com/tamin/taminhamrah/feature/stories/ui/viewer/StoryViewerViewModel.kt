@@ -2,9 +2,9 @@ package com.tamin.taminhamrah.feature.stories.ui.viewer
 
 import androidx.lifecycle.viewModelScope
 import com.tamin.taminhamrah.base.BaseViewModel
-import com.tamin.taminhamrah.feature.stories.data.StoryCatalog
-import com.tamin.taminhamrah.feature.stories.model.StoryChannel
-import com.tamin.taminhamrah.feature.stories.model.StoryMedia
+import com.tamin.taminhamrah.feature.stories.ui.mapper.toPresentation
+import com.tamin.taminhamrah.feature.stories.ui.model.StoryChannelPR
+import com.tamin.taminhamrah.feature.stories.ui.model.StoryMediaPR
 import com.tamin.taminhamrah.feature.stories.ui.theme.STORY_DEFAULT_DURATION_MS
 import com.tamin.taminhamrah.feature.stories.ui.theme.STORY_TICK_MS
 import com.tamin.taminhamrah.feature.stories.ui.viewer.contract.StoryViewerEvent
@@ -12,13 +12,20 @@ import com.tamin.taminhamrah.feature.stories.ui.viewer.contract.StoryViewerInten
 import com.tamin.taminhamrah.feature.stories.ui.viewer.contract.StoryViewerUiState
 import com.tamin.taminhamrah.feature.stories.ui.viewer.contract.StoryViewerUiState.PartialState
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
+import com.tamin.taminhamrah.useCases.stories.GetStoryChannelsUseCase
+import com.tamin.taminhamrah.useCases.stories.MarkStoryChannelSeenUseCase
+import com.tamin.taminhamrah.useCases.stories.ObserveStoryEngagementUseCase
+import com.tamin.taminhamrah.useCases.stories.ToggleStoryLikeUseCase
+import com.tamin.taminhamrah.useCases.stories.ToggleStorySaveUseCase
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
@@ -59,7 +66,11 @@ private const val MEDIA_READY_TIMEOUT_MS = 8_000L
  * story always moves on.
  */
 class StoryViewerViewModel(
-    private val catalog: StoryCatalog,
+    private val getStoryChannelsUseCase: GetStoryChannelsUseCase,
+    private val markStoryChannelSeenUseCase: MarkStoryChannelSeenUseCase,
+    private val observeStoryEngagementUseCase: ObserveStoryEngagementUseCase,
+    private val toggleStoryLikeUseCase: ToggleStoryLikeUseCase,
+    private val toggleStorySaveUseCase: ToggleStorySaveUseCase,
 ) : BaseViewModel<StoryViewerUiState, PartialState, StoryViewerEvent, StoryViewerIntent>(
     initialState = StoryViewerUiState(),
 ) {
@@ -93,8 +104,11 @@ class StoryViewerViewModel(
             is StoryViewerIntent.MediaReady -> mediaReady(intent.durationMs)
             StoryViewerIntent.MediaEnded -> if (currentIsVideo()) goNext()
             StoryViewerIntent.MediaFailed -> mediaFailed()
-            StoryViewerIntent.ToggleLike -> uiState.value.item?.let { catalog.toggleLike(it.id) }
-            StoryViewerIntent.ToggleSave -> uiState.value.item?.let { catalog.toggleSave(it.id) }
+            StoryViewerIntent.ToggleLike ->
+                uiState.value.item?.let { toggleStoryLikeUseCase(it.id) }
+
+            StoryViewerIntent.ToggleSave ->
+                uiState.value.item?.let { toggleStorySaveUseCase(it.id) }
             StoryViewerIntent.CtaClicked -> ctaClicked()
             StoryViewerIntent.Close -> close()
         }
@@ -109,10 +123,12 @@ class StoryViewerViewModel(
         opened = true
 
         emit(PartialState.Loading(true))
-        try {
-            // Already filled in practice — the rail that opened this viewer loaded it — so this
-            // is the guard doing its job rather than a second fetch.
-            catalog.ensureLoaded()
+        val channels = try {
+            // `first()` and not `collect`, deliberately: this flow is a cached fetch with a single
+            // source, not a cache-then-network pair, so there is no fresher second emission to
+            // miss. In practice the rail that opened this viewer already loaded it, and the
+            // repository's guard means no second fetch happens here at all.
+            getStoryChannelsUseCase().first().toPresentation()
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -121,7 +137,6 @@ class StoryViewerViewModel(
             return
         }
 
-        val channels = catalog.channels.value
         if (channels.isEmpty()) {
             emit(PartialState.Loading(false))
             sendEvent(StoryViewerEvent.Close)
@@ -135,8 +150,11 @@ class StoryViewerViewModel(
         // Never completes, which is the point: a like made in the viewer has to reach the state
         // that draws the heart, and this is the only thing watching for it.
         emitAll(
-            combine(catalog.likedItems, catalog.savedItems) { liked, saved ->
-                PartialState.Engagement(liked, saved)
+            observeStoryEngagementUseCase().map { engagement ->
+                PartialState.Engagement(
+                    likedItems = engagement.likedItemIds.toImmutableSet(),
+                    savedItems = engagement.savedItemIds.toImmutableSet(),
+                )
             },
         )
     }
@@ -155,7 +173,7 @@ class StoryViewerViewModel(
 
         // The channel is finished, which is what marks it watched — the ring behind us on the
         // home page goes grey from here.
-        catalog.markChannelSeen(channel.key)
+        markStoryChannelSeenUseCase(channel.key)
 
         val nextChannel = state.channelIndex + 1
         if (nextChannel <= state.channels.lastIndex) {
@@ -194,12 +212,12 @@ class StoryViewerViewModel(
      * player to say how long it is.
      */
     private suspend fun FlowCollector<PartialState>.startSegment(
-        channels: ImmutableList<StoryChannel>,
+        channels: ImmutableList<StoryChannelPR>,
         channelIndex: Int,
         itemIndex: Int,
     ) {
         val item = channels.getOrNull(channelIndex)?.items?.getOrNull(itemIndex) ?: return
-        val isVideo = item.media is StoryMedia.Video
+        val isVideo = item.media is StoryMediaPR.Video
 
         stopClock()
         stopWatchdog()
@@ -270,23 +288,23 @@ class StoryViewerViewModel(
         if (!state.isPaused) startClock(STORY_DEFAULT_DURATION_MS)
     }
 
-    private fun currentIsVideo(): Boolean = uiState.value.item?.media is StoryMedia.Video
+    private fun currentIsVideo(): Boolean = uiState.value.item?.media is StoryMediaPR.Video
 
     /* ---- Leaving ------------------------------------------------------------------------ */
 
-    private fun ctaClicked() {
+    private suspend fun ctaClicked() {
         val state = uiState.value
         val flag = state.item?.cta?.target ?: return
         stopClock()
         stopWatchdog()
-        state.channel?.let { catalog.markChannelSeen(it.key) }
+        state.channel?.let { markStoryChannelSeenUseCase(it.key) }
         sendEvent(StoryViewerEvent.OpenFeature(flag))
     }
 
-    private fun close() {
+    private suspend fun close() {
         stopClock()
         stopWatchdog()
-        uiState.value.channel?.let { catalog.markChannelSeen(it.key) }
+        uiState.value.channel?.let { markStoryChannelSeenUseCase(it.key) }
         sendEvent(StoryViewerEvent.Close)
     }
 

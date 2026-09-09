@@ -31,7 +31,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.tamin.taminhamrah.feature.stories.model.StoryChannel
+import com.tamin.taminhamrah.feature.stories.ui.model.StoryChannelPR
 import com.tamin.taminhamrah.feature.stories.ui.rail.contract.StoryRailContent
 import com.tamin.taminhamrah.feature.stories.ui.rail.contract.StoryRailEvent
 import com.tamin.taminhamrah.feature.stories.ui.rail.contract.StoryRailIntent
@@ -201,7 +201,7 @@ private fun StoryRailHeader(
  */
 @Composable
 private fun StoryRailItem(
-    channel: StoryChannel,
+    channel: StoryChannelPR,
     isSeen: Boolean,
     type: StoryTextStyles,
     onClick: () -> Unit,

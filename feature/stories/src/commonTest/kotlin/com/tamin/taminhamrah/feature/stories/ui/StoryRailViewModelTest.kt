@@ -1,8 +1,9 @@
 package com.tamin.taminhamrah.feature.stories.ui
 
 import app.cash.turbine.test
-import com.tamin.taminhamrah.feature.stories.FakeStorySource
-import com.tamin.taminhamrah.feature.stories.data.StoryCatalog
+import com.tamin.taminhamrah.feature.stories.FakeStoryRepository
+import com.tamin.taminhamrah.useCases.stories.GetStoryChannelsUseCase
+import com.tamin.taminhamrah.useCases.stories.ObserveSeenStoryChannelsUseCase
 import com.tamin.taminhamrah.feature.stories.testChannel
 import com.tamin.taminhamrah.feature.stories.ui.rail.StoryRailViewModel
 import com.tamin.taminhamrah.feature.stories.ui.rail.contract.StoryRailContent
@@ -32,15 +33,18 @@ class StoryRailViewModelTest {
     @AfterTest
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel(source: FakeStorySource) = StoryRailViewModel(StoryCatalog(source))
+    private fun viewModel(repository: FakeStoryRepository) = StoryRailViewModel(
+        getStoryChannelsUseCase = GetStoryChannelsUseCase(repository),
+        observeSeenStoryChannelsUseCase = ObserveSeenStoryChannelsUseCase(repository),
+    )
 
     /* ---- Showing the list ---------------------------------------------------------------- */
 
     @Test
     fun `loads the catalogue and shows its channels`() = runTest {
-        val source = FakeStorySource(listOf(testChannel("a"), testChannel("b")))
+        val repository = FakeStoryRepository(listOf(testChannel("a"), testChannel("b")))
 
-        val state = viewModel(source).uiState.value
+        val state = viewModel(repository).uiState.value
 
         assertEquals(StoryRailContent.Channels, state.content)
         assertEquals(listOf("a", "b"), state.channels.map { it.key })
@@ -49,7 +53,7 @@ class StoryRailViewModelTest {
 
     @Test
     fun `a catalogue with no channels shows the empty state rather than an empty row`() = runTest {
-        val state = viewModel(FakeStorySource(channels = emptyList())).uiState.value
+        val state = viewModel(FakeStoryRepository(channels = emptyList())).uiState.value
 
         assertEquals(StoryRailContent.Empty, state.content)
         assertTrue(state.channels.isEmpty())
@@ -58,10 +62,10 @@ class StoryRailViewModelTest {
     /* ---- Failing, and recovering ---------------------------------------------------------- */
 
     @Test
-    fun `a source that throws leaves the rail in its error state`() = runTest {
-        val source = FakeStorySource().apply { failWith = IllegalStateException("no network") }
+    fun `a repository that throws leaves the rail in its error state`() = runTest {
+        val repository = FakeStoryRepository().apply { failWith = IllegalStateException("no network") }
 
-        val state = viewModel(source).uiState.value
+        val state = viewModel(repository).uiState.value
 
         assertEquals(StoryRailContent.Error, state.content)
         assertNotNull(state.error)
@@ -69,11 +73,11 @@ class StoryRailViewModelTest {
 
     @Test
     fun `retrying after a failure loads the list and clears the error`() = runTest {
-        val source = FakeStorySource().apply { failWith = IllegalStateException("no network") }
-        val viewModel = viewModel(source)
+        val repository = FakeStoryRepository().apply { failWith = IllegalStateException("no network") }
+        val viewModel = viewModel(repository)
         assertEquals(StoryRailContent.Error, viewModel.uiState.value.content)
 
-        source.failWith = null
+        repository.failWith = null
         viewModel.sendIntent(StoryRailIntent.Retry)
 
         val state = viewModel.uiState.value
@@ -85,42 +89,43 @@ class StoryRailViewModelTest {
 
     @Test
     fun `repeated loads do not refetch the catalogue`() = runTest {
-        val source = FakeStorySource()
-        val viewModel = viewModel(source)
+        val repository = FakeStoryRepository()
+        val viewModel = viewModel(repository)
         // One from init.
-        assertEquals(1, source.callCount)
+        assertEquals(1, repository.fetchCount)
 
         repeat(3) { viewModel.sendIntent(StoryRailIntent.Load) }
 
-        assertEquals(1, source.callCount)
+        assertEquals(1, repository.fetchCount)
     }
 
     @Test
-    fun `two rails sharing one catalogue fetch it once between them`() = runTest {
-        val source = FakeStorySource()
-        val catalog = StoryCatalog(source)
+    fun `two rails sharing one repository fetch the catalogue once between them`() = runTest {
+        val repository = FakeStoryRepository()
 
-        StoryRailViewModel(catalog)
-        StoryRailViewModel(catalog)
+        viewModel(repository)
+        viewModel(repository)
 
-        assertEquals(1, source.callCount)
+        assertEquals(1, repository.fetchCount)
     }
 
     @Test
-    fun `retry is the one path allowed to fetch again`() = runTest {
-        val source = FakeStorySource()
-        val viewModel = viewModel(source)
+    fun `retry does nothing when there is no failure to retry`() = runTest {
+        val repository = FakeStoryRepository()
+        val viewModel = viewModel(repository)
 
         viewModel.sendIntent(StoryRailIntent.Retry)
 
-        assertEquals(2, source.callCount)
+        // The retry only exists on the error row; without this guard a stray one would leave a
+        // second permanent collector behind.
+        assertEquals(1, repository.fetchCount)
     }
 
     /* ---- Opening, and view tracking -------------------------------------------------------- */
 
     @Test
     fun `tapping a channel raises the viewer event for that position`() = runTest {
-        val viewModel = viewModel(FakeStorySource())
+        val viewModel = viewModel(FakeStoryRepository())
 
         viewModel.events.test {
             viewModel.sendIntent(StoryRailIntent.OpenChannel(1))
@@ -129,14 +134,14 @@ class StoryRailViewModelTest {
     }
 
     @Test
-    fun `a channel marked seen on the catalogue greys out on the rail`() = runTest {
-        val source = FakeStorySource()
-        val catalog = StoryCatalog(source)
-        val viewModel = StoryRailViewModel(catalog)
+    fun `a channel marked seen on the repository greys out on the rail`() = runTest {
+        val repository = FakeStoryRepository()
+        val viewModel = viewModel(repository)
         val channel = viewModel.uiState.value.channels.first()
         assertEquals(false, viewModel.uiState.value.isSeen(channel))
 
-        catalog.markChannelSeen(channel.key)
+        // What the viewer does when it closes; the rail behind it has to notice.
+        repository.markChannelSeen(channel.key)
 
         assertTrue(viewModel.uiState.value.isSeen(channel))
     }
