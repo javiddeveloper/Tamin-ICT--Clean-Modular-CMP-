@@ -1,9 +1,11 @@
 package com.tamin.taminhamrah.feature.history.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -22,15 +24,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.history.ui.components.ChartAxis
 import com.tamin.taminhamrah.feature.history.ui.components.DashedDivider
-import com.tamin.taminhamrah.feature.history.ui.components.HistoryActionCards
 import com.tamin.taminhamrah.feature.history.ui.components.FilterChipPR
+import com.tamin.taminhamrah.feature.history.ui.components.HistoryActionCards
 import com.tamin.taminhamrah.feature.history.ui.components.HistoryChartCard
 import com.tamin.taminhamrah.feature.history.ui.components.HistoryHero
 import com.tamin.taminhamrah.feature.history.ui.components.HistorySpanNote
@@ -40,23 +46,26 @@ import com.tamin.taminhamrah.feature.history.ui.components.ReportMenuSheet
 import com.tamin.taminhamrah.feature.history.ui.components.WageText
 import com.tamin.taminhamrah.feature.history.ui.components.WorkshopSummaryRow
 import com.tamin.taminhamrah.feature.history.ui.components.YearDetailSheet
+import com.tamin.taminhamrah.feature.history.ui.components.YearMonthPickerSheet
 import com.tamin.taminhamrah.feature.history.ui.contract.HistoryEvent
 import com.tamin.taminhamrah.feature.history.ui.contract.HistoryIntent
 import com.tamin.taminhamrah.feature.history.ui.contract.HistoryUiState
 import com.tamin.taminhamrah.feature.history.ui.model.DurationLabels
+import com.tamin.taminhamrah.feature.history.ui.model.HistoryMetric
 import com.tamin.taminhamrah.feature.history.ui.model.HistoryScope
 import com.tamin.taminhamrah.feature.history.ui.model.YearDetailPR
 import com.tamin.taminhamrah.feature.history.ui.model.YearHistoryPR
 import com.tamin.taminhamrah.feature.history.ui.model.careerDurationChips
 import com.tamin.taminhamrah.feature.history.ui.model.detailWith
 import com.tamin.taminhamrah.feature.history.ui.model.gapYearCount
-import com.tamin.taminhamrah.feature.history.ui.model.HistoryMetric
 import com.tamin.taminhamrah.feature.history.ui.model.maxMonthWage
 import com.tamin.taminhamrah.feature.history.ui.model.maxYearWage
 import com.tamin.taminhamrah.feature.history.ui.model.monthBars
+import com.tamin.taminhamrah.feature.history.ui.model.pickerMonthRows
+import com.tamin.taminhamrah.feature.history.ui.model.pickerYearRows
+import com.tamin.taminhamrah.feature.history.ui.model.sourceChips
 import com.tamin.taminhamrah.feature.history.ui.model.wageMonthBars
 import com.tamin.taminhamrah.feature.history.ui.model.wageYearBars
-import com.tamin.taminhamrah.feature.history.ui.model.sourceChips
 import com.tamin.taminhamrah.feature.history.ui.model.yearBars
 import com.tamin.taminhamrah.feature.history.ui.model.yearChips
 import com.tamin.taminhamrah.feature.history.ui.model.yearDurationChips
@@ -65,6 +74,7 @@ import com.tamin.taminhamrah.model.history.HistoryCertificateType
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.BarChartSeries
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.ShimmerRows
@@ -72,15 +82,16 @@ import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
-import com.tamin.taminhamrah.ui.components.BarChartSeries
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.rememberCollapsingHeaderState
+import com.tamin.taminhamrah.ui.components.reservedHeight
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.ToasterState
 import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.ui.toRialAmount
 import com.tamin.taminhamrah.ui.toPriceFormat
+import com.tamin.taminhamrah.ui.toRialAmount
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.persistentListOf
@@ -90,10 +101,15 @@ import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
+import taminx.core.core_ui.Res as CoreRes
 import taminx.core.core_ui.action_back
 import taminx.core.core_ui.action_cancel
 import taminx.core.core_ui.btn_understood
 import taminx.core.core_ui.history_metric_label
+import taminx.core.core_ui.history_picker_apply_month
+import taminx.core.core_ui.history_picker_apply_none
+import taminx.core.core_ui.history_picker_apply_year
+import taminx.core.core_ui.history_picker_no_history
 import taminx.core.core_ui.history_series_days
 import taminx.core.core_ui.history_series_max_days
 import taminx.core.core_ui.history_series_max_wage
@@ -101,6 +117,7 @@ import taminx.core.core_ui.history_series_wage
 import taminx.core.core_ui.history_split_chip
 import taminx.core.core_ui.history_split_label
 import taminx.core.core_ui.ic_tamin_download
+import taminx.feature.history.Res as HistoryRes
 import taminx.feature.history.history_action_send_title
 import taminx.feature.history.history_all_title
 import taminx.feature.history.history_chart_hint_all
@@ -133,8 +150,6 @@ import taminx.feature.history.history_send_confirm_action
 import taminx.feature.history.history_send_confirm_body
 import taminx.feature.history.history_send_success_title
 import taminx.feature.history.history_stat_sources
-import taminx.core.core_ui.Res as CoreRes
-import taminx.feature.history.Res as HistoryRes
 
 /**
  * «کلیه سوابق».
@@ -345,51 +360,99 @@ fun HistoryContent(
             .takeIf { (detail?.workshops?.size ?: 0) > 1 }
     }
 
+    // ── «انتخاب سال و ماه» ───────────────────────────────────────────────────────
+    // Folded from the chips the strip already uses, so the sheet lists exactly the years the strip
+    // does, in the same order, including the gaps.
+    val dayLabelOf: (String) -> String = remember(dayLabel) {
+        { days -> dayLabel.replace(HistoryConstants.PLACEHOLDER_DAYS, days) }
+    }
+    val noHistoryLabel = stringResource(CoreRes.string.history_picker_no_history)
+    val pickerYearRows = remember(chips, uiState.years, uiState.yearQuery, uiState.pickerYear, dayLabelOf, noHistoryLabel) {
+        chips.pickerYearRows(
+            years = uiState.years,
+            query = uiState.yearQuery,
+            picked = uiState.pickerYear,
+            dayLabel = dayLabelOf,
+            noHistoryLabel = noHistoryLabel,
+            toPersian = { it.toPersianDigits() },
+        )
+    }
+    val stagedYear = remember(uiState.years, uiState.pickerYear) {
+        uiState.pickerYear?.let { picked -> uiState.years.firstOrNull { it.year == picked } }
+    }
+    val pickerMonthRows = remember(stagedYear, uiState.pickerMonth, dayLabelOf) {
+        stagedYear.pickerMonthRows(
+            picked = uiState.pickerMonth,
+            monthNames = PersianDateFormatter.monthNames,
+            dayLabel = dayLabelOf,
+            toPersian = { it.toPersianDigits() },
+        )
+    }
+    val applyNone = stringResource(CoreRes.string.history_picker_apply_none)
+    val applyWholeYear = stringResource(CoreRes.string.history_picker_apply_year, PLACEHOLDER)
+    val applyMonth = stringResource(CoreRes.string.history_picker_apply_month, PLACEHOLDER, PLACEHOLDER_2)
+    val applyLabel = remember(uiState.pickerYear, uiState.pickerMonth, applyNone, applyWholeYear, applyMonth) {
+        val year = uiState.pickerYear
+        when {
+            year == null -> applyNone
+            uiState.pickerMonth == null -> applyWholeYear.replace(PLACEHOLDER, year.toPersianDigits())
+            else -> applyMonth
+                .replace(PLACEHOLDER, PersianDateFormatter.monthNames[uiState.pickerMonth])
+                .replace(PLACEHOLDER_2, year.toPersianDigits())
+        }
+    }
+    val yearRange = remember(uiState.years) {
+        if (uiState.years.isEmpty()) {
+            ""
+        } else {
+            "${uiState.years.first().year.toPersianDigits()} – ${uiState.years.last().year.toPersianDigits()}"
+        }
+    }
+    val onQueryChange: (String) -> Unit = remember(onIntent) {
+        { query -> onIntent(HistoryIntent.YearQueryChanged(query)) }
+    }
+    val onPickYear: (String) -> Unit = remember(onIntent) {
+        { year -> onIntent(HistoryIntent.PickerYearSelected(year)) }
+    }
+    val onPickMonth: (Int?) -> Unit = remember(onIntent) {
+        { month -> onIntent(HistoryIntent.PickerMonthSelected(month)) }
+    }
+    val onApplyPick: () -> Unit = remember(onIntent) { { onIntent(HistoryIntent.ApplyYearPicker) } }
+    val onPickAllYears: () -> Unit = remember(onIntent) {
+        {
+            onIntent(HistoryIntent.SelectScope(HistoryScope.All))
+            onIntent(HistoryIntent.DismissYearPicker)
+        }
+    }
+    val onDismissPicker: () -> Unit = remember(onIntent) {
+        { onIntent(HistoryIntent.DismissYearPicker) }
+    }
+
     val bars = dayBars
     val dense = scope is HistoryScope.All && bars.size > HistoryConstants.DENSE_BAR_THRESHOLD
     val scopeDays = if (scope is HistoryScope.All) uiState.careerTotal.totalDays else detail?.totalDays ?: 0
 
+    // The head folds as the body scrolls, the way the treatment hub's card does. The body drives it
+    // through a nested-scroll connection rather than reading the list's offset, so the fold plays
+    // under the finger and works even on a career short enough that the page does not scroll.
+    val collapse = rememberCollapsingHeaderState(HistoryDimens.heroCollapseDistance)
+    var headerHeightPx by remember { mutableIntStateOf(0) }
+
     Scaffold(modifier = modifier, containerColor = colors.bgPage) { padding ->
+      Box(modifier = Modifier.fillMaxSize().padding(bottom = padding.calculateBottomPadding())) {
         LazyColumn(
             state = lazyListState,
-            modifier = Modifier.fillMaxSize().padding(bottom = padding.calculateBottomPadding()),
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(collapse.nestedScrollConnection),
             contentPadding = PaddingValues(bottom = Spacing.xxl),
         ) {
+            // Stands in for the floating head, at whatever height it currently measures. Read at
+            // layout time, so the body closes up over the fold without recomposing a single item.
             item(key = HistoryConstants.HERO_KEY) {
-                HistoryHero(
-                    title = stringResource(HistoryRes.string.history_all_title),
-                    scope = scope,
-                    yearChips = chips,
-                    allChipLabel = stringResource(HistoryRes.string.history_scope_all),
-                    orbDays = scopeDays.toString().toPersianDigits(),
-                    orbDaysLabel = stringResource(HistoryRes.string.history_orb_days),
-                    caption = when (scope) {
-                        is HistoryScope.All -> stringResource(HistoryRes.string.history_orb_caption_all)
-                        is HistoryScope.Year -> stringResource(
-                            HistoryRes.string.history_orb_caption_year,
-                            scope.year.toPersianDigits(),
-                        )
-                    },
-                    durations = durations,
-                    onScopeChange = { onIntent(HistoryIntent.SelectScope(it)) },
-                    navigationIcon = {
-                        TaminTopAppBarButton(
-                            icon = Icons.Filled.ChevronRight,
-                            contentDescription = stringResource(CoreRes.string.action_back),
-                            onClick = onBackClicked,
-                            bordered = true,
-                        )
-                    },
-                    action = {
-                        TaminTopAppBarButton(
-                            icon = vectorResource(CoreRes.drawable.ic_tamin_download),
-                            contentDescription = stringResource(HistoryRes.string.history_report_action),
-                            onClick = { onIntent(HistoryIntent.ShowReportMenu) },
-                            bordered = true,
-                        )
-                    },
-                )
+                Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
             }
+
 
             if (uiState.years.isNotEmpty()) {
                 item(key = HistoryConstants.CHART_KEY) {
@@ -522,6 +585,47 @@ fun HistoryContent(
                 }
             }
         }
+
+        // On top of the list, not in it: the body passes underneath as it scrolls, which is what
+        // lets the head fold over the content rather than scrolling away with it.
+        HistoryHero(
+            title = stringResource(HistoryRes.string.history_all_title),
+            scope = scope,
+            yearChips = chips,
+            allChipLabel = stringResource(HistoryRes.string.history_scope_all),
+            orbDays = scopeDays.toString().toPersianDigits(),
+            orbDaysLabel = stringResource(HistoryRes.string.history_orb_days),
+            caption = when (scope) {
+                is HistoryScope.All -> stringResource(HistoryRes.string.history_orb_caption_all)
+                is HistoryScope.Year -> stringResource(
+                    HistoryRes.string.history_orb_caption_year,
+                    scope.year.toPersianDigits(),
+                )
+            },
+            durations = durations,
+            onScopeChange = { onIntent(HistoryIntent.SelectScope(it)) },
+            navigationIcon = {
+                TaminTopAppBarButton(
+                    icon = Icons.Filled.ChevronRight,
+                    contentDescription = stringResource(CoreRes.string.action_back),
+                    onClick = onBackClicked,
+                    bordered = true,
+                )
+            },
+            action = {
+                TaminTopAppBarButton(
+                    icon = vectorResource(CoreRes.drawable.ic_tamin_download),
+                    contentDescription = stringResource(HistoryRes.string.history_report_action),
+                    onClick = { onIntent(HistoryIntent.ShowReportMenu) },
+                    bordered = true,
+                )
+            },
+            progress = collapse.progressProvider,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .onSizeChanged { headerHeightPx = it.height },
+        )
+      }
     }
 
     // Outside the list: a failure is the only thing worth attending to while it is up, and a dialog
@@ -539,6 +643,25 @@ fun HistoryContent(
             message = uiState.error,
             onDismiss = onBackClicked,
             onRetry = { onIntent(HistoryIntent.Load) },
+        )
+    }
+
+    if (uiState.yearPickerOpen) {
+        YearMonthPickerSheet(
+            query = uiState.yearQuery.toPersianDigits(),
+            yearRows = pickerYearRows,
+            monthRows = pickerMonthRows,
+            // «کل سال» is on only once a year is staged for it to mean anything.
+            wholeYearSelected = uiState.pickerMonth == null && uiState.pickerYear != null,
+            applyLabel = applyLabel,
+            applyEnabled = uiState.pickerYear != null,
+            yearRange = yearRange,
+            onQueryChange = onQueryChange,
+            onYearClick = onPickYear,
+            onMonthClick = onPickMonth,
+            onApply = onApplyPick,
+            onAllYears = onPickAllYears,
+            onDismiss = onDismissPicker,
         )
     }
 
@@ -827,3 +950,13 @@ private fun HistoryFixtureYearScopePreview() {
 
 /** Wages are reported in rials; the chart's «بیشینه» states them in millions, as the design does. */
 private const val MILLION = 1_000_000L
+
+/**
+ * Stand-ins for the picker's two format arguments.
+ *
+ * `stringResource` needs its arguments at composition; the label is folded in a `remember` keyed on
+ * the staged pick, so the resource is read once with placeholders and filled in there instead of
+ * being re-read on every tap.
+ */
+private const val PLACEHOLDER = "%%1"
+private const val PLACEHOLDER_2 = "%%2"

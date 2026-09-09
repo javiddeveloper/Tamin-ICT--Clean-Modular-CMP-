@@ -39,6 +39,8 @@ import com.tamin.taminhamrah.feature.history.ui.model.DurationChipPR
 import com.tamin.taminhamrah.feature.history.ui.model.HistoryScope
 import com.tamin.taminhamrah.feature.history.ui.model.YearChipPR
 import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.components.collapseHeightAway
+import com.tamin.taminhamrah.ui.components.collapsingBottomPadding
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHistoryChipBg
 import com.tamin.taminhamrah.ui.theme.TaminHistoryChipBorder
@@ -68,6 +70,11 @@ import com.tamin.taminhamrah.ui.theme.Duration
  *
  * Its own composable rather than a lambda in the screen, so the year list underneath never
  * recomposes when a chip is tapped.
+ *
+ * [progress] folds it as the body scrolls, 0 open to 1 closed. Only the orb deck goes: the app-bar
+ * row and the year strip are how the page is steered, and a control that scrolls out of reach is
+ * one of the person has to scroll back up to use. The value is read inside layout and draw lambdas
+ * only, so a frame of the fold costs no recomposition here or in the chips.
  */
 @Composable
 fun HistoryHero(
@@ -83,6 +90,7 @@ fun HistoryHero(
     navigationIcon: @Composable () -> Unit,
     action: @Composable () -> Unit,
     modifier: Modifier = Modifier,
+    progress: () -> Float = { 0f },
 ) {
     // Both themes' heads live in the theme: navy running down in light, the design's teal→blue on
     // the diagonal in dark.
@@ -100,7 +108,14 @@ fun HistoryHero(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = HistoryDimens.heroPaddingH)
-                .padding(top = HistoryDimens.heroPaddingTop, bottom = HistoryDimens.heroPaddingBottom),
+                .padding(top = HistoryDimens.heroPaddingTop)
+                // Closes with the deck above it. Left fixed, the folded head keeps a band of empty
+                // navy under the chips exactly as deep as the expanded one needed.
+                .collapsingBottomPadding(
+                    progress = progress,
+                    expanded = HistoryDimens.heroPaddingBottom,
+                    collapsed = HistoryDimens.heroPaddingBottomCollapsed,
+                ),
             // The design's own row gap. A uniform theme spacing left the head visibly taller than
             // the mock, most obviously with one chip and a zero orb.
             verticalArrangement = Arrangement.spacedBy(HistoryDimens.heroRowGap),
@@ -128,7 +143,9 @@ fun HistoryHero(
             )
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .collapseHeightAway(progress),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.md),
                 verticalAlignment = Alignment.CenterVertically,
             ) {

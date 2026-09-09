@@ -9,9 +9,11 @@ import androidx.compose.runtime.setValue
 import com.tamin.taminhamrah.feature.history.ui.contract.HistoryIntent
 import com.tamin.taminhamrah.feature.history.ui.contract.HistoryUiState
 import com.tamin.taminhamrah.feature.history.ui.model.CareerTotalPR
+import com.tamin.taminhamrah.feature.history.ui.model.HistoryScope
 import com.tamin.taminhamrah.feature.history.ui.model.YearHistoryPR
 import com.tamin.taminhamrah.model.history.DastmozdInfoItemPR
 import com.tamin.taminhamrah.model.history.WageDetailPR
+import com.tamin.taminhamrah.ui.digitsOnly
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
@@ -169,6 +171,32 @@ private fun HistoryUiState.reduceForFixture(intent: HistoryIntent): HistoryUiSta
     )
 
     is HistoryIntent.SelectYear -> copy(selectedYear = intent.year)
+
+    // «انتخاب سال و ماه», reduced the same way the ViewModel does so the fixture exercises the real
+    // staging rules — including that a new year drops the month staged under the last one.
+    HistoryIntent.OpenYearPicker -> copy(
+        yearPickerOpen = true,
+        yearQuery = "",
+        pickerYear = (scope as? HistoryScope.Year)?.year,
+        pickerMonth = (scope as? HistoryScope.Year)?.let { selectedMonth },
+    )
+
+    HistoryIntent.DismissYearPicker -> copy(yearPickerOpen = false)
+
+    is HistoryIntent.YearQueryChanged -> copy(yearQuery = intent.query.digitsOnly())
+
+    is HistoryIntent.PickerYearSelected -> copy(pickerYear = intent.year, pickerMonth = null)
+
+    is HistoryIntent.PickerMonthSelected -> copy(pickerMonth = intent.month)
+
+    HistoryIntent.ApplyYearPicker -> pickerYear?.let { year ->
+        copy(
+            scope = HistoryScope.Year(year),
+            selectedMonth = pickerMonth,
+            selectedSource = null,
+            yearPickerOpen = false,
+        )
+    } ?: this
 
     is HistoryIntent.DismissYearDetail -> copy(selectedYear = null)
 
