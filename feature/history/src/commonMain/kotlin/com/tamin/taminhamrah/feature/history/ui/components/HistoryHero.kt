@@ -8,73 +8,60 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import com.tamin.taminhamrah.feature.history.ui.HistoryConstants
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.history.ui.HistoryDimens
-import com.tamin.taminhamrah.feature.history.ui.model.DurationChipPR
 import com.tamin.taminhamrah.feature.history.ui.model.HistoryScope
 import com.tamin.taminhamrah.feature.history.ui.model.YearChipPR
 import com.tamin.taminhamrah.ui.components.NumericText
-import com.tamin.taminhamrah.ui.components.collapseHeightAway
-import com.tamin.taminhamrah.ui.components.collapsingBottomPadding
-import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHistoryChipBg
 import com.tamin.taminhamrah.ui.theme.TaminHistoryChipBorder
 import com.tamin.taminhamrah.ui.theme.TaminHistoryChipSelectedBorder
-import com.tamin.taminhamrah.ui.theme.TaminHistoryChipSelectedEnd
-import com.tamin.taminhamrah.ui.theme.TaminHistoryChipSelectedStart
 import com.tamin.taminhamrah.ui.theme.TaminHistoryChipSelectedText
 import com.tamin.taminhamrah.ui.theme.TaminHistoryChipText
 import com.tamin.taminhamrah.ui.theme.TaminHistoryChipTextDisabled
-import com.tamin.taminhamrah.ui.theme.TaminHistoryHeroCaption
-import com.tamin.taminhamrah.ui.theme.TaminHistoryHeroChipBg
-import com.tamin.taminhamrah.ui.theme.TaminHistoryHeroChipBorder
-import com.tamin.taminhamrah.ui.theme.TaminHistoryHeroGrid
-import com.tamin.taminhamrah.ui.theme.TaminHistoryOrbBase
-import com.tamin.taminhamrah.ui.theme.TaminHistoryOrbBody
-import com.tamin.taminhamrah.ui.theme.TaminHistoryOrbGlow
-import com.tamin.taminhamrah.ui.theme.TaminHistoryOrbHighlight
+import com.tamin.taminhamrah.ui.theme.TaminHistoryHeroBottom
+import com.tamin.taminhamrah.ui.theme.TaminHistoryHeroMid
+import com.tamin.taminhamrah.ui.theme.TaminHistoryHeroTop
 import kotlinx.collections.immutable.ImmutableList
-import com.tamin.taminhamrah.ui.theme.LocalTaminColors
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import com.tamin.taminhamrah.ui.theme.Duration
+import org.jetbrains.compose.resources.vectorResource
+import taminx.core.core_ui.Res as CoreRes
+import taminx.core.core_ui.ic_tamin_download
+
+import androidx.compose.material.icons.filled.ChevronRight
+import com.tamin.taminhamrah.ui.components.rideUpIntoHeader
+import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.action_back
 
 /**
- * The page's dark head: who is looking, how long they were insured, and which years they can pick.
+ * The redesigned hero header for «کلیه سوابق».
  *
- * Its own composable rather than a lambda in the screen, so the year list underneath never
- * recomposes when a chip is tapped.
- *
- * [progress] folds it as the body scrolls, 0 open to 1 closed. Only the orb deck goes: the app-bar
- * row and the year strip are how the page is steered, and a control that scrolls out of reach is
- * one of the person has to scroll back up to use. The value is read inside layout and draw lambdas
- * only, so a frame of the fold costs no recomposition here or in the chips.
+ * Features:
+ * - Curved gradient background (`#173D7E` -> `#1B4790` -> `#1F4FA3`) with rounded bottom corners.
+ * - Top app bar with translucent navigation back button (36dp rounded square), center title, and search & download action buttons.
+ * - 4-item year switcher: «همه», up to 2 recent years, and a «More» dropdown chip.
  */
 @Composable
 fun HistoryHero(
@@ -82,149 +69,217 @@ fun HistoryHero(
     scope: HistoryScope,
     yearChips: ImmutableList<YearChipPR>,
     allChipLabel: String,
-    orbDays: String,
-    orbDaysLabel: String,
-    caption: String,
-    durations: ImmutableList<DurationChipPR>,
     onScopeChange: (HistoryScope) -> Unit,
-    navigationIcon: @Composable () -> Unit,
-    action: @Composable () -> Unit,
+    onSearchClick: () -> Unit,
+    onDownloadClick: () -> Unit,
+    onMoreClick: () -> Unit,
+    onBackClicked: () -> Unit,
     modifier: Modifier = Modifier,
-    progress: () -> Float = { 0f },
 ) {
-    // Both themes' heads live in the theme: navy running down in light, the design's teal→blue on
-    // the diagonal in dark.
-    val heroBrush = LocalTaminColors.current.heroBrush
+    val heroBrush = remember {
+        Brush.linearGradient(
+            listOf(TaminHistoryHeroTop, TaminHistoryHeroMid, TaminHistoryHeroBottom),
+        )
+    }
+    val heroShape = remember {
+        RoundedCornerShape(bottomStart = HistoryDimens.heroCorner, bottomEnd = HistoryDimens.heroCorner)
+    }
 
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(bottomStart = HistoryDimens.heroCorner, bottomEnd = HistoryDimens.heroCorner))
+            .clip(heroShape)
             .background(heroBrush)
-            .heroGrid()
             .windowInsetsPadding(WindowInsets.statusBars),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = HistoryDimens.heroPaddingH)
-                .padding(top = HistoryDimens.heroPaddingTop)
-                // Closes with the deck above it. Left fixed, the folded head keeps a band of empty
-                // navy under the chips exactly as deep as the expanded one needed.
-                .collapsingBottomPadding(
-                    progress = progress,
-                    expanded = HistoryDimens.heroPaddingBottom,
-                    collapsed = HistoryDimens.heroPaddingBottomCollapsed,
-                ),
-            // The design's own row gap. A uniform theme spacing left the head visibly taller than
-            // the mock, most obviously with one chip and a zero orb.
+                .padding(top = HistoryDimens.heroPaddingTop, bottom = HistoryDimens.heroPaddingBottom),
             verticalArrangement = Arrangement.spacedBy(HistoryDimens.heroRowGap),
         ) {
+            // App bar row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                navigationIcon()
+                // Back button (right in RTL)
+                HeroActionButton(
+                    icon = Icons.Filled.ChevronRight,
+                    contentDescription = stringResource(CoreRes.string.action_back),
+                    onClick = onBackClicked,
+                )
+
+                // Center screen title
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.ExtraBold,
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                    ),
                     color = Color.White,
                 )
-                action()
+
+                // Actions: Search + Download (left in RTL)
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(7.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    HeroActionButton(
+                        icon = Icons.Filled.Search,
+                        contentDescription = "جستجوی سال",
+                        onClick = onSearchClick,
+                    )
+                    HeroActionButton(
+                        icon = vectorResource(CoreRes.drawable.ic_tamin_download),
+                        contentDescription = "دانلود فایل",
+                        onClick = onDownloadClick,
+                    )
+                }
             }
 
-            YearChipStrip(
+            // Year chips row (4 slots)
+            YearSwitchRow(
                 scope = scope,
                 chips = yearChips,
                 allLabel = allChipLabel,
                 onScopeChange = onScopeChange,
+                onMoreClick = onMoreClick,
             )
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .collapseHeightAway(progress),
-                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                DayOrb(days = orbDays, label = orbDaysLabel)
-
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(Spacing.sm),
-                ) {
-                    Text(
-                        text = caption,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = TaminHistoryHeroCaption,
-                    )
-                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-                        durations.forEach { chip -> DurationChip(chip) }
-                    }
-                }
-            }
         }
     }
 }
 
 /**
- * The faint grid ruled over the hero.
+ * Floating top area of the «کلیه سوابق» screen.
  *
- * Drawn rather than composed: it is one repeating pattern of hairlines, and a grid of Boxes for it
- * would be a hundred layout nodes that never change.
+ * Hosts the curved gradient [HistoryHero] and the collapsible [HistoryDurationCard]
+ * riding up into the header as [collapseProgress] runs 0 → 1, matching the
+ * treatment hub collapsing header interaction.
  */
-private fun Modifier.heroGrid(): Modifier = drawBehind {
-    val step = HistoryDimens.gridStep.toPx()
-    val stroke = HistoryDimens.gridStroke.toPx()
-    var x = 0f
-    while (x < size.width) {
-        drawRect(TaminHistoryHeroGrid, Offset(x, 0f), Size(stroke, size.height))
-        x += step
-    }
-    var y = 0f
-    while (y < size.height) {
-        drawRect(TaminHistoryHeroGrid, Offset(0f, y), Size(size.width, stroke))
-        y += step
+@Composable
+fun HistoryTopArea(
+    title: String,
+    scope: HistoryScope,
+    yearChips: ImmutableList<YearChipPR>,
+    allChipLabel: String,
+    onScopeChange: (HistoryScope) -> Unit,
+    onSearchClick: () -> Unit,
+    onDownloadClick: () -> Unit,
+    onMoreClick: () -> Unit,
+    onBackClicked: () -> Unit,
+    durationCardModel: DurationCardPR,
+    onStepOlder: () -> Unit,
+    onStepNewer: () -> Unit,
+    collapseProgress: () -> Float,
+    modifier: Modifier = Modifier,
+    hasYears: Boolean = true,
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        HistoryHero(
+            title = title,
+            scope = scope,
+            yearChips = yearChips,
+            allChipLabel = allChipLabel,
+            onScopeChange = onScopeChange,
+            onSearchClick = onSearchClick,
+            onDownloadClick = onDownloadClick,
+            onMoreClick = onMoreClick,
+            onBackClicked = onBackClicked,
+        )
+
+        if (hasYears) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp)
+                    .rideUpIntoHeader(
+                        progress = collapseProgress,
+                        expandedOverlap = 34.dp,
+                        collapsedOverlap = 130.dp,
+                    ),
+            ) {
+                HistoryDurationCard(
+                    model = durationCardModel,
+                    onStepOlder = onStepOlder,
+                    onStepNewer = onStepNewer,
+                    collapseProgress = collapseProgress,
+                )
+            }
+        }
     }
 }
 
-/**
- * Every year in the span, newest first, with «همه» pinned before them.
- *
- * Lazy, because a long career is forty chips and only six are ever on screen. A year the service
- * reported nothing for is drawn dimmed and does not answer a tap — the design shows the gaps rather
- * than hiding them, and the note under the chart counts them.
- */
+/** 4-item switcher row: «همه», recent years, and «More» chip. */
 @Composable
-private fun YearChipStrip(
+private fun YearSwitchRow(
     scope: HistoryScope,
     chips: ImmutableList<YearChipPR>,
     allLabel: String,
     onScopeChange: (HistoryScope) -> Unit,
+    onMoreClick: () -> Unit,
 ) {
-    LazyRow(
+    val isAll = scope is HistoryScope.All
+    val hasMore = chips.size > 3
+    val railYears = remember(chips, hasMore) {
+        chips.take(if (hasMore) 2 else 3)
+    }
+    val olderYears = remember(chips, railYears) {
+        chips.drop(railYears.size)
+    }
+    val scopeYear = (scope as? HistoryScope.Year)?.year
+    val scopeIsOlder = remember(scopeYear, olderYears) {
+        scopeYear != null && olderYears.any { it.year == scopeYear }
+    }
+
+    val moreLabel = remember(scopeIsOlder, scopeYear, olderYears) {
+        when {
+            scopeIsOlder && scopeYear != null -> chips.firstOrNull { it.year == scopeYear }?.label ?: scopeYear
+            olderYears.isNotEmpty() -> "${olderYears.last().label}–${olderYears.first().label}"
+            else -> ""
+        }
+    }
+
+    Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(HistoryDimens.chipGap),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        item(key = HistoryConstants.ALL_CHIP_KEY) {
+        // «همه»
+        Box(modifier = Modifier.weight(1f)) {
             HeroChip(
                 label = allLabel,
-                selected = scope is HistoryScope.All,
+                selected = isAll,
                 enabled = true,
                 numeric = false,
                 onClick = { onScopeChange(HistoryScope.All) },
             )
         }
-        items(chips, key = { it.year }) { chip ->
-            HeroChip(
-                label = chip.label,
-                selected = scope is HistoryScope.Year && scope.year == chip.year,
-                enabled = chip.hasHistory,
-                numeric = true,
-                onClick = { onScopeChange(HistoryScope.Year(chip.year)) },
-            )
+
+        // Rail years
+        railYears.forEach { chip ->
+            Box(modifier = Modifier.weight(1f)) {
+                HeroChip(
+                    label = chip.label,
+                    selected = scope is HistoryScope.Year && scope.year == chip.year,
+                    enabled = chip.hasHistory,
+                    numeric = true,
+                    onClick = { onScopeChange(HistoryScope.Year(chip.year)) },
+                )
+            }
+        }
+
+        // More chip (if career spans more years)
+        if (hasMore) {
+            Box(modifier = Modifier.weight(1f)) {
+                HeroDropdownChip(
+                    label = moreLabel,
+                    selected = scopeIsOlder,
+                    onClick = onMoreClick,
+                )
+            }
         }
     }
 }
@@ -237,150 +292,109 @@ private fun HeroChip(
     numeric: Boolean,
     onClick: () -> Unit,
 ) {
-    val selectedBrush = remember {
-        Brush.linearGradient(listOf(TaminHistoryChipSelectedStart, TaminHistoryChipSelectedEnd))
+    val shape = remember { RoundedCornerShape(16.dp) }
+    val bg = if (selected) Color.White else TaminHistoryChipBg
+    val border = if (selected) TaminHistoryChipSelectedBorder else TaminHistoryChipBorder
+    val textColor = when {
+        selected -> TaminHistoryChipSelectedText
+        enabled -> TaminHistoryChipText
+        else -> TaminHistoryChipTextDisabled
     }
-    val shape = remember { RoundedCornerShape(HistoryDimens.chipCorner) }
-
-    /*
-     * Every part of the transition is held as State and read inside `drawBehind` or a color
-     * lambda, never during composition.
-     *
-     * These chips are the most-tapped thing on the page: a selection that recomposed the strip
-     * would recompose every chip in it, and the strip is as long as the person's career.
-     */
-    val selection = animateFloatAsState(
-        targetValue = if (selected) 1f else 0f,
-        animationSpec = tween(Duration.fast),
-        label = "chipSelection",
-    )
-    val border = animateColorAsState(
-        targetValue = if (selected) {
-            TaminHistoryChipSelectedBorder
-        } else {
-            TaminHistoryChipBorder
-        },
-        animationSpec = tween(Duration.fast),
-        label = "chipBorder",
-    )
-    val textColor = animateColorAsState(
-        targetValue = when {
-            selected -> TaminHistoryChipSelectedText
-            enabled -> TaminHistoryChipText
-            else -> TaminHistoryChipTextDisabled
-        },
-        animationSpec = tween(Duration.fast),
-        label = "chipText",
-    )
 
     Box(
         modifier = Modifier
+            .fillMaxWidth()
+            .height(34.dp)
             .clip(shape)
-            .drawBehind {
-                // The unselected glass is always there; the selected fill washes over it.
-                drawRect(TaminHistoryChipBg)
-                drawRect(brush = selectedBrush, alpha = selection.value)
-            }
-            .border(HistoryDimens.hairline, border.value, shape)
-            .clickable(enabled = enabled, onClick = onClick)
-            .padding(
-                horizontal = HistoryDimens.chipPaddingH,
-                vertical = HistoryDimens.chipPaddingV,
-            ),
+            .background(bg)
+            .border(HistoryDimens.hairline, border, shape)
+            .then(if (enabled) Modifier.clickable(onClick = onClick) else Modifier),
         contentAlignment = Alignment.Center,
     ) {
-        val style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
         if (numeric) {
-            NumericText(text = label, style = style, color = textColor.value)
+            NumericText(
+                text = label,
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                ),
+                color = textColor,
+            )
         } else {
-            Text(text = label, style = style, color = textColor.value, maxLines = 1)
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                ),
+                color = textColor,
+            )
         }
     }
 }
 
-/** The day count, as the design's lit sphere. */
 @Composable
-private fun DayOrb(days: String, label: String) {
-    val orbBrush = remember {
-        Brush.radialGradient(
-            colors = listOf(TaminHistoryOrbHighlight, TaminHistoryOrbBody, TaminHistoryOrbBase),
-            center = Offset.Unspecified,
-        )
-    }
-    val haloBrush = remember {
-        Brush.radialGradient(listOf(TaminHistoryOrbGlow, Color.Transparent))
-    }
+private fun HeroDropdownChip(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    val shape = remember { RoundedCornerShape(16.dp) }
+    val bg = if (selected) Color.White else TaminHistoryChipBg
+    val border = if (selected) TaminHistoryChipSelectedBorder else TaminHistoryChipBorder
+    val textColor = if (selected) TaminHistoryChipSelectedText else TaminHistoryChipText
 
-    Box(
-        modifier = Modifier.size(HistoryDimens.orbSize),
-        contentAlignment = Alignment.Center,
-    ) {
-        Box(
-            modifier = Modifier
-                .size(HistoryDimens.haloSize)
-                .blur(HistoryDimens.haloBlur)
-                .background(haloBrush, CircleShape),
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(CircleShape)
-                .background(orbBrush),
-            contentAlignment = Alignment.Center,
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                NumericText(
-                    text = days,
-                    // Shrinks as the number grows, so a five-digit career still fits the sphere.
-                    style = MaterialTheme.typography.headlineSmall.copy(
-                        fontSize = orbFontSize(days.length),
-                        fontWeight = FontWeight.Bold,
-                    ),
-                    color = Color.White,
-                )
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = TaminHistoryHeroCaption,
-                    textAlign = TextAlign.Center,
-                )
-            }
-        }
-    }
-}
-
-private fun orbFontSize(digits: Int) = when {
-    digits > 5 -> HistoryDimens.orbTextSmall
-    digits > 4 -> HistoryDimens.orbTextMedium
-    else -> HistoryDimens.orbTextLarge
-}
-
-@Composable
-private fun DurationChip(chip: DurationChipPR) {
     Row(
         modifier = Modifier
-            .clip(RoundedCornerShape(HistoryDimens.pillCorner))
-            .background(TaminHistoryHeroChipBg)
-            .border(
-                HistoryDimens.hairline,
-                TaminHistoryHeroChipBorder,
-                RoundedCornerShape(HistoryDimens.pillCorner),
-            )
-            .padding(horizontal = Spacing.sm, vertical = HistoryDimens.durationChipPaddingV),
-        horizontalArrangement = Arrangement.spacedBy(HistoryDimens.durationChipGap),
+            .fillMaxWidth()
+            .height(34.dp)
+            .clip(shape)
+            .background(bg)
+            .border(HistoryDimens.hairline, border, shape)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 4.dp),
+        horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         NumericText(
-            text = chip.value,
-            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-            color = Color.White,
+            text = label,
+            style = MaterialTheme.typography.labelMedium.copy(
+                fontSize = 12.sp,
+                fontWeight = FontWeight.ExtraBold,
+            ),
+            color = textColor,
         )
-        Text(
-            text = chip.label,
-            style = MaterialTheme.typography.labelSmall,
-            color = TaminHistoryHeroCaption,
+        Icon(
+            imageVector = Icons.Filled.KeyboardArrowDown,
+            contentDescription = null,
+            tint = textColor,
+            modifier = Modifier.size(13.dp),
         )
     }
 }
 
+@Composable
+fun HeroActionButton(
+    icon: ImageVector,
+    contentDescription: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val shape = remember { RoundedCornerShape(HistoryDimens.heroActionCorner) }
+    Box(
+        modifier = modifier
+            .size(HistoryDimens.heroActionSize)
+            .clip(shape)
+            .background(Color(0x1AFFFFFF))
+            .border(HistoryDimens.hairline, Color(0x33FFFFFF), shape)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            tint = Color.White,
+            modifier = Modifier.size(HistoryDimens.heroActionIconSize),
+        )
+    }
+}

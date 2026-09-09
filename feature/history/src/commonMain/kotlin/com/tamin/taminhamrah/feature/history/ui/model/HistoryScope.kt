@@ -1,8 +1,9 @@
 package com.tamin.taminhamrah.feature.history.ui.model
 
 import androidx.compose.runtime.Immutable
-import com.tamin.taminhamrah.model.history.DastmozdInfoItemPR
+import com.tamin.taminhamrah.feature.history.ui.HistoryConstants
 import com.tamin.taminhamrah.feature.history.ui.components.SourceChipPR
+import com.tamin.taminhamrah.model.history.DastmozdInfoItemPR
 import com.tamin.taminhamrah.ui.components.BarChartItem
 import com.tamin.taminhamrah.ui.theme.TaminHistoryBarFullBottom
 import com.tamin.taminhamrah.ui.theme.TaminHistoryBarFullTop
@@ -10,18 +11,15 @@ import com.tamin.taminhamrah.ui.theme.TaminHistoryBarPartialMonthBottom
 import com.tamin.taminhamrah.ui.theme.TaminHistoryBarPartialMonthTop
 import com.tamin.taminhamrah.ui.theme.TaminHistoryBarPartialYearBottom
 import com.tamin.taminhamrah.ui.theme.TaminHistoryBarPartialYearTop
-import com.tamin.taminhamrah.ui.theme.TaminHistoryBarSelectedBottom
-import com.tamin.taminhamrah.ui.theme.TaminHistoryBarSelectedTop
 import com.tamin.taminhamrah.ui.theme.TaminHistoryConcurrentBottom
 import com.tamin.taminhamrah.ui.theme.TaminHistoryConcurrentTop
 import com.tamin.taminhamrah.ui.theme.TaminHistoryZeroText
 import com.tamin.taminhamrah.ui.theme.TaminLightTextSecondary
 import com.tamin.taminhamrah.ui.theme.TaminNavy700
+import com.tamin.taminhamrah.util.PersianDateFormatter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
-import com.tamin.taminhamrah.util.PersianDateFormatter
-import com.tamin.taminhamrah.feature.history.ui.HistoryConstants
 
 /**
  * What the page is showing: everything, or one year.
@@ -128,6 +126,28 @@ fun List<YearHistoryPR>.gapYearCount(): Int {
  * with no wage row behind them (before ۱۳۸۶ there are none at all), and the design shows that
  * honestly rather than making the two agree.
  */
+/**
+ * What to call the employer behind a wage row.
+ *
+ * Rows that are a scheme rather than an employer carry no workshop name — an optional or a
+ * construction-worker policy has none to carry. The design names the scheme from its history type
+ * instead of leaving the line blank, and so does this.
+ *
+ * Shared rather than inlined where it is needed, because the year detail and the «تفکیک کارگاه»
+ * chips must call the same employer the same thing; two copies of this rule would disagree the
+ * first time either was edited.
+ */
+fun DastmozdInfoItemPR.displayName(
+    optionalSchemeName: String,
+    constructionSchemeName: String,
+): String = rwshname.ifBlank {
+    if (historytypedesc.startsWith(HistoryConstants.OPTIONAL_TYPE_PREFIX)) {
+        optionalSchemeName
+    } else {
+        constructionSchemeName
+    }
+}
+
 fun YearHistoryPR.detailWith(
     rows: List<DastmozdInfoItemPR>,
     optionalSchemeName: String,
@@ -141,16 +161,7 @@ fun YearHistoryPR.detailWith(
         }
         WorkshopPR(
             id = row.rwshid.ifBlank { row.id.toString() },
-            // Rows that are a scheme rather than an employer carry no workshop name — an optional
-            // or a construction-worker policy has none to carry. The design names the scheme from
-            // the history type instead of leaving the line blank, and so does this.
-            name = row.rwshname.ifBlank {
-                if (row.historytypedesc.startsWith(HistoryConstants.OPTIONAL_TYPE_PREFIX)) {
-                    optionalSchemeName
-                } else {
-                    constructionSchemeName
-                }
-            },
+            name = row.displayName(optionalSchemeName, constructionSchemeName),
             type = row.historytypedesc,
             branch = row.brhname,
             code = row.rwshid.takeIf { it.isNotBlank() },
@@ -264,12 +275,12 @@ fun YearDetailPR?.monthBars(
             label = PersianDateFormatter.monthNames[month],
             fraction = if (length == 0) 0f else days.toFloat() / length,
             fillTop = when {
-                selected -> TaminHistoryBarSelectedTop
+                selected -> if (full) com.tamin.taminhamrah.ui.theme.TaminHistoryBarFullSelectedTop else com.tamin.taminhamrah.ui.theme.TaminHistoryBarPartialSelectedTop
                 full -> TaminHistoryBarFullTop
                 else -> TaminHistoryBarPartialMonthTop
             },
             fillBottom = when {
-                selected -> TaminHistoryBarSelectedBottom
+                selected -> if (full) com.tamin.taminhamrah.ui.theme.TaminHistoryBarFullSelectedBottom else com.tamin.taminhamrah.ui.theme.TaminHistoryBarPartialSelectedBottom
                 full -> TaminHistoryBarFullBottom
                 else -> TaminHistoryBarPartialMonthBottom
             },

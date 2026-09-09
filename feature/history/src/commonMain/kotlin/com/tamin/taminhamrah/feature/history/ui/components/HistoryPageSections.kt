@@ -11,11 +11,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -23,21 +25,28 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.history.ui.HistoryConstants
 import com.tamin.taminhamrah.feature.history.ui.HistoryDimens
 import com.tamin.taminhamrah.feature.history.ui.model.WorkshopPR
 import com.tamin.taminhamrah.mapper.history.labelRes
 import com.tamin.taminhamrah.model.history.HistoryCertificateType
-import com.tamin.taminhamrah.ui.components.BannerCard
-import com.tamin.taminhamrah.ui.components.BannerType
-import com.tamin.taminhamrah.ui.components.TaminActionTile
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.TaminHistoryButtonEnd
+import com.tamin.taminhamrah.ui.theme.TaminHistoryButtonStart
+import com.tamin.taminhamrah.ui.theme.TaminHistoryInfoBg
+import com.tamin.taminhamrah.ui.theme.TaminHistoryInfoIcon
+import com.tamin.taminhamrah.ui.theme.TaminHistoryInfoText
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -49,6 +58,8 @@ import taminx.feature.history.history_action_send_subtitle
 import taminx.feature.history.history_action_send_title
 import taminx.feature.history.history_combined_year_days
 import taminx.feature.history.history_download_sheet_title
+import taminx.feature.history.history_many_shops_subtitle
+import taminx.feature.history.history_many_shops_title
 import taminx.feature.history.history_note_gaps
 import taminx.feature.history.history_note_span
 import taminx.core.core_ui.Res as CoreRes
@@ -56,8 +67,7 @@ import taminx.core.core_ui.Res as CoreRes
 /**
  * The span of a career in one sentence, gaps included.
  *
- * Uses the shared banner in its calm teal form: nothing here is a warning, it is the shape of the
- * years the service holds — and the years it does not.
+ * Rendered in the new calm cyan banner with an info icon.
  */
 @Composable
 fun HistorySpanNote(
@@ -79,7 +89,31 @@ fun HistorySpanNote(
         HistoryConstants.SENTENCE_END
     }
 
-    BannerCard(message = span + gaps, type = BannerType.Tip, modifier = modifier)
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(TaminHistoryInfoBg)
+            .padding(horizontal = 12.dp, vertical = 11.dp),
+        horizontalArrangement = Arrangement.spacedBy(9.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.Info,
+            contentDescription = null,
+            tint = TaminHistoryInfoIcon,
+            modifier = Modifier.size(18.dp),
+        )
+        Text(
+            text = span + gaps,
+            style = MaterialTheme.typography.bodySmall.copy(
+                fontSize = 10.5.sp,
+                lineHeight = 20.sp,
+            ),
+            color = TaminHistoryInfoText,
+            modifier = Modifier.weight(1f),
+        )
+    }
 }
 
 /** One employer under the chart: who they were, and how much of the year they reported. */
@@ -90,33 +124,53 @@ fun WorkshopSummaryRow(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
+    val shape = remember { RoundedCornerShape(16.dp) }
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(CornerRadius.lg))
+            .clip(shape)
             .background(colors.bgSurface)
-            .border(HistoryDimens.hairline, colors.border, RoundedCornerShape(CornerRadius.lg))
+            .border(HistoryDimens.hairline, Color(0xFFEEF1F6), shape)
             .clickable(onClick = onClick)
-            .padding(horizontal = HistoryDimens.rowPaddingH, vertical = HistoryDimens.rowPaddingV),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        WorkshopIconTile()
+        // Blue tile icon
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .clip(RoundedCornerShape(11.dp))
+                .background(colors.blueBg),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Description,
+                contentDescription = null,
+                tint = colors.blueText,
+                modifier = Modifier.size(18.dp),
+            )
+        }
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = workshop.name,
-                style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.ExtraBold,
-                color = colors.textPrimary,
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontSize = 11.5.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                ),
+                color = Color(0xFF0F172A),
                 maxLines = 1,
             )
             Text(
                 text = workshop.type + HistoryConstants.SEPARATOR + workshop.branch,
-                style = MaterialTheme.typography.labelSmall,
-                color = colors.textMuted,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 9.5.sp,
+                ),
+                color = Color(0xFF9DB2CE),
                 maxLines = 1,
+                modifier = Modifier.padding(top = 2.dp),
             )
         }
 
@@ -125,54 +179,121 @@ fun WorkshopSummaryRow(
         Icon(
             imageVector = Icons.Filled.ChevronLeft,
             contentDescription = null,
-            tint = colors.textMuted,
-            modifier = Modifier.size(HistoryDimens.chevronSize),
+            tint = Color(0xFF9DB2CE),
+            modifier = Modifier.size(16.dp),
         )
     }
 }
 
+/** Multi-workshop banner card shown when a year has multiple employers. */
 @Composable
-private fun WorkshopIconTile() {
-    val colors = LocalTaminColors.current
-    Box(
-        modifier = Modifier
-            .size(HistoryDimens.tileSize)
-            .clip(RoundedCornerShape(HistoryDimens.tileCorner))
-            .background(colors.blueBg),
-        contentAlignment = Alignment.Center,
+fun ManyWorkshopsBanner(
+    workshopCount: Int,
+    totalDays: Int,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val shape = remember { RoundedCornerShape(18.dp) }
+    val gradient = remember {
+        Brush.linearGradient(listOf(TaminHistoryButtonStart, TaminHistoryButtonEnd))
+    }
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(gradient)
+            .border(HistoryDimens.hairline, Color(0x29FFFFFF), shape)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color.White),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Description,
+                contentDescription = null,
+                tint = Color(0xFF173D7E),
+                modifier = Modifier.size(20.dp),
+            )
+        }
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = stringResource(Res.string.history_many_shops_title, workshopCount.toString().toPersianDigits()),
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                ),
+                color = Color.White,
+            )
+            Text(
+                text = stringResource(Res.string.history_many_shops_subtitle),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 9.5.sp,
+                ),
+                color = Color(0xC2FFFFFF),
+                modifier = Modifier.padding(top = 2.dp),
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .clip(CircleShape)
+                .background(Color(0x2EFFFFFF))
+                .border(HistoryDimens.hairline, Color(0x42FFFFFF), CircleShape)
+                .padding(horizontal = 9.dp, vertical = 4.dp),
+        ) {
+            Text(
+                text = stringResource(Res.string.history_combined_year_days, totalDays.toString().toPersianDigits()),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 9.5.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                ),
+                color = Color.White,
+            )
+        }
+
         Icon(
-            imageVector = Icons.Outlined.Description,
+            imageVector = Icons.Filled.ChevronLeft,
             contentDescription = null,
-            tint = colors.blueText,
-            modifier = Modifier.size(HistoryDimens.tileIconSize),
+            tint = Color.White,
+            modifier = Modifier.size(16.dp),
         )
     }
 }
 
-/** «۲۴۵ روز» — the same pill the workshop rows and the sheet header both use. */
+/** «۲۴۵ روز» — the pill used in workshop summary rows. */
 @Composable
 fun DaysPill(days: Int, modifier: Modifier = Modifier) {
     val colors = LocalTaminColors.current
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(HistoryDimens.pillCorner))
+            .clip(CircleShape)
             .background(colors.blueBg)
-            .padding(horizontal = Spacing.sm, vertical = HistoryDimens.pillPaddingV),
+            .padding(horizontal = 9.dp, vertical = 4.dp),
     ) {
         Text(
             text = stringResource(
                 Res.string.history_combined_year_days,
                 days.toString().toPersianDigits(),
             ),
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontSize = 9.5.sp,
+                fontWeight = FontWeight.Bold,
+            ),
             color = colors.blueText,
         )
     }
 }
 
-/** The two things this page can do with the history it just showed. */
+/** The two action cards: Download PDF and Send to Institutions. */
 @Composable
 fun HistoryActionCards(
     onDownload: () -> Unit,
@@ -183,34 +304,85 @@ fun HistoryActionCards(
 
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        horizontalArrangement = Arrangement.spacedBy(9.dp),
     ) {
-        TaminActionTile(
+        ActionCardItem(
             icon = vectorResource(CoreRes.drawable.ic_tamin_download),
+            iconBg = colors.blueBg,
+            iconTint = colors.blueText,
             title = stringResource(Res.string.history_action_download_title),
             subtitle = stringResource(Res.string.history_action_download_subtitle),
-            iconTint = colors.blueText,
-            iconBackground = colors.blueBg,
             onClick = onDownload,
             modifier = Modifier.weight(1f),
         )
-        TaminActionTile(
+        ActionCardItem(
             icon = Icons.AutoMirrored.Filled.Send,
+            iconBg = colors.tealBg,
+            iconTint = colors.tealText,
             title = stringResource(Res.string.history_action_send_title),
             subtitle = stringResource(Res.string.history_action_send_subtitle),
-            iconTint = colors.tealText,
-            iconBackground = colors.tealBg,
             onClick = onSend,
             modifier = Modifier.weight(1f),
         )
     }
 }
 
+@Composable
+private fun ActionCardItem(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    iconBg: Color,
+    iconTint: Color,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val shape = remember { RoundedCornerShape(18.dp) }
+    Column(
+        modifier = modifier
+            .clip(shape)
+            .background(Color.White)
+            .border(HistoryDimens.hairline, Color(0xFFEEF1F6), shape)
+            .clickable(onClick = onClick)
+            .padding(13.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(34.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(iconBg),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = iconTint,
+                modifier = Modifier.size(18.dp),
+            )
+        }
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodySmall.copy(
+                fontSize = 12.sp,
+                fontWeight = FontWeight.ExtraBold,
+            ),
+            color = Color(0xFF0F172A),
+            modifier = Modifier.padding(top = 3.dp),
+        )
+        Text(
+            text = subtitle,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontSize = 9.5.sp,
+                lineHeight = 16.sp,
+            ),
+            color = Color(0xFF9DB2CE),
+        )
+    }
+}
+
 /**
  * The three reports, in the order the previous app listed them.
- *
- * A plain list rather than the shared selection sheet: choosing here opens the file straight away,
- * so there is nothing to confirm and no submit button to press.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -253,7 +425,20 @@ fun ReportMenuSheet(
                     horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    WorkshopIconTile()
+                    Box(
+                        modifier = Modifier
+                            .size(HistoryDimens.tileSize)
+                            .clip(RoundedCornerShape(HistoryDimens.tileCorner))
+                            .background(colors.blueBg),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Description,
+                            contentDescription = null,
+                            tint = colors.blueText,
+                            modifier = Modifier.size(HistoryDimens.tileIconSize),
+                        )
+                    }
                     Text(
                         text = stringResource(type.labelRes()),
                         style = MaterialTheme.typography.bodySmall,
@@ -279,4 +464,3 @@ private val ReportTypes = listOf(
     HistoryCertificateType.WAGES,
     HistoryCertificateType.COMBINED,
 )
-

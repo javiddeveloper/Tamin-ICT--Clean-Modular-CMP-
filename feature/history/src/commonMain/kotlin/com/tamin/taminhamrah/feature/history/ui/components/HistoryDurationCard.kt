@@ -31,7 +31,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.history.ui.HistoryDimens
-import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.collapseAway
 import com.tamin.taminhamrah.ui.components.collapseHeightAway
 import com.tamin.taminhamrah.ui.components.collapsingBottomPadding
@@ -128,10 +127,10 @@ fun HistoryDurationCard(
             // Older step button
             Box(modifier = Modifier.collapseAway(collapseProgress)) {
                 NavStepButton(
-                    icon = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                    enabled = model.hasOlder,
-                    onClick = onStepOlder,
-                    contentDescription = stringResource(CoreRes.string.history_step_older),
+                    icon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    enabled = model.hasNewer,
+                    onClick = onStepNewer,
+                    contentDescription = stringResource(CoreRes.string.history_step_newer),
                 )
             }
 
@@ -182,7 +181,7 @@ fun HistoryDurationCard(
                     horizontalArrangement = Arrangement.Center,
                 ) {
                     // Part 1 (Years / Main)
-                    NumericText(
+                    Text(
                         text = model.part1.number,
                         style = MaterialTheme.typography.headlineLarge.copy(
                             fontSize = HistoryDimens.durationTextLarge,
@@ -218,7 +217,7 @@ fun HistoryDurationCard(
                             color = TaminHistoryDurationNavBorder,
                             modifier = Modifier.alignByBaseline().padding(horizontal = 5.dp),
                         )
-                        NumericText(
+                        Text(
                             text = p2.number,
                             style = MaterialTheme.typography.headlineMedium.copy(
                                 fontSize = HistoryDimens.durationTextMedium,
@@ -255,7 +254,7 @@ fun HistoryDurationCard(
                             color = TaminHistoryDurationNavBorder,
                             modifier = Modifier.alignByBaseline().padding(horizontal = 5.dp),
                         )
-                        NumericText(
+                        Text(
                             text = p3.number,
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontSize = HistoryDimens.durationTextSmall,
@@ -285,10 +284,10 @@ fun HistoryDurationCard(
             // Newer step button
             Box(modifier = Modifier.collapseAway(collapseProgress)) {
                 NavStepButton(
-                    icon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    enabled = model.hasNewer,
-                    onClick = onStepNewer,
-                    contentDescription = stringResource(CoreRes.string.history_step_newer),
+                    icon = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                    enabled = model.hasOlder,
+                    onClick = onStepOlder,
+                    contentDescription = stringResource(CoreRes.string.history_step_older),
                 )
             }
         }
