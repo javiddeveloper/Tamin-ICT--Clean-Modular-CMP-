@@ -29,6 +29,23 @@ object HistoryDimens {
     /** The gap between the app-bar row, the chip strip and the orb row. */
     val heroRowGap = 14.dp
 
+    /**
+     * What the hero's lower padding closes to once the orb deck has folded away.
+     *
+     * Not zero: the year chips still need to clear the head's rounded edge, and the chart card
+     * rides up over that edge by [chartOverlap] — at zero the two meet and the strip's last row
+     * disappears under the card.
+     */
+    val heroPaddingBottomCollapsed = 12.dp
+
+    /**
+     * How far the body drags before the hero is fully folded.
+     *
+     * The orb deck's own height plus the row gap above it and the lower padding it takes with it,
+     * so the fold finishes exactly as the deck runs out rather than part-way through it.
+     */
+    val heroCollapseDistance = 104.dp + 14.dp + 16.dp
+
     /** The faint rule ruled over the hero. */
     val gridStep = 34.dp
     val gridStroke = 1.dp
@@ -103,6 +120,36 @@ object HistoryDimens {
     /** The dashed rule: dash, then gap. */
     val dashWidth = 4.dp
     val dashGap = 3.dp
+
+    // ── Year + month picker ───────────────────────────────────────────────────
+    /** The two columns, and the gap the design sets between and inside them. */
+    val pickerColumnGap = 9.dp
+    val pickerCardCorner = 18.dp
+    val pickerCardPaddingH = 8.dp
+    val pickerCardPaddingTop = 9.dp
+    val pickerCardPaddingBottom = 8.dp
+    val pickerHeaderPaddingH = 4.dp
+    val pickerHeaderPaddingBottom = 7.dp
+    val pickerRowGap = 5.dp
+    val pickerRowCorner = 13.dp
+    val pickerRowPaddingH = 10.dp
+    val pickerRowPaddingV = 8.dp
+
+    /**
+     * The design caps each column rather than letting it grow.
+     *
+     * The year column is the taller of the two because a career can be forty years and the month
+     * one is always twelve, so they are given different ceilings rather than one shared number.
+     */
+    val pickerYearListHeight = 212.dp
+    val pickerMonthListHeight = 172.dp
+
+    val pickerApplyCorner = 17.dp
+    val pickerApplyPaddingV = 13.dp
+    val pickerAllYearsCorner = 16.dp
+    val pickerAllYearsPaddingH = 13.dp
+    val pickerAllYearsPaddingV = 11.dp
+    val pickerEmptyPaddingV = 18.dp
 
     // ── Page ──────────────────────────────────────────────────────────────────
     val sidePadding = 18.dp

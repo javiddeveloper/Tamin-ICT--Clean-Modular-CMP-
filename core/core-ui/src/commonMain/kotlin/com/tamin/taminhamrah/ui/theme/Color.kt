@@ -440,19 +440,16 @@ val TaminHistoryZeroText = Color(0xFFC3CDDC)
 val TaminHistoryPartialYearText = Color(0xFFB4711A)
 val TaminHistoryPartialYearBg = Color(0xFFFDF3E3)
 
-/** Teal surface — the calm informational banner and the «ارسال» tile sit on it. */
-val TaminLightTealBg = Color(0xFFEAF7F7)
-
-/**
- * The same surface in dark, as a translucent accent rather than a darkened hex.
- *
- * Follows the convention the rest of the dark palette already uses (`0x29` over the accent), which
- * is what lets the tile sit on the card the way its blue sibling does.
- */
-val TaminDarkTealBg = Color(0x245BD8D4)
-
 /** Teal that stays legible on a dark surface — the design's own lighter teal. */
 val TaminDarkTeal = Color(0xFF5BD8D4)
+
+/**
+ * The secondary line on a picked row — a day count under a selected year or month.
+ *
+ * White at 72%, which is the design's own value. It sits on the filled row's gradient, so it is
+ * fixed rather than themed for the same reason the gradient is.
+ */
+val TaminHistoryPickedRowSub = Color(0xB8FFFFFF)
 
 /** Season markers in the year sheet: spring, summer, autumn, winter. */
 val TaminHistorySeasonSpring = Color(0xFF22A06B)

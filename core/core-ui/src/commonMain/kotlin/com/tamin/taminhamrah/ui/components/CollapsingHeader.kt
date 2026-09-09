@@ -18,6 +18,7 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.offset
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.util.lerp
 import com.tamin.taminhamrah.ui.theme.Easing
@@ -163,6 +164,26 @@ fun Modifier.collapseAway(progress: () -> Float, rate: Float = 2f): Modifier =
     }
 
 /**
+ * Like [collapseAway], but only the height goes.
+ *
+ * [collapseAway] shrinks both axes, which is what a short label beside something that stays wants —
+ * it should visibly pull in from every side. A full-width row folds differently: squeezing it
+ * horizontally reads as the row being crushed, not as it leaving, and its own children re-lay out
+ * on the way. Here the piece keeps its width, fades, and gives its height back, so what follows
+ * closes up over the fade the way a header's lower deck does.
+ *
+ * [progress] is read inside the layout lambda, so a frame of the fold costs no recomposition.
+ */
+fun Modifier.collapseHeightAway(progress: () -> Float, rate: Float = 1f): Modifier =
+    layout { measurable, constraints ->
+        val placeable = measurable.measure(constraints)
+        val fade = (1f - progress() * rate).coerceIn(0f, 1f)
+        layout(placeable.width, (placeable.height * fade).roundToInt()) {
+            placeable.placeRelativeWithLayer(0, 0) { alpha = fade }
+        }
+    }
+
+/**
  * Shrinks a piece toward [minScale] as it travels, anchored to its start edge so it keeps its
  * place in the collapsed bar rather than drifting toward the middle.
  */
@@ -175,6 +196,23 @@ fun Modifier.shrinkOnCollapse(
     scaleX = scale
     scaleY = scale
     transformOrigin = TransformOrigin(if (rtl) 1f else 0f, 0.5f)
+}
+
+/**
+ * Bottom padding that closes as the header folds, from [expanded] to [collapsed].
+ *
+ * A header's lower padding is sized for its open state. Left fixed, a folded header keeps a band of
+ * empty ground under its last row exactly as deep as the expanded one needed, which reads as the
+ * fold having stopped short. The padding is applied during layout, so it closes without recomposing.
+ */
+fun Modifier.collapsingBottomPadding(
+    progress: () -> Float,
+    expanded: Dp,
+    collapsed: Dp,
+): Modifier = layout { measurable, constraints ->
+    val padding = lerp(expanded.toPx(), collapsed.toPx(), progress().coerceIn(0f, 1f)).roundToInt()
+    val placeable = measurable.measure(constraints.offset(vertical = -padding))
+    layout(placeable.width, placeable.height + padding) { placeable.place(0, 0) }
 }
 
 /**

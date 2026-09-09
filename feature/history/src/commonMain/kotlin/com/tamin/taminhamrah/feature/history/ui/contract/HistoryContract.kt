@@ -79,6 +79,25 @@ data class HistoryUiState(
     val selectedSource: Int? = null,
     /** The year whose months are on screen in the sheet, or null while the page is. */
     val selectedYear: YearHistoryPR? = null,
+    /** «انتخاب سال و ماه» is open. */
+    val yearPickerOpen: Boolean = false,
+    /**
+     * What has been typed into the picker's year search, in ASCII digits?
+     *
+     * The field shows Persian digits and the years are matched as ASCII, so the conversion happens
+     * once on the way in rather than on every year of a long career on the way out.
+     */
+    val yearQuery: String = "",
+    /**
+     * What the picker has staged, which is not yet what the page shows.
+     *
+     * The design lets a person land on a year, look at its months, and change their mind before
+     * anything happens — so the pick is held here and only becomes [scope] and [selectedMonth] when
+     * they confirm. Applying on each tap would reload the chart under them three times on the way
+     * to the month they wanted.
+     */
+    val pickerYear: String? = null,
+    val pickerMonth: Int? = null,
     /** «ارسال سابقه به موسسات» is waiting to be confirmed. */
     val showSendConfirm: Boolean = false,
     /** The send is in flight; the confirm button says so and cannot be pressed twice. */
@@ -133,6 +152,20 @@ data class HistoryUiState(
 
         data class MetricSelected(val metric: HistoryMetric) : PartialState
 
+        /** Opening seeds the staged pick from what is on screen; closing leaves it untouched. */
+        data class YearPickerVisible(
+            val visible: Boolean,
+            val year: String? = null,
+            val month: Int? = null,
+        ) : PartialState
+
+        data class YearQueryChanged(val query: String) : PartialState
+
+        /** A year staged in the picker. Choosing one always drops the month staged under the last. */
+        data class PickerYearStaged(val year: String) : PartialState
+
+        data class PickerMonthStaged(val month: Int?) : PartialState
+
         data class SplitChanged(val split: Boolean) : PartialState
 
         data class SendConfirmVisible(val visible: Boolean) : PartialState
@@ -179,6 +212,21 @@ sealed interface HistoryIntent {
 
     /** Break the bars out per employer, or add them back together. */
     data object ToggleSplit : HistoryIntent
+
+    // ── «انتخاب سال و ماه» ───────────────────────────────────────────────────────
+    data object OpenYearPicker : HistoryIntent
+
+    data object DismissYearPicker : HistoryIntent
+
+    data class YearQueryChanged(val query: String) : HistoryIntent
+
+    data class PickerYearSelected(val year: String) : HistoryIntent
+
+    /** Null is «کل سال» — the whole year rather than one month of it. */
+    data class PickerMonthSelected(val month: Int?) : HistoryIntent
+
+    /** Commits the staged pick to the page and closes the sheet. */
+    data object ApplyYearPicker : HistoryIntent
 
     data object AskSendNotice : HistoryIntent
 
