@@ -54,6 +54,7 @@ import com.tamin.taminhamrah.ui.theme.GradientGreenStart
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.coroutines.flow.Flow
+import com.tamin.taminhamrah.model.payment.PaymentRequestDN
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.contract_affairs_pay_premium
@@ -67,6 +68,7 @@ fun ContractPremiumPaymentRoute(
     insuranceType: String,
     onBackClicked: () -> Unit,
     onNavigateToPaymentDetails: (premiumTypeCode: String, startDate: Long, endDate: Long) -> Unit,
+    onNavigateToPayment: (PaymentRequestDN) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -80,6 +82,7 @@ fun ContractPremiumPaymentRoute(
         events = viewModel.events,
         onBackClicked = onBackClicked,
         onNavigateToPaymentDetails = onNavigateToPaymentDetails,
+        onNavigateToPayment = onNavigateToPayment,
     )
 
     ContractPremiumPaymentScreen(uiState = uiState, onIntent = viewModel::sendIntent)
@@ -90,6 +93,7 @@ private fun ContractPremiumPaymentEvents(
     events: Flow<ContractPremiumPaymentEvent>,
     onBackClicked: () -> Unit,
     onNavigateToPaymentDetails: (premiumTypeCode: String, startDate: Long, endDate: Long) -> Unit,
+    onNavigateToPayment: (PaymentRequestDN) -> Unit,
 ) {
     val toaster = LocalToaster.current
     events.collectWithLifecycleAware { event ->
@@ -97,6 +101,7 @@ private fun ContractPremiumPaymentEvents(
             ContractPremiumPaymentEvent.NavigateBack -> onBackClicked()
             is ContractPremiumPaymentEvent.ShowError -> toaster.error(event.message)
             is ContractPremiumPaymentEvent.ShowWarning -> toaster.warning(event.message)
+            is ContractPremiumPaymentEvent.NavigateToPayment -> onNavigateToPayment(event.request)
             is ContractPremiumPaymentEvent.NavigateToPaymentDetails ->
                 onNavigateToPaymentDetails(event.premiumTypeCode, event.startDate, event.endDate)
         }

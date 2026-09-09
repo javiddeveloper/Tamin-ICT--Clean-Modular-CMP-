@@ -9,8 +9,12 @@ import com.tamin.taminhamrah.feature.contractaffair.ui.premiumPayment.contract.C
 import com.tamin.taminhamrah.model.contractAffair.ContractDebitDN
 import com.tamin.taminhamrah.model.contractAffair.ContractLastPaymentDN
 import com.tamin.taminhamrah.model.contractAffair.ContractPremiumType
+import com.tamin.taminhamrah.model.contracts.InsurancePaymentDN
+import com.tamin.taminhamrah.model.payment.PaymentVerifierKey
+import com.tamin.taminhamrah.feature.contractaffair.fake.FakeContractsRepository
 import com.tamin.taminhamrah.useCases.contractAffair.GetContractDebitUseCase
 import com.tamin.taminhamrah.useCases.contractAffair.GetContractLastPaymentUseCase
+import com.tamin.taminhamrah.useCases.contracts.GetInsurancePaymentUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -30,15 +34,18 @@ class ContractPremiumPaymentViewModelTest {
 
     private val dispatcher = UnconfinedTestDispatcher()
     private lateinit var repository: FakeContractAffairRepository
+    private lateinit var contractsRepository: FakeContractsRepository
     private lateinit var viewModel: ContractPremiumPaymentViewModel
 
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(dispatcher)
         repository = FakeContractAffairRepository()
+        contractsRepository = FakeContractsRepository()
         viewModel = ContractPremiumPaymentViewModel(
             getContractLastPaymentUseCase = GetContractLastPaymentUseCase(repository),
             getContractDebitUseCase = GetContractDebitUseCase(repository),
+            getInsurancePaymentUseCase = GetInsurancePaymentUseCase(contractsRepository),
         )
     }
 
@@ -154,6 +161,60 @@ class ContractPremiumPaymentViewModelTest {
             viewModel.sendIntent(ContractPremiumPaymentIntent.Calculate)
             var event = awaitItem()
             while (event !is ContractPremiumPaymentEvent.ShowError) event = awaitItem()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `Pay intent emits NavigateToPayment when ticket is fetched`() = runTest(dispatcher) {
+        repository.contractDebitResult = ContractDebitDN(
+            total = 53_866_782L,
+            insurancePremiums = 50_000_000L,
+            previousDebit = 0L,
+            startDate = 1000L,
+            endDate = 2000L,
+            payPremiumDate = "14051001",
+            infoMessage = null,
+        )
+        contractsRepository.insurancePaymentResult = InsurancePaymentDN(
+            paymentTicket = "TICKET-12345",
+            paymentUrl = "https://tfh.tamin.ir/payment",
+            responseMessage = "OK",
+            succeed = true,
+        )
+
+        viewModel.sendIntent(ContractPremiumPaymentIntent.Calculate)
+
+        viewModel.events.test {
+            viewModel.sendIntent(ContractPremiumPaymentIntent.Pay)
+            val event = awaitItem()
+            assertTrue(event is ContractPremiumPaymentEvent.NavigateToPayment)
+            assertEquals("TICKET-12345", event.request.ticket)
+            assertEquals(PaymentVerifierKey.SPECIAL_INSURED, event.request.verifierKey)
+            assertEquals("03", event.request.verifierReference)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `Pay intent emits ShowError when ticket fetch fails`() = runTest(dispatcher) {
+        repository.contractDebitResult = ContractDebitDN(
+            total = 53_866_782L,
+            insurancePremiums = 50_000_000L,
+            previousDebit = 0L,
+            startDate = 1000L,
+            endDate = 2000L,
+            payPremiumDate = "14051001",
+            infoMessage = null,
+        )
+        contractsRepository.shouldThrowError = true
+
+        viewModel.sendIntent(ContractPremiumPaymentIntent.Calculate)
+
+        viewModel.events.test {
+            viewModel.sendIntent(ContractPremiumPaymentIntent.Pay)
+            val event = awaitItem()
+            assertTrue(event is ContractPremiumPaymentEvent.ShowError)
             cancelAndIgnoreRemainingEvents()
         }
     }

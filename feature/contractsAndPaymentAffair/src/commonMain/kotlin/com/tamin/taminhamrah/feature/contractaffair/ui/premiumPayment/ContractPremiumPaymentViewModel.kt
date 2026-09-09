@@ -9,9 +9,14 @@ import com.tamin.taminhamrah.feature.contractaffair.ui.premiumPayment.contract.M
 import com.tamin.taminhamrah.feature.contractaffair.ui.premiumPayment.contract.MIN_PAYMENT_MONTHS
 import com.tamin.taminhamrah.mapper.contractAffair.toPresentation
 import com.tamin.taminhamrah.model.contractAffair.ContractPremiumType
+import com.tamin.taminhamrah.model.contracts.InsurancePaymentParamsDN
+import com.tamin.taminhamrah.model.payment.PaymentRequestDN
+import com.tamin.taminhamrah.model.payment.PaymentVerifierKey
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.contractAffair.GetContractDebitUseCase
 import com.tamin.taminhamrah.useCases.contractAffair.GetContractLastPaymentUseCase
+import com.tamin.taminhamrah.useCases.contracts.GetInsurancePaymentUseCase
+import com.tamin.taminhamrah.util.NetworkConstants
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
@@ -19,12 +24,13 @@ import kotlinx.coroutines.flow.flow
 
 /**
  * پرداخت حق بیمه (محاسبهٔ حق بیمه). Ported from `old_android`'s `InsurancePaymentViewModel`
- * (`getInitData` / `getInitDataOptional` + `calculateDebitByMonth`), trimmed to what the new
- * design needs — the SEP online-payment call is intentionally left out.
+ * (`getInitData` / `getInitDataOptional` + `calculateDebitByMonth`), integrated with shared
+ * `:feature:payment` via [GetInsurancePaymentUseCase].
  */
 class ContractPremiumPaymentViewModel(
     private val getContractLastPaymentUseCase: GetContractLastPaymentUseCase,
     private val getContractDebitUseCase: GetContractDebitUseCase,
+    private val getInsurancePaymentUseCase: GetInsurancePaymentUseCase,
 ) : BaseViewModel<ContractPremiumPaymentUiState, PartialState, ContractPremiumPaymentEvent, ContractPremiumPaymentIntent>(
     initialState = ContractPremiumPaymentUiState(),
 ) {
@@ -52,10 +58,7 @@ class ContractPremiumPaymentViewModel(
             ContractPremiumPaymentIntent.Calculate -> calculate()
             ContractPremiumPaymentIntent.OpenPaymentDetails -> openPaymentDetails()
 
-            ContractPremiumPaymentIntent.Pay -> {
-                // TODO: SEP online-payment — intentionally deferred, no logic wired here.
-                emptyFlow()
-            }
+            ContractPremiumPaymentIntent.Pay -> pay()
 
             ContractPremiumPaymentIntent.OnBackClicked -> {
                 sendEvent(ContractPremiumPaymentEvent.NavigateBack)
@@ -118,6 +121,46 @@ class ContractPremiumPaymentViewModel(
         }
     }
 
+    private fun pay(): Flow<PartialState> {
+        val debit = uiState.value.debit ?: return emptyFlow()
+        val systemType = "03"
+        return flow {
+            emit(PartialState.Paying(true))
+            try {
+                val params = InsurancePaymentParamsDN(
+                    systemType = systemType,
+                    redirectUrl = NetworkConstants.TFH_BASE_URL,
+                    startDate = debit.startDate,
+                    endDate = debit.endDate,
+                    amount = debit.payableAmount.toLongOrNull() ?: 0L,
+                    redirectUri = "mytamin://payment_callback",
+                    paramPage = "0",
+                    month = uiState.value.months,
+                )
+                val payment = getInsurancePaymentUseCase(params).first()
+                val ticket = payment.paymentTicket
+                if (payment.succeed == true && !ticket.isNullOrBlank()) {
+                    sendEvent(
+                        ContractPremiumPaymentEvent.NavigateToPayment(
+                            PaymentRequestDN(
+                                ticket = ticket,
+                                verifierKey = PaymentVerifierKey.SPECIAL_INSURED,
+                                verifierReference = systemType,
+                            ),
+                        ),
+                    )
+                } else {
+                    val message = payment.responseMessage ?: "خطا در دریافت شناسه پرداخت"
+                    sendEvent(ContractPremiumPaymentEvent.ShowError(message))
+                }
+            } catch (e: Exception) {
+                sendEvent(ContractPremiumPaymentEvent.ShowError(e.toSingleLineMessage()))
+            } finally {
+                emit(PartialState.Paying(false))
+            }
+        }
+    }
+
     private fun openPaymentDetails(): Flow<PartialState> {
         val debit = uiState.value.debit ?: return emptyFlow()
         sendEvent(
@@ -154,6 +197,8 @@ class ContractPremiumPaymentViewModel(
         )
 
         is PartialState.Calculating -> currentState.copy(isCalculating = partialState.calculating)
+
+        is PartialState.Paying -> currentState.copy(isPaying = partialState.isPaying)
 
         is PartialState.DebitCalculated -> currentState.copy(debit = partialState.debit)
 
