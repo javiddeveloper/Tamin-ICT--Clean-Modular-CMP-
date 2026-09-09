@@ -77,8 +77,6 @@ data class HistoryUiState(
     val selectedMonth: Int? = null,
     /** Which employer the month bars are filtered to, or null for all of them together. */
     val selectedSource: Int? = null,
-    /** The year whose months are on screen in the sheet, or null while the page is. */
-    val selectedYear: YearHistoryPR? = null,
     /** «انتخاب سال و ماه» is open. */
     val yearPickerOpen: Boolean = false,
     /**
@@ -142,7 +140,6 @@ data class HistoryUiState(
             val hasWageRecords: Boolean,
         ) : PartialState
 
-        data class YearSelected(val year: YearHistoryPR?) : PartialState
 
         data class ScopeChanged(val scope: HistoryScope) : PartialState
 
@@ -194,9 +191,7 @@ sealed interface HistoryIntent {
     data object Load : HistoryIntent
 
     /** Carries the year itself, so the sheet can never be handed a stale list position. */
-    data class SelectYear(val year: YearHistoryPR) : HistoryIntent
 
-    data object DismissYearDetail : HistoryIntent
 
     /** Switch the page between all years and one of them. */
     data class SelectScope(val scope: HistoryScope) : HistoryIntent

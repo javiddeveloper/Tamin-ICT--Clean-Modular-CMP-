@@ -170,7 +170,6 @@ private fun HistoryUiState.reduceForFixture(intent: HistoryIntent): HistoryUiSta
         selectedSource = if (!splitBySource) null else selectedSource,
     )
 
-    is HistoryIntent.SelectYear -> copy(selectedYear = intent.year)
 
     // «انتخاب سال و ماه», reduced the same way the ViewModel does so the fixture exercises the real
     // staging rules — including that a new year drops the month staged under the last one.
@@ -198,7 +197,6 @@ private fun HistoryUiState.reduceForFixture(intent: HistoryIntent): HistoryUiSta
         )
     } ?: this
 
-    is HistoryIntent.DismissYearDetail -> copy(selectedYear = null)
 
     is HistoryIntent.AskSendNotice -> copy(showSendConfirm = true)
 

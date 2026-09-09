@@ -24,17 +24,56 @@ object HistoryDimens {
     val heroCorner = 34.dp
     val heroPaddingH = 18.dp
     val heroPaddingTop = 8.dp
-    val heroPaddingBottom = 28.dp
+    val heroPaddingBottom = 54.dp
 
-    /** The gap between the app-bar row, the chip strip and the orb row. */
-    val heroRowGap = 14.dp
+    val heroActionSize = 36.dp
+    val heroActionCorner = 14.dp
+    val heroActionIconSize = 18.dp
+
+    // ── Duration Card ─────────────────────────────────────────────────────────
+    val durationCardOverlap = (-34).dp
+    val durationCardCorner = 24.dp
+    val durationStripeHeight = 3.dp
+    val durationNavSize = 31.dp
+
+    val durationCardPaddingH = 14.dp
+    val durationCardPaddingV = 13.dp
+
+    /** What the card's lower padding closes to once it is just a summary bar. */
+    val durationCardPaddingVCollapsed = 7.dp
+
+    /** Between the scope pill and the figures under it. */
+    val durationFiguresGap = 5.dp
 
     /**
-     * What the hero's lower padding closes to once the orb deck has folded away.
+     * How far the figures shrink in the collapsed bar.
      *
-     * Not zero: the year chips still need to clear the head's rounded edge, and the chart card
-     * rides up over that edge by [chartOverlap] — at zero the two meet and the strip's last row
-     * disappears under the card.
+     * Small enough to read as a summary rather than a heading, large enough that the ۴۶sp figure is
+     * still the thing the eye lands on — the same role the name plays in the treatment card's bar.
+     */
+    const val durationFiguresCollapsedScale = 0.52f
+    val durationNavIconSize = 15.dp
+
+    /**
+     * The three figures, and the units beside them.
+     *
+     * A much narrower spread than the mock's 46/27/17: at that range the years dwarf the months and
+     * days into footnotes and the line stops reading as one figure. These keep the hierarchy — the
+     * years are still first — while letting all three be read together.
+     */
+    val durationTextLarge = 34.sp
+    val durationTextMedium = 27.sp
+    val durationTextSmall = 23.sp
+    val durationUnitLarge = 13.sp
+    val durationUnitMedium = 12.sp
+    val durationUnitSmall = 11.sp
+    val durationSeparator = 14.sp
+
+    /** The gap between the app-bar row, the chip strip and the duration card. */
+    val heroRowGap = 16.dp
+
+    /**
+     * What the hero's lower padding closes to once folded away.
      */
     val heroPaddingBottomCollapsed = 12.dp
 
@@ -45,6 +84,12 @@ object HistoryDimens {
      * so the fold finishes exactly as the deck runs out rather than part-way through it.
      */
     val heroCollapseDistance = 104.dp + 14.dp + 16.dp
+
+    /** The app-bar button, and the spacer that balances it so a centred title really is centred. */
+    val heroButtonSize = 36.dp
+
+    /** The bloom washed over the head's top corner. */
+    val heroGlowSize = 95.dp
 
     /** The faint rule ruled over the hero. */
     val gridStep = 34.dp
@@ -68,9 +113,23 @@ object HistoryDimens {
     val durationChipGap = 5.dp
 
     // ── Chart card ────────────────────────────────────────────────────────────
-    val cardCorner = 24.dp
-    val cardPaddingH = 15.dp
+    val cardCorner = 22.dp
+    val cardPaddingH = 12.dp
     val cardPaddingV = 14.dp
+
+    val indicatorWidth = 3.dp
+    val indicatorHeight = 15.dp
+    val indicatorCorner = 2.dp
+
+    val subChartCorner = 16.dp
+    val subChartPaddingH = 11.dp
+    val subChartPaddingV = 9.dp
+
+    val legendCorner = 12.dp
+    val legendPaddingH = 10.dp
+    val legendPaddingV = 8.dp
+    val legendDotSize = 9.dp
+    val legendDotCorner = 3.dp
 
     val sourceChipPaddingV = 6.dp
 

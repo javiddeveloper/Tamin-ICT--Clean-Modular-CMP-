@@ -35,8 +35,7 @@ import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.collapseAway
 import com.tamin.taminhamrah.ui.components.collapseHeightAway
 import com.tamin.taminhamrah.ui.components.collapsingBottomPadding
-import com.tamin.taminhamrah.ui.components.scaleDownToFitWidth
-import com.tamin.taminhamrah.ui.components.shrinkOnCollapse
+import com.tamin.taminhamrah.ui.components.scaleOnCollapse
 import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationCardBgEnd
 import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationCardBgStart
 import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationCardBorder
@@ -171,18 +170,15 @@ fun HistoryDurationCard(
                             collapsed = 0.dp,
                         )
                         // What survives the fold: the person's own record, in one line, smaller.
-                        // The design's proportions between the three figures are kept because the
-                        // whole line scales together rather than each part being re-styled.
-                        .shrinkOnCollapse(
+                        // One modifier measures the line unbounded (so «۱۷» keeps its ۷), scales it
+                        // as the head folds, and reports the scaled size so the card closes with it.
+                        .scaleOnCollapse(
                             progress = collapseProgress,
                             minScale = HistoryDimens.durationFiguresCollapsedScale,
                             rtl = true,
-                        )
-                        // «۱۷ سال · ۱ ماه · ۳ روز» is one figure in four sizes. Without this the
-                        // 46sp number is measured against whatever width the pieces after it left
-                        // over and wraps — ۱۷ drawn as ۱ above ۷.
-                        .scaleDownToFitWidth(),
-                    verticalAlignment = Alignment.Bottom,
+                        ),
+                    // One baseline for all three figures and their units — aligning on the bottom
+                    // edge instead left each piece sitting at its own height.
                     horizontalArrangement = Arrangement.Center,
                 ) {
                     // Part 1 (Years / Main)
@@ -195,18 +191,19 @@ fun HistoryDurationCard(
                             lineHeight = HistoryDimens.durationTextLarge,
                         ),
                         color = TaminHistoryDurationNavIcon,
+                        modifier = Modifier.alignByBaseline(),
                     )
                     if (model.part1.unit.isNotBlank()) {
                         Text(
                             text = model.part1.unit,
                             style = MaterialTheme.typography.bodyMedium.copy(
-                                fontSize = 14.sp,
+                                fontSize = HistoryDimens.durationUnitLarge,
                                 fontWeight = FontWeight.Bold,
                             ),
                             color = TaminHistoryDurationUnit,
                             maxLines = 1,
                             softWrap = false,
-                            modifier = Modifier.padding(start = 4.dp, bottom = 6.dp),
+                            modifier = Modifier.alignByBaseline().padding(start = 4.dp),
                         )
                     }
 
@@ -215,11 +212,11 @@ fun HistoryDurationCard(
                         Text(
                             text = "·",
                             style = MaterialTheme.typography.titleMedium.copy(
-                                fontSize = 15.sp,
+                                fontSize = HistoryDimens.durationSeparator,
                                 fontWeight = FontWeight.Bold,
                             ),
                             color = TaminHistoryDurationNavBorder,
-                            modifier = Modifier.padding(horizontal = 5.dp).padding(bottom = 6.dp),
+                            modifier = Modifier.alignByBaseline().padding(horizontal = 5.dp),
                         )
                         NumericText(
                             text = p2.number,
@@ -230,19 +227,19 @@ fun HistoryDurationCard(
                                 lineHeight = HistoryDimens.durationTextMedium,
                             ),
                             color = TaminHistoryDurationFigureMinor,
-                            modifier = Modifier.padding(bottom = 2.dp),
+                            modifier = Modifier.alignByBaseline(),
                         )
                         if (p2.unit.isNotBlank()) {
                             Text(
                                 text = p2.unit,
                                 style = MaterialTheme.typography.bodySmall.copy(
-                                    fontSize = 11.5.sp,
+                                    fontSize = HistoryDimens.durationUnitMedium,
                                     fontWeight = FontWeight.Bold,
                                 ),
                                 color = TaminHistoryDurationUnit,
                                 maxLines = 1,
                                 softWrap = false,
-                                modifier = Modifier.padding(start = 4.dp, bottom = 6.dp),
+                            modifier = Modifier.alignByBaseline().padding(start = 4.dp),
                             )
                         }
                     }
@@ -252,11 +249,11 @@ fun HistoryDurationCard(
                         Text(
                             text = "·",
                             style = MaterialTheme.typography.titleSmall.copy(
-                                fontSize = 13.sp,
+                                fontSize = HistoryDimens.durationSeparator,
                                 fontWeight = FontWeight.Bold,
                             ),
                             color = TaminHistoryDurationNavBorder,
-                            modifier = Modifier.padding(horizontal = 5.dp).padding(bottom = 6.dp),
+                            modifier = Modifier.alignByBaseline().padding(horizontal = 5.dp),
                         )
                         NumericText(
                             text = p3.number,
@@ -266,19 +263,19 @@ fun HistoryDurationCard(
                                 lineHeight = HistoryDimens.durationTextSmall,
                             ),
                             color = TaminHistoryDurationFigureLeast,
-                            modifier = Modifier.padding(bottom = 3.dp),
+                            modifier = Modifier.alignByBaseline(),
                         )
                         if (p3.unit.isNotBlank()) {
                             Text(
                                 text = p3.unit,
                                 style = MaterialTheme.typography.labelSmall.copy(
-                                    fontSize = 10.sp,
+                                    fontSize = HistoryDimens.durationUnitSmall,
                                     fontWeight = FontWeight.SemiBold,
                                 ),
                                 color = TaminHistoryDurationUnit,
                                 maxLines = 1,
                                 softWrap = false,
-                                modifier = Modifier.padding(start = 4.dp, bottom = 6.dp),
+                            modifier = Modifier.alignByBaseline().padding(start = 4.dp),
                             )
                         }
                     }
