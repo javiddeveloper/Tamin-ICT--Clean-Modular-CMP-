@@ -184,6 +184,41 @@ fun Modifier.collapseHeightAway(progress: () -> Float, rate: Float = 1f): Modifi
     }
 
 /**
+ * Shrinks a line toward [minScale] as the header folds, and gives back the space it stops using.
+ *
+ * [shrinkOnCollapse] scales in the draw phase, so the piece *looks* smaller while still reserving
+ * its full size — a card folded that way keeps the height of its expanded content and reads as a
+ * mostly-empty box. This scales in the layout phase instead, so the row above closes up behind it.
+ *
+ * It also measures its content unbounded, which is what a line of mixed type needs: measured
+ * against a width it does not have, a `Text` inside is laid out to that width and clipped, so a
+ * two-digit number loses its second digit. Measure first, scale second.
+ *
+ * If the result would still be wider than the space available, the scale tightens further, so this
+ * subsumes a plain fit-to-width — there is no need to stack the two.
+ */
+fun Modifier.scaleOnCollapse(
+    progress: () -> Float,
+    minScale: Float,
+    rtl: Boolean,
+): Modifier = layout { measurable, constraints ->
+    val placeable = measurable.measure(Constraints())
+    var scale = lerp(1f, minScale, Easing.standard.transform(progress().coerceIn(0f, 1f)))
+    val max = constraints.maxWidth
+    if (max != Constraints.Infinity && placeable.width > 0 && placeable.width * scale > max) {
+        scale = max.toFloat() / placeable.width.toFloat()
+    }
+    layout((placeable.width * scale).roundToInt(), (placeable.height * scale).roundToInt()) {
+        placeable.placeRelativeWithLayer(0, 0) {
+            scaleX = scale
+            scaleY = scale
+            // Anchored to the leading edge so the line stays put as it shrinks.
+            transformOrigin = TransformOrigin(if (rtl) 1f else 0f, 0.5f)
+        }
+    }
+}
+
+/**
  * Shrinks a piece toward [minScale] as it travels, anchored to its start edge so it keeps its
  * place in the collapsed bar rather than drifting toward the middle.
  */
@@ -196,6 +231,44 @@ fun Modifier.shrinkOnCollapse(
     scaleX = scale
     scaleY = scale
     transformOrigin = TransformOrigin(if (rtl) 1f else 0f, 0.5f)
+}
+
+/**
+ * Shrinks a row of mixed type uniformly, and only when it would not otherwise fit.
+ *
+ * A line like «۱۷ سال · ۱ ماه · ۳ روز» is one figure built from eight pieces at four sizes. Left to
+ * a `Row`, each piece is measured against whatever width the pieces before it left over, and a
+ * number too wide for its share does not shrink — it *wraps*, so ۱۷ is drawn as ۱ above ۷. Capping
+ * lines does not help either: the pieces then clip one by one from the end.
+ *
+ * So the content is measured unbounded — at the size the design actually specifies — and the whole
+ * line is scaled down together when the width cannot take it. The proportions between the parts are
+ * the design's and survive; only the overall size gives. On a wide screen nothing scales at all.
+ *
+ * The scale is applied in the layout and draw phases, so a width change costs no recomposition.
+ */
+fun Modifier.scaleDownToFitWidth(): Modifier = layout { measurable, constraints ->
+    // Fully unbounded, not `constraints.copy(maxWidth = Infinity)`: the copy keeps the incoming
+    // height bounds, and a text measured under them can still be laid out against a width it was
+    // never given. `Constraints()` is what the app's other morphing cards measure their pieces
+    // with, and it is the only form that reliably reports a line's true intrinsic width.
+    val placeable = measurable.measure(Constraints())
+    val scale = if (placeable.width > constraints.maxWidth && placeable.width > 0) {
+        constraints.maxWidth.toFloat() / placeable.width.toFloat()
+    } else {
+        1f
+    }
+    val width = (placeable.width * scale).roundToInt()
+    val height = (placeable.height * scale).roundToInt()
+    layout(width, height) {
+        placeable.placeRelativeWithLayer(0, 0) {
+            scaleX = scale
+            scaleY = scale
+            // Anchored to the leading edge, so the scaled line starts where the row starts
+            // instead of drifting toward the middle as it shrinks.
+            transformOrigin = TransformOrigin(0f, 0.5f)
+        }
+    }
 }
 
 /**

@@ -9,12 +9,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,18 +30,28 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.history.ui.HistoryConstants
 import com.tamin.taminhamrah.feature.history.ui.HistoryDimens
 import com.tamin.taminhamrah.feature.history.ui.model.YearDetailPR
 import com.tamin.taminhamrah.ui.components.BarChartSeries
 import com.tamin.taminhamrah.ui.components.NumericText
-import com.tamin.taminhamrah.ui.components.TaminBarChartGroup
+import com.tamin.taminhamrah.ui.components.TaminBarChart
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.ui.theme.TaminHistoryButtonEnd
-import com.tamin.taminhamrah.ui.theme.TaminHistoryButtonStart
+import com.tamin.taminhamrah.ui.theme.TaminHistoryBarFullBottom
+import com.tamin.taminhamrah.ui.theme.TaminHistoryBarFullTop
+import com.tamin.taminhamrah.ui.theme.TaminHistoryBarPartialMonthBottom
+import com.tamin.taminhamrah.ui.theme.TaminHistoryBarPartialMonthTop
 import com.tamin.taminhamrah.ui.theme.TaminHistoryConcurrentBottom
 import com.tamin.taminhamrah.ui.theme.TaminHistoryConcurrentTop
+import com.tamin.taminhamrah.ui.theme.TaminHistoryIndicatorEnd
+import com.tamin.taminhamrah.ui.theme.TaminHistoryIndicatorStart
+import com.tamin.taminhamrah.ui.theme.TaminHistoryLegendBg
+import com.tamin.taminhamrah.ui.theme.TaminHistorySubChartBgEnd
+import com.tamin.taminhamrah.ui.theme.TaminHistorySubChartBgStart
+import com.tamin.taminhamrah.ui.theme.TaminHistorySubChartBorder
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -45,11 +59,35 @@ import kotlinx.collections.immutable.persistentListOf
 @Immutable
 data class SourceChipPR(val label: String, val selected: Boolean)
 
+/** One tappable pill: a filter, a series, or a toggle. */
+@Immutable
+data class FilterChipPR(val label: String, val selected: Boolean)
+
+/** A workshop split timeline row. */
+@Immutable
+data class WorkshopSplitRowPR(
+    val label: String,
+    val color: Color,
+    val totalText: String,
+    val monthOpacities: ImmutableList<Float>,
+)
+
+/** The three points a dense series is read by, instead of a label under every bar. */
+@Immutable
+data class ChartAxis(val oldest: String, val middle: String, val newest: String)
+
 /**
- * The chart and everything read off it.
+ * The redesigned chart card for «کلیه سوابق».
  *
- * The card is the same in both scopes — only its title, its bars and what sits under them change —
- * so it is one composable rather than two that would drift apart.
+ * Features:
+ * - Clean white container with rounded corners and border.
+ * - Header with vertical gradient indicator bar, title and hint.
+ * - Employer (کارگاه) filter row + «تفکیک کارگاه» toggle button.
+ * - Metric switcher row (شاخص: هر دو / دستمزد / روزهای کار).
+ * - Styled sub-chart cards for each series (wage, days) with max badges and gridlines.
+ * - Legend status bar (سال کامل / سال ناقص / بدون سابقه، ستونی ندارد).
+ * - Optional workshop timeline breakdown when split mode is active.
+ * - Detail footer.
  */
 @Composable
 fun HistoryChartCard(
@@ -63,46 +101,70 @@ fun HistoryChartCard(
     sourceLabel: String = "",
     sourceChips: ImmutableList<SourceChipPR> = persistentListOf(),
     onSourceClick: (Int?) -> Unit = {},
-    /** The تفکیک کارگاه toggle, or null where there is only one employer to split. */
     splitChip: FilterChipPR? = null,
     onSplitClick: () -> Unit = {},
     metricLabel: String = "",
     metricChips: ImmutableList<FilterChipPR> = persistentListOf(),
     onMetricClick: (Int) -> Unit = {},
     rotateLabels: Boolean = false,
+    fullLabel: String = "سال کامل",
+    partialLabel: String = "سال ناقص",
+    barHint: String = "بدون سابقه، ستونی ندارد",
+    splitRows: ImmutableList<WorkshopSplitRowPR> = persistentListOf(),
     concurrency: String? = null,
     concurrencyLabel: String = "",
     footer: @Composable ColumnScope.() -> Unit = {},
 ) {
     val colors = LocalTaminColors.current
+    val indicatorBrush = remember {
+        Brush.verticalGradient(listOf(TaminHistoryIndicatorStart, TaminHistoryIndicatorEnd))
+    }
 
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(HistoryDimens.cardCorner))
             .background(colors.bgSurface)
-            .border(HistoryDimens.hairline, colors.border, RoundedCornerShape(HistoryDimens.cardCorner))
+            .border(HistoryDimens.hairline, Color(0xFFEEF1F6), RoundedCornerShape(HistoryDimens.cardCorner))
             .padding(horizontal = HistoryDimens.cardPaddingH, vertical = HistoryDimens.cardPaddingV),
         verticalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
+        // Header row
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.ExtraBold,
-                color = colors.textPrimary,
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(7.dp),
+            ) {
+                // Vertical accent indicator
+                Box(
+                    modifier = Modifier
+                        .size(width = HistoryDimens.indicatorWidth, height = HistoryDimens.indicatorHeight)
+                        .clip(RoundedCornerShape(HistoryDimens.indicatorCorner))
+                        .background(indicatorBrush),
+                )
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                    ),
+                    color = Color(0xFF0F172A),
+                )
+            }
             Text(
                 text = hint,
-                style = MaterialTheme.typography.labelSmall,
-                color = colors.textMuted,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 9.5.sp,
+                    color = Color(0xFF64748B),
+                ),
             )
         }
 
+        // Workshop chips row
         if (sourceChips.isNotEmpty() || splitChip != null) {
             SourceChipRow(
                 label = sourceLabel,
@@ -111,25 +173,59 @@ fun HistoryChartCard(
                 splitChip = splitChip,
                 onSplitClick = onSplitClick,
             )
+            DashedDivider(modifier = Modifier.padding(top = 2.dp))
         }
 
+        // Metric chips row
         if (metricChips.isNotEmpty()) {
-            MetricChipRow(label = metricLabel, chips = metricChips, onPick = onMetricClick)
+            MetricChipRow(
+                label = metricLabel,
+                chips = metricChips,
+                onPick = onMetricClick,
+            )
         }
 
-        TaminBarChartGroup(
-            series = series,
-            onBarClick = onBarClick,
-            dense = dense,
-            showLabels = !dense,
-            rotateLabels = rotateLabels,
-        )
+        val chartScrollState = rememberScrollState()
 
+        // Sub-chart containers
+        series.forEach { plot ->
+            SubChartContainer(
+                series = plot,
+                onBarClick = onBarClick,
+                dense = dense,
+                rotateLabels = rotateLabels,
+                scrollState = chartScrollState,
+            )
+        }
+
+        // Axis row if dense series
         axis?.let { ChartAxisRow(it) }
 
+        // Legend bar
+        LegendBar(
+            fullLabel = fullLabel,
+            partialLabel = partialLabel,
+            hint = barHint,
+        )
+
+        // Workshop split timeline rows
+        if (splitChip?.selected == true && splitRows.isNotEmpty()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = Spacing.xs),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                splitRows.forEach { row ->
+                    WorkshopTimelineRow(row = row)
+                }
+            }
+        }
+
+        // Concurrent employment indicator
         concurrency?.let { note ->
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(top = Spacing.xs),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -146,8 +242,7 @@ fun HistoryChartCard(
                 )
                 Text(
                     text = concurrencyLabel,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                     color = colors.tealText,
                 )
                 Text(
@@ -162,9 +257,228 @@ fun HistoryChartCard(
     }
 }
 
-/** The three points a dense series is read by, instead of a label under every bar. */
-@Immutable
-data class ChartAxis(val oldest: String, val middle: String, val newest: String)
+/** Card container for an individual sub-chart (Wage / Days). */
+@Composable
+private fun SubChartContainer(
+    series: BarChartSeries,
+    onBarClick: (String) -> Unit,
+    dense: Boolean,
+    rotateLabels: Boolean,
+    scrollState: androidx.compose.foundation.ScrollState,
+) {
+    val containerBrush = remember {
+        Brush.verticalGradient(listOf(TaminHistorySubChartBgStart, TaminHistorySubChartBgEnd))
+    }
+    val containerShape = remember { RoundedCornerShape(HistoryDimens.subChartCorner) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(containerShape)
+            .background(containerBrush)
+            .border(HistoryDimens.hairline, TaminHistorySubChartBorder, containerShape)
+            .padding(horizontal = HistoryDimens.subChartPaddingH, vertical = HistoryDimens.subChartPaddingV),
+    ) {
+        // Sub-chart header
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 9.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = series.title,
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontSize = 10.5.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                ),
+                color = Color(0xFF0F172A),
+            )
+
+            if (series.caption.isNotBlank()) {
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(Color.White)
+                        .border(HistoryDimens.hairline, Color(0xFFE8EDF5), CircleShape)
+                        .padding(horizontal = 8.dp, vertical = 3.dp),
+                ) {
+                    Text(
+                        text = series.caption,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontSize = 8.5.sp,
+                            fontWeight = FontWeight.Bold,
+                        ),
+                        color = Color(0xFF64748B),
+                    )
+                }
+            }
+        }
+
+        // Plot area with adaptive horizontal scrolling and shared synchronized scroll
+        TaminBarChart(
+            bars = series.bars,
+            onBarClick = onBarClick,
+            plotHeight = series.plotHeight,
+            dense = dense,
+            showLabels = true,
+            rotateLabels = rotateLabels,
+            animationKey = series.id,
+            scrollBehavior = com.tamin.taminhamrah.ui.components.ChartScrollBehavior.Adaptive,
+            minBarWidth = 34.dp,
+            gap = 6.dp,
+            scrollState = scrollState,
+            gridLines = com.tamin.taminhamrah.ui.components.ChartGridLines(
+                showTop = true,
+                showMiddle = true,
+                showBaseline = true,
+                lineColor = Color(0x120F172A),
+                middleLineColor = Color(0x0D0F172A),
+                baselineColor = Color(0x240F172A),
+            ),
+        )
+    }
+}
+
+/** Status chips legend: Full, Partial, and Empty hint. */
+@Composable
+private fun LegendBar(
+    fullLabel: String,
+    partialLabel: String,
+    hint: String,
+) {
+    val fullBrush = remember {
+        Brush.verticalGradient(listOf(TaminHistoryBarFullTop, TaminHistoryBarFullBottom))
+    }
+    val partialBrush = remember {
+        Brush.verticalGradient(listOf(TaminHistoryBarPartialMonthTop, TaminHistoryBarPartialMonthBottom))
+    }
+    val shape = remember { RoundedCornerShape(HistoryDimens.legendCorner) }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(TaminHistoryLegendBg)
+            .padding(horizontal = HistoryDimens.legendPaddingH, vertical = HistoryDimens.legendPaddingV),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        // Full cover swatch
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(HistoryDimens.legendDotSize)
+                    .clip(RoundedCornerShape(HistoryDimens.legendDotCorner))
+                    .background(fullBrush),
+            )
+            Text(
+                text = fullLabel,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 9.5.sp,
+                    fontWeight = FontWeight.Bold,
+                ),
+                color = Color(0xFF64748B),
+            )
+        }
+
+        // Partial cover swatch
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(HistoryDimens.legendDotSize)
+                    .clip(RoundedCornerShape(HistoryDimens.legendDotCorner))
+                    .background(partialBrush),
+            )
+            Text(
+                text = partialLabel,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 9.5.sp,
+                    fontWeight = FontWeight.Bold,
+                ),
+                color = Color(0xFF64748B),
+            )
+        }
+
+        // Empty hint
+        Text(
+            text = hint,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontSize = 9.sp,
+                fontWeight = FontWeight.SemiBold,
+            ),
+            color = Color(0xFF64748B),
+        )
+    }
+}
+
+/** One workshop row in the split timeline view. */
+@Composable
+private fun WorkshopTimelineRow(row: WorkshopSplitRowPR) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(5.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.weight(1f),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(7.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(row.color),
+                )
+                Text(
+                    text = row.label,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                    color = Color(0xFF0F172A),
+                    maxLines = 1,
+                )
+            }
+            NumericText(
+                text = row.totalText,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 9.5.sp,
+                    fontWeight = FontWeight.Bold,
+                ),
+                color = Color(0xFF64748B),
+            )
+        }
+
+        // 12-month mini-cells timeline
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(3.dp),
+        ) {
+            row.monthOpacities.forEach { opacity ->
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(9.dp)
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(
+                            if (opacity > 0f) row.color.copy(alpha = opacity) else Color(0x120F172A),
+                        ),
+                )
+            }
+        }
+    }
+}
 
 @Composable
 private fun ChartAxisRow(axis: ChartAxis) {
@@ -191,16 +505,6 @@ private fun ChartAxisRow(axis: ChartAxis) {
     }
 }
 
-/** One tappable pill: a filter, a series, or a toggle. */
-@Immutable
-data class FilterChipPR(val label: String, val selected: Boolean)
-
-/**
- * «کارگاه» — which employer the bars count, and whether they are split out per employer.
- *
- * The split toggle sits at the far end of the same row because it answers the same question from
- * the other side: filter *down to* one, or show them all *apart*.
- */
 @Composable
 private fun SourceChipRow(
     label: String,
@@ -209,30 +513,67 @@ private fun SourceChipRow(
     splitChip: FilterChipPR?,
     onSplitClick: () -> Unit,
 ) {
-    ChipLane(label = label) {
-        chips.forEachIndexed { index, chip ->
-            // The first chip is «همه»; the rest map onto the employer at their own position.
-            val source = (index - 1).takeIf { it >= 0 }
-            HistoryPillChip(
-                label = chip.label,
-                selected = chip.selected,
-                onClick = { onSourceClick(source) },
-            )
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Row(
+            modifier = Modifier.weight(1f).horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (label.isNotBlank()) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                    color = Color(0xFF64748B),
+                )
+            }
+            chips.forEachIndexed { index, chip ->
+                val source = (index - 1).takeIf { it >= 0 }
+                HistoryPillChip(
+                    label = chip.label,
+                    selected = chip.selected,
+                    onClick = { onSourceClick(source) },
+                )
+            }
         }
+
         splitChip?.let {
-            HistoryPillChip(label = it.label, selected = it.selected, onClick = onSplitClick)
+            HistorySplitToggleChip(
+                label = it.label,
+                selected = it.selected,
+                onClick = onSplitClick,
+            )
         }
     }
 }
 
-/** «شاخص» — which series the chart plots. */
 @Composable
 private fun MetricChipRow(
     label: String,
     chips: ImmutableList<FilterChipPR>,
     onPick: (Int) -> Unit,
 ) {
-    ChipLane(label = label) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (label.isNotBlank()) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold,
+                ),
+                color = Color(0xFF64748B),
+            )
+        }
         chips.forEachIndexed { index, chip ->
             HistoryPillChip(
                 label = chip.label,
@@ -243,69 +584,71 @@ private fun MetricChipRow(
     }
 }
 
-/**
- * A named row of pills.
- *
- * A plain scrolling [Row] rather than a `LazyRow`: these lanes hold three or four chips, and a lazy
- * list would add a scroll container and its own item bookkeeping to save composing nothing.
- */
-@Composable
-private fun ChipLane(label: String, content: @Composable RowScope.() -> Unit) {
-    val colors = LocalTaminColors.current
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        if (label.isNotBlank()) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = colors.textMuted,
-            )
-        }
-        content()
-    }
-}
-
-/**
- * One pill.
- *
- * The selected brush is hoisted to a file-level value: it never varies, and building a [Brush] per
- * chip per recomposition is an allocation on every frame of a chart forming.
- */
 @Composable
 private fun HistoryPillChip(label: String, selected: Boolean, onClick: () -> Unit) {
-    val colors = LocalTaminColors.current
-    val shape = remember { RoundedCornerShape(HistoryDimens.pillCorner) }
+    val shape = remember { CircleShape }
+    val bg = if (selected) Color(0xFF173D7E) else Color.White
+    val border = if (selected) Color(0xFF173D7E) else Color(0xFFE5E7EB)
+    val textColor = if (selected) Color.White else Color(0xFF64748B)
+
     Box(
         modifier = Modifier
             .clip(shape)
-            .then(
-                if (selected) Modifier.background(SelectedChipBrush) else Modifier.background(colors.bgPage),
-            )
-            .border(
-                HistoryDimens.hairline,
-                if (selected) TaminHistoryButtonEnd else colors.border,
-                shape,
-            )
+            .background(bg)
+            .border(HistoryDimens.hairline, border, shape)
             .clickable(onClick = onClick)
-            .padding(horizontal = Spacing.sm, vertical = HistoryDimens.sourceChipPaddingV),
+            .padding(horizontal = 10.dp, vertical = 6.dp),
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Bold,
-            color = if (selected) Color.White else colors.textSecondary,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+            ),
+            color = textColor,
             maxLines = 1,
         )
     }
 }
 
-private val SelectedChipBrush =
-    Brush.linearGradient(listOf(TaminHistoryButtonStart, TaminHistoryButtonEnd))
+@Composable
+private fun HistorySplitToggleChip(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    val shape = remember { CircleShape }
+    val bg = if (selected) Color(0xFF173D7E) else Color.White
+    val border = if (selected) Color(0xFF173D7E) else Color(0xFFE5E7EB)
+    val textColor = if (selected) Color.White else Color(0xFF64748B)
+
+    Row(
+        modifier = Modifier
+            .clip(shape)
+            .background(bg)
+            .border(HistoryDimens.hairline, border, shape)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 10.dp, vertical = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = Icons.Filled.BarChart,
+            contentDescription = null,
+            tint = textColor,
+            modifier = Modifier.size(12.dp),
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+            ),
+            color = textColor,
+            maxLines = 1,
+        )
+    }
+}
 
 /**
  * What one month paid, employer by employer, and the total under it.

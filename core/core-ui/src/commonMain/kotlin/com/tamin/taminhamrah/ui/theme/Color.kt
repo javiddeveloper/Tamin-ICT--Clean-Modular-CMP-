@@ -379,9 +379,17 @@ val CampaignCaptionInk = TaminOnAccentInk.copy(alpha = 0.55f)
 // into a composable. Values taken from the design source, not sampled from a screenshot.
 
 /** Hero gradient, top to bottom. */
-val TaminHistoryHeroTop = Color(0xFF081A3A)
-val TaminHistoryHeroMid = Color(0xFF0E2652)
-val TaminHistoryHeroBottom = Color(0xFF14336B)
+val TaminHistoryHeroTop = Color(0xFF173D7E)
+val TaminHistoryHeroMid = Color(0xFF1B4790)
+val TaminHistoryHeroBottom = Color(0xFF1F4FA3)
+
+/**
+ * The bloom washed over a hero's top corner — white at 14%, fading to nothing.
+ *
+ * Fixed rather than themed, like the rest of the head it sits on: both themes paint the head dark,
+ * so a light-theme variant of this would be a wash over a colour that never appears.
+ */
+val TaminHistoryHeroGlowCore = Color(0x24FFFFFF)
 
 /** The faint 34dp grid ruled over the hero. */
 val TaminHistoryHeroGrid = Color(0x1278B4FF)
@@ -392,36 +400,68 @@ val TaminHistoryOrbBody = Color(0xFF3B82F6)
 val TaminHistoryOrbBase = Color(0xFF1D4FB0)
 val TaminHistoryOrbGlow = Color(0x803B82F6)
 
-/** Year chips on the hero: the selected one is filled, the rest are glass. */
-val TaminHistoryChipSelectedStart = Color(0xFF8FC5FF)
-val TaminHistoryChipSelectedEnd = Color(0xFF3B82F6)
-val TaminHistoryChipSelectedText = Color(0xFF06183A)
-val TaminHistoryChipBg = Color(0x14FFFFFF)
-val TaminHistoryChipBorder = Color(0x29FFFFFF)
-val TaminHistoryChipSelectedBorder = Color(0x80FFFFFF)
-val TaminHistoryChipText = Color(0xC7FFFFFF)
-val TaminHistoryChipTextDisabled = Color(0x57FFFFFF)
+/** Year chips on the hero: the selected one is solid white, the rest are translucent glass. */
+val TaminHistoryChipSelectedStart = Color(0xFFFFFFFF)
+val TaminHistoryChipSelectedEnd = Color(0xFFFFFFFF)
+val TaminHistoryChipSelectedText = Color(0xFF173D7E)
+val TaminHistoryChipBg = Color(0x1FFFFFFF)
+val TaminHistoryChipBorder = Color(0x33FFFFFF)
+val TaminHistoryChipSelectedBorder = Color(0xFFFFFFFF)
+val TaminHistoryChipText = Color(0xE6FFFFFF)
+val TaminHistoryChipTextDisabled = Color(0x66FFFFFF)
 val TaminHistoryHeroCaption = Color(0xA8FFFFFF)
 val TaminHistoryHeroChipBg = Color(0x1AFFFFFF)
 val TaminHistoryHeroChipBorder = Color(0x2EFFFFFF)
 
+/** Duration card tokens. */
+val TaminHistoryDurationCardBgStart = Color(0xFFF4F8FF)
+val TaminHistoryDurationCardBgEnd = Color(0xFFFFFFFF)
+val TaminHistoryDurationCardBorder = Color(0xFFDCE7FB)
+val TaminHistoryDurationStripeStart = Color(0xFF1F4FA3)
+val TaminHistoryDurationStripeEnd = Color(0xFF2DBE85)
+val TaminHistoryDurationNavBg = Color(0xFFEFF4FF)
+val TaminHistoryDurationNavBorder = Color(0xFFDCE7FB)
+val TaminHistoryDurationNavIcon = Color(0xFF1F4FA3)
+
+/** The three figures, largest to smallest, and the unit that follows each. */
+val TaminHistoryDurationFigureMajor = Color(0xFF1F4FA3)
+val TaminHistoryDurationFigureMinor = Color(0xFF173D7E)
+val TaminHistoryDurationFigureLeast = Color(0xFF475569)
+val TaminHistoryDurationUnit = Color(0xFF64748B)
+
+/** The card's own drop shadow. */
+val TaminHistoryDurationShadow = Color(0x24173D7E)
+
+/** Sub-chart container and card accents. */
+val TaminHistorySubChartBgStart = Color(0xFFFAFBFE)
+val TaminHistorySubChartBgEnd = Color(0xFFF5F8FC)
+val TaminHistorySubChartBorder = Color(0xFFEEF2F8)
+val TaminHistoryIndicatorStart = Color(0xFF2DBE85)
+val TaminHistoryIndicatorEnd = Color(0xFF0E7C82)
+val TaminHistoryLegendBg = Color(0xFFF7F9FC)
+val TaminHistoryInfoBg = Color(0xFFEAF7F7)
+val TaminHistoryInfoIcon = Color(0xFF0E7C82)
+val TaminHistoryInfoText = Color(0xFF64748B)
+
 /**
  * Chart bars.
  *
- * The track stays light in both themes — the dark design keeps it that way, so a bar reads as a
- * proportion of a lit column rather than a shape on a dark card. Only the labels beneath it follow
- * the theme.
+ * Full cover is green (#6FE0A8 -> #1D9E68), partial cover is amber (#FFCE6A -> #E1901A).
  */
-val TaminHistoryBarTrack = Color(0xFFF1F5FA)
+val TaminHistoryBarTrack = Color(0x070F172A)
 val TaminHistoryBarEmpty = Color(0xFFE7ECF3)
-val TaminHistoryBarFullTop = Color(0xFF5C92E8)
-val TaminHistoryBarFullBottom = Color(0xFF173D7E)
-val TaminHistoryBarPartialYearTop = Color(0xFF7FB0F0)
-val TaminHistoryBarPartialYearBottom = Color(0xFF2A5FB8)
-val TaminHistoryBarPartialMonthTop = Color(0xFFF7C173)
-val TaminHistoryBarPartialMonthBottom = Color(0xFFDE8A1F)
-val TaminHistoryBarSelectedTop = Color(0xFF2F6FD0)
-val TaminHistoryBarSelectedBottom = Color(0xFF0E2652)
+val TaminHistoryBarFullTop = Color(0xFF6FE0A8)
+val TaminHistoryBarFullBottom = Color(0xFF1D9E68)
+val TaminHistoryBarFullSelectedTop = Color(0xFF3FCB8E)
+val TaminHistoryBarFullSelectedBottom = Color(0xFF0A7A4C)
+val TaminHistoryBarPartialYearTop = Color(0xFFFFCE6A)
+val TaminHistoryBarPartialYearBottom = Color(0xFFE1901A)
+val TaminHistoryBarPartialMonthTop = Color(0xFFFFCE6A)
+val TaminHistoryBarPartialMonthBottom = Color(0xFFE1901A)
+val TaminHistoryBarPartialSelectedTop = Color(0xFFFFB524)
+val TaminHistoryBarPartialSelectedBottom = Color(0xFFB96C08)
+val TaminHistoryBarSelectedTop = Color(0xFF3FCB8E)
+val TaminHistoryBarSelectedBottom = Color(0xFF0A7A4C)
 val TaminHistoryBarGlow = Color(0x3D1F4FA3)
 
 /** The cap marking a month worked at two employers at once. */
@@ -456,3 +496,12 @@ val TaminHistorySeasonSpring = Color(0xFF22A06B)
 val TaminHistorySeasonSummer = Color(0xFFE08A21)
 val TaminHistorySeasonAutumn = Color(0xFF8C7CF6)
 val TaminHistorySeasonWinter = Color(0xFF1F4FA3)
+
+/** Palette for workshop split timeline rows in the chart card. */
+val TaminHistoryWorkshopPalette = listOf(
+    Color(0xFF0E9E90),
+    Color(0xFF7C5CE0),
+    Color(0xFFD9557C),
+    Color(0xFF7A9E1F),
+)
+
