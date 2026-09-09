@@ -16,7 +16,7 @@ import org.koin.dsl.module
 val datastoreModule = module {
     single<Settings> { Settings() }
     singleOf(::UserPreferencesRepositoryImpl) bind UserPreferencesRepository::class
-    singleOf(::TokenStoreManagerImpl) bind TokenStoreManager::class
+    single<TokenStoreManager> { TokenStoreManagerImpl(get()) }
     singleOf(::InMemoryBiometricSessionState) bind BiometricSessionState::class
     single<DeveloperOptionsRepository> { DeveloperOptionsRepositoryImpl(get()) }
 }
