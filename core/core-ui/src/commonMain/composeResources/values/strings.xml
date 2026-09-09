@@ -774,6 +774,5 @@
     <string name="history_series_max_days">بیشینه %1$s روز</string>
     <string name="history_split_label">کارگاه</string>
     <string name="history_split_chip">تفکیک کارگاه</string>
-    <string name="history_wage_unavailable">دستمزدی دریافت نشد</string>
 
 </resources>
