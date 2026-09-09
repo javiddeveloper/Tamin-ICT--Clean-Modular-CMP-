@@ -8,6 +8,8 @@ import com.tamin.taminhamrah.useCases.auth.DeepLinkManager
 import com.tamin.taminhamrah.useCases.auth.DeepLinkManagerImpl
 import com.tamin.taminhamrah.useCases.auth.ExchangeCodeForTokensUseCase
 import com.tamin.taminhamrah.useCases.auth.ExchangeCodeForTokensUseCaseImpl
+import com.tamin.taminhamrah.useCases.auth.DebugClientCredentialsLoginUseCase
+import com.tamin.taminhamrah.useCases.auth.DebugClientCredentialsLoginUseCaseImpl
 import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCase
 import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCaseImpl
 import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCase
@@ -95,6 +97,14 @@ import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.common.GetJobTitleUseCase
 import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetContractsUseCase
+import com.tamin.taminhamrah.useCases.contractAffair.GetContractsPageUseCase
+import com.tamin.taminhamrah.useCases.contractAffair.GetContractStatesUseCase
+import com.tamin.taminhamrah.useCases.contractAffair.CancelContractUseCase
+import com.tamin.taminhamrah.useCases.contractAffair.GetContractPaymentHistoryUseCase
+import com.tamin.taminhamrah.useCases.contractAffair.DownloadContractReportUseCase
+import com.tamin.taminhamrah.useCases.contractAffair.GetContractDebitUseCase
+import com.tamin.taminhamrah.useCases.contractAffair.GetContractLastPaymentUseCase
+import com.tamin.taminhamrah.useCases.contractAffair.GetPaymentCalculationDetailsUseCase
 import com.tamin.taminhamrah.useCases.contracts.CalculateFreelanceSalaryUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetOptionalPremiumRangeUseCase
 import com.tamin.taminhamrah.useCases.contracts.CheckRedCrossStatusUseCase
@@ -189,6 +199,10 @@ import com.tamin.taminhamrah.useCases.workshops.GetPaymentSheetsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetRecentlyAddedMembersUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebitsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebtInquiryUseCase
+import com.tamin.taminhamrah.useCases.payment.CancelPaymentUseCase
+import com.tamin.taminhamrah.useCases.payment.CreatePaymentLinkUseCase
+import com.tamin.taminhamrah.useCases.payment.GetPaymentPreviewUseCase
+import com.tamin.taminhamrah.useCases.payment.VerifyPaymentUseCase
 import com.tamin.taminhamrah.useCases.workshops.PayWorkshopDebitUseCase
 import com.tamin.taminhamrah.useCases.workshops.SaveArticleSixteenRequestUseCase
 import com.tamin.taminhamrah.useCases.workshops.SaveDebitObjectionUseCase
@@ -262,6 +276,7 @@ val domainModule = module {
     factoryOf(::DeepLinkManagerImpl) bind DeepLinkManager::class
     factoryOf(::AuthAuthorizeUrlUseCaseImpl) bind AuthAuthorizeUrlUseCase::class
     factoryOf(::ExchangeCodeForTokensUseCaseImpl) bind ExchangeCodeForTokensUseCase::class
+    factoryOf(::DebugClientCredentialsLoginUseCaseImpl) bind DebugClientCredentialsLoginUseCase::class
     factoryOf(::HandleAuthDeepLinkUseCaseImpl) bind HandleAuthDeepLinkUseCase::class
     factoryOf(::UserProfileImageUseCase)
     factoryOf(::TaminRelationUseCase)
@@ -360,6 +375,14 @@ val domainModule = module {
     factoryOf(::DeleteMyRequestUseCase)
     factoryOf(::InboxInquiryLicenseUseCase)
     factoryOf(::GetContractsUseCase)
+    factoryOf(::GetContractsPageUseCase)
+    factoryOf(::GetContractStatesUseCase)
+    factoryOf(::CancelContractUseCase)
+    factoryOf(::GetContractPaymentHistoryUseCase)
+    factoryOf(::DownloadContractReportUseCase)
+    factoryOf(::GetContractDebitUseCase)
+    factoryOf(::GetContractLastPaymentUseCase)
+    factoryOf(::GetPaymentCalculationDetailsUseCase)
     factoryOf(::GetRegistrationInfoUseCase)
     factoryOf(::GetBranchesUseCase)
     factoryOf(::GetSpcPremiumRatesUseCase)
@@ -428,6 +451,14 @@ val domainModule = module {
     factoryOf(::GetDemandDocumentsUseCase)
     factoryOf(::GetDebitTurnoverPdfUseCase)
     factoryOf(::PayWorkshopDebitUseCase)
+
+    // Shared payment flow. VerifyPaymentUseCase collects every PaymentVerifier registered by any
+    // feature module — getAll() is what lets a feature contribute one without core-domain, or this
+    // list, having to know that the feature exists.
+    factoryOf(::GetPaymentPreviewUseCase)
+    factoryOf(::CreatePaymentLinkUseCase)
+    factoryOf(::CancelPaymentUseCase)
+    factory { VerifyPaymentUseCase(repository = get(), verifiers = getAll()) }
     factoryOf(::GetWorkshopDebtInquiryUseCase)
     factoryOf(::GetObjectionableDebitsUseCase)
     factoryOf(::CheckObjectionDeadlineUseCase)

@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.ui.navigation
 
 import androidx.navigation.NavController
+import com.tamin.taminhamrah.feature.contractaffair.navigateToContractAffairs
 import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.history.navigateToHistory
 import com.tamin.taminhamrah.feature.history.navigateToHistoryJobInfo
@@ -40,7 +41,7 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
         FeatureFlag.CONTRACT_INFO -> navigateToContractRows()
         FeatureFlag.COMPLETE_WORKSHOP_INFO -> navigateToCompleteEmployerInfo()
         FeatureFlag.STACK_HOLDER_LIST -> navigateToLegalRepresentativeWorkshops()
-        FeatureFlag.CONTRACTS -> navigateToContracts()
+        FeatureFlag.CONTRACTS -> navigateToContractAffairs()
         FeatureFlag.STUDENT_INSURANCE -> navigateToContractFlow(ContractType.STUDENT)
         FeatureFlag.FREELANCE_INSURANCE -> navigateToContractFlow(ContractType.FREELANCE)
         FeatureFlag.OPTIONAL_INSURANCE -> navigateToContractFlow(ContractType.OPTIONAL)

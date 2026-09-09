@@ -20,6 +20,8 @@ tags: [moc]
 - [[Database]] — Room KMP, DAOs, schemas
 - [[Data-and-Caching]] — repository patterns, offline-first decision rubric, the `.first()` vs `.collect()` shipped bug
 - [[Error-Handling]] — exception-based error chain, `BaseDTO`, no `Result<T>` wrapper
+- [[Payments]] — the one payment flow every feature uses, and its mock gateway
+- [[Debug-Tooling]] — `TokenSlot`, the back-to-back debug login, and the `isDebug` gate
 
 ## Conventions
 

@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.feature.developerOptions.ui.contract.DeveloperOptio
 import com.tamin.taminhamrah.feature.developerOptions.ui.contract.DeveloperOptionsUiState.PartialState
 import com.tamin.taminhamrah.feature.developerOptions.ui.model.BaseUrlPresets
 import com.tamin.taminhamrah.model.BaseUrlKey
+import com.tamin.taminhamrah.model.payment.PaymentMockMode
 import com.tamin.taminhamrah.repository.DeveloperOptionsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -24,6 +25,11 @@ class DeveloperOptionsViewModel(
         viewModelScope.launch {
             developerOptionsRepository.observeOverrides().collect { overrides ->
                 sendIntent(DeveloperOptionsIntent.OnOverridesUpdated(overrides))
+            }
+        }
+        viewModelScope.launch {
+            developerOptionsRepository.observePaymentMockMode().collect { mode ->
+                sendIntent(DeveloperOptionsIntent.OnPaymentMockModeUpdated(mode))
             }
         }
     }
@@ -52,6 +58,14 @@ class DeveloperOptionsViewModel(
                 emit(PartialState.SetEditingKey(null))
             }
 
+            is DeveloperOptionsIntent.OnPaymentMockModeSelected -> flow {
+                developerOptionsRepository.setPaymentMockMode(intent.mode)
+            }
+
+            is DeveloperOptionsIntent.OnPaymentMockModeUpdated -> flow {
+                emit(PartialState.SetPaymentMockMode(intent.mode))
+            }
+
             is DeveloperOptionsIntent.OnResetClicked -> flow {
                 developerOptionsRepository.clearOverride(intent.key)
                 emit(PartialState.SetEditingKey(null))
@@ -67,6 +81,7 @@ class DeveloperOptionsViewModel(
         is PartialState.Error -> currentState.copy(isLoading = false, error = partialState.message)
         is PartialState.SetItems -> currentState.copy(items = partialState.items)
         is PartialState.SetEditingKey -> currentState.copy(editingKey = partialState.key)
+        is PartialState.SetPaymentMockMode -> currentState.copy(paymentMockMode = partialState.mode)
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)
