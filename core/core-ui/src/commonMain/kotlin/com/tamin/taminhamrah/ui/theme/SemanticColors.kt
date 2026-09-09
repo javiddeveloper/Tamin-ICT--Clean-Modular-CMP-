@@ -78,12 +78,11 @@ data class TaminColors(
     val blueBorder: Color,
 
     /**
-     * Teal surface and its ink — the calm note and the «ارسال» tile.
+     * The ink on [tealBg] — the calm note and the «ارسال» tile.
      *
-     * A pair, like [blueBg]/[blueText], because a tile that hardcodes one theme's teal stops
-     * matching the blue tile beside it the moment the theme changes.
+     * Paired with [tealBg] like [blueBg]/[blueText], because a tile that hardcodes one theme's
+     * teal stops matching the blue tile beside it the moment the theme changes.
      */
-    val tealBg: Color,
     val tealText: Color,
 
     // Shadows

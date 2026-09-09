@@ -943,6 +943,28 @@
     <string name="history_split_label">کارگاه</string>
     <string name="history_split_chip">تفکیک کارگاه</string>
 
+    <!-- «انتخاب سال و ماه» — the year+month picker behind the toolbar's search -->
+    <string name="history_picker_action">انتخاب سال و ماه</string>
+    <string name="history_picker_title">انتخاب سال و ماه</string>
+    <string name="history_picker_hint">فقط سال بزنید تا کل سال بیاید</string>
+    <string name="history_picker_search">عدد سال را بنویسید، مثلاً ۱۳۹۵</string>
+    <string name="history_picker_year">سال</string>
+    <string name="history_picker_year_order">جدید به قدیم</string>
+    <string name="history_picker_month">ماه</string>
+    <string name="history_picker_month_optional">اختیاری</string>
+    <string name="history_picker_whole_year">کل سال</string>
+    <string name="history_picker_empty">سالی با این عدد پیدا نشد</string>
+    <string name="history_picker_no_history">بدون سابقه</string>
+    <string name="history_picker_apply_none">یک سال انتخاب کنید</string>
+    <string name="history_picker_apply_year">نمایش کل سال %1$s</string>
+    <string name="history_picker_apply_month">نمایش %1$s %2$s</string>
+    <string name="history_picker_all_years">نمایش همهٔ سال‌ها</string>
+
+    <!-- «کارگاه‌های سال» — one year's employers, as its own screen -->
+    <string name="history_workshops_title">کارگاه‌های سال %1$s</string>
+    <string name="history_workshops_caption">ریز دستمزد و شمارهٔ هر کارگاه</string>
+    <string name="history_months_breakdown">تفکیک ماه‌های سال</string>
+
     <string name="deferred_installment_title">گواهی کسر اقساط معوق</string>
     <string name="deferred_installment_subtitle">گواهی کسر اقساط برای تسهیلات بانکی</string>
     <string name="deferred_installment_step_request">درخواست گواهی</string>

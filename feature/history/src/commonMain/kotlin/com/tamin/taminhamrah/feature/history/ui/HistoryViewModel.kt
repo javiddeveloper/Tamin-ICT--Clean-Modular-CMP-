@@ -17,6 +17,7 @@ import com.tamin.taminhamrah.model.history.DastmozdInfoItemPR
 import com.tamin.taminhamrah.model.history.HistoryCertificateType
 import com.tamin.taminhamrah.model.history.UserRoleDN
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
+import com.tamin.taminhamrah.ui.digitsOnly
 import com.tamin.taminhamrah.useCases.history.DownloadHistoryReportUseCase
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
@@ -84,6 +85,58 @@ class HistoryViewModel(
 
         HistoryIntent.ToggleSplit ->
             flow { emit(PartialState.SplitChanged(!uiState.value.splitBySource)) }
+
+        /*
+         * Opening seeds the pick from what the page is already showing, so the sheet lands on the
+         * year in front of the person rather than on nothing. From «همه» there is no year to seed
+         * with, which is also the state the picker's «یک سال انتخاب کنید» button describes.
+         */
+        HistoryIntent.OpenYearPicker -> flow {
+            val state = uiState.value
+            val scope = state.scope as? HistoryScope.Year
+            emit(
+                PartialState.YearPickerVisible(
+                    visible = true,
+                    year = scope?.year,
+                    month = scope?.let { state.selectedMonth },
+                )
+            )
+            emit(PartialState.YearQueryChanged(""))
+        }
+
+        HistoryIntent.DismissYearPicker -> flow {
+            emit(PartialState.YearPickerVisible(visible = false))
+        }
+
+        // Persian digits are what the field shows; the years are ASCII, so the search converts once
+        // here rather than per year on every keystroke.
+        is HistoryIntent.YearQueryChanged -> flow {
+            emit(PartialState.YearQueryChanged(intent.query.digitsOnly()))
+        }
+
+        is HistoryIntent.PickerYearSelected -> flow {
+            emit(PartialState.PickerYearStaged(intent.year))
+        }
+
+        is HistoryIntent.PickerMonthSelected -> flow {
+            emit(PartialState.PickerMonthStaged(intent.month))
+        }
+
+        /*
+         * The one place the staged pick becomes the page.
+         *
+         * Emits the same partials a chip tap does, so a year reached through the sheet and a year
+         * reached from the strip leave the page in exactly the same state — including the employer
+         * filter, which belonged to the year being left.
+         */
+        HistoryIntent.ApplyYearPicker -> flow {
+            val state = uiState.value
+            val year = state.pickerYear ?: return@flow
+            emit(PartialState.ScopeChanged(HistoryScope.Year(year)))
+            emit(PartialState.MonthSelected(state.pickerMonth))
+            emit(PartialState.SourceSelected(null))
+            emit(PartialState.YearPickerVisible(visible = false))
+        }
 
         is HistoryIntent.AskSendNotice -> flow { emit(PartialState.SendConfirmVisible(true)) }
 
@@ -334,6 +387,25 @@ class HistoryViewModel(
         is PartialState.SourceSelected -> currentState.copy(selectedSource = partialState.source)
 
         is PartialState.MetricSelected -> currentState.copy(metric = partialState.metric)
+
+        is PartialState.YearPickerVisible -> currentState.copy(
+            yearPickerOpen = partialState.visible,
+            // Only an opening carries a seed; closing leaves the staged pick alone so the sheet
+            // does not visibly empty itself on the way out.
+            pickerYear = if (partialState.visible) partialState.year else currentState.pickerYear,
+            pickerMonth = if (partialState.visible) partialState.month else currentState.pickerMonth,
+        )
+
+        is PartialState.YearQueryChanged -> currentState.copy(yearQuery = partialState.query)
+
+        // A different year invalidates the month staged under the last one — ماه ۵ of ۱۴۰۲ is not
+        // ماه ۵ of ۱۴۰۳, and the month list the person was choosing from has just been replaced.
+        is PartialState.PickerYearStaged -> currentState.copy(
+            pickerYear = partialState.year,
+            pickerMonth = null,
+        )
+
+        is PartialState.PickerMonthStaged -> currentState.copy(pickerMonth = partialState.month)
 
         // Splitting shows every employer at once, so a filter down to one of them is the
         // same question asked twice — it is cleared rather than left to contradict the bars.
