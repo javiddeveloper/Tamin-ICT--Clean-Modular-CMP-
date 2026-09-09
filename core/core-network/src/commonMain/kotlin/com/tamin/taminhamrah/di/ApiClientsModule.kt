@@ -14,6 +14,8 @@ import com.tamin.taminhamrah.apiService.agent.createAgentApiService
 import com.tamin.taminhamrah.apiService.WorkShopsApiService
 import com.tamin.taminhamrah.apiService.contract.ContractsApiService
 import com.tamin.taminhamrah.apiService.contract.createContractsApiService
+import com.tamin.taminhamrah.apiService.contractAffair.ContractAffairApiService
+import com.tamin.taminhamrah.apiService.contractAffair.createContractAffairApiService
 import com.tamin.taminhamrah.apiService.createCommonApiService
 import com.tamin.taminhamrah.apiService.createHistoryApiServices
 import com.tamin.taminhamrah.apiService.createUserApiService
@@ -169,6 +171,11 @@ val ApiClientsModule = module {
     single<ContractsApiService>(named("contractsApiService")) {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.createContractsApiService()
+    }
+
+    single<ContractAffairApiService>(named("contractAffairApiService")) {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createContractAffairApiService()
     }
 
     single<AgentApiService>(named("agentApiService")) {

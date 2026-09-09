@@ -97,6 +97,14 @@ import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.common.GetJobTitleUseCase
 import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetContractsUseCase
+import com.tamin.taminhamrah.useCases.contractAffair.GetContractsPageUseCase
+import com.tamin.taminhamrah.useCases.contractAffair.GetContractStatesUseCase
+import com.tamin.taminhamrah.useCases.contractAffair.CancelContractUseCase
+import com.tamin.taminhamrah.useCases.contractAffair.GetContractPaymentHistoryUseCase
+import com.tamin.taminhamrah.useCases.contractAffair.DownloadContractReportUseCase
+import com.tamin.taminhamrah.useCases.contractAffair.GetContractDebitUseCase
+import com.tamin.taminhamrah.useCases.contractAffair.GetContractLastPaymentUseCase
+import com.tamin.taminhamrah.useCases.contractAffair.GetPaymentCalculationDetailsUseCase
 import com.tamin.taminhamrah.useCases.contracts.CalculateFreelanceSalaryUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetOptionalPremiumRangeUseCase
 import com.tamin.taminhamrah.useCases.contracts.CheckRedCrossStatusUseCase
@@ -363,6 +371,14 @@ val domainModule = module {
     factoryOf(::DeleteMyRequestUseCase)
     factoryOf(::InboxInquiryLicenseUseCase)
     factoryOf(::GetContractsUseCase)
+    factoryOf(::GetContractsPageUseCase)
+    factoryOf(::GetContractStatesUseCase)
+    factoryOf(::CancelContractUseCase)
+    factoryOf(::GetContractPaymentHistoryUseCase)
+    factoryOf(::DownloadContractReportUseCase)
+    factoryOf(::GetContractDebitUseCase)
+    factoryOf(::GetContractLastPaymentUseCase)
+    factoryOf(::GetPaymentCalculationDetailsUseCase)
     factoryOf(::GetRegistrationInfoUseCase)
     factoryOf(::GetBranchesUseCase)
     factoryOf(::GetSpcPremiumRatesUseCase)

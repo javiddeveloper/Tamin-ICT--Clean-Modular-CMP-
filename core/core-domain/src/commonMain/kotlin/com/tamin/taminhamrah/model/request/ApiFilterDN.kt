@@ -83,6 +83,8 @@ enum class FilterProperty(val key: String) {
     @SerialName("debitReason") DEBIT_REASON("debitReason"),
     @SerialName("paymentSheetStatus") PAYMENT_SHEET_STATUS("paymentSheetStatus"),
     @SerialName("premiumTypeCode") PREMIUM_TYPE_CODE("premiumTypeCode"),
+    // special-insured-services/list-contracts-mobile — جستجوی قرارداد by exact contract number.
+    @SerialName("contractNumber") CONTRACT_NUMBER("contractNumber"),
     @SerialName("paymentType") PAYMENT_TYPE("paymentType"),
     @SerialName("insuranceNumber") INSURANCE_NUMBER("insuranceNumber"),
     @SerialName("endDate") END_DATE("endDate"),

@@ -9,7 +9,7 @@ import com.tamin.taminhamrah.data.di.dataKoinModule
 import com.tamin.taminhamrah.feature.history.di.historyModule
 
 import com.tamin.taminhamrah.feature.contracts.di.contractsModule
-
+import com.tamin.taminhamrah.feature.contractaffair.di.contractAffairModule
 import com.tamin.taminhamrah.feature.taminServices.di.TaminServicesModule
 
 import com.tamin.taminhamrah.feature.cartable.di.cartableModule
@@ -101,7 +101,7 @@ val sharedModules: List<Module>
         historyModule,
 
         contractsModule,
-
+        contractAffairModule,
         TaminServicesModule,
 
         workshopsModule,
