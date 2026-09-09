@@ -54,11 +54,26 @@ other. It is also why opening the viewer costs no second fetch.
 new state through the whole MVI pipeline every frame it moved.
 
 Instead the state describes the *segment* — `segmentDurationMs`, `segmentElapsedMs`, `isBuffering`,
-the two hold flags, and a `segmentToken` — and `StoryProgressBar` animates itself with an
-`Animatable` keyed on `(segmentToken, isPlaying)`. The ViewModel bumps the token when the segment
-itself changes: a new slide, a clip reporting its length, media failing. Holds need no bump —
-`isPlaying` is the other key, so a hold arriving or leaving restarts the animation on its own,
-from the `segmentElapsedMs` published alongside it.
+the two hold flags, and a `segmentToken` — and `StoryProgressBar` animates itself. The ViewModel
+bumps the token when the segment itself changes: a new slide, a clip reporting its length, media
+failing. Holds need no bump: the effect is also keyed on `isPlaying`, so a hold arriving cancels
+the animation where it stands and leaving resumes it from that exact value.
+
+### The Animatable is built per segment, in composition
+
+```kotlin
+val fill = remember(segmentToken) { Animatable(startFraction) }
+```
+
+Not one long-lived `Animatable` snapped back to zero from the effect. `segmentToken` and
+`itemIndex` change together in the composition pass, but an effect body only runs *after* it — so
+with a shared instance there was one frame in which the incoming segment was drawn with the
+outgoing one's fill. It read as the next bar starting part-filled and instantly correcting itself,
+and it was reported. Creating the value alongside the index it belongs to closes the window
+instead of racing it.
+
+The same change lets the remaining time be measured from `fill.value` rather than from the clock's
+tally, so resuming carries on from the pixel that is actually on screen.
 
 The ViewModel's own clock (`segmentJob`) accumulates in 50 ms ticks rather than sleeping out the
 whole duration in one `delay`, which is what lets a pause report how far the slide already got —

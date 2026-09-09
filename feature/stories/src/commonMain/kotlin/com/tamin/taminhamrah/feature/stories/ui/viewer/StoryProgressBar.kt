@@ -25,19 +25,19 @@ import com.tamin.taminhamrah.feature.stories.ui.theme.StoryProgressTrack
  * ### Why it animates itself
  *
  * The fill is an [Animatable] driven from the segment description rather than a number pushed
- * through the state on every frame. [segmentToken] is the only thing that restarts it, and the
- * ViewModel moves that exactly when the fill has to start over — a new slide, a clip that finally
- * reported its length, media that failed, a paused slide resuming. Between those moments this
- * composable never recomposes, and the whole bar is drawn in one [Canvas] that reads the animation
- * in the draw phase, so a running story costs redraws and neither recomposition nor relayout.
+ * through the state on every frame. [segmentToken] is what starts a new one, and the ViewModel
+ * moves it exactly when the fill has to begin again — a new slide, a clip that finally reported
+ * its length, media that failed. Between those moments this composable never recomposes, and the
+ * whole bar is drawn in one [Canvas] that reads the animation in the draw phase, so a running
+ * story costs redraws and neither recomposition nor relayout.
  *
  * Pausing works by cancellation: [isPlaying] going false ends the effect, which cancels
- * `animateTo` and leaves the fill exactly where it stood. Resuming re-enters with [elapsedMs] set
- * to what the clock had counted, so the segment finishes in the time it had left rather than
- * starting over.
+ * `animateTo` and leaves the fill exactly where it stood. Resuming re-enters on the same
+ * [Animatable] and animates the rest of the way, so the segment finishes in the time it had left
+ * rather than starting over. That is why a hold needs no token of its own.
  *
- * A buffering clip is the same mechanism: it is not playing, so the bar snaps to zero and holds
- * there until the player says how long the clip is.
+ * A buffering clip is the same mechanism: it is not playing, so its fresh [Animatable] sits at
+ * zero until the player says how long the clip is.
  */
 @Composable
 internal fun StoryProgressBar(
@@ -49,23 +49,32 @@ internal fun StoryProgressBar(
     isPlaying: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val progress = remember { Animatable(0f) }
+    val startFraction = if (durationMs > 0L) {
+        (elapsedMs.toFloat() / durationMs.toFloat()).coerceIn(0f, 1f)
+    } else {
+        0f
+    }
 
-    LaunchedEffect(segmentToken, isPlaying) {
-        val from = if (durationMs > 0L) {
-            (elapsedMs.toFloat() / durationMs.toFloat()).coerceIn(0f, 1f)
-        } else {
-            0f
-        }
-        // Snapped before the play check on purpose: a slide that comes up already paused — a clip
-        // still buffering — has to show an empty bar rather than the previous slide's full one.
-        progress.snapTo(from)
+    // A new Animatable per segment, built **during composition** at the fraction that segment
+    // starts from.
+    //
+    // The alternative — one long-lived Animatable snapped back to zero from the effect below —
+    // has a visible flaw: `segmentToken` and `currentIndex` change together in the composition
+    // pass, but an effect body only runs after it. For that one frame the incoming segment was
+    // drawn with the outgoing one's fill, which read as the new bar starting part-filled and
+    // instantly correcting itself. Creating the value alongside the index it belongs to closes
+    // that window rather than racing it.
+    val fill = remember(segmentToken) { Animatable(startFraction) }
+
+    LaunchedEffect(fill, isPlaying) {
         if (!isPlaying) return@LaunchedEffect
-
-        val remaining = (durationMs - elapsedMs).coerceAtLeast(0L)
-        progress.animateTo(
+        // Measured from where the fill actually stands rather than from the clock's own tally, so
+        // resuming carries on from the pixel the reader was looking at. The two agree to within
+        // one tick; this is the one that is on screen.
+        val remainingMs = ((1f - fill.value) * durationMs).toLong().coerceAtLeast(0L)
+        fill.animateTo(
             targetValue = 1f,
-            animationSpec = tween(durationMillis = remaining.toInt(), easing = LinearEasing),
+            animationSpec = tween(durationMillis = remainingMs.toInt(), easing = LinearEasing),
         )
     }
 
@@ -97,7 +106,7 @@ internal fun StoryProgressBar(
 
             val fraction = when {
                 index < currentIndex -> 1f
-                index == currentIndex -> progress.value
+                index == currentIndex -> fill.value
                 else -> 0f
             }
             if (fraction <= 0f) return@repeat
