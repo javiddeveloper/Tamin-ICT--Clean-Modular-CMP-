@@ -307,11 +307,19 @@ val TaminCostsOperationsInk = Color(0xFFFFFFFF)
  * everything on it is a wash of white at a set strength rather than a surface color.
  */
 val TaminInsuranceCardInk = Color(0xFFFFFFFF)
-val TaminInsuranceCardInkMuted = TaminInsuranceCardInk.copy(alpha = 0.75f)
+
+/**
+ * The card's secondary ink. A mint-tinted off-white (`#EAF9F6` in the design), not white at a
+ * lower alpha: the card's own gradient runs teal → blue, and a translucent white takes on the
+ * blue underneath it, so the subtitle drifts cool while the same line stays mint on the teal end.
+ */
+val TaminInsuranceCardInkMuted = Color(0xFFEAF9F6)
 
 /** The translucent chips and pills the card sets on its own gradient. */
 val TaminInsuranceCardChipBg = TaminInsuranceCardInk.copy(alpha = 0.13f)
-val TaminInsuranceCardTrackBg = TaminInsuranceCardInk.copy(alpha = 0.08f)
+
+/** `border-top: 1px solid #ffffff26` above the coverage line. */
+val TaminInsuranceCardDivider = TaminInsuranceCardInk.copy(alpha = 0.15f)
 
 /* ---- Ink on accent surfaces ------------------------------------------------------------------ */
 

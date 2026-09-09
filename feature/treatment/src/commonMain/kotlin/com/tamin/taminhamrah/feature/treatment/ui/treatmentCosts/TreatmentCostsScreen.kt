@@ -33,7 +33,7 @@ import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
+import com.tamin.taminhamrah.ui.components.taminHeroGradient
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.toImmutableList
@@ -114,7 +114,7 @@ fun TreatmentCostsScreen(
         topBar = {
             TaminTopAppBar(
                 title = stringResource(Res.string.category_misc_claims),
-                background = taminTopAppBarGradient(colors.topAppBarStops),
+                background = taminHeroGradient(colors.topAppBarStops),
                 navigationIcon = {
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
