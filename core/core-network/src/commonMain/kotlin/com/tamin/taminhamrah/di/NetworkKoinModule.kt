@@ -4,22 +4,23 @@ import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSource
 import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSource
 import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSourceImpl
+import com.tamin.taminhamrah.model.BaseUrlKey
 import com.tamin.taminhamrah.repository.AuthRepository
 import com.tamin.taminhamrah.repository.AuthTokenInvalidator
+import com.tamin.taminhamrah.repository.DeveloperOptionsRepository
 import com.tamin.taminhamrah.repository.authRepository.AuthRepositoryImpl
 import com.tamin.taminhamrah.repository.authRepository.AuthTokenInvalidatorImpl
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
 import com.tamin.taminhamrah.tools.errorHandling.PlainTextErrorResponsePlugin
-import com.tamin.taminhamrah.util.NetworkConstants
 import com.tamin.taminhamrah.util.AppConfig
-import com.tamin.taminhamrah.model.BaseUrlKey
-import com.tamin.taminhamrah.repository.DeveloperOptionsRepository
+import com.tamin.taminhamrah.util.NetworkConstants
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
+import io.ktor.client.plugins.HttpRedirect
 import io.ktor.client.plugins.HttpTimeout
-import io.ktor.client.plugins.auth.authProviders
 import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.authProviders
 import io.ktor.client.plugins.auth.providers.BearerAuthProvider
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
@@ -33,7 +34,6 @@ import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
-import io.ktor.util.logging.KtorSimpleLogger
 import kotlinx.serialization.json.Json
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
@@ -123,6 +123,18 @@ val networkModule = module {
         )
     }
 
+    // Payment gateway HTTP Client (TFH — its own host, bearer-authenticated like the main API)
+    single(named("tfhHttpClient")) {
+        createHttpClient(
+            engine = get(),
+            authRepository = get<AuthRepository>(),
+            authTokenInvalidator = get(),
+            json = get<Json>(),
+            timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_60_SEC,
+            baseUrl = get<DeveloperOptionsRepository>().getEffectiveBaseUrl(BaseUrlKey.TFH)
+        )
+    }
+
     // AI HTTP Client
     single(named("aiHttpClient")) {
         val aiBaseUrl = get<DeveloperOptionsRepository>().getEffectiveBaseUrl(BaseUrlKey.AI)
@@ -165,7 +177,13 @@ private fun createHttpClient(
             socketTimeoutMillis = timeoutMillis
         }
 
-
+        // The backend's load balancer 302s a plain-http request to https on the same host (seen
+        // on a developer-options base-URL override entered without a scheme); without this the
+        // redirect comes back as an empty 302 body instead of being followed.
+        install(HttpRedirect) {
+            checkHttpMethod = false
+            allowHttpsDowngrade = false
+        }
 
         install(Auth) {
             bearer {
@@ -245,6 +263,11 @@ private fun createHealthHttpClient(
             socketTimeoutMillis = timeoutMillis
         }
 
+        install(HttpRedirect) {
+            checkHttpMethod = false
+            allowHttpsDowngrade = false
+        }
+
         install(Logging) {
             logger = Logger.DEFAULT
             level = if (AppConfig.isDebug) LogLevel.ALL else LogLevel.NONE
@@ -280,6 +303,11 @@ private fun createAuthHttpClient(
             requestTimeoutMillis = timeoutMillis
             connectTimeoutMillis = timeoutMillis
             socketTimeoutMillis = timeoutMillis
+        }
+
+        install(HttpRedirect) {
+            checkHttpMethod = false
+            allowHttpsDowngrade = false
         }
 
         install(Logging) {

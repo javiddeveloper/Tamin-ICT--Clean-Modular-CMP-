@@ -14,6 +14,7 @@ import com.tamin.taminhamrah.model.common.RecipientDTO
 import com.tamin.taminhamrah.model.common.UserInsuredInfoDTO
 import com.tamin.taminhamrah.model.common.UserType
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.auth.TokenSlot
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.repository.TokenStoreManager
 import io.ktor.client.statement.HttpStatement
@@ -130,6 +131,13 @@ class CommonRepositoryImplTest {
         override fun getToken(): String? = null
         override fun saveRefreshToken(refreshToken: String?) = Unit
         override fun getRefreshToken(): String? = null
+        override fun getToken(slot: TokenSlot): String? = null
+        override fun saveToken(slot: TokenSlot, token: String?) = Unit
+        override fun getRefreshToken(slot: TokenSlot): String? = null
+        override fun saveRefreshToken(slot: TokenSlot, refreshToken: String?) = Unit
+        override fun getActiveSlot(): TokenSlot = TokenSlot.USER
+        override fun activeSlotFlow(): Flow<TokenSlot> = MutableStateFlow(TokenSlot.USER).asStateFlow()
+        override suspend fun setActiveSlot(slot: TokenSlot) = Unit
         override fun saveUserId(userId: String?) = Unit
         override fun getUserId(): String? = null
         override fun saveUserType(userType: String?) { storedUserType = userType }
