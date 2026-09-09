@@ -89,21 +89,22 @@ The tap columns use `Alignment.TopStart`/`TopEnd`, not left/right. Under this ap
 puts "next" on the left as required, and it stays correct rather than inverted if an LTR layout is
 ever added.
 
-### Tap vs. hold — two traps, both already sprung
+### Tap vs. hold — three traps, all already sprung
 
-`StoryTapZone` looks over-commented; it isn't. Both of these were real bugs:
+`StoryTapZone` looks over-commented; it isn't. All three of these were real, reported bugs:
 
 1. **`onLongPress` must be supplied, even empty.** Without it `detectTapGestures` reports a long
    hold-then-release as a *tap*, so resting a finger on the screen jumped to the next slide when
    you lifted it. Its mere presence suppresses that; the pause itself is done in `onPress`, which
-   is the only place that can await the release.
+   is the only callback that can await the release.
 2. **`pointerInput(Unit)`, with the callbacks read through `rememberUpdatedState`.** Keying
    `pointerInput` on the lambdas — new instances every recomposition — tore the gesture down
    mid-press: pausing recomposes the viewer, which restarted `pointerInput`, which cancelled the
    `tryAwaitRelease()` that was going to resume. **The story then stayed paused forever.**
-
-The hold threshold is `viewConfiguration.longPressTimeoutMillis`, deliberately the same number
-`detectTapGestures` uses internally, so one gesture cannot count as both.
+3. **Pause on touch-down, with nothing waited out first.** Gating the pause behind the long-press
+   threshold as well left the bar visibly running for half a second under a resting thumb. The
+   threshold decides only whether *lifting* the finger moves the story — it has no say in when the
+   story stops.
 
 ## Holding the story — two independent reasons
 

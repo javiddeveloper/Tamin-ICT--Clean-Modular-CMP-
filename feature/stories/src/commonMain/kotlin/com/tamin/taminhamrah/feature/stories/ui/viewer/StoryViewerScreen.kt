@@ -3,8 +3,8 @@ package com.tamin.taminhamrah.feature.stories.ui.viewer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -12,11 +12,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -92,7 +92,6 @@ import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.util.toPersianDigits
-import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -388,14 +387,17 @@ private fun BoxScope.StoryTapZones(
 /**
  * One tap column.
  *
- * ### Tap and hold are told apart by a threshold
+ * ### Pausing is immediate; only the navigation waits on a threshold
  *
- * A finger that lifts before the platform's long-press timeout is a tap and moves the story. A
- * finger that outlives it is a hold: it pauses, and it must never move the story when it lifts.
- * `onLongPress` is supplied for exactly that reason — with it set, `detectTapGestures` stops
- * reporting a long hold as a tap, which is what used to make a hold jump to the next slide.
+ * Every touch pauses the moment it lands — a bar that carried on for half a second under a
+ * resting thumb was the first thing anyone noticed. What the platform's long-press timeout
+ * decides is something else entirely: whether *lifting* the finger counts as a tap.
  *
- * The two clocks below are deliberately the same number, so a gesture cannot be counted as both.
+ * A finger that lifts before that timeout is a tap and moves the story. One that outlives it is a
+ * hold, and must not move the story at all when it lifts. `onLongPress` is supplied for exactly
+ * that reason — with it set, `detectTapGestures` stops reporting a long hold as a tap, which is
+ * what used to make a hold jump to the next slide. The pause and the resume are handled in
+ * `onPress` because it is the only callback that can await the release.
  *
  * ### `pointerInput(Unit)`, and why it matters here
  *
@@ -425,22 +427,18 @@ private fun BoxScope.StoryTapZone(
             .fillMaxHeight()
             .padding(top = StoryDimens.viewerTapZoneTop)
             .pointerInput(Unit) {
-                val holdThresholdMs = viewConfiguration.longPressTimeoutMillis
                 detectTapGestures(
                     onPress = {
                         // While the keyboard is up the story is already held by it, and the only
                         // thing a touch out here means is "put that away".
                         if (!currentIsComposing) {
-                            // Null means the finger was still down when the threshold passed —
-                            // a hold. Anything shorter is a tap and is left to onTap below, so an
-                            // ordinary tap never flickers the progress bar.
-                            val heldPastThreshold =
-                                withTimeoutOrNull(holdThresholdMs) { tryAwaitRelease() } == null
-                            if (heldPastThreshold) {
-                                currentOnIntent(StoryViewerIntent.Pause)
-                                tryAwaitRelease()
-                                currentOnIntent(StoryViewerIntent.Resume)
-                            }
+                            // The instant the finger lands, with nothing waited out first: the
+                            // bar has to stop under the thumb, not half a second after it. The
+                            // threshold below decides whether the *release* moves the story; it
+                            // has no say in when the story stops.
+                            currentOnIntent(StoryViewerIntent.Pause)
+                            tryAwaitRelease()
+                            currentOnIntent(StoryViewerIntent.Resume)
                         }
                     },
                     // Empty, and load-bearing: its presence is what keeps a hold from also being
