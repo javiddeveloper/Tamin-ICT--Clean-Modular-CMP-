@@ -70,11 +70,17 @@ presentation, so `StoryChannelDN` carries none. `StoryUiMapper` adds both from t
 through one lookup table, and that table **falls back** rather than failing — a channel published
 after this build shipped renders in the default palette instead of crashing the rail.
 
-**`StoryMediaDN.SampleImage` / `SampleVideo` are mock-only variants, not paths.** The mock could
-not name a file in the feature's own asset bundle without core-data knowing about it, so it names
-*what the slide is* and the mapper resolves it (`Res.getUri`, which is an ordinary function, not a
-suspending one — so the mapper stays plain and nothing touches the asset bundle from a unit test).
-Deleting those two variants when the service lands makes the compiler point at every site.
+**`StoryMediaDN.BundledImage(path)` / `BundledVideo(path)` are mock-only variants.** A bundled path
+is an address the same way a URL is, and the mapper resolves both — past it, a file inside the app
+and a picture off a host are the same thing. `Res.getUri` is an ordinary function, not a suspending
+one, so the mapper stays plain and no unit test ever reaches the asset bundle. Deleting the two
+variants when the service lands makes the compiler point at every site.
+
+That is also **the quickest way to try real media by hand**: drop a file into
+`feature/stories/src/commonMain/composeResources/files/` and name it on a slide. Nothing is
+generated from that folder — the path is plain string concatenation — so no Gradle sync is needed,
+only a rebuild to repackage the assets. The recipe is in a comment block at the top of
+`StoryMockCatalog.kt`.
 
 ## The segment clock — the one design decision worth knowing
 
@@ -193,7 +199,7 @@ The three pieces that were deliberately skipped are exactly the three you add:
 2. Point `StoryRepositoryImpl` at that data source instead of `mockStoryChannels()`, and delete
    `StoryMockCatalog.kt`. The interface, the use cases, the mapper, the models and both ViewModels
    do not move.
-3. Delete `StoryMediaDN.SampleImage` / `SampleVideo` and the bundled files under
+3. Delete `StoryMediaDN.BundledImage` / `BundledVideo` and the sample files under
    `composeResources/files/`; the compiler will point at the mapper branches to remove.
 
 Then:

@@ -56,20 +56,22 @@ sealed interface StoryMediaDN {
     data class Video(val url: String) : StoryMediaDN
 
     /**
-     * A picture bundled with the app rather than fetched.
+     * A picture shipped inside the app rather than fetched.
      *
-     * Exists only while the catalogue is a mock, so that the image path is reachable without a
-     * service and without a network. A real service always sends [Image].
+     * [path] is an address in the presentation module's own resource bundle, the way [Image.url]
+     * is an address on a host — the mapper resolves both, and past it the two are the same thing.
      *
-     * Deliberately a variant rather than a path string: the app's assets are the presentation
-     * layer's business, and this way the domain names *what* the slide is without knowing where
-     * the file lives. When the service arrives, deleting this and [SampleVideo] makes the compiler
-     * point at every place that has to change.
+     * Exists so the image path is exercisable without a service and without a network, which is
+     * also what makes it the quickest way to try a real picture by hand: drop a file in and name
+     * it here. A real service always sends [Image].
+     *
+     * When the endpoint lands, deleting this and [BundledVideo] makes the compiler point at every
+     * place that has to change.
      */
-    data object SampleImage : StoryMediaDN
+    data class BundledImage(val path: String) : StoryMediaDN
 
-    /** A clip bundled with the app. See [SampleImage]. */
-    data object SampleVideo : StoryMediaDN
+    /** A clip shipped inside the app. See [BundledImage]. */
+    data class BundledVideo(val path: String) : StoryMediaDN
 }
 
 /**

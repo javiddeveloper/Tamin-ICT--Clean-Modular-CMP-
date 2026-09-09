@@ -20,10 +20,6 @@ import taminx.feature.stories.generated.resources.ic_story_insured
 import taminx.feature.stories.generated.resources.ic_story_pensioner
 import taminx.feature.stories.generated.resources.ic_story_public_relations
 
-/** Where the bundled samples live inside this module. */
-private const val SAMPLE_IMAGE_PATH = "files/story_sample_image.jpg"
-private const val SAMPLE_VIDEO_PATH = "files/story_sample_video.mp4"
-
 fun List<StoryChannelDN>.toPresentation(): ImmutableList<StoryChannelPR> =
     map { it.toPresentation() }.toImmutableList()
 
@@ -59,16 +55,18 @@ private fun StoryItemDN.toPresentation() = StoryItemPR(
 /**
  * Resolves the domain's media to something the UI can load.
  *
- * The bundled-sample variants become real URIs here, which is why the presentation model has no
- * equivalent of them: past this point a sample and a served picture are the same thing.
- * `Res.getUri` is an ordinary function, not a suspending one, so this stays a plain mapper.
+ * The bundled variants become real URIs here, which is why the presentation model has no
+ * equivalent of them: past this point a file in the app and a picture off a host are the same
+ * thing. `Res.getUri` is an ordinary function, not a suspending one, so this stays a plain mapper
+ * — and it is pure string work, so a path that names nothing produces a URI that simply fails to
+ * load, which the viewer already handles as a media failure.
  */
 private fun StoryMediaDN.toPresentation(): StoryMediaPR = when (this) {
     StoryMediaDN.None -> StoryMediaPR.None
     is StoryMediaDN.Image -> StoryMediaPR.Image(url)
     is StoryMediaDN.Video -> StoryMediaPR.Video(url)
-    StoryMediaDN.SampleImage -> StoryMediaPR.Image(Res.getUri(SAMPLE_IMAGE_PATH))
-    StoryMediaDN.SampleVideo -> StoryMediaPR.Video(Res.getUri(SAMPLE_VIDEO_PATH))
+    is StoryMediaDN.BundledImage -> StoryMediaPR.Image(Res.getUri(path))
+    is StoryMediaDN.BundledVideo -> StoryMediaPR.Video(Res.getUri(path))
 }
 
 private fun StoryCtaDN.toPresentation() = StoryCtaPR(label = label, target = target)

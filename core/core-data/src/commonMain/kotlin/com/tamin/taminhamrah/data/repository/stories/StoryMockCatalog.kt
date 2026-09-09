@@ -6,6 +6,33 @@ import com.tamin.taminhamrah.model.stories.StoryCtaDN
 import com.tamin.taminhamrah.model.stories.StoryItemDN
 import com.tamin.taminhamrah.model.stories.StoryMediaDN
 
+/*
+ * ─── Trying your own photos and clips ──────────────────────────────────────────────────────────
+ *
+ * 1. Drop the file into `feature/stories/src/commonMain/composeResources/files/`.
+ *    Any name, any number of them. Nothing is generated from that folder — the path is resolved
+ *    as a plain string — so no Gradle sync is needed, only a rebuild to repackage the assets.
+ *
+ * 2. Name it below and put it on whichever slide you want to look at:
+ *
+ *        media = StoryMediaDN.BundledImage("files/my_photo.jpg")
+ *        media = StoryMediaDN.BundledVideo("files/my_clip.mp4")
+ *
+ *    A remote address works the same way, with `StoryMediaDN.Image(url)` / `Video(url)` — but see
+ *    the warning about image URLs in `docs/vault/Stories.md`: the shared image loader sends the
+ *    signed-in user's token to whatever host it fetches from. Video URLs do not go through it.
+ *
+ * 3. What to expect: a picture is cropped to fill (portrait 9:16 fits without losing anything) and
+ *    stays up for 6.2 s; a clip is cropped the same way and its own length drives the progress bar.
+ *    A path that names nothing shows «نمایش این محتوا ممکن نشد» and the story moves on rather than
+ *    stalling — so a typo looks like that, not like a crash.
+ * ───────────────────────────────────────────────────────────────────────────────────────────────
+ */
+
+/** The two clips shipped as samples. Replace the files, or add your own beside them. */
+private const val SAMPLE_IMAGE = "files/story_sample_image.jpg"
+private const val SAMPLE_VIDEO = "files/file_example.mp4"
+
 /**
  * The bundled «تازه‌ها» catalogue: five channels of three slides each, copy taken from the design
  * reference.
@@ -45,7 +72,7 @@ private fun publicRelationsChannel() = StoryChannelDN(
             id = "pr:1",
             title = "خدمات غیرحضوری",
             body = "بیشتر درخواست‌ها را از همین اپ ثبت کنید؛ مراجعه به شعبه فقط برای موارد ضروری لازم است.",
-            media = StoryMediaDN.SampleImage,
+            media = StoryMediaDN.BundledImage(SAMPLE_IMAGE),
             baseLikes = 243,
         ),
         StoryItemDN(
@@ -103,7 +130,7 @@ private fun assistantChannel() = StoryChannelDN(
             id = "ai:0",
             title = "یارا، دستیار هوشمند",
             body = "سؤال‌های بیمه‌ای خود را به زبان ساده بپرسید و پاسخ روشن بگیرید.",
-            media = StoryMediaDN.SampleVideo,
+            media = StoryMediaDN.BundledVideo(SAMPLE_VIDEO),
             cta = StoryCtaDN("شروع گفت‌وگو", FeatureFlag.AGENT),
             baseLikes = 245,
         ),
