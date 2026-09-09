@@ -59,6 +59,7 @@ fun <T> WorkshopListScaffold(
     listState: LazyListState = rememberLazyListState(),
     contentPadding: PaddingValues = WorkshopDimens.listContentPadding,
     emptyMessage: String = stringResource(Res.string.workshop_empty_list),
+    emptyContent: (@Composable () -> Unit)? = null,
     key: ((T) -> Any)? = null,
     header: (@Composable () -> Unit)? = null,
     /**
@@ -94,8 +95,6 @@ fun <T> WorkshopListScaffold(
      */
     row: @Composable (T, Modifier) -> Unit,
 ) {
-    // The three states share one set of insets: a header that keeps the page margins while the
-    // list is loading, then loses them once the rows arrive, reads as the page jumping sideways.
     if (state.isFirstLoad) {
         WorkshopListSkeleton(
             modifier = modifier,

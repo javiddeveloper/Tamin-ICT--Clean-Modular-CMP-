@@ -199,6 +199,8 @@ import com.tamin.taminhamrah.useCases.payment.CreatePaymentLinkUseCase
 import com.tamin.taminhamrah.useCases.payment.GetPaymentPreviewUseCase
 import com.tamin.taminhamrah.useCases.payment.VerifyPaymentUseCase
 import com.tamin.taminhamrah.useCases.workshops.PayWorkshopDebitUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetWorkShopObjectionsUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetWorkShopObjectionSmsUseCase
 import com.tamin.taminhamrah.useCases.workshops.SaveArticleSixteenRequestUseCase
 import com.tamin.taminhamrah.useCases.workshops.SaveDebitObjectionUseCase
 import com.tamin.taminhamrah.useCases.agent.SendAgentPromptUseCase
@@ -453,6 +455,8 @@ val domainModule = module {
     factoryOf(::CheckObjectionDeadlineUseCase)
     factoryOf(::SaveDebitObjectionUseCase)
     factoryOf(::GetDebitObjectionPdfUseCase)
+    factoryOf(::GetWorkShopObjectionsUseCase)
+    factoryOf(::GetWorkShopObjectionSmsUseCase)
     factoryOf(::GetRecentlyAddedMembersUseCase)
     factoryOf(::ConfirmRecentlyAddedMemberUseCase)
     factoryOf(::DeleteRecentlyAddedMemberUseCase)
