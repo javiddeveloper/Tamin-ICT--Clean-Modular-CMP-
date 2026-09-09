@@ -31,6 +31,7 @@ import com.tamin.taminhamrah.feature.workshops.navigateToContractRows
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.navigateToCompleteEmployerInfo
 import com.tamin.taminhamrah.feature.workshops.navigateToLegalRepresentativeWorkshops
+import com.tamin.taminhamrah.feature.workshops.navigateToDebtObjectionStatus
 import com.tamin.taminhamrah.model.common.FeatureFlag
 
 fun NavController.navigateToFeature(flag: FeatureFlag) {
@@ -42,6 +43,7 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
         FeatureFlag.COMPLETE_WORKSHOP_INFO -> navigateToCompleteEmployerInfo()
         FeatureFlag.STACK_HOLDER_LIST -> navigateToLegalRepresentativeWorkshops()
         FeatureFlag.CONTRACTS -> navigateToContractAffairs()
+        FeatureFlag.FOLLOW_PROTEST_STATUS -> navigateToDebtObjectionStatus()
         FeatureFlag.STUDENT_INSURANCE -> navigateToContractFlow(ContractType.STUDENT)
         FeatureFlag.FREELANCE_INSURANCE -> navigateToContractFlow(ContractType.FREELANCE)
         FeatureFlag.OPTIONAL_INSURANCE -> navigateToContractFlow(ContractType.OPTIONAL)
