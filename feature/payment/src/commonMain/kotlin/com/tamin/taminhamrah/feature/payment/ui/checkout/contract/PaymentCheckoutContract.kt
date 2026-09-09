@@ -38,7 +38,11 @@ data class PaymentCheckoutUiState(
     val canSubmit: Boolean
         get() = !isLoading && !isSubmitting && !isExpired && !hasOpenedGateway &&
             preview.isPayable &&
-            (!payerType.needsIdentifier || (payerIdentifier.isNotBlank() && !identifierError))
+            if (payerType.needsIdentifier) {
+                payerIdentifier.isNotBlank() && !identifierError
+            } else {
+                currentUserNationalCode.isNotBlank()
+            }
 
     sealed interface PartialState {
         data class Loading(val isLoading: Boolean) : PartialState

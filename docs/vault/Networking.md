@@ -130,4 +130,4 @@ The `Logging` plugin uses Kermit with tags `KtorClient` / `KtorHealthClient`. Lo
 
 `core-network/src/commonTest/resources/mocks/` and `androidUnitTest/resources/mocks/` hold sample JSON (`certificate/`, `pension/`) used with `ktor-client-mock`.
 
-Related: [[Dependency-Injection]] · [[Database]] · [[Overview]]
+Related: [[Dependency-Injection]] · [[Database]] · [[Overview]] · [[Debug-Tooling]]

@@ -37,6 +37,7 @@ import taminx.core.core_ui.debug_login_client_id_hint
 import taminx.core.core_ui.debug_login_client_secret_hint
 import taminx.core.core_ui.debug_login_submit
 import taminx.core.core_ui.debug_login_title
+import taminx.core.core_ui.error_generic
 import taminx.core.core_ui.ic_tamin_chevron_back
 
 @Composable
@@ -121,9 +122,14 @@ private fun DebugLoginContent(
             }
 
             state.statusText?.let { statusText ->
+                val displayText = if (state.isError) {
+                    stringResource(Res.string.error_generic, statusText)
+                } else {
+                    statusText
+                }
                 SelectionContainer {
                     Text(
-                        text = statusText,
+                        text = displayText,
                         style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                         color = taminColors.textSecondary
                     )

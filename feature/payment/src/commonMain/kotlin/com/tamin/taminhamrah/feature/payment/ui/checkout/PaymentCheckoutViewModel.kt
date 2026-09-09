@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.feature.payment.ui.checkout.contract.PaymentCheckou
 import com.tamin.taminhamrah.feature.payment.ui.checkout.contract.PaymentCheckoutUiState.PartialState
 import com.tamin.taminhamrah.model.payment.PayerType
 import com.tamin.taminhamrah.model.payment.isIdentifierValid
+import com.tamin.taminhamrah.ui.digitsOnly
 import com.tamin.taminhamrah.useCases.agent.GetCurrentUserNationalCodeUseCase
 import com.tamin.taminhamrah.useCases.payment.CancelPaymentUseCase
 import com.tamin.taminhamrah.useCases.payment.CreatePaymentLinkUseCase
@@ -54,7 +55,7 @@ class PaymentCheckoutViewModel(
         }
 
         is PaymentCheckoutIntent.PayerIdentifierChanged -> flow {
-            val digits = intent.identifier.filter { it in '0'..'9' }
+            val digits = intent.identifier.digitsOnly()
             val payerType = uiState.value.payerType
             emit(
                 PartialState.SetPayerIdentifier(

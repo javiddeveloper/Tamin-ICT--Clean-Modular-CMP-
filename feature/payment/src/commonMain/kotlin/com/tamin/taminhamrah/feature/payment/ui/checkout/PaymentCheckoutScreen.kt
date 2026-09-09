@@ -19,14 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.payment.ui.checkout.components.PayerTypeSelector
-import com.tamin.taminhamrah.feature.payment.ui.checkout.components.PaymentDetailCard
-import com.tamin.taminhamrah.feature.payment.ui.checkout.components.PaymentDetailRow
 import com.tamin.taminhamrah.feature.payment.ui.checkout.contract.PaymentCheckoutEvent
 import com.tamin.taminhamrah.feature.payment.ui.checkout.contract.PaymentCheckoutIntent
 import com.tamin.taminhamrah.feature.payment.ui.checkout.contract.PaymentCheckoutUiState
 import com.tamin.taminhamrah.model.payment.PayerType
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.BackHandler
+import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.TaminBottomBar
@@ -37,6 +36,7 @@ import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.TaminTextField
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.rememberTaminCountdownState
+import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toPriceFormat
@@ -149,21 +149,29 @@ private fun PaymentCheckoutContent(
                 .imePadding(),
             verticalArrangement = Arrangement.spacedBy(Spacing.lg),
         ) {
-            PaymentDetailCard {
-                PaymentDetailRow(
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .taminSurface()
+                    .padding(Spacing.lg),
+                verticalArrangement = Arrangement.spacedBy(Spacing.md),
+            ) {
+                DetailRow(
                     label = stringResource(Res.string.payment_amount_label),
-                    value = state.preview.amount.toRialAmount(),
-                    emphasize = true,
+                    value = state.preview.amount.toPriceFormat(),
+                    unit = stringResource(Res.string.payment_currency_unit),
+                    valueStyle = MaterialTheme.typography.titleMedium,
                 )
-                PaymentDetailRow(
+                DetailRow(
                     label = stringResource(Res.string.payment_id_label),
                     value = state.preview.paymentId.orDash(),
                 )
-                PaymentDetailRow(
+                DetailRow(
                     label = stringResource(Res.string.payment_reason_label),
                     value = state.preview.description.orDash(),
+                    numeric = false,
                 )
-                PaymentDetailRow(
+                DetailRow(
                     label = stringResource(Res.string.payment_remaining_time_label),
                     value = countdown.formattedTime,
                 )
@@ -262,8 +270,3 @@ private const val DASH = "—"
 
 @Composable
 internal fun String.orDash(): String = ifBlank { DASH }.toPersianDigits()
-
-/** Grouped Persian digits followed by the currency unit, the way every money line in the app reads. */
-@Composable
-internal fun Long.toRialAmount(): String =
-    "${toPriceFormat()} ${stringResource(Res.string.payment_currency_unit)}"

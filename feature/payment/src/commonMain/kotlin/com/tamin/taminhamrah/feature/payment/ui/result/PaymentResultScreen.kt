@@ -17,10 +17,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.tamin.taminhamrah.feature.payment.ui.checkout.components.PaymentDetailCard
-import com.tamin.taminhamrah.feature.payment.ui.checkout.components.PaymentDetailRow
 import com.tamin.taminhamrah.feature.payment.ui.checkout.orDash
-import com.tamin.taminhamrah.feature.payment.ui.checkout.toRialAmount
 import com.tamin.taminhamrah.feature.payment.ui.result.contract.PaymentResultEvent
 import com.tamin.taminhamrah.feature.payment.ui.result.contract.PaymentResultIntent
 import com.tamin.taminhamrah.feature.payment.ui.result.contract.PaymentResultKind
@@ -30,16 +27,20 @@ import com.tamin.taminhamrah.model.payment.PaymentStatus
 import com.tamin.taminhamrah.model.payment.PaymentVerifierKey
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.BackHandler
+import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.TaminBottomBar
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
+import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.toPriceFormat
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.payment_currency_unit
 import taminx.core.core_ui.payment_id_label
 import taminx.core.core_ui.payment_reason_label
 import taminx.core.core_ui.payment_reference_number_label
@@ -149,33 +150,41 @@ private fun PaymentResultContent(
             }
 
             if (state.kind != PaymentResultKind.CHECKING) {
-                PaymentDetailCard {
-                    PaymentDetailRow(
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .taminSurface()
+                        .padding(Spacing.lg),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.md),
+                ) {
+                    DetailRow(
                         label = stringResource(Res.string.payment_settled_amount_label),
                         // Falls back to what was asked for: a gateway that reports success without
                         // echoing the settled amount must not print a receipt reading zero.
                         value = preview.settledAmount
                             .takeIf { it > 0L }
                             .let { it ?: preview.amount }
-                            .toRialAmount(),
-                        emphasize = true,
+                            .toPriceFormat(),
+                        unit = stringResource(Res.string.payment_currency_unit),
+                        valueStyle = MaterialTheme.typography.titleMedium,
                     )
-                    PaymentDetailRow(
+                    DetailRow(
                         label = stringResource(Res.string.payment_id_label),
                         value = preview.paymentId.orDash(),
                     )
-                    PaymentDetailRow(
+                    DetailRow(
                         label = stringResource(Res.string.payment_reason_label),
                         value = preview.description.orDash(),
+                        numeric = false,
                     )
                     if (preview.referenceNumber.isNotBlank()) {
-                        PaymentDetailRow(
+                        DetailRow(
                             label = stringResource(Res.string.payment_reference_number_label),
                             value = preview.referenceNumber.orDash(),
                         )
                     }
                     if (preview.traceNumber.isNotBlank()) {
-                        PaymentDetailRow(
+                        DetailRow(
                             label = stringResource(Res.string.payment_trace_number_label),
                             value = preview.traceNumber.orDash(),
                         )

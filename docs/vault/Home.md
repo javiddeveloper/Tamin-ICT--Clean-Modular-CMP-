@@ -19,6 +19,7 @@ tags: [moc]
 - [[Networking]] — Ktor, the five HTTP clients, auth and token refresh
 - [[Database]] — Room KMP, DAOs, schemas
 - [[Payments]] — the one payment flow every feature uses, and its mock gateway
+- [[Debug-Tooling]] — `TokenSlot`, the back-to-back debug login, and the `isDebug` gate
 
 ## Conventions
 

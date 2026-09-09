@@ -58,7 +58,7 @@ class DeveloperOptionsRepositoryImpl(
      * from a fake, whatever a previous debug install left in shared app storage.
      */
     override fun getPaymentMockMode(): PaymentMockMode =
-        if (AppConfig.isDebug) _paymentMockMode.value else PaymentMockMode.DISABLED
+        if (isDebug) _paymentMockMode.value else PaymentMockMode.DISABLED
 
     override fun observePaymentMockMode(): Flow<PaymentMockMode> = _paymentMockMode.asStateFlow()
 

@@ -108,6 +108,18 @@ class PaymentCheckoutViewModelTest {
     }
 
     @Test
+    fun `paying for oneself is blocked when the app could not load the user's own national code`() =
+        runTest {
+            val vm = viewModel(nationalCode = null)
+            vm.sendIntent(PaymentCheckoutIntent.Load(TICKET))
+
+            assertFalse(vm.uiState.value.canSubmit)
+
+            vm.sendIntent(PaymentCheckoutIntent.PayClicked)
+            assertEquals(0, repository.paymentLinkCalls)
+        }
+
+    @Test
     fun `an identifier that fails its own rule keeps the payment from being sent`() = runTest {
         val vm = viewModel()
         vm.sendIntent(PaymentCheckoutIntent.Load(TICKET))
@@ -122,6 +134,22 @@ class PaymentCheckoutViewModelTest {
         vm.sendIntent(PaymentCheckoutIntent.PayClicked)
         assertEquals(0, repository.paymentLinkCalls)
     }
+
+    @Test
+    fun `typing a national code on a Persian-numeral keyboard keeps every digit typed so far`() =
+        runTest {
+            val vm = viewModel()
+            vm.sendIntent(PaymentCheckoutIntent.Load(TICKET))
+            vm.sendIntent(PaymentCheckoutIntent.PayerTypeSelected(PayerType.OTHER_PERSON))
+
+            // A Persian-numeral keyboard types Persian glyphs into the field one at a time; each
+            // keystroke must fold onto what was already typed, not wipe it.
+            vm.sendIntent(PaymentCheckoutIntent.PayerIdentifierChanged("۰"))
+            vm.sendIntent(PaymentCheckoutIntent.PayerIdentifierChanged("۰۴"))
+            vm.sendIntent(PaymentCheckoutIntent.PayerIdentifierChanged("۰۴۹"))
+
+            assertEquals("049", vm.uiState.value.payerIdentifier)
+        }
 
     @Test
     fun `an empty identifier is incomplete rather than flagged as wrong`() = runTest {

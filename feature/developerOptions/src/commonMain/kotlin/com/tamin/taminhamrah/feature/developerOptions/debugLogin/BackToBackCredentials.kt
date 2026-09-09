@@ -4,12 +4,17 @@ package com.tamin.taminhamrah.feature.developerOptions.debugLogin
  * The back-to-back test client, pre-filled on the debug login screen and re-used when the token
  * screen re-issues that slot.
  *
- * Hardcoded at explicit request and accepted risk: `feature:developerOptions` ships unminified in
- * every build, so both values are readable in the release APK/IPA by anyone who extracts it.
- * Reaching the screens that use them is gated on `AppConfig.isDebug`, but that gate does not strip
- * the string literals themselves.
+ * Platform-specific rather than a plain `object` in this file: on Android the real values live
+ * only in the `debug` build type's `BuildConfig`
+ * (`feature/developerOptions/build.gradle.kts`) — the `release` build type compiles them as empty
+ * strings, so the secret text itself is absent from a release APK's compiled classes, not merely
+ * unreachable behind the `AppConfig.isDebug` gate on the screens that read it.
+ *
+ * iOS has no equivalent build-type-scoped compile step in this project yet, so the iOS `actual`
+ * still carries the literal and remains readable in an extracted release IPA — a known gap, not
+ * solved here.
  */
-internal object BackToBackCredentials {
-    const val CLIENT_ID = "442e832b206822656b5f816f6a630383"
-    const val CLIENT_SECRET = "04136b343832526014771644295c43636e4323051a805f4e1c3b192589820373"
+internal expect object BackToBackCredentials {
+    val CLIENT_ID: String
+    val CLIENT_SECRET: String
 }

@@ -49,12 +49,15 @@ class DebugLoginViewModel(
     ): DebugLoginUiState = when (partialState) {
         is PartialState.SetClientId -> currentState.copy(clientId = partialState.value)
         is PartialState.SetClientSecret -> currentState.copy(clientSecret = partialState.value)
-        PartialState.LoginStarted -> currentState.copy(isLoading = true, statusText = null)
-        is PartialState.LoginFinished -> currentState.copy(isLoading = false, statusText = partialState.statusText)
+        PartialState.LoginStarted -> currentState.copy(isLoading = true, statusText = null, isError = false)
+        is PartialState.LoginFinished ->
+            currentState.copy(isLoading = false, statusText = partialState.statusText, isError = false)
+
+        is PartialState.LoginFailed ->
+            currentState.copy(isLoading = false, statusText = partialState.message, isError = true)
     }
 
-    override fun createErrorState(message: String): PartialState =
-        PartialState.LoginFinished(statusText = "خطا: $message")
+    override fun createErrorState(message: String): PartialState = PartialState.LoginFailed(message)
 }
 
 private fun DebugLoginResultDN.toRawStatusText(): String = buildString {

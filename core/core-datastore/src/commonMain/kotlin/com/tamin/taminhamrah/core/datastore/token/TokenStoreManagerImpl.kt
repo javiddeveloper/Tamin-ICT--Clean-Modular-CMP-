@@ -16,7 +16,8 @@ import kotlinx.coroutines.flow.asStateFlow
 
 
 class TokenStoreManagerImpl(
-    private val settings: Settings
+    private val settings: Settings,
+    private val isDebug: Boolean = AppConfig.isDebug,
 ) : TokenStoreManager {
 
     private val tokenKey = "TOKEN"
@@ -50,19 +51,18 @@ class TokenStoreManagerImpl(
     }
 
     private fun readActiveSlot(): TokenSlot {
-        if (!AppConfig.isDebug) return TokenSlot.USER
+        if (!isDebug) return TokenSlot.USER
         val stored = settings.getStringOrNull(activeSlotKey) ?: return TokenSlot.USER
         return TokenSlot.entries.firstOrNull { it.name == stored } ?: TokenSlot.USER
     }
 
     override fun saveToken(token: String?) {
         saveToken(TokenSlot.USER, token)
-        // Signing out of the real account must not leave the app running on a debug token: the
-        // next session starts from the same slot every time.
-        if (token == null) {
-            settings.remove(activeSlotKey)
-            _activeSlotFlow.value = TokenSlot.USER
-        }
+        // Neither signing out nor a fresh real login may leave the app running on a debug slot:
+        // logging out must not leave the next session pointed at a stale debug token, and logging
+        // in for real while a debug slot was active must not keep sending that debug bearer.
+        settings.remove(activeSlotKey)
+        _activeSlotFlow.value = TokenSlot.USER
     }
 
     override fun getToken(): String? = getToken(getActiveSlot())
@@ -89,13 +89,13 @@ class TokenStoreManagerImpl(
     }
 
     override fun getActiveSlot(): TokenSlot =
-        if (AppConfig.isDebug) _activeSlotFlow.value else TokenSlot.USER
+        if (isDebug) _activeSlotFlow.value else TokenSlot.USER
 
     override fun activeSlotFlow(): Flow<TokenSlot> = _activeSlotFlow.asStateFlow()
 
     override suspend fun setActiveSlot(slot: TokenSlot) {
         // AGENT is not a bearer slot, and a release build has nothing to switch between.
-        if (!AppConfig.isDebug || slot == TokenSlot.AGENT) return
+        if (!isDebug || slot == TokenSlot.AGENT) return
         settings.putString(activeSlotKey, slot.name)
         _activeSlotFlow.value = slot
         // The switched-to slot decides whether the app now counts as logged in.
