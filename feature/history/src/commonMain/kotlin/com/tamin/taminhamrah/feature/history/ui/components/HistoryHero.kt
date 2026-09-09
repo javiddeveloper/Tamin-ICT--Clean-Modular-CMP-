@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
@@ -26,7 +27,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -36,25 +36,22 @@ import com.tamin.taminhamrah.feature.history.ui.HistoryDimens
 import com.tamin.taminhamrah.feature.history.ui.model.HistoryScope
 import com.tamin.taminhamrah.feature.history.ui.model.YearChipPR
 import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.components.collapsingBottomPadding
+import com.tamin.taminhamrah.ui.components.rideUpIntoHeader
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.TaminHistoryChipBg
 import com.tamin.taminhamrah.ui.theme.TaminHistoryChipBorder
 import com.tamin.taminhamrah.ui.theme.TaminHistoryChipSelectedBorder
 import com.tamin.taminhamrah.ui.theme.TaminHistoryChipSelectedText
 import com.tamin.taminhamrah.ui.theme.TaminHistoryChipText
 import com.tamin.taminhamrah.ui.theme.TaminHistoryChipTextDisabled
-import com.tamin.taminhamrah.ui.theme.TaminHistoryHeroBottom
-import com.tamin.taminhamrah.ui.theme.TaminHistoryHeroMid
-import com.tamin.taminhamrah.ui.theme.TaminHistoryHeroTop
+import com.tamin.taminhamrah.ui.theme.TaminHistoryHeroChipBg
 import kotlinx.collections.immutable.ImmutableList
-import org.jetbrains.compose.resources.vectorResource
-import taminx.core.core_ui.Res as CoreRes
-import taminx.core.core_ui.ic_tamin_download
-
-import androidx.compose.material.icons.filled.ChevronRight
-import com.tamin.taminhamrah.ui.components.collapsingBottomPadding
-import com.tamin.taminhamrah.ui.components.rideUpIntoHeader
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.action_back
+import taminx.core.core_ui.ic_tamin_download
+import taminx.core.core_ui.Res as CoreRes
 
 /**
  * The redesigned hero header for «کلیه سوابق».
@@ -79,11 +76,8 @@ fun HistoryHero(
     /** Read only inside the layout phase — see [HistoryTopArea]. */
     collapseProgress: () -> Float = { 0f },
 ) {
-    val heroBrush = remember {
-        Brush.linearGradient(
-            listOf(TaminHistoryHeroTop, TaminHistoryHeroMid, TaminHistoryHeroBottom),
-        )
-    }
+    val colors = LocalTaminColors.current
+    val heroBrush = colors.heroBrush
     val heroShape = remember {
         RoundedCornerShape(bottomStart = HistoryDimens.heroCorner, bottomEnd = HistoryDimens.heroCorner)
     }
@@ -400,8 +394,8 @@ fun HeroActionButton(
         modifier = modifier
             .size(HistoryDimens.heroActionSize)
             .clip(shape)
-            .background(Color(0x1AFFFFFF))
-            .border(HistoryDimens.hairline, Color(0x33FFFFFF), shape)
+            .background(TaminHistoryHeroChipBg)
+            .border(HistoryDimens.hairline, TaminHistoryChipBorder, shape)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {

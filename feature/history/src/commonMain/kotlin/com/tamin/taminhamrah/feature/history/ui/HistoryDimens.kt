@@ -109,6 +109,14 @@ object HistoryDimens {
     val heroPaddingBottomCollapsed = 12.dp
 
     /**
+     * How far «کارگاه‌های سال» drags before its head is folded.
+     *
+     * What that head gives up: the caption-and-pills row, plus the gap it carries above it. The
+     * title row and the back button stay, so the page keeps a bar to leave by however far it scrolls.
+     */
+    val workshopsHeroCollapseDistance = heroRowGap + 24.dp
+
+    /**
      * How far the body drags before the hero is fully folded.
      *
      * Exactly what the head gives up — the card's own shrink, less the ride it hands back as it
@@ -262,6 +270,10 @@ object HistoryDimens {
      * worth reading and days become a strip beneath it, which is the design's own proportion
      * (`104px` over `48px`). Alone, a series takes the whole `138px`.
      */
+    /** A bar's own width, and the air between two of them, before the chart starts scrolling. */
+    val chartBarWidth = 34.dp
+    val chartBarGap = 6.dp
+
     val plotHeightSingle = 138.dp
     val plotHeightPaired = 104.dp
     val plotHeightSecondary = 48.dp

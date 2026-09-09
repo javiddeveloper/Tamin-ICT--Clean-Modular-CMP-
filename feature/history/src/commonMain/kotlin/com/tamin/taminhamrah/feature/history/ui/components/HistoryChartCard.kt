@@ -36,7 +36,9 @@ import com.tamin.taminhamrah.feature.history.ui.HistoryConstants
 import com.tamin.taminhamrah.feature.history.ui.HistoryDimens
 import com.tamin.taminhamrah.feature.history.ui.model.YearDetailPR
 import com.tamin.taminhamrah.ui.components.BarChartSeries
+import com.tamin.taminhamrah.ui.components.ChartScrollBehavior
 import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.components.rememberChartGridLines
 import com.tamin.taminhamrah.ui.components.TaminBarChart
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -48,10 +50,6 @@ import com.tamin.taminhamrah.ui.theme.TaminHistoryConcurrentBottom
 import com.tamin.taminhamrah.ui.theme.TaminHistoryConcurrentTop
 import com.tamin.taminhamrah.ui.theme.TaminHistoryIndicatorEnd
 import com.tamin.taminhamrah.ui.theme.TaminHistoryIndicatorStart
-import com.tamin.taminhamrah.ui.theme.TaminHistoryLegendBg
-import com.tamin.taminhamrah.ui.theme.TaminHistorySubChartBgEnd
-import com.tamin.taminhamrah.ui.theme.TaminHistorySubChartBgStart
-import com.tamin.taminhamrah.ui.theme.TaminHistorySubChartBorder
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -134,7 +132,7 @@ fun HistoryChartCard(
             .fillMaxWidth()
             .clip(RoundedCornerShape(HistoryDimens.cardCorner))
             .background(colors.bgSurface)
-            .border(HistoryDimens.hairline, Color(0xFFEEF1F6), RoundedCornerShape(HistoryDimens.cardCorner))
+            .border(HistoryDimens.hairline, colors.border, RoundedCornerShape(HistoryDimens.cardCorner))
             .padding(horizontal = HistoryDimens.cardPaddingH, vertical = HistoryDimens.cardPaddingV),
         verticalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
@@ -161,14 +159,14 @@ fun HistoryChartCard(
                         fontSize = 13.sp,
                         fontWeight = FontWeight.ExtraBold,
                     ),
-                    color = Color(0xFF0F172A),
+                    color = colors.textPrimary,
                 )
             }
             Text(
                 text = hint,
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontSize = 9.5.sp,
-                    color = Color(0xFF64748B),
+                    color = colors.textSecondary,
                 ),
             )
         }
@@ -276,8 +274,9 @@ private fun SubChartContainer(
     rotateLabels: Boolean,
     scrollState: androidx.compose.foundation.ScrollState,
 ) {
+    val colors = LocalTaminColors.current
     val containerBrush = remember {
-        Brush.verticalGradient(listOf(TaminHistorySubChartBgStart, TaminHistorySubChartBgEnd))
+        Brush.verticalGradient(listOf(colors.historyPanelStart, colors.historyPanelEnd))
     }
     val containerShape = remember { RoundedCornerShape(HistoryDimens.subChartCorner) }
 
@@ -286,7 +285,7 @@ private fun SubChartContainer(
             .fillMaxWidth()
             .clip(containerShape)
             .background(containerBrush)
-            .border(HistoryDimens.hairline, TaminHistorySubChartBorder, containerShape)
+            .border(HistoryDimens.hairline, colors.historyPanelBorder, containerShape)
             .padding(horizontal = HistoryDimens.subChartPaddingH, vertical = HistoryDimens.subChartPaddingV),
     ) {
         // Sub-chart header
@@ -301,15 +300,15 @@ private fun SubChartContainer(
                     fontSize = 10.5.sp,
                     fontWeight = FontWeight.ExtraBold,
                 ),
-                color = Color(0xFF0F172A),
+                color = colors.textPrimary,
             )
 
             if (series.caption.isNotBlank()) {
                 Box(
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(Color.White)
-                        .border(HistoryDimens.hairline, Color(0xFFE8EDF5), CircleShape)
+                        .background(colors.bgSurface)
+                        .border(HistoryDimens.hairline, colors.border, CircleShape)
                         .padding(horizontal = 8.dp, vertical = 3.dp),
                 ) {
                     Text(
@@ -318,7 +317,7 @@ private fun SubChartContainer(
                             fontSize = 8.5.sp,
                             fontWeight = FontWeight.Bold,
                         ),
-                        color = Color(0xFF64748B),
+                        color = colors.textSecondary,
                     )
                 }
             }
@@ -333,18 +332,13 @@ private fun SubChartContainer(
             showLabels = true,
             rotateLabels = rotateLabels,
             animationKey = series.id,
-            scrollBehavior = com.tamin.taminhamrah.ui.components.ChartScrollBehavior.Adaptive,
-            minBarWidth = 34.dp,
-            gap = 6.dp,
+            scrollBehavior = ChartScrollBehavior.Adaptive,
+            minBarWidth = HistoryDimens.chartBarWidth,
+            gap = HistoryDimens.chartBarGap,
             scrollState = scrollState,
-            gridLines = com.tamin.taminhamrah.ui.components.ChartGridLines(
-                showTop = true,
-                showMiddle = true,
-                showBaseline = true,
-                lineColor = Color(0x120F172A),
-                middleLineColor = Color(0x0D0F172A),
-                baselineColor = Color(0x240F172A),
-            ),
+            // Remembered rather than built here: a fresh instance every recomposition is an
+            // argument the chart can never skip on.
+            gridLines = rememberChartGridLines(),
         )
     }
 }
@@ -356,6 +350,7 @@ private fun LegendBar(
     partialLabel: String,
     hint: String,
 ) {
+    val colors = LocalTaminColors.current
     val fullBrush = remember {
         Brush.verticalGradient(listOf(TaminHistoryBarFullTop, TaminHistoryBarFullBottom))
     }
@@ -368,7 +363,7 @@ private fun LegendBar(
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape)
-            .background(TaminHistoryLegendBg)
+            .background(colors.historyLegendBg)
             .padding(horizontal = HistoryDimens.legendPaddingH, vertical = HistoryDimens.legendPaddingV),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -390,7 +385,7 @@ private fun LegendBar(
                     fontSize = 9.5.sp,
                     fontWeight = FontWeight.Bold,
                 ),
-                color = Color(0xFF64748B),
+                color = colors.textSecondary,
             )
         }
 
@@ -411,7 +406,7 @@ private fun LegendBar(
                     fontSize = 9.5.sp,
                     fontWeight = FontWeight.Bold,
                 ),
-                color = Color(0xFF64748B),
+                color = colors.textSecondary,
             )
         }
 
@@ -422,7 +417,7 @@ private fun LegendBar(
                 fontSize = 9.sp,
                 fontWeight = FontWeight.SemiBold,
             ),
-            color = Color(0xFF64748B),
+            color = colors.textSecondary,
         )
     }
 }
@@ -430,6 +425,7 @@ private fun LegendBar(
 /** One workshop row in the split timeline view. */
 @Composable
 private fun WorkshopTimelineRow(row: WorkshopSplitRowPR) {
+    val colors = LocalTaminColors.current
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(5.dp),
@@ -456,7 +452,7 @@ private fun WorkshopTimelineRow(row: WorkshopSplitRowPR) {
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                     ),
-                    color = Color(0xFF0F172A),
+                    color = colors.textPrimary,
                     maxLines = 1,
                 )
             }
@@ -466,7 +462,7 @@ private fun WorkshopTimelineRow(row: WorkshopSplitRowPR) {
                     fontSize = 9.5.sp,
                     fontWeight = FontWeight.Bold,
                 ),
-                color = Color(0xFF64748B),
+                color = colors.textSecondary,
             )
         }
 
@@ -483,12 +479,12 @@ private fun WorkshopTimelineRow(row: WorkshopSplitRowPR) {
                         .weight(1f)
                         .height(9.dp)
                         .clip(cellShape)
-                        .background(if (worked) row.color.copy(alpha = opacity) else Color(0x120F172A))
+                        .background(if (worked) row.color.copy(alpha = opacity) else colors.historyGridLine)
                         // Only a column this employer actually worked is worth ringing; ringing an
                         // empty track would read as a bar that is simply very short.
                         .then(
                             if (worked && row.selectedCell == index) {
-                                Modifier.border(1.2.dp, Color(0x800F172A), cellShape)
+                                Modifier.border(1.2.dp, colors.historyCellRing, cellShape)
                             } else {
                                 Modifier
                             },
@@ -532,6 +528,7 @@ private fun SourceChipRow(
     splitChip: FilterChipPR?,
     onSplitClick: () -> Unit,
 ) {
+    val colors = LocalTaminColors.current
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -549,7 +546,7 @@ private fun SourceChipRow(
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Bold,
                     ),
-                    color = Color(0xFF64748B),
+                    color = colors.textSecondary,
                 )
             }
             chips.forEachIndexed { index, chip ->
@@ -578,6 +575,7 @@ private fun MetricChipRow(
     chips: ImmutableList<FilterChipPR>,
     onPick: (Int) -> Unit,
 ) {
+    val colors = LocalTaminColors.current
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
@@ -590,7 +588,7 @@ private fun MetricChipRow(
                     fontSize = 9.sp,
                     fontWeight = FontWeight.Bold,
                 ),
-                color = Color(0xFF64748B),
+                color = colors.textSecondary,
             )
         }
         chips.forEachIndexed { index, chip ->
@@ -605,10 +603,11 @@ private fun MetricChipRow(
 
 @Composable
 private fun HistoryPillChip(label: String, selected: Boolean, onClick: () -> Unit) {
+    val colors = LocalTaminColors.current
     val shape = remember { CircleShape }
-    val bg = if (selected) Color(0xFF173D7E) else Color.White
-    val border = if (selected) Color(0xFF173D7E) else Color(0xFFE5E7EB)
-    val textColor = if (selected) Color.White else Color(0xFF64748B)
+    val bg = if (selected) colors.chipSelectedBg else colors.bgSurface
+    val border = if (selected) colors.chipSelectedBg else colors.border
+    val textColor = if (selected) Color.White else colors.textSecondary
 
     Box(
         modifier = Modifier
@@ -636,10 +635,11 @@ private fun HistorySplitToggleChip(
     selected: Boolean,
     onClick: () -> Unit,
 ) {
+    val colors = LocalTaminColors.current
     val shape = remember { CircleShape }
-    val bg = if (selected) Color(0xFF173D7E) else Color.White
-    val border = if (selected) Color(0xFF173D7E) else Color(0xFFE5E7EB)
-    val textColor = if (selected) Color.White else Color(0xFF64748B)
+    val bg = if (selected) colors.chipSelectedBg else colors.bgSurface
+    val border = if (selected) colors.chipSelectedBg else colors.border
+    val textColor = if (selected) Color.White else colors.textSecondary
 
     Row(
         modifier = Modifier

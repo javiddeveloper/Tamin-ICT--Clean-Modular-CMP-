@@ -26,7 +26,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,6 +36,8 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -47,7 +51,10 @@ import com.tamin.taminhamrah.feature.history.ui.model.YearDetailPR
 import com.tamin.taminhamrah.feature.history.ui.model.detailWith
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.collapseHeightAway
+import com.tamin.taminhamrah.ui.components.rememberCollapsingHeaderState
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
+import com.tamin.taminhamrah.ui.components.reservedHeight
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHistoryHeroCaption
@@ -122,68 +129,87 @@ fun YearWorkshopsContent(
 ) {
     val colors = LocalTaminColors.current
 
+    // The head stays put and folds under the drag rather than scrolling away with the list — the
+    // same state, spacer and floating-header arrangement every other page in the app is built from.
+    val collapse = rememberCollapsingHeaderState(HistoryDimens.workshopsHeroCollapseDistance)
+    var headerHeightPx by remember { mutableIntStateOf(0) }
+
     Scaffold(modifier = modifier, containerColor = colors.bgPage) { padding ->
-        LazyColumn(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(bottom = padding.calculateBottomPadding()),
-            contentPadding = PaddingValues(bottom = Spacing.xxl),
-            verticalArrangement = Arrangement.spacedBy(Spacing.sm),
-            // The same give the rest of the app scrolls with.
-            overscrollEffect = rememberJellyOverscroll(),
         ) {
-            item(key = HistoryConstants.HERO_KEY) {
-                YearWorkshopsHero(
-                    year = year,
-                    totalDays = detail?.totalDays ?: 0,
-                    onBackClicked = onBackClicked,
-                )
-            }
-
-            when {
-                // The wage call failed, so «ثبت نشده» would be a claim about data that never came.
-                wagesUnavailable -> item(key = HistoryConstants.WAGES_UNAVAILABLE_KEY) {
-                    YearWorkshopsNote(stringResource(HistoryRes.string.history_combined_wage_unavailable))
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .nestedScroll(collapse.nestedScrollConnection),
+                contentPadding = PaddingValues(bottom = Spacing.xxl),
+                verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+                // The same give the rest of the app scrolls with.
+                overscrollEffect = rememberJellyOverscroll(),
+            ) {
+                // Stands in for the floating head, which is measured rather than fixed.
+                item(key = HistoryConstants.HERO_KEY) {
+                    Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
                 }
 
-                detail == null || detail.workshops.isEmpty() ->
-                    item(key = HistoryConstants.NO_WORKSHOP_KEY) {
-                        YearWorkshopsNote(stringResource(HistoryRes.string.history_combined_no_workshop))
+                when {
+                    // The wage call failed, so «ثبت نشده» would be a claim about data that never came.
+                    wagesUnavailable -> item(key = HistoryConstants.WAGES_UNAVAILABLE_KEY) {
+                        YearWorkshopsNote(stringResource(HistoryRes.string.history_combined_wage_unavailable))
                     }
 
-                else -> items(detail.workshops, key = { it.id }) { workshop ->
-                    Box(modifier = Modifier.padding(horizontal = HistoryDimens.sidePadding)) {
-                        WorkshopCard(workshop = workshop)
+                    detail == null || detail.workshops.isEmpty() ->
+                        item(key = HistoryConstants.NO_WORKSHOP_KEY) {
+                            YearWorkshopsNote(stringResource(HistoryRes.string.history_combined_no_workshop))
+                        }
+
+                    else -> items(detail.workshops, key = { it.id }) { workshop ->
+                        Box(modifier = Modifier.padding(horizontal = HistoryDimens.sidePadding)) {
+                            WorkshopCard(workshop = workshop)
+                        }
+                    }
+                }
+
+                if (detail != null) {
+                    item(key = HistoryConstants.SEASONS_TITLE_KEY) {
+                        Text(
+                            text = stringResource(CoreRes.string.history_months_breakdown),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = colors.textPrimary,
+                            modifier = Modifier
+                                .padding(horizontal = HistoryDimens.sidePadding)
+                                .padding(top = Spacing.sm),
+                        )
+                    }
+
+                    // Two cards per row — the design's grid, without nesting a grid inside a list.
+                    items(HistoryConstants.SEASONS / 2, key = { "season_row_$it" }) { row ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = HistoryDimens.sidePadding),
+                            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                        ) {
+                            SeasonCard(detail = detail, season = row * 2, modifier = Modifier.weight(1f))
+                            SeasonCard(detail = detail, season = row * 2 + 1, modifier = Modifier.weight(1f))
+                        }
                     }
                 }
             }
 
-            if (detail != null) {
-                item(key = HistoryConstants.SEASONS_TITLE_KEY) {
-                    Text(
-                        text = stringResource(CoreRes.string.history_months_breakdown),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = colors.textPrimary,
-                        modifier = Modifier
-                            .padding(horizontal = HistoryDimens.sidePadding)
-                            .padding(top = Spacing.sm),
-                    )
-                }
-
-                // Two cards per row — the design's grid, without nesting a grid inside a list.
-                items(HistoryConstants.SEASONS / 2, key = { "season_row_$it" }) { row ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = HistoryDimens.sidePadding),
-                        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-                    ) {
-                        SeasonCard(detail = detail, season = row * 2, modifier = Modifier.weight(1f))
-                        SeasonCard(detail = detail, season = row * 2 + 1, modifier = Modifier.weight(1f))
-                    }
-                }
-            }
+            // Floats over the list so the content passes underneath it as it scrolls away.
+            YearWorkshopsHero(
+                year = year,
+                totalDays = detail?.totalDays ?: 0,
+                onBackClicked = onBackClicked,
+                collapseProgress = collapse.progressProvider,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .onSizeChanged { headerHeightPx = it.height },
+            )
         }
     }
 }
@@ -196,13 +222,20 @@ fun YearWorkshopsContent(
  * is the palette, which they take from the same tokens.
  */
 @Composable
-private fun YearWorkshopsHero(year: String, totalDays: Int, onBackClicked: () -> Unit) {
+private fun YearWorkshopsHero(
+    year: String,
+    totalDays: Int,
+    onBackClicked: () -> Unit,
+    modifier: Modifier = Modifier,
+    /** Read only inside the layout phase, so a frame of the fold costs no recomposition. */
+    collapseProgress: () -> Float = { 0f },
+) {
     val colors = LocalTaminColors.current
     val heroBrush = colors.heroBrush
     val complete = totalDays >= HistoryConstants.FULL_YEAR_DAYS
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clip(
                 RoundedCornerShape(
@@ -222,7 +255,6 @@ private fun YearWorkshopsHero(year: String, totalDays: Int, onBackClicked: () ->
                     top = HistoryDimens.heroPaddingTop,
                     bottom = HistoryDimens.heroPaddingBottomCollapsed,
                 ),
-            verticalArrangement = Arrangement.spacedBy(HistoryDimens.heroRowGap),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -250,8 +282,15 @@ private fun YearWorkshopsHero(year: String, totalDays: Int, onBackClicked: () ->
                 Spacer(modifier = Modifier.size(HistoryDimens.heroButtonSize))
             }
 
+            // The caption and its two pills belong to the open state: they give their height back
+            // as the head folds, so the title row lands as a slim bar rather than over a gap.
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    // The gap above it is the row's own padding rather than the column's spacing,
+                    // so it goes with the row instead of leaving a band the fold cannot close.
+                    .collapseHeightAway(collapseProgress)
+                    .padding(top = HistoryDimens.heroRowGap),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
                 verticalAlignment = Alignment.CenterVertically,
             ) {

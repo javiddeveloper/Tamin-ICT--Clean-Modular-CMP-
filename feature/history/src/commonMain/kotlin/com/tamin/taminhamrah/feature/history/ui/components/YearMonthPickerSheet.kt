@@ -43,6 +43,7 @@ import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminSearchField
 import com.tamin.taminhamrah.ui.theme.Duration
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHistoryButtonEnd
 import com.tamin.taminhamrah.ui.theme.TaminHistoryButtonStart
@@ -305,6 +306,8 @@ private fun PickerRowList(
     LazyColumn(
         modifier = Modifier.height(height),
         verticalArrangement = Arrangement.spacedBy(HistoryDimens.pickerRowGap),
+        // The same give the rest of the app scrolls with.
+        overscrollEffect = rememberJellyOverscroll(),
     ) {
         items(rows, key = { it.id }) { row ->
             PickerRow(

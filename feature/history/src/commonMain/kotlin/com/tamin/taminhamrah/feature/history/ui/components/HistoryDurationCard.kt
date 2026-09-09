@@ -28,33 +28,27 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.LastBaseline
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.util.lerp
+import kotlin.math.roundToInt
 import com.tamin.taminhamrah.feature.history.ui.HistoryDimens
 import com.tamin.taminhamrah.ui.components.collapseAway
 import com.tamin.taminhamrah.ui.components.collapseHeightAway
 import com.tamin.taminhamrah.ui.components.collapsingBottomPadding
 import com.tamin.taminhamrah.ui.components.collapsingVerticalPadding
 import com.tamin.taminhamrah.ui.components.scaleOnCollapse
-import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationCardBgEnd
-import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationCardBgStart
-import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationCardBorder
-import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationFigureLeast
-import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationFigureMajor
-import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationFigureMinor
-import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationNavBg
-import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationNavBorder
-import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationNavIcon
-import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationShadow
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationStripeEnd
 import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationStripeStart
-import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationUnit
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.history_step_newer
 import taminx.core.core_ui.history_step_older
@@ -92,9 +86,10 @@ fun HistoryDurationCard(
     modifier: Modifier = Modifier,
     collapseProgress: () -> Float = { 0f },
 ) {
+    val colors = LocalTaminColors.current
     val cardShape = remember { RoundedCornerShape(HistoryDimens.durationCardCorner) }
     val cardBg = remember {
-        Brush.linearGradient(listOf(TaminHistoryDurationCardBgStart, TaminHistoryDurationCardBgEnd))
+        Brush.linearGradient(listOf(colors.historyCardBgStart, colors.bgSurface))
     }
     val stripeBrush = remember {
         Brush.horizontalGradient(listOf(TaminHistoryDurationStripeStart, TaminHistoryDurationStripeEnd))
@@ -103,10 +98,10 @@ fun HistoryDurationCard(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .shadow(elevation = 14.dp, shape = cardShape, spotColor = TaminHistoryDurationShadow)
+            .shadow(elevation = 14.dp, shape = cardShape, spotColor = colors.historyCardShadow)
             .clip(cardShape)
             .background(cardBg)
-            .border(HistoryDimens.hairline, TaminHistoryDurationCardBorder, cardShape),
+            .border(HistoryDimens.hairline, colors.historyCardBorder, cardShape),
     ) {
         // Top accent line
         Box(
@@ -157,8 +152,8 @@ fun HistoryDurationCard(
                         // Closes upward, giving its height back to the bar.
                         .collapseHeightAway(collapseProgress, rate = 1.4f)
                         .clip(CircleShape)
-                        .background(TaminHistoryDurationNavBg)
-                        .border(HistoryDimens.hairline, TaminHistoryDurationNavBorder, CircleShape)
+                        .background(colors.blueBg)
+                        .border(HistoryDimens.hairline, colors.historyCardBorder, CircleShape)
                         .padding(horizontal = 11.dp, vertical = 3.dp),
                 ) {
                     Text(
@@ -167,12 +162,13 @@ fun HistoryDurationCard(
                             fontSize = 9.5.sp,
                             fontWeight = FontWeight.Bold,
                         ),
-                        color = TaminHistoryDurationNavIcon,
+                        color = colors.historyAccent,
                     )
                 }
 
                 DurationFigures(
                     model = model,
+                    collapseProgress = collapseProgress,
                     modifier = Modifier
                         .collapsingBottomPadding(
                             progress = collapseProgress,
@@ -210,20 +206,21 @@ private fun NavStepButton(
     onClick: () -> Unit,
     contentDescription: String,
 ) {
+    val colors = LocalTaminColors.current
     val alpha = if (enabled) 1f else 0.3f
     Box(
         modifier = Modifier
             .size(HistoryDimens.durationNavSize)
             .clip(CircleShape)
-            .background(TaminHistoryDurationNavBg.copy(alpha = alpha))
-            .border(HistoryDimens.hairline, TaminHistoryDurationNavBorder.copy(alpha = alpha), CircleShape)
+            .background(colors.blueBg.copy(alpha = alpha))
+            .border(HistoryDimens.hairline, colors.historyCardBorder.copy(alpha = alpha), CircleShape)
             .then(if (enabled) Modifier.clickable(onClick = onClick) else Modifier),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
-            tint = TaminHistoryDurationNavIcon.copy(alpha = alpha),
+            tint = colors.historyAccent.copy(alpha = alpha),
             modifier = Modifier.size(HistoryDimens.durationNavIconSize),
         )
     }
@@ -244,59 +241,102 @@ private fun NavStepButton(
  * placement stays a simple left-to-right walk.
  */
 @Composable
-private fun DurationFigures(model: DurationCardPR, modifier: Modifier = Modifier) {
-    val figureLarge = MaterialTheme.typography.headlineLarge.copy(
+private fun DurationFigures(
+    model: DurationCardPR,
+    modifier: Modifier = Modifier,
+    collapseProgress: () -> Float = { 0f },
+) {
+    val colors = LocalTaminColors.current
+    // Every part is composed at the *largest* style and scaled down to its own while the card is
+    // open. That is what lets the fold end with all three at one size, which is what the collapsed
+    // bar wants: it is a summary, and a summary whose months and days have shrunk to a footnote
+    // beside the years is one nobody can read. Composing three styles and swapping them at the end
+    // would be the obvious way round, and it would cost a recomposition on every frame of the fold;
+    // scaling costs a re-layout of this one line and nothing else.
+    val figureStyle = MaterialTheme.typography.headlineLarge.copy(
         fontSize = HistoryDimens.durationTextLarge,
         fontWeight = FontWeight.ExtraBold,
         lineHeight = HistoryDimens.durationTextLarge,
     )
-    val figureMedium = MaterialTheme.typography.headlineMedium.copy(
-        fontSize = HistoryDimens.durationTextMedium,
-        fontWeight = FontWeight.ExtraBold,
-        lineHeight = HistoryDimens.durationTextMedium,
-    )
-    val figureSmall = MaterialTheme.typography.titleLarge.copy(
-        fontSize = HistoryDimens.durationTextSmall,
-        fontWeight = FontWeight.Bold,
-        lineHeight = HistoryDimens.durationTextSmall,
-    )
+    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+
+    // What each part measures against the first one, open. Read in the layout block below, where
+    // the fold's progress may be read for free.
+    val openRatios = remember {
+        floatArrayOf(
+            1f,
+            HistoryDimens.durationTextMedium.value / HistoryDimens.durationTextLarge.value,
+            HistoryDimens.durationTextSmall.value / HistoryDimens.durationTextLarge.value,
+        )
+    }
 
     Layout(
         modifier = modifier,
         content = {
-            DurationFigure(model.part1, figureLarge, HistoryDimens.durationUnitLarge, TaminHistoryDurationFigureMajor)
+            DurationFigure(model.part1, figureStyle, colors.historyAccent)
             model.part2?.let { part ->
                 DurationSeparator()
-                DurationFigure(part, figureMedium, HistoryDimens.durationUnitMedium, TaminHistoryDurationFigureMinor)
+                DurationFigure(part, figureStyle, colors.chipSelectedBg)
             }
             model.part3?.let { part ->
                 DurationSeparator()
-                DurationFigure(part, figureSmall, HistoryDimens.durationUnitSmall, TaminHistoryDurationFigureLeast)
+                DurationFigure(part, figureStyle, colors.historyFigureLeast)
             }
         },
     ) { measurables, _ ->
         // Unbounded, always: a figure is never asked to fit, only ever measured and then placed.
-        val placeable = measurables.map { it.measure(Constraints()) }
-        val baseline = placeable.maxOf { it[LastBaseline] }
-        val below = placeable.maxOf { it.height - it[LastBaseline] }
-        layout(placeable.sumOf { it.width }, baseline + below) {
+        val pieces = measurables.map { it.measure(Constraints()) }
+        val t = collapseProgress().coerceIn(0f, 1f)
+
+        // Children arrive as part1, [separator, part2], [separator, part3] — a separator takes the
+        // scale of the part it introduces, so the gap keeps its proportion to what follows it.
+        val scales = FloatArray(pieces.size) { index ->
+            val part = when (index) {
+                0 -> 0
+                1, 2 -> 1
+                else -> 2
+            }
+            lerp(openRatios[part], 1f, t)
+        }
+
+        val baseline = pieces.indices.maxOf { pieces[it][LastBaseline] * scales[it] }
+        val below = pieces.indices.maxOf { (pieces[it].height - pieces[it][LastBaseline]) * scales[it] }
+        val width = pieces.indices.sumOf { (pieces[it].width * scales[it]).roundToInt() }
+
+        layout(width, (baseline + below).roundToInt()) {
             var x = 0
-            placeable.forEach { piece ->
-                piece.placeRelative(x, baseline - piece[LastBaseline])
-                x += piece.width
+            pieces.forEachIndexed { index, piece ->
+                val scale = scales[index]
+                val pieceBaseline = piece[LastBaseline]
+                piece.placeRelativeWithLayer(x, (baseline - pieceBaseline).roundToInt()) {
+                    scaleX = scale
+                    scaleY = scale
+                    // Pivoted on the leading edge and on the piece's own baseline, so scaling a
+                    // piece neither drifts it along the line nor lifts it off the shared baseline.
+                    transformOrigin = TransformOrigin(
+                        pivotFractionX = if (rtl) 1f else 0f,
+                        pivotFractionY = if (piece.height == 0) 0f else pieceBaseline.toFloat() / piece.height,
+                    )
+                }
+                x += (piece.width * scale).roundToInt()
             }
         }
     }
 }
 
-/** One figure and the unit that follows it, as a single baseline-aligned piece. */
+/**
+ * One figure and the unit that follows it, as a single baseline-aligned piece.
+ *
+ * Both are drawn at the largest size and scaled as a pair by [DurationFigures], so a part keeps the
+ * design's proportion between its number and its unit at every point of the fold.
+ */
 @Composable
 private fun DurationFigure(
     part: DurationPart,
     figureStyle: TextStyle,
-    unitSize: TextUnit,
     figureColor: Color,
 ) {
+    val colors = LocalTaminColors.current
     Row {
         Text(
             text = part.number,
@@ -308,10 +348,10 @@ private fun DurationFigure(
             Text(
                 text = part.unit,
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    fontSize = unitSize,
+                    fontSize = HistoryDimens.durationUnitLarge,
                     fontWeight = FontWeight.Bold,
                 ),
-                color = TaminHistoryDurationUnit,
+                color = colors.textSecondary,
                 modifier = Modifier.alignByBaseline().padding(start = HistoryDimens.durationUnitGap),
             )
         }
@@ -321,13 +361,14 @@ private fun DurationFigure(
 /** The «·» the design sets between two figures. */
 @Composable
 private fun DurationSeparator() {
+    val colors = LocalTaminColors.current
     Text(
         text = "·",
         style = MaterialTheme.typography.titleMedium.copy(
             fontSize = HistoryDimens.durationSeparator,
             fontWeight = FontWeight.Bold,
         ),
-        color = TaminHistoryDurationNavBorder,
+        color = colors.historyCardBorder,
         modifier = Modifier.padding(horizontal = HistoryDimens.durationSeparatorGap),
     )
 }

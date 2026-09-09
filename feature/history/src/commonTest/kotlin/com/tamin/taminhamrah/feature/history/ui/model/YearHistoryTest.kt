@@ -158,6 +158,46 @@ class YearHistoryTest {
         assertEquals(1, total.days)
     }
 
+    /**
+     * The crash this fixed: the list was keyed on `rwshid`, the *workshop* number, so a year that
+     * carries the same workshop twice — two spells, or an اجباری row beside an اختیاری one — handed
+     * a `LazyColumn` two items with one key, which it refuses outright.
+     */
+    @Test
+    fun detailWith_givesEveryRowItsOwnKeyEvenWhenTheWorkshopRepeats() {
+        val detail = YearHistoryPR(
+            year = "1400",
+            monthDays = List(12) { 30 }.toImmutableList(),
+            totalDays = 360,
+        ).detailWith(
+            rows = listOf(
+                wageRowFor(year = "1400", workshopId = "6318210244"),
+                wageRowFor(year = "1400", workshopId = "6318210244"),
+            ),
+            optionalSchemeName = "اختیاری",
+            constructionSchemeName = "ساختمانی",
+        )
+
+        assertEquals(2, detail.workshops.size)
+        assertEquals(
+            detail.workshops.size,
+            detail.workshops.map { it.id }.distinct().size,
+            "two rows for one workshop must still be two distinct keys",
+        )
+        assertTrue(
+            detail.workshops.all { it.code == "6318210244" },
+            "the workshop's own number stays available to show and copy",
+        )
+    }
+
+    private fun wageRowFor(year: String, workshopId: String) = DastmozdInfoItemPR(
+        wageDetails = List(12) { WageDetailPR(month = "30", wage = "100") },
+        hisyear = year, id = 0, risufname = "", risubirthdate = "", risuidserial2 = "",
+        risuidserial1 = "", rwshname = "کارگاه", expcitycode = "", brhcode = "", risuidno = "",
+        risudname = "", risuid = "", risulname = "", risunatcode = "", brhname = "",
+        historytypedesc = "", rwshid = workshopId,
+    )
+
     private fun wageRow(year: String, days: List<Int>) = DastmozdInfoItemPR(
         wageDetails = days.map { WageDetailPR(month = it.toString(), wage = "0") },
         hisyear = year, id = 0, risufname = "", risubirthdate = "", risuidserial2 = "",

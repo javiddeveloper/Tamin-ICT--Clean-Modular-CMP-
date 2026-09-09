@@ -509,6 +509,15 @@ fun HistoryContent(
             nameOf = { it.displayName(optionalScheme, constructionScheme) },
         )
     }
+    // The employer filter, folded here rather than at the call site: it is a list built from the
+    // year's rows, and building it inside the chart's own item ran it again on every recomposition.
+    val sourceChips = remember(uiState.splitBySource, detail, uiState.selectedSource, allChipLabel) {
+        if (uiState.splitBySource) {
+            persistentListOf()
+        } else {
+            detail.sourceChips(selected = uiState.selectedSource, allLabel = allChipLabel)
+        }
+    }
     val splitLabel = stringResource(CoreRes.string.history_split_chip)
     val millionFormat = stringResource(CoreRes.string.history_amount_million, PLACEHOLDER)
     val rialFormat = stringResource(CoreRes.string.history_amount_rial, PLACEHOLDER)
@@ -690,14 +699,7 @@ fun HistoryContent(
                         rotateLabels = scope is HistoryScope.Year,
                         axis = null,
                         sourceLabel = stringResource(CoreRes.string.history_split_label),
-                        sourceChips = if (uiState.splitBySource) {
-                            persistentListOf()
-                        } else {
-                            detail.sourceChips(
-                                selected = uiState.selectedSource,
-                                allLabel = stringResource(HistoryRes.string.history_scope_all),
-                            )
-                        },
+                        sourceChips = sourceChips,
                         onSourceClick = onSourceClick,
                         splitChip = splitChip,
                         onSplitClick = onSplitClick,

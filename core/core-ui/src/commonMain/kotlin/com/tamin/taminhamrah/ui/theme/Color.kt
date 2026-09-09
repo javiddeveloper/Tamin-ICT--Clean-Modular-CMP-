@@ -110,6 +110,27 @@ val TaminDarkGreenBg = Color(0x2910B981)     // rgba(16,185,129,.16)
 val TaminDarkMint = Color(0xFF6FCB8C)
 val TaminDarkMintBg = Color(0x293DA35D)
 val TaminDarkTealBg = Color(0x245BD8D4)      // rgba(91,216,212,.14)
+
+/**
+ * One step above [TaminDarkBgSurface]: the inner panel a card holds — a sub-chart, a legend strip,
+ * a pill. In light theme that separation is made by tinting *down* from white; in dark there is
+ * nothing below the surface to tint toward, so it lifts instead.
+ */
+val TaminDarkSurfaceRaised = Color(0xFF1A2338)
+
+/** What a raised card casts on the dark page — the ground itself, not a colored bloom. */
+val TaminDarkShadow = Color(0x66000000)
+
+// ---- «کلیه سوابق» — Dark mode ----
+// The panels lift off the page rather than tinting blue: a pale blue card on a dark ground reads as
+// a leftover from the light theme, not as a card. The rules invert from ink-at-alpha to
+// white-at-alpha for the same reason — ink on a dark page is invisible.
+val TaminDarkHistoryPanel = TaminDarkSurfaceRaised
+val TaminDarkHistoryBarTrack = Color(0x0FFFFFFF)
+val TaminDarkHistoryGridLine = Color(0x14FFFFFF)
+val TaminDarkHistoryGridMidLine = Color(0x0FFFFFFF)
+val TaminDarkHistoryGridBaseline = Color(0x2EFFFFFF)
+val TaminDarkHistoryCellRing = Color(0xB3FFFFFF)
 val TaminDarkBlueBorder = Color(0x476396FF)  // rgba(99,150,255,.28)
 val TaminDarkPurpleBg = Color(0x297C4BC0)
 
@@ -449,6 +470,12 @@ val TaminHistoryInfoText = Color(0xFF64748B)
  * Full cover is green (#6FE0A8 -> #1D9E68), partial cover is amber (#FFCE6A -> #E1901A).
  */
 val TaminHistoryBarTrack = Color(0x070F172A)
+
+// The chart's own rules and cells, light: ink at alpha over a white panel.
+val TaminHistoryGridLine = Color(0x120F172A)
+val TaminHistoryGridMidLine = Color(0x0D0F172A)
+val TaminHistoryGridBaseline = Color(0x240F172A)
+val TaminHistoryCellRing = Color(0x800F172A)
 val TaminHistoryBarEmpty = Color(0xFFE7ECF3)
 val TaminHistoryBarFullTop = Color(0xFF6FE0A8)
 val TaminHistoryBarFullBottom = Color(0xFF1D9E68)

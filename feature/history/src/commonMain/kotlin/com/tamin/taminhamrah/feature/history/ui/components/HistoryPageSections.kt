@@ -40,13 +40,13 @@ import com.tamin.taminhamrah.feature.history.ui.model.WorkshopPR
 import com.tamin.taminhamrah.mapper.history.labelRes
 import com.tamin.taminhamrah.model.history.HistoryCertificateType
 import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.TaminHistoryChipBorder
+import com.tamin.taminhamrah.ui.theme.TaminHistoryHeroCaption
+import com.tamin.taminhamrah.ui.theme.TaminHistoryHeroChipBorder
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHistoryButtonEnd
 import com.tamin.taminhamrah.ui.theme.TaminHistoryButtonStart
-import com.tamin.taminhamrah.ui.theme.TaminHistoryInfoBg
-import com.tamin.taminhamrah.ui.theme.TaminHistoryInfoIcon
-import com.tamin.taminhamrah.ui.theme.TaminHistoryInfoText
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -77,6 +77,7 @@ fun HistorySpanNote(
     gapYears: Int,
     modifier: Modifier = Modifier,
 ) {
+    val colors = LocalTaminColors.current
     val span = stringResource(
         Res.string.history_note_span,
         yearCount.toString().toPersianDigits(),
@@ -93,7 +94,7 @@ fun HistorySpanNote(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(TaminHistoryInfoBg)
+            .background(colors.tealBg)
             .padding(horizontal = 12.dp, vertical = 11.dp),
         horizontalArrangement = Arrangement.spacedBy(9.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -101,7 +102,7 @@ fun HistorySpanNote(
         Icon(
             imageVector = Icons.Outlined.Info,
             contentDescription = null,
-            tint = TaminHistoryInfoIcon,
+            tint = colors.teal,
             modifier = Modifier.size(18.dp),
         )
         Text(
@@ -110,7 +111,7 @@ fun HistorySpanNote(
                 fontSize = 10.5.sp,
                 lineHeight = 20.sp,
             ),
-            color = TaminHistoryInfoText,
+            color = colors.textSecondary,
             modifier = Modifier.weight(1f),
         )
     }
@@ -131,7 +132,7 @@ fun WorkshopSummaryRow(
             .fillMaxWidth()
             .clip(shape)
             .background(colors.bgSurface)
-            .border(HistoryDimens.hairline, Color(0xFFEEF1F6), shape)
+            .border(HistoryDimens.hairline, colors.border, shape)
             .clickable(onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -160,7 +161,7 @@ fun WorkshopSummaryRow(
                     fontSize = 11.5.sp,
                     fontWeight = FontWeight.ExtraBold,
                 ),
-                color = Color(0xFF0F172A),
+                color = colors.textPrimary,
                 maxLines = 1,
             )
             Text(
@@ -168,7 +169,7 @@ fun WorkshopSummaryRow(
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontSize = 9.5.sp,
                 ),
-                color = Color(0xFF9DB2CE),
+                color = colors.textMuted,
                 maxLines = 1,
                 modifier = Modifier.padding(top = 2.dp),
             )
@@ -179,7 +180,7 @@ fun WorkshopSummaryRow(
         Icon(
             imageVector = Icons.Filled.ChevronLeft,
             contentDescription = null,
-            tint = Color(0xFF9DB2CE),
+            tint = colors.textMuted,
             modifier = Modifier.size(16.dp),
         )
     }
@@ -193,6 +194,7 @@ fun ManyWorkshopsBanner(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val colors = LocalTaminColors.current
     val shape = remember { RoundedCornerShape(18.dp) }
     val gradient = remember {
         Brush.linearGradient(listOf(TaminHistoryButtonStart, TaminHistoryButtonEnd))
@@ -203,7 +205,7 @@ fun ManyWorkshopsBanner(
             .fillMaxWidth()
             .clip(shape)
             .background(gradient)
-            .border(HistoryDimens.hairline, Color(0x29FFFFFF), shape)
+            .border(HistoryDimens.hairline, TaminHistoryHeroChipBorder, shape)
             .clickable(onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -219,7 +221,7 @@ fun ManyWorkshopsBanner(
             Icon(
                 imageVector = Icons.Outlined.Description,
                 contentDescription = null,
-                tint = Color(0xFF173D7E),
+                tint = colors.chipSelectedBg,
                 modifier = Modifier.size(20.dp),
             )
         }
@@ -238,7 +240,7 @@ fun ManyWorkshopsBanner(
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontSize = 9.5.sp,
                 ),
-                color = Color(0xC2FFFFFF),
+                color = TaminHistoryHeroCaption,
                 modifier = Modifier.padding(top = 2.dp),
             )
         }
@@ -246,8 +248,8 @@ fun ManyWorkshopsBanner(
         Box(
             modifier = Modifier
                 .clip(CircleShape)
-                .background(Color(0x2EFFFFFF))
-                .border(HistoryDimens.hairline, Color(0x42FFFFFF), CircleShape)
+                .background(TaminHistoryHeroChipBorder)
+                .border(HistoryDimens.hairline, TaminHistoryChipBorder, CircleShape)
                 .padding(horizontal = 9.dp, vertical = 4.dp),
         ) {
             Text(
@@ -337,12 +339,13 @@ private fun ActionCardItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val colors = LocalTaminColors.current
     val shape = remember { RoundedCornerShape(18.dp) }
     Column(
         modifier = modifier
             .clip(shape)
-            .background(Color.White)
-            .border(HistoryDimens.hairline, Color(0xFFEEF1F6), shape)
+            .background(colors.bgSurface)
+            .border(HistoryDimens.hairline, colors.border, shape)
             .clickable(onClick = onClick)
             .padding(13.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -367,7 +370,7 @@ private fun ActionCardItem(
                 fontSize = 12.sp,
                 fontWeight = FontWeight.ExtraBold,
             ),
-            color = Color(0xFF0F172A),
+            color = colors.textPrimary,
             modifier = Modifier.padding(top = 3.dp),
         )
         Text(
@@ -376,7 +379,7 @@ private fun ActionCardItem(
                 fontSize = 9.5.sp,
                 lineHeight = 16.sp,
             ),
-            color = Color(0xFF9DB2CE),
+            color = colors.textMuted,
         )
     }
 }

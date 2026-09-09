@@ -126,6 +126,41 @@ data class TaminColors(
     val grey900 : Color,
 
     val chipBg: Color,
+
+    /**
+     * The fill a selected pill wears — the brand navy on a light page, the accent the dark theme
+     * already selects with on a dark one. A pill that hardcoded the navy vanished into the dark
+     * surface it was drawn on.
+     */
+    val chipSelectedBg: Color,
+
+    // ── «کلیه سوابق» ──────────────────────────────────────────────────────────
+    // Only what has no counterpart above: the card's own tinted ground, the panels inside it, and
+    // the rules and cells its chart is drawn with. Everything else the page needs — its surface,
+    // its inks, its hairline, the note's teal, the blue behind a step button — is a token this
+    // scheme already carries, and the page reads those rather than restating them.
+    /** The wash at the top of the career-duration card, above [bgSurface]. */
+    val historyCardBgStart: Color,
+    val historyCardBorder: Color,
+    val historyCardShadow: Color,
+    /** The blue the card's headline figure and its step arrows are drawn in. */
+    val historyAccent: Color,
+    /** The quietest of the three duration figures. */
+    val historyFigureLeast: Color,
+    /** A panel inside the chart card: the two plots, and the legend strip under them. */
+    val historyPanelStart: Color,
+    val historyPanelEnd: Color,
+    val historyPanelBorder: Color,
+    val historyLegendBg: Color,
+    /** The ground a bar stands on, and the cell an employer reported nothing in. */
+    val historyBarTrack: Color,
+    val historyBarEmpty: Color,
+    /** The chart's rules: the top line, the midline, and the axis it sits on. */
+    val historyGridLine: Color,
+    val historyGridMidLine: Color,
+    val historyGridBaseline: Color,
+    /** The ring round the open column of a «تفکیک کارگاه» timeline. */
+    val historyCellRing: Color,
     val warning: Color,
     val fuchsiaBlue: Color ,
     /** The fill [fuchsiaBlue] sits on when it tints an icon tile. */
@@ -164,6 +199,22 @@ data class TaminColors(
 )
 
 val LightTaminColors = TaminColors(
+    historyCardBgStart = TaminHistoryDurationCardBgStart,
+    historyCardBorder = TaminHistoryDurationCardBorder,
+    historyCardShadow = TaminHistoryDurationShadow,
+    historyAccent = TaminHistoryDurationFigureMajor,
+    historyFigureLeast = TaminHistoryDurationFigureLeast,
+    historyPanelStart = TaminHistorySubChartBgStart,
+    historyPanelEnd = TaminHistorySubChartBgEnd,
+    historyPanelBorder = TaminHistorySubChartBorder,
+    historyLegendBg = TaminHistoryLegendBg,
+    historyBarTrack = TaminHistoryBarTrack,
+    historyBarEmpty = TaminHistoryBarEmpty,
+    historyGridLine = TaminHistoryGridLine,
+    historyGridMidLine = TaminHistoryGridMidLine,
+    historyGridBaseline = TaminHistoryGridBaseline,
+    historyCellRing = TaminHistoryCellRing,
+    chipSelectedBg = TaminNavy900,
     bgPage = TaminLightBackground,
     bgSurface = TaminLightSurface,
     border = CoreBorder,
@@ -296,6 +347,22 @@ val LightTaminColors = TaminColors(
 )
 
 val DarkTaminColors = TaminColors(
+    historyCardBgStart = TaminDarkHistoryPanel,
+    historyCardBorder = TaminDarkBorder,
+    historyCardShadow = TaminDarkShadow,
+    historyAccent = TaminDarkBlueText,
+    historyFigureLeast = TaminDarkTextSecondary,
+    historyPanelStart = TaminDarkHistoryPanel,
+    historyPanelEnd = TaminDarkBgSurface,
+    historyPanelBorder = TaminDarkBorder,
+    historyLegendBg = TaminDarkHistoryPanel,
+    historyBarTrack = TaminDarkHistoryBarTrack,
+    historyBarEmpty = TaminDarkHistoryPanel,
+    historyGridLine = TaminDarkHistoryGridLine,
+    historyGridMidLine = TaminDarkHistoryGridMidLine,
+    historyGridBaseline = TaminDarkHistoryGridBaseline,
+    historyCellRing = TaminDarkHistoryCellRing,
+    chipSelectedBg = TaminDarkBlueText,
     bgPage = TaminDarkBackground,
     bgSurface = TaminDarkSurface,
     border = TaminDarkBorder,
@@ -432,4 +499,3 @@ val DarkTaminColors = TaminColors(
     // token that stays legible against the dark page.
     campaignDotIdle = TaminDarkChevron,
 )
-

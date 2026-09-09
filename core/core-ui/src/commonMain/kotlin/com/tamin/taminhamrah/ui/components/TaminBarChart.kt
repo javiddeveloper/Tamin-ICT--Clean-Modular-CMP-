@@ -27,10 +27,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.ui.theme.TaminHistoryBarTrack
-import com.tamin.taminhamrah.ui.theme.TaminHistoryPillBg
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import kotlinx.collections.immutable.ImmutableList
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -58,6 +58,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -105,17 +106,42 @@ enum class ChartScrollBehavior {
     Never,
 }
 
-/** Background grid lines drawn behind the bars. */
+/**
+ * Background grid lines drawn behind the bars.
+ *
+ * Build one with [rememberChartGridLines] rather than by hand: its colors come from the theme, and
+ * a set written out as literals is a chart that rules itself in ink on a dark page.
+ */
 @Immutable
 data class ChartGridLines(
+    val lineColor: Color,
+    val middleLineColor: Color,
+    val baselineColor: Color,
     val showTop: Boolean = true,
     val showMiddle: Boolean = true,
     val showBaseline: Boolean = true,
-    val lineColor: Color = Color(0x120F172A),
-    val middleLineColor: Color = Color(0x0D0F172A),
-    val baselineColor: Color = Color(0x240F172A),
     val strokeWidth: Dp = 1.dp,
 )
+
+/** The theme's own rules for a chart: ink at alpha on a light page, white at alpha on a dark one. */
+@Composable
+fun rememberChartGridLines(
+    showTop: Boolean = true,
+    showMiddle: Boolean = true,
+    showBaseline: Boolean = true,
+): ChartGridLines {
+    val colors = LocalTaminColors.current
+    return remember(colors, showTop, showMiddle, showBaseline) {
+        ChartGridLines(
+            lineColor = colors.historyGridLine,
+            middleLineColor = colors.historyGridMidLine,
+            baselineColor = colors.historyGridBaseline,
+            showTop = showTop,
+            showMiddle = showMiddle,
+            showBaseline = showBaseline,
+        )
+    }
+}
 
 /**
  * A row of proportional bars, each tappable, with adaptive horizontal scrolling and smooth motions.
@@ -159,22 +185,47 @@ fun TaminBarChart(
         }
 
         val internalScrollState = scrollState ?: rememberScrollState()
-
-        // Auto-scroll to selected bar if scrollable
-        val selectedIndex = remember(bars) { bars.indexOfFirst { it.isSelected || it.pill != null } }
-        LaunchedEffect(selectedIndex, needsScroll) {
-            if (needsScroll && selectedIndex >= 0) {
-                // Smoothly keep selected bar in view
-                val targetOffset = ((effectiveBarWidth + gap) * selectedIndex).coerceAtLeast(0.dp)
-            }
-        }
+        // The same give the rest of the app scrolls with, along this chart's own axis.
+        val overscroll = rememberJellyOverscroll(Orientation.Horizontal)
 
         val contentWidth = if (needsScroll) totalBarsWidth.coerceAtLeast(availableWidth) else availableWidth
+
+        // A selection made somewhere else — a chip, a picker, the series beside this one — can land
+        // on a bar that is off-screen. Bring it into view, but only when it actually is: scrolling a
+        // bar the reader can already see would yank the chart out from under them.
+        //
+        // Offsets are measured from the scroll's own start, which `horizontalScroll` already mirrors
+        // under RTL, so the same arithmetic holds in both directions.
+        val selectedIndex = remember(bars) { bars.indexOfFirst { it.isSelected } }
+        val density = LocalDensity.current
+        LaunchedEffect(selectedIndex, needsScroll, contentWidth, availableWidth) {
+            if (!needsScroll || selectedIndex < 0) return@LaunchedEffect
+            val barStart: Float
+            val barEnd: Float
+            val viewport: Float
+            with(density) {
+                barStart = ((effectiveBarWidth + gap) * selectedIndex).toPx()
+                barEnd = barStart + effectiveBarWidth.toPx()
+                viewport = availableWidth.toPx()
+            }
+            val offset = internalScrollState.value.toFloat()
+            if (barStart >= offset && barEnd <= offset + viewport) return@LaunchedEffect
+            val centred = barStart - (viewport - (barEnd - barStart)) / 2f
+            internalScrollState.animateScrollTo(
+                centred.roundToInt().coerceIn(0, internalScrollState.maxValue),
+            )
+        }
 
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .then(if (needsScroll) Modifier.horizontalScroll(internalScrollState) else Modifier),
+                .then(
+                    if (needsScroll) {
+                        Modifier.horizontalScroll(internalScrollState, overscrollEffect = overscroll)
+                    } else {
+                        Modifier
+                    },
+                ),
         ) {
             // Plot area with grid lines
             Box(
@@ -346,7 +397,7 @@ private fun Bar(
                 .fillMaxWidth()
                 .weight(1f)
                 .clip(RoundedCornerShape(corner))
-                .background(TaminHistoryBarTrack),
+                .background(LocalTaminColors.current.historyBarTrack),
             contentAlignment = Alignment.BottomCenter,
         ) {
             Box(
@@ -454,7 +505,7 @@ private fun PillLabel(text: String) {
         maxLines = 1,
         modifier = Modifier
             .clip(RoundedCornerShape(PillCorner))
-            .background(TaminHistoryPillBg)
+            .background(LocalTaminColors.current.chipSelectedBg)
             .padding(horizontal = Spacing.sm, vertical = PillPadding),
     )
 }
