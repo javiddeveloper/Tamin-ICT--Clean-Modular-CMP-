@@ -151,6 +151,49 @@ class FakeAgentRepository : AgentRepository {
     }
 }
 
+/**
+ * Only here because [com.tamin.taminhamrah.useCases.agent.CheckChatAllowedUseCase] files the chat
+ * token away for the Developer Options token screen. Nothing in these tests reads it back.
+ */
+class FakeAgentTokenStore : com.tamin.taminhamrah.repository.TokenStoreManager {
+    private val tokens = mutableMapOf<com.tamin.taminhamrah.model.auth.TokenSlot, String?>()
+    private val tokenValid = MutableStateFlow(false)
+    private val authProcessing = MutableStateFlow(false)
+    private val activeSlot = MutableStateFlow(com.tamin.taminhamrah.model.auth.TokenSlot.USER)
+
+    override fun saveToken(token: String?) = Unit
+    override fun getToken(): String? = null
+    override fun saveRefreshToken(refreshToken: String?) = Unit
+    override fun getRefreshToken(): String? = null
+    override fun getToken(slot: com.tamin.taminhamrah.model.auth.TokenSlot): String? = tokens[slot]
+    override fun saveToken(slot: com.tamin.taminhamrah.model.auth.TokenSlot, token: String?) {
+        tokens[slot] = token
+    }
+
+    override fun getRefreshToken(slot: com.tamin.taminhamrah.model.auth.TokenSlot): String? = null
+    override fun saveRefreshToken(
+        slot: com.tamin.taminhamrah.model.auth.TokenSlot,
+        refreshToken: String?,
+    ) = Unit
+
+    override fun getActiveSlot() = activeSlot.value
+    override fun activeSlotFlow() = activeSlot
+    override suspend fun setActiveSlot(slot: com.tamin.taminhamrah.model.auth.TokenSlot) {
+        activeSlot.value = slot
+    }
+
+    override fun saveUserId(userId: String?) = Unit
+    override fun getUserId(): String? = null
+    override fun saveUserType(userType: String?) = Unit
+    override fun getUserType(): String? = null
+    override fun saveCodeVerifier(codeVerifier: String?) = Unit
+    override fun getCodeVerifier(): String? = null
+    override fun tokenValidFlow() = tokenValid
+    override suspend fun setTokenValid(isValid: Boolean) { tokenValid.value = isValid }
+    override fun isAuthProcessingFlow() = authProcessing
+    override fun setAuthProcessing(isProcessing: Boolean) { authProcessing.value = isProcessing }
+}
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class AgentViewModelTest {
 
@@ -161,6 +204,7 @@ class AgentViewModelTest {
     private lateinit var checkChatAllowedUseCase: CheckChatAllowedUseCase
     private lateinit var sendAgentPromptUseCase: SendAgentPromptUseCase
     private lateinit var fakeCacheRepository: FakeAgentChatCacheRepository
+    private lateinit var fakeTokenStore: FakeAgentTokenStore
 
     // A single StandardTestDispatcher shared between Dispatchers.Main (viewModelScope)
     // and the runTest scope, so advanceUntilIdle() drains ALL pending coroutines.
@@ -177,8 +221,9 @@ class AgentViewModelTest {
         actionDispatcher = AgentActionDispatcher(registry, fakeFeatureManager, json)
 
         fakeAgentRepository = FakeAgentRepository()
+        fakeTokenStore = FakeAgentTokenStore()
         fakeCacheRepository = FakeAgentChatCacheRepository()
-        checkChatAllowedUseCase = CheckChatAllowedUseCase(fakeAgentRepository)
+        checkChatAllowedUseCase = CheckChatAllowedUseCase(fakeAgentRepository, fakeTokenStore)
         sendAgentPromptUseCase = SendAgentPromptUseCase(fakeAgentRepository)
     }
 

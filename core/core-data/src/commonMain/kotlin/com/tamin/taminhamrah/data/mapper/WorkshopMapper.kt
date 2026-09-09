@@ -267,23 +267,16 @@ fun DebitPaymentPreCheckDTO.toDomain(): DebitPaymentPreCheckDN = DebitPaymentPre
 private const val PAYMENT_ALLOWED = "1"
 
 /**
- * The payment page the user is sent to.
- *
- * The service answers with a ticket and a URL, and the page is addressed by ticket alone. When the
- * ticket field is empty the ticket is the last segment of the URL — which is the same fallback the
+ * The service answers with a ticket and a URL, and the payment page is addressed by ticket alone.
+ * When the ticket field is empty the ticket is the last segment of the URL — the same fallback the
  * old client used, and the reason a payment still worked when only one of the two arrived.
  */
-private const val TFH_PAYMENT_PAGE = "https://tfh.tamin.ir/view/#/payment/"
-
-fun DebitPaymentDTO.toDomain(): DebitPaymentDN {
-    val ticket = paymentTicket?.takeIf { it.isNotBlank() }
-        ?: paymentUrl?.trimEnd('/')?.substringAfterLast('/')?.takeIf { it.isNotBlank() }
-    return DebitPaymentDN(
-        succeeded = succeed == true,
-        message = responseMessage.orEmpty(),
-        paymentPageUrl = ticket?.let { TFH_PAYMENT_PAGE + it }.orEmpty(),
-    )
-}
+fun DebitPaymentDTO.toDomain(): DebitPaymentDN = DebitPaymentDN(
+    succeeded = succeed == true,
+    message = responseMessage.orEmpty(),
+    paymentTicket = paymentTicket?.takeIf { it.isNotBlank() }
+        ?: paymentUrl?.trimEnd('/')?.substringAfterLast('/').orEmpty(),
+)
 
 fun DebitPaymentRequestDN.toDto(): DebitPaymentRequestDTO = DebitPaymentRequestDTO(
     branchCode = branchCode,

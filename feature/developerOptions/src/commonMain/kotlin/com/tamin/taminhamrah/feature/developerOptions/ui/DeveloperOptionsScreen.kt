@@ -52,6 +52,8 @@ import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.theme.DarkTaminColors
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.model.payment.PaymentMockMode
+import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
@@ -62,16 +64,27 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.action_cancel
 import taminx.core.core_ui.action_save
 import taminx.core.core_ui.developer_options_custom_url_hint
+import taminx.core.core_ui.developer_options_debug_login_entry
 import taminx.core.core_ui.developer_options_dialog_title
+import taminx.core.core_ui.developer_options_payment_mock_description
+import taminx.core.core_ui.developer_options_payment_mock_disabled
+import taminx.core.core_ui.developer_options_payment_mock_failure
+import taminx.core.core_ui.developer_options_payment_mock_success
+import taminx.core.core_ui.developer_options_payment_mock_title
 import taminx.core.core_ui.developer_options_reset_to_default
+import taminx.core.core_ui.developer_options_test_payment_entry
 import taminx.core.core_ui.developer_options_restart_notice_item
 import taminx.core.core_ui.developer_options_title
+import taminx.core.core_ui.developer_options_token_manager_entry
 import taminx.core.core_ui.ic_tamin_chevron_back
 
 @Composable
 fun DeveloperOptionsScreen(
     viewModel: DeveloperOptionsViewModel = koinViewModel(),
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToDebugLogin: () -> Unit,
+    onNavigateToTokenManager: () -> Unit,
+    onStartTestPayment: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -83,7 +96,10 @@ fun DeveloperOptionsScreen(
     DeveloperOptionsContent(
         state = uiState,
         onIntent = viewModel::sendIntent,
-        onNavigateBack = onNavigateBack
+        onNavigateBack = onNavigateBack,
+        onNavigateToDebugLogin = onNavigateToDebugLogin,
+        onNavigateToTokenManager = onNavigateToTokenManager,
+        onStartTestPayment = onStartTestPayment
     )
 }
 
@@ -104,7 +120,10 @@ private fun DeveloperOptionsContent(
     modifier: Modifier = Modifier,
     state: DeveloperOptionsUiState,
     onIntent: (DeveloperOptionsIntent) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToDebugLogin: () -> Unit,
+    onNavigateToTokenManager: () -> Unit,
+    onStartTestPayment: () -> Unit
 ) {
     val taminColors = LocalTaminColors.current
     val isDark = taminColors == DarkTaminColors
@@ -162,6 +181,43 @@ private fun DeveloperOptionsContent(
                         }.toTypedArray()
                     )
                 )
+
+                Spacer(modifier = Modifier.height(Spacing.lg))
+
+                PaymentMockSection(
+                    selected = state.paymentMockMode,
+                    onSelect = { onIntent(DeveloperOptionsIntent.OnPaymentMockModeSelected(it)) },
+                    onStartTestPayment = onStartTestPayment,
+                    containerBorder = defaultBorder
+                )
+
+                Spacer(modifier = Modifier.height(Spacing.lg))
+
+                ListGroupView(
+                    containerBorder = defaultBorder,
+                    items = persistentListOf(
+                        ListItemData(
+                            title = stringResource(Res.string.developer_options_debug_login_entry),
+                            leadingIconPainter = rememberVectorPainter(Icons.Rounded.Code),
+                            colors = ListItemColors(
+                                leadingIconTintColor = taminColors.bgIconProfile,
+                                leadingIconBackgroundGradient = taminColors.iconGradientNeutral
+                            ),
+                            showArrow = true,
+                            onClick = onNavigateToDebugLogin
+                        ),
+                        ListItemData(
+                            title = stringResource(Res.string.developer_options_token_manager_entry),
+                            leadingIconPainter = rememberVectorPainter(Icons.Rounded.Code),
+                            colors = ListItemColors(
+                                leadingIconTintColor = taminColors.bgIconProfile,
+                                leadingIconBackgroundGradient = taminColors.iconGradientNeutral
+                            ),
+                            showArrow = true,
+                            onClick = onNavigateToTokenManager
+                        )
+                    )
+                )
             }
         }
     }
@@ -178,6 +234,94 @@ private fun DeveloperOptionsContent(
             )
         }
     }
+}
+
+/**
+ * Puts a stand-in in front of the payment gateway, in either of the two answers a payment can end
+ * with.
+ *
+ * Selecting a mode takes effect on the next payment — the gateway data source reads the mode per
+ * call, unlike the base-URL overrides above, which are baked into HTTP clients at startup.
+ */
+@Composable
+private fun PaymentMockSection(
+    selected: PaymentMockMode,
+    onSelect: (PaymentMockMode) -> Unit,
+    onStartTestPayment: () -> Unit,
+    containerBorder: BorderStroke
+) {
+    val taminColors = LocalTaminColors.current
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        TaminText(
+            text = stringResource(Res.string.developer_options_payment_mock_title),
+            style = MaterialTheme.typography.titleSmall,
+            color = taminColors.textPrimary,
+            modifier = Modifier.padding(bottom = Spacing.xs)
+        )
+        TaminText(
+            text = stringResource(Res.string.developer_options_payment_mock_description),
+            style = MaterialTheme.typography.bodySmall,
+            color = taminColors.textSecondary,
+            modifier = Modifier.padding(bottom = Spacing.sm)
+        )
+        ListGroupView(
+            containerBorder = containerBorder,
+            items = persistentListOf(
+                *PaymentMockMode.entries.map { mode ->
+                    ListItemData(
+                        title = mode.label(),
+                        leadingIconPainter = rememberVectorPainter(Icons.Rounded.Code),
+                        colors = ListItemColors(
+                            leadingIconTintColor = taminColors.bgIconProfile,
+                            leadingIconBackgroundGradient = taminColors.iconGradientNeutral
+                        ),
+                        showArrow = false,
+                        customTrailingContent = if (mode == selected) {
+                            {
+                                Icon(
+                                    imageVector = Icons.Rounded.Check,
+                                    contentDescription = null,
+                                    tint = taminColors.greenText
+                                )
+                            }
+                        } else {
+                            null
+                        },
+                        onClick = { onSelect(mode) }
+                    )
+                }.toTypedArray()
+            )
+        )
+
+        Spacer(modifier = Modifier.height(Spacing.sm))
+
+        ListGroupView(
+            containerBorder = containerBorder,
+            items = persistentListOf(
+                ListItemData(
+                    title = stringResource(Res.string.developer_options_test_payment_entry),
+                    leadingIconPainter = rememberVectorPainter(Icons.Rounded.Code),
+                    colors = ListItemColors(
+                        leadingIconTintColor = taminColors.bgIconProfile,
+                        leadingIconBackgroundGradient = taminColors.iconGradientNeutral
+                    ),
+                    showArrow = true,
+                    // Only meaningful with a mock selected: a made-up ticket is not something the
+                    // real gateway will preview.
+                    enabled = selected != PaymentMockMode.DISABLED,
+                    onClick = onStartTestPayment
+                )
+            )
+        )
+    }
+}
+
+@Composable
+private fun PaymentMockMode.label(): String = when (this) {
+    PaymentMockMode.DISABLED -> stringResource(Res.string.developer_options_payment_mock_disabled)
+    PaymentMockMode.SUCCESS -> stringResource(Res.string.developer_options_payment_mock_success)
+    PaymentMockMode.FAILURE -> stringResource(Res.string.developer_options_payment_mock_failure)
 }
 
 @Composable

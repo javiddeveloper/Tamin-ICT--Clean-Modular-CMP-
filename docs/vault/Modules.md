@@ -60,6 +60,7 @@ Colors, spacing, radius: [[Theme]] — never hardcode `Color`, `.dp`, or UI copy
 | `:feature:pensionStatusInquiry` | `feature/pensionStatusInquiry` | `…feature.pensionStatusInquiry` |
 | `:feature:girlSurvivor` | `feature/girlSurvivor` | `…feature.girlSurvivor` |
 | `:feature:pensionSurvivor` | `feature/pensionSurvivor` | `…feature.pensionSurvivor` |
+| `:feature:payment` | `feature/payment` | `…feature.payment` — the shared payment flow, see [[Payments]] |
 
 ### Layout of a feature module
 
