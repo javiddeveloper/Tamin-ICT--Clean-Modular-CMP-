@@ -234,6 +234,47 @@ class FakeContractsRepository : ContractsRepository {
         )
     }
 
+    var lastUpdateFreelanceContractParams: FreelanceMakeContractParams? = null
+    var updateFreelanceContractCalled = false
+    var lastUpdateOptionalPremium: Long? = null
+    var updateOptionalContractCalled = false
+    var lastUpdateFreelanceContractByGuardianParams: FreelanceContractByGuardianParams? = null
+    var updateFreelanceContractByGuardianCalled = false
+    var lastUpdateOptionalContractByGuardianParams: OptionalContractByGuardianParams? = null
+    var updateOptionalContractByGuardianCalled = false
+
+    override fun updateFreelanceContract(params: FreelanceMakeContractParams): Flow<Unit> = flow {
+        lastUpdateFreelanceContractParams = params
+        updateFreelanceContractCalled = true
+        if (shouldThrowError) throw error
+        emit(Unit)
+    }
+
+    override fun updateOptionalContract(premium: Long): Flow<Unit> = flow {
+        lastUpdateOptionalPremium = premium
+        updateOptionalContractCalled = true
+        if (shouldThrowError) throw error
+        emit(Unit)
+    }
+
+    override fun updateFreelanceContractByGuardian(
+        params: FreelanceContractByGuardianParams,
+    ): Flow<Unit> = flow {
+        lastUpdateFreelanceContractByGuardianParams = params
+        updateFreelanceContractByGuardianCalled = true
+        if (shouldThrowError) throw error
+        emit(Unit)
+    }
+
+    override fun updateOptionalContractByGuardian(
+        params: OptionalContractByGuardianParams,
+    ): Flow<Unit> = flow {
+        lastUpdateOptionalContractByGuardianParams = params
+        updateOptionalContractByGuardianCalled = true
+        if (shouldThrowError) throw error
+        emit(Unit)
+    }
+
     override fun getInsurancePayment(params: InsurancePaymentParamsDN): Flow<InsurancePaymentDN> = flow {
         lastInsurancePaymentParams = params
         if (shouldThrowError) throw error

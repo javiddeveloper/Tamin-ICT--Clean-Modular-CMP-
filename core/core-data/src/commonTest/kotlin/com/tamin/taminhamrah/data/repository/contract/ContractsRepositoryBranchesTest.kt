@@ -22,6 +22,8 @@ import com.tamin.taminhamrah.model.contracts.OptionalContractByGuardianRequestDT
 import com.tamin.taminhamrah.model.contracts.PremiumRateDTO
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDTO
 import com.tamin.taminhamrah.model.contracts.SaveContactRequestDTO
+import com.tamin.taminhamrah.model.contracts.UpdateOptionalContractByGuardianRequestDTO
+import com.tamin.taminhamrah.model.contracts.UpdateOptionalContractDTO
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.FilterOperator
@@ -208,6 +210,22 @@ private class FakeContractsRemoteDataSource(
         selectedSalary: Long,
         request: OptionalContractByGuardianRequestDTO,
     ): FreelanceContractResultDTO = unused()
+    override suspend fun updateFreelanceContract(
+        premium: Long,
+        request: FreelanceMakeContractRequestDTO,
+    ) = unused<Unit>()
+    override suspend fun updateOptionalContract(
+        premium: Long,
+        request: UpdateOptionalContractDTO,
+    ) = unused<Unit>()
+    override suspend fun updateFreelanceContractByGuardian(
+        premium: Long,
+        request: ContractByGuardianRequestDTO,
+    ) = unused<Unit>()
+    override suspend fun updateOptionalContractByGuardian(
+        premium: Long,
+        request: UpdateOptionalContractByGuardianRequestDTO,
+    ) = unused<Unit>()
     override suspend fun getInsurancePayment(params: InsurancePaymentParamsDN): InsurancePaymentDTO = unused()
     override suspend fun checkInsurancePaymentStatus(systemType: String): Any? = unused()
     override suspend fun uploadImage(request: UploadImageRequestDN): String? = unused()

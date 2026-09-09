@@ -2441,6 +2441,8 @@
     <string name="contract_payment_dialog_dismiss">متوجه شدم</string>
     <string name="contract_submit_success_title">قرارداد شما ثبت شد</string>
     <string name="contract_submit_success_message">قرارداد شما در تاریخ %1$s ثبت شد. شما می‌توانید نسبت به پرداخت حق بیمه خود اقدام نمایید. در صورت عدم تمایل می‌توانید در زمان دیگری این کار را انجام دهید.</string>
+    <string name="contract_update_success_title">ویرایش قرارداد</string>
+    <string name="contract_update_success_message">ویرایش اطلاعات با موفقیت انجام شد.</string>
     <string name="contract_submit_failure_title">ثبت قرارداد با خطا مواجه شد</string>
     <string name="contract_submit_failure_message_fallback">ثبت قرارداد انجام نشد. لطفاً دوباره تلاش کنید.</string>
     <string name="contract_treatment_support_yes">حمایت درمان دارد</string>
@@ -2511,6 +2513,8 @@
     <string name="payment_sandbox_scenario_unconfirmed">پرداخت موفق، تأیید ناموفق سرویس</string>
     <string name="contract_hero_step_1_title">نام‌نویسی و احراز شرایط</string>
     <string name="contract_hero_step_1_desc">وضعیت نام‌نویسی و شرایط انعقاد قرارداد شما بررسی شد.</string>
+    <string name="contract_edit_info_step_title">اطلاعات قرارداد</string>
+    <string name="contract_edit_info_step_desc">شماره و نوع قرارداد را بررسی کنید، سپس ادامه دهید.</string>
     <string name="contract_hero_step_2_title">مقررات و ضوابط</string>
     <string name="contract_hero_step_2_desc">ضوابط قرارداد را مطالعه و تعهدنامه را تأیید کنید.</string>
     <string name="contract_hero_step_3_title">اطلاعات کاربر</string>

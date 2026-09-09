@@ -37,6 +37,10 @@ interface ContractsRepository {
     fun makeContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN>
     fun makeFreelanceContractByGuardian(params: FreelanceContractByGuardianParams): Flow<FreelanceContractResultDN>
     fun makeOptionalContractByGuardian(params: OptionalContractByGuardianParams): Flow<FreelanceContractResultDN>
+    fun updateFreelanceContract(params: FreelanceMakeContractParams): Flow<Unit>
+    fun updateOptionalContract(premium: Long): Flow<Unit>
+    fun updateFreelanceContractByGuardian(params: FreelanceContractByGuardianParams): Flow<Unit>
+    fun updateOptionalContractByGuardian(params: OptionalContractByGuardianParams): Flow<Unit>
     fun getInsurancePayment(params: InsurancePaymentParamsDN): Flow<InsurancePaymentDN>
     fun checkInsurancePaymentStatus(systemType: String): Flow<Any?>
     fun uploadImage(request: UploadImageRequestDN): Flow<String>

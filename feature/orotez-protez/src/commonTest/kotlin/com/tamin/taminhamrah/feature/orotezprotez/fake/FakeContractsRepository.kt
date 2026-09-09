@@ -82,6 +82,10 @@ class FakeContractsRepository : ContractsRepository {
     ): Flow<FreelanceContractResultDN> = flow {
         emit(FreelanceContractResultDN(contractNumber = null, contractDate = null))
     }
+    override fun updateFreelanceContract(params: FreelanceMakeContractParams): Flow<Unit> = flow { emit(Unit) }
+    override fun updateOptionalContract(premium: Long): Flow<Unit> = flow { emit(Unit) }
+    override fun updateFreelanceContractByGuardian(params: FreelanceContractByGuardianParams): Flow<Unit> = flow { emit(Unit) }
+    override fun updateOptionalContractByGuardian(params: OptionalContractByGuardianParams): Flow<Unit> = flow { emit(Unit) }
     override fun getInsurancePayment(params: InsurancePaymentParamsDN): Flow<InsurancePaymentDN> = flow {
         emit(InsurancePaymentDN(paymentTicket = null, paymentUrl = null, responseMessage = null, succeed = null))
     }

@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.feature.contracts.flow.guardian.buildFreelanceContr
 import com.tamin.taminhamrah.feature.contracts.flow.guardian.buildOptionalContractByGuardianParams
 import com.tamin.taminhamrah.feature.contracts.flow.preflight.ContractPreflightBlock
 import com.tamin.taminhamrah.feature.contracts.flow.preflight.resolvePreflightBlock
+import com.tamin.taminhamrah.feature.contracts.flow.seedExistingContractEdit
 import com.tamin.taminhamrah.feature.contracts.flow.specialjob.RED_CRESCENT_DAY_LIMIT
 import com.tamin.taminhamrah.feature.contracts.flow.specialjob.SpecialFreeJobOutcome
 import com.tamin.taminhamrah.feature.contracts.flow.specialjob.SpecialFreeJobRejectReason
@@ -31,6 +32,8 @@ import com.tamin.taminhamrah.model.common.ProvincePR
 import com.tamin.taminhamrah.contractFlow.ContractApplicantType
 import com.tamin.taminhamrah.contractFlow.ContractStep
 import com.tamin.taminhamrah.contractFlow.isEditableFromSummary
+import com.tamin.taminhamrah.contractFlow.nextStep
+import com.tamin.taminhamrah.contractFlow.previousStep
 import com.tamin.taminhamrah.model.contractFlow.GuardianFormPR
 import com.tamin.taminhamrah.model.contractFlow.FreelanceContractResultPR
 import com.tamin.taminhamrah.model.contractFlow.SpcPremiumRateOptionPR
@@ -62,6 +65,9 @@ import com.tamin.taminhamrah.useCases.contracts.MakeContractUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeFreelanceContractByGuardianUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeOptionalContractByGuardianUseCase
 import com.tamin.taminhamrah.useCases.contracts.SaveContactUseCase
+import com.tamin.taminhamrah.useCases.contracts.UpdateContractUseCase
+import com.tamin.taminhamrah.useCases.contracts.UpdateFreelanceContractByGuardianUseCase
+import com.tamin.taminhamrah.useCases.contracts.UpdateOptionalContractByGuardianUseCase
 import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
@@ -93,6 +99,7 @@ import taminx.core.core_ui.contract_upload_jpeg_only_error
 
 class ContractFlowViewModel(
     private val config: ContractFlowConfig,
+    private val editContractNumber: String? = null,
     private val getRegistrationInfoUseCase: GetRegistrationInfoUseCase,
     private val getContractsUseCase: GetContractsUseCase,
     private val identityInfoUseCase: IdentityInfoUseCase,
@@ -108,6 +115,9 @@ class ContractFlowViewModel(
     private val makeContractUseCase: MakeContractUseCase,
     private val makeOptionalContractByGuardianUseCase: MakeOptionalContractByGuardianUseCase,
     private val makeFreelanceContractByGuardianUseCase: MakeFreelanceContractByGuardianUseCase,
+    private val updateContractUseCase: UpdateContractUseCase,
+    private val updateOptionalContractByGuardianUseCase: UpdateOptionalContractByGuardianUseCase,
+    private val updateFreelanceContractByGuardianUseCase: UpdateFreelanceContractByGuardianUseCase,
     private val saveContactUseCase: SaveContactUseCase,
     private val uploadImageUseCase: UploadImageUseCase,
     private val subdominantUseCase: SubdominantUseCase,
@@ -119,7 +129,15 @@ class ContractFlowViewModel(
     >(
     initialState = ContractFlowUiState(
         config = config,
-        allowsOnlinePayment = config.allowsOnlinePaymentAfterSubmit,
+        allowsOnlinePayment = if (editContractNumber != null) {
+            false
+        } else {
+            config.allowsOnlinePaymentAfterSubmit
+        },
+        isRulesConfirmed = editContractNumber != null,
+        isEditingExistingContract = editContractNumber != null,
+        editContractNumber = editContractNumber,
+        isAgreementConfirmed = editContractNumber != null,
         currentStep = config.steps.first(),
     ),
 ) {
@@ -234,7 +252,9 @@ class ContractFlowViewModel(
                 val presentation = info.toPresentation()
                 emit(PartialState.RegistrationInfoLoaded(presentation))
                 emit(PartialState.UserInfoChanged(UserInfoFormPR.fromRegistration(presentation)))
-                if (isFemaleOnlyServiceBlocked(config.requiresFemaleGender, presentation.isFemale)) {
+                if (!uiState.value.isEditingExistingContract &&
+                    isFemaleOnlyServiceBlocked(config.requiresFemaleGender, presentation.isFemale)
+                ) {
                     emit(PartialState.GenderGateError(getString(Res.string.contract_female_only_service)))
                 }
                 emitPreflightGateIfReady()
@@ -257,6 +277,7 @@ class ContractFlowViewModel(
     }
 
     private suspend fun kotlinx.coroutines.flow.FlowCollector<PartialState>.emitPreflightGateIfReady() {
+        if (uiState.value.isEditingExistingContract) return
         val registration = uiState.value.registrationInfo ?: return
         if (!uiState.value.hasLoadedTypedContracts) return
         if (!uiState.value.hasLoadedAllContracts) return
@@ -294,10 +315,34 @@ class ContractFlowViewModel(
                 emit(PartialState.RawTypedContractsLoaded(contracts))
                 emit(PartialState.EligibilityLoaded(contracts.resolveEligibility()))
                 emit(PartialState.ContractsLoaded(contracts.toPresentation()))
+                maybeSeedExistingContractEdit(contracts)
                 emitPreflightGateIfReady()
             }
         } catch (e: Exception) {
             emitError(e.message)
+        }
+    }
+
+    private var hasSeededExistingContractEdit = false
+
+    private suspend fun kotlinx.coroutines.flow.FlowCollector<PartialState>.maybeSeedExistingContractEdit(
+        contracts: List<ContractDN>,
+    ) {
+        if (hasSeededExistingContractEdit) return
+        val editNumber = uiState.value.editContractNumber ?: return
+        if (!uiState.value.isEditingExistingContract) return
+        val match = contracts.firstOrNull { it.contractNumber?.toString() == editNumber } ?: return
+        val seed = seedExistingContractEdit(
+            contract = match,
+            isOptionalInsurance = config.isOptionalInsurance,
+        )
+        hasSeededExistingContractEdit = true
+        emit(PartialState.ExistingContractEditSeeded(seed))
+        if (seed.branchSelection.provinceCode.isNotBlank()) {
+            emitAll(loadBranchCities(seed.branchSelection.provinceCode))
+        }
+        if (seed.branchSelection.cityCode.isNotBlank()) {
+            emitAll(loadBranches(seed.branchSelection.cityCode))
         }
     }
 
@@ -391,10 +436,12 @@ class ContractFlowViewModel(
         }
     }
 
+    private fun navigationSteps(): List<ContractStep> = uiState.value.navigationSteps
+
     private fun handleGoToNextStep(): Flow<PartialState> {
         val flowConfig = uiState.value.config ?: config
         val currentStep = uiState.value.currentStep
-        val nextStep = flowConfig.nextStep(currentStep) ?: return flow { }
+        val nextStep = navigationSteps().nextStep(currentStep) ?: return flow { }
         if (!uiState.value.canGoNext) return flow { }
 
         if (currentStep == ContractStep.STEP_USER_INFO) {
@@ -477,12 +524,12 @@ class ContractFlowViewModel(
         return merge(
             flow {
                 val flowConfig = uiState.value.config ?: config
-                val previousStep = flowConfig.previousStep(uiState.value.currentStep) ?: return@flow
+                val previousStep = navigationSteps().previousStep(uiState.value.currentStep) ?: return@flow
                 emit(PartialState.StepChanged(previousStep))
             },
             flow {
                 val flowConfig = uiState.value.config ?: config
-                val previousStep = flowConfig.previousStep(uiState.value.currentStep) ?: return@flow
+                val previousStep = navigationSteps().previousStep(uiState.value.currentStep) ?: return@flow
                 if (previousStep == ContractStep.STEP_INSURANCE_PREMIUM) {
                     emitAll(reloadPremiumRangeIfNeeded(flowConfig))
                 }
@@ -493,6 +540,9 @@ class ContractFlowViewModel(
     private fun handleEditStep(step: ContractStep): Flow<PartialState> {
         val flowConfig = uiState.value.config ?: config
         if (step !in flowConfig.steps || !step.isEditableFromSummary()) return flow { }
+        if (uiState.value.isEditingExistingContract && step == ContractStep.STEP_SELECT_BRANCH) {
+            return flow { }
+        }
         return merge(
             flow { emit(PartialState.StepChanged(step = step, isEditMode = true)) },
             when (step) {
@@ -913,6 +963,11 @@ class ContractFlowViewModel(
     }
 
     private fun handleSubmitContract(): Flow<PartialState> = flow {
+        if (uiState.value.isEditingExistingContract) {
+            emitAll(handleUpdateExistingContract())
+            return@flow
+        }
+
         val flowConfig = uiState.value.config ?: config
         val submitAsGuardian =
             uiState.value.contractApplicantType == ContractApplicantType.GUARDIAN
@@ -960,6 +1015,39 @@ class ContractFlowViewModel(
             makeContractUseCase(flowConfig.isOptionalInsurance, params).collect { result ->
                 emitContractSubmitted(result.toContractResultPresentation())
             }
+        } catch (e: Exception) {
+            sendEvent(
+                ContractFlowEvent.ShowSubmitFailure(
+                    e.message ?: getString(Res.string.contract_submit_failure_message_fallback),
+                ),
+            )
+        } finally {
+            emit(PartialState.SubmittingContract(false))
+        }
+    }
+
+    private fun handleUpdateExistingContract(): Flow<PartialState> = flow {
+        val flowConfig = uiState.value.config ?: config
+        val submitAsGuardian =
+            uiState.value.contractApplicantType == ContractApplicantType.GUARDIAN
+
+        emit(PartialState.SubmittingContract(true))
+        try {
+            when {
+                submitAsGuardian && flowConfig.isOptionalInsurance -> {
+                    val params = buildOptionalGuardianSubmitParams() ?: return@flow
+                    updateOptionalContractByGuardianUseCase(params).collect { }
+                }
+                submitAsGuardian -> {
+                    val params = buildFreelanceGuardianSubmitParams() ?: return@flow
+                    updateFreelanceContractByGuardianUseCase(params).collect { }
+                }
+                else -> {
+                    val params = buildMakeContractParams() ?: return@flow
+                    updateContractUseCase(flowConfig.isOptionalInsurance, params).collect { }
+                }
+            }
+            sendEvent(ContractFlowEvent.ShowUpdateSuccess)
         } catch (e: Exception) {
             sendEvent(
                 ContractFlowEvent.ShowSubmitFailure(
@@ -1118,17 +1206,51 @@ class ContractFlowViewModel(
         is PartialState.BranchCitiesLoading -> currentState.copy(
             isBranchCitiesLoading = partialState.isLoading,
         )
-        is PartialState.BranchCitiesLoaded -> currentState.copy(
-            isBranchCitiesLoading = false,
-            branchCities = partialState.cities,
-        )
+        is PartialState.BranchCitiesLoaded -> {
+            val cities = partialState.cities
+            val selection = currentState.branchSelection
+            val matchedCityName = cities
+                .firstOrNull { it.cityCode == selection.cityCode }
+                ?.cityName
+                .orEmpty()
+            currentState.copy(
+                isBranchCitiesLoading = false,
+                branchCities = cities,
+                branchSelection = if (
+                    currentState.isEditingExistingContract &&
+                    matchedCityName.isNotBlank() &&
+                    selection.cityName.isBlank()
+                ) {
+                    selection.copy(cityName = matchedCityName)
+                } else {
+                    selection
+                },
+            )
+        }
         is PartialState.BranchesLoading -> currentState.copy(
             isBranchesLoading = partialState.isLoading,
         )
-        is PartialState.BranchesLoaded -> currentState.copy(
-            isBranchesLoading = false,
-            branches = partialState.branches,
-        )
+        is PartialState.BranchesLoaded -> {
+            val branches = partialState.branches
+            val selection = currentState.branchSelection
+            val matchedBranchName = branches
+                .firstOrNull { it.code == selection.branchCode }
+                ?.name
+                .orEmpty()
+            currentState.copy(
+                isBranchesLoading = false,
+                branches = branches,
+                branchSelection = if (
+                    currentState.isEditingExistingContract &&
+                    matchedBranchName.isNotBlank() &&
+                    selection.branchName.isBlank()
+                ) {
+                    selection.copy(branchName = matchedBranchName)
+                } else {
+                    selection
+                },
+            )
+        }
         is PartialState.FreeJobsLoading -> currentState.copy(
             isFreeJobsLoading = partialState.isLoading,
             freeJobsLoadMoreError = null,
@@ -1333,6 +1455,25 @@ class ContractFlowViewModel(
             hasLoadedDependents = true,
             dependentsError = partialState.message,
         )
+        is PartialState.ExistingContractEditSeeded -> {
+            val seed = partialState.seed
+            currentState.copy(
+                branchSelection = seed.branchSelection,
+                selectedFreeJobCode = seed.freeJobCode,
+                selectedFreeJobName = seed.freeJobName,
+                treatmentSupportCode = seed.treatmentSupportCode,
+                isTreatmentCommitmentConfirmed = seed.isTreatmentCommitmentConfirmed,
+                selectedPremiumRateCode = seed.selectedPremiumRateCode,
+                selectedMonthlyPremium = seed.selectedMonthlyPremium,
+                calculatedMonthlySalary = seed.calculatedMonthlySalary,
+                isPremiumCalculated = seed.isPremiumCalculated,
+                uploadedDocuments = listOfNotNull(seed.uploadedDocument),
+                documentDescription = seed.uploadedDocument?.description.orEmpty(),
+                contractApplicantType = seed.contractApplicantType,
+                isAgreementConfirmed = true,
+                allowsOnlinePayment = false,
+            )
+        }
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)

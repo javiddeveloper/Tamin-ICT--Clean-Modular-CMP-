@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.data.local.dao.RegistrationInfoDao
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toDto
 import com.tamin.taminhamrah.data.mapper.toEntity
+import com.tamin.taminhamrah.data.mapper.toUpdateDto
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSource
 import com.tamin.taminhamrah.model.contracts.BranchDN
 import com.tamin.taminhamrah.model.contracts.ContractsPaging
@@ -217,6 +218,39 @@ class ContractsRepositoryImpl(
                 request = params.toDto(),
             ).toDomain(),
         )
+    }
+
+    override fun updateFreelanceContract(params: FreelanceMakeContractParams): Flow<Unit> = flow {
+        contractsRemoteDataSource.updateFreelanceContract(
+            premium = params.monthlyPremium,
+            request = params.request.toDto(),
+        )
+        emit(Unit)
+    }
+
+    override fun updateOptionalContract(premium: Long): Flow<Unit> = flow {
+        contractsRemoteDataSource.updateOptionalContract(premium = premium)
+        emit(Unit)
+    }
+
+    override fun updateFreelanceContractByGuardian(
+        params: FreelanceContractByGuardianParams,
+    ): Flow<Unit> = flow {
+        contractsRemoteDataSource.updateFreelanceContractByGuardian(
+            premium = params.selectedSalary,
+            request = params.toDto(),
+        )
+        emit(Unit)
+    }
+
+    override fun updateOptionalContractByGuardian(
+        params: OptionalContractByGuardianParams,
+    ): Flow<Unit> = flow {
+        contractsRemoteDataSource.updateOptionalContractByGuardian(
+            premium = params.selectedSalary,
+            request = params.toUpdateDto(),
+        )
+        emit(Unit)
     }
 
     override fun getInsurancePayment(params: InsurancePaymentParamsDN): Flow<InsurancePaymentDN> = flow {

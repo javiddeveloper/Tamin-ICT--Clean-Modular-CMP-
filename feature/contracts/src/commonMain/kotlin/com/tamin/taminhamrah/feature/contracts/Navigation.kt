@@ -11,20 +11,27 @@ import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import kotlinx.serialization.Serializable
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 import org.koin.core.qualifier.named
 
 @Serializable
 data object ContractsRoute
 
 @Serializable
-data class ContractFlowRoute(val type: ContractType)
+data class ContractFlowRoute(
+    val type: ContractType,
+    val editContractNumber: String? = null,
+)
 
 fun NavController.navigateToContracts() {
     navigate(ContractsRoute)
 }
 
-fun NavController.navigateToContractFlow(type: ContractType) {
-    navigate(ContractFlowRoute(type))
+fun NavController.navigateToContractFlow(
+    type: ContractType,
+    editContractNumber: String? = null,
+) {
+    navigate(ContractFlowRoute(type = type, editContractNumber = editContractNumber))
 }
 
 fun NavController.navigateToStudentContract() = navigateToContractFlow(ContractType.STUDENT)
@@ -51,6 +58,7 @@ fun NavGraphBuilder.contractsScreen(
 
 fun NavGraphBuilder.contractFlowScreen(
     onBack: () -> Unit,
+    onEditSuccess: () -> Unit = onBack,
     onShowRules: () -> Unit = {},
     onPaymentRequested: (contractNumber: String, amount: Long) -> Unit = { _, _ -> },
 ) {
@@ -58,9 +66,12 @@ fun NavGraphBuilder.contractFlowScreen(
         val route = backStackEntry.toRoute<ContractFlowRoute>()
         ContractFlowScreen(
             onBack = onBack,
+            onEditSuccess = onEditSuccess,
             onShowRules = onShowRules,
             onPaymentRequested = onPaymentRequested,
-            viewModel = koinViewModel<ContractFlowViewModel>(named(route.type.koinQualifier)),
+            viewModel = koinViewModel<ContractFlowViewModel>(named(route.type.koinQualifier)) {
+                parametersOf(route.editContractNumber)
+            },
         )
     }
 }
