@@ -36,6 +36,7 @@ tags: [moc]
 
 - [[Feature-Flags]] — dynamic menu, `FeatureFlag`, `FeatureManager`
 - [[History-Objection]] — اعتراض به سوابق ناموجود, and why its repository is still a stub ⚠️
+- [[Stories]] — «تازه‌ها» rail and the full-screen story viewer (front-end only, mock catalogue) ⚠️
 - [[AI-Agent]] — architecture of the AI assistant rewrite
 - [[AI-Agent-API-Contract]] — exact JSON contract the client parses
 - [[Glossary]] — Persian domain term ↔ name in code

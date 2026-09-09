@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -47,6 +48,10 @@ import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
+import kotlin.math.PI
+import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.sin
 
 /**
  * Design-system building blocks shared across the app. Everything here takes primitives
@@ -72,6 +77,38 @@ val PrimaryButtonShadow = Color(0x47173D7E)
 fun startToEndGradient(colors: List<Color>): Brush {
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     return Brush.horizontalGradient(if (isRtl) colors.reversed() else colors)
+}
+
+/**
+ * A CSS `linear-gradient(<angle>deg, …)` as a [Brush], for a box of [width] by [height] pixels.
+ *
+ * CSS measures the angle from "to top", turning clockwise, and runs the gradient along a line
+ * through the box center whose length is `|W·sin a| + |H·cos a|` — long enough that the first and
+ * last stops land exactly on the corners. [Brush.linearGradient] takes two points instead, so the
+ * line has to be reconstructed from the angle and the box.
+ *
+ * Pixel coordinates, so the result never mirrors under a right-to-left layout: a design that
+ * states an angle means that angle on screen. Callers that want the gradient to follow the
+ * reading direction want [startToEndGradient] instead.
+ *
+ * [stops] are `offset to color` pairs in the order CSS lists them.
+ */
+fun angledLinearGradient(
+    angleDeg: Float,
+    stops: List<Pair<Float, Color>>,
+    width: Float,
+    height: Float,
+): Brush {
+    val radians = angleDeg * (PI.toFloat() / 180f)
+    val dx = sin(radians)
+    val dy = -cos(radians)
+    val half = (abs(width * dx) + abs(height * dy)) / 2f
+    val centre = Offset(width / 2f, height / 2f)
+    return Brush.linearGradient(
+        colorStops = stops.toTypedArray(),
+        start = Offset(centre.x - half * dx, centre.y - half * dy),
+        end = Offset(centre.x + half * dx, centre.y + half * dy),
+    )
 }
 
 /**

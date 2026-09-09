@@ -1,0 +1,15 @@
+<resources>
+    <!-- «تازه‌ها» rail on the home page -->
+    <string name="stories_title">تازه‌ها</string>
+    <string name="stories_channel_count">%1$s کانال خبری</string>
+    <string name="stories_empty">فعلاً تازه‌ای منتشر نشده است</string>
+    <string name="stories_error">تازه‌ها بارگذاری نشد</string>
+    <string name="stories_retry">تلاش دوباره</string>
+
+    <!-- Story viewer -->
+    <string name="stories_close">بستن</string>
+    <string name="stories_like">پسندیدن</string>
+    <string name="stories_save">ذخیره</string>
+    <string name="stories_comment_hint">دیدگاه خود را بنویسید…</string>
+    <string name="stories_media_failed">نمایش این محتوا ممکن نشد</string>
+</resources>

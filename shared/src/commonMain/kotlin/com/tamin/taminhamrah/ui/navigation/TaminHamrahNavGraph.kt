@@ -109,6 +109,9 @@ import com.tamin.taminhamrah.feature.security.SecurityRoute
 import com.tamin.taminhamrah.feature.security.securityScreen
 import com.tamin.taminhamrah.feature.settings.SettingsRoute
 import com.tamin.taminhamrah.feature.settings.settingsScreen
+import com.tamin.taminhamrah.feature.stories.navigateToStoryViewer
+import com.tamin.taminhamrah.feature.stories.storyViewerScreen
+import com.tamin.taminhamrah.feature.stories.ui.rail.StoryRail
 import com.tamin.taminhamrah.feature.contracts.contractFlowScreen
 import com.tamin.taminhamrah.feature.taminServices.TaminServicesRoute
 import com.tamin.taminhamrah.feature.taminServices.inspectionScreen
@@ -367,6 +370,7 @@ internal fun TaminHamrahNavGraph(
                         onShowMessage = { message ->
                             snackbarScope.launch { snackbarHostState.showSnackbar(message) }
                         },
+                        onOpenStory = { index -> navController.navigateToStoryViewer(index) },
                     )
                 }
 
@@ -481,6 +485,16 @@ internal fun TaminHamrahNavGraph(
                 deferredInstallmentScreen(onBack = { navController.popBackStack() })
                 girlSurvivorScreen(onBack = { navController.popBackStack() })
                 inquiryEducationScreen(onBack = { navController.popBackStack() })
+
+                storyViewerScreen(
+                    onClose = { navController.popBackStack() },
+                    onOpenFeature = { flag ->
+                        // Leaves the viewer behind rather than stacking a service on top of it:
+                        // coming back from that service should land on the home page.
+                        navController.popBackStack()
+                        navController.navigateToFeature(flag)
+                    },
+                )
                 pensionSurvivorScreen(
                     navController = navController,
                     onBack = { navController.popBackStack() })
@@ -629,6 +643,8 @@ fun HomeScreen(
     // No default: a disabled feature says why through this, and a caller that omitted it used to
     // drop the message silently — the tap then did nothing at all.
     onShowMessage: (String) -> Unit,
+    /** Where tapping a channel on the «تازه‌ها» rail leads. */
+    onOpenStory: (channelIndex: Int) -> Unit,
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -723,6 +739,15 @@ fun HomeScreen(
             }
 
             Spacer(modifier = Modifier.height(8.dp))
+
+            // «تازه‌ها» sits directly above the campaigns, as on the design, and is full-bleed for
+            // the same reason: a row that scrolls has to be able to run a ring off the screen edge.
+            StoryRail(
+                onOpenViewer = onOpenStory,
+                modifier = Modifier
+                    .ignoreHorizontalPadding(HomeContentPadding)
+                    .padding(top = Spacing.xlg),
+            )
 
             // The same for every role: campaigns are not filtered by the picker above.
             //

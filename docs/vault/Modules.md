@@ -60,6 +60,7 @@ Colors, spacing, radius: [[Theme]] — never hardcode `Color`, `.dp`, or UI copy
 | `:feature:pensionStatusInquiry` | `feature/pensionStatusInquiry` | `…feature.pensionStatusInquiry` |
 | `:feature:girlSurvivor` | `feature/girlSurvivor` | `…feature.girlSurvivor` |
 | `:feature:pensionSurvivor` | `feature/pensionSurvivor` | `…feature.pensionSurvivor` |
+| `:feature:stories` | `feature/stories` | `…feature.stories` — «تازه‌ها» rail + story viewer, [[Stories]] |
 
 ### Layout of a feature module
 
