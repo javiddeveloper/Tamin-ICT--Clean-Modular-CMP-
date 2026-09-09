@@ -51,6 +51,7 @@ import taminx.core.core_ui.Res as CoreRes
 import taminx.core.core_ui.ic_tamin_download
 
 import androidx.compose.material.icons.filled.ChevronRight
+import com.tamin.taminhamrah.ui.components.collapsingBottomPadding
 import com.tamin.taminhamrah.ui.components.rideUpIntoHeader
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.action_back
@@ -75,6 +76,8 @@ fun HistoryHero(
     onMoreClick: () -> Unit,
     onBackClicked: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Read only inside the layout phase — see [HistoryTopArea]. */
+    collapseProgress: () -> Float = { 0f },
 ) {
     val heroBrush = remember {
         Brush.linearGradient(
@@ -95,8 +98,16 @@ fun HistoryHero(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                // The band under the chip strip closes as the card folds, so the head tightens
+                // around the summary bar and lifts it with it. Left at its open depth, the bar
+                // stays parked on the hero's bottom edge under a band of empty blue.
+                .collapsingBottomPadding(
+                    progress = collapseProgress,
+                    expanded = HistoryDimens.heroPaddingBottom,
+                    collapsed = HistoryDimens.heroPaddingBottomFolded,
+                )
                 .padding(horizontal = HistoryDimens.heroPaddingH)
-                .padding(top = HistoryDimens.heroPaddingTop, bottom = HistoryDimens.heroPaddingBottom),
+                .padding(top = HistoryDimens.heroPaddingTop),
             verticalArrangement = Arrangement.spacedBy(HistoryDimens.heroRowGap),
         ) {
             // App bar row
@@ -188,6 +199,7 @@ fun HistoryTopArea(
             onDownloadClick = onDownloadClick,
             onMoreClick = onMoreClick,
             onBackClicked = onBackClicked,
+            collapseProgress = collapseProgress,
         )
 
         if (hasYears) {
@@ -195,10 +207,13 @@ fun HistoryTopArea(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 14.dp)
+                    // Folds in place: the card keeps its slot under the chip strip and only gives
+                    // up its own height, settling onto the hero's edge rather than climbing over
+                    // the strip and onto the app-bar row.
                     .rideUpIntoHeader(
                         progress = collapseProgress,
-                        expandedOverlap = 34.dp,
-                        collapsedOverlap = 130.dp,
+                        expandedOverlap = HistoryDimens.durationCardOverlap,
+                        collapsedOverlap = HistoryDimens.durationCardCollapsedOverlap,
                     ),
             ) {
                 HistoryDurationCard(

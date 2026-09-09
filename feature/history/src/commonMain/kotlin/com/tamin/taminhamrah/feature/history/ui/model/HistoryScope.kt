@@ -153,14 +153,18 @@ fun YearHistoryPR.detailWith(
     optionalSchemeName: String,
     constructionSchemeName: String,
 ): YearDetailPR {
-    val workshops = rows.map { row ->
+    val workshops = rows.mapIndexed { rowIndex, row ->
         val months = row.wageDetails.mapIndexedNotNull { index, detail ->
             val days = detail.month.toIntOrNull() ?: 0
             val wage = detail.wage.toLongOrNull() ?: 0L
             if (days == 0 && wage == 0L) null else WorkedMonthPR(index, days, detail.wage)
         }
         WorkshopPR(
-            id = row.rwshid.ifBlank { row.id.toString() },
+            // The row's identity, not the workshop's. One year can carry the same workshop twice —
+            // two spells, or an اجباری row beside an اختیاری one — and `rwshid` is then the same on
+            // both, which a `LazyColumn` keyed on it rejects outright. The workshop's own number is
+            // still on `code` for anything that needs to show or copy it.
+            id = "$rowIndex:${row.rwshid}",
             name = row.displayName(optionalSchemeName, constructionSchemeName),
             type = row.historytypedesc,
             branch = row.brhname,

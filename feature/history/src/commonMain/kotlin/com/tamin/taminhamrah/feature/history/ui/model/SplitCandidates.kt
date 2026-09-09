@@ -20,9 +20,14 @@ data class SplitCandidatePR(
     val key: String,
     val label: String,
     val totalDays: Int,
-    /** Days per month, index 0 = فروردین, summed over every row this employer reported. */
-    val monthDays: ImmutableList<Int>,
-    val monthWages: ImmutableList<Long>,
+    val totalWage: Long,
+    /**
+     * One value per column of the chart this row sits under: a year in «همه», a month inside a
+     * single year. The cells are a timeline of the same columns, so they must be built in the same
+     * order the bars are — see [splitCandidates]'s `yearOrder`.
+     */
+    val cellDays: ImmutableList<Int>,
+    val cellWages: ImmutableList<Long>,
 )
 
 /**
@@ -35,10 +40,17 @@ data class SplitCandidatePR(
  *
  * Ordered by days rather than by year, so the split shows the employers that actually account for
  * the career instead of whichever the service happened to list first.
+ *
+ * [yearOrder] is the chart's own column order in «همه» — the years exactly as the bars above are
+ * laid out, so each employer's timeline lines up with them column for column. Taken from the caller
+ * rather than sorted here, because a timeline that orders its own years is a timeline that silently
+ * stops agreeing with the chart the first time the chart's order changes. Ignored inside one year,
+ * where the columns are always the twelve months.
  */
 fun splitCandidates(
     wageByYear: ImmutableMap<String, ImmutableList<DastmozdInfoItemPR>>,
     year: String?,
+    yearOrder: List<String>,
     nameOf: (DastmozdInfoItemPR) -> String,
 ): ImmutableList<SplitCandidatePR> {
     val rows = if (year == null) {
@@ -48,6 +60,15 @@ fun splitCandidates(
     }
     if (rows.isEmpty()) return emptyCandidates
 
+    // A column per year across the career, a column per month inside one year.
+    val columnOfYear = if (year == null) {
+        yearOrder.withIndex().associate { (index, it) -> it to index }
+    } else {
+        null
+    }
+    val columns = columnOfYear?.size ?: HistoryConstants.MONTHS_IN_YEAR
+    if (columns == 0) return emptyCandidates
+
     // Grouped in first-seen order, then ranked — so the ranking decides what shows, not the map.
     val grouped = LinkedHashMap<String, MutableList<DastmozdInfoItemPR>>()
     rows.forEach { row ->
@@ -56,13 +77,24 @@ fun splitCandidates(
 
     return grouped.entries
         .map { (key, employerRows) ->
-            val days = IntArray(HistoryConstants.MONTHS_IN_YEAR)
-            val wages = LongArray(HistoryConstants.MONTHS_IN_YEAR)
+            val days = IntArray(columns)
+            val wages = LongArray(columns)
             employerRows.forEach { row ->
-                row.wageDetails.forEachIndexed { month, detail ->
-                    if (month < HistoryConstants.MONTHS_IN_YEAR) {
-                        days[month] += detail.month.toIntOrNull() ?: 0
-                        wages[month] += detail.wage.toLongOrNull() ?: 0L
+                if (columnOfYear != null) {
+                    // A whole year folds into its one column; a year the chart does not draw — the
+                    // wage service reporting one the merged service did not — is left out rather
+                    // than shifting every column beside it.
+                    val column = columnOfYear[row.hisyear] ?: return@forEach
+                    row.wageDetails.forEach { detail ->
+                        days[column] += detail.month.toIntOrNull() ?: 0
+                        wages[column] += detail.wage.toLongOrNull() ?: 0L
+                    }
+                } else {
+                    row.wageDetails.forEachIndexed { month, detail ->
+                        if (month < columns) {
+                            days[month] += detail.month.toIntOrNull() ?: 0
+                            wages[month] += detail.wage.toLongOrNull() ?: 0L
+                        }
                     }
                 }
             }
@@ -70,8 +102,9 @@ fun splitCandidates(
                 key = key,
                 label = nameOf(employerRows.first()),
                 totalDays = days.sum(),
-                monthDays = days.toList().toImmutableList(),
-                monthWages = wages.toList().toImmutableList(),
+                totalWage = wages.sum(),
+                cellDays = days.toList().toImmutableList(),
+                cellWages = wages.toList().toImmutableList(),
             )
         }
         .sortedByDescending { it.totalDays }

@@ -959,6 +959,8 @@
     <string name="history_series_wage">دستمزد ماه</string>
     <string name="history_series_days">روزهای کار</string>
     <string name="history_series_max_wage">بیشینه %1$s م ریال</string>
+    <string name="history_amount_million">%1$s م ریال</string>
+    <string name="history_amount_rial">%1$s ریال</string>
     <string name="history_series_max_days">بیشینه %1$s روز</string>
     <string name="history_split_label">کارگاه</string>
     <string name="history_split_chip">تفکیک کارگاه</string>

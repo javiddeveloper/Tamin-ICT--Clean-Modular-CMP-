@@ -108,6 +108,8 @@ import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res as CoreRes
 import taminx.core.core_ui.action_cancel
 import taminx.core.core_ui.btn_understood
+import taminx.core.core_ui.history_amount_million
+import taminx.core.core_ui.history_amount_rial
 import taminx.core.core_ui.history_legend_no_bar
 import taminx.core.core_ui.history_metric_label
 import taminx.core.core_ui.history_picker_apply_month
@@ -496,45 +498,75 @@ fun HistoryContent(
      * nineteen years can split their chart, which is the design's own rule. Reading it off the
      * open year's detail — which is null in «همه» — is why the chip was missing there.
      */
-    val splitSources = remember(uiState.wageByYear, scope, optionalScheme, constructionScheme) {
+    // The chart's own column order across «همه» — the same reversal the bars are built with, so a
+    // split timeline lines up with the bars above it instead of ordering its years for itself.
+    val chartYears = remember(uiState.years) { uiState.years.asReversed().map { it.year } }
+    val splitSources = remember(uiState.wageByYear, scope, chartYears, optionalScheme, constructionScheme) {
         splitCandidates(
             wageByYear = uiState.wageByYear,
             year = (scope as? HistoryScope.Year)?.year,
+            yearOrder = chartYears,
             nameOf = { it.displayName(optionalScheme, constructionScheme) },
         )
     }
     val splitLabel = stringResource(CoreRes.string.history_split_chip)
+    val millionFormat = stringResource(CoreRes.string.history_amount_million, PLACEHOLDER)
+    val rialFormat = stringResource(CoreRes.string.history_amount_rial, PLACEHOLDER)
     val splitChip = remember(splitLabel, uiState.splitBySource, splitSources) {
         FilterChipPR(splitLabel, uiState.splitBySource).takeIf { splitSources.size > 1 }
     }
 
-    val splitRows = remember(uiState.splitBySource, detail, dayLabel) {
-        if (!uiState.splitBySource || detail == null || detail.workshops.size <= 1) {
+    /*
+     * One timeline per employer, built from the same candidates the chip is offered for — so the
+     * split draws in «همه» as well as inside a year. Read off the open year's `detail` it could
+     * only ever draw in a year, which is why the chip in «همه» toggled to nothing.
+     */
+    val splitRows = remember(
+        uiState.splitBySource,
+        splitSources,
+        uiState.selectedMonth,
+        scope,
+        dayLabel,
+        millionFormat,
+        rialFormat,
+    ) {
+        if (!uiState.splitBySource || splitSources.size <= 1) {
             persistentListOf()
         } else {
-            detail.workshops.mapIndexed { index, workshop ->
-                val color = TaminHistoryWorkshopPalette[index % TaminHistoryWorkshopPalette.size]
-                val maxMonthDays = workshop.months.maxOfOrNull { it.days }?.coerceAtLeast(1) ?: 30
-                val opacities = (0 until HistoryConstants.MONTHS_IN_YEAR).map { monthIdx ->
-                    val worked = workshop.months.firstOrNull { it.monthIndex == monthIdx }
-                    if (worked != null && worked.days > 0) {
-                        (0.4f + 0.6f * (worked.days.toFloat() / maxMonthDays.toFloat())).coerceIn(0f, 1f)
-                    } else {
-                        0f
-                    }
-                }.toImmutableList()
-
-                val totalWage = workshop.months.sumOf { it.wage.toLongOrNull() ?: 0L }
-                val daysStr = dayLabel.replace(HistoryConstants.PLACEHOLDER_DAYS, workshop.totalDays.toString().toPersianDigits())
-                val wageStr = if (totalWage > 0L) {
-                    " · ${(totalWage / MILLION).toString().toPriceFormat().toPersianDigits()} م ریال"
-                } else ""
-
+            // Across «همه» the columns are years and nothing is open; inside a year the open month
+            // is ringed on every row, so the employers can be read against each other in it.
+            val openColumn = (scope as? HistoryScope.Year)?.let { uiState.selectedMonth }
+            splitSources.mapIndexed { index, source ->
+                // The employer's own busiest column sets its scale: a scheme with a handful of days
+                // still shows its shape instead of being flattened by whoever worked the most.
+                val busiest = (source.cellDays.maxOrNull() ?: 0).coerceAtLeast(1)
+                val days = dayLabel.replace(
+                    HistoryConstants.PLACEHOLDER_DAYS,
+                    source.totalDays.toString().toPersianDigits(),
+                )
+                val amount = if (source.totalWage >= MILLION) {
+                    millionFormat.replace(
+                        PLACEHOLDER,
+                        (source.totalWage / MILLION).toString().toPriceFormat().toPersianDigits(),
+                    )
+                } else {
+                    rialFormat.replace(
+                        PLACEHOLDER,
+                        source.totalWage.toString().toPriceFormat().toPersianDigits(),
+                    )
+                }
                 WorkshopSplitRowPR(
-                    label = workshop.name,
-                    color = color,
-                    totalText = daysStr + wageStr,
-                    monthOpacities = opacities,
+                    label = source.label,
+                    color = TaminHistoryWorkshopPalette[index % TaminHistoryWorkshopPalette.size],
+                    totalText = "$days${HistoryConstants.SEPARATOR}$amount",
+                    cellOpacities = source.cellDays.map { worked ->
+                        if (worked > 0) {
+                            (0.4f + 0.6f * (worked.toFloat() / busiest.toFloat())).coerceIn(0f, 1f)
+                        } else {
+                            0f
+                        }
+                    }.toImmutableList(),
+                    selectedCell = openColumn,
                 )
             }.toImmutableList()
         }

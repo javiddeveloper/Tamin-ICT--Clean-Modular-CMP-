@@ -26,12 +26,41 @@ object HistoryDimens {
     val heroPaddingTop = 8.dp
     val heroPaddingBottom = 54.dp
 
+    /**
+     * What the hero's lower band closes to as the card folds.
+     *
+     * Open, the band is deep enough for the card to ride up into. Folded, the head tightens around
+     * the summary bar and carries it up with it, instead of leaving the bar parked on the hero's
+     * bottom edge under a band of empty blue as deep as the open state needed.
+     *
+     * Not [heroPaddingBottomCollapsed]: that one is the year-workshops head's own fixed padding,
+     * which has no card to make room for. Sharing the number would tie two unrelated heads together.
+     */
+    val heroPaddingBottomFolded = 34.dp
+
     val heroActionSize = 36.dp
     val heroActionCorner = 14.dp
     val heroActionIconSize = 18.dp
 
     // ── Duration Card ─────────────────────────────────────────────────────────
-    val durationCardOverlap = (-34).dp
+    /** How far the card rides up into the hero when open. */
+    val durationCardOverlap = 34.dp
+
+    /** What the card measures with the scope pill and the step buttons still on it. */
+    val durationCardExpandedHeight = 84.dp
+
+    /** What is left once it is a summary bar: it's padding around the folded figures. */
+    val durationCardCollapsedHeight = 38.dp
+
+    /**
+     * Folded, the bar rides up by half its own height, so the hero's bottom edge runs through its
+     * center rather than sitting above it — the rule the identity and treatment cards fold by.
+     *
+     * The card folds *in place*: it keeps its slot under the chip strip and only gives up its own
+     * height. Riding further up would carry it over the strip and onto the app-bar row.
+     */
+    val durationCardCollapsedOverlap = durationCardCollapsedHeight / 2
+
     val durationCardCorner = 24.dp
     val durationStripeHeight = 3.dp
     val durationNavSize = 31.dp
@@ -82,10 +111,14 @@ object HistoryDimens {
     /**
      * How far the body drags before the hero is fully folded.
      *
-     * The orb deck's own height plus the row gap above it and the lower padding it takes with it,
-     * so the fold finishes exactly as the deck runs out rather than part-way through it.
+     * Exactly what the head gives up — the card's own shrink, less the ride it hands back as it
+     * settles onto the hero's edge — so the body tracks the finger 1:1. A budget larger than the
+     * height actually lost is the fold finishing early and the drag carrying on against a head
+     * that cannot move any further.
      */
-    val heroCollapseDistance = 104.dp + 14.dp + 16.dp
+    val heroCollapseDistance = (durationCardExpandedHeight - durationCardCollapsedHeight) -
+        (durationCardOverlap - durationCardCollapsedOverlap) +
+        (heroPaddingBottom - heroPaddingBottomFolded)
 
     /** The app-bar button, and the spacer that balances it so a centred title really is centred. */
     val heroButtonSize = 36.dp

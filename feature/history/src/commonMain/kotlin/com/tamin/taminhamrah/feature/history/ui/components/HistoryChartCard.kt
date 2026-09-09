@@ -63,13 +63,22 @@ data class SourceChipPR(val label: String, val selected: Boolean)
 @Immutable
 data class FilterChipPR(val label: String, val selected: Boolean)
 
-/** A workshop split timeline row. */
+/**
+ * One employer's own timeline under the chart — «تفکیک کارگاه».
+ *
+ * [cellOpacities] holds one value per column of the chart above it: a year across «همه», a month
+ * inside a single year. Zero means the employer reported nothing in that column, which draws as the
+ * empty track rather than as no cell at all, so every row stays the same length and the columns
+ * still line up.
+ */
 @Immutable
 data class WorkshopSplitRowPR(
     val label: String,
     val color: Color,
     val totalText: String,
-    val monthOpacities: ImmutableList<Float>,
+    val cellOpacities: ImmutableList<Float>,
+    /** The column the chart has open, ringed on every row so they can be read across. */
+    val selectedCell: Int? = null,
 )
 
 /** The three points a dense series is read by, instead of a label under every bar. */
@@ -208,12 +217,13 @@ fun HistoryChartCard(
             hint = barHint,
         )
 
-        // Workshop split timeline rows
+        // Workshop split timeline rows, ruled off from the legend above them as the design has it.
         if (splitChip?.selected == true && splitRows.isNotEmpty()) {
+            DashedDivider(modifier = Modifier.padding(top = 11.dp))
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = Spacing.xs),
+                    .padding(top = 11.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 splitRows.forEach { row ->
@@ -460,19 +470,28 @@ private fun WorkshopTimelineRow(row: WorkshopSplitRowPR) {
             )
         }
 
-        // 12-month mini-cells timeline
+        // One cell per column of the chart above: a year in «همه», a month inside one year.
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(3.dp),
         ) {
-            row.monthOpacities.forEach { opacity ->
+            val cellShape = RoundedCornerShape(3.dp)
+            row.cellOpacities.forEachIndexed { index, opacity ->
+                val worked = opacity > 0f
                 Box(
                     modifier = Modifier
                         .weight(1f)
                         .height(9.dp)
-                        .clip(RoundedCornerShape(3.dp))
-                        .background(
-                            if (opacity > 0f) row.color.copy(alpha = opacity) else Color(0x120F172A),
+                        .clip(cellShape)
+                        .background(if (worked) row.color.copy(alpha = opacity) else Color(0x120F172A))
+                        // Only a column this employer actually worked is worth ringing; ringing an
+                        // empty track would read as a bar that is simply very short.
+                        .then(
+                            if (worked && row.selectedCell == index) {
+                                Modifier.border(1.2.dp, Color(0x800F172A), cellShape)
+                            } else {
+                                Modifier
+                            },
                         ),
                 )
             }

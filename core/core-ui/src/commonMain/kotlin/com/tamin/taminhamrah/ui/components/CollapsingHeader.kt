@@ -212,8 +212,12 @@ fun Modifier.scaleOnCollapse(
         placeable.placeRelativeWithLayer(0, 0) {
             scaleX = scale
             scaleY = scale
-            // Anchored to the leading edge so the line stays put as it shrinks.
-            transformOrigin = TransformOrigin(if (rtl) 1f else 0f, 0.5f)
+            // Anchored to the leading edge so the line stays put as it shrinks, and to the *top*
+            // rather than the middle: the box reported above is the scaled height, so a vertically
+            // centered origin would keep drawing the line centered on the height it no longer
+            // reserves — half of it hanging below its own box, and a matching band of dead space
+            // above it. Whatever centers this line then centers the empty box, not the line.
+            transformOrigin = TransformOrigin(if (rtl) 1f else 0f, 0f)
         }
     }
 }
@@ -286,6 +290,23 @@ fun Modifier.collapsingBottomPadding(
     val padding = lerp(expanded.toPx(), collapsed.toPx(), progress().coerceIn(0f, 1f)).roundToInt()
     val placeable = measurable.measure(constraints.offset(vertical = -padding))
     layout(placeable.width, placeable.height + padding) { placeable.place(0, 0) }
+}
+
+/**
+ * [collapsingBottomPadding] on both edges at once, so what it wraps stays centered as it closes.
+ *
+ * A bar whose lower padding closes while its upper one is fixed is a bar whose content drifts to
+ * the top as it folds — which reads as the fold having pushed it there rather than as the bar
+ * having tightened around it. Applied during layout, so it closes without recomposing.
+ */
+fun Modifier.collapsingVerticalPadding(
+    progress: () -> Float,
+    expanded: Dp,
+    collapsed: Dp,
+): Modifier = layout { measurable, constraints ->
+    val padding = lerp(expanded.toPx(), collapsed.toPx(), progress().coerceIn(0f, 1f)).roundToInt()
+    val placeable = measurable.measure(constraints.offset(vertical = -padding * 2))
+    layout(placeable.width, placeable.height + padding * 2) { placeable.place(0, padding) }
 }
 
 /**

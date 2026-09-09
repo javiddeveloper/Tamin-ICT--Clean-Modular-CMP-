@@ -14,8 +14,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -40,6 +40,7 @@ import com.tamin.taminhamrah.feature.history.ui.HistoryDimens
 import com.tamin.taminhamrah.ui.components.collapseAway
 import com.tamin.taminhamrah.ui.components.collapseHeightAway
 import com.tamin.taminhamrah.ui.components.collapsingBottomPadding
+import com.tamin.taminhamrah.ui.components.collapsingVerticalPadding
 import com.tamin.taminhamrah.ui.components.scaleOnCollapse
 import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationCardBgEnd
 import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationCardBgStart
@@ -55,9 +56,9 @@ import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationStripeEnd
 import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationStripeStart
 import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationUnit
 import org.jetbrains.compose.resources.stringResource
-import taminx.core.core_ui.Res as CoreRes
 import taminx.core.core_ui.history_step_newer
 import taminx.core.core_ui.history_step_older
+import taminx.core.core_ui.Res as CoreRes
 
 /** Holds the pre-formatted digits and units to avoid formatting inside composition. */
 @Immutable
@@ -118,26 +119,29 @@ fun HistoryDurationCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .collapsingBottomPadding(
+                // Both edges close together, so the folded bar keeps its figures centered instead
+                // of leaving them against its top with the closed padding all below.
+                .collapsingVerticalPadding(
                     progress = collapseProgress,
                     expanded = HistoryDimens.durationCardPaddingV,
                     collapsed = HistoryDimens.durationCardPaddingVCollapsed,
                 )
-                .padding(
-                    start = HistoryDimens.durationCardPaddingH,
-                    end = HistoryDimens.durationCardPaddingH,
-                    top = HistoryDimens.durationCardPaddingV,
-                ),
+                .padding(horizontal = HistoryDimens.durationCardPaddingH),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            // Older step button
+            // In RTL this is the row's first child, so it is the button on the *right*: the one
+            // that steps toward the newer end of the career.
+            //
+            // The chevrons are the plain, non-mirrored pair on purpose. They point at the physical
+            // edge each button sits against, so the pair faces outwards; the `AutoMirrored` pair
+            // flips with the reading direction and turns both of them inwards on an RTL page.
             Box(modifier = Modifier.collapseAway(collapseProgress)) {
                 NavStepButton(
-                    icon = Icons.Filled.KeyboardArrowRight,
-                    enabled = model.hasOlder,
-                    onClick = onStepOlder,
-                    contentDescription = stringResource(CoreRes.string.history_step_older),
+                    icon = Icons.Filled.ChevronRight,
+                    enabled = model.hasNewer,
+                    onClick = onStepNewer,
+                    contentDescription = stringResource(CoreRes.string.history_step_newer),
                 )
             }
 
@@ -186,13 +190,13 @@ fun HistoryDurationCard(
                 )
             }
 
-            // Newer step button
+            // The row's last child, so the button on the *left*: it steps back toward the oldest year.
             Box(modifier = Modifier.collapseAway(collapseProgress)) {
                 NavStepButton(
-                    icon = Icons.Filled.KeyboardArrowLeft,
-                    enabled = model.hasNewer,
-                    onClick = onStepNewer,
-                    contentDescription = stringResource(CoreRes.string.history_step_newer),
+                    icon = Icons.Filled.ChevronLeft,
+                    enabled = model.hasOlder,
+                    onClick = onStepOlder,
+                    contentDescription = stringResource(CoreRes.string.history_step_older),
                 )
             }
         }
@@ -272,12 +276,12 @@ private fun DurationFigures(model: DurationCardPR, modifier: Modifier = Modifier
         },
     ) { measurables, _ ->
         // Unbounded, always: a figure is never asked to fit, only ever measured and then placed.
-        val placeables = measurables.map { it.measure(Constraints()) }
-        val baseline = placeables.maxOf { it[LastBaseline] }
-        val below = placeables.maxOf { it.height - it[LastBaseline] }
-        layout(placeables.sumOf { it.width }, baseline + below) {
+        val placeable = measurables.map { it.measure(Constraints()) }
+        val baseline = placeable.maxOf { it[LastBaseline] }
+        val below = placeable.maxOf { it.height - it[LastBaseline] }
+        layout(placeable.sumOf { it.width }, baseline + below) {
             var x = 0
-            placeables.forEach { piece ->
+            placeable.forEach { piece ->
                 piece.placeRelative(x, baseline - piece[LastBaseline])
                 x += piece.width
             }
