@@ -105,6 +105,14 @@ object StoryDimens {
     val actionIconSize = 19.dp
     val actionInnerGap = 6.dp
 
+    /**
+     * The send button inside the comment field.
+     *
+     * Not from the design — its comment pill is a display-only stub with nothing to send. Sized to
+     * the pill's inner height so the tap target is reachable without the icon growing.
+     */
+    val commentSendSize = 32.dp
+
     /** linear-gradient(168deg) and linear-gradient(140deg), in CSS degrees. */
     const val VIEWER_GRADIENT_ANGLE_DEG = 168f
     const val RING_GRADIENT_ANGLE_DEG = 140f

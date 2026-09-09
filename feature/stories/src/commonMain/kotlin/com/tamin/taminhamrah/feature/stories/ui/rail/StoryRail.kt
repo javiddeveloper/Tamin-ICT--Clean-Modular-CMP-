@@ -3,6 +3,8 @@ package com.tamin.taminhamrah.feature.stories.ui.rail
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,13 +18,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -204,16 +209,34 @@ private fun StoryRailItem(
 ) {
     val colors = LocalTaminColors.current
     val palette = channel.palette
+    // Shared on purpose: the whole column is the target — the label opens the channel too — but
+    // the press is drawn on the ring, so the ripple is the circle the reader sees rather than the
+    // column's rectangle around it.
+    val interactionSource = remember { MutableInteractionSource() }
 
     Column(
         modifier = modifier
             .width(StoryDimens.railItemWidth)
-            .clickable(onClick = onClick),
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                role = Role.Button,
+                onClickLabel = channel.shortName,
+                onClick = onClick,
+            ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(
             modifier = Modifier
                 .size(StoryDimens.ringSize)
+                .clip(CircleShape)
+                .indication(
+                    interactionSource = interactionSource,
+                    indication = ripple(
+                        bounded = true,
+                        color = if (isSeen) colors.chevron else palette.iconTone,
+                    ),
+                )
                 .drawWithCache {
                     // Rebuilt only when the ring changes size, so scrolling the row costs a
                     // redraw and nothing else.

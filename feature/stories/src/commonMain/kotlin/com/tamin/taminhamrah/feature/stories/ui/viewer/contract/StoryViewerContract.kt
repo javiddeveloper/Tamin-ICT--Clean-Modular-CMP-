@@ -35,9 +35,19 @@ data class StoryViewerUiState(
     /** Bumped whenever the fill has to start over. See the class comment. */
     val segmentToken: Int = 0,
     val segmentDurationMs: Long = STORY_DEFAULT_DURATION_MS,
-    /** How much of the segment had already run when it was paused; zero at every fresh start. */
+    /** How much of the segment had already run when it was held; zero at every fresh start. */
     val segmentElapsedMs: Long = 0L,
-    val isPaused: Boolean = false,
+    /** A finger resting on the story. */
+    val isTouchHeld: Boolean = false,
+    /**
+     * The comment field has focus and the keyboard is up.
+     *
+     * Tracked apart from [isTouchHeld] because the two are independent: lifting a finger must not
+     * restart a story that is waiting on the keyboard, and closing the keyboard must not restart
+     * one a finger is still resting on.
+     */
+    val isComposingComment: Boolean = false,
+    val commentDraft: String = "",
     /** A clip that has not yet said how long it is. The bar waits rather than guessing. */
     val isBuffering: Boolean = false,
     /** The media could not be shown; the slide falls back to its gradient and carries on. */
@@ -51,6 +61,9 @@ data class StoryViewerUiState(
     val item: StoryItem? get() = channel?.items?.getOrNull(itemIndex)
 
     val itemCount: Int get() = channel?.items?.size ?: 0
+
+    /** Anything at all is holding the story: a finger, or the comment keyboard. */
+    val isPaused: Boolean get() = isTouchHeld || isComposingComment
 
     /** Whether the fill should be moving right now. */
     val isPlaying: Boolean get() = !isPaused && !isBuffering && item != null
@@ -85,9 +98,18 @@ data class StoryViewerUiState(
         /** The media could not be shown; the slide runs out on the default duration instead. */
         data class MediaFailed(val durationMs: Long) : PartialState
 
-        data class Paused(val elapsedMs: Long) : PartialState
+        /**
+         * A hold started or ended. Both reasons travel together so the reducer always writes a
+         * consistent pair, and [elapsedMs] carries how far the slide got for the bar to pick up
+         * from — it is unchanged when a hold merely swaps reasons.
+         */
+        data class Held(
+            val touchHeld: Boolean,
+            val composingComment: Boolean,
+            val elapsedMs: Long,
+        ) : PartialState
 
-        data object Resumed : PartialState
+        data class CommentDraftChanged(val draft: String) : PartialState
 
         data class Engagement(
             val likedItems: ImmutableSet<String>,
@@ -102,14 +124,39 @@ sealed interface StoryViewerIntent {
     /** Sent once by the screen with the channel the rail was tapped on. */
     data class Open(val channelIndex: Int) : StoryViewerIntent
 
-    /** The wide tap column, which under a right-to-left page is the left of the screen. */
+    /**
+     * The wide tap column, which under a right-to-left page is the left of the screen.
+     *
+     * A **tap**, never a hold: the gesture detector separates the two by the platform's long-press
+     * threshold, so resting a finger on this column pauses the story and never moves it.
+     */
     data object Next : StoryViewerIntent
 
-    /** The narrow tap column, on the right. */
+    /** The narrow tap column, on the right. Same tap-not-hold rule as [Next]. */
     data object Previous : StoryViewerIntent
 
+    /** A finger came to rest on the story, past the tap threshold. */
     data object Pause : StoryViewerIntent
+
+    /** That finger lifted. */
     data object Resume : StoryViewerIntent
+
+    /**
+     * The comment field gained or lost focus. Holds the story for as long as the keyboard is up,
+     * independently of any finger resting on it.
+     */
+    data class CommentFocusChanged(val focused: Boolean) : StoryViewerIntent
+
+    data class CommentChanged(val draft: String) : StoryViewerIntent
+
+    /**
+     * The reader sent their comment.
+     *
+     * There is nowhere to send it yet, so this clears the field and lets the story run on. The
+     * field is deliberately real anyway: how it feels to type into is exactly what this stage is
+     * meant to test.
+     */
+    data object CommentSubmitted : StoryViewerIntent
 
     /**
      * Raised by the segment clock when a slide has had its time.

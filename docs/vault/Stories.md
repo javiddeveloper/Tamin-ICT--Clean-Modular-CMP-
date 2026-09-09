@@ -53,10 +53,12 @@ other. It is also why opening the viewer costs no second fetch.
 **There is no `progress: Float` in the viewer's state.** A bar that filled from state would push a
 new state through the whole MVI pipeline every frame it moved.
 
-Instead the state describes the *segment* — `segmentDurationMs`, `segmentElapsedMs`, `isPaused`,
-`isBuffering`, and a `segmentToken` — and `StoryProgressBar` animates itself with an `Animatable`
-keyed on that token. The ViewModel bumps the token exactly when the fill has to start over: a new
-slide, a clip reporting its length, media failing, a paused slide resuming.
+Instead the state describes the *segment* — `segmentDurationMs`, `segmentElapsedMs`, `isBuffering`,
+the two hold flags, and a `segmentToken` — and `StoryProgressBar` animates itself with an
+`Animatable` keyed on `(segmentToken, isPlaying)`. The ViewModel bumps the token when the segment
+itself changes: a new slide, a clip reporting its length, media failing. Holds need no bump —
+`isPlaying` is the other key, so a hold arriving or leaving restarts the animation on its own,
+from the `segmentElapsedMs` published alongside it.
 
 The ViewModel's own clock (`segmentJob`) accumulates in 50 ms ticks rather than sleeping out the
 whole duration in one `delay`, which is what lets a pause report how far the slide already got —
@@ -77,7 +79,7 @@ Consequences:
 |---|---|
 | Tap the wide column (left under RTL) | next slide |
 | Tap the narrow column (right under RTL) | previous slide |
-| Hold anywhere | pause; releasing resumes from where it stopped |
+| Hold anywhere | pause; releasing resumes from where it stopped, and **never** moves the story |
 | Next past a channel's last slide | next channel, and the finished one is marked seen |
 | Next past the last channel | viewer closes |
 | Previous on the very first slide | replays it (the design does nothing; "مناسب UX" was the requirement) |
@@ -86,6 +88,41 @@ Consequences:
 The tap columns use `Alignment.TopStart`/`TopEnd`, not left/right. Under this app's RTL layout that
 puts "next" on the left as required, and it stays correct rather than inverted if an LTR layout is
 ever added.
+
+### Tap vs. hold — two traps, both already sprung
+
+`StoryTapZone` looks over-commented; it isn't. Both of these were real bugs:
+
+1. **`onLongPress` must be supplied, even empty.** Without it `detectTapGestures` reports a long
+   hold-then-release as a *tap*, so resting a finger on the screen jumped to the next slide when
+   you lifted it. Its mere presence suppresses that; the pause itself is done in `onPress`, which
+   is the only place that can await the release.
+2. **`pointerInput(Unit)`, with the callbacks read through `rememberUpdatedState`.** Keying
+   `pointerInput` on the lambdas — new instances every recomposition — tore the gesture down
+   mid-press: pausing recomposes the viewer, which restarted `pointerInput`, which cancelled the
+   `tryAwaitRelease()` that was going to resume. **The story then stayed paused forever.**
+
+The hold threshold is `viewConfiguration.longPressTimeoutMillis`, deliberately the same number
+`detectTapGestures` uses internally, so one gesture cannot count as both.
+
+## Holding the story — two independent reasons
+
+A finger (`isTouchHeld`) and the comment keyboard (`isComposingComment`) both stop the same clock,
+so neither may start or stop it alone. `StoryViewerViewModel.setHold()` is the only place either
+is applied: the clock stops when the first hold arrives and starts again only when the last one
+leaves. `isPaused` is derived from the two. Lifting a finger while the keyboard is up therefore
+leaves the story exactly where it is.
+
+## The comment field
+
+Real field, no service: the keyboard opens, the story holds while it is up, `ImeAction.Send` and
+the send button both clear it, and nothing is sent anywhere. Focus is the single signal — gaining
+it holds the story, losing it (by sending, by tapping the picture, or by system back) releases it —
+so no caller has to pair a "start" with a matching "stop".
+
+While it has focus the field takes the whole action bar; the like and bookmark chips are dropped
+rather than squeezed. The bottom column pads against `navigationBars.union(ime)`, which needs the
+`adjustResize` already set on `MainActivity` in the manifest.
 
 ## Media
 
@@ -115,9 +152,8 @@ never been compiled — iOS does not build on Windows. Verify it on a Mac before
    sets `sendWithoutRequest { true }`, so every image Coil fetches through it carries the user's
    access token — fine for the bundled files today, wrong the moment media comes off a CDN. Give
    story media its own unauthenticated `ImageLoader` then.
-5. Comments are presentation only right now — the pill is drawn and is deliberately not clickable,
-   because a field that accepted text and dropped it would be worse than one that plainly does
-   nothing.
+5. The comment field types and sends but goes nowhere — `CommentSubmitted` only clears the draft.
+   Give it a destination there.
 
 ## A deliberate deviation
 
@@ -127,7 +163,7 @@ inventing one. `StorySource` is the seam that makes undoing it cheap.
 
 ## Tests
 
-`feature/stories/src/commonTest` — 35 tests, `kotlin.test` + Turbine + `runTest`, hand-written
+`feature/stories/src/commonTest` — 41 tests, `kotlin.test` + Turbine + `runTest`, hand-written
 fakes, no Robolectric and no `getString` in either ViewModel (see [[Typography]] and the
 `getstring-viewmodel-test-hazard` memory).
 
@@ -138,4 +174,5 @@ fakes, no Robolectric and no `getString` in either ViewModel (see [[Typography]]
 Covered: list / empty / error / retry, duplicate-request prevention, opening the viewer, next,
 previous, channel roll-over, close-at-the-end, auto-advance, pause, resume-from-remaining,
 image duration, video buffering and reported duration, `onEnded`, media failure, the watchdog,
-close, CTA, and view tracking.
+close, CTA, view tracking — and the two independent holds: the keyboard holding the story, a
+finger lifting under it not restarting it, and vice versa.

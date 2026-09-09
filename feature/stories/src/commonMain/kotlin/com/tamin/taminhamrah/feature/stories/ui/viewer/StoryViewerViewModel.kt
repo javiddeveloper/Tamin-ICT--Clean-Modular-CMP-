@@ -79,8 +79,16 @@ class StoryViewerViewModel(
             is StoryViewerIntent.Open -> open(intent.channelIndex)
             StoryViewerIntent.Next -> goNext()
             StoryViewerIntent.Previous -> goPrevious()
-            StoryViewerIntent.Pause -> pause()
-            StoryViewerIntent.Resume -> resume()
+            StoryViewerIntent.Pause -> setHold(touchHeld = true)
+            StoryViewerIntent.Resume -> setHold(touchHeld = false)
+            is StoryViewerIntent.CommentFocusChanged -> setHold(composingComment = intent.focused)
+            is StoryViewerIntent.CommentChanged ->
+                emit(PartialState.CommentDraftChanged(intent.draft))
+
+            StoryViewerIntent.CommentSubmitted -> {
+                emit(PartialState.CommentDraftChanged(""))
+                setHold(composingComment = false)
+            }
             is StoryViewerIntent.AutoAdvance -> if (intent.serial == segmentSerial) goNext()
             is StoryViewerIntent.MediaReady -> mediaReady(intent.durationMs)
             StoryViewerIntent.MediaEnded -> if (currentIsVideo()) goNext()
@@ -208,23 +216,39 @@ class StoryViewerViewModel(
         if (isVideo) startWatchdog() else startClock(STORY_DEFAULT_DURATION_MS)
     }
 
-    /* ---- Pause and resume --------------------------------------------------------------- */
+    /* ---- Holding the story --------------------------------------------------------------- */
 
-    private suspend fun FlowCollector<PartialState>.pause() {
-        if (uiState.value.isPaused) return
+    /**
+     * The one place either reason for holding a story is applied.
+     *
+     * Two independent reasons — a finger on the screen, and the comment keyboard — share one
+     * clock, so neither may start or stop it on its own: the clock stops when the first hold
+     * arrives and starts again only when the last one leaves. A finger lifting while the keyboard
+     * is still up therefore leaves the story where it is, which is the whole point of tracking
+     * them apart.
+     *
+     * Each parameter defaults to what it already is, so a caller states only the reason it owns.
+     */
+    private suspend fun FlowCollector<PartialState>.setHold(
+        touchHeld: Boolean = uiState.value.isTouchHeld,
+        composingComment: Boolean = uiState.value.isComposingComment,
+    ) {
+        val state = uiState.value
+        if (touchHeld == state.isTouchHeld && composingComment == state.isComposingComment) return
+
+        val wasHeld = state.isPaused
+        val isHeld = touchHeld || composingComment
+
         // The watchdog is left running on purpose: a finger held on a buffering slide should not
         // buy a stalled clip unlimited time to answer.
-        val elapsed = stopClock()
-        emit(PartialState.Paused(elapsed))
-    }
+        val elapsedMsSoFar = if (isHeld && !wasHeld) stopClock() else state.segmentElapsedMs
+        emit(PartialState.Held(touchHeld, composingComment, elapsedMsSoFar))
 
-    private suspend fun FlowCollector<PartialState>.resume() {
-        val state = uiState.value
-        if (!state.isPaused) return
-        emit(PartialState.Resumed)
-        // Read off this class rather than off the state just emitted, which has not been reduced
-        // yet — and which is the same number anyway.
-        if (!state.isBuffering) startClock(state.segmentDurationMs, fromMs = elapsedMs)
+        if (wasHeld && !isHeld && !state.isBuffering) {
+            // Read off this class rather than off the state just emitted, which has not been
+            // reduced yet — and which is the same number anyway.
+            startClock(state.segmentDurationMs, fromMs = elapsedMs)
+        }
     }
 
     /* ---- Media -------------------------------------------------------------------------- */
@@ -328,7 +352,11 @@ class StoryViewerViewModel(
             segmentElapsedMs = 0L,
             segmentToken = currentState.segmentToken + 1,
             isBuffering = partialState.isBuffering,
-            isPaused = false,
+            isTouchHeld = false,
+            // A draft belongs to the slide it was written under, and a story cannot advance while
+            // the keyboard is up anyway — so arriving on a new slide starts from an empty field.
+            isComposingComment = false,
+            commentDraft = "",
             mediaFailed = false,
         )
 
@@ -347,17 +375,15 @@ class StoryViewerViewModel(
             mediaFailed = true,
         )
 
-        is PartialState.Paused -> currentState.copy(
-            isPaused = true,
+        // No token bump: the bar's animation is keyed on isPlaying as well, so a hold arriving or
+        // leaving already restarts it — from segmentElapsedMs, which is published right here.
+        is PartialState.Held -> currentState.copy(
+            isTouchHeld = partialState.touchHeld,
+            isComposingComment = partialState.composingComment,
             segmentElapsedMs = partialState.elapsedMs,
         )
 
-        // The token moves so the bar picks the fill up from segmentElapsedMs rather than from
-        // wherever its own animation happened to be left.
-        PartialState.Resumed -> currentState.copy(
-            isPaused = false,
-            segmentToken = currentState.segmentToken + 1,
-        )
+        is PartialState.CommentDraftChanged -> currentState.copy(commentDraft = partialState.draft)
 
         is PartialState.Engagement -> currentState.copy(
             likedItems = partialState.likedItems,

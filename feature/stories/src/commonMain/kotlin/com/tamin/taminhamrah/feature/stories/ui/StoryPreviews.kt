@@ -153,6 +153,24 @@ private fun StoryViewerEngagedPreview() {
     }
 }
 
+/**
+ * The comment field in use: the story is held, the field has the bar to itself, and the send
+ * button has appeared because there is something to send.
+ */
+@PreviewRtlTheme
+@Composable
+private fun StoryViewerComposingCommentPreview() {
+    PreviewRtlThemeContent(darkTheme = false) {
+        ViewerPreviewBody(
+            PreviewViewerState.copy(
+                itemIndex = 1,
+                isComposingComment = true,
+                commentDraft = "خیلی خوب شد که همهٔ خدمات یک‌جا جمع شده",
+            ),
+        )
+    }
+}
+
 /* ---- Fixtures --------------------------------------------------------------------------- */
 
 private val PreviewPalette = StoryPalette(

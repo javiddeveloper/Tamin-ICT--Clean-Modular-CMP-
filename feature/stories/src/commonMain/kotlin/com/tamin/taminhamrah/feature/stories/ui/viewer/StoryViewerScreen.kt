@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.feature.stories.ui.viewer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,24 +21,37 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.stories.model.StoryChannel
@@ -66,6 +81,7 @@ import com.tamin.taminhamrah.feature.stories.ui.viewer.contract.StoryViewerInten
 import com.tamin.taminhamrah.feature.stories.ui.viewer.contract.StoryViewerUiState
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.LoadAsyncImage
 import com.tamin.taminhamrah.ui.components.NumericText
@@ -76,6 +92,7 @@ import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.util.toPersianDigits
+import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -87,11 +104,13 @@ import taminx.feature.stories.generated.resources.ic_story_heart
 import taminx.feature.stories.generated.resources.ic_story_heart_filled
 import taminx.feature.stories.generated.resources.stories_close
 import taminx.feature.stories.generated.resources.stories_comment_hint
+import taminx.feature.stories.generated.resources.stories_comment_send
 import taminx.feature.stories.generated.resources.stories_like
 import taminx.feature.stories.generated.resources.stories_media_failed
 import taminx.feature.stories.generated.resources.stories_save
 import taminx.core.core_ui.Res as CoreRes
 import taminx.core.core_ui.ic_close
+import taminx.core.core_ui.ic_send
 import taminx.core.core_ui.ic_tamin_chevron_forward
 
 private val PillShape = RoundedCornerShape(CornerRadius.max)
@@ -149,6 +168,18 @@ internal fun StoryViewerBody(
     val channel = state.channel
     val item = state.item
 
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    // Dropping focus is the whole of it: the field reports that back, and the story resumes from
+    // there rather than from two places having to agree.
+    val dismissComment: () -> Unit = {
+        keyboardController?.hide()
+        focusManager.clearFocus()
+    }
+
+    // While the keyboard is up, back closes it instead of the viewer.
+    BackHandler(enabled = state.isComposingComment, onBack = dismissComment)
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -178,7 +209,11 @@ internal fun StoryViewerBody(
                     ),
             )
 
-            StoryTapZones(onIntent = onIntent)
+            StoryTapZones(
+                isComposingComment = state.isComposingComment,
+                onIntent = onIntent,
+                onDismissComment = dismissComment,
+            )
 
             Column(
                 modifier = Modifier
@@ -217,9 +252,15 @@ internal fun StoryViewerBody(
                 item = item,
                 type = type,
                 onIntent = onIntent,
+                onSubmitComment = {
+                    onIntent(StoryViewerIntent.CommentSubmitted)
+                    dismissComment()
+                },
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .windowInsetsPadding(WindowInsets.navigationBars)
+                    // The union rather than either alone: the copy sits above the navigation bar
+                    // normally, and above the keyboard while the comment field has it open.
+                    .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime))
                     // padding: 0 20px 30px — no top inset, so the copy hangs off the bottom of
                     // the screen the way the design has it rather than floating 30 above it.
                     .padding(
@@ -319,47 +360,96 @@ private fun BoxScope.StoryMediaLayer(
  * wide "next" column on the left and the narrow "back" column on the right, which is what the
  * design and the requirement both ask for — and it stays correct rather than inverted if a
  * left-to-right layout is ever added.
- *
- * `onPress` pauses the moment a finger lands and `tryAwaitRelease` resumes when it lifts, so a
- * hold pauses and a tap is a pause and a resume too quick to see before it moves the story.
  */
 @Composable
-private fun BoxScope.StoryTapZones(onIntent: (StoryViewerIntent) -> Unit) {
+private fun BoxScope.StoryTapZones(
+    isComposingComment: Boolean,
+    onIntent: (StoryViewerIntent) -> Unit,
+    onDismissComment: () -> Unit,
+) {
     StoryTapZone(
         widthFraction = StoryDimens.VIEWER_PREVIOUS_ZONE_FRACTION,
         alignment = Alignment.TopStart,
+        isComposingComment = isComposingComment,
         onTap = { onIntent(StoryViewerIntent.Previous) },
+        onDismissComment = onDismissComment,
         onIntent = onIntent,
     )
     StoryTapZone(
         widthFraction = 1f - StoryDimens.VIEWER_PREVIOUS_ZONE_FRACTION,
         alignment = Alignment.TopEnd,
+        isComposingComment = isComposingComment,
         onTap = { onIntent(StoryViewerIntent.Next) },
+        onDismissComment = onDismissComment,
         onIntent = onIntent,
     )
 }
 
+/**
+ * One tap column.
+ *
+ * ### Tap and hold are told apart by a threshold
+ *
+ * A finger that lifts before the platform's long-press timeout is a tap and moves the story. A
+ * finger that outlives it is a hold: it pauses, and it must never move the story when it lifts.
+ * `onLongPress` is supplied for exactly that reason — with it set, `detectTapGestures` stops
+ * reporting a long hold as a tap, which is what used to make a hold jump to the next slide.
+ *
+ * The two clocks below are deliberately the same number, so a gesture cannot be counted as both.
+ *
+ * ### `pointerInput(Unit)`, and why it matters here
+ *
+ * The callbacks are read through [rememberUpdatedState] so this key can be `Unit`. Keying on the
+ * lambdas instead — which are new instances on every recomposition — tore the gesture down
+ * mid-press: pausing recomposes the viewer, which restarted `pointerInput`, which cancelled
+ * `tryAwaitRelease()` before it could resume. The story then stayed paused for good.
+ */
 @Composable
 private fun BoxScope.StoryTapZone(
     widthFraction: Float,
     alignment: Alignment,
+    isComposingComment: Boolean,
     onTap: () -> Unit,
+    onDismissComment: () -> Unit,
     onIntent: (StoryViewerIntent) -> Unit,
 ) {
+    val currentOnTap by rememberUpdatedState(onTap)
+    val currentOnDismissComment by rememberUpdatedState(onDismissComment)
+    val currentOnIntent by rememberUpdatedState(onIntent)
+    val currentIsComposing by rememberUpdatedState(isComposingComment)
+
     Box(
         modifier = Modifier
             .align(alignment)
             .fillMaxWidth(widthFraction)
             .fillMaxHeight()
             .padding(top = StoryDimens.viewerTapZoneTop)
-            .pointerInput(onTap) {
+            .pointerInput(Unit) {
+                val holdThresholdMs = viewConfiguration.longPressTimeoutMillis
                 detectTapGestures(
                     onPress = {
-                        onIntent(StoryViewerIntent.Pause)
-                        tryAwaitRelease()
-                        onIntent(StoryViewerIntent.Resume)
+                        // While the keyboard is up the story is already held by it, and the only
+                        // thing a touch out here means is "put that away".
+                        if (!currentIsComposing) {
+                            // Null means the finger was still down when the threshold passed —
+                            // a hold. Anything shorter is a tap and is left to onTap below, so an
+                            // ordinary tap never flickers the progress bar.
+                            val heldPastThreshold =
+                                withTimeoutOrNull(holdThresholdMs) { tryAwaitRelease() } == null
+                            if (heldPastThreshold) {
+                                currentOnIntent(StoryViewerIntent.Pause)
+                                tryAwaitRelease()
+                                currentOnIntent(StoryViewerIntent.Resume)
+                            }
+                        }
                     },
-                    onTap = { onTap() },
+                    // Empty, and load-bearing: its presence is what keeps a hold from also being
+                    // reported as a tap. The pause itself is handled above, where the release can
+                    // be awaited.
+                    onLongPress = { },
+                    onTap = {
+                        if (currentIsComposing) currentOnDismissComment() else currentOnTap()
+                    },
                 )
             },
     )
@@ -446,6 +536,7 @@ private fun StoryContent(
     item: StoryItem,
     type: StoryTextStyles,
     onIntent: (StoryViewerIntent) -> Unit,
+    onSubmitComment: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
@@ -526,6 +617,7 @@ private fun StoryContent(
             state = state,
             type = type,
             onIntent = onIntent,
+            onSubmitComment = onSubmitComment,
             modifier = Modifier.padding(top = StoryDimens.actionsTopGap),
         )
     }
@@ -534,15 +626,19 @@ private fun StoryContent(
 /**
  * The bar of glass pills under the copy: a comment field, a like count and a bookmark.
  *
- * Like and bookmark are real and remembered for the session; the comment pill is presentation
- * only — there is no service behind comments yet, and a field that accepted text and dropped it
- * would be worse than one that plainly does nothing. It is not clickable for that reason.
+ * The field is a real one — the keyboard opens, the story holds while it is up, and sending
+ * clears it. Nothing is sent anywhere: there is no comments service yet, and how the field feels
+ * to type into is what this stage is for.
+ *
+ * While the keyboard is up the field takes the whole bar. The chips would be squeezed to nothing
+ * beside it, and neither is a sensible target with a thumb on the keyboard anyway.
  */
 @Composable
 private fun StoryActions(
     state: StoryViewerUiState,
     type: StoryTextStyles,
     onIntent: (StoryViewerIntent) -> Unit,
+    onSubmitComment: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -550,28 +646,16 @@ private fun StoryActions(
         horizontalArrangement = Arrangement.spacedBy(StoryDimens.actionsGap),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(
-            modifier = Modifier
-                .weight(1f)
-                .height(StoryDimens.actionHeight)
-                .glassPill()
-                .padding(horizontal = StoryDimens.commentPaddingHorizontal),
-            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(
-                imageVector = vectorResource(Res.drawable.ic_story_comment),
-                contentDescription = null,
-                tint = StoryOnBackdrop,
-                modifier = Modifier.size(StoryDimens.commentIconSize),
-            )
-            TaminText(
-                text = stringResource(Res.string.stories_comment_hint),
-                style = type.actionHint,
-                color = StoryHintInk,
-                maxLines = 1,
-            )
-        }
+        StoryCommentField(
+            draft = state.commentDraft,
+            type = type,
+            onDraftChange = { onIntent(StoryViewerIntent.CommentChanged(it)) },
+            onFocusChanged = { onIntent(StoryViewerIntent.CommentFocusChanged(it)) },
+            onSubmit = onSubmitComment,
+            modifier = Modifier.weight(1f),
+        )
+
+        if (state.isComposingComment) return@Row
 
         Row(
             modifier = Modifier
@@ -612,6 +696,97 @@ private fun StoryActions(
                 tint = StoryOnBackdrop,
                 modifier = Modifier.size(StoryDimens.actionIconSize),
             )
+        }
+    }
+}
+
+/**
+ * The comment field: the design's glass pill, with a real text field inside it.
+ *
+ * Focus is the single signal. Gaining it opens the keyboard and holds the story; losing it —
+ * whether by sending, by tapping the picture, or by the system back button — releases both. That
+ * is why the caller never has to pair a "start" with a matching "stop".
+ *
+ * The send affordance appears only once there is something to send, and does nothing beyond
+ * clearing the field: there is no comments service yet. `ImeAction.Send` on the keyboard does the
+ * same thing, so either route works.
+ */
+@Composable
+private fun StoryCommentField(
+    draft: String,
+    type: StoryTextStyles,
+    onDraftChange: (String) -> Unit,
+    onFocusChanged: (Boolean) -> Unit,
+    onSubmit: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val focusRequester = remember { FocusRequester() }
+    // The pill is wider than the field's own text, so the strip either side has to focus it too.
+    // No indication: a ripple across a glass capsule reads as a smear, and the caret appearing is
+    // the feedback that matters.
+    val interactionSource = remember { MutableInteractionSource() }
+
+    Row(
+        modifier = modifier
+            .height(StoryDimens.actionHeight)
+            .glassPill()
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+            ) { focusRequester.requestFocus() }
+            .padding(horizontal = StoryDimens.commentPaddingHorizontal),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = vectorResource(Res.drawable.ic_story_comment),
+            contentDescription = null,
+            tint = StoryOnBackdrop,
+            modifier = Modifier.size(StoryDimens.commentIconSize),
+        )
+
+        BasicTextField(
+            value = draft,
+            onValueChange = onDraftChange,
+            modifier = Modifier
+                .weight(1f)
+                .focusRequester(focusRequester)
+                .onFocusChanged { onFocusChanged(it.isFocused) },
+            textStyle = type.actionHint.copy(color = StoryOnBackdrop),
+            cursorBrush = SolidColor(StoryOnBackdrop),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+            keyboardActions = KeyboardActions(onSend = { onSubmit() }),
+            decorationBox = { innerTextField ->
+                Box(contentAlignment = Alignment.CenterStart) {
+                    if (draft.isEmpty()) {
+                        TaminText(
+                            text = stringResource(Res.string.stories_comment_hint),
+                            style = type.actionHint,
+                            color = StoryHintInk,
+                            maxLines = 1,
+                        )
+                    }
+                    innerTextField()
+                }
+            },
+        )
+
+        if (draft.isNotBlank()) {
+            Box(
+                modifier = Modifier
+                    .size(StoryDimens.commentSendSize)
+                    .clip(CircleShape)
+                    .clickable(onClick = onSubmit),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = vectorResource(CoreRes.drawable.ic_send),
+                    contentDescription = stringResource(Res.string.stories_comment_send),
+                    tint = StoryOnBackdrop,
+                    modifier = Modifier.size(StoryDimens.commentIconSize),
+                )
+            }
         }
     }
 }

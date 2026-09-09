@@ -11,5 +11,6 @@
     <string name="stories_like">پسندیدن</string>
     <string name="stories_save">ذخیره</string>
     <string name="stories_comment_hint">دیدگاه خود را بنویسید…</string>
+    <string name="stories_comment_send">ارسال دیدگاه</string>
     <string name="stories_media_failed">نمایش این محتوا ممکن نشد</string>
 </resources>

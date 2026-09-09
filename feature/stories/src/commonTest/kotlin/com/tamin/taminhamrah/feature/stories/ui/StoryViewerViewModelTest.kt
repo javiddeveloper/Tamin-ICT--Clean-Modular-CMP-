@@ -234,6 +234,94 @@ class StoryViewerViewModelTest {
         assertEquals(1, viewModel.uiState.value.itemIndex)
     }
 
+    /* ---- The comment field ----------------------------------------------------------------- */
+
+    @Test
+    fun `the comment keyboard holds the story while it is up`() = test {
+        val viewModel = catalog(testChannel("a")).viewer()
+        elapse(1_000)
+
+        viewModel.sendIntent(StoryViewerIntent.CommentFocusChanged(focused = true))
+        elapse(STORY_DEFAULT_DURATION_MS * 3)
+
+        assertTrue(viewModel.uiState.value.isComposingComment)
+        assertFalse(viewModel.uiState.value.isPlaying)
+        assertEquals(0, viewModel.uiState.value.itemIndex)
+    }
+
+    @Test
+    fun `closing the keyboard finishes the slide in the time it had left`() = test {
+        val viewModel = catalog(testChannel("a")).viewer()
+        elapse(2_000)
+        viewModel.sendIntent(StoryViewerIntent.CommentFocusChanged(focused = true))
+        elapse(60_000)
+
+        viewModel.sendIntent(StoryViewerIntent.CommentFocusChanged(focused = false))
+
+        elapse(4_000)
+        assertEquals(0, viewModel.uiState.value.itemIndex)
+        elapse(200)
+        assertEquals(1, viewModel.uiState.value.itemIndex)
+    }
+
+    @Test
+    fun `a finger lifting does not restart a story the keyboard is still holding`() = test {
+        val viewModel = catalog(testChannel("a")).viewer()
+        viewModel.sendIntent(StoryViewerIntent.CommentFocusChanged(focused = true))
+        viewModel.sendIntent(StoryViewerIntent.Pause)
+
+        viewModel.sendIntent(StoryViewerIntent.Resume)
+
+        val state = viewModel.uiState.value
+        assertFalse(state.isTouchHeld)
+        assertTrue(state.isComposingComment)
+        assertFalse(state.isPlaying)
+
+        elapse(STORY_DEFAULT_DURATION_MS * 2)
+        assertEquals(0, viewModel.uiState.value.itemIndex)
+    }
+
+    @Test
+    fun `closing the keyboard does not restart a story a finger is still on`() = test {
+        val viewModel = catalog(testChannel("a")).viewer()
+        viewModel.sendIntent(StoryViewerIntent.Pause)
+        viewModel.sendIntent(StoryViewerIntent.CommentFocusChanged(focused = true))
+
+        viewModel.sendIntent(StoryViewerIntent.CommentFocusChanged(focused = false))
+
+        assertTrue(viewModel.uiState.value.isTouchHeld)
+        assertFalse(viewModel.uiState.value.isPlaying)
+
+        elapse(STORY_DEFAULT_DURATION_MS * 2)
+        assertEquals(0, viewModel.uiState.value.itemIndex)
+    }
+
+    @Test
+    fun `typing is kept and sending clears it and lets the story run on`() = test {
+        val viewModel = catalog(testChannel("a")).viewer()
+        viewModel.sendIntent(StoryViewerIntent.CommentFocusChanged(focused = true))
+
+        viewModel.sendIntent(StoryViewerIntent.CommentChanged("سلام"))
+        assertEquals("سلام", viewModel.uiState.value.commentDraft)
+
+        viewModel.sendIntent(StoryViewerIntent.CommentSubmitted)
+
+        val state = viewModel.uiState.value
+        assertEquals("", state.commentDraft)
+        assertFalse(state.isComposingComment)
+        assertTrue(state.isPlaying)
+    }
+
+    @Test
+    fun `a draft belongs to its own slide`() = test {
+        val viewModel = catalog(testChannel("a")).viewer()
+        viewModel.sendIntent(StoryViewerIntent.CommentChanged("نیمه‌کاره"))
+
+        viewModel.sendIntent(StoryViewerIntent.Next)
+
+        assertEquals("", viewModel.uiState.value.commentDraft)
+    }
+
     /* ---- Video ---------------------------------------------------------------------------- */
 
     @Test
