@@ -20,6 +20,7 @@ Read the relevant page there before searching the codebase:
 | Scroll-driven collapsing headers (fold/unfold on drag) | `docs/vault/TopArea-System.md` |
 | DI and Koin | `docs/vault/Dependency-Injection.md` |
 | Networking, tokens, endpoints | `docs/vault/Networking.md` |
+| Payments (any feature, and the mock gateway) | `docs/vault/Payments.md` |
 | Database and schemas | `docs/vault/Database.md` |
 | Build, flavors, JDK | `docs/vault/Build-and-Run.md` |
 | CI | `docs/vault/CI-CD.md` |

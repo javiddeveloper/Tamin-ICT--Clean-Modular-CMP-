@@ -44,6 +44,10 @@ import com.tamin.taminhamrah.data.repository.ContactUsRepositoryImpl
 import com.tamin.taminhamrah.repository.ContactUsRepository
 import com.tamin.taminhamrah.data.repository.health.HealthRepositoryImpl
 import com.tamin.taminhamrah.data.repository.addDependent.AddDependentRepositoryImpl
+import com.tamin.taminhamrah.data.repository.payment.PaymentGatewayRepositoryImpl
+import com.tamin.taminhamrah.repository.payment.PaymentGatewayRepository
+import com.tamin.taminhamrah.repository.payment.PaymentReturnNotifier
+import com.tamin.taminhamrah.repository.payment.PaymentReturnNotifierImpl
 import com.tamin.taminhamrah.data.repository.WorkShopsRepositoryImpl
 import com.tamin.taminhamrah.repository.WorkShopsRepository
 import com.tamin.taminhamrah.data.repository.InspectionRepositoryImpl
@@ -71,6 +75,8 @@ val dataKoinModule = module {
     singleOf(::CommonRepositoryImpl) { bind<CommonRepository>() }
     singleOf(::AgentChatCacheRepositoryImpl) { bind<AgentChatCacheRepository>() }
     singleOf(::WorkShopsRepositoryImpl) { bind<WorkShopsRepository>() }
+    singleOf(::PaymentGatewayRepositoryImpl) { bind<PaymentGatewayRepository>() }
+    singleOf(::PaymentReturnNotifierImpl) { bind<PaymentReturnNotifier>() }
     singleOf(::PersonalInboxRepositoryImpl) { bind<PersonalInboxRepository>() }
     singleOf(::UserRequestRepositoryImpl) { bind<UserRequestRepository>() }
     singleOf(::PersonalRepositoryImpl) { bind<PersonalRepository>() }
