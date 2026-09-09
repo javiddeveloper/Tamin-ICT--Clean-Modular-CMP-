@@ -41,7 +41,6 @@ import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDN
 import com.tamin.taminhamrah.model.identity.IdentityInfoDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
-import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
 import com.tamin.taminhamrah.model.user.CurrentUserDN
@@ -475,22 +474,26 @@ private class FakeTestCityProvinceRepo : CityProvinceRepository {
 }
 
 private class FakeTestContractsRepo : ContractsRepository {
-    override fun getBranches(cityCode: String): Flow<List<BranchDN>> = flowOf(
-        listOf(
-            BranchDN(
-                code = "123",
-                name = "شعبه ۱",
-                branchAddress = "تهران",
-                cityCode = cityCode,
-                minCode = null,
-                maxCode = null,
-            )
-        )
+    override fun getBranches(cityCode: String, page: Int): Flow<PagedListDN<BranchDN>> = flowOf(
+        PagedListDN(
+            items = listOf(
+                BranchDN(
+                    code = "123",
+                    name = "شعبه ۱",
+                    branchAddress = "تهران",
+                    cityCode = cityCode,
+                    minCode = null,
+                    maxCode = null,
+                ),
+            ),
+            total = 1,
+        ),
     )
 
-    override fun getContracts(query: ApiQueryParamDN?): Flow<List<ContractDN>> = flowOf(emptyList())
-    override fun getContractsByPremiumType(premiumTypeCode: String): Flow<List<ContractDN>> = flowOf(emptyList())
-    override fun getStudentInsuranceContracts(): Flow<List<ContractDN>> = flowOf(emptyList())
+    override fun getContracts(page: Int): Flow<PagedListDN<ContractDN>> = flowOf(PagedListDN())
+    override fun getContractsByPremiumType(premiumTypeCode: String, page: Int): Flow<PagedListDN<ContractDN>> =
+        flowOf(PagedListDN())
+    override fun getStudentInsuranceContracts(page: Int): Flow<PagedListDN<ContractDN>> = flowOf(PagedListDN())
     override fun getRegistrationInfo(): Flow<RegistrationInfoDN> = flowOf(RegistrationInfoDN(null, true, null, null, null))
     override fun getSpcPremiumRates(): Flow<List<PremiumRateDN>> = flowOf(emptyList())
     override fun getFreeJobWages(page: Int, searchQuery: String?): Flow<PagedListDN<FreeJobDN>> =

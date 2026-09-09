@@ -246,8 +246,8 @@ class ContractFlowViewModel(
 
     private fun loadAllContracts(): Flow<PartialState> = flow {
         try {
-            getContractsUseCase().collect { contracts ->
-                emit(PartialState.AllContractsLoaded(contracts))
+            getContractsUseCase().collect { page ->
+                emit(PartialState.AllContractsLoaded(page.items))
                 emitPreflightGateIfReady()
             }
         } catch (e: Exception) {
@@ -289,7 +289,8 @@ class ContractFlowViewModel(
 
     private fun loadContracts(): Flow<PartialState> = flow {
         try {
-            getContractsUseCase.contractsByPremiumType(config.premiumTypeCode).collect { contracts ->
+            getContractsUseCase.contractsByPremiumType(config.premiumTypeCode).collect { page ->
+                val contracts = page.items
                 emit(PartialState.RawTypedContractsLoaded(contracts))
                 emit(PartialState.EligibilityLoaded(contracts.resolveEligibility()))
                 emit(PartialState.ContractsLoaded(contracts.toPresentation()))
@@ -380,8 +381,8 @@ class ContractFlowViewModel(
     private fun loadBranches(cityCode: String): Flow<PartialState> = flow {
         emit(PartialState.BranchesLoading(true))
         try {
-            getBranchesUseCase(cityCode).collect { branches ->
-                emit(PartialState.BranchesLoaded(branches.toBranchPresentation()))
+            getBranchesUseCase(cityCode).collect { page ->
+                emit(PartialState.BranchesLoaded(page.items.toBranchPresentation()))
             }
         } catch (e: Exception) {
             emitError(e.message)

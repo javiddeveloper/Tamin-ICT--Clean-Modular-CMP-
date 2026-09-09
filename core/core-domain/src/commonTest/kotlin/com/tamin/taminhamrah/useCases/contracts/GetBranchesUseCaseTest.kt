@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.useCases.contracts
 
 import app.cash.turbine.test
 import com.tamin.taminhamrah.model.contracts.BranchDN
+import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.repository.contracts.FakeContractsRepository
 import com.tamin.taminhamrah.useCases.BaseUseCaseTest
 import kotlinx.coroutines.test.runTest
@@ -35,11 +36,12 @@ class GetBranchesUseCaseTest : BaseUseCaseTest() {
         repository.branchesResult = expectedBranches
 
         useCase("0101").test {
-            assertEquals(expectedBranches, awaitItem())
+            assertEquals(PagedListDN(items = expectedBranches, total = expectedBranches.size), awaitItem())
             awaitComplete()
         }
 
         assertEquals("0101", repository.lastBranchCityCode)
+        assertEquals(1, repository.lastBranchesPage)
     }
 
     @Test

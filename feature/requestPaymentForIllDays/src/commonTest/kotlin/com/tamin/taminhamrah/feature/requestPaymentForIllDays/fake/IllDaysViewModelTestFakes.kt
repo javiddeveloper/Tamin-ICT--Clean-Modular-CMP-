@@ -19,7 +19,6 @@ import com.tamin.taminhamrah.model.contracts.PremiumRateDN
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDN
 import com.tamin.taminhamrah.model.contracts.SaveContactRequestDN
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
-import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.requestPaymentForIllDays.CovidResultDN
 import com.tamin.taminhamrah.model.requestPaymentForIllDays.IllDaysBranchWorkshopDN
 import com.tamin.taminhamrah.model.requestPaymentForIllDays.IllDaysInsuredMainInfoDN
@@ -112,10 +111,11 @@ class FakeIllDaysContractsRepository : ContractsRepository {
         emit(uploadGuid)
     }
 
-    override fun getBranches(cityCode: String): Flow<List<BranchDN>> = flowOf(emptyList())
-    override fun getContracts(query: ApiQueryParamDN?): Flow<List<ContractDN>> = flowOf(emptyList())
-    override fun getContractsByPremiumType(premiumTypeCode: String): Flow<List<ContractDN>> = flowOf(emptyList())
-    override fun getStudentInsuranceContracts(): Flow<List<ContractDN>> = flowOf(emptyList())
+    override fun getBranches(cityCode: String, page: Int): Flow<PagedListDN<BranchDN>> = flowOf(PagedListDN())
+    override fun getContracts(page: Int): Flow<PagedListDN<ContractDN>> = flowOf(PagedListDN())
+    override fun getContractsByPremiumType(premiumTypeCode: String, page: Int): Flow<PagedListDN<ContractDN>> =
+        flowOf(PagedListDN())
+    override fun getStudentInsuranceContracts(page: Int): Flow<PagedListDN<ContractDN>> = flowOf(PagedListDN())
     override fun getRegistrationInfo(): Flow<RegistrationInfoDN> = flowOf()
     override fun getSpcPremiumRates(): Flow<List<PremiumRateDN>> = flowOf(emptyList())
     override fun getFreeJobWages(
