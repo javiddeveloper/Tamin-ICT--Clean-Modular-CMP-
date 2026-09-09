@@ -158,6 +158,16 @@ private fun HistoryUiState.reduceForFixture(intent: HistoryIntent): HistoryUiSta
 
     is HistoryIntent.SelectSource -> copy(selectedSource = intent.source)
 
+    is HistoryIntent.SelectMetric -> copy(metric = intent.metric)
+
+    // Same rule as the ViewModel: splitting already shows every employer, so a filter down to one
+    // of them is the same question asked twice, and is cleared rather than left to contradict the
+    // bars.
+    HistoryIntent.ToggleSplit -> copy(
+        splitBySource = !splitBySource,
+        selectedSource = if (!splitBySource) null else selectedSource,
+    )
+
     is HistoryIntent.SelectYear -> copy(selectedYear = intent.year)
 
     is HistoryIntent.DismissYearDetail -> copy(selectedYear = null)

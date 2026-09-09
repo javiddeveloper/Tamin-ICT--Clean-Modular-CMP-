@@ -80,6 +80,11 @@ class HistoryViewModel(
 
         is HistoryIntent.SelectSource -> flow { emit(PartialState.SourceSelected(intent.source)) }
 
+        is HistoryIntent.SelectMetric -> flow { emit(PartialState.MetricSelected(intent.metric)) }
+
+        HistoryIntent.ToggleSplit ->
+            flow { emit(PartialState.SplitChanged(!uiState.value.splitBySource)) }
+
         is HistoryIntent.AskSendNotice -> flow { emit(PartialState.SendConfirmVisible(true)) }
 
         is HistoryIntent.DismissSendConfirm -> flow { emit(PartialState.SendConfirmVisible(false)) }
@@ -327,6 +332,15 @@ class HistoryViewModel(
         is PartialState.MonthSelected -> currentState.copy(selectedMonth = partialState.month)
 
         is PartialState.SourceSelected -> currentState.copy(selectedSource = partialState.source)
+
+        is PartialState.MetricSelected -> currentState.copy(metric = partialState.metric)
+
+        // Splitting shows every employer at once, so a filter down to one of them is the
+        // same question asked twice — it is cleared rather than left to contradict the bars.
+        is PartialState.SplitChanged -> currentState.copy(
+            splitBySource = partialState.split,
+            selectedSource = if (partialState.split) null else currentState.selectedSource,
+        )
 
         is PartialState.SendConfirmVisible ->
             currentState.copy(showSendConfirm = partialState.visible)

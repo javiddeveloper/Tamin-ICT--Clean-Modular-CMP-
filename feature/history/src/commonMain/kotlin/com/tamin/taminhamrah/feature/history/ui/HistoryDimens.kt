@@ -113,4 +113,15 @@ object HistoryDimens {
 
     /** What a card measures, so a skeleton stands in for one without the page jumping. */
     val cardHeight = 76.dp
+
+    /**
+     * How tall each plot is drawn.
+     *
+     * Paired, the two series split one chart's worth of height unevenly: earnings carry the shape
+     * worth reading and days become a strip beneath it, which is the design's own proportion
+     * (`104px` over `48px`). Alone, a series takes the whole `138px`.
+     */
+    val plotHeightSingle = 138.dp
+    val plotHeightPaired = 104.dp
+    val plotHeightSecondary = 48.dp
 }

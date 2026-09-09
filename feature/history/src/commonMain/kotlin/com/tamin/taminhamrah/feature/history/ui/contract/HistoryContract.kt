@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.history.ui.contract
 
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.feature.history.ui.model.CareerTotalPR
+import com.tamin.taminhamrah.feature.history.ui.model.HistoryMetric
 import com.tamin.taminhamrah.feature.history.ui.model.HistoryScope
 import com.tamin.taminhamrah.feature.history.ui.model.YearHistoryPR
 import com.tamin.taminhamrah.model.history.DastmozdInfoItemPR
@@ -56,6 +57,22 @@ data class HistoryUiState(
      * year the person had chosen.
      */
     val scope: HistoryScope = HistoryScope.All,
+    /**
+     * Which series the chart plots — the شاخص chips above it.
+     *
+     * In the state rather than remembered in the composable for the same reason [scope] is: it
+     * decides what the whole card draws, and rotating the phone must not quietly put the person
+     * back on a series they did not choose.
+     */
+    val metric: HistoryMetric = HistoryMetric.BOTH,
+    /**
+     * Whether the bars are broken out per employer rather than added together.
+     *
+     * Mutually exclusive with [selectedSource] by construction: splitting *shows* every employer,
+     * so a filter down to one of them would be answering the same question twice. Turning it on
+     * clears the filter.
+     */
+    val splitBySource: Boolean = false,
     /** The month whose wages are open under the chart, in year scope only. */
     val selectedMonth: Int? = null,
     /** Which employer the month bars are filtered to, or null for all of them together. */
@@ -114,6 +131,10 @@ data class HistoryUiState(
 
         data class SourceSelected(val source: Int?) : PartialState
 
+        data class MetricSelected(val metric: HistoryMetric) : PartialState
+
+        data class SplitChanged(val split: Boolean) : PartialState
+
         data class SendConfirmVisible(val visible: Boolean) : PartialState
 
         data class Sending(val isSending: Boolean) : PartialState
@@ -152,6 +173,12 @@ sealed interface HistoryIntent {
 
     /** Filter the month bars to one employer, or null for all of them. */
     data class SelectSource(val source: Int?) : HistoryIntent
+
+    /** Switch the chart between دستمزد, روزهای کار and both together. */
+    data class SelectMetric(val metric: HistoryMetric) : HistoryIntent
+
+    /** Break the bars out per employer, or add them back together. */
+    data object ToggleSplit : HistoryIntent
 
     data object AskSendNotice : HistoryIntent
 

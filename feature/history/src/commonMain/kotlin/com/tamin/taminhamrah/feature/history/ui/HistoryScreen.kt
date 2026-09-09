@@ -30,6 +30,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.history.ui.components.ChartAxis
 import com.tamin.taminhamrah.feature.history.ui.components.DashedDivider
 import com.tamin.taminhamrah.feature.history.ui.components.HistoryActionCards
+import com.tamin.taminhamrah.feature.history.ui.components.FilterChipPR
 import com.tamin.taminhamrah.feature.history.ui.components.HistoryChartCard
 import com.tamin.taminhamrah.feature.history.ui.components.HistoryHero
 import com.tamin.taminhamrah.feature.history.ui.components.HistorySpanNote
@@ -49,7 +50,12 @@ import com.tamin.taminhamrah.feature.history.ui.model.YearHistoryPR
 import com.tamin.taminhamrah.feature.history.ui.model.careerDurationChips
 import com.tamin.taminhamrah.feature.history.ui.model.detailWith
 import com.tamin.taminhamrah.feature.history.ui.model.gapYearCount
+import com.tamin.taminhamrah.feature.history.ui.model.HistoryMetric
+import com.tamin.taminhamrah.feature.history.ui.model.maxMonthWage
+import com.tamin.taminhamrah.feature.history.ui.model.maxYearWage
 import com.tamin.taminhamrah.feature.history.ui.model.monthBars
+import com.tamin.taminhamrah.feature.history.ui.model.wageMonthBars
+import com.tamin.taminhamrah.feature.history.ui.model.wageYearBars
 import com.tamin.taminhamrah.feature.history.ui.model.sourceChips
 import com.tamin.taminhamrah.feature.history.ui.model.yearBars
 import com.tamin.taminhamrah.feature.history.ui.model.yearChips
@@ -66,6 +72,7 @@ import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
+import com.tamin.taminhamrah.ui.components.BarChartSeries
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.ToasterState
@@ -73,9 +80,11 @@ import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toRialAmount
+import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
@@ -84,6 +93,13 @@ import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.action_back
 import taminx.core.core_ui.action_cancel
 import taminx.core.core_ui.btn_understood
+import taminx.core.core_ui.history_metric_label
+import taminx.core.core_ui.history_series_days
+import taminx.core.core_ui.history_series_max_days
+import taminx.core.core_ui.history_series_max_wage
+import taminx.core.core_ui.history_series_wage
+import taminx.core.core_ui.history_split_chip
+import taminx.core.core_ui.history_split_label
 import taminx.core.core_ui.ic_tamin_download
 import taminx.feature.history.history_action_send_title
 import taminx.feature.history.history_all_title
@@ -207,7 +223,7 @@ fun HistoryContent(
         }
     }
 
-    val bars = remember(scope, uiState.years, detail, uiState.selectedSource, uiState.selectedMonth) {
+    val dayBars = remember(scope, uiState.years, detail, uiState.selectedSource, uiState.selectedMonth) {
         if (scope is HistoryScope.All) {
             uiState.years.yearBars { it.toPersianDigits() }
         } else {
@@ -220,6 +236,116 @@ fun HistoryContent(
             )
         }
     }
+
+    // The wage rows for whichever scope is on screen: every year at once, or one year's employers.
+    val scopeWages = remember(scope, uiState.wageByYear) {
+        when (scope) {
+            is HistoryScope.All -> null
+            is HistoryScope.Year -> uiState.wageByYear[scope.year]
+        }
+    }
+
+    val wageBars = remember(scope, uiState.years, uiState.wageByYear, scopeWages, uiState.selectedSource, uiState.selectedMonth) {
+        if (scope is HistoryScope.All) {
+            uiState.years.wageYearBars(uiState.wageByYear) { it.toPersianDigits() }
+        } else {
+            scopeWages.wageMonthBars(
+                source = uiState.selectedSource,
+                selectedMonth = uiState.selectedMonth,
+                wageLabel = { wage -> wage.toString().toPriceFormat().toPersianDigits() },
+            )
+        }
+    }
+
+    // How tall each plot is, and what its «بیشینه» says. Both series scale differently on purpose
+    // — see WageBars.kt — so each states its own ceiling rather than sharing one axis.
+    val maxWage = remember(scope, uiState.years, uiState.wageByYear, scopeWages, uiState.selectedSource) {
+        if (scope is HistoryScope.All) {
+            uiState.years.maxYearWage(uiState.wageByYear)
+        } else {
+            scopeWages.maxMonthWage(uiState.selectedSource)
+        }
+    }
+    val maxDayLabel = stringResource(
+        CoreRes.string.history_series_max_days,
+        (if (scope is HistoryScope.All) {
+            HistoryConstants.DAYS_IN_LEAP_YEAR.toInt()
+        } else {
+            HistoryConstants.DAYS_IN_MONTH
+        }).toString().toPersianDigits(),
+    )
+    val maxWageLabel = stringResource(
+        CoreRes.string.history_series_max_wage,
+        (maxWage / MILLION).toString().toPriceFormat().toPersianDigits(),
+    )
+    val wageTitle = stringResource(CoreRes.string.history_series_wage)
+    val daysTitle = stringResource(CoreRes.string.history_series_days)
+    val metric = uiState.metric
+
+    // One list, rebuilt only when something it draws changes. Handing the group a freshly built
+    // list every recomposition would cost it — and both charts under it — their skippability.
+    val series = remember(metric, wageBars, dayBars, maxWageLabel, maxDayLabel, wageTitle, daysTitle, scope) {
+        val both = metric == HistoryMetric.BOTH
+        buildList {
+            if (metric.showsWage) {
+                add(
+                    BarChartSeries(
+                        id = "wage:$scope",
+                        title = wageTitle,
+                        caption = maxWageLabel,
+                        bars = wageBars,
+                        plotHeight = if (both) HistoryDimens.plotHeightPaired else HistoryDimens.plotHeightSingle,
+                    )
+                )
+            }
+            if (metric.showsDays) {
+                add(
+                    BarChartSeries(
+                        id = "days:$scope",
+                        title = daysTitle,
+                        caption = maxDayLabel,
+                        bars = dayBars,
+                        plotHeight = if (both) HistoryDimens.plotHeightSecondary else HistoryDimens.plotHeightSingle,
+                    )
+                )
+            }
+        }.toImmutableList()
+    }
+
+    // Hoisted so the card and the group under it keep their skippability: an inline lambda is a
+    // new instance on every recomposition, and these are handed to a chart that redraws per frame.
+    val onBarClick: (String) -> Unit = remember(scope, onIntent) {
+        { id ->
+            if (scope is HistoryScope.All) {
+                onIntent(HistoryIntent.SelectScope(HistoryScope.Year(id)))
+            } else {
+                id.toIntOrNull()?.let { onIntent(HistoryIntent.SelectMonth(it)) }
+            }
+        }
+    }
+    val onSourceClick: (Int?) -> Unit = remember(onIntent) {
+        { source -> onIntent(HistoryIntent.SelectSource(source)) }
+    }
+    val onSplitClick: () -> Unit = remember(onIntent) { { onIntent(HistoryIntent.ToggleSplit) } }
+    val onMetricClick: (Int) -> Unit = remember(onIntent) {
+        { index -> onIntent(HistoryIntent.SelectMetric(HistoryMetric.entries[index])) }
+    }
+
+    val metricLabels = HistoryMetric.entries.map { stringResource(it.label) }
+    val metricChips = remember(metric, metricLabels) {
+        HistoryMetric.entries
+            .mapIndexed { index, entry -> FilterChipPR(metricLabels[index], entry == metric) }
+            .toImmutableList()
+    }
+
+    // Offered only where there is more than one employer to pull apart.
+    val splitLabel = stringResource(CoreRes.string.history_split_chip)
+    val splitChip = remember(splitLabel, uiState.splitBySource, detail) {
+        FilterChipPR(splitLabel, uiState.splitBySource)
+            .takeIf { (detail?.workshops?.size ?: 0) > 1 }
+    }
+
+    val bars = dayBars
     val dense = scope is HistoryScope.All && bars.size > HistoryConstants.DENSE_BAR_THRESHOLD
     val scopeDays = if (scope is HistoryScope.All) uiState.careerTotal.totalDays else detail?.totalDays ?: 0
 
@@ -284,23 +410,14 @@ fun HistoryContent(
                                 HistoryRes.string.history_chart_hint_year
                             },
                         ),
-                        bars = bars,
-                        onBarClick = { id ->
-                            if (scope is HistoryScope.All) {
-                                onIntent(HistoryIntent.SelectScope(HistoryScope.Year(id)))
-                            } else {
-                                id.toIntOrNull()?.let { onIntent(HistoryIntent.SelectMonth(it)) }
-                            }
-                        },
+                        series = series,
+                        onBarClick = onBarClick,
                         modifier = Modifier
                             .offset(y = HistoryDimens.chartOverlap)
                             .padding(horizontal = HistoryDimens.chartSidePadding),
                         dense = dense,
                         // Twelve full month names never fit side by side; the year labels do.
                         rotateLabels = scope is HistoryScope.Year,
-                        // The chart re-forms when the scope or the employer filter changes, and
-                        // stays put when a month is merely selected.
-                        animationKey = scope to uiState.selectedSource,
                         axis = if (dense) {
                             ChartAxis(
                                 oldest = bars.last().label,
@@ -310,11 +427,21 @@ fun HistoryContent(
                         } else {
                             null
                         },
-                        sourceChips = detail.sourceChips(
-                            selected = uiState.selectedSource,
-                            allLabel = stringResource(HistoryRes.string.history_scope_all),
-                        ),
-                        onSourceClick = { onIntent(HistoryIntent.SelectSource(it)) },
+                        sourceLabel = stringResource(CoreRes.string.history_split_label),
+                        sourceChips = if (uiState.splitBySource) {
+                            persistentListOf()
+                        } else {
+                            detail.sourceChips(
+                                selected = uiState.selectedSource,
+                                allLabel = stringResource(HistoryRes.string.history_scope_all),
+                            )
+                        },
+                        onSourceClick = onSourceClick,
+                        splitChip = splitChip,
+                        onSplitClick = onSplitClick,
+                        metricLabel = stringResource(CoreRes.string.history_metric_label),
+                        metricChips = metricChips,
+                        onMetricClick = onMetricClick,
                         concurrency = detail
                             ?.takeIf { it.hasConcurrency && uiState.selectedSource == null }
                             ?.let {
@@ -697,3 +824,6 @@ private fun HistoryFixtureYearScopePreview() {
         )
     }
 }
+
+/** Wages are reported in rials; the chart's «بیشینه» states them in millions, as the design does. */
+private const val MILLION = 1_000_000L

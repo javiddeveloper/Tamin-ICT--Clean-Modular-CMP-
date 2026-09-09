@@ -3,15 +3,17 @@ package com.tamin.taminhamrah.feature.history.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -24,10 +26,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import com.tamin.taminhamrah.feature.history.ui.HistoryConstants
+import com.tamin.taminhamrah.feature.history.ui.HistoryDimens
 import com.tamin.taminhamrah.feature.history.ui.model.YearDetailPR
-import com.tamin.taminhamrah.ui.components.BarChartItem
+import com.tamin.taminhamrah.ui.components.BarChartSeries
 import com.tamin.taminhamrah.ui.components.NumericText
-import com.tamin.taminhamrah.ui.components.TaminBarChart
+import com.tamin.taminhamrah.ui.components.TaminBarChartGroup
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHistoryButtonEnd
@@ -36,8 +40,6 @@ import com.tamin.taminhamrah.ui.theme.TaminHistoryConcurrentBottom
 import com.tamin.taminhamrah.ui.theme.TaminHistoryConcurrentTop
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-import com.tamin.taminhamrah.feature.history.ui.HistoryDimens
-import com.tamin.taminhamrah.feature.history.ui.HistoryConstants
 
 /** One filter above the month bars: «همه», or a single employer. */
 @Immutable
@@ -53,16 +55,21 @@ data class SourceChipPR(val label: String, val selected: Boolean)
 fun HistoryChartCard(
     title: String,
     hint: String,
-    bars: ImmutableList<BarChartItem>,
+    series: ImmutableList<BarChartSeries>,
     onBarClick: (String) -> Unit,
     modifier: Modifier = Modifier,
     dense: Boolean = false,
     axis: ChartAxis? = null,
+    sourceLabel: String = "",
     sourceChips: ImmutableList<SourceChipPR> = persistentListOf(),
     onSourceClick: (Int?) -> Unit = {},
+    /** The تفکیک کارگاه toggle, or null where there is only one employer to split. */
+    splitChip: FilterChipPR? = null,
+    onSplitClick: () -> Unit = {},
+    metricLabel: String = "",
+    metricChips: ImmutableList<FilterChipPR> = persistentListOf(),
+    onMetricClick: (Int) -> Unit = {},
     rotateLabels: Boolean = false,
-    /** What makes this a different series — the bars rise again when it changes. */
-    animationKey: Any? = null,
     concurrency: String? = null,
     concurrencyLabel: String = "",
     footer: @Composable ColumnScope.() -> Unit = {},
@@ -96,17 +103,26 @@ fun HistoryChartCard(
             )
         }
 
-        if (sourceChips.isNotEmpty()) {
-            SourceChipRow(chips = sourceChips, onSourceClick = onSourceClick)
+        if (sourceChips.isNotEmpty() || splitChip != null) {
+            SourceChipRow(
+                label = sourceLabel,
+                chips = sourceChips,
+                onSourceClick = onSourceClick,
+                splitChip = splitChip,
+                onSplitClick = onSplitClick,
+            )
         }
 
-        TaminBarChart(
-            bars = bars,
+        if (metricChips.isNotEmpty()) {
+            MetricChipRow(label = metricLabel, chips = metricChips, onPick = onMetricClick)
+        }
+
+        TaminBarChartGroup(
+            series = series,
             onBarClick = onBarClick,
             dense = dense,
             showLabels = !dense,
             rotateLabels = rotateLabels,
-            animationKey = animationKey,
         )
 
         axis?.let { ChartAxisRow(it) }
@@ -175,53 +191,121 @@ private fun ChartAxisRow(axis: ChartAxis) {
     }
 }
 
+/** One tappable pill: a filter, a series, or a toggle. */
+@Immutable
+data class FilterChipPR(val label: String, val selected: Boolean)
+
+/**
+ * «کارگاه» — which employer the bars count, and whether they are split out per employer.
+ *
+ * The split toggle sits at the far end of the same row because it answers the same question from
+ * the other side: filter *down to* one, or show them all *apart*.
+ */
 @Composable
 private fun SourceChipRow(
+    label: String,
     chips: ImmutableList<SourceChipPR>,
     onSourceClick: (Int?) -> Unit,
+    splitChip: FilterChipPR?,
+    onSplitClick: () -> Unit,
 ) {
-    val colors = LocalTaminColors.current
-    val selectedBrush = remember {
-        Brush.linearGradient(listOf(TaminHistoryButtonStart, TaminHistoryButtonEnd))
-    }
-
-    LazyRow(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
-    ) {
-        items(chips.size, key = { it }) { index ->
-            val chip = chips[index]
+    ChipLane(label = label) {
+        chips.forEachIndexed { index, chip ->
             // The first chip is «همه»; the rest map onto the employer at their own position.
             val source = (index - 1).takeIf { it >= 0 }
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(HistoryDimens.pillCorner))
-                    .then(
-                        if (chip.selected) {
-                            Modifier.background(selectedBrush)
-                        } else {
-                            Modifier.background(colors.bgPage)
-                        },
-                    )
-                    .border(
-                        HistoryDimens.hairline,
-                        if (chip.selected) TaminHistoryButtonEnd else colors.border,
-                        RoundedCornerShape(HistoryDimens.pillCorner),
-                    )
-                    .clickable { onSourceClick(source) }
-                    .padding(horizontal = Spacing.sm, vertical = HistoryDimens.sourceChipPaddingV),
-            ) {
-                Text(
-                    text = chip.label,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = if (chip.selected) Color.White else colors.textSecondary,
-                    maxLines = 1,
-                )
-            }
+            HistoryPillChip(
+                label = chip.label,
+                selected = chip.selected,
+                onClick = { onSourceClick(source) },
+            )
+        }
+        splitChip?.let {
+            HistoryPillChip(label = it.label, selected = it.selected, onClick = onSplitClick)
         }
     }
 }
+
+/** «شاخص» — which series the chart plots. */
+@Composable
+private fun MetricChipRow(
+    label: String,
+    chips: ImmutableList<FilterChipPR>,
+    onPick: (Int) -> Unit,
+) {
+    ChipLane(label = label) {
+        chips.forEachIndexed { index, chip ->
+            HistoryPillChip(
+                label = chip.label,
+                selected = chip.selected,
+                onClick = { onPick(index) },
+            )
+        }
+    }
+}
+
+/**
+ * A named row of pills.
+ *
+ * A plain scrolling [Row] rather than a `LazyRow`: these lanes hold three or four chips, and a lazy
+ * list would add a scroll container and its own item bookkeeping to save composing nothing.
+ */
+@Composable
+private fun ChipLane(label: String, content: @Composable RowScope.() -> Unit) {
+    val colors = LocalTaminColors.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (label.isNotBlank()) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = colors.textMuted,
+            )
+        }
+        content()
+    }
+}
+
+/**
+ * One pill.
+ *
+ * The selected brush is hoisted to a file-level value: it never varies, and building a [Brush] per
+ * chip per recomposition is an allocation on every frame of a chart forming.
+ */
+@Composable
+private fun HistoryPillChip(label: String, selected: Boolean, onClick: () -> Unit) {
+    val colors = LocalTaminColors.current
+    val shape = remember { RoundedCornerShape(HistoryDimens.pillCorner) }
+    Box(
+        modifier = Modifier
+            .clip(shape)
+            .then(
+                if (selected) Modifier.background(SelectedChipBrush) else Modifier.background(colors.bgPage),
+            )
+            .border(
+                HistoryDimens.hairline,
+                if (selected) TaminHistoryButtonEnd else colors.border,
+                shape,
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = Spacing.sm, vertical = HistoryDimens.sourceChipPaddingV),
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold,
+            color = if (selected) Color.White else colors.textSecondary,
+            maxLines = 1,
+        )
+    }
+}
+
+private val SelectedChipBrush =
+    Brush.linearGradient(listOf(TaminHistoryButtonStart, TaminHistoryButtonEnd))
 
 /**
  * What one month paid, employer by employer, and the total under it.

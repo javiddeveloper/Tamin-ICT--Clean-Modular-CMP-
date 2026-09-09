@@ -762,4 +762,18 @@
     <string name="orotez_protez_document_pick_read_error">خطا در خواندن فایل انتخاب‌شده.</string>
     <string name="orotez_protez_document_validation_min_count">حداقل باید ۲ مدرک بارگذاری شود.</string>
     <string name="orotez_protez_document_validation_required">بارگذاری «نسخه تجویز پزشک» و «فاکتور خرید» الزامی است.</string>
+
+    <!-- شاخص — which series the chart plots -->
+    <string name="history_metric_label">شاخص</string>
+    <string name="history_metric_both">هردو</string>
+    <string name="history_metric_wage">دستمزد</string>
+    <string name="history_metric_days">روزهای کار</string>
+    <string name="history_series_wage">دستمزد ماه</string>
+    <string name="history_series_days">روزهای کار</string>
+    <string name="history_series_max_wage">بیشینه %1$s م ریال</string>
+    <string name="history_series_max_days">بیشینه %1$s روز</string>
+    <string name="history_split_label">کارگاه</string>
+    <string name="history_split_chip">تفکیک کارگاه</string>
+    <string name="history_wage_unavailable">دستمزدی دریافت نشد</string>
+
 </resources>
