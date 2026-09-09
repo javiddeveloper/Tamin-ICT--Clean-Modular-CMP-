@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,19 +22,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -42,13 +36,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
@@ -124,9 +115,13 @@ import com.tamin.taminhamrah.feature.workshops.completeEmployerInfoScreen
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.mapper.campaign.toPresentation
+import com.tamin.taminhamrah.mapper.home.featuredServices
+import com.tamin.taminhamrah.mapper.home.toQuickAccessSections
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
+import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
+import com.tamin.taminhamrah.model.home.HomeServiceSection
 import com.tamin.taminhamrah.openUrl
 import com.tamin.taminhamrah.ui.blur.AppBarScrim
 import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
@@ -134,11 +129,19 @@ import com.tamin.taminhamrah.ui.blur.NavigationBarItemContent
 import com.tamin.taminhamrah.ui.blur.TopBarScrim
 import com.tamin.taminhamrah.ui.blur.safeHazeSource
 import com.tamin.taminhamrah.ui.components.CampaignCarousel
+import com.tamin.taminhamrah.ui.components.HeaderSuggestionChip
+import com.tamin.taminhamrah.ui.components.HomeAgentAskBar
+import com.tamin.taminhamrah.ui.components.HomeFeaturedSection
+import com.tamin.taminhamrah.ui.components.HomeHeader
+import com.tamin.taminhamrah.ui.components.HomeQuickAccessSection
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import com.tamin.taminhamrah.ui.contract.CustomNavigationBarItem
 import com.tamin.taminhamrah.ui.home.HomeViewModel
 import com.tamin.taminhamrah.ui.home.contract.HomeEvent
 import com.tamin.taminhamrah.ui.home.contract.HomeIntent
+import com.tamin.taminhamrah.ui.home.contract.HomeUiState
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.AppConfig
 import dev.chrisbanes.haze.HazeState
@@ -150,6 +153,11 @@ import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.error_load_menu_failed
+import taminx.core.core_ui.home_ask_agent_cd
+import taminx.core.core_ui.home_ask_agent_hint
+import taminx.core.core_ui.home_suggestion_booklet
+import taminx.core.core_ui.home_suggestion_history
+import taminx.core.core_ui.home_suggestion_retirement
 import taminx.core.core_ui.ic_home_menu
 import taminx.core.core_ui.ic_profile_menu
 import taminx.core.core_ui.ic_services_menu
@@ -158,16 +166,11 @@ import taminx.core.core_ui.login_required_desc
 import taminx.core.core_ui.login_to_tamin_man
 import taminx.core.core_ui.please_login_to_your_account
 import taminx.core.core_ui.retry
-import taminx.core.core_ui.select_group
 import taminx.core.core_ui.tab_agent
 import taminx.core.core_ui.tab_home
 import taminx.core.core_ui.tab_profile
 import taminx.core.core_ui.tab_services
 import taminx.core.core_ui.tab_treatment
-import taminx.core.core_ui.tamin_man_services
-import taminx.core.core_ui.user_type_employer
-import taminx.core.core_ui.user_type_insured
-import taminx.core.core_ui.user_type_pensioner
 
 private enum class BottomTab { HOME, SERVICES, TREATMENT, PROFILE, OTHER }
 
@@ -367,6 +370,14 @@ internal fun TaminHamrahNavGraph(
                         onShowMessage = { message ->
                             snackbarScope.launch { snackbarHostState.showSnackbar(message) }
                         },
+                        onNavigateToAllServices = {
+                            navController.navigate(TaminServicesRoute) {
+                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        onNavigateToAgent = { navController.navigateToAgent() },
                     )
                 }
 
@@ -607,6 +618,14 @@ internal fun TaminHamrahNavGraph(
 private val HomeContentPadding = 16.dp
 
 /**
+ * How far the AI ask-bar drops below the header's bottom edge — half its own height
+ * ([com.tamin.taminhamrah.ui.theme.ButtonDimens.height] / 2), matching the profile screen's status
+ * card. This is the trailing spacer under the header, so the bar (bottom-aligned over it) ends up
+ * straddling the gradient edge. The header carries enough bottom padding that its chips clear it.
+ */
+private val HomeAskBarOverlap = 28.dp
+
+/**
  * Measures the content [inset] wider than the column allows, so a full-bleed child can reach the
  * screen edge from inside a padded, center-aligned column. Placement is symmetric, which is what
  * cancels the padding — the parent's own width is fixed, so nothing else moves.
@@ -629,6 +648,8 @@ fun HomeScreen(
     // No default: a disabled feature says why through this, and a caller that omitted it used to
     // drop the message silently — the tap then did nothing at all.
     onShowMessage: (String) -> Unit,
+    onNavigateToAllServices: () -> Unit,
+    onNavigateToAgent: () -> Unit,
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -643,6 +664,27 @@ fun HomeScreen(
         }
     }
 
+    HomeScreenContent(
+        uiState = uiState,
+        onNavigateToAgent = onNavigateToAgent,
+        onNavigateToAllServices = onNavigateToAllServices,
+        onCampaignClick = { viewModel.sendIntent(HomeIntent.OnCampaignClick(it)) },
+        onSectionSelected = { viewModel.sendIntent(HomeIntent.OnSectionSelected(it)) },
+        onServiceClick = { viewModel.sendIntent(HomeIntent.OnServiceClick(it)) },
+        onRetry = { viewModel.sendIntent(HomeIntent.LoadMenu) },
+    )
+}
+
+@Composable
+private fun HomeScreenContent(
+    uiState: HomeUiState,
+    onNavigateToAgent: () -> Unit,
+    onNavigateToAllServices: () -> Unit,
+    onCampaignClick: (FeatureFlag) -> Unit,
+    onSectionSelected: (HomeServiceSection) -> Unit,
+    onServiceClick: (MainServiceDN) -> Unit,
+    onRetry: () -> Unit,
+) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.TopCenter
@@ -656,84 +698,61 @@ fun HomeScreen(
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = HomeContentPadding)
-                // Top padding for content breathing room
-                .padding(top = 16.dp)
                 // Bottom padding so last item scrolls fully above the floating blur bar
                 .windowInsetsPadding(WindowInsets.navigationBars)
                 .padding(bottom = 80.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                stringResource(Res.string.tamin_man_services),
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(vertical = 16.dp)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-            val userTypes = listOf(
-                1 to stringResource(Res.string.user_type_insured),
-                2 to stringResource(Res.string.user_type_pensioner),
-                3 to stringResource(Res.string.user_type_employer)
-            )
-            val availableTypes = remember(uiState.menuItems) {
-                val typesInData =
-                    uiState.menuItems.flatMap { it.showRole.filterNotNull() }.toSet()
-                userTypes.filter { it.first in typesInData }.ifEmpty { userTypes }
-            }
-            var selectedType by remember(availableTypes) {
-                mutableStateOf(availableTypes.firstOrNull()?.first ?: 1)
-            }
-            var expanded by remember { mutableStateOf(false) }
-
-            Box(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp)
-            ) {
-                OutlinedButton(
-                    onClick = { expanded = true },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.small
-                ) {
-                    Text(
-                        text = availableTypes.find { it.first == selectedType }?.second
-                            ?: stringResource(Res.string.select_group),
-                        style = MaterialTheme.typography.titleMedium
+            // Header + AI ask-bar. The bar straddles the header's bottom edge the way the profile
+            // screen's status card does: the header sits in a Column with a trailing spacer that
+            // reserves the bar's lower half, and the bar is bottom-aligned in the Box over it.
+            Box(modifier = Modifier.ignoreHorizontalPadding(HomeContentPadding)) {
+                Column {
+                    HomeHeader(
+                        fullName = uiState.identityFullName,
+                        hasDarmanCoverage = uiState.hasDarmanCoverage,
+                        hasActiveRelation = uiState.hasActiveRelation,
                     )
-                    Spacer(Modifier.weight(1f))
-                    Icon(
-                        Icons.Default.ArrowDropDown,
-                        contentDescription = null
+                    if (uiState.isAgentEnabled) {
+                        Spacer(modifier = Modifier.height(HomeAskBarOverlap))
+                    }
+                }
+                if (uiState.isAgentEnabled) {
+                    HomeAgentAskBar(
+                        hint = stringResource(Res.string.home_ask_agent_hint),
+                        contentDescription = stringResource(Res.string.home_ask_agent_cd),
+                        onClick = onNavigateToAgent,
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(horizontal = HomeContentPadding),
                     )
                 }
+            }
 
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false },
-                    modifier = Modifier.fillMaxWidth(0.9f)
+            if (uiState.isAgentEnabled) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
+                        .padding(top = Spacing.sm),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 ) {
-                    availableTypes.forEach { (id, name) ->
-                        DropdownMenuItem(
-                            text = { Text(name) },
-                            onClick = {
-                                selectedType = id
-                                expanded = false
-                            }
-                        )
+                    listOf(
+                        stringResource(Res.string.home_suggestion_retirement),
+                        stringResource(Res.string.home_suggestion_history),
+                        stringResource(Res.string.home_suggestion_booklet),
+                    ).forEach { suggestion ->
+                        HeaderSuggestionChip(text = suggestion, onClick = onNavigateToAgent)
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // The same for every role: campaigns are not filtered by the picker above.
-            //
             // Full-bleed on purpose. A pager clips along its scroll axis, so leaving it inside this
             // column's 16dp inset would cut the peeking neighbor down from 34 to 18 and leave the
             // cards' merged shadow with a hard vertical edge 16dp in from the screen.
             CampaignCarousel(
                 campaigns = uiState.campaigns.toPresentation(),
-                onCampaignClick = { flag ->
-                    viewModel.sendIntent(HomeIntent.OnCampaignClick(flag))
-                },
+                onCampaignClick = onCampaignClick,
                 modifier = Modifier
                     .ignoreHorizontalPadding(HomeContentPadding)
                     .padding(top = Spacing.xlg),
@@ -741,89 +760,21 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            val servicesToShow = uiState.menuItems.filter { it.showRole.contains(selectedType) }
+            HomeQuickAccessSection(
+                sections = uiState.menuItems.toQuickAccessSections(),
+                selectedSection = uiState.selectedSection,
+                onSectionSelected = onSectionSelected,
+                onServiceClick = onServiceClick,
+                onSeeAll = onNavigateToAllServices,
+                modifier = Modifier.padding(top = Spacing.lg),
+            )
 
-            servicesToShow.forEach { service ->
-                val isDisabled = service.status == MenuServiceStatusDN.DISABLED ||
-                    service.status == MenuServiceStatusDN.TEMPORARY_DISABLED ||
-                    service.status == MenuServiceStatusDN.COMPLETELY_DISABLED
+            HomeFeaturedSection(
+                services = uiState.menuItems.featuredServices(),
+                onServiceClick = onServiceClick,
+                modifier = Modifier.padding(top = Spacing.md),
+            )
 
-                val cardAlpha = if (isDisabled) 0.5f else 1.0f
-
-                Card(
-                    onClick = {
-                        if (!isDisabled) {
-                            viewModel.sendIntent(HomeIntent.OnServiceClick(service))
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp, horizontal = 8.dp)
-                        .alpha(cardAlpha),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                ) {
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Start
-                        ) {
-                            // Icon could be added here based on service.icon
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .background(
-                                        MaterialTheme.colorScheme.primaryContainer,
-                                        MaterialTheme.shapes.small
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Home, // Placeholder
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                            }
-
-                            Spacer(Modifier.width(16.dp))
-
-                            Column {
-                                Text(
-                                    service.name ?: "",
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                                if (!service.subtitle.isNullOrEmpty()) {
-                                    Text(
-                                        service.subtitle!!,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-                        }
-
-                        // Show message if present and service is not just ACTIVE
-                        if (!service.message.isNullOrEmpty() && service.status != MenuServiceStatusDN.ACTIVE) {
-                            val msgColor =
-                                if (service.status == MenuServiceStatusDN.ENABLED_WITH_ERROR)
-                                    MaterialTheme.colorScheme.error
-                                else
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-
-                            Text(
-                                text = service.message!!,
-                                style = MaterialTheme.typography.labelMedium,
-                                color = msgColor,
-                                modifier = Modifier.padding(
-                                    start = 72.dp,
-                                    end = 16.dp,
-                                    bottom = 12.dp
-                                )
-                            )
-                        }
-                    }
-                }
-            }
 
             if (uiState.menuItems.isEmpty() && !uiState.isLoading) {
                 Text(
@@ -832,7 +783,7 @@ fun HomeScreen(
                     modifier = Modifier.padding(top = 32.dp)
                 )
                 Button(
-                    onClick = { viewModel.sendIntent(HomeIntent.LoadMenu) },
+                    onClick = onRetry,
                     modifier = Modifier.padding(top = 16.dp)
                 ) {
                     Text(stringResource(Res.string.retry))
@@ -842,3 +793,45 @@ fun HomeScreen(
     }
 }
 
+private fun previewHomeUiState() = HomeUiState(
+    isLoading = false,
+    menuItems = (HomeServiceSection.FREQUENT.members + HomeServiceSection.FEATURED.members)
+        .distinct()
+        .map { MainServiceDN(id = it.id, name = it.name, status = MenuServiceStatusDN.ACTIVE) },
+    identityFullName = "سنا حقیقی",
+    hasDarmanCoverage = true,
+    hasActiveRelation = true,
+    isAgentEnabled = true,
+)
+
+@PreviewRtlTheme
+@Composable
+private fun HomeScreenPreview() {
+    PreviewRtlThemeContent {
+        HomeScreenContent(
+            uiState = previewHomeUiState(),
+            onNavigateToAgent = {},
+            onNavigateToAllServices = {},
+            onCampaignClick = {},
+            onSectionSelected = {},
+            onServiceClick = {},
+            onRetry = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun HomeScreenPreviewDark() {
+    PreviewRtlThemeContent(darkTheme = true) {
+        HomeScreenContent(
+            uiState = previewHomeUiState(),
+            onNavigateToAgent = {},
+            onNavigateToAllServices = {},
+            onCampaignClick = {},
+            onSectionSelected = {},
+            onServiceClick = {},
+            onRetry = {},
+        )
+    }
+}

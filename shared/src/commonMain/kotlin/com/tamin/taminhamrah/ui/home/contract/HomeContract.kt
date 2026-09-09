@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.campaign.CampaignKind
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.MainServiceDN
+import com.tamin.taminhamrah.model.home.HomeServiceSection
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -21,7 +22,25 @@ data class HomeUiState(
      * `ImmutableList<CampaignPR>` filled in from the wire and nothing below it moves.
      */
     val campaigns: ImmutableList<CampaignKind> = persistentListOf(),
-    val error: String? = null
+    /**
+     * Which «دسترسی سریع» chip is selected. The rendered chip list and the grid under it are
+     * derived in the screen from [menuItems] via `toQuickAccessSections()`; this is only the
+     * selection. If the selected section resolves empty (so it isn't in the chip row), the screen
+     * falls back to the first non-empty section.
+     */
+    val selectedSection: HomeServiceSection = HomeServiceSection.FREQUENT,
+    /** Header: the user's display name, `null` until [com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase] resolves. */
+    val identityFullName: String? = null,
+    /**
+     * Header chip «بیمهٔ درمانی»: `true`/`false` once the entitlement call resolves, `null` while it
+     * hasn't (or came back empty) — the chip stays hidden rather than showing a guess.
+     */
+    val hasDarmanCoverage: Boolean? = null,
+    /** Header chip «ارتباط فعال»: `null` until the active-relation list resolves. */
+    val hasActiveRelation: Boolean? = null,
+    /** Whether `FeatureFlag.AGENT` is on — gates the ask-bar and suggestion chips in the header. */
+    val isAgentEnabled: Boolean = false,
+    val error: String? = null,
 ){
     sealed interface HomePartialState {
         data class Loading(val isLoading: Boolean) : HomePartialState
@@ -29,6 +48,11 @@ data class HomeUiState(
             val menuItems: List<MainServiceDN>,
             val campaigns: ImmutableList<CampaignKind>,
         ) : HomePartialState
+        data class SectionSelected(val section: HomeServiceSection) : HomePartialState
+        data class IdentityLoaded(val fullName: String) : HomePartialState
+        data class DarmanCoverageLoaded(val covered: Boolean?) : HomePartialState
+        data class ActiveRelationLoaded(val hasActive: Boolean) : HomePartialState
+        data class AgentAvailability(val enabled: Boolean) : HomePartialState
         data class Error(val message: String?) : HomePartialState
     }
 }
@@ -37,8 +61,10 @@ data class HomeUiState(
 
 sealed interface HomeIntent {
     object LoadMenu : HomeIntent
+    object LoadHeader : HomeIntent
     data class OnServiceClick(val service: MainServiceDN) : HomeIntent
     data class OnCampaignClick(val flag: FeatureFlag) : HomeIntent
+    data class OnSectionSelected(val section: HomeServiceSection) : HomeIntent
 }
 
 sealed interface HomeEvent {
