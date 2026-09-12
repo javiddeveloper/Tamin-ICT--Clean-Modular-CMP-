@@ -102,6 +102,8 @@ data class TaminColors(
     // Top app bar. Held as stops rather than a Brush so the bar owns its sweep
     // direction; the strip behind the status bar shares this same wash.
     val topAppBarStops: List<Color>,
+    /** The treatment hub's own wash — the design ends it a shade deeper than [topAppBarStops]. */
+    val treatmentHubStops: List<Color>,
     val profileGradientStops: List<Color>,
     val aiAssistantGradient: Brush,
     val grey900 : Color,
@@ -141,7 +143,6 @@ data class TaminColors(
      * which the design names directly (`--tm-blue-text`); only the idle tone needed a token of its
      * own, because it sits on the page rather than on a card and so has to follow the theme.
      */
-    val campaignDotIdle: Color,
 )
 
 val LightTaminColors = TaminColors(
@@ -234,6 +235,7 @@ val LightTaminColors = TaminColors(
     medicalGradient = Brush.linearGradient(listOf(Secondary500, Secondary700)),
     // Same stops as the quick-access card; the bar just sweeps the other way.
     topAppBarStops = listOf(TaminTeal900, TaminTeal500),
+    treatmentHubStops = listOf(TaminTeal900, TaminTeal700),
     profileGradientStops = listOf(TaminNavy900, TaminNavy700),
     aiAssistantGradient = Brush.linearGradient(
         listOf(TaminPurple900, TaminPurple700, Color(0xFF3F5BD9), TaminNavy700)
@@ -267,7 +269,6 @@ val LightTaminColors = TaminColors(
     verifiedIconBg = TaminLightSurface,
     verifiedIconTint = TaminLightSuccess, // greenText
     onGradient = Color.White,
-    campaignDotIdle = CampaignDotIdle,
 )
 
 val DarkTaminColors = TaminColors(
@@ -366,6 +367,7 @@ val DarkTaminColors = TaminColors(
     // Dark mode overrides every hero to the same teal-to-blue wash, status bar included,
     // so the bar and the strip above it join into one continuous band.
     topAppBarStops = listOf(TaminDarkHeroStart, TaminDarkHeroEnd),
+    treatmentHubStops = listOf(TaminDarkHeroStart, TaminDarkHeroEnd),
     profileGradientStops = listOf(TaminDarkHeroStart, TaminDarkHeroEnd),
     aiAssistantGradient = Brush.linearGradient(
         listOf(TaminPurple900, TaminPurple700, Color(0xFF3F5BD9), TaminNavy700)
@@ -401,6 +403,5 @@ val DarkTaminColors = TaminColors(
     onGradient = Color.White,
     // The design has no dark variant for this section; the page's own chevron gray is the closest
     // token that stays legible against the dark page.
-    campaignDotIdle = TaminDarkChevron,
 )
 

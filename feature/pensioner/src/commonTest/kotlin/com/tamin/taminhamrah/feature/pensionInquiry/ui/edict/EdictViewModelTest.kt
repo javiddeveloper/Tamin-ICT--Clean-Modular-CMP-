@@ -17,6 +17,8 @@ import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatu
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequestDN
 import com.tamin.taminhamrah.model.pension.retirement.RetirementPersonalDN
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestCreatedDN
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestFormDN
 import com.tamin.taminhamrah.model.pension.retirement.RetirementSaveDocumentDN
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDN
 import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityFinalConfirmDN
@@ -135,8 +137,8 @@ class EdictViewModelTest {
             while (state.edictPensioner == null || state.isLoading) state = awaitItem()
 
             assertNotNull(state.edictPensioner)
-            assertNotNull(state.edictPensioner?.edictInfo)
-            assertEquals("5500000", state.edictPensioner?.edictInfo?.payableMonthly)
+            assertNotNull(state.edictPensioner.edictInfo)
+            assertEquals("5500000", state.edictPensioner.edictInfo?.payableMonthly)
             assertEquals("123", state.selectedPensionerId)
             cancelAndIgnoreRemainingEvents()
         }
@@ -271,6 +273,10 @@ private class FakeEdictPensionRepository : PensionRepository {
         error("not used in EdictViewModel")
     override suspend fun getRetirementRequestInfo(filters: List<ApiFilterDN>): Flow<List<RetirementRequestDN>> =
         error("not used in EdictViewModel")
+    override suspend fun createRetirementRequest(
+        authenticationsCode: Long,
+        form: RetirementRequestFormDN
+    ): Flow<RetirementRequestCreatedDN> = error("not used in EdictViewModel")
     override suspend fun checkRetirementStatus(): Flow<RetirementStatusDN> =
         error("not used in EdictViewModel")
     override suspend fun sendRetirementDocument(requestId: String, request: RetirementSaveDocumentDN): Flow<String?> =

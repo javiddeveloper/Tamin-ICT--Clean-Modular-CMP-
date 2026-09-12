@@ -21,6 +21,8 @@ import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertif
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequestDN
 import com.tamin.taminhamrah.model.pension.retirement.RetirementPersonalDN
 import com.tamin.taminhamrah.model.pension.retirement.RetirementSaveDocumentDN
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestCreatedDN
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestFormDN
 import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.personal.DisabilityPersonalInfoDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
@@ -86,6 +88,17 @@ class PensionRepositoryImpl(
     override suspend fun getRetirementRequestInfo(filters: List<ApiFilterDN>): Flow<List<RetirementRequestDN>> = flow {
         val remoteData = pensionRemoteDataSource.getRetirementRequestInfo(filters)
         emit(remoteData.list?.map { it.toDomain() } ?: emptyList())
+    }
+
+    override suspend fun createRetirementRequest(
+        authenticationsCode: Long,
+        form: RetirementRequestFormDN
+    ): Flow<RetirementRequestCreatedDN> = flow {
+        val remoteData = pensionRemoteDataSource.createRetirementRequest(
+            authenticationsCode = authenticationsCode,
+            form = form.toDTO()
+        )
+        emit(remoteData.toDomain())
     }
 
     override suspend fun checkRetirementStatus(): Flow<RetirementStatusDN> = flow {

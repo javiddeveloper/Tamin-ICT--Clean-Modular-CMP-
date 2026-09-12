@@ -16,6 +16,10 @@ import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.R
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.*
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDN
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestCreatedDTO
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestCreatedDN
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestFormDN
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestFormDTO
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDTO
 import com.tamin.taminhamrah.model.pension.retirement.*
 import com.tamin.taminhamrah.model.pension.sendRetirementDocument.RetirementDocumentDTO
@@ -119,7 +123,7 @@ fun SurvivorInfoDTO.toDomain(): SurvivorInfoDN {
         differenceProportionalityBasedHistory = differenceProportionalityBasedHistory,
         nationalCode = nationalCode,
         pensionerId = pensionerId,
-        quota = quota ?: "",
+        quota = quota,
         totalAmount = totalAmount
     )
 }
@@ -206,6 +210,37 @@ fun PayRollDTO.toDomain(): PayRollDN {
         hisYearPlus = hisYearPlus,
         hisMonPlus = hisMonPlus,
         hisDayPlus = hisDayPlus
+    )
+}
+
+fun RetirementRequestFormDN.toDTO(): RetirementRequestFormDTO {
+    return RetirementRequestFormDTO(
+        activityType = activityType,
+        address = address,
+        age = age,
+        birthDate = birthDate,
+        branchCode = branchCode,
+        fatherName = fatherName,
+        firstName = firstName,
+        gender = gender,
+        idNumber = idNumber,
+        insuranceNumber = insuranceNumber,
+        issuePlace = issuePlace,
+        lastName = lastName,
+        managerName = managerName,
+        mobileNumber = mobileNumber,
+        nationalCode = nationalCode,
+        phoneNumber = phoneNumber,
+        status = status,
+        workshopAddress = workshopAddress,
+        workshopCode = workshopCode,
+        workshopName = workshopName
+    )
+}
+
+fun RetirementRequestCreatedDTO.toDomain(): RetirementRequestCreatedDN {
+    return RetirementRequestCreatedDN(
+        requestId = request?.id
     )
 }
 

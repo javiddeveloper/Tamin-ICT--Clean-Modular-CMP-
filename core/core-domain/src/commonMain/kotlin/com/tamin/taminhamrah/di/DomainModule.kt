@@ -39,6 +39,9 @@ import com.tamin.taminhamrah.useCases.pension.SendPayRollToInboxUseCase
 import com.tamin.taminhamrah.useCases.pension.GetUserAgeUseCase
 import com.tamin.taminhamrah.useCases.pension.GetRetirementRequestInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.CheckRetirementStatusUseCase
+import com.tamin.taminhamrah.useCases.pension.GetAuthenticationCodeUseCase
+import com.tamin.taminhamrah.useCases.pension.AuthenticationAndGetPersonalInfoUseCase
+import com.tamin.taminhamrah.useCases.pension.CreateRetirementRequestUseCase
 import com.tamin.taminhamrah.useCases.pension.SendRetirementDocumentUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.DeleteMyRequestUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.InboxInquiryLicenseUseCase
@@ -119,6 +122,9 @@ import com.tamin.taminhamrah.useCases.contracts.GetSpcPremiumRatesUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeFreelanceContractByGuardianUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeOptionalContractByGuardianUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeContractUseCase
+import com.tamin.taminhamrah.useCases.contracts.UpdateContractUseCase
+import com.tamin.taminhamrah.useCases.contracts.UpdateFreelanceContractByGuardianUseCase
+import com.tamin.taminhamrah.useCases.contracts.UpdateOptionalContractByGuardianUseCase
 import com.tamin.taminhamrah.useCases.contracts.SaveContactUseCase
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetHistoryJobInfosUseCase
@@ -204,6 +210,8 @@ import com.tamin.taminhamrah.useCases.payment.CreatePaymentLinkUseCase
 import com.tamin.taminhamrah.useCases.payment.GetPaymentPreviewUseCase
 import com.tamin.taminhamrah.useCases.payment.VerifyPaymentUseCase
 import com.tamin.taminhamrah.useCases.workshops.PayWorkshopDebitUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetWorkShopObjectionsUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetWorkShopObjectionSmsUseCase
 import com.tamin.taminhamrah.useCases.workshops.SaveArticleSixteenRequestUseCase
 import com.tamin.taminhamrah.useCases.workshops.SaveDebitObjectionUseCase
 import com.tamin.taminhamrah.useCases.agent.SendAgentPromptUseCase
@@ -292,6 +300,10 @@ val domainModule = module {
     factoryOf(::GetUserAgeUseCase)
     factoryOf(::GetRetirementRequestInfoUseCase)
     factoryOf(::CheckRetirementStatusUseCase)
+    factoryOf(::GetAuthenticationCodeUseCase)
+    factoryOf(::AuthenticationAndGetPersonalInfoUseCase)
+    factoryOf(::CreateRetirementRequestUseCase)
+    factoryOf(::SendRetirementDocumentUseCase)
     factoryOf(::GetEdictPensionerUseCase)
     factoryOf(::GetEdictReportPDFUseCase)
     factoryOf(::SendEdictPensionerToMyInboxUseCase)
@@ -395,6 +407,9 @@ val domainModule = module {
     factoryOf(::MakeContractUseCase)
     factoryOf(::MakeFreelanceContractByGuardianUseCase)
     factoryOf(::MakeOptionalContractByGuardianUseCase)
+    factoryOf(::UpdateContractUseCase)
+    factoryOf(::UpdateFreelanceContractByGuardianUseCase)
+    factoryOf(::UpdateOptionalContractByGuardianUseCase)
     factoryOf(::GetInsurancePaymentUseCase)
     factoryOf(::CheckInsurancePaymentStatusUseCase)
     factoryOf(::SaveContactUseCase)
@@ -423,6 +438,7 @@ val domainModule = module {
     factoryOf(::UpdateAgentSessionUseCase)
 
     factoryOf(::SendRetirementDocumentUseCase)
+    factoryOf(::CreateRetirementRequestUseCase)
     factoryOf(::GetRolesUseCase)
 
 
@@ -464,6 +480,8 @@ val domainModule = module {
     factoryOf(::CheckObjectionDeadlineUseCase)
     factoryOf(::SaveDebitObjectionUseCase)
     factoryOf(::GetDebitObjectionPdfUseCase)
+    factoryOf(::GetWorkShopObjectionsUseCase)
+    factoryOf(::GetWorkShopObjectionSmsUseCase)
     factoryOf(::GetRecentlyAddedMembersUseCase)
     factoryOf(::ConfirmRecentlyAddedMemberUseCase)
     factoryOf(::DeleteRecentlyAddedMemberUseCase)

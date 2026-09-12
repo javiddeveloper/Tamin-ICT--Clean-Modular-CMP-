@@ -12,11 +12,19 @@ object NetworkConstants {
 
     /** Where the gateway sends the browser once it is finished, back into the app. */
     const val PAYMENT_RETURN_URI = "mytamin://payment_callback"
+
+    /**
+     * Appended to the gateway's base URL with the ticket, to bind it to the signed-in user.
+     *
+     * The base it is appended to comes from Developer Options ([TFH_BASE_URL] is only its default),
+     * so an overridden gateway host is honoured here too.
+     */
+    const val TFH_TICKET_PATH = "ticket/current-user/"
     const val CLIENT_ID = "1c13370e0148031d1546242f2448152e"
     const val REQUEST_TIMEOUT_60_SEC = 60_000L
     const val REQUEST_TIMEOUT_5_MIN = 300_000L
     const val REDIRECT_URI = "mytamin://login"
-    const val DEFAULT_AUDIENCE = "https://es.tamin.ir,https://eservices.tamin.ir,https://profile-api.tamin.ir"
+    const val DEFAULT_AUDIENCE = "https://es.tamin.ir,https://eservices.tamin.ir,https://profile-api.tamin.ir,https://tfh.tamin.ir"
     const val EDIT_MOBILE_URL = "https://apim.tamin.ir/t/um-mobile-api.tamin.ir/change-mobile-number/request/v1"
     const val VERIFY_EDIT_MOBILE_URL = "https://apim.tamin.ir/t/um-mobile-api.tamin.ir/change-mobile-number/confirm/v1"
 

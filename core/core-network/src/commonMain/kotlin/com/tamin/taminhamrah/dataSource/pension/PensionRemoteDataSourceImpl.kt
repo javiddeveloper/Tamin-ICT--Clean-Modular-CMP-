@@ -15,6 +15,8 @@ import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequest
 import com.tamin.taminhamrah.model.pension.retirement.RetirementPersonalDTO
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestCreatedDTO
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestFormDTO
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDTO
 import com.tamin.taminhamrah.model.pension.sendRetirementDocument.RetirementSaveDocumentRequest
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
@@ -22,6 +24,7 @@ import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestP
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
 import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
@@ -54,10 +57,10 @@ class PensionRemoteDataSourceImpl(
 
     override suspend fun getEdictPensioner(
         query: ApiQueryParamDN
-    ): EdictPensionerDTO? = errorParser.safeCall("getEdictPensioner") {
+    ): EdictPensionerDTO = errorParser.safeCall("getEdictPensioner") {
         val filterJson = apiQueryBuilder.buildFilterJson(query.filters)
         val response = pensionApiService.getEdictPensioner(mapOf("filter" to filterJson))
-        response?.extractData()
+        response.extractData()
     }
 
     override suspend fun sendRequestDeferredInstallmentCertificate(
@@ -85,8 +88,14 @@ class PensionRemoteDataSourceImpl(
     override suspend fun getUserAge(
         filter: List<ApiFilterDN>
     ): AgeDTO = errorParser.safeCall("getUserAge") {
-        val filterJson = apiQueryBuilder.buildFilterJson(filter)
-        val response = pensionApiService.getUserAge(mapOf("birthDate" to filterJson))
+        // `birthDate` is a bare epoch, not a filter array — the endpoint takes the value itself
+        // (legacy: `@Query("birthDate") birthDate: Long?`). Encoding the filter JSON here sent
+        // `birthDate=[]` and the service answered with no age at all.
+        val birthDate = filter
+            .firstOrNull { it.property == FilterProperty.BIRTH_DATE }
+            ?.value
+            .orEmpty()
+        val response = pensionApiService.getUserAge(mapOf("birthDate" to birthDate))
         response.extractData()
     }
 
@@ -122,6 +131,14 @@ class PensionRemoteDataSourceImpl(
         response.extractData()
     }
 
+    override suspend fun createRetirementRequest(
+        authenticationsCode: Long,
+        form: RetirementRequestFormDTO
+    ): RetirementRequestCreatedDTO = errorParser.safeCall("createRetirementRequest") {
+        val response = pensionApiService.createRetirementRequest(authenticationsCode, form)
+        response.extractData()
+    }
+
     override suspend fun checkRetirementStatus(): RetirementStatusDTO =
         errorParser.safeCall("checkRetirementStatus") {
             val response = pensionApiService.checkRetirementStatus()
@@ -140,7 +157,7 @@ class PensionRemoteDataSourceImpl(
         request: RetirementSaveDocumentRequest
     ): String? = errorParser.safeCall("sendRetirementDocument") {
         val response = pensionApiService.sendRetirementDocument(requestId, request)
-        response?.extractData()
+        response.extractData()
     }
 
     override suspend fun getAuthenticationCode(): AuthenticationTicketDTO =
@@ -151,7 +168,7 @@ class PensionRemoteDataSourceImpl(
 
     override suspend fun sendEdictPensionerToMyInbox(
         filter: List<ApiFilterDN>
-    ): String? = errorParser.safeCall("sendEdictPensionerToMyInbox") {
+    ): String = errorParser.safeCall("sendEdictPensionerToMyInbox") {
         val filterJson = apiQueryBuilder.buildFilterJson(filter)
         val response =
             pensionApiService.sendEdictPensionerToMyInbox(mapOf("filter" to filterJson))

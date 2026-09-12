@@ -15,9 +15,10 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 private fun Module.contractFlowViewModel(qualifier: String, config: ContractFlowConfig) {
-    viewModel(named(qualifier)) {
+    viewModel(named(qualifier)) { parameters ->
         ContractFlowViewModel(
             config = config,
+            editContractNumber = parameters.getOrNull<String>(),
             getRegistrationInfoUseCase = get(),
             getContractsUseCase = get(),
             identityInfoUseCase = get(),
@@ -32,6 +33,10 @@ private fun Module.contractFlowViewModel(qualifier: String, config: ContractFlow
             checkMedicalStudentUseCase = get(),
             makeContractUseCase = get(),
             makeOptionalContractByGuardianUseCase = get(),
+            makeFreelanceContractByGuardianUseCase = get(),
+            updateContractUseCase = get(),
+            updateOptionalContractByGuardianUseCase = get(),
+            updateFreelanceContractByGuardianUseCase = get(),
             saveContactUseCase = get(),
             uploadImageUseCase = get(),
             subdominantUseCase = get(),

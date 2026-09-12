@@ -17,6 +17,8 @@ import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveDocum
 import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoRequest
 import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoResponseDTO
 import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.RegisteredMedicalCommissionDTO
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestCreatedDTO
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestFormDTO
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
 import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.DisabilityPersonalInfoDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
@@ -150,6 +152,12 @@ private class FakePensionRemoteDataSource(
         error("not used in PensionRepositoryImplTest")
 
     override suspend fun getRetirementRequestInfo(filter: List<ApiFilterDN>): ListData<RetirementRequestDTO> =
+        error("not used in PensionRepositoryImplTest")
+
+    override suspend fun createRetirementRequest(
+        authenticationsCode: Long,
+        form: RetirementRequestFormDTO
+    ): RetirementRequestCreatedDTO =
         error("not used in PensionRepositoryImplTest")
 
     override suspend fun checkRetirementStatus(): RetirementStatusDTO =

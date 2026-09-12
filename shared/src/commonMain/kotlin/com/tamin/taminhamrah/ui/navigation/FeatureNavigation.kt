@@ -20,6 +20,7 @@ import com.tamin.taminhamrah.feature.pensionInquiry.navigateToIssuanceCertificat
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPayRoll
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.navigateToPensionStatusInquiry
 import com.tamin.taminhamrah.feature.pensionSurvivor.navigateToPensionSurvivor
+import com.tamin.taminhamrah.feature.retirementPension.navigateToRetirementPension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPrescription
 import com.tamin.taminhamrah.feature.contracts.navigateToContractFlow
 import com.tamin.taminhamrah.feature.contracts.flow.ContractType
@@ -31,6 +32,7 @@ import com.tamin.taminhamrah.feature.workshops.navigateToContractRows
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.navigateToCompleteEmployerInfo
 import com.tamin.taminhamrah.feature.workshops.navigateToLegalRepresentativeWorkshops
+import com.tamin.taminhamrah.feature.workshops.navigateToDebtObjectionStatus
 import com.tamin.taminhamrah.model.common.FeatureFlag
 
 fun NavController.navigateToFeature(flag: FeatureFlag) {
@@ -42,11 +44,13 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
         FeatureFlag.COMPLETE_WORKSHOP_INFO -> navigateToCompleteEmployerInfo()
         FeatureFlag.STACK_HOLDER_LIST -> navigateToLegalRepresentativeWorkshops()
         FeatureFlag.CONTRACTS -> navigateToContractAffairs()
+        FeatureFlag.FOLLOW_PROTEST_STATUS -> navigateToDebtObjectionStatus()
         FeatureFlag.STUDENT_INSURANCE -> navigateToContractFlow(ContractType.STUDENT)
         FeatureFlag.FREELANCE_INSURANCE -> navigateToContractFlow(ContractType.FREELANCE)
         FeatureFlag.OPTIONAL_INSURANCE -> navigateToContractFlow(ContractType.OPTIONAL)
         FeatureFlag.HOUSEWIFE_INSURANCE -> navigateToContractFlow(ContractType.HOUSEWIFE)
         FeatureFlag.PENSION_INQUIRY -> navigateToPensionStatusInquiry()
+        FeatureFlag.RETIREMENT_PENSION -> navigateToRetirementPension()
         FeatureFlag.CALCULATE_WAGE_PENSION -> navigateToCalculatePension()
         FeatureFlag.PRESCRIPTION -> navigateToPrescription()
         FeatureFlag.DESERVED_TREATMENT_101 -> navigateToDeservedTreatment()

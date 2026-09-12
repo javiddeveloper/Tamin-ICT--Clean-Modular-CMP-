@@ -135,6 +135,7 @@ class WorkshopsViewModel(
     private fun clearSearch(): Flow<PartialState> = flow {
         val status = uiState.value.statusFilter
         emit(PartialState.SearchInputChanged(workshopId = "", branchCode = ""))
+        emit(PartialState.SearchOpenChanged(false))
         emit(PartialState.QueryApplied(WorkshopSearch(), status))
         emitAll(loadPage(page = 0, search = WorkshopSearch(), status = status))
     }
@@ -182,6 +183,8 @@ class WorkshopsViewModel(
         workshopId = workshopId,
         branchCode = branchCode,
         workshopName = name,
+        characterCode = characterCode,
+        legalNationalId = legalNationalId,
     )
 
     override fun reduceState(

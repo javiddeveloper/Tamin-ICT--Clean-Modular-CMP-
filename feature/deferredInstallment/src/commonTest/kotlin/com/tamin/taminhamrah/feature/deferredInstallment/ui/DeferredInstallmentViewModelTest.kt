@@ -89,7 +89,7 @@ class DeferredInstallmentViewModelTest {
         val state = viewModel.uiState.value
         assertFalse(state.isLoading)
         assertNotNull(state.error)
-        assertTrue(state.error!!.isNotBlank())
+        assertTrue(state.error.isNotBlank())
     }
 
     @Test
@@ -306,6 +306,10 @@ private class FakeDeferredInstallmentPensionRepository : PensionRepository {
         error("not used")
     override suspend fun getRetirementRequestInfo(filters: List<ApiFilterDN>): Flow<List<RetirementRequestDN>> =
         error("not used")
+    override suspend fun createRetirementRequest(
+        authenticationsCode: Long,
+        form: com.tamin.taminhamrah.model.pension.retirement.RetirementRequestFormDN
+    ): Flow<com.tamin.taminhamrah.model.pension.retirement.RetirementRequestCreatedDN> = error("not used")
     override suspend fun checkRetirementStatus(): Flow<RetirementStatusDN> =
         error("not used")
     override suspend fun sendRetirementDocument(requestId: String, request: RetirementSaveDocumentDN): Flow<String?> =

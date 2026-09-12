@@ -4,6 +4,7 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,6 +30,7 @@ import com.tamin.taminhamrah.ui.theme.Primary700
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminOnAccentInk
 import com.tamin.taminhamrah.ui.theme.TaminOnAccentInkFaint
+import com.tamin.taminhamrah.ui.theme.TaminOnAccentInkReached
 import com.tamin.taminhamrah.ui.theme.TaminOnAccentInkMuted
 import com.tamin.taminhamrah.ui.theme.TaminOnAccentInkSoft
 import com.tamin.taminhamrah.util.toPersianDigits
@@ -39,16 +41,11 @@ import taminx.core.core_ui.step_of_total_label
 private const val HeroStepSegmentFillDurationMs = 420
 
 /**
- * Hero-header step chrome: current step title + "step X of Y", then equal-width segments where
- * the current index **and every step before it** are opaque (cumulative fill, so the bar reads as
- * progress made rather than just "you are here") — revised from the original "only current index"
- * behavior (which matched an early pension-survivor mockup) after disability-pension UX feedback.
- * Each segment fills progressively (track + a width-animated overlay via [animateFloatAsState]),
- * the same technique [StepIndicator]'s `StepConnector` uses between step circles, rather than
- * snapping or cross-fading color — only the segment newly becoming complete/current visibly
- * animates, since already-complete ones are already at full fraction. Only
- * `:feature:pensioner`'s disability-pension screen consumes this component today, so this default
- * changed with no other screen affected.
+ * Hero-header step chrome: current step title + "step X of Y", then equal-width segments.
+ *
+ * By default, **only the current index** is opaque (matches pension-survivor mockups; not
+ * cumulative fill). Pass [maxReachedStep] for a wizard that also shows how far the user has got,
+ * and [onStepClick] to let them tap back to a step they have already completed.
  *
  * Intended for [TaminTopAppBar]'s `content` slot on a blue/gradient hero.
  *
@@ -63,11 +60,24 @@ fun TaminHeroStepProgress(
     currentStep: Int,
     totalSteps: Int,
     modifier: Modifier = Modifier,
+    /** One line under the segments saying what this step asks for. Omitted when the step has none. */
+    hint: String? = null,
+    /**
+     * Highest step the user has reached, so earlier segments read as done rather than pending.
+     * `0` — the default — keeps the current-only highlight every existing caller expects.
+     */
+    maxReachedStep: Int = 0,
+    /**
+     * Makes segments *before* the current one tappable, called with that step's 1-based index.
+     * Future steps stay inert: a wizard cannot be skipped forward from its own progress bar.
+     */
+    onStepClick: ((Int) -> Unit)? = null,
     stepSubtitle: String? = null,
     isEditingSingleStep: Boolean = false,
 ) {
     require(totalSteps > 0) { "totalSteps must be > 0" }
     val clampedStep = currentStep.coerceIn(1, totalSteps)
+    val reached = maxReachedStep.coerceIn(0, totalSteps)
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -101,31 +111,27 @@ fun TaminHeroStepProgress(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
         ) {
+            val segmentShape = RoundedCornerShape(CornerRadius.full)
             for (index in 1..totalSteps) {
-                val fillFraction by animateFloatAsState(
-                    targetValue = if (isEditingSingleStep) {
-                        if (index == clampedStep) 0f else 1f
-                    } else if (index <= clampedStep) {
-                        1f
-                    } else {
-                        0f
-                    },
-                    animationSpec = tween(HeroStepSegmentFillDurationMs, easing = FastOutSlowInEasing),
-                )
+                val fill = when {
+                    index == clampedStep -> TaminOnAccentInk
+                    index <= reached -> TaminOnAccentInkReached
+                    else -> TaminOnAccentInkFaint
+                }
+                val goBack = onStepClick?.takeIf { index < clampedStep }
                 Box(
                     modifier = Modifier
                         .weight(1f)
                         .height(IconSize.heroStepSegmentHeight)
-                        .clip(RoundedCornerShape(CornerRadius.full))
-                        .background(TaminOnAccentInkFaint),
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .fillMaxWidth(fillFraction)
-                            .background(TaminOnAccentInk),
-                    )
-                }
+                        .background(color = fill, shape = segmentShape)
+                        .then(
+                            if (goBack != null) {
+                                Modifier.clickable { goBack(index) }
+                            } else {
+                                Modifier
+                            },
+                        ),
+                )
             }
         }
 
@@ -135,6 +141,14 @@ fun TaminHeroStepProgress(
                 style = MaterialTheme.typography.bodySmall,
                 color = TaminOnAccentInkMuted,
                 modifier = Modifier.fillMaxWidth(),
+            )
+        }
+
+        if (hint != null) {
+            TaminText(
+                text = hint,
+                style = MaterialTheme.typography.bodySmall,
+                color = TaminOnAccentInkSoft,
             )
         }
     }
@@ -154,6 +168,28 @@ private fun TaminHeroStepProgressPreview() {
                 stepTitle = "مقررات و ضوابط",
                 currentStep = 1,
                 totalSteps = 5,
+            )
+        }
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun TaminHeroStepProgressWithHintPreview() {
+    PreviewRtlThemeContent {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Primary700)
+                .padding(Spacing.lg),
+        ) {
+            TaminHeroStepProgress(
+                stepTitle = "اطلاعات هویتی",
+                currentStep = 3,
+                totalSteps = 8,
+                hint = "اطلاعات هویتی را بررسی و شمارهٔ تلفن ثابت و نشانی را تکمیل کنید.",
+                maxReachedStep = 5,
+                onStepClick = {},
             )
         }
     }

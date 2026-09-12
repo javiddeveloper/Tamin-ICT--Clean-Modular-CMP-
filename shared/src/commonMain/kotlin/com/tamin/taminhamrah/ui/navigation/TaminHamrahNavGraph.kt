@@ -78,7 +78,6 @@ import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.deferredInstallment.deferredInstallmentScreen
 import com.tamin.taminhamrah.feature.deferredInstallment.navigateToDeferredInstallment
 import com.tamin.taminhamrah.feature.developerOptions.DebugLoginRoute
-import com.tamin.taminhamrah.feature.developerOptions.DeveloperOptionsRoute
 import com.tamin.taminhamrah.feature.developerOptions.TokenManagerRoute
 import com.tamin.taminhamrah.feature.developerOptions.debugLoginScreen
 import com.tamin.taminhamrah.feature.developerOptions.developerOptionsScreen
@@ -91,7 +90,6 @@ import com.tamin.taminhamrah.feature.history.historyScreen
 import com.tamin.taminhamrah.feature.historyobjection.historyObjectionScreen
 import com.tamin.taminhamrah.feature.historyobjection.historyObjectionStepperScreen
 import com.tamin.taminhamrah.feature.inquiryEducation.inquiryEducationScreen
-import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
 import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
 import com.tamin.taminhamrah.feature.orotezprotez.orotezProtezScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.calculatePensionScreen
@@ -104,15 +102,18 @@ import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDisabilityPension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPrescription
 import com.tamin.taminhamrah.feature.payment.PaymentRoute
 import com.tamin.taminhamrah.feature.payment.paymentGraph
+import com.tamin.taminhamrah.feature.payment.navigateToPayment
 import com.tamin.taminhamrah.feature.payment.paymentSandboxScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.payrollScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.prescriptionScreen
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.pensionStatusInquiryGraph
 import com.tamin.taminhamrah.feature.pensionSurvivor.navigateToPensionSurvivor
 import com.tamin.taminhamrah.feature.pensionSurvivor.pensionSurvivorScreen
+import com.tamin.taminhamrah.feature.retirementPension.retirementPensionScreen
 import com.tamin.taminhamrah.feature.pregnancyPay.pregnancyPayScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
+import com.tamin.taminhamrah.feature.contractaffair.CONTRACT_AFFAIRS_REFRESH_KEY
 import com.tamin.taminhamrah.feature.contractaffair.contractAffairsScreen
 import com.tamin.taminhamrah.feature.contractaffair.contractPaymentHistoryScreen
 import com.tamin.taminhamrah.feature.contractaffair.contractPaymentCalcDetailScreen
@@ -126,6 +127,8 @@ import com.tamin.taminhamrah.feature.security.securityScreen
 import com.tamin.taminhamrah.feature.settings.SettingsRoute
 import com.tamin.taminhamrah.feature.settings.settingsScreen
 import com.tamin.taminhamrah.feature.contracts.contractFlowScreen
+import com.tamin.taminhamrah.feature.contracts.flow.resolveContractTypeForEdit
+import com.tamin.taminhamrah.feature.contracts.navigateToContractFlow
 import com.tamin.taminhamrah.feature.taminServices.TaminServicesRoute
 import com.tamin.taminhamrah.feature.taminServices.inspectionScreen
 import com.tamin.taminhamrah.feature.taminServices.occurrenceScreen
@@ -134,6 +137,16 @@ import com.tamin.taminhamrah.feature.taminServices.sendInsuranceHistoryToInstitu
 import com.tamin.taminhamrah.feature.taminServices.taminServicesScreen
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
 import com.tamin.taminhamrah.feature.treatment.treatmentGraph
+import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
+import com.tamin.taminhamrah.feature.workshops.completeEmployerInfoScreen
+import com.tamin.taminhamrah.feature.workshops.debtObjectionStatusScreen
+import com.tamin.taminhamrah.feature.workshops.workshopsScreen
+import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
+import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
+import com.tamin.taminhamrah.feature.security.securityScreen
+import com.tamin.taminhamrah.feature.developerOptions.DeveloperOptionsRoute
+import com.tamin.taminhamrah.feature.developerOptions.developerOptionsScreen
+import com.tamin.taminhamrah.feature.settings.settingsScreen
 import com.tamin.taminhamrah.feature.userRequest.UserRequestRoute
 import com.tamin.taminhamrah.feature.userRequest.userRequestGraph
 import com.tamin.taminhamrah.feature.workshops.completeEmployerInfoScreen
@@ -478,6 +491,7 @@ internal fun TaminHamrahNavGraph(
                     onDone = { navController.popBackStack() },
                 )
 
+                retirementPensionScreen(onBack = { navController.popBackStack() })
                 calculatePensionScreen(onBack = { navController.popBackStack() })
                 prescriptionScreen(onBack = { navController.popBackStack() })
                 deservedTreatmentScreen(onBack = { navController.popBackStack() })
@@ -540,6 +554,14 @@ internal fun TaminHamrahNavGraph(
                             insuranceType,
                         )
                     },
+                    onNavigateToEditContract = { premiumTypeCode, freeJobCode, contractNumber ->
+                        val type = resolveContractTypeForEdit(premiumTypeCode, freeJobCode)
+                            ?: return@contractAffairsScreen
+                        navController.navigateToContractFlow(
+                            type = type,
+                            editContractNumber = contractNumber,
+                        )
+                    },
                 )
 
                 contractPaymentHistoryScreen(onBack = { navController.popBackStack() })
@@ -557,8 +579,14 @@ internal fun TaminHamrahNavGraph(
 
                 contractPaymentCalcDetailScreen(onBack = { navController.popBackStack() })
 
-                workshopsScreen(navController, onOpenUrl = { url -> openUrl(url) })
+                workshopsScreen(
+                    navController,
+                    // The debt payment runs in the app's own payment flow, which owns the gateway
+                    // address; the feature only hands over the ticket the service issued.
+                    onStartPayment = { request -> navController.navigateToPayment(request) },
+                )
                 completeEmployerInfoScreen(navController)
+                debtObjectionStatusScreen(navController)
 
                 myInboxScreen(onNavigateBack = { navController.popBackStack() })
 
@@ -566,7 +594,15 @@ internal fun TaminHamrahNavGraph(
 
                 userRequestGraph(navController = navController)
 
-                contractFlowScreen(onBack = { navController.popBackStack() })
+                contractFlowScreen(
+                    onBack = { navController.popBackStack() },
+                    onEditSuccess = {
+                        navController.previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set(CONTRACT_AFFAIRS_REFRESH_KEY, true)
+                        navController.popBackStack()
+                    },
+                )
 
                 // Maps the assistant's destination ids to real routes. Ids come from
                 // AgentDestination; anything unmapped is ignored rather than crashing.
