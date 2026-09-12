@@ -60,7 +60,7 @@ class PayWorkshopDebitUseCase(private val repository: WorkShopsRepository) {
         // returned as it stands so the caller can repeat the reason the service gave.
         if (!payment.isPayable) return payment
 
-        repository.confirmPaymentTicket(payment.ticket)
+        repository.confirmPaymentTicket(payment.paymentTicket)
         return payment
     }
 }

@@ -53,8 +53,8 @@ data class DebitPaymentRequestDN(
     val debitNumber: String,
     val agreementRow: String,
     val deposit: Boolean = false,
-//    /** `01` حقیقی / `02` حقوقی, straight from the workshop record. */
-//    val characterCode: String = "",
-//    /** The حقوقی workshop's national id; blank for a حقیقی workshop, which has none. */
-//    val legalNationalId: String = "",
+    /** `01` حقیقی / `02` حقوقی, straight from the workshop record. */
+    val characterCode: String = "",
+    /** The حقوقی workshop's national id; blank for a حقیقی workshop, which has none. */
+    val legalNationalId: String = "",
 )

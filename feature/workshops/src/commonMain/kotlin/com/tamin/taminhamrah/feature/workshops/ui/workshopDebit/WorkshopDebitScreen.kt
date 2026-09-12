@@ -16,6 +16,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopScreenShell
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopSectionHeader
 import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
+import com.tamin.taminhamrah.model.payment.PaymentRequestDN
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
@@ -54,7 +55,7 @@ fun WorkshopDebitScreen(
     branchCode: String,
     onBack: () -> Unit,
     onOpenDocuments: (String, String) -> Unit,
-    onOpenUrl: (String) -> Unit,
+    onStartPayment: (PaymentRequestDN) -> Unit,
     modifier: Modifier = Modifier,
     workshopName: String = "",
     characterCode: String = "",
@@ -69,7 +70,7 @@ fun WorkshopDebitScreen(
         )
     }
 
-    HandleWorkshopDebitEvents(events = viewModel.events, onOpenUrl = onOpenUrl)
+    HandleWorkshopDebitEvents(events = viewModel.events, onStartPayment = onStartPayment)
 
     WorkshopDebitContent(
         state = state,

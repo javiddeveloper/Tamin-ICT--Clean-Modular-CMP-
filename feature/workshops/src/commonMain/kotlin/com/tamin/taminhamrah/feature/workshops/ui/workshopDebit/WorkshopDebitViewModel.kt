@@ -90,7 +90,7 @@ class WorkshopDebitViewModel(
         emit(PartialState.Paying(null))
 
         if (result.isPayable) {
-            sendEvent(WorkshopDebitEvent.OpenPaymentPage(result.paymentPageUrl))
+            sendEvent(WorkshopDebitEvent.StartPayment(result.toPaymentRequest()))
         } else {
             reportPaymentFailure(result.message)
         }

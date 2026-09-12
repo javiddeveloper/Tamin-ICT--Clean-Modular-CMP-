@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.feature.workshops
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.toRoute
+import com.tamin.taminhamrah.model.payment.PaymentRequestDN
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopsRoute
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsEvent
 import com.tamin.taminhamrah.feature.workshops.ui.demandDocuments.DemandDocumentsScreen
@@ -111,9 +112,6 @@ fun NavController.navigateToWorkshops() {
     navigate(WorkshopsListRoute)
 }
 
-/**
- * @param onOpenUrl leaves the app: the debt payment page is hosted outside it.
- */
 /** The `FeatureFlag.CONTRACT_INFO` entry — no workshop yet, so the screen opens its picker. */
 fun NavController.navigateToContractRows() {
     navigate(ContractRowsRoute())
@@ -133,7 +131,7 @@ fun NavController.navigateToLegalRepresentativeWorkshops() {
  */
 fun NavGraphBuilder.workshopsScreen(
     navController: NavController,
-    onOpenUrl: (String) -> Unit,
+    onStartPayment: (PaymentRequestDN) -> Unit,
 ) {
     composableWithFadeTransitions<WorkshopsListRoute> {
         WorkshopsRoute(
@@ -175,7 +173,7 @@ fun NavGraphBuilder.workshopsScreen(
                     DemandDocumentsRoute(debitNumber, branchCode, route.workshopName),
                 )
             },
-            onOpenUrl = onOpenUrl,
+            onStartPayment = onStartPayment,
         )
     }
 

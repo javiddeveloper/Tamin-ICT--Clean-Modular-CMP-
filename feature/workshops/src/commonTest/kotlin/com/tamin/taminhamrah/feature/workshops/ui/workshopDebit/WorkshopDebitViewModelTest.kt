@@ -90,7 +90,7 @@ class WorkshopDebitViewModelTest {
         runTest(testDispatcher) {
             repository.workshopDebits = debtsPage(count = 1, total = 1)
             repository.paymentPreCheck = DebitPaymentPreCheckDN(allowed = true)
-            repository.paymentResult = DebitPaymentDN(succeeded = true, paymentPageUrl = PAYMENT_URL)
+            repository.paymentResult = DebitPaymentDN(succeeded = true, paymentTicket = TICKET)
 
             val viewModel = viewModel()
             open(viewModel)
@@ -117,7 +117,7 @@ class WorkshopDebitViewModelTest {
             total = 1,
         )
         repository.paymentPreCheck = DebitPaymentPreCheckDN(allowed = true)
-        repository.paymentResult = DebitPaymentDN(succeeded = true, paymentPageUrl = PAYMENT_URL)
+        repository.paymentResult = DebitPaymentDN(succeeded = true, paymentTicket = TICKET)
 
         val viewModel = viewModel()
         open(viewModel)
@@ -127,10 +127,10 @@ class WorkshopDebitViewModelTest {
     }
 
     @Test
-    fun `an accepted payment sends the user to the payment page`() = runTest(testDispatcher) {
+    fun `an accepted payment hands its ticket to the payment flow`() = runTest(testDispatcher) {
         repository.workshopDebits = debtsPage(count = 1, total = 1)
         repository.paymentPreCheck = DebitPaymentPreCheckDN(allowed = true)
-        repository.paymentResult = DebitPaymentDN(succeeded = true, paymentPageUrl = PAYMENT_URL)
+        repository.paymentResult = DebitPaymentDN(succeeded = true, paymentTicket = TICKET)
 
         val viewModel = viewModel()
         open(viewModel)
@@ -140,8 +140,8 @@ class WorkshopDebitViewModelTest {
                 WorkshopDebitIntent.PayDebit(viewModel.uiState.value.list.items[0])
             )
             val event = awaitItem()
-            assertTrue(event is WorkshopDebitEvent.OpenPaymentPage)
-            assertEquals(PAYMENT_URL, event.url)
+            assertTrue(event is WorkshopDebitEvent.StartPayment)
+            assertEquals(TICKET, event.request.ticket)
         }
     }
 
@@ -156,8 +156,7 @@ class WorkshopDebitViewModelTest {
             repository.paymentPreCheck = DebitPaymentPreCheckDN(allowed = true)
             repository.paymentResult = DebitPaymentDN(
                 succeeded = true,
-                paymentPageUrl = PAYMENT_URL,
-                ticket = TICKET,
+                paymentTicket = TICKET,
             )
 
             val viewModel = viewModel()
@@ -179,8 +178,7 @@ class WorkshopDebitViewModelTest {
             repository.paymentPreCheck = DebitPaymentPreCheckDN(allowed = true)
             repository.paymentResult = DebitPaymentDN(
                 succeeded = true,
-                paymentPageUrl = PAYMENT_URL,
-                ticket = TICKET,
+                paymentTicket = TICKET,
             )
 
             val viewModel = viewModel()
@@ -320,7 +318,7 @@ class WorkshopDebitViewModelTest {
     fun `the row stops showing progress once the answer is in`() = runTest(testDispatcher) {
         repository.workshopDebits = debtsPage(count = 1, total = 1)
         repository.paymentPreCheck = DebitPaymentPreCheckDN(allowed = true)
-        repository.paymentResult = DebitPaymentDN(succeeded = true, paymentPageUrl = PAYMENT_URL)
+        repository.paymentResult = DebitPaymentDN(succeeded = true, paymentTicket = TICKET)
 
         val viewModel = viewModel()
         open(viewModel)
@@ -368,7 +366,6 @@ class WorkshopDebitViewModelTest {
         const val BRANCH_CODE = "14"
         const val RAW_DEBIT_NUMBER = "6310030089235"
         const val RAW_AGREEMENT_ROW = "09600002"
-        const val PAYMENT_URL = "https://example.invalid/pay/ticket"
         const val TICKET = "ticket-9028218513"
         const val GATEWAY_REFUSAL = "تیکت پرداخت معتبر نیست."
         const val REFUSAL = "بدهی ارسالی معتبر نمی باشد."
