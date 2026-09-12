@@ -52,6 +52,8 @@ import taminx.core.core_ui.contract_submit_failure_message_fallback
 import taminx.core.core_ui.contract_submit_failure_title
 import taminx.core.core_ui.contract_submit_success_message
 import taminx.core.core_ui.contract_submit_success_title
+import taminx.core.core_ui.contract_update_success_message
+import taminx.core.core_ui.contract_update_success_title
 import taminx.core.core_ui.ic_error
 import taminx.core.core_ui.ic_tamin_check_circle
 import taminx.core.core_ui.retry
@@ -63,6 +65,8 @@ sealed interface ContractSubmitResult {
         val amount: Long,
         val canPayOnline: Boolean,
     ) : ContractSubmitResult
+
+    data object UpdateSuccess : ContractSubmitResult
 
     data class Failure(
         val message: String,
@@ -85,12 +89,44 @@ fun ContractSubmitResultDialog(
             onDismiss = onDismiss,
             onPay = onPay,
         )
+        ContractSubmitResult.UpdateSuccess -> ContractUpdateSuccessDialog(onDismiss = onDismiss)
         is ContractSubmitResult.Failure -> ContractSubmitFailureDialog(
             message = result.message,
             onDismiss = onDismiss,
             onRetry = onRetry,
         )
     }
+}
+
+@Composable
+private fun ContractUpdateSuccessDialog(
+    onDismiss: () -> Unit,
+) {
+    val colors = LocalTaminColors.current
+    ContractSubmitResultScaffold(
+        onDismissRequest = onDismiss,
+        icon = {
+            ResultStatusIcon(
+                background = colors.greenBg,
+                iconRes = Res.drawable.ic_tamin_check_circle,
+                tint = colors.greenText,
+            )
+        },
+        title = stringResource(Res.string.contract_update_success_title),
+        description = stringResource(Res.string.contract_update_success_message),
+        content = null,
+        actions = {
+            TaminFilledButton(
+                text = stringResource(Res.string.contract_payment_dialog_dismiss),
+                onClick = onDismiss,
+                modifier = Modifier.fillMaxWidth(),
+                background = Brush.linearGradient(
+                    listOf(colors.greenText, colors.greenText),
+                ),
+                shape = RoundedCornerShape(CornerRadius.lg),
+            )
+        },
+    )
 }
 
 @Composable
@@ -353,6 +389,17 @@ private fun ContractSubmitSuccessDialogPreview() {
                 amount = 22_596_000L,
                 canPayOnline = true,
             ),
+            onDismiss = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun ContractUpdateSuccessDialogPreview() {
+    PreviewRtlThemeContent {
+        ContractSubmitResultDialog(
+            result = ContractSubmitResult.UpdateSuccess,
             onDismiss = {},
         )
     }

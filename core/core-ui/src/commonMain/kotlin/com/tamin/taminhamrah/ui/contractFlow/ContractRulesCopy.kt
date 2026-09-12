@@ -48,8 +48,10 @@ import taminx.core.core_ui.contract_rules_sheet_title_optional
 import taminx.core.core_ui.contract_rules_sheet_title_student
 
 /**
- * Per-contract-type string resources for [ContractRulesBottomSheet].
- * Each contract flow config supplies the matching copy so the shared sheet never defaults to student text.
+ * Per-contract-type string resources formerly used by the in-app rules sheet.
+ * Rules are now shown via PDF (`rulesPdfPath`); this copy remains available for
+ * config wiring / future non-PDF surfaces.
+ * Each contract flow config supplies the matching copy.
  */
 data class ContractRulesCopy(
     val titleRes: StringResource,

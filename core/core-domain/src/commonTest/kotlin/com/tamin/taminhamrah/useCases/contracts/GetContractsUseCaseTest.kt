@@ -7,7 +7,7 @@ import com.tamin.taminhamrah.model.contracts.ContractStatusObjectDN
 import com.tamin.taminhamrah.model.contracts.FreeJobDN
 import com.tamin.taminhamrah.model.contracts.PremiumRateDN
 import com.tamin.taminhamrah.model.contracts.PremiumTypeDN
-import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.repository.contracts.FakeContractsRepository
 import com.tamin.taminhamrah.useCases.BaseUseCaseTest
 import kotlinx.coroutines.test.runTest
@@ -33,24 +33,23 @@ class GetContractsUseCaseTest : BaseUseCaseTest() {
 
         useCase().test {
             val result = awaitItem()
-            assertEquals(expectedList, result)
+            assertEquals(PagedListDN(items = expectedList, total = expectedList.size), result)
             awaitComplete()
         }
 
-        assertEquals(null, repository.lastQuery)
+        assertEquals(1, repository.lastContractsPage)
     }
 
     @Test
-    fun `invoke should pass query to repository`() = runTest {
-        val query = ApiQueryParamDN(page = 1, start = 0, limit = 10)
+    fun `invoke should pass page to repository`() = runTest {
         repository.contractsResult = emptyList()
 
-        useCase(query).test {
+        useCase(page = 2).test {
             awaitItem()
             awaitComplete()
         }
 
-        assertEquals(query, repository.lastQuery)
+        assertEquals(2, repository.lastContractsPage)
     }
 
     @Test
@@ -59,12 +58,12 @@ class GetContractsUseCaseTest : BaseUseCaseTest() {
         repository.contractsResult = expectedList
 
         useCase.contractsByPremiumType(ContractPremiumTypeCode.FREELANCE).test {
-            assertEquals(expectedList, awaitItem())
+            assertEquals(PagedListDN(items = expectedList, total = expectedList.size), awaitItem())
             awaitComplete()
         }
 
         assertEquals(ContractPremiumTypeCode.FREELANCE, repository.lastPremiumTypeCode)
-        assertEquals(null, repository.lastQuery)
+        assertEquals(1, repository.lastContractsPage)
     }
 
     @Test

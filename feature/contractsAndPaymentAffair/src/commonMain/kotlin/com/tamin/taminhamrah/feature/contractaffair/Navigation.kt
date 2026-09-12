@@ -1,5 +1,8 @@
 package com.tamin.taminhamrah.feature.contractaffair
 
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.toRoute
@@ -80,9 +83,25 @@ fun NavGraphBuilder.contractAffairsScreen(
         premiumTypeCode: String,
         insuranceType: String,
     ) -> Unit,
+    onNavigateToEditContract: (
+        premiumTypeCode: String,
+        freeJobCode: String,
+        contractNumber: String,
+    ) -> Unit,
 ) {
-    composableWithFadeTransitions<ContractAffairsRoute> {
+    composableWithFadeTransitions<ContractAffairsRoute> { backStackEntry ->
         val viewModel: ContractAffairsViewModel = koinViewModel()
+        val shouldRefresh by backStackEntry.savedStateHandle
+            .getStateFlow(CONTRACT_AFFAIRS_REFRESH_KEY, false)
+            .collectAsStateWithLifecycle()
+        LaunchedEffect(shouldRefresh) {
+            if (shouldRefresh) {
+                viewModel.sendIntent(
+                    com.tamin.taminhamrah.feature.contractaffair.ui.contract.ContractAffairsIntent.RefreshContracts,
+                )
+                backStackEntry.savedStateHandle[CONTRACT_AFFAIRS_REFRESH_KEY] = false
+            }
+        }
         ContractAffairsRoute(
             viewModel = viewModel,
             onBackClicked = onBack,
@@ -90,9 +109,12 @@ fun NavGraphBuilder.contractAffairsScreen(
             onOpenUrl = onOpenUrl,
             onNavigateToPaymentHistory = onNavigateToPaymentHistory,
             onNavigateToPremiumPayment = onNavigateToPremiumPayment,
+            onNavigateToEditContract = onNavigateToEditContract,
         )
     }
 }
+
+const val CONTRACT_AFFAIRS_REFRESH_KEY = "contract_affairs_refresh"
 
 fun NavGraphBuilder.contractPaymentHistoryScreen(
     onBack: () -> Unit,
