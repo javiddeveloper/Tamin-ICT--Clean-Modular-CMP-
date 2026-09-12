@@ -103,6 +103,34 @@ data class TaminColors(
     // direction; the strip behind the status bar shares this same wash.
     val topAppBarStops: List<Color>,
     val profileGradientStops: List<Color>,
+
+    // خلاصهٔ سابقه — the home page's history summary card. Its blues are a shade of their own
+    // rather than the brand primaries, so they are named here instead of borrowed from a token
+    // that would drag the card along the next time the primary palette moves.
+    val historyCardBorder: Color,
+    val historyCardShadow: Color,
+    val historyCardDivider: Color,
+    /** The soft radial wash in the card's top corner. */
+    val historyGlow: Color,
+    val historyYearPillBorder: Color,
+    /** Stops of the header icon's tile, start to end. */
+    val historyIconStops: List<Color>,
+    /** The large "months registered" figure. */
+    val historyFigure: Color,
+    /** A month whose premium is registered — also the filled stretch of the progress bar. */
+    val historyMonthStops: List<Color>,
+    /** The current month, a shade deeper so it reads as today rather than as one more cell. */
+    val historyMonthCurrentStops: List<Color>,
+    val historyUnpaidBg: Color,
+    val historyUnpaidBorder: Color,
+    /** The two tones the unpaid stretch of the progress bar hatches between. */
+    val historyUnpaidStripe: Color,
+    val historyUnpaidStripeSoft: Color,
+    val historyUpcomingBg: Color,
+    val historyUpcomingBorder: Color,
+    val historyProgressTrack: Color,
+    val historyWarningBorder: Color,
+    val historyWarningText: Color,
     val aiAssistantGradient: Brush,
     val grey900 : Color,
 
@@ -235,6 +263,24 @@ val LightTaminColors = TaminColors(
     // Same stops as the quick-access card; the bar just sweeps the other way.
     topAppBarStops = listOf(TaminTeal900, TaminTeal500),
     profileGradientStops = listOf(TaminNavy900, TaminNavy700),
+    historyCardBorder = HistoryCardBorder,
+    historyCardShadow = HistoryCardShadow,
+    historyCardDivider = HistoryCardDivider,
+    historyGlow = HistoryCardGlow,
+    historyYearPillBorder = HistoryYearPillBorder,
+    historyIconStops = listOf(HistoryIconStart, HistoryIconEnd),
+    historyFigure = HistoryFigure,
+    historyMonthStops = listOf(HistoryMonthStart, HistoryMonthEnd),
+    historyMonthCurrentStops = listOf(HistoryMonthCurrentStart, HistoryMonthCurrentEnd),
+    historyUnpaidBg = HistoryUnpaidBg,
+    historyUnpaidBorder = HistoryUnpaidBorder,
+    historyUnpaidStripe = HistoryUnpaidStripe,
+    historyUnpaidStripeSoft = HistoryUnpaidStripeSoft,
+    historyUpcomingBg = HistoryUpcomingBg,
+    historyUpcomingBorder = HistoryUpcomingBorder,
+    historyProgressTrack = HistoryProgressTrack,
+    historyWarningBorder = HistoryWarningBorder,
+    historyWarningText = HistoryWarningText,
     aiAssistantGradient = Brush.linearGradient(
         listOf(TaminPurple900, TaminPurple700, Color(0xFF3F5BD9), TaminNavy700)
     ),
@@ -367,6 +413,24 @@ val DarkTaminColors = TaminColors(
     // so the bar and the strip above it join into one continuous band.
     topAppBarStops = listOf(TaminDarkHeroStart, TaminDarkHeroEnd),
     profileGradientStops = listOf(TaminDarkHeroStart, TaminDarkHeroEnd),
+    historyCardBorder = TaminDarkBorder,
+    historyCardShadow = HistoryDarkCardShadow,
+    historyCardDivider = TaminDarkDivider,
+    historyGlow = HistoryDarkCardGlow,
+    historyYearPillBorder = TaminDarkBorder,
+    historyIconStops = listOf(HistoryIconStart, HistoryIconEnd),
+    historyFigure = TaminDarkInfo,
+    historyMonthStops = listOf(HistoryMonthStart, HistoryMonthEnd),
+    historyMonthCurrentStops = listOf(HistoryMonthCurrentStart, HistoryMonthCurrentEnd),
+    historyUnpaidBg = HistoryDarkUnpaidBg,
+    historyUnpaidBorder = HistoryDarkUnpaidBorder,
+    historyUnpaidStripe = HistoryDarkUnpaidStripe,
+    historyUnpaidStripeSoft = HistoryDarkUnpaidStripeSoft,
+    historyUpcomingBg = HistoryDarkUpcomingBg,
+    historyUpcomingBorder = HistoryDarkUpcomingBorder,
+    historyProgressTrack = HistoryDarkProgressTrack,
+    historyWarningBorder = TaminDarkOrangeBg,
+    historyWarningText = HistoryDarkWarningText,
     aiAssistantGradient = Brush.linearGradient(
         listOf(TaminPurple900, TaminPurple700, Color(0xFF3F5BD9), TaminNavy700)
     ),

@@ -372,3 +372,43 @@ val CampaignBadgeBorder = TaminOnAccentInk.copy(alpha = 0.26f)
 val CampaignBodyInk = TaminOnAccentInk.copy(alpha = 0.82f)
 val CampaignCaptionInk = TaminOnAccentInk.copy(alpha = 0.55f)
 
+
+// ─── خلاصهٔ سابقه — the home page's history summary card ──────────────────────────────────
+// Straight off the design file (`Tamin Man App` home). Its blues are a shade of their own rather
+// than the brand primaries, so they are named here instead of borrowed from a token that would
+// drag the card along the next time the primary palette moves.
+
+val HistoryCardBorder = Color(0xFFE9EEF6)
+val HistoryCardShadow = Color(0x12173D7E)      // 0 12px 30px rgba(23,61,126,.07)
+val HistoryCardDivider = Color(0xFFEEF1F6)
+val HistoryCardGlow = Color(0x215C8EF6)        // rgba(92,142,246,.13)
+val HistoryYearPillBorder = Color(0xFFD7E6FF)
+val HistoryIconStart = Color(0xFF3B6FE8)
+val HistoryIconEnd = Color(0xFF1FB6D8)
+val HistoryFigure = Color(0xFF2C67D8)
+val HistoryMonthStart = Color(0xFF5C8EF6)
+val HistoryMonthEnd = Color(0xFF2C67D8)
+val HistoryMonthCurrentStart = Color(0xFF3F79EA)
+val HistoryMonthCurrentEnd = Color(0xFF1E51B8)
+val HistoryUnpaidBg = Color(0xFFFFF7E6)
+val HistoryUnpaidBorder = Color(0xFFE9BE62)
+val HistoryUnpaidStripe = Color(0xFFF1C572)
+val HistoryUnpaidStripeSoft = Color(0xFFFBE6BE)
+val HistoryUpcomingBg = Color(0xFFF7F9FC)
+val HistoryUpcomingBorder = Color(0xFFDCE3EE)
+val HistoryProgressTrack = Color(0xFFEDF1F8)
+val HistoryWarningBorder = Color(0xFFF3DFB4)
+val HistoryWarningText = Color(0xFF8A5406)
+
+// The same card in dark: the blues carry over — they are the card's identity — while every
+// surface, border and paper-coloured fill is restated against the dark page.
+val HistoryDarkCardGlow = Color(0x2E5C8EF6)
+val HistoryDarkCardShadow = Color(0x33000000)
+val HistoryDarkUnpaidBg = Color(0x29F59E0B)
+val HistoryDarkUnpaidBorder = Color(0x8AF59E0B)
+val HistoryDarkUnpaidStripe = Color(0x66F59E0B)
+val HistoryDarkUnpaidStripeSoft = Color(0x2EF59E0B)
+val HistoryDarkUpcomingBg = Color(0x0DFFFFFF)
+val HistoryDarkUpcomingBorder = Color(0x1FFFFFFF)
+val HistoryDarkProgressTrack = Color(0x14FFFFFF)
+val HistoryDarkWarningText = Color(0xFFFBBF24)
