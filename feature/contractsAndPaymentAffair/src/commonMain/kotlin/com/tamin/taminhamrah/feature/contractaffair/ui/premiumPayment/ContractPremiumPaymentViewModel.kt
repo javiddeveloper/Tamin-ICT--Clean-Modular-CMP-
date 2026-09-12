@@ -17,6 +17,7 @@ import com.tamin.taminhamrah.useCases.contractAffair.GetContractDebitUseCase
 import com.tamin.taminhamrah.useCases.contractAffair.GetContractLastPaymentUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetInsurancePaymentUseCase
 import com.tamin.taminhamrah.util.NetworkConstants
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
@@ -94,6 +95,7 @@ class ContractPremiumPaymentViewModel(
                 sendEvent(ContractPremiumPaymentEvent.ShowWarning(it))
             }
         } catch (e: Exception) {
+            if (e is CancellationException) throw e
             emit(PartialState.Error(e.toSingleLineMessage()))
         } finally {
             emit(PartialState.InitLoading(false))
@@ -122,6 +124,7 @@ class ContractPremiumPaymentViewModel(
                 sendEvent(ContractPremiumPaymentEvent.ShowWarning(it))
             }
         } catch (e: Exception) {
+            if (e is CancellationException) throw e
             sendEvent(ContractPremiumPaymentEvent.ShowError(e.toSingleLineMessage()))
         } finally {
             emit(PartialState.Calculating(false))
@@ -162,6 +165,7 @@ class ContractPremiumPaymentViewModel(
                     sendEvent(ContractPremiumPaymentEvent.ShowError(message))
                 }
             } catch (e: Exception) {
+                if (e is CancellationException) throw e
                 sendEvent(ContractPremiumPaymentEvent.ShowError(e.toSingleLineMessage()))
             } finally {
                 emit(PartialState.Paying(false))

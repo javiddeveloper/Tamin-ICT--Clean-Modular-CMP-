@@ -228,6 +228,28 @@ class ContractPremiumPaymentViewModelTest {
         }
     }
 
+    @Test
+    fun `Pay intent does not emit ShowError when operation is cancelled via CancellationException`() = runTest(dispatcher) {
+        repository.contractDebitResult = ContractDebitDN(
+            total = 53_866_782L,
+            insurancePremiums = 50_000_000L,
+            previousDebit = 0L,
+            startDate = 1000L,
+            endDate = 2000L,
+            payPremiumDate = "14051001",
+            infoMessage = null,
+        )
+        contractsRepository.shouldThrowError = true
+        contractsRepository.error = kotlinx.coroutines.CancellationException("Job cancelled")
+
+        viewModel.sendIntent(ContractPremiumPaymentIntent.Calculate)
+
+        viewModel.events.test {
+            viewModel.sendIntent(ContractPremiumPaymentIntent.Pay)
+            expectNoEvents()
+        }
+    }
+
     private suspend fun ReceiveTurbine<ContractPremiumPaymentUiState>.awaitUntil(
         predicate: (ContractPremiumPaymentUiState) -> Boolean,
     ): ContractPremiumPaymentUiState {

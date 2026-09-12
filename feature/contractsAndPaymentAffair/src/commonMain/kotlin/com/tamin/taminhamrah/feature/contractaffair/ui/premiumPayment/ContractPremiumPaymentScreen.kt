@@ -44,6 +44,7 @@ import com.tamin.taminhamrah.model.contractAffair.ContractLastPaymentPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.components.toast.AppToastHost
@@ -200,6 +201,7 @@ internal fun ContractPremiumPaymentScreen(
 
             PremiumPaymentBottomBar(
                 enabled = uiState.canPay,
+                isLoading = uiState.isPaying,
                 onPay = { onIntent(ContractPremiumPaymentIntent.Pay) },
             )
         }
@@ -209,6 +211,7 @@ internal fun ContractPremiumPaymentScreen(
 @Composable
 private fun PremiumPaymentBottomBar(
     enabled: Boolean,
+    isLoading: Boolean,
     onPay: () -> Unit,
 ) {
     val colors = LocalTaminColors.current
@@ -218,21 +221,20 @@ private fun PremiumPaymentBottomBar(
             .background(colors.bgPage),
     ) {
         TaminDivider()
-        TaminPrimaryButton(
-            background = Brush.linearGradient(listOf(GradientGreenStart, GradientGreenEnd)),
-            iconAtStart = true,
-            icon = Icons.Outlined.Payment,
+        LoadingButton(
             text = stringResource(Res.string.contract_affairs_pay_premium),
-            onClick = { if (enabled) onPay() },
-            modifier = Modifier
-                .padding(
-                    start = Spacing.page,
-                    end = Spacing.page,
-                    top = Spacing.md,
-                    bottom = WindowInsets.navigationBars.asPaddingValues()
-                        .calculateBottomPadding() + Spacing.md,
-                )
-                .alpha(if (enabled) 1f else 0.45f),
+            onClick = onPay,
+            enabled = enabled,
+            isLoading = isLoading,
+            icon = Icons.Outlined.Payment,
+            background = Brush.linearGradient(listOf(GradientGreenStart, GradientGreenEnd)),
+            modifier = Modifier.padding(
+                start = Spacing.page,
+                end = Spacing.page,
+                top = Spacing.md,
+                bottom = WindowInsets.navigationBars.asPaddingValues()
+                    .calculateBottomPadding() + Spacing.md,
+            ),
         )
     }
 }
