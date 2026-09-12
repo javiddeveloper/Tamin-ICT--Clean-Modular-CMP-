@@ -36,7 +36,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.SectionLabel
-import com.tamin.taminhamrah.ui.components.TaminCheckbox1
+import com.tamin.taminhamrah.ui.components.TaminStaticCheckbox
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
@@ -145,7 +145,7 @@ fun DisabilityPensionSummaryStep(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                TaminCheckbox1(checked = state.isFinalConfirmed)
+                TaminStaticCheckbox(checked = state.isFinalConfirmed)
                 Text(
                     text = stringResource(Res.string.disability_pension_summary_confirm_label, state.applicantFullName),
                     style = MaterialTheme.typography.bodySmall,

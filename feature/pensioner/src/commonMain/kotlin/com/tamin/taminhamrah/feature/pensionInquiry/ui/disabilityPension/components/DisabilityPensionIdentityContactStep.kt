@@ -27,7 +27,7 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contrac
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionIntent
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.DisabilityPensionUiState
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.contract.LandlinePhoneError
-import com.tamin.taminhamrah.ui.components.TaminCheckbox1
+import com.tamin.taminhamrah.ui.components.TaminStaticCheckbox
 import com.tamin.taminhamrah.ui.components.TaminStyledTextField
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -183,7 +183,7 @@ fun DisabilityPensionIdentityContactStep(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                TaminCheckbox1(checked = state.isIdentityConfirmed)
+                TaminStaticCheckbox(checked = state.isIdentityConfirmed)
                 Text(
                     text = stringResource(Res.string.disability_pension_identity_confirm_label),
                     style = MaterialTheme.typography.bodySmall,

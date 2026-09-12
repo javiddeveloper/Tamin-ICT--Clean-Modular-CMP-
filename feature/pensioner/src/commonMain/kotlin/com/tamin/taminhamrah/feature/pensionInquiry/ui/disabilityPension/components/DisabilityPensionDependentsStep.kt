@@ -31,7 +31,7 @@ import com.tamin.taminhamrah.ui.components.BannerCard
 import com.tamin.taminhamrah.ui.components.BannerType
 import com.tamin.taminhamrah.ui.components.IconPosition
 import com.tamin.taminhamrah.ui.components.StatusPill
-import com.tamin.taminhamrah.ui.components.TaminCheckbox1
+import com.tamin.taminhamrah.ui.components.TaminStaticCheckbox
 import com.tamin.taminhamrah.ui.components.TaminEmptyState
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
@@ -123,7 +123,7 @@ fun DisabilityPensionDependentsStep(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                TaminCheckbox1(checked = state.isDependentsListConfirmed)
+                TaminStaticCheckbox(checked = state.isDependentsListConfirmed)
                 Text(
                     text = stringResource(Res.string.disability_pension_dependents_confirm_label),
                     style = MaterialTheme.typography.bodySmall,

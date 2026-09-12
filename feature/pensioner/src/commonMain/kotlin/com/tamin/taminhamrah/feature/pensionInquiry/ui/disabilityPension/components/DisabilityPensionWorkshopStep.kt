@@ -26,7 +26,7 @@ import com.tamin.taminhamrah.model.personal.DisabilityPersonalPR
 import com.tamin.taminhamrah.model.personal.DisabilityWorkPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import com.tamin.taminhamrah.ui.components.TaminCheckbox1
+import com.tamin.taminhamrah.ui.components.TaminStaticCheckbox
 import com.tamin.taminhamrah.ui.components.TaminStyledTextField
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -132,7 +132,7 @@ fun DisabilityPensionWorkshopStep(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                TaminCheckbox1(checked = state.isWorkshopConfirmed)
+                TaminStaticCheckbox(checked = state.isWorkshopConfirmed)
                 Text(
                     text = stringResource(Res.string.disability_pension_workshop_confirm_label),
                     style = MaterialTheme.typography.bodySmall,
