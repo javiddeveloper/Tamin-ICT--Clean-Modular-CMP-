@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.model.activeRelation.ActiveRelationPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -212,7 +213,8 @@ private fun InfoRow(
                 text = value,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold,
-                color = taminColors.textPrimary
+                color = taminColors.textPrimary,
+                textAlign = TextAlign.End
             )
         }
     }

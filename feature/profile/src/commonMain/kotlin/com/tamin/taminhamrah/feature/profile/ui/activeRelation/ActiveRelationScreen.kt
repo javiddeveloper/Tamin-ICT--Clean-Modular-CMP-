@@ -125,7 +125,8 @@ internal fun ActiveRelationScreen(
             overscrollEffect = rememberJellyOverscroll(),
             modifier = Modifier
                 .fillMaxSize()
-                .driveTopArea(topArea, listState),
+                .driveTopArea(topArea, listState)
+                .padding(top= Spacing.lg),
             contentPadding = topAreaContentPadding(
                 state = topArea,
                 rest = PaddingValues(

@@ -122,7 +122,7 @@ internal fun Step2WorkshopStep(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = padding.calculateTopPadding())
+                    .padding(padding)
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = Spacing.lg),
             ) {
@@ -312,7 +312,6 @@ internal fun Step2WorkshopStep(
                 }
 
                 Spacer(modifier = Modifier.height(Spacing.lg))
-                Spacer(modifier = Modifier.height(padding.calculateBottomPadding()))
             }
         }
     }
