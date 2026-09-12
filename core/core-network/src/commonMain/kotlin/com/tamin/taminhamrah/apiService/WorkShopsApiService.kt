@@ -143,7 +143,7 @@ internal interface WorkShopsApiService {
      * Binds a payment ticket to the signed-in user, on the gateway's own host.
      *
      * Absolute, because TFH is not behind this service's base URL — the caller builds the address
-     * from [NetworkConstants.BASE_URL_TFH].
+     * from the gateway base URL Developer Options resolves (`BaseUrlKey.TFH`).
      */
     @GET
     suspend fun getPaymentTicketInfo(
