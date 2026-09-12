@@ -11,16 +11,23 @@ import com.tamin.taminhamrah.feature.taminServices.inspection.contract.Inspectio
 import com.tamin.taminhamrah.feature.taminServices.inspection.contract.WorkshopInfoStepState
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.mapper.toPR
 import com.tamin.taminhamrah.mapper.personal.toPresentation
-import com.tamin.taminhamrah.useCases.inspection.GetInspectionListUseCase
-import com.tamin.taminhamrah.useCases.inspection.GetBranchListUseCase
+import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.request.FilterOperator
+import com.tamin.taminhamrah.model.request.FilterProperty
+import com.tamin.taminhamrah.paging.Paginator
+import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
+import com.tamin.taminhamrah.useCases.inspection.GetBranchPageUseCase
 import com.tamin.taminhamrah.useCases.inspection.GetInspectionReportPDFUseCase
-import com.tamin.taminhamrah.useCases.inspection.GetJobListUseCase
+import com.tamin.taminhamrah.useCases.inspection.GetInsurancePageUseCase
+import com.tamin.taminhamrah.useCases.inspection.GetJobPageUseCase
 import com.tamin.taminhamrah.useCases.inspection.SubmitInspectionUseCase
 import com.tamin.taminhamrah.useCases.user.GetUserProfileUseCase
-import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
@@ -28,9 +35,9 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 
 class InspectionViewModel(
-    private val getInspectionListUseCase: GetInspectionListUseCase,
-    private val getBranchListUseCase: GetBranchListUseCase,
-    private val getJobListUseCase: GetJobListUseCase,
+    private val getInsurancePageUseCase: GetInsurancePageUseCase,
+    private val getBranchPageUseCase: GetBranchPageUseCase,
+    private val getJobPageUseCase: GetJobPageUseCase,
     private val submitInspectionUseCase: SubmitInspectionUseCase,
     private val getInspectionReportPDFUseCase: GetInspectionReportPDFUseCase,
     private val getUserProfileUseCase: GetUserProfileUseCase,
@@ -38,15 +45,43 @@ class InspectionViewModel(
     initialState = InspectionUiState()
 ) {
 
+    // One offset paginator per list endpoint (see docs/vault/Pagination.md). The branch/job
+    // paginators stay idle at their default empty state until the request wizard opens and
+    // refreshes them; the inspection paginator loads its first page on init.
+    private val inspectionPaginator = Paginator(
+        loadPage = { query -> getInsurancePageUseCase(query).first() },
+    )
+    private val branchPaginator = Paginator(
+        loadPage = { query -> getBranchPageUseCase(query).first() },
+    )
+    private val jobPaginator = Paginator(
+        loadPage = { query -> getJobPageUseCase(query).first() },
+    )
+
     init {
-        sendIntent(InspectionIntent.LoadInspections())
+        sendIntent(InspectionIntent.LoadInspections)
     }
 
     override fun handleIntent(intent: InspectionIntent): Flow<PartialState> {
         return when (intent) {
-            is InspectionIntent.LoadInspections -> handleLoadInspections(intent)
-            is InspectionIntent.LoadBranches -> handleLoadBranches(intent)
-            is InspectionIntent.LoadJobs -> handleLoadJobs(intent)
+            is InspectionIntent.LoadInspections -> handleLoadInspections()
+            is InspectionIntent.LoadNextInspections -> flow { inspectionPaginator.loadNext() }
+            is InspectionIntent.RetryNextInspections -> flow { inspectionPaginator.retry() }
+
+            is InspectionIntent.LoadNextBranches -> flow { branchPaginator.loadNext() }
+            is InspectionIntent.RetryNextBranches -> flow { branchPaginator.retry() }
+            is InspectionIntent.SearchBranches -> flow {
+                emit(PartialState.BranchQueryChanged(intent.query))
+                branchPaginator.refresh(branchBaseQuery(intent.query))
+            }
+
+            is InspectionIntent.LoadNextJobs -> flow { jobPaginator.loadNext() }
+            is InspectionIntent.RetryNextJobs -> flow { jobPaginator.retry() }
+            is InspectionIntent.SearchJobs -> flow {
+                emit(PartialState.JobQueryChanged(intent.query))
+                jobPaginator.refresh(jobBaseQuery(intent.query))
+            }
+
             is InspectionIntent.SubmitRequest -> handleSubmitRequest(intent)
             is InspectionIntent.DownloadReportPdf -> handleDownloadReportPdf(intent)
             is InspectionIntent.DismissPdfViewer -> flow { emit(PartialState.ViewerPdfChanged(null)) }
@@ -69,21 +104,91 @@ class InspectionViewModel(
     }
 
     /**
+     * Long-lived intent: subscribes the three paginators' state to the UI (mirrors
+     * `MyInboxViewModel.handleLoadInbox`) and kicks off the inspection list's first page.
+     * Branch/job observers are wired here too so the wizard only has to call `refresh()` —
+     * it never re-subscribes.
+     */
+    private fun handleLoadInspections(): Flow<PartialState> = merge(
+        observeInspectionPaging(),
+        observeBranchPaging(),
+        observeJobPaging(),
+        flow { inspectionPaginator.loadNext() },
+    )
+
+    private fun observeInspectionPaging(): Flow<PartialState> = inspectionPaginator.state.map { paging ->
+        val errorMessage = paging.error?.toSingleLineMessage()
+        if (errorMessage != null && paging.items.isEmpty()) {
+            sendEvent(InspectionEvent.ShowToast(errorMessage))
+        }
+        PartialState.InspectionsPagingChanged(
+            items = paging.items.map { it.toPR() }.toImmutableList(),
+            isLoadingFirstPage = paging.isLoadingFirstPage,
+            isLoadingNextPage = paging.isLoadingNextPage,
+            endReached = paging.endReached,
+            error = errorMessage,
+        )
+    }
+
+    private fun observeBranchPaging(): Flow<PartialState> = branchPaginator.state.map { paging ->
+        PartialState.BranchesPagingChanged(
+            items = paging.items.map { it.toPR() }.toImmutableList(),
+            isLoadingFirstPage = paging.isLoadingFirstPage,
+            isLoadingNextPage = paging.isLoadingNextPage,
+            endReached = paging.endReached,
+            error = paging.error?.toSingleLineMessage(),
+        )
+    }
+
+    private fun observeJobPaging(): Flow<PartialState> = jobPaginator.state.map { paging ->
+        PartialState.JobsPagingChanged(
+            items = paging.items.map { it.toPR() }.toImmutableList(),
+            isLoadingFirstPage = paging.isLoadingFirstPage,
+            isLoadingNextPage = paging.isLoadingNextPage,
+            endReached = paging.endReached,
+            error = paging.error?.toSingleLineMessage(),
+        )
+    }
+
+    /** `type=1` + `status=1` are always sent; a non-blank [query] adds a `name LIKE "*query*"` filter. */
+    private fun branchBaseQuery(query: String): ApiQueryParamDN = ApiQueryParamDN(
+        filters = buildList {
+            add(ApiFilterDN(FilterProperty.TYPE, "1", FilterOperator.EQUAL))
+            add(ApiFilterDN(FilterProperty.STATUS, "1", FilterOperator.EQUAL))
+            query.trim().takeIf { it.isNotEmpty() }?.let {
+                add(ApiFilterDN(FilterProperty.NAME, "*$it*", FilterOperator.LIKE))
+            }
+        }
+    )
+
+    /** `jobDescription LIKE "*query*"`, or `LIKE "*"` (match all) when [query] is blank. */
+    private fun jobBaseQuery(query: String): ApiQueryParamDN = ApiQueryParamDN(
+        filters = listOf(
+            ApiFilterDN(
+                FilterProperty.JOB_DESCRIPTION,
+                query.trim().takeIf { it.isNotEmpty() }?.let { "*$it*" } ?: "*",
+                FilterOperator.LIKE,
+            )
+        )
+    )
+
+    /**
      * Fires current-user (Step1) and branch+job (Step2) requests together on entry, per product
      * decision to prefetch the whole wizard's data up front rather than per-step. Each call's
      * failure blocks only the step it feeds with a fatal, retryable error tagged to that specific
-     * call (mirrors the occurrence wizard's per-[InspectionRequestErrorSource] error map) — Step1
-     * via [InspectionRequestErrorSource.USER_INFO], Step2's branch/job pickers via
-     * [InspectionRequestErrorSource.BRANCHES]/[InspectionRequestErrorSource.JOBS] independently, so
-     * retrying one never re-triggers the other if it already succeeded.
+     * call — Step1 via [InspectionRequestErrorSource.USER_INFO], Step2's branch/job pickers via
+     * [InspectionRequestErrorSource.BRANCHES]/[InspectionRequestErrorSource.JOBS] independently
+     * (each picker has its own paginator), so retrying one never re-triggers the other.
      */
     private fun handleOpenRequestFlow(intent: InspectionIntent.OpenRequestFlow): Flow<PartialState> = merge(
         flow { emit(PartialState.RequestFlowOpened(intent.item)) },
         fetchUserProfileForRequest(),
-        handleLoadBranches(InspectionIntent.LoadBranches()),
-        handleLoadJobs(InspectionIntent.LoadJobs()),
+        flow { branchPaginator.refresh(branchBaseQuery("")) },
+        flow { jobPaginator.refresh(jobBaseQuery("")) },
     ).onStart {
         emit(PartialState.ClearRequestErrors)
+        emit(PartialState.BranchQueryChanged(""))
+        emit(PartialState.JobQueryChanged(""))
         emit(PartialState.Loading(true))
     }.onCompletion {
         emit(PartialState.Loading(false))
@@ -91,8 +196,8 @@ class InspectionViewModel(
 
     private fun handleRetrySource(source: InspectionRequestErrorSource): Flow<PartialState> = when (source) {
         InspectionRequestErrorSource.USER_INFO -> fetchUserProfileForRequest()
-        InspectionRequestErrorSource.BRANCHES -> handleLoadBranches(InspectionIntent.LoadBranches())
-        InspectionRequestErrorSource.JOBS -> handleLoadJobs(InspectionIntent.LoadJobs())
+        InspectionRequestErrorSource.BRANCHES -> flow { branchPaginator.retry() }
+        InspectionRequestErrorSource.JOBS -> flow { jobPaginator.retry() }
     }.onStart {
         // Optimistic clear here rather than in the success reducer: branches and jobs load
         // independently, so only the call actually being retried should have its error cleared.
@@ -119,39 +224,6 @@ class InspectionViewModel(
             emit(PartialState.RequestFlowClosed)
         } else {
             emit(PartialState.GoToPreviousRequestStep)
-        }
-    }
-
-    private fun handleLoadInspections(intent: InspectionIntent.LoadInspections): Flow<PartialState> = flow {
-        emit(PartialState.Loading(true))
-        try {
-            val result = getInspectionListUseCase(filters = intent.filters)
-            emit(PartialState.InspectionsLoaded(result.list.map { it.toPR() }))
-        } catch (e: Exception) {
-            emit(PartialState.Loading(false))
-            sendEvent(InspectionEvent.ShowToast(e.toSingleLineMessage()))
-        }
-    }
-
-    private fun handleLoadBranches(intent: InspectionIntent.LoadBranches): Flow<PartialState> = flow {
-        emit(PartialState.Loading(true))
-        try {
-            val result = getBranchListUseCase(filters = intent.filters)
-            emit(PartialState.BranchesLoaded(result.list.map { it.toPR() }))
-        } catch (e: Exception) {
-            emit(PartialState.Loading(false))
-            emit(PartialState.RequestError(e.toSingleLineMessage(), InspectionRequestErrorSource.BRANCHES))
-        }
-    }
-
-    private fun handleLoadJobs(intent: InspectionIntent.LoadJobs): Flow<PartialState> = flow {
-        emit(PartialState.Loading(true))
-        try {
-            val result = getJobListUseCase(filters = intent.filters)
-            emit(PartialState.JobsLoaded(result.list.map { it.toPR() }))
-        } catch (e: Exception) {
-            emit(PartialState.Loading(false))
-            emit(PartialState.RequestError(e.toSingleLineMessage(), InspectionRequestErrorSource.JOBS))
         }
     }
 
@@ -184,9 +256,46 @@ class InspectionViewModel(
         partialState: PartialState
     ): InspectionUiState = when (partialState) {
         is PartialState.Loading -> currentState.copy(isLoading = partialState.isLoading)
-        is PartialState.InspectionsLoaded -> currentState.copy(isLoading = false, inspections = partialState.list)
-        is PartialState.BranchesLoaded -> currentState.copy(isLoading = false, branches = partialState.list)
-        is PartialState.JobsLoaded -> currentState.copy(isLoading = false, jobs = partialState.list)
+
+        is PartialState.InspectionsPagingChanged -> currentState.copy(
+            inspections = partialState.items,
+            isLoadingInspections = partialState.isLoadingFirstPage,
+            isLoadingNextInspections = partialState.isLoadingNextPage,
+            inspectionsEndReached = partialState.endReached,
+            inspectionsPagingError = partialState.error,
+        )
+
+        is PartialState.BranchesPagingChanged -> currentState.copy(
+            branches = partialState.items,
+            isLoadingBranches = partialState.isLoadingFirstPage,
+            isLoadingNextBranches = partialState.isLoadingNextPage,
+            branchesEndReached = partialState.endReached,
+            branchesPagingError = partialState.error,
+            requestErrors = tagPickerError(
+                currentState.requestErrors,
+                InspectionRequestErrorSource.BRANCHES,
+                partialState.error,
+                partialState.items.isEmpty(),
+            ),
+        )
+
+        is PartialState.JobsPagingChanged -> currentState.copy(
+            jobs = partialState.items,
+            isLoadingJobs = partialState.isLoadingFirstPage,
+            isLoadingNextJobs = partialState.isLoadingNextPage,
+            jobsEndReached = partialState.endReached,
+            jobsPagingError = partialState.error,
+            requestErrors = tagPickerError(
+                currentState.requestErrors,
+                InspectionRequestErrorSource.JOBS,
+                partialState.error,
+                partialState.items.isEmpty(),
+            ),
+        )
+
+        is PartialState.BranchQueryChanged -> currentState.copy(branchQuery = partialState.query)
+        is PartialState.JobQueryChanged -> currentState.copy(jobQuery = partialState.query)
+
         is PartialState.SubmitSuccess -> currentState.copy(
             isLoading = false,
             isSubmitted = true,
@@ -257,4 +366,13 @@ class InspectionViewModel(
         sendEvent(InspectionEvent.ShowToast(message))
         return PartialState.Loading(false)
     }
+
+    /** A picker's first-page failure with nothing to show blocks Step 2; anything else clears its tag. */
+    private fun tagPickerError(
+        current: Map<InspectionRequestErrorSource, String>,
+        source: InspectionRequestErrorSource,
+        error: String?,
+        itemsEmpty: Boolean,
+    ): Map<InspectionRequestErrorSource, String> =
+        if (error != null && itemsEmpty) current + (source to error) else current - source
 }
