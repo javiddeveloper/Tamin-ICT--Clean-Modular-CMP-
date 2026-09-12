@@ -141,6 +141,9 @@ sealed interface StoryViewerIntent {
     /** That finger lifted. */
     data object Resume : StoryViewerIntent
 
+    /** Swiped to a different channel via gesture. */
+    data class JumpToChannel(val index: Int) : StoryViewerIntent
+
     /**
      * The comment field gained or lost focus. Holds the story for as long as the keyboard is up,
      * independently of any finger resting on it.

@@ -92,6 +92,7 @@ class StoryViewerViewModel(
             StoryViewerIntent.Previous -> goPrevious()
             StoryViewerIntent.Pause -> setHold(touchHeld = true)
             StoryViewerIntent.Resume -> setHold(touchHeld = false)
+            is StoryViewerIntent.JumpToChannel -> jumpToChannel(intent.index)
             is StoryViewerIntent.CommentFocusChanged -> setHold(composingComment = intent.focused)
             is StoryViewerIntent.CommentChanged ->
                 emit(PartialState.CommentDraftChanged(intent.draft))
@@ -205,6 +206,17 @@ class StoryViewerViewModel(
 
         val target = state.channels[previousChannel]
         startSegment(state.channels, previousChannel, target.items.lastIndex)
+    }
+
+    private suspend fun FlowCollector<PartialState>.jumpToChannel(channelIndex: Int) {
+        val state = uiState.value
+        val validIndex = channelIndex.coerceIn(0, state.channels.lastIndex)
+        if (state.channelIndex == validIndex) return
+        
+        // Mark the current one as seen before leaving it
+        state.channel?.let { markStoryChannelSeenUseCase(it.key) }
+        
+        startSegment(state.channels, validIndex, itemIndex = 0)
     }
 
     /**
