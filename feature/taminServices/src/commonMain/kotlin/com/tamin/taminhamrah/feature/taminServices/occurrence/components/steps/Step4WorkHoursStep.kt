@@ -142,7 +142,7 @@ internal fun Step4WorkHoursStep(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = padding.calculateTopPadding())
+                    .padding(padding)
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = Spacing.lg),
             ) {
@@ -294,7 +294,6 @@ internal fun Step4WorkHoursStep(
 
 
                 Spacer(modifier = Modifier.height(Spacing.lg))
-                Spacer(modifier = Modifier.height(padding.calculateBottomPadding()))
             }
         }
     }

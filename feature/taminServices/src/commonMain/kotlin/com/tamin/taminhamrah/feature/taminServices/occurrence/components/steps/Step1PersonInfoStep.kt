@@ -126,7 +126,7 @@ internal fun Step1PersonInfoStep(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = padding.calculateTopPadding())
+                    .padding(padding)
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = Spacing.lg),
             ) {
@@ -182,7 +182,6 @@ internal fun Step1PersonInfoStep(
                 }
 
                 Spacer(modifier = Modifier.height(Spacing.lg))
-                Spacer(modifier = Modifier.height(padding.calculateBottomPadding()))
             }
         }
     }

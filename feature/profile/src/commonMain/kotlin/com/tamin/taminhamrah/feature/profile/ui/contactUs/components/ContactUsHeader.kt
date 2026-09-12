@@ -1,12 +1,12 @@
 package com.tamin.taminhamrah.feature.profile.ui.contactUs.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -16,17 +16,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import com.tamin.taminhamrah.ui.components.collapseAway
+import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.toparea.TopAreaState
+import com.tamin.taminhamrah.ui.toparea.topAreaHide
+import kotlin.math.roundToInt
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
@@ -36,87 +38,58 @@ import taminx.core.core_ui.ic_support
 import taminx.core.core_ui.ic_tamin_chevron_back
 
 @Composable
-fun ContactUsHeader(
+internal fun ContactUsHeader(
     onBackClicked: () -> Unit,
+    topAreaState: TopAreaState,
     modifier: Modifier = Modifier,
-    collapseProgress: () -> Float = { 0f },
 ) {
     val taminColors = LocalTaminColors.current
-    val profileGradientBrush = remember(taminColors.profileGradientStops) {
+
+    val topBarGradient = remember(taminColors.profileGradientStops) {
         Brush.horizontalGradient(taminColors.profileGradientStops)
     }
+
+    val title = stringResource(Res.string.contact_us_title)
+    val subtitle = stringResource(Res.string.contact_us_subtitle)
 
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(
                 RoundedCornerShape(
-                    bottomStart = 40.dp,
-                    bottomEnd = 40.dp
+                    bottomEnd = 40.dp,
+                    bottomStart = 40.dp
                 )
             )
-            .background(profileGradientBrush)
+            .background(taminTopAppBarGradient(taminColors.profileGradientStops)),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Title fades out and the subtitle fades in over the same title-row spot, so
-        // scrolling reads as the subtitle taking over the title's place rather than two
-        // unrelated labels swapping. Sequential (not overlapping) so the RTL glyphs
-        // never sit half-opaque on top of each other mid-fade.
-        val title = stringResource(Res.string.contact_us_title)
-        val subtitle = stringResource(Res.string.contact_us_subtitle)
-        val titleAlpha = { (1f - collapseProgress() * 2f).coerceIn(0f, 1f) }
-        val collapsedAlpha = { ((collapseProgress() - 0.5f) * 2f).coerceIn(0f, 1f) }
-
         TaminTopAppBar(
             title = title,
-            background = profileGradientBrush,
-            titleContent = {
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = Color.White,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .graphicsLayer { alpha = titleAlpha() },
-                    )
-                    Text(
-                        text = subtitle,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = Color.White,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .graphicsLayer { alpha = collapsedAlpha() },
-                    )
-                }
-            },
+            centerTitle = true,
+            background = topBarGradient,
+            bottomPadding = Spacing.none,
             navigationIcon = {
                 TaminTopAppBarButton(
+                    bordered = true,
                     icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                     contentDescription = null,
                     onClick = onBackClicked,
-                    bordered = true
-                )
-            },
-            // The header icon fades out below as this fades in here, on the same schedule
-            // as the title/subtitle handoff, so it reads as the icon moving up into the bar.
-            action = {
-                TaminTopAppBarButton(
-                    icon = vectorResource(Res.drawable.ic_support),
-                    contentDescription = null,
-                    onClick = {},
-                    modifier = Modifier.graphicsLayer { alpha = collapsedAlpha() },
+                    modifier = Modifier
                 )
             }
         )
 
-        // Only the expanded-state icon below folds away; the title row itself stays put
-        // so the bar reads the same as the rest of the app once collapsed.
+        // Only the expanded-state furniture below the title row folds away; the title
+        // row itself stays put so the bar reads the same as the rest of the app once collapsed.
+        // This shrinks the column's own measured height, which is what makes the header's total
+        // rendered height track the drag -- so it must span the full 0..1 progress range (the
+        // same range maxOffsetPx models), never a narrower one, or the header visibly collapses
+        // faster than the finger.
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .collapseAway(collapseProgress)
+                .topAreaHide(topAreaState)
                 .padding(bottom = Spacing.xl)
         ) {
             DecorativeBackgroundCircle(
@@ -129,7 +102,10 @@ fun ContactUsHeader(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                AnimatedRingHeaderIcon(icon = vectorResource(Res.drawable.ic_support))
+                AnimatedRingHeaderIcon(
+                    icon = vectorResource(Res.drawable.ic_support),
+                    animated = !topAreaState.isMeasureProbe
+                )
                 Spacer(modifier = Modifier.height(Spacing.md))
                 Text(
                     text = subtitle,
@@ -138,14 +114,37 @@ fun ContactUsHeader(
                 )
             }
         }
+
+        // Zero height while expanded, growing to CollapsedBottomSpace as the header folds --
+        // the inverse of topAreaHide above. Gives the collapsed bar breathing room below its
+        // title row without adding to the expanded gap between the title and the ring icon.
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .topAreaReveal(topAreaState, CollapsedBottomSpace)
+        )
     }
 }
+
+private val CollapsedBottomSpace = 20.dp
+
+/** Grows a child from zero up to [height] as [state] folds -- the inverse of [topAreaHide]. */
+private fun Modifier.topAreaReveal(state: TopAreaState, height: Dp): Modifier =
+    layout { measurable, constraints ->
+        val targetPx = height.roundToPx()
+        val revealedPx = (targetPx * state.progress).roundToInt()
+        val placeable = measurable.measure(constraints.copy(minHeight = 0, maxHeight = revealedPx.coerceAtLeast(0)))
+        layout(placeable.width, revealedPx) { placeable.place(0, 0) }
+    }
 
 @com.tamin.taminhamrah.ui.PreviewRtlTheme
 @Composable
 private fun PreviewContactUsHeaderLight() {
     com.tamin.taminhamrah.ui.PreviewRtlThemeContent {
-        ContactUsHeader(onBackClicked = {})
+        ContactUsHeader(
+            onBackClicked = {},
+            topAreaState = com.tamin.taminhamrah.ui.toparea.rememberTopAreaState(224.dp, 64.dp)
+        )
     }
 }
 
@@ -153,6 +152,9 @@ private fun PreviewContactUsHeaderLight() {
 @Composable
 private fun PreviewContactUsHeaderDark() {
     com.tamin.taminhamrah.ui.theme.TaminHamrahTheme(darkTheme = true) {
-        ContactUsHeader(onBackClicked = {})
+        ContactUsHeader(
+            onBackClicked = {},
+            topAreaState = com.tamin.taminhamrah.ui.toparea.rememberTopAreaState(224.dp, 64.dp)
+        )
     }
 }

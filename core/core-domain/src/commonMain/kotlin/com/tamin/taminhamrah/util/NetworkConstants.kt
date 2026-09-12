@@ -6,6 +6,12 @@ object NetworkConstants {
     const val BASE_URL_ACCOUNT = "https://account.tamin.ir/auth/"
     const val BASE_URL_HEALTH_PROFILE = "http://172.16.14.115:5700/api/"
     const val AI_BASE_URL = "https://sw.tamin.ir/api/"
+
+    /** The payment gateway (تامین فراهم). Every payment in the app is settled through it. */
+    const val TFH_BASE_URL = "https://tfh.tamin.ir/api/v1.1/payment/"
+
+    /** Where the gateway sends the browser once it is finished, back into the app. */
+    const val PAYMENT_RETURN_URI = "mytamin://payment_callback"
     const val CLIENT_ID = "1c13370e0148031d1546242f2448152e"
     const val REQUEST_TIMEOUT_60_SEC = 60_000L
     const val REQUEST_TIMEOUT_5_MIN = 300_000L
