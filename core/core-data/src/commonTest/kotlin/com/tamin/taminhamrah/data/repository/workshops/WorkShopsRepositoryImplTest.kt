@@ -23,6 +23,8 @@ import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDTO
 import com.tamin.taminhamrah.model.workshop.DebitReasonDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmitRequestDTO
+import com.tamin.taminhamrah.model.workshop.EmployerCommitmentInfoDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberConfirmResultDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
@@ -31,11 +33,14 @@ import com.tamin.taminhamrah.model.workshop.SmsMessageDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionQuery
+import com.tamin.taminhamrah.model.workshop.WorkshopContractDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDTO
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -62,6 +67,22 @@ private class FakeWorkShopsRemoteDataSource : WorkShopsRemoteDataSource {
     }
 
     override suspend fun getAllEmployerAgreementByNationalId(query: ApiQueryParamDN) = notImplemented()
+    override suspend fun getEmployerAgreementsByWorkshop(
+        workshopId: String,
+        branchCode: String,
+        query: ApiQueryParamDN
+    ): ListData<EmployerAgreementDTO> {
+        notImplemented()
+    }
+
+    override suspend fun getWorkshopContracts(
+        workshopId: String,
+        branchCode: String,
+        query: ApiQueryParamDN
+    ): ListData<WorkshopContractDTO> {
+        notImplemented()
+    }
+
     override suspend fun getWorkshopPaymentSheets(query: ApiQueryParamDN) = notImplemented()
     override suspend fun getDebitReasons(query: ApiQueryParamDN) = notImplemented()
     override suspend fun getWorkshopDebitList(workshopId: String, branchCode: String, query: ApiQueryParamDN) = notImplemented()
@@ -93,6 +114,32 @@ private class FakeWorkShopsRemoteDataSource : WorkShopsRemoteDataSource {
     override suspend fun verifyLegalRepresentativeTicket(ticket: String) = notImplemented()
     override suspend fun submitLegalRepresentative(ticket: String, request: LegalRepresentativeRequestDTO) = notImplemented()
     override suspend fun deleteLegalRepresentative(ticket: String, stackId: Long) = notImplemented()
+    override suspend fun requestEmployerAgreementTicket(
+        mobileNumber: String,
+        email: String
+    ): String {
+        notImplemented()
+    }
+
+    override suspend fun getEmployerAgreementUserInfo(verificationCode: String): EmployerCommitmentInfoDTO {
+        notImplemented()
+    }
+
+    override suspend fun getEmployerWorkshopsWithoutContract(query: ApiQueryParamDN): ListData<WorkshopWithoutContractDTO> {
+        notImplemented()
+    }
+
+    override suspend fun getEmployerWorkshopContractList(
+        workshopId: String,
+        branchCode: String,
+        query: ApiQueryParamDN
+    ): ListData<WorkshopContractRowDTO> {
+        notImplemented()
+    }
+
+    override suspend fun submitEmployerAgreement(request: EmployerAgreementSubmitRequestDTO): String {
+        notImplemented()
+    }
 
     private fun notImplemented(): Nothing = throw UnsupportedOperationException("not needed by this test")
 }
