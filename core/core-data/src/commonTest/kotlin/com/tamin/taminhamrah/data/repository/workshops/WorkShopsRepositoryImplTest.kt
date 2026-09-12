@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.model.utils.ListData
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmitRequestDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeContractDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeRequestDTO
@@ -93,6 +94,13 @@ private class FakeWorkShopsRemoteDataSource : WorkShopsRemoteDataSource {
     override suspend fun verifyLegalRepresentativeTicket(ticket: String) = notImplemented()
     override suspend fun submitLegalRepresentative(ticket: String, request: LegalRepresentativeRequestDTO) = notImplemented()
     override suspend fun deleteLegalRepresentative(ticket: String, stackId: Long) = notImplemented()
+    override suspend fun getEmployerWorkshopsWithoutContract(query: ApiQueryParamDN) = notImplemented()
+    override suspend fun getEmployerWorkshopContractList(workshopId: String, branchCode: String, query: ApiQueryParamDN) = notImplemented()
+    override suspend fun getEmployerAgreementsByWorkshop(workshopId: String, branchCode: String, query: ApiQueryParamDN) = notImplemented()
+    override suspend fun getWorkshopContracts(workshopId: String, branchCode: String, query: ApiQueryParamDN) = notImplemented()
+    override suspend fun getEmployerAgreementUserInfo(verificationCode: String) = notImplemented()
+    override suspend fun requestEmployerAgreementTicket(mobileNumber: String, email: String) = notImplemented()
+    override suspend fun submitEmployerAgreement(request: EmployerAgreementSubmitRequestDTO) = notImplemented()
 
     private fun notImplemented(): Nothing = throw UnsupportedOperationException("not needed by this test")
 }
