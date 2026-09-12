@@ -24,6 +24,8 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -33,6 +35,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
@@ -164,8 +167,6 @@ internal fun StoryViewerBody(
     modifier: Modifier = Modifier,
 ) {
     val type = storyTextStyles()
-    val channel = state.channel
-    val item = state.item
 
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -179,104 +180,190 @@ internal fun StoryViewerBody(
     // While the keyboard is up, back closes it instead of the viewer.
     BackHandler(enabled = state.isComposingComment, onBack = dismissComment)
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .then(if (channel != null) Modifier.storyBackdrop(channel) else Modifier),
-    ) {
-        if (channel != null && item != null) {
-            StoryMediaLayer(
-                item = item,
-                isPaused = state.isPaused,
-                mediaFailed = state.mediaFailed,
-                onIntent = onIntent,
-            )
-
-            // Keeps the copy legible over whatever the media turned out to be.
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .height(StoryDimens.viewerScrimHeight)
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(
-                                Color.Transparent,
-                                StoryScrimInk.copy(alpha = StoryDimens.viewerScrimAlpha),
-                            ),
-                        ),
-                    ),
-            )
-
-            StoryTapZones(
-                isComposingComment = state.isComposingComment,
-                onIntent = onIntent,
-                onDismissComment = dismissComment,
-            )
-
-            Column(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .fillMaxWidth()
-                    .windowInsetsPadding(WindowInsets.statusBars),
-            ) {
-                StoryProgressBar(
-                    segmentCount = state.itemCount,
-                    currentIndex = state.itemIndex,
-                    segmentToken = state.segmentToken,
-                    durationMs = state.segmentDurationMs,
-                    elapsedMs = state.segmentElapsedMs,
-                    isPlaying = state.isPlaying,
-                    modifier = Modifier.padding(
-                        start = StoryDimens.progressPaddingHorizontal,
-                        end = StoryDimens.progressPaddingHorizontal,
-                        top = StoryDimens.progressPaddingTop,
-                    ),
-                )
-                StoryHeader(
-                    channel = channel,
-                    type = type,
-                    onClose = { onIntent(StoryViewerIntent.Close) },
-                    modifier = Modifier.padding(
-                        start = StoryDimens.headerPaddingHorizontal,
-                        end = StoryDimens.headerPaddingHorizontal,
-                        top = StoryDimens.headerPaddingTop,
-                    ),
-                )
-            }
-
-            StoryContent(
-                state = state,
-                channel = channel,
-                item = item,
-                type = type,
-                onIntent = onIntent,
-                onSubmitComment = {
-                    onIntent(StoryViewerIntent.CommentSubmitted)
-                    dismissComment()
-                },
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    // The union rather than either alone: the copy sits above the navigation bar
-                    // normally, and above the keyboard while the comment field has it open.
-                    .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime))
-                    // padding: 0 20px 30px — no top inset, so the copy hangs off the bottom of
-                    // the screen the way the design has it rather than floating 30 above it.
-                    .padding(
-                        start = StoryDimens.contentPaddingHorizontal,
-                        end = StoryDimens.contentPaddingHorizontal,
-                        bottom = StoryDimens.contentPaddingBottom,
-                    ),
+    //
+    if (state.channels.isEmpty()) {
+        Box(modifier = modifier.fillMaxSize()) {
+            ErrorStateView(
+                message = state.error,
+                onDismiss = onDismissError,
             )
         }
-
-        // A catalogue that would not load leaves nothing to show, so acknowledging the failure
-        // leaves the viewer rather than stranding the reader on an empty screen.
-        ErrorStateView(
-            message = state.error,
-            onDismiss = onDismissError,
-        )
+        return
     }
+
+    val pagerState = rememberPagerState(
+        initialPage = state.channelIndex,
+        pageCount = { state.channels.size }
+    )
+
+    LaunchedEffect(state.channelIndex) {
+        if (pagerState.currentPage != state.channelIndex) {
+            pagerState.animateScrollToPage(state.channelIndex)
+        }
+    }
+
+    LaunchedEffect(pagerState.settledPage) {
+        if (pagerState.settledPage != state.channelIndex) {
+            onIntent(StoryViewerIntent.JumpToChannel(pagerState.settledPage))
+        }
+    }
+
+    LaunchedEffect(pagerState.isScrollInProgress) {
+        if (pagerState.isScrollInProgress) {
+            onIntent(StoryViewerIntent.Pause)
+        } else {
+            onIntent(StoryViewerIntent.Resume)
+        }
+    }
+
+    HorizontalPager(
+        state = pagerState,
+        modifier = modifier.fillMaxSize(),
+    ) { page ->
+        val channel = state.channels[page]
+        val isCurrentPage = page == state.channelIndex
+
+        var lastSeenItem by remember { androidx.compose.runtime.mutableStateOf(channel.items.firstOrNull()) }
+        var lastSeenIndex by remember { androidx.compose.runtime.mutableStateOf(0) }
+
+        if (isCurrentPage) {
+            lastSeenItem = state.item
+            lastSeenIndex = state.itemIndex
+        }
+
+        val item = if (isCurrentPage) state.item else lastSeenItem
+
+        val pageState = if (isCurrentPage) state else state.copy(
+            channelIndex = page,
+            itemIndex = lastSeenIndex,
+            segmentElapsedMs = 0L,
+            isTouchHeld = true, // Force pause on inactive pages so they don't play
+            isComposingComment = false,
+            isBuffering = false,
+            mediaFailed = false,
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .storyBackdrop(channel),
+        ) {
+            if (item != null) {
+                var pendingMediaReady by remember { androidx.compose.runtime.mutableStateOf<Long?>(null) }
+                var pendingMediaFailed by remember { androidx.compose.runtime.mutableStateOf(false) }
+
+                val pageIntent: (StoryViewerIntent) -> Unit = { intent ->
+                    if (isCurrentPage) {
+                        if (intent == StoryViewerIntent.Resume && pagerState.isScrollInProgress) {
+                            // Ignore Resume from tap cancellation during drag
+                        } else {
+                            onIntent(intent)
+                        }
+                    } else {
+                        when (intent) {
+                            is StoryViewerIntent.MediaReady -> pendingMediaReady = intent.durationMs
+                            StoryViewerIntent.MediaFailed -> pendingMediaFailed = true
+                            else -> {}
+                        }
+                    }
+                }
+
+                LaunchedEffect(isCurrentPage) {
+                    if (isCurrentPage) {
+                        pendingMediaReady?.let { onIntent(StoryViewerIntent.MediaReady(it)) }
+                        if (pendingMediaFailed) onIntent(StoryViewerIntent.MediaFailed)
+                        pendingMediaReady = null
+                        pendingMediaFailed = false
+                    }
+                }
+
+                StoryMediaLayer(
+                    item = item,
+                    isPaused = pageState.isPaused,
+                    mediaFailed = pageState.mediaFailed,
+                    onIntent = pageIntent,
+                )
+
+                // Keeps the copy legible over whatever the media turned out to be.
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .height(StoryDimens.viewerScrimHeight)
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(
+                                    Color.Transparent,
+                                    StoryScrimInk.copy(alpha = StoryDimens.viewerScrimAlpha),
+                                ),
+                            ),
+                        ),
+                )
+
+                StoryTapZones(
+                    isComposingComment = pageState.isComposingComment,
+                    onIntent = pageIntent,
+                    onDismissComment = dismissComment,
+                )
+
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .fillMaxWidth()
+                        .windowInsetsPadding(WindowInsets.statusBars),
+                ) {
+                    StoryProgressBar(
+                        segmentCount = pageState.itemCount,
+                        currentIndex = pageState.itemIndex,
+                        segmentToken = pageState.segmentToken,
+                        durationMs = pageState.segmentDurationMs,
+                        elapsedMs = pageState.segmentElapsedMs,
+                        isPlaying = pageState.isPlaying,
+                        modifier = Modifier.padding(
+                            start = StoryDimens.progressPaddingHorizontal,
+                            end = StoryDimens.progressPaddingHorizontal,
+                            top = StoryDimens.progressPaddingTop,
+                        ),
+                    )
+                    StoryHeader(
+                        channel = channel,
+                        type = type,
+                        onClose = { pageIntent(StoryViewerIntent.Close) },
+                        modifier = Modifier.padding(
+                            start = StoryDimens.headerPaddingHorizontal,
+                            end = StoryDimens.headerPaddingHorizontal,
+                            top = StoryDimens.headerPaddingTop,
+                        ),
+                    )
+                }
+
+                StoryContent(
+                    state = pageState,
+                    channel = channel,
+                    item = item,
+                    type = type,
+                    onIntent = pageIntent,
+                    onSubmitComment = {
+                        pageIntent(StoryViewerIntent.CommentSubmitted)
+                        dismissComment()
+                    },
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        // The union rather than either alone: the copy sits above the navigation bar
+                        // normally, and above the keyboard while the comment field has it open.
+                        .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime))
+                        // padding: 0 20px 30px — no top inset, so the copy hangs off the bottom of
+                        // the screen the way the design has it rather than floating 30 above it.
+                        .padding(
+                            start = StoryDimens.contentPaddingHorizontal,
+                            end = StoryDimens.contentPaddingHorizontal,
+                            bottom = StoryDimens.contentPaddingBottom,
+                        ),
+                )
+            }
+        }
+    }
+    //
 }
 
 /** The channel gradient, plus the soft light the design puts in its upper corner. */
