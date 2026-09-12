@@ -152,6 +152,8 @@ import com.tamin.taminhamrah.mapper.campaign.toPresentation
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
+import com.tamin.taminhamrah.model.history.HistoryMonthStatusPR
+import com.tamin.taminhamrah.model.history.HistorySummaryPR
 import com.tamin.taminhamrah.openUrl
 import com.tamin.taminhamrah.ui.blur.AppBarScrim
 import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
@@ -159,6 +161,8 @@ import com.tamin.taminhamrah.ui.blur.NavigationBarItemContent
 import com.tamin.taminhamrah.ui.blur.TopBarScrim
 import com.tamin.taminhamrah.ui.blur.safeHazeSource
 import com.tamin.taminhamrah.ui.components.CampaignCarousel
+import com.tamin.taminhamrah.ui.components.HistorySummaryCard
+import com.tamin.taminhamrah.ui.components.HistorySummaryCardSkeleton
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import com.tamin.taminhamrah.ui.contract.CustomNavigationBarItem
 import com.tamin.taminhamrah.ui.home.HomeViewModel
@@ -166,7 +170,10 @@ import com.tamin.taminhamrah.ui.home.contract.HomeEvent
 import com.tamin.taminhamrah.ui.home.contract.HomeIntent
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.AppConfig
+import com.tamin.taminhamrah.util.PersianDateFormatter
+import com.tamin.taminhamrah.util.toPersianDigits
 import dev.chrisbanes.haze.HazeState
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -807,6 +814,28 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            // خلاصهٔ سابقه, above the campaigns exactly as the design orders the page.
+            //
+            // Insured users only: a pensioner has no premium to pay and an employer pays for other
+            // people, so the year of "premiums registered against you" reads as neither's.
+            //
+            // TODO(EM-2563): swap the placeholder for the year the history feature loads. Only the
+            //  `summary` argument and the three callbacks change; the card itself is final.
+            if (selectedType == InsuredUserType) {
+                if (uiState.isLoading) {
+                    HistorySummaryCardSkeleton(modifier = Modifier.padding(top = Spacing.xlg))
+                } else {
+                    HistorySummaryCard(
+                        summary = rememberPlaceholderHistorySummary(),
+                        onCardClick = {},
+                        onYearClick = {},
+                        onDetailsClick = {},
+                        onFollowUpClick = {},
+                        modifier = Modifier.padding(top = Spacing.xlg),
+                    )
+                }
+            }
+
             // The same for every role: campaigns are not filtered by the picker above.
             //
             // Full-bleed on purpose. A pager clips along its scroll axis, so leaving it inside this
@@ -923,4 +952,41 @@ fun HomeScreen(
             }
         }
     }
+}
+
+
+/** The «بیمه شدگان» entry of the home page's role picker — the only role خلاصهٔ سابقه belongs to. */
+private const val InsuredUserType = 1
+
+/**
+ * The year the خلاصهٔ سابقه card shows until the history service arrives with a real one.
+ *
+ * TODO(EM-2563): delete this and read the summary from the history feature's state.
+ *
+ * The shape is the design's own sample — three registered months, three unpaid — but the year and
+ * the current month are real, so the card cannot be mistaken for a screenshot while it is on the
+ * device.
+ */
+@Composable
+private fun rememberPlaceholderHistorySummary(): HistorySummaryPR = remember {
+    val currentMonthIndex = PersianDateFormatter.today().second - 1
+    val sample = listOf(
+        HistoryMonthStatusPR.Unpaid,
+        HistoryMonthStatusPR.Unpaid,
+        HistoryMonthStatusPR.Registered,
+        HistoryMonthStatusPR.Registered,
+        HistoryMonthStatusPR.Unpaid,
+        HistoryMonthStatusPR.Registered,
+    )
+    HistorySummaryPR(
+        yearLabel = PersianDateFormatter.currentJalaliYear().toString().toPersianDigits(),
+        months = List(HistorySummaryPR.MONTHS_IN_YEAR) { index ->
+            when {
+                index > currentMonthIndex -> HistoryMonthStatusPR.Upcoming
+                else -> sample[index % sample.size]
+            }
+        }.toImmutableList(),
+        currentMonthIndex = currentMonthIndex,
+        lastRegisteredMonth = PersianDateFormatter.monthNames.getOrNull(currentMonthIndex),
+    )
 }
