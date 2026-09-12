@@ -324,6 +324,14 @@ class RetirementPensionViewModel(
                     rawAge = rawAge,
                     // An age the service did not report is not a refusal: the gate closes only on a
                     // reported age that is under the statutory minimum.
+                    //
+                    // Deliberately unlike `old_android`, which kept the age in a non-null `Int`
+                    // defaulted to 0 (`RetirementDataModel.yearsAge`, also set to 0 whenever the
+                    // reported value would not parse) and so refused anyone whose age the service
+                    // failed to report — `0 < 42`. That refusal is final on the client: the
+                    // applicant is sent back with a message about their age, and a service outage
+                    // or an unparsed field reads to them as "you are too young". The branch decides
+                    // eligibility for real, so a missing age is passed on rather than judged here.
                     isAgeEligible = years == null || years >= MIN_RETIREMENT_AGE_YEARS,
                     requestId = status?.requestId,
                     statusCode = status?.requestStatusCode,
