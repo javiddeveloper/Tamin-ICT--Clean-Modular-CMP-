@@ -73,6 +73,8 @@ import com.tamin.taminhamrah.useCases.orotezProtez.GetRequestInsuredMainInfoUseC
 import com.tamin.taminhamrah.useCases.orotezProtez.SaveShortTermOrthosisUseCase
 import com.tamin.taminhamrah.useCases.inquiryEducation.GetDataForEducationUseCase
 import com.tamin.taminhamrah.useCases.inquiryEducation.InquiryEducationCertificateUseCase
+import com.tamin.taminhamrah.useCases.fractionContract.CheckFractionAgeAndHistoryUseCase
+import com.tamin.taminhamrah.useCases.fractionContract.MakeFractionContractUseCase
 import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.CalcIllnessAmountUseCase
 import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.GetCovidResultUseCase
 import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.GetIllDaysInsuredMainInfoUseCase
@@ -368,6 +370,8 @@ val domainModule = module {
     factoryOf(::SaveShortTermOrthosisUseCase)
     factoryOf(::GetDataForEducationUseCase)
     factoryOf(::InquiryEducationCertificateUseCase)
+    factoryOf(::CheckFractionAgeAndHistoryUseCase)
+    factoryOf(::MakeFractionContractUseCase)
     factoryOf(::GetIllDaysInsuredMainInfoUseCase)
     factoryOf(::GetCovidResultUseCase)
     factoryOf(::CalcIllnessAmountUseCase)
