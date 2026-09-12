@@ -187,28 +187,26 @@ fun ObjectionFormPage(
     }
 
     if (form.isConfirmVisible) {
-        ObjectionSubmitConfirmDialog(
-            debitNumberLabel = debt.debitNumberLabel,
-            onIntent = onIntent,
-        )
+        ObjectionSubmitConfirmDialog(onIntent = onIntent)
     }
 }
 
 /**
  * The last word before the objection is filed.
  *
- * The old app asked for it too, and for the same reason: a filed objection cannot be withdrawn,
- * so the تعهدنامه tick alone is not taken as the answer.
+ * The old app put the same modal between the تعهدنامه tick and the API call, and its text is
+ * kept verbatim: it is not an "are you sure" but the undertaking the employer is agreeing to —
+ * that the branch reviews the documents, that the right to a هیات بدوی hearing survives a
+ * rejection, and that the answer comes within a week through پیگیری وضعیت اعتراض.
  */
 @Composable
 private fun ObjectionSubmitConfirmDialog(
-    debitNumberLabel: String,
     onIntent: (ObjectionableDebitIntent) -> Unit,
 ) {
     val colors = LocalTaminColors.current
     TaminConfirmationDialog(
         title = stringResource(Res.string.obj_form_confirm_title),
-        description = stringResource(Res.string.obj_form_confirm_body, debitNumberLabel),
+        description = stringResource(Res.string.obj_form_confirm_body),
         confirmButton = {
             TaminFilledButton(
                 text = stringResource(Res.string.action_confirm),
