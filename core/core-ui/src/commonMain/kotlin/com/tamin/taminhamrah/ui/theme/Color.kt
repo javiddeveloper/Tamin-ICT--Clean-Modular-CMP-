@@ -375,7 +375,6 @@ val CampaignStudentEnd = Color(0xFF22B8D6)
 val CampaignStudentShadow = Color(0x474B2E86)       // rgba(75,46,134,.28)
 
 /** The idle page dot under the carousel; the active one is `blueText`. */
-val CampaignDotIdle = Color(0xFFD7E0EC)
 
 /** The two aria-hidden decoration circles every campaign card carries. */
 val CampaignGlowCore = TaminOnAccentInk.copy(alpha = 0.22f)

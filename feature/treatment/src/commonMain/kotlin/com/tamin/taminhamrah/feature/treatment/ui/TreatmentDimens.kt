@@ -76,17 +76,8 @@ internal object TreatmentDimens {
     val brandTickIconSize = 13.dp
     val cardLoadingHeight = 160.dp
 
-    val pageIndicatorDotSize = 7.dp
-    val pageIndicatorSelectedWidth = 22.dp
-    val pageIndicatorGap = 7.dp
-    val pageIndicatorPaddingHorizontal = 11.dp
-    val pageIndicatorPaddingVertical = 7.dp
-
     /** `margin-top: 12px` between the cards and the strip of dots. */
     val pageIndicatorTopGap = 12.dp
-
-    /** Past this the strip scrolls rather than growing the pill off the card. */
-    val pageIndicatorMaxWidth = 140.dp
 
     /*
      * The three translucent shapes over the card's gradient, each at its own strength:
