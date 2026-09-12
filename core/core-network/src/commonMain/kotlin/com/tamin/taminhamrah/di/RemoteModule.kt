@@ -69,6 +69,8 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
 import com.tamin.taminhamrah.dataSource.inquiryEducation.InquiryEducationRemoteDataSource
 import com.tamin.taminhamrah.dataSource.inquiryEducation.InquiryEducationRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.weddingPresent.WeddingPresentRemoteDataSource
+import com.tamin.taminhamrah.dataSource.weddingPresent.WeddingPresentRemoteDataSourceImpl
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
@@ -293,6 +295,13 @@ val remoteModule = module {
     single<InquiryEducationRemoteDataSource> {
         InquiryEducationRemoteDataSourceImpl(
             inquiryEducationApiService = get(),
+            errorParser = get()
+        )
+    }
+
+    single<WeddingPresentRemoteDataSource> {
+        WeddingPresentRemoteDataSourceImpl(
+            weddingPresentApiService = get(),
             errorParser = get()
         )
     }
