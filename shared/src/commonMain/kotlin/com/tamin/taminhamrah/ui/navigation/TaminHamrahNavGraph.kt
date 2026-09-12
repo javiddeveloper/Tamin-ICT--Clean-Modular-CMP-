@@ -1,7 +1,6 @@
 package com.tamin.taminhamrah.ui.navigation
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -19,14 +18,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -133,17 +129,10 @@ import com.tamin.taminhamrah.feature.workshops.completeEmployerInfoScreen
 import com.tamin.taminhamrah.feature.workshops.debtObjectionStatusScreen
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
-import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
-import com.tamin.taminhamrah.feature.security.securityScreen
 import com.tamin.taminhamrah.feature.developerOptions.DeveloperOptionsRoute
-import com.tamin.taminhamrah.feature.developerOptions.developerOptionsScreen
-import com.tamin.taminhamrah.feature.settings.settingsScreen
 import com.tamin.taminhamrah.feature.userRequest.UserRequestRoute
 import com.tamin.taminhamrah.feature.userRequest.navigateToUserRequestDetail
 import com.tamin.taminhamrah.feature.userRequest.userRequestGraph
-import com.tamin.taminhamrah.feature.workshops.completeEmployerInfoScreen
-import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
-import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.mapper.campaign.toPresentation
 import com.tamin.taminhamrah.mapper.home.featuredServices
 import com.tamin.taminhamrah.mapper.home.toQuickAccessSections
@@ -410,7 +399,9 @@ internal fun TaminHamrahNavGraph(
                             }
                         },
                         onNavigateToAgent = { navController.navigateToAgent() },
-                        onNavigateToUserRequests = { navController.navigate(UserRequestRoute.List) },
+                        onNavigateToUserRequests = { refCode, requestTypeId ->
+                            navController.navigate(UserRequestRoute.List(refCode = refCode, requestTypeId = requestTypeId))
+                        },
                         onNavigateToUserRequestDetail = { requestId, refCode, requestTypeId, title, referenceId ->
                             navController.navigateToUserRequestDetail(
                                 requestId = requestId,
@@ -462,7 +453,7 @@ internal fun TaminHamrahNavGraph(
                         navController.navigate(SettingsRoute)
                     },
                     onNavigateToUserRequests = {
-                        navController.navigate(UserRequestRoute.List)
+                        navController.navigate(UserRequestRoute.List())
                     },
 
                     onOpenUrl = { url -> openUrl(url) },
@@ -767,7 +758,7 @@ fun HomeScreen(
     onShowMessage: (String) -> Unit,
     onNavigateToAllServices: () -> Unit,
     onNavigateToAgent: () -> Unit,
-    onNavigateToUserRequests: () -> Unit,
+    onNavigateToUserRequests: (String?, String?) -> Unit,
     onNavigateToUserRequestDetail: (Long, String, Long, String, String) -> Unit,
     viewModel: HomeViewModel = koinViewModel()
 ) {
@@ -794,15 +785,9 @@ fun HomeScreen(
         uiState = uiState,
         onNavigateToAgent = onNavigateToAgent,
         onNavigateToAllServices = onNavigateToAllServices,
-        onNavigateToUserRequests = onNavigateToUserRequests,
+        onNavigateToUserRequests = { onNavigateToUserRequests(null, null) },
         onRequestClick = { request ->
-            onNavigateToUserRequestDetail(
-                request.id,
-                request.refCode,
-                request.requestTypeId,
-                request.title,
-                request.referenceId,
-            )
+            onNavigateToUserRequests(request.refCode, request.requestTypeId.toString())
         },
         onCampaignClick = { viewModel.sendIntent(HomeIntent.OnCampaignClick(it)) },
         onSectionSelected = { viewModel.sendIntent(HomeIntent.OnSectionSelected(it)) },

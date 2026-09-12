@@ -35,13 +35,32 @@ internal class UserRequestRepositoryImpl(
 ) : UserRequestRepository {
 
     override fun getUserRequests(search: UserRequestSearchParams): Flow<List<UserRequestDN>> = flow {
+        val targetRef = search.refCode?.trim()?.takeIf { it.isNotEmpty() }
+        val targetTypeId = search.requestTypeId?.trim()?.takeIf { it.isNotEmpty() }
+        val isFiltered = targetRef != null || targetTypeId != null
+
+        fun List<UserRequestDN>.applySearchFilter(): List<UserRequestDN> {
+            if (!isFiltered) return this
+            return filter { req ->
+                val ref = req.refCode
+                val typeId = req.requestType?.id?.toString()
+                val matchesRef = targetRef == null || (ref != null && ref.contains(targetRef, ignoreCase = true))
+                val matchesType = targetTypeId == null || typeId == targetTypeId
+                matchesRef && matchesType
+            }
+        }
+
         val localRequests = requestDao.getUserRequests().first()
-        emit(localRequests.map { it.toDomain() })
+        emit(localRequests.map { it.toDomain() }.applySearchFilter())
 
         try {
             val response = requestRemoteDataSource.getUserRequests(buildQuery(search))
-            val remoteRequests = response.list.orEmpty()
-            requestDao.replaceAll(remoteRequests.map { it.toEntity() })
+            val remoteRequests = response.list.orEmpty().map { it.toEntity() }
+            if (isFiltered) {
+                requestDao.upsertUserRequests(remoteRequests)
+            } else {
+                requestDao.replaceAll(remoteRequests)
+            }
         } catch (e: Exception) {
             if (localRequests.isEmpty()) {
                 throw e
@@ -50,7 +69,7 @@ internal class UserRequestRepositoryImpl(
 
         emitAll(
             requestDao.getUserRequests().map { entities ->
-                entities.map { it.toDomain() }
+                entities.map { it.toDomain() }.applySearchFilter()
             }
         )
     }.distinctUntilChanged()

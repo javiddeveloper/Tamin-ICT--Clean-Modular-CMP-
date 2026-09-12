@@ -7,8 +7,10 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,8 +25,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.model.userRequest.UserRequestPR
@@ -40,8 +40,10 @@ import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.home_see_all
 import taminx.core.core_ui.home_section_last_requests
-import taminx.core.core_ui.ic_error
+import taminx.core.core_ui.ic_tamin_alert_circle
 import taminx.core.core_ui.ic_tamin_check_circle
+import taminx.core.core_ui.ic_tamin_cross
+import taminx.core.core_ui.ic_tamin_edit
 import taminx.core.core_ui.ic_tamin_search
 
 @Composable
@@ -87,59 +89,89 @@ private fun LastRequestItemCard(
 
     val workflowStatus = UserRequestWorkflowStatus.fromCode(request.statusCode)
 
-    val (badgeBg, badgeTextColor, iconBgBrush, iconRes) = when (workflowStatus) {
+    val (badgeBg, badgeTextColor, accentBarColor, iconBg, iconTint, iconRes) = when (workflowStatus) {
         UserRequestWorkflowStatus.PROCESSING_COMPLETE,
         UserRequestWorkflowStatus.FINAL_APPROVED,
-        UserRequestWorkflowStatus.ARTICLE_SIXTEEN_APPROVED -> Quadruple(
+        UserRequestWorkflowStatus.ARTICLE_SIXTEEN_APPROVED -> Sextuple(
             taminColors.greenBg,
             taminColors.greenText,
-            Brush.verticalGradient(listOf(Color(0xFF27AE60), Color(0xFF1E824C))),
+            taminColors.greenText,
+            taminColors.greenBg,
+            taminColors.greenText,
             Res.drawable.ic_tamin_check_circle,
         )
 
         UserRequestWorkflowStatus.SHOW_ERRORS,
-        UserRequestWorkflowStatus.DISAPPROVED -> Quadruple(
+        UserRequestWorkflowStatus.DISAPPROVED -> Sextuple(
             taminColors.dangerBg,
             taminColors.dangerText,
-            Brush.verticalGradient(listOf(Color(0xFFEB5757), Color(0xFFC0392B))),
-            Res.drawable.ic_error,
+            taminColors.dangerText,
+            taminColors.dangerBg,
+            taminColors.dangerText,
+            Res.drawable.ic_tamin_cross,
         )
 
-        UserRequestWorkflowStatus.DOCUMENT_DEFECT,
-        UserRequestWorkflowStatus.AWAITING_COMPLETION -> Quadruple(
-            taminColors.orangeBg,
-            taminColors.orangeText,
-            Brush.verticalGradient(listOf(Color(0xFFF2994A), Color(0xFFD35400))),
-            Res.drawable.ic_tamin_search,
+        UserRequestWorkflowStatus.DOCUMENT_DEFECT -> Sextuple(
+            taminColors.dangerBg,
+            taminColors.dangerText,
+            taminColors.dangerText,
+            taminColors.dangerBg,
+            taminColors.dangerText,
+            Res.drawable.ic_tamin_alert_circle,
+        )
+
+        UserRequestWorkflowStatus.AWAITING_COMPLETION -> Sextuple(
+            taminColors.blueBg,
+            taminColors.blueText,
+            taminColors.blueText,
+            taminColors.blueBg,
+            taminColors.blueText,
+            Res.drawable.ic_tamin_edit,
         )
 
         UserRequestWorkflowStatus.PRE_PROCESSING,
-        UserRequestWorkflowStatus.BRANCH_DELIVERED -> Quadruple(
+        UserRequestWorkflowStatus.BRANCH_DELIVERED -> Sextuple(
             taminColors.blueBg,
             taminColors.blueText,
-            Brush.verticalGradient(listOf(Color(0xFF2F80ED), Color(0xFF1B4F72))),
+            taminColors.blueText,
+            taminColors.blueBg,
+            taminColors.blueText,
             Res.drawable.ic_tamin_search,
         )
 
         null -> when (request.statusTone) {
-            UserRequestStatusTone.APPROVED -> Quadruple(
+            UserRequestStatusTone.APPROVED -> Sextuple(
                 taminColors.greenBg,
                 taminColors.greenText,
-                Brush.verticalGradient(listOf(Color(0xFF27AE60), Color(0xFF1E824C))),
+                taminColors.greenText,
+                taminColors.greenBg,
+                taminColors.greenText,
                 Res.drawable.ic_tamin_check_circle,
             )
-            UserRequestStatusTone.ERROR -> Quadruple(
+            UserRequestStatusTone.ERROR -> Sextuple(
                 taminColors.dangerBg,
                 taminColors.dangerText,
-                Brush.verticalGradient(listOf(Color(0xFFEB5757), Color(0xFFC0392B))),
-                Res.drawable.ic_error,
+                taminColors.dangerText,
+                taminColors.dangerBg,
+                taminColors.dangerText,
+                Res.drawable.ic_tamin_cross,
             )
-            UserRequestStatusTone.NEUTRAL -> Quadruple(
+            UserRequestStatusTone.NEUTRAL -> Sextuple(
                 taminColors.blueBg,
                 taminColors.blueText,
-                Brush.verticalGradient(listOf(Color(0xFF2F80ED), Color(0xFF1B4F72))),
+                taminColors.blueText,
+                taminColors.blueBg,
+                taminColors.blueText,
                 Res.drawable.ic_tamin_search,
             )
+        }
+    }
+
+    val subtitleText = remember(request.refCode, request.creationTime) {
+        if (request.refCode.isNotBlank()) {
+            "${request.refCode} • ${request.creationTime}"
+        } else {
+            request.creationTime
         }
     }
 
@@ -157,66 +189,83 @@ private fun LastRequestItemCard(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = onClick,
-            )
-            .padding(horizontal = Spacing.md, vertical = Spacing.md),
+            ),
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min),
         ) {
-            // Icon container with gradient
+            // Right vertical accent strip
             Box(
                 modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(CornerRadius.xl))
-                    .background(iconBgBrush),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    imageVector = vectorResource(iconRes),
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(24.dp),
-                )
-            }
+                    .width(4.dp)
+                    .fillMaxHeight()
+                    .background(accentBarColor)
+            )
 
-            Spacer(modifier = Modifier.width(Spacing.md))
-
-            // Title & Creation Date
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.Center,
-            ) {
-                Text(
-                    text = request.title.ifBlank { request.requestTypeTitle },
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = colorScheme.onSurface,
-                )
-                Spacer(modifier = Modifier.height(Spacing.xxs))
-                Text(
-                    text = request.creationTime,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = taminColors.textMuted,
-                )
-            }
-
-            Spacer(modifier = Modifier.width(Spacing.sm))
-
-            // Status Badge
-            Box(
+            Row(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(50))
-                    .background(badgeBg)
-                    .padding(horizontal = Spacing.sm, vertical = Spacing.xs),
-                contentAlignment = Alignment.Center,
+                    .weight(1f)
+                    .padding(horizontal = Spacing.md, vertical = Spacing.md),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    text = request.statusDesc,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = badgeTextColor,
-                )
+                // Icon container with soft background
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(RoundedCornerShape(CornerRadius.lg))
+                        .background(iconBg),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = vectorResource(iconRes),
+                        contentDescription = null,
+                        tint = iconTint,
+                        modifier = Modifier.size(22.dp),
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(Spacing.md))
+
+                // Title & Subtitle (RefCode • Creation Date)
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Text(
+                        text = request.title.ifBlank { request.requestTypeTitle },
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.onSurface,
+                    )
+                    Spacer(modifier = Modifier.height(Spacing.xxs))
+                    Text(
+                        text = subtitleText,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = taminColors.textMuted,
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(Spacing.sm))
+
+                // Status Badge
+                if (request.statusDesc.isNotBlank()) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .background(badgeBg)
+                            .padding(horizontal = Spacing.smPlus, vertical = Spacing.xs),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = request.statusDesc,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = badgeTextColor,
+                        )
+                    }
+                }
             }
         }
     }
@@ -225,39 +274,39 @@ private fun LastRequestItemCard(
 private val samplePreviewRequests = listOf(
     UserRequestPR(
         id = 1L,
-        refCode = "1048384001",
-        title = "تأییدیه پزشکی",
+        refCode = "۱۰۴۸۴۰۱۸۴۹",
+        title = "غرامت دستمزد ایام بیماری",
         comment = "",
-        creationTime = "۱۴۰۴/۰۳/۲۸",
+        creationTime = "۱۴۰۵/۰۳/۱۱",
         createByName = "",
-        statusDesc = "تأیید شد",
-        statusCode = "18",
+        statusDesc = "نقص مدارک ارسالی",
+        statusCode = "21",
         requestTypeId = 1L,
-        requestTypeTitle = "تأییدیه پزشکی",
+        requestTypeTitle = "غرامت دستمزد ایام بیماری",
     ),
     UserRequestPR(
         id = 2L,
-        refCode = "1048384002",
-        title = "انعقاد قرارداد بیمه اختیاری",
+        refCode = "۱۰۴۸۳۹۷۲۱۵",
+        title = "درخواست بررسی مدارک ارسالی",
         comment = "",
-        creationTime = "۱۴۰۵/۰۴/۰۲",
+        creationTime = "۱۴۰۵/۰۲/۲۸",
         createByName = "",
-        statusDesc = "ویرایش قرارداد",
-        statusCode = "21",
+        statusDesc = "عدم تأیید",
+        statusCode = "19",
         requestTypeId = 2L,
-        requestTypeTitle = "انعقاد قرارداد بیمه اختیاری",
+        requestTypeTitle = "درخواست بررسی مدارک ارسالی",
     ),
     UserRequestPR(
         id = 3L,
-        refCode = "1048384456",
-        title = "درخواست بیمه کارگران ساختمانی",
+        refCode = "۱۰۴۸۳۸۴۰۰۲",
+        title = "غرامت دستمزد ایام بارداری",
         comment = "",
-        creationTime = "۱۴۰۳/۱۲/۱۸",
+        creationTime = "۱۴۰۵/۰۲/۰۵",
         createByName = "",
-        statusDesc = "عدم تایید-فاقد شرایط",
-        statusCode = "19",
+        statusDesc = "در انتظار تکمیل اطلاعات",
+        statusCode = "14",
         requestTypeId = 3L,
-        requestTypeTitle = "درخواست بیمه کارگران ساختمانی",
+        requestTypeTitle = "غرامت دستمزد ایام بارداری",
     ),
 )
 
@@ -287,9 +336,11 @@ private fun HomeLastRequestsSectionPreviewDark() {
     }
 }
 
-private data class Quadruple<A, B, C, D>(
+private data class Sextuple<A, B, C, D, E, F>(
     val first: A,
     val second: B,
     val third: C,
-    val fourth: D
+    val fourth: D,
+    val fifth: E,
+    val sixth: F,
 )
