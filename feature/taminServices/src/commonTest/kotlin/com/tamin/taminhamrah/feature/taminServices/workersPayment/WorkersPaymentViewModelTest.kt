@@ -118,10 +118,13 @@ class WorkersPaymentViewModelTest {
     }
 
     @Test
-    fun `OnResumed when payment is in flight forces repository re-fetch`() = runTest(testDispatcher) {
+    fun `OnResumed when payment is in flight forces repository re-fetch and closes detail screen`() = runTest(testDispatcher) {
         repository.paymentInfoResult = WorkersPaymentInfoListDN(0L, 0L, 0L, 1, listOf(sampleDn()))
         viewModel = buildViewModel()
         val item = viewModel.uiState.value.items.first()
+        viewModel.sendIntent(WorkersPaymentIntent.OpenPaymentScreen(item))
+        assertEquals(item, viewModel.uiState.value.selectedPaymentItem)
+
         repository.payDebitResult = WorkersPayDebitResultDN(
             paymentUrl = "https://tfh.tamin.ir/view/#/payment/T-1",
             ticket = "T-1",
@@ -133,6 +136,7 @@ class WorkersPaymentViewModelTest {
         viewModel.sendIntent(WorkersPaymentIntent.OnResumed)
 
         assertEquals(initialCallCount + 1, repository.getPaymentInfoCallCount)
+        assertNull(viewModel.uiState.value.selectedPaymentItem)
     }
 
     // ── screen 2 open / close ──────────────────────────────────────────────

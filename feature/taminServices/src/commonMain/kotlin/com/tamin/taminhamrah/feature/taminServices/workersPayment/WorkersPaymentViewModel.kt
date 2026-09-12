@@ -16,6 +16,7 @@ import com.tamin.taminhamrah.useCases.workersPayment.PayWorkersDebitUseCase
 import com.tamin.taminhamrah.util.NetworkConstants
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onCompletion
@@ -62,7 +63,10 @@ class WorkersPaymentViewModel(
     private fun handleOnResumed(): Flow<PartialState> {
         if (isPaymentInFlight) {
             isPaymentInFlight = false
-            return loadPaymentInfo(force = true)
+            return flow {
+                emit(PartialState.PaymentScreenClosed)
+                emitAll(loadPaymentInfo(force = true))
+            }
         }
         return emptyFlow()
     }
@@ -141,6 +145,7 @@ class WorkersPaymentViewModel(
             totalPenalty = partialState.totalPenalty,
             totalPremium = partialState.totalPremium,
             items = partialState.items,
+            selectedPaymentItem = null,
         )
 
         is PartialState.ProcessingPayment -> currentState.copy(isProcessingPayment = partialState.inProgress)
