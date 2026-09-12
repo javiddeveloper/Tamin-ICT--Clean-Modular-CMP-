@@ -102,6 +102,7 @@ import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDisabilityPension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPrescription
 import com.tamin.taminhamrah.feature.payment.PaymentRoute
 import com.tamin.taminhamrah.feature.payment.paymentGraph
+import com.tamin.taminhamrah.feature.payment.navigateToPayment
 import com.tamin.taminhamrah.feature.payment.paymentSandboxScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.payrollScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.prescriptionScreen
@@ -562,7 +563,12 @@ internal fun TaminHamrahNavGraph(
 
                 contractPaymentCalcDetailScreen(onBack = { navController.popBackStack() })
 
-                workshopsScreen(navController, onOpenUrl = { url -> openUrl(url) })
+                workshopsScreen(
+                    navController,
+                    // The debt payment runs in the app's own payment flow, which owns the gateway
+                    // address; the feature only hands over the ticket the service issued.
+                    onStartPayment = { request -> navController.navigateToPayment(request) },
+                )
                 completeEmployerInfoScreen(navController)
                 debtObjectionStatusScreen(navController)
 
