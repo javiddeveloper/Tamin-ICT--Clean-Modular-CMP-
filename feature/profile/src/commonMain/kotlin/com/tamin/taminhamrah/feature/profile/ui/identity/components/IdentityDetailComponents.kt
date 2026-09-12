@@ -4,8 +4,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -19,6 +21,8 @@ import com.tamin.taminhamrah.ui.components.SectionLabel
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.ShimmerBlock
+import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.stringResource
@@ -106,6 +110,72 @@ private fun IdentitySectionCard(
                     verticalPadding = IdentityDimens.rowVerticalPadding,
                 )
                 if (index != section.fields.lastIndex) TaminDivider()
+            }
+        }
+    }
+}
+
+/** The rows each section will hold, so the placeholder cards are the height the real ones will be. */
+private val SkeletonSectionRows = listOf(2, 6, 1, 5)
+
+/**
+ * The body's outline while the record loads: the notice line, then the same titled cards with the
+ * same rows, so the fields land where their placeholders were rather than after a spinner clears.
+ */
+@Composable
+internal fun IdentitySectionsSkeleton(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(Spacing.lg),
+    ) {
+        ShimmerBlock(
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(vertical = Spacing.sm)
+                .width(ShimmerSize.subtitleWidth)
+                .height(ShimmerSize.subtitleHeight),
+        )
+        SkeletonSectionRows.forEach { rows ->
+            IdentitySectionCardSkeleton(rows = rows)
+        }
+    }
+}
+
+@Composable
+private fun IdentitySectionCardSkeleton(rows: Int, modifier: Modifier = Modifier) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        ShimmerBlock(
+            modifier = Modifier
+                .padding(bottom = IdentityDimens.sectionLabelGap)
+                .width(ShimmerSize.sectionLabelWidth)
+                .height(ShimmerSize.titleHeight),
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .taminSurface()
+                .padding(horizontal = IdentityDimens.rowHorizontalPadding),
+        ) {
+            repeat(rows) { index ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = IdentityDimens.rowVerticalPadding),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    ShimmerBlock(
+                        modifier = Modifier
+                            .width(ShimmerSize.labelWidth)
+                            .height(ShimmerSize.subtitleHeight),
+                    )
+                    ShimmerBlock(
+                        modifier = Modifier
+                            .width(ShimmerSize.valueWidth)
+                            .height(ShimmerSize.valueHeight),
+                    )
+                }
+                if (index != rows - 1) TaminDivider()
             }
         }
     }

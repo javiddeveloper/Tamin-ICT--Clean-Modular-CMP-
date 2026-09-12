@@ -101,7 +101,7 @@ private class FakeWorkShopsRemoteDataSource : WorkShopsRemoteDataSource {
     override suspend fun getEmployerAgreementUserInfo(verificationCode: String) = notImplemented()
     override suspend fun requestEmployerAgreementTicket(mobileNumber: String, email: String) = notImplemented()
     override suspend fun submitEmployerAgreement(request: EmployerAgreementSubmitRequestDTO) = notImplemented()
-
+    override suspend fun confirmPaymentTicket(ticket: String) = notImplemented()
     private fun notImplemented(): Nothing = throw UnsupportedOperationException("not needed by this test")
 }
 

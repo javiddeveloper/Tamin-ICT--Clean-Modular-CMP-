@@ -80,7 +80,12 @@ internal interface UserApiService {
         @Url url: String,
         @Field("grant_type") grantType: String = "client_credentials",
         @Field("client_id") clientId: String,
-        @Field("client_secret") clientSecret: String
+        @Field("client_secret") clientSecret: String,
+        // The same audience list [signIn] asks for. Without it the token is minted for the main
+        // API alone, and every call to the payment gateway's own host (`https://tfh.tamin.ir`)
+        // comes back 403 -- which looked like an intermittent payment failure, because it only
+        // happened while Developer Options had this login active.
+        @Field("audience") audience: String = NetworkConstants.DEFAULT_AUDIENCE,
     ): TokenResponseDto
 
     @GET
