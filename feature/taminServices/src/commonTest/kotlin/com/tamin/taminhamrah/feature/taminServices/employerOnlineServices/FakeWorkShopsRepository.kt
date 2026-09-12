@@ -72,7 +72,6 @@ class FakeWorkShopsRepository : WorkShopsRepository {
 
         val fromIndex = (query.page * query.pageSize).coerceIn(0, filtered.size)
         val toIndex = (fromIndex + query.pageSize).coerceIn(fromIndex, filtered.size)
-5
         return PagedListDN(
             items = filtered.subList(fromIndex, toIndex),
             total = if (isFiltered) filtered.size else agreements.total,
@@ -130,7 +129,6 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     override suspend fun getWorkShopObjections(query: WorkShopObjectionQuery) = notUsed()
     override suspend fun getWorkShopObjectionSms(seqNo: Long, page: Int) = notUsed()
     override suspend fun confirmPaymentTicket(ticket: String) = notUsed()
-    override suspend fun getPaymentSheets(query: PaymentSheetQuery): PagedListDN<PaymentSheetDN> = notUsed()
     override suspend fun getPaymentSheets(query: PaymentSheetQuery): PagedListDN<PaymentSheetDN> =
         notUsed()
 
