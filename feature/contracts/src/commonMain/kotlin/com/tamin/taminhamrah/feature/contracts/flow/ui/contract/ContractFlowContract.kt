@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.contracts.flow.ui.contract
 
 import com.tamin.taminhamrah.feature.contracts.flow.config.ContractFlowConfig
+import com.tamin.taminhamrah.feature.contracts.flow.ExistingContractEditSeed
 import com.tamin.taminhamrah.model.common.CityPR
 import com.tamin.taminhamrah.model.common.ProvincePR
 import com.tamin.taminhamrah.model.contractFlow.BranchSelectionFormPR
@@ -86,16 +87,44 @@ data class ContractFlowUiState(
     val allowsOnlinePayment: Boolean = false,
     val currentStep: ContractStep = ContractStep.STEP_REGISTRATION,
     val isEditMode: Boolean = false,
+    /** True when opened from «ویرایش قرارداد» — distinct from [isEditMode] (summary jump-back). */
+    val isEditingExistingContract: Boolean = false,
+    val editContractNumber: String? = null,
 ) {
+    /**
+     * Steps the user can actually walk. Edit skips rules (already confirmed) and branch
+     * selection (fixed after create — legacy STEP_CONTRACT_INFO is display-only).
+     */
+    val navigationSteps: List<ContractStep>
+        get() {
+            val steps = config?.steps.orEmpty()
+            if (!isEditingExistingContract) return steps
+            return steps.filter {
+                it != ContractStep.STEP_CONTRACT_TERMS &&
+                    it != ContractStep.STEP_SELECT_BRANCH
+            }
+        }
+
+    /** Read-only branch line for the edit first step (city - branch), matching legacy. */
+    val editBranchInfoDisplay: String
+        get() = listOf(
+            branchSelection.cityName,
+            branchSelection.branchName.ifBlank { branchSelection.provinceName },
+        ).filter { it.isNotBlank() }.joinToString(" - ")
+
     val canGoNext: Boolean
         get() {
             val flowConfig = config ?: return false
             return !isSavingContact && when (currentStep) {
                 ContractStep.STEP_REGISTRATION ->
-                    registrationInfo != null &&
-                        genderGateError == null &&
-                        preflightGateError == null &&
-                        (eligibility == null || eligibility.isEligible)
+                    if (isEditingExistingContract) {
+                        registrationInfo != null
+                    } else {
+                        registrationInfo != null &&
+                            genderGateError == null &&
+                            preflightGateError == null &&
+                            (eligibility == null || eligibility.isEligible)
+                    }
                 ContractStep.STEP_AUTHORIZATION -> eligibility?.isEligible == true
                 ContractStep.STEP_CONTRACT_TERMS -> isRulesConfirmed
                 ContractStep.STEP_USER_INFO -> isUserInfoStepComplete(userInfo)
@@ -199,6 +228,9 @@ data class ContractFlowUiState(
         data class GuardianDocumentUploading(val isUploading: Boolean) : PartialState()
         data class GuardianDocumentUploaded(val guid: String, val name: String, val bytes: ByteArray) : PartialState()
         data object GuardianDocumentCleared : PartialState()
+        data class ExistingContractEditSeeded(
+            val seed: ExistingContractEditSeed,
+        ) : PartialState()
     }
 }
 
@@ -240,6 +272,9 @@ sealed class ContractFlowEvent {
         val amount: Long,
         val canPayOnline: Boolean,
     ) : ContractFlowEvent()
+
+    /** ویرایش قرارداد succeeded — close without payment CTA. */
+    data object ShowUpdateSuccess : ContractFlowEvent()
 
     data class ShowSubmitFailure(val message: String) : ContractFlowEvent()
 
