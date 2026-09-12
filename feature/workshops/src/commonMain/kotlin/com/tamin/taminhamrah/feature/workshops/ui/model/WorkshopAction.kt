@@ -10,11 +10,14 @@ import taminx.core.core_ui.contract_rows_title
 import taminx.core.core_ui.ic_tamin_workshop_contract_rows
 import taminx.core.core_ui.ic_tamin_workshop_inquiry
 import taminx.core.core_ui.ic_tamin_workshop_payment
+import taminx.core.core_ui.ic_tamin_workshop_objection
 import taminx.core.core_ui.ic_tamin_workshop_turnover
 import taminx.core.core_ui.workshop_action_debit_turnover
 import taminx.core.core_ui.workshop_action_debit_turnover_desc
 import taminx.core.core_ui.workshop_action_debt_inquiry
 import taminx.core.core_ui.workshop_action_debt_inquiry_desc
+import taminx.core.core_ui.workshop_action_objection
+import taminx.core.core_ui.workshop_action_objection_desc
 import taminx.core.core_ui.workshop_action_payment_sheets
 import taminx.core.core_ui.workshop_action_payment_sheets_desc
 
@@ -59,6 +62,12 @@ enum class WorkshopAction(
         description = Res.string.workshop_action_debt_inquiry_desc,
         icon = Res.drawable.ic_tamin_workshop_inquiry,
         tint = StatusTint.MINT,
+    ),
+    OBJECTION(
+        label = Res.string.workshop_action_objection,
+        description = Res.string.workshop_action_objection_desc,
+        icon = Res.drawable.ic_tamin_workshop_objection,
+        tint = StatusTint.WARNING,
     ),
 
     CONTRACT_ROWS(
