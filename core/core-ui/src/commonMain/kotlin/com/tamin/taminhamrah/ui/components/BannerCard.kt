@@ -16,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -49,7 +50,15 @@ fun BannerCard(
     modifier: Modifier = Modifier,
     type: BannerType = BannerType.Info,
     icon: ImageVector? = null,
-    showIcon: Boolean = true
+    showIcon: Boolean = true,
+    /**
+     * Overrides the message color, leaving the icon and the tint on its own accent.
+     *
+     * Null — the default — keeps the message the same colour as the icon, which is what every
+     * existing caller was built against. The design's informational notes read in slate rather
+     * than blue, because the paragraph is prose and only the glyph is a signal.
+     */
+    textColor: Color? = null
 ) {
     val taminColors = LocalTaminColors.current
     val (bgColor, contentColor, defaultIcon) = when (type) {
@@ -85,7 +94,7 @@ fun BannerCard(
             text = message,
             style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.Medium,
-            color = contentColor,
+            color = textColor ?: contentColor,
             modifier = Modifier.weight(1f)
         )
     }

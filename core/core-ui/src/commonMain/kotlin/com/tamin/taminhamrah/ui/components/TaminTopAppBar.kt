@@ -153,9 +153,11 @@ fun TaminTopAppBar(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 HeaderSlot(
+                    hasContent = navigationIcon != null,
                     modifier = Modifier.onSizeChanged { navCapWidth = it.width },
                 ) { navigationIcon?.invoke() }
                 HeaderSlot(
+                    hasContent = action != null,
                     modifier = Modifier.onSizeChanged { actionCapWidth = it.width },
                 ) { action?.invoke() }
             }
@@ -177,6 +179,22 @@ fun TaminTopAppBar(
 fun taminTopAppBarGradient(
     stops: List<Color> = LocalTaminColors.current.profileGradientStops,
 ): Brush = Brush.horizontalGradient(stops)
+
+/** The design's hero angle: `linear-gradient(160deg, …)` — near vertical, dark stop at the top. */
+const val HERO_GRADIENT_ANGLE_DEG = 160f
+
+/**
+ * The bar's wash as the design actually draws it — a `160deg` sweep, so the dark stop sits along
+ * the top edge behind the status bar and the light one runs out along the bottom.
+ *
+ * Separate from [taminTopAppBarGradient] rather than replacing it: every hero in the design is
+ * 160deg, but the app has painted them left-to-right everywhere for long enough that swapping the
+ * default would move every screen at once. Callers adopt this one screen at a time.
+ */
+@Composable
+fun taminHeroGradient(
+    stops: List<Color> = LocalTaminColors.current.profileGradientStops,
+): Brush = cssAngleGradient(HERO_GRADIENT_ANGLE_DEG, stops)
 
 /**
  * Translucent chip holding a single bar icon — a back chevron, a search or share action.
@@ -232,12 +250,25 @@ fun TaminTopAppBarButton(
  * a bar has an icon on one side only. It has to grow past that when a caller supplies more than one
  * action, though: pinning it to [HEADER_BUTTON_SIZE] silently clipped everything after the first
  * button, so a bar with a download and a share showed only the download.
+ *
+ * An *empty* cap reserves no *width*: a bar with no buttons at all has nothing for the title to
+ * clear, and holding a button's width open on both sides pushed a start-aligned title 44dp further
+ * in than the design puts it — which is what made the treatment hub's «درمان» sit adrift of the
+ * edge. The minimum *height* stays unconditional either way, so no bar changes height: a screen's
+ * shimmer skeleton draws a button-less bar while the real screen behind it has a back button, and
+ * relaxing the height too would drop the placeholder 12dp and jump when the content arrived.
  */
 @Composable
-private fun HeaderSlot(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+private fun HeaderSlot(
+    hasContent: Boolean,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
     Box(
-        modifier = modifier
-            .defaultMinSize(minWidth = HEADER_BUTTON_SIZE, minHeight = HEADER_BUTTON_SIZE),
+        modifier = modifier.defaultMinSize(
+            minWidth = if (hasContent) HEADER_BUTTON_SIZE else Dp.Unspecified,
+            minHeight = HEADER_BUTTON_SIZE,
+        ),
         contentAlignment = Alignment.Center,
         content = { content() },
     )

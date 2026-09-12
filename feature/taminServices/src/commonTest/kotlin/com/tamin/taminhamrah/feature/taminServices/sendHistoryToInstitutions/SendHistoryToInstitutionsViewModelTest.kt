@@ -283,6 +283,10 @@ class SendHistoryToInstitutionsViewModelTest {
         override suspend fun pensionerPayRollPDF(filters: List<ApiFilterDN>) = flow<PdfDownloadDN> { TODO() }
         override suspend fun getEdictReportPDF(filters: List<ApiFilterDN>): Flow<PdfDownloadDN> = flow { TODO() }
         override suspend fun getRetirementRequestInfo(filters: List<ApiFilterDN>) = flow<List<com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDN>> { TODO() }
+        override suspend fun createRetirementRequest(
+            authenticationsCode: Long,
+            form: com.tamin.taminhamrah.model.pension.retirement.RetirementRequestFormDN
+        ) = flow<com.tamin.taminhamrah.model.pension.retirement.RetirementRequestCreatedDN> { TODO() }
         override suspend fun checkRetirementStatus() = flow<com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDN> { TODO() }
         override suspend fun sendRetirementDocument(requestId: String, request: com.tamin.taminhamrah.model.pension.retirement.RetirementSaveDocumentDN) = flow<String?> { TODO() }
         override suspend fun authenticationAndGetPersonalInfo(authenticationsCode: Long) = flow<com.tamin.taminhamrah.model.pension.retirement.RetirementPersonalDN> { TODO() }
