@@ -123,6 +123,7 @@ fun EmployerWorkshopDTO.toDomain(): WorkshopSummaryDN = WorkshopSummaryDN(
     branchOfficeCode = branch?.code ?: brhCode.orEmpty(),
     branchOfficeName = branch?.organizationName ?: branchTitle.orEmpty(),
     characterCode = character?.characterCode.orEmpty(),
+    legalNationalId = legalWorkshop?.nationalId.orEmpty(),
     characterDescription = character?.characterDesc.orEmpty(),
     workshopTypeDescription = workshopType?.workshopTypeDesc.orEmpty(),
     statusCode = workshopStatus?.workshopStatusCode.orEmpty(),
@@ -130,7 +131,7 @@ fun EmployerWorkshopDTO.toDomain(): WorkshopSummaryDN = WorkshopSummaryDN(
     branchTitle = branchTitle.orEmpty()
 )
 
-// ---------------------------------------------- خدمات غیرحضوری کارفرما (employerEservicesAgreement)
+// ---------------------------------------------- خدمات غیرحضوری کارفرما (employerServicesAgreement)
 
 fun EmployerCommitmentInfoDTO.toDomain(): EmployerContactInfoDN = EmployerContactInfoDN(
     firstName = firstName.orEmpty(),
@@ -271,6 +272,18 @@ private const val PAYMENT_ALLOWED = "1"
  * When the ticket field is empty the ticket is the last segment of the URL — the same fallback the
  * old client used, and the reason a payment still worked when only one of the two arrived.
  */
+//private const val TFH_PAYMENT_PAGE = "https://tfh.tamin.ir/view/#/payment/"
+//
+//fun DebitPaymentDTO.toDomain(): DebitPaymentDN {
+//    val ticket = paymentTicket?.takeIf { it.isNotBlank() }
+//        ?: paymentUrl?.trimEnd('/')?.substringAfterLast('/')?.takeIf { it.isNotBlank() }
+//    return DebitPaymentDN(
+//        succeeded = succeed == true,
+//        message = responseMessage.orEmpty(),
+//        paymentPageUrl = ticket?.let { TFH_PAYMENT_PAGE + it }.orEmpty(),
+//        ticket = ticket.orEmpty(),
+//    )
+//}
 fun DebitPaymentDTO.toDomain(): DebitPaymentDN = DebitPaymentDN(
     succeeded = succeed == true,
     message = responseMessage.orEmpty(),
@@ -282,9 +295,22 @@ fun DebitPaymentRequestDN.toDto(): DebitPaymentRequestDTO = DebitPaymentRequestD
     branchCode = branchCode,
     workshopId = workshopId,
     debitNumber = debitNumber,
+    // Empty rather than absent when the debt has none: the old client coalesces the service's
+    // null before building its request, so the key is always on the wire.
     agreementRow = agreementRow,
-    deposit = deposit.toString(),
+    // "1"/"0", not "true"/"false".
+    deposit = if (deposit) DEPOSIT_YES else DEPOSIT_NO,
+    // Only a حقوقی workshop has one. Blank is not the same as absent here: the service expects
+    // the key present and null, so an empty id becomes null rather than "".
+    nationalId = legalNationalId.takeIf { characterCode == CHARACTER_LEGAL && it.isNotBlank() },
+    nationalType = characterCode,
 )
+
+private const val DEPOSIT_YES = "1"
+private const val DEPOSIT_NO = "0"
+
+/** `02` حقوقی — the only character that carries a national id of its own. */
+private const val CHARACTER_LEGAL = "02"
 
 /**
  * The wire value of `objectionType` on `objection-save` — a Persian label, not a code. The same

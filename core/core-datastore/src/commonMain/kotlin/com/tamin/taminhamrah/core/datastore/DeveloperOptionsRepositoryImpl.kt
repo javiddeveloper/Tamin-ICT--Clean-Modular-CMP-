@@ -40,12 +40,12 @@ class DeveloperOptionsRepositoryImpl(
     override fun setOverride(key: BaseUrlKey, url: String) {
         val normalized = url.trim().let { if (it.endsWith("/")) it else "$it/" }
         settings.putString(prefKey(key), normalized)
-        _overrides.value = _overrides.value + (key to normalized)
+        _overrides.value += (key to normalized)
     }
 
     override fun clearOverride(key: BaseUrlKey) {
         settings.remove(prefKey(key))
-        _overrides.value = _overrides.value - key
+        _overrides.value -= key
     }
 
     private fun loadPaymentMockMode(): PaymentMockMode =
