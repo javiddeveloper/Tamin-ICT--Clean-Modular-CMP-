@@ -58,6 +58,11 @@ data class EmployerWorkshopDTO(
     @SerialName("branchTitle") val branchTitle: String? = null,
     @SerialName("brhCode") val brhCode: String? = null,
     @SerialName("character") val character: WorkshopCharacterDTO? = null,
+    /**
+     * Present only for a حقوقی workshop (`character.characterCode == "02"`); null otherwise.
+     * `pay-normal-debit` sends its `nationalId` alongside the character code.
+     */
+    @SerialName("legalWorkshop") val legalWorkshop: WorkshopLegalDTO? = null,
     @SerialName("workshopType") val workshopType: WorkshopTypeDTO? = null,
     @SerialName("workshopStatus") val workshopStatus: WorkshopStatusDTO? = null,
 )

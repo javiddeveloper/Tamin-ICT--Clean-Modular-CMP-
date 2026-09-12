@@ -74,6 +74,10 @@ fun EmployerAgreementDN.toPresentation(): WorkshopPR = with(workshop) {
     WorkshopPR(
         workshopId = workshopId,
         branchCode = branchCode,
+        // Raw, like the two identity fields above: these travel into a request body, where a
+        // dash or a Persian digit would be wrong.
+        characterCode = characterCode,
+        legalNationalId = legalNationalId,
         hasIdentity = hasIdentity,
         name = name.orDash(),
         codeLabel = workshopId.orDashDigits(),
@@ -256,7 +260,8 @@ fun DebitReasonDN.toPresentation(): DebitReasonPR = DebitReasonPR(
 fun WorkShopDebtDN.toPresentation(): WorkShopDebtPR = WorkShopDebtPR(
     debitNumber = debitNumber,
     debitNumberLabel = debitNumber.orDashDigits(),
-    agreementRow = agreementRow.orDashDigits(),
+    agreementRow = agreementRow,
+    agreementRowLabel = agreementRow.orDashDigits(),
     notifyDate = orderRecipeDate.orDashDate(),
     customerCode = customerCode.orDashDigits(),
     amount = debitAmount.orDashAmount(),
@@ -274,9 +279,9 @@ fun WorkshopDemandDocDN.toPresentation(): WorkshopDemandDocPR = WorkshopDemandDo
     docNumber = docNumber,
     docNumberLabel = docNumber.orDashDigits(),
     docDate = docDate.orDashDate(),
-    docType = docTypeDescription.orDash(),
-    step = debitStepDescription.orDash(),
-    state = debitStateDescription.orDash(),
+    docType = docTypeDescription.orDashProse(),
+    step = debitStepDescription.orDashProse(),
+    state = debitStateDescription.orDashProse(),
     isViewable = isViewable,
 )
 
@@ -348,7 +353,10 @@ fun WorkshopMemberDN.toPresentation(): WorkshopMemberPR = WorkshopMemberPR(
     relationType = relationTypeDescription.orDash(),
     leavingWorkStatus = leavingWorkStatus.orDash(),
     leavingWorkDate = leavingWorkDate.orDashDate(),
-    isEmployed = leavingWorkDate == null,
+    // Blank, not null: the service sends `leavingWorkDate` nullable but the domain model
+    // flattens it with `orEmpty()`, so a null-check here is always false and marked every
+    // member as having left.
+    isEmployed = leavingWorkDate.isBlank(),
 )
 
 fun WorkshopStackHolderDN.toPresentation(): WorkshopStackHolderPR = WorkshopStackHolderPR(
@@ -380,6 +388,28 @@ fun SmsMessageDN.toPresentation(): SmsMessagePR = SmsMessagePR(
 // ------------------------------------------------------------------ formatting
 
 /** Digits the user reads are Persian; a value the service omitted is the design's dash. */
+/**
+ * A description as the reader expects to see it, or a dash.
+ *
+ * Service descriptions arrive with round brackets — «محاسبه (اعلام نشده)» — and a bracket is
+ * bidi-neutral: in a right-to-left run it is drawn with its mirror glyph, so the one the service
+ * opens with reaches the screen as a closing bracket and the value reads «محاسبه )اعلام نشده(».
+ * Swapping the pair cancels that. It is the reordering-safe half of the problem: both brackets are
+ * bidi class ON and both mirror, so each keeps the position the algorithm gives it and only the
+ * glyph changes.
+ *
+ * Stated here, at the presentation edge, so the domain keeps the service's own spelling.
+ */
+private fun String.orDashProse(): String = ifBlank { null }?.swapBrackets().orDash()
+
+private fun String.swapBrackets(): String = map { character ->
+    when (character) {
+        '(' -> ')'
+        ')' -> '('
+        else -> character
+    }
+}.joinToString("")
+
 private fun String.orDashDigits(): String = ifBlank { null }?.toPersianDigits().orDash()
 
 /** Compact Jalali (`14050131`) renders as `۱۴۰۵/۰۱/۳۱`; an absent date is a dash. */

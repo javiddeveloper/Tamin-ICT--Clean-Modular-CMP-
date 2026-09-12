@@ -1,9 +1,17 @@
 package com.tamin.taminhamrah.feature.workshops.ui.components
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopConstants
 import com.tamin.taminhamrah.ui.digitsOnly
+import com.tamin.taminhamrah.ui.theme.Spacing
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.workshop_branch_code
@@ -42,3 +50,33 @@ fun WorkshopSearchPanel(
     }
 }
 
+/**
+ * A search panel raised into a dialog.
+ *
+ * [panel] is whichever panel the screen already draws, unchanged — only the surface it sits on
+ * differs, so a screen keeps its own fields and its own buttons. The content scrolls because
+ * برگ پرداخت‌ها searches on six fields and would otherwise run off a short screen.
+ *
+ * The panel's own buttons close it: both جست‌وجو and همهٔ موارد apply and dismiss, so the dialog
+ * has no separate close action of its own.
+ */
+@Composable
+fun WorkshopSearchDialog(
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+    panel: @Composable () -> Unit,
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.page)
+                .verticalScroll(rememberScrollState()),
+        ) {
+            panel()
+        }
+    }
+}

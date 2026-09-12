@@ -3,7 +3,6 @@ package com.tamin.taminhamrah.feature.workshops.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsEvent
-import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
 import kotlinx.coroutines.flow.Flow
@@ -22,18 +21,13 @@ import org.jetbrains.compose.resources.getString
 @Composable
 fun HandleWorkshopsEvents(
     events: Flow<WorkshopsEvent>,
-    onOpenAction: (WorkshopAction, String, String, String) -> Unit,
+    onOpenAction: (WorkshopsEvent.Navigate) -> Unit,
 ) {
     val toaster = LocalToaster.current
     LaunchedEffect(events, toaster) {
         events.collect { event ->
             when (event) {
-                is WorkshopsEvent.Navigate -> onOpenAction(
-                    event.action,
-                    event.workshopId,
-                    event.branchCode,
-                    event.workshopName,
-                )
+                is WorkshopsEvent.Navigate -> onOpenAction(event)
 
                 is WorkshopsEvent.ShowMessage -> toaster.error(getString(event.message))
                 is WorkshopsEvent.ShowToast -> toaster.error(event.message)
