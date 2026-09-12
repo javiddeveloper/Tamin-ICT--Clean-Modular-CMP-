@@ -1,25 +1,27 @@
 package com.tamin.taminhamrah.repository.inspection
 
-import com.tamin.taminhamrah.model.inspection.BranchListDN
-import com.tamin.taminhamrah.model.inspection.InspectionPerformedListDN
-import com.tamin.taminhamrah.model.inspection.JobListDN
+import com.tamin.taminhamrah.model.inspection.BranchDN
+import com.tamin.taminhamrah.model.inspection.InspectionPerformedDN
+import com.tamin.taminhamrah.model.inspection.JobDN
 import com.tamin.taminhamrah.model.inspection.SubmitInspectionRequestDN
 import com.tamin.taminhamrah.model.inspection.SubmitInspectionRequestResultDN
+import com.tamin.taminhamrah.model.paging.PageDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
-import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import kotlinx.coroutines.flow.Flow
 
 interface InspectionRepository {
-    suspend fun getAllInsurance(
-        filters: List<ApiFilterDN> = emptyList()
-    ): InspectionPerformedListDN
+    fun getInsurancePage(
+        query: ApiQueryParamDN
+    ): Flow<PageDN<InspectionPerformedDN>>
 
-    suspend fun getBranches(
-        filters: List<ApiFilterDN> = emptyList()
-    ): BranchListDN
+    fun getBranchesPage(
+        query: ApiQueryParamDN
+    ): Flow<PageDN<BranchDN>>
 
-    suspend fun getJobs(
-        filters: List<ApiFilterDN> = emptyList()
-    ): JobListDN
+    fun getJobsPage(
+        query: ApiQueryParamDN
+    ): Flow<PageDN<JobDN>>
 
     suspend fun submitInspectionRequest(
         request: SubmitInspectionRequestDN

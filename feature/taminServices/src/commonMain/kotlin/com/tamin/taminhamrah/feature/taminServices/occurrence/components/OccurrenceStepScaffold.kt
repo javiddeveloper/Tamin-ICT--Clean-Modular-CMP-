@@ -27,7 +27,7 @@ internal fun OccurrenceStepScaffold(
     content: @Composable (PaddingValues) -> Unit,
 ) {
     Scaffold(
-        modifier = modifier.fillMaxSize().imePadding(),
+        modifier = modifier.fillMaxSize(),
         topBar = {
             TaminStepTopAppBar(
                 title = title,

@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.dataSource.workshopsSource
 import com.tamin.taminhamrah.apiService.WorkShopsApiService
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
+import com.tamin.taminhamrah.model.BaseUrlKey
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.FilterOperator
@@ -18,6 +19,7 @@ import com.tamin.taminhamrah.model.workshop.DebitPaymentDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDTO
 import com.tamin.taminhamrah.model.workshop.DebitReasonDTO
+import com.tamin.taminhamrah.util.NetworkConstants
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmitRequestDTO
@@ -29,6 +31,8 @@ import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberConfirmResultDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDTO
+import com.tamin.taminhamrah.model.workshop.SmsMessageDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDTO
@@ -46,6 +50,7 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
+import com.tamin.taminhamrah.repository.DeveloperOptionsRepository
 import com.tamin.taminhamrah.tools.readPdfChannel
 
 /** `serviceName` the `request-ticket` endpoint expects for the Employer → Online Services flow. */
@@ -55,6 +60,7 @@ internal class WorkShopsRemoteDataSourceImpl(
     private val apiService: WorkShopsApiService,
     private val queryBuilder: ApiQueryBuilder,
     private val errorParser: ErrorParser,
+    private val developerOptionsRepository: DeveloperOptionsRepository,
 ) : WorkShopsRemoteDataSource {
     private val legalRepresentativeListQuery = ApiQueryParamDN(page = 1, start = 0, limit = 1000)
     // ---------------------------------------------------------------- کارگاه‌های کارفرما
@@ -136,6 +142,19 @@ internal class WorkShopsRemoteDataSourceImpl(
 
     override suspend fun payWorkshopDebit(request: DebitPaymentRequestDTO): DebitPaymentDTO = call {
         apiService.payWorkshopDebit(request).extractData()
+    }
+
+    override suspend fun confirmPaymentTicket(ticket: String) {
+        call {
+            // Read from Developer Options rather than the constant: this address is absolute, so
+            // it overrides whatever base URL the client it travels on was built with, and pointing
+            // "سرویس TFH" at a test host used to leave this one call on production.
+            val url = developerOptionsRepository.getEffectiveBaseUrl(BaseUrlKey.TFH) +
+                NetworkConstants.TFH_TICKET_PATH + ticket
+            // Extracted rather than ignored: that is what turns a refusal envelope into a throw,
+            // which is the whole of what this call reports.
+            apiService.getPaymentTicketInfo(url).extractData()
+        }
     }
 
     // ---------------------------------------------------------------------- استعلام بدهی کارگاه
@@ -292,6 +311,19 @@ internal class WorkShopsRemoteDataSourceImpl(
         request: EmployerAgreementSubmitRequestDTO,
     ): String = call {
         apiService.submitEmployerAgreement(request).extractMessage()
+    }
+
+    override suspend fun getWorkShopObjections(
+        query: ApiQueryParamDN
+    ): ListData<WorkShopObjectionDTO> = call {
+        apiService.getWorkShopObjections(query.toQueries()).extractData()
+    }
+
+    override suspend fun getWorkShopObjectionSms(
+        objectionCode: Long,
+        query: ApiQueryParamDN,
+    ): ListData<SmsMessageDTO> = call {
+        apiService.getWorkShopObjectionSms(objectionCode, query.toQueries()).extractData()
     }
 
     private fun ApiQueryParamDN.toQueries(): Map<String, String> = queryBuilder.buildQuery(this)
