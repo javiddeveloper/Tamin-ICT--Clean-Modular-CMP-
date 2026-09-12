@@ -168,18 +168,6 @@ class WorkShopsRepositoryEmployerOnlineServicesTest {
             lastSubmitBody = request
             return submitMessage
         }
-
-        override suspend fun getWorkShopObjections(query: ApiQueryParamDN): ListData<WorkShopObjectionDTO> {
-            notUsed()
-        }
-
-        override suspend fun getWorkShopObjectionSms(
-            objectionCode: Long,
-            query: ApiQueryParamDN
-        ): ListData<SmsMessageDTO> {
-           notUsed()
-        }
-
         // ------------------------------------------------------- not used by these tests
 
         private fun notUsed(): Nothing = error("not exercised by the employer online-services repository tests")
