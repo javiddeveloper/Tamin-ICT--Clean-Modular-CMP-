@@ -9,6 +9,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.scale
+import kotlinx.coroutines.delay
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -114,6 +122,7 @@ import taminx.core.core_ui.Res as CoreRes
 import taminx.core.core_ui.ic_close
 import taminx.core.core_ui.ic_send
 import taminx.core.core_ui.ic_tamin_chevron_forward
+import kotlin.time.Duration.Companion.milliseconds
 
 private val PillShape = RoundedCornerShape(CornerRadius.max)
 private val CtaShape = RoundedCornerShape(CornerRadius.xl)
@@ -139,6 +148,8 @@ fun StoryViewerScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
+    var likeAnimationTrigger by remember { androidx.compose.runtime.mutableStateOf(0) }
+
     LaunchedEffect(channelIndex) {
         viewModel.sendIntent(StoryViewerIntent.Open(channelIndex))
     }
@@ -147,11 +158,15 @@ fun StoryViewerScreen(
         when (event) {
             StoryViewerEvent.Close -> onClose()
             is StoryViewerEvent.OpenFeature -> onOpenFeature(event.flag)
+            StoryViewerEvent.ShowLikeAnimation -> {
+                likeAnimationTrigger++
+            }
         }
     }
 
     StoryViewerBody(
         state = state,
+        likeAnimationTrigger = likeAnimationTrigger,
         onIntent = viewModel::sendIntent,
         onDismissError = onClose,
         modifier = modifier,
@@ -165,6 +180,7 @@ internal fun StoryViewerBody(
     onIntent: (StoryViewerIntent) -> Unit,
     onDismissError: () -> Unit,
     modifier: Modifier = Modifier,
+    likeAnimationTrigger: Int = 0,
 ) {
     val type = storyTextStyles()
 
@@ -216,151 +232,194 @@ internal fun StoryViewerBody(
         }
     }
 
-    HorizontalPager(
-        state = pagerState,
-        modifier = modifier.fillMaxSize(),
-    ) { page ->
-        val channel = state.channels[page]
-        val isCurrentPage = page == state.channelIndex
+    Box(modifier = modifier.fillMaxSize()) {
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxSize(),
+        ) { page ->
+            val channel = state.channels[page]
+            val isCurrentPage = page == state.channelIndex
 
-        var lastSeenItem by remember { androidx.compose.runtime.mutableStateOf(channel.items.firstOrNull()) }
-        var lastSeenIndex by remember { androidx.compose.runtime.mutableStateOf(0) }
+            var lastSeenItem by remember { androidx.compose.runtime.mutableStateOf(channel.items.firstOrNull()) }
+            var lastSeenIndex by remember { androidx.compose.runtime.mutableStateOf(0) }
 
-        if (isCurrentPage) {
-            lastSeenItem = state.item
-            lastSeenIndex = state.itemIndex
-        }
+            if (isCurrentPage) {
+                lastSeenItem = state.item
+                lastSeenIndex = state.itemIndex
+            }
 
-        val item = if (isCurrentPage) state.item else lastSeenItem
+            val item = if (isCurrentPage) state.item else lastSeenItem
 
-        val pageState = if (isCurrentPage) state else state.copy(
-            channelIndex = page,
-            itemIndex = lastSeenIndex,
-            segmentElapsedMs = 0L,
-            isTouchHeld = true, // Force pause on inactive pages so they don't play
-            isComposingComment = false,
-            isBuffering = false,
-            mediaFailed = false,
-        )
+            val pageState = if (isCurrentPage) state else state.copy(
+                channelIndex = page,
+                itemIndex = lastSeenIndex,
+                segmentElapsedMs = 0L,
+                isTouchHeld = true, // Force pause on inactive pages so they don't play
+                isComposingComment = false,
+                isBuffering = false,
+                mediaFailed = false,
+            )
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .storyBackdrop(channel),
-        ) {
-            if (item != null) {
-                var pendingMediaReady by remember { androidx.compose.runtime.mutableStateOf<Long?>(null) }
-                var pendingMediaFailed by remember { androidx.compose.runtime.mutableStateOf(false) }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .storyBackdrop(channel),
+            ) {
+                if (item != null) {
+                    var pendingMediaReady by remember { androidx.compose.runtime.mutableStateOf<Long?>(null) }
+                    var pendingMediaFailed by remember { androidx.compose.runtime.mutableStateOf(false) }
 
-                val pageIntent: (StoryViewerIntent) -> Unit = { intent ->
-                    if (isCurrentPage) {
-                        if (intent == StoryViewerIntent.Resume && pagerState.isScrollInProgress) {
-                            // Ignore Resume from tap cancellation during drag
+                    val pageIntent: (StoryViewerIntent) -> Unit = { intent ->
+                        if (isCurrentPage) {
+                            if (intent == StoryViewerIntent.Resume && pagerState.isScrollInProgress) {
+                                // Ignore Resume from tap cancellation during drag
+                            } else {
+                                onIntent(intent)
+                            }
                         } else {
-                            onIntent(intent)
-                        }
-                    } else {
-                        when (intent) {
-                            is StoryViewerIntent.MediaReady -> pendingMediaReady = intent.durationMs
-                            StoryViewerIntent.MediaFailed -> pendingMediaFailed = true
-                            else -> {}
+                            when (intent) {
+                                is StoryViewerIntent.MediaReady -> pendingMediaReady = intent.durationMs
+                                StoryViewerIntent.MediaFailed -> pendingMediaFailed = true
+                                else -> {}
+                            }
                         }
                     }
-                }
 
-                LaunchedEffect(isCurrentPage) {
-                    if (isCurrentPage) {
-                        pendingMediaReady?.let { onIntent(StoryViewerIntent.MediaReady(it)) }
-                        if (pendingMediaFailed) onIntent(StoryViewerIntent.MediaFailed)
-                        pendingMediaReady = null
-                        pendingMediaFailed = false
+                    LaunchedEffect(isCurrentPage) {
+                        if (isCurrentPage) {
+                            pendingMediaReady?.let { onIntent(StoryViewerIntent.MediaReady(it)) }
+                            if (pendingMediaFailed) onIntent(StoryViewerIntent.MediaFailed)
+                            pendingMediaReady = null
+                            pendingMediaFailed = false
+                        }
                     }
-                }
 
-                StoryMediaLayer(
-                    item = item,
-                    isPaused = pageState.isPaused,
-                    mediaFailed = pageState.mediaFailed,
-                    onIntent = pageIntent,
-                )
+                    StoryMediaLayer(
+                        item = item,
+                        isPaused = pageState.isPaused,
+                        mediaFailed = pageState.mediaFailed,
+                        onIntent = pageIntent,
+                    )
 
-                // Keeps the copy legible over whatever the media turned out to be.
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .height(StoryDimens.viewerScrimHeight)
-                        .background(
-                            Brush.verticalGradient(
-                                listOf(
-                                    Color.Transparent,
-                                    StoryScrimInk.copy(alpha = StoryDimens.viewerScrimAlpha),
+                    // Keeps the copy legible over whatever the media turned out to be.
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .height(StoryDimens.viewerScrimHeight)
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(
+                                        Color.Transparent,
+                                        StoryScrimInk.copy(alpha = StoryDimens.viewerScrimAlpha),
+                                    ),
                                 ),
                             ),
-                        ),
-                )
-
-                StoryTapZones(
-                    isComposingComment = pageState.isComposingComment,
-                    onIntent = pageIntent,
-                    onDismissComment = dismissComment,
-                )
-
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .fillMaxWidth()
-                        .windowInsetsPadding(WindowInsets.statusBars),
-                ) {
-                    StoryProgressBar(
-                        segmentCount = pageState.itemCount,
-                        currentIndex = pageState.itemIndex,
-                        segmentToken = pageState.segmentToken,
-                        durationMs = pageState.segmentDurationMs,
-                        elapsedMs = pageState.segmentElapsedMs,
-                        isPlaying = pageState.isPlaying,
-                        modifier = Modifier.padding(
-                            start = StoryDimens.progressPaddingHorizontal,
-                            end = StoryDimens.progressPaddingHorizontal,
-                            top = StoryDimens.progressPaddingTop,
-                        ),
                     )
-                    StoryHeader(
+
+                    StoryTapZones(
+                        isComposingComment = pageState.isComposingComment,
+                        onIntent = pageIntent,
+                        onDismissComment = dismissComment,
+                    )
+
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .fillMaxWidth()
+                            .windowInsetsPadding(WindowInsets.statusBars),
+                    ) {
+                        StoryProgressBar(
+                            segmentCount = pageState.itemCount,
+                            currentIndex = pageState.itemIndex,
+                            segmentToken = pageState.segmentToken,
+                            durationMs = pageState.segmentDurationMs,
+                            elapsedMs = pageState.segmentElapsedMs,
+                            isPlaying = pageState.isPlaying,
+                            modifier = Modifier.padding(
+                                start = StoryDimens.progressPaddingHorizontal,
+                                end = StoryDimens.progressPaddingHorizontal,
+                                top = StoryDimens.progressPaddingTop,
+                            ),
+                        )
+                        StoryHeader(
+                            channel = channel,
+                            type = type,
+                            onClose = { pageIntent(StoryViewerIntent.Close) },
+                            modifier = Modifier.padding(
+                                start = StoryDimens.headerPaddingHorizontal,
+                                end = StoryDimens.headerPaddingHorizontal,
+                                top = StoryDimens.headerPaddingTop,
+                            ),
+                        )
+                    }
+
+                    StoryContent(
+                        state = pageState,
                         channel = channel,
+                        item = item,
                         type = type,
-                        onClose = { pageIntent(StoryViewerIntent.Close) },
-                        modifier = Modifier.padding(
-                            start = StoryDimens.headerPaddingHorizontal,
-                            end = StoryDimens.headerPaddingHorizontal,
-                            top = StoryDimens.headerPaddingTop,
-                        ),
+                        onIntent = pageIntent,
+                        onSubmitComment = {
+                            pageIntent(StoryViewerIntent.CommentSubmitted)
+                            dismissComment()
+                        },
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            // The union rather than either alone: the copy sits above the navigation bar
+                            // normally, and above the keyboard while the comment field has it open.
+                            .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime))
+                            // padding: 0 20px 30px — no top inset, so the copy hangs off the bottom of
+                            // the screen the way the design has it rather than floating 30 above it.
+                            .padding(
+                                start = StoryDimens.contentPaddingHorizontal,
+                                end = StoryDimens.contentPaddingHorizontal,
+                                bottom = StoryDimens.contentPaddingBottom,
+                            ),
                     )
                 }
+            }
+        }
 
-                StoryContent(
-                    state = pageState,
-                    channel = channel,
-                    item = item,
-                    type = type,
-                    onIntent = pageIntent,
-                    onSubmitComment = {
-                        pageIntent(StoryViewerIntent.CommentSubmitted)
-                        dismissComment()
-                    },
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        // The union rather than either alone: the copy sits above the navigation bar
-                        // normally, and above the keyboard while the comment field has it open.
-                        .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime))
-                        // padding: 0 20px 30px — no top inset, so the copy hangs off the bottom of
-                        // the screen the way the design has it rather than floating 30 above it.
-                        .padding(
-                            start = StoryDimens.contentPaddingHorizontal,
-                            end = StoryDimens.contentPaddingHorizontal,
-                            bottom = StoryDimens.contentPaddingBottom,
-                        ),
+        // Like Animation Overlay
+        val scale = remember { Animatable(0f) }
+        val alpha = remember { Animatable(0f) }
+
+        LaunchedEffect(state.channelIndex, state.itemIndex) {
+            scale.snapTo(0f)
+            alpha.snapTo(0f)
+        }
+
+        LaunchedEffect(likeAnimationTrigger) {
+            if (likeAnimationTrigger > 0) {
+                scale.snapTo(0f)
+                alpha.snapTo(1f)
+                scale.animateTo(
+                    targetValue = 1f,
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessLow
+                    )
+                )
+                delay(400.milliseconds)
+                alpha.animateTo(
+                    targetValue = 0f,
+                    animationSpec = tween(durationMillis = 300, easing = LinearEasing)
                 )
             }
+        }
+
+        if (alpha.value > 0f) {
+            Icon(
+                imageVector = vectorResource(Res.drawable.ic_story_heart_filled),
+                contentDescription = null,
+                tint = StoryLikeActive,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(120.dp)
+                    .scale(scale.value)
+                    .alpha(alpha.value)
+            )
         }
     }
     //

@@ -105,8 +105,14 @@ class StoryViewerViewModel(
             is StoryViewerIntent.MediaReady -> mediaReady(intent.durationMs)
             StoryViewerIntent.MediaEnded -> if (currentIsVideo()) goNext()
             StoryViewerIntent.MediaFailed -> mediaFailed()
-            StoryViewerIntent.ToggleLike ->
-                uiState.value.item?.let { toggleStoryLikeUseCase(it.id) }
+            StoryViewerIntent.ToggleLike -> {
+                val item = uiState.value.item ?: return@flow
+                val wasLiked = uiState.value.isLiked
+                toggleStoryLikeUseCase(item.id)
+                if (!wasLiked) {
+                    sendEvent(StoryViewerEvent.ShowLikeAnimation)
+                }
+            }
 
             StoryViewerIntent.ToggleSave ->
                 uiState.value.item?.let { toggleStorySaveUseCase(it.id) }

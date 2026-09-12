@@ -195,4 +195,7 @@ sealed interface StoryViewerEvent {
      * where it goes — and whether the server has that service switched on.
      */
     data class OpenFeature(val flag: FeatureFlag) : StoryViewerEvent
+    
+    /** Emitted when a like action actually changes the state to liked. */
+    data object ShowLikeAnimation : StoryViewerEvent
 }
