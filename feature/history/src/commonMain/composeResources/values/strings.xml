@@ -76,6 +76,7 @@
     <string name="history_send_confirm_body">قبل از ارسال سابقه لطفا تمامی سوابق خود را مشاهده و بررسی نمایید.</string>
     <string name="history_send_confirm_action">ارسال سابقه</string>
     <string name="history_send_success_title">درخواست شما ثبت شد</string>
+    <string name="history_send_success_default">درخواست شما با موفقیت ثبت شد.</string>
     <string name="history_report_no_history">سابقه‌ای برای تهیهٔ گزارش وجود ندارد.</string>
     <string name="history_report_empty">برای این نوع گزارش سابقه‌ای ثبت نشده است.</string>
 </resources>

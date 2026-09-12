@@ -204,10 +204,11 @@ private fun HistoryUiState.reduceForFixture(intent: HistoryIntent): HistoryUiSta
 
     is HistoryIntent.ConfirmSendNotice -> copy(
         showSendConfirm = false,
+        showSendSuccess = true,
         sendSuccessMessage = "سوابق شما با موفقیت برای موسسات ارسال شد.",
     )
 
-    is HistoryIntent.DismissSendSuccess -> copy(sendSuccessMessage = null)
+    is HistoryIntent.DismissSendSuccess -> copy(showSendSuccess = false, sendSuccessMessage = null)
 
     is HistoryIntent.ShowReportMenu -> copy(showReportMenu = true)
 

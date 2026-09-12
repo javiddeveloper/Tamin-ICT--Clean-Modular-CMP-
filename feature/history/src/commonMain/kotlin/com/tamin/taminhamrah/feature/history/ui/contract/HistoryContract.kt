@@ -100,7 +100,16 @@ data class HistoryUiState(
     val showSendConfirm: Boolean = false,
     /** The send is in flight; the confirm button says so and cannot be pressed twice. */
     val isSending: Boolean = false,
-    /** The server's own confirmation text, which is also what keeps the success dialog up. */
+    /** The success dialog is up. */
+    val showSendSuccess: Boolean = false,
+    /**
+     * The server's own confirmation text, when it sent any.
+     *
+     * Null means it confirmed without wording of its own, and the screen falls back to
+     * `history_send_success_default` — it does *not* mean the dialog is hidden; that is
+     * [showSendSuccess]. A service answering with an empty string used to raise a dialog with
+     * no text in it.
+     */
     val sendSuccessMessage: String? = null,
     /**
      * The signed-in person's national number, from the record the access check already fetched.
@@ -169,7 +178,10 @@ data class HistoryUiState(
 
         data class Sending(val isSending: Boolean) : PartialState
 
+        /** Sent. [message] is the service's own wording, or null if it sent none. */
         data class SendSucceeded(val message: String?) : PartialState
+
+        data object SendSuccessDismissed : PartialState
 
         data class IdentityLoaded(val nationalId: String?) : PartialState
 
@@ -189,9 +201,6 @@ data class HistoryUiState(
 
 sealed interface HistoryIntent {
     data object Load : HistoryIntent
-
-    /** Carries the year itself, so the sheet can never be handed a stale list position. */
-
 
     /** Switch the page between all years and one of them. */
     data class SelectScope(val scope: HistoryScope) : HistoryIntent

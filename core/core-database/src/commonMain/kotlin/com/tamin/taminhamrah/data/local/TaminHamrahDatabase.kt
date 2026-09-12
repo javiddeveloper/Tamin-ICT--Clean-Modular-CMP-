@@ -96,7 +96,7 @@ import kotlinx.coroutines.IO
         HistoryYearEntity::class,
         HistoryWageRowEntity::class,
     ],
-    version = 2,
+    version = 3,
 )
 @ConstructedBy(TaminXDatabaseConstructor::class)
 @TypeConverters(TaminHamrahConverters::class)

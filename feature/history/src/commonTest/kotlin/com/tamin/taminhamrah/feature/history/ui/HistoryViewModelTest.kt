@@ -307,7 +307,44 @@ class HistoryViewModelTest {
         val state = viewModel.uiState.value
         assertEquals(1, repository.noticeCalls)
         assertEquals(false, state.showSendConfirm, "the confirmation closes behind the send")
+        assertTrue(state.showSendSuccess, "the confirmation dialog opens")
         assertEquals("ارسال شد", state.sendSuccessMessage, "the server's own wording is shown")
+    }
+
+    /**
+     * A service that confirms without wording of its own must still read as a confirmation.
+     *
+     * The fallback sentence lives in `strings.xml` and is resolved by the screen, so what is
+     * pinned here is that the dialog opens with no message of its own to show — the case that
+     * used to be a Persian literal in this ViewModel's companion object.
+     */
+    @Test
+    fun sendingTheNotice_whenTheServiceSendsNoWording_stillConfirms() = runTest(testDispatcher) {
+        repository.noticeResult = null
+
+        viewModel.sendIntent(HistoryIntent.ConfirmSendNotice)
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertEquals(1, repository.noticeCalls)
+        assertTrue(state.showSendSuccess, "a wordless confirmation is still a confirmation")
+        assertNull(state.sendSuccessMessage, "and carries no wording for the screen to print")
+        assertNull(state.error)
+    }
+
+    /** Dismissing takes the dialog down and clears what it was showing. */
+    @Test
+    fun dismissingTheSuccessDialog_closesIt() = runTest(testDispatcher) {
+        viewModel.sendIntent(HistoryIntent.ConfirmSendNotice)
+        advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.showSendSuccess)
+
+        viewModel.sendIntent(HistoryIntent.DismissSendSuccess)
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertEquals(false, state.showSendSuccess)
+        assertNull(state.sendSuccessMessage)
     }
 
     @Test
@@ -319,7 +356,8 @@ class HistoryViewModelTest {
 
         val state = viewModel.uiState.value
         assertNotNull(state.error)
-        assertNull(state.sendSuccessMessage, "a failure must not read as a confirmation")
+        assertEquals(false, state.showSendSuccess, "a failure must not read as a confirmation")
+        assertNull(state.sendSuccessMessage)
         assertEquals(false, state.isSending)
     }
 

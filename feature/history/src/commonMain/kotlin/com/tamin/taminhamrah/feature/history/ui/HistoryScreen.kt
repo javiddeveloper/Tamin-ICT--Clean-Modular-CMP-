@@ -151,6 +151,7 @@ import taminx.feature.history.history_scheme_optional
 import taminx.feature.history.history_scope_all
 import taminx.feature.history.history_send_confirm_action
 import taminx.feature.history.history_send_confirm_body
+import taminx.feature.history.history_send_success_default
 import taminx.feature.history.history_send_success_title
 import taminx.feature.history.history_stat_sources
 import taminx.feature.history.history_year_full
@@ -889,11 +890,12 @@ fun HistoryContent(
     }
 
     // The service's own wording when it sends any, so the person reads what تأمین said, not our
-    // paraphrase of it.
-    uiState.sendSuccessMessage?.let { message ->
+    // paraphrase of it — and our own sentence only when it sent none.
+    if (uiState.showSendSuccess) {
         TaminConfirmationDialog(
             title = stringResource(HistoryRes.string.history_send_success_title),
-            description = message,
+            description = uiState.sendSuccessMessage
+                ?: stringResource(HistoryRes.string.history_send_success_default),
             icon = Icons.Filled.Check,
             iconTint = colors.greenText,
             iconBackground = colors.greenBg,

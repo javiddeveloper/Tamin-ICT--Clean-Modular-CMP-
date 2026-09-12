@@ -140,7 +140,7 @@ class HistoryViewModel(
 
         is HistoryIntent.DismissSendConfirm -> flow { emit(PartialState.SendConfirmVisible(false)) }
 
-        is HistoryIntent.DismissSendSuccess -> flow { emit(PartialState.SendSucceeded(null)) }
+        is HistoryIntent.DismissSendSuccess -> flow { emit(PartialState.SendSuccessDismissed) }
 
         /*
          * The «اعلام» the previous app sent from this very screen — `sendeblagh`, not the three-flag
@@ -155,7 +155,9 @@ class HistoryViewModel(
             try {
                 val message = sendHistoryNoticeUseCase()
                 emit(PartialState.SendConfirmVisible(false))
-                emit(PartialState.SendSucceeded(message ?: DEFAULT_SEND_SUCCESS))
+                // The service's wording is passed through untouched; the screen supplies the
+                // fallback copy when it sent none, so no user-facing text lives in here.
+                emit(PartialState.SendSucceeded(message))
             } catch (e: Exception) {
                 emit(PartialState.SendConfirmVisible(false))
                 emit(PartialState.Error(e.toSingleLineMessage()))
@@ -359,10 +361,7 @@ class HistoryViewModel(
         is PartialState.Loading ->
             currentState.copy(isLoading = partialState.isLoading, error = null)
 
-        is PartialState.HistoryLoaded -> run {
-            println("TOTALDBG years=${partialState.years.size} total=${partialState.careerTotal} merged=${partialState.hasCombinedRecords} wage=${partialState.hasWageRecords}")
-            currentState
-        }.copy(
+        is PartialState.HistoryLoaded -> currentState.copy(
             isLoading = false,
             hasLoadedOnce = true,
             years = partialState.years,
@@ -420,7 +419,10 @@ class HistoryViewModel(
         is PartialState.Sending -> currentState.copy(isSending = partialState.isSending)
 
         is PartialState.SendSucceeded ->
-            currentState.copy(sendSuccessMessage = partialState.message)
+            currentState.copy(showSendSuccess = true, sendSuccessMessage = partialState.message)
+
+        PartialState.SendSuccessDismissed ->
+            currentState.copy(showSendSuccess = false, sendSuccessMessage = null)
 
         is PartialState.IdentityLoaded ->
             currentState.copy(nationalId = partialState.nationalId)
@@ -442,11 +444,6 @@ class HistoryViewModel(
 
         is PartialState.Error ->
             currentState.copy(isLoading = false, error = partialState.message)
-    }
-
-    private companion object {
-        /** Used only when the service confirms without wording of its own. */
-        const val DEFAULT_SEND_SUCCESS = "درخواست شما با موفقیت ثبت شد."
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)
