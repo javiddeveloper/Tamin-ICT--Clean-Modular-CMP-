@@ -108,6 +108,7 @@
     <string name="profile_cartable">کارتابل</string>
     <string name="profile_requests">درخواست ها</string>
     <string name="profile_personal_inbox">صندوق شخصی</string>
+    <string name="profile_save_events">ذخیره رویدادها</string>
     <string name="profile_security_settings">امنیت و تنظیمات</string>
     <string name="profile_security">امنیت</string>
     <string name="security_account_title">امنیت حساب</string>
