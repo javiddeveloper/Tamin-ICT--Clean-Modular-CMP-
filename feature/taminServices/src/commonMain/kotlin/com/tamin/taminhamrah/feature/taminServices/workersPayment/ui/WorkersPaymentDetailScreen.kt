@@ -13,13 +13,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onSizeChanged
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.contract.WorkersPaymentIntent
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.model.WorkersPaymentInfoPR
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.ui.components.WorkersPaymentDetailHeader
@@ -31,14 +29,17 @@ import com.tamin.taminhamrah.feature.taminServices.workersPayment.ui.components.
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
-import com.tamin.taminhamrah.ui.components.reservedHeight
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.toparea.driveTopArea
+import com.tamin.taminhamrah.ui.toparea.rememberMeasuredTopAreaState
+import com.tamin.taminhamrah.ui.toparea.reportTopAreaHeight
+import com.tamin.taminhamrah.ui.toparea.topAreaContentSpacer
 
 /**
  * Screen 2 — the single-month confirmation before the bank gateway. The header is copied from
  * screen 1's (pinned gradient bar + ripple-ring icon + subtitle, with the month recap card riding
- * up into its rounded bottom edge), only non-collapsing. Body is the صورت‌حساب breakdown + gateway
+ * up into its rounded bottom edge), collapsing on scroll. Body is the صورت‌حساب breakdown + gateway
  * notice, with one sticky action that fires [WorkersPaymentIntent.PayItem]. Shares the ViewModel
  * with the list screen.
  */
@@ -51,7 +52,16 @@ internal fun WorkersPaymentDetailScreen(
 ) {
     val colors = LocalTaminColors.current
     var showInfoSheet by remember { mutableStateOf(false) }
-    var headerHeightPx by remember { mutableIntStateOf(0) }
+    val scrollState = rememberScrollState()
+
+    val topArea = rememberMeasuredTopAreaState { state ->
+        WorkersPaymentDetailHeader(
+            item = item,
+            onBack = onBack,
+            topAreaState = state,
+            onInfoClicked = { showInfoSheet = true },
+        )
+    }
 
     Box(
         modifier = Modifier
@@ -63,11 +73,10 @@ internal fun WorkersPaymentDetailScreen(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .verticalScroll(rememberScrollState()),
+                    .driveTopArea(topArea, scrollState)
+                    .verticalScroll(scrollState),
             ) {
-                // Stands in for the pinned header (top bar + recap card) so the scrolling body
-                // starts below it — same trick as screen 1's list.
-                Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
+                Spacer(modifier = Modifier.topAreaContentSpacer(topArea))
 
                 Column(
                     modifier = Modifier
@@ -93,10 +102,11 @@ internal fun WorkersPaymentDetailScreen(
         WorkersPaymentDetailHeader(
             item = item,
             onBack = onBack,
+            topAreaState = topArea,
             onInfoClicked = { showInfoSheet = true },
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .onSizeChanged { headerHeightPx = it.height },
+                .reportTopAreaHeight(topArea),
         )
 
         if (isProcessing) {

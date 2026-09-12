@@ -26,6 +26,9 @@ import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.rideUpIntoHeader
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.toparea.TopAreaState
+import com.tamin.taminhamrah.ui.toparea.rememberTopAreaState
+import com.tamin.taminhamrah.ui.toparea.topAreaHide
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
@@ -43,12 +46,13 @@ private val HEADER_OVERLAP = 24.dp
  * Screen 2's header — copied from screen 1's [WorkersPaymentHeader]: a gradient [TaminTopAppBar]
  * (ripple-ring icon + subtitle) with the [WorkersPaymentMonthRecapCard] as a sibling directly below
  * it, riding [HEADER_OVERLAP] up into the bar's bottom padding so the white card overlaps the
- * rounded gradient edge. No collapse — `progress` is fixed at `0f`.
+ * rounded gradient edge. Folds on scroll via [topAreaHide].
  */
 @Composable
 internal fun WorkersPaymentDetailHeader(
     item: WorkersPaymentInfoPR,
     onBack: () -> Unit,
+    topAreaState: TopAreaState,
     onInfoClicked: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -61,7 +65,7 @@ internal fun WorkersPaymentDetailHeader(
         TaminTopAppBar(
             title = stringResource(Res.string.workers_payment_detail_title),
             background = gradient,
-            bottomPadding = HEADER_OVERLAP,
+            bottomPadding = Spacing.page + HEADER_OVERLAP,
             navigationIcon = {
                 TaminTopAppBarButton(
                     icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
@@ -81,6 +85,7 @@ internal fun WorkersPaymentDetailHeader(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .topAreaHide(topAreaState)
                         .padding(horizontal = Spacing.page, vertical = Spacing.smPlus),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
@@ -105,7 +110,7 @@ internal fun WorkersPaymentDetailHeader(
             modifier = Modifier
                 .fillMaxWidth()
                 .rideUpIntoHeader(
-                    progress = { 0f },
+                    progress = topAreaState.progressProvider,
                     expandedOverlap = HEADER_OVERLAP,
                     collapsedOverlap = HEADER_OVERLAP,
                 )
@@ -121,6 +126,7 @@ private fun WorkersPaymentDetailHeaderPreview() {
         WorkersPaymentDetailHeader(
             item = workersPaymentPreviewItem(),
             onBack = {},
+            topAreaState = rememberTopAreaState(expandedHeight = 300.dp, collapsedHeight = 96.dp),
             onInfoClicked = {},
         )
     }
@@ -133,6 +139,7 @@ private fun WorkersPaymentDetailHeaderPreviewDark() {
         WorkersPaymentDetailHeader(
             item = workersPaymentPreviewItem(),
             onBack = {},
+            topAreaState = rememberTopAreaState(expandedHeight = 300.dp, collapsedHeight = 96.dp),
             onInfoClicked = {},
         )
     }
