@@ -14,8 +14,14 @@ fun NavController.navigateToWeddingPresent(navOptions: NavOptions? = null) {
     navigate(WeddingPresentRoute, navOptions)
 }
 
-fun NavGraphBuilder.weddingPresentScreen(onBack: () -> Unit) {
+fun NavGraphBuilder.weddingPresentScreen(
+    onBack: () -> Unit,
+    onNavigateToCalculate: () -> Unit = {},
+) {
     composableWithFadeTransitions<WeddingPresentRoute> {
-        WeddingPresentScreen(onBack = onBack)
+        WeddingPresentScreen(
+            onBack = onBack,
+            onNavigateToCalculate = onNavigateToCalculate,
+        )
     }
 }
