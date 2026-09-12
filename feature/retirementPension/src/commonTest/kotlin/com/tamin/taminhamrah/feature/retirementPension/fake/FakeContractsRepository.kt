@@ -26,14 +26,28 @@ class FakeContractsRepository : ContractsRepository {
     var uploadImageResult: String = "guid-abc-123"
     var lastUploadImageRequest: UploadImageRequestDN? = null
 
+    private fun notUsed(): Nothing = error("not exercised here")
+
     override fun uploadImage(request: UploadImageRequestDN): Flow<String> = flow {
         lastUploadImageRequest = request
         emit(uploadImageResult)
     }
 
-    override fun getContracts(query: ApiQueryParamDN?): Flow<List<ContractDN>> = flow { emit(emptyList()) }
-    override fun getContractsByPremiumType(premiumTypeCode: String): Flow<List<ContractDN>> = flow { emit(emptyList()) }
-    override fun getStudentInsuranceContracts(): Flow<List<ContractDN>> = flow { emit(emptyList()) }
+    override fun getContracts(page: Int): Flow<PagedListDN<ContractDN>> {
+        notUsed()
+    }
+
+    override fun getContractsByPremiumType(
+        premiumTypeCode: String,
+        page: Int
+    ): Flow<PagedListDN<ContractDN>> {
+        notUsed()
+    }
+
+    override fun getStudentInsuranceContracts(page: Int): Flow<PagedListDN<ContractDN>> {
+        notUsed()
+    }
+
     override fun getRegistrationInfo(): Flow<RegistrationInfoDN> = flow {
         emit(
             RegistrationInfoDN(
@@ -45,7 +59,14 @@ class FakeContractsRepository : ContractsRepository {
             ),
         )
     }
-    override fun getBranches(cityCode: String): Flow<List<BranchDN>> = flow { emit(emptyList()) }
+
+    override fun getBranches(
+        cityCode: String,
+        page: Int
+    ): Flow<PagedListDN<BranchDN>> {
+        notUsed()
+    }
+
     override fun getSpcPremiumRates(): Flow<List<PremiumRateDN>> = flow { emit(emptyList()) }
     override fun getFreeJobWages(page: Int, searchQuery: String?): Flow<PagedListDN<FreeJobDN>> =
         flow { emit(PagedListDN()) }
@@ -71,6 +92,23 @@ class FakeContractsRepository : ContractsRepository {
     override fun makeOptionalContractByGuardian(params: OptionalContractByGuardianParams): Flow<FreelanceContractResultDN> = flow {
         emit(FreelanceContractResultDN(contractNumber = null, contractDate = null))
     }
+
+    override fun updateFreelanceContract(params: FreelanceMakeContractParams): Flow<Unit> {
+        notUsed()
+    }
+
+    override fun updateOptionalContract(premium: Long): Flow<Unit> {
+        notUsed()
+    }
+
+    override fun updateFreelanceContractByGuardian(params: FreelanceContractByGuardianParams): Flow<Unit> {
+        notUsed()
+    }
+
+    override fun updateOptionalContractByGuardian(params: OptionalContractByGuardianParams): Flow<Unit> {
+        notUsed()
+    }
+
     override fun getInsurancePayment(params: InsurancePaymentParamsDN): Flow<InsurancePaymentDN> = flow {
         emit(InsurancePaymentDN(paymentTicket = null, paymentUrl = null, responseMessage = null, succeed = null))
     }

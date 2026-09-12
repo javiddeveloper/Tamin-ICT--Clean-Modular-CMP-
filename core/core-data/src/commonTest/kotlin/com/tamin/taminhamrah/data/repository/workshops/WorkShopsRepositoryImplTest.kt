@@ -166,10 +166,6 @@ private class FakeWorkShopsRemoteDataSource : WorkShopsRemoteDataSource {
         query: ApiQueryParamDN
     ) = notImplemented()
 
-    override suspend fun getEmployerWorkshopsWithoutContract(query: ApiQueryParamDN) = notImplemented()
-    override suspend fun getEmployerWorkshopContractList(workshopId: String, branchCode: String, query: ApiQueryParamDN) = notImplemented()
-    override suspend fun getEmployerAgreementsByWorkshop(workshopId: String, branchCode: String, query: ApiQueryParamDN) = notImplemented()
-    override suspend fun getWorkshopContracts(workshopId: String, branchCode: String, query: ApiQueryParamDN) = notImplemented()
     override suspend fun getEmployerAgreementUserInfo(verificationCode: String) = notImplemented()
     override suspend fun requestEmployerAgreementTicket(mobileNumber: String, email: String) =
         notImplemented()
@@ -184,11 +180,6 @@ private class FakeWorkShopsRemoteDataSource : WorkShopsRemoteDataSource {
     override suspend fun submitEmployerAgreement(request: EmployerAgreementSubmitRequestDTO) =
         notImplemented()
 
-    private fun notImplemented(): Nothing =
-        throw UnsupportedOperationException("not needed by this test")
-    override suspend fun requestEmployerAgreementTicket(mobileNumber: String, email: String) = notImplemented()
-    override suspend fun submitEmployerAgreement(request: EmployerAgreementSubmitRequestDTO) = notImplemented()
-    override suspend fun confirmPaymentTicket(ticket: String) = notImplemented()
     private fun notImplemented(): Nothing = throw UnsupportedOperationException("not needed by this test")
 }
 
