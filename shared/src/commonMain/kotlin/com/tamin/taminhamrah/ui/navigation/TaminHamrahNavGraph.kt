@@ -73,6 +73,7 @@ import com.tamin.taminhamrah.feature.cartable.CartableRoute
 import com.tamin.taminhamrah.feature.cartable.cartableGraph
 import com.tamin.taminhamrah.feature.changemobile.changeMobileScreen
 import com.tamin.taminhamrah.feature.changemobile.navigateToChangeMobile
+import com.tamin.taminhamrah.feature.contractaffair.ContractPremiumPaymentRoute
 import com.tamin.taminhamrah.feature.contracts.contractsScreen
 import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.deferredInstallment.deferredInstallmentScreen
@@ -561,7 +562,11 @@ internal fun TaminHamrahNavGraph(
                         )
                     },
                     onNavigateToPayment = { request ->
-                        navController.navigateToPayment(request)
+                        navController.navigateToPayment(request) {
+                            popUpTo<ContractPremiumPaymentRoute> {
+                                inclusive = true
+                            }
+                        }
                     },
                 )
 
