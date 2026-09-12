@@ -40,7 +40,9 @@ import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.contract_terms_commitment_body_full
 import taminx.core.core_ui.contract_terms_commitment_header
-import taminx.core.core_ui.contract_terms_info_banner
+import taminx.core.core_ui.contract_terms_info_banner_highlight
+import taminx.core.core_ui.contract_terms_info_banner_prefix
+import taminx.core.core_ui.contract_terms_info_banner_suffix
 import taminx.core.core_ui.contract_terms_view_rules_btn
 import taminx.core.core_ui.ic_tamin_print
 
@@ -138,24 +140,16 @@ fun ContractTermsStepContent(
 @Composable
 private fun buildInfoBannerText() = buildAnnotatedString {
     val colors = LocalTaminColors.current
-    val template = stringResource(Res.string.contract_terms_info_banner)
-    val highlightWord = "مقررات و ضوابط انعقاد قرارداد"
-    val index = template.indexOf(highlightWord)
-
-    if (index == -1) {
-        append(template)
-    } else {
-        append(template.substring(0, index))
-        withStyle(
-            SpanStyle(
-                color = colors.blueText,
-                fontWeight = FontWeight.Bold,
-            ),
-        ) {
-            append(highlightWord)
-        }
-        append(template.substring(index + highlightWord.length))
+    append(stringResource(Res.string.contract_terms_info_banner_prefix))
+    withStyle(
+        SpanStyle(
+            color = colors.blueText,
+            fontWeight = FontWeight.Bold,
+        ),
+    ) {
+        append(stringResource(Res.string.contract_terms_info_banner_highlight))
     }
+    append(stringResource(Res.string.contract_terms_info_banner_suffix))
 }
 
 @Composable

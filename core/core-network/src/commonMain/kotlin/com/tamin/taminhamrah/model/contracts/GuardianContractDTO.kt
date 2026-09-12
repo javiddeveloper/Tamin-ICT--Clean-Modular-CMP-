@@ -34,3 +34,15 @@ data class OptionalContractByGuardianRequestDTO(
     @SerialName("contract") val contract: OptionalMakeContractRequestDTO,
     @SerialName("protector") val protector: GuardianShipDetailDTO,
 )
+
+/** Legacy empty optional update body (`UpdateOptionalContract`). */
+@Serializable
+data class UpdateOptionalContractDTO(
+    @SerialName("provinceCode") val provinceCode: String = "",
+)
+
+@Serializable
+data class UpdateOptionalContractByGuardianRequestDTO(
+    @SerialName("contract") val contract: UpdateOptionalContractDTO = UpdateOptionalContractDTO(),
+    @SerialName("protector") val protector: GuardianShipDetailDTO,
+)

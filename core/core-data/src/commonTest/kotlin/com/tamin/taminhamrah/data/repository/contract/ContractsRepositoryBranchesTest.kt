@@ -22,12 +22,12 @@ import com.tamin.taminhamrah.model.contracts.OptionalContractByGuardianRequestDT
 import com.tamin.taminhamrah.model.contracts.PremiumRateDTO
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDTO
 import com.tamin.taminhamrah.model.contracts.SaveContactRequestDTO
+import com.tamin.taminhamrah.model.contracts.UpdateOptionalContractByGuardianRequestDTO
+import com.tamin.taminhamrah.model.contracts.UpdateOptionalContractDTO
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
-import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.utils.ListData
-import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
@@ -65,7 +65,6 @@ class ContractsRepositoryBranchesTest {
         contractDao = FakeContractDao(),
         registrationInfoDao = FakeRegistrationInfoDao(),
         branchDao = dao,
-        apiQueryBuilder = FakeApiQueryBuilder(),
     )
 
     @Test
@@ -76,7 +75,7 @@ class ContractsRepositoryBranchesTest {
         // toList() only returns for a flow that completes.
         val emissions = repository(remote, dao).getBranches("0701").toList()
 
-        assertEquals(listOf("123"), emissions.last().map { it.code })
+        assertEquals(listOf("123"), emissions.last().items.map { it.code })
         assertTrue(emissions.isNotEmpty())
     }
 
@@ -90,6 +89,9 @@ class ContractsRepositoryBranchesTest {
         assertEquals("cityCode", filter?.property?.key)
         assertEquals(FilterOperator.EQUAL, filter?.operator)
         assertEquals("0701", filter?.value)
+        assertEquals(1, remote.lastQuery?.page)
+        assertEquals(0, remote.lastQuery?.start)
+        assertEquals(10, remote.lastQuery?.limit)
     }
 
     @Test
@@ -103,7 +105,7 @@ class ContractsRepositoryBranchesTest {
 
         val branches = repository(remote, FakeBranchDao()).getBranches("0701").toList().last()
 
-        assertEquals(listOf("123"), branches.map { it.code })
+        assertEquals(listOf("123"), branches.items.map { it.code })
     }
 
     @Test
@@ -118,7 +120,7 @@ class ContractsRepositoryBranchesTest {
 
         val branches = repository(remote, FakeBranchDao()).getBranches("0701").toList().last()
 
-        assertEquals(listOf("123"), branches.map { it.code })
+        assertEquals(listOf("123"), branches.items.map { it.code })
     }
 
     @Test
@@ -148,7 +150,7 @@ class ContractsRepositoryBranchesTest {
 
         val emissions = repository(remote, dao).getBranches("0701").toList()
 
-        assertEquals(listOf("999"), emissions.last().map { it.code })
+        assertEquals(listOf("999"), emissions.last().items.map { it.code })
     }
 }
 
@@ -208,6 +210,22 @@ private class FakeContractsRemoteDataSource(
         selectedSalary: Long,
         request: OptionalContractByGuardianRequestDTO,
     ): FreelanceContractResultDTO = unused()
+    override suspend fun updateFreelanceContract(
+        premium: Long,
+        request: FreelanceMakeContractRequestDTO,
+    ) = unused<Unit>()
+    override suspend fun updateOptionalContract(
+        premium: Long,
+        request: UpdateOptionalContractDTO,
+    ) = unused<Unit>()
+    override suspend fun updateFreelanceContractByGuardian(
+        premium: Long,
+        request: ContractByGuardianRequestDTO,
+    ) = unused<Unit>()
+    override suspend fun updateOptionalContractByGuardian(
+        premium: Long,
+        request: UpdateOptionalContractByGuardianRequestDTO,
+    ) = unused<Unit>()
     override suspend fun getInsurancePayment(params: InsurancePaymentParamsDN): InsurancePaymentDTO = unused()
     override suspend fun checkInsurancePaymentStatus(systemType: String): Any? = unused()
     override suspend fun uploadImage(request: UploadImageRequestDN): String? = unused()
@@ -224,12 +242,6 @@ private class FakeRegistrationInfoDao : RegistrationInfoDao {
     override fun getRegistrationInfo(id: Int): Flow<RegistrationInfoEntity?> = unused()
     override suspend fun upsertRegistrationInfo(info: RegistrationInfoEntity) = unused<Unit>()
     override suspend fun clearRegistrationInfo() = unused<Unit>()
-}
-
-private class FakeApiQueryBuilder : ApiQueryBuilder {
-    override fun defaultQuery(): ApiQueryParamDN = ApiQueryParamDN()
-    override fun buildQuery(query: ApiQueryParamDN): Map<String, String> = emptyMap()
-    override fun buildFilterJson(filters: List<ApiFilterDN>): String = "[]"
 }
 
 private fun <T> unused(): T = error("not part of the branches path under test")

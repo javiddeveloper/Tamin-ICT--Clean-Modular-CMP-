@@ -45,8 +45,8 @@ class ContractsViewModel(
             }
             emit(PartialState.OptionsLoaded(contractOptions))
 
-            getContractsUseCase().collect { contracts ->
-                emit(PartialState.ContractsLoaded(contracts.toPresentation()))
+            getContractsUseCase().collect { page ->
+                emit(PartialState.ContractsLoaded(page.items.toPresentation()))
             }
         } catch (e: Exception) {
             emit(PartialState.Error(e.message))

@@ -2261,6 +2261,11 @@
     <string name="contract_freelance_insurance_type">بیمه صاحبان حرف و مشاغل آزاد</string>
     <string name="contract_housewife_screen_title">انعقاد قرارداد بیمه زنان خانه‌دار</string>
     <string name="contract_housewife_insurance_type">بیمه زنان خانه‌دار</string>
+    <string name="contract_housewife_hero_reg_confirmed">مشخصات هویتی و شرایط شما برای این قرارداد تأیید شد.</string>
+    <string name="contract_housewife_eligibility_ok">متقاضی محترم، شما دارای شرایط لازم برای انعقاد قرارداد بیمه زنان خانه‌دار هستید.</string>
+    <string name="contract_housewife_check_no_active">قرارداد خودپردازی فعالی به نام شما ثبت نشده است.</string>
+    <string name="contract_housewife_check_no_compulsory">تحت پوشش بیمه اجباری دیگری نیستید.</string>
+    <string name="contract_housewife_info_rates_treatment">در ادامه نرخ حق بیمه را از میان ۱۲، ۱۴ و ۱۸ درصد انتخاب می‌کنید و بهره‌مندی از حمایت درمان نیز اختیاری است.</string>
     <string name="contract_optional_screen_title">انعقاد قرارداد بیمه اختیاری</string>
     <string name="contract_optional_insurance_type">بیمه اختیاری</string>
     <string name="contract_optional_fixed_rate_title">نرخ ثابت و قانونی حق بیمه</string>
@@ -2319,7 +2324,13 @@
     <string name="contract_step_salary">محاسبه حق بیمه</string>
     <string name="contract_premium_rate_label">نرخ حق بیمه ماهانه</string>
     <string name="contract_premium_rate_percent">%1$s درصد</string>
-    <string name="contract_premium_rate_14_info">با انتخاب نرخ ۱۴ درصد با داشتن حداقل ۱ سال سابقه بیمه‌پردازی از معاینات پزشکی معاف می‌باشید. این نرخ شامل حمایت بازنشستگی و فوت است.</string>
+    <string name="contract_premium_rate_12_info">با انتخاب نرخ ۱۲ درصد از معاینات پزشکی معاف می‌باشید.</string>
+    <string name="contract_premium_rate_14_info">با انتخاب نرخ ۱۴ درصد با داشتن حداقل ۱ سال سابقه بیمه‌پردازی از معاینات پزشکی معاف می‌باشید.</string>
+    <string name="contract_premium_rate_18_info">با انتخاب نرخ ۱۸ درصد، در صورتی که در ۱۰ سال قبل از انعقاد قرارداد حداقل ۱ سال و در ۱ سال قبل از انعقاد قرارداد حداقل ۹۰ روز سابقه بیمه‌پردازی داشته باشید، از معاینات پزشکی معاف می‌باشید.</string>
+    <string name="contract_premium_range_hint">شما می‌توانید مبلغ حق بیمه ماهانه در این قرارداد را از ماهانه %1$s ریال تا حداکثر %2$s ریال تعیین و پرداخت نمایید.</string>
+    <string name="contract_premium_formula_hint">دستمزد ماهیانه مبنای حق بیمه شما بر اساس میزان حق بیمه انتخابی با فرمول «حق بیمه ماهانه انتخابی × ۱۰۰ ÷ %1$s» محاسبه می‌شود.</string>
+    <string name="contract_premium_annual_increase">مبلغ حق بیمه انتخابی شما هر ساله متناسب با مصوبه شورای عالی کار (افزایش دستمزدها) به نسبت افزایش خواهد یافت.</string>
+    <string name="contract_premium_treatment_per_person">در صورت استفاده از حمایت درمان ماهانه مبلغ %1$s ریال به ازاء هر نفر محاسبه می‌گردد.</string>
     <string name="contract_premium_base_wage_label">دستمزد مبنای ماهانه</string>
     <string name="contract_premium_payable_label">حق بیمه ماهانه قابل پرداخت</string>
     <string name="contract_premium_decrease">کاهش دستمزد</string>
@@ -2431,6 +2442,8 @@
     <string name="contract_payment_dialog_dismiss">متوجه شدم</string>
     <string name="contract_submit_success_title">قرارداد شما ثبت شد</string>
     <string name="contract_submit_success_message">قرارداد شما در تاریخ %1$s ثبت شد. شما می‌توانید نسبت به پرداخت حق بیمه خود اقدام نمایید. در صورت عدم تمایل می‌توانید در زمان دیگری این کار را انجام دهید.</string>
+    <string name="contract_update_success_title">ویرایش قرارداد</string>
+    <string name="contract_update_success_message">ویرایش اطلاعات با موفقیت انجام شد.</string>
     <string name="contract_submit_failure_title">ثبت قرارداد با خطا مواجه شد</string>
     <string name="contract_submit_failure_message_fallback">ثبت قرارداد انجام نشد. لطفاً دوباره تلاش کنید.</string>
     <string name="contract_treatment_support_yes">حمایت درمان دارد</string>
@@ -2566,6 +2579,8 @@
     <string name="payment_sandbox_scenario_unconfirmed">پرداخت موفق، تأیید ناموفق سرویس</string>
     <string name="contract_hero_step_1_title">نام‌نویسی و احراز شرایط</string>
     <string name="contract_hero_step_1_desc">وضعیت نام‌نویسی و شرایط انعقاد قرارداد شما بررسی شد.</string>
+    <string name="contract_edit_info_step_title">اطلاعات قرارداد</string>
+    <string name="contract_edit_info_step_desc">شماره و نوع قرارداد را بررسی کنید، سپس ادامه دهید.</string>
     <string name="contract_hero_step_2_title">مقررات و ضوابط</string>
     <string name="contract_hero_step_2_desc">ضوابط قرارداد را مطالعه و تعهدنامه را تأیید کنید.</string>
     <string name="contract_hero_step_3_title">اطلاعات کاربر</string>
@@ -2590,7 +2605,9 @@
     <string name="contract_field_birth_date">تاریخ تولد</string>
     <string name="contract_field_contract_type">نوع قرارداد</string>
 
-    <string name="contract_terms_info_banner">تأیید این مرحله به منزلهٔ مطالعه و پذیرش مقررات و ضوابط انعقاد قرارداد می‌باشد.</string>
+    <string name="contract_terms_info_banner_prefix">تأیید این مرحله به منزلهٔ مطالعه و پذیرش </string>
+    <string name="contract_terms_info_banner_highlight">مقررات و ضوابط انعقاد قرارداد</string>
+    <string name="contract_terms_info_banner_suffix"> می‌باشد.</string>
     <string name="contract_terms_view_rules_btn">مشاهده ضوابط و مقررات</string>
     <string name="contract_terms_commitment_header">تعهدنامه</string>
     <string name="contract_terms_commitment_body_full">اینجانب %1$s با آگاهی کامل و در صحت عقلی، شرایط و مقررات فوق را مطالعه کرده و خود را در هنگام انعقاد قرارداد و در ادامهٔ بیمه‌پردازی ملزم به رعایت آن می‌دانم؛ در غیر اینصورت کلیهٔ تبعات و مسئولیت‌های آن متوجه اینجانب بوده و سازمان تأمین‌اجتماعی در این خصوص مسئولیتی نخواهد داشت.</string>
@@ -2602,6 +2619,7 @@
     <string name="contract_field_phone_required">شمارهٔ تلفن *</string>
     <string name="contract_field_mobile_readonly">تلفن همراه</string>
 
+    <string name="contract_rules_pdf_title">ضوابط و مقررات</string>
     <string name="contract_rules_sheet_title_student">مقررات و ضوابط انعقاد قرارداد بیمۀ دانشجویی</string>
     <string name="contract_rules_sheet_title_freelance">مقررات و ضوابط انعقاد قرارداد بیمه صاحبان حرف و مشاغل آزاد</string>
     <string name="contract_rules_sheet_title_housewife">مقررات و ضوابط انعقاد قرارداد بیمۀ زنان خانه‌دار</string>
