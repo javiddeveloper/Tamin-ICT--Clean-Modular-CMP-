@@ -15,6 +15,7 @@ import com.tamin.taminhamrah.useCases.workersPayment.GetWorkersPaymentInfoUseCas
 import com.tamin.taminhamrah.useCases.workersPayment.PayWorkersDebitUseCase
 import com.tamin.taminhamrah.util.NetworkConstants
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
@@ -87,6 +88,7 @@ class WorkersPaymentViewModel(
                     ),
                 )
             } catch (e: Exception) {
+                if (e is CancellationException) throw e
                 val message = e.toSingleLineMessage()
                 emit(PartialState.Error(message))
                 sendEvent(WorkersPaymentEvent.ShowToast(message))
@@ -127,6 +129,7 @@ class WorkersPaymentViewModel(
                 ),
             )
         } catch (e: Exception) {
+            if (e is CancellationException) throw e
             emit(PartialState.ProcessingPayment(false))
             sendEvent(WorkersPaymentEvent.ShowToast(e.toSingleLineMessage()))
         }
