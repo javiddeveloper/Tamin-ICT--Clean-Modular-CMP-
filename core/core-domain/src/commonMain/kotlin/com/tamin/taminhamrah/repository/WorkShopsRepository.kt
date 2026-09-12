@@ -1,7 +1,5 @@
 package com.tamin.taminhamrah.repository
 
-import com.tamin.taminhamrah.model.request.ApiFilterDN
-import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeContractListDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeListDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeRequestDN
@@ -20,27 +18,26 @@ import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDN
 import com.tamin.taminhamrah.model.workshop.ContractRowQuery
 import com.tamin.taminhamrah.model.workshop.DebitReasonDN
-import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmissionDN
 import com.tamin.taminhamrah.model.workshop.EmployerContactInfoDN
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetQuery
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
+import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDN
 import com.tamin.taminhamrah.model.workshop.WorkshopContractDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDN
 import com.tamin.taminhamrah.model.workshop.WorkshopListQuery
-import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDN
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDN
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberQuery
-import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDN
-import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
-import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDN
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDN
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderQuery
+import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDN
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
 import kotlinx.coroutines.flow.Flow
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
@@ -95,6 +92,9 @@ interface WorkShopsRepository {
 
     suspend fun payWorkshopDebit(request: DebitPaymentRequestDN): DebitPaymentDN
 
+    /** Binds [ticket] to the signed-in user on the gateway; throws when the gateway refuses it. */
+    suspend fun confirmPaymentTicket(ticket: String)
+
     // ---------------------------------------------------------------------- استعلام بدهی کارگاه
 
     suspend fun getWorkshopDebtInquiry(workshopId: String, branchCode: String): WorkshopDebtInquiryDN
@@ -126,7 +126,7 @@ interface WorkShopsRepository {
     suspend fun deleteRecentlyAddedMember(personalId: Long)
 
     /**
-     * Whether the organisation has never registered this national id.
+     * Whether the organization has never registered this national id.
      *
      * `relation-tamins/isnew` answers a bare boolean — there is no id in the reply, so a
      * person it already knows is reported, not silently reused.
@@ -178,7 +178,7 @@ interface WorkShopsRepository {
 
     suspend fun deleteLegalRepresentative(ticket: String, stakeId: Long)
 
-    // ------------------------------------------------- خدمات غیرحضوری کارفرما (employerEservicesAgreement)
+    // ------------------------------------------------- خدمات غیرحضوری کارفرما (employerServicesAgreement)
 
     /**
      * Step 1 — request the OTP ticket. Builds the `mobileNumber`/`email`/`serviceName` filter

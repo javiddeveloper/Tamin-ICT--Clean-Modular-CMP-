@@ -47,6 +47,13 @@ data class WorkshopSummaryDN(
      * offering the form to the wrong workshops.
      */
     val characterCode: String = "",
+    /**
+     * The حقوقی workshop's own national id, blank for a حقیقی one.
+     *
+     * Not shown anywhere; it is carried because `pay-normal-debit` sends it beside
+     * [characterCode], and the payment screen has no other way to reach the workshop record.
+     */
+    val legalNationalId: String = "",
     /** حقیقی / حقوقی, as the service words it — for display only. */
     val characterDescription: String = "",
     val workshopTypeDescription: String = "",

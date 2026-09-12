@@ -23,6 +23,17 @@ data class WorkshopCharacterDTO(
 )
 
 /**
+ * The حقوقی identity hung off a workshop, present only when `character.characterCode` is `02`.
+ *
+ * Only [nationalId] is modelled: `pay-normal-debit` needs it as its own `nationalId` field, and
+ * nothing on these screens shows the rest of the legal record.
+ */
+@Serializable
+data class WorkshopLegalDTO(
+    @SerialName("nationalId") val nationalId: String? = null,
+)
+
+/**
  * The server spells these two keys `workshoptype…` — lower-case `t`, unlike every neighbouring
  * field. That is the contract; "fixing" the spelling makes the field stop deserialising.
  */

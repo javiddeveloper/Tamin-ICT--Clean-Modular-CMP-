@@ -39,11 +39,29 @@ class GetDebitTurnoverPdfUseCase(private val repository: WorkShopsRepository) {
  * payment, and splitting them across two callers is how the old client ended up able to pay
  * without checking. A refused pre-check returns [DebitPaymentDN] with `succeeded = false` so the
  * caller has one shape to handle.
+ *
+ * Three calls, because the gateway is asked to confirm the ticket before anyone is sent to it:
+ * pre-check, pay, then `payment/ticket/current-user/{ticket}` on TFH's own host. The old client
+ * (`my-tamin-droid`, `WorkshopInfoViewModel.normalDebitPaymentPreview()`) made the same three; it
+ * then opened a browser on a URL it built itself, where the confirmed ticket is now handed to the
+ * app's own payment flow, which owns the gateway's address.
+ *
+ * One thing is deliberately not copied. That client ignored the confirmation's outcome — its
+ * fragment read `if (result.isSuccess)` with no `else` — so a ticket the gateway would not honor
+ * left the pay button doing nothing at all. Here a refused confirmation throws, and the caller
+ * reports it like any other payment failure.
  */
 class PayWorkshopDebitUseCase(private val repository: WorkShopsRepository) {
     suspend operator fun invoke(request: DebitPaymentRequestDN): DebitPaymentDN {
         val preCheck = repository.checkDebitPayment(request.debitNumber, request.branchCode)
         if (!preCheck.allowed) return DebitPaymentDN(succeeded = false)
-        return repository.payWorkshopDebit(request)
+
+        val payment = repository.payWorkshopDebit(request)
+        // Nothing to confirm unless the service both agreed and named a ticket; a refusal is
+        // returned as it stands so the caller can repeat the reason the service gave.
+        if (!payment.isPayable) return payment
+
+        repository.confirmPaymentTicket(payment.paymentTicket)
+        return payment
     }
 }
