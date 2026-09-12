@@ -45,10 +45,11 @@ starts at 0. So `PaginationConfig.firstPage` defaults to **0** and `start` is de
 `(page - firstPage) * pageSize`.
 
 `firstPage` stays configurable only because a handful of existing callers pass `page = 1`
-with `limit = 100/500` to pull a whole list in one request (`CityListQuery`,
-`ContractsRepositoryImpl.contractListQuery`) — there `start = 0` is what actually drives
-the response, so the ordinal is inert. Do not change the default without a captured
-request proving a given endpoint is one-based.
+with a large `limit` to pull a whole list in one request (`CityListQuery`) — there
+`start = 0` is what actually drives the response, so the ordinal is inert. Contracts list
+and branch list use 1-based `page` with `ContractsPaging.PAGE_SIZE` (10) and return
+`PagedListDN`, same shape as `getFreeJobWages`. Do not change the default without a
+captured request proving a given endpoint is one-based.
 
 `total` is declared `String?` on `PersonalInboxListDTO` while the server sends a JSON
 number; this decodes because the shared `Json` is configured with `isLenient = true`

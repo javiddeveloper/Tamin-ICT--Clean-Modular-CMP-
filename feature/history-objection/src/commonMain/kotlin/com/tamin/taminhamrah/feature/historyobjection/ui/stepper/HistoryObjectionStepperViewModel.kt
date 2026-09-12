@@ -268,8 +268,8 @@ class HistoryObjectionStepperViewModel(
         emit(PartialState.BottomSheetStateChanged(config = null, target = null))
         emit(PartialState.BranchesLoading(true))
         try {
-            getBranchesUseCase(city.cityCode).collect { branches ->
-                emit(PartialState.BranchesLoaded(branches.toPersistentList()))
+            getBranchesUseCase(city.cityCode).collect { page ->
+                emit(PartialState.BranchesLoaded(page.items.toPersistentList()))
             }
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
@@ -400,8 +400,8 @@ class HistoryObjectionStepperViewModel(
         if (cityCode != null) {
             emit(PartialState.BranchesLoading(true))
             try {
-                getBranchesUseCase(cityCode).collect { branches ->
-                    emit(PartialState.BranchesLoaded(branches.toPersistentList()))
+                getBranchesUseCase(cityCode).collect { page ->
+                    emit(PartialState.BranchesLoaded(page.items.toPersistentList()))
                 }
             } catch (e: Exception) {
                 emit(PartialState.Error(e.toSingleLineMessage()))

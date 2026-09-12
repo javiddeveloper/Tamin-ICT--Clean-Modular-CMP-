@@ -12,12 +12,15 @@ import com.tamin.taminhamrah.model.contracts.OptionalContractByGuardianRequestDT
 import com.tamin.taminhamrah.model.contracts.PremiumRateDTO
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDTO
 import com.tamin.taminhamrah.model.contracts.SaveContactRequestDTO
+import com.tamin.taminhamrah.model.contracts.UpdateOptionalContractByGuardianRequestDTO
+import com.tamin.taminhamrah.model.contracts.UpdateOptionalContractDTO
 import com.tamin.taminhamrah.model.contracts.UploadImageResponseDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseDTO
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.POST
+import de.jensklingenberg.ktorfit.http.PUT
 import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.Query
 import de.jensklingenberg.ktorfit.http.QueryMap
@@ -98,6 +101,34 @@ interface ContractsApiService {
         @Path("selectedSalary") selectedSalary: Long,
         @Body request: OptionalContractByGuardianRequestDTO,
     ): BaseDTO<FreelanceContractResultDTO>
+
+    /** ویرایش قرارداد — حرف و مشاغل آزاد (خود متقاضی). */
+    @PUT("special-insured-services/freelance-update-contract/{premium}")
+    suspend fun updateFreelanceContract(
+        @Path("premium") premium: Long,
+        @Body request: FreelanceMakeContractRequestDTO,
+    ): BaseDTO<JsonElement>
+
+    /** ویرایش قرارداد — بیمه اختیاری (خود متقاضی). Body matches legacy empty `UpdateOptionalContract`. */
+    @PUT("special-insured-services/update-contract/{premium}")
+    suspend fun updateOptionalContract(
+        @Path("premium") premium: Long,
+        @Body request: UpdateOptionalContractDTO,
+    ): BaseDTO<JsonElement>
+
+    /** ویرایش قرارداد — حرف و مشاغل آزاد با قیم. */
+    @PUT("special-insured-services/freelance-update-contract-by-protector/{premium}")
+    suspend fun updateFreelanceContractByGuardian(
+        @Path("premium") premium: Long,
+        @Body request: ContractByGuardianRequestDTO,
+    ): BaseDTO<JsonElement>
+
+    /** ویرایش قرارداد — بیمه اختیاری با قیم. */
+    @PUT("special-insured-services/update-contract-by-protector/{premium}")
+    suspend fun updateOptionalContractByGuardian(
+        @Path("premium") premium: Long,
+        @Body request: UpdateOptionalContractByGuardianRequestDTO,
+    ): BaseDTO<JsonElement>
 
     @GET("sep/online-payment-mobile")
     suspend fun getInsurancePayment(

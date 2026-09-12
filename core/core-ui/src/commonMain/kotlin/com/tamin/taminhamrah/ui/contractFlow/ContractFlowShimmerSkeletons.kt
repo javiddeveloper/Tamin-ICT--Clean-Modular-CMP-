@@ -323,6 +323,86 @@ fun ContractRegistrationStepShimmerSkeleton(
 }
 
 /**
+ * Edit-contract first step: registration banner + contract number/type + identity + branch.
+ */
+@Composable
+fun EditRegistrationStepShimmerSkeleton(
+    modifier: Modifier = Modifier,
+) {
+    val taminColors = LocalTaminColors.current
+    val cardShape = RoundedCornerShape(CornerRadius.x2l)
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(cardShape)
+            .background(taminColors.bgSurface)
+            .border(Thickness.border, taminColors.border, cardShape)
+            .padding(Spacing.lg),
+        verticalArrangement = Arrangement.spacedBy(Spacing.md),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(ShimmerSize.bannerHeight)
+                .clip(RoundedCornerShape(CornerRadius.card))
+                .shimmer(),
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+        ) {
+            EditInfoTileShimmer(modifier = Modifier.weight(1f))
+            EditInfoTileShimmer(modifier = Modifier.weight(1f))
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+        ) {
+            EditInfoTileShimmer(modifier = Modifier.weight(1f))
+            EditInfoTileShimmer(modifier = Modifier.weight(1f))
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+        ) {
+            EditInfoTileShimmer(modifier = Modifier.weight(1f))
+        }
+        EditInfoTileShimmer(modifier = Modifier.fillMaxWidth())
+    }
+}
+
+@Composable
+private fun EditInfoTileShimmer(
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(CornerRadius.card))
+            .background(colors.bgPage)
+            .padding(horizontal = Spacing.md, vertical = Spacing.md),
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        Box(
+            modifier = Modifier
+                .width(ShimmerSize.labelWidth)
+                .height(ShimmerSize.subtitleHeight)
+                .clip(RoundedCornerShape(CornerRadius.xs))
+                .shimmer(),
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.75f)
+                .height(ShimmerSize.titleHeight)
+                .clip(RoundedCornerShape(CornerRadius.xs))
+                .shimmer(),
+        )
+    }
+}
+
+/**
  * Step 3: User Info Form Shimmer Skeleton.
  */
 @Composable
@@ -916,6 +996,14 @@ private fun ContractFlowScreenShimmerSkeletonPreview() {
 private fun ContractRegistrationStepShimmerSkeletonPreview() {
     PreviewRtlThemeContent {
         ContractRegistrationStepShimmerSkeleton()
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun EditRegistrationStepShimmerSkeletonPreview() {
+    PreviewRtlThemeContent {
+        EditRegistrationStepShimmerSkeleton()
     }
 }
 

@@ -3,11 +3,14 @@ package com.tamin.taminhamrah.ui.contractFlow
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -31,8 +34,10 @@ import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
+import com.tamin.taminhamrah.ui.theme.shimmer
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
@@ -41,6 +46,11 @@ import taminx.core.core_ui.contract_field_birth_date
 import taminx.core.core_ui.contract_field_contract_type
 import taminx.core.core_ui.contract_field_full_name
 import taminx.core.core_ui.contract_field_national_id
+import taminx.core.core_ui.contract_field_number
+import taminx.core.core_ui.contract_housewife_check_no_active
+import taminx.core.core_ui.contract_housewife_check_no_compulsory
+import taminx.core.core_ui.contract_housewife_eligibility_ok
+import taminx.core.core_ui.contract_housewife_info_rates_treatment
 import taminx.core.core_ui.contract_optional_age_max
 import taminx.core.core_ui.contract_optional_age_min
 import taminx.core.core_ui.contract_optional_check_age
@@ -52,6 +62,7 @@ import taminx.core.core_ui.contract_optional_info_definition
 import taminx.core.core_ui.contract_optional_info_treatment_in_rate
 import taminx.core.core_ui.contract_step_reg_banner_1
 import taminx.core.core_ui.contract_step_reg_banner_2_student
+import taminx.core.core_ui.contract_summary_branch
 
 @Composable
 fun ContractRegistrationStepContent(
@@ -62,15 +73,36 @@ fun ContractRegistrationStepContent(
     preflightGateError: String? = null,
     isLoading: Boolean = false,
     isOptionalInsurance: Boolean = false,
+    usesChecklistRegistration: Boolean = false,
+    contractNumber: String? = null,
+    isEditingExistingContract: Boolean = false,
+    branchInfo: String? = null,
+    isBranchInfoLoading: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     if (isLoading) {
-        ContractRegistrationStepShimmerSkeleton(modifier = modifier)
+        if (isEditingExistingContract) {
+            EditRegistrationStepShimmerSkeleton(modifier = modifier)
+        } else {
+            ContractRegistrationStepShimmerSkeleton(modifier = modifier)
+        }
         return
     }
 
-    if (isOptionalInsurance) {
-        OptionalRegistrationStepContent(
+    if (isEditingExistingContract) {
+        EditRegistrationStepContent(
+            info = info,
+            insuranceTypeLabel = insuranceTypeLabel,
+            contractNumber = contractNumber.orEmpty(),
+            branchInfo = branchInfo.orEmpty(),
+            isBranchInfoLoading = isBranchInfoLoading,
+            modifier = modifier,
+        )
+        return
+    }
+
+    when {
+        isOptionalInsurance -> OptionalRegistrationStepContent(
             info = info,
             insuranceTypeLabel = insuranceTypeLabel,
             eligibility = eligibility,
@@ -78,8 +110,15 @@ fun ContractRegistrationStepContent(
             preflightGateError = preflightGateError,
             modifier = modifier,
         )
-    } else {
-        SharedRegistrationStepContent(
+        usesChecklistRegistration -> HousewifeRegistrationStepContent(
+            info = info,
+            insuranceTypeLabel = insuranceTypeLabel,
+            eligibility = eligibility,
+            genderGateError = genderGateError,
+            preflightGateError = preflightGateError,
+            modifier = modifier,
+        )
+        else -> SharedRegistrationStepContent(
             info = info,
             insuranceTypeLabel = insuranceTypeLabel,
             eligibility = eligibility,
@@ -136,6 +175,76 @@ private fun SharedRegistrationStepContent(
 }
 
 @Composable
+private fun EditRegistrationStepContent(
+    info: RegistrationInfoPR,
+    insuranceTypeLabel: String,
+    contractNumber: String,
+    branchInfo: String,
+    isBranchInfoLoading: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+    val cardShape = RoundedCornerShape(CornerRadius.x2l)
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(cardShape)
+            .background(colors.bgSurface)
+            .border(Thickness.border, colors.border, cardShape)
+            .padding(Spacing.lg),
+        verticalArrangement = Arrangement.spacedBy(Spacing.md),
+    ) {
+        RegistrationBannerCard(insuranceId = info.insuranceId)
+        RegistrationIdentityGrid(
+            info = info,
+            insuranceTypeLabel = insuranceTypeLabel,
+            contractNumber = contractNumber,
+        )
+        when {
+            isBranchInfoLoading -> EditBranchInfoShimmerTile(modifier = Modifier.fillMaxWidth())
+            branchInfo.isNotBlank() -> DetailInfoTile(
+                label = stringResource(Res.string.contract_summary_branch),
+                value = branchInfo,
+                numeric = false,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
+}
+
+@Composable
+private fun EditBranchInfoShimmerTile(
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+    val shape = RoundedCornerShape(CornerRadius.card)
+
+    Column(
+        modifier = modifier
+            .clip(shape)
+            .background(colors.bgPage)
+            .padding(horizontal = Spacing.md, vertical = Spacing.md),
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        Box(
+            modifier = Modifier
+                .width(ShimmerSize.labelWidth)
+                .height(ShimmerSize.subtitleHeight)
+                .clip(RoundedCornerShape(CornerRadius.xs))
+                .shimmer(),
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.7f)
+                .height(ShimmerSize.titleHeight)
+                .clip(RoundedCornerShape(CornerRadius.xs))
+                .shimmer(),
+        )
+    }
+}
+
+@Composable
 private fun OptionalRegistrationStepContent(
     info: RegistrationInfoPR,
     insuranceTypeLabel: String,
@@ -163,6 +272,136 @@ private fun OptionalRegistrationStepContent(
             preflightGateError = preflightGateError,
             hasBlockingError = hasBlockingError,
             ageYears = PersianDateFormatter.ageYearsFromBirthEpoch(info.dateOfBirthEpoch),
+        )
+    }
+}
+
+@Composable
+private fun HousewifeRegistrationStepContent(
+    info: RegistrationInfoPR,
+    insuranceTypeLabel: String,
+    eligibility: ContractEligibilityPR?,
+    genderGateError: String?,
+    preflightGateError: String?,
+    modifier: Modifier = Modifier,
+) {
+    val hasBlockingError = genderGateError != null ||
+        preflightGateError != null ||
+        (eligibility != null && !eligibility.isEligible)
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(Spacing.md),
+    ) {
+        HousewifeRegistrationIdentityCard(
+            info = info,
+            insuranceTypeLabel = insuranceTypeLabel,
+        )
+        HousewifeRegistrationEligibilityCard(
+            insuranceTypeLabel = insuranceTypeLabel,
+            eligibility = eligibility,
+            genderGateError = genderGateError,
+            preflightGateError = preflightGateError,
+            hasBlockingError = hasBlockingError,
+            ageYears = PersianDateFormatter.ageYearsFromBirthEpoch(info.dateOfBirthEpoch),
+        )
+    }
+}
+
+@Composable
+private fun HousewifeRegistrationIdentityCard(
+    info: RegistrationInfoPR,
+    insuranceTypeLabel: String,
+) {
+    val colors = LocalTaminColors.current
+    val cardShape = RoundedCornerShape(CornerRadius.x2l)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(cardShape)
+            .background(colors.bgSurface)
+            .border(Thickness.border, colors.border, cardShape)
+            .padding(Spacing.lg),
+        verticalArrangement = Arrangement.spacedBy(Spacing.md),
+    ) {
+        RegistrationBannerCard(insuranceId = info.insuranceId)
+        RegistrationIdentityGrid(
+            info = info,
+            insuranceTypeLabel = insuranceTypeLabel,
+        )
+    }
+}
+
+@Composable
+private fun HousewifeRegistrationEligibilityCard(
+    insuranceTypeLabel: String,
+    eligibility: ContractEligibilityPR?,
+    genderGateError: String?,
+    preflightGateError: String?,
+    hasBlockingError: Boolean,
+    ageYears: Int?,
+) {
+    val colors = LocalTaminColors.current
+    val cardShape = RoundedCornerShape(CornerRadius.x2l)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(cardShape)
+            .background(colors.bgSurface)
+            .border(Thickness.border, colors.border, cardShape)
+            .padding(Spacing.lg),
+        verticalArrangement = Arrangement.spacedBy(Spacing.md),
+    ) {
+        if (hasBlockingError) {
+            val errorMsg = genderGateError
+                ?: preflightGateError
+                ?: eligibility?.eligibilityMessage(insuranceTypeLabel).orEmpty()
+            BannerCard(
+                message = errorMsg,
+                type = BannerType.Error,
+            )
+        } else {
+            BannerCard(
+                message = stringResource(Res.string.contract_housewife_eligibility_ok),
+                type = BannerType.Success,
+            )
+            HousewifeEligibilityChecklist(ageYears = ageYears)
+            BannerCard(
+                message = stringResource(Res.string.contract_housewife_info_rates_treatment),
+                type = BannerType.Info,
+            )
+        }
+    }
+}
+
+@Composable
+private fun HousewifeEligibilityChecklist(ageYears: Int?) {
+    val ageMin = stringResource(Res.string.contract_optional_age_min)
+    val ageMax = stringResource(Res.string.contract_optional_age_max)
+    val ageCheck = if (ageYears != null) {
+        stringResource(
+            Res.string.contract_optional_check_age,
+            ageYears.toString().toPersianDigits(),
+            ageMin,
+            ageMax,
+        )
+    } else {
+        stringResource(
+            Res.string.contract_optional_check_age_fallback,
+            ageMin,
+            ageMax,
+        )
+    }
+
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+        OptionalEligibilityCheckRow(text = ageCheck)
+        OptionalEligibilityCheckRow(
+            text = stringResource(Res.string.contract_housewife_check_no_active),
+        )
+        OptionalEligibilityCheckRow(
+            text = stringResource(Res.string.contract_housewife_check_no_compulsory),
         )
     }
 }
@@ -300,8 +539,28 @@ private fun OptionalEligibilityCheckRow(text: String) {
 private fun RegistrationIdentityGrid(
     info: RegistrationInfoPR,
     insuranceTypeLabel: String,
+    contractNumber: String? = null,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
+        if (!contractNumber.isNullOrBlank()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+            ) {
+                DetailInfoTile(
+                    label = stringResource(Res.string.contract_field_number),
+                    value = contractNumber,
+                    numeric = true,
+                    modifier = Modifier.weight(1f),
+                )
+                DetailInfoTile(
+                    label = stringResource(Res.string.contract_field_contract_type),
+                    value = insuranceTypeLabel,
+                    numeric = false,
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(Spacing.md),
@@ -329,12 +588,14 @@ private fun RegistrationIdentityGrid(
                 numeric = false,
                 modifier = Modifier.weight(1f),
             )
-            DetailInfoTile(
-                label = stringResource(Res.string.contract_field_contract_type),
-                value = insuranceTypeLabel,
-                numeric = false,
-                modifier = Modifier.weight(1f),
-            )
+            if (contractNumber.isNullOrBlank()) {
+                DetailInfoTile(
+                    label = stringResource(Res.string.contract_field_contract_type),
+                    value = insuranceTypeLabel,
+                    numeric = false,
+                    modifier = Modifier.weight(1f),
+                )
+            }
         }
     }
 }
@@ -570,6 +831,109 @@ private fun ContractRegistrationStepContentIneligiblePreview() {
                 isEligible = false,
                 reason = com.tamin.taminhamrah.contractFlow.ContractEligibilityReason.AGE_HISTORY_NOT_MET,
             ),
+        )
+    }
+}
+
+@com.tamin.taminhamrah.ui.PreviewRtlTheme
+@Composable
+private fun HousewifeContractRegistrationStepContentPreview() {
+    com.tamin.taminhamrah.ui.PreviewRtlThemeContent {
+        ContractRegistrationStepContent(
+            info = RegistrationInfoPR(
+                fullName = "زهرا دریکوند",
+                nationalId = "0924558130",
+                birthDateFormatted = "1369/11/03",
+                insuranceId = "0043819250",
+                genderCode = "02",
+                address = "تهران",
+                zipCode = "1234567890",
+                phoneNumber = "02166001234",
+                mobileNumber = "09121234567",
+                hasMobile = true,
+                dateOfBirthEpoch = 665_280_000_000L,
+            ),
+            insuranceTypeLabel = "زنان خانه‌دار",
+            eligibility = ContractEligibilityPR(
+                statusCode = 2,
+                isEligible = true,
+                reason = com.tamin.taminhamrah.contractFlow.ContractEligibilityReason.AGE_UNDER_FIFTY,
+            ),
+            usesChecklistRegistration = true,
+        )
+    }
+}
+
+@com.tamin.taminhamrah.ui.PreviewRtlTheme
+@Composable
+private fun EditContractRegistrationStepContentPreview() {
+    com.tamin.taminhamrah.ui.PreviewRtlThemeContent {
+        ContractRegistrationStepContent(
+            info = RegistrationInfoPR(
+                fullName = "علی محمدی",
+                nationalId = "0012345678",
+                birthDateFormatted = "1375/04/15",
+                insuranceId = "12345678",
+                genderCode = "01",
+                address = "تهران",
+                zipCode = "1234567890",
+                phoneNumber = "02166001234",
+                mobileNumber = "09121234567",
+                hasMobile = true,
+            ),
+            insuranceTypeLabel = "بیمه دانشجویی",
+            contractNumber = "483222268",
+            isEditingExistingContract = true,
+            branchInfo = "تهران - شعبه ۱ تهران (شهدای هفتم تیر)",
+        )
+    }
+}
+
+@com.tamin.taminhamrah.ui.PreviewRtlTheme
+@Composable
+private fun EditContractRegistrationStepBranchLoadingPreview() {
+    com.tamin.taminhamrah.ui.PreviewRtlThemeContent {
+        ContractRegistrationStepContent(
+            info = RegistrationInfoPR(
+                fullName = "علی محمدی",
+                nationalId = "0012345678",
+                birthDateFormatted = "1375/04/15",
+                insuranceId = "12345678",
+                genderCode = "01",
+                address = "تهران",
+                zipCode = "1234567890",
+                phoneNumber = "02166001234",
+                mobileNumber = "09121234567",
+                hasMobile = true,
+            ),
+            insuranceTypeLabel = "بیمه دانشجویی",
+            contractNumber = "483222268",
+            isEditingExistingContract = true,
+            isBranchInfoLoading = true,
+        )
+    }
+}
+
+@com.tamin.taminhamrah.ui.PreviewRtlTheme
+@Composable
+private fun EditContractRegistrationStepShimmerPreview() {
+    com.tamin.taminhamrah.ui.PreviewRtlThemeContent {
+        ContractRegistrationStepContent(
+            info = RegistrationInfoPR(
+                fullName = "",
+                nationalId = "",
+                birthDateFormatted = "",
+                insuranceId = "",
+                genderCode = "01",
+                address = "",
+                zipCode = "",
+                phoneNumber = "",
+                mobileNumber = "",
+                hasMobile = false,
+            ),
+            insuranceTypeLabel = "بیمه دانشجویی",
+            isLoading = true,
+            isEditingExistingContract = true,
         )
     }
 }
