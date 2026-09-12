@@ -28,4 +28,5 @@ class HousewifeContractFlowConfig : ContractFlowConfig {
     override val requiresFemaleGender = true
     override val fixedFreeJobCode = ContractFreeJobCode.WOMEN_CONTRACT_CODE
     override val allowsOnlinePaymentAfterSubmit = true
+    override val usesChecklistRegistration = true
 }

@@ -4,23 +4,20 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
@@ -41,14 +38,16 @@ import com.tamin.taminhamrah.model.contactUs.SocialChannelTypePR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
-import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
-import com.tamin.taminhamrah.ui.components.rememberCollapsingHeaderState
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
-import com.tamin.taminhamrah.ui.components.reservedHeight
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.success
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.ShimmerCardList
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.toparea.driveTopArea
+import com.tamin.taminhamrah.ui.toparea.rememberMeasuredTopAreaState
+import com.tamin.taminhamrah.ui.toparea.reportTopAreaHeight
+import com.tamin.taminhamrah.ui.toparea.topAreaContentPadding
 import com.tamin.taminhamrah.ui.util.ExternalAppLauncher
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
@@ -56,7 +55,9 @@ import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.contact_us_copied
 
-private val HeaderCollapseDistance = 160.dp
+/** What the page stands in with while the contact details load. */
+private const val LoadingPlaceholderCards = 3
+private val LoadingPlaceholderCardHeight = 150.dp
 
 @Composable
 fun ContactUsRoute(
@@ -131,8 +132,17 @@ fun ContactUsScreen(
 ) {
     val colors = LocalTaminColors.current
 
-    val collapse = rememberCollapsingHeaderState(HeaderCollapseDistance)
-    var headerHeightPx by remember { mutableIntStateOf(0) }
+    // Folds the header from the list's drag, snapping on release. Read only inside the
+    // header's layout/draw lambdas, so the fold never recomposes the screen. The drag budget
+    // itself is measured from the real header below (expanded vs. collapsed height), not
+    // guessed -- so it can't drift out of sync with a copy/font change to that header.
+    val topArea = rememberMeasuredTopAreaState { state ->
+        ContactUsHeader(
+            onBackClicked = {},
+            topAreaState = state,
+        )
+    }
+    val listState = rememberLazyListState()
 
     Box(
         modifier = modifier
@@ -140,27 +150,38 @@ fun ContactUsScreen(
             .background(colors.bgPage)
     ) {
         if (state.isLoading) {
-            LoadingStateOverlay()
+            // Inset by the same top-area padding as the list, so the real cards land where the
+            // placeholders were.
+            ShimmerCardList(
+                modifier = Modifier.padding(top = Spacing.md),
+                count = LoadingPlaceholderCards,
+                cardHeight = LoadingPlaceholderCardHeight,
+                spacing = Spacing.md,
+                contentPadding = topAreaContentPadding(
+                    state = topArea,
+                    rest = PaddingValues(horizontal = Spacing.page)
+                )
+            )
         } else {
             state.contactInfo?.let { info ->
                 LazyColumn(
+                    state = listState,
                     overscrollEffect = rememberJellyOverscroll(),
                     modifier = Modifier
                         .fillMaxSize()
-                        .nestedScroll(collapse.nestedScrollConnection),
-                    contentPadding = PaddingValues(
-                        top = Spacing.md,
-                        bottom = WindowInsets.navigationBars.asPaddingValues()
-                            .calculateBottomPadding() + Spacing.xxl,
-                        start = Spacing.page,
-                        end = Spacing.page
+                        .driveTopArea(topArea, listState)
+                        .padding(top = Spacing.md),
+                    contentPadding = topAreaContentPadding(
+                        state = topArea,
+                        rest = PaddingValues(
+                            bottom = WindowInsets.navigationBars.asPaddingValues()
+                                .calculateBottomPadding() + Spacing.xxl,
+                            start = Spacing.page,
+                            end = Spacing.page
+                        )
                     ),
                     verticalArrangement = Arrangement.spacedBy(Spacing.md)
                 ) {
-                    item(key = "header_spacer") {
-                        Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
-                    }
-
                     item(key = "hotline_card") {
                         HotlineCard(
                             hotline = info.hotline,
@@ -189,12 +210,13 @@ fun ContactUsScreen(
             }
         }
 
+        // The header floats on top so the list passes underneath it as it scrolls away.
         ContactUsHeader(
             onBackClicked = { onIntent(ContactUsIntent.OnBackClicked) },
-            collapseProgress = collapse.progressProvider,
+            topAreaState = topArea,
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .onSizeChanged { headerHeightPx = it.height }
+                .reportTopAreaHeight(topArea)
         )
     }
 }
@@ -208,6 +230,17 @@ private fun ContactUsScreenLightPreview() {
                 isLoading = false,
                 contactInfo = getSampleContactUsPR()
             ),
+            onIntent = {}
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun ContactUsScreenLoadingPreview() {
+    PreviewRtlThemeContent {
+        ContactUsScreen(
+            state = ContactUsUiState(isLoading = true),
             onIntent = {}
         )
     }

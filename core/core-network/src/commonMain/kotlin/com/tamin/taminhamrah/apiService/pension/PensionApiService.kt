@@ -9,6 +9,8 @@ import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatu
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
 import com.tamin.taminhamrah.model.pension.retirement.RetirementPersonalDTO
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestCreatedDTO
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestFormDTO
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDTO
 import com.tamin.taminhamrah.model.pension.sendRetirementDocument.RetirementSaveDocumentRequest
 import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.DisabilityPersonalInfoDTO
@@ -89,6 +91,18 @@ interface PensionApiService {
     suspend fun authenticationAndGetPersonalInfo(
         @Query("ticketCode") authenticationsCode: Long
     ): BaseDTO<RetirementPersonalDTO>
+
+    /**
+     * Creates the retirement request from the confirmed identity/workshop form and returns its id.
+     * The OTP ticket is re-presented here as `ticketCode`, exactly as `pension-request/personal`
+     * takes it — the server treats the ticket, not a session flag, as proof of verification.
+     */
+    @Headers("Content-Type: application/json")
+    @POST("pension-request")
+    suspend fun createRetirementRequest(
+        @Query("ticketCode") authenticationsCode: Long,
+        @Body body: RetirementRequestFormDTO
+    ): BaseDTO<RetirementRequestCreatedDTO>
 
     @GET("pension-request/checkRequests")
     suspend fun checkRetirementStatus(): BaseDTO<RetirementStatusDTO>

@@ -1,16 +1,13 @@
 package com.tamin.taminhamrah.ui.util
 
 import platform.Foundation.NSCharacterSet
+import platform.Foundation.NSString
 import platform.Foundation.NSURL
 import platform.Foundation.URLQueryAllowedCharacterSet
-import platform.UIKit.UIActivityViewController
-import platform.UIKit.UIApplication
-import platform.UIKit.UIPopoverPresentationController
-import platform.Foundation.NSString
 import platform.Foundation.create
 import platform.Foundation.stringByAddingPercentEncodingWithAllowedCharacters
 import platform.UIKit.UIActivityViewController
-import platform.UIKit.popoverPresentationController
+import platform.UIKit.UIApplication
 
 actual class ExternalAppLauncher actual constructor() {
 

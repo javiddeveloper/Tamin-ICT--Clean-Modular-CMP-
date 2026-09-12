@@ -1,6 +1,8 @@
 package com.tamin.taminhamrah.ui.navigation
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -66,8 +68,11 @@ import com.tamin.taminhamrah.feature.contracts.contractsScreen
 import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.deferredInstallment.deferredInstallmentScreen
 import com.tamin.taminhamrah.feature.deferredInstallment.navigateToDeferredInstallment
-import com.tamin.taminhamrah.feature.developerOptions.DeveloperOptionsRoute
+import com.tamin.taminhamrah.feature.developerOptions.DebugLoginRoute
+import com.tamin.taminhamrah.feature.developerOptions.TokenManagerRoute
+import com.tamin.taminhamrah.feature.developerOptions.debugLoginScreen
 import com.tamin.taminhamrah.feature.developerOptions.developerOptionsScreen
+import com.tamin.taminhamrah.feature.developerOptions.tokenManagerScreen
 import com.tamin.taminhamrah.feature.girlSurvivor.girlSurvivorScreen
 import com.tamin.taminhamrah.feature.healthProfile.healthProfileScreen
 import com.tamin.taminhamrah.feature.healthProfile.navigateToHealthProfile
@@ -76,7 +81,6 @@ import com.tamin.taminhamrah.feature.history.historyScreen
 import com.tamin.taminhamrah.feature.historyobjection.historyObjectionScreen
 import com.tamin.taminhamrah.feature.historyobjection.historyObjectionStepperScreen
 import com.tamin.taminhamrah.feature.inquiryEducation.inquiryEducationScreen
-import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
 import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
 import com.tamin.taminhamrah.feature.orotezprotez.orotezProtezScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.calculatePensionScreen
@@ -87,20 +91,35 @@ import com.tamin.taminhamrah.feature.pensionInquiry.issuanceCertificateScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeservedTreatment
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDisabilityPension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPrescription
+import com.tamin.taminhamrah.feature.payment.PaymentRoute
+import com.tamin.taminhamrah.feature.payment.paymentGraph
+import com.tamin.taminhamrah.feature.payment.navigateToPayment
+import com.tamin.taminhamrah.feature.payment.paymentSandboxScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.payrollScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.prescriptionScreen
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.pensionStatusInquiryGraph
 import com.tamin.taminhamrah.feature.pensionSurvivor.navigateToPensionSurvivor
 import com.tamin.taminhamrah.feature.pensionSurvivor.pensionSurvivorScreen
+import com.tamin.taminhamrah.feature.retirementPension.retirementPensionScreen
 import com.tamin.taminhamrah.feature.pregnancyPay.pregnancyPayScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
+import com.tamin.taminhamrah.feature.contractaffair.CONTRACT_AFFAIRS_REFRESH_KEY
+import com.tamin.taminhamrah.feature.contractaffair.contractAffairsScreen
+import com.tamin.taminhamrah.feature.contractaffair.contractPaymentHistoryScreen
+import com.tamin.taminhamrah.feature.contractaffair.contractPaymentCalcDetailScreen
+import com.tamin.taminhamrah.feature.contractaffair.contractPremiumPaymentScreen
+import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPaymentCalcDetail
+import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPaymentHistory
+import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPremiumPayment
 import com.tamin.taminhamrah.feature.requestPaymentForIllDays.requestPaymentForIllDaysScreen
 import com.tamin.taminhamrah.feature.security.SecurityRoute
 import com.tamin.taminhamrah.feature.security.securityScreen
 import com.tamin.taminhamrah.feature.settings.SettingsRoute
 import com.tamin.taminhamrah.feature.settings.settingsScreen
 import com.tamin.taminhamrah.feature.contracts.contractFlowScreen
+import com.tamin.taminhamrah.feature.contracts.flow.resolveContractTypeForEdit
+import com.tamin.taminhamrah.feature.contracts.navigateToContractFlow
 import com.tamin.taminhamrah.feature.taminServices.TaminServicesRoute
 import com.tamin.taminhamrah.feature.taminServices.inspectionScreen
 import com.tamin.taminhamrah.feature.taminServices.occurrenceScreen
@@ -109,6 +128,16 @@ import com.tamin.taminhamrah.feature.taminServices.sendInsuranceHistoryToInstitu
 import com.tamin.taminhamrah.feature.taminServices.taminServicesScreen
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
 import com.tamin.taminhamrah.feature.treatment.treatmentGraph
+import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
+import com.tamin.taminhamrah.feature.workshops.completeEmployerInfoScreen
+import com.tamin.taminhamrah.feature.workshops.debtObjectionStatusScreen
+import com.tamin.taminhamrah.feature.workshops.workshopsScreen
+import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
+import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
+import com.tamin.taminhamrah.feature.security.securityScreen
+import com.tamin.taminhamrah.feature.developerOptions.DeveloperOptionsRoute
+import com.tamin.taminhamrah.feature.developerOptions.developerOptionsScreen
+import com.tamin.taminhamrah.feature.settings.settingsScreen
 import com.tamin.taminhamrah.feature.userRequest.UserRequestRoute
 import com.tamin.taminhamrah.feature.userRequest.navigateToUserRequestDetail
 import com.tamin.taminhamrah.feature.userRequest.userRequestGraph
@@ -277,10 +306,10 @@ internal fun TaminHamrahNavGraph(
             AnimatedVisibility(
                 visible = isBottomBarVisible,
                 enter = fadeIn(
-                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300),
+                    animationSpec = tween(durationMillis = 300),
                 ),
                 exit = fadeOut(
-                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300),
+                    animationSpec = tween(durationMillis = 300),
                 ),
             ) {
                 Box(
@@ -486,6 +515,7 @@ internal fun TaminHamrahNavGraph(
                     onDone = { navController.popBackStack() },
                 )
 
+                retirementPensionScreen(onBack = { navController.popBackStack() })
                 calculatePensionScreen(onBack = { navController.popBackStack() })
                 prescriptionScreen(onBack = { navController.popBackStack() })
                 deservedTreatmentScreen(onBack = { navController.popBackStack() })
@@ -505,6 +535,14 @@ internal fun TaminHamrahNavGraph(
                 deferredInstallmentScreen(onBack = { navController.popBackStack() })
                 girlSurvivorScreen(onBack = { navController.popBackStack() })
                 inquiryEducationScreen(onBack = { navController.popBackStack() })
+
+                // The shared payment flow. Any feature that has been handed a gateway ticket
+                // enters it with navController.navigateToPayment(request); finishing pops back to
+                // whichever screen started the payment.
+                paymentGraph(
+                    navController = navController,
+                    onFinished = { navController.popBackStack() },
+                )
                 pensionSurvivorScreen(
                     navController = navController,
                     onBack = { navController.popBackStack() })
@@ -521,8 +559,55 @@ internal fun TaminHamrahNavGraph(
                     onOpenUrl = { url -> openUrl(url) }
                 )
 
-                workshopsScreen(navController, onOpenUrl = { url -> openUrl(url) })
+                contractAffairsScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToService = { flag ->
+                    navController.navigateToFeature(flag)
+                },
+                    onOpenUrl =  { url -> openUrl(url) },
+                    onNavigateToPaymentHistory = { contractNumber, insuranceType ->
+                        navController.navigateToContractPaymentHistory(contractNumber, insuranceType)
+                    },
+                    onNavigateToPremiumPayment = { contractNumber, premiumTypeCode, insuranceType ->
+                        navController.navigateToContractPremiumPayment(
+                            contractNumber,
+                            premiumTypeCode,
+                            insuranceType,
+                        )
+                    },
+                    onNavigateToEditContract = { premiumTypeCode, freeJobCode, contractNumber ->
+                        val type = resolveContractTypeForEdit(premiumTypeCode, freeJobCode)
+                            ?: return@contractAffairsScreen
+                        navController.navigateToContractFlow(
+                            type = type,
+                            editContractNumber = contractNumber,
+                        )
+                    },
+                )
+
+                contractPaymentHistoryScreen(onBack = { navController.popBackStack() })
+
+                contractPremiumPaymentScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToPaymentDetails = { premiumTypeCode, startDate, endDate ->
+                        navController.navigateToContractPaymentCalcDetail(
+                            premiumTypeCode,
+                            startDate,
+                            endDate,
+                        )
+                    },
+                )
+
+                contractPaymentCalcDetailScreen(onBack = { navController.popBackStack() })
+
+                workshopsScreen(
+                    navController,
+                    // The debt payment runs in the app's own payment flow, which owns the gateway
+                    // address; the feature only hands over the ticket the service issued.
+                    onStartPayment = { request -> navController.navigateToPayment(request) },
+                )
                 completeEmployerInfoScreen(navController)
+                debtObjectionStatusScreen(navController)
 
                 myInboxScreen(onNavigateBack = { navController.popBackStack() })
 
@@ -530,7 +615,15 @@ internal fun TaminHamrahNavGraph(
 
                 userRequestGraph(navController = navController)
 
-                contractFlowScreen(onBack = { navController.popBackStack() })
+                contractFlowScreen(
+                    onBack = { navController.popBackStack() },
+                    onEditSuccess = {
+                        navController.previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set(CONTRACT_AFFAIRS_REFRESH_KEY, true)
+                        navController.popBackStack()
+                    },
+                )
 
                 // Maps the assistant's destination ids to real routes. Ids come from
                 // AgentDestination; anything unmapped is ignored rather than crashing.
@@ -555,7 +648,18 @@ internal fun TaminHamrahNavGraph(
                 securityScreen(onNavigateBack = { navController.popBackStack() })
 
                 if (AppConfig.isDebug) {
-                    developerOptionsScreen(onNavigateBack = { navController.popBackStack() })
+                    developerOptionsScreen(
+                        onNavigateBack = { navController.popBackStack() },
+                        onNavigateToDebugLogin = { navController.navigate(DebugLoginRoute) },
+                        onNavigateToTokenManager = { navController.navigate(TokenManagerRoute) },
+                        onStartTestPayment = { navController.navigate(PaymentRoute.Sandbox) }
+                    )
+                    paymentSandboxScreen(
+                        navController = navController,
+                        onNavigateBack = { navController.popBackStack() }
+                    )
+                    debugLoginScreen(onNavigateBack = { navController.popBackStack() })
+                    tokenManagerScreen(onNavigateBack = { navController.popBackStack() })
                 }
 
                 orotezProtezScreen(onBack = { navController.popBackStack() })
@@ -579,10 +683,10 @@ internal fun TaminHamrahNavGraph(
             AnimatedVisibility(
                 visible = isBottomBarVisible,
                 enter = fadeIn(
-                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300)
+                    animationSpec = tween(durationMillis = 300)
                 ),
                 exit = fadeOut(
-                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300)
+                    animationSpec = tween(durationMillis = 300)
                 ),
                 modifier = Modifier.align(Alignment.TopCenter)
             ) {

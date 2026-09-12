@@ -59,6 +59,12 @@ import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetStatus
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDTO
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionType
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionStatus
+import com.tamin.taminhamrah.model.workshop.SmsMessageDN
+import com.tamin.taminhamrah.model.workshop.SmsMessageDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDN
@@ -117,6 +123,7 @@ fun EmployerWorkshopDTO.toDomain(): WorkshopSummaryDN = WorkshopSummaryDN(
     branchOfficeCode = branch?.code ?: brhCode.orEmpty(),
     branchOfficeName = branch?.organizationName ?: branchTitle.orEmpty(),
     characterCode = character?.characterCode.orEmpty(),
+    legalNationalId = legalWorkshop?.nationalId.orEmpty(),
     characterDescription = character?.characterDesc.orEmpty(),
     workshopTypeDescription = workshopType?.workshopTypeDesc.orEmpty(),
     statusCode = workshopStatus?.workshopStatusCode.orEmpty(),
@@ -124,7 +131,7 @@ fun EmployerWorkshopDTO.toDomain(): WorkshopSummaryDN = WorkshopSummaryDN(
     branchTitle = branchTitle.orEmpty()
 )
 
-// ---------------------------------------------- خدمات غیرحضوری کارفرما (employerEservicesAgreement)
+// ---------------------------------------------- خدمات غیرحضوری کارفرما (employerServicesAgreement)
 
 fun EmployerCommitmentInfoDTO.toDomain(): EmployerContactInfoDN = EmployerContactInfoDN(
     firstName = firstName.orEmpty(),
@@ -261,31 +268,49 @@ fun DebitPaymentPreCheckDTO.toDomain(): DebitPaymentPreCheckDN = DebitPaymentPre
 private const val PAYMENT_ALLOWED = "1"
 
 /**
- * The payment page the user is sent to.
- *
- * The service answers with a ticket and a URL, and the page is addressed by ticket alone. When the
- * ticket field is empty the ticket is the last segment of the URL — which is the same fallback the
+ * The service answers with a ticket and a URL, and the payment page is addressed by ticket alone.
+ * When the ticket field is empty the ticket is the last segment of the URL — the same fallback the
  * old client used, and the reason a payment still worked when only one of the two arrived.
  */
-private const val TFH_PAYMENT_PAGE = "https://tfh.tamin.ir/view/#/payment/"
-
-fun DebitPaymentDTO.toDomain(): DebitPaymentDN {
-    val ticket = paymentTicket?.takeIf { it.isNotBlank() }
-        ?: paymentUrl?.trimEnd('/')?.substringAfterLast('/')?.takeIf { it.isNotBlank() }
-    return DebitPaymentDN(
-        succeeded = succeed == true,
-        message = responseMessage.orEmpty(),
-        paymentPageUrl = ticket?.let { TFH_PAYMENT_PAGE + it }.orEmpty(),
-    )
-}
+//private const val TFH_PAYMENT_PAGE = "https://tfh.tamin.ir/view/#/payment/"
+//
+//fun DebitPaymentDTO.toDomain(): DebitPaymentDN {
+//    val ticket = paymentTicket?.takeIf { it.isNotBlank() }
+//        ?: paymentUrl?.trimEnd('/')?.substringAfterLast('/')?.takeIf { it.isNotBlank() }
+//    return DebitPaymentDN(
+//        succeeded = succeed == true,
+//        message = responseMessage.orEmpty(),
+//        paymentPageUrl = ticket?.let { TFH_PAYMENT_PAGE + it }.orEmpty(),
+//        ticket = ticket.orEmpty(),
+//    )
+//}
+fun DebitPaymentDTO.toDomain(): DebitPaymentDN = DebitPaymentDN(
+    succeeded = succeed == true,
+    message = responseMessage.orEmpty(),
+    paymentTicket = paymentTicket?.takeIf { it.isNotBlank() }
+        ?: paymentUrl?.trimEnd('/')?.substringAfterLast('/').orEmpty(),
+)
 
 fun DebitPaymentRequestDN.toDto(): DebitPaymentRequestDTO = DebitPaymentRequestDTO(
     branchCode = branchCode,
     workshopId = workshopId,
     debitNumber = debitNumber,
+    // Empty rather than absent when the debt has none: the old client coalesces the service's
+    // null before building its request, so the key is always on the wire.
     agreementRow = agreementRow,
-    deposit = deposit.toString(),
+    // "1"/"0", not "true"/"false".
+    deposit = if (deposit) DEPOSIT_YES else DEPOSIT_NO,
+    // Only a حقوقی workshop has one. Blank is not the same as absent here: the service expects
+    // the key present and null, so an empty id becomes null rather than "".
+    nationalId = legalNationalId.takeIf { characterCode == CHARACTER_LEGAL && it.isNotBlank() },
+    nationalType = characterCode,
 )
+
+private const val DEPOSIT_YES = "1"
+private const val DEPOSIT_NO = "0"
+
+/** `02` حقوقی — the only character that carries a national id of its own. */
+private const val CHARACTER_LEGAL = "02"
 
 /**
  * The wire value of `objectionType` on `objection-save` — a Persian label, not a code. The same
@@ -482,6 +507,25 @@ fun NewMemberRegistrationDN.toDto(): NewMemberRegistrationDTO = NewMemberRegistr
 
 fun NewMemberRegistrationResultDTO.toDomain(): NewMemberRegistrationResultDN =
     NewMemberRegistrationResultDN(personalId = id)
+
+
+fun WorkShopObjectionDTO.toDomain(): WorkShopObjectionDN = WorkShopObjectionDN(
+    seqNo = seqNo,
+    workshopId = workshopId.orEmpty(),
+    debitNumber = debitNumber.orEmpty(),
+    branchCode = branchCode.orEmpty(),
+    objectionType = WorkShopObjectionType.fromCode(objectionType),
+    objectionDate = objectionDate.orEmpty(),
+    objectionDescription = objectionDesc.orEmpty(),
+    status = WorkShopObjectionStatus.fromCode(status),
+    voteTypeDescription = voteType?.description.orEmpty(),
+)
+
+fun SmsMessageDTO.toDomain(): SmsMessageDN = SmsMessageDN(
+    id = id,
+    description = smsDescription.takeUnless { it.isNullOrEmpty() || it.equals("null", ignoreCase = true) }.orEmpty(),
+    status = WorkShopObjectionStatus.fromCode(status),
+)
 
 
 fun LegalRepresentativeWorkshopDTO.toDomain(): LegalRepresentativeWorkshopDN {

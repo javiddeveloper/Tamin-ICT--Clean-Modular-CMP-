@@ -307,11 +307,19 @@ val TaminCostsOperationsInk = Color(0xFFFFFFFF)
  * everything on it is a wash of white at a set strength rather than a surface color.
  */
 val TaminInsuranceCardInk = Color(0xFFFFFFFF)
-val TaminInsuranceCardInkMuted = TaminInsuranceCardInk.copy(alpha = 0.75f)
+
+/**
+ * The card's secondary ink. A mint-tinted off-white (`#EAF9F6` in the design), not white at a
+ * lower alpha: the card's own gradient runs teal → blue, and a translucent white takes on the
+ * blue underneath it, so the subtitle drifts cool while the same line stays mint on the teal end.
+ */
+val TaminInsuranceCardInkMuted = Color(0xFFEAF9F6)
 
 /** The translucent chips and pills the card sets on its own gradient. */
 val TaminInsuranceCardChipBg = TaminInsuranceCardInk.copy(alpha = 0.13f)
-val TaminInsuranceCardTrackBg = TaminInsuranceCardInk.copy(alpha = 0.08f)
+
+/** `border-top: 1px solid #ffffff26` above the coverage line. */
+val TaminInsuranceCardDivider = TaminInsuranceCardInk.copy(alpha = 0.15f)
 
 /* ---- Ink on accent surfaces ------------------------------------------------------------------ */
 
@@ -327,6 +335,13 @@ val TaminOnAccentInkSoft = TaminOnAccentInk.copy(alpha = 0.90f)
 val TaminOnAccentInkMuted = TaminOnAccentInk.copy(alpha = 0.80f)
 /** Dimmed white for inactive hero step segments (current-only highlight). */
 val TaminOnAccentInkFaint = TaminOnAccentInk.copy(alpha = 0.35f)
+
+/**
+ * Hero step segments the wizard has already been through, when it tracks how far the user has got
+ * rather than lighting only the current one. Reads between [TaminOnAccentInk] and
+ * [TaminOnAccentInkFaint], so all three states stay distinguishable in one strip.
+ */
+val TaminOnAccentInkReached = TaminOnAccentInk.copy(alpha = 0.62f)
 
 /** Translucent fills and hairlines the same surfaces set on themselves. */
 val TaminOnAccentFill = TaminOnAccentInk.copy(alpha = 0.10f)
@@ -360,7 +375,6 @@ val CampaignStudentEnd = Color(0xFF22B8D6)
 val CampaignStudentShadow = Color(0x474B2E86)       // rgba(75,46,134,.28)
 
 /** The idle page dot under the carousel; the active one is `blueText`. */
-val CampaignDotIdle = Color(0xFFD7E0EC)
 
 /** The two aria-hidden decoration circles every campaign card carries. */
 val CampaignGlowCore = TaminOnAccentInk.copy(alpha = 0.22f)

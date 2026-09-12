@@ -6,8 +6,10 @@ import com.tamin.taminhamrah.data.local.dao.RegistrationInfoDao
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toDto
 import com.tamin.taminhamrah.data.mapper.toEntity
+import com.tamin.taminhamrah.data.mapper.toUpdateDto
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSource
 import com.tamin.taminhamrah.model.contracts.BranchDN
+import com.tamin.taminhamrah.model.contracts.ContractsPaging
 import com.tamin.taminhamrah.model.contracts.FreelanceContractByGuardianParams
 import com.tamin.taminhamrah.model.contracts.OptionalContractByGuardianParams
 import com.tamin.taminhamrah.model.contracts.ContractDN
@@ -30,13 +32,11 @@ import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.repository.contracts.ContractsRepository
-import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 
 class ContractsRepositoryImpl(
@@ -44,68 +44,110 @@ class ContractsRepositoryImpl(
     private val contractDao: ContractDao,
     private val registrationInfoDao: RegistrationInfoDao,
     private val branchDao: BranchDao,
-    private val apiQueryBuilder: ApiQueryBuilder,
-) :
-    ContractsRepository {
-    override fun getContracts(query: ApiQueryParamDN?): Flow<List<ContractDN>> =
-        flow {
-            val effectiveQuery = query ?: apiQueryBuilder.defaultQuery()
+) : ContractsRepository {
+
+    override fun getContracts(page: Int): Flow<PagedListDN<ContractDN>> =
+        getContractsPage(contractListQuery(premiumTypeCode = null, page = page))
+
+    override fun getContractsByPremiumType(
+        premiumTypeCode: String,
+        page: Int,
+    ): Flow<PagedListDN<ContractDN>> =
+        getContractsPage(contractListQuery(premiumTypeCode = premiumTypeCode, page = page))
+
+    override fun getStudentInsuranceContracts(page: Int): Flow<PagedListDN<ContractDN>> =
+        getContractsByPremiumType(
+            premiumTypeCode = com.tamin.taminhamrah.model.contracts.ContractPremiumTypeCode.STUDENT,
+            page = page,
+        )
+
+    private fun getContractsPage(query: ApiQueryParamDN): Flow<PagedListDN<ContractDN>> = flow {
+        val isFirstPage = query.start == 0
+        if (isFirstPage) {
             val localItems = contractDao.getContracts().first()
-            emit(localItems.map { it.toDomain() })
-
-            try {
-                val response = contractsRemoteDataSource.getContracts(effectiveQuery)
-                val remoteItems = response.list?:emptyList()
-                contractDao.replaceAll(remoteItems.map { it.toEntity() })
-            } catch (e: Exception) {
-                if (localItems.isEmpty()) {
-                    throw e
-                }
+            if (localItems.isNotEmpty()) {
+                emit(
+                    PagedListDN(
+                        items = localItems.map { it.toDomain() },
+                        total = localItems.size,
+                    ),
+                )
             }
-
-            emitAll(
-                contractDao.getContracts().map { entities ->
-                    entities.map { it.toDomain() }
-                }
-            )
-        }.distinctUntilChanged()
-
-    override fun getContractsByPremiumType(premiumTypeCode: String): Flow<List<ContractDN>> =
-        getContracts(contractListQuery(premiumTypeCode))
-
-    override fun getStudentInsuranceContracts(): Flow<List<ContractDN>> =
-        getContractsByPremiumType(com.tamin.taminhamrah.model.contracts.ContractPremiumTypeCode.STUDENT)
-
-    override fun getBranches(cityCode: String): Flow<List<BranchDN>> = flow {
-        val localBranches = branchDao.getBranchesByCityCode(cityCode).first()
-        emit(localBranches.map { it.toDomain() })
+        }
 
         try {
-            val response = contractsRemoteDataSource.getBranches(branchListQuery(cityCode))
+            val response = contractsRemoteDataSource.getContracts(query)
+            val remoteItems = response.list.orEmpty()
+            if (isFirstPage) {
+                contractDao.replaceAll(remoteItems.map { it.toEntity() })
+            }
+            emit(
+                PagedListDN(
+                    items = remoteItems.map { it.toDomain() },
+                    total = response.total,
+                ),
+            )
+        } catch (e: Exception) {
+            if (!isFirstPage) throw e
+            val localItems = contractDao.getContracts().first()
+            if (localItems.isEmpty()) throw e
+            emit(
+                PagedListDN(
+                    items = localItems.map { it.toDomain() },
+                    total = localItems.size,
+                ),
+            )
+        }
+    }
+
+    override fun getBranches(cityCode: String, page: Int): Flow<PagedListDN<BranchDN>> = flow {
+        val query = branchListQuery(cityCode, page)
+        val isFirstPage = query.start == 0
+        if (isFirstPage) {
+            val localBranches = branchDao.getBranchesByCityCode(cityCode).first()
+            if (localBranches.isNotEmpty()) {
+                emit(
+                    PagedListDN(
+                        items = localBranches.map { it.toDomain() },
+                        total = localBranches.size,
+                    ),
+                )
+            }
+        }
+
+        try {
+            val response = contractsRemoteDataSource.getBranches(query)
             val remoteBranches = (response.list ?: emptyList())
                 // `code` is the primary key and is what the picker returns; a row without one
                 // cannot be selected and would collide with every other blank-coded row.
                 .filter { !it.code.isNullOrBlank() }
-            branchDao.replaceAllForCity(cityCode, remoteBranches.map { it.toEntity(cityCode) })
-        } catch (e: Exception) {
-            if (localBranches.isEmpty()) {
-                throw e
+            if (isFirstPage) {
+                branchDao.replaceAllForCity(cityCode, remoteBranches.map { it.toEntity(cityCode) })
             }
-            // The cached list was already emitted above and is all we can offer.
-            return@flow
+            val items = if (isFirstPage) {
+                branchDao.getBranchesByCityCode(cityCode).first().map { it.toDomain() }
+            } else {
+                remoteBranches.map { it.toDomain() }
+            }
+            emit(PagedListDN(items = items, total = response.total))
+        } catch (e: Exception) {
+            if (!isFirstPage) throw e
+            val localBranches = branchDao.getBranchesByCityCode(cityCode).first()
+            if (localBranches.isEmpty()) throw e
+            // The cached list was already emitted above when non-empty; if we skipped the
+            // early emit (empty cache) we still need to surface the failure.
+            emit(
+                PagedListDN(
+                    items = localBranches.map { it.toDomain() },
+                    total = localBranches.size,
+                ),
+            )
         }
-
-        // A single read of what was just written, and then the flow **completes**. It used to
-        // `emitAll` the DAO's Flow, which never completes — so a caller that cleared its loading
-        // flag in a `finally` after collecting never cleared it, and the branch picker sat on
-        // "در حال بارگذاری..." forever. Nothing here needs live updates: branches are reference
-        // data fetched once per city.
-        emit(branchDao.getBranchesByCityCode(cityCode).first().map { it.toDomain() })
-    }.distinctUntilChanged()
+    }
 
     override fun getSpcPremiumRates(): Flow<List<PremiumRateDN>> = flow {
         val response = contractsRemoteDataSource.getSpcPremiumRates()
-        emit((response.list?:emptyList()).map { it.toDomain() })
+        emit((response.list ?: emptyList()).map { it.toDomain() })
     }
 
     override fun getFreeJobWages(page: Int, searchQuery: String?): Flow<PagedListDN<FreeJobDN>> = flow {
@@ -178,6 +220,39 @@ class ContractsRepositoryImpl(
         )
     }
 
+    override fun updateFreelanceContract(params: FreelanceMakeContractParams): Flow<Unit> = flow {
+        contractsRemoteDataSource.updateFreelanceContract(
+            premium = params.monthlyPremium,
+            request = params.request.toDto(),
+        )
+        emit(Unit)
+    }
+
+    override fun updateOptionalContract(premium: Long): Flow<Unit> = flow {
+        contractsRemoteDataSource.updateOptionalContract(premium = premium)
+        emit(Unit)
+    }
+
+    override fun updateFreelanceContractByGuardian(
+        params: FreelanceContractByGuardianParams,
+    ): Flow<Unit> = flow {
+        contractsRemoteDataSource.updateFreelanceContractByGuardian(
+            premium = params.selectedSalary,
+            request = params.toDto(),
+        )
+        emit(Unit)
+    }
+
+    override fun updateOptionalContractByGuardian(
+        params: OptionalContractByGuardianParams,
+    ): Flow<Unit> = flow {
+        contractsRemoteDataSource.updateOptionalContractByGuardian(
+            premium = params.selectedSalary,
+            request = params.toUpdateDto(),
+        )
+        emit(Unit)
+    }
+
     override fun getInsurancePayment(params: InsurancePaymentParamsDN): Flow<InsurancePaymentDN> = flow {
         emit(contractsRemoteDataSource.getInsurancePayment(params).toDomain())
     }
@@ -209,38 +284,51 @@ class ContractsRepositoryImpl(
         }
         emitAll(
             registrationInfoDao.getRegistrationInfo()
-                .mapNotNull { it?.toDomain() }
+                .mapNotNull { it?.toDomain() },
         )
     }.distinctUntilChanged()
 
-    private fun contractListQuery(premiumTypeCode: String): ApiQueryParamDN = ApiQueryParamDN(
-        page = 1,
-        start = 0,
-        limit = 100,
-        filters = listOf(
-            ApiFilterDN(
-                property = FilterProperty.PREMIUM_TYPE_CODE,
-                operator = FilterOperator.EQ,
-                value = premiumTypeCode,
-            ),
-        ),
-    )
+    private fun contractListQuery(premiumTypeCode: String?, page: Int): ApiQueryParamDN {
+        val safePage = page.coerceAtLeast(1)
+        val start = (safePage - 1) * ContractsPaging.PAGE_SIZE
+        val filters = premiumTypeCode
+            ?.takeIf { it.isNotBlank() }
+            ?.let {
+                listOf(
+                    ApiFilterDN(
+                        property = FilterProperty.PREMIUM_TYPE_CODE,
+                        operator = FilterOperator.EQ,
+                        value = it,
+                    ),
+                )
+            }
+            .orEmpty()
+        return ApiQueryParamDN(
+            page = safePage,
+            start = start,
+            limit = ContractsPaging.PAGE_SIZE,
+            filters = filters,
+        )
+    }
 
-    private fun branchListQuery(cityCode: String): ApiQueryParamDN = ApiQueryParamDN(
-        // 1, not 0: every other query in this layer and the old client's pager are 1-indexed.
-        page = 1,
-        start = 0,
-        limit = 100,
-        filters = listOf(
-            ApiFilterDN(
-                property = FilterProperty.CITY_CODE,
-                // EQUAL, not EQ: this is the operator `old_android` sends to
-                // special-insured-services/branches, and the old client owns the wire contract.
-                operator = FilterOperator.EQUAL,
-                value = cityCode,
+    private fun branchListQuery(cityCode: String, page: Int): ApiQueryParamDN {
+        val safePage = page.coerceAtLeast(1)
+        val start = (safePage - 1) * ContractsPaging.PAGE_SIZE
+        return ApiQueryParamDN(
+            page = safePage,
+            start = start,
+            limit = ContractsPaging.PAGE_SIZE,
+            filters = listOf(
+                ApiFilterDN(
+                    property = FilterProperty.CITY_CODE,
+                    // EQUAL, not EQ: this is the operator `old_android` sends to
+                    // special-insured-services/branches, and the old client owns the wire contract.
+                    operator = FilterOperator.EQUAL,
+                    value = cityCode,
+                ),
             ),
-        ),
-    )
+        )
+    }
 
     private fun freeJobWagesQuery(page: Int, searchQuery: String?): ApiQueryParamDN {
         val safePage = page.coerceAtLeast(1)

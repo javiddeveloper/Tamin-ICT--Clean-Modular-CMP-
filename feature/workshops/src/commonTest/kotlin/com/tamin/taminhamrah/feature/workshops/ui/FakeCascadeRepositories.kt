@@ -42,6 +42,9 @@ import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDN
 import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDN
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionQuery
+import com.tamin.taminhamrah.model.workshop.SmsMessageDN
 import com.tamin.taminhamrah.repository.CityProvinceRepository
 import com.tamin.taminhamrah.repository.WorkShopsRepository
 import kotlinx.coroutines.flow.Flow
@@ -102,6 +105,7 @@ internal class FakeCascadeWorkShopsRepository : WorkShopsRepository {
     override suspend fun getDebitTurnoverPdf(debitNumber: String, branchCode: String): PdfDownloadDN = unusedValue()
     override suspend fun checkDebitPayment(debitNumber: String, branchCode: String): DebitPaymentPreCheckDN = unusedValue()
     override suspend fun payWorkshopDebit(request: DebitPaymentRequestDN): DebitPaymentDN = unusedValue()
+    override suspend fun confirmPaymentTicket(ticket: String) = unusedValue<Unit>()
     override suspend fun getWorkshopDebtInquiry(
         workshopId: String,
         branchCode: String
@@ -137,6 +141,8 @@ internal class FakeCascadeWorkShopsRepository : WorkShopsRepository {
     override suspend fun getWorkshopStackHolders(
         query: WorkshopStackHolderQuery
     ): PagedListDN<WorkshopStackHolderDN> = unusedValue()
+    override suspend fun getWorkShopObjections(query: WorkShopObjectionQuery): PagedListDN<WorkShopObjectionDN> = unusedValue()
+    override suspend fun getWorkShopObjectionSms(seqNo: Long, page: Int): PagedListDN<SmsMessageDN> = unusedValue()
     override fun getLegalRepresentativeWorkshops(): Flow<LegalRepresentativeWorkshopListDN?> = unused()
     override fun getLegalRepresentatives(
         workshopId: String,

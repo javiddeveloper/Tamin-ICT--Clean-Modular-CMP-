@@ -3,13 +3,16 @@ package com.tamin.taminhamrah.feature.workshops
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.toRoute
+import com.tamin.taminhamrah.model.payment.PaymentRequestDN
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopsRoute
+import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsEvent
+import com.tamin.taminhamrah.feature.workshops.ui.demandDocuments.DemandDocumentsScreen
 import com.tamin.taminhamrah.feature.workshops.ui.contractRows.ContractRowsScreen
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
 import com.tamin.taminhamrah.feature.workshops.ui.paymentSheets.PaymentSheetsScreen
+import com.tamin.taminhamrah.feature.workshops.ui.workshopDebit.WorkshopDebitScreen
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebtInquiry.WorkshopDebtInquiryScreen
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
-import androidx.navigation.toRoute
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.workshops.LegalRepresentativeWorkshopsScreen
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.otp.LegalRepresentativeOtpScreen
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.list.LegalRepresentativeListScreen
@@ -29,6 +32,29 @@ data object WorkshopsListRoute
  */
 @Serializable
 data class PaymentSheetsRoute(val workshopId: String, val branchCode: String, val workshopName: String = "")
+
+@Serializable
+data class WorkshopDebitRoute(
+    val workshopId: String,
+    val branchCode: String,
+    val workshopName: String = "",
+    /** `01` حقیقی / `02` حقوقی. Travels only so the payment body can carry `nationalType`. */
+    val characterCode: String = "",
+    /** The حقوقی workshop's national id, blank for a حقیقی one. Sent as `nationalId`. */
+    val legalNationalId: String = "",
+)
+
+/**
+ * مطالبات is keyed on the debt, not the workshop: it is opened from a row of گردش حساب بدهی
+ * rather than from the کارگاه menu, so it is the only destination here that does not start from
+ * a workshop identity.
+ */
+@Serializable
+data class DemandDocumentsRoute(
+    val debitNumber: String,
+    val branchCode: String,
+    val workshopName: String = "",
+)
 
 @Serializable
 data object LegalRepresentativeWorkshopsRoute
@@ -105,14 +131,12 @@ fun NavController.navigateToLegalRepresentativeWorkshops() {
  */
 fun NavGraphBuilder.workshopsScreen(
     navController: NavController,
-    @Suppress("UNUSED_PARAMETER") onOpenUrl: (String) -> Unit,
+    onStartPayment: (PaymentRequestDN) -> Unit,
 ) {
     composableWithFadeTransitions<WorkshopsListRoute> {
         WorkshopsRoute(
             onBack = { navController.popBackStack() },
-            onOpenAction = { action, workshopId, branchCode, workshopName ->
-                navController.navigate(action.route(workshopId, branchCode, workshopName))
-            },
+            onOpenAction = { navController.navigate(it.route()) },
         )
     }
 
@@ -129,6 +153,34 @@ fun NavGraphBuilder.workshopsScreen(
         val route = entry.toRoute<PaymentSheetsRoute>()
         PaymentSheetsScreen(
             workshopId = route.workshopId,
+            branchCode = route.branchCode,
+            workshopName = route.workshopName,
+            onBack = { navController.popBackStack() },
+        )
+    }
+
+    composableWithFadeTransitions<WorkshopDebitRoute> { entry ->
+        val route = entry.toRoute<WorkshopDebitRoute>()
+        WorkshopDebitScreen(
+            workshopId = route.workshopId,
+            branchCode = route.branchCode,
+            workshopName = route.workshopName,
+            characterCode = route.characterCode,
+            legalNationalId = route.legalNationalId,
+            onBack = { navController.popBackStack() },
+            onOpenDocuments = { debitNumber, branchCode ->
+                navController.navigate(
+                    DemandDocumentsRoute(debitNumber, branchCode, route.workshopName),
+                )
+            },
+            onStartPayment = onStartPayment,
+        )
+    }
+
+    composableWithFadeTransitions<DemandDocumentsRoute> { entry ->
+        val route = entry.toRoute<DemandDocumentsRoute>()
+        DemandDocumentsScreen(
+            debitNumber = route.debitNumber,
             branchCode = route.branchCode,
             workshopName = route.workshopName,
             onBack = { navController.popBackStack() },
@@ -256,12 +308,18 @@ fun NavGraphBuilder.workshopsScreen(
  * One `when` over the enum, so adding an action is a compile error here until it has a
  * destination, rather than a menu row that quietly does nothing.
  */
-private fun WorkshopAction.route(
-    workshopId: String,
-    branchCode: String,
-    workshopName: String,
-): Any = when (this) {
+private fun WorkshopsEvent.Navigate.route(): Any = when (action) {
     WorkshopAction.PAYMENT_SHEETS -> PaymentSheetsRoute(workshopId, branchCode, workshopName)
+    WorkshopAction.DEBIT_TURNOVER -> WorkshopDebitRoute(
+        workshopId = workshopId,
+        branchCode = branchCode,
+        workshopName = workshopName,
+        // گردش حساب بدهی is the only destination that pays, and paying needs the workshop's
+        // character and legal id — which live on the list row and nowhere downstream.
+        characterCode = characterCode,
+        legalNationalId = legalNationalId,
+    )
+
     WorkshopAction.CONTRACT_ROWS -> ContractRowsRoute(workshopId, branchCode)
     WorkshopAction.DEBT_INQUIRY ->
         WorkshopDebtInquiryRoute(workshopId, branchCode, workshopName)

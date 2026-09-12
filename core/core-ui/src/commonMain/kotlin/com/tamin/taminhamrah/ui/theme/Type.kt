@@ -204,3 +204,60 @@ private fun campaignStyle(
     lineHeight = lineHeight,
     letterSpacing = letterSpacing,
 )
+
+/**
+ * Type for the electronic health-insurance card
+ * ([com.tamin.taminhamrah.feature.treatment.ui.components.InsuranceCard]).
+ *
+ * Declared here for the same two reasons as [CampaignTextStyles]: none of the design's sizes —
+ * 9 / 10.5 / 11.5 / 13 / 14.5 — has a role in [taminHamrahTypography], and leaving the rest to
+ * `LocalTextStyle` would drag `bodyLarge`'s 27.2sp line height onto a 9sp caption.
+ *
+ * Weights are the mock's own: 800 where it says so, 400 where it says nothing (the design frame
+ * sets no base weight, so an unstated weight is normal). The same ⚠️ as [CampaignTextStyles]
+ * applies — 700 and 800 are synthesized, since no Bold or ExtraBold face is registered.
+ */
+@Immutable
+data class InsuranceCardTextStyles(
+    /** The holder's initial, in the tile at the top of the card. */
+    val initial: TextStyle,
+    val orgName: TextStyle,
+    val orgSubtitle: TextStyle,
+    val holderName: TextStyle,
+    val codeLabel: TextStyle,
+    val code: TextStyle,
+    val coverage: TextStyle,
+)
+
+@Composable
+fun insuranceCardTextStyles(): InsuranceCardTextStyles {
+    val fontFamily = applicationFont()
+    return remember(fontFamily) { insuranceCardTextStyles(fontFamily) }
+}
+
+private fun insuranceCardTextStyles(fontFamily: FontFamily) = InsuranceCardTextStyles(
+    initial = cardStyle(fontFamily, 13.sp, 16.sp, weight = 800),
+    orgName = cardStyle(fontFamily, 11.5.sp, 15.sp, weight = 800),
+    orgSubtitle = cardStyle(fontFamily, 9.sp, 12.sp, weight = 400),
+    holderName = cardStyle(fontFamily, 14.5.sp, 19.sp, weight = 800),
+    codeLabel = cardStyle(fontFamily, 9.sp, 12.sp, weight = 400),
+    // font: 700 11.5px 'JetBrains Mono'; letter-spacing: .5px. There is no mono face in the app,
+    // so the code keeps the UI font — its `tnum` feature already holds the digits to one width.
+    code = cardStyle(fontFamily, 11.5.sp, 15.sp, weight = 700, letterSpacing = 0.5.sp),
+    coverage = cardStyle(fontFamily, 10.5.sp, 14.sp, weight = 700),
+)
+
+private fun cardStyle(
+    fontFamily: FontFamily,
+    fontSize: TextUnit,
+    lineHeight: TextUnit,
+    weight: Int,
+    letterSpacing: TextUnit = 0.sp,
+) = TextStyle(
+    fontFamily = fontFamily,
+    fontFeatureSettings = DEFAULT_FONT_FEATURES,
+    fontWeight = FontWeight(weight),
+    fontSize = fontSize,
+    lineHeight = lineHeight,
+    letterSpacing = letterSpacing,
+)

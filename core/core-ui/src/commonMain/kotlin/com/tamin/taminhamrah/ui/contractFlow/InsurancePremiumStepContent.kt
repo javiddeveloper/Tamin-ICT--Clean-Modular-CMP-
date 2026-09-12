@@ -63,21 +63,27 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.contract_field_job
+import taminx.core.core_ui.contract_premium_annual_increase
 import taminx.core.core_ui.contract_premium_base_wage_label
 import taminx.core.core_ui.contract_premium_calculate_monthly
 import taminx.core.core_ui.contract_premium_decrease
+import taminx.core.core_ui.contract_premium_formula_hint
 import taminx.core.core_ui.contract_premium_increase
 import taminx.core.core_ui.contract_premium_monthly_salary
 import taminx.core.core_ui.contract_premium_payable_label
+import taminx.core.core_ui.contract_premium_range_hint
+import taminx.core.core_ui.contract_premium_rate_12_info
 import taminx.core.core_ui.contract_premium_rate_14_info
+import taminx.core.core_ui.contract_premium_rate_18_info
 import taminx.core.core_ui.contract_premium_rate_label
 import taminx.core.core_ui.contract_premium_rate_not_found
 import taminx.core.core_ui.contract_premium_rate_percent
+import taminx.core.core_ui.contract_premium_treatment_per_person
 import taminx.core.core_ui.ic_tamin_print
 import taminx.core.core_ui.unit_rial
 
-private const val RATE_14_PERCENT = "14"
 private const val PREMIUM_RATE_SINGLE_ROW_MAX = 4
+private const val PREMIUM_RATE_ADD_STEP = 10_000L
 
 @Composable
 private fun PremiumRateGrid(
@@ -141,6 +147,7 @@ fun InsurancePremiumStepContent(
     isCalculating: Boolean = false,
     isPremiumCalculated: Boolean = false,
     showPremiumSlider: Boolean = true,
+    showTreatmentCostHint: Boolean = false,
     onPremiumChange: (Long) -> Unit = {},
     onCalculate: () -> Unit = {},
     modifier: Modifier = Modifier,
@@ -187,6 +194,8 @@ fun InsurancePremiumStepContent(
                     )
                 }
 
+                PremiumRateBenefitHints()
+
                 PremiumRateLabel()
 
                 PremiumRateGrid(
@@ -195,17 +204,6 @@ fun InsurancePremiumStepContent(
                     isRateSelectionEnabled = isRateSelectionEnabled,
                     onRateSelected = onRateSelected,
                 )
-
-                AnimatedVisibility(
-                    visible = selectedRate?.insurancePercent == RATE_14_PERCENT,
-                    enter = fadeIn() + expandVertically(),
-                    exit = fadeOut() + shrinkVertically(),
-                ) {
-                    BannerCard(
-                        message = stringResource(Res.string.contract_premium_rate_14_info),
-                        type = BannerType.Info,
-                    )
-                }
 
                 if (showWageSection) {
                     if (wageLoading) {
@@ -217,6 +215,8 @@ fun InsurancePremiumStepContent(
                             calculatedMonthlySalary = calculatedMonthlySalary,
                             isCalculating = isCalculating,
                             isPremiumCalculated = isPremiumCalculated,
+                            selectedRatePercent = selectedRate?.insurancePercent,
+                            showTreatmentCostHint = showTreatmentCostHint,
                             onPremiumChange = onPremiumChange,
                             onCalculate = onCalculate,
                         )
@@ -224,6 +224,27 @@ fun InsurancePremiumStepContent(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun PremiumRateBenefitHints(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        BannerCard(
+            message = stringResource(Res.string.contract_premium_rate_12_info),
+            type = BannerType.Info,
+        )
+        BannerCard(
+            message = stringResource(Res.string.contract_premium_rate_14_info),
+            type = BannerType.Info,
+        )
+        BannerCard(
+            message = stringResource(Res.string.contract_premium_rate_18_info),
+            type = BannerType.Info,
+        )
     }
 }
 
@@ -298,6 +319,8 @@ private fun PremiumWageSection(
     calculatedMonthlySalary: Long?,
     isCalculating: Boolean,
     isPremiumCalculated: Boolean,
+    selectedRatePercent: String?,
+    showTreatmentCostHint: Boolean,
     onPremiumChange: (Long) -> Unit,
     onCalculate: () -> Unit,
     modifier: Modifier = Modifier,
@@ -305,14 +328,45 @@ private fun PremiumWageSection(
     val colors = LocalTaminColors.current
     val low = premiumRange.lowPremium
     val high = premiumRange.highPremium
-    val step = premiumRange.paymentTabayi.takeIf { it > 0L }
-        ?: ((high - low) / 100).coerceAtLeast(1L)
+    val step = PREMIUM_RATE_ADD_STEP
     val current = (selectedPremium ?: low).coerceIn(low, high)
+    val treatmentCost = premiumRange.paymentTabayi.takeIf { it > 0L }
 
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
+        BannerCard(
+            message = stringResource(
+                Res.string.contract_premium_range_hint,
+                low.toPriceFormat(),
+                high.toPriceFormat(),
+            ),
+            type = BannerType.Info,
+        )
+        if (!selectedRatePercent.isNullOrBlank()) {
+            BannerCard(
+                message = stringResource(
+                    Res.string.contract_premium_formula_hint,
+                    selectedRatePercent,
+                ),
+                type = BannerType.Info,
+            )
+        }
+        BannerCard(
+            message = stringResource(Res.string.contract_premium_annual_increase),
+            type = BannerType.Info,
+        )
+        if (showTreatmentCostHint && treatmentCost != null) {
+            BannerCard(
+                message = stringResource(
+                    Res.string.contract_premium_treatment_per_person,
+                    treatmentCost.toPriceFormat(),
+                ),
+                type = BannerType.Info,
+            )
+        }
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
