@@ -104,6 +104,35 @@ class WorkshopDebitViewModelTest {
         }
 
     /**
+     * A حقوقی workshop pays with its own national id, and the two fields that carry it (نوع شخصیت
+     * and کد ملی) arrive with the route rather than with the debt row — so nothing in the payment
+     * call itself would notice if they were lost on the way. The service refuses a legal-person
+     * request that arrives without them, so the trip `Open` -> ui state -> the request `pay()`
+     * builds is pinned here as well as at the mapper.
+     */
+    @Test
+    fun `a legal person workshop pays with its own national id`() = runTest(testDispatcher) {
+        repository.workshopDebits = debtsPage(count = 1, total = 1)
+        repository.paymentPreCheck = DebitPaymentPreCheckDN(allowed = true)
+        repository.paymentResult = DebitPaymentDN(succeeded = true, paymentTicket = TICKET)
+
+        val viewModel = viewModel()
+        viewModel.sendIntent(
+            WorkshopDebitIntent.Open(
+                workshopId = WORKSHOP_ID,
+                branchCode = BRANCH_CODE,
+                characterCode = LEGAL_CHARACTER,
+                legalNationalId = LEGAL_NATIONAL_ID,
+            )
+        )
+        viewModel.sendIntent(WorkshopDebitIntent.PayDebit(viewModel.uiState.value.list.items[0]))
+
+        val sent = assertNotNull(repository.lastPaymentRequest)
+        assertEquals(LEGAL_CHARACTER, sent.characterCode)
+        assertEquals(LEGAL_NATIONAL_ID, sent.legalNationalId)
+    }
+
+    /**
      * A debt whose agreement row the service reports as null/blank passes an empty agreementRow
      * in the domain request, which the data mapper drops before serializing to prevent
      * ProxyRuntimeException from the service.
@@ -367,6 +396,10 @@ class WorkshopDebitViewModelTest {
         const val RAW_DEBIT_NUMBER = "6310030089235"
         const val RAW_AGREEMENT_ROW = "09600002"
         const val TICKET = "ticket-9028218513"
+
+        /** `02` حقوقی, and the national id only a workshop of that character carries. */
+        const val LEGAL_CHARACTER = "02"
+        const val LEGAL_NATIONAL_ID = "10861847766"
         const val GATEWAY_REFUSAL = "تیکت پرداخت معتبر نیست."
         const val REFUSAL = "بدهی ارسالی معتبر نمی باشد."
         const val SERVER_FAILURE = "خطای سرور"

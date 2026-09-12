@@ -42,8 +42,9 @@ class GetDebitTurnoverPdfUseCase(private val repository: WorkShopsRepository) {
  *
  * Three calls, because the gateway is asked to confirm the ticket before anyone is sent to it:
  * pre-check, pay, then `payment/ticket/current-user/{ticket}` on TFH's own host. The old client
- * (`my-tamin-droid`, `WorkshopInfoViewModel.normalDebitPaymentPreview()`) made the same three, and
- * the address opened afterward is byte-for-byte the one built here.
+ * (`my-tamin-droid`, `WorkshopInfoViewModel.normalDebitPaymentPreview()`) made the same three; it
+ * then opened a browser on a URL it built itself, where the confirmed ticket is now handed to the
+ * app's own payment flow, which owns the gateway's address.
  *
  * One thing is deliberately not copied. That client ignored the confirmation's outcome — its
  * fragment read `if (result.isSuccess)` with no `else` — so a ticket the gateway would not honor
