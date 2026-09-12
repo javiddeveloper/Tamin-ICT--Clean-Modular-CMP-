@@ -160,6 +160,26 @@
     <string name="developer_options_service_account">سرویس احراز هویت</string>
     <string name="developer_options_service_health_profile">پرونده سلامت من</string>
     <string name="developer_options_service_ai">دستیار هوشمند</string>
+    <string name="debug_login_title">ورود دیباگ (Back-to-Back)</string>
+    <string name="developer_options_debug_login_entry">ورود دیباگ (Back-to-Back)</string>
+    <string name="developer_options_token_manager_entry">مدیریت توکن‌ها</string>
+    <string name="token_manager_title">مدیریت توکن‌ها</string>
+    <string name="token_manager_slot_user">توکن کاربر (ورود عادی)</string>
+    <string name="token_manager_slot_back_to_back">توکن Back-to-Back (دیباگ)</string>
+    <string name="token_manager_slot_agent">توکن دستیار هوشمند</string>
+    <string name="token_manager_active">فعال</string>
+    <string name="token_manager_activate">فعال‌سازی</string>
+    <string name="token_manager_refresh">رفرش</string>
+    <string name="token_manager_clear">حذف</string>
+    <string name="token_manager_empty">توکنی ذخیره نشده است</string>
+    <string name="token_manager_expired">%1$s دقیقه پیش منقضی شده</string>
+    <string name="token_manager_expires_in">%1$s دقیقه تا انقضا</string>
+    <string name="token_manager_expiry_unknown">زمان انقضا نامشخص</string>
+    <string name="token_manager_agent_hint">این توکن در بدنهٔ درخواست دستیار ارسال می‌شود، نه به‌عنوان توکن اصلی برنامه؛ برای همین قابل فعال‌سازی نیست.</string>
+    <string name="token_manager_back_to_back_hint">این نوع ورود refresh token ندارد؛ دکمهٔ رفرش یک توکن تازه با همان کلاینت می‌گیرد و توکن فعال را عوض نمی‌کند.</string>
+    <string name="debug_login_client_id_hint">Client ID</string>
+    <string name="debug_login_client_secret_hint">Client Secret</string>
+    <string name="debug_login_submit">ورود</string>
     <string name="action_save">ذخیره</string>
     <string name="label_inbox_inquiry_desc">این فرم جهت صدور مجوز استعلام (به اشتراک گذاری) اسناد یا اطلاعات موجود در صندوق شخصی شما تعبیه شده است.\nاطلاعاتی که توسط این فرم به اشتراک گذاشته می شوند از طریق لینک "پنل مخصوص دستگاههای دولتی و مرجع استعلامات رسمی" که در قسمت حاشیه انتهایی سایت (Footer) قرار دارد، توسط مراجع بیرونی قابل استعلام خواهد بود.\nامکان استعلام اسناد شما توسط سایرین فقط به واسطه ارائه کد ملی و رمز صادر شده در زمان به اشتراک گذاری امکان پذیر خواهد بود.\nشما در این فرم می توانید نسبت به صدور مجوز استعلام در خصوص یکی از موارد صندوق شخصی خود به مدت مشخص (شروع از تاریخ روز جاری) اقدام نمایید.\nبدیهی است پس از اتمام مدت تعیین شده مجوز استعلام بصورت اتوماتیک لغو خواهد شد.\nلازم به ذکر است در صورتی که مایل به لغو مجوز استعلام بصورت دستی هستید میتوانید از طریق دکمه "لغو مجوز استعلام" اقدام نمایید.</string>
 
@@ -1699,6 +1719,7 @@
     <string name="workshop_demand_doc_step">مرحله</string>
     <string name="workshop_demand_doc_state">وضعیت</string>
     <string name="workshop_demand_doc_calculation">مشاهده جزئیات محاسبه</string>
+    <string name="workshop_turnover_filename_format">workshop_turnover_%1$s.pdf</string>
 
     <!-- استعلام بدهی -->
     <string name="workshop_inquiry_result">وضعیت بدهی</string>
@@ -1781,6 +1802,10 @@
     <string name="obj_form_check_deposit">مبلغ بدهی را به‌صورت سپردهٔ بانکی پرداخت کرده‌ام.</string>
     <string name="obj_form_check_confirm">صحت اطلاعات و مدارک ارسالی را تأیید می‌کنم.</string>
     <string name="obj_form_submit">ثبت اعتراض</string>
+    <string name="obj_form_confirm_title">ثبت نهایی اعتراض</string>
+    <string name="obj_form_confirm_body">کارفرمای محترم مدارک و مستندات ارائه شده توسط شعبه بررسی و در صورت تایید آنها، اصلاح بدهی بدون حضور در جلسه هیات بدوی انجام میگردد. بدیهی است در صورت عدم کافی بودن مستندات یا عدم تایید آنها توسط شعبه حق اعتراض به بدهی و طرح آن در هیات بدوی محفوظ می‌باشد. لذا پس از بررسی‌های معمول، نتیجه ظرف مهلت یک هفته به جنابعالی اطلاع‌رسانی خواهد شد.
+
+نتیجه بررسی‌های معمول و وضعیت رسیدگی به بدهی مورد اعتراض کارفرما پس از ثبت و تایید نهایی از طریق منوی پیگیری وضعیت اعتراض و درخواست رسیدگی این سامانه قابل مشاهده خواهد بود.</string>
     <string name="obj_form_done_body">اعتراض شما با شمارهٔ پیگیری %1$s ثبت شد و به هیئت رسیدگی ارجاع گردید.</string>
 
     <!-- درخواست رسیدگی به بدهی ماده ۱۶ -->
@@ -1959,6 +1984,174 @@
     <string name="employer_info_value_missing">-</string>
     <string name="employer_info_err_otp_code">لطفاً کد اعتبارسنجی پنج‌رقمی را وارد کنید.</string>
 
+    <!-- برقراری مستمری بازنشستگی — Pension Inquiry / Retirement Request -->
+
+    <!-- ===== برقراری مستمری بازنشستگی (FeatureFlag.RETIREMENT_PENSION) ===== -->
+    <string name="retirement_pension_title">برقراری مستمری بازنشستگی</string>
+    <string name="retirement_pension_track_title">وضعیت درخواست بازنشستگی</string>
+
+    <!-- Intro -->
+    <string name="retirement_pension_insured_card_title">مشخصات بیمه‌شده</string>
+    <string name="retirement_pension_label_full_name">نام و نام خانوادگی</string>
+    <string name="retirement_pension_label_insurance_number">شمارهٔ بیمه</string>
+    <string name="retirement_pension_label_national_code">کد ملی</string>
+    <string name="retirement_pension_label_age">سن</string>
+    <string name="retirement_pension_age_value">%1$s سال و %2$s ماه</string>
+    <string name="retirement_pension_camera_permission_denied">دسترسی به دوربین داده نشد. از گالری تصاویر انتخاب کنید.</string>
+    <string name="retirement_pension_request_creation_failed">ثبت درخواست انجام نشد. لطفاً دوباره تلاش کنید.</string>
+    <string name="retirement_pension_label_branch">شعبهٔ رسیدگی</string>
+    <string name="retirement_pension_age_gate_passed">شرایط سنی برای ثبت درخواست احراز شد.</string>
+    <string name="retirement_pension_intro_steps_note">ثبت درخواست در ۸ مرحله انجام می‌شود: مقررات، احراز هویت پیامکی، اطلاعات هویتی، اطلاعات کارگاه، سوابق بیمه‌ای، مدارک هویتی، نامهٔ ترک کار و تأیید نهایی. پس از ثبت، بررسی درخواست در شعبه انجام و وضعیت آن در همین سرویس قابل پیگیری است.</string>
+    <string name="retirement_pension_track_request">پیگیری وضعیت درخواست</string>
+    <string name="retirement_pension_start_request">شروع ثبت درخواست</string>
+
+    <!-- Step titles and hints -->
+    <string name="retirement_pension_step_rules_title">مقررات و ضوابط</string>
+    <string name="retirement_pension_step_rules_hint">ضوابط برقراری مستمری بازنشستگی را ببینید و تعهدنامه را تأیید کنید.</string>
+    <string name="retirement_pension_step_authentication_title">احراز هویت</string>
+    <string name="retirement_pension_step_authentication_hint">کد ۶ رقمی پیامک‌شده را وارد کنید؛ با تکمیل کد، احراز هویت انجام می‌شود.</string>
+    <string name="retirement_pension_step_identity_title">اطلاعات هویتی</string>
+    <string name="retirement_pension_step_identity_hint">اطلاعات هویتی را بررسی و شمارهٔ تلفن ثابت و نشانی را تکمیل کنید.</string>
+    <string name="retirement_pension_step_workshop_title">اطلاعات کارگاه و شعبه</string>
+    <string name="retirement_pension_step_workshop_hint">مشخصات آخرین کارگاه محل اشتغال و شعبهٔ رسیدگی‌کننده را کامل کنید.</string>
+    <string name="retirement_pension_step_history_title">سوابق بیمه‌ای</string>
+    <string name="retirement_pension_step_identity_documents_title">مدارک هویتی</string>
+    <string name="retirement_pension_step_identity_documents_hint">تصویر صفحهٔ اول و صفحهٔ توضیحات شناسنامه را بارگذاری کنید.</string>
+    <string name="retirement_pension_step_quit_letter_title">نامهٔ ترک کار</string>
+    <string name="retirement_pension_step_quit_letter_hint">تصویر نامهٔ ترک کار صادرشده توسط کارفرما را بارگذاری کنید.</string>
+    <string name="retirement_pension_step_final_title">تأیید نهایی</string>
+    <string name="retirement_pension_step_final_hint">خلاصهٔ درخواست را ببینید و ثبت نهایی را انجام دهید.</string>
+
+    <!-- Step 1: rules -->
+    <string name="retirement_pension_rules_body">تأیید این مرحله به منزلهٔ مطالعه و پذیرش مقررات و ضوابط برقراری مستمری بازنشستگی می‌باشد.</string>
+    <string name="retirement_pension_rules_link">مشاهدهٔ ضوابط و مقررات</string>
+    <string name="retirement_pension_consent_label">اینجانب %1$s با آگاهی کامل و در صحت عقلی، شرایط و مقررات فوق را مطالعه کرده و خود را ملزم به رعایت آن می‌دانم.</string>
+
+    <!-- Step 2: SMS authentication -->
+    <string name="retirement_pension_otp_intro">کاربر گرامی، به منظور احراز هویت، کد ۶ رقمی را دریافت و در کادر مربوطه درج نمایید.</string>
+    <string name="retirement_pension_otp_request">دریافت کد احراز هویت</string>
+    <string name="retirement_pension_otp_sent">کد اعتبارسنجی از طریق پیامک برای شمارهٔ %1$s ارسال شد.</string>
+    <string name="retirement_pension_otp_resend_in">ارسال مجدد تا</string>
+    <string name="retirement_pension_otp_invalid">کد وارد شده اشتباه است.</string>
+    <string name="retirement_pension_otp_verified">احراز هویت با موفقیت انجام شد.</string>
+
+    <!-- Step 3: identity -->
+    <string name="retirement_pension_label_father_name">نام پدر</string>
+    <string name="retirement_pension_label_id_number">شمارهٔ شناسنامه</string>
+    <string name="retirement_pension_label_gender">جنسیت</string>
+    <string name="retirement_pension_label_birth_date">تاریخ تولد</string>
+    <string name="retirement_pension_label_issue_place">محل صدور</string>
+    <string name="retirement_pension_label_mobile">موبایل</string>
+    <string name="retirement_pension_field_phone">تلفن ثابت</string>
+    <string name="retirement_pension_field_phone_placeholder">۰۲۱۸۸۷۷۶۶۵۵</string>
+    <string name="retirement_pension_field_address">نشانی محل سکونت</string>
+    <string name="retirement_pension_field_address_placeholder">استان، شهر، خیابان، پلاک و کد پستی</string>
+    <string name="retirement_pension_identity_confirm">اطلاعات هویتی و تماس بالا را بررسی کردم و صحت آن را تأیید می‌کنم.</string>
+
+    <!-- Step 4: workshop and branch -->
+    <string name="retirement_pension_label_branch_name">شعبهٔ رسیدگی‌کننده</string>
+    <string name="retirement_pension_label_branch_code">کد شعبه</string>
+    <string name="retirement_pension_field_workshop_name">نام کارگاه</string>
+    <string name="retirement_pension_field_workshop_code">کد کارگاه</string>
+    <string name="retirement_pension_field_workshop_code_placeholder">۱۰ رقم</string>
+    <string name="retirement_pension_field_workshop_address">نشانی کارگاه</string>
+    <string name="retirement_pension_field_workshop_address_placeholder">نشانی کامل محل کارگاه</string>
+    <string name="retirement_pension_field_employer_name">نام کارفرما (اختیاری)</string>
+    <string name="retirement_pension_field_employer_name_placeholder">نام کارفرما</string>
+    <string name="retirement_pension_field_activity_type">نوع فعالیت (اختیاری)</string>
+    <string name="retirement_pension_field_activity_type_placeholder">مثلاً تولیدی</string>
+    <string name="retirement_pension_workshop_confirm">اطلاعات کارگاه و شعبهٔ بالا را بررسی کردم و صحت آن را تأیید می‌کنم.</string>
+
+    <!-- Step 5: insurance history -->
+    <string name="retirement_pension_average_wage">متوسط دستمزد مبنای محاسبه</string>
+    <string name="retirement_pension_estimated_pension">مستمری برآوردی ماهانه</string>
+    <string name="retirement_pension_history_card_title">سابقهٔ بیمه‌ای شما</string>
+    <string name="retirement_pension_history_unit_year">سال</string>
+    <string name="retirement_pension_history_unit_month">ماه</string>
+    <string name="retirement_pension_history_unit_day">روز</string>
+    <string name="retirement_pension_history_total_days_label">مجموع روزهای سابقه</string>
+    <string name="retirement_pension_history_total_days_value">%1$s روز</string>
+    <string name="retirement_pension_history_note">سابقه و مبلغ برآوردی مستمری را ببینید؛ در صورت مغایرت اعتراض ثبت کنید.</string>
+    <string name="retirement_pension_history_objection">ثبت اعتراض به سوابق</string>
+    <string name="retirement_pension_amount_rial">%1$s ریال</string>
+    <string name="retirement_pension_history_summary_value">%1$s سال و %2$s ماه</string>
+
+    <!-- Steps 6 and 7: documents -->
+    <string name="retirement_pension_identity_documents_note">هر دو مدرک زیر الزامی است. تصویر باید خوانا و کامل باشد.</string>
+    <string name="retirement_pension_document_id_first_page">صفحهٔ اول شناسنامه</string>
+    <string name="retirement_pension_document_id_first_page_hint">تصویر صفحهٔ اول شناسنامه؛ نام، نام خانوادگی و کد ملی خوانا باشد.</string>
+    <string name="retirement_pension_document_id_description_page">صفحهٔ توضیحات شناسنامه</string>
+    <string name="retirement_pension_document_id_description_page_hint">آخرین صفحهٔ شناسنامه (توضیحات)؛ اگر خالی است همان صفحهٔ خالی را بفرستید.</string>
+    <string name="retirement_pension_document_quit_letter">نامهٔ ترک کار</string>
+    <string name="retirement_pension_document_quit_letter_hint">انتخاب از دوربین یا گالری</string>
+    <string name="retirement_pension_quit_letter_note">تصویر نامهٔ ترک کار با مهر و امضای کارفرما، شامل تاریخ آخرین روز اشتغال. فقط یک فایل قابل بارگذاری است.</string>
+    <string name="retirement_pension_document_uploaded">بارگذاری شد · برای تغییر ضربه بزنید</string>
+    <string name="retirement_pension_document_uploading">در حال بارگذاری…</string>
+    <string name="retirement_pension_document_missing">لطفاً «%1$s» را بارگذاری کنید.</string>
+    <string name="retirement_pension_document_quit_letter_missing">لطفاً تصویر نامهٔ ترک کار را بارگذاری کنید.</string>
+
+    <!-- Step 8: final confirmation -->
+    <string name="retirement_pension_label_phone">تلفن ثابت</string>
+    <string name="retirement_pension_label_address">نشانی</string>
+    <string name="retirement_pension_label_workshop_name">نام کارگاه</string>
+    <string name="retirement_pension_label_workshop_code">کد کارگاه</string>
+    <string name="retirement_pension_label_history">سابقهٔ بیمه‌ای</string>
+    <string name="retirement_pension_final_note">پس از ثبت نهایی، اقدامات انجام‌شده و وضعیت صدور حکم بازنشستگی در همین سرویس قابل مشاهده است. صدور حکم از طریق پیامک نیز اطلاع‌رسانی خواهد شد.</string>
+    <string name="retirement_pension_final_confirm">صحت اطلاعات و مدارک بارگذاری‌شده را تأیید می‌کنم و درخواست برقراری مستمری بازنشستگی خود را ثبت می‌نمایم.</string>
+    <string name="retirement_pension_submit_final">ثبت نهایی درخواست</string>
+    <string name="retirement_pension_next_step">مرحلهٔ بعدی</string>
+    <string name="retirement_pension_value_placeholder">—</string>
+
+    <!-- Validation, shown only after the step's action is pressed -->
+    <string name="retirement_pension_error_consent">برای ادامه، مطالعه و پذیرش مقررات را تأیید کنید.</string>
+    <string name="retirement_pension_error_authentication">برای ادامه، احراز هویت پیامکی را کامل کنید.</string>
+    <string name="retirement_pension_error_phone_required">لطفاً شمارهٔ تلفن ثابت را وارد کنید.</string>
+    <string name="retirement_pension_error_phone_prefix">شمارهٔ تلفن ثابت باید با ۰ شروع شود.</string>
+    <string name="retirement_pension_error_phone_length">شمارهٔ تلفن ثابت باید حداقل ۱۱ رقم باشد.</string>
+    <string name="retirement_pension_error_address_required">لطفاً نشانی محل سکونت را وارد کنید.</string>
+    <string name="retirement_pension_error_address_short">نشانی واردشده کوتاه است؛ نشانی کامل را بنویسید.</string>
+    <string name="retirement_pension_error_address_invalid">آدرس شامل کاراکتر غیر مجاز است</string>
+    <string name="retirement_pension_error_identity_confirm">برای ادامه، صحت اطلاعات هویتی را تأیید کنید.</string>
+    <string name="retirement_pension_error_workshop_name">لطفاً نام کارگاه را وارد کنید.</string>
+    <string name="retirement_pension_error_workshop_code">کد کارگاه باید ۱۰ رقم باشد.</string>
+    <string name="retirement_pension_error_workshop_address">لطفاً نشانی کارگاه را کامل وارد کنید.</string>
+    <string name="retirement_pension_error_workshop_confirm">برای ادامه، صحت اطلاعات کارگاه را تأیید کنید.</string>
+    <string name="retirement_pension_error_identity_documents">بارگذاری هر دو مدرک هویتی الزامی است.</string>
+    <string name="retirement_pension_error_quit_letter">بارگذاری تصویر نامهٔ ترک کار الزامی است.</string>
+    <string name="retirement_pension_error_final_confirm">برای ثبت نهایی، تأیید صحت اطلاعات الزامی است.</string>
+
+    <!-- Dialogs -->
+    <string name="retirement_pension_dialog_rules_title">ضوابط و مقررات</string>
+    <string name="retirement_pension_dialog_rules_body">برقراری مستمری بازنشستگی مشمول شرایط سنی و سابقهٔ مقرر در قانون تأمین اجتماعی است. پس از ثبت درخواست، مدارک و سوابق شما در شعبه بررسی و در صورت احراز شرایط، حکم بازنشستگی صادر می‌شود. متن کامل مقررات در سامانهٔ قوانین و مقررات در دسترس است.</string>
+    <string name="retirement_pension_rules_unavailable">فایل ضوابط و مقررات هنوز در این نسخه متصل نشده است.</string>
+    <string name="retirement_pension_dialog_objection_title">اعتراض به سوابق</string>
+    <string name="retirement_pension_dialog_objection_body">برای ثبت اعتراض به سوابق، از بخش خدمات سرویس «اعتراض سابقه ناموجود» را انتخاب کنید. تا زمان رسیدگی به اعتراض، ادامهٔ ثبت درخواست بازنشستگی امکان‌پذیر است.</string>
+    <string name="retirement_pension_dialog_age_gate_title">انجام درخواست امکان‌پذیر نیست</string>
+    <string name="retirement_pension_dialog_age_gate_body">با توجه به شرایط سنی شما، ثبت درخواست بازنشستگی در حال حاضر امکان‌پذیر نیست.</string>
+    <string name="retirement_pension_dialog_done_title">درخواست شما ثبت شد</string>
+    <string name="retirement_pension_dialog_done_body">درخواست بازنشستگی شما ذخیره شده و جهت بررسی تکمیلی به شعبه ارسال گردید. پس از تأیید شعبه می‌توانید ادامهٔ درخواست را در همین سرویس دنبال کنید.</string>
+    <string name="retirement_pension_dialog_done_action">مشاهدهٔ وضعیت درخواست</string>
+    <string name="retirement_pension_dialog_understood">متوجه شدم</string>
+    <string name="retirement_pension_leave_title">رها کردن برقراری مستمری بازنشستگی؟</string>
+    <string name="retirement_pension_leave_body">اطلاعاتی که تا این مرحله در فرم برقراری مستمری بازنشستگی وارد کرده‌اید ذخیره نمی‌شود و در صورت خروج، باید درخواست را از ابتدا تکمیل کنید.</string>
+    <string name="retirement_pension_leave_stay">ادامهٔ تکمیل فرم</string>
+    <string name="retirement_pension_leave_confirm">رها می‌کنم</string>
+
+    <!-- Track screen -->
+    <string name="retirement_pension_track_code_label">کد رهگیری درخواست</string>
+    <string name="retirement_pension_track_status_branch_review">در حال بررسی شعبه</string>
+    <string name="retirement_pension_track_stages_title">مراحل رسیدگی</string>
+    <string name="retirement_pension_track_summary_title">خلاصهٔ اطلاعات ثبت‌شده</string>
+    <string name="retirement_pension_stage_current">مرحلهٔ جاری</string>
+    <string name="retirement_pension_stage_authentication">احراز هویت</string>
+    <string name="retirement_pension_stage_submit_info">ثبت اطلاعات</string>
+    <string name="retirement_pension_stage_upload_identity_documents">بارگذاری مدارک هویتی</string>
+    <string name="retirement_pension_stage_branch_review_needed">نیاز به رسیدگی شعبه</string>
+    <string name="retirement_pension_stage_branch_history_review">در حال بررسی شعبه - گام اعلام سابقه</string>
+    <string name="retirement_pension_stage_upload_quit_letter">بارگذاری نامهٔ ترک کار</string>
+    <string name="retirement_pension_stage_branch_quit_letter_review">بررسی شعبه - گام اعلام ترک کار</string>
+    <string name="retirement_pension_stage_issue_edict">صدور حکم</string>
+
 
     <!-- Request payment for illness days -->
     <string name="ill_days_title">غرامت دستمزد ایام بیماری</string>
@@ -2047,6 +2240,123 @@
     <string name="ill_days_submit_missing_data">اطلاعات لازم برای ثبت درخواست کامل نیست.</string>
     <string name="ill_days_submit_success_fallback">درخواست با موفقیت ثبت شد.</string>
 
+    <!-- ===================== Contract Affairs Screen ===================== -->
+    <string name="contract_affairs_title">امور قراردادها و پرداخت</string>
+    <string name="contract_affairs_subtitle">لیست قراردادهای بیمه‌شده با سازمان تأمین اجتماعی</string>
+    <string name="contract_affairs_search_title">جستجوی قرارداد</string>
+    <string name="contract_affairs_new_contract">انعقاد قرارداد جدید</string>
+    <string name="contract_affairs_count_label">قرارداد</string>
+    <string name="contract_affairs_empty_title">قراردادی یافت نشد</string>
+    <string name="contract_affairs_empty_subtitle">قراردادی برای شما ثبت نشده است</string>
+    <string name="contract_affairs_new_contract_sheet_title">نوع قرارداد را انتخاب کنید</string>
+    <string name="contract_affairs_new_contract_sheet_description">هر نوع قرارداد شرایط و نرخ حق بیمهٔ خودش را دارد؛ پس از انتخاب، فرم انعقاد همان قرارداد باز می‌شود</string>
+    <string name="contract_affairs_request_date">تاریخ درخواست</string>
+    <string name="contract_affairs_contract_code">شماره قرارداد</string>
+    <string name="contract_affairs_premium_rate">نرخ حق بیمه</string>
+    <string name="contract_affairs_monthly_wage">دستمزد ماهانه</string>
+    <string name="contract_affairs_treatment_support">حمایت درمان</string>
+    <string name="contract_affairs_job">شغل</string>
+    <string name="contract_affairs_treatment_has">دارد</string>
+    <string name="contract_affairs_treatment_none">ندارد</string>
+    <string name="contract_affairs_status_active">فعال</string>
+    <string name="contract_affairs_operations">امور قرارداد</string>
+    <string name="contract_affairs_pay_premium">پرداخت حق بیمه</string>
+    <string name="contract_affairs_view_contract">مشاهدهٔ قرارداد</string>
+    <string name="contract_affairs_deferred_debt">بدهی معوق %1$s دارید؛ این مبلغ به اولین پرداخت اضافه می‌شود.</string>
+    <string name="contract_affairs_search_subtitle">شمارهٔ قرارداد را وارد کنید یا نوع بیمه را انتخاب کنید؛ می‌توانید هر دو را با هم به کار ببرید.</string>
+    <string name="contract_affairs_search_number_label">شمارهٔ قرارداد</string>
+    <string name="contract_affairs_search_number_hint">مثلاً ۴۸۳۲۲۲۲۶۸۶</string>
+    <string name="contract_affairs_search_type_label">نوع بیمه</string>
+    <string name="contract_affairs_search_type_all">همهٔ قراردادها</string>
+    <string name="contract_affairs_search_type_freelance">حرف و مشاغل آزاد</string>
+    <string name="contract_affairs_search_type_optional">اختیاری</string>
+    <string name="contract_affairs_search_type_fraction">تکمیل سوابق کسری از ماه</string>
+    <string name="contract_affairs_search_submit">جستجو</string>
+    <string name="contract_affairs_search_clear">پاک کردن</string>
+    <string name="contract_affairs_search_empty_title">قراردادی پیدا نشد</string>
+    <string name="contract_affairs_search_empty_subtitle">قراردادی با مشخصات واردشده وجود ندارد. شماره یا نوع بیمه را تغییر دهید.</string>
+    <string name="contract_affairs_filter_label">فیلتر:</string>
+    <string name="contract_affairs_filter_clear">حذف فیلتر</string>
+    <string name="contract_affairs_filter_number">شماره</string>
+    <string name="contract_type_student_title">قرارداد بیمهٔ دانشجویی</string>
+    <string name="contract_type_student_desc">برای دانشجویان شاغل به تحصیل در دانشگاه‌های مورد تأیید</string>
+    <string name="contract_type_housewife_title">قرارداد بیمهٔ زنان خانه‌دار</string>
+    <string name="contract_type_housewife_desc">بانوان خانه‌دار و دختران مجرد بدون پوشش بیمهٔ اجباری</string>
+    <string name="contract_type_freelance_title">قرارداد صاحبان حرف و مشاغل آزاد</string>
+    <string name="contract_type_freelance_desc">شاغلان مشاغل آزاد با کد شغلی مشخص</string>
+    <string name="contract_type_optional_title">قرارداد بیمهٔ اختیاری</string>
+    <string name="contract_type_optional_desc">ادامهٔ بیمه با حداقل ۳۰ ماه سابقهٔ قبلی</string>
+    <string name="contract_affairs_operations_sheet_title">امور قرارداد %1$s</string>
+    <string name="contract_affairs_operations_pending_note">این قرارداد در انتظار بررسی است؛ تا تأیید نهایی، پرداخت و ویرایش آن ممکن نیست.</string>
+    <string name="contract_affairs_operations_fraction_note">پرداخت حق بیمهٔ قرارداد کسری از ماه تنها یک‌بار و در پایان فرم انعقاد انجام می‌شود.</string>
+    <string name="contract_affairs_view_payments">مشاهدهٔ پرداخت‌ها</string>
+    <string name="contract_affairs_edit_contract">ویرایش قرارداد</string>
+    <string name="contract_affairs_deactivate_contract">غیرفعال کردن قرارداد</string>
+    <string name="contract_affairs_report_filename_format">contract_report_%1$s.pdf</string>
+    <string name="contract_affairs_cancel_title">غیرفعال کردن قرارداد</string>
+    <string name="contract_affairs_cancel_subtitle">%1$s · شمارهٔ %2$s</string>
+    <string name="contract_affairs_cancel_warning">با غیرفعال شدن قرارداد، امکان پرداخت حق بیمه و برخورداری از حمایت‌های این قرارداد متوقف می‌شود.</string>
+    <string name="contract_affairs_cancel_insurance_type">نوع بیمه</string>
+    <string name="contract_affairs_cancel_reason_label">علت خاتمهٔ قرارداد</string>
+    <string name="contract_affairs_cancel_reason_placeholder">علت خاتمه را انتخاب کنید</string>
+    <string name="contract_affairs_cancel_reason_sheet_title">علت خاتمهٔ قرارداد</string>
+    <string name="contract_affairs_cancel_description_label">توضیحات</string>
+    <string name="contract_affairs_cancel_description_placeholder">در صورت نیاز توضیح خود را بنویسید</string>
+    <string name="contract_affairs_cancel_submit">غیرفعال کردن قرارداد</string>
+    <string name="contract_affairs_cancel_confirm_title">غیرفعال کردن قرارداد</string>
+    <string name="contract_affairs_cancel_confirm_message">قرارداد شمارهٔ %1$s غیرفعال شود؟ این اقدام قابل بازگشت نیست.</string>
+    <string name="contract_affairs_cancel_confirm_accept">غیرفعال کن</string>
+    <string name="contract_affairs_cancel_confirm_dismiss">انصراف</string>
+    <string name="contract_affairs_cancel_success_title">قرارداد غیرفعال شد</string>
+    <string name="contract_affairs_cancel_success_message">درخواست غیرفعال کردن قرارداد ثبت شد.</string>
+    <string name="contract_affairs_cancel_success_dismiss">متوجه شدم</string>
+    <string name="contract_payment_history_title">سوابق پرداخت</string>
+    <string name="contract_payment_history_number_prefix">شمارهٔ</string>
+    <string name="contract_payment_history_summary_total">جمع پرداخت‌های موفق</string>
+    <string name="contract_payment_history_summary_count_unit">برگ پرداخت</string>
+    <string name="contract_payment_history_payment_date">تاریخ پرداخت</string>
+    <string name="contract_payment_history_debt_number">شمارهٔ بدهی</string>
+    <string name="contract_payment_history_show_details">نمایش جزئیات</string>
+    <string name="contract_payment_history_hide_details">بستن</string>
+    <string name="contract_payment_history_collection_status">وضعیت وصول</string>
+    <string name="contract_payment_history_total_debt">مبلغ کل بدهی</string>
+    <string name="contract_payment_history_term_start">شروع دوره</string>
+    <string name="contract_payment_history_term_end">پایان دوره</string>
+    <string name="contract_payment_history_payment_deadline">مهلت پرداخت</string>
+    <string name="contract_payment_history_empty_title">سابقهٔ پرداختی نیست</string>
+    <string name="contract_payment_history_empty_subtitle">برای این قرارداد هنوز پرداختی ثبت نشده است</string>
+    <string name="contract_affair_cancel_reason">لطفاً علت خاتمهٔ قرارداد را انتخاب کنید</string>
+
+    <!-- ===================== Contract Premium Payment (پرداخت حق بیمه) ===================== -->
+    <string name="contract_premium_payment_title">پرداخت حق بیمه</string>
+    <string name="contract_premium_payment_paid_until">حق بیمهٔ شما تا تاریخ %1$s پرداخت شده است.</string>
+    <string name="contract_premium_payment_info_freelance">در این فرم حق بیمهٔ قرارداد صاحبان حرف و مشاغل آزاد شما محاسبه می‌شود.</string>
+    <string name="contract_premium_payment_info_optional">در این فرم حق بیمهٔ قرارداد بیمهٔ اختیاری شما محاسبه می‌شود.</string>
+    <string name="contract_premium_payment_info_deadline">مهلت پرداخت برای قرارداد اول حداکثر ۲۰ روز از تاریخ قرارداد و در پرداخت‌های بعدی حداکثر ۳ ماه و یک روز از تاریخ آخرین پرداخت است.</string>
+    <string name="contract_premium_payment_info_max_month">حداکثر مقدار ماه انتخابی برای پرداخت، تا پایان سال جاری است.</string>
+    <string name="contract_premium_payment_period_label">دورهٔ پرداخت (ماه)</string>
+    <string name="contract_premium_payment_calculate">محاسبهٔ حق بیمه</string>
+    <string name="contract_premium_payment_payable">قابل پرداخت</string>
+    <string name="contract_premium_payment_period_start">شروع دورهٔ پرداخت</string>
+    <string name="contract_premium_payment_period_end">پایان دورهٔ پرداخت</string>
+    <string name="contract_premium_payment_period_premium">حق بیمه دوره (%1$s ماه)</string>
+    <string name="contract_premium_payment_past_debt">بدهی گذشته</string>
+    <string name="contract_premium_payment_deadline">مهلت پرداخت</string>
+    <string name="contract_premium_payment_details_cta">جزئیات برگ پرداخت</string>
+
+    <string name="contract_payment_details_title">جزئیات برگ پرداخت</string>
+    <string name="contract_payment_details_subtitle">ریز محاسبهٔ %1$s ماه حق بیمه</string>
+    <string name="contract_payment_details_period">دورهٔ برگ پرداخت</string>
+    <string name="contract_payment_details_total">جمع کل</string>
+    <string name="contract_payment_details_month_unit">ماه</string>
+    <string name="contract_payment_details_day_unit">%1$s روز</string>
+    <string name="contract_payment_details_net">جمع</string>
+    <string name="contract_payment_details_base_wage">دستمزد مبنا</string>
+    <string name="contract_payment_details_rate">نرخ حق بیمه</string>
+    <string name="contract_payment_details_rate_value">%1$s درصد</string>
+    <string name="contract_payment_details_empty_title">جزئیاتی یافت نشد</string>
+    <string name="contract_payment_details_empty_subtitle">برای این دوره ریز محاسبه‌ای ثبت نشده است</string>
+
     <!-- Home campaigns carousel -->
     <string name="campaigns_title">کمپین‌ها</string>
     <string name="campaigns_swipe_hint">با کشیدن انگشت ببینید</string>
@@ -2124,6 +2434,11 @@
     <string name="contract_freelance_insurance_type">بیمه صاحبان حرف و مشاغل آزاد</string>
     <string name="contract_housewife_screen_title">انعقاد قرارداد بیمه زنان خانه‌دار</string>
     <string name="contract_housewife_insurance_type">بیمه زنان خانه‌دار</string>
+    <string name="contract_housewife_hero_reg_confirmed">مشخصات هویتی و شرایط شما برای این قرارداد تأیید شد.</string>
+    <string name="contract_housewife_eligibility_ok">متقاضی محترم، شما دارای شرایط لازم برای انعقاد قرارداد بیمه زنان خانه‌دار هستید.</string>
+    <string name="contract_housewife_check_no_active">قرارداد خودپردازی فعالی به نام شما ثبت نشده است.</string>
+    <string name="contract_housewife_check_no_compulsory">تحت پوشش بیمه اجباری دیگری نیستید.</string>
+    <string name="contract_housewife_info_rates_treatment">در ادامه نرخ حق بیمه را از میان ۱۲، ۱۴ و ۱۸ درصد انتخاب می‌کنید و بهره‌مندی از حمایت درمان نیز اختیاری است.</string>
     <string name="contract_optional_screen_title">انعقاد قرارداد بیمه اختیاری</string>
     <string name="contract_optional_insurance_type">بیمه اختیاری</string>
     <string name="contract_optional_fixed_rate_title">نرخ ثابت و قانونی حق بیمه</string>
@@ -2182,7 +2497,13 @@
     <string name="contract_step_salary">محاسبه حق بیمه</string>
     <string name="contract_premium_rate_label">نرخ حق بیمه ماهانه</string>
     <string name="contract_premium_rate_percent">%1$s درصد</string>
-    <string name="contract_premium_rate_14_info">با انتخاب نرخ ۱۴ درصد با داشتن حداقل ۱ سال سابقه بیمه‌پردازی از معاینات پزشکی معاف می‌باشید. این نرخ شامل حمایت بازنشستگی و فوت است.</string>
+    <string name="contract_premium_rate_12_info">با انتخاب نرخ ۱۲ درصد از معاینات پزشکی معاف می‌باشید.</string>
+    <string name="contract_premium_rate_14_info">با انتخاب نرخ ۱۴ درصد با داشتن حداقل ۱ سال سابقه بیمه‌پردازی از معاینات پزشکی معاف می‌باشید.</string>
+    <string name="contract_premium_rate_18_info">با انتخاب نرخ ۱۸ درصد، در صورتی که در ۱۰ سال قبل از انعقاد قرارداد حداقل ۱ سال و در ۱ سال قبل از انعقاد قرارداد حداقل ۹۰ روز سابقه بیمه‌پردازی داشته باشید، از معاینات پزشکی معاف می‌باشید.</string>
+    <string name="contract_premium_range_hint">شما می‌توانید مبلغ حق بیمه ماهانه در این قرارداد را از ماهانه %1$s ریال تا حداکثر %2$s ریال تعیین و پرداخت نمایید.</string>
+    <string name="contract_premium_formula_hint">دستمزد ماهیانه مبنای حق بیمه شما بر اساس میزان حق بیمه انتخابی با فرمول «حق بیمه ماهانه انتخابی × ۱۰۰ ÷ %1$s» محاسبه می‌شود.</string>
+    <string name="contract_premium_annual_increase">مبلغ حق بیمه انتخابی شما هر ساله متناسب با مصوبه شورای عالی کار (افزایش دستمزدها) به نسبت افزایش خواهد یافت.</string>
+    <string name="contract_premium_treatment_per_person">در صورت استفاده از حمایت درمان ماهانه مبلغ %1$s ریال به ازاء هر نفر محاسبه می‌گردد.</string>
     <string name="contract_premium_base_wage_label">دستمزد مبنای ماهانه</string>
     <string name="contract_premium_payable_label">حق بیمه ماهانه قابل پرداخت</string>
     <string name="contract_premium_decrease">کاهش دستمزد</string>
@@ -2294,13 +2615,80 @@
     <string name="contract_payment_dialog_dismiss">متوجه شدم</string>
     <string name="contract_submit_success_title">قرارداد شما ثبت شد</string>
     <string name="contract_submit_success_message">قرارداد شما در تاریخ %1$s ثبت شد. شما می‌توانید نسبت به پرداخت حق بیمه خود اقدام نمایید. در صورت عدم تمایل می‌توانید در زمان دیگری این کار را انجام دهید.</string>
+    <string name="contract_update_success_title">ویرایش قرارداد</string>
+    <string name="contract_update_success_message">ویرایش اطلاعات با موفقیت انجام شد.</string>
     <string name="contract_submit_failure_title">ثبت قرارداد با خطا مواجه شد</string>
     <string name="contract_submit_failure_message_fallback">ثبت قرارداد انجام نشد. لطفاً دوباره تلاش کنید.</string>
     <string name="contract_treatment_support_yes">حمایت درمان دارد</string>
     <string name="contract_treatment_support_no">حمایت درمان ندارد</string>
 
+    <!-- Shared payment flow (feature:payment) -->
+    <string name="payment_title">پرداخت</string>
+    <string name="payment_currency_unit">ریال</string>
+    <string name="payment_amount_label">مبلغ قابل پرداخت</string>
+    <string name="payment_settled_amount_label">مبلغ تراکنش</string>
+    <string name="payment_id_label">شناسه پرداخت</string>
+    <string name="payment_reason_label">بابت</string>
+    <string name="payment_remaining_time_label">مهلت پرداخت</string>
+    <string name="payment_payer_section_title">پرداخت‌کننده</string>
+    <string name="payment_payer_section_description">مشخص کنید این پرداخت به نام چه کسی ثبت شود.</string>
+    <string name="payment_payer_current_user">خودم</string>
+    <string name="payment_payer_other_person">شخص حقیقی دیگر</string>
+    <string name="payment_payer_legal_entity">شخص حقوقی</string>
+    <string name="payment_payer_foreign_national">اتباع خارجی</string>
+    <string name="payment_payer_national_code_label">کد ملی پرداخت‌کننده</string>
+    <string name="payment_payer_legal_id_label">شناسه ملی شخص حقوقی</string>
+    <string name="payment_payer_foreign_id_label">کد اتباع</string>
+    <string name="payment_payer_national_code_error">کد ملی وارد شده معتبر نیست.</string>
+    <string name="payment_payer_legal_id_error">شناسه ملی باید ۱۱ رقم باشد.</string>
+    <string name="payment_payer_foreign_id_error">کد اتباع باید بین ۱۰ تا ۱۶ رقم باشد.</string>
+    <string name="payment_pay_action">پرداخت</string>
+    <string name="payment_ticket_missing">اطلاعات این تراکنش در دسترس نیست.</string>
+    <string name="payment_not_payable">این تراکنش دیگر قابل پرداخت نیست.</string>
+    <string name="payment_link_failed">امکان اتصال به درگاه پرداخت وجود ندارد.</string>
+    <string name="payment_expired_message">مهلت پرداخت این تراکنش به پایان رسید. لطفاً دوباره تلاش کنید.</string>
+    <string name="payment_cancel_confirm_title">لغو پرداخت</string>
+    <string name="payment_cancel_confirm_message">با بازگشت از این صفحه، تراکنش لغو می‌شود. ادامه می‌دهید؟</string>
+    <string name="payment_cancel_confirm_accept">بله، لغو کن</string>
+    <string name="payment_cancel_confirm_reject">ادامه پرداخت</string>
+    <string name="payment_result_title">نتیجه پرداخت</string>
+    <string name="payment_result_pending">در حال بررسی نتیجه پرداخت…</string>
+    <string name="payment_result_success_title">پرداخت با موفقیت انجام شد</string>
+    <string name="payment_result_verifying_message">تراکنش شما انجام شده و تسویه نهایی آن نزد درگاه در حال بررسی است.</string>
+    <string name="payment_result_failed_title">پرداخت انجام نشد</string>
+    <string name="payment_result_failed_message">مبلغی از حساب شما کسر نشده است. می‌توانید دوباره تلاش کنید.</string>
+    <string name="payment_result_expired_title">مهلت پرداخت به پایان رسید</string>
+    <string name="payment_result_unconfirmed_title">پرداخت انجام شد اما تأیید نهایی ثبت نشد</string>
+    <string name="payment_result_unconfirmed_message">مبلغ از حساب شما کسر شده است. شماره پیگیری زیر را نزد خود نگه دارید و در صورت باقی ماندن بدهی با شعبه تماس بگیرید.</string>
+    <string name="payment_reference_number_label">شماره پیگیری</string>
+    <string name="payment_trace_number_label">شماره مرجع</string>
+    <string name="payment_result_check_again">بررسی مجدد</string>
+    <string name="payment_result_done">بازگشت</string>
+
+    <!-- Developer options: payment gateway mock -->
+    <string name="developer_options_service_tfh">درگاه پرداخت</string>
+    <string name="developer_options_payment_mock_title">شبیه‌سازی درگاه پرداخت</string>
+    <string name="developer_options_payment_mock_description">وقتی درگاه واقعی در دسترس نیست، کل فلوی پرداخت با پاسخ ساختگی اجرا می‌شود.</string>
+    <string name="developer_options_payment_mock_disabled">غیرفعال (درگاه واقعی)</string>
+    <string name="developer_options_payment_mock_success">پاسخ موفق</string>
+    <string name="developer_options_payment_mock_failure">پاسخ ناموفق</string>
+    <string name="developer_options_test_payment_entry">سناریوهای پرداخت آزمایشی</string>
+
+    <!-- Debug-only payment sandbox (feature:payment) -->
+    <string name="payment_sandbox_title">سناریوهای پرداخت</string>
+    <string name="payment_sandbox_description">هر مورد یک تیکت تازه می‌سازد و کل فلوی پرداخت را با درگاه شبیه‌سازی‌شده اجرا می‌کند. نتیجه (موفق یا ناموفق) از حالت انتخاب‌شده در بالای همین صفحه پیروی می‌کند.</string>
+    <string name="payment_sandbox_scenario_workshop_debt">بدهی کارگاه (پرداخت غیرحضوری)</string>
+    <string name="payment_sandbox_scenario_debt_installment">قسط بدهی کارفرما</string>
+    <string name="payment_sandbox_scenario_construction_premium">حق‌بیمه ساختمان</string>
+    <string name="payment_sandbox_scenario_construction_workers">حق‌بیمه کارگران ساختمانی</string>
+    <string name="payment_sandbox_scenario_freelance">بیمه مشاغل آزاد</string>
+    <string name="payment_sandbox_scenario_optional">بیمه اختیاری</string>
+    <string name="payment_sandbox_scenario_student">بیمه دانشجویی</string>
+    <string name="payment_sandbox_scenario_unconfirmed">پرداخت موفق، تأیید ناموفق سرویس</string>
     <string name="contract_hero_step_1_title">نام‌نویسی و احراز شرایط</string>
     <string name="contract_hero_step_1_desc">وضعیت نام‌نویسی و شرایط انعقاد قرارداد شما بررسی شد.</string>
+    <string name="contract_edit_info_step_title">اطلاعات قرارداد</string>
+    <string name="contract_edit_info_step_desc">شماره و نوع قرارداد را بررسی کنید، سپس ادامه دهید.</string>
     <string name="contract_hero_step_2_title">مقررات و ضوابط</string>
     <string name="contract_hero_step_2_desc">ضوابط قرارداد را مطالعه و تعهدنامه را تأیید کنید.</string>
     <string name="contract_hero_step_3_title">اطلاعات کاربر</string>
@@ -2325,7 +2713,9 @@
     <string name="contract_field_birth_date">تاریخ تولد</string>
     <string name="contract_field_contract_type">نوع قرارداد</string>
 
-    <string name="contract_terms_info_banner">تأیید این مرحله به منزلهٔ مطالعه و پذیرش مقررات و ضوابط انعقاد قرارداد می‌باشد.</string>
+    <string name="contract_terms_info_banner_prefix">تأیید این مرحله به منزلهٔ مطالعه و پذیرش </string>
+    <string name="contract_terms_info_banner_highlight">مقررات و ضوابط انعقاد قرارداد</string>
+    <string name="contract_terms_info_banner_suffix"> می‌باشد.</string>
     <string name="contract_terms_view_rules_btn">مشاهده ضوابط و مقررات</string>
     <string name="contract_terms_commitment_header">تعهدنامه</string>
     <string name="contract_terms_commitment_body_full">اینجانب %1$s با آگاهی کامل و در صحت عقلی، شرایط و مقررات فوق را مطالعه کرده و خود را در هنگام انعقاد قرارداد و در ادامهٔ بیمه‌پردازی ملزم به رعایت آن می‌دانم؛ در غیر اینصورت کلیهٔ تبعات و مسئولیت‌های آن متوجه اینجانب بوده و سازمان تأمین‌اجتماعی در این خصوص مسئولیتی نخواهد داشت.</string>
@@ -2337,6 +2727,7 @@
     <string name="contract_field_phone_required">شمارهٔ تلفن *</string>
     <string name="contract_field_mobile_readonly">تلفن همراه</string>
 
+    <string name="contract_rules_pdf_title">ضوابط و مقررات</string>
     <string name="contract_rules_sheet_title_student">مقررات و ضوابط انعقاد قرارداد بیمۀ دانشجویی</string>
     <string name="contract_rules_sheet_title_freelance">مقررات و ضوابط انعقاد قرارداد بیمه صاحبان حرف و مشاغل آزاد</string>
     <string name="contract_rules_sheet_title_housewife">مقررات و ضوابط انعقاد قرارداد بیمۀ زنان خانه‌دار</string>
@@ -2384,4 +2775,65 @@
     <string name="contract_rules_sheet_optional_section2_item3">۳. شرایط معافیت از معاینات پزشکی بر اساس سابقهٔ بیمه‌پردازی و مقررات جاری سازمان اعمال می‌شود.</string>
     <string name="contract_rules_sheet_understood">متوجه شدم</string>
     <string name="contract_next_step">مرحلهٔ بعدی</string>
+    <!-- پیگیری وضعیت اعتراض به بدهی -->
+    <string name="objection_status_title">پیگیری وضعیت اعتراض به بدهی</string>
+    <string name="objection_status_subtitle">وضعیت اعتراض‌های ثبت‌شدهٔ شما</string>
+    <string name="objection_status_search">جستجو</string>
+    <string name="objection_status_search_field">جستجوی اعتراض</string>
+    <string name="objection_status_search_title">جستجو در اعتراض‌ها</string>
+    <string name="objection_status_stat_count">اعتراض</string>
+    <string name="objection_status_identity_national_id">کد ملی</string>
+    <string name="objection_status_identity_name">نام و نام خانوادگی</string>
+    <string name="objection_status_objection_number">شمارهٔ اعتراض</string>
+    <string name="objection_status_workshop_id">کد کارگاه</string>
+    <string name="objection_status_debit_number">شمارهٔ بدهی</string>
+    <string name="objection_status_objection_date">تاریخ اعتراض</string>
+    <string name="objection_status_description">شرح اعتراض</string>
+    <string name="objection_status_vote_type">نوع رای</string>
+    <string name="objection_status_field_type">نوع درخواست</string>
+    <string name="objection_status_field_optional">اختیاری</string>
+    <string name="objection_status_clear_filters">حذف فیلتر</string>
+    <string name="objection_status_remove_filters">حذف</string>
+    <string name="objection_status_filter_chip">فیلتر</string>
+    <string name="objection_status_applied_filter_workshop_id">کد کارگاه %1$s</string>
+    <string name="objection_status_applied_filter_objection_number">شمارهٔ اعتراض %1$s</string>
+    <string name="objection_status_applied_filter_debit_number">شمارهٔ بدهی %1$s</string>
+    <string name="objection_status_empty_title">اعتراضی با این مشخصات یافت نشد</string>
+    <string name="objection_status_empty_message">فیلتر را حذف کنید یا شمارهٔ دیگری را جستجو کنید.</string>
+    <string name="objection_status_action_document">سند اعتراض</string>
+    <string name="objection_status_action_document_article16">گزارش کمیتهٔ رسیدگی</string>
+    <string name="objection_status_action_no_document">سند در دسترس نیست</string>
+    <string name="objection_status_action_sms">پیامک‌ها</string>
+    <string name="objection_state_submitted">ثبت درخواست</string>
+    <string name="objection_state_calculation_review">بازنگری محاسبات</string>
+    <string name="objection_state_board_review">طرح در هیئت</string>
+    <string name="objection_state_recalculated">تجدید محاسبه شده</string>
+    <string name="objection_state_time_allocated">تخصیص زمان</string>
+    <string name="objection_state_approved">تایید رای</string>
+    <string name="objection_state_unknown">نامشخص</string>
+    <string name="objection_type_estimate">اعتراض به بدهی برآوردی</string>
+    <string name="objection_type_primary_vote">اعتراض به رای هیئت بدوی</string>
+    <string name="objection_type_article_sixteen">درخواست رسیدگی به بدهی قطعی (مادهٔ ۱۶)</string>
+    <string name="objection_type_unknown">نوع نامشخص</string>
+
+    <string name="objection_sms_title">پیامک‌ها</string>
+    <string name="objection_sms_section_title">پیامک‌های ارسال‌شده</string>
+    <string name="objection_sms_order_oldest_first">از قدیمی‌ترین به جدیدترین</string>
+    <string name="objection_sms_empty">پیامکی برای این اعتراض ارسال نشده است</string>
+
+    <string name="objection_document_title">سند اعتراض</string>
+    <string name="objection_document_title_article16">گزارش کمیتهٔ رسیدگی</string>
+    <string name="objection_document_subtitle_default">PDF</string>
+    <string name="objection_document_subtitle_article16">PDF</string>
+    <string name="objection_document_file_size">PDF · %1$d کیلوبایت</string>
+    <string name="objection_document_objection_number">شمارهٔ اعتراض</string>
+    <string name="objection_document_debit_number">شمارهٔ بدهی</string>
+    <string name="objection_document_objection_date">تاریخ اعتراض</string>
+    <string name="objection_document_download_button">دریافت فایل</string>
+    <string name="objection_document_downloaded_title">فایل دریافت شد</string>
+    <string name="objection_document_downloaded_desc">سند در پوشهٔ دانلودهای دستگاه شما ذخیره شد.</string>
+    <string name="objection_document_no_document_title">سندی برای نمایش نیست</string>
+    <string name="objection_document_no_document_desc">برای این نوع درخواست، سندی در سامانه بارگذاری نشده است. برای پیگیری با شعبهٔ مربوطه تماس بگیرید.</string>
+    <string name="objection_document_got_it">متوجه شدم</string>
+
 </resources>

@@ -1,44 +1,50 @@
 package com.tamin.taminhamrah.feature.taminServices.inspection
 
-import com.tamin.taminhamrah.model.inspection.BranchListDN
-import com.tamin.taminhamrah.model.inspection.InspectionPerformedListDN
-import com.tamin.taminhamrah.model.inspection.JobListDN
+import com.tamin.taminhamrah.model.inspection.BranchDN
+import com.tamin.taminhamrah.model.inspection.InspectionPerformedDN
+import com.tamin.taminhamrah.model.inspection.JobDN
 import com.tamin.taminhamrah.model.inspection.SubmitInspectionRequestDN
 import com.tamin.taminhamrah.model.inspection.SubmitInspectionRequestResultDN
+import com.tamin.taminhamrah.model.paging.PageDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
-import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.inspection.InspectionRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 class FakeInspectionRepository : InspectionRepository {
-    var allInsuranceResult: InspectionPerformedListDN = InspectionPerformedListDN(total = 0, list = emptyList())
-    var branchesResult: BranchListDN = BranchListDN(total = 0, list = emptyList())
-    var jobsResult: JobListDN = JobListDN(total = 0, list = emptyList())
+    var insurancePageResult: List<InspectionPerformedDN> = emptyList()
+    var insurancePageTotal: Int? = null
+    var branchPageResult: List<BranchDN> = emptyList()
+    var branchPageTotal: Int? = null
+    var jobPageResult: List<JobDN> = emptyList()
+    var jobPageTotal: Int? = null
     var submitResult: SubmitInspectionRequestResultDN = SubmitInspectionRequestResultDN(id = null)
     var reportPdfResult: PdfDownloadDN = PdfDownloadDN(pdf = null)
 
     var shouldThrowError = false
-    var lastAllInsuranceFilters: List<ApiFilterDN>? = null
-    var lastBranchesFilters: List<ApiFilterDN>? = null
-    var lastJobsFilters: List<ApiFilterDN>? = null
+    var lastInsuranceQuery: ApiQueryParamDN? = null
+    var lastBranchQuery: ApiQueryParamDN? = null
+    var lastJobQuery: ApiQueryParamDN? = null
     var lastSubmitRequest: SubmitInspectionRequestDN? = null
     var lastReportPdfInspectionNo: String? = null
 
-    override suspend fun getAllInsurance(filters: List<ApiFilterDN>): InspectionPerformedListDN {
+    override fun getInsurancePage(query: ApiQueryParamDN): Flow<PageDN<InspectionPerformedDN>> = flow {
         if (shouldThrowError) throw RuntimeException("Error")
-        lastAllInsuranceFilters = filters
-        return allInsuranceResult
+        lastInsuranceQuery = query
+        emit(PageDN(items = insurancePageResult, total = insurancePageTotal))
     }
 
-    override suspend fun getBranches(filters: List<ApiFilterDN>): BranchListDN {
+    override fun getBranchesPage(query: ApiQueryParamDN): Flow<PageDN<BranchDN>> = flow {
         if (shouldThrowError) throw RuntimeException("Error")
-        lastBranchesFilters = filters
-        return branchesResult
+        lastBranchQuery = query
+        emit(PageDN(items = branchPageResult, total = branchPageTotal))
     }
 
-    override suspend fun getJobs(filters: List<ApiFilterDN>): JobListDN {
+    override fun getJobsPage(query: ApiQueryParamDN): Flow<PageDN<JobDN>> = flow {
         if (shouldThrowError) throw RuntimeException("Error")
-        lastJobsFilters = filters
-        return jobsResult
+        lastJobQuery = query
+        emit(PageDN(items = jobPageResult, total = jobPageTotal))
     }
 
     override suspend fun submitInspectionRequest(request: SubmitInspectionRequestDN): SubmitInspectionRequestResultDN {

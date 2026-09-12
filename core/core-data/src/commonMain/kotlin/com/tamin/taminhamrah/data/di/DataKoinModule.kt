@@ -13,6 +13,7 @@ import com.tamin.taminhamrah.data.repository.HistoryRepositoryImpl
 import com.tamin.taminhamrah.data.repository.calculateWagePension.CalculateWagePensionRepositoryImpl
 import com.tamin.taminhamrah.data.repository.VersionHistoryRepositoryImpl
 import com.tamin.taminhamrah.data.repository.contract.ContractsRepositoryImpl
+import com.tamin.taminhamrah.data.repository.contractAffair.ContractAffairRepositoryImpl
 import com.tamin.taminhamrah.data.repository.pension.PensionRepositoryImpl
 import com.tamin.taminhamrah.data.repository.userRequests.UserRequestRepositoryImpl
 import com.tamin.taminhamrah.data.repository.orotezProtez.OrotezProtezRepositoryImpl
@@ -30,6 +31,7 @@ import com.tamin.taminhamrah.repository.personalInbox.PersonalInboxRepository
 import com.tamin.taminhamrah.repository.HistoryRepository
 import com.tamin.taminhamrah.repository.calculateWagePension.CalculateWagePensionRepository
 import com.tamin.taminhamrah.repository.contracts.ContractsRepository
+import com.tamin.taminhamrah.repository.contractAffair.ContractAffairRepository
 import com.tamin.taminhamrah.repository.pension.PensionRepository
 import com.tamin.taminhamrah.repository.userRequest.UserRequestRepository
 import com.tamin.taminhamrah.repository.orotezProtez.OrotezProtezRepository
@@ -44,6 +46,10 @@ import com.tamin.taminhamrah.data.repository.ContactUsRepositoryImpl
 import com.tamin.taminhamrah.repository.ContactUsRepository
 import com.tamin.taminhamrah.data.repository.health.HealthRepositoryImpl
 import com.tamin.taminhamrah.data.repository.addDependent.AddDependentRepositoryImpl
+import com.tamin.taminhamrah.data.repository.payment.PaymentGatewayRepositoryImpl
+import com.tamin.taminhamrah.repository.payment.PaymentGatewayRepository
+import com.tamin.taminhamrah.repository.payment.PaymentReturnNotifier
+import com.tamin.taminhamrah.repository.payment.PaymentReturnNotifierImpl
 import com.tamin.taminhamrah.data.repository.WorkShopsRepositoryImpl
 import com.tamin.taminhamrah.repository.WorkShopsRepository
 import com.tamin.taminhamrah.data.repository.InspectionRepositoryImpl
@@ -73,10 +79,13 @@ val dataKoinModule = module {
     singleOf(::CommonRepositoryImpl) { bind<CommonRepository>() }
     singleOf(::AgentChatCacheRepositoryImpl) { bind<AgentChatCacheRepository>() }
     singleOf(::WorkShopsRepositoryImpl) { bind<WorkShopsRepository>() }
+    singleOf(::PaymentGatewayRepositoryImpl) { bind<PaymentGatewayRepository>() }
+    singleOf(::PaymentReturnNotifierImpl) { bind<PaymentReturnNotifier>() }
     singleOf(::PersonalInboxRepositoryImpl) { bind<PersonalInboxRepository>() }
     singleOf(::UserRequestRepositoryImpl) { bind<UserRequestRepository>() }
     singleOf(::PersonalRepositoryImpl) { bind<PersonalRepository>() }
     singleOf(::ContractsRepositoryImpl) { bind<ContractsRepository>() }
+    singleOf(::ContractAffairRepositoryImpl) { bind<ContractAffairRepository>() }
     singleOf(::HealthRepositoryImpl) { bind<HealthRepository>() }
     singleOf(::AddDependentRepositoryImpl) { bind<AddDependentRepository>() }
     singleOf(::VersionHistoryRepositoryImpl) { bind<VersionHistoryRepository>() }

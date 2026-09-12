@@ -4,6 +4,8 @@ import com.tamin.taminhamrah.model.pension.EdictPensionerDTO
 import com.tamin.taminhamrah.model.pension.PensionIdDTO
 import com.tamin.taminhamrah.model.pension.PensionInquiryDTO
 import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDTO
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestCreatedDTO
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestFormDTO
 import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDTO
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
@@ -37,6 +39,11 @@ interface PensionRemoteDataSource {
     suspend fun getAuthenticationCode(): AuthenticationTicketDTO
 
     suspend fun getRetirementRequestInfo(filter: List<ApiFilterDN>) :ListData<RetirementRequestDTO>
+    suspend fun createRetirementRequest(
+        authenticationsCode: Long,
+        form: RetirementRequestFormDTO
+    ): RetirementRequestCreatedDTO
+
     suspend fun checkRetirementStatus(): RetirementStatusDTO
     suspend fun getDisabilityPersonalInfo(): DisabilityPersonalInfoDTO
     suspend fun sendRequestInquirePensionCertificate(filter: List<ApiFilterDN>) : String?

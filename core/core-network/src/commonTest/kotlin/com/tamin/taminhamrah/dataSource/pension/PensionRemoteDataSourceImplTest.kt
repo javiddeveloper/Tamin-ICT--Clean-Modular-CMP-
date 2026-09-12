@@ -10,6 +10,8 @@ import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequest
 import com.tamin.taminhamrah.model.pension.retirement.RetirementPersonalDTO
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestCreatedDTO
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestFormDTO
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDTO
 import com.tamin.taminhamrah.model.pension.sendRetirementDocument.RetirementSaveDocumentRequest
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
@@ -157,7 +159,7 @@ private class FakePensionApiService(
         )
     }
 
-    override suspend fun sendPayRollToInbox(filter: String): BaseDTO<JsonElement?>? {
+    override suspend fun sendPayRollToInbox(filter: String): BaseDTO<JsonElement?> {
         if (shouldThrow) throw IllegalStateException("network")
         return success(JsonPrimitive("عملیات با موفقیت انجام شد"))
     }
@@ -169,6 +171,12 @@ private class FakePensionApiService(
         error("not used in PensionRemoteDataSourceImplTest")
 
     override suspend fun authenticationAndGetPersonalInfo(authenticationsCode: Long): BaseDTO<RetirementPersonalDTO> =
+        error("not used in PensionRemoteDataSourceImplTest")
+
+    override suspend fun createRetirementRequest(
+        authenticationsCode: Long,
+        body: RetirementRequestFormDTO
+    ): BaseDTO<RetirementRequestCreatedDTO> =
         error("not used in PensionRemoteDataSourceImplTest")
 
     override suspend fun checkRetirementStatus(): BaseDTO<RetirementStatusDTO> =

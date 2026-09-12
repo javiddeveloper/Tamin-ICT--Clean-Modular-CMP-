@@ -14,6 +14,13 @@ import androidx.compose.runtime.Immutable
 data class WorkshopPR(
     val workshopId: String = "",
     val branchCode: String = "",
+    /**
+     * `01` حقیقی / `02` حقوقی, raw. Travels to the payment call as `nationalType`, so it is the
+     * code and not [employerType], which is the same fact worded for a label.
+     */
+    val characterCode: String = "",
+    /** The حقوقی workshop's national id, raw; blank for a حقیقی one. Sent as `nationalId`. */
+    val legalNationalId: String = "",
     val hasIdentity: Boolean = false,
     val name: String = "",
     /** [workshopId] as the card prints it. */

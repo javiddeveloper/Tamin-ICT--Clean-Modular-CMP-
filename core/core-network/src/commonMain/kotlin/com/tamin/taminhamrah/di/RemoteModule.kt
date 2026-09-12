@@ -12,6 +12,11 @@ import com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSourc
 import com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSource
 import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSourceFakeImpl
+import com.tamin.taminhamrah.dataSource.paymentSource.FakePaymentGatewayRemoteDataSource
+import com.tamin.taminhamrah.dataSource.paymentSource.PaymentGatewayRemoteDataSource
+import com.tamin.taminhamrah.dataSource.paymentSource.PaymentGatewayRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.paymentSource.PaymentGatewayRemoteDataSourceSelector
+import com.tamin.taminhamrah.repository.DeveloperOptionsRepository
 import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSource
 import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.calculateWagePension.CalculateWagePensionRemoteDataSource
@@ -20,6 +25,8 @@ import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSource
 import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSource
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.contractAffair.ContractAffairRemoteDataSource
+import com.tamin.taminhamrah.dataSource.contractAffair.ContractAffairRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.employerInfo.EmployerInfoRemoteDataSource
 import com.tamin.taminhamrah.dataSource.employerInfo.EmployerInfoRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.historyObjection.HistoryObjectionRemoteDataSource
@@ -121,7 +128,8 @@ val remoteModule = module {
         WorkShopsRemoteDataSourceImpl(
             apiService = get(),
             queryBuilder = get(),
-            errorParser = get()
+            errorParser = get(),
+            developerOptionsRepository = get()
         )
     }
 
@@ -190,6 +198,14 @@ val remoteModule = module {
     single<ContractsRemoteDataSource> {
         ContractsRemoteDataSourceImpl(
             contractsApiService = get(named("contractsApiService")),
+            apiQueryBuilder = get(),
+            errorParser = get()
+        )
+    }
+
+    single<ContractAffairRemoteDataSource> {
+        ContractAffairRemoteDataSourceImpl(
+            contractAffairApiService = get(named("contractAffairApiService")),
             apiQueryBuilder = get(),
             errorParser = get()
         )
@@ -278,6 +294,26 @@ val remoteModule = module {
         InquiryEducationRemoteDataSourceImpl(
             inquiryEducationApiService = get(),
             errorParser = get()
+        )
+    }
+
+    /**
+     * The payment gateway, wrapped so Developer Options can put a fake in front of it.
+     *
+     * Both fakes are built eagerly and cost nothing until a mode selects one; building them here
+     * rather than inside the selector keeps the selector free of construction logic and makes the
+     * two mock behaviours visible in the module, which is where a developer looks for them.
+     * The selector answers with the real gateway in release builds regardless of what is stored.
+     */
+    single<PaymentGatewayRemoteDataSource> {
+        PaymentGatewayRemoteDataSourceSelector(
+            real = PaymentGatewayRemoteDataSourceImpl(
+                apiService = get(),
+                errorParser = get()
+            ),
+            successFake = FakePaymentGatewayRemoteDataSource(succeeds = true),
+            failureFake = FakePaymentGatewayRemoteDataSource(succeeds = false),
+            developerOptionsRepository = get<DeveloperOptionsRepository>()
         )
     }
 }

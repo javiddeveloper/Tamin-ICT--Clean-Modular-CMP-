@@ -242,7 +242,7 @@ class CompleteEmployerInfoViewModel(
             source = getBranchesUseCase(city.cityCode),
             loading = CompleteEmployerInfoPartialState::BranchesLoading,
             onSuccess = {
-                CompleteEmployerInfoPartialState.BranchesLoaded(it.toBranchPresentation().toImmutableList())
+                CompleteEmployerInfoPartialState.BranchesLoaded(it.items.toBranchPresentation().toImmutableList())
             },
             onFailure = { CompleteEmployerInfoPartialState.BranchesLoaded(persistentListOf()) },
         )

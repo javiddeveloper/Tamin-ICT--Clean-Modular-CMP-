@@ -22,13 +22,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.LinearGradientShader
+import androidx.compose.ui.graphics.Shader
+import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -48,6 +54,11 @@ import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
+import kotlin.math.PI
+import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.jvm.JvmName
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
@@ -78,6 +89,68 @@ fun startToEndGradient(colors: List<Color>): Brush {
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     return Brush.horizontalGradient(if (isRtl) colors.reversed() else colors)
 }
+
+/**
+ * A CSS `linear-gradient(<angle>deg, …)` as a Compose [Brush].
+ *
+ * CSS measures the angle from "to top", turning clockwise, and runs the gradient along a line
+ * through the box center whose length is `|W·sin a| + |H·cos a|` — long enough that the first and
+ * last stops land exactly on the corners. `Brush.linearGradient` takes two fixed points instead,
+ * which cannot be resolved until the box is measured, so this is a [ShaderBrush]: it is handed the
+ * real size at paint time and reconstructs the line from it.
+ *
+ * That matters for the app's heroes and cards. Every gradient in the design is angled — the hero
+ * bars are `160deg`, near vertical, and the insurance cards are `120deg` — so painting them with
+ * [Brush.horizontalGradient] puts the dark stop on an edge instead of at the top, and the whole
+ * surface reads as the wrong color even though both stops are right.
+ *
+ * Deliberately *not* direction-aware: a CSS angle is a physical direction, and the design's own
+ * right-to-left pages use these same angles unmirrored.
+ */
+// Both overloads erase to (Float, List) on the JVM, so the explicit-stops one is renamed
+// there. Kotlin call sites — every one of them — still see one overloaded name.
+@JvmName("cssAngleGradientStops")
+fun cssAngleGradient(angleDeg: Float, colorStops: List<Pair<Float, Color>>): Brush =
+    CssAngleGradient(angleDeg, colorStops)
+
+/**
+ * A [data class][CssAngleGradient], not an anonymous [ShaderBrush], so two brushes built from the
+ * same angle and stops compare equal.
+ *
+ * These are rebuilt on every composition — the stops come from [LocalTaminColors] — and land on a
+ * `background` parameter. An anonymous object compares by identity, so every one of those would
+ * read as a changed argument and recompose the card or bar it paints, once per frame while the
+ * carousel is being swiped. `Brush.linearGradient` returns an `@Immutable` value for the same
+ * reason; this keeps that property.
+ */
+@Immutable
+private data class CssAngleGradient(
+    private val angleDeg: Float,
+    private val colorStops: List<Pair<Float, Color>>,
+) : ShaderBrush() {
+    override fun createShader(size: Size): Shader {
+        val radians = angleDeg * (PI.toFloat() / 180f)
+        val dx = sin(radians)
+        val dy = -cos(radians)
+        val half = (abs(size.width * dx) + abs(size.height * dy)) / 2f
+        val centreX = size.width / 2f
+        val centreY = size.height / 2f
+        return LinearGradientShader(
+            from = Offset(centreX - half * dx, centreY - half * dy),
+            to = Offset(centreX + half * dx, centreY + half * dy),
+            colors = colorStops.map { it.second },
+            colorStops = colorStops.map { it.first },
+        )
+    }
+}
+
+/** [cssAngleGradient] for stops spread evenly, the common case. */
+fun cssAngleGradient(angleDeg: Float, colors: List<Color>): Brush = cssAngleGradient(
+    angleDeg = angleDeg,
+    colorStops = colors.mapIndexed { index, color ->
+        index / (colors.size - 1).coerceAtLeast(1).toFloat() to color
+    },
+)
 
 /**
  * A CSS `linear-gradient(<angle>deg, …)` as a [Brush], for a box of [width] by [height] pixels.

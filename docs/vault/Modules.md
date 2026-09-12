@@ -61,6 +61,7 @@ Colors, spacing, radius: [[Theme]] — never hardcode `Color`, `.dp`, or UI copy
 | `:feature:girlSurvivor` | `feature/girlSurvivor` | `…feature.girlSurvivor` |
 | `:feature:pensionSurvivor` | `feature/pensionSurvivor` | `…feature.pensionSurvivor` |
 | `:feature:stories` | `feature/stories` | `…feature.stories` — «تازه‌ها» rail + story viewer, [[Stories]] |
+| `:feature:payment` | `feature/payment` | `…feature.payment` — the shared payment flow, see [[Payments]] |
 
 ### Layout of a feature module
 

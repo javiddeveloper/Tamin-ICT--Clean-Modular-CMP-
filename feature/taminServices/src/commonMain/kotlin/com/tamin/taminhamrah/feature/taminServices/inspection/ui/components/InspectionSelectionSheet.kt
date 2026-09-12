@@ -11,15 +11,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,9 +35,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.components.CustomSearchBar
 import com.tamin.taminhamrah.ui.components.TaminText
+import com.tamin.taminhamrah.ui.paging.OnLoadMore
+import com.tamin.taminhamrah.ui.paging.PagingFooter
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.inspection_request_selection_empty
@@ -45,12 +52,15 @@ data class InspectionSelectionOption(
     val title: String,
 )
 
+private const val SEARCH_DEBOUNCE_MS = 300L
+private const val SELECTION_FOOTER_KEY = "selection_paging_footer"
+
 /**
  * Single-select, searchable bottom sheet for the request wizard's code/label picker fields
  * (branch, job title): drag-handle sheet, title, a rounded search field, and a flat list of
- * plain rounded rows — matches the product-supplied design, no radio buttons/borders. The branch
- * and job lists are prefetched up front (see `InspectionViewModel.handleOpenRequestFlow`) and
- * filtering here is purely local/client-side against the already-loaded [options].
+ * plain rounded rows. Search and paging are **server-side** — text changes are debounced and
+ * pushed up via [onQueryChange], and scrolling near the end calls [onLoadMore]; the sheet only
+ * renders the [options] page it is given.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,17 +68,32 @@ internal fun InspectionSelectionSheet(
     title: String,
     options: List<InspectionSelectionOption>,
     selectedId: String?,
+    query: String,
+    onQueryChange: (String) -> Unit,
     onSelect: (InspectionSelectionOption) -> Unit,
     onDismiss: () -> Unit,
+    onLoadMore: () -> Unit,
+    onRetry: () -> Unit,
+    isLoadingFirstPage: Boolean,
+    isLoadingNextPage: Boolean,
+    endReached: Boolean,
+    pagingError: String?,
     modifier: Modifier = Modifier,
     searchPlaceholder: String? = null,
 ) {
     val taminColors = LocalTaminColors.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var query by remember { mutableStateOf("") }
+    val listState = rememberLazyListState()
 
-    val filteredOptions = remember(options, query) {
-        if (query.isBlank()) options else options.filter { it.title.contains(query, ignoreCase = true) }
+    var text by remember { mutableStateOf(query) }
+    LaunchedEffect(text) {
+        if (text == query) return@LaunchedEffect
+        delay(SEARCH_DEBOUNCE_MS)
+        onQueryChange(text)
+    }
+
+    listState.OnLoadMore(enabled = !endReached && pagingError == null && !isLoadingFirstPage) {
+        onLoadMore()
     }
 
     ModalBottomSheet(
@@ -93,15 +118,33 @@ internal fun InspectionSelectionSheet(
 
             if (searchPlaceholder != null) {
                 CustomSearchBar(
-                    query = query,
-                    onQueryChange = { query = it },
+                    query = text,
+                    onQueryChange = { text = it },
                     placeHolder = searchPlaceholder,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
 
-            if (filteredOptions.isEmpty()) {
-                Box(
+            when {
+                isLoadingFirstPage && options.isEmpty() -> Box(
+                    modifier = Modifier.fillMaxWidth().height(120.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(Spacing.xl),
+                        strokeWidth = 2.dp,
+                        color = taminColors.textMuted,
+                    )
+                }
+
+                pagingError != null && options.isEmpty() -> PagingFooter(
+                    isLoadingNextPage = false,
+                    error = pagingError,
+                    onRetry = onRetry,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+
+                options.isEmpty() -> Box(
                     modifier = Modifier.fillMaxWidth().height(120.dp),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -110,16 +153,24 @@ internal fun InspectionSelectionSheet(
                         color = taminColors.textMuted,
                     )
                 }
-            } else {
-                LazyColumn(
+
+                else -> LazyColumn(
+                    state = listState,
                     modifier = Modifier.fillMaxWidth().heightIn(max = 420.dp),
                     verticalArrangement = Arrangement.spacedBy(Spacing.sm),
                 ) {
-                    items(filteredOptions, key = { it.id }) { option ->
+                    items(options, key = { it.id }) { option ->
                         InspectionSelectionOptionRow(
                             option = option,
                             selected = option.id == selectedId,
                             onClick = { onSelect(option) },
+                        )
+                    }
+                    item(key = SELECTION_FOOTER_KEY) {
+                        PagingFooter(
+                            isLoadingNextPage = isLoadingNextPage,
+                            error = pagingError,
+                            onRetry = onRetry,
                         )
                     }
                 }

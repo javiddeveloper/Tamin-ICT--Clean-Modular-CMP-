@@ -1,6 +1,5 @@
 package com.tamin.taminhamrah.ui.components
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -24,12 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.geometry.CornerRadius as DrawCornerRadius
 import com.tamin.taminhamrah.mapper.campaign.toPresentation
 import com.tamin.taminhamrah.model.campaign.CampaignKind
 import com.tamin.taminhamrah.model.campaign.CampaignPR
@@ -140,9 +135,9 @@ fun CampaignCarousel(
         }
 
         if (pageCount > 1) {
-            CampaignDots(
-                pagerState = pagerState,
+            TaminPageIndicator(
                 pageCount = pageCount,
+                pagerState = pagerState,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(top = CampaignDimens.dotsTopGap),
@@ -272,57 +267,6 @@ private fun CampaignCard(
     }
 }
 
-/**
- * Takes the [pagerState] rather than the current page, and reads it **in the draw phase**.
- *
- * A swipe therefore costs this strip one redraw: no recomposition, and no relayout either. Reading
- * `currentPage` during composition — here or, worse, in the carousel above — would recompose on
- * every page change, and a row of per-dot `Box`es would then re-measure because the active dot is
- * a different width from the rest. The strip's own width never changes: exactly one dot is wide,
- * whichever it is.
- *
- * The width snaps rather than interpolating, which is what the design does — `cpIdx` is
- * `Math.round(scrollLeft / step)`, so the active dot changes at the halfway point and never
- * part-way.
- */
-@Composable
-private fun CampaignDots(
-    pagerState: PagerState,
-    pageCount: Int,
-    modifier: Modifier = Modifier,
-) {
-    val colors = LocalTaminColors.current
-    val activeColor = colors.blueText
-    val idleColor = colors.campaignDotIdle
-    val stripWidth = CampaignDimens.dotActiveWidth +
-        (CampaignDimens.dotSize + CampaignDimens.dotGap) * (pageCount - 1)
-
-    Canvas(
-        modifier = modifier.size(width = stripWidth, height = CampaignDimens.dotSize),
-    ) {
-        val gap = CampaignDimens.dotGap.toPx()
-        val idleWidth = CampaignDimens.dotSize.toPx()
-        val activeWidth = CampaignDimens.dotActiveWidth.toPx()
-        val radius = DrawCornerRadius(size.height / 2f)
-        val rtl = layoutDirection == LayoutDirection.Rtl
-        val current = pagerState.currentPage
-
-        var offset = 0f
-        repeat(pageCount) { page ->
-            val selected = page == current
-            val width = if (selected) activeWidth else idleWidth
-            // The first dot belongs to the first page, which under RTL is the rightmost one.
-            val left = if (rtl) size.width - offset - width else offset
-            drawRoundRect(
-                color = if (selected) activeColor else idleColor,
-                topLeft = Offset(left, 0f),
-                size = Size(width, size.height),
-                cornerRadius = radius,
-            )
-            offset += width + gap
-        }
-    }
-}
 
 /**
  * Everything a campaign card is made of below its content: the shadow it casts, the rounded clip,

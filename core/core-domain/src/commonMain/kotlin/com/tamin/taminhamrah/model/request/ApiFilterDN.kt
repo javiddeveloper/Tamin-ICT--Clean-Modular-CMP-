@@ -83,6 +83,8 @@ enum class FilterProperty(val key: String) {
     @SerialName("debitReason") DEBIT_REASON("debitReason"),
     @SerialName("paymentSheetStatus") PAYMENT_SHEET_STATUS("paymentSheetStatus"),
     @SerialName("premiumTypeCode") PREMIUM_TYPE_CODE("premiumTypeCode"),
+    // special-insured-services/list-contracts-mobile — جستجوی قرارداد by exact contract number.
+    @SerialName("contractNumber") CONTRACT_NUMBER("contractNumber"),
     @SerialName("paymentType") PAYMENT_TYPE("paymentType"),
     @SerialName("insuranceNumber") INSURANCE_NUMBER("insuranceNumber"),
     @SerialName("endDate") END_DATE("endDate"),
@@ -98,6 +100,9 @@ enum class FilterProperty(val key: String) {
     @SerialName("type") TYPE("type"),
     @SerialName("status") STATUS("status"),
     @SerialName("jobDescription") JOB_DESCRIPTION("jobDescription"),
+    // proxy/models/branch names its label column `name` (not `branchName`, which is a
+    // different filter on other list endpoints).
+    @SerialName("name") NAME("name"),
     @SerialName("bankName") BANK_NAME("bankName"),
     @SerialName("insuranceTypeDesc") INSURANCE_TYPE_DESC("insuranceTypeDesc"),
     /** Free-job wage titles (`baseinfo/free-job-wage`); legacy filter property is misspelled. */
@@ -117,6 +122,7 @@ enum class FilterProperty(val key: String) {
 
     @SerialName("debitNumber") DEBIT_NUMBER("debitNumber"),
     @SerialName("peymanSequence") PEYMAN_SEQUENCE("peymanSequence"),
+    @SerialName("seqNo") SEQ_NO("seqNo"),
 }
 
 
