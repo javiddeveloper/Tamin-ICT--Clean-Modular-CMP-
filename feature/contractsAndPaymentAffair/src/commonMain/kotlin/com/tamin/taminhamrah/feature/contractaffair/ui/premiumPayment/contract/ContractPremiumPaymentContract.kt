@@ -49,7 +49,7 @@ data class ContractPremiumPaymentUiState(
         data class MonthsChanged(val months: Int) : PartialState
         data class Calculating(val calculating: Boolean) : PartialState
         data class Paying(val isPaying: Boolean) : PartialState
-        data class DebitCalculated(val debit: ContractDebitPR) : PartialState
+        data class DebitCalculated(val debit: ContractDebitPR?) : PartialState
         data class Error(val message: String?) : PartialState
     }
 }
@@ -70,6 +70,7 @@ sealed interface ContractPremiumPaymentIntent {
     /** پرداخت حق بیمه — requests gateway ticket and triggers navigation to checkout. */
     data object Pay : ContractPremiumPaymentIntent
     data object Retry : ContractPremiumPaymentIntent
+    data object OnResumed : ContractPremiumPaymentIntent
     data object OnBackClicked : ContractPremiumPaymentIntent
 }
 

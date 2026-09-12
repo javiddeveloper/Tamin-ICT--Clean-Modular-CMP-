@@ -20,10 +20,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.contractaffair.ui.components.ContractAffairsActionRow
 import com.tamin.taminhamrah.feature.contractaffair.ui.components.ContractAffairsHeader
@@ -94,6 +97,16 @@ fun ContractAffairsRoute(
     ) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    var isFirstResume by rememberSaveable { mutableStateOf(true) }
+
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        if (isFirstResume) {
+            isFirstResume = false
+        } else {
+            viewModel.sendIntent(ContractAffairsIntent.RefreshContracts)
+        }
+    }
 
     ContractAffairsEvents(
         events = viewModel.events,

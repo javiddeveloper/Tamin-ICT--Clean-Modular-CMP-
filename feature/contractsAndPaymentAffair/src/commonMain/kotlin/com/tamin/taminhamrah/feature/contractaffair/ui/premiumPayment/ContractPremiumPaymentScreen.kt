@@ -26,6 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.contractaffair.ui.premiumPayment.components.ContractDebitResultCard
 import com.tamin.taminhamrah.feature.contractaffair.ui.premiumPayment.components.ContractDebitResultCardSkeleton
@@ -76,6 +78,10 @@ fun ContractPremiumPaymentRoute(
         viewModel.sendIntent(
             ContractPremiumPaymentIntent.Load(contractNumber, premiumTypeCode, insuranceType),
         )
+    }
+
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        viewModel.sendIntent(ContractPremiumPaymentIntent.OnResumed)
     }
 
     ContractPremiumPaymentEvents(

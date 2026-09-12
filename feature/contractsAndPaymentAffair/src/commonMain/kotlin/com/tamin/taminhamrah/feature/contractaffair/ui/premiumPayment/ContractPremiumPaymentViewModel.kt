@@ -60,6 +60,8 @@ class ContractPremiumPaymentViewModel(
 
             ContractPremiumPaymentIntent.Pay -> pay()
 
+            ContractPremiumPaymentIntent.OnResumed -> reloadLastPaymentOnResume()
+
             ContractPremiumPaymentIntent.OnBackClicked -> {
                 sendEvent(ContractPremiumPaymentEvent.NavigateBack)
                 emptyFlow()
@@ -96,6 +98,11 @@ class ContractPremiumPaymentViewModel(
         } finally {
             emit(PartialState.InitLoading(false))
         }
+    }
+
+    private fun reloadLastPaymentOnResume(): Flow<PartialState> {
+        if (!hasLoaded) return emptyFlow()
+        return loadLastPayment()
     }
 
     private fun changeMonths(target: Int): Flow<PartialState> {
@@ -140,6 +147,7 @@ class ContractPremiumPaymentViewModel(
                 val payment = getInsurancePaymentUseCase(params).first()
                 val ticket = payment.paymentTicket
                 if (payment.succeed == true && !ticket.isNullOrBlank()) {
+                    emit(PartialState.DebitCalculated(null))
                     sendEvent(
                         ContractPremiumPaymentEvent.NavigateToPayment(
                             PaymentRequestDN(
