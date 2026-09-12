@@ -13,6 +13,8 @@ import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequestDN
 import com.tamin.taminhamrah.model.pension.retirement.RetirementPersonalDN
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestCreatedDN
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestFormDN
 import com.tamin.taminhamrah.model.pension.retirement.RetirementSaveDocumentDN
 import com.tamin.taminhamrah.model.personal.DisabilityPersonalInfoDN
 import com.tamin.taminhamrah.model.personal.AgeDN
@@ -56,6 +58,11 @@ interface PensionRepository {
     suspend fun getRetirementRequestInfo(
         filters: List<ApiFilterDN>
     ): Flow<List<RetirementRequestDN>>
+
+    suspend fun createRetirementRequest(
+        authenticationsCode: Long,
+        form: RetirementRequestFormDN
+    ): Flow<RetirementRequestCreatedDN>
 
     suspend fun checkRetirementStatus(): Flow<RetirementStatusDN>
 

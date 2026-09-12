@@ -1981,6 +1981,174 @@
     <string name="employer_info_value_missing">-</string>
     <string name="employer_info_err_otp_code">لطفاً کد اعتبارسنجی پنج‌رقمی را وارد کنید.</string>
 
+    <!-- برقراری مستمری بازنشستگی — Pension Inquiry / Retirement Request -->
+
+    <!-- ===== برقراری مستمری بازنشستگی (FeatureFlag.RETIREMENT_PENSION) ===== -->
+    <string name="retirement_pension_title">برقراری مستمری بازنشستگی</string>
+    <string name="retirement_pension_track_title">وضعیت درخواست بازنشستگی</string>
+
+    <!-- Intro -->
+    <string name="retirement_pension_insured_card_title">مشخصات بیمه‌شده</string>
+    <string name="retirement_pension_label_full_name">نام و نام خانوادگی</string>
+    <string name="retirement_pension_label_insurance_number">شمارهٔ بیمه</string>
+    <string name="retirement_pension_label_national_code">کد ملی</string>
+    <string name="retirement_pension_label_age">سن</string>
+    <string name="retirement_pension_age_value">%1$s سال و %2$s ماه</string>
+    <string name="retirement_pension_camera_permission_denied">دسترسی به دوربین داده نشد. از گالری تصاویر انتخاب کنید.</string>
+    <string name="retirement_pension_request_creation_failed">ثبت درخواست انجام نشد. لطفاً دوباره تلاش کنید.</string>
+    <string name="retirement_pension_label_branch">شعبهٔ رسیدگی</string>
+    <string name="retirement_pension_age_gate_passed">شرایط سنی برای ثبت درخواست احراز شد.</string>
+    <string name="retirement_pension_intro_steps_note">ثبت درخواست در ۸ مرحله انجام می‌شود: مقررات، احراز هویت پیامکی، اطلاعات هویتی، اطلاعات کارگاه، سوابق بیمه‌ای، مدارک هویتی، نامهٔ ترک کار و تأیید نهایی. پس از ثبت، بررسی درخواست در شعبه انجام و وضعیت آن در همین سرویس قابل پیگیری است.</string>
+    <string name="retirement_pension_track_request">پیگیری وضعیت درخواست</string>
+    <string name="retirement_pension_start_request">شروع ثبت درخواست</string>
+
+    <!-- Step titles and hints -->
+    <string name="retirement_pension_step_rules_title">مقررات و ضوابط</string>
+    <string name="retirement_pension_step_rules_hint">ضوابط برقراری مستمری بازنشستگی را ببینید و تعهدنامه را تأیید کنید.</string>
+    <string name="retirement_pension_step_authentication_title">احراز هویت</string>
+    <string name="retirement_pension_step_authentication_hint">کد ۶ رقمی پیامک‌شده را وارد کنید؛ با تکمیل کد، احراز هویت انجام می‌شود.</string>
+    <string name="retirement_pension_step_identity_title">اطلاعات هویتی</string>
+    <string name="retirement_pension_step_identity_hint">اطلاعات هویتی را بررسی و شمارهٔ تلفن ثابت و نشانی را تکمیل کنید.</string>
+    <string name="retirement_pension_step_workshop_title">اطلاعات کارگاه و شعبه</string>
+    <string name="retirement_pension_step_workshop_hint">مشخصات آخرین کارگاه محل اشتغال و شعبهٔ رسیدگی‌کننده را کامل کنید.</string>
+    <string name="retirement_pension_step_history_title">سوابق بیمه‌ای</string>
+    <string name="retirement_pension_step_identity_documents_title">مدارک هویتی</string>
+    <string name="retirement_pension_step_identity_documents_hint">تصویر صفحهٔ اول و صفحهٔ توضیحات شناسنامه را بارگذاری کنید.</string>
+    <string name="retirement_pension_step_quit_letter_title">نامهٔ ترک کار</string>
+    <string name="retirement_pension_step_quit_letter_hint">تصویر نامهٔ ترک کار صادرشده توسط کارفرما را بارگذاری کنید.</string>
+    <string name="retirement_pension_step_final_title">تأیید نهایی</string>
+    <string name="retirement_pension_step_final_hint">خلاصهٔ درخواست را ببینید و ثبت نهایی را انجام دهید.</string>
+
+    <!-- Step 1: rules -->
+    <string name="retirement_pension_rules_body">تأیید این مرحله به منزلهٔ مطالعه و پذیرش مقررات و ضوابط برقراری مستمری بازنشستگی می‌باشد.</string>
+    <string name="retirement_pension_rules_link">مشاهدهٔ ضوابط و مقررات</string>
+    <string name="retirement_pension_consent_label">اینجانب %1$s با آگاهی کامل و در صحت عقلی، شرایط و مقررات فوق را مطالعه کرده و خود را ملزم به رعایت آن می‌دانم.</string>
+
+    <!-- Step 2: SMS authentication -->
+    <string name="retirement_pension_otp_intro">کاربر گرامی، به منظور احراز هویت، کد ۶ رقمی را دریافت و در کادر مربوطه درج نمایید.</string>
+    <string name="retirement_pension_otp_request">دریافت کد احراز هویت</string>
+    <string name="retirement_pension_otp_sent">کد اعتبارسنجی از طریق پیامک برای شمارهٔ %1$s ارسال شد.</string>
+    <string name="retirement_pension_otp_resend_in">ارسال مجدد تا</string>
+    <string name="retirement_pension_otp_invalid">کد وارد شده اشتباه است.</string>
+    <string name="retirement_pension_otp_verified">احراز هویت با موفقیت انجام شد.</string>
+
+    <!-- Step 3: identity -->
+    <string name="retirement_pension_label_father_name">نام پدر</string>
+    <string name="retirement_pension_label_id_number">شمارهٔ شناسنامه</string>
+    <string name="retirement_pension_label_gender">جنسیت</string>
+    <string name="retirement_pension_label_birth_date">تاریخ تولد</string>
+    <string name="retirement_pension_label_issue_place">محل صدور</string>
+    <string name="retirement_pension_label_mobile">موبایل</string>
+    <string name="retirement_pension_field_phone">تلفن ثابت</string>
+    <string name="retirement_pension_field_phone_placeholder">۰۲۱۸۸۷۷۶۶۵۵</string>
+    <string name="retirement_pension_field_address">نشانی محل سکونت</string>
+    <string name="retirement_pension_field_address_placeholder">استان، شهر، خیابان، پلاک و کد پستی</string>
+    <string name="retirement_pension_identity_confirm">اطلاعات هویتی و تماس بالا را بررسی کردم و صحت آن را تأیید می‌کنم.</string>
+
+    <!-- Step 4: workshop and branch -->
+    <string name="retirement_pension_label_branch_name">شعبهٔ رسیدگی‌کننده</string>
+    <string name="retirement_pension_label_branch_code">کد شعبه</string>
+    <string name="retirement_pension_field_workshop_name">نام کارگاه</string>
+    <string name="retirement_pension_field_workshop_code">کد کارگاه</string>
+    <string name="retirement_pension_field_workshop_code_placeholder">۱۰ رقم</string>
+    <string name="retirement_pension_field_workshop_address">نشانی کارگاه</string>
+    <string name="retirement_pension_field_workshop_address_placeholder">نشانی کامل محل کارگاه</string>
+    <string name="retirement_pension_field_employer_name">نام کارفرما (اختیاری)</string>
+    <string name="retirement_pension_field_employer_name_placeholder">نام کارفرما</string>
+    <string name="retirement_pension_field_activity_type">نوع فعالیت (اختیاری)</string>
+    <string name="retirement_pension_field_activity_type_placeholder">مثلاً تولیدی</string>
+    <string name="retirement_pension_workshop_confirm">اطلاعات کارگاه و شعبهٔ بالا را بررسی کردم و صحت آن را تأیید می‌کنم.</string>
+
+    <!-- Step 5: insurance history -->
+    <string name="retirement_pension_average_wage">متوسط دستمزد مبنای محاسبه</string>
+    <string name="retirement_pension_estimated_pension">مستمری برآوردی ماهانه</string>
+    <string name="retirement_pension_history_card_title">سابقهٔ بیمه‌ای شما</string>
+    <string name="retirement_pension_history_unit_year">سال</string>
+    <string name="retirement_pension_history_unit_month">ماه</string>
+    <string name="retirement_pension_history_unit_day">روز</string>
+    <string name="retirement_pension_history_total_days_label">مجموع روزهای سابقه</string>
+    <string name="retirement_pension_history_total_days_value">%1$s روز</string>
+    <string name="retirement_pension_history_note">سابقه و مبلغ برآوردی مستمری را ببینید؛ در صورت مغایرت اعتراض ثبت کنید.</string>
+    <string name="retirement_pension_history_objection">ثبت اعتراض به سوابق</string>
+    <string name="retirement_pension_amount_rial">%1$s ریال</string>
+    <string name="retirement_pension_history_summary_value">%1$s سال و %2$s ماه</string>
+
+    <!-- Steps 6 and 7: documents -->
+    <string name="retirement_pension_identity_documents_note">هر دو مدرک زیر الزامی است. تصویر باید خوانا و کامل باشد.</string>
+    <string name="retirement_pension_document_id_first_page">صفحهٔ اول شناسنامه</string>
+    <string name="retirement_pension_document_id_first_page_hint">تصویر صفحهٔ اول شناسنامه؛ نام، نام خانوادگی و کد ملی خوانا باشد.</string>
+    <string name="retirement_pension_document_id_description_page">صفحهٔ توضیحات شناسنامه</string>
+    <string name="retirement_pension_document_id_description_page_hint">آخرین صفحهٔ شناسنامه (توضیحات)؛ اگر خالی است همان صفحهٔ خالی را بفرستید.</string>
+    <string name="retirement_pension_document_quit_letter">نامهٔ ترک کار</string>
+    <string name="retirement_pension_document_quit_letter_hint">انتخاب از دوربین یا گالری</string>
+    <string name="retirement_pension_quit_letter_note">تصویر نامهٔ ترک کار با مهر و امضای کارفرما، شامل تاریخ آخرین روز اشتغال. فقط یک فایل قابل بارگذاری است.</string>
+    <string name="retirement_pension_document_uploaded">بارگذاری شد · برای تغییر ضربه بزنید</string>
+    <string name="retirement_pension_document_uploading">در حال بارگذاری…</string>
+    <string name="retirement_pension_document_missing">لطفاً «%1$s» را بارگذاری کنید.</string>
+    <string name="retirement_pension_document_quit_letter_missing">لطفاً تصویر نامهٔ ترک کار را بارگذاری کنید.</string>
+
+    <!-- Step 8: final confirmation -->
+    <string name="retirement_pension_label_phone">تلفن ثابت</string>
+    <string name="retirement_pension_label_address">نشانی</string>
+    <string name="retirement_pension_label_workshop_name">نام کارگاه</string>
+    <string name="retirement_pension_label_workshop_code">کد کارگاه</string>
+    <string name="retirement_pension_label_history">سابقهٔ بیمه‌ای</string>
+    <string name="retirement_pension_final_note">پس از ثبت نهایی، اقدامات انجام‌شده و وضعیت صدور حکم بازنشستگی در همین سرویس قابل مشاهده است. صدور حکم از طریق پیامک نیز اطلاع‌رسانی خواهد شد.</string>
+    <string name="retirement_pension_final_confirm">صحت اطلاعات و مدارک بارگذاری‌شده را تأیید می‌کنم و درخواست برقراری مستمری بازنشستگی خود را ثبت می‌نمایم.</string>
+    <string name="retirement_pension_submit_final">ثبت نهایی درخواست</string>
+    <string name="retirement_pension_next_step">مرحلهٔ بعدی</string>
+    <string name="retirement_pension_value_placeholder">—</string>
+
+    <!-- Validation, shown only after the step's action is pressed -->
+    <string name="retirement_pension_error_consent">برای ادامه، مطالعه و پذیرش مقررات را تأیید کنید.</string>
+    <string name="retirement_pension_error_authentication">برای ادامه، احراز هویت پیامکی را کامل کنید.</string>
+    <string name="retirement_pension_error_phone_required">لطفاً شمارهٔ تلفن ثابت را وارد کنید.</string>
+    <string name="retirement_pension_error_phone_prefix">شمارهٔ تلفن ثابت باید با ۰ شروع شود.</string>
+    <string name="retirement_pension_error_phone_length">شمارهٔ تلفن ثابت باید حداقل ۱۱ رقم باشد.</string>
+    <string name="retirement_pension_error_address_required">لطفاً نشانی محل سکونت را وارد کنید.</string>
+    <string name="retirement_pension_error_address_short">نشانی واردشده کوتاه است؛ نشانی کامل را بنویسید.</string>
+    <string name="retirement_pension_error_address_invalid">آدرس شامل کاراکتر غیر مجاز است</string>
+    <string name="retirement_pension_error_identity_confirm">برای ادامه، صحت اطلاعات هویتی را تأیید کنید.</string>
+    <string name="retirement_pension_error_workshop_name">لطفاً نام کارگاه را وارد کنید.</string>
+    <string name="retirement_pension_error_workshop_code">کد کارگاه باید ۱۰ رقم باشد.</string>
+    <string name="retirement_pension_error_workshop_address">لطفاً نشانی کارگاه را کامل وارد کنید.</string>
+    <string name="retirement_pension_error_workshop_confirm">برای ادامه، صحت اطلاعات کارگاه را تأیید کنید.</string>
+    <string name="retirement_pension_error_identity_documents">بارگذاری هر دو مدرک هویتی الزامی است.</string>
+    <string name="retirement_pension_error_quit_letter">بارگذاری تصویر نامهٔ ترک کار الزامی است.</string>
+    <string name="retirement_pension_error_final_confirm">برای ثبت نهایی، تأیید صحت اطلاعات الزامی است.</string>
+
+    <!-- Dialogs -->
+    <string name="retirement_pension_dialog_rules_title">ضوابط و مقررات</string>
+    <string name="retirement_pension_dialog_rules_body">برقراری مستمری بازنشستگی مشمول شرایط سنی و سابقهٔ مقرر در قانون تأمین اجتماعی است. پس از ثبت درخواست، مدارک و سوابق شما در شعبه بررسی و در صورت احراز شرایط، حکم بازنشستگی صادر می‌شود. متن کامل مقررات در سامانهٔ قوانین و مقررات در دسترس است.</string>
+    <string name="retirement_pension_rules_unavailable">فایل ضوابط و مقررات هنوز در این نسخه متصل نشده است.</string>
+    <string name="retirement_pension_dialog_objection_title">اعتراض به سوابق</string>
+    <string name="retirement_pension_dialog_objection_body">برای ثبت اعتراض به سوابق، از بخش خدمات سرویس «اعتراض سابقه ناموجود» را انتخاب کنید. تا زمان رسیدگی به اعتراض، ادامهٔ ثبت درخواست بازنشستگی امکان‌پذیر است.</string>
+    <string name="retirement_pension_dialog_age_gate_title">انجام درخواست امکان‌پذیر نیست</string>
+    <string name="retirement_pension_dialog_age_gate_body">با توجه به شرایط سنی شما، ثبت درخواست بازنشستگی در حال حاضر امکان‌پذیر نیست.</string>
+    <string name="retirement_pension_dialog_done_title">درخواست شما ثبت شد</string>
+    <string name="retirement_pension_dialog_done_body">درخواست بازنشستگی شما ذخیره شده و جهت بررسی تکمیلی به شعبه ارسال گردید. پس از تأیید شعبه می‌توانید ادامهٔ درخواست را در همین سرویس دنبال کنید.</string>
+    <string name="retirement_pension_dialog_done_action">مشاهدهٔ وضعیت درخواست</string>
+    <string name="retirement_pension_dialog_understood">متوجه شدم</string>
+    <string name="retirement_pension_leave_title">رها کردن برقراری مستمری بازنشستگی؟</string>
+    <string name="retirement_pension_leave_body">اطلاعاتی که تا این مرحله در فرم برقراری مستمری بازنشستگی وارد کرده‌اید ذخیره نمی‌شود و در صورت خروج، باید درخواست را از ابتدا تکمیل کنید.</string>
+    <string name="retirement_pension_leave_stay">ادامهٔ تکمیل فرم</string>
+    <string name="retirement_pension_leave_confirm">رها می‌کنم</string>
+
+    <!-- Track screen -->
+    <string name="retirement_pension_track_code_label">کد رهگیری درخواست</string>
+    <string name="retirement_pension_track_status_branch_review">در حال بررسی شعبه</string>
+    <string name="retirement_pension_track_stages_title">مراحل رسیدگی</string>
+    <string name="retirement_pension_track_summary_title">خلاصهٔ اطلاعات ثبت‌شده</string>
+    <string name="retirement_pension_stage_current">مرحلهٔ جاری</string>
+    <string name="retirement_pension_stage_authentication">احراز هویت</string>
+    <string name="retirement_pension_stage_submit_info">ثبت اطلاعات</string>
+    <string name="retirement_pension_stage_upload_identity_documents">بارگذاری مدارک هویتی</string>
+    <string name="retirement_pension_stage_branch_review_needed">نیاز به رسیدگی شعبه</string>
+    <string name="retirement_pension_stage_branch_history_review">در حال بررسی شعبه - گام اعلام سابقه</string>
+    <string name="retirement_pension_stage_upload_quit_letter">بارگذاری نامهٔ ترک کار</string>
+    <string name="retirement_pension_stage_branch_quit_letter_review">بررسی شعبه - گام اعلام ترک کار</string>
+    <string name="retirement_pension_stage_issue_edict">صدور حکم</string>
+
 
     <!-- Request payment for illness days -->
     <string name="ill_days_title">غرامت دستمزد ایام بیماری</string>

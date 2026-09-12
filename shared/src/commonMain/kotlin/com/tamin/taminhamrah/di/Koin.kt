@@ -47,6 +47,7 @@ import com.tamin.taminhamrah.feature.orotezprotez.di.orotezProtezModule
 import com.tamin.taminhamrah.feature.girlSurvivor.di.girlSurvivorModule
 
 import com.tamin.taminhamrah.feature.pensionSurvivor.di.pensionSurvivorModule
+import com.tamin.taminhamrah.feature.retirementPension.di.retirementPensionModule
 
 import com.tamin.taminhamrah.feature.deferredInstallment.di.deferredInstallmentModule
 import com.tamin.taminhamrah.feature.inquiryEducation.di.inquiryEducationModule
@@ -133,6 +134,7 @@ val sharedModules: List<Module>
         pensionSurvivorModule,
 
         pregnancyPayModule,
+        retirementPensionModule,
         inquiryEducationModule,
         paymentModule,
     )
