@@ -43,7 +43,7 @@ import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
-import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
+import com.tamin.taminhamrah.ui.components.taminHeroGradient
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -306,7 +306,7 @@ fun RecordDetailContent(
                 TreatmentRecordPdfExport.PRESCRIPTION -> stringResource(Res.string.prescription_viewer_title)
                 TreatmentRecordPdfExport.LAB_RESULT -> stringResource(Res.string.lab_result_viewer_title)
             },
-            background = taminTopAppBarGradient(colors.topAppBarStops),
+            background = taminHeroGradient(colors.topAppBarStops),
             pdf = state.viewerPdf,
             downloadFailed = state.viewerDownloadFailed,
             onRequestDownload = {
