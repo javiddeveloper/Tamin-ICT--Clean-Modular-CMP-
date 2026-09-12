@@ -18,6 +18,8 @@ tags: [moc]
 - [[Dependency-Injection]] — Koin modules and registration order
 - [[Networking]] — Ktor, the five HTTP clients, auth and token refresh
 - [[Database]] — Room KMP, DAOs, schemas
+- [[Payments]] — the one payment flow every feature uses, and its mock gateway
+- [[Debug-Tooling]] — `TokenSlot`, the back-to-back debug login, and the `isDebug` gate
 
 ## Conventions
 
@@ -36,6 +38,7 @@ tags: [moc]
 
 - [[Feature-Flags]] — dynamic menu, `FeatureFlag`, `FeatureManager`
 - [[History-Objection]] — اعتراض به سوابق ناموجود, and why its repository is still a stub ⚠️
+- [[Debt-Objection-Status]] — پیگیری وضعیت اعتراض به بدهی, `:feature:workshops` → `ui/objectionStatus`
 - [[AI-Agent]] — architecture of the AI assistant rewrite
 - [[AI-Agent-API-Contract]] — exact JSON contract the client parses
 - [[Glossary]] — Persian domain term ↔ name in code

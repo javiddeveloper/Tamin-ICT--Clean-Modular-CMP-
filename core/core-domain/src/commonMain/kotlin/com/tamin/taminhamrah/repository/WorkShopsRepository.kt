@@ -47,6 +47,9 @@ import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDN
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
 import kotlinx.coroutines.flow.Flow
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionQuery
+import com.tamin.taminhamrah.model.workshop.SmsMessageDN
 
 /**
  * Everything the کارگاه‌های کارفرما feature reads and writes.
@@ -217,4 +220,8 @@ interface WorkShopsRepository {
 
     /** Step 3 — submit the final agreement. Returns the backend's bare success message. */
     suspend fun submitEmployerAgreement(request: EmployerAgreementSubmissionDN): String
+
+    suspend fun getWorkShopObjections(query: WorkShopObjectionQuery): PagedListDN<WorkShopObjectionDN>
+
+    suspend fun getWorkShopObjectionSms(seqNo: Long, page: Int = 0): PagedListDN<SmsMessageDN>
 }

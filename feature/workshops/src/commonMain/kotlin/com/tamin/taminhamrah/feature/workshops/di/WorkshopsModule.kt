@@ -8,6 +8,9 @@ import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.list.Legal
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.otp.LegalRepresentativeOtpViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.workshops.LegalRepresentativeWorkshopsViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachmentUploader
+import com.tamin.taminhamrah.feature.workshops.ui.objectionStatus.document.ObjectionDocumentViewModel
+import com.tamin.taminhamrah.feature.workshops.ui.objectionStatus.list.ObjectionStatusViewModel
+import com.tamin.taminhamrah.feature.workshops.ui.objectionStatus.sms.ObjectionSmsViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.paymentSheets.PaymentSheetsViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebtInquiry.WorkshopDebtInquiryViewModel
 import org.koin.core.module.dsl.factoryOf
@@ -27,4 +30,7 @@ val workshopsModule = module {
     viewModelOf(::AddLegalRepresentativeViewModel)
     viewModelOf(::ContractRowsViewModel)
     viewModelOf(::AssignerContractsViewModel)
+    viewModelOf(::ObjectionStatusViewModel)
+    viewModelOf(::ObjectionSmsViewModel)
+    viewModelOf(::ObjectionDocumentViewModel)
 }

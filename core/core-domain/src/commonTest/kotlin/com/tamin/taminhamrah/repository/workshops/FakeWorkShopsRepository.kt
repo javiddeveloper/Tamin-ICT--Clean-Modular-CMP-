@@ -44,6 +44,9 @@ import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDN
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionQuery
+import com.tamin.taminhamrah.model.workshop.SmsMessageDN
 import com.tamin.taminhamrah.repository.WorkShopsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -72,6 +75,8 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     var workshopsWithoutContract: PagedListDN<WorkshopWithoutContractDN> = PagedListDN()
     var workshopContractRows: PagedListDN<WorkshopContractRowDN> = PagedListDN()
     var employerAgreementsByWorkshop: PagedListDN<EmployerAgreementByWorkshopDN> = PagedListDN()
+    var workShopObjections: PagedListDN<WorkShopObjectionDN> = PagedListDN()
+    var objectionSms: PagedListDN<SmsMessageDN> = PagedListDN()
 
     var debtInquiry: WorkshopDebtInquiryDN = WorkshopDebtInquiryDN()
     var paymentPreCheck: DebitPaymentPreCheckDN = DebitPaymentPreCheckDN()
@@ -122,6 +127,10 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     var newMemberIsNew: Boolean = true
     var registrationResult: NewMemberRegistrationResultDN = NewMemberRegistrationResultDN()
     var lastRegistrationRequest: NewMemberRegistrationDN? = null
+        private set
+    var lastWorkShopObjectionQuery: WorkShopObjectionQuery? = null
+        private set
+    var lastObjectionSmsSeqNo: Long? = null
         private set
 
     override suspend fun getEmployerAgreements(
@@ -317,6 +326,21 @@ class FakeWorkShopsRepository : WorkShopsRepository {
             lastEmployerAgreementSubmission = request
             employerAgreementSubmitMessage
         }
+
+    override suspend fun getWorkShopObjections(
+        query: WorkShopObjectionQuery,
+    ): PagedListDN<WorkShopObjectionDN> = answer {
+        lastWorkShopObjectionQuery = query
+        workShopObjections
+    }
+
+    override suspend fun getWorkShopObjectionSms(
+        seqNo: Long,
+        page: Int,
+    ): PagedListDN<SmsMessageDN> = answer {
+        lastObjectionSmsSeqNo = seqNo
+        objectionSms
+    }
 
     private inline fun <T> answer(block: () -> T): T {
         error?.let { throw it }

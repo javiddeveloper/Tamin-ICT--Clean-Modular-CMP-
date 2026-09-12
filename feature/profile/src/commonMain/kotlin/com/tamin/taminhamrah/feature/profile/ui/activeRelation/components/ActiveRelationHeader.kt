@@ -27,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
+import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
@@ -74,10 +75,6 @@ internal fun ActiveRelationHeader(
         LineHeightStyle(alignment = LineHeightStyle.Alignment.Center, trim = LineHeightStyle.Trim.Both)
     }
 
-    // Title fades out and the status text fades in over the same title-row spot, so
-    // scrolling reads as the status taking over the title's place rather than two
-    // unrelated labels swapping. Sequential (not overlapping) so the RTL glyphs never
-    // sit half-opaque on top of each other mid-fade.
     val title = stringResource(Res.string.profile_active_relation)
     val statusText = if (activeCount > 0) stringResource(Res.string.active_relation_header_status_ok) else stringResource(Res.string.active_relation_header_status_error)
     val statusColor =
@@ -100,29 +97,6 @@ internal fun ActiveRelationHeader(
             centerTitle = true,
             background = topBarGradient,
             bottomPadding = Spacing.none,
-            titleContent = {
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = Color.White,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .topAreaAlpha(topAreaState, from = 1f, to = 0f, endProgress = 0.5f),
-                    )
-                    Text(
-                        text = statusText,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = statusColor,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .topAreaAlpha(topAreaState, from = 0f, to = 1f, startProgress = 0.5f),
-                    )
-                }
-            },
             navigationIcon = {
                 TaminTopAppBarButton(
                     bordered = true,
@@ -131,17 +105,7 @@ internal fun ActiveRelationHeader(
                     onClick = onBackClicked,
                     modifier = Modifier
                 )
-            },
-            // The header icon fades out below as this fades in here, on the same schedule
-            // as the title/status handoff, so it reads as the icon moving up into the bar.
-            action = {
-                TaminTopAppBarButton(
-                    icon = vectorResource(Res.drawable.ic_communication),
-                    contentDescription = null,
-                    onClick = {},
-                    modifier = Modifier.topAreaAlpha(topAreaState, from = 0f, to = 1f, startProgress = 0.5f),
-                )
-            },
+            }
         )
 
         // Only the expanded-state furniture below the title row folds away; the title
@@ -150,14 +114,23 @@ internal fun ActiveRelationHeader(
         // rendered height track the drag -- so it must span the full 0..1 progress range (the
         // same range maxOffsetPx models), never a narrower one, or the header visibly collapses
         // faster than the finger.
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .topAreaHide(topAreaState)
-                .padding(bottom = Spacing.xl),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(bottom = Spacing.xl)
         ) {
-            AnimatedRingHeaderIcon(
+            DecorativeBackgroundCircle(
+                size = 190.dp,
+                xOffset = 450.dp,
+                yOffset = (-150).dp
+            )
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                AnimatedRingHeaderIcon(
                 icon = vectorResource(Res.drawable.ic_communication),
                 animated = !topAreaState.isMeasureProbe
             )
@@ -209,6 +182,7 @@ internal fun ActiveRelationHeader(
                     color = taminColors.txtNatProfile
                 )
             }
+        }
         }
 
         // Zero height while expanded, growing to CollapsedBottomSpace as the header folds --
