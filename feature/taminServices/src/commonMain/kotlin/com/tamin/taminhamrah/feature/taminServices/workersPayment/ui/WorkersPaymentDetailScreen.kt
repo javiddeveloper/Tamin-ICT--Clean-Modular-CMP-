@@ -21,14 +21,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.contract.WorkersPaymentIntent
-import com.tamin.taminhamrah.feature.taminServices.workersPayment.contract.WorkersPaymentUiState
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.model.WorkersPaymentInfoPR
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.ui.components.WorkersPaymentDetailHeader
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.ui.components.WorkersPaymentGatewayBar
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.ui.components.WorkersPaymentGatewayNoticeBanner
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.ui.components.WorkersPaymentInfoBottomSheet
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.ui.components.WorkersPaymentStatementCard
-import com.tamin.taminhamrah.feature.taminServices.workersPayment.ui.components.WorkersPaymentSuccessDialog
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.ui.components.workersPaymentPreviewItem
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
@@ -50,8 +48,6 @@ internal fun WorkersPaymentDetailScreen(
     isProcessing: Boolean,
     onIntent: (WorkersPaymentIntent) -> Unit,
     onBack: () -> Unit,
-    receipt: WorkersPaymentUiState.PaymentReceipt? = null,
-    onDismissReceipt: () -> Unit = {},
 ) {
     val colors = LocalTaminColors.current
     var showInfoSheet by remember { mutableStateOf(false) }
@@ -111,10 +107,6 @@ internal fun WorkersPaymentDetailScreen(
     if (showInfoSheet) {
         WorkersPaymentInfoBottomSheet(onDismiss = { showInfoSheet = false })
     }
-
-    if (receipt != null) {
-        WorkersPaymentSuccessDialog(receipt = receipt, onDismiss = onDismissReceipt)
-    }
 }
 
 // ─── Previews ─────────────────────────────────────────────────────────────────
@@ -158,20 +150,3 @@ private fun WorkersPaymentDetailScreenPreviewWithFine() {
     }
 }
 
-@PreviewRtlTheme
-@Composable
-private fun WorkersPaymentDetailScreenSuccessPreview() {
-    PreviewRtlThemeContent {
-        WorkersPaymentDetailScreen(
-            item = workersPaymentPreviewItem(),
-            isProcessing = false,
-            onIntent = {},
-            onBack = {},
-            receipt = WorkersPaymentUiState.PaymentReceipt(
-                item = workersPaymentPreviewItem(),
-                trackingCode = "952622593384",
-                message = "پرداخت با موفقیت انجام شد.",
-            ),
-        )
-    }
-}

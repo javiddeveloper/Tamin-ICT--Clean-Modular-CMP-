@@ -157,4 +157,7 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     override suspend fun verifyLegalRepresentativeTicket(ticket: String) = notUsed()
     override suspend fun submitLegalRepresentative(ticket: String, request: LegalRepresentativeRequestDN) = notUsed()
     override suspend fun deleteLegalRepresentative(ticket: String, stakeId: Long) = notUsed()
+
+    override suspend fun getWorkShopObjections(query: WorkShopObjectionQuery): PagedListDN<WorkShopObjectionDN> = notUsed()
+    override suspend fun getWorkShopObjectionSms(seqNo: Long, page: Int): PagedListDN<SmsMessageDN> = notUsed()
 }

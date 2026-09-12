@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -31,9 +30,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.compose.currentStateAsState
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.WorkersPaymentViewModel
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.contract.WorkersPaymentEvent
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.contract.WorkersPaymentIntent
@@ -41,6 +39,7 @@ import com.tamin.taminhamrah.feature.taminServices.workersPayment.contract.Worke
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.model.WorkersPaymentInfoPR
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.ui.components.WorkersPaymentHeader
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.ui.components.WorkersPaymentInfoBottomSheet
+import com.tamin.taminhamrah.model.payment.PaymentRequestDN
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.ui.components.WorkersPaymentListSkeleton
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.ui.components.WorkersPaymentMonthCard
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -71,6 +70,7 @@ fun WorkersPaymentRoute(
     viewModel: WorkersPaymentViewModel,
     onBackClicked: () -> Unit,
     onOpenUrl: (String) -> Unit,
+    onNavigateToPayment: (PaymentRequestDN) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val toaster = LocalToaster.current
@@ -80,17 +80,11 @@ fun WorkersPaymentRoute(
         onShowToast = { toaster.error(it) },
         onOpenUrl = onOpenUrl,
         onNavigateBack = onBackClicked,
+        onNavigateToPayment = onNavigateToPayment,
     )
 
-    // No dedicated deep-link route for the gateway callback — instead, whenever the app comes back
-    // to the foreground with a ticket still pending (i.e. we just returned from the bank), verify it.
-    // Success populates uiState.paymentReceipt and screen 2 shows WorkersPaymentSuccessDialog.
-    val lifecycleState by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
-    LaunchedEffect(lifecycleState) {
-        println("WorkersPaymentCallback: lifecycle=$lifecycleState hasPendingPayment=${viewModel.uiState.value.hasPendingPayment}") // TEMP
-        if (lifecycleState == Lifecycle.State.RESUMED && viewModel.uiState.value.hasPendingPayment) {
-            viewModel.sendIntent(WorkersPaymentIntent.VerifyPendingPayment)
-        }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        viewModel.sendIntent(WorkersPaymentIntent.OnResumed)
     }
 
     val onCloseDetail = { viewModel.sendIntent(WorkersPaymentIntent.ClosePaymentScreen) }
@@ -99,8 +93,6 @@ fun WorkersPaymentRoute(
         BackHandler(onBack = onCloseDetail)
     }
 
-    // Full-screen slide between the list and the single-item confirmation, mirroring the
-    // inspection request flow's AnimatedContent (RTL-aware Start/End directions).
     AnimatedContent(
         targetState = uiState.selectedPaymentItem,
         transitionSpec = {
@@ -120,8 +112,6 @@ fun WorkersPaymentRoute(
                 isProcessing = uiState.isProcessingPayment,
                 onIntent = viewModel::sendIntent,
                 onBack = onCloseDetail,
-                receipt = uiState.paymentReceipt,
-                onDismissReceipt = { viewModel.sendIntent(WorkersPaymentIntent.DismissReceipt) },
             )
         } else {
             WorkersPaymentListScreen(
@@ -139,11 +129,13 @@ private fun WorkersPaymentEvents(
     onShowToast: (String) -> Unit,
     onOpenUrl: (String) -> Unit,
     onNavigateBack: () -> Unit,
+    onNavigateToPayment: (PaymentRequestDN) -> Unit,
 ) {
     events.collectWithLifecycleAware { event ->
         when (event) {
             is WorkersPaymentEvent.ShowToast -> onShowToast(event.message)
             is WorkersPaymentEvent.OpenPaymentUrl -> onOpenUrl(event.url)
+            is WorkersPaymentEvent.NavigateToPayment -> onNavigateToPayment(event.request)
             WorkersPaymentEvent.NavigateBack -> onNavigateBack()
         }
     }

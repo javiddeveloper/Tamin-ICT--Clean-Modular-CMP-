@@ -28,7 +28,10 @@ class FakeWorkersPaymentRepository : WorkersPaymentRepository {
     var lastPayDebitParams: WorkersPayDebitParamsDN? = null
     var lastInspectTicketParams: Pair<String?, String?>? = null
 
+    var getPaymentInfoCallCount = 0
+
     override suspend fun getWorkersPaymentInfo(): WorkersPaymentInfoListDN {
+        getPaymentInfoCallCount++
         if (shouldThrowError) throw error
         return paymentInfoResult
     }

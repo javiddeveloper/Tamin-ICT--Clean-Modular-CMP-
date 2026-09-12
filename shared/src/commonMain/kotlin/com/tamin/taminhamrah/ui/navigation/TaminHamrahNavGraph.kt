@@ -138,16 +138,10 @@ import com.tamin.taminhamrah.feature.workshops.completeEmployerInfoScreen
 import com.tamin.taminhamrah.feature.workshops.debtObjectionStatusScreen
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
-import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
-import com.tamin.taminhamrah.feature.security.securityScreen
 import com.tamin.taminhamrah.feature.developerOptions.DeveloperOptionsRoute
-import com.tamin.taminhamrah.feature.developerOptions.developerOptionsScreen
-import com.tamin.taminhamrah.feature.settings.settingsScreen
+import com.tamin.taminhamrah.feature.payment.navigateToPayment
 import com.tamin.taminhamrah.feature.userRequest.UserRequestRoute
 import com.tamin.taminhamrah.feature.userRequest.userRequestGraph
-import com.tamin.taminhamrah.feature.workshops.completeEmployerInfoScreen
-import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
-import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.mapper.campaign.toPresentation
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
@@ -489,6 +483,9 @@ internal fun TaminHamrahNavGraph(
                 workersPaymentInfoScreen(
                     onBack = { navController.popBackStack() },
                     onOpenUrl = { url -> openUrl(url) },
+                    onNavigateToPayment = { request ->
+                        navController.navigateToPayment(request)
+                    },
                 )
 
                 calculatePensionScreen(onBack = { navController.popBackStack() })

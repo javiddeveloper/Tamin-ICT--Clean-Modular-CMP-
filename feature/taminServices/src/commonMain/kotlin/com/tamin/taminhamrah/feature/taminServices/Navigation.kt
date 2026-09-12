@@ -15,6 +15,7 @@ import com.tamin.taminhamrah.feature.taminServices.ui.TamminServicesViewModel
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.WorkersPaymentViewModel
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.ui.WorkersPaymentRoute
 import com.tamin.taminhamrah.model.common.FeatureFlag
+import com.tamin.taminhamrah.model.payment.PaymentRequestDN
 import kotlinx.serialization.Serializable
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -123,6 +124,7 @@ fun NavGraphBuilder.employerOnlineServicesScreen(onBack: () -> Unit) {
 fun NavGraphBuilder.workersPaymentInfoScreen(
     onBack: () -> Unit,
     onOpenUrl: (String) -> Unit,
+    onNavigateToPayment: (PaymentRequestDN) -> Unit,
 ) {
     composableWithFadeTransitions<WorkersPaymentInfoRoute> {
         val viewModel: WorkersPaymentViewModel = koinViewModel()
@@ -130,6 +132,7 @@ fun NavGraphBuilder.workersPaymentInfoScreen(
             viewModel = viewModel,
             onBackClicked = onBack,
             onOpenUrl = onOpenUrl,
+            onNavigateToPayment = onNavigateToPayment,
         )
     }
 }
