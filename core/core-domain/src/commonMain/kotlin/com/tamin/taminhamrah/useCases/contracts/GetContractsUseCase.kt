@@ -14,7 +14,4 @@ class GetContractsUseCase(
 
     fun contractsByPremiumType(premiumTypeCode: String): Flow<List<ContractDN>> =
         contractsRepository.getContractsByPremiumType(premiumTypeCode)
-
-    fun studentInsuranceContracts(): Flow<List<ContractDN>> =
-        contractsRepository.getStudentInsuranceContracts()
 }

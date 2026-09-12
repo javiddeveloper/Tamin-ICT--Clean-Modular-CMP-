@@ -15,5 +15,6 @@ enum class ProfileMenuItem {
     CONTACT_ME,
     SHARE,
     VERSION_HISTORY,
-    LOGOUT
+    LOGOUT,
+    DEVELOPER_OPTIONS
 }

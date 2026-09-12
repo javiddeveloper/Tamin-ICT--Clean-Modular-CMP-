@@ -4,8 +4,10 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.toRoute
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopsRoute
+import com.tamin.taminhamrah.feature.workshops.ui.contractRows.ContractRowsScreen
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
 import com.tamin.taminhamrah.feature.workshops.ui.paymentSheets.PaymentSheetsScreen
+import com.tamin.taminhamrah.feature.workshops.ui.workshopDebtInquiry.WorkshopDebtInquiryScreen
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import androidx.navigation.toRoute
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.workshops.LegalRepresentativeWorkshopsScreen
@@ -64,8 +66,29 @@ data class AddLegalRepresentativeRoute(
     val special: Boolean,
 )
 
+/**
+ * ردیف‌های پیمان, which is the one destination here that is also a services-grid entry.
+ *
+ * Both halves of the identity default to blank, because the grid knows no workshop — the screen
+ * then asks for one. The drill-down from جزئیات کارگاه fills them in and the list loads at once.
+ */
+@Serializable
+data class ContractRowsRoute(val workshopId: String = "", val branchCode: String = "")
+
+@Serializable
+data class WorkshopDebtInquiryRoute(
+    val workshopId: String,
+    val branchCode: String,
+    val workshopName: String = "",
+)
+
 fun NavController.navigateToWorkshops() {
     navigate(WorkshopsListRoute)
+}
+
+/** The `FeatureFlag.CONTRACT_INFO` entry — no workshop yet, so the screen opens its picker. */
+fun NavController.navigateToContractRows() {
+    navigate(ContractRowsRoute())
 }
 
 fun NavController.navigateToLegalRepresentativeWorkshops() {
@@ -90,6 +113,15 @@ fun NavGraphBuilder.workshopsScreen(
             onOpenAction = { action, workshopId, branchCode, workshopName ->
                 navController.navigate(action.route(workshopId, branchCode, workshopName))
             },
+        )
+    }
+
+    composableWithFadeTransitions<ContractRowsRoute> { entry ->
+        val route = entry.toRoute<ContractRowsRoute>()
+        ContractRowsScreen(
+            workshopId = route.workshopId,
+            branchCode = route.branchCode,
+            onBack = { navController.popBackStack() },
         )
     }
 
@@ -206,6 +238,16 @@ fun NavGraphBuilder.workshopsScreen(
             onSubmitted = { navController.popBackStack() },
         )
     }
+
+    composableWithFadeTransitions<WorkshopDebtInquiryRoute> { entry ->
+        val route = entry.toRoute<WorkshopDebtInquiryRoute>()
+        WorkshopDebtInquiryScreen(
+            workshopId = route.workshopId,
+            branchCode = route.branchCode,
+            workshopName = route.workshopName,
+            onBack = { navController.popBackStack() },
+        )
+    }
 }
 
 /**
@@ -220,4 +262,7 @@ private fun WorkshopAction.route(
     workshopName: String,
 ): Any = when (this) {
     WorkshopAction.PAYMENT_SHEETS -> PaymentSheetsRoute(workshopId, branchCode, workshopName)
+    WorkshopAction.CONTRACT_ROWS -> ContractRowsRoute(workshopId, branchCode)
+    WorkshopAction.DEBT_INQUIRY ->
+        WorkshopDebtInquiryRoute(workshopId, branchCode, workshopName)
 }

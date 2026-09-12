@@ -10,9 +10,11 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
@@ -21,15 +23,10 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 
 /**
- * The app's single-line text input.
+ * The app's standard labelled text input.
  *
- * `SegmentedInputField` covers fixed-length codes typed into slots — a national ID, an OTP — and
- * `PickerRow` covers values chosen rather than typed. Anything freely typed and of unknown length
- * had no shared component, so screens reached for Material's `OutlinedTextField` directly and each
- * dressed it differently. This is that field, wearing the theme's own tokens.
- *
- * Reports a problem the same way the rest of the form does: the border turns [LocalTaminColors]'
- * danger colour and [errorMessage], when given, sits under the field.
+ * Places the [label] as a title above the input box (matching [PickerRow] and [SelectableField]),
+ * and renders a styled rounded outlined text field with theme tokens.
  */
 @Composable
 fun TaminTextField(
@@ -39,11 +36,15 @@ fun TaminTextField(
     label: String? = null,
     placeholder: String? = null,
     enabled: Boolean = true,
+    readOnly: Boolean = false,
     singleLine: Boolean = true,
+    minLines: Int = 1,
+    maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     isError: Boolean = false,
     errorMessage: String? = null,
     keyboardType: KeyboardType = KeyboardType.Text,
-    /** Overrides the typed text's and placeholder's style — e.g. to match a `PickerRow` beside it. */
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
     textStyle: TextStyle = LocalTextStyle.current,
 ) {
     val colors = LocalTaminColors.current
@@ -53,24 +54,46 @@ fun TaminTextField(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(Spacing.xs),
     ) {
+        if (label != null) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = colors.textSecondary,
+            )
+        }
+
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
             enabled = enabled,
+            readOnly = readOnly,
             singleLine = singleLine,
+            minLines = minLines,
+            maxLines = maxLines,
             isError = showError,
             shape = RoundedCornerShape(CornerRadius.lg),
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-            textStyle = textStyle,
-            label = label?.let { { TaminText(text = it, color = colors.textSecondary) } },
-            placeholder = placeholder?.let { { TaminText(text = it, color = colors.textMuted, style = textStyle) } },
+            textStyle = textStyle.copy(fontWeight = FontWeight.SemiBold),
+            placeholder = placeholder?.let {
+                {
+                    Text(
+                        text = it,
+                        style = textStyle.copy(fontWeight = FontWeight.Normal),
+                        color = colors.textMuted,
+                    )
+                }
+            },
+            leadingIcon = leadingIcon,
+            trailingIcon = trailingIcon,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = colors.blueText,
                 unfocusedBorderColor = colors.border,
                 errorBorderColor = colors.dangerText,
                 focusedTextColor = colors.textPrimary,
                 unfocusedTextColor = colors.textPrimary,
-                disabledTextColor = colors.textMuted,
+                disabledTextColor = colors.textPrimary,
+                disabledBorderColor = colors.border,
+                disabledContainerColor = colors.bgSurface,
                 cursorColor = colors.blueText,
                 focusedContainerColor = colors.bgSurface,
                 unfocusedContainerColor = colors.bgSurface,
@@ -79,7 +102,7 @@ fun TaminTextField(
         )
 
         if (errorMessage != null) {
-            TaminText(
+            Text(
                 text = errorMessage,
                 style = MaterialTheme.typography.labelSmall,
                 color = colors.dangerText,
@@ -97,7 +120,7 @@ private fun TaminTextFieldPreview() {
             modifier = Modifier.padding(Spacing.lg),
             verticalArrangement = Arrangement.spacedBy(Spacing.lg),
         ) {
-            TaminTextField(value = "", onValueChange = {}, label = "کد کارگاه")
+            TaminTextField(value = "", onValueChange = {}, label = "کد کارگاه", placeholder = "مثلاً ۱۲۳۴۵۶")
             TaminTextField(value = "۹۹۰۰۰۲۰", onValueChange = {}, label = "کد کارگاه")
             TaminTextField(
                 value = "۱۲",
@@ -106,11 +129,10 @@ private fun TaminTextFieldPreview() {
                 errorMessage = "کد کارگاه معتبر نیست",
             )
             TaminTextField(
-                value = "",
+                value = "۰۹۱۴۳۰۱۸۳۷۲",
                 onValueChange = {},
-                label = "غیر فعال",
+                label = "تلفن همراه",
                 enabled = false,
-                placeholder = "قابل ویرایش نیست",
             )
         }
     }

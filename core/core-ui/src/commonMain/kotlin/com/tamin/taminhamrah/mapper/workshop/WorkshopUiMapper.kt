@@ -6,9 +6,14 @@ import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeWorksh
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtPR
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoDN
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoPR
+import com.tamin.taminhamrah.model.workshop.ContractRowPR
 import com.tamin.taminhamrah.model.workshop.DebitReasonDN
 import com.tamin.taminhamrah.model.workshop.DebitReasonPR
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopDN
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopPR
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
+import com.tamin.taminhamrah.model.workshop.EmployerContactInfoDN
+import com.tamin.taminhamrah.model.workshop.EmployerContactInfoPR
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeContractPR
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativePR
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopPR
@@ -16,6 +21,7 @@ import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetPR
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtPR
+import com.tamin.taminhamrah.model.workshop.WorkshopContractDN
 import com.tamin.taminhamrah.model.workshop.WorkshopActivityStatus
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryPR
@@ -26,9 +32,17 @@ import com.tamin.taminhamrah.model.workshop.WorkshopMemberPR
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDN
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberPR
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
+import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDN
+import com.tamin.taminhamrah.model.workshop.WorkshopContractRowPR
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDN
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderPR
+import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDN
+import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractPR
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionPR
+import com.tamin.taminhamrah.model.workshop.SmsMessageDN
+import com.tamin.taminhamrah.model.workshop.SmsMessagePR
 import com.tamin.taminhamrah.ui.orDash
 import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.util.toPersianDigits
@@ -64,6 +78,88 @@ fun EmployerAgreementDN.toPresentation(): WorkshopPR = with(workshop) {
         approveDate = approveDate.orDashDate(),
     )
 }
+
+// ------------------------------------------------------------------------ ردیف‌های پیمان
+
+/**
+ * A تعهدنامه‌دار row: seven fields, from the agreement envelope and the workshop nested in it.
+ *
+ * ردیف پیمان comes from the agreement's own `pymseq`, *not* from the workshop's `contractRow` —
+ * the two are different columns and the نام کارگاه on this card belongs to the workshop while the
+ * ردیف belongs to the agreement.
+ */
+fun EmployerAgreementDN.toContractRow(): ContractRowPR = ContractRowPR(
+    workshopId = workshop.workshopId,
+    branchCode = workshop.branchCode,
+    name = workshop.name.orDash(),
+    rowLabel = contractRow.orDashDigits(),
+    workshopCodeLabel = workshop.workshopId.orDashDigits(),
+    commitmentDate = startDate.orDashDate(),
+    mobile = mobile.orDashDigits(),
+    email = email.orDash(),
+    // Blank, not dashed: the card drops the tile entirely rather than drawing a dash across it.
+    address = workshop.address,
+)
+
+/** A بدون تعهدنامه row: the same card with the contact block absent, because the data is. */
+fun WorkshopContractDN.toContractRow(): ContractRowPR = ContractRowPR(
+    workshopId = workshopId,
+    branchCode = branchCode,
+    name = workshopName.orDash(),
+    rowLabel = contractRow.orDashDigits(),
+    workshopCodeLabel = workshopId.orDashDigits(),
+    commitmentDate = startDate.orDashDate(),
+)
+
+// ---------------------------------------------- خدمات غیرحضوری کارفرما (employerEservicesAgreement)
+
+fun EmployerContactInfoDN.toPresentation(): EmployerContactInfoPR = EmployerContactInfoPR(
+    fullName = fullName.orDash(),
+    nationalCode = nationalCode.orDashDigits(),
+    currentMobile = currentMobile.orDashDigits(),
+    currentEmail = currentEmail.orDash(),
+)
+
+fun WorkshopWithoutContractDN.toPresentation(): WorkshopWithoutContractPR = WorkshopWithoutContractPR(
+    workshopId = workshopId,
+    branchCode = branchCode,
+    hasIdentity = hasIdentity,
+    name = name.orDash(),
+    codeLabel = workshopId.orDashDigits(),
+    nationalId = nationalId.orDashDigits(),
+    postalCode = postalCode.orDashDigits(),
+    tel = tel.orDashDigits(),
+    address = address.orDash(),
+    branchOfficeName = branchOfficeName.orDash(),
+)
+
+fun WorkshopContractRowDN.toPresentation(): WorkshopContractRowPR = WorkshopContractRowPR(
+    contractRow = contractRow.orDashDigits(),
+    fullName = fullName.orDash(),
+    nationalCode = nationalCode.orDashDigits(),
+    mobile = mobile.orDashDigits(),
+    email = email.orDash(),
+    tel = tel.orDashDigits(),
+    postalCode = postalCode.orDashDigits(),
+    startDate = startDate.orDashDate(),
+    endDate = endDate.orDashDate(),
+    workshopName = workshop.name.orDash(),
+    workshopCodeLabel = workshop.workshopId.orDashDigits(),
+)
+
+fun EmployerAgreementByWorkshopDN.toPresentation(): EmployerAgreementByWorkshopPR =
+    EmployerAgreementByWorkshopPR(
+        workshopId = workshop.workshopId,
+        branchCode = workshop.branchCode,
+        paymentSequence = paymentSequence.orDashDigits(),
+        workshopName = workshop.name.orDash(),
+        workshopCodeLabel = workshop.workshopId.orDashDigits(),
+        address = workshop.address.orDash(),
+        startDate = startDate.orDashDate(),
+        commitmentDate = commitmentDate.orDashDate(),
+        mobile = mobile.orDashDigits(),
+        email = email.orDash(),
+    )
 
 // -------------------------------------------------------------------------- برگ پرداخت‌ها
 
@@ -191,6 +287,24 @@ fun WorkshopStackHolderDN.toPresentation(): WorkshopStackHolderPR = WorkshopStac
     fatherName = fatherName.orDash(),
     birthDate = birthDate.orDashTimestamp(),
     stackType = stackType.orDash(),
+)
+
+fun WorkShopObjectionDN.toPresentation(): WorkShopObjectionPR = WorkShopObjectionPR(
+    seqNo = seqNo,
+    workshopId = workshopId.orDashDigits(),
+    debitNumber = debitNumber.orDashDigits(),
+    objectionNumber = (seqNo?.toString() ?: "").orDashDigits(),
+    objectionDate = objectionDate.orDashDate(),
+    objectionDescription = objectionDescription.orDash(),
+    voteTypeDescription = voteTypeDescription.orDash(),
+    objectionType = objectionType,
+    status = status,
+)
+
+fun SmsMessageDN.toPresentation(): SmsMessagePR = SmsMessagePR(
+    id = id,
+    description = description.orDash(),
+    status = status,
 )
 
 // ------------------------------------------------------------------ formatting

@@ -5,8 +5,12 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.HttpErrorCopy
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.errorHandling.shouldNavigateBack
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
+import com.tamin.taminhamrah.model.user.EditMobileResponseDto
 import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -188,5 +192,66 @@ class BaseDTOTest {
         val error = assertFailsWith<TaminErrorUriException> { dto.extractData() }
         assertEquals(ErrorUri.SERVER_PROBLEM, error.uri)
         assertEquals("شناسه نامعتبر است", error.serverMessage)
+    }
+
+    // --- extractTypedData (um-mobile-api gateway error envelope: {cause, message}) ---
+
+    @Test
+    fun `extractTypedData decodes the typed payload on success`() {
+        val dto = BaseDTO<kotlinx.serialization.json.JsonElement?>(
+            status = 200,
+            family = "System",
+            reason = "OK",
+            data = buildJsonObject {
+                put("traceId", "trace-1")
+                putJsonObject("data") {
+                    put("hash", "hash-1")
+                    put("expirationTime", 120L)
+                }
+            }
+        )
+
+        val decoded = dto.extractTypedData(Json, EditMobileResponseDto.serializer())
+
+        assertEquals("trace-1", decoded.traceId)
+        assertEquals("hash-1", decoded.data?.hash)
+        assertEquals(120L, decoded.data?.expirationTime)
+    }
+
+    @Test
+    fun `extractTypedData surfaces the gateway's own message on a 4xx error`() {
+        val dto = BaseDTO<kotlinx.serialization.json.JsonElement?>(
+            status = 409,
+            family = "CLIENT_ERROR",
+            reason = "Conflict",
+            data = buildJsonObject {
+                put("cause", "DUPLICATE_MOBILE")
+                put("message", "این شماره موبایل قبلا ثبت شده است")
+            }
+        )
+        val error = assertFailsWith<TaminErrorUriException> {
+            dto.extractTypedData(Json, String.serializer())
+        }
+        assertEquals("این شماره موبایل قبلا ثبت شده است", error.serverMessage)
+
+        val parsed = ErrorParserImpl().parseGeneralError(error)
+        assertEquals("این شماره موبایل قبلا ثبت شده است", parsed.subtitle)
+    }
+
+    @Test
+    fun `extractTypedData surfaces the gateway's own message on a 5xx error`() {
+        val dto = BaseDTO<kotlinx.serialization.json.JsonElement?>(
+            status = 502,
+            family = "SERVER_ERROR",
+            reason = "Bad Gateway",
+            data = buildJsonObject {
+                put("cause", "UPSTREAM_TIMEOUT")
+                put("message", "سرویس موقتا در دسترس نیست")
+            }
+        )
+        val error = assertFailsWith<TaminErrorUriException> {
+            dto.extractTypedData(Json, String.serializer())
+        }
+        assertEquals("سرویس موقتا در دسترس نیست", error.serverMessage)
     }
 }

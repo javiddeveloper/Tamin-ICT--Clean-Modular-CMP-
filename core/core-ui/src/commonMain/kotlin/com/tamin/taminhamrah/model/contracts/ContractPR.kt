@@ -13,7 +13,6 @@ data class ContractPR(
     val insuranceType: String,
     val monthlyPremiumLabel: String,
     val monthlyIncome: String,
-    val treatmentSupportText: String,
     val hasTreatmentSupport: Boolean,
     val jobTitle: String,
 )

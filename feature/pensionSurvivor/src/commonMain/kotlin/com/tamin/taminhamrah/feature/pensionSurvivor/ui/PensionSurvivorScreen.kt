@@ -8,8 +8,10 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -54,6 +56,7 @@ import com.tamin.taminhamrah.ui.components.TaminHeroStepProgress
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
 import com.tamin.taminhamrah.ui.components.buttons.SquareIconButton
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
@@ -258,12 +261,18 @@ private fun PensionSurvivorContent(
         PensionSurvivorStep.Survivors -> step4Title
         PensionSurvivorStep.Final -> step5Title
     }
+    val colors = LocalTaminColors.current
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colors.bgPage),
+        containerColor = colors.bgPage,
+        contentWindowInsets = WindowInsets(0),
         topBar = {
             TaminTopAppBar(
                 title = stringResource(Res.string.pension_survivor_title),
+                background = taminTopAppBarGradient(colors.profileGradientStops),
                 bottomPadding = Spacing.xl,
                 shape = RoundedCornerShape(
                     bottomStart = CornerRadius.x3l,

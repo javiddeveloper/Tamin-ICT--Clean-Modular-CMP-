@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.repository.contracts
 
 import com.tamin.taminhamrah.model.contracts.BranchDN
+import com.tamin.taminhamrah.model.contracts.ContractPremiumTypeCode
 import com.tamin.taminhamrah.model.contracts.FreelanceContractByGuardianParams
 import com.tamin.taminhamrah.model.contracts.OptionalContractByGuardianParams
 import com.tamin.taminhamrah.model.contracts.ContractDN
@@ -17,6 +18,7 @@ import com.tamin.taminhamrah.model.contracts.RegistrationInfoDN
 import com.tamin.taminhamrah.model.contracts.SaveContactRequestDN
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.util.PagedListDN
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.json.JsonElement
@@ -34,6 +36,7 @@ class FakeContractsRepository : ContractsRepository {
     var makeContractResult: FreelanceContractResultDN? = null
     var lastMakeContractParams: FreelanceMakeContractParams? = null
     var makeContractCalled = false
+    var makeFreelanceContractCalled = false
     var lastMakeFreelanceContractByGuardianParams: FreelanceContractByGuardianParams? = null
     var makeFreelanceContractByGuardianCalled = false
     var lastMakeOptionalContractByGuardianParams: OptionalContractByGuardianParams? = null
@@ -44,7 +47,6 @@ class FakeContractsRepository : ContractsRepository {
     var paymentStatusResult: JsonElement? = JsonPrimitive(true)
     var lastQuery: ApiQueryParamDN? = null
     var lastBranchCityCode: String? = null
-    var studentInsuranceContractsCalled = false
 
     var lastUploadImageRequest: UploadImageRequestDN? = null
     var uploadImageResult: String = "a4769aa8-b9af-4183-83b9-367dc9f52511"
@@ -60,6 +62,9 @@ class FakeContractsRepository : ContractsRepository {
 
     var lastPremiumTypeCode: String? = null
     var freeJobWagesResult: List<FreeJobDN> = emptyList()
+    var freeJobWagesTotal: Int = 0
+    var lastFreeJobWagesPage: Int? = null
+    var lastFreeJobWagesSearchQuery: String? = null
     var calculatedOptionalSalaryResult: Long? = null
     var lastPremiumRateCode: String? = null
     var lastFreelanceCalculateParams: FreelanceCalculateSalaryParams? = null
@@ -71,11 +76,8 @@ class FakeContractsRepository : ContractsRepository {
         emit(contractsResult)
     }
 
-    override fun getStudentInsuranceContracts(): Flow<List<ContractDN>> = flow {
-        studentInsuranceContractsCalled = true
-        if (shouldThrowError) throw error
-        emit(contractsResult)
-    }
+    override fun getStudentInsuranceContracts(): Flow<List<ContractDN>> =
+        getContractsByPremiumType(ContractPremiumTypeCode.STUDENT)
 
     override fun getRegistrationInfo(): Flow<RegistrationInfoDN> = flow {
         if (shouldThrowError) throw error
@@ -99,9 +101,11 @@ class FakeContractsRepository : ContractsRepository {
         emit(spcPremiumRatesResult)
     }
 
-    override fun getFreeJobWages(): Flow<List<FreeJobDN>> = flow {
+    override fun getFreeJobWages(page: Int, searchQuery: String?): Flow<PagedListDN<FreeJobDN>> = flow {
+        lastFreeJobWagesPage = page
+        lastFreeJobWagesSearchQuery = searchQuery
         if (shouldThrowError) throw error
-        emit(freeJobWagesResult)
+        emit(PagedListDN(items = freeJobWagesResult, total = freeJobWagesTotal.coerceAtLeast(freeJobWagesResult.size)))
     }
 
     override fun getFreelancePremiumRange(params: FreelancePremiumRangeParams): Flow<FreelancePremiumRangeDN> = flow {
@@ -115,6 +119,31 @@ class FakeContractsRepository : ContractsRepository {
                 highPremium = 0L,
             ),
         )
+    }
+
+    override fun getOptionalPremiumRange(): Flow<FreelancePremiumRangeDN> = flow {
+        if (shouldThrowError) throw error
+        emit(
+            freelancePremiumRangeResult ?: FreelancePremiumRangeDN(
+                paymentTabayi = 0L,
+                lowPremium = 0L,
+                history = 0,
+                highPremium = 0L,
+            ),
+        )
+    }
+
+    var redCrossStatusResult: String = "ok"
+    var medicalStudentStatusResult: String = "ok14"
+
+    override fun checkRedCrossStatus(): Flow<String> = flow {
+        if (shouldThrowError) throw error
+        emit(redCrossStatusResult)
+    }
+
+    override fun checkMedicalStudent(): Flow<String> = flow {
+        if (shouldThrowError) throw error
+        emit(medicalStudentStatusResult)
     }
 
     override fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Flow<Long> = flow {
@@ -131,6 +160,7 @@ class FakeContractsRepository : ContractsRepository {
 
     override fun makeFreelanceContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN> = flow {
         lastMakeContractParams = params
+        makeFreelanceContractCalled = true
         makeContractCalled = false
         if (shouldThrowError) throw error
         emit(
@@ -144,6 +174,7 @@ class FakeContractsRepository : ContractsRepository {
     override fun makeContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN> = flow {
         lastMakeContractParams = params
         makeContractCalled = true
+        makeFreelanceContractCalled = false
         if (shouldThrowError) throw error
         emit(
             makeContractResult ?: FreelanceContractResultDN(

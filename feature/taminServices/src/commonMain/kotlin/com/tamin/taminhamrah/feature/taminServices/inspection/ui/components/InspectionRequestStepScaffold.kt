@@ -22,7 +22,7 @@ internal fun InspectionRequestStepScaffold(
     content: @Composable (PaddingValues) -> Unit,
 ) {
     Scaffold(
-        modifier = modifier.fillMaxSize().imePadding(),
+        modifier = modifier.fillMaxSize(),
         bottomBar = {
             TaminBottomActionBar(
                 primaryText = primaryText,

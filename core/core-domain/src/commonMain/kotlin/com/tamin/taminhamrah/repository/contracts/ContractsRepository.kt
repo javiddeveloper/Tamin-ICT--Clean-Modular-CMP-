@@ -17,6 +17,7 @@ import com.tamin.taminhamrah.model.contracts.RegistrationInfoDN
 import com.tamin.taminhamrah.model.contracts.SaveContactRequestDN
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.util.PagedListDN
 import kotlinx.coroutines.flow.Flow
 
 interface ContractsRepository {
@@ -26,8 +27,11 @@ interface ContractsRepository {
     fun getRegistrationInfo(): Flow<RegistrationInfoDN>
     fun getBranches(cityCode: String): Flow<List<BranchDN>>
     fun getSpcPremiumRates(): Flow<List<PremiumRateDN>>
-    fun getFreeJobWages(): Flow<List<FreeJobDN>>
+    fun getFreeJobWages(page: Int = 1, searchQuery: String? = null): Flow<PagedListDN<FreeJobDN>>
     fun getFreelancePremiumRange(params: FreelancePremiumRangeParams): Flow<FreelancePremiumRangeDN>
+    fun getOptionalPremiumRange(): Flow<FreelancePremiumRangeDN>
+    fun checkRedCrossStatus(): Flow<String>
+    fun checkMedicalStudent(): Flow<String>
     fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Flow<Long>
     fun calculateOptionalSalary(premiumRateCode: String): Flow<Long>
     fun makeFreelanceContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN>

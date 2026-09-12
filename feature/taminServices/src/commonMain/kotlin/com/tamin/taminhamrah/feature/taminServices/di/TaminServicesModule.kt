@@ -21,12 +21,13 @@ import com.tamin.taminhamrah.useCases.occurrence.GetWorkshopSpecUseCase
 import com.tamin.taminhamrah.useCases.occurrence.SubmitOccurrenceUseCase
 import com.tamin.taminhamrah.useCases.occurrence.UploadOccurrenceImageUseCase
 import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
-import com.tamin.taminhamrah.useCases.inspection.GetInspectionListUseCase
-import com.tamin.taminhamrah.useCases.inspection.GetBranchListUseCase
+import com.tamin.taminhamrah.useCases.inspection.GetInsurancePageUseCase
+import com.tamin.taminhamrah.useCases.inspection.GetBranchPageUseCase
 import com.tamin.taminhamrah.useCases.inspection.GetInspectionReportPDFUseCase
-import com.tamin.taminhamrah.useCases.inspection.GetJobListUseCase
+import com.tamin.taminhamrah.useCases.inspection.GetJobPageUseCase
 import com.tamin.taminhamrah.useCases.inspection.SubmitInspectionUseCase
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.InspectionViewModel
+import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.EmployerOnlineServicesViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
@@ -48,6 +49,9 @@ val TaminServicesModule = module {
     factoryOf(::GetOccurrenceDocTypesUseCase)
     factoryOf(::UploadOccurrenceImageUseCase)
     factoryOf(::SubmitOccurrenceUseCase)
+    factoryOf(::GetInsurancePageUseCase)
+    factoryOf(::GetBranchPageUseCase)
+    factoryOf(::GetJobPageUseCase)
 
     viewModelOf(::WorkersPaymentViewModel)
     factoryOf(::GetWorkersPaymentInfoUseCase)
@@ -62,5 +66,9 @@ val TaminServicesModule = module {
     factoryOf(::SubmitInspectionUseCase)
     factoryOf(::GetInspectionReportPDFUseCase)
     viewModelOf(::InspectionViewModel)
+
+    // خدمات غیرحضوری کارفرمایان — use cases (GetUserProfileUseCase, GetEmployerAgreementsUseCase)
+    // are already provided by core-domain's DomainModule.
+    viewModelOf(::EmployerOnlineServicesViewModel)
 }
 

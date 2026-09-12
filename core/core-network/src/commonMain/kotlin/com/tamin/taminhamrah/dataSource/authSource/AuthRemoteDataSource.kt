@@ -16,6 +16,10 @@ interface AuthRemoteDataSource {
         clientId: String,
     ): TokenResponseDto
 
+    suspend fun debugClientCredentialsLogin(
+        clientId: String,
+        clientSecret: String,
+    ): TokenResponseDto
 
     suspend fun signOut(token: String): String
 

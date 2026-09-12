@@ -47,9 +47,8 @@ Colors, spacing, radius: [[Theme]] — never hardcode `Color`, `.dp`, or UI copy
 | `:feature:pensioner` | `feature/pensioner` | `…feature.pensionInquiry` ⚠️ |
 | `:feature:cartable` | `feature/cartable` | `…feature.cartable` |
 | `:feature:history` | `feature/history` | `…feature.history` |
-| `:feature:contracts` | `feature/contracts` | `…feature.contracts` |
+| `:feature:contracts` | `feature/contracts` | `…feature.contracts` — list, create/edit flows (`flow/` package) |
 | `:feature:workshops` | `feature/workshops` | `…feature.workshops` |
-| `:feature:studentInsuranceContract` | `feature/studentInsuranceContract` | `…feature.studentInsuranceContract` |
 | `:feature:agent` | `feature/agent` | `…feature.agent` |
 | `:feature:healthProfile` | `feature/healthProfile` | `…feature.healthProfile` |
 | `:feature:taminServices` | `feature/taminServices` | `…feature.taminServices` |
@@ -61,6 +60,7 @@ Colors, spacing, radius: [[Theme]] — never hardcode `Color`, `.dp`, or UI copy
 | `:feature:pensionStatusInquiry` | `feature/pensionStatusInquiry` | `…feature.pensionStatusInquiry` |
 | `:feature:girlSurvivor` | `feature/girlSurvivor` | `…feature.girlSurvivor` |
 | `:feature:pensionSurvivor` | `feature/pensionSurvivor` | `…feature.pensionSurvivor` |
+| `:feature:payment` | `feature/payment` | `…feature.payment` — the shared payment flow, see [[Payments]] |
 
 ### Layout of a feature module
 

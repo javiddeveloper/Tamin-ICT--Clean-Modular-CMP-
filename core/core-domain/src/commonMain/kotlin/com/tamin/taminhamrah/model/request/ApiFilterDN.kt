@@ -69,6 +69,9 @@ enum class FilterProperty(val key: String) {
     @SerialName("nationalCode") NATIONAL_CODE("nationalCode"),
     // The employer-info ticket endpoints name the contact fields this way; `mobile` above is
     // a different filter on a different service and is not interchangeable with it.
+    // خدمات غیرحضوری کارفرما — the `workshop-services/request-ticket` filter for the
+    // employerEservicesAgreement flow addresses these three columns (see
+    // WorkShopsRemoteDataSourceImpl.requestEmployerAgreementTicket).
     @SerialName("mobileNumber") MOBILE_NUMBER("mobileNumber"),
     @SerialName("email") EMAIL("email"),
     @SerialName("serviceName") SERVICE_NAME("serviceName"),
@@ -80,6 +83,8 @@ enum class FilterProperty(val key: String) {
     @SerialName("debitReason") DEBIT_REASON("debitReason"),
     @SerialName("paymentSheetStatus") PAYMENT_SHEET_STATUS("paymentSheetStatus"),
     @SerialName("premiumTypeCode") PREMIUM_TYPE_CODE("premiumTypeCode"),
+    // special-insured-services/list-contracts-mobile — جستجوی قرارداد by exact contract number.
+    @SerialName("contractNumber") CONTRACT_NUMBER("contractNumber"),
     @SerialName("paymentType") PAYMENT_TYPE("paymentType"),
     @SerialName("insuranceNumber") INSURANCE_NUMBER("insuranceNumber"),
     @SerialName("endDate") END_DATE("endDate"),
@@ -95,8 +100,13 @@ enum class FilterProperty(val key: String) {
     @SerialName("type") TYPE("type"),
     @SerialName("status") STATUS("status"),
     @SerialName("jobDescription") JOB_DESCRIPTION("jobDescription"),
+    // proxy/models/branch names its label column `name` (not `branchName`, which is a
+    // different filter on other list endpoints).
+    @SerialName("name") NAME("name"),
     @SerialName("bankName") BANK_NAME("bankName"),
     @SerialName("insuranceTypeDesc") INSURANCE_TYPE_DESC("insuranceTypeDesc"),
+    /** Free-job wage titles (`baseinfo/free-job-wage`); legacy filter property is misspelled. */
+    @SerialName("discrioption") DISCRIOPTION("discrioption"),
 
     // Workshop member / stakeholder / absentee-registration lists. Each list addresses the same
     // two people-columns under a different prefix, which is why there is one entry per list
@@ -112,6 +122,7 @@ enum class FilterProperty(val key: String) {
 
     @SerialName("debitNumber") DEBIT_NUMBER("debitNumber"),
     @SerialName("peymanSequence") PEYMAN_SEQUENCE("peymanSequence"),
+    @SerialName("seqNo") SEQ_NO("seqNo"),
 }
 
 

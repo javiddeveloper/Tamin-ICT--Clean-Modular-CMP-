@@ -14,6 +14,8 @@ import com.tamin.taminhamrah.apiService.agent.createAgentApiService
 import com.tamin.taminhamrah.apiService.WorkShopsApiService
 import com.tamin.taminhamrah.apiService.contract.ContractsApiService
 import com.tamin.taminhamrah.apiService.contract.createContractsApiService
+import com.tamin.taminhamrah.apiService.contractAffair.ContractAffairApiService
+import com.tamin.taminhamrah.apiService.contractAffair.createContractAffairApiService
 import com.tamin.taminhamrah.apiService.createCommonApiService
 import com.tamin.taminhamrah.apiService.createHistoryApiServices
 import com.tamin.taminhamrah.apiService.createUserApiService
@@ -28,6 +30,8 @@ import com.tamin.taminhamrah.apiService.requestPaymentForIllDays.RequestPaymentF
 import com.tamin.taminhamrah.apiService.requestPaymentForIllDays.createRequestPaymentForIllDaysApiService
 import com.tamin.taminhamrah.apiService.pregnancyPay.PregnancyPayApiService
 import com.tamin.taminhamrah.apiService.pregnancyPay.createPregnancyPayApiService
+import com.tamin.taminhamrah.apiService.payment.PaymentGatewayApiService
+import com.tamin.taminhamrah.apiService.payment.createPaymentGatewayApiService
 import com.tamin.taminhamrah.apiService.pension.PensionApiService
 import com.tamin.taminhamrah.apiService.pension.createPensionApiService
 import com.tamin.taminhamrah.apiService.personal.PersonalApiService
@@ -52,7 +56,8 @@ import com.tamin.taminhamrah.apiService.employerInfo.EmployerInfoApiService
 import com.tamin.taminhamrah.apiService.employerInfo.createEmployerInfoApiService
 import com.tamin.taminhamrah.apiService.inquiryEducation.InquiryEducationApiService
 import com.tamin.taminhamrah.apiService.inquiryEducation.createInquiryEducationApiService
-import com.tamin.taminhamrah.util.NetworkConstants
+import com.tamin.taminhamrah.model.BaseUrlKey
+import com.tamin.taminhamrah.repository.DeveloperOptionsRepository
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
 import org.koin.core.qualifier.named
@@ -84,8 +89,16 @@ val ApiClientsModule = module {
     // Health Ktorfit instance (uses HTTP base IP 172.16.14.115:5700)
     single(named("healthKtorfit")) {
         Ktorfit.Builder()
-            .baseUrl(NetworkConstants.BASE_URL_HEALTH_PROFILE)
+            .baseUrl(get<DeveloperOptionsRepository>().getEffectiveBaseUrl(BaseUrlKey.HEALTH_PROFILE))
             .httpClient(get<HttpClient>(named("healthHttpClient")))
+            .build()
+    }
+
+    // Payment gateway Ktorfit instance (TFH host)
+    single(named("tfhKtorfit")) {
+        Ktorfit.Builder()
+            .baseUrl(get<DeveloperOptionsRepository>().getEffectiveBaseUrl(BaseUrlKey.TFH))
+            .httpClient(get<HttpClient>(named("tfhHttpClient")))
             .build()
     }
 
@@ -162,6 +175,11 @@ val ApiClientsModule = module {
         ktorfit.createContractsApiService()
     }
 
+    single<ContractAffairApiService>(named("contractAffairApiService")) {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createContractAffairApiService()
+    }
+
     single<AgentApiService>(named("agentApiService")) {
         val ktorfit: Ktorfit = get(named("aiKtorfit"))
         ktorfit.createAgentApiService()
@@ -205,5 +223,9 @@ val ApiClientsModule = module {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.createWorkersPaymentApiService()
     }
-}
 
+    single<PaymentGatewayApiService> {
+        val ktorfit: Ktorfit = get(named("tfhKtorfit"))
+        ktorfit.createPaymentGatewayApiService()
+    }
+}

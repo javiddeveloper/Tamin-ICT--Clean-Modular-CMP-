@@ -493,8 +493,12 @@ private class FakeTestContractsRepo : ContractsRepository {
     override fun getStudentInsuranceContracts(): Flow<List<ContractDN>> = flowOf(emptyList())
     override fun getRegistrationInfo(): Flow<RegistrationInfoDN> = flowOf(RegistrationInfoDN(null, true, null, null, null))
     override fun getSpcPremiumRates(): Flow<List<PremiumRateDN>> = flowOf(emptyList())
-    override fun getFreeJobWages(): Flow<List<FreeJobDN>> = flowOf(emptyList())
+    override fun getFreeJobWages(page: Int, searchQuery: String?): Flow<PagedListDN<FreeJobDN>> =
+        flowOf(PagedListDN())
     override fun getFreelancePremiumRange(params: FreelancePremiumRangeParams): Flow<FreelancePremiumRangeDN> = flowOf(FreelancePremiumRangeDN(0L, 0L, 0, 0L))
+    override fun getOptionalPremiumRange(): Flow<FreelancePremiumRangeDN> = flowOf(FreelancePremiumRangeDN(0L, 0L, 0, 0L))
+    override fun checkRedCrossStatus(): Flow<String> = flowOf("ok")
+    override fun checkMedicalStudent(): Flow<String> = flowOf("ok")
     override fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Flow<Long> = flowOf(0L)
     override fun calculateOptionalSalary(premiumRateCode: String): Flow<Long> = flowOf(0L)
     override fun makeFreelanceContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN> = flowOf(FreelanceContractResultDN(null, null))

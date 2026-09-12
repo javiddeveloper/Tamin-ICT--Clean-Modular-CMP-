@@ -59,8 +59,7 @@ import com.tamin.taminhamrah.ui.components.TaminSwitchButton
 import com.tamin.taminhamrah.ui.components.TaminTextField
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import com.tamin.taminhamrah.ui.components.bottomsheet.TaminOptionSheetItem
-import com.tamin.taminhamrah.ui.components.bottomsheet.TaminSearchableOptionSheet
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminSearchableListSheet
 import com.tamin.taminhamrah.ui.components.document.TaminDocumentSourceSheet
 import com.tamin.taminhamrah.ui.components.document.TaminDocumentUploadCard
 import com.tamin.taminhamrah.ui.components.document.TaminDocumentUploadState
@@ -943,43 +942,29 @@ private fun IllDaysWizardPickers(
 ) {
     when (state.picker) {
         IllDaysWizardPicker.Branch -> {
-            val branchById = remember(state.branchOptions) {
-                state.branchOptions.associateBy { it.id }
-            }
-            TaminSearchableOptionSheet(
+            TaminSearchableListSheet(
                 title = stringResource(Res.string.ill_days_wizard_pick_branch_title),
                 subtitle = stringResource(Res.string.ill_days_wizard_pick_branch_subtitle),
-                items = remember(state.branchOptions) {
-                    state.branchOptions.map { TaminOptionSheetItem(id = it.id, label = it.label) }
-                },
-                selectedId = state.selectedBranch?.id,
+                items = state.branchOptions,
+                itemLabel = { it.label },
+                itemKey = { it.id },
                 showSearch = false,
-                onSelect = { item ->
-                    branchById[item.id]?.let { onIntent(IllDaysWizardIntent.BranchPicked(it)) }
-                },
+                onItemSelected = { onIntent(IllDaysWizardIntent.BranchPicked(it)) },
                 onDismiss = { onIntent(IllDaysWizardIntent.DismissPicker) },
             )
         }
         IllDaysWizardPicker.City -> {
-            val cityByCode = remember(state.cityOptions) {
-                state.cityOptions.associateBy { it.cityCode }
-            }
-            TaminSearchableOptionSheet(
+            TaminSearchableListSheet(
                 title = stringResource(Res.string.ill_days_wizard_pick_city_title),
                 subtitle = stringResource(Res.string.ill_days_wizard_pick_city_subtitle),
-                items = remember(state.cityOptions) {
-                    state.cityOptions.map {
-                        TaminOptionSheetItem(id = it.cityCode, label = it.cityName)
-                    }
-                },
-                selectedId = state.selectedCity?.cityCode,
+                items = state.cityOptions,
+                itemLabel = { it.cityName },
+                itemKey = { it.cityCode },
                 searchPlaceholder = stringResource(Res.string.ill_days_wizard_city_search),
                 onSearchQueryChange = { query ->
                     onIntent(IllDaysWizardIntent.CitySearchQuery(query))
                 },
-                onSelect = { item ->
-                    cityByCode[item.id]?.let { onIntent(IllDaysWizardIntent.CityPicked(it)) }
-                },
+                onItemSelected = { onIntent(IllDaysWizardIntent.CityPicked(it)) },
                 onDismiss = { onIntent(IllDaysWizardIntent.DismissPicker) },
             )
         }

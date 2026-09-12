@@ -17,6 +17,7 @@ import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractParams
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDN
 import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
 import com.tamin.taminhamrah.model.contracts.FreeJobDN
+import com.tamin.taminhamrah.model.contracts.FreeJobWagesPaging
 import com.tamin.taminhamrah.model.contracts.InsurancePaymentDN
 import com.tamin.taminhamrah.model.contracts.InsurancePaymentParamsDN
 import com.tamin.taminhamrah.model.contracts.PremiumRateDN
@@ -27,6 +28,7 @@ import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
+import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.repository.contracts.ContractsRepository
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import kotlinx.coroutines.flow.Flow
@@ -106,13 +108,26 @@ class ContractsRepositoryImpl(
         emit((response.list?:emptyList()).map { it.toDomain() })
     }
 
-    override fun getFreeJobWages(): Flow<List<FreeJobDN>> = flow {
-        val response = contractsRemoteDataSource.getFreeJobWages(freeJobWagesQuery())
-        emit(response.list.orEmpty().map { it.toDomain() })
+    override fun getFreeJobWages(page: Int, searchQuery: String?): Flow<PagedListDN<FreeJobDN>> = flow {
+        val response = contractsRemoteDataSource.getFreeJobWages(freeJobWagesQuery(page, searchQuery))
+        val items = response.list.orEmpty().map { it.toDomain() }
+        emit(PagedListDN(items = items, total = response.total))
     }
 
     override fun getFreelancePremiumRange(params: FreelancePremiumRangeParams): Flow<FreelancePremiumRangeDN> = flow {
         emit(contractsRemoteDataSource.getFreelancePremiumRange(params).toDomain())
+    }
+
+    override fun getOptionalPremiumRange(): Flow<FreelancePremiumRangeDN> = flow {
+        emit(contractsRemoteDataSource.getOptionalPremiumRange().toDomain())
+    }
+
+    override fun checkRedCrossStatus(): Flow<String> = flow {
+        emit(contractsRemoteDataSource.checkRedCrossStatus())
+    }
+
+    override fun checkMedicalStudent(): Flow<String> = flow {
+        emit(contractsRemoteDataSource.checkMedicalStudent())
     }
 
     override fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Flow<Long> = flow {
@@ -227,9 +242,26 @@ class ContractsRepositoryImpl(
         ),
     )
 
-    private fun freeJobWagesQuery(): ApiQueryParamDN = ApiQueryParamDN(
-        page = 1,
-        start = 0,
-        limit = 100,
-    )
+    private fun freeJobWagesQuery(page: Int, searchQuery: String?): ApiQueryParamDN {
+        val safePage = page.coerceAtLeast(1)
+        val start = (safePage - 1) * FreeJobWagesPaging.PAGE_SIZE
+        val filters = searchQuery
+            ?.takeIf { it.isNotBlank() }
+            ?.let {
+                listOf(
+                    ApiFilterDN(
+                        property = FilterProperty.DISCRIOPTION,
+                        operator = FilterOperator.LIKE,
+                        value = "*$it*",
+                    ),
+                )
+            }
+            .orEmpty()
+        return ApiQueryParamDN(
+            page = safePage,
+            start = start,
+            limit = FreeJobWagesPaging.PAGE_SIZE,
+            filters = filters,
+        )
+    }
 }

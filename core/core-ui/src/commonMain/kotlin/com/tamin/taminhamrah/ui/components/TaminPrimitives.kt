@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
@@ -132,7 +133,9 @@ fun StatusPill(
         Text(
             text = text,
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = fontWeight),
-            color = contentColor
+            color = contentColor,
+            maxLines = 1,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
         )
     }
 }
@@ -440,6 +443,14 @@ fun TaminPrimaryButton(
     height: Dp = PRIMARY_BUTTON_HEIGHT,
     shape: Shape = RoundedCornerShape(CornerRadius.iconTile),
     textStyle: TextStyle = MaterialTheme.typography.titleMedium,
+    /**
+     * Whether the button accepts taps, and reads as though it does.
+     *
+     * Defaults to the always-clickable behavior every existing caller has. Pass false where a
+     * guard already drops the action — a submit that is ignored while a request is in flight looks
+     * exactly like a broken button unless the button says so.
+     */
+    enabled: Boolean = true,
 ) {
     val iconContent: @Composable () -> Unit = {
         if (icon != null) {
@@ -456,9 +467,10 @@ fun TaminPrimaryButton(
         modifier = modifier
             .fillMaxWidth()
             .height(height)
+            .alpha(if (enabled) 1f else PRIMARY_BUTTON_DISABLED_ALPHA)
             .clip(shape)
             .background(background)
-            .clickable(onClick = onClick),
+            .clickable(enabled = enabled, onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm, Alignment.CenterHorizontally),
     ) {
@@ -467,6 +479,9 @@ fun TaminPrimaryButton(
         if (!iconAtStart) iconContent()
     }
 }
+
+/** How far a disabled primary button fades — enough to read as unavailable, not as absent. */
+private const val PRIMARY_BUTTON_DISABLED_ALPHA = 0.5f
 
 @Composable
 fun TaminOutlinedButton(

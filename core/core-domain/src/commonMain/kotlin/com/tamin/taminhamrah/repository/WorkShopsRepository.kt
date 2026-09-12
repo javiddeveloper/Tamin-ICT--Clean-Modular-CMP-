@@ -18,16 +18,23 @@ import com.tamin.taminhamrah.model.workshop.DebitObjectionResultDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDN
+import com.tamin.taminhamrah.model.workshop.ContractRowQuery
 import com.tamin.taminhamrah.model.workshop.DebitReasonDN
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmissionDN
+import com.tamin.taminhamrah.model.workshop.EmployerContactInfoDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetQuery
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
+import com.tamin.taminhamrah.model.workshop.WorkshopContractDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDN
 import com.tamin.taminhamrah.model.workshop.WorkshopListQuery
+import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDN
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDN
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberQuery
+import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDN
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDN
@@ -36,6 +43,9 @@ import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDN
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
 import kotlinx.coroutines.flow.Flow
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionQuery
+import com.tamin.taminhamrah.model.workshop.SmsMessageDN
 
 /**
  * Everything the کارگاه‌های کارفرما feature reads and writes.
@@ -46,6 +56,18 @@ import kotlinx.coroutines.flow.Flow
 interface WorkShopsRepository {
 
     suspend fun getEmployerAgreements(query: WorkshopListQuery): PagedListDN<EmployerAgreementDN>
+
+    // ------------------------------------------------------------------------ ردیف‌های پیمان
+
+    /** ردیف پیمان‌های one workshop that has a تعهدنامه — seven fields per row. */
+    suspend fun getContractRowsWithAgreement(
+        query: ContractRowQuery,
+    ): PagedListDN<EmployerAgreementDN>
+
+    /** ردیف پیمان‌های one workshop with no تعهدنامه — four fields per row, a different model. */
+    suspend fun getContractRowsWithoutAgreement(
+        query: ContractRowQuery,
+    ): PagedListDN<WorkshopContractDN>
 
     // -------------------------------------------------------------------------- برگ پرداخت‌ها
 
@@ -155,4 +177,32 @@ interface WorkShopsRepository {
     suspend fun submitLegalRepresentative(ticket: String, request: LegalRepresentativeRequestDN)
 
     suspend fun deleteLegalRepresentative(ticket: String, stakeId: Long)
+
+    // ------------------------------------------------- خدمات غیرحضوری کارفرما (employerEservicesAgreement)
+
+    /**
+     * Step 1 — request the OTP ticket. Builds the `mobileNumber`/`email`/`serviceName` filter
+     * internally; returns the backend's bare confirmation message.
+     */
+    suspend fun requestEmployerAgreementTicket(mobile: String, email: String): String
+
+    /** Step 2 — exchange the entered OTP for the employer's identity block. */
+    suspend fun getEmployerAgreementContactInfo(verificationCode: String): EmployerContactInfoDN
+
+    /** Step 2 — one page of the employer's workshops that have no contract yet. */
+    suspend fun getWorkshopsWithoutContract(page: Int = 0): PagedListDN<WorkshopWithoutContractDN>
+
+    /** Contract / پیمانکار rows of one workshop. */
+    suspend fun getWorkshopContractRows(
+        workshopId: String,
+        branchCode: String,
+        page: Int = 0,
+    ): PagedListDN<WorkshopContractRowDN>
+
+    /** Step 3 — submit the final agreement. Returns the backend's bare success message. */
+    suspend fun submitEmployerAgreement(request: EmployerAgreementSubmissionDN): String
+
+    suspend fun getWorkShopObjections(query: WorkShopObjectionQuery): PagedListDN<WorkShopObjectionDN>
+
+    suspend fun getWorkShopObjectionSms(seqNo: Long, page: Int = 0): PagedListDN<SmsMessageDN>
 }

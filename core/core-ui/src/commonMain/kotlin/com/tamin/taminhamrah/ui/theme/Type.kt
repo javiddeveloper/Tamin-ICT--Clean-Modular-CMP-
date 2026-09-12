@@ -2,9 +2,12 @@ package com.tamin.taminhamrah.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 
 /**
@@ -135,4 +138,69 @@ fun taminHamrahTypography(): Typography {
 private fun TextStyle.withAppDefaults(fontFamily: FontFamily): TextStyle = this.copy(
     fontFamily = fontFamily,
     fontFeatureSettings = DEFAULT_FONT_FEATURES
+)
+
+/**
+ * Type for the home campaigns carousel
+ * ([com.tamin.taminhamrah.ui.components.CampaignCarousel]).
+ *
+ * Declared here rather than assembled at the call site for two reasons. None of the design's sizes
+ * — 8.5 / 10.5 / 15.5 / 16 — has a role in [taminHamrahTypography]. And leaving the rest to
+ * `LocalTextStyle`, which Material3 sets to `bodyLarge`, would drag its 27.2sp line height onto an
+ * 8.5sp pill, so every style names its own. Each one takes [applicationFont] and
+ * [DEFAULT_FONT_FEATURES] the same way the roles above do.
+ *
+ * ⚠️ **700 and 800 are synthesized.** [applicationFont] registers Light, Normal, Medium and
+ * SemiBold only — there is no Bold or ExtraBold file in `composeResources/font/`. That is true of
+ * the whole app (`titleLarge`, `headlineLarge` and ~350 call sites already ask for 700 or 800), so
+ * these weights match their surroundings rather than quietly diverging. Dropping `bold.ttf` and
+ * `extra_bold.ttf` in and registering them would fix every one of those at once.
+ */
+@Immutable
+data class CampaignTextStyles(
+    val sectionTitle: TextStyle,
+    val sectionHint: TextStyle,
+    val badge: TextStyle,
+    val cardTitle: TextStyle,
+    val body: TextStyle,
+    val ctaLabel: TextStyle,
+    val caption: TextStyle,
+)
+
+@Composable
+fun campaignTextStyles(): CampaignTextStyles {
+    val fontFamily = applicationFont()
+    return remember(fontFamily) { campaignTextStyles(fontFamily) }
+}
+
+private fun campaignTextStyles(fontFamily: FontFamily) = CampaignTextStyles(
+    sectionTitle = campaignStyle(fontFamily, 16.sp, 19.sp, weight = 700),
+    sectionHint = campaignStyle(fontFamily, 10.5.sp, 13.sp, weight = 600),
+    badge = campaignStyle(fontFamily, 8.5.sp, 11.sp, weight = 800),
+    cardTitle = campaignStyle(
+        fontFamily,
+        fontSize = 15.5.sp,
+        lineHeight = 19.sp,
+        weight = 800,
+        letterSpacing = (-0.2).sp,
+    ),
+    // line-height: 1.8
+    body = campaignStyle(fontFamily, 10.5.sp, 18.9.sp, weight = 500),
+    ctaLabel = campaignStyle(fontFamily, 10.5.sp, 13.sp, weight = 800),
+    caption = campaignStyle(fontFamily, 8.5.sp, 11.sp, weight = 600),
+)
+
+private fun campaignStyle(
+    fontFamily: FontFamily,
+    fontSize: TextUnit,
+    lineHeight: TextUnit,
+    weight: Int,
+    letterSpacing: TextUnit = 0.sp,
+) = TextStyle(
+    fontFamily = fontFamily,
+    fontFeatureSettings = DEFAULT_FONT_FEATURES,
+    fontWeight = FontWeight(weight),
+    fontSize = fontSize,
+    lineHeight = lineHeight,
+    letterSpacing = letterSpacing,
 )
