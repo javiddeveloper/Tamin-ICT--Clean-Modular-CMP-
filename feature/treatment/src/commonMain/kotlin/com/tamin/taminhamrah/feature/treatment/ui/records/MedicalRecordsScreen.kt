@@ -1,8 +1,5 @@
 package com.tamin.taminhamrah.feature.treatment.ui.records
 
-import com.tamin.taminhamrah.feature.treatment.ui.components.raisedCard
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,6 +32,7 @@ import com.tamin.taminhamrah.feature.treatment.ui.components.MedicalRecordCard
 import com.tamin.taminhamrah.feature.treatment.ui.components.RecordGroupHeader
 import com.tamin.taminhamrah.feature.treatment.ui.components.TimelineFilterBar
 import com.tamin.taminhamrah.feature.treatment.ui.components.TreatmentFilterChipRow
+import com.tamin.taminhamrah.feature.treatment.ui.components.raisedCard
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsEvent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsIntent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsUiState
@@ -64,6 +62,7 @@ import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
+import com.tamin.taminhamrah.ui.components.taminHeroGradient
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -405,6 +404,7 @@ fun MedicalRecordsContent(
         topBar = {
             TaminTopAppBar(
                 title = stringResource(Res.string.records_title),
+                background = taminHeroGradient(colors.topAppBarStops),
                 navigationIcon = {
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),

@@ -36,6 +36,7 @@ import com.tamin.taminhamrah.contractFlow.ContractStep
 import com.tamin.taminhamrah.contractFlow.isEditableFromSummary
 import com.tamin.taminhamrah.contractFlow.isFirstStep
 import com.tamin.taminhamrah.contractFlow.isLastStep
+import com.tamin.taminhamrah.feature.contracts.flow.config.ContractRulesPdf
 import com.tamin.taminhamrah.feature.contracts.flow.ui.contract.ContractFlowEvent
 import com.tamin.taminhamrah.feature.contracts.flow.ui.contract.ContractFlowIntent
 import com.tamin.taminhamrah.feature.contracts.flow.ui.contract.ContractFlowUiState
@@ -45,6 +46,7 @@ import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
 import com.tamin.taminhamrah.ui.components.TaminBottomBar
 import com.tamin.taminhamrah.ui.components.TaminHeroStepProgress
+import com.tamin.taminhamrah.ui.components.TaminLocalPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.TaminSingleLineAutoSizeText
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
@@ -57,7 +59,6 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.contractFlow.ContractApplicantStepContent
 import com.tamin.taminhamrah.ui.contractFlow.ContractFlowScreenShimmerSkeleton
 import com.tamin.taminhamrah.ui.contractFlow.ContractRegistrationStepContent
-import com.tamin.taminhamrah.ui.contractFlow.ContractRulesBottomSheet
 import com.tamin.taminhamrah.ui.contractFlow.ContractSubmitResult
 import com.tamin.taminhamrah.ui.contractFlow.ContractSubmitResultDialog
 import com.tamin.taminhamrah.ui.contractFlow.ContractSummaryRowPR
@@ -76,15 +77,21 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminOnAccentInkSoft
 import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.util.toPersianDigits
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.contract_edit_info_step_desc
+import taminx.core.core_ui.contract_edit_info_step_title
 import taminx.core.core_ui.contract_flow_submit_contract
 import taminx.core.core_ui.contract_hero_step_job_title
+import taminx.core.core_ui.contract_housewife_hero_reg_confirmed
 import taminx.core.core_ui.contract_next_step
 import taminx.core.core_ui.contract_optional_hero_reg_confirmed
+import taminx.core.core_ui.contract_rules_pdf_title
 import taminx.core.core_ui.contract_save_edit
 import taminx.core.core_ui.contract_step_contract_applicant
 import taminx.core.core_ui.contract_step_treatment_support
@@ -108,6 +115,7 @@ import taminx.core.core_ui.no_items_found
 @Composable
 fun ContractFlowScreen(
     onBack: () -> Unit,
+    onEditSuccess: () -> Unit = onBack,
     onShowRules: () -> Unit = {},
     onPaymentRequested: (contractNumber: String, amount: Long) -> Unit = { _, _ -> },
     viewModel: ContractFlowViewModel = koinViewModel(),
@@ -115,10 +123,23 @@ fun ContractFlowScreen(
     val state by viewModel.uiState.collectAsState()
     val toaster = LocalToaster.current
     var submitResult by remember { mutableStateOf<ContractSubmitResult?>(null) }
-    var showRulesSheet by remember { mutableStateOf(false) }
+    var showRulesPdf by remember { mutableStateOf(false) }
+    var rulesPdfBytes by remember { mutableStateOf<ByteArray?>(null) }
+    val rulesPdfPath = state.config?.rulesPdfPath ?: ContractRulesPdf.SPECIAL_INSURED
 
     LaunchedEffect(Unit) {
         viewModel.sendIntent(ContractFlowIntent.LoadInitialData)
+    }
+
+    LaunchedEffect(showRulesPdf, rulesPdfPath) {
+        if (!showRulesPdf) {
+            rulesPdfBytes = null
+            return@LaunchedEffect
+        }
+        rulesPdfBytes = null
+        rulesPdfBytes = withContext(Dispatchers.Default) {
+            runCatching { Res.readBytes("files/$rulesPdfPath") }.getOrElse { ByteArray(0) }
+        }
     }
 
     HandleContractFlowEvents(
@@ -132,6 +153,9 @@ fun ContractFlowScreen(
                 canPayOnline = canPayOnline,
             )
         },
+        onShowUpdateSuccess = {
+            submitResult = ContractSubmitResult.UpdateSuccess
+        },
         onShowSubmitFailure = { message ->
             submitResult = ContractSubmitResult.Failure(message = message)
         },
@@ -140,7 +164,12 @@ fun ContractFlowScreen(
     submitResult?.let { result ->
         ContractSubmitResultDialog(
             result = result,
-            onDismiss = { submitResult = null },
+            onDismiss = {
+                submitResult = null
+                if (result is ContractSubmitResult.UpdateSuccess) {
+                    onEditSuccess()
+                }
+            },
             onPay = { contractNumber, amount ->
                 onPaymentRequested(contractNumber, amount)
             },
@@ -154,20 +183,18 @@ fun ContractFlowScreen(
         state = state,
         onBack = onBack,
         onShowRules = {
-            showRulesSheet = true
+            showRulesPdf = true
             onShowRules()
         },
         onIntent = viewModel::sendIntent,
     )
 
-    if (showRulesSheet) {
-        val rulesCopy = state.config?.rulesCopy
-        if (rulesCopy != null) {
-            ContractRulesBottomSheet(
-                rulesCopy = rulesCopy,
-                onDismiss = { showRulesSheet = false },
-            )
-        }
+    if (showRulesPdf) {
+        TaminLocalPdfViewer(
+            pdfBytes = rulesPdfBytes,
+            title = stringResource(Res.string.contract_rules_pdf_title),
+            onDismiss = { showRulesPdf = false },
+        )
     }
 }
 
@@ -184,21 +211,31 @@ fun ContractFlowScreenContent(
         return
     }
 
-    val steps = state.config?.steps ?: emptyList()
+    val steps = state.navigationSteps
     val currentStepIndex = (steps.indexOf(state.currentStep) + 1).coerceAtLeast(1)
     val totalSteps = steps.size.coerceAtLeast(1)
     val screenTitle = state.config?.screenTitleRes?.let { stringResource(it) }.orEmpty()
-    val stepTitle = stringResource(state.currentStep.titleRes)
-    val isOptionalRegistrationConfirmed =
-        state.config?.isOptionalInsurance == true &&
+    val isEditInfoStep =
+        state.isEditingExistingContract && state.currentStep == ContractStep.STEP_REGISTRATION
+    val stepTitle = if (isEditInfoStep) {
+        stringResource(Res.string.contract_edit_info_step_title)
+    } else {
+        stringResource(state.currentStep.titleRes)
+    }
+    val isRegistrationConfirmed =
+        !state.isEditingExistingContract &&
             state.currentStep == ContractStep.STEP_REGISTRATION &&
             state.genderGateError == null &&
             state.preflightGateError == null &&
             (state.eligibility == null || state.eligibility.isEligible)
-    val stepSubtitle = if (isOptionalRegistrationConfirmed) {
-        stringResource(Res.string.contract_optional_hero_reg_confirmed)
-    } else {
-        stringResource(state.currentStep.descRes)
+    val stepSubtitle = when {
+        isEditInfoStep ->
+            stringResource(Res.string.contract_edit_info_step_desc)
+        isRegistrationConfirmed && state.config?.isOptionalInsurance == true ->
+            stringResource(Res.string.contract_optional_hero_reg_confirmed)
+        isRegistrationConfirmed && state.config?.usesChecklistRegistration == true ->
+            stringResource(Res.string.contract_housewife_hero_reg_confirmed)
+        else -> stringResource(state.currentStep.descRes)
     }
 
     val handleNavigateBack: () -> Unit = {
@@ -336,6 +373,18 @@ fun ContractFlowScreenContent(
                                             genderGateError = state.genderGateError,
                                             preflightGateError = state.preflightGateError,
                                             isOptionalInsurance = state.config?.isOptionalInsurance == true,
+                                            usesChecklistRegistration = state.config?.usesChecklistRegistration == true,
+                                            contractNumber = state.editContractNumber,
+                                            isEditingExistingContract = state.isEditingExistingContract,
+                                            branchInfo = state.editBranchInfoDisplay,
+                                            isBranchInfoLoading = state.isEditingExistingContract &&
+                                                state.editBranchInfoDisplay.isBlank() &&
+                                                (
+                                                    state.isBranchCitiesLoading ||
+                                                        state.isBranchesLoading ||
+                                                        state.branchSelection.branchCode.isNotBlank() ||
+                                                        state.branchSelection.cityCode.isNotBlank()
+                                                    ),
                                         )
                                     }
 
@@ -522,6 +571,8 @@ fun ContractFlowScreenContent(
                                             isPremiumCalculated = state.isPremiumCalculated,
                                             showPremiumSlider = !state.hidePremiumSlider &&
                                                 (state.config?.usesFreelancePremiumRange == true || state.config?.isOptionalInsurance == true),
+                                            showTreatmentCostHint = state.treatmentSupportCode ==
+                                                ContractFlowUiState.TREATMENT_SUPPORT_WITH,
                                             onPremiumChange = {
                                                 onIntent(ContractFlowIntent.SelectMonthlyPremium(it))
                                             },
@@ -656,10 +707,14 @@ private fun isStepValid(state: ContractFlowUiState): Boolean {
     if (state.isLoading) return false
     return when (state.currentStep) {
         ContractStep.STEP_REGISTRATION -> {
-            state.registrationInfo != null &&
-                state.genderGateError == null &&
-                state.preflightGateError == null &&
-                (state.eligibility == null || state.eligibility.isEligible)
+            if (state.isEditingExistingContract) {
+                state.registrationInfo != null
+            } else {
+                state.registrationInfo != null &&
+                    state.genderGateError == null &&
+                    state.preflightGateError == null &&
+                    (state.eligibility == null || state.eligibility.isEligible)
+            }
         }
         ContractStep.STEP_AUTHORIZATION -> {
             state.eligibility != null && state.eligibility.isEligible
@@ -717,7 +772,8 @@ private fun buildContractSummaryRows(state: ContractFlowUiState): List<ContractS
         .mapNotNull { step ->
             val title = summaryTitleFor(step) ?: return@mapNotNull null
             val value = summaryValueFor(state, step)
-            ContractSummaryRowPR(step = step, title = title, value = value)
+            val canEdit = !(state.isEditingExistingContract && step == ContractStep.STEP_SELECT_BRANCH)
+            ContractSummaryRowPR(step = step, title = title, value = value, isEditable = canEdit)
         }
 }
 
@@ -782,6 +838,7 @@ private fun HandleContractFlowEvents(
         amount: Long,
         canPayOnline: Boolean,
     ) -> Unit,
+    onShowUpdateSuccess: () -> Unit,
     onShowSubmitFailure: (String) -> Unit,
 ) {
     events.collectWithLifecycleAware { event ->
@@ -793,6 +850,7 @@ private fun HandleContractFlowEvents(
                 event.amount,
                 event.canPayOnline,
             )
+            ContractFlowEvent.ShowUpdateSuccess -> onShowUpdateSuccess()
             is ContractFlowEvent.ShowSubmitFailure -> onShowSubmitFailure(event.message)
         }
     }
@@ -1210,6 +1268,71 @@ private fun ContractFlowScreenContentEditModePreview() {
                 currentStep = ContractStep.STEP_USER_INFO,
                 isEditMode = true,
                 userInfo = MockUserInfo,
+            ),
+            onBack = {},
+            onShowRules = {},
+            onIntent = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun ContractFlowScreenContentEditingExistingInfoPreview() {
+    PreviewRtlThemeContent {
+        ContractFlowScreenContent(
+            state = ContractFlowUiState(
+                isLoading = false,
+                registrationInfo = MockRegistrationInfo,
+                config = MockConfig,
+                currentStep = ContractStep.STEP_REGISTRATION,
+                isEditingExistingContract = true,
+                editContractNumber = "483222268",
+                isRulesConfirmed = true,
+                isAgreementConfirmed = true,
+                branchSelection = MockBranchSelection,
+            ),
+            onBack = {},
+            onShowRules = {},
+            onIntent = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun ContractFlowScreenContentEditingExistingBranchLoadingPreview() {
+    PreviewRtlThemeContent {
+        ContractFlowScreenContent(
+            state = ContractFlowUiState(
+                isLoading = false,
+                registrationInfo = MockRegistrationInfo,
+                config = MockConfig,
+                currentStep = ContractStep.STEP_REGISTRATION,
+                isEditingExistingContract = true,
+                editContractNumber = "483222268",
+                isRulesConfirmed = true,
+                isAgreementConfirmed = true,
+                isBranchesLoading = true,
+            ),
+            onBack = {},
+            onShowRules = {},
+            onIntent = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun ContractFlowScreenContentEditingExistingShimmerPreview() {
+    PreviewRtlThemeContent {
+        ContractFlowScreenContent(
+            state = ContractFlowUiState(
+                isLoading = true,
+                registrationInfo = null,
+                config = MockConfig,
+                isEditingExistingContract = true,
+                editContractNumber = "483222268",
             ),
             onBack = {},
             onShowRules = {},
