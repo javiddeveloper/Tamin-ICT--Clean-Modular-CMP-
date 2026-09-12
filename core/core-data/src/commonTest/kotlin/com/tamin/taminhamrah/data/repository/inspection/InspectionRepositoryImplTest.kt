@@ -13,6 +13,7 @@ import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -76,50 +77,53 @@ class InspectionRepositoryImplTest {
     }
 
     @Test
-    fun getAllInsurance_success_emitsMappedInspectionPerformedListDN() = runTest {
+    fun getInsurancePage_success_emitsMappedPageWithTotal() = runTest {
         remoteDataSource.allInsuranceResult = ListData(
-            total = 1,
+            total = 42,
             list = listOf(InspectionPerformedDTO(activityDesc = "فعالیت تست"))
         )
+        val query = ApiQueryParamDN(page = 1, start = 10, limit = 10)
 
-        val result = repository.getAllInsurance(emptyList())
+        val page = repository.getInsurancePage(query).first()
 
-        assertEquals(1, result.total)
-        assertEquals(1, result.list.size)
-        assertEquals("فعالیت تست", result.list.first().activityDesc)
-        assertEquals(100, remoteDataSource.lastAllInsuranceQuery?.limit)
+        assertEquals(42, page.total)
+        assertEquals(1, page.items.size)
+        assertEquals("فعالیت تست", page.items.first().activityDesc)
+        assertEquals(query, remoteDataSource.lastAllInsuranceQuery)
     }
 
     @Test
-    fun getBranches_success_emitsMappedBranchListDN() = runTest {
+    fun getBranchesPage_success_emitsMappedPageWithTotal() = runTest {
         remoteDataSource.branchesResult = ListData(
-            total = 1,
+            total = 5,
             list = listOf(BranchDTO(code = "0010", name = "تهران"))
         )
+        val query = ApiQueryParamDN(page = 0, start = 0, limit = 10)
 
-        val result = repository.getBranches(emptyList())
+        val page = repository.getBranchesPage(query).first()
 
-        assertEquals(1, result.total)
-        assertEquals(1, result.list.size)
-        assertEquals("0010", result.list.first().code)
-        assertEquals("تهران", result.list.first().name)
-        assertEquals(100, remoteDataSource.lastBranchesQuery?.limit)
+        assertEquals(5, page.total)
+        assertEquals(1, page.items.size)
+        assertEquals("0010", page.items.first().code)
+        assertEquals("تهران", page.items.first().name)
+        assertEquals(query, remoteDataSource.lastBranchesQuery)
     }
 
     @Test
-    fun getJobs_success_emitsMappedJobListDN() = runTest {
+    fun getJobsPage_success_emitsMappedPageWithTotal() = runTest {
         remoteDataSource.jobsResult = ListData(
             total = 1,
             list = listOf(JobDTO(jobCode = "2035", jobDescription = "قرص ساز"))
         )
+        val query = ApiQueryParamDN(page = 2, start = 20, limit = 10)
 
-        val result = repository.getJobs(emptyList())
+        val page = repository.getJobsPage(query).first()
 
-        assertEquals(1, result.total)
-        assertEquals(1, result.list.size)
-        assertEquals("2035", result.list.first().jobCode)
-        assertEquals("قرص ساز", result.list.first().jobDescription)
-        assertEquals(100, remoteDataSource.lastJobsQuery?.limit)
+        assertEquals(1, page.total)
+        assertEquals(1, page.items.size)
+        assertEquals("2035", page.items.first().jobCode)
+        assertEquals("قرص ساز", page.items.first().jobDescription)
+        assertEquals(query, remoteDataSource.lastJobsQuery)
     }
 
     @Test
@@ -160,12 +164,12 @@ class InspectionRepositoryImplTest {
     }
 
     @Test
-    fun getAllInsurance_onError_throwsParsedException() = runTest {
+    fun getInsurancePage_onError_throwsParsedException() = runTest {
         val expectedError = RuntimeException("Network Error")
         remoteDataSource.shouldThrowError = expectedError
 
         val actualError = assertFailsWith<RuntimeException> {
-            repository.getAllInsurance(emptyList())
+            repository.getInsurancePage(ApiQueryParamDN()).first()
         }
 
         assertEquals(expectedError.message, actualError.message)
