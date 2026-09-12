@@ -18,13 +18,8 @@ import com.tamin.taminhamrah.feature.workshops.ui.paymentSheets.PaymentSheetsScr
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebit.WorkshopDebitScreen
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebtInquiry.WorkshopDebtInquiryScreen
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
-import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.workshops.LegalRepresentativeWorkshopsScreen
-import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.otp.LegalRepresentativeOtpScreen
-import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.list.LegalRepresentativeListScreen
-import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.add.AddLegalRepresentativeScreen
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativePR
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopPR
-import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import kotlinx.serialization.Serializable
 
 @Serializable

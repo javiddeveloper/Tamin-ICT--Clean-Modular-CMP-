@@ -15,13 +15,18 @@ import com.tamin.taminhamrah.feature.workshops.ui.objectionStatus.sms.ObjectionS
 import com.tamin.taminhamrah.feature.workshops.ui.paymentSheets.PaymentSheetsViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebit.WorkshopDebitViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebtInquiry.WorkshopDebtInquiryViewModel
-import org.koin.core.module.dsl.factoryOf
+import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
+import kotlinx.coroutines.flow.first
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 val workshopsModule = module {
-    // Shared by the three forms that attach evidence.
-    factoryOf(::WorkshopAttachmentUploader)
+    // Shared by the three forms that attach evidence. The use case is Flow-shaped; the single
+    // guid a form actually wants is taken here, so the forms never see the Flow.
+    factory {
+        val uploadImage: UploadImageUseCase = get()
+        WorkshopAttachmentUploader { uploadImage(it).first() }
+    }
 
     viewModelOf(::WorkshopsViewModel)
     viewModelOf(::WorkshopDebtInquiryViewModel)

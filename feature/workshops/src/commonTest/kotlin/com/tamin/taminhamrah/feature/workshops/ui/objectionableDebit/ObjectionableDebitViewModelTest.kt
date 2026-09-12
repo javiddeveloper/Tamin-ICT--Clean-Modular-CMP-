@@ -2,32 +2,13 @@ package com.tamin.taminhamrah.feature.workshops.ui.objectionableDebit
 
 import app.cash.turbine.test
 import com.tamin.taminhamrah.feature.workshops.fake.FakeWorkShopsRepository
+import com.tamin.taminhamrah.feature.workshops.ui.model.ObjectionDocumentTypes
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachmentUploader
 import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
 import com.tamin.taminhamrah.useCases.workshops.CheckObjectionDeadlineUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetDebitObjectionPdfUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetObjectionableDebitsUseCase
-import com.tamin.taminhamrah.repository.contracts.ContractsRepository
-import com.tamin.taminhamrah.model.contracts.BranchDN
-import com.tamin.taminhamrah.model.contracts.FreelanceContractByGuardianParams
-import com.tamin.taminhamrah.model.contracts.OptionalContractByGuardianParams
-import com.tamin.taminhamrah.model.contracts.ContractDN
-import com.tamin.taminhamrah.model.contracts.FreelanceCalculateSalaryParams
-import com.tamin.taminhamrah.model.contracts.FreelanceContractResultDN
-import com.tamin.taminhamrah.model.contracts.FreelanceMakeContractParams
-import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeDN
-import com.tamin.taminhamrah.model.contracts.FreelancePremiumRangeParams
-import com.tamin.taminhamrah.model.contracts.FreeJobDN
-import com.tamin.taminhamrah.model.contracts.InsurancePaymentDN
-import com.tamin.taminhamrah.model.contracts.InsurancePaymentParamsDN
-import com.tamin.taminhamrah.model.contracts.PremiumRateDN
-import com.tamin.taminhamrah.model.contracts.RegistrationInfoDN
-import com.tamin.taminhamrah.model.contracts.SaveContactRequestDN
-import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
-import com.tamin.taminhamrah.model.request.ApiQueryParamDN
-import kotlinx.coroutines.flow.Flow
-import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
 import com.tamin.taminhamrah.useCases.workshops.SaveDebitObjectionUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -39,6 +20,8 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -70,7 +53,7 @@ class ObjectionableDebitViewModelTest {
         GetObjectionableDebitsUseCase(repository),
         CheckObjectionDeadlineUseCase(repository),
         GetDebitObjectionPdfUseCase(repository),
-        WorkshopAttachmentUploader(UploadImageUseCase(NoUploads)),
+        WorkshopAttachmentUploader { UPLOADED_GUID },
         SaveDebitObjectionUseCase(repository),
     )
 
@@ -173,6 +156,85 @@ class ObjectionableDebitViewModelTest {
         assertNull(viewModel.uiState.value.form, "no form for a debt past its filing window")
     }
 
+    /**
+     * The tick is not the answer: submit asks once more, and nothing is filed until it is answered.
+     *
+     * The old app put a modal between the تعهدنامه checkbox and the API call for a reason — a
+     * filed objection cannot be withdrawn.
+     */
+    @Test
+    fun `a complete form asks before it files`() = runTest(testDispatcher) {
+        val viewModel = readyToSubmit()
+
+        viewModel.sendIntent(ObjectionableDebitIntent.FormSubmit)
+
+        assertEquals(viewModel.uiState.value.form?.isConfirmVisible, true, "it must ask first")
+        assertNull(repository.lastDebitObjectionRequest, "nothing may be filed before the answer")
+    }
+
+    @Test
+    fun `answering the question files the objection`() = runTest(testDispatcher) {
+        val viewModel = readyToSubmit()
+
+        viewModel.sendIntent(ObjectionableDebitIntent.FormSubmit)
+        viewModel.sendIntent(ObjectionableDebitIntent.FormConfirmAccepted)
+
+        assertNotNull(repository.lastDebitObjectionRequest, "confirming must file it")
+        assertNull(viewModel.uiState.value.form, "the form closes once it is filed")
+    }
+
+    @Test
+    fun `declining the question files nothing and keeps the form`() = runTest(testDispatcher) {
+        val viewModel = readyToSubmit()
+
+        viewModel.sendIntent(ObjectionableDebitIntent.FormSubmit)
+        viewModel.sendIntent(ObjectionableDebitIntent.FormConfirmDismissed)
+
+        assertNull(repository.lastDebitObjectionRequest, "declining must file nothing")
+        assertNotNull(viewModel.uiState.value.form, "the form stays, filled in as it was")
+        assertNotEquals(viewModel.uiState.value.form?.isConfirmVisible, true)
+    }
+
+    /** An incomplete form is refused where it always was — the question is never reached. */
+    @Test
+    fun `an incomplete form is refused instead of asked about`() = runTest(testDispatcher) {
+        val viewModel = openForm()
+
+        viewModel.sendIntent(ObjectionableDebitIntent.FormSubmit)
+
+        val form = assertNotNull(viewModel.uiState.value.form)
+        assertTrue(form.hasTriedSubmit, "the form must say what is missing")
+        assertFalse(form.isConfirmVisible, "and must not ask about a form it would refuse")
+        assertNull(repository.lastDebitObjectionRequest)
+    }
+
+    /** A debt inside its window, with its form open. */
+    private fun openForm(): ObjectionableDebitViewModel {
+        repository.objectionableDebits = PagedListDN(items = listOf(estimateDebt()), total = 1)
+        repository.objectionElapsedDays = WITHIN_WINDOW
+
+        val viewModel = viewModel()
+        open(viewModel)
+        viewModel.sendIntent(
+            ObjectionableDebitIntent.RowAction(viewModel.uiState.value.list.items[0])
+        )
+        return viewModel
+    }
+
+    /** …and filled in far enough that every rule passes. */
+    private fun readyToSubmit(): ObjectionableDebitViewModel {
+        val viewModel = openForm()
+        viewModel.sendIntent(
+            ObjectionableDebitIntent.FormAddDocument(
+                fileName = "evidence.jpg",
+                bytes = ByteArray(2048),
+                typeCode = ObjectionDocumentTypes.first().code,
+            )
+        )
+        viewModel.sendIntent(ObjectionableDebitIntent.FormConfirmedChanged(isConfirmed = true))
+        return viewModel
+    }
+
     private fun debts(count: Int) = PagedListDN(
         items = List(count) { estimateDebt(debitNumber = "$RAW_DEBIT_NUMBER$it") },
         total = count,
@@ -199,6 +261,7 @@ class ObjectionableDebitViewModelTest {
         const val WORKSHOP_ID = "9028218513"
         const val BRANCH_CODE = "14"
         const val RAW_DEBIT_NUMBER = "6310030089235"
+        const val UPLOADED_GUID = "a-guid"
 
         /** The codes [WorkShopDebtDN.objectionKind] reads to decide a row is still objectionable. */
         const val STEP_ESTIMATE = "01"
@@ -208,37 +271,4 @@ class ObjectionableDebitViewModelTest {
         const val WITHIN_WINDOW = 10
         const val PAST_WINDOW = 99
     }
-}
-
-/**
- * The uploader's dependency, present only because the view model takes one.
- *
- * None of these tests attaches a file, so every call fails loudly rather than returning a silent
- * default — a test that starts uploading by accident should say so rather than quietly pass.
- */
-private object NoUploads : ContractsRepository {
-    private fun notUsed(): Nothing =
-        error("not used by ObjectionableDebitViewModel tests")
-
-    override fun getContracts(query: ApiQueryParamDN?): Flow<List<ContractDN>> = notUsed()
-    override fun getContractsByPremiumType(premiumTypeCode: String): Flow<List<ContractDN>> = notUsed()
-    override fun getStudentInsuranceContracts(): Flow<List<ContractDN>> = notUsed()
-    override fun getRegistrationInfo(): Flow<RegistrationInfoDN> = notUsed()
-    override fun getBranches(cityCode: String): Flow<List<BranchDN>> = notUsed()
-    override fun getSpcPremiumRates(): Flow<List<PremiumRateDN>> = notUsed()
-    override fun getFreeJobWages(): Flow<List<FreeJobDN>> = notUsed()
-    override fun getFreelancePremiumRange(params: FreelancePremiumRangeParams): Flow<FreelancePremiumRangeDN> = notUsed()
-    override fun getOptionalPremiumRange(): Flow<FreelancePremiumRangeDN> = notUsed()
-    override fun checkRedCrossStatus(): Flow<String> = notUsed()
-    override fun checkMedicalStudent(): Flow<String> = notUsed()
-    override fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Flow<Long> = notUsed()
-    override fun calculateOptionalSalary(premiumRateCode: String): Flow<Long> = notUsed()
-    override fun makeFreelanceContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN> = notUsed()
-    override fun makeContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN> = notUsed()
-    override fun makeFreelanceContractByGuardian(params: FreelanceContractByGuardianParams): Flow<FreelanceContractResultDN> = notUsed()
-    override fun makeOptionalContractByGuardian(params: OptionalContractByGuardianParams): Flow<FreelanceContractResultDN> = notUsed()
-    override fun getInsurancePayment(params: InsurancePaymentParamsDN): Flow<InsurancePaymentDN> = notUsed()
-    override fun checkInsurancePaymentStatus(systemType: String): Flow<Any?> = notUsed()
-    override fun uploadImage(request: UploadImageRequestDN): Flow<String> = notUsed()
-    override fun saveContact(request: SaveContactRequestDN): Flow<Any?> = notUsed()
 }
