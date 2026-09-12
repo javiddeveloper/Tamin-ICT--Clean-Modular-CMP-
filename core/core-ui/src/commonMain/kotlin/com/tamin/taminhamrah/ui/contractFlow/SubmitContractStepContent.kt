@@ -52,6 +52,7 @@ data class ContractSummaryRowPR(
     val step: ContractStep,
     val title: String,
     val value: String,
+    val isEditable: Boolean = true,
 )
 
 @Composable
@@ -93,7 +94,11 @@ fun SubmitContractStepContent(
                 ContractSummaryRow(
                     title = row.title,
                     value = row.value,
-                    onEdit = { onEditStep(row.step) },
+                    onEdit = if (row.isEditable) {
+                        { onEditStep(row.step) }
+                    } else {
+                        null
+                    },
                 )
                 if (index < summaryRows.lastIndex) {
                     HorizontalDivider(
@@ -145,7 +150,7 @@ fun SubmitContractStepContent(
 private fun ContractSummaryRow(
     title: String,
     value: String,
-    onEdit: () -> Unit,
+    onEdit: (() -> Unit)?,
 ) {
     val colors = LocalTaminColors.current
     Row(
@@ -177,15 +182,17 @@ private fun ContractSummaryRow(
             textAlign = TextAlign.Start,
             modifier = Modifier.weight(1f),
         )
-        Icon(
-            imageVector = vectorResource(Res.drawable.ic_tamin_edit),
-            contentDescription = stringResource(Res.string.contract_edit_step),
-            tint = colors.blueText,
-            modifier = Modifier
-                .size(IconSize.medium)
-                .clip(CircleShape)
-                .clickable(role = Role.Button, onClick = onEdit),
-        )
+        if (onEdit != null) {
+            Icon(
+                imageVector = vectorResource(Res.drawable.ic_tamin_edit),
+                contentDescription = stringResource(Res.string.contract_edit_step),
+                tint = colors.blueText,
+                modifier = Modifier
+                    .size(IconSize.medium)
+                    .clip(CircleShape)
+                    .clickable(role = Role.Button, onClick = onEdit),
+            )
+        }
     }
 }
 

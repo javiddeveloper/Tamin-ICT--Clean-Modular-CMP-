@@ -122,6 +122,9 @@ import com.tamin.taminhamrah.useCases.contracts.GetSpcPremiumRatesUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeFreelanceContractByGuardianUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeOptionalContractByGuardianUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeContractUseCase
+import com.tamin.taminhamrah.useCases.contracts.UpdateContractUseCase
+import com.tamin.taminhamrah.useCases.contracts.UpdateFreelanceContractByGuardianUseCase
+import com.tamin.taminhamrah.useCases.contracts.UpdateOptionalContractByGuardianUseCase
 import com.tamin.taminhamrah.useCases.contracts.SaveContactUseCase
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetHistoryJobInfosUseCase
@@ -398,6 +401,9 @@ val domainModule = module {
     factoryOf(::MakeContractUseCase)
     factoryOf(::MakeFreelanceContractByGuardianUseCase)
     factoryOf(::MakeOptionalContractByGuardianUseCase)
+    factoryOf(::UpdateContractUseCase)
+    factoryOf(::UpdateFreelanceContractByGuardianUseCase)
+    factoryOf(::UpdateOptionalContractByGuardianUseCase)
     factoryOf(::GetInsurancePaymentUseCase)
     factoryOf(::CheckInsurancePaymentStatusUseCase)
     factoryOf(::SaveContactUseCase)
