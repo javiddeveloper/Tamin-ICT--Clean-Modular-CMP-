@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.data.repository
 
+import com.tamin.taminhamrah.data.mapper.requestId
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toDomainPage
 import com.tamin.taminhamrah.data.mapper.toDto
@@ -37,6 +38,8 @@ import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetQuery
+import com.tamin.taminhamrah.model.workshop.SettlementRequestDN
+import com.tamin.taminhamrah.model.workshop.SettlementSubjectDN
 import com.tamin.taminhamrah.model.workshop.WORKSHOP_PAGE_SIZE
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
 import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDN
@@ -58,6 +61,8 @@ import com.tamin.taminhamrah.model.workshop.SmsMessageDN
 import com.tamin.taminhamrah.repository.WorkShopsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+
+private const val SETTLEMENT_SUBJECTS_PAGE_SIZE = 100
 
 /**
  * Turns the feature's typed queries into the ExtJS-style `filter` array every workshop service
@@ -152,6 +157,23 @@ class WorkShopsRepositoryImpl(
 
     override suspend fun getComputationalBasePdf(documentId: String): PdfDownloadDN =
         remoteDataSource.getComputationalBasePdf(documentId).toDomain()
+
+    // ------------------------------------------------------------ درخواست مفاصاحساب
+
+    override suspend fun getSettlementSubjects(): List<SettlementSubjectDN> =
+        // ponytail: one page wide enough for the whole table (thirty codes); page it if it ever grows.
+        remoteDataSource
+            .getSettlementSubjects(pageQuery(page = 0, pageSize = SETTLEMENT_SUBJECTS_PAGE_SIZE))
+            .list.orEmpty()
+            .map { it.toDomain() }
+            // The code is the last part of the request id; a subject without one cannot be filed.
+            .filter { it.code.isNotBlank() }
+
+    override suspend fun uploadSettlementPdf(fileName: String, bytes: ByteArray): String =
+        remoteDataSource.uploadSettlementPdf(fileName, bytes)
+
+    override suspend fun submitSettlementRequest(request: SettlementRequestDN): String =
+        remoteDataSource.submitSettlementRequest(request.requestId(), request.toDto())
 
     // -------------------------------------------------------------------- برگ پرداخت‌ها
 

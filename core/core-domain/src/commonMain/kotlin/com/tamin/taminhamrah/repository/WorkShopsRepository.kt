@@ -29,6 +29,8 @@ import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetQuery
+import com.tamin.taminhamrah.model.workshop.SettlementRequestDN
+import com.tamin.taminhamrah.model.workshop.SettlementSubjectDN
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
 import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDN
 import com.tamin.taminhamrah.model.workshop.WorkshopContractDN
@@ -84,6 +86,15 @@ interface WorkShopsRepository {
 
     /** A PDF attached to a مبنای محاسباتی. */
     suspend fun getComputationalBasePdf(documentId: String): PdfDownloadDN
+
+    /** موضوعات کار a درخواست مفاصاحساب can be filed under. */
+    suspend fun getSettlementSubjects(): List<SettlementSubjectDN>
+
+    /** Stores one PDF of a درخواست مفاصاحساب; returns the id the request names it by. */
+    suspend fun uploadSettlementPdf(fileName: String, bytes: ByteArray): String
+
+    /** Files a درخواست مفاصاحساب; returns the service's confirmation. */
+    suspend fun submitSettlementRequest(request: SettlementRequestDN): String
 
     // -------------------------------------------------------------------------- برگ پرداخت‌ها
 
