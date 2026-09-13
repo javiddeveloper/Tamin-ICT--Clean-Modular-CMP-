@@ -36,6 +36,7 @@ Domain: insurance and social security. Maps the Persian term used by the busines
 | فیش حقوقی | payslip | `PAY_ROLL` |
 | حکم مستمری | pension decree | `EDICT_PENSIONER` |
 | گواهی کسر اقساط | deferred installment certificate | `DEFERRED_INSTALLMENT_CERTIFICATE` |
+| تکمیل سوابق کسری از ماه | fraction / short-month history completion | `FRACTION_CONTRACT`, `feature:fractionContract` |
 | گواهی حقوق | wage certificate | `ISSUANCE_WAGE_CERTIFICATE` |
 | مستمری ازکارافتادگی | disability pension | `DISABILITY_PENSION` |
 | دختر بازمانده / تعهدنامه فرزندان دختر | surviving daughter commitment | `GIRL_SURVIVOR`, `feature:girlSurvivor` |

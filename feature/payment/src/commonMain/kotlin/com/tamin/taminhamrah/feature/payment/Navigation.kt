@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.payment
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.toRoute
 import com.tamin.taminhamrah.feature.payment.ui.checkout.PaymentCheckoutScreen
 import com.tamin.taminhamrah.feature.payment.ui.result.PaymentResultScreen
@@ -113,12 +114,17 @@ fun NavGraphBuilder.paymentSandboxScreen(
     }
 }
 
-fun NavController.navigateToPayment(request: PaymentRequestDN) {
+fun NavController.navigateToPayment(
+    request: PaymentRequestDN,
+    builder: (NavOptionsBuilder.() -> Unit)? = null,
+) {
     navigate(
         PaymentRoute.Checkout(
             ticket = request.ticket,
             verifierKey = request.verifierKey,
             verifierReference = request.verifierReference,
         )
-    )
+    ) {
+        builder?.invoke(this)
+    }
 }
