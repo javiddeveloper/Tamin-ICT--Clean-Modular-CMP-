@@ -2684,7 +2684,9 @@
     <string name="assigner_filter_clear">حذف</string>
     <string name="assigner_contract_date">تاریخ قرارداد</string>
     <string name="assigner_contract_subtitle">%1$s · ردیف %2$s</string>
-    <string name="assigner_count">%1$s پیمان</string>
+    <string name="assigner_tab_active">جاری</string>
+    <string name="assigner_tab_finished">خاتمه‌یافته</string>
+    <string name="assigner_count_label">واگذارنده</string>
 
     <!-- Search sheet -->
     <string name="assigner_search_branch_code_optional">کد شعبه (اختیاری)</string>

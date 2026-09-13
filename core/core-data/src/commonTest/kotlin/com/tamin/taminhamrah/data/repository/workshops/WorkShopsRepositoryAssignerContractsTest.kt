@@ -69,6 +69,14 @@ class WorkShopsRepositoryAssignerContractsTest {
         assertEquals(FilterProperty.WORKSHOP_ID, filters.single().property)
     }
 
+    /** With no code at all the filter array is empty — which is how the screen asks for every پیمان. */
+    @Test
+    fun `assigner contracts with no codes send no filter at all`() = runTest {
+        repository.getAssignerContracts(AssignerContractQuery(workshopId = ""))
+
+        assertEquals(emptyList(), remote.lastContractsQuery?.filters)
+    }
+
     @Test
     fun `assigner contracts page from the index and fold the envelope`() = runTest {
         remote.contracts = ListData(

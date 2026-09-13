@@ -13,6 +13,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.Doc
 import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
 import com.tamin.taminhamrah.mapper.personal.toPresentation
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
+import com.tamin.taminhamrah.model.workshop.AssignerContractPR
 import com.tamin.taminhamrah.model.workshop.AssignerContractQuery
 import com.tamin.taminhamrah.model.workshop.BaseDocumentKind
 import com.tamin.taminhamrah.model.workshop.ComputationalBaseQuery
@@ -56,8 +57,8 @@ class AssignerContractsViewModel(
 
     override fun handleIntent(intent: AssignerContractsIntent): Flow<PartialState> = when (intent) {
         is AssignerContractsIntent.Open -> open(intent)
-        AssignerContractsIntent.LoadMore -> loadMore()
-        AssignerContractsIntent.Retry -> loadPage(page = 0)
+        AssignerContractsIntent.Retry -> loadAll(uiState.value.filter)
+        is AssignerContractsIntent.TabSelected -> flow { emit(PartialState.TabChanged(intent.tab)) }
         is AssignerContractsIntent.SearchOpenChanged -> setSearchOpen(intent.isOpen)
 
         is AssignerContractsIntent.DraftWorkshopIdChanged -> flow {
@@ -83,9 +84,11 @@ class AssignerContractsViewModel(
         }
 
         AssignerContractsIntent.ApplySearch -> applySearch()
+        // Dropping the search goes back to every پیمان, not to an empty page.
         AssignerContractsIntent.ClearSearch -> flow {
             emit(PartialState.Cleared)
             emit(PartialState.SearchOpenChanged(isOpen = false))
+            emitAll(loadAll(filter = null))
         }
 
         is AssignerContractsIntent.OpenBases -> openBases(intent.keys)
@@ -115,57 +118,58 @@ class AssignerContractsViewModel(
     // ------------------------------------------------------------------------------ the list
 
     /**
-     * Opened with a workshop — the drill-down from جزئیات کارگاه — searches for it straight away.
-     * Opened without one — the services grid — has nothing to fetch, so it raises the search sheet
-     * rather than showing an empty list the user has no way to read as "search for a workshop".
+     * Every پیمان the employer is the واگذارنده of, straight away — the list is not gated on a
+     * search. From جزئیات کارگاه the route carries a workshop and the list opens narrowed to it; from
+     * the services grid it carries none and shows them all.
      *
-     * Re-opening on a filter already in state does not refetch: coming back from جزئیات پیمان keeps
-     * the page and the scroll position the user left behind.
+     * Re-opening on what is already applied does not refetch: coming back from جزئیات پیمان keeps
+     * the rows and the scroll position the user left behind.
      */
     private fun open(intent: AssignerContractsIntent.Open): Flow<PartialState> = flow {
-        val state = uiState.value
-        if (intent.workshopId.isBlank()) {
-            if (state.filter == null) emitAll(setSearchOpen(isOpen = true))
-            return@flow
+        val filter = intent.workshopId.takeIf { it.isNotBlank() }?.let {
+            AssignerContractFilter(workshopId = it, branchCode = intent.branchCode)
         }
-        val filter = AssignerContractFilter(
-            workshopId = intent.workshopId,
-            branchCode = intent.branchCode,
-        )
-        if (state.filter == filter) return@flow
-        emit(PartialState.DraftChanged(intent.workshopId, intent.branchCode, contractRow = ""))
+        val state = uiState.value
+        if (state.hasApplied && state.filter == filter) return@flow
+        if (filter != null) {
+            emit(PartialState.DraftChanged(filter.workshopId, filter.branchCode, contractRow = ""))
+        }
         emit(PartialState.Applied(filter))
-        emitAll(loadPage(page = 0, filter = filter))
+        emitAll(loadAll(filter))
     }
 
-    private fun loadPage(
-        page: Int,
-        filter: AssignerContractFilter? = uiState.value.filter,
-    ): Flow<PartialState> = flow {
-        if (filter == null) return@flow
-        emit(if (page == 0) PartialState.Loading else PartialState.LoadingMore)
-        val result = getContracts(
-            AssignerContractQuery(
-                workshopId = filter.workshopId,
-                // Blank is dropped from the filter array by the repository, which *widens* the
-                // search — unlike ردیف‌های پیمان, where a blank addresses a route that 404s.
-                branchCode = filter.branchCode.ifBlank { null },
-                contractRow = filter.contractRow.ifBlank { null },
-                page = page,
+    /**
+     * Every page of [filter]'s result, fetched one after another and shown as each land.
+     *
+     * Paged on the wire but loaded whole, because the جاری / خاتمه‌یافته split and its count are
+     * decided on the device: a tab built from the first page alone would read empty while its rows
+     * were still on page three. The first page still paints at once; later ones append under the
+     * footer shimmer.
+     *
+     * ponytail: every page up front — a server-side status filter is the upgrade if one employer
+     * ever holds hundreds of پیمان.
+     */
+    private fun loadAll(filter: AssignerContractFilter?): Flow<PartialState> = flow {
+        emit(PartialState.Loading)
+        var list = PagedListState<AssignerContractPR>()
+        var page = 0
+        do {
+            val result = getContracts(
+                AssignerContractQuery(
+                    // Blank codes are dropped from the filter array by the repository, which
+                    // widens the search — so no filter at all asks for every پیمان. Unlike
+                    // ردیف‌های پیمان, where a blank addresses a route that 404s.
+                    workshopId = filter?.workshopId.orEmpty(),
+                    branchCode = filter?.branchCode?.ifBlank { null },
+                    contractRow = filter?.contractRow?.ifBlank { null },
+                    page = page,
+                )
             )
-        )
-        emit(
-            PartialState.Loaded(
-                uiState.value.list.loaded(result, isFirstPage = page == 0) { it.toPresentation() }
-            )
-        )
+            list = list.loaded(result, isFirstPage = page == 0) { it.toPresentation() }
+            emit(PartialState.Loaded(if (list.hasMore) list.loadingMore() else list, filter))
+            page = list.nextPage
+        } while (list.hasMore)
     }.catch { emit(PartialState.Error(it.toSingleLineMessage())) }
-
-    private fun loadMore(): Flow<PartialState> {
-        val list = uiState.value.list
-        if (!list.canLoadMore) return flow { }
-        return loadPage(page = list.nextPage)
-    }
 
     /**
      * Opening the sheet seeds it from what is already applied, so re-opening edits the live search
@@ -208,11 +212,11 @@ class AssignerContractsViewModel(
     }
 
     /**
-     * کد کارگاه is the one required field.
+     * کد کارگاه is the one required field of a search.
      *
      * Not because the service demands it — all three travel as filter clauses and a blank one is
-     * simply omitted — but because the design does: without it the screen would open onto every
-     * پیمان the employer holds, which is what its two worded-apart empty states exist to prevent.
+     * simply omitted — but because a search without it is no search: the unfiltered list is already
+     * what the screen opens on, and what «حذف» returns to.
      */
     private fun applySearch(): Flow<PartialState> = flow {
         val state = uiState.value
@@ -230,7 +234,7 @@ class AssignerContractsViewModel(
         )
         emit(PartialState.Applied(filter))
         emit(PartialState.SearchOpenChanged(isOpen = false))
-        emitAll(loadPage(page = 0, filter = filter))
+        emitAll(loadAll(filter))
     }
 
     // ---------------------------------------------------------------------- مبانی محاسباتی
@@ -376,17 +380,29 @@ class AssignerContractsViewModel(
         partialState: PartialState,
     ): AssignerContractsUiState = when (partialState) {
         PartialState.Loading -> currentState.copy(list = currentState.list.loading())
-        PartialState.LoadingMore -> currentState.copy(list = currentState.list.loadingMore())
-        is PartialState.Loaded -> currentState.copy(list = partialState.list)
+
+        // A page of a search the user has since replaced is dropped rather than painted over the
+        // rows of the one now applied.
+        is PartialState.Loaded ->
+            if (partialState.filter == currentState.filter) {
+                currentState.copy(list = partialState.list)
+            } else {
+                currentState
+            }
+
         is PartialState.Error ->
             currentState.copy(list = currentState.list.failed(partialState.message))
 
-        is PartialState.Applied -> currentState.copy(filter = partialState.filter)
+        is PartialState.Applied ->
+            currentState.copy(filter = partialState.filter, hasApplied = true)
+
         PartialState.Cleared -> currentState.copy(
             filter = null,
             draft = AssignerSearchDraft(),
             list = PagedListState(),
         )
+
+        is PartialState.TabChanged -> currentState.copy(tab = partialState.tab)
 
         is PartialState.SearchOpenChanged -> currentState.copy(isSearchOpen = partialState.isOpen)
         is PartialState.DraftChanged -> currentState.copy(

@@ -213,6 +213,7 @@ fun AssignerContractDTO.toDomain(): AssignerContractDN = AssignerContractDN(
     contractSequence = contractSequence.orEmpty(),
     contractNumber = contractNumber.orEmpty(),
     contractDate = contractDate.orEmpty(),
+    contractEndDate = contractEndDate.orEmpty(),
     contractSubject = contractSubject.orEmpty(),
     // Two sides, never folded together: `assigner` is the signed-in employer's own کارگاه and
     // `employer` is the پیمانکار. Swapping them puts the user's own workshop on every card and

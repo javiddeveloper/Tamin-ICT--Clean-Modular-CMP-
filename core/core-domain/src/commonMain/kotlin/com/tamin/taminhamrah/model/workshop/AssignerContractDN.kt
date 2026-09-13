@@ -22,6 +22,8 @@ data class AssignerContractDN(
     val contractNumber: String = "",
     /** Compact Jalali, `14010210`. */
     val contractDate: String = "",
+    /** Compact Jalali, `14030601`; blank when the service sent none. */
+    val contractEndDate: String = "",
     val contractSubject: String = "",
     val assigner: AssignerPartyDN = AssignerPartyDN(),
     val employer: AssignerPartyDN = AssignerPartyDN(),
@@ -52,7 +54,7 @@ data class ComputationalBaseDN(
 /**
  * One document attached to a مبنای محاسباتی.
  *
- * [kind] is behaviour — it decides which of the two endpoints serves the file — so it is settled
+ * [kind] is behavior — it decides which of the two endpoints serves the file — so it is settled
  * here. [categoryCode] is copy, and stays a raw code until core-ui turns it into a heading.
  */
 data class BaseDocumentDN(

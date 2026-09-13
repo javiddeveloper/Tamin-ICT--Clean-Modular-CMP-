@@ -1,0 +1,109 @@
+package com.tamin.taminhamrah.mapper.workshop
+
+import com.tamin.taminhamrah.model.workshop.AssignerContractDN
+import com.tamin.taminhamrah.model.workshop.AssignerPartyDN
+import com.tamin.taminhamrah.model.workshop.BaseDocumentCategory
+import com.tamin.taminhamrah.model.workshop.BaseDocumentDN
+import com.tamin.taminhamrah.model.workshop.BaseDocumentKind
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseDN
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
+
+/**
+ * The domain → screen half of واگذارندگان: which tab a پیمان lands in, and the formatting and grouping
+ * decisions where a wrong answer would still look plausible on screen.
+ */
+class AssignerUiMapperTest {
+
+    private fun contract(endDate: String) = AssignerContractDN(
+        contractRow = "1",
+        contractEndDate = endDate,
+        employer = AssignerPartyDN(workshopId = "9028212822", branchCode = "0210"),
+    )
+
+    // ------------------------------------------------------------------ جاری / خاتمه‌یافته
+
+    @Test
+    fun aContractWhoseEndDateHasPassedIsFinished() {
+        assertTrue(contract(endDate = "13990101").toPresentation().isFinished)
+    }
+
+    @Test
+    fun aContractEndingInTheFutureIsActive() {
+        assertFalse(contract(endDate = "15000101").toPresentation().isFinished)
+    }
+
+    /** Both shapes the services send a Jalali date in are read, not only the compact one. */
+    @Test
+    fun aSeparatedEndDateIsReadToo() {
+        assertTrue(contract(endDate = "1399/01/01").toPresentation().isFinished)
+    }
+
+    /**
+     * No end date is not an ended contract.
+     *
+     * The field is unconfirmed on the live service. If it never arrives, every پیمان must still show
+     * under جاری rather than the whole list disappearing into خاتمه‌یافته.
+     */
+    @Test
+    fun aMissingOrUnreadableEndDateStaysActive() {
+        assertFalse(contract(endDate = "").toPresentation().isFinished)
+        assertFalse(contract(endDate = "2024-03-20T00:00:00Z").toPresentation().isFinished)
+    }
+
+    // ----------------------------------------------------------------------- مبانی محاسباتی
+
+    /**
+     * Zero and missing are different answers for a مبلغ.
+     *
+     * The service reporting ۰ ریال is a fact; the service reporting nothing is a gap, and printing
+     * the gap as ۰ would state an amount nobody gave.
+     */
+    @Test
+    fun aZeroAmountPrintsWhileAMissingOneDashes() {
+        val zero = ComputationalBaseDN(letterNumber = "1", amount = 0L).toPresentation()
+        val missing = ComputationalBaseDN(letterNumber = "1", amount = null).toPresentation()
+
+        assertTrue(zero.amount.contains("ریال"))
+        assertFalse(missing.amount.contains("ریال"))
+        assertNotEquals(zero.amount, missing.amount)
+    }
+
+    /** Each of the four codes the old app names gets its heading; anything else is still shown. */
+    @Test
+    fun documentCodesMapToTheirHeadings() {
+        val expected = mapOf(
+            "1" to BaseDocumentCategory.LETTER,
+            "2" to BaseDocumentCategory.SUBCONTRACTOR,
+            "3" to BaseDocumentCategory.SUPPLEMENT,
+            "4" to BaseDocumentCategory.FINAL_STATUS,
+            "9" to BaseDocumentCategory.OTHER,
+            "" to BaseDocumentCategory.OTHER,
+        )
+        expected.forEach { (code, category) ->
+            assertEquals(category, BaseDocumentCategory.fromCode(code), "code «$code»")
+        }
+        assertEquals(BaseDocumentCategory.OTHER, BaseDocumentCategory.fromCode(null))
+    }
+
+    /**
+     * A letter is identified by its code alone, whatever its type.
+     *
+     * The old app also required `documentType == "1"` for this heading, which hid a letter filed as a
+     * PDF from every section. Pinned so the difference stays a decision rather than an accident.
+     */
+    @Test
+    fun aLetterFiledAsPdfIsStillALetter() {
+        val document = BaseDocumentDN(
+            documentId = "b2",
+            kind = BaseDocumentKind.PDF,
+            categoryCode = "1",
+        ).toPresentation()
+
+        assertEquals(BaseDocumentCategory.LETTER, document.category)
+        assertEquals(BaseDocumentKind.PDF, document.kind)
+    }
+}

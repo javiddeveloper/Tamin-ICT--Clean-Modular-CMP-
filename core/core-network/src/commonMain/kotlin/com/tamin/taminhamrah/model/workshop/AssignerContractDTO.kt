@@ -30,6 +30,12 @@ data class AssignerContractDTO(
     @SerialName("contractNumber") val contractNumber: String? = null,
     /** Compact Jalali (`14010210`), separated at the presentation edge. */
     @SerialName("contractDate") val contractDate: String? = null,
+    /**
+     * When the پیمان ends, compact Jalali like [contractDate] — what splits the list into جاری and
+     * خاتمه‌یافته. The old app's model for this endpoint declares it but never draws it, so no live
+     * payload has yet confirmed it arrives populated.
+     */
+    @SerialName("contractEndDate") val contractEndDate: String? = null,
     /** موضوع پیمان, as prose. The numeric `contractSubjectCode` is a different column. */
     @SerialName("contractSubject") val contractSubject: String? = null,
     /** واگذارنده — the signed-in employer's own workshop. */

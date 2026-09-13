@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.workshops.ui.assignerContracts
 
 import app.cash.turbine.test
 import com.tamin.taminhamrah.feature.workshops.fake.FakeWorkShopsRepository
+import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractTab
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractsIntent
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.ComputationalBaseKeys
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
@@ -129,23 +130,37 @@ class AssignerContractsViewModelTest {
     }
 
     /**
-     * The services-grid entry knows no workshop. An empty list would leave the user nothing to act
-     * on, so the search sheet is what opens instead — and nothing is requested.
+     * The services-grid entry knows no workshop and shows every پیمان anyway — the list is not gated
+     * on a search. Nothing is filtered, and the sheet stays down.
      */
     @Test
-    fun `opening without a workshop raises the search and requests nothing`() =
-        runTest(testDispatcher) {
-            val vm = viewModel()
-            vm.sendIntent(AssignerContractsIntent.Open("", ""))
+    fun `opening without a workshop loads every contract`() = runTest(testDispatcher) {
+        repository.assignerContracts = PagedListDN(listOf(contract("1"), contract("2")), total = 2)
 
-            vm.uiState.test {
-                val state = awaitItem()
-                assertTrue(state.isSearchOpen)
-                assertNull(state.filter)
-                assertTrue(state.list.items.isEmpty())
-            }
-            assertNull(repository.lastAssignerContractQuery)
+        val vm = viewModel()
+        vm.sendIntent(AssignerContractsIntent.Open("", ""))
+
+        vm.uiState.test {
+            val state = awaitItem()
+            assertFalse(state.isSearchOpen)
+            assertNull(state.filter)
+            assertEquals(2, state.list.items.size)
         }
+        assertEquals("", repository.lastAssignerContractQuery?.workshopId)
+        assertNull(repository.lastAssignerContractQuery?.branchCode)
+    }
+
+    /** Coming back to the screen keeps the rows already in hand instead of fetching them again. */
+    @Test
+    fun `re-opening the unfiltered list does not refetch`() = runTest(testDispatcher) {
+        repository.assignerContracts = PagedListDN(listOf(contract("1")), total = 1)
+
+        val vm = viewModel()
+        vm.sendIntent(AssignerContractsIntent.Open("", ""))
+        vm.sendIntent(AssignerContractsIntent.Open("", ""))
+
+        assertEquals(1, repository.assignerContractQueries.size)
+    }
 
     /**
      * A blank کد کارگاه surfaces at the field rather than doing nothing.
@@ -203,40 +218,69 @@ class AssignerContractsViewModelTest {
             assertEquals("2", repository.lastAssignerContractQuery?.contractRow)
         }
 
+    /**
+     * Every page arrives without the user scrolling for it.
+     *
+     * The tabs and their count are decided on the device, so a result held back behind a scroll
+     * would leave a tab reading empty while its rows sat on a page nobody had asked for.
+     */
     @Test
-    fun `a full first page asks for a second and appends it`() = runTest(testDispatcher) {
-        val firstPage = List(WORKSHOP_PAGE_SIZE) { contract(row = (it + 1).toString()) }
-        repository.assignerContracts = PagedListDN(firstPage, total = WORKSHOP_PAGE_SIZE + 1)
+    fun `every page of the result is loaded up front`() = runTest(testDispatcher) {
+        val total = WORKSHOP_PAGE_SIZE + 1
+        repository.assignerContractPages = mapOf(
+            0 to PagedListDN(List(WORKSHOP_PAGE_SIZE) { contract(row = (it + 1).toString()) }, total),
+            1 to PagedListDN(listOf(contract("11")), total),
+        )
 
         val vm = viewModel()
         vm.sendIntent(AssignerContractsIntent.Open("9028212822", "0210"))
 
-        repository.assignerContracts = PagedListDN(listOf(contract("11")), total = WORKSHOP_PAGE_SIZE + 1)
-        vm.sendIntent(AssignerContractsIntent.LoadMore)
-
         vm.uiState.test {
             val state = awaitItem()
-            assertEquals(WORKSHOP_PAGE_SIZE + 1, state.list.items.size)
+            assertEquals(total, state.list.items.size)
             assertEquals("۱۱", state.list.items.last().card.rowLabel)
+            assertFalse(state.list.isLoadingMore)
         }
-        assertEquals(1, repository.lastAssignerContractQuery?.page)
+        assertEquals(listOf(0, 1), repository.assignerContractQueries.map { it.page })
     }
 
-    /** Clearing drops the filter and the rows with it — the list means nothing without a workshop. */
+    /** Clearing drops the filter and goes back to every پیمان, not to an empty page. */
     @Test
-    fun `clearing the search empties the list`() = runTest(testDispatcher) {
+    fun `clearing the search goes back to every contract`() = runTest(testDispatcher) {
         repository.assignerContracts = PagedListDN(listOf(contract("1")), total = 1)
 
         val vm = viewModel()
         vm.sendIntent(AssignerContractsIntent.Open("9028212822", "0210"))
+        repository.assignerContracts = PagedListDN(listOf(contract("1"), contract("2")), total = 2)
         vm.sendIntent(AssignerContractsIntent.ClearSearch)
 
         vm.uiState.test {
             val state = awaitItem()
             assertNull(state.filter)
-            assertTrue(state.list.items.isEmpty())
+            assertEquals(2, state.list.items.size)
             assertEquals("", state.draft.workshopId)
         }
+        assertEquals("", repository.lastAssignerContractQuery?.workshopId)
+    }
+
+    /**
+     * Choosing a tab only changes which half is shown: the rows stay in hand and nothing is fetched
+     * again, so switching back and forth costs no request.
+     */
+    @Test
+    fun `selecting a tab switches the half shown without refetching`() = runTest(testDispatcher) {
+        repository.assignerContracts = PagedListDN(listOf(contract("1")), total = 1)
+
+        val vm = viewModel()
+        vm.sendIntent(AssignerContractsIntent.Open("", ""))
+        vm.sendIntent(AssignerContractsIntent.TabSelected(AssignerContractTab.FINISHED))
+
+        vm.uiState.test {
+            val state = awaitItem()
+            assertEquals(AssignerContractTab.FINISHED, state.tab)
+            assertEquals(1, state.list.items.size)
+        }
+        assertEquals(1, repository.assignerContractQueries.size)
     }
 
     /** A failed list is not an empty one, and the screen has to be able to tell them apart. */

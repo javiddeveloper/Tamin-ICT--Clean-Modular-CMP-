@@ -17,7 +17,7 @@ import kotlin.test.assertTrue
  *    and `employer` is the پیمانکار, and swapping them puts the user's own workshop on every card;
  * 2. the مبانی محاسباتی payload is spelled in the service's own lower-case abbreviations
  *    (`letno`, `senddate`, `cntamount`, `dataDetail`), and a rename that "tidies" one makes the
- *    field silently deserialise to null.
+ *    field silently deserialize to null.
  *
  * Both are decoded from literal payloads rather than constructed DTOs, because a constructor call
  * cannot catch a renamed `@SerialName` — only a real decode can.
@@ -34,6 +34,7 @@ class AssignerContractMapperTest {
               "contractSequence": "3",
               "contractNumber": "44122",
               "contractDate": "14010210",
+              "contractEndDate": "14030601",
               "contractSubject": "خدمات نظافت و پشتیبانی",
               "assigner": {
                 "workshopId": "0968210170",
@@ -58,6 +59,7 @@ class AssignerContractMapperTest {
         assertEquals("3", domain.contractSequence)
         assertEquals("44122", domain.contractNumber)
         assertEquals("14010210", domain.contractDate)
+        assertEquals("14030601", domain.contractEndDate)
         assertEquals("خدمات نظافت و پشتیبانی", domain.contractSubject)
 
         // واگذارنده — you.
@@ -80,6 +82,7 @@ class AssignerContractMapperTest {
 
         assertEquals("2", domain.contractRow)
         assertEquals("", domain.contractSequence)
+        assertEquals("", domain.contractEndDate)
         assertEquals("", domain.employer.workshopId)
         assertEquals("", domain.assigner.branchCode)
     }

@@ -38,6 +38,8 @@ data class AssignerContractPR(
     val contractDate: String = "",
     /** موضوع پیمان — prose, so it is not digit-converted. */
     val contractSubject: String = "",
+    /** Whether the پیمان's end date has passed — which tab it belongs to. False when it has none. */
+    val isFinished: Boolean = false,
     /** «اطلاعات واگذارنده (کارگاه شما)» — the signed-in employer's own workshop. */
     val assigner: AssignerPartyPR = AssignerPartyPR(),
     /** «اطلاعات پیمانکار» — the counterparty, and the workshop [card] shows. */
@@ -103,6 +105,11 @@ data class BaseDocumentPR(
  * down — the service sends the digit and nothing else.
  */
 enum class BaseDocumentCategory(val code: String, val title: StringResource) {
+    /**
+     * Identified by its code alone. The old app also required `documentType == "1"` for this
+     * heading, which dropped a letter filed as a PDF from every section; it is shown here instead,
+     * opened by the viewer its type calls for. `AssignerUiMapperTest` pins the choice.
+     */
     LETTER("1", Res.string.assigner_doc_category_letter),
     SUBCONTRACTOR("2", Res.string.assigner_doc_category_subcontractor),
     SUPPLEMENT("3", Res.string.assigner_doc_category_supplement),

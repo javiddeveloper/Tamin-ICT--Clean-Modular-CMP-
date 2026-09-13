@@ -157,6 +157,9 @@ fun AssignerContractDN.toPresentation(): AssignerContractPR = AssignerContractPR
     contractNumber = contractNumber.orDashDigits(),
     contractDate = contractDate.orDashDate(),
     contractSubject = contractSubject.orDash(),
+    // Ended only once its end date is behind today. A blank or unparseable date reads as still in
+    // force: a پیمان is shown as ended only when the service says when it ended.
+    isFinished = (PersianDateFormatter.daysSince(contractEndDate) ?: 0) > 0,
     assigner = assigner.toPresentation(),
     employer = employer.toPresentation(),
 )

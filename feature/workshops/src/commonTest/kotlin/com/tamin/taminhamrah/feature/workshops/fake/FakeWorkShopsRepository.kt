@@ -151,7 +151,11 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     // ------------------------------------------------------------------------ واگذارندگان
 
     var assignerContracts: PagedListDN<AssignerContractDN> = PagedListDN()
+
+    /** One answer per page, for the paging tests; a page with no entry answers [assignerContracts]. */
+    var assignerContractPages: Map<Int, PagedListDN<AssignerContractDN>> = emptyMap()
     var lastAssignerContractQuery: AssignerContractQuery? = null
+    val assignerContractQueries = mutableListOf<AssignerContractQuery>()
     var computationalBases: PagedListDN<ComputationalBaseDN> = PagedListDN()
     var lastComputationalBaseQuery: ComputationalBaseQuery? = null
     var computationalBasePdf: PdfDownloadDN = PdfDownloadDN(pdf = null)
@@ -161,7 +165,8 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         query: AssignerContractQuery,
     ): PagedListDN<AssignerContractDN> = answer {
         lastAssignerContractQuery = query
-        assignerContracts
+        assignerContractQueries += query
+        assignerContractPages[query.page] ?: assignerContracts
     }
 
     override suspend fun getComputationalBases(

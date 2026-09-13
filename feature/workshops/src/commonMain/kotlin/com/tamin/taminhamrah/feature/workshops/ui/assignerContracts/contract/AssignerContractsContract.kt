@@ -10,7 +10,29 @@ import com.tamin.taminhamrah.model.workshop.ComputationalBasePR
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import org.jetbrains.compose.resources.StringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.assigner_tab_active
+import taminx.core.core_ui.assigner_tab_finished
+
+/**
+ * The two halves the list is split into, in the order the tabs sit.
+ *
+ * The label and the membership rule are columns of this one table, so a tab cannot end up titled
+ * for one half while drawing the other.
+ */
+enum class AssignerContractTab(val label: StringResource) {
+    ACTIVE(Res.string.assigner_tab_active),
+    FINISHED(Res.string.assigner_tab_finished);
+
+    fun includes(contract: AssignerContractPR): Boolean = contract.isFinished == (this == FINISHED)
+
+    companion object {
+        /** Hoisted, so the tab strip is handed the same list instance on every recomposition. */
+        val all: ImmutableList<AssignerContractTab> = entries.toImmutableList()
+    }
+}
 
 /** What the visible page of واگذارندگان was fetched with. */
 @Immutable
@@ -98,8 +120,16 @@ data class DocumentPreview(
 @Immutable
 data class AssignerContractsUiState(
     val list: PagedListState<AssignerContractPR> = PagedListState(),
-    /** Null until a search has been applied — the screen's two empty states turn on this. */
+    /** The search in force. Null is no search — the list then holds every پیمان, not nothing. */
     val filter: AssignerContractFilter? = null,
+    /**
+     * Whether [filter] has been applied at least once, so re-entering the screen on the same one
+     * keeps the rows instead of fetching them again. A flag of its own because null is a real
+     * filter now and cannot also mean "not asked yet".
+     */
+    val hasApplied: Boolean = false,
+    /** Which half of [list] is on screen. */
+    val tab: AssignerContractTab = AssignerContractTab.ACTIVE,
     val draft: AssignerSearchDraft = AssignerSearchDraft(),
     val isSearchOpen: Boolean = false,
     /** کارگاه‌های شما — the quick-pick rows, fetched the first time the sheet opens. */
@@ -125,11 +155,23 @@ data class AssignerContractsUiState(
     sealed interface PartialState {
         // ------------------------------------------------------------------------ the list
         data object Loading : PartialState
-        data object LoadingMore : PartialState
-        data class Loaded(val list: PagedListState<AssignerContractPR>) : PartialState
+
+        /**
+         * [filter] is the search the page was fetched *for*, null for the unfiltered list.
+         *
+         * `BaseViewModel` runs intents through `flatMapMerge`, and every page of a result is fetched
+         * in one loop, so a search applied while another is still paging leaves two loops running.
+         * The reducer drops pages that belong to the one no longer applied.
+         */
+        data class Loaded(
+            val list: PagedListState<AssignerContractPR>,
+            val filter: AssignerContractFilter?,
+        ) : PartialState
+
         data class Error(val message: String?) : PartialState
-        data class Applied(val filter: AssignerContractFilter) : PartialState
+        data class Applied(val filter: AssignerContractFilter?) : PartialState
         data object Cleared : PartialState
+        data class TabChanged(val tab: AssignerContractTab) : PartialState
         data class SearchOpenChanged(val isOpen: Boolean) : PartialState
         data class DraftChanged(
             val workshopId: String? = null,
@@ -175,15 +217,14 @@ sealed interface AssignerContractsIntent {
     /**
      * Carries the identity the route was opened with.
      *
-     * Blank on the services-grid entry, where no workshop is known and the search sheet raises
-     * itself; filled on the drill-down from جزئیات کارگاه, where the list loads straight away.
+     * Blank on the services-grid entry, where the list shows every پیمان; filled on the drill-down
+     * from جزئیات کارگاه, where it opens narrowed to that workshop.
      */
     data class Open(val workshopId: String, val branchCode: String) : AssignerContractsIntent
 
-    data object LoadMore : AssignerContractsIntent
-
-    /** Re-runs the applied search after a failure, without reopening the sheet. */
+    /** Re-runs the applied search — or the unfiltered list — after a failure. */
     data object Retry : AssignerContractsIntent
+    data class TabSelected(val tab: AssignerContractTab) : AssignerContractsIntent
     data class SearchOpenChanged(val isOpen: Boolean) : AssignerContractsIntent
     data class DraftWorkshopIdChanged(val value: String) : AssignerContractsIntent
     data class DraftBranchCodeChanged(val value: String) : AssignerContractsIntent
