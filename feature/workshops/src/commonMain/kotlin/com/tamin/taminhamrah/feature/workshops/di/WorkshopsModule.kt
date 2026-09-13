@@ -3,8 +3,6 @@ package com.tamin.taminhamrah.feature.workshops.di
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopsViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.contractRows.ContractRowsViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.demandDocuments.DemandDocumentsViewModel
-import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachmentUploader
-import com.tamin.taminhamrah.feature.workshops.ui.objectionableDebit.ObjectionableDebitViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.add.AddLegalRepresentativeViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.list.LegalRepresentativeListViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.otp.LegalRepresentativeOtpViewModel
@@ -18,8 +16,6 @@ import com.tamin.taminhamrah.feature.workshops.ui.paymentSheets.PaymentSheetsVie
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebit.WorkshopDebitViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebtInquiry.WorkshopDebtInquiryViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersViewModel
-import org.koin.core.module.dsl.factoryOf
-import com.tamin.taminhamrah.feature.workshops.ui.workshopDebtInquiry.WorkshopDebtInquiryViewModel
 import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
 import kotlinx.coroutines.flow.first
 import org.koin.core.module.dsl.viewModelOf
@@ -34,11 +30,9 @@ val workshopsModule = module {
     }
 
     viewModelOf(::WorkshopsViewModel)
+    viewModelOf(::WorkshopDebtInquiryViewModel)
+    viewModelOf(::ObjectionableDebitViewModel)
     viewModelOf(::WorkshopRecentlyAddedMembersViewModel)
-    viewModelOf(::ObjectionableDebitViewModel)
-    viewModelOf(::WorkshopDebtInquiryViewModel)
-    viewModelOf(::WorkshopDebtInquiryViewModel)
-    viewModelOf(::ObjectionableDebitViewModel)
     viewModelOf(::PaymentSheetsViewModel)
     viewModelOf(::WorkshopDebitViewModel)
     viewModelOf(::DemandDocumentsViewModel)

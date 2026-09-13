@@ -1,6 +1,5 @@
 package com.tamin.taminhamrah.feature.workshops.ui.objectionableDebit
 
-import androidx.compose.runtime.mutableStateMapOf
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.model.ObjectionDocumentTypes
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachmentUploader
@@ -43,7 +42,7 @@ class ObjectionableDebitViewModel(
      * The domain rows the presentation rows were built from, kept so a deadline check and the
      * eventual submission work on the debt the service sent rather than on its formatted copy.
      */
-    private val debtsByNumber = mutableStateMapOf<String, WorkShopDebtDN>()
+    private val debtsByNumber = mutableMapOf<String, WorkShopDebtDN>()
 
     override fun handleIntent(intent: ObjectionableDebitIntent): Flow<PartialState> = when (intent) {
         is ObjectionableDebitIntent.Open -> open(intent)
@@ -177,20 +176,14 @@ class ObjectionableDebitViewModel(
     /**
      * The last gate before the objection leaves: every rule the form states, then the user saying
      * so out loud.
-     * Files the objection, once every rule the form states is actually satisfied.
      *
      * The rules are checked here rather than in the screen so that a form which is not ready
      * simply reveals why, and cannot be submitted by any other path either. The dialog is what
      * the old app asked for too — a filed objection cannot be withdrawn, so the tick alone is
      * not taken as the answer.
-     * The guard runs here rather than in the screen so that a form which is not ready simply
-     * reveals why, and cannot be submitted by any other path either.
      */
     private fun askToConfirm(): Flow<PartialState> = flow {
         val form = uiState.value.form ?: return@flow
-    private fun submitObjection(): Flow<PartialState> = flow {
-        val state = uiState.value
-        val form = state.form ?: return@flow
         if (form.attachments.isEmpty() || !form.isConfirmed) {
             emit(PartialState.FormSubmitRejected)
             return@flow

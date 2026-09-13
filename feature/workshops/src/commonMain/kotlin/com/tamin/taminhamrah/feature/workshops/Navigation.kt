@@ -18,7 +18,6 @@ import com.tamin.taminhamrah.feature.workshops.ui.paymentSheets.PaymentSheetsScr
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebit.WorkshopDebitScreen
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebtInquiry.WorkshopDebtInquiryScreen
 import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersScreen
-import com.tamin.taminhamrah.feature.workshops.ui.workshopDebtInquiry.WorkshopDebtInquiryScreen
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativePR
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopPR
@@ -55,27 +54,6 @@ data class WorkshopDebitRoute(
 @Serializable
 data class DemandDocumentsRoute(
     val debitNumber: String,
-    val branchCode: String,
-    val workshopName: String = "",
-)
-
-@Serializable
-data class WorkshopDebtInquiryRoute(
-    val workshopId: String,
-    val branchCode: String,
-    val workshopName: String = "",
-)
-
-@Serializable
-data class ObjectionableDebitRoute(
-    val workshopId: String,
-    val branchCode: String,
-    val workshopName: String = "",
-)
-
-@Serializable
-data class WorkshopRecentlyAddedMembersRoute(
-    val workshopId: String,
     val branchCode: String,
     val workshopName: String = "",
 )
@@ -134,6 +112,13 @@ data class WorkshopDebtInquiryRoute(
 
 @Serializable
 data class ObjectionableDebitRoute(
+    val workshopId: String,
+    val branchCode: String,
+    val workshopName: String = "",
+)
+
+@Serializable
+data class WorkshopRecentlyAddedMembersRoute(
     val workshopId: String,
     val branchCode: String,
     val workshopName: String = "",
@@ -212,34 +197,6 @@ fun NavGraphBuilder.workshopsScreen(
         val route = entry.toRoute<DemandDocumentsRoute>()
         DemandDocumentsScreen(
             debitNumber = route.debitNumber,
-            branchCode = route.branchCode,
-            workshopName = route.workshopName,
-            onBack = { navController.popBackStack() },
-        )
-    }
-
-    composableWithFadeTransitions<WorkshopDebtInquiryRoute> { entry ->
-        val route = entry.toRoute<WorkshopDebtInquiryRoute>()
-        WorkshopDebtInquiryScreen(
-            workshopId = route.workshopId,
-            branchCode = route.branchCode,
-            workshopName = route.workshopName,
-            onBack = { navController.popBackStack() },
-        )
-    }
-    composableWithFadeTransitions<ObjectionableDebitRoute> { entry ->
-        val route = entry.toRoute<ObjectionableDebitRoute>()
-        ObjectionableDebitScreen(
-            workshopId = route.workshopId,
-            branchCode = route.branchCode,
-            workshopName = route.workshopName,
-            onBack = { navController.popBackStack() },
-        )
-    }
-    composableWithFadeTransitions<WorkshopRecentlyAddedMembersRoute> { entry ->
-        val route = entry.toRoute<WorkshopRecentlyAddedMembersRoute>()
-        WorkshopRecentlyAddedMembersScreen(
-            workshopId = route.workshopId,
             branchCode = route.branchCode,
             workshopName = route.workshopName,
             onBack = { navController.popBackStack() },
@@ -368,6 +325,15 @@ fun NavGraphBuilder.workshopsScreen(
             onBack = { navController.popBackStack() },
         )
     }
+    composableWithFadeTransitions<WorkshopRecentlyAddedMembersRoute> { entry ->
+        val route = entry.toRoute<WorkshopRecentlyAddedMembersRoute>()
+        WorkshopRecentlyAddedMembersScreen(
+            workshopId = route.workshopId,
+            branchCode = route.branchCode,
+            workshopName = route.workshopName,
+            onBack = { navController.popBackStack() },
+        )
+    }
 }
 
 /**
@@ -389,10 +355,6 @@ private fun WorkshopsEvent.Navigate.route(): Any = when (action) {
     )
 
     WorkshopAction.CONTRACT_ROWS -> ContractRowsRoute(workshopId, branchCode)
-    WorkshopAction.DEBT_INQUIRY ->
-        WorkshopDebtInquiryRoute(workshopId, branchCode, workshopName)
-    WorkshopAction.OBJECTION ->
-        ObjectionableDebitRoute(workshopId, branchCode, workshopName)
     WorkshopAction.DEBT_INQUIRY ->
         WorkshopDebtInquiryRoute(workshopId, branchCode, workshopName)
     WorkshopAction.OBJECTION ->
