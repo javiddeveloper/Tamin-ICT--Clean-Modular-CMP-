@@ -198,9 +198,16 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     override suspend fun getObjectionElapsedDays(orderRecipeDate: String): Int =
         answer { objectionElapsedDays }
 
+    /** What was actually filed, so a test can tell «asked to confirm» from «sent». */
+    var lastDebitObjectionRequest: DebitObjectionRequestDN? = null
+        private set
+
     override suspend fun saveDebitObjection(
         request: DebitObjectionRequestDN,
-    ): DebitObjectionResultDN = answer { objectionResult }
+    ): DebitObjectionResultDN = answer {
+        lastDebitObjectionRequest = request
+        objectionResult
+    }
 
     var debitObjectionPdfCallCount: Int = 0
         private set
