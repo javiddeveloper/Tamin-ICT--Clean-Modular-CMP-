@@ -1,9 +1,9 @@
 package com.tamin.taminhamrah.dataSource.workshopsSource
 
 import com.tamin.taminhamrah.apiService.WorkShopsApiService
+import com.tamin.taminhamrah.model.BaseUrlKey
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
-import com.tamin.taminhamrah.model.BaseUrlKey
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.FilterOperator
@@ -21,8 +21,6 @@ import com.tamin.taminhamrah.model.workshop.DebitPaymentDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDTO
 import com.tamin.taminhamrah.model.workshop.DebitReasonDTO
-import com.tamin.taminhamrah.util.NetworkConstants
-import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmitRequestDTO
 import com.tamin.taminhamrah.model.workshop.EmployerCommitmentInfoDTO
@@ -34,10 +32,12 @@ import com.tamin.taminhamrah.model.workshop.NewMemberConfirmResultDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
-import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
-import com.tamin.taminhamrah.model.workshop.WorkshopContractDTO
-import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDTO
+import com.tamin.taminhamrah.model.workshop.SettlementRequestDTO
+import com.tamin.taminhamrah.model.workshop.SettlementSubjectDTO
 import com.tamin.taminhamrah.model.workshop.SmsMessageDTO
+import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopContractDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDTO
@@ -46,14 +46,22 @@ import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDTO
+import com.tamin.taminhamrah.repository.DeveloperOptionsRepository
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
-import com.tamin.taminhamrah.repository.DeveloperOptionsRepository
 import com.tamin.taminhamrah.tools.readPdfChannel
+import com.tamin.taminhamrah.util.NetworkConstants
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
+import io.ktor.http.ContentType
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
 
 /** `serviceName` the `request-ticket` endpoint expects for the Employer → Online Services flow. */
 private const val EMPLOYER_ESERVICES_AGREEMENT = "employerEservicesAgreement"
@@ -125,6 +133,38 @@ internal class WorkShopsRemoteDataSourceImpl(
                 pdf = apiService.getComputationalBasePdf(documentId).readPdfChannel()
             )
         )
+    }
+
+    override suspend fun getSettlementSubjects(
+        query: ApiQueryParamDN,
+    ): ListData<SettlementSubjectDTO> = call {
+        apiService.getSettlementSubjects(query.toQueries()).extractData()
+    }
+
+    override suspend fun uploadSettlementPdf(fileName: String, bytes: ByteArray): String = call {
+        val content = MultiPartFormDataContent(
+            formData {
+                // `file`, the part name the old app's multipart body uses.
+                append(
+                    key = "file",
+                    value = bytes,
+                    headers = Headers.build {
+                        append(HttpHeaders.ContentType, ContentType.Application.Pdf.toString())
+                        append(HttpHeaders.ContentDisposition, "filename=\"$fileName\"")
+                    },
+                )
+            },
+        )
+        val id = apiService.uploadSettlementPdf(content).extractData()?.jsonPrimitive?.contentOrNull
+        // A blank id would file the document under nothing, so it fails here instead of at submit.
+        requireNotNull(id?.takeIf { it.isNotBlank() }) { "persistPdf answered without an id" }
+    }
+
+    override suspend fun submitSettlementRequest(
+        id: String,
+        request: SettlementRequestDTO,
+    ): String = call {
+        apiService.submitSettlementRequest(id, request).extractMessage()
     }
 
     // -------------------------------------------------------------------------- برگ پرداخت‌ها

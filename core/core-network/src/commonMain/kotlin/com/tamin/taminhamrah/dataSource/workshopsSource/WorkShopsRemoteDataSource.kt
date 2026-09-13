@@ -26,6 +26,8 @@ import com.tamin.taminhamrah.model.workshop.NewMemberConfirmResultDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
+import com.tamin.taminhamrah.model.workshop.SettlementRequestDTO
+import com.tamin.taminhamrah.model.workshop.SettlementSubjectDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopContractDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDTO
@@ -87,6 +89,15 @@ interface WorkShopsRemoteDataSource {
 
     /** A PDF document attached to a مبنای محاسباتی, drained to bytes before the response closes. */
     suspend fun getComputationalBasePdf(documentId: String): PdfDownloadDTO
+
+    /** موضوعات کار a درخواست مفاصاحساب can be filed under. */
+    suspend fun getSettlementSubjects(query: ApiQueryParamDN): ListData<SettlementSubjectDTO>
+
+    /** Stores one PDF of a درخواست مفاصاحساب; returns the id the request names it by. */
+    suspend fun uploadSettlementPdf(fileName: String, bytes: ByteArray): String
+
+    /** Files a درخواست مفاصاحساب under [id]; returns the service's confirmation. */
+    suspend fun submitSettlementRequest(id: String, request: SettlementRequestDTO): String
 
     suspend fun getWorkshopPaymentSheets(
         query: ApiQueryParamDN

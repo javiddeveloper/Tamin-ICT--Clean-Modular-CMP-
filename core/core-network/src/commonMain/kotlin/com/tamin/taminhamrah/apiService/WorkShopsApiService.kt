@@ -31,6 +31,8 @@ import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
 import com.tamin.taminhamrah.model.workshop.PaymentTicketInfoDTO
+import com.tamin.taminhamrah.model.workshop.SettlementRequestDTO
+import com.tamin.taminhamrah.model.workshop.SettlementSubjectDTO
 import com.tamin.taminhamrah.model.workshop.SmsMessageDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDTO
@@ -53,6 +55,7 @@ import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.Query
 import de.jensklingenberg.ktorfit.http.QueryMap
 import de.jensklingenberg.ktorfit.http.Url
+import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.statement.HttpStatement
 import kotlinx.serialization.json.JsonElement
 
@@ -140,6 +143,38 @@ internal interface WorkShopsApiService {
     suspend fun getComputationalBasePdf(
         @Path("documentId") documentId: String,
     ): HttpStatement
+
+    // ------------------------------------------------------------- درخواست مفاصاحساب
+
+    /** موضوعات کار a درخواست مفاصاحساب can be filed under, paged like every ExtJS list. */
+    @GET("requestissuanceinvoices38/contractSubject-request-issuance-invoices38")
+    suspend fun getSettlementSubjects(
+        @QueryMap queries: Map<String, String>,
+    ): BaseDTO<ListData<SettlementSubjectDTO>>
+
+    /**
+     * Stores one PDF of a درخواست مفاصاحساب and answers with the id the request names it by.
+     *
+     * The id is `data`, a bare string. Typed [JsonElement] rather than `String` so a failure, which
+     * puts `{cause, message}` in the same slot, still deserializes and reaches the user in the
+     * service's words. An image goes to the shared `upload-image` instead.
+     */
+    @POST("requestissuanceinvoices38/persistPdf-request-issuance-invoices38")
+    suspend fun uploadSettlementPdf(
+        @Body content: MultiPartFormDataContent,
+    ): BaseDTO<JsonElement?>
+
+    /**
+     * Files a درخواست مفاصاحساب.
+     *
+     * A PUT onto an id the client composes (`SettlementRequestDN.requestId`), e.g.
+     * `0082810145TT02100001TT0210TT01TT01` — not a POST that returns one.
+     */
+    @PUT("requestissuanceinvoices38/update-request-issuance-invoices38/{id}")
+    suspend fun submitSettlementRequest(
+        @Path("id") id: String,
+        @Body request: SettlementRequestDTO,
+    ): BaseDTO<JsonElement?>
 
     // The image half of the same pair reuses the shared `upload-image` route, which answers with a
     // base64 payload rather than bytes; `UserRequestApiService.downloadDocument` already declares
