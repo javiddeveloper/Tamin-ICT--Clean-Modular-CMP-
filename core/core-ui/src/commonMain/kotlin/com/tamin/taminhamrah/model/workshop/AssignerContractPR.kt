@@ -32,6 +32,8 @@ data class AssignerContractPR(
     val card: ContractRowPR = ContractRowPR(),
     val contractRow: String = "",
     val contractSequence: String = "",
+    /** The پیمان's own branch code, raw ASCII — the third key of a درخواست مفاصاحساب's id. */
+    val branchCode: String = "",
     /** شمارهٔ قرارداد, Persian digits. */
     val contractNumber: String = "",
     /** تاریخ قرارداد, `۱۴۰۱/۰۲/۱۰`. */

@@ -38,6 +38,11 @@ data class AssignerContractDTO(
     @SerialName("contractEndDate") val contractEndDate: String? = null,
     /** موضوع پیمان, as prose. The numeric `contractSubjectCode` is a different column. */
     @SerialName("contractSubject") val contractSubject: String? = null,
+    /**
+     * The پیمان's own شعبه. The old app addresses a درخواست مفاصاحساب with this one rather than the
+     * پیمانکار's, so it is read on its own even where the two agree.
+     */
+    @SerialName("branch") val branch: AssignerBranchDTO? = null,
     /** واگذارنده — the signed-in employer's own workshop. */
     @SerialName("assigner") val assigner: AssignerPartyDTO? = null,
     /** پیمانکار — the counterparty, and the workshop every drill-down is keyed on. */

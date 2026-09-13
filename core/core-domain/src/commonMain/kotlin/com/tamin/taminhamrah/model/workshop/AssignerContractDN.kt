@@ -19,6 +19,11 @@ data class AssignerContractDN(
      * rather than sending three keys out of four and getting somebody else's bases back.
      */
     val contractSequence: String = "",
+    /**
+     * The پیمان's own branch — the third key of a درخواست مفاصاحساب's id. The service's top-level
+     * `branch`, which is what the old app reads there, or the پیمانکار's when it sent none.
+     */
+    val branchCode: String = "",
     val contractNumber: String = "",
     /** Compact Jalali, `14010210`. */
     val contractDate: String = "",

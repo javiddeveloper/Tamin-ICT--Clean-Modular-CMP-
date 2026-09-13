@@ -75,6 +75,23 @@ class AssignerContractMapperTest {
         assertEquals("شعبه ۲ بجنورد", domain.employer.branchName)
     }
 
+    /**
+     * درخواست مفاصاحساب is addressed with the پیمان's own top-level `branch`, which is what the old app
+     * reads there; a payload without one falls back to the پیمانکار's rather than leaving the id short.
+     */
+    @Test
+    fun contractBranchPrefersTheTopLevelBranch() {
+        val withOwn = json.decodeFromString<AssignerContractDTO>(
+            """{"branch":{"code":"0310"},"employer":{"branch":{"code":"0210"}}}""",
+        ).toDomain()
+        assertEquals("0310", withOwn.branchCode)
+
+        val withoutOwn = json.decodeFromString<AssignerContractDTO>(
+            """{"employer":{"branch":{"code":"0210"}}}""",
+        ).toDomain()
+        assertEquals("0210", withoutOwn.branchCode)
+    }
+
     /** A پیمان the service sent without either party still maps, with blanks rather than nulls. */
     @Test
     fun assignerContractSurvivesMissingParties() {
