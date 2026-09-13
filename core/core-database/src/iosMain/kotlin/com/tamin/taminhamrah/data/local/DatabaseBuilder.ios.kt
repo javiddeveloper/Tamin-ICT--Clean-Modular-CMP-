@@ -17,6 +17,9 @@ import com.tamin.taminhamrah.data.local.dao.TreatmentDao
 import com.tamin.taminhamrah.data.local.dao.TestDao
 import com.tamin.taminhamrah.data.local.dao.AgentChatDao
 import platform.Foundation.NSHomeDirectory
+import com.tamin.taminhamrah.data.local.dao.HistoryCacheDao
+import com.tamin.taminhamrah.data.local.dao.HistoryJobInfoDao
+import com.tamin.taminhamrah.data.local.dao.VersionHistoryDao
 
 @Suppress("ACTUAL_ANNOTATIONS_NOT_MATCH_EXPECT")
 actual abstract class TaminXDatabase : RoomDatabase() {
@@ -34,6 +37,9 @@ actual abstract class TaminXDatabase : RoomDatabase() {
     actual abstract fun treatmentDao(): TreatmentDao
     actual abstract fun healthDao(): HealthDao
     actual abstract fun agentChatDao(): AgentChatDao
+    actual abstract fun historyJobInfoDao(): HistoryJobInfoDao
+    actual abstract fun historyCacheDao(): HistoryCacheDao
+    actual abstract fun versionHistoryDao(): VersionHistoryDao
 }
 
 fun getDatabaseBuilder(): RoomDatabase.Builder<TaminXDatabase> {

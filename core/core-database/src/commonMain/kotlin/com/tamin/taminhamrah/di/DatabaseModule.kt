@@ -25,4 +25,5 @@ val databaseModule = module {
     single { get<TaminXDatabase>().agentChatDao() }
     single { get<TaminXDatabase>().versionHistoryDao() }
     single { get<TaminXDatabase>().historyJobInfoDao() }
+    single { get<TaminXDatabase>().historyCacheDao() }
 }
