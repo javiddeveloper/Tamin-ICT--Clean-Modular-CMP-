@@ -58,6 +58,8 @@ import com.tamin.taminhamrah.apiService.fractionContract.FractionContractApiServ
 import com.tamin.taminhamrah.apiService.fractionContract.createFractionContractApiService
 import com.tamin.taminhamrah.apiService.inquiryEducation.InquiryEducationApiService
 import com.tamin.taminhamrah.apiService.inquiryEducation.createInquiryEducationApiService
+import com.tamin.taminhamrah.apiService.weddingPresent.WeddingPresentApiService
+import com.tamin.taminhamrah.apiService.weddingPresent.createWeddingPresentApiService
 import com.tamin.taminhamrah.model.BaseUrlKey
 import com.tamin.taminhamrah.repository.DeveloperOptionsRepository
 import de.jensklingenberg.ktorfit.Ktorfit
@@ -229,6 +231,11 @@ val ApiClientsModule = module {
     single<WorkersPaymentApiService> {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.createWorkersPaymentApiService()
+    }
+
+    single<WeddingPresentApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createWeddingPresentApiService()
     }
 
     single<PaymentGatewayApiService> {
