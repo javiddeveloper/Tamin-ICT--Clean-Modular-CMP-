@@ -312,11 +312,11 @@ class StoryViewerViewModel(
 
     private suspend fun ctaClicked() {
         val state = uiState.value
-        val flag = state.item?.cta?.target ?: return
+        val link = state.item?.cta?.deepLink ?: return
         stopClock()
         stopWatchdog()
         state.channel?.let { markStoryChannelSeenUseCase(it.key) }
-        sendEvent(StoryViewerEvent.OpenFeature(flag))
+        sendEvent(StoryViewerEvent.OpenDeepLink(link))
     }
 
     private suspend fun close() {

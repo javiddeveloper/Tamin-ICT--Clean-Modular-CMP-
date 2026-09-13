@@ -2,7 +2,6 @@ package com.tamin.taminhamrah.feature.stories.ui.model
 
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.feature.stories.ui.theme.StoryPalette
-import com.tamin.taminhamrah.model.common.FeatureFlag
 import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.DrawableResource
 
@@ -52,5 +51,5 @@ sealed interface StoryMediaPR {
 @Immutable
 data class StoryCtaPR(
     val label: String,
-    val target: FeatureFlag,
+    val deepLink: String?,
 )

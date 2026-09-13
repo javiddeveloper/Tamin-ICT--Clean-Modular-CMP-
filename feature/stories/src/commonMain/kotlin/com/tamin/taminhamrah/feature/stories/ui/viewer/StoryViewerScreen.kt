@@ -90,7 +90,6 @@ import com.tamin.taminhamrah.feature.stories.ui.theme.storyTextStyles
 import com.tamin.taminhamrah.feature.stories.ui.viewer.contract.StoryViewerEvent
 import com.tamin.taminhamrah.feature.stories.ui.viewer.contract.StoryViewerIntent
 import com.tamin.taminhamrah.feature.stories.ui.viewer.contract.StoryViewerUiState
-import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.ErrorStateView
@@ -142,7 +141,7 @@ private val CtaShape = RoundedCornerShape(CornerRadius.xl)
 fun StoryViewerScreen(
     channelIndex: Int,
     onClose: () -> Unit,
-    onOpenFeature: (FeatureFlag) -> Unit,
+    onOpenDeepLink: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: StoryViewerViewModel = koinViewModel(),
 ) {
@@ -157,7 +156,7 @@ fun StoryViewerScreen(
     viewModel.events.collectWithLifecycleAware { event ->
         when (event) {
             StoryViewerEvent.Close -> onClose()
-            is StoryViewerEvent.OpenFeature -> onOpenFeature(event.flag)
+            is StoryViewerEvent.OpenDeepLink -> onOpenDeepLink(event.deepLink)
             StoryViewerEvent.ShowLikeAnimation -> {
                 likeAnimationTrigger++
             }
@@ -721,7 +720,7 @@ private fun StoryContent(
             )
         }
 
-        item.cta?.let { cta ->
+        item.cta?.takeIf { !it.deepLink.isNullOrBlank() && it.label.isNotBlank() }?.let { cta ->
             Row(
                 modifier = Modifier
                     .padding(top = StoryDimens.ctaTopGap)

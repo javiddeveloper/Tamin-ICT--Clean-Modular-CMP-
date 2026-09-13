@@ -69,7 +69,7 @@ private fun StoryMediaDN.toPresentation(): StoryMediaPR = when (this) {
     is StoryMediaDN.BundledVideo -> StoryMediaPR.Video(Res.getUri(path))
 }
 
-private fun StoryCtaDN.toPresentation() = StoryCtaPR(label = label, target = target)
+private fun StoryCtaDN.toPresentation() = StoryCtaPR(label = label, deepLink = deepLink)
 
 /**
  * A channel's look, keyed by the identity the source gives it.

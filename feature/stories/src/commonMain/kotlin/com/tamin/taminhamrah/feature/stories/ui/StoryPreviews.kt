@@ -19,7 +19,6 @@ import com.tamin.taminhamrah.feature.stories.ui.rail.contract.StoryRailUiState
 import com.tamin.taminhamrah.feature.stories.ui.theme.StoryPalette
 import com.tamin.taminhamrah.feature.stories.ui.viewer.StoryViewerBody
 import com.tamin.taminhamrah.feature.stories.ui.viewer.contract.StoryViewerUiState
-import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -200,7 +199,7 @@ private val PreviewChannel = StoryChannelPR(
             title = "تأمین‌من به‌روز شد",
             body = "پرداخت حق بیمه، مشاهدهٔ سوابق و دریافت فیش، همه در یک صفحه جمع شده است.",
             media = StoryMediaPR.None,
-            cta = StoryCtaPR("دیدن سوابق من", FeatureFlag.WAGE_AND_HISTORY),
+            cta = StoryCtaPR("دیدن سوابق من", "tamin://feature/WAGE_AND_HISTORY"),
             baseLikes = 312,
         ),
         StoryItemPR(

@@ -1,6 +1,5 @@
 package com.tamin.taminhamrah.data.repository.stories
 
-import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.stories.StoryChannelDN
 import com.tamin.taminhamrah.model.stories.StoryCtaDN
 import com.tamin.taminhamrah.model.stories.StoryItemDN
@@ -63,7 +62,7 @@ private fun publicRelationsChannel() = StoryChannelDN(
             title = "تأمین‌من به‌روز شد",
             body = "پرداخت حق بیمه، مشاهدهٔ سوابق و دریافت فیش، همه در یک صفحه جمع شده است.",
             media = StoryMediaDN.None,
-            cta = StoryCtaDN("دیدن سوابق من", FeatureFlag.WAGE_AND_HISTORY),
+            cta = StoryCtaDN("دیدن سوابق من", "tamin://feature/WAGE_AND_HISTORY"),
             baseLikes = 312,
         ),
         // The slide the design renders as its reference screenshot, and the one carrying the
@@ -80,6 +79,7 @@ private fun publicRelationsChannel() = StoryChannelDN(
             title = "ارتباط با ما",
             body = "پاسخ‌گویی تلفنی و پیام‌رسان سازمان، همهٔ روزهای هفته در دسترس شماست.",
             media = StoryMediaDN.None,
+            cta = StoryCtaDN("سایت رسمی سازمان", "https://tamin.ir"),
             baseLikes = 98,
         ),
     ),
@@ -96,7 +96,7 @@ private fun insuredChannel() = StoryChannelDN(
             title = "سابقهٔ شما، یک‌جا",
             body = "همهٔ سال‌های بیمه‌پردازی، روزهای کارکرد و دستمزد هر ماه را در یک نمودار ببینید.",
             media = StoryMediaDN.None,
-            cta = StoryCtaDN("کلیهٔ سوابق", FeatureFlag.COMBINED_RECORD),
+            cta = StoryCtaDN("کلیهٔ سوابق", "tamin://feature/COMBINED_RECORD"),
             baseLikes = 187,
         ),
         StoryItemDN(
@@ -104,7 +104,7 @@ private fun insuredChannel() = StoryChannelDN(
             title = "سابقهٔ جامانده را اعلام کنید",
             body = "اگر بازه‌ای از کارکرد شما ثبت نشده، درخواست بررسی را از اپ ثبت کنید.",
             media = StoryMediaDN.None,
-            cta = StoryCtaDN("اعلام سابقه", FeatureFlag.OBJECTION_NON_EXISTENT_HISTORY),
+            cta = StoryCtaDN("اعلام سابقه", "tamin://feature/OBJECTION_NON_EXISTENT_HISTORY"),
             baseLikes = 154,
         ),
         StoryItemDN(
@@ -112,7 +112,7 @@ private fun insuredChannel() = StoryChannelDN(
             title = "قرارداد و پرداخت حق بیمه",
             body = "قرارداد بیمهٔ اختیاری یا مشاغل آزاد را ببندید و اقلام ماهانه را همان‌جا پرداخت کنید.",
             media = StoryMediaDN.None,
-            cta = StoryCtaDN("امور قراردادها", FeatureFlag.CONTRACTS),
+            cta = StoryCtaDN("امور قراردادها", "tamin://feature/CONTRACTS"),
             baseLikes = 121,
         ),
     ),
@@ -131,7 +131,7 @@ private fun assistantChannel() = StoryChannelDN(
             title = "یارا، دستیار هوشمند",
             body = "سؤال‌های بیمه‌ای خود را به زبان ساده بپرسید و پاسخ روشن بگیرید.",
             media = StoryMediaDN.BundledVideo(SAMPLE_VIDEO),
-            cta = StoryCtaDN("شروع گفت‌وگو", FeatureFlag.AGENT),
+            cta = StoryCtaDN("شروع گفت‌وگو", "tamin://feature/AGENT"),
             baseLikes = 245,
         ),
         StoryItemDN(
@@ -139,7 +139,7 @@ private fun assistantChannel() = StoryChannelDN(
             title = "چقدر تا بازنشستگی مانده؟",
             body = "یارا سابقهٔ شما را می‌خواند و شرایط بازنشستگی را ساده توضیح می‌دهد.",
             media = StoryMediaDN.None,
-            cta = StoryCtaDN("پرسیدن از یارا", FeatureFlag.AGENT),
+            cta = StoryCtaDN("پرسیدن از یارا", "tamin://feature/AGENT"),
             baseLikes = 176,
         ),
         StoryItemDN(
@@ -163,7 +163,7 @@ private fun pensionerChannel() = StoryChannelDN(
             title = "فیش حقوقی هر ماه",
             body = "فیش هر ماه پس از واریز مستمری در اپ قابل مشاهده و دریافت است.",
             media = StoryMediaDN.None,
-            cta = StoryCtaDN("مشاهدهٔ فیش حقوقی", FeatureFlag.PAY_ROLL),
+            cta = StoryCtaDN("مشاهدهٔ فیش حقوقی", "tamin://feature/PAY_ROLL"),
             baseLikes = 204,
         ),
         StoryItemDN(
@@ -171,7 +171,7 @@ private fun pensionerChannel() = StoryChannelDN(
             title = "حکم مستمری",
             body = "آخرین حکم و احکام گذشتهٔ خود را ببینید و نسخهٔ آن را ذخیره کنید.",
             media = StoryMediaDN.None,
-            cta = StoryCtaDN("حکم مستمری", FeatureFlag.EDICT_PENSIONER),
+            cta = StoryCtaDN("حکم مستمری", "tamin://feature/EDICT_PENSIONER"),
             baseLikes = 141,
         ),
         StoryItemDN(
@@ -179,6 +179,7 @@ private fun pensionerChannel() = StoryChannelDN(
             title = "گواهی بدون مراجعه",
             body = "گواهی حقوق و گواهی کسر اقساط را از همین اپ درخواست کنید.",
             media = StoryMediaDN.None,
+            cta = StoryCtaDN("بدون اکشن", null),
             baseLikes = 73,
         ),
     ),
@@ -195,7 +196,7 @@ private fun employerChannel() = StoryChannelDN(
             title = "لیست و پرداخت",
             body = "لیست حق بیمه را ارسال و بدهی کارگاه را در همان صفحه پرداخت کنید.",
             media = StoryMediaDN.None,
-            cta = StoryCtaDN("کارگاه‌های من", FeatureFlag.WORKSHOPS),
+            cta = StoryCtaDN("کارگاه‌های من", "tamin://feature/WORKSHOPS"),
             baseLikes = 132,
         ),
         StoryItemDN(

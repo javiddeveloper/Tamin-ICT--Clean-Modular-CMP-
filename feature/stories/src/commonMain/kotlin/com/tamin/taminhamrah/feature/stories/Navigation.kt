@@ -5,7 +5,6 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.toRoute
 import com.tamin.taminhamrah.feature.stories.ui.viewer.StoryViewerScreen
-import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import kotlinx.serialization.Serializable
 
@@ -25,20 +24,20 @@ fun NavController.navigateToStoryViewer(channelIndex: Int, navOptions: NavOption
 }
 
 /**
- * @param onOpenFeature where a slide's call to action leads. Takes a [FeatureFlag] rather than
+ * @param onOpenDeepLink where a slide's call to action leads. Carries a deep link rather than
  *   navigating from here: the story feature must not import another feature, and the host is also
- *   where the server's answer about that service is checked.
+ *   where the deep link is resolved.
  */
 fun NavGraphBuilder.storyViewerScreen(
     onClose: () -> Unit,
-    onOpenFeature: (FeatureFlag) -> Unit,
+    onOpenDeepLink: (String) -> Unit,
 ) {
     composableWithFadeTransitions<StoryViewerRoute> { backStackEntry ->
         val route = backStackEntry.toRoute<StoryViewerRoute>()
         StoryViewerScreen(
             channelIndex = route.channelIndex,
             onClose = onClose,
-            onOpenFeature = onOpenFeature,
+            onOpenDeepLink = onOpenDeepLink,
         )
     }
 }

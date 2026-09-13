@@ -12,7 +12,6 @@ import com.tamin.taminhamrah.feature.stories.ui.theme.STORY_DEFAULT_DURATION_MS
 import com.tamin.taminhamrah.feature.stories.ui.viewer.StoryViewerViewModel
 import com.tamin.taminhamrah.feature.stories.ui.viewer.contract.StoryViewerEvent
 import com.tamin.taminhamrah.feature.stories.ui.viewer.contract.StoryViewerIntent
-import com.tamin.taminhamrah.model.common.FeatureFlag
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
@@ -434,12 +433,40 @@ class StoryViewerViewModelTest {
     }
 
     @Test
-    fun `a call to action raises its feature for the host to open`() = test {
+    fun `a call to action with an internal deep link raises it for the host to open`() = test {
         val viewModel = repository(testChannel("a", ctaIndices = setOf(0))).viewer()
 
         viewModel.events.test {
             viewModel.sendIntent(StoryViewerIntent.CtaClicked)
-            assertEquals(StoryViewerEvent.OpenFeature(FeatureFlag.AGENT), awaitItem())
+            assertEquals(StoryViewerEvent.OpenDeepLink("tamin://feature/AGENT"), awaitItem())
+        }
+    }
+
+    @Test
+    fun `a call to action with an external deep link raises it for the host to openUrl`() = test {
+        val channel = testChannel("a", itemCount = 1)
+        val modifiedItems = channel.items.toMutableList()
+        modifiedItems[0] = modifiedItems[0].copy(cta = com.tamin.taminhamrah.model.stories.StoryCtaDN("سایت", "https://tamin.ir"))
+        val modifiedChannel = channel.copy(items = modifiedItems)
+        val viewModel = repository(modifiedChannel).viewer()
+
+        viewModel.events.test {
+            viewModel.sendIntent(StoryViewerIntent.CtaClicked)
+            assertEquals(StoryViewerEvent.OpenDeepLink("https://tamin.ir"), awaitItem())
+        }
+    }
+
+    @Test
+    fun `a call to action without a deep link does not navigate`() = test {
+        val channel = testChannel("a", itemCount = 1)
+        val modifiedItems = channel.items.toMutableList()
+        modifiedItems[0] = modifiedItems[0].copy(cta = com.tamin.taminhamrah.model.stories.StoryCtaDN("label", null))
+        val modifiedChannel = channel.copy(items = modifiedItems)
+        val viewModel = repository(modifiedChannel).viewer()
+
+        viewModel.events.test {
+            viewModel.sendIntent(StoryViewerIntent.CtaClicked)
+            expectNoEvents()
         }
     }
 

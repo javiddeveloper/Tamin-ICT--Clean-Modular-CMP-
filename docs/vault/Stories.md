@@ -138,6 +138,15 @@ The tap columns use `Alignment.TopStart`/`TopEnd`, not left/right. Under this ap
 puts "next" on the left as required, and it stays correct rather than inverted if an LTR layout is
 ever added.
 
+### Call to Action (CTA)
+
+A CTA uses a nullable `deepLink: String?`. 
+- If `deepLink` is null, no button is shown.
+- If it's an internal route (e.g., `tamin://feature/AGENT`), the host delegates it to standard Compose Navigation.
+- If it's an external URL (`http(s)://...`), the host resolves it using the app's cross-platform `openUrl` mechanism.
+- If a deep link is malformed or unrecognized, the navigation handles it gracefully (fails silently) without crashing.
+- Feature Stories is unaware of how the link resolves and delegates it upward to prevent feature module coupling.
+
 ### Tap vs. hold — three traps, all already sprung
 
 `StoryTapZone` looks over-commented; it isn't. All three of these were real, reported bugs:

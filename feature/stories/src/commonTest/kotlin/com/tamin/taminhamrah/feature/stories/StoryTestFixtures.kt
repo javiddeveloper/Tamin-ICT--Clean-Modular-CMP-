@@ -1,6 +1,5 @@
 package com.tamin.taminhamrah.feature.stories
 
-import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.stories.StoryChannelDN
 import com.tamin.taminhamrah.model.stories.StoryCtaDN
 import com.tamin.taminhamrah.model.stories.StoryEngagementDN
@@ -42,7 +41,7 @@ internal fun testChannel(
             } else {
                 StoryMediaDN.None
             },
-            cta = if (index in ctaIndices) StoryCtaDN("cta", FeatureFlag.AGENT) else null,
+            cta = if (index in ctaIndices) StoryCtaDN("cta", "tamin://feature/AGENT") else null,
             baseLikes = 10,
         )
     },

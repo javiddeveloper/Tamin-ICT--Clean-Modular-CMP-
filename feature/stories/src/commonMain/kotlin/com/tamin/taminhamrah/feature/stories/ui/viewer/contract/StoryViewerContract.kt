@@ -4,7 +4,6 @@ import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.feature.stories.ui.model.StoryChannelPR
 import com.tamin.taminhamrah.feature.stories.ui.model.StoryItemPR
 import com.tamin.taminhamrah.feature.stories.ui.theme.STORY_DEFAULT_DURATION_MS
-import com.tamin.taminhamrah.model.common.FeatureFlag
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
@@ -191,10 +190,10 @@ sealed interface StoryViewerEvent {
     data object Close : StoryViewerEvent
 
     /**
-     * A call to action was taken. Carries the flag rather than a route so the host graph decides
-     * where it goes — and whether the server has that service switched on.
+     * A call to action was taken. Carries the deep link rather than a feature flag.
+     * The host graph decides where it goes.
      */
-    data class OpenFeature(val flag: FeatureFlag) : StoryViewerEvent
+    data class OpenDeepLink(val deepLink: String) : StoryViewerEvent
     
     /** Emitted when a like action actually changes the state to liked. */
     data object ShowLikeAnimation : StoryViewerEvent

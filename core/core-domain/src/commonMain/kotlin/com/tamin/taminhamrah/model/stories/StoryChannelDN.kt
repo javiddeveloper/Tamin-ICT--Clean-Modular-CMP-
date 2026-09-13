@@ -1,6 +1,5 @@
 package com.tamin.taminhamrah.model.stories
 
-import com.tamin.taminhamrah.model.common.FeatureFlag
 
 /**
  * One publisher on the «تازه‌ها» rail, and its stories.
@@ -82,7 +81,7 @@ sealed interface StoryMediaDN {
  */
 data class StoryCtaDN(
     val label: String,
-    val target: FeatureFlag,
+    val deepLink: String?,
 )
 
 /**
