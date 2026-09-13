@@ -25,6 +25,8 @@ class FakeContractsRepository : ContractsRepository {
     var uploadImageResult: String = "guid-abc-123"
     var lastUploadImageRequest: UploadImageRequestDN? = null
 
+    private fun notUsed(): Nothing = error("not exercised here")
+
     override fun uploadImage(request: UploadImageRequestDN): Flow<String> = flow {
         lastUploadImageRequest = request
         emit(uploadImageResult)
