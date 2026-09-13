@@ -53,6 +53,7 @@ import com.tamin.taminhamrah.ui.components.vanishOnCollapse
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.Easing
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminCardAmberEnd
 import com.tamin.taminhamrah.ui.theme.TaminCardAmberMid
@@ -75,7 +76,6 @@ import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardInkMuted
 import com.tamin.taminhamrah.ui.theme.TaminRed
 import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.ui.theme.insuranceCardTextStyles
-import com.tamin.taminhamrah.ui.theme.shimmer
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -588,48 +588,26 @@ private fun InsuranceCardBrandRowSkeleton(modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
-        Box(
-            modifier = Modifier
-                .size(TreatmentDimens.brandTileSize)
-                .clip(RoundedCornerShape(TreatmentDimens.brandTileRadius))
-                .shimmer(
-                    colorBase = TaminInsuranceCardInk.copy(alpha = 0.15f),
-                    colorHighlight = TaminInsuranceCardInk.copy(alpha = 0.35f),
-                ),
+        ShimmerBlock(
+            modifier = Modifier.size(TreatmentDimens.brandTileSize),
+            cornerRadius = TreatmentDimens.brandTileRadius,
         )
         Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(Spacing.xs),
         ) {
-            Box(
-                modifier = Modifier
-                    .width(110.dp)
-                    .height(11.dp)
-                    .clip(RoundedCornerShape(CornerRadius.xs))
-                    .shimmer(
-                        colorBase = TaminInsuranceCardInk.copy(alpha = 0.15f),
-                        colorHighlight = TaminInsuranceCardInk.copy(alpha = 0.35f),
-                    ),
+            ShimmerBlock(
+                modifier = Modifier.width(110.dp).height(12.dp),
+                cornerRadius = CornerRadius.xs,
             )
-            Box(
-                modifier = Modifier
-                    .width(135.dp)
-                    .height(10.dp)
-                    .clip(RoundedCornerShape(CornerRadius.xs))
-                    .shimmer(
-                        colorBase = TaminInsuranceCardInk.copy(alpha = 0.10f),
-                        colorHighlight = TaminInsuranceCardInk.copy(alpha = 0.25f),
-                    ),
+            ShimmerBlock(
+                modifier = Modifier.width(140.dp).height(10.dp),
+                cornerRadius = CornerRadius.xs,
             )
         }
-        Box(
-            modifier = Modifier
-                .size(TreatmentDimens.brandTickSize)
-                .clip(CircleShape)
-                .shimmer(
-                    colorBase = TaminInsuranceCardInk.copy(alpha = 0.15f),
-                    colorHighlight = TaminInsuranceCardInk.copy(alpha = 0.35f),
-                ),
+        ShimmerBlock(
+            modifier = Modifier.size(TreatmentDimens.brandTickSize),
+            cornerRadius = CornerRadius.full,
         )
     }
 }
@@ -639,12 +617,13 @@ private fun InsuranceCardBrandRowSkeleton(modifier: Modifier = Modifier) {
  */
 @Composable
 private fun InsuranceCardFooterSkeleton(modifier: Modifier = Modifier) {
+    val colors = LocalTaminColors.current
     Row(
         modifier = modifier
             .fillMaxWidth()
             .drawBehind {
                 drawRect(
-                    color = TaminInsuranceCardDivider,
+                    color = colors.border,
                     size = Size(size.width, Thickness.border.toPx()),
                 )
             }
@@ -655,37 +634,32 @@ private fun InsuranceCardFooterSkeleton(modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(TreatmentDimens.cardFooterGap),
     ) {
-        Spacer(Modifier.size(TreatmentDimens.coverageBadgeSize))
-        Box(
-            modifier = Modifier
-                .width(160.dp)
-                .height(13.dp)
-                .clip(RoundedCornerShape(CornerRadius.xs))
-                .shimmer(
-                    colorBase = TaminInsuranceCardInk.copy(alpha = 0.15f),
-                    colorHighlight = TaminInsuranceCardInk.copy(alpha = 0.35f),
-                ),
+        ShimmerBlock(
+            modifier = Modifier.size(TreatmentDimens.coverageBadgeSize),
+            cornerRadius = CornerRadius.full,
+        )
+        ShimmerBlock(
+            modifier = Modifier.width(180.dp).height(13.dp),
+            cornerRadius = CornerRadius.xs,
         )
     }
 }
 
 /**
  * Skeleton placeholder for an electronic health-insurance card during initial load.
- * Matches the expanded → collapsed geometry of [InsuranceCard] to eliminate layout shift.
+ * Matches the expanded → collapsed geometry of [InsuranceCard] to eliminate layout shift,
+ * styled as a surface card with standard shimmer blocks like other features' cards.
  */
 @Composable
 fun InsuranceCardSkeleton(
     modifier: Modifier = Modifier,
-    background: Brush = insuranceCardGradient(isDependent = false),
     collapseProgress: () -> Float = { 0f },
 ) {
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(CornerRadius.cardCompact))
-            .background(background)
-            .cardDecoration(),
+            .raisedCard(CornerRadius.cardCompact),
     ) {
         Layout(
             content = {
@@ -694,7 +668,7 @@ fun InsuranceCardSkeleton(
                         .layoutId(CardSlot.Brand)
                         .vanishOnCollapse(collapseProgress),
                 )
-                Box(
+                ShimmerBlock(
                     modifier = Modifier
                         .layoutId(CardSlot.Name)
                         .shrinkOnCollapse(
@@ -702,43 +676,27 @@ fun InsuranceCardSkeleton(
                             minScale = TreatmentDimens.cardNameCollapsedScale,
                             rtl = rtl,
                         )
-                        .size(width = 120.dp, height = 20.dp)
-                        .clip(RoundedCornerShape(CornerRadius.xs))
-                        .shimmer(
-                            colorBase = TaminInsuranceCardInk.copy(alpha = 0.15f),
-                            colorHighlight = TaminInsuranceCardInk.copy(alpha = 0.35f),
-                        ),
+                        .size(width = 120.dp, height = 20.dp),
+                    cornerRadius = CornerRadius.xs,
                 )
-                Box(
+                ShimmerBlock(
                     modifier = Modifier
                         .layoutId(CardSlot.CodeLabel)
                         .vanishOnCollapse(collapseProgress)
-                        .size(width = 44.dp, height = 11.dp)
-                        .clip(RoundedCornerShape(CornerRadius.xs))
-                        .shimmer(
-                            colorBase = TaminInsuranceCardInk.copy(alpha = 0.10f),
-                            colorHighlight = TaminInsuranceCardInk.copy(alpha = 0.25f),
-                        ),
+                        .size(width = 44.dp, height = 11.dp),
+                    cornerRadius = CornerRadius.xs,
                 )
-                Box(
+                ShimmerBlock(
                     modifier = Modifier
                         .layoutId(CardSlot.Code)
-                        .size(width = 96.dp, height = 15.dp)
-                        .clip(RoundedCornerShape(CornerRadius.xs))
-                        .shimmer(
-                            colorBase = TaminInsuranceCardInk.copy(alpha = 0.15f),
-                            colorHighlight = TaminInsuranceCardInk.copy(alpha = 0.35f),
-                        ),
+                        .size(width = 100.dp, height = 15.dp),
+                    cornerRadius = CornerRadius.xs,
                 )
-                Box(
+                ShimmerBlock(
                     modifier = Modifier
                         .layoutId(CardSlot.Badge)
-                        .size(TreatmentDimens.coverageBadgeSize)
-                        .clip(CircleShape)
-                        .shimmer(
-                            colorBase = TaminInsuranceCardInk.copy(alpha = 0.20f),
-                            colorHighlight = TaminInsuranceCardInk.copy(alpha = 0.45f),
-                        ),
+                        .size(TreatmentDimens.coverageBadgeSize),
+                    cornerRadius = CornerRadius.full,
                 )
                 InsuranceCardFooterSkeleton(
                     modifier = Modifier
@@ -801,38 +759,20 @@ fun InsuranceCardSkeleton(
 fun TaminPageIndicatorSkeleton(
     modifier: Modifier = Modifier,
 ) {
-    val colors = LocalTaminColors.current
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        Row(
-            modifier = Modifier
-                .clip(CircleShape)
-                .background(colors.chevron.copy(alpha = 0.30f))
-                .padding(horizontal = 11.dp, vertical = 7.dp),
-            horizontalArrangement = Arrangement.spacedBy(7.dp, Alignment.CenterHorizontally),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(width = 22.dp, height = 7.dp)
-                    .clip(CircleShape)
-                    .background(colors.teal.copy(alpha = 0.7f))
-                    .shimmer(
-                        colorBase = colors.teal.copy(alpha = 0.5f),
-                        colorHighlight = colors.teal,
-                    ),
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        ShimmerBlock(
+            modifier = Modifier.size(width = 24.dp, height = 7.dp),
+            cornerRadius = CornerRadius.full,
+        )
+        repeat(2) {
+            ShimmerBlock(
+                modifier = Modifier.size(7.dp),
+                cornerRadius = CornerRadius.full,
             )
-            repeat(2) {
-                Box(
-                    modifier = Modifier
-                        .size(7.dp)
-                        .clip(CircleShape)
-                        .background(colors.chevron.copy(alpha = 0.5f))
-                        .shimmer(
-                            colorBase = colors.chevron.copy(alpha = 0.4f),
-                            colorHighlight = colors.chevron.copy(alpha = 0.8f),
-                        ),
-                )
-            }
         }
     }
 }
@@ -863,14 +803,12 @@ fun InsuranceCardCarouselSkeleton(
             ) {
                 InsuranceCardSkeleton(
                     modifier = Modifier.width(cardWidth),
-                    background = insuranceCardGradient(isDependent = false),
                     collapseProgress = collapseProgress,
                 )
                 InsuranceCardSkeleton(
                     modifier = Modifier
                         .width(cardWidth)
                         .vanishOnCollapse(collapseProgress),
-                    background = insuranceCardGradient(isDependent = true, dependantOrdinal = 0),
                     collapseProgress = collapseProgress,
                 )
             }

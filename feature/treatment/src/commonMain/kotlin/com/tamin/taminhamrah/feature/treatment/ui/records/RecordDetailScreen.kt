@@ -41,6 +41,7 @@ import com.tamin.taminhamrah.ui.components.TaminEmptyState
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
 import com.tamin.taminhamrah.ui.components.taminHeroGradient
@@ -198,43 +199,48 @@ fun RecordDetailContent(
         modifier = modifier,
         containerColor = colors.bgPage,
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        topBar = {
+            TaminTopAppBar(
+                title = stringResource(Res.string.prescription_title),
+                background = taminHeroGradient(colors.treatmentHubStops),
+                navigationIcon = {
+                    TaminTopAppBarButton(
+                        icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                        contentDescription = stringResource(Res.string.action_back),
+                        onClick = onBack,
+                    )
+                },
+                action = {
+                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                        TaminTopAppBarButton(
+                            icon = vectorResource(Res.drawable.ic_share),
+                            contentDescription = stringResource(Res.string.prescription_share_cd),
+                            onClick = { launcher.shareText(shareBody) },
+                        )
+                        // One download, and only when this record actually has one. Which
+                        // export it is, and whether it exists at all, is a property of the
+                        // record -- its `flagSata` -- not of the category it belongs to.
+                        // Keying it on PARACLINIC instead put a lab-result button on every
+                        // paraclinic record, including the ones whose result is not ready,
+                        // where it can only fail. See RecordExport.
+                        export?.let { available ->
+                            TaminTopAppBarButton(
+                                icon = vectorResource(available.icon),
+                                contentDescription = stringResource(available.contentDescription),
+                                onClick = { showing = available.export },
+                            )
+                        }
+                    }
+                },
+            )
+        },
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                TaminTopAppBar(
-                    title = stringResource(Res.string.prescription_title),
-                    background = taminHeroGradient(colors.treatmentHubStops),
-                    navigationIcon = {
-                        TaminTopAppBarButton(
-                            icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                            contentDescription = stringResource(Res.string.action_back),
-                            onClick = onBack,
-                        )
-                    },
-                    action = {
-                        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                            TaminTopAppBarButton(
-                                icon = vectorResource(Res.drawable.ic_share),
-                                contentDescription = stringResource(Res.string.prescription_share_cd),
-                                onClick = { launcher.shareText(shareBody) },
-                            )
-                            // One download, and only when this record actually has one. Which
-                            // export it is, and whether it exists at all, is a property of the
-                            // record -- its `flagSata` -- not of the category it belongs to.
-                            // Keying it on PARACLINIC instead put a lab-result button on every
-                            // paraclinic record, including the ones whose result is not ready,
-                            // where it can only fail. See RecordExport.
-                            export?.let { available ->
-                                TaminTopAppBarButton(
-                                    icon = vectorResource(available.icon),
-                                    contentDescription = stringResource(available.contentDescription),
-                                    onClick = { showing = available.export },
-                                )
-                            }
-                        }
-                    },
-                )
-
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState(), overscrollEffect = rememberJellyOverscroll()),
+            ) {
                 when {
                     state.isLoading -> RecordDetailShimmerSkeleton()
 
@@ -251,10 +257,10 @@ fun RecordDetailContent(
                         RecordSummaryCard(
                             metaLabel = stringResource(Res.string.detail_doctor),
                             metaValue = if (docName.isBlank()) {
-            UNKNOWN_VALUE
-        } else {
-            stringResource(Res.string.records_doctor_named, docName)
-        },
+                                UNKNOWN_VALUE
+                            } else {
+                                stringResource(Res.string.records_doctor_named, docName)
+                            },
                             trackingCode = trackingCode.ifBlank { UNKNOWN_VALUE }.toPersianDigits(),
                             trackingCodeRaw = trackingCode,
                             date = prescDate.ifBlank { UNKNOWN_VALUE }.toJalaliDateLabel(),
