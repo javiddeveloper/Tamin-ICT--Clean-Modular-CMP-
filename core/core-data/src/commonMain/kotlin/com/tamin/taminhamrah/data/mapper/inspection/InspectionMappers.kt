@@ -2,16 +2,12 @@ package com.tamin.taminhamrah.data.mapper.inspection
 
 import com.tamin.taminhamrah.model.inspection.BranchDTO
 import com.tamin.taminhamrah.model.inspection.BranchDN
-import com.tamin.taminhamrah.model.inspection.BranchListDN
 import com.tamin.taminhamrah.model.inspection.InspectionPerformedDTO
 import com.tamin.taminhamrah.model.inspection.InspectionPerformedDN
-import com.tamin.taminhamrah.model.inspection.InspectionPerformedListDN
 import com.tamin.taminhamrah.model.inspection.JobDTO
 import com.tamin.taminhamrah.model.inspection.JobDN
-import com.tamin.taminhamrah.model.inspection.JobListDN
 import com.tamin.taminhamrah.model.inspection.SubmitInspectionRequestDTO
 import com.tamin.taminhamrah.model.inspection.SubmitInspectionRequestDN
-import com.tamin.taminhamrah.model.utils.ListData
 
 fun InspectionPerformedDTO.toDN() = InspectionPerformedDN(
     activityDesc = activityDesc ?: "",
@@ -60,20 +56,5 @@ fun SubmitInspectionRequestDN.toDTO() = SubmitInspectionRequestDTO(
     workshopName = workshopName,
     workshopNumber = workshopNumber,
     workshopTel = workshopTel
-)
-
-fun ListData<InspectionPerformedDTO>.toDN() = InspectionPerformedListDN(
-    total = total,
-    list = list?.map { it.toDN() } ?: emptyList()
-)
-
-fun ListData<BranchDTO>.toDN() = BranchListDN(
-    total = total,
-    list = list?.map { it.toDN() } ?: emptyList()
-)
-
-fun ListData<JobDTO>.toDN() = JobListDN(
-    total = total,
-    list = list?.map { it.toDN() } ?: emptyList()
 )
 

@@ -2,12 +2,16 @@ package com.tamin.taminhamrah.ui.home
 
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.FeatureManager
+import com.tamin.taminhamrah.model.campaign.CampaignKind
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.model.common.MainServiceDN
+import com.tamin.taminhamrah.model.common.featureStatusOf
 import com.tamin.taminhamrah.ui.home.contract.*
 import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
 import com.tamin.taminhamrah.util.AppConfig
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
@@ -30,22 +34,31 @@ class HomeViewModel(
             is HomeIntent.LoadMenu -> {
                 emit(HomeUiState.HomePartialState.Loading(true))
                 emitAll(
-                    getMainMenuUseCase(AppConfig.versionName, false).map {
-                        HomeUiState.HomePartialState.MenuLoaded(it)
+                    getMainMenuUseCase(AppConfig.versionName, false).map { menu ->
+                        HomeUiState.HomePartialState.MenuLoaded(menu, menu.visibleCampaigns())
                     }
                 )
             }
             is HomeIntent.OnServiceClick -> {
                 handleServiceClick(intent.service)
             }
+            is HomeIntent.OnCampaignClick -> {
+                handleFeatureClick(intent.flag)
+            }
         }
     }
 
     private suspend fun handleServiceClick(service: MainServiceDN) {
         val flag = FeatureFlag.fromId(service.id) ?: return
+        handleFeatureClick(flag)
+    }
 
-        val status = featureManager.getFeatureStatus(flag).first()
-        when (status) {
+    /**
+     * The one gate every tap on this screen goes through — a service card or a campaign card.
+     * Routing around it would let a card open a service the server has switched off.
+     */
+    private suspend fun handleFeatureClick(flag: FeatureFlag) {
+        when (val status = featureManager.getFeatureStatus(flag).first()) {
             is FeatureStatus.Enabled -> {
                 sendEvent(HomeEvent.NavigateToService(flag))
             }
@@ -65,6 +78,16 @@ class HomeViewModel(
         }
     }
 
+    /**
+     * Read off the menu that has just arrived rather than asked of [featureManager] per campaign:
+     * `getFeatureStatus` refetches the menu on every call, so three campaigns would cost three
+     * extra round trips for an answer this list already holds.
+     */
+    private fun List<MainServiceDN>.visibleCampaigns(): ImmutableList<CampaignKind> =
+        CampaignKind.entries
+            .filter { featureStatusOf(it.flag).opensSomething }
+            .toImmutableList()
+
     override fun reduceState(
         currentState: HomeUiState,
         partialState: HomeUiState.HomePartialState
@@ -72,7 +95,8 @@ class HomeViewModel(
         is  HomeUiState.HomePartialState.Loading -> currentState.copy(isLoading = partialState.isLoading)
         is  HomeUiState.HomePartialState.MenuLoaded -> currentState.copy(
             isLoading = false,
-            menuItems = partialState.menuItems
+            menuItems = partialState.menuItems,
+            campaigns = partialState.campaigns
         )
         is  HomeUiState.HomePartialState.Error -> currentState.copy(
             isLoading = false,

@@ -130,6 +130,7 @@ fun ObjectionableDebitContent(
         WorkshopListScaffold(
             state = state.list,
             onLoadMore = { onIntent(ObjectionableDebitIntent.LoadMore) },
+            onRetry = { onIntent(ObjectionableDebitIntent.Retry) },
             key = { it.debitNumber },
             header = {
                 WorkshopSectionHeader(
@@ -137,10 +138,11 @@ fun ObjectionableDebitContent(
                     count = state.list.items.size,
                 )
             },
-        ) { debt ->
+        ) { debt, rowModifier ->
             ObjectionableDebtCard(
                 debt = debt,
                 onAction = { onIntent(ObjectionableDebitIntent.RowAction(debt)) },
+                modifier = rowModifier,
             )
         }
     }

@@ -16,7 +16,25 @@ import com.tamin.taminhamrah.model.history.TalfighInfoItemPR
 import com.tamin.taminhamrah.model.history.TalfighInfoPR
 import com.tamin.taminhamrah.model.history.WageDetailDN
 import com.tamin.taminhamrah.model.history.WageDetailPR
+import com.tamin.taminhamrah.model.history.HistoryCertificateType
+import org.jetbrains.compose.resources.StringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.send_history_type_all
+import taminx.core.core_ui.send_history_type_combined
+import taminx.core.core_ui.send_history_type_wages
 import kotlin.jvm.JvmName
+
+/**
+ * What each «سوابق» certificate is called on screen.
+ *
+ * One table for a type that is now read in two places — the اعلام سابقه wizard picks these to send,
+ * «مجموع سوابق» picks the same three to download — so the wording cannot drift between them.
+ */
+fun HistoryCertificateType.labelRes(): StringResource = when (this) {
+    HistoryCertificateType.ALL -> Res.string.send_history_type_all
+    HistoryCertificateType.WAGES -> Res.string.send_history_type_wages
+    HistoryCertificateType.COMBINED -> Res.string.send_history_type_combined
+}
 
 fun TalfighInfoItemDN.toPresentation(): TalfighInfoItemPR {
     return TalfighInfoItemPR(

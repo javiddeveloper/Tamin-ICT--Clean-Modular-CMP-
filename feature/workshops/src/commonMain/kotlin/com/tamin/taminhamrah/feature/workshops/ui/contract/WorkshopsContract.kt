@@ -5,7 +5,10 @@ import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
 import com.tamin.taminhamrah.model.workshop.WorkshopActivityStatus
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import org.jetbrains.compose.resources.StringResource
+
 
 /**
  * State of the کارگاه‌های کارفرما list.
@@ -17,6 +20,13 @@ data class WorkshopsUiState(
     val stats: WorkshopStats? = null,
     /** The workshop جزئیات کارگاه is showing, or null while the list is up. */
     val detailFor: WorkshopPR? = null,
+    /**
+     * Which services جزئیات کارگاه offers, after the server's feature flags have had their say.
+     *
+     * Starts as every action and narrows once the flags are read, rather than starting empty — a
+     * menu that flashes blank on open reads as a failure, and an unreachable row is the rarer case.
+     */
+    val availableActions: ImmutableList<WorkshopAction> = WorkshopAction.entries.toImmutableList(),
 
     // Search & Status Filters
     val workshopIdInput: String = "",
@@ -41,6 +51,7 @@ data class WorkshopsUiState(
         data class Loaded(val list: PagedListState<WorkshopPR>) : PartialState
         data class StatsLoaded(val stats: WorkshopStats) : PartialState
         data class DetailForChanged(val workshop: WorkshopPR?) : PartialState
+        data class ActionsResolved(val actions: ImmutableList<WorkshopAction>) : PartialState
 
         // Search & Filters
         data class SearchInputChanged(
@@ -96,14 +107,24 @@ sealed interface WorkshopsIntent {
     data class DetailRequested(val workshop: WorkshopPR) : WorkshopsIntent
     data object DetailDismissed : WorkshopsIntent
     data class ActionSelected(val action: WorkshopAction, val workshop: WorkshopPR) : WorkshopsIntent
+    data class AvailableActionsResolved(val actions: ImmutableList<WorkshopAction>) : WorkshopsIntent
 }
 
 sealed interface WorkshopsEvent {
+    /**
+     * Carries the whole workshop identity rather than a widening list of positional strings: the
+     * payment call needs two more fields than the destination's own route does, and six adjacent
+     * `String` parameters are one transposition away from paying the wrong workshop.
+     */
     data class Navigate(
         val action: WorkshopAction,
         val workshopId: String,
         val branchCode: String,
         val workshopName: String,
+        /** `01` حقیقی / `02` حقوقی — reaches `pay-normal-debit` as `nationalType`. */
+        val characterCode: String,
+        /** The حقوقی workshop's national id; blank for a حقیقی one. */
+        val legalNationalId: String,
     ) : WorkshopsEvent
 
     data class ShowMessage(val message: StringResource) : WorkshopsEvent

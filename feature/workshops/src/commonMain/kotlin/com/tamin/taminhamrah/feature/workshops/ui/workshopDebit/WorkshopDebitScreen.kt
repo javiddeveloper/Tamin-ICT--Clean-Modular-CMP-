@@ -16,6 +16,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopScreenShell
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopSectionHeader
 import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
+import com.tamin.taminhamrah.model.payment.PaymentRequestDN
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
@@ -54,18 +55,22 @@ fun WorkshopDebitScreen(
     branchCode: String,
     onBack: () -> Unit,
     onOpenDocuments: (String, String) -> Unit,
-    onOpenUrl: (String) -> Unit,
+    onStartPayment: (PaymentRequestDN) -> Unit,
     modifier: Modifier = Modifier,
     workshopName: String = "",
+    characterCode: String = "",
+    legalNationalId: String = "",
     viewModel: WorkshopDebitViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(workshopId, branchCode) {
-        viewModel.sendIntent(WorkshopDebitIntent.Open(workshopId, branchCode))
+    LaunchedEffect(workshopId, branchCode, characterCode, legalNationalId) {
+        viewModel.sendIntent(
+            WorkshopDebitIntent.Open(workshopId, branchCode, characterCode, legalNationalId),
+        )
     }
 
-    HandleWorkshopDebitEvents(events = viewModel.events, onOpenUrl = onOpenUrl)
+    HandleWorkshopDebitEvents(events = viewModel.events, onStartPayment = onStartPayment)
 
     WorkshopDebitContent(
         state = state,
@@ -96,6 +101,7 @@ fun WorkshopDebitContent(
         WorkshopListScaffold(
             state = state.list,
             onLoadMore = { onIntent(WorkshopDebitIntent.LoadMore) },
+            onRetry = { onIntent(WorkshopDebitIntent.Retry) },
             key = { it.debitNumber },
             header = {
                 WorkshopSectionHeader(
@@ -103,11 +109,12 @@ fun WorkshopDebitContent(
                     count = state.list.items.size,
                 )
             },
-        ) { debt ->
+        ) { debt, rowModifier ->
             WorkshopDebtCard(
                 debt = debt,
                 onDocuments = { onOpenDocuments(debt.debitNumber) },
                 onPay = { onIntent(WorkshopDebitIntent.PayDebit(debt)) },
+                modifier = rowModifier,
             )
         }
     }
@@ -143,6 +150,7 @@ private fun WorkshopDebtCard(
         DetailRow(
             label = stringResource(Res.string.payment_sheet_debit_number),
             value = debt.debitNumberLabel,
+            copyValue = debt.debitNumber,
             verticalPadding = WorkshopDimens.cellVerticalPadding,
         )
         TaminDivider()
@@ -187,7 +195,7 @@ private fun WorkshopDebtCard(
             TaminDivider()
             DetailRow(
                 label = stringResource(Res.string.payment_sheet_agreement_row),
-                value = debt.agreementRow,
+                value = debt.agreementRowLabel,
                 verticalPadding = WorkshopDimens.cellVerticalPadding,
             )
 
@@ -228,7 +236,8 @@ private fun WorkshopDebitScreenPreview() {
                             remainingAmount = "۱۴٬۲۰۳٬۳۱۱",
                             fromDate = "۱۳۹۶/۰۷/۰۱",
                             toDate = "۱۳۹۷/۰۶/۳۱",
-                            agreementRow = "۰۹۶۰۰۰۰۲",
+                            agreementRow = "09600002",
+                            agreementRowLabel = "۰۹۶۰۰۰۰۲",
                         ),
                     ),
                 ),

@@ -2,16 +2,19 @@ package com.tamin.taminhamrah.feature.workshops.ui
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
+import com.tamin.taminhamrah.feature.workshops.fake.FakeFeatureManager
 import com.tamin.taminhamrah.feature.workshops.fake.FakeWorkShopsRepository
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopSearch
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsEvent
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsIntent
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
+import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
 import com.tamin.taminhamrah.model.workshop.WORKSHOP_PAGE_SIZE
 import com.tamin.taminhamrah.model.workshop.WorkshopActivityStatus
+import com.tamin.taminhamrah.model.workshop.WorkshopPR
 import com.tamin.taminhamrah.model.workshop.WorkshopSummaryDN
 import com.tamin.taminhamrah.tools.errorHandling.TaminApiException
 import com.tamin.taminhamrah.useCases.workshops.GetEmployerAgreementsUseCase
@@ -43,18 +46,20 @@ class WorkshopsViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var repository: FakeWorkShopsRepository
+    private lateinit var featureManager: FakeFeatureManager
 
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         repository = FakeWorkShopsRepository()
+        featureManager = FakeFeatureManager()
     }
 
     @AfterTest
     fun tearDown() = Dispatchers.resetMain()
 
     /** Built after the answer is staged, because the ViewModel loads as soon as it exists. */
-    private fun viewModel() = WorkshopsViewModel(GetEmployerAgreementsUseCase(repository))
+    private fun viewModel() = WorkshopsViewModel(GetEmployerAgreementsUseCase(repository), featureManager)
 
     @Test
     fun `the list loads itself without being asked`() = runTest(testDispatcher) {
@@ -80,10 +85,82 @@ class WorkshopsViewModelTest {
         assertEquals(1, last.pageSize)
     }
 
+    // ------------------------------------------------- feature flags and identity
+
+    /**
+     * A service the server switched off must disappear from here too.
+     *
+     * ردیف‌های پیمان is reachable two ways — the services grid, which routes through
+     * `FeatureFlag.CONTRACT_INFO`, and this menu. Honoring the flag in one place only closes one
+     * of the two doors.
+     */
+    @Test
+    fun `an action whose feature flag is off is not offered`() = runTest(testDispatcher) {
+        featureManager.disabled = setOf(FeatureFlag.CONTRACT_INFO)
+
+        val viewModel = viewModel()
+
+        val actions = viewModel.uiState.value.availableActions
+        assertFalse(WorkshopAction.CONTRACT_ROWS in actions)
+        // The rest of the menu is untouched.
+        assertTrue(WorkshopAction.PAYMENT_SHEETS in actions)
+    }
+
+    @Test
+    fun `every action is offered when nothing is disabled`() = runTest(testDispatcher) {
+        val viewModel = viewModel()
+        assertEquals(WorkshopAction.entries.size, viewModel.uiState.value.availableActions.size)
+    }
+
+    /** A flag that cannot be read is not a flag that is off — the menu still opens. */
+    @Test
+    fun `a failing feature manager leaves the menu intact`() = runTest(testDispatcher) {
+        featureManager.error = IllegalStateException("boom")
+
+        val viewModel = viewModel()
+
+        assertEquals(WorkshopAction.entries.size, viewModel.uiState.value.availableActions.size)
+    }
+
+    /**
+     * Half an identity addresses a route that does not exist.
+     *
+     * Every workshop service takes workshopId/branchCode as path segments, so navigating with one
+     * of them blank lands on a 404 the destination shows as an unexplained empty list. It is
+     * refused here, where the missing half is still visible, and the refusal is spoken.
+     */
+    @Test
+    fun `an action on a workshop missing half its identity does not navigate`() =
+        runTest(testDispatcher) {
+            val viewModel = viewModel()
+            val incomplete = WorkshopPR(workshopId = "9028212822", branchCode = "", hasIdentity = false)
+
+            viewModel.events.test {
+                viewModel.sendIntent(WorkshopsIntent.ActionSelected(WorkshopAction.CONTRACT_ROWS, incomplete))
+                assertTrue(awaitItem() is WorkshopsEvent.ShowMessage)
+            }
+        }
+
+    @Test
+    fun `an action on a complete workshop navigates`() = runTest(testDispatcher) {
+        val viewModel = viewModel()
+        val complete = WorkshopPR(workshopId = "9028212822", branchCode = "0210", hasIdentity = true)
+
+        viewModel.events.test {
+            viewModel.sendIntent(WorkshopsIntent.ActionSelected(WorkshopAction.CONTRACT_ROWS, complete))
+            val event = awaitItem()
+            assertTrue(event is WorkshopsEvent.Navigate)
+            assertEquals("0210", event.branchCode)
+        }
+    }
+
     @Test
     fun `a failed count still leaves the total on screen`() = runTest(testDispatcher) {
         repository.employerAgreements = agreementsPage(count = 3, total = 7)
-        val viewModel = WorkshopsViewModel(GetEmployerAgreementsUseCase(FailAfterFirstCall(repository)))
+        val viewModel = WorkshopsViewModel(
+            GetEmployerAgreementsUseCase(FailAfterFirstCall(repository)),
+            featureManager,
+        )
 
         val stats = assertNotNull(viewModel.uiState.value.stats)
         assertEquals(7, stats.total)
@@ -97,6 +174,9 @@ class WorkshopsViewModelTest {
 
         viewModel.uiState.test {
             awaitItem()
+            // A real second page carries different workshops; identical rows would collapse.
+            repository.employerAgreements =
+                agreementsPage(count = WORKSHOP_PAGE_SIZE, total = 30, startAt = WORKSHOP_PAGE_SIZE)
             viewModel.sendIntent(WorkshopsIntent.LoadMore)
             awaitUntil { it.list.items.size > WORKSHOP_PAGE_SIZE }
 
@@ -296,13 +376,13 @@ class WorkshopsViewModelTest {
         assertFalse(viewModel.uiState.value.list.isLoading)
     }
 
-    private fun agreementsPage(count: Int, total: Int) = PagedListDN(
+    private fun agreementsPage(count: Int, total: Int, startAt: Int = 0) = PagedListDN(
         items = List(count) {
             EmployerAgreementDN(
                 workshop = WorkshopSummaryDN(
-                    workshopId = "096821017$it",
+                    workshopId = "09682101${startAt + it}",
                     branchCode = "14",
-                    name = "آموزشگاه شماره $it",
+                    name = "آموزشگاه شماره ${startAt + it}",
                     statusCode = "1",
                 ),
             )

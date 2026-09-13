@@ -69,7 +69,11 @@ class ObjectionableDebitViewModel(
         is ObjectionableDebitIntent.FormRemoveDocument ->
             just(PartialState.FormAttachmentRemoved(intent.index))
 
-        ObjectionableDebitIntent.FormSubmit -> submitObjection()
+        ObjectionableDebitIntent.FormSubmit -> askToConfirm()
+        ObjectionableDebitIntent.FormConfirmDismissed ->
+            just(PartialState.FormConfirmVisible(false))
+
+        ObjectionableDebitIntent.FormConfirmAccepted -> submitObjection()
     }
 
     private fun just(partialState: PartialState): Flow<PartialState> = flow { emit(partialState) }
@@ -171,11 +175,19 @@ class ObjectionableDebitViewModel(
     }
 
     /**
+     * The last gate before the objection leaves: every rule the form states, then the user saying
+     * so out loud.
      * Files the objection, once every rule the form states is actually satisfied.
      *
+     * The rules are checked here rather than in the screen so that a form which is not ready
+     * simply reveals why, and cannot be submitted by any other path either. The dialog is what
+     * the old app asked for too — a filed objection cannot be withdrawn, so the tick alone is
+     * not taken as the answer.
      * The guard runs here rather than in the screen so that a form which is not ready simply
      * reveals why, and cannot be submitted by any other path either.
      */
+    private fun askToConfirm(): Flow<PartialState> = flow {
+        val form = uiState.value.form ?: return@flow
     private fun submitObjection(): Flow<PartialState> = flow {
         val state = uiState.value
         val form = state.form ?: return@flow
@@ -183,6 +195,14 @@ class ObjectionableDebitViewModel(
             emit(PartialState.FormSubmitRejected)
             return@flow
         }
+        emit(PartialState.FormConfirmVisible(true))
+    }
+
+    /** Files the objection, once [askToConfirm] has been answered. */
+    private fun submitObjection(): Flow<PartialState> = flow {
+        val state = uiState.value
+        val form = state.form ?: return@flow
+        emit(PartialState.FormConfirmVisible(false))
         val domainDebt = debtsByNumber[form.debt.debitNumber]
         if (domainDebt == null) {
             sendEvent(ObjectionableDebitEvent.ShowMessage(Res.string.workshop_error_receive_data))
@@ -270,6 +290,10 @@ class ObjectionableDebitViewModel(
 
         is PartialState.FormSubmittingChanged -> currentState.editForm {
             copy(isSubmitting = partialState.isSubmitting)
+        }
+
+        is PartialState.FormConfirmVisible -> currentState.editForm {
+            copy(isConfirmVisible = partialState.isVisible)
         }
     }
 

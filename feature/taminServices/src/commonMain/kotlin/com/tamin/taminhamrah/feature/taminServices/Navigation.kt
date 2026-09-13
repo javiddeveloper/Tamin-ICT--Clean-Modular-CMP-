@@ -5,6 +5,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import com.tamin.taminhamrah.feature.taminServices.occurrence.OccurrenceScreen
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
+import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.EmployerOnlineServicesRoute
+import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.EmployerOnlineServicesViewModel
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.InspectionRoute
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.InspectionViewModel
 import com.tamin.taminhamrah.feature.taminServices.sendHistoryToInstitutions.SendHistoryToInstitutionsScreen
@@ -25,6 +27,9 @@ data object InspectionRoute
 
 @Serializable
 data object OccurrenceRoute
+
+@Serializable
+data object EmployerOnlineServicesRoute
 
 fun NavController.navigateToTaminServices(builder: NavOptionsBuilder.() -> Unit = {}) {
     navigate(TaminServicesRoute, builder)
@@ -88,6 +93,20 @@ fun NavGraphBuilder.occurrenceScreen(
         OccurrenceScreen(
             onBack = onBack,
             onDone = onDone,
+        )
+    }
+}
+
+fun NavController.navigateToEmployerOnlineServices(builder: NavOptionsBuilder.() -> Unit = {}) {
+    navigate(EmployerOnlineServicesRoute, builder)
+}
+
+fun NavGraphBuilder.employerOnlineServicesScreen(onBack: () -> Unit) {
+    composableWithFadeTransitions<EmployerOnlineServicesRoute> {
+        val viewModel: EmployerOnlineServicesViewModel = koinViewModel()
+        EmployerOnlineServicesRoute(
+            viewModel = viewModel,
+            onBackClicked = onBack,
         )
     }
 }

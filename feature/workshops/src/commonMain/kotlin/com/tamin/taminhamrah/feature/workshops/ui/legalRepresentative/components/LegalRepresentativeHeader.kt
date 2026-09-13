@@ -1,0 +1,235 @@
+package com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.components
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
+import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
+import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.components.TaminTopAppBar
+import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.taminSurface
+import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.IconSize
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.ShimmerBlock
+import com.tamin.taminhamrah.ui.theme.ShimmerSize
+import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.toparea.TopAreaState
+import com.tamin.taminhamrah.ui.toparea.topAreaHide
+import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.ic_tamin_legal_representative
+import taminx.core.core_ui.ic_tamin_workshop_legal
+import taminx.core.core_ui.legal_representative_full_name_label
+import taminx.core.core_ui.legal_representative_title
+import taminx.core.core_ui.legal_representative_workshop_stat_label
+
+@Composable
+internal fun LegalRepresentativeHeader(
+    onBackClicked: () -> Unit,
+    modifier: Modifier = Modifier,
+    /** Extra blue space left below [content] for a [LegalRepresentativeIdentitySummaryCard] to ride up into. */
+    heroCardOverlap: Dp = Spacing.none,
+    content: @Composable () -> Unit = {},
+) {
+    val taminColors = LocalTaminColors.current
+    val gradient = remember(taminColors.profileGradientStops) {
+        Brush.horizontalGradient(taminColors.profileGradientStops)
+    }
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(bottomStart = CornerRadius.x3l, bottomEnd = CornerRadius.x3l))
+            .background(gradient)
+            .padding(bottom = Spacing.smPlus + heroCardOverlap),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        TaminTopAppBar(
+            title = stringResource(Res.string.legal_representative_title),
+            background = gradient,
+            bottomPadding = Spacing.smPlus,
+            navigationIcon = {
+                TaminTopAppBarButton(
+                    icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                    contentDescription = null,
+                    onClick = onBackClicked,
+                    bordered = true,
+                )
+            },
+        )
+        DecorativeBackgroundCircle(
+            size = 190.dp,
+            xOffset = 250.dp,
+            yOffset = (-150).dp
+        )
+        content()
+    }
+}
+
+@Composable
+internal fun LegalRepresentativeHeroSubtitle(
+    text: String,
+    topAreaState: TopAreaState,
+    modifier: Modifier = Modifier,
+) {
+    val taminColors = LocalTaminColors.current
+    Column(
+        modifier = modifier.topAreaHide(topAreaState),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        // Statically rendered while this composable is one of rememberMeasuredTopAreaState's
+        // off-screen measure probes -- an infinite-repeat animation there would otherwise keep
+        // requesting frames for a slot that's never actually drawn.
+        AnimatedRingHeaderIcon(
+            icon = vectorResource(Res.drawable.ic_tamin_legal_representative),
+            animated = !topAreaState.isMeasureProbe,
+        )
+        Spacer(Modifier.height(Spacing.sm))
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelLarge,
+            color = taminColors.textHeaderSubtitle,
+        )
+    }
+}
+
+@Composable
+internal fun LegalRepresentativeWorkshopSummaryCard(
+    workshopName: String,
+    subtitle: String,
+) {
+    val taminColors = LocalTaminColors.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.lg)
+            .clip(RoundedCornerShape(CornerRadius.card))
+            .background(taminColors.glassIconTileBg)
+            .padding(Spacing.md),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(IconSize.largePlus)
+                .background(
+                    color = Color.White.copy(alpha = 0.2f),
+                    shape = RoundedCornerShape(CornerRadius.chip)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = vectorResource(Res.drawable.ic_tamin_workshop_legal),
+                contentDescription = null,
+                tint = Color.White,
+            )
+        }
+        Column {
+            Text(
+                text = workshopName,
+                style = MaterialTheme.typography.titleSmall,
+                color = Color.White,
+            )
+            Spacer(Modifier.height(2.dp))
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.labelMedium,
+                color = taminColors.textHeaderSubtitle,
+            )
+        }
+    }
+}
+
+@Composable
+internal fun LegalRepresentativeIdentitySummaryCard(
+    fullName: String?,
+    workshopCount: Int,
+    modifier: Modifier = Modifier,
+) {
+    val taminColors = LocalTaminColors.current
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .taminSurface()
+            .padding(vertical = Spacing.md),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(
+            modifier = Modifier.weight(1f).padding(horizontal = Spacing.lg),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            if (fullName == null) {
+                ShimmerBlock(
+                    modifier = Modifier
+                        .width(ShimmerSize.titleWidth)
+                        .height(ShimmerSize.titleHeight),
+                )
+            } else {
+                Text(
+                    text = fullName,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = taminColors.blueText,
+                    textAlign = TextAlign.Center,
+                )
+            }
+            Spacer(Modifier.height(Spacing.xxs))
+            Text(
+                text = stringResource(Res.string.legal_representative_full_name_label),
+                style = MaterialTheme.typography.labelSmall,
+                color = taminColors.textMuted,
+                textAlign = TextAlign.Center,
+            )
+        }
+        Box(
+            modifier = Modifier
+                .width(1.dp)
+                .height(Spacing.xxl)
+                .background(taminColors.border),
+        )
+        Column(
+            modifier = Modifier.padding(horizontal = Spacing.lg),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            NumericText(
+                text = workshopCount.toString(),
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                color = taminColors.blueText,
+            )
+            Spacer(Modifier.height(Spacing.xxs))
+            Text(
+                text = stringResource(Res.string.legal_representative_workshop_stat_label),
+                style = MaterialTheme.typography.labelSmall,
+                color = taminColors.textMuted,
+            )
+        }
+    }
+}

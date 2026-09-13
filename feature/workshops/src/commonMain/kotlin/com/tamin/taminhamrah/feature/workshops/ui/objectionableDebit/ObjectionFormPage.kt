@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -23,14 +25,22 @@ import com.tamin.taminhamrah.feature.workshops.ui.model.ObjectionDocumentTypes
 import com.tamin.taminhamrah.model.workshop.ObjectionKind
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
+import com.tamin.taminhamrah.ui.components.TaminFilledButton
+import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.action_cancel
+import taminx.core.core_ui.action_confirm
 import taminx.core.core_ui.obj_form_area_hint
 import taminx.core.core_ui.obj_form_area_label
 import taminx.core.core_ui.obj_form_check_confirm
 import taminx.core.core_ui.obj_form_check_deposit
+import taminx.core.core_ui.obj_form_confirm_body
+import taminx.core.core_ui.obj_form_confirm_title
 import taminx.core.core_ui.obj_form_desc_estimate
 import taminx.core.core_ui.obj_form_desc_primary_vote
 import taminx.core.core_ui.obj_form_group_debt
@@ -68,7 +78,15 @@ fun ObjectionFormPage(
     val periodToLabel = stringResource(Res.string.obj_form_period_to)
     val amountLabel = stringResource(Res.string.workshop_debt_amount)
     val notifyDateLabel = stringResource(Res.string.workshop_debt_notify_date)
-    val debtRows = remember(debt, debtNumberLabel) {
+    val debtRows = remember(
+        debt,
+        debtNumberLabel,
+        agreementRowLabel,
+        periodFromLabel,
+        periodToLabel,
+        amountLabel,
+        notifyDateLabel,
+    ) {
         persistentListOf(
             WorkshopReviewRow(debtNumberLabel, debt.debitNumberLabel),
             WorkshopReviewRow(agreementRowLabel, debt.agreementRow),
@@ -167,6 +185,47 @@ fun ObjectionFormPage(
             isBusy = form.isBusy,
         )
     }
+
+    if (form.isConfirmVisible) {
+        ObjectionSubmitConfirmDialog(onIntent = onIntent)
+    }
+}
+
+/**
+ * The last word before the objection is filed.
+ *
+ * The old app put the same modal between the تعهدنامه tick and the API call, and its text is
+ * kept verbatim: it is not an "are you sure" but the undertaking the employer is agreeing to —
+ * that the branch reviews the documents, that the right to a هیات بدوی hearing survives a
+ * rejection, and that the answer comes within a week through پیگیری وضعیت اعتراض.
+ */
+@Composable
+private fun ObjectionSubmitConfirmDialog(
+    onIntent: (ObjectionableDebitIntent) -> Unit,
+) {
+    val colors = LocalTaminColors.current
+    TaminConfirmationDialog(
+        title = stringResource(Res.string.obj_form_confirm_title),
+        description = stringResource(Res.string.obj_form_confirm_body),
+        confirmButton = {
+            TaminFilledButton(
+                text = stringResource(Res.string.action_confirm),
+                onClick = { onIntent(ObjectionableDebitIntent.FormConfirmAccepted) },
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
+        dismissButton = {
+            TaminOutlinedButton(
+                text = stringResource(Res.string.action_cancel),
+                onClick = { onIntent(ObjectionableDebitIntent.FormConfirmDismissed) },
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
+        onDismissRequest = { onIntent(ObjectionableDebitIntent.FormConfirmDismissed) },
+        icon = Icons.Outlined.Info,
+        iconTint = colors.orangeText,
+        iconBackground = colors.orangeBg,
+    )
 }
 
 @PreviewRtlTheme

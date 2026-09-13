@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.ui.navigation
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -32,8 +33,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -55,6 +54,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -63,6 +64,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.tamin.taminhamrah.feature.FeatureManager
+import com.tamin.taminhamrah.feature.addDependent.AddDependentRoute
+import com.tamin.taminhamrah.feature.addDependent.addDependentGraph
 import com.tamin.taminhamrah.feature.agent.AgentDestination
 import com.tamin.taminhamrah.feature.agent.agentScreen
 import com.tamin.taminhamrah.feature.agent.navigateToAgent
@@ -70,54 +73,89 @@ import com.tamin.taminhamrah.feature.cartable.CartableRoute
 import com.tamin.taminhamrah.feature.cartable.cartableGraph
 import com.tamin.taminhamrah.feature.changemobile.changeMobileScreen
 import com.tamin.taminhamrah.feature.changemobile.navigateToChangeMobile
+import com.tamin.taminhamrah.feature.contractaffair.ContractPremiumPaymentRoute
 import com.tamin.taminhamrah.feature.contracts.contractsScreen
 import com.tamin.taminhamrah.feature.contracts.navigateToContracts
+import com.tamin.taminhamrah.feature.deferredInstallment.deferredInstallmentScreen
+import com.tamin.taminhamrah.feature.deferredInstallment.navigateToDeferredInstallment
+import com.tamin.taminhamrah.feature.developerOptions.DebugLoginRoute
+import com.tamin.taminhamrah.feature.developerOptions.TokenManagerRoute
+import com.tamin.taminhamrah.feature.developerOptions.debugLoginScreen
+import com.tamin.taminhamrah.feature.developerOptions.developerOptionsScreen
+import com.tamin.taminhamrah.feature.developerOptions.tokenManagerScreen
+import com.tamin.taminhamrah.feature.fractionContract.fractionContractScreen
+import com.tamin.taminhamrah.feature.girlSurvivor.girlSurvivorScreen
 import com.tamin.taminhamrah.feature.healthProfile.healthProfileScreen
 import com.tamin.taminhamrah.feature.healthProfile.navigateToHealthProfile
 import com.tamin.taminhamrah.feature.history.historyJobInfoScreen
 import com.tamin.taminhamrah.feature.history.historyScreen
-import com.tamin.taminhamrah.feature.deferredInstallment.deferredInstallmentScreen
-import com.tamin.taminhamrah.feature.deferredInstallment.navigateToDeferredInstallment
+import com.tamin.taminhamrah.feature.historyobjection.historyObjectionScreen
+import com.tamin.taminhamrah.feature.historyobjection.historyObjectionStepperScreen
+import com.tamin.taminhamrah.feature.inquiryEducation.inquiryEducationScreen
+import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
+import com.tamin.taminhamrah.feature.orotezprotez.orotezProtezScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.calculatePensionScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.deservedTreatmentScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.disabilityPensionScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.edictScreen
-import com.tamin.taminhamrah.feature.girlSurvivor.girlSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.issuanceCertificateScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeservedTreatment
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDisabilityPension
-import com.tamin.taminhamrah.feature.pensionSurvivor.navigateToPensionSurvivor
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPrescription
+import com.tamin.taminhamrah.feature.payment.PaymentRoute
+import com.tamin.taminhamrah.feature.payment.paymentGraph
+import com.tamin.taminhamrah.feature.payment.navigateToPayment
+import com.tamin.taminhamrah.feature.payment.paymentSandboxScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.payrollScreen
-import com.tamin.taminhamrah.feature.pensionStatusInquiry.pensionStatusInquiryGraph
-import com.tamin.taminhamrah.feature.pensionSurvivor.pensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.prescriptionScreen
+import com.tamin.taminhamrah.feature.pensionStatusInquiry.pensionStatusInquiryGraph
+import com.tamin.taminhamrah.feature.pensionSurvivor.navigateToPensionSurvivor
+import com.tamin.taminhamrah.feature.pensionSurvivor.pensionSurvivorScreen
+import com.tamin.taminhamrah.feature.retirementPension.retirementPensionScreen
+import com.tamin.taminhamrah.feature.pregnancyPay.pregnancyPayScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
-import com.tamin.taminhamrah.feature.addDependent.addDependentGraph
-import com.tamin.taminhamrah.feature.addDependent.AddDependentRoute
-import com.tamin.taminhamrah.feature.studentInsuranceContract.studentInsuranceContractScreen
+import com.tamin.taminhamrah.feature.contractaffair.CONTRACT_AFFAIRS_REFRESH_KEY
+import com.tamin.taminhamrah.feature.contractaffair.contractAffairsScreen
+import com.tamin.taminhamrah.feature.contractaffair.contractPaymentHistoryScreen
+import com.tamin.taminhamrah.feature.contractaffair.contractPaymentCalcDetailScreen
+import com.tamin.taminhamrah.feature.contractaffair.contractPremiumPaymentScreen
+import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPaymentCalcDetail
+import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPaymentHistory
+import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPremiumPayment
+import com.tamin.taminhamrah.feature.payment.navigateToPayment
+import com.tamin.taminhamrah.feature.requestPaymentForIllDays.requestPaymentForIllDaysScreen
+import com.tamin.taminhamrah.feature.security.SecurityRoute
+import com.tamin.taminhamrah.feature.security.securityScreen
+import com.tamin.taminhamrah.feature.settings.SettingsRoute
+import com.tamin.taminhamrah.feature.settings.settingsScreen
+import com.tamin.taminhamrah.feature.contracts.contractFlowScreen
+import com.tamin.taminhamrah.feature.contracts.flow.resolveContractTypeForEdit
+import com.tamin.taminhamrah.feature.contracts.navigateToContractFlow
 import com.tamin.taminhamrah.feature.taminServices.TaminServicesRoute
-import com.tamin.taminhamrah.feature.taminServices.occurrenceScreen
 import com.tamin.taminhamrah.feature.taminServices.inspectionScreen
+import com.tamin.taminhamrah.feature.taminServices.occurrenceScreen
+import com.tamin.taminhamrah.feature.taminServices.employerOnlineServicesScreen
 import com.tamin.taminhamrah.feature.taminServices.sendInsuranceHistoryToInstitutionsScreen
 import com.tamin.taminhamrah.feature.taminServices.taminServicesScreen
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
 import com.tamin.taminhamrah.feature.treatment.treatmentGraph
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
+import com.tamin.taminhamrah.feature.workshops.completeEmployerInfoScreen
+import com.tamin.taminhamrah.feature.workshops.debtObjectionStatusScreen
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
 import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
-import com.tamin.taminhamrah.feature.security.SecurityRoute
 import com.tamin.taminhamrah.feature.security.securityScreen
-import com.tamin.taminhamrah.feature.settings.SettingsRoute
+import com.tamin.taminhamrah.feature.developerOptions.DeveloperOptionsRoute
+import com.tamin.taminhamrah.feature.developerOptions.developerOptionsScreen
 import com.tamin.taminhamrah.feature.settings.settingsScreen
 import com.tamin.taminhamrah.feature.userRequest.UserRequestRoute
 import com.tamin.taminhamrah.feature.userRequest.userRequestGraph
-import com.tamin.taminhamrah.feature.historyobjection.historyObjectionScreen
-import com.tamin.taminhamrah.feature.historyobjection.historyObjectionStepperScreen
-import com.tamin.taminhamrah.feature.orotezprotez.orotezProtezScreen
-import com.tamin.taminhamrah.feature.pregnancyPay.pregnancyPayScreen
+import com.tamin.taminhamrah.feature.workshops.completeEmployerInfoScreen
+import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
+import com.tamin.taminhamrah.feature.workshops.workshopsScreen
+import com.tamin.taminhamrah.mapper.campaign.toPresentation
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
@@ -127,11 +165,14 @@ import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
 import com.tamin.taminhamrah.ui.blur.NavigationBarItemContent
 import com.tamin.taminhamrah.ui.blur.TopBarScrim
 import com.tamin.taminhamrah.ui.blur.safeHazeSource
+import com.tamin.taminhamrah.ui.components.CampaignCarousel
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import com.tamin.taminhamrah.ui.contract.CustomNavigationBarItem
 import com.tamin.taminhamrah.ui.home.HomeViewModel
 import com.tamin.taminhamrah.ui.home.contract.HomeEvent
 import com.tamin.taminhamrah.ui.home.contract.HomeIntent
+import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.util.AppConfig
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -150,6 +191,7 @@ import taminx.core.core_ui.login_to_tamin_man
 import taminx.core.core_ui.please_login_to_your_account
 import taminx.core.core_ui.retry
 import taminx.core.core_ui.select_group
+import taminx.core.core_ui.tab_agent
 import taminx.core.core_ui.tab_home
 import taminx.core.core_ui.tab_profile
 import taminx.core.core_ui.tab_services
@@ -187,8 +229,6 @@ internal fun TaminHamrahNavGraph(
     val isProfileSelected = currentDestination?.hasRoute<ProfileRoute.Main>() == true
     val isHomeSelected = currentDestination?.hasRoute<Route.Home>() == true
 
-val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
-
     // بررسی Feature Flag سراسری Agent برای کنترل نمایش FAB
     val featureManager: FeatureManager = koinInject()
     val isAgentEnabled by featureManager
@@ -197,6 +237,7 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
         .collectAsState(initial = false)
     val currentTab = currentDestination.toBottomTab()
     val isBottomBarVisible = currentTab != BottomTab.OTHER
+    val agentLabel = stringResource(Res.string.tab_agent)
 
     val navigationItems = listOf(
         NavigationTab(
@@ -255,25 +296,17 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
     val hazeState = remember { HazeState(initialBlurEnabled = true) }
     val snackbarHostState = remember { SnackbarHostState() }
     val snackbarScope = rememberCoroutineScope()
-    Scaffold(contentWindowInsets = WindowInsets(0),
+    Scaffold(
+        contentWindowInsets = WindowInsets(0),
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        floatingActionButton = {
-            AnimatedVisibility(
-                visible = isHomeRoute && isAgentEnabled,
-                enter = androidx.compose.animation.scaleIn(),
-                exit = androidx.compose.animation.scaleOut()
-            ) {
-                AgentFab(onClick = { navController.navigateToAgent() })
-            }
-        },
         bottomBar = {
             AnimatedVisibility(
                 visible = isBottomBarVisible,
                 enter = fadeIn(
-                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300),
+                    animationSpec = tween(durationMillis = 300),
                 ),
                 exit = fadeOut(
-                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300),
+                    animationSpec = tween(durationMillis = 300),
                 ),
             ) {
                 Box(
@@ -281,12 +314,22 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                         .fillMaxWidth()
                         .background(brush = AppBarScrim.bottomGradient)
                 ) {
-                    val selectedIndex = remember(currentTab) { navigationItems.indexOfFirst { it.isSelected }.coerceAtLeast(0) }
+                    val selectedIndex = remember(currentTab) {
+                        navigationItems.indexOfFirst { it.isSelected }.coerceAtLeast(0)
+                    }
                     FloatingGlassNavigationBar(
                         hazeState = hazeState,
                         selectedIndex = selectedIndex,
                         itemCount = navigationItems.size,
-                        isBlurEnabled = isBottomBarVisible
+                        isBlurEnabled = isBottomBarVisible,
+                        trailingButton = if (isAgentEnabled) {
+                            {
+                                AgentOrbButton(
+                                    onClick = { navController.navigateToAgent() },
+                                    contentDescription = agentLabel,
+                                )
+                            }
+                        } else null,
                     ) {
 
                         navigationItems.forEach { navigationItem ->
@@ -388,6 +431,9 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                     onNavigateToSecurity = {
                         navController.navigate(SecurityRoute)
                     },
+                    onNavigateToDeveloperOptions = {
+                        navController.navigate(DeveloperOptionsRoute)
+                    },
                     onNavigateToAddDependent = {
                         navController.navigate(AddDependentRoute)
                     },
@@ -436,6 +482,10 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                     onBack = { navController.popBackStack() }
                 )
 
+                employerOnlineServicesScreen(
+                    onBack = { navController.popBackStack() }
+                )
+
                 pensionStatusInquiryGraph(
                     onBack = { navController.popBackStack() }
                 )
@@ -444,6 +494,7 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                     onDone = { navController.popBackStack() },
                 )
 
+                retirementPensionScreen(onBack = { navController.popBackStack() })
                 calculatePensionScreen(onBack = { navController.popBackStack() })
                 prescriptionScreen(onBack = { navController.popBackStack() })
                 deservedTreatmentScreen(onBack = { navController.popBackStack() })
@@ -453,20 +504,31 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                     onBack = { navController.popBackStack() },
                     onGoHome = {
                         navController.navigate(Route.Home) {
-                            popUpTo(navController.graph.findStartDestination().id) { inclusive = false }
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                inclusive = false
+                            }
                             launchSingleTop = true
                         }
                     }
                 )
                 deferredInstallmentScreen(onBack = { navController.popBackStack() })
                 girlSurvivorScreen(onBack = { navController.popBackStack() })
+                inquiryEducationScreen(onBack = { navController.popBackStack() })
+                fractionContractScreen(onBack = { navController.popBackStack() })
+
+                // The shared payment flow. Any feature that has been handed a gateway ticket
+                // enters it with navController.navigateToPayment(request); finishing pops back to
+                // whichever screen started the payment.
+                paymentGraph(
+                    navController = navController,
+                    onFinished = { navController.popBackStack() },
+                )
                 pensionSurvivorScreen(
                     navController = navController,
-                    onBack = { navController.popBackStack() },
-                )
+                    onBack = { navController.popBackStack() })
                 disabilityPensionScreen(onBack = { navController.popBackStack() })
 
-                historyScreen()
+                historyScreen(navController = navController, onBack = { navController.popBackStack() })
                 historyJobInfoScreen(onBack = { navController.popBackStack() })
 
                 contractsScreen(
@@ -477,7 +539,62 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
                     onOpenUrl = { url -> openUrl(url) }
                 )
 
-                workshopsScreen(navController, onOpenUrl = { url -> openUrl(url) })
+                contractAffairsScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToService = { flag ->
+                    navController.navigateToFeature(flag)
+                },
+                    onOpenUrl =  { url -> openUrl(url) },
+                    onNavigateToPaymentHistory = { contractNumber, insuranceType ->
+                        navController.navigateToContractPaymentHistory(contractNumber, insuranceType)
+                    },
+                    onNavigateToPremiumPayment = { contractNumber, premiumTypeCode, insuranceType ->
+                        navController.navigateToContractPremiumPayment(
+                            contractNumber,
+                            premiumTypeCode,
+                            insuranceType,
+                        )
+                    },
+                    onNavigateToEditContract = { premiumTypeCode, freeJobCode, contractNumber ->
+                        val type = resolveContractTypeForEdit(premiumTypeCode, freeJobCode)
+                            ?: return@contractAffairsScreen
+                        navController.navigateToContractFlow(
+                            type = type,
+                            editContractNumber = contractNumber,
+                        )
+                    },
+                )
+
+                contractPaymentHistoryScreen(onBack = { navController.popBackStack() })
+
+                contractPremiumPaymentScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToPaymentDetails = { premiumTypeCode, startDate, endDate ->
+                        navController.navigateToContractPaymentCalcDetail(
+                            premiumTypeCode,
+                            startDate,
+                            endDate,
+                        )
+                    },
+                    onNavigateToPayment = { request ->
+                        navController.navigateToPayment(request) {
+                            popUpTo<ContractPremiumPaymentRoute> {
+                                inclusive = true
+                            }
+                        }
+                    },
+                )
+
+                contractPaymentCalcDetailScreen(onBack = { navController.popBackStack() })
+
+                workshopsScreen(
+                    navController,
+                    // The debt payment runs in the app's own payment flow, which owns the gateway
+                    // address; the feature only hands over the ticket the service issued.
+                    onStartPayment = { request -> navController.navigateToPayment(request) },
+                )
+                completeEmployerInfoScreen(navController)
+                debtObjectionStatusScreen(navController)
 
                 myInboxScreen(onNavigateBack = { navController.popBackStack() })
 
@@ -485,7 +602,15 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
 
                 userRequestGraph(navController = navController)
 
-                studentInsuranceContractScreen(onBack = { navController.popBackStack() })
+                contractFlowScreen(
+                    onBack = { navController.popBackStack() },
+                    onEditSuccess = {
+                        navController.previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set(CONTRACT_AFFAIRS_REFRESH_KEY, true)
+                        navController.popBackStack()
+                    },
+                )
 
                 // Maps the assistant's destination ids to real routes. Ids come from
                 // AgentDestination; anything unmapped is ignored rather than crashing.
@@ -509,14 +634,33 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
 
                 securityScreen(onNavigateBack = { navController.popBackStack() })
 
+                if (AppConfig.isDebug) {
+                    developerOptionsScreen(
+                        onNavigateBack = { navController.popBackStack() },
+                        onNavigateToDebugLogin = { navController.navigate(DebugLoginRoute) },
+                        onNavigateToTokenManager = { navController.navigate(TokenManagerRoute) },
+                        onStartTestPayment = { navController.navigate(PaymentRoute.Sandbox) }
+                    )
+                    paymentSandboxScreen(
+                        navController = navController,
+                        onNavigateBack = { navController.popBackStack() }
+                    )
+                    debugLoginScreen(onNavigateBack = { navController.popBackStack() })
+                    tokenManagerScreen(onNavigateBack = { navController.popBackStack() })
+                }
+
                 orotezProtezScreen(onBack = { navController.popBackStack() })
 
-                historyObjectionScreen(navController = navController, onBack = { navController.popBackStack() })
+                historyObjectionScreen(
+                    navController = navController,
+                    onBack = { navController.popBackStack() })
 
                 historyObjectionStepperScreen(
                     onBack = { navController.popBackStack() },
                     onNavigateHome = { navController.popBackStack(Route.Home, inclusive = false) },
                 )
+
+                requestPaymentForIllDaysScreen(onBack = { navController.popBackStack() })
 
                 pregnancyPayScreen(onBack = { navController.popBackStack() })
 
@@ -526,10 +670,10 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
             AnimatedVisibility(
                 visible = isBottomBarVisible,
                 enter = fadeIn(
-                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300)
+                    animationSpec = tween(durationMillis = 300)
                 ),
                 exit = fadeOut(
-                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300)
+                    animationSpec = tween(durationMillis = 300)
                 ),
                 modifier = Modifier.align(Alignment.TopCenter)
             ) {
@@ -574,6 +718,25 @@ val isHomeRoute = currentDestination?.hasRoute<Route.Home>() == true
     }
 }
 
+/** What the placeholder home column insets its content by; the carousel needs to know it. */
+private val HomeContentPadding = 16.dp
+
+/**
+ * Measures the content [inset] wider than the column allows, so a full-bleed child can reach the
+ * screen edge from inside a padded, center-aligned column. Placement is symmetric, which is what
+ * cancels the padding — the parent's own width is fixed, so nothing else moves.
+ *
+ * Local to this screen on purpose: it exists only because the placeholder home column pads all of
+ * its children, and it goes away with the placeholder.
+ */
+private fun Modifier.ignoreHorizontalPadding(inset: Dp) = layout { measurable, constraints ->
+    val width = constraints.maxWidth + inset.roundToPx() * 2
+    val placeable = measurable.measure(
+        constraints.copy(minWidth = width, maxWidth = width)
+    )
+    layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+}
+
 @Composable
 fun HomeScreen(
     onNavigateToService: (FeatureFlag) -> Unit,
@@ -607,7 +770,7 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = HomeContentPadding)
                 // Top padding for content breathing room
                 .padding(top = 16.dp)
                 // Bottom padding so last item scrolls fully above the floating blur bar
@@ -673,6 +836,23 @@ fun HomeScreen(
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // The same for every role: campaigns are not filtered by the picker above.
+            //
+            // Full-bleed on purpose. A pager clips along its scroll axis, so leaving it inside this
+            // column's 16dp inset would cut the peeking neighbor down from 34 to 18 and leave the
+            // cards' merged shadow with a hard vertical edge 16dp in from the screen.
+            CampaignCarousel(
+                campaigns = uiState.campaigns.toPresentation(),
+                onCampaignClick = { flag ->
+                    viewModel.sendIntent(HomeIntent.OnCampaignClick(flag))
+                },
+                modifier = Modifier
+                    .ignoreHorizontalPadding(HomeContentPadding)
+                    .padding(top = Spacing.xlg),
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -773,66 +953,6 @@ fun HomeScreen(
                     Text(stringResource(Res.string.retry))
                 }
             }
-        }
-    }
-}
-@Composable
-private fun AgentFab(onClick: () -> Unit) {
-    val infiniteTransition = androidx.compose.animation.core.rememberInfiniteTransition(label = "fab_pulse")
-    val glowAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.4f,
-        targetValue = 0.9f,
-        animationSpec = androidx.compose.animation.core.infiniteRepeatable(
-            animation = androidx.compose.animation.core.tween(1200),
-            repeatMode = androidx.compose.animation.core.RepeatMode.Reverse
-        ),
-        label = "glow"
-    )
-    val scale by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 1.08f,
-        animationSpec = androidx.compose.animation.core.infiniteRepeatable(
-            animation = androidx.compose.animation.core.tween(1200),
-            repeatMode = androidx.compose.animation.core.RepeatMode.Reverse
-        ),
-        label = "scale"
-    )
-
-    androidx.compose.ui.layout.Layout(
-        content = {
-            androidx.compose.foundation.Canvas(modifier = Modifier.size(72.dp)) {
-                drawCircle(
-                    color = Color(0xFF1A73E8).copy(alpha = glowAlpha * 0.4f),
-                    radius = size.minDimension / 2f * 1.3f
-                )
-            }
-            FloatingActionButton(
-                onClick = onClick,
-                modifier = Modifier.size(56.dp),
-                containerColor = Color(0xFF1A73E8),
-                contentColor = Color.White,
-                elevation = FloatingActionButtonDefaults.elevation(
-                    defaultElevation = 8.dp,
-                    pressedElevation = 4.dp
-                )
-            ) {
-                Text(
-                    text = "AI",
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                        color = Color.White
-                    )
-                )
-            }
-        }
-    ) { measurables, constraints ->
-        val glow = measurables[0].measure(constraints)
-        val fab = measurables[1].measure(constraints)
-        val w = maxOf(glow.width, fab.width)
-        val h = maxOf(glow.height, fab.height)
-        layout(w, h) {
-            glow.placeRelative((w - glow.width) / 2, (h - glow.height) / 2)
-            fab.placeRelative((w - fab.width) / 2, (h - fab.height) / 2)
         }
     }
 }

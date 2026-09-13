@@ -18,8 +18,8 @@ import kotlin.test.assertTrue
  */
 class PagedListStateTest {
 
-    private fun page(items: Int, total: Int) =
-        PagedListDN(items = List(items) { "row-$it" }, total = total)
+    private fun page(items: Int, total: Int, startAt: Int = 0) =
+        PagedListDN(items = List(items) { "row-${startAt + it}" }, total = total)
 
     @Test
     fun `first page replaces whatever was there`() {
@@ -33,7 +33,8 @@ class PagedListStateTest {
     fun `later pages append rather than replace`() {
         val first = PagedListState<String>()
             .loaded(page(items = WORKSHOP_PAGE_SIZE, total = 12), isFirstPage = true) { it }
-        val second = first.loaded(page(items = 2, total = 12), isFirstPage = false) { it }
+        val second = first.loaded(
+            page(items = 2, total = 12, startAt = WORKSHOP_PAGE_SIZE), isFirstPage = false) { it }
 
         assertEquals(WORKSHOP_PAGE_SIZE + 2, second.items.size)
         assertEquals("row-0", second.items.first())
@@ -127,6 +128,61 @@ class PagedListStateTest {
     }
 
     @Test
+    fun `a row identical to one already shown is not shown twice`() {
+        val state = PagedListState<String>().loaded(
+            PagedListDN(items = listOf("a", "b", "a", "c", "b"), total = 5),
+            isFirstPage = true,
+        ) { it }
+
+        assertEquals(listOf("a", "b", "c"), state.items)
+    }
+
+    @Test
+    fun `a repeat arriving on the next page is dropped too`() {
+        val first = PagedListState<String>()
+            .loaded(PagedListDN(items = List(WORKSHOP_PAGE_SIZE) { "row-$it" }, total = 40),
+                isFirstPage = true) { it }
+        val second = first.loaded(
+            PagedListDN(items = listOf("row-0", "row-1", "fresh"), total = 40),
+            isFirstPage = false,
+        ) { it }
+
+        assertEquals(WORKSHOP_PAGE_SIZE + 1, second.items.size)
+        assertEquals("fresh", second.items.last())
+    }
+
+    @Test
+    fun `paging counts what the service sent, not what is shown`() {
+        // Every row of the first page a duplicate of the last: counting the shortened list would
+        // ask for page 0 again, and a list that repeats itself would never advance at all.
+        val state = PagedListState<String>().loaded(
+            PagedListDN(items = List(WORKSHOP_PAGE_SIZE) { "same" }, total = 40),
+            isFirstPage = true,
+        ) { it }
+
+        assertEquals(1, state.items.size)
+        assertEquals(WORKSHOP_PAGE_SIZE, state.receivedCount)
+        assertEquals(1, state.nextPage)
+        assertTrue(state.hasMore)
+    }
+
+    @Test
+    fun `a reload starts the received count over`() {
+        val paged = PagedListState<String>()
+            .loaded(PagedListDN(items = List(WORKSHOP_PAGE_SIZE) { "row-$it" }, total = 40),
+                isFirstPage = true) { it }
+            .loaded(PagedListDN(items = List(WORKSHOP_PAGE_SIZE) { "more-$it" }, total = 40),
+                isFirstPage = false) { it }
+        assertEquals(2, paged.nextPage)
+
+        val reloaded = paged.loaded(
+            PagedListDN(items = listOf("only"), total = 1), isFirstPage = true) { it }
+
+        assertEquals(1, reloaded.receivedCount)
+        assertEquals(0, reloaded.nextPage)
+    }
+
+    @Test
     fun `a reload that comes back empty clears the rows it had`() {
         val state = PagedListState<String>()
             .loaded(page(items = 3, total = 3), isFirstPage = true) { it }
@@ -134,6 +190,46 @@ class PagedListStateTest {
 
         assertTrue(state.items.isEmpty())
         assertTrue(state.isEmpty)
+    }
+
+    // --------------------------------------------------------------- failure state
+
+    /**
+     * A failed list is not an empty one.
+     *
+     * These two were indistinguishable before `isFailed` existed: neither `isFirstLoad` nor
+     * `isEmpty` matched a failure with no rows, so the list rendered zero items and the page came
+     * out blank — a 404 looked exactly like a workshop that genuinely has no rows.
+     */
+    @Test
+    fun `a failure with no rows is failed and not empty`() {
+        val state = PagedListState<String>().loading().failed("boom")
+
+        assertTrue(state.isFailed)
+        assertFalse(state.isEmpty)
+        assertFalse(state.isFirstLoad)
+    }
+
+    @Test
+    fun `an empty success is empty and not failed`() {
+        val state = PagedListState<String>()
+            .loading()
+            .loaded(PagedListDN<String>(emptyList(), total = 0), isFirstPage = true) { it }
+
+        assertTrue(state.isEmpty)
+        assertFalse(state.isFailed)
+    }
+
+    /** A failed *next* page keeps what already arrived — only the footer stops. */
+    @Test
+    fun `a failure with rows already shown is not failed`() {
+        val loaded = PagedListState<String>()
+            .loading()
+            .loaded(PagedListDN(listOf("a", "b"), total = 99), isFirstPage = true) { it }
+        val state = loaded.loadingMore().failed("boom")
+
+        assertFalse(state.isFailed)
+        assertEquals(2, state.items.size)
     }
 }
 

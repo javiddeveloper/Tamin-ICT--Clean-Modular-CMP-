@@ -6,21 +6,25 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.composed
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.unit.Dp
-
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 
 private const val SHIMMER_DURATION_MS = 1200
 
@@ -66,4 +70,33 @@ fun ShimmerBlock(
     colorHighlight: Color = Color.Unspecified,
 ) {
     Box(modifier.clip(RoundedCornerShape(cornerRadius)).shimmer(colorBase, colorHighlight))
+}
+
+/**
+ * A page of cards that have not arrived yet, at the rhythm the real list will have — so the
+ * content lands where the placeholders already were instead of the page jumping when it does.
+ *
+ * A plain [Column]: a screen shows a handful of these while it loads, never a scrollable list of
+ * them.
+ */
+@Composable
+fun ShimmerCardList(
+    modifier: Modifier = Modifier,
+    count: Int = 3,
+    cardHeight: Dp = ShimmerSize.cardHeight,
+    cornerRadius: Dp = CornerRadius.cardCompact,
+    spacing: Dp = Spacing.lg,
+    contentPadding: PaddingValues = PaddingValues(Spacing.page),
+) {
+    Column(
+        modifier = modifier.fillMaxWidth().padding(contentPadding),
+        verticalArrangement = Arrangement.spacedBy(spacing),
+    ) {
+        repeat(count) {
+            ShimmerBlock(
+                modifier = Modifier.fillMaxWidth().height(cardHeight),
+                cornerRadius = cornerRadius,
+            )
+        }
+    }
 }

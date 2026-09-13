@@ -4,20 +4,23 @@ import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSource
 import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSource
 import com.tamin.taminhamrah.dataSource.userSource.UserRemoteDataSourceImpl
+import com.tamin.taminhamrah.model.BaseUrlKey
 import com.tamin.taminhamrah.repository.AuthRepository
 import com.tamin.taminhamrah.repository.AuthTokenInvalidator
+import com.tamin.taminhamrah.repository.DeveloperOptionsRepository
 import com.tamin.taminhamrah.repository.authRepository.AuthRepositoryImpl
 import com.tamin.taminhamrah.repository.authRepository.AuthTokenInvalidatorImpl
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
 import com.tamin.taminhamrah.tools.errorHandling.PlainTextErrorResponsePlugin
-import com.tamin.taminhamrah.util.NetworkConstants
 import com.tamin.taminhamrah.util.AppConfig
+import com.tamin.taminhamrah.util.NetworkConstants
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
+import io.ktor.client.plugins.HttpRedirect
 import io.ktor.client.plugins.HttpTimeout
-import io.ktor.client.plugins.auth.authProviders
 import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.authProviders
 import io.ktor.client.plugins.auth.providers.BearerAuthProvider
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
@@ -31,7 +34,6 @@ import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
-import io.ktor.util.logging.KtorSimpleLogger
 import kotlinx.serialization.json.Json
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
@@ -48,7 +50,8 @@ val networkModule = module {
     single<AuthRemoteDataSource> {
         AuthRemoteDataSourceImpl(
             userApiService = get(named("authUserApiService")),
-            errorParser = get()
+            errorParser = get(),
+            developerOptionsRepository = get()
         )
     }
 
@@ -57,7 +60,8 @@ val networkModule = module {
             userApiService = get(),
 //            httpClient = get(named("mainHttpClient")),
             errorParser = get(),
-            queryBuilder = get()
+            queryBuilder = get(),
+            json = get()
         )
     }
 
@@ -80,7 +84,8 @@ val networkModule = module {
         createAuthHttpClient(
             engine = get(),
             json = get<Json>(),
-            timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_60_SEC
+            timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_60_SEC,
+            baseUrl = get<DeveloperOptionsRepository>().getEffectiveBaseUrl(BaseUrlKey.MAIN)
         )
     }
 
@@ -91,7 +96,8 @@ val networkModule = module {
             authRepository = get<AuthRepository>(),
             authTokenInvalidator = get(),
             json = get<Json>(),
-            timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_60_SEC
+            timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_60_SEC,
+            baseUrl = get<DeveloperOptionsRepository>().getEffectiveBaseUrl(BaseUrlKey.MAIN)
         )
     }
 
@@ -100,7 +106,8 @@ val networkModule = module {
         createHealthHttpClient(
             engine = get(),
             json = get<Json>(),
-            timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_60_SEC
+            timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_60_SEC,
+            baseUrl = get<DeveloperOptionsRepository>().getEffectiveBaseUrl(BaseUrlKey.HEALTH_PROFILE)
         )
     }
 
@@ -111,23 +118,37 @@ val networkModule = module {
             authRepository = get<AuthRepository>(),
             authTokenInvalidator = get(),
             json = get<Json>(),
-            timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_5_MIN
+            timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_5_MIN,
+            baseUrl = get<DeveloperOptionsRepository>().getEffectiveBaseUrl(BaseUrlKey.MAIN)
         )
     }
 
-    // AI HTTP Client
-    single(named("aiHttpClient")) {
+    // Payment gateway HTTP Client (TFH — its own host, bearer-authenticated like the main API)
+    single(named("tfhHttpClient")) {
         createHttpClient(
             engine = get(),
             authRepository = get<AuthRepository>(),
             authTokenInvalidator = get(),
             json = get<Json>(),
             timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_60_SEC,
-            baseUrl = NetworkConstants.AI_BASE_URL
+            baseUrl = get<DeveloperOptionsRepository>().getEffectiveBaseUrl(BaseUrlKey.TFH)
+        )
+    }
+
+    // AI HTTP Client
+    single(named("aiHttpClient")) {
+        val aiBaseUrl = get<DeveloperOptionsRepository>().getEffectiveBaseUrl(BaseUrlKey.AI)
+        createHttpClient(
+            engine = get(),
+            authRepository = get<AuthRepository>(),
+            authTokenInvalidator = get(),
+            json = get<Json>(),
+            timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_60_SEC,
+            baseUrl = aiBaseUrl
         ).config {
             install(com.tamin.taminhamrah.apiService.agent.AiChatTokenPlugin) {
                 this.json = get<Json>()
-                this.aiBaseUrl = NetworkConstants.AI_BASE_URL
+                this.aiBaseUrl = aiBaseUrl
             }
         }
     }
@@ -156,7 +177,13 @@ private fun createHttpClient(
             socketTimeoutMillis = timeoutMillis
         }
 
-
+        // The backend's load balancer 302s a plain-http request to https on the same host (seen
+        // on a developer-options base-URL override entered without a scheme); without this the
+        // redirect comes back as an empty 302 body instead of being followed.
+        install(HttpRedirect) {
+            checkHttpMethod = false
+            allowHttpsDowngrade = false
+        }
 
         install(Auth) {
             bearer {
@@ -220,7 +247,8 @@ private fun createHttpClient(
 private fun createHealthHttpClient(
     engine: HttpClientEngine,
     json: Json,
-    timeoutMillis: Long
+    timeoutMillis: Long,
+    baseUrl: String
 ): HttpClient {
     return HttpClient(engine) {
         expectSuccess = false
@@ -233,6 +261,11 @@ private fun createHealthHttpClient(
             requestTimeoutMillis = timeoutMillis
             connectTimeoutMillis = timeoutMillis
             socketTimeoutMillis = timeoutMillis
+        }
+
+        install(HttpRedirect) {
+            checkHttpMethod = false
+            allowHttpsDowngrade = false
         }
 
         install(Logging) {
@@ -246,7 +279,7 @@ private fun createHealthHttpClient(
         }
 
         defaultRequest {
-            url(NetworkConstants.BASE_URL_HEALTH_PROFILE)
+            url(baseUrl)
             header(HttpHeaders.Accept, "*/*")
             header(HttpHeaders.ContentType, ContentType.Application.Json)
         }
@@ -256,7 +289,8 @@ private fun createHealthHttpClient(
 private fun createAuthHttpClient(
     engine: HttpClientEngine,
     json: Json,
-    timeoutMillis: Long
+    timeoutMillis: Long,
+    baseUrl: String
 ): HttpClient {
     return HttpClient(engine) {
         expectSuccess = false
@@ -269,6 +303,11 @@ private fun createAuthHttpClient(
             requestTimeoutMillis = timeoutMillis
             connectTimeoutMillis = timeoutMillis
             socketTimeoutMillis = timeoutMillis
+        }
+
+        install(HttpRedirect) {
+            checkHttpMethod = false
+            allowHttpsDowngrade = false
         }
 
         install(Logging) {
@@ -283,7 +322,7 @@ private fun createAuthHttpClient(
         }
 
         defaultRequest {
-            url(NetworkConstants.BASE_URL)
+            url(baseUrl)
             header(HttpHeaders.Accept, "*/*")
         }
     }

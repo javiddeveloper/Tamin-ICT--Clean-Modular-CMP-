@@ -22,6 +22,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
+import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -63,6 +64,7 @@ fun WorkshopDebtInquiryScreen(
         state = state,
         workshopName = workshopName,
         onBack = onBack,
+        onRetry = { viewModel.sendIntent(WorkshopDebtInquiryIntent.Retry) },
         modifier = modifier,
     )
 }
@@ -72,6 +74,7 @@ fun WorkshopDebtInquiryContent(
     state: WorkshopDebtInquiryUiState,
     workshopName: String,
     onBack: () -> Unit,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     WorkshopScreenShell(
@@ -84,6 +87,15 @@ fun WorkshopDebtInquiryContent(
         val inquiry = state.inquiry
         when {
             state.isLoading -> WorkshopListSkeleton(rowCount = 1)
+
+            // Before the empty branch, because a failed inquiry leaves [inquiry] null too — and
+            // telling someone their workshop has no debt record when the service simply could not
+            // be reached is the wrong answer to give about a debt.
+            state.error != null -> ErrorStateView(
+                message = state.error,
+                onDismiss = onBack,
+                onRetry = onRetry,
+            )
 
             inquiry == null -> EmptyStateMessage(
                 icon = Icons.Outlined.Info,
@@ -166,6 +178,7 @@ private fun WorkshopDebtInquiryScreenPreview() {
             ),
             workshopName = "آموزشگاه کامپیوتر توکلی-ایمیل",
             onBack = {},
+            onRetry = {},
         )
     }
 }

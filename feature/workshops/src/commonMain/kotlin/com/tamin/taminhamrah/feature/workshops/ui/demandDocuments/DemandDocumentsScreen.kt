@@ -3,7 +3,11 @@ package com.tamin.taminhamrah.feature.workshops.ui.demandDocuments
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButton
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButtonTone
@@ -18,6 +22,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.TaminDivider
+import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.persistentListOf
@@ -32,6 +37,7 @@ import taminx.core.core_ui.workshop_demand_doc_state
 import taminx.core.core_ui.workshop_demand_doc_step
 import taminx.core.core_ui.workshop_demand_doc_type
 import taminx.core.core_ui.workshop_docs_debit_heading
+import taminx.core.core_ui.workshop_turnover_filename_format
 
 /**
  * اسناد مطالبه of one debt, each openable as a PDF.
@@ -73,6 +79,11 @@ fun DemandDocumentsContent(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // Opening is a screen concern: the view model only owns the bytes, and the viewer asks for
+    // those itself once it finds nothing cached.
+    var isViewerOpen by remember(debitNumber) { mutableStateOf(false) }
+    val colors = LocalTaminColors.current
+
     WorkshopScreenShell(
         title = stringResource(Res.string.workshop_debt_documents),
         onBack = onBack,
@@ -86,16 +97,41 @@ fun DemandDocumentsContent(
         WorkshopListScaffold(
             state = state.list,
             onLoadMore = { onIntent(DemandDocumentsIntent.LoadMore) },
+            onRetry = { onIntent(DemandDocumentsIntent.Retry) },
             key = { it.docNumber },
             header = {
-                WorkshopSectionHeader(title = heading, count = state.list.items.size)
+                WorkshopSectionHeader(
+                    title = heading,
+                    count = state.list.items.size,
+                    copyValue = debitNumber,
+                )
             },
-        ) { document ->
+        ) { document, rowModifier ->
             DemandDocumentCard(
                 document = document,
-                onShowCalculation = { onIntent(DemandDocumentsIntent.ShowCalculationPdf) },
+                onShowCalculation = { isViewerOpen = true },
+                modifier = rowModifier,
             )
         }
+    }
+
+    if (isViewerOpen) {
+        TaminPdfViewer(
+            fileName = stringResource(
+                Res.string.workshop_turnover_filename_format,
+                debitNumber,
+            ),
+            // The viewer opens over this feature, so it keeps this feature's bar rather than the
+            // app-wide default, which is a different hue entirely.
+            background = Brush.horizontalGradient(colors.profileGradientStops),
+            pdf = state.viewerPdf,
+            downloadFailed = state.downloadFailed,
+            onRequestDownload = { onIntent(DemandDocumentsIntent.ShowCalculationPdf) },
+            onDismiss = {
+                isViewerOpen = false
+                onIntent(DemandDocumentsIntent.DismissViewer)
+            },
+        )
     }
 }
 
@@ -124,6 +160,7 @@ private fun DemandDocumentCard(
         DetailRow(
             label = stringResource(Res.string.workshop_demand_doc_number),
             value = document.docNumberLabel,
+            copyValue = document.docNumber,
             verticalPadding = WorkshopDimens.cellVerticalPadding,
         )
         TaminDivider()

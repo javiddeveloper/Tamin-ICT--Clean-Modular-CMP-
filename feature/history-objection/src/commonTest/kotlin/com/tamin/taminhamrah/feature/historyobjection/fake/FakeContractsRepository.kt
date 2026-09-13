@@ -16,7 +16,7 @@ import com.tamin.taminhamrah.model.contracts.PremiumRateDN
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDN
 import com.tamin.taminhamrah.model.contracts.SaveContactRequestDN
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
-import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.repository.contracts.ContractsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -28,18 +28,24 @@ class FakeContractsRepository : ContractsRepository {
     var shouldThrowError = false
     var error: Throwable = RuntimeException("Error")
 
-    override fun getBranches(cityCode: String): Flow<List<BranchDN>> = flow {
+    override fun getBranches(cityCode: String, page: Int): Flow<PagedListDN<BranchDN>> = flow {
         lastBranchCityCode = cityCode
         if (shouldThrowError) throw error
-        emit(branchesResult)
+        emit(PagedListDN(items = branchesResult, total = branchesResult.size))
     }
-
-    override fun getContracts(query: ApiQueryParamDN?): Flow<List<ContractDN>> = flow { emit(emptyList()) }
-    override fun getContractsByPremiumType(premiumTypeCode: String): Flow<List<ContractDN>> = flow { emit(emptyList()) }
-    override fun getStudentInsuranceContracts(): Flow<List<ContractDN>> = flow { emit(emptyList()) }
+    override fun getOptionalPremiumRange(): Flow<FreelancePremiumRangeDN> = flow {
+        emit(FreelancePremiumRangeDN(paymentTabayi = 0L, lowPremium = 0L, history = 0, highPremium = 0L))
+    }
+    override fun checkRedCrossStatus(): Flow<String> = flow { emit("ok") }
+    override fun checkMedicalStudent(): Flow<String> = flow { emit("ok14") }
+    override fun getContracts(page: Int): Flow<PagedListDN<ContractDN>> = flow { emit(PagedListDN()) }
+    override fun getContractsByPremiumType(premiumTypeCode: String, page: Int): Flow<PagedListDN<ContractDN>> =
+        flow { emit(PagedListDN()) }
+    override fun getStudentInsuranceContracts(page: Int): Flow<PagedListDN<ContractDN>> = flow { emit(PagedListDN()) }
     override fun getRegistrationInfo(): Flow<RegistrationInfoDN> = flow {}
     override fun getSpcPremiumRates(): Flow<List<PremiumRateDN>> = flow { emit(emptyList()) }
-    override fun getFreeJobWages(): Flow<List<FreeJobDN>> = flow { emit(emptyList()) }
+    override fun getFreeJobWages(page: Int, searchQuery: String?): Flow<PagedListDN<FreeJobDN>> =
+        flow { emit(PagedListDN()) }
     override fun getFreelancePremiumRange(params: FreelancePremiumRangeParams): Flow<FreelancePremiumRangeDN> = flow {}
     override fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Flow<Long> = flow { emit(0L) }
     override fun calculateOptionalSalary(premiumRateCode: String): Flow<Long> = flow { emit(0L) }
@@ -47,6 +53,10 @@ class FakeContractsRepository : ContractsRepository {
     override fun makeContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN> = flow {}
     override fun makeFreelanceContractByGuardian(params: FreelanceContractByGuardianParams): Flow<FreelanceContractResultDN> = flow {}
     override fun makeOptionalContractByGuardian(params: OptionalContractByGuardianParams): Flow<FreelanceContractResultDN> = flow {}
+    override fun updateFreelanceContract(params: FreelanceMakeContractParams): Flow<Unit> = flow {}
+    override fun updateOptionalContract(premium: Long): Flow<Unit> = flow {}
+    override fun updateFreelanceContractByGuardian(params: FreelanceContractByGuardianParams): Flow<Unit> = flow {}
+    override fun updateOptionalContractByGuardian(params: OptionalContractByGuardianParams): Flow<Unit> = flow {}
     override fun getInsurancePayment(params: InsurancePaymentParamsDN): Flow<InsurancePaymentDN> = flow {}
     override fun checkInsurancePaymentStatus(systemType: String): Flow<Any?> = flow { emit(null) }
     override fun uploadImage(request: UploadImageRequestDN): Flow<String> = flow { emit("") }
