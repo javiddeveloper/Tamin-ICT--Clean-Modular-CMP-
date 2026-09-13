@@ -110,6 +110,7 @@ import com.tamin.taminhamrah.feature.pensionInquiry.prescriptionScreen
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.pensionStatusInquiryGraph
 import com.tamin.taminhamrah.feature.pensionSurvivor.navigateToPensionSurvivor
 import com.tamin.taminhamrah.feature.pensionSurvivor.pensionSurvivorScreen
+import com.tamin.taminhamrah.feature.retirementPension.retirementPensionScreen
 import com.tamin.taminhamrah.feature.pregnancyPay.pregnancyPayScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
@@ -492,6 +493,7 @@ internal fun TaminHamrahNavGraph(
                     onDone = { navController.popBackStack() },
                 )
 
+                retirementPensionScreen(onBack = { navController.popBackStack() })
                 calculatePensionScreen(onBack = { navController.popBackStack() })
                 prescriptionScreen(onBack = { navController.popBackStack() })
                 deservedTreatmentScreen(onBack = { navController.popBackStack() })
@@ -524,7 +526,7 @@ internal fun TaminHamrahNavGraph(
                     onBack = { navController.popBackStack() })
                 disabilityPensionScreen(onBack = { navController.popBackStack() })
 
-                historyScreen()
+                historyScreen(navController = navController, onBack = { navController.popBackStack() })
                 historyJobInfoScreen(onBack = { navController.popBackStack() })
 
                 contractsScreen(

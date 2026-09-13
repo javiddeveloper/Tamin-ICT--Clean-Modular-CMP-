@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +14,8 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -21,10 +24,20 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.Thickness
 
 /**
  * The app's standard labelled text input.
  *
+ * `SegmentedInputField` covers fixed-length codes typed into slots — a national ID, an OTP — and
+ * `PickerRow` covers values chosen rather than typed. Anything freely typed and of unknown length
+ * had no shared component, so screens reached for Material's `OutlinedTextField` directly and each
+ * dressed it differently. This is that field, wearing the theme's own tokens.
+ *
+ * Reports a problem the same way the rest of the form does: the border turns [LocalTaminColors]'
+ * danger color and [errorMessage], when given, sits under the field. Set [animateErrorBorder] to
+ * draw that outline with [animatedErrorBorder] instead, so a rejected value sweeps to the danger
+ * color like the segmented fields and text areas beside it.
  * Places the [label] as a title above the input box (matching [PickerRow] and [SelectableField]),
  * and renders a styled rounded outlined text field with theme tokens.
  */
@@ -46,6 +59,13 @@ fun TaminTextField(
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
     textStyle: TextStyle = LocalTextStyle.current,
+    /**
+     * Swaps Material's outline for [animatedErrorBorder].
+     *
+     * Off by default: the animated stroke replaces the focus outline too, and the screens already
+     * using this field were built against Material's look.
+     */
+    animateErrorBorder: Boolean = false,
 ) {
     val colors = LocalTaminColors.current
     val showError = isError || errorMessage != null
@@ -62,6 +82,10 @@ fun TaminTextField(
             )
         }
 
+        val shape = RoundedCornerShape(CornerRadius.lg)
+        // Material's outline is switched off only when the animated one replaces it: two strokes on
+        // the same rounded rect read as one doubled hairline.
+        val outline = Color.Transparent.takeIf { animateErrorBorder }
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
@@ -71,7 +95,7 @@ fun TaminTextField(
             minLines = minLines,
             maxLines = maxLines,
             isError = showError,
-            shape = RoundedCornerShape(CornerRadius.lg),
+            shape = shape,
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
             textStyle = textStyle.copy(fontWeight = FontWeight.SemiBold),
             placeholder = placeholder?.let {
@@ -86,9 +110,9 @@ fun TaminTextField(
             leadingIcon = leadingIcon,
             trailingIcon = trailingIcon,
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = colors.blueText,
-                unfocusedBorderColor = colors.border,
-                errorBorderColor = colors.dangerText,
+                focusedBorderColor = outline ?: colors.blueText,
+                unfocusedBorderColor = outline ?: colors.border,
+                errorBorderColor = outline ?: colors.dangerText,
                 focusedTextColor = colors.textPrimary,
                 unfocusedTextColor = colors.textPrimary,
                 disabledTextColor = colors.textPrimary,
@@ -98,7 +122,21 @@ fun TaminTextField(
                 focusedContainerColor = colors.bgSurface,
                 unfocusedContainerColor = colors.bgSurface,
             ),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = if (animateErrorBorder) {
+                Modifier
+                    .fillMaxWidth()
+                    .clip(shape)
+                    .background(colors.bgSurface)
+                    .animatedErrorBorder(
+                        isError = showError,
+                        errorColor = colors.dangerText,
+                        normalColor = colors.border,
+                        borderWidth = Thickness.border,
+                        cornerRadius = CornerRadius.lg,
+                    )
+            } else {
+                Modifier.fillMaxWidth()
+            },
         )
 
         if (errorMessage != null) {

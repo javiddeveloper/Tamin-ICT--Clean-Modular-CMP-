@@ -39,6 +39,9 @@ import com.tamin.taminhamrah.useCases.pension.SendPayRollToInboxUseCase
 import com.tamin.taminhamrah.useCases.pension.GetUserAgeUseCase
 import com.tamin.taminhamrah.useCases.pension.GetRetirementRequestInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.CheckRetirementStatusUseCase
+import com.tamin.taminhamrah.useCases.pension.GetAuthenticationCodeUseCase
+import com.tamin.taminhamrah.useCases.pension.AuthenticationAndGetPersonalInfoUseCase
+import com.tamin.taminhamrah.useCases.pension.CreateRetirementRequestUseCase
 import com.tamin.taminhamrah.useCases.pension.SendRetirementDocumentUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.DeleteMyRequestUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.InboxInquiryLicenseUseCase
@@ -126,6 +129,10 @@ import com.tamin.taminhamrah.useCases.contracts.SaveContactUseCase
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetHistoryJobInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
+import com.tamin.taminhamrah.useCases.history.DownloadHistoryReportUseCase
+import com.tamin.taminhamrah.useCases.history.GetUserInfosUseCase
+import com.tamin.taminhamrah.useCases.history.GetUserRoleUseCase
+import com.tamin.taminhamrah.useCases.history.SendHistoryNoticeUseCase
 import com.tamin.taminhamrah.useCases.calculateWagePension.CalculateMultipleWorkshopsPensionUseCase
 import com.tamin.taminhamrah.useCases.calculateWagePension.CalculateWagePensionUseCase
 import com.tamin.taminhamrah.useCases.calculateWagePension.CheckMultipleWorkshopsUseCase
@@ -291,6 +298,10 @@ val domainModule = module {
     factoryOf(::GetUserAgeUseCase)
     factoryOf(::GetRetirementRequestInfoUseCase)
     factoryOf(::CheckRetirementStatusUseCase)
+    factoryOf(::GetAuthenticationCodeUseCase)
+    factoryOf(::AuthenticationAndGetPersonalInfoUseCase)
+    factoryOf(::CreateRetirementRequestUseCase)
+    factoryOf(::SendRetirementDocumentUseCase)
     factoryOf(::GetEdictPensionerUseCase)
     factoryOf(::GetEdictReportPDFUseCase)
     factoryOf(::SendEdictPensionerToMyInboxUseCase)
@@ -347,6 +358,10 @@ val domainModule = module {
     factoryOf(::FinalConfirmHistoryObjectionNotExistUseCase)
 
     factoryOf(::GetTalfighInfosUseCase)
+    factoryOf(::GetUserInfosUseCase)
+    factoryOf(::GetUserRoleUseCase)
+    factoryOf(::DownloadHistoryReportUseCase)
+    factoryOf(::SendHistoryNoticeUseCase)
     factoryOf(::GetDastmozdInfosUseCase)
     factoryOf(::GetHistoryJobInfosUseCase)
     factoryOf(::GetMultipleWorkshopPersonalInfoUseCase)
@@ -420,6 +435,7 @@ val domainModule = module {
     factoryOf(::UpdateAgentSessionUseCase)
 
     factoryOf(::SendRetirementDocumentUseCase)
+    factoryOf(::CreateRetirementRequestUseCase)
     factoryOf(::GetRolesUseCase)
 
 

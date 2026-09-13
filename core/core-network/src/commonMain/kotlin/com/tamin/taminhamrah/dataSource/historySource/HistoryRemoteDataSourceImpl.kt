@@ -2,86 +2,100 @@ package com.tamin.taminhamrah.dataSource.historySource
 
 import com.tamin.taminhamrah.apiService.HistoryApiServices
 import com.tamin.taminhamrah.model.history.DastmozdInfoDTO
-import com.tamin.taminhamrah.model.history.UserInfoDTO
+import com.tamin.taminhamrah.model.history.HistoryCertificateType
 import com.tamin.taminhamrah.model.history.HistoryJobInfoDTO
 import com.tamin.taminhamrah.model.history.TalfighInfoDTO
+import com.tamin.taminhamrah.model.history.UserInfoDTO
+import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
-import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
-import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
+import com.tamin.taminhamrah.tools.safeCall
 
+/**
+ * The «سوابق» endpoints.
+ *
+ * Each goes through the shared [safeCall], the same wrapper the other data sources use: the
+ * envelope's own status is already classified by `BaseDTO.extractData` through
+ * `HttpStatusErrorMapper`, and anything that never reached that point is a failed call.
+ */
 internal class HistoryRemoteDataSourceImpl(
     private val apiServices: HistoryApiServices,
     private val queryBuilder: ApiQueryBuilder,
     private val errorParser: ErrorParser
 ) : HistoryRemoteDataSource {
 
-    override suspend fun getTalfighInfos(query: ApiQueryParamDN): TalfighInfoDTO {
-        return try {
-            val response = apiServices.getTalfighInfos(queryBuilder.buildQuery(query))
-            response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
+    override suspend fun getTalfighInfos(query: ApiQueryParamDN): TalfighInfoDTO =
+        errorParser.safeCall(TAG_TALFIGH) {
+            apiServices.getTalfighInfos(queryBuilder.buildQuery(query)).extractData()
+        }
+
+    override suspend fun getDastmozdInfos(query: ApiQueryParamDN): DastmozdInfoDTO =
+        errorParser.safeCall(TAG_DASTMOZD) {
+            apiServices.getDastmozdInfos(queryBuilder.buildQuery(query)).extractData()
+        }
+
+    override suspend fun getHistoryJobInfos(query: ApiQueryParamDN): HistoryJobInfoDTO =
+        errorParser.safeCall(TAG_JOB_INFO) {
+            apiServices.getHistoryJobInfos(queryBuilder.buildQuery(query)).extractData()
+        }
+
+    /** Who the signed-in person is, which is what decides whether this service has anything to show. */
+    override suspend fun getUserInfos(): UserInfoDTO =
+        errorParser.safeCall(TAG_USER_INFO) {
+            apiServices.getUserInfos().extractData()
+        }
+
+    override suspend fun getLoginInfo(): ListData<String> =
+        errorParser.safeCall(TAG_LOGIN_INFO) {
+            apiServices.getLoginInfo().extractData()
+        }
+
+    override suspend fun sendHistoryNotice(): String? =
+        errorParser.safeCall(TAG_SEND_NOTICE) {
+            apiServices.sendHistoryNotice().extractData().text
+        }
+
+    /**
+     * The path is chosen here rather than in the repository so the three report URLs stay in one
+     * table beside the interface that declares them.
+     */
+    override suspend fun downloadHistoryReport(type: HistoryCertificateType): PdfDownloadDTO =
+        errorParser.safeCall(TAG_DOWNLOAD_REPORT) {
+            val statement = when (type) {
+                HistoryCertificateType.ALL -> apiServices.downloadAllHistoryReport()
+                HistoryCertificateType.WAGES -> apiServices.downloadWageHistoryReport()
+                HistoryCertificateType.COMBINED -> apiServices.downloadCombinedHistoryReport()
+            }
+            PdfDownloadDTO(pdf = InputStreamDTO(pdf = statement.body()))
+        }
+
+    override suspend fun sendToInstitution(
+        allHistorySelected: Boolean,
+        historyAndWageSelected: Boolean,
+        combineHistorySelected: Boolean
+    ) {
+        errorParser.safeCall(TAG_SEND_TO_INSTITUTION) {
+            apiServices.sendToInstitution(
+                allHistorySelected,
+                historyAndWageSelected,
+                combineHistorySelected
+            ).extractMessage()
         }
     }
 
-    override suspend fun getDastmozdInfos(query: ApiQueryParamDN): DastmozdInfoDTO {
-        return try {
-            val response = apiServices.getDastmozdInfos(queryBuilder.buildQuery(query))
-            response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
-        }
-    }
-
-    override suspend fun getHistoryJobInfos(query: ApiQueryParamDN): HistoryJobInfoDTO {
-        return try {
-            val response = apiServices.getHistoryJobInfos(queryBuilder.buildQuery(query))
-            response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
-        }
-    }
-
-    override suspend fun getUserInfos(): UserInfoDTO {
-        return try {
-            val response = apiServices.getUserInfos()
-            response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
-        }
-    }
-
-    override suspend fun sendToInstitution(allHistorySelected: Boolean, historyAndWageSelected: Boolean, combineHistorySelected: Boolean) {
-        try {
-            val response = apiServices.sendToInstitution(allHistorySelected, historyAndWageSelected, combineHistorySelected)
-            response.extractMessage()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
-        }
+    private companion object {
+        const val TAG_TALFIGH = "getTalfighInfos"
+        const val TAG_DASTMOZD = "getDastmozdInfos"
+        const val TAG_JOB_INFO = "getHistoryJobInfos"
+        const val TAG_USER_INFO = "getUserInfos"
+        const val TAG_LOGIN_INFO = "getLoginInfo"
+        const val TAG_SEND_TO_INSTITUTION = "sendToInstitution"
+        const val TAG_DOWNLOAD_REPORT = "downloadHistoryReport"
+        const val TAG_SEND_NOTICE = "sendHistoryNotice"
     }
 }
-

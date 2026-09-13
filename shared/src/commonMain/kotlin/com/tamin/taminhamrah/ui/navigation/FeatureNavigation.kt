@@ -20,6 +20,7 @@ import com.tamin.taminhamrah.feature.pensionInquiry.navigateToIssuanceCertificat
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPayRoll
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.navigateToPensionStatusInquiry
 import com.tamin.taminhamrah.feature.pensionSurvivor.navigateToPensionSurvivor
+import com.tamin.taminhamrah.feature.retirementPension.navigateToRetirementPension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPrescription
 import com.tamin.taminhamrah.feature.contracts.navigateToContractFlow
 import com.tamin.taminhamrah.feature.contracts.flow.ContractType
@@ -36,7 +37,12 @@ import com.tamin.taminhamrah.model.common.FeatureFlag
 
 fun NavController.navigateToFeature(flag: FeatureFlag) {
     when (flag) {
+        // «مجموع سوابق» — the insured years added up. Menu id 8; it reached nothing before.
+        FeatureFlag.COMBINED_RECORD -> navigateToHistory()
         FeatureFlag.MERGE_HISTORY -> navigateToHistory()
+        // «سوابق و دستمزد» — menu id 7. The same page: it is where the wage rows are read, and it
+        // reached nothing before.
+        FeatureFlag.WAGE_AND_HISTORY -> navigateToHistory()
         FeatureFlag.WORKSHOPS -> navigateToWorkshops()
         // «اطلاعات پیمان» in the server menu; the screen it opens is titled «ردیف‌های پیمان».
         FeatureFlag.CONTRACT_INFO -> navigateToContractRows()
@@ -49,6 +55,7 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
         FeatureFlag.OPTIONAL_INSURANCE -> navigateToContractFlow(ContractType.OPTIONAL)
         FeatureFlag.HOUSEWIFE_INSURANCE -> navigateToContractFlow(ContractType.HOUSEWIFE)
         FeatureFlag.PENSION_INQUIRY -> navigateToPensionStatusInquiry()
+        FeatureFlag.RETIREMENT_PENSION -> navigateToRetirementPension()
         FeatureFlag.CALCULATE_WAGE_PENSION -> navigateToCalculatePension()
         FeatureFlag.PRESCRIPTION -> navigateToPrescription()
         FeatureFlag.DESERVED_TREATMENT_101 -> navigateToDeservedTreatment()

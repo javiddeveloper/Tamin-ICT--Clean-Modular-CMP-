@@ -8,7 +8,11 @@ import com.tamin.taminhamrah.feature.pensionStatusInquiry.ui.contract.PensionSta
 import com.tamin.taminhamrah.model.pension.InquirePensionCertificateDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryPR
+import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequestDN
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestFormDN
+import com.tamin.taminhamrah.model.pension.retirement.RetirementSaveDocumentDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.pension.PensionRepository
 import com.tamin.taminhamrah.tools.errorHandling.TaminApiException
 import com.tamin.taminhamrah.useCases.pension.GetPensionInquiryUseCase
@@ -150,9 +154,9 @@ private class TestPensionRepository : PensionRepository {
     }
 
     override suspend fun getPensionerId() = unused()
-    override suspend fun getEdictPensioner(query: com.tamin.taminhamrah.model.request.ApiQueryParamDN) = unused()
+    override suspend fun getEdictPensioner(query: ApiQueryParamDN) = unused()
     override suspend fun sendRequestDeferredInstallmentCertificate(
-        request: com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequestDN,
+        request: DeferredInstallmentRequestDN,
     ) = unused()
     override suspend fun getPensionerPayRoll(filters: List<ApiFilterDN>) = unused()
     override suspend fun getDisabilityPersonalInfo() = unused()
@@ -160,10 +164,14 @@ private class TestPensionRepository : PensionRepository {
     override suspend fun pensionerPayRollPDF(filters: List<ApiFilterDN>) = unused()
     override suspend fun getEdictReportPDF(filters: List<ApiFilterDN>) = unused()
     override suspend fun getRetirementRequestInfo(filters: List<ApiFilterDN>) = unused()
+    override suspend fun createRetirementRequest(
+        authenticationsCode: Long,
+        form: RetirementRequestFormDN,
+    ) = unused()
     override suspend fun checkRetirementStatus() = unused()
     override suspend fun sendRetirementDocument(
         requestId: String,
-        request: com.tamin.taminhamrah.model.pension.retirement.RetirementSaveDocumentDN,
+        request: RetirementSaveDocumentDN,
     ) = unused()
     override suspend fun authenticationAndGetPersonalInfo(authenticationsCode: Long) = unused()
     override suspend fun getAuthenticationCode() = unused()

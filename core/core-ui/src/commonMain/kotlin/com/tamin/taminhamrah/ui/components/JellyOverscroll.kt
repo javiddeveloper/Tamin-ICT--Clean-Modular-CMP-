@@ -4,6 +4,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.OverscrollEffect
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -39,12 +40,20 @@ import kotlin.math.sign
  * redraw and never a recomposition or a re-layout — the content is translated, not measured again.
  */
 @Stable
-class JellyOverscrollEffect : OverscrollEffect {
+class JellyOverscrollEffect(
+    /** Which way the scroller it is handed to runs. The band only ever pulls along that axis. */
+    private val orientation: Orientation = Orientation.Vertical,
+) : OverscrollEffect {
 
-    /** Signed pixels the content is pulled past its edge; positive is downward. */
+    private val vertical: Boolean get() = orientation == Orientation.Vertical
+
+    /** Signed pixels the content is pulled past its edge; positive is down, or toward the end. */
     private var pullPx by mutableFloatStateOf(0f)
 
-    /** The scroller's own height, learned while drawing: the band never stretches beyond it. */
+    /**
+     * The scroller's own extent along [orientation], learned while drawing: the band never
+     * stretches beyond it.
+     */
     private var viewportPx = 0f
 
     override val isInProgress: Boolean
@@ -59,16 +68,21 @@ class JellyOverscrollEffect : OverscrollEffect {
         if (source != NestedScrollSource.UserInput) return performScroll(delta)
 
         // Dragging back toward the content releases the band one-to-one first, as a real one would.
-        val released = release(delta.y)
-        val taken = performScroll(Offset(delta.x, delta.y - released))
+        val along = if (vertical) delta.y else delta.x
+        val released = release(along)
+        val offered = if (vertical) Offset(delta.x, along - released) else Offset(along - released, delta.y)
+        val taken = performScroll(offered)
+        val consumed = if (vertical) taken.y else taken.x
         // Whatever is left over nobody wanted — not the scroller, not the header above it — so it
         // goes into the band.
-        val stretched = stretch(delta.y - released - taken.y)
-        return Offset(taken.x, released + taken.y + stretched)
+        val stretched = stretch(along - released - consumed)
+        val total = released + consumed + stretched
+        return if (vertical) Offset(taken.x, total) else Offset(total, taken.y)
     }
 
     override suspend fun applyToFling(velocity: Velocity, performFling: suspend (Velocity) -> Velocity) {
-        val leftover = velocity.y - performFling(velocity).y
+        val performed = performFling(velocity)
+        val leftover = if (vertical) velocity.y - performed.y else velocity.x - performed.x
         if (pullPx == 0f && leftover == 0f) return
         // The leftover throw carries the band out; the spring brings it home. Critically damped, so
         // it settles without crossing back past the edge and flashing a gap on the other side.
@@ -105,9 +119,13 @@ class JellyOverscrollEffect : OverscrollEffect {
 
     private inner class JellyNode : Modifier.Node(), DrawModifierNode {
         override fun ContentDrawScope.draw() {
-            viewportPx = size.height
+            viewportPx = if (vertical) size.height else size.width
             val pull = pullPx
-            if (pull == 0f) drawContent() else translate(top = pull) { this@draw.drawContent() }
+            when {
+                pull == 0f -> drawContent()
+                vertical -> translate(top = pull) { this@draw.drawContent() }
+                else -> translate(left = pull) { this@draw.drawContent() }
+            }
         }
     }
 
@@ -125,6 +143,18 @@ class JellyOverscrollEffect : OverscrollEffect {
     }
 }
 
-/** A [JellyOverscrollEffect] for one scrollable. Hand it to `verticalScroll`/`LazyColumn`. */
+/**
+ * A [JellyOverscrollEffect] for one scrollable. Hand it to the scrollable that will drive it:
+ *
+ * ```
+ * Column(Modifier.verticalScroll(state, overscrollEffect = rememberJellyOverscroll()))
+ * Row(Modifier.horizontalScroll(state, overscrollEffect = rememberJellyOverscroll(Horizontal)))
+ * ```
+ *
+ * One effect belongs to one scrollable — it holds that scroller's own pull — so call this once per
+ * scrollable rather than hoisting a single instance across several.
+ */
 @Composable
-fun rememberJellyOverscroll(): JellyOverscrollEffect = remember { JellyOverscrollEffect() }
+fun rememberJellyOverscroll(
+    orientation: Orientation = Orientation.Vertical,
+): JellyOverscrollEffect = remember(orientation) { JellyOverscrollEffect(orientation) }
