@@ -168,7 +168,6 @@ class WorkShopsRepositoryEmployerOnlineServicesTest {
             lastSubmitBody = request
             return submitMessage
         }
-
         // ------------------------------------------------------- not used by these tests
 
         private fun notUsed(): Nothing = error("not exercised by the employer online-services repository tests")
