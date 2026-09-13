@@ -38,12 +38,10 @@ import taminx.core.core_ui.ic_tamin_cross
  * The scale and pan are read inside `graphicsLayer`, so a pinch costs a redraw and never a
  * recomposition of the image beneath it.
  *
- * Callers that fetch the image *after* opening the viewer get the same three states
- * [TaminPdfViewer] has, and for the same reason — a viewer that can only draw a finished image
- * either sits on a broken-image placeholder while the bytes arrive, or cannot be opened at all
- * until they do. Pass [url] blank while the fetch is in flight for a shimmer, and set
- * [downloadFailed] when it comes back empty-handed for [emptyMessage]. Both default to the
- * original behavior, so a caller that already holds the image draws it immediately as before.
+ * Callers that fetch the image *after* opening the viewer can opt into the same three states
+ * [TaminPdfViewer] has: set [isLoading] while the fetch is in flight for a shimmer, and
+ * [downloadFailed] when it comes back empty-handed for [emptyMessage]. Both default to false, which
+ * is exactly the original viewer — black mat, image loader — for every caller that does not ask.
  */
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
@@ -61,6 +59,7 @@ fun TaminImageViewer(
     background: Brush = taminTopAppBarGradient(),
     downloadFailed: Boolean = false,
     emptyMessage: String = stringResource(Res.string.document_viewer_file_unavailable),
+    isLoading: Boolean = false,
 ) {
     val colors = LocalTaminColors.current
     Dialog(
@@ -82,7 +81,7 @@ fun TaminImageViewer(
             }
         }
 
-        val hasImage = !downloadFailed && url.isNotBlank()
+        val hasImage = !downloadFailed && !isLoading
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -102,7 +101,7 @@ fun TaminImageViewer(
                 )
 
                 // Still arriving. The same card-shaped wait the PDF viewer shows.
-                url.isBlank() -> Box(
+                isLoading -> Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(Spacing.page)

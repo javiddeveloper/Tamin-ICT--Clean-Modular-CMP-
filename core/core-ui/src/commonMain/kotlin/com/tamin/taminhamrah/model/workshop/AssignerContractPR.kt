@@ -57,6 +57,16 @@ data class AssignerContractPR(
     val canOpenBases: Boolean
         get() = card.workshopId.isNotBlank() && card.branchCode.isNotBlank() &&
             contractRow.isNotBlank() && contractSequence.isNotBlank()
+
+    /**
+     * Whether a درخواست مفاصاحساب can be addressed for this row.
+     *
+     * The request is a PUT onto an id built from these four keys plus the subject; a blank one files
+     * it under an id the service does not know, so the action is offered disabled instead.
+     */
+    val canRequestSettlement: Boolean
+        get() = card.workshopId.isNotBlank() && branchCode.isNotBlank() &&
+            contractRow.isNotBlank() && contractSequence.isNotBlank()
 }
 
 /** One side of a پیمان as جزئیات پیمان prints it — the same five cells for either party. */

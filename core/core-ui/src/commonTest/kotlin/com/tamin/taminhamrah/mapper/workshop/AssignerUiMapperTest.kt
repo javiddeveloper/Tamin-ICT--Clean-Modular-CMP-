@@ -54,6 +54,27 @@ class AssignerUiMapperTest {
         assertFalse(contract(endDate = "2024-03-20T00:00:00Z").toPresentation().isFinished)
     }
 
+    // ------------------------------------------------------------------- درخواست مفاصاحساب
+
+    /**
+     * The request is a PUT onto an id built from four keys; a پیمان missing any of them offers the
+     * action disabled rather than filing under an id the service does not know.
+     */
+    @Test
+    fun settlementNeedsEveryKeyOfTheRequestId() {
+        val complete = AssignerContractDN(
+            contractRow = "1",
+            contractSequence = "3",
+            branchCode = "0310",
+            employer = AssignerPartyDN(workshopId = "9028212822", branchCode = "0210"),
+        ).toPresentation()
+
+        assertTrue(complete.canRequestSettlement)
+        assertFalse(complete.copy(contractSequence = "").canRequestSettlement)
+        assertFalse(complete.copy(branchCode = "").canRequestSettlement)
+        assertFalse(complete.copy(contractRow = "").canRequestSettlement)
+    }
+
     // ----------------------------------------------------------------------- مبانی محاسباتی
 
     /**

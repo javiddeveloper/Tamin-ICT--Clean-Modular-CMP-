@@ -72,6 +72,7 @@ import taminx.core.core_ui.assigner_search_workshop
 import taminx.core.core_ui.ic_tamin_assigner_contracts
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_search
+import taminx.core.core_ui.settlement_title
 
 /**
  * واگذارندگان — the پیمان‌ها the signed-in employer assigned out.
@@ -86,6 +87,7 @@ fun AssignerContractsScreen(
     onBack: () -> Unit,
     onOpenDetail: (AssignerContractPR) -> Unit,
     onOpenBases: (AssignerContractPR) -> Unit,
+    onRequestSettlement: (AssignerContractPR) -> Unit,
     modifier: Modifier = Modifier,
     workshopId: String = "",
     branchCode: String = "",
@@ -102,6 +104,7 @@ fun AssignerContractsScreen(
         onBack = onBack,
         onOpenDetail = onOpenDetail,
         onOpenBases = onOpenBases,
+        onRequestSettlement = onRequestSettlement,
         modifier = modifier,
     )
 }
@@ -113,6 +116,7 @@ fun AssignerContractsContent(
     onBack: () -> Unit,
     onOpenDetail: (AssignerContractPR) -> Unit,
     onOpenBases: (AssignerContractPR) -> Unit,
+    onRequestSettlement: (AssignerContractPR) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
@@ -222,8 +226,8 @@ fun AssignerContractsContent(
                 )
             },
         ) { contract, itemModifier ->
-            // The same card ردیف‌های پیمان draws, with its two destinations offered on the card
-            // itself rather than behind a sheet — one tap instead of three, and the same shape
+            // The same card ردیف‌های پیمان draws, with the old menu's three actions offered on the
+            // card itself rather than behind a sheet — one tap instead of three, and the same shape
             // every other کارگاه card here uses. `dateLabel` differs because the column does:
             // this endpoint sends تاریخ قرارداد where that one sends تاریخ تعهد.
             ContractRowCard(
@@ -248,6 +252,21 @@ fun AssignerContractsContent(
                             WorkshopCardButtonTone.DISABLED
                         },
                         onClick = { onOpenBases(contract) },
+                    )
+                },
+                // On its own row: three equal buttons need 304dp and a 360dp phone gives the card
+                // 300, and «درخواست مفاصاحساب» would wrap inside a third of that.
+                secondaryButtons = {
+                    WorkshopCardButton(
+                        text = stringResource(Res.string.settlement_title),
+                        // The request is filed under an id built from the same four keys, so a row
+                        // missing one offers it disabled rather than filing under the wrong id.
+                        tone = if (contract.canRequestSettlement) {
+                            WorkshopCardButtonTone.OUTLINE
+                        } else {
+                            WorkshopCardButtonTone.DISABLED
+                        },
+                        onClick = { onRequestSettlement(contract) },
                     )
                 },
             )
@@ -420,6 +439,7 @@ private fun AssignerContractsActivePreview() = PreviewRtlThemeContent {
         onBack = {},
         onOpenDetail = {},
         onOpenBases = {},
+        onRequestSettlement = {},
     )
 }
 
@@ -432,6 +452,7 @@ private fun AssignerContractsFinishedPreview() = PreviewRtlThemeContent {
         onBack = {},
         onOpenDetail = {},
         onOpenBases = {},
+        onRequestSettlement = {},
     )
 }
 
@@ -447,6 +468,7 @@ private fun AssignerContractsSearchedPreview() = PreviewRtlThemeContent {
         onBack = {},
         onOpenDetail = {},
         onOpenBases = {},
+        onRequestSettlement = {},
     )
 }
 
@@ -460,6 +482,7 @@ private fun AssignerContractsNoneHeldPreview() = PreviewRtlThemeContent {
         onBack = {},
         onOpenDetail = {},
         onOpenBases = {},
+        onRequestSettlement = {},
     )
 }
 
@@ -476,6 +499,7 @@ private fun AssignerContractsEmptySearchPreview() = PreviewRtlThemeContent {
         onBack = {},
         onOpenDetail = {},
         onOpenBases = {},
+        onRequestSettlement = {},
     )
 }
 
@@ -488,6 +512,7 @@ private fun AssignerContractsLoadingPreview() = PreviewRtlThemeContent {
         onBack = {},
         onOpenDetail = {},
         onOpenBases = {},
+        onRequestSettlement = {},
     )
 }
 
@@ -503,6 +528,7 @@ private fun AssignerContractsFailedPreview() = PreviewRtlThemeContent {
         onBack = {},
         onOpenDetail = {},
         onOpenBases = {},
+        onRequestSettlement = {},
     )
 }
 

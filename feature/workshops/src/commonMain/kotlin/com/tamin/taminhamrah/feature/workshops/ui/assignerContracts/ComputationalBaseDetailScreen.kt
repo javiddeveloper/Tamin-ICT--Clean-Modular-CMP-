@@ -419,6 +419,7 @@ private fun DocumentViewer(
             // Base64 straight from `upload-image`; the async loader decodes it.
             url = preview.imageData,
             downloadFailed = preview.didFail,
+            isLoading = preview.imageData.isBlank() && !preview.didFail,
             onDismiss = onDismiss,
         )
 
@@ -431,6 +432,7 @@ private fun DocumentViewer(
             onRequestDownload = onRetry,
             onDismiss = onDismiss,
             title = title,
+            showEmptyStateTile = true,
         )
     }
 }

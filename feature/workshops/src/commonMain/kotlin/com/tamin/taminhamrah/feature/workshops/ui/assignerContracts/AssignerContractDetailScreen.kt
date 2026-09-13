@@ -141,12 +141,14 @@ fun AssignerContractDetailContent(
         }
 
         // درخواست مفاصاحساب starts from the پیمان it is for — the old app's third action on the same
-        // row. Pinned here rather than as a third card button, which does not fit three labels at
-        // this width.
-        WorkshopFormFooter(
-            nextLabel = stringResource(Res.string.settlement_title),
-            onNext = { onRequestSettlement(contract) },
-        )
+        // row, offered here as well as on the list card. Left out for a پیمان missing a key of the
+        // request id, the same rule the card applies.
+        if (contract.canRequestSettlement) {
+            WorkshopFormFooter(
+                nextLabel = stringResource(Res.string.settlement_title),
+                onNext = { onRequestSettlement(contract) },
+            )
+        }
     }
 }
 

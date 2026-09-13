@@ -1,5 +1,7 @@
 package com.tamin.taminhamrah.feature.treatment.ui
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -40,6 +42,8 @@ import com.tamin.taminhamrah.ui.components.ListItemColors
 import com.tamin.taminhamrah.ui.components.ListItemData
 import com.tamin.taminhamrah.ui.components.SectionLabel
 import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.Duration
+import com.tamin.taminhamrah.ui.theme.Easing
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -102,40 +106,57 @@ internal fun PatientCarousel(
     onRetry: () -> Unit = {},
     collapseProgress: () -> Float = { 0f },
 ) {
-    when {
-        isLoading && cards.isEmpty() -> InsuranceCardCarouselSkeleton(
-            collapseProgress = collapseProgress,
-        )
+    val phase = when {
+        isLoading && cards.isEmpty() -> CarouselPhase.Loading
+        cards.isEmpty() -> CarouselPhase.Placeholder
+        else -> CarouselPhase.Cards
+    }
 
-        // A failure or an empty result still renders a card, so the carousel slot never
-        // collapses into a bare line of text.
-        cards.isEmpty() -> PatientPlaceholderCard(
-            message = error ?: stringResource(Res.string.hub_empty_patients),
-            isError = error != null,
-            onRetry = onRetry,
-        )
+    // The skeleton hands over with a fade, not a cut. It is laid out to the card's own geometry, so
+    // only the paint changes: the gray placeholder dissolves into the gradient card where it stands.
+    Crossfade(
+        targetState = phase,
+        animationSpec = tween(durationMillis = Duration.normal, easing = Easing.standard),
+        label = "patientCarousel",
+    ) { shown ->
+        when (shown) {
+            CarouselPhase.Loading -> InsuranceCardCarouselSkeleton(
+                collapseProgress = collapseProgress,
+            )
 
-        else -> {
-            val cardLambda: @Composable (Int) -> Unit = remember(cards, collapseProgress) {
-                { page ->
-                    cards.getOrNull(page)?.let { card ->
-                        PatientCard(
-                            patient = card.patient,
-                            status = card.coverage,
-                            dependantOrdinal = card.dependantOrdinal,
-                            collapseProgress = collapseProgress,
-                        )
+            // A failure or an empty result still renders a card, so the carousel slot never
+            // collapses into a bare line of text.
+            CarouselPhase.Placeholder -> PatientPlaceholderCard(
+                message = error ?: stringResource(Res.string.hub_empty_patients),
+                isError = error != null,
+                onRetry = onRetry,
+            )
+
+            CarouselPhase.Cards -> {
+                val cardLambda: @Composable (Int) -> Unit = remember(cards, collapseProgress) {
+                    { page ->
+                        cards.getOrNull(page)?.let { card ->
+                            PatientCard(
+                                patient = card.patient,
+                                status = card.coverage,
+                                dependantOrdinal = card.dependantOrdinal,
+                                collapseProgress = collapseProgress,
+                            )
+                        }
                     }
                 }
+                InsuranceCardCarousel(
+                    pageCount = cards.size,
+                    pagerState = pagerState,
+                    card = cardLambda,
+                )
             }
-            InsuranceCardCarousel(
-                pageCount = cards.size,
-                pagerState = pagerState,
-                card = cardLambda,
-            )
         }
     }
 }
+
+/** What the carousel slot is showing — the three states it fades between. */
+private enum class CarouselPhase { Loading, Placeholder, Cards }
 
 /**
  * Stands in for the insurance card when there is nobody to show.

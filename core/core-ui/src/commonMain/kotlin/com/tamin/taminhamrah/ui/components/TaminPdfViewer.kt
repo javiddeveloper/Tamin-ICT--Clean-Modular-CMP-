@@ -22,6 +22,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -62,6 +64,11 @@ fun TaminPdfViewer(
     title: String = stringResource(Res.string.document_viewer_title),
     background: Brush = taminTopAppBarGradient(),
     emptyMessage: String = stringResource(Res.string.document_viewer_file_unavailable),
+    /**
+     * Draws the empty state as the app's icon-tile block instead of a centred line of text. False —
+     * the default — keeps the text every existing caller was built against.
+     */
+    showEmptyStateTile: Boolean = false,
 ) {
     val colors = LocalTaminColors.current
     val saver = rememberPdfSaver()
@@ -129,14 +136,18 @@ fun TaminPdfViewer(
                             .clip(RoundedCornerShape(CornerRadius.card))
                             .shimmer(),
                     )
-                    // The app's own empty block, icon tile and all, rather than a line of text
-                    // adrift in the middle of the page.
                     else -> if (ready.isEmpty()) {
-                        EmptyStateMessage(
-                            icon = vectorResource(Res.drawable.ic_warning),
-                            title = emptyMessage,
-                            showIconTile = true,
-                        )
+                        if (showEmptyStateTile) {
+                            EmptyStateMessage(
+                                icon = vectorResource(Res.drawable.ic_warning),
+                                title = emptyMessage,
+                                showIconTile = true,
+                            )
+                        } else {
+                            Box(Modifier.fillMaxSize(), Alignment.Center) {
+                                Text(text = emptyMessage, color = colors.textSecondary)
+                            }
+                        }
                     } else {
                         PdfPagesView(pdfBytes = ready, modifier = Modifier.fillMaxSize())
                     }

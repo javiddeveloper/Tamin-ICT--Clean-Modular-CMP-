@@ -58,6 +58,8 @@ import taminx.core.core_ui.contract_rows_workshop_number
  * @param buttons the card's own actions, laid out in one equal-width row the way
  *   [com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopRecordCard] lays out its own.
  *   Null — the default — leaves the card inert, which is what ردیف‌های پیمان wants.
+ * @param secondaryButtons a second row of actions under [buttons], for a card with more actions than
+ *   one row fits. Null — the default — draws no second row, so every existing card is unchanged.
  */
 @Composable
 fun ContractRowCard(
@@ -66,6 +68,7 @@ fun ContractRowCard(
     modifier: Modifier = Modifier,
     dateLabel: StringResource = Res.string.contract_rows_commitment_date,
     buttons: (@Composable RowScope.() -> Unit)? = null,
+    secondaryButtons: (@Composable RowScope.() -> Unit)? = null,
 ) {
     val colors = LocalTaminColors.current
     Column(
@@ -159,6 +162,16 @@ fun ContractRowCard(
                     .padding(top = WorkshopDimens.cardButtonsTopMargin),
                 horizontalArrangement = Arrangement.spacedBy(WorkshopDimens.cardButtonGap),
                 content = buttons,
+            )
+        }
+
+        if (secondaryButtons != null) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = WorkshopDimens.cardButtonGap),
+                horizontalArrangement = Arrangement.spacedBy(WorkshopDimens.cardButtonGap),
+                content = secondaryButtons,
             )
         }
     }

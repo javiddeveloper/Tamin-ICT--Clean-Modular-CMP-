@@ -285,6 +285,15 @@ fun NavGraphBuilder.workshopsScreen(
                         )
                     )
                 },
+                // Disabled on the card unless the four keys of the request id are present.
+                onRequestSettlement = { contract ->
+                    navController.navigate(
+                        SettlementRequestRoute(
+                            contractRow = contract.contractRow,
+                            contractSequence = contract.contractSequence,
+                        )
+                    )
+                },
             )
         }
 
