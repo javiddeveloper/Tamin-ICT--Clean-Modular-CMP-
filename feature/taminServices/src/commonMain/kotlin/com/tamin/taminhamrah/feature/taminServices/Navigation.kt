@@ -12,7 +12,10 @@ import com.tamin.taminhamrah.feature.taminServices.inspection.ui.InspectionViewM
 import com.tamin.taminhamrah.feature.taminServices.sendHistoryToInstitutions.SendHistoryToInstitutionsScreen
 import com.tamin.taminhamrah.feature.taminServices.ui.TaminServicesRoute
 import com.tamin.taminhamrah.feature.taminServices.ui.TamminServicesViewModel
+import com.tamin.taminhamrah.feature.taminServices.workersPayment.WorkersPaymentViewModel
+import com.tamin.taminhamrah.feature.taminServices.workersPayment.ui.WorkersPaymentRoute
 import com.tamin.taminhamrah.model.common.FeatureFlag
+import com.tamin.taminhamrah.model.payment.PaymentRequestDN
 import kotlinx.serialization.Serializable
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -31,6 +34,9 @@ data object OccurrenceRoute
 @Serializable
 data object EmployerOnlineServicesRoute
 
+@Serializable
+data object WorkersPaymentInfoRoute
+
 fun NavController.navigateToTaminServices(builder: NavOptionsBuilder.() -> Unit = {}) {
     navigate(TaminServicesRoute, builder)
 }
@@ -41,6 +47,10 @@ fun NavController.navigateToSendInsuranceHistoryToInstitutions(builder: NavOptio
 
 fun NavController.navigateToOccurrence(builder: NavOptionsBuilder.() -> Unit = {}) {
     navigate(OccurrenceRoute, builder)
+}
+
+fun NavController.navigateToWorkersPaymentInfo(builder: NavOptionsBuilder.() -> Unit = {}) {
+    navigate(WorkersPaymentInfoRoute, builder)
 }
 
 fun NavGraphBuilder.taminServicesScreen(
@@ -107,6 +117,22 @@ fun NavGraphBuilder.employerOnlineServicesScreen(onBack: () -> Unit) {
         EmployerOnlineServicesRoute(
             viewModel = viewModel,
             onBackClicked = onBack,
+        )
+    }
+}
+
+fun NavGraphBuilder.workersPaymentInfoScreen(
+    onBack: () -> Unit,
+    onOpenUrl: (String) -> Unit,
+    onNavigateToPayment: (PaymentRequestDN) -> Unit,
+) {
+    composableWithFadeTransitions<WorkersPaymentInfoRoute> {
+        val viewModel: WorkersPaymentViewModel = koinViewModel()
+        WorkersPaymentRoute(
+            viewModel = viewModel,
+            onBackClicked = onBack,
+            onOpenUrl = onOpenUrl,
+            onNavigateToPayment = onNavigateToPayment,
         )
     }
 }

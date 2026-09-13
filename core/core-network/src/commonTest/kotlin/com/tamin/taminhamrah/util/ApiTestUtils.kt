@@ -407,3 +407,14 @@ object InspectionTestData {
         get() = readResourceFile("mocks/inspection_submit_success.json")
 }
 
+object WorkersPaymentTestData {
+    val paymentInfoSuccess: String
+        get() = readResourceFile("mocks/workers_payment_info_success.json")
+
+    val payDebitSuccess: String
+        get() = readResourceFile("mocks/workers_payment_pay_debit_success.json")
+
+    val inspectTicketSuccess: String
+        get() = readResourceFile("mocks/workers_payment_inspect_ticket_success.json")
+}
+

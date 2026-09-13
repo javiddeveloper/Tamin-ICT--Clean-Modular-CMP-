@@ -32,6 +32,7 @@ import com.tamin.taminhamrah.feature.taminServices.navigateToInspection
 import com.tamin.taminhamrah.feature.taminServices.navigateToEmployerOnlineServices
 import com.tamin.taminhamrah.feature.taminServices.navigateToSendInsuranceHistoryToInstitutions
 import com.tamin.taminhamrah.feature.workshops.navigateToContractRows
+import com.tamin.taminhamrah.feature.taminServices.navigateToWorkersPaymentInfo
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.navigateToCompleteEmployerInfo
 import com.tamin.taminhamrah.feature.workshops.navigateToLegalRepresentativeWorkshops
@@ -75,6 +76,7 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
         FeatureFlag.OROTEZ_PROTEZ -> navigateToOrotezProtez()
         FeatureFlag.REQUEST_PAYMENT_FOR_ILL_DAYS -> navigateToRequestPaymentForIllDays()
         FeatureFlag.OCCURRENCE -> navigateToOccurrence()
+        FeatureFlag.WORKERS_PAYMENT_INFO -> navigateToWorkersPaymentInfo()
         FeatureFlag.LIST_OF_INSPECTIONS_PERFORMED -> navigateToInspection()
         FeatureFlag.REGISTER_AGREEMENT -> navigateToEmployerOnlineServices()
         FeatureFlag.OBJECTION_NON_EXISTENT_HISTORY -> navigateToHistoryObjection()

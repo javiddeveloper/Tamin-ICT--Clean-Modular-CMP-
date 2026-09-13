@@ -140,6 +140,7 @@ import com.tamin.taminhamrah.feature.taminServices.inspectionScreen
 import com.tamin.taminhamrah.feature.taminServices.occurrenceScreen
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServicesScreen
 import com.tamin.taminhamrah.feature.taminServices.sendInsuranceHistoryToInstitutionsScreen
+import com.tamin.taminhamrah.feature.taminServices.workersPaymentInfoScreen
 import com.tamin.taminhamrah.feature.taminServices.taminServicesScreen
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
 import com.tamin.taminhamrah.feature.treatment.treatmentGraph
@@ -148,16 +149,10 @@ import com.tamin.taminhamrah.feature.workshops.completeEmployerInfoScreen
 import com.tamin.taminhamrah.feature.workshops.debtObjectionStatusScreen
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
-import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
-import com.tamin.taminhamrah.feature.security.securityScreen
 import com.tamin.taminhamrah.feature.developerOptions.DeveloperOptionsRoute
-import com.tamin.taminhamrah.feature.developerOptions.developerOptionsScreen
-import com.tamin.taminhamrah.feature.settings.settingsScreen
+import com.tamin.taminhamrah.feature.payment.navigateToPayment
 import com.tamin.taminhamrah.feature.userRequest.UserRequestRoute
 import com.tamin.taminhamrah.feature.userRequest.userRequestGraph
-import com.tamin.taminhamrah.feature.workshops.completeEmployerInfoScreen
-import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
-import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.mapper.campaign.toPresentation
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
@@ -495,6 +490,13 @@ internal fun TaminHamrahNavGraph(
                 occurrenceScreen(
                     onBack = { navController.popBackStack() },
                     onDone = { navController.popBackStack() },
+                )
+                workersPaymentInfoScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenUrl = { url -> openUrl(url) },
+                    onNavigateToPayment = { request ->
+                        navController.navigateToPayment(request)
+                    },
                 )
 
                 retirementPensionScreen(onBack = { navController.popBackStack() })

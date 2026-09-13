@@ -64,6 +64,8 @@ import com.tamin.taminhamrah.data.repository.historyObjection.HistoryObjectionRe
 import com.tamin.taminhamrah.repository.historyObjection.HistoryObjectionRepository
 import com.tamin.taminhamrah.data.repository.employerInfo.EmployerInfoRepositoryImpl
 import com.tamin.taminhamrah.repository.employerInfo.EmployerInfoRepository
+import com.tamin.taminhamrah.data.repository.workersPayment.WorkersPaymentRepositoryImpl
+import com.tamin.taminhamrah.repository.workersPayment.WorkersPaymentRepository
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
@@ -101,5 +103,6 @@ val dataKoinModule = module {
     singleOf(::PregnancyPayRepositoryImpl) { bind<PregnancyPayRepository>() }
     singleOf(::InquiryEducationRepositoryImpl) { bind<InquiryEducationRepository>() }
     singleOf(::FractionContractRepositoryImpl) { bind<FractionContractRepository>() }
+    singleOf(::WorkersPaymentRepositoryImpl) { bind<WorkersPaymentRepository>() }
     singleOf(::WeddingPresentRepositoryImpl) { bind<WeddingPresentRepository>() }
 }
