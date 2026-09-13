@@ -51,7 +51,6 @@ sealed interface WeddingPresentIntent {
     data object Submit : WeddingPresentIntent
     data object DismissSuccessDialog : WeddingPresentIntent
     data object OpenCalculate : WeddingPresentIntent
-    data object DismissError : WeddingPresentIntent
 }
 
 sealed interface WeddingPresentEvent {

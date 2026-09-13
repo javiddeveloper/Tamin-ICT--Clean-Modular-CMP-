@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.model.weddingPresent.MarriageGiftRequestDTO
 import com.tamin.taminhamrah.model.weddingPresent.ShortTermMarriageRequestDTO
 import com.tamin.taminhamrah.model.weddingPresent.WeddingPresentInfoDTO
 import com.tamin.taminhamrah.tools.BaseDTO
+import com.tamin.taminhamrah.tools.FakeIOException
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminApiException
@@ -15,7 +16,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-
 class FakeWeddingPresentApiService : WeddingPresentApiService {
     var getInfoResult: BaseDTO<WeddingPresentInfoDTO> =
         BaseDTO(status = 200, family = "OK", reason = "OK", data = WeddingPresentInfoDTO())
@@ -106,7 +106,7 @@ class WeddingPresentRemoteDataSourceImplTest {
 
     @Test
     fun getWeddingPresentInfo_networkException_throwsNoConnection() = runTest {
-        fakeApiService.shouldThrowException = RuntimeException("network")
+        fakeApiService.shouldThrowException = FakeIOException()
 
         val exception = assertFailsWith<TaminApiException> {
             dataSource.getWeddingPresentInfo()

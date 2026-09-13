@@ -21,6 +21,7 @@ import org.jetbrains.compose.resources.getString
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.error_select_check_box
 import taminx.core.core_ui.error_not_valid_national_id
+import taminx.core.core_ui.error_updating_infos
 import taminx.core.core_ui.message_select_marriage_date
 
 private const val NATIONAL_CODE_LENGTH = 10
@@ -83,7 +84,6 @@ class WeddingPresentViewModel(
             }
             WeddingPresentIntent.OpenCalculate ->
                 sendEvent(WeddingPresentEvent.NavigateToCalculate)
-            WeddingPresentIntent.DismissError -> emit(PartialState.Error(null))
         }
     }
 
@@ -120,7 +120,7 @@ class WeddingPresentViewModel(
             return
         }
         if (info == null) {
-            emit(createErrorState(getString(Res.string.message_select_marriage_date)))
+            emit(createErrorState(getString(Res.string.error_updating_infos)))
             return
         }
 
