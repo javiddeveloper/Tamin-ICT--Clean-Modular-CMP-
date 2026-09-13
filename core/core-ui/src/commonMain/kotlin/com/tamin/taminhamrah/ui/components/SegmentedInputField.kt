@@ -106,6 +106,13 @@ fun SegmentedInputField(
     groupBreaks: ImmutableSet<Int> = persistentSetOf(),
     groupSpacing: Dp = Spacing.sm,
     slotSpacing: Dp = Spacing.xxs,
+    /**
+     * Height of the padding above and below the slots.
+     *
+     * Defaulted to what every existing caller was built against; a form whose design draws a
+     * shorter box passes a smaller value rather than every screen getting one.
+     */
+    verticalPadding: Dp = Spacing.md,
     valueFilter: (String) -> String = { raw ->
         raw.filter { it.isDigit() || it.isPersianDigit() }.take(slotCount)
     },
@@ -127,7 +134,7 @@ fun SegmentedInputField(
                 borderWidth = Thickness.border,
                 cornerRadius = CornerRadius.lg
             )
-            .padding(horizontal = Spacing.md, vertical = Spacing.md),
+            .padding(horizontal = Spacing.md, vertical = verticalPadding),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
     ) {
