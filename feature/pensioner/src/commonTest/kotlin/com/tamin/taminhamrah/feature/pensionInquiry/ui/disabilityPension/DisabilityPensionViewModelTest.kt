@@ -696,6 +696,8 @@ internal class FakeDisabilityPensionRepository : PensionRepository {
         error("not used in DisabilityPensionViewModel")
     override suspend fun sendRequestInquirePensionCertificate(filters: List<ApiFilterDN>): Flow<InquirePensionCertificateDN> =
         error("not used in DisabilityPensionViewModel")
+    override suspend fun createRetirementRequest(authenticationsCode: Long, form: com.tamin.taminhamrah.model.pension.retirement.RetirementRequestFormDN): Flow<com.tamin.taminhamrah.model.pension.retirement.RetirementRequestCreatedDN> =
+        error("not used in DisabilityPensionViewModel")
     var saveDisabilityUserInfoResult: DisabilityRequestRefDN? = DisabilityRequestRefDN(id = 555L, refCode = "9999999999")
     var saveDisabilityUserInfoError: Throwable? = null
     var lastSaveDisabilityUserInfoBody: DisabilitySaveInfoDN? = null
@@ -791,8 +793,6 @@ internal class FakeDisabilityAddDependentRepository : AddDependentRepository {
     override fun uploadImage(imageBytes: ByteArray, fileName: String, mimeType: String): Flow<UploadImageDN> =
         error("not used in DisabilityPensionViewModel")
     override fun addNewDependent(request: RequestAddDependentDN): Flow<GeneralResultDN> =
-        error("not used in DisabilityPensionViewModel")
-    override suspend fun createRetirementRequest(authenticationsCode: Long, form: com.tamin.taminhamrah.model.pension.retirement.RetirementRequestFormDN): Flow<com.tamin.taminhamrah.model.pension.retirement.RetirementRequestCreatedDN> =
         error("not used in DisabilityPensionViewModel")
 }
 

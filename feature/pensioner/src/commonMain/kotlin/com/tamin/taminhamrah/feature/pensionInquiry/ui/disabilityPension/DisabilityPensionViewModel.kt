@@ -731,7 +731,7 @@ class DisabilityPensionViewModel(
     private companion object {
         const val LANDLINE_PHONE_LENGTH = 11
         const val MIN_ADDRESS_LENGTH = 10
-        const val DISABILITY_DEMAND_TYPE_CODE = "01"
+
         const val MAX_DOCUMENT_SIZE_BYTES = 2 * 1024 * 1024
         const val SAVE_INFO_STATUS = "3"
         const val SAVE_DOCUMENT_STATUS = "4"
