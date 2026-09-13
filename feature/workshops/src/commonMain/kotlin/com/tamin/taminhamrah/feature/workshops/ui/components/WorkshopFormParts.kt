@@ -59,7 +59,6 @@ import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
-import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.components.animatedErrorBorder
 import com.tamin.taminhamrah.ui.components.document.TaminDocumentUploadCard
 import com.tamin.taminhamrah.ui.components.document.TaminDocumentUploadState
@@ -249,7 +248,7 @@ fun WorkshopReviewGroup(
     onEdit: (() -> Unit)? = null,
 ) {
     val colors = LocalTaminColors.current
-    val rotation by animateFloatAsState(
+    val rotation = animateFloatAsState(
         if (isOpen) WorkshopDimens.toggleHalfTurn else 0f,
         label = "review-group",
     )
@@ -290,7 +289,7 @@ fun WorkshopReviewGroup(
                 tint = colors.chevron,
                 modifier = Modifier
                     .size(WorkshopDimens.serviceRowChevronSize)
-                    .graphicsLayer { rotationZ = rotation },
+                    .graphicsLayer { rotationZ = rotation.value },
             )
         }
 
@@ -436,7 +435,6 @@ fun WorkshopDocumentsPanel(
                 fontWeight = FontWeight.Bold,
                 color = colors.textPrimary,
             )
-            val shape = remember { RoundedCornerShape(CornerRadius.max) }
             NumericText(
                 text = stringResource(
                     Res.string.ws_form_docs_count,
@@ -446,9 +444,9 @@ fun WorkshopDocumentsPanel(
                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                 color = colors.blueText,
                 modifier = Modifier
-                    .clip(shape)
+                    .clip(DocsBadgeShape)
                     .background(colors.blueBg)
-                    .border(Thickness.border, colors.blueBorder, shape)
+                    .border(Thickness.border, colors.blueBorder, DocsBadgeShape)
                     .padding(
                         horizontal = DocCountHorizontalPadding,
                         vertical = WorkshopDimens.countBadgeVerticalPadding,
@@ -462,46 +460,53 @@ fun WorkshopDocumentsPanel(
                 state = TaminDocumentUploadState.Uploaded,
                 statusText = stringResource(Res.string.ws_form_file_size, attachment.size),
                 onDeleteClick = { onRemove(index) },
-                modifier = Modifier.padding(top = Spacing.cardGap),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = WorkshopDimens.cardButtonsTopMargin),
             )
         }
 
         if (isWaving) {
-            val waving = attachments.lastOrNull()?.type?.takeIf { hasLanded } ?: pendingType
-            TaminDocumentUploadCard(
-                title = waving?.label?.let { stringResource(it) }.orEmpty(),
-                state = TaminDocumentUploadState.Uploading,
-                modifier = Modifier.padding(top = Spacing.cardGap),
+            // Replaces the upload button until the wave finishes, so only one upload runs at a
+            // time and the card cannot be covered up while playing.
+            ShimmerBlock(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(WorkshopDimens.panelButtonHeight)
+                    .padding(top = WorkshopDimens.cardButtonsTopMargin),
+                cornerRadius = CornerRadius.chip,
             )
-        }
-
-        if (attachments.size < capacity && !isWaving) {
-            TaminPrimaryButton(
+        } else if (attachments.size < capacity) {
+            TaminOutlinedButton(
                 text = stringResource(Res.string.ws_form_add_doc),
                 onClick = { isTypeSheetOpen = true },
                 icon = Icons.Default.Add,
-                iconAtStart = true,
-                background = colors.successGradient,
+                shape = BannerShape,
                 height = WorkshopDimens.panelButtonHeight,
-                shape = RoundedCornerShape(CornerRadius.chip),
-                textStyle = MaterialTheme.typography.labelLarge
-                    .copy(fontWeight = FontWeight.ExtraBold),
+                borderWidth = WorkshopDimens.panelButtonBorderWidth,
+                borderColor = if (isError) colors.dangerText else colors.blueBorder,
+                containerColor = colors.bgSurface,
+                contentColor = if (isError) colors.dangerText else colors.blueText,
                 modifier = Modifier
-                    .padding(top = Spacing.cardGap)
+                    .fillMaxWidth()
+                    .padding(top = WorkshopDimens.cardButtonsTopMargin)
                     .animatedErrorBorder(
                         isError = isError,
                         errorColor = colors.dangerText,
-                        normalColor = Color.Transparent,
-                        borderWidth = Thickness.border,
+                        normalColor = colors.blueBorder,
+                        borderWidth = WorkshopDimens.panelButtonBorderWidth,
                         cornerRadius = CornerRadius.chip,
                     ),
             )
-            if (isError) {
-                WorkshopFieldError(
-                    text = stringResource(Res.string.ws_form_err_docs),
-                    modifier = Modifier.padding(top = Spacing.xs),
-                )
-            }
+        }
+
+        if (isError) {
+            Text(
+                text = stringResource(Res.string.ws_form_err_docs),
+                style = MaterialTheme.typography.labelSmall,
+                color = colors.dangerText,
+                modifier = Modifier.padding(top = Spacing.xs),
+            )
         }
     }
 
@@ -510,8 +515,8 @@ fun WorkshopDocumentsPanel(
             types = types,
             onDismiss = { isTypeSheetOpen = false },
             onSelect = { type ->
-                isTypeSheetOpen = false
                 pendingType = type
+                isTypeSheetOpen = false
                 filePicker.launch()
             },
         )
@@ -525,13 +530,12 @@ private const val WAVE_TAIL_MILLIS = 1600L
 @Composable
 fun WorkshopFormNote(text: String, modifier: Modifier = Modifier) {
     val colors = LocalTaminColors.current
-    val shape = remember { RoundedCornerShape(CornerRadius.chip) }
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(shape)
+            .clip(NoteShape)
             .background(colors.orangeBg)
-            .border(Thickness.border, colors.orangeText.copy(alpha = NoteBorderAlpha), shape)
+            .border(Thickness.border, colors.orangeText.copy(alpha = NoteBorderAlpha), NoteShape)
             .padding(horizontal = NoteHorizontalPadding, vertical = NoteVerticalPadding),
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
@@ -559,13 +563,11 @@ fun WorkshopFormCheck(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    val cardShape = remember { RoundedCornerShape(CornerRadius.xl) }
-    val boxShape = remember { RoundedCornerShape(CheckBoxCorner) }
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(cardShape)
+            .clip(CheckCardShape)
             .taminSurface(CornerRadius.xl)
             .clickable(onClick = onToggle)
             .padding(horizontal = CheckHorizontalPadding, vertical = CheckVerticalPadding),
@@ -574,14 +576,14 @@ fun WorkshopFormCheck(
         Box(
             modifier = Modifier
                 .size(CheckBoxSize)
-                .clip(boxShape)
+                .clip(CheckBoxShape)
                 .then(
                     if (isChecked) {
-                        Modifier.background(colors.buttonGradient, boxShape)
+                        Modifier.background(colors.buttonGradient, CheckBoxShape)
                     } else {
                         Modifier
                             .background(colors.bgSurface)
-                            .border(CheckBoxBorder, colors.outerBorder, boxShape)
+                            .border(CheckBoxBorder, colors.outerBorder, CheckBoxShape)
                     },
                 ),
             contentAlignment = Alignment.Center,
@@ -638,7 +640,6 @@ fun WorkshopFormTextArea(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    val shape = remember { RoundedCornerShape(TextAreaCorner) }
     val textStyle = MaterialTheme.typography.labelLarge.copy(
         color = colors.textPrimary,
         lineHeight = TextAreaLineHeight,
@@ -648,29 +649,31 @@ fun WorkshopFormTextArea(
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.SemiBold,
             color = colors.textSecondary,
-            modifier = Modifier.padding(bottom = Spacing.tabSelector),
+            modifier = Modifier.padding(bottom = WorkshopDimens.fieldLabelGap),
         )
         BasicTextField(
             value = value,
             onValueChange = onValueChange,
             textStyle = textStyle,
-            cursorBrush = remember(colors.blueText) { SolidColor(colors.blueText) },
+            cursorBrush = SolidColor(colors.blueText),
             modifier = Modifier
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = TextAreaHeight)
-                .clip(shape)
-                .background(colors.bgSurface)
-                .border(Thickness.border, colors.border, shape)
-                .padding(horizontal = TextAreaPadding, vertical = TextAreaPadding),
-            decorationBox = { field ->
-                Box {
-                    if (value.isEmpty()) {
-                        Text(text = placeholder, style = textStyle, color = colors.textMuted)
-                    }
-                    field()
+                .clip(TextAreaShape)
+                .background(colors.bgPage)
+                .border(Thickness.border, colors.border, TextAreaShape)
+                .padding(TextAreaPadding),
+            decorationBox = { innerTextField ->
+                if (value.isEmpty()) {
+                    Text(
+                        text = placeholder,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = colors.textMuted,
+                        lineHeight = TextAreaLineHeight,
+                    )
                 }
+                innerTextField()
             },
         )
     }
@@ -717,7 +720,7 @@ fun WorkshopFormFooter(
                 text = stringResource(Res.string.ws_form_prev),
                 onClick = onPrev,
                 icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                shape = RoundedCornerShape(FooterButtonCorner),
+                shape = FooterButtonShape,
                 height = FooterButtonHeight,
                 borderWidth = FooterButtonBorder,
                 borderColor = colors.blueBorder,
@@ -737,7 +740,7 @@ fun WorkshopFormFooter(
             icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
             iconPosition = LoadingButtonIconPosition.TRAILING,
             height = FooterButtonHeight,
-            shape = RoundedCornerShape(FooterButtonCorner),
+            shape = FooterButtonShape,
             modifier = Modifier.weight(NextButtonWeight),
         )
     }
@@ -851,7 +854,7 @@ fun WorkshopDocumentTypeSheet(
                     color = colors.textPrimary,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(CornerRadius.md))
+                        .clip(DocTypeItemShape)
                         .clickable { onSelect(type) }
                         .background(colors.chipBg)
                         .padding(horizontal = Spacing.lg, vertical = Spacing.md),
@@ -921,7 +924,15 @@ fun <T> WorkshopLookupSheet(
                 }
             }
             LazyColumn(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-                items(options.size) { index ->
+                items(
+                    count = options.size,
+                    key = { index ->
+                        val item = options[index]
+                        (item as? com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.PickedOption)?.code
+                            ?: (item as? WorkshopDocumentType)?.code
+                            ?: index
+                    },
+                ) { index ->
                     val option = options[index]
                     Text(
                         text = label(option),
@@ -929,7 +940,7 @@ fun <T> WorkshopLookupSheet(
                         color = colors.textPrimary,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(CornerRadius.md))
+                            .clip(OptionItemShape)
                             .clickable { onSelect(option) }
                             .background(colors.chipBg)
                             .padding(horizontal = Spacing.lg, vertical = Spacing.md),
@@ -944,13 +955,12 @@ fun <T> WorkshopLookupSheet(
 @Composable
 fun WorkshopFormBanner(text: String, modifier: Modifier = Modifier) {
     val colors = LocalTaminColors.current
-    val shape = remember { RoundedCornerShape(CornerRadius.chip) }
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(shape)
+            .clip(BannerShape)
             .background(colors.blueBg)
-            .border(Thickness.border, colors.blueBorder, shape)
+            .border(Thickness.border, colors.blueBorder, BannerShape)
             .padding(horizontal = NoteHorizontalPadding, vertical = NoteVerticalPadding),
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
@@ -972,3 +982,14 @@ fun WorkshopFormBanner(text: String, modifier: Modifier = Modifier) {
 /** A lookup waits as four row-shaped blocks — about a sheet's worth before it scrolls. */
 private const val LookupShimmerRows = 4
 private val LookupShimmerRowHeight = 44.dp
+
+private val DocsBadgeShape = RoundedCornerShape(CornerRadius.max)
+private val NoteShape = RoundedCornerShape(CornerRadius.chip)
+private val CheckCardShape = RoundedCornerShape(CornerRadius.xl)
+private val CheckBoxShape = RoundedCornerShape(CheckBoxCorner)
+private val TextAreaShape = RoundedCornerShape(TextAreaCorner)
+private val FooterButtonShape = RoundedCornerShape(FooterButtonCorner)
+private val DocTypeItemShape = RoundedCornerShape(CornerRadius.md)
+private val OptionItemShape = RoundedCornerShape(CornerRadius.md)
+private val BannerShape = RoundedCornerShape(CornerRadius.chip)
+

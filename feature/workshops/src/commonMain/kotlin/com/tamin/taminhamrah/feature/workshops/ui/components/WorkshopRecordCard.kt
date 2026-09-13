@@ -97,7 +97,6 @@ fun RowScope.WorkshopCardButton(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    val shape = RoundedCornerShape(CornerRadius.listRow)
     val textStyle = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
     val slot = modifier.weight(1f).widthIn(min = WorkshopDimens.cardButtonMinWidth)
 
@@ -114,7 +113,7 @@ fun RowScope.WorkshopCardButton(
             onClick = onClick,
             background = gradient,
             height = WorkshopDimens.cardButtonHeight,
-            shape = shape,
+            shape = CardButtonShape,
             textStyle = textStyle,
             modifier = slot,
         )
@@ -140,7 +139,7 @@ fun RowScope.WorkshopCardButton(
         text = text,
         onClick = onClick,
         enabled = tone != WorkshopCardButtonTone.DISABLED,
-        shape = shape,
+        shape = CardButtonShape,
         height = WorkshopDimens.cardButtonHeight,
         borderWidth = WorkshopDimens.cardButtonBorderWidth,
         borderColor = border,
@@ -150,4 +149,7 @@ fun RowScope.WorkshopCardButton(
         modifier = slot,
     )
 }
+
+private val CardButtonShape = RoundedCornerShape(CornerRadius.listRow)
+
 

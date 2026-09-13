@@ -23,6 +23,7 @@ import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -94,10 +95,14 @@ fun WorkshopRecentlyAddedMembersScreen(
 
     HandleRecentlyAddedMembersEvents(viewModel.events)
 
+    val onIntent = remember(viewModel) {
+        { intent: WorkshopRecentlyAddedMembersIntent -> viewModel.sendIntent(intent) }
+    }
+
     WorkshopRecentlyAddedMembersContent(
         state = state,
         workshopName = workshopName,
-        onIntent = viewModel::sendIntent,
+        onIntent = onIntent,
         onBack = onBack,
         modifier = modifier,
     )
@@ -114,6 +119,34 @@ fun WorkshopRecentlyAddedMembersContent(
     val colors = LocalTaminColors.current
     val isSearchOpen = state.isSearchOpen
     val draft = state.draft
+    val workshopCode = remember(state.workshopId) {
+        state.workshopId.takeIf { it.isNotBlank() }?.toPersianDigits()
+    }
+
+    val onRequestDownload = remember(onIntent) {
+        { onIntent(WorkshopRecentlyAddedMembersIntent.FormDownloadDeclaration) }
+    }
+    val onDismissDeclaration = remember(onIntent) {
+        { onIntent(WorkshopRecentlyAddedMembersIntent.DeclarationViewerDismissed) }
+    }
+    val onDismissForm = remember(onIntent) {
+        { onIntent(WorkshopRecentlyAddedMembersIntent.FormDismissed) }
+    }
+    val onToggleSearch = remember(onIntent, isSearchOpen) {
+        { onIntent(WorkshopRecentlyAddedMembersIntent.SearchOpenChanged(!isSearchOpen)) }
+    }
+    val onLoadMore = remember(onIntent) {
+        { onIntent(WorkshopRecentlyAddedMembersIntent.LoadMore) }
+    }
+    val onApplySearch = remember(onIntent) {
+        { onIntent(WorkshopRecentlyAddedMembersIntent.ApplySearch) }
+    }
+    val onClearSearch = remember(onIntent) {
+        { onIntent(WorkshopRecentlyAddedMembersIntent.ClearSearch) }
+    }
+    val onAddMember = remember(onIntent) {
+        { onIntent(WorkshopRecentlyAddedMembersIntent.Edit(NewRegistration)) }
+    }
 
     // The registration is a page of this screen, not a route: it is created against the workshop
     // this list is already showing.
@@ -124,24 +157,20 @@ fun WorkshopRecentlyAddedMembersContent(
             fileName = stringResource(Res.string.abs_form_declaration_file),
             pdf = pdf,
             downloadFailed = false,
-            onRequestDownload = {
-                onIntent(WorkshopRecentlyAddedMembersIntent.FormDownloadDeclaration)
-            },
-            onDismiss = {
-                onIntent(WorkshopRecentlyAddedMembersIntent.DeclarationViewerDismissed)
-            },
+            onRequestDownload = onRequestDownload,
+            onDismiss = onDismissDeclaration,
             title = stringResource(Res.string.abs_form_download),
         )
     }
 
     state.form?.let { form ->
-        BackHandler { onIntent(WorkshopRecentlyAddedMembersIntent.FormDismissed) }
+        BackHandler(onBack = onDismissForm)
         RegistrationFormPage(
             form = form,
             workshopName = workshopName,
-            workshopCode = state.workshopId.takeIf { it.isNotBlank() }?.toPersianDigits(),
+            workshopCode = workshopCode,
             onIntent = onIntent,
-            onBack = { onIntent(WorkshopRecentlyAddedMembersIntent.FormDismissed) },
+            onBack = onDismissForm,
             modifier = modifier,
         )
         return
@@ -151,20 +180,16 @@ fun WorkshopRecentlyAddedMembersContent(
         title = stringResource(Res.string.workshop_action_new_member),
         onBack = onBack,
         workshopName = workshopName.takeIf { it.isNotBlank() },
-        workshopCode = state.workshopId.takeIf { it.isNotBlank() }?.toPersianDigits(),
+        workshopCode = workshopCode,
         action = {
-            WorkshopSearchAction(
-                onClick = {
-                    onIntent(WorkshopRecentlyAddedMembersIntent.SearchOpenChanged(!isSearchOpen))
-                },
-            )
+            WorkshopSearchAction(onClick = onToggleSearch)
         },
         modifier = modifier,
     ) {
         WorkshopListScaffold(
             state = state.list,
-            onLoadMore = { onIntent(WorkshopRecentlyAddedMembersIntent.LoadMore) },
-            key = { it.nationalId },
+            onLoadMore = onLoadMore,
+            key = { it.personalId ?: it.nationalId },
             header = {
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.cardGap)) {
                     AnimatedVisibility(
@@ -173,10 +198,8 @@ fun WorkshopRecentlyAddedMembersContent(
                         exit = shrinkVertically() + fadeOut(),
                     ) {
                         WorkshopSearchCard(
-                            onSearch = {
-                                onIntent(WorkshopRecentlyAddedMembersIntent.ApplySearch)
-                            },
-                            onClear = { onIntent(WorkshopRecentlyAddedMembersIntent.ClearSearch) },
+                            onSearch = onApplySearch,
+                            onClear = onClearSearch,
                         ) {
                             WorkshopTextField(
                                 label = stringResource(Res.string.new_member_national_id),
@@ -200,14 +223,12 @@ fun WorkshopRecentlyAddedMembersContent(
                     // starts a registration rather than acting on an existing one.
                     TaminPrimaryButton(
                         text = stringResource(Res.string.new_member_add),
-                        onClick = {
-                            onIntent(WorkshopRecentlyAddedMembersIntent.Edit(NewRegistration))
-                        },
+                        onClick = onAddMember,
                         icon = Icons.Default.Add,
                         iconAtStart = true,
                         background = colors.buttonGradient,
                         height = WorkshopDimens.addButtonHeight,
-                        shape = RoundedCornerShape(WorkshopDimens.addButtonCorner),
+                        shape = AddButtonShape,
                     )
 
                     WorkshopSectionHeader(
@@ -216,7 +237,13 @@ fun WorkshopRecentlyAddedMembersContent(
                     )
                 }
             },
-        ) { member -> NewMemberCard(member = member, onIntent = onIntent) }
+        ) { member, rowModifier ->
+            NewMemberCard(
+                member = member,
+                onIntent = onIntent,
+                modifier = rowModifier,
+            )
+        }
     }
 }
 
@@ -230,6 +257,19 @@ private fun NewMemberCard(
     var isExpanded by rememberSaveable(member.nationalId) { mutableStateOf(false) }
     val isDraft = member.isDraft
 
+    val onConfirm = remember(member, onIntent) {
+        { onIntent(WorkshopRecentlyAddedMembersIntent.Confirm(member)) }
+    }
+    val onEdit = remember(member, onIntent) {
+        { onIntent(WorkshopRecentlyAddedMembersIntent.Edit(member)) }
+    }
+    val onDelete = remember(member, onIntent) {
+        { onIntent(WorkshopRecentlyAddedMembersIntent.Delete(member)) }
+    }
+    val onFollow = remember(member, onIntent) {
+        { onIntent(WorkshopRecentlyAddedMembersIntent.Follow(member)) }
+    }
+
     WorkshopRecordCard(
         modifier = modifier,
         isExpanded = isExpanded,
@@ -239,23 +279,23 @@ private fun NewMemberCard(
                 WorkshopCardButton(
                     text = stringResource(Res.string.new_member_confirm),
                     tone = WorkshopCardButtonTone.SUCCESS,
-                    onClick = { onIntent(WorkshopRecentlyAddedMembersIntent.Confirm(member)) },
+                    onClick = onConfirm,
                 )
                 WorkshopCardButton(
                     text = stringResource(Res.string.new_member_edit),
                     tone = WorkshopCardButtonTone.OUTLINE,
-                    onClick = { onIntent(WorkshopRecentlyAddedMembersIntent.Edit(member)) },
+                    onClick = onEdit,
                 )
                 WorkshopCardButton(
                     text = stringResource(Res.string.new_member_delete),
                     tone = WorkshopCardButtonTone.DANGER,
-                    onClick = { onIntent(WorkshopRecentlyAddedMembersIntent.Delete(member)) },
+                    onClick = onDelete,
                 )
             } else {
                 WorkshopCardButton(
                     text = stringResource(Res.string.new_member_follow),
                     tone = WorkshopCardButtonTone.OUTLINE,
-                    onClick = { onIntent(WorkshopRecentlyAddedMembersIntent.Follow(member)) },
+                    onClick = onFollow,
                 )
             }
         },
@@ -308,6 +348,7 @@ private fun NewMemberCard(
 
 /** An empty registration — what «افزودن پرسنل جدید» opens the form on. */
 private val NewRegistration = WorkshopNewMemberPR()
+private val AddButtonShape = RoundedCornerShape(WorkshopDimens.addButtonCorner)
 
 
 @PreviewRtlTheme

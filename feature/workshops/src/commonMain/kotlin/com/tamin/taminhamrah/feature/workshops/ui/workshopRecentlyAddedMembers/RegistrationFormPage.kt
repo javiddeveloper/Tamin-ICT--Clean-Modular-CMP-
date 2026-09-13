@@ -105,12 +105,35 @@ fun RegistrationFormPage(
     val identityLabel = stringResource(Res.string.abs_form_step_identity)
     val placeLabel = stringResource(Res.string.abs_form_step_place)
     val docsLabel = stringResource(Res.string.abs_form_step_docs)
-    val steps = remember(form.step, identityLabel) {
+    val steps = remember(form.step, identityLabel, placeLabel, docsLabel) {
         persistentListOf(
             WorkshopFormStep(identityLabel, form.step > 1, form.step == 1),
             WorkshopFormStep(placeLabel, form.step > 2, form.step == 2),
             WorkshopFormStep(docsLabel, false, form.step == 3),
         )
+    }
+
+    val onNext = remember(onIntent) {
+        { onIntent(WorkshopRecentlyAddedMembersIntent.FormNext) }
+    }
+    val onPrev = remember(onIntent, form.step > 1) {
+        if (form.step > 1) {
+            { onIntent(WorkshopRecentlyAddedMembersIntent.FormPrev) }
+        } else {
+            null
+        }
+    }
+    val onPickBirthDate = remember {
+        { openDatePicker = DateField.BIRTH }
+    }
+    val onPickStartDate = remember {
+        { openDatePicker = DateField.START }
+    }
+    val onDismissPicker = remember(onIntent) {
+        { onIntent(WorkshopRecentlyAddedMembersIntent.FormPickerOpened(null)) }
+    }
+    val onQueryChange = remember(onIntent) {
+        { query: String -> onIntent(WorkshopRecentlyAddedMembersIntent.FormPickerQueryChanged(query)) }
     }
 
     WorkshopScreenShell(
@@ -139,13 +162,13 @@ fun RegistrationFormPage(
                     1 -> IdentityStep(
                         form = form,
                         onIntent = onIntent,
-                        onPickDate = { openDatePicker = DateField.BIRTH },
+                        onPickDate = onPickBirthDate,
                     )
 
                     2 -> PlaceStep(
                         form = form,
                         onIntent = onIntent,
-                        onPickDate = { openDatePicker = DateField.START },
+                        onPickDate = onPickStartDate,
                     )
 
                     else -> DocumentsStep(
@@ -168,17 +191,18 @@ fun RegistrationFormPage(
             nextLabel = stringResource(
                 if (form.isLastStep) Res.string.abs_form_submit else Res.string.ws_form_next,
             ),
-            onNext = { onIntent(WorkshopRecentlyAddedMembersIntent.FormNext) },
-            onPrev = if (form.step > 1) {
-                { onIntent(WorkshopRecentlyAddedMembersIntent.FormPrev) }
-            } else {
-                null
-            },
+            onNext = onNext,
+            onPrev = onPrev,
             isBusy = form.isBusy,
         )
     }
 
     form.picker?.let { picker ->
+        val onSelectOption = remember(onIntent, picker) {
+            { option: PickedOption ->
+                onIntent(WorkshopRecentlyAddedMembersIntent.FormOptionPicked(picker, option))
+            }
+        }
         WorkshopLookupSheet(
             title = stringResource(
                 when (picker) {
@@ -188,15 +212,12 @@ fun RegistrationFormPage(
                 },
             ),
             query = form.pickerQuery,
-            onQueryChange = {
-                onIntent(WorkshopRecentlyAddedMembersIntent.FormPickerQueryChanged(it))
-            },
+            onQueryChange = onQueryChange,
             options = form.pickerOptions,
             isLoading = form.isPickerLoading,
-            onDismiss = { onIntent(WorkshopRecentlyAddedMembersIntent.FormPickerOpened(null)) },
-            onSelect = { option ->
-                onIntent(WorkshopRecentlyAddedMembersIntent.FormOptionPicked(picker, option))
-            },
+            onDismiss = onDismissPicker,
+            onSelect = onSelectOption,
+            label = { it.label },
         )
     }
 
@@ -260,13 +281,47 @@ private fun IdentityStep(
         else -> null
     }
 
+    val onDownloadDeclaration = remember(onIntent) {
+        { onIntent(WorkshopRecentlyAddedMembersIntent.FormDownloadDeclaration) }
+    }
+    val onFirstNameChange = remember(onIntent) {
+        { value: String ->
+            onIntent(
+                WorkshopRecentlyAddedMembersIntent.FormFieldChanged(
+                    RegistrationField.FIRST_NAME,
+                    value,
+                ),
+            )
+        }
+    }
+    val onLastNameChange = remember(onIntent) {
+        { value: String ->
+            onIntent(
+                WorkshopRecentlyAddedMembersIntent.FormFieldChanged(
+                    RegistrationField.LAST_NAME,
+                    value,
+                ),
+            )
+        }
+    }
+    val onNationalIdChange = remember(onIntent) {
+        { value: String ->
+            onIntent(
+                WorkshopRecentlyAddedMembersIntent.FormFieldChanged(
+                    RegistrationField.NATIONAL_ID,
+                    value.digitsOnly(),
+                ),
+            )
+        }
+    }
+
     WorkshopFormBanner(text = stringResource(Res.string.abs_form_banner))
     TaminOutlinedButton(
         text = stringResource(Res.string.abs_form_download),
-        onClick = { onIntent(WorkshopRecentlyAddedMembersIntent.FormDownloadDeclaration) },
+        onClick = onDownloadDeclaration,
         icon = vectorResource(Res.drawable.ic_tamin_download),
         enabled = !form.isDownloadingDeclaration,
-        shape = RoundedCornerShape(CornerRadius.chip),
+        shape = DeclarationButtonShape,
         height = WorkshopDimens.panelButtonHeight,
         borderWidth = WorkshopDimens.panelButtonBorderWidth,
         borderColor = LocalTaminColors.current.blueBorder,
@@ -285,14 +340,7 @@ private fun IdentityStep(
         WorkshopTextField(
             label = stringResource(Res.string.abs_form_first_name),
             value = form.firstName,
-            onValueChange = { value ->
-                onIntent(
-                    WorkshopRecentlyAddedMembersIntent.FormFieldChanged(
-                        RegistrationField.FIRST_NAME,
-                        value,
-                    ),
-                )
-            },
+            onValueChange = onFirstNameChange,
             keyboardType = KeyboardType.Text,
             inputRestriction = InputRestriction.LettersOnly,
             isRequired = true,
@@ -303,14 +351,7 @@ private fun IdentityStep(
         WorkshopTextField(
             label = stringResource(Res.string.abs_form_last_name),
             value = form.lastName,
-            onValueChange = { value ->
-                onIntent(
-                    WorkshopRecentlyAddedMembersIntent.FormFieldChanged(
-                        RegistrationField.LAST_NAME,
-                        value,
-                    ),
-                )
-            },
+            onValueChange = onLastNameChange,
             keyboardType = KeyboardType.Text,
             inputRestriction = InputRestriction.LettersOnly,
             isRequired = true,
@@ -327,14 +368,7 @@ private fun IdentityStep(
     ) {
         SegmentedInputField(
             value = form.nationalId,
-            onValueChange = { value ->
-                onIntent(
-                    WorkshopRecentlyAddedMembersIntent.FormFieldChanged(
-                        RegistrationField.NATIONAL_ID,
-                        value.digitsOnly(),
-                    ),
-                )
-            },
+            onValueChange = onNationalIdChange,
             slotCount = WorkshopConstants.NATIONAL_ID_LENGTH,
             error = nationalIdValid == false,
             errorMessage = when {
@@ -357,7 +391,7 @@ private fun IdentityStep(
     )
 }
 
-/** Marks a required field wrong only once the step has been attempted and it is still empty. */
+/** Marks a required field wrong only once the step has been attempted, and it is still empty. */
 private fun validWhenFilled(tried: Boolean, value: String): Boolean? =
     if (tried && value.isBlank()) false else null
 
@@ -369,6 +403,34 @@ private fun PlaceStep(
     onPickDate: () -> Unit,
 ) {
     val tried = form.hasTriedNext
+    val onPickBirthCity = remember(onIntent) {
+        {
+            onIntent(
+                WorkshopRecentlyAddedMembersIntent.FormPickerOpened(
+                    RegistrationPicker.BIRTH_CITY,
+                ),
+            )
+        }
+    }
+    val onPickIssueCity = remember(onIntent) {
+        {
+            onIntent(
+                WorkshopRecentlyAddedMembersIntent.FormPickerOpened(
+                    RegistrationPicker.ISSUE_CITY,
+                ),
+            )
+        }
+    }
+    val onPickJob = remember(onIntent) {
+        {
+            onIntent(
+                WorkshopRecentlyAddedMembersIntent.FormPickerOpened(
+                    RegistrationPicker.JOB,
+                ),
+            )
+        }
+    }
+
     WorkshopFormSection(
         title = stringResource(Res.string.abs_form_place_title),
         description = stringResource(Res.string.abs_form_place_desc),
@@ -382,13 +444,7 @@ private fun PlaceStep(
             value = form.birthCity?.label,
             isRequired = true,
             isValid = validWhenFilled(tried, form.birthCity?.label.orEmpty()),
-            onClick = {
-                onIntent(
-                    WorkshopRecentlyAddedMembersIntent.FormPickerOpened(
-                        RegistrationPicker.BIRTH_CITY,
-                    ),
-                )
-            },
+            onClick = onPickBirthCity,
             modifier = Modifier.weight(1f),
         )
         WorkshopPickerField(
@@ -396,13 +452,7 @@ private fun PlaceStep(
             value = form.issueCity?.label,
             isRequired = true,
             isValid = validWhenFilled(tried, form.issueCity?.label.orEmpty()),
-            onClick = {
-                onIntent(
-                    WorkshopRecentlyAddedMembersIntent.FormPickerOpened(
-                        RegistrationPicker.ISSUE_CITY,
-                    ),
-                )
-            },
+            onClick = onPickIssueCity,
             modifier = Modifier.weight(1f),
         )
     }
@@ -411,9 +461,7 @@ private fun PlaceStep(
         value = form.job?.label,
         isRequired = true,
         isValid = validWhenFilled(tried, form.job?.label.orEmpty()),
-        onClick = {
-            onIntent(WorkshopRecentlyAddedMembersIntent.FormPickerOpened(RegistrationPicker.JOB))
-        },
+        onClick = onPickJob,
     )
     WorkshopPickerField(
         label = stringResource(Res.string.abs_form_start_date),
@@ -441,7 +489,25 @@ private fun DocumentsStep(
     val jobLabel = stringResource(Res.string.abs_form_job)
     val startDateLabel = stringResource(Res.string.abs_form_start_date)
     val workshopLabel = stringResource(Res.string.abs_form_workshop)
-    val summaryRows = remember(form, fullNameLabel) {
+
+    val summaryRows = remember(
+        form.fullName,
+        form.nationalId,
+        form.birthDate,
+        form.birthCity?.label,
+        form.issueCity?.label,
+        form.job?.label,
+        form.startDate,
+        workshopName,
+        fullNameLabel,
+        nationalIdLabel,
+        birthDateLabel,
+        birthCityLabel,
+        issueCityLabel,
+        jobLabel,
+        startDateLabel,
+        workshopLabel,
+    ) {
         persistentListOf(
             WorkshopReviewRow(fullNameLabel, form.fullName, isNumeric = false),
             WorkshopReviewRow(nationalIdLabel, form.nationalId),
@@ -454,6 +520,38 @@ private fun DocumentsStep(
         )
     }
 
+    val onSummaryToggle = remember(onIntent, form.isSummaryOpen) {
+        {
+            onIntent(
+                WorkshopRecentlyAddedMembersIntent.FormSummaryToggled(!form.isSummaryOpen),
+            )
+        }
+    }
+    val onSummaryEdit = remember(onIntent) {
+        {
+            onIntent(WorkshopRecentlyAddedMembersIntent.FormStepRequested(FirstStep))
+        }
+    }
+    val onAddDocument = remember(onIntent) {
+        { fileName: String, bytes: ByteArray, typeCode: String ->
+            onIntent(
+                WorkshopRecentlyAddedMembersIntent.FormAddDocument(fileName, bytes, typeCode),
+            )
+        }
+    }
+    val onRemoveDocument = remember(onIntent) {
+        { index: Int ->
+            onIntent(WorkshopRecentlyAddedMembersIntent.FormRemoveDocument(index))
+        }
+    }
+    val onConfirmToggle = remember(onIntent, form.isConfirmed) {
+        {
+            onIntent(
+                WorkshopRecentlyAddedMembersIntent.FormConfirmedChanged(!form.isConfirmed),
+            )
+        }
+    }
+
     WorkshopFormSection(
         title = stringResource(Res.string.abs_form_docs_title),
         description = stringResource(Res.string.abs_form_docs_desc),
@@ -462,27 +560,15 @@ private fun DocumentsStep(
         title = stringResource(Res.string.abs_form_summary),
         rows = summaryRows,
         isOpen = form.isSummaryOpen,
-        onToggle = {
-            onIntent(
-                WorkshopRecentlyAddedMembersIntent.FormSummaryToggled(!form.isSummaryOpen),
-            )
-        },
-        onEdit = {
-            onIntent(WorkshopRecentlyAddedMembersIntent.FormStepRequested(FirstStep))
-        },
+        onToggle = onSummaryToggle,
+        onEdit = onSummaryEdit,
     )
     WorkshopDocumentsPanel(
         attachments = form.attachments,
         types = RegistrationDocumentTypes,
         capacity = REGISTRATION_MAX_DOCUMENTS,
-        onAdd = { fileName, bytes, typeCode ->
-            onIntent(
-                WorkshopRecentlyAddedMembersIntent.FormAddDocument(fileName, bytes, typeCode),
-            )
-        },
-        onRemove = { index ->
-            onIntent(WorkshopRecentlyAddedMembersIntent.FormRemoveDocument(index))
-        },
+        onAdd = onAddDocument,
+        onRemove = onRemoveDocument,
         isUploading = form.isUploading,
         isError = form.isDocumentsError,
     )
@@ -491,11 +577,7 @@ private fun DocumentsStep(
     WorkshopFormCheck(
         label = stringResource(Res.string.abs_form_check),
         isChecked = form.isConfirmed,
-        onToggle = {
-            onIntent(
-                WorkshopRecentlyAddedMembersIntent.FormConfirmedChanged(!form.isConfirmed),
-            )
-        },
+        onToggle = onConfirmToggle,
     )
 }
 
@@ -536,3 +618,4 @@ private fun RegistrationFormDocumentsPreview() {
 
 /** The step «ویرایش اطلاعات» jumps back to. */
 private const val FirstStep = 1
+private val DeclarationButtonShape = RoundedCornerShape(CornerRadius.chip)
