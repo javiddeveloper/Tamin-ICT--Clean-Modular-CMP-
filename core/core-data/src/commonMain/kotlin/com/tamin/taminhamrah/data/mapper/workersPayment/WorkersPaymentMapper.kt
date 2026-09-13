@@ -55,5 +55,5 @@ internal fun WorkersPayDebitParamsDN.toRequestDTO(): WorkersPayDebitRequestDTO =
 internal fun WorkersPayDebitDTO.toDomain(): WorkersPayDebitResultDN = WorkersPayDebitResultDN(
     paymentUrl = list.getOrNull(0),
     ticket = list.getOrNull(1),
-    paymentInfo = list.getOrNull(3),
+    paymentInfo = list.getOrNull(3) ?: list.getOrNull(2),
 )

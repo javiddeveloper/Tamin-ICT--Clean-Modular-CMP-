@@ -172,7 +172,7 @@ class WorkersPaymentViewModelTest {
             val event = assertIs<WorkersPaymentEvent.NavigateToPayment>(awaitItem())
             assertEquals("T-1", event.request.ticket)
             assertEquals(PaymentVerifierKey.CONSTRUCTION_WORKERS, event.request.verifierKey)
-            assertEquals("enc-info", event.request.verifierReference)
+            assertEquals("T-1|enc-info", event.request.verifierReference)
             cancelAndIgnoreRemainingEvents()
         }
 

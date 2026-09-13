@@ -16,6 +16,12 @@ class ConstructionWorkersPaymentVerifier(
     override val key: PaymentVerifierKey = PaymentVerifierKey.CONSTRUCTION_WORKERS
 
     override suspend fun verify(reference: String): String {
-        return inspectWorkersPaymentTicketUseCase(ticket = null, paymentInfo = reference)
+        val parts = reference.split("|", limit = 2)
+        val (ticket, paymentInfo) = if (parts.size == 2) {
+            parts[0].ifBlank { null } to parts[1].ifBlank { null }
+        } else {
+            null to reference.ifBlank { null }
+        }
+        return inspectWorkersPaymentTicketUseCase(ticket = ticket, paymentInfo = paymentInfo)
     }
 }

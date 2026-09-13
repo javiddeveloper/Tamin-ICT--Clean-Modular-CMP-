@@ -127,7 +127,7 @@ class WorkersPaymentRepositoryImplTest {
 
         assertEquals("https://tfh.tamin.ir/view/#/payment/T-1", result.paymentUrl) // list[0]
         assertEquals("T-1", result.ticket)                                          // list[1]
-        assertNull(result.paymentInfo)                                              // list[3] absent in a 3-element list
+        assertEquals("extra-index-2", result.paymentInfo)                           // list[3] absent, falls back to list[2]
     }
 
     @Test

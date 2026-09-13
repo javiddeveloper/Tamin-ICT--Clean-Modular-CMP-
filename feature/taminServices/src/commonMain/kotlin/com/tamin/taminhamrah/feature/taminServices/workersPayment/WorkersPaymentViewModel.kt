@@ -124,7 +124,7 @@ class WorkersPaymentViewModel(
                     PaymentRequestDN(
                         ticket = ticket,
                         verifierKey = PaymentVerifierKey.CONSTRUCTION_WORKERS,
-                        verifierReference = result.paymentInfo.orEmpty(),
+                        verifierReference = "$ticket|${result.paymentInfo.orEmpty()}",
                     ),
                 ),
             )

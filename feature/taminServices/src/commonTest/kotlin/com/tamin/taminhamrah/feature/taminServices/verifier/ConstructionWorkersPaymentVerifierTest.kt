@@ -29,7 +29,17 @@ class ConstructionWorkersPaymentVerifierTest {
     }
 
     @Test
-    fun `verify invokes inspect ticket use case with reference token`() = runTest {
+    fun `verify invokes inspect ticket use case with ticket and payment info when delimited`() = runTest {
+        repository.inspectTicketResult = "SUCCESSFUL_CONFIRMATION"
+
+        val result = verifier.verify("TICKET-123|WRK-TOKEN-123")
+
+        assertEquals("TICKET-123" to "WRK-TOKEN-123", repository.lastInspectTicketParams)
+        assertEquals("SUCCESSFUL_CONFIRMATION", result)
+    }
+
+    @Test
+    fun `verify invokes inspect ticket use case with null ticket when reference has no delimiter`() = runTest {
         repository.inspectTicketResult = "SUCCESSFUL_CONFIRMATION"
 
         val result = verifier.verify("WRK-TOKEN-123")
