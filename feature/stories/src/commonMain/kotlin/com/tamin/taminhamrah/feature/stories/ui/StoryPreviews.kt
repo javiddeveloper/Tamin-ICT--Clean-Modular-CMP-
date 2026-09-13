@@ -1,5 +1,4 @@
 package com.tamin.taminhamrah.feature.stories.ui
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,14 +28,11 @@ import kotlinx.collections.immutable.toImmutableList
 import taminx.feature.stories.generated.resources.Res
 import taminx.feature.stories.generated.resources.ic_story_assistant
 import taminx.feature.stories.generated.resources.ic_story_public_relations
-
 /*
  * The rail and the viewer, without their ViewModels. Every state either can be in is one preview
  * away, which is the point of the two `*Body` composables taking plain state.
  */
-
 /* ---- Rail ------------------------------------------------------------------------------- */
-
 @Composable
 private fun RailPreviewBody(state: StoryRailUiState) {
     Box(
@@ -48,7 +44,6 @@ private fun RailPreviewBody(state: StoryRailUiState) {
         StoryRailBody(state = state, onChannelClick = {}, onRetry = {})
     }
 }
-
 @PreviewRtlTheme
 @Composable
 private fun StoryRailLightPreview() {
@@ -56,7 +51,6 @@ private fun StoryRailLightPreview() {
         RailPreviewBody(PreviewRailState)
     }
 }
-
 @PreviewRtlTheme
 @Composable
 private fun StoryRailDarkPreview() {
@@ -64,7 +58,6 @@ private fun StoryRailDarkPreview() {
         RailPreviewBody(PreviewRailState)
     }
 }
-
 /** The first channel already watched: grey ring, muted label, receded icon. */
 @PreviewRtlTheme
 @Composable
@@ -73,7 +66,6 @@ private fun StoryRailSeenPreview() {
         RailPreviewBody(PreviewRailState.copy(seenKeys = persistentSetOf("pr")))
     }
 }
-
 @PreviewRtlTheme
 @Composable
 private fun StoryRailLoadingPreview() {
@@ -81,7 +73,6 @@ private fun StoryRailLoadingPreview() {
         RailPreviewBody(StoryRailUiState(isLoading = true))
     }
 }
-
 @PreviewRtlTheme
 @Composable
 private fun StoryRailEmptyPreview() {
@@ -89,7 +80,6 @@ private fun StoryRailEmptyPreview() {
         RailPreviewBody(StoryRailUiState(isLoading = false))
     }
 }
-
 @PreviewRtlTheme
 @Composable
 private fun StoryRailErrorPreview() {
@@ -97,9 +87,7 @@ private fun StoryRailErrorPreview() {
         RailPreviewBody(StoryRailUiState(isLoading = false, error = "خطا"))
     }
 }
-
 /* ---- Viewer ----------------------------------------------------------------------------- */
-
 /**
  * Boxed to a phone-sized frame rather than left to fill the preview, so the bottom-anchored copy
  * and the top-anchored progress bar land where they would on a device.
@@ -115,9 +103,7 @@ private fun ViewerPreviewBody(state: StoryViewerUiState) {
         )
     }
 }
-
 private val PreviewViewerHeight = 780.dp
-
 /** The slide with a call to action, which is the taller of the two layouts. */
 @PreviewRtlTheme
 @Composable
@@ -126,7 +112,6 @@ private fun StoryViewerPreview() {
         ViewerPreviewBody(PreviewViewerState)
     }
 }
-
 /** The design's reference screenshot: second slide, no call to action, nothing liked yet. */
 @PreviewRtlTheme
 @Composable
@@ -135,7 +120,6 @@ private fun StoryViewerWithoutCtaPreview() {
         ViewerPreviewBody(PreviewViewerState.copy(itemIndex = 1))
     }
 }
-
 /** Liked and bookmarked, and the media having failed — every marker the action bar can show. */
 @PreviewRtlTheme
 @Composable
@@ -151,7 +135,6 @@ private fun StoryViewerEngagedPreview() {
         )
     }
 }
-
 /**
  * The comment field in use: the story is held, the field has the bar to itself, and the send
  * button has appeared because there is something to send.
@@ -169,9 +152,7 @@ private fun StoryViewerComposingCommentPreview() {
         )
     }
 }
-
 /* ---- Fixtures --------------------------------------------------------------------------- */
-
 private val PreviewPalette = StoryPalette(
     ringStart = Color(0xFF7FB4FF),
     ringEnd = Color(0xFF1F4FA3),
@@ -185,7 +166,6 @@ private val PreviewPalette = StoryPalette(
     iconTint = Color(0xFFEAF1FF),
     iconTone = Color(0xFF1F4FA3),
 )
-
 private val PreviewChannel = StoryChannelPR(
     key = "pr",
     name = "روابط عمومی سازمان",
@@ -200,25 +180,21 @@ private val PreviewChannel = StoryChannelPR(
             body = "پرداخت حق بیمه، مشاهدهٔ سوابق و دریافت فیش، همه در یک صفحه جمع شده است.",
             media = StoryMediaPR.None,
             cta = StoryCtaPR("دیدن سوابق من", "tamin://feature/WAGE_AND_HISTORY"),
-            baseLikes = 312,
         ),
         StoryItemPR(
             id = "pr:1",
             title = "خدمات غیرحضوری",
             body = "بیشتر درخواست‌ها را از همین اپ ثبت کنید؛ مراجعه به شعبه فقط برای موارد ضروری لازم است.",
             media = StoryMediaPR.None,
-            baseLikes = 243,
         ),
         StoryItemPR(
             id = "pr:2",
             title = "ارتباط با ما",
             body = "پاسخ‌گویی تلفنی و پیام‌رسان سازمان، همهٔ روزهای هفته در دسترس شماست.",
             media = StoryMediaPR.None,
-            baseLikes = 98,
         ),
     ),
 )
-
 private val PreviewAssistantChannel = PreviewChannel.copy(
     key = "ai",
     name = "هوش مصنوعی · یارا",
@@ -231,12 +207,10 @@ private val PreviewAssistantChannel = PreviewChannel.copy(
         iconTint = Color(0xFFF1ECFF),
     ),
 )
-
 private val PreviewRailState = StoryRailUiState(
     isLoading = false,
     channels = listOf(PreviewChannel, PreviewAssistantChannel).toImmutableList(),
 )
-
 private val PreviewViewerState = StoryViewerUiState(
     isLoading = false,
     channels = persistentListOf(PreviewChannel),

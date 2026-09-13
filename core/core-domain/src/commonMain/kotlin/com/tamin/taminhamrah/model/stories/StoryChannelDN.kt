@@ -37,8 +37,6 @@ data class StoryItemDN(
     val body: String,
     val media: StoryMediaDN,
     val cta: StoryCtaDN? = null,
-    /** How many likes the slide carries before this reader's own. */
-    val baseLikes: Int = 0,
 )
 
 /**

@@ -1,10 +1,8 @@
 package com.tamin.taminhamrah.data.repository.stories
-
 import com.tamin.taminhamrah.model.stories.StoryChannelDN
 import com.tamin.taminhamrah.model.stories.StoryCtaDN
 import com.tamin.taminhamrah.model.stories.StoryItemDN
 import com.tamin.taminhamrah.model.stories.StoryMediaDN
-
 /*
  * ─── Trying your own photos and clips ──────────────────────────────────────────────────────────
  *
@@ -27,11 +25,9 @@ import com.tamin.taminhamrah.model.stories.StoryMediaDN
  *    stalling — so a typo looks like that, not like a crash.
  * ───────────────────────────────────────────────────────────────────────────────────────────────
  */
-
 /** The two clips shipped as samples. Replace the files, or add your own beside them. */
 private const val SAMPLE_IMAGE = "files/story_sample_image.jpg"
 private const val SAMPLE_VIDEO = "files/file_example.mp4"
-
 /**
  * The bundled «تازه‌ها» catalogue: five channels of three slides each, copy taken from the design
  * reference.
@@ -50,7 +46,6 @@ internal fun mockStoryChannels(): List<StoryChannelDN> = listOf(
     pensionerChannel(),
     employerChannel(),
 )
-
 private fun publicRelationsChannel() = StoryChannelDN(
     key = "pr",
     name = "روابط عمومی سازمان",
@@ -63,7 +58,6 @@ private fun publicRelationsChannel() = StoryChannelDN(
             body = "پرداخت حق بیمه، مشاهدهٔ سوابق و دریافت فیش، همه در یک صفحه جمع شده است.",
             media = StoryMediaDN.None,
             cta = StoryCtaDN("دیدن سوابق من", "tamin://feature/WAGE_AND_HISTORY"),
-            baseLikes = 312,
         ),
         // The slide the design renders as its reference screenshot, and the one carrying the
         // picture so that an image story is reachable without a service.
@@ -72,7 +66,6 @@ private fun publicRelationsChannel() = StoryChannelDN(
             title = "خدمات غیرحضوری",
             body = "بیشتر درخواست‌ها را از همین اپ ثبت کنید؛ مراجعه به شعبه فقط برای موارد ضروری لازم است.",
             media = StoryMediaDN.BundledImage(SAMPLE_IMAGE),
-            baseLikes = 243,
         ),
         StoryItemDN(
             id = "pr:2",
@@ -80,11 +73,9 @@ private fun publicRelationsChannel() = StoryChannelDN(
             body = "پاسخ‌گویی تلفنی و پیام‌رسان سازمان، همهٔ روزهای هفته در دسترس شماست.",
             media = StoryMediaDN.None,
             cta = StoryCtaDN("سایت رسمی سازمان", "https://tamin.ir"),
-            baseLikes = 98,
         ),
     ),
 )
-
 private fun insuredChannel() = StoryChannelDN(
     key = "ins",
     name = "بیمه‌شده‌ها",
@@ -97,7 +88,6 @@ private fun insuredChannel() = StoryChannelDN(
             body = "همهٔ سال‌های بیمه‌پردازی، روزهای کارکرد و دستمزد هر ماه را در یک نمودار ببینید.",
             media = StoryMediaDN.None,
             cta = StoryCtaDN("کلیهٔ سوابق", "tamin://feature/COMBINED_RECORD"),
-            baseLikes = 187,
         ),
         StoryItemDN(
             id = "ins:1",
@@ -105,7 +95,6 @@ private fun insuredChannel() = StoryChannelDN(
             body = "اگر بازه‌ای از کارکرد شما ثبت نشده، درخواست بررسی را از اپ ثبت کنید.",
             media = StoryMediaDN.None,
             cta = StoryCtaDN("اعلام سابقه", "tamin://feature/OBJECTION_NON_EXISTENT_HISTORY"),
-            baseLikes = 154,
         ),
         StoryItemDN(
             id = "ins:2",
@@ -113,11 +102,9 @@ private fun insuredChannel() = StoryChannelDN(
             body = "قرارداد بیمهٔ اختیاری یا مشاغل آزاد را ببندید و اقلام ماهانه را همان‌جا پرداخت کنید.",
             media = StoryMediaDN.None,
             cta = StoryCtaDN("امور قراردادها", "tamin://feature/CONTRACTS"),
-            baseLikes = 121,
         ),
     ),
 )
-
 private fun assistantChannel() = StoryChannelDN(
     key = "ai",
     name = "هوش مصنوعی · یارا",
@@ -132,7 +119,6 @@ private fun assistantChannel() = StoryChannelDN(
             body = "سؤال‌های بیمه‌ای خود را به زبان ساده بپرسید و پاسخ روشن بگیرید.",
             media = StoryMediaDN.BundledVideo(SAMPLE_VIDEO),
             cta = StoryCtaDN("شروع گفت‌وگو", "tamin://feature/AGENT"),
-            baseLikes = 245,
         ),
         StoryItemDN(
             id = "ai:1",
@@ -140,18 +126,15 @@ private fun assistantChannel() = StoryChannelDN(
             body = "یارا سابقهٔ شما را می‌خواند و شرایط بازنشستگی را ساده توضیح می‌دهد.",
             media = StoryMediaDN.None,
             cta = StoryCtaDN("پرسیدن از یارا", "tamin://feature/AGENT"),
-            baseLikes = 176,
         ),
         StoryItemDN(
             id = "ai:2",
             title = "پاسخ همراه با ارجاع",
             body = "هر پاسخ به قانون و بخشنامهٔ مربوط ارجاع داده می‌شود تا خیال شما راحت باشد.",
             media = StoryMediaDN.None,
-            baseLikes = 89,
         ),
     ),
 )
-
 private fun pensionerChannel() = StoryChannelDN(
     key = "pen",
     name = "مستمری‌بگیران",
@@ -164,7 +147,6 @@ private fun pensionerChannel() = StoryChannelDN(
             body = "فیش هر ماه پس از واریز مستمری در اپ قابل مشاهده و دریافت است.",
             media = StoryMediaDN.None,
             cta = StoryCtaDN("مشاهدهٔ فیش حقوقی", "tamin://feature/PAY_ROLL"),
-            baseLikes = 204,
         ),
         StoryItemDN(
             id = "pen:1",
@@ -172,7 +154,6 @@ private fun pensionerChannel() = StoryChannelDN(
             body = "آخرین حکم و احکام گذشتهٔ خود را ببینید و نسخهٔ آن را ذخیره کنید.",
             media = StoryMediaDN.None,
             cta = StoryCtaDN("حکم مستمری", "tamin://feature/EDICT_PENSIONER"),
-            baseLikes = 141,
         ),
         StoryItemDN(
             id = "pen:2",
@@ -180,11 +161,9 @@ private fun pensionerChannel() = StoryChannelDN(
             body = "گواهی حقوق و گواهی کسر اقساط را از همین اپ درخواست کنید.",
             media = StoryMediaDN.None,
             cta = StoryCtaDN("بدون اکشن", null),
-            baseLikes = 73,
         ),
     ),
 )
-
 private fun employerChannel() = StoryChannelDN(
     key = "emp",
     name = "کارفرمایان",
@@ -197,21 +176,18 @@ private fun employerChannel() = StoryChannelDN(
             body = "لیست حق بیمه را ارسال و بدهی کارگاه را در همان صفحه پرداخت کنید.",
             media = StoryMediaDN.None,
             cta = StoryCtaDN("کارگاه‌های من", "tamin://feature/WORKSHOPS"),
-            baseLikes = 132,
         ),
         StoryItemDN(
             id = "emp:1",
             title = "نتیجهٔ بازرسی",
             body = "گزارش بازرسی کارگاه و مهلت اعتراض را از اپ پیگیری کنید.",
             media = StoryMediaDN.None,
-            baseLikes = 66,
         ),
         StoryItemDN(
             id = "emp:2",
             title = "نمایندهٔ الکترونیک",
             body = "برای هر کارگاه نمایندهٔ رسمی تعریف کنید تا خدمات را از طرف شما بگیرد.",
             media = StoryMediaDN.None,
-            baseLikes = 51,
         ),
     ),
 )

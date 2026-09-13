@@ -71,10 +71,6 @@ data class StoryViewerUiState(
 
     val isSaved: Boolean get() = item?.id in savedItems
 
-    /** The slide's own count plus this reader's, which is held locally until a service owns it. */
-    val likeCount: Int
-        get() = item?.let { it.baseLikes + if (it.id in likedItems) 1 else 0 } ?: 0
-
     sealed interface PartialState {
         data class Loading(val isLoading: Boolean) : PartialState
 

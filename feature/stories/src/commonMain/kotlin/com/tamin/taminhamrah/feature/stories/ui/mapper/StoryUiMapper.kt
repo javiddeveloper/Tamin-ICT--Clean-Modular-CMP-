@@ -49,7 +49,6 @@ private fun StoryItemDN.toPresentation() = StoryItemPR(
     body = body,
     media = media.toPresentation(),
     cta = cta?.toPresentation(),
-    baseLikes = baseLikes,
 )
 
 /**

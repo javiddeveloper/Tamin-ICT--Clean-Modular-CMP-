@@ -206,7 +206,6 @@ data class StoryTextStyles(
     val slideBody: TextStyle,
     val ctaLabel: TextStyle,
     val actionHint: TextStyle,
-    val likeCount: TextStyle,
 )
 
 @Composable
@@ -235,7 +234,6 @@ private fun storyTextStyles(fontFamily: FontFamily) = StoryTextStyles(
     slideBody = storyStyle(fontFamily, 13.sp, 26.sp, weight = 500),
     ctaLabel = storyStyle(fontFamily, 12.5.sp, 15.sp, weight = 800),
     actionHint = storyStyle(fontFamily, 11.sp, 14.sp, weight = 600),
-    likeCount = storyStyle(fontFamily, 11.sp, 14.sp, weight = 800),
 )
 
 private fun storyStyle(

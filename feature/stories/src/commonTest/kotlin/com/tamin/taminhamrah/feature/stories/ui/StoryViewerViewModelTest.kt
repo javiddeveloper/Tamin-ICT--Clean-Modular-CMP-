@@ -483,17 +483,14 @@ class StoryViewerViewModelTest {
     /* ---- Liking and saving ------------------------------------------------------------------ */
 
     @Test
-    fun `liking a slide counts it and shows on the slide it was made on`() = test {
+    fun `liking a slide toggles it and shows on the slide it was made on`() = test {
         val viewModel = repository(testChannel("a")).viewer()
-        val before = viewModel.uiState.value.likeCount
 
         viewModel.sendIntent(StoryViewerIntent.ToggleLike)
         assertTrue(viewModel.uiState.value.isLiked)
-        assertEquals(before + 1, viewModel.uiState.value.likeCount)
 
         viewModel.sendIntent(StoryViewerIntent.ToggleLike)
         assertFalse(viewModel.uiState.value.isLiked)
-        assertEquals(before, viewModel.uiState.value.likeCount)
     }
 
     @Test

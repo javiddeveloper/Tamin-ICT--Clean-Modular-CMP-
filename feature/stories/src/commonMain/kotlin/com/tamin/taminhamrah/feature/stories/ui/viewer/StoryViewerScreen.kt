@@ -800,14 +800,12 @@ private fun StoryActions(
 
         if (state.isComposingComment) return@Row
 
-        Row(
+        Box(
             modifier = Modifier
-                .height(StoryDimens.actionHeight)
+                .size(StoryDimens.actionHeight)
                 .glassPill()
-                .clickable { onIntent(StoryViewerIntent.ToggleLike) }
-                .padding(horizontal = StoryDimens.actionPaddingHorizontal),
-            horizontalArrangement = Arrangement.spacedBy(StoryDimens.actionInnerGap),
-            verticalAlignment = Alignment.CenterVertically,
+                .clickable { onIntent(StoryViewerIntent.ToggleLike) },
+            contentAlignment = Alignment.Center,
         ) {
             Icon(
                 imageVector = vectorResource(
@@ -816,11 +814,6 @@ private fun StoryActions(
                 contentDescription = stringResource(Res.string.stories_like),
                 tint = if (state.isLiked) StoryLikeActive else StoryOnBackdrop,
                 modifier = Modifier.size(StoryDimens.actionIconSize),
-            )
-            NumericText(
-                text = state.likeCount.toString().toPersianDigits(),
-                style = type.likeCount,
-                color = StoryOnBackdrop,
             )
         }
 

@@ -1,5 +1,4 @@
 package com.tamin.taminhamrah.feature.stories
-
 import com.tamin.taminhamrah.model.stories.StoryChannelDN
 import com.tamin.taminhamrah.model.stories.StoryCtaDN
 import com.tamin.taminhamrah.model.stories.StoryEngagementDN
@@ -12,7 +11,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.update
-
 /**
  * Channels built to order, so a test states the shape it needs — how many slides, which of them
  * carry a clip — instead of depending on the bundled catalogue staying the way it is today.
@@ -42,11 +40,9 @@ internal fun testChannel(
                 StoryMediaDN.None
             },
             cta = if (index in ctaIndices) StoryCtaDN("cta", "tamin://feature/AGENT") else null,
-            baseLikes = 10,
         )
     },
 )
-
 /**
  * A repository a test can drive.
  *
@@ -58,18 +54,14 @@ internal fun testChannel(
 internal class FakeStoryRepository(
     private val channels: List<StoryChannelDN> = listOf(testChannel("a"), testChannel("b")),
 ) : StoryRepository {
-
     var fetchCount = 0
         private set
-
     /** When set, the next fetch throws it instead of answering. */
     var failWith: Throwable? = null
-
     private var loaded = false
     private val cached = MutableStateFlow<List<StoryChannelDN>>(emptyList())
     private val seen = MutableStateFlow<Set<String>>(emptySet())
     private val engagement = MutableStateFlow(StoryEngagementDN())
-
     override fun getChannels(forceRefresh: Boolean): Flow<List<StoryChannelDN>> = flow {
         if (!loaded || forceRefresh) {
             fetchCount++
@@ -79,26 +71,19 @@ internal class FakeStoryRepository(
         }
         emitAll(cached.asStateFlow())
     }
-
     override fun observeSeenChannels(): Flow<Set<String>> = seen.asStateFlow()
-
     override fun observeEngagement(): Flow<StoryEngagementDN> = engagement.asStateFlow()
-
     override suspend fun markChannelSeen(channelKey: String) {
         seen.update { it + channelKey }
     }
-
     override suspend fun toggleLike(itemId: String) {
         engagement.update { it.copy(likedItemIds = it.likedItemIds.toggle(itemId)) }
     }
-
     override suspend fun toggleSave(itemId: String) {
         engagement.update { it.copy(savedItemIds = it.savedItemIds.toggle(itemId)) }
     }
-
     /** What the viewer has marked watched, for a test to assert on. */
     val seenChannels: Set<String> get() = seen.value
-
     private fun Set<String>.toggle(value: String): Set<String> =
         if (value in this) this - value else this + value
 }

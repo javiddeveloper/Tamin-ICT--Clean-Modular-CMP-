@@ -32,7 +32,6 @@ data class StoryItemPR(
     val body: String,
     val media: StoryMediaPR,
     val cta: StoryCtaPR? = null,
-    val baseLikes: Int = 0,
 )
 
 /**
