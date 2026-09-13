@@ -527,25 +527,40 @@ internal fun TaminHamrahNavGraph(
                 storyViewerScreen(
                     onClose = { navController.popBackStack() },
                     onOpenDeepLink = { link ->
-                        // Leaves the viewer behind rather than stacking a service on top of it:
-                        // coming back from that service should land on the home page.
-                        navController.popBackStack()
                         val featurePrefix = "tamin://feature/"
                         if (link.startsWith("http://", ignoreCase = true) || link.startsWith("https://", ignoreCase = true)) {
+                            // Leaves the viewer behind rather than stacking a service on top of it:
+                            // coming back from that service should land on the home page.
+                            navController.popBackStack()
                             openUrl(link)
                         } else if (link.startsWith(featurePrefix, ignoreCase = true)) {
                             val flagName = link.substringAfter(featurePrefix)
                             val flag = runCatching { FeatureFlag.valueOf(flagName) }.getOrNull()
                             if (flag == FeatureFlag.AGENT) {
+                                navController.popBackStack()
                                 navController.navigateToAgent()
                             } else if (flag != null) {
+                                navController.popBackStack()
                                 navController.navigateToFeature(flag)
+                            } else {
+                                snackbarScope.launch {
+                                    snackbarHostState.showSnackbar("لینک نامعتبر است")
+                                }
                             }
                         } else {
+                            val currentRoute = navController.currentDestination?.route
                             try {
-                                navController.navigate(link)
+                                navController.navigate(link) {
+                                    if (currentRoute != null) {
+                                        popUpTo(currentRoute) {
+                                            inclusive = true
+                                        }
+                                    }
+                                }
                             } catch (e: Exception) {
-                                // Ignore or handle invalid deep link gracefully
+                                snackbarScope.launch {
+                                    snackbarHostState.showSnackbar("لینک نامعتبر است")
+                                }
                             }
                         }
                     },

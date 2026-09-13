@@ -133,8 +133,8 @@ sealed interface StoryViewerIntent {
     /** A finger came to rest on the story, past the tap threshold. */
     data object Pause : StoryViewerIntent
 
-    /** That finger lifted. */
-    data object Resume : StoryViewerIntent
+    /** That finger lifted, or the pager settled. [channelIndex] ensures an old page does not resume a new one. */
+    data class Resume(val channelIndex: Int? = null) : StoryViewerIntent
 
     /** Swiped to a different channel via gesture. */
     data class JumpToChannel(val index: Int) : StoryViewerIntent

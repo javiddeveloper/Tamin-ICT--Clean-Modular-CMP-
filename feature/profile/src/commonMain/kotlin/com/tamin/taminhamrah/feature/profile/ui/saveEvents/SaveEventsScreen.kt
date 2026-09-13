@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.profile.ui.saveEvents
 
 import androidx.compose.foundation.background
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -61,6 +62,10 @@ import com.tamin.taminhamrah.ui.theme.Thickness
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.feature.profile.generated.resources.save_events_back
+import taminx.feature.profile.generated.resources.save_events_empty
+import taminx.feature.profile.generated.resources.save_events_empty_hint
+import taminx.feature.profile.generated.resources.save_events_title
 
 @Composable
 fun SaveEventsRoute(
@@ -117,14 +122,14 @@ internal fun SaveEventsScreen(
                         tint = taminColors.chevron
                     )
                     Text(
-                        text = "هنوز رویدادی ذخیره نشده است",
+                        text = stringResource(taminx.feature.profile.generated.resources.Res.string.save_events_empty),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = taminColors.textPrimary,
                         textAlign = TextAlign.Center
                     )
                     Text(
-                        text = "در استوری‌های صفحه اصلی روی نشان ذخیره بزنید تا رویداد اینجا نگه داشته شود.",
+                        text = stringResource(taminx.feature.profile.generated.resources.Res.string.save_events_empty_hint),
                         style = MaterialTheme.typography.bodyMedium,
                         color = taminColors.textSecondary,
                         textAlign = TextAlign.Center
@@ -148,7 +153,10 @@ internal fun SaveEventsScreen(
                 items(state.events) { event ->
                     SaveEventCard(
                         event = event,
-                        onClick = { /* handle */ },
+                        onClick = {
+                            // Out of scope for this iteration: navigating to the story viewer by event ID
+                            // requires a new route that accepts an event ID instead of a channel index.
+                        },
                         onToggleSave = { onIntent(SaveEventsIntent.ToggleSave(event.id)) }
                     )
                 }
@@ -168,7 +176,7 @@ private fun SaveEventsHeader(
     val topBarGradient =
         remember(isDark) { Brush.horizontalGradient(taminColors.profileGradientStops) }
 
-    val title = "ذخیره رویدادها"
+    val title = stringResource(taminx.feature.profile.generated.resources.Res.string.save_events_title)
 
     Column(
         modifier = modifier
@@ -192,7 +200,7 @@ private fun SaveEventsHeader(
                 TaminTopAppBarButton(
                     bordered = true,
                     icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                    contentDescription = "بازگشت",
+                    contentDescription = stringResource(taminx.feature.profile.generated.resources.Res.string.save_events_back),
                     onClick = onBackClicked,
                 )
             }

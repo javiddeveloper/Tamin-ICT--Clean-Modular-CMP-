@@ -41,6 +41,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -64,6 +65,9 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.stories.ui.model.StoryChannelPR
 import com.tamin.taminhamrah.feature.stories.ui.model.StoryItemPR
@@ -208,6 +212,21 @@ internal fun StoryViewerBody(
         return
     }
 
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP) {
+                onIntent(StoryViewerIntent.Pause)
+            } else if (event == Lifecycle.Event.ON_START) {
+                onIntent(StoryViewerIntent.Resume())
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
     val pagerState = rememberPagerState(
         initialPage = state.channelIndex,
         pageCount = { state.channels.size }
@@ -228,8 +247,8 @@ internal fun StoryViewerBody(
     LaunchedEffect(pagerState.isScrollInProgress) {
         if (pagerState.isScrollInProgress) {
             onIntent(StoryViewerIntent.Pause)
-        } else if (pagerState.currentPage == state.channelIndex) {
-            onIntent(StoryViewerIntent.Resume)
+        } else {
+            onIntent(StoryViewerIntent.Resume(pagerState.currentPage))
         }
     }
 
@@ -272,7 +291,7 @@ internal fun StoryViewerBody(
 
                     val pageIntent: (StoryViewerIntent) -> Unit = { intent ->
                         if (isCurrentPage) {
-                            if (intent == StoryViewerIntent.Resume && pagerState.isScrollInProgress) {
+                            if (intent == StoryViewerIntent.Resume() && pagerState.isScrollInProgress) {
                                 // Ignore Resume from tap cancellation during drag
                             } else {
                                 onIntent(intent)
@@ -423,7 +442,6 @@ internal fun StoryViewerBody(
             )
         }
     }
-    //
 }
 
 /** The channel gradient, plus the soft light the design puts in its upper corner. */
@@ -585,7 +603,7 @@ private fun BoxScope.StoryTapZone(
                             // has no say in when the story stops.
                             currentOnIntent(StoryViewerIntent.Pause)
                             tryAwaitRelease()
-                            currentOnIntent(StoryViewerIntent.Resume)
+                            currentOnIntent(StoryViewerIntent.Resume())
                         }
                     },
                     // Empty, and load-bearing: its presence is what keeps a hold from also being

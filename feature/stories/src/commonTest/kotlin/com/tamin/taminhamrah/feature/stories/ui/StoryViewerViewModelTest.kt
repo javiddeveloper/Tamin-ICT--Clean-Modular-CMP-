@@ -202,6 +202,36 @@ class StoryViewerViewModelTest {
     }
 
     @Test
+    fun `a stale resume from a swiped-away channel does not unpause the new one`() = test {
+        val viewModel = repository(testChannel("a"), testChannel("b")).viewer(channelIndex = 0)
+        
+        viewModel.uiState.test {
+            // let it start
+            val first = awaitItem()
+            
+            // pause on a
+            viewModel.sendIntent(StoryViewerIntent.Pause)
+            assertTrue(awaitItem().isPaused)
+            
+            // jump to b
+            viewModel.sendIntent(StoryViewerIntent.JumpToChannel(1))
+            val jumped = awaitItem()
+            assertEquals(1, jumped.channelIndex)
+            assertFalse(jumped.isPaused)
+            
+            // pause b
+            viewModel.sendIntent(StoryViewerIntent.Pause)
+            assertTrue(awaitItem().isPaused)
+            
+            // a stale resume from the old page 'a' arrives
+            viewModel.sendIntent(StoryViewerIntent.Resume(channelIndex = 0))
+            
+            // Should not resume b
+            expectNoEvents()
+        }
+    }
+
+    @Test
     fun `a paused slide stays put however long it is held`() = test {
         val viewModel = repository(testChannel("a")).viewer()
         elapse(1_000)

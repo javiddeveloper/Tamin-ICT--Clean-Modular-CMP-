@@ -91,7 +91,11 @@ class StoryViewerViewModel(
             StoryViewerIntent.Next -> goNext()
             StoryViewerIntent.Previous -> goPrevious()
             StoryViewerIntent.Pause -> setHold(touchHeld = true)
-            StoryViewerIntent.Resume -> setHold(touchHeld = false)
+            is StoryViewerIntent.Resume -> {
+                if (intent.channelIndex == null || intent.channelIndex == uiState.value.channelIndex) {
+                    setHold(touchHeld = false)
+                }
+            }
             is StoryViewerIntent.JumpToChannel -> jumpToChannel(intent.index)
             is StoryViewerIntent.CommentFocusChanged -> setHold(composingComment = intent.focused)
             is StoryViewerIntent.CommentChanged ->
