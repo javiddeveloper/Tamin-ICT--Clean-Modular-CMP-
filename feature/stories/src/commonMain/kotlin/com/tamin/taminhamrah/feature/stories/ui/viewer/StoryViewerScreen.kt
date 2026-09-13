@@ -195,8 +195,10 @@ internal fun StoryViewerBody(
     // While the keyboard is up, back closes it instead of the viewer.
     BackHandler(enabled = state.isComposingComment, onBack = dismissComment)
 
-    //
-    if (state.channels.isEmpty()) {
+    if (state.isLoading && state.channels.isEmpty()) {
+        Box(modifier = modifier.fillMaxSize())
+        return
+    } else if (state.channels.isEmpty()) {
         Box(modifier = modifier.fillMaxSize()) {
             ErrorStateView(
                 message = state.error,
@@ -226,7 +228,7 @@ internal fun StoryViewerBody(
     LaunchedEffect(pagerState.isScrollInProgress) {
         if (pagerState.isScrollInProgress) {
             onIntent(StoryViewerIntent.Pause)
-        } else {
+        } else if (pagerState.currentPage == state.channelIndex) {
             onIntent(StoryViewerIntent.Resume)
         }
     }

@@ -43,7 +43,7 @@ actual fun StoryVideoPlayer(
         ExoPlayer.Builder(context).build().apply {
             setMediaItem(MediaItem.fromUri(url))
             prepare()
-            playWhenReady = true
+            playWhenReady = !isPaused
         }
     }
 
