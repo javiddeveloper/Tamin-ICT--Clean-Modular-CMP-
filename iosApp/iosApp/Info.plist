@@ -43,6 +43,14 @@
 			<key>CFBundleURLName</key>
 			<string>com.tamin.taminhamrah</string>
 		</dict>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>mytamin</string>
+			</array>
+			<key>CFBundleURLName</key>
+			<string>com.tamin.taminhamrah.mytamin</string>
+		</dict>
 	</array>
 	<key>NSUserActivityTypes</key>
 	<array>

@@ -19,6 +19,7 @@ import com.tamin.taminhamrah.data.repository.userRequests.UserRequestRepositoryI
 import com.tamin.taminhamrah.data.repository.orotezProtez.OrotezProtezRepositoryImpl
 import com.tamin.taminhamrah.data.repository.inquiryEducation.InquiryEducationRepositoryImpl
 import com.tamin.taminhamrah.data.repository.fractionContract.FractionContractRepositoryImpl
+import com.tamin.taminhamrah.data.repository.weddingPresent.WeddingPresentRepositoryImpl
 import com.tamin.taminhamrah.data.repository.requestPaymentForIllDays.RequestPaymentForIllDaysRepositoryImpl
 import com.tamin.taminhamrah.data.repository.pregnancyPay.PregnancyPayRepositoryImpl
 import com.tamin.taminhamrah.data.repository.personal.PersonalRepositoryImpl
@@ -37,6 +38,7 @@ import com.tamin.taminhamrah.repository.pension.PensionRepository
 import com.tamin.taminhamrah.repository.userRequest.UserRequestRepository
 import com.tamin.taminhamrah.repository.orotezProtez.OrotezProtezRepository
 import com.tamin.taminhamrah.repository.inquiryEducation.InquiryEducationRepository
+import com.tamin.taminhamrah.repository.weddingPresent.WeddingPresentRepository
 import com.tamin.taminhamrah.repository.fractionContract.FractionContractRepository
 import com.tamin.taminhamrah.repository.requestPaymentForIllDays.RequestPaymentForIllDaysRepository
 import com.tamin.taminhamrah.repository.pregnancyPay.PregnancyPayRepository
@@ -62,6 +64,8 @@ import com.tamin.taminhamrah.data.repository.historyObjection.HistoryObjectionRe
 import com.tamin.taminhamrah.repository.historyObjection.HistoryObjectionRepository
 import com.tamin.taminhamrah.data.repository.employerInfo.EmployerInfoRepositoryImpl
 import com.tamin.taminhamrah.repository.employerInfo.EmployerInfoRepository
+import com.tamin.taminhamrah.data.repository.workersPayment.WorkersPaymentRepositoryImpl
+import com.tamin.taminhamrah.repository.workersPayment.WorkersPaymentRepository
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
@@ -99,4 +103,6 @@ val dataKoinModule = module {
     singleOf(::PregnancyPayRepositoryImpl) { bind<PregnancyPayRepository>() }
     singleOf(::InquiryEducationRepositoryImpl) { bind<InquiryEducationRepository>() }
     singleOf(::FractionContractRepositoryImpl) { bind<FractionContractRepository>() }
+    singleOf(::WorkersPaymentRepositoryImpl) { bind<WorkersPaymentRepository>() }
+    singleOf(::WeddingPresentRepositoryImpl) { bind<WeddingPresentRepository>() }
 }

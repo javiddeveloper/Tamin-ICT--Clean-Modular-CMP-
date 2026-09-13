@@ -16,6 +16,8 @@ import com.tamin.taminhamrah.feature.pensionInquiry.navigateToEdict
 import com.tamin.taminhamrah.feature.fractionContract.navigateToFractionContract
 import com.tamin.taminhamrah.feature.girlSurvivor.navigateToGirlSurvivor
 import com.tamin.taminhamrah.feature.inquiryEducation.navigateToInquiryEducation
+import com.tamin.taminhamrah.feature.weddingPresent.navigateToWeddingPresent
+import com.tamin.taminhamrah.feature.weddingPresent.navigateToWeddingPresentCalculate
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToIssuanceCertificate
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPayRoll
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.navigateToPensionStatusInquiry
@@ -30,6 +32,7 @@ import com.tamin.taminhamrah.feature.taminServices.navigateToEmployerOnlineServi
 import com.tamin.taminhamrah.feature.taminServices.navigateToSendInsuranceHistoryToInstitutions
 import com.tamin.taminhamrah.feature.workshops.navigateToAssignerContracts
 import com.tamin.taminhamrah.feature.workshops.navigateToContractRows
+import com.tamin.taminhamrah.feature.taminServices.navigateToWorkersPaymentInfo
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.navigateToCompleteEmployerInfo
 import com.tamin.taminhamrah.feature.workshops.navigateToLegalRepresentativeWorkshops
@@ -75,11 +78,14 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
         FeatureFlag.OROTEZ_PROTEZ -> navigateToOrotezProtez()
         FeatureFlag.REQUEST_PAYMENT_FOR_ILL_DAYS -> navigateToRequestPaymentForIllDays()
         FeatureFlag.OCCURRENCE -> navigateToOccurrence()
+        FeatureFlag.WORKERS_PAYMENT_INFO -> navigateToWorkersPaymentInfo()
         FeatureFlag.LIST_OF_INSPECTIONS_PERFORMED -> navigateToInspection()
         FeatureFlag.REGISTER_AGREEMENT -> navigateToEmployerOnlineServices()
         FeatureFlag.OBJECTION_NON_EXISTENT_HISTORY -> navigateToHistoryObjection()
         FeatureFlag.INQUIRY_EDUCATION -> navigateToInquiryEducation()
         FeatureFlag.FRACTION_CONTRACT -> navigateToFractionContract()
+        FeatureFlag.WEDDING_PRESENT -> navigateToWeddingPresent()
+        FeatureFlag.CALCULATE_MARRIAGE_ALLOWANCE -> navigateToWeddingPresentCalculate()
         FeatureFlag.REQUEST_FOR_PREGNANCY_PAY -> navigateToPregnancyPay()
         else -> Unit
     }
