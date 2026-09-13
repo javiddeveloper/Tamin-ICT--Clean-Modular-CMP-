@@ -17,6 +17,7 @@ import com.tamin.taminhamrah.feature.pensionInquiry.navigateToEdict
 import com.tamin.taminhamrah.feature.girlSurvivor.navigateToGirlSurvivor
 import com.tamin.taminhamrah.feature.inquiryEducation.navigateToInquiryEducation
 import com.tamin.taminhamrah.feature.weddingPresent.navigateToWeddingPresent
+import com.tamin.taminhamrah.feature.weddingPresent.navigateToWeddingPresentCalculate
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToIssuanceCertificate
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPayRoll
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.navigateToPensionStatusInquiry
@@ -71,6 +72,7 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
         FeatureFlag.OBJECTION_NON_EXISTENT_HISTORY -> navigateToHistoryObjection()
         FeatureFlag.INQUIRY_EDUCATION -> navigateToInquiryEducation()
         FeatureFlag.WEDDING_PRESENT -> navigateToWeddingPresent()
+        FeatureFlag.CALCULATE_MARRIAGE_ALLOWANCE -> navigateToWeddingPresentCalculate()
         FeatureFlag.REQUEST_FOR_PREGNANCY_PAY -> navigateToPregnancyPay()
         else -> Unit
     }

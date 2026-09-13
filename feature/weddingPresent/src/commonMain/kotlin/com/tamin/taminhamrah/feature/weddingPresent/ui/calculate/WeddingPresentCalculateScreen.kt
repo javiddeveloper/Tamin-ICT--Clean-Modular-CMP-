@@ -24,7 +24,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
@@ -265,12 +264,12 @@ private fun PayableResultCard(result: WeddingPresentCalcResultUi) {
         Text(
             text = result.payableAmountLabel,
             style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-            color = Color.White,
+            color = colors.onGradient,
         )
         Text(
             text = stringResource(Res.string.wedding_present_calc_payable_disclaimer),
             style = MaterialTheme.typography.bodySmall,
-            color = Color.White.copy(alpha = 0.9f),
+            color = colors.onGradient.copy(alpha = 0.9f),
         )
     }
 }

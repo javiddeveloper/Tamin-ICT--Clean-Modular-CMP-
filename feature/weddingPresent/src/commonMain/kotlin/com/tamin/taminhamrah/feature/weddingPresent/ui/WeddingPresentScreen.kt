@@ -249,7 +249,8 @@ private fun WeddingPresentContent(
 
     ErrorStateView(
         message = state.error,
-        onDismiss = { onIntent(WeddingPresentIntent.DismissError) },
+        onDismiss = onBack,
+        onRetry = { onIntent(WeddingPresentIntent.Load) },
     )
 }
 

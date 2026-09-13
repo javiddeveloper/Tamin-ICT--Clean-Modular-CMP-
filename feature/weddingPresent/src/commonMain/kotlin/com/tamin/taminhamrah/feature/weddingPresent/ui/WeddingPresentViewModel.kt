@@ -63,7 +63,7 @@ class WeddingPresentViewModel(
                 )
             }
             is WeddingPresentIntent.PartnerNationalCodeChanged -> {
-                val filtered = intent.value.filter(Char::isDigit).take(NATIONAL_CODE_LENGTH)
+                val filtered = intent.value.toAsciiDigitsOnly().take(NATIONAL_CODE_LENGTH)
                 emit(PartialState.PartnerNationalCodeChanged(filtered))
                 if (filtered.length == NATIONAL_CODE_LENGTH && isValidNationalCode(filtered)) {
                     emit(
@@ -167,3 +167,11 @@ class WeddingPresentViewModel(
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)
 }
+
+private fun String.toAsciiDigitsOnly(): String = mapNotNull { char ->
+    when (char) {
+        in '0'..'9' -> char
+        in '۰'..'۹' -> '0' + (char - '۰')
+        else -> null
+    }
+}.joinToString("")
