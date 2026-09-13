@@ -27,7 +27,7 @@ fun ContractDN.toPresentation(): ContractPR {
     return ContractPR(
         contractNumber = contractNumber?.toString() ?: "",
         statusDesc = statusDesc,
-        isActive = !statusDesc.contains("ابطال"),
+        isActive = contractStatusObject?.selfIsuContStatCode == 1,
         requestDate = PersianDateFormatter.formatTimestamp(
             createDate ?: contractDate ?: creatDate ?: startDate,
         ),
@@ -65,8 +65,6 @@ fun ContractStateDN.toPresentation(): ContractStatePR? {
 fun List<ContractStateDN>.toPresentation(): List<ContractStatePR> = mapNotNull { it.toPresentation() }
 
 fun ContractPaymentHistoryItemDN.toPresentation(): ContractPaymentHistoryItemPR {
-    // Vazirmatn `ss01` renders these ASCII digits as Persian at draw time, so nothing is
-    // digit-converted here — the raw strings stay copy-safe.
     val paid = when {
         statusContract?.contains("نشده") == true -> false
         statusContract?.contains("شده") == true -> true

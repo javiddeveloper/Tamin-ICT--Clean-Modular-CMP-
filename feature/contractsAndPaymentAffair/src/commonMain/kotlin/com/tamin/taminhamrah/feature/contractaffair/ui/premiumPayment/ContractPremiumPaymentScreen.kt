@@ -26,6 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.contractaffair.ui.premiumPayment.components.ContractDebitResultCard
 import com.tamin.taminhamrah.feature.contractaffair.ui.premiumPayment.components.ContractDebitResultCardSkeleton
@@ -42,6 +44,7 @@ import com.tamin.taminhamrah.model.contractAffair.ContractLastPaymentPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.components.toast.AppToastHost
@@ -54,6 +57,7 @@ import com.tamin.taminhamrah.ui.theme.GradientGreenStart
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.coroutines.flow.Flow
+import com.tamin.taminhamrah.model.payment.PaymentRequestDN
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.contract_affairs_pay_premium
@@ -67,6 +71,7 @@ fun ContractPremiumPaymentRoute(
     insuranceType: String,
     onBackClicked: () -> Unit,
     onNavigateToPaymentDetails: (premiumTypeCode: String, startDate: Long, endDate: Long) -> Unit,
+    onNavigateToPayment: (PaymentRequestDN) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -76,10 +81,15 @@ fun ContractPremiumPaymentRoute(
         )
     }
 
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        viewModel.sendIntent(ContractPremiumPaymentIntent.OnResumed)
+    }
+
     ContractPremiumPaymentEvents(
         events = viewModel.events,
         onBackClicked = onBackClicked,
         onNavigateToPaymentDetails = onNavigateToPaymentDetails,
+        onNavigateToPayment = onNavigateToPayment,
     )
 
     ContractPremiumPaymentScreen(uiState = uiState, onIntent = viewModel::sendIntent)
@@ -90,6 +100,7 @@ private fun ContractPremiumPaymentEvents(
     events: Flow<ContractPremiumPaymentEvent>,
     onBackClicked: () -> Unit,
     onNavigateToPaymentDetails: (premiumTypeCode: String, startDate: Long, endDate: Long) -> Unit,
+    onNavigateToPayment: (PaymentRequestDN) -> Unit,
 ) {
     val toaster = LocalToaster.current
     events.collectWithLifecycleAware { event ->
@@ -97,6 +108,7 @@ private fun ContractPremiumPaymentEvents(
             ContractPremiumPaymentEvent.NavigateBack -> onBackClicked()
             is ContractPremiumPaymentEvent.ShowError -> toaster.error(event.message)
             is ContractPremiumPaymentEvent.ShowWarning -> toaster.warning(event.message)
+            is ContractPremiumPaymentEvent.NavigateToPayment -> onNavigateToPayment(event.request)
             is ContractPremiumPaymentEvent.NavigateToPaymentDetails ->
                 onNavigateToPaymentDetails(event.premiumTypeCode, event.startDate, event.endDate)
         }
@@ -189,6 +201,7 @@ internal fun ContractPremiumPaymentScreen(
 
             PremiumPaymentBottomBar(
                 enabled = uiState.canPay,
+                isLoading = uiState.isPaying,
                 onPay = { onIntent(ContractPremiumPaymentIntent.Pay) },
             )
         }
@@ -198,6 +211,7 @@ internal fun ContractPremiumPaymentScreen(
 @Composable
 private fun PremiumPaymentBottomBar(
     enabled: Boolean,
+    isLoading: Boolean,
     onPay: () -> Unit,
 ) {
     val colors = LocalTaminColors.current
@@ -207,21 +221,20 @@ private fun PremiumPaymentBottomBar(
             .background(colors.bgPage),
     ) {
         TaminDivider()
-        TaminPrimaryButton(
-            background = Brush.linearGradient(listOf(GradientGreenStart, GradientGreenEnd)),
-            iconAtStart = true,
-            icon = Icons.Outlined.Payment,
+        LoadingButton(
             text = stringResource(Res.string.contract_affairs_pay_premium),
-            onClick = { if (enabled) onPay() },
-            modifier = Modifier
-                .padding(
-                    start = Spacing.page,
-                    end = Spacing.page,
-                    top = Spacing.md,
-                    bottom = WindowInsets.navigationBars.asPaddingValues()
-                        .calculateBottomPadding() + Spacing.md,
-                )
-                .alpha(if (enabled) 1f else 0.45f),
+            onClick = onPay,
+            enabled = enabled,
+            isLoading = isLoading,
+            icon = Icons.Outlined.Payment,
+            background = Brush.linearGradient(listOf(GradientGreenStart, GradientGreenEnd)),
+            modifier = Modifier.padding(
+                start = Spacing.page,
+                end = Spacing.page,
+                top = Spacing.md,
+                bottom = WindowInsets.navigationBars.asPaddingValues()
+                    .calculateBottomPadding() + Spacing.md,
+            ),
         )
     }
 }
