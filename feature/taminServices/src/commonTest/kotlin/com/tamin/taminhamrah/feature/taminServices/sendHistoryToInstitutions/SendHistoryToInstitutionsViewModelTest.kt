@@ -40,6 +40,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import com.tamin.taminhamrah.model.history.UserRoleDN
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SendHistoryToInstitutionsViewModelTest {
@@ -246,6 +247,13 @@ class SendHistoryToInstitutionsViewModelTest {
             return userInfoResult
         }
 
+        override suspend fun getUserRole(): UserRoleDN = UserRoleDN.INSURED
+
+        override fun downloadHistoryReport(type: HistoryCertificateType): Flow<PdfDownloadDN> =
+            flow { TODO() }
+
+    override suspend fun sendHistoryNotice(): String? = null
+
         override suspend fun sendToInstitution(selectedTypes: Set<HistoryCertificateType>) {
             if (shouldThrowError) throw RuntimeException("send failed")
             lastSentTypes = selectedTypes
@@ -275,6 +283,10 @@ class SendHistoryToInstitutionsViewModelTest {
         override suspend fun pensionerPayRollPDF(filters: List<ApiFilterDN>) = flow<PdfDownloadDN> { TODO() }
         override suspend fun getEdictReportPDF(filters: List<ApiFilterDN>): Flow<PdfDownloadDN> = flow { TODO() }
         override suspend fun getRetirementRequestInfo(filters: List<ApiFilterDN>) = flow<List<com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDN>> { TODO() }
+        override suspend fun createRetirementRequest(
+            authenticationsCode: Long,
+            form: com.tamin.taminhamrah.model.pension.retirement.RetirementRequestFormDN
+        ) = flow<com.tamin.taminhamrah.model.pension.retirement.RetirementRequestCreatedDN> { TODO() }
         override suspend fun checkRetirementStatus() = flow<com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDN> { TODO() }
         override suspend fun sendRetirementDocument(requestId: String, request: com.tamin.taminhamrah.model.pension.retirement.RetirementSaveDocumentDN) = flow<String?> { TODO() }
         override suspend fun authenticationAndGetPersonalInfo(authenticationsCode: Long) = flow<com.tamin.taminhamrah.model.pension.retirement.RetirementPersonalDN> { TODO() }

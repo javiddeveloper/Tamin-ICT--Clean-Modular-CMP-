@@ -20,10 +20,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.contractaffair.ui.components.ContractAffairsActionRow
 import com.tamin.taminhamrah.feature.contractaffair.ui.components.ContractAffairsHeader
@@ -92,8 +95,23 @@ fun ContractAffairsRoute(
         premiumTypeCode: String,
         insuranceType: String,
     ) -> Unit,
+    onNavigateToEditContract: (
+        premiumTypeCode: String,
+        freeJobCode: String,
+        contractNumber: String,
+    ) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    var isFirstResume by rememberSaveable { mutableStateOf(true) }
+
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        if (isFirstResume) {
+            isFirstResume = false
+        } else {
+            viewModel.sendIntent(ContractAffairsIntent.RefreshContracts)
+        }
+    }
 
     ContractAffairsEvents(
         events = viewModel.events,
@@ -101,6 +119,7 @@ fun ContractAffairsRoute(
         onNavigateToWeb = onOpenUrl,
         onNavigateToPaymentHistory = onNavigateToPaymentHistory,
         onNavigateToPremiumPayment = onNavigateToPremiumPayment,
+        onNavigateToEditContract = onNavigateToEditContract,
     )
 
     ContractAffairsScreen(
@@ -121,6 +140,11 @@ private fun ContractAffairsEvents(
         premiumTypeCode: String,
         insuranceType: String,
     ) -> Unit,
+    onNavigateToEditContract: (
+        premiumTypeCode: String,
+        freeJobCode: String,
+        contractNumber: String,
+    ) -> Unit,
 ) {
     val toaster = LocalToaster.current
     events.collectWithLifecycleAware { event ->
@@ -136,7 +160,11 @@ private fun ContractAffairsEvents(
                 event.contract.insuranceType,
             )
 
-            is ContractAffairsEvent.NavigateToEditContract -> Unit // TODO(ui): edit-contract flow
+            is ContractAffairsEvent.NavigateToEditContract -> onNavigateToEditContract(
+                event.contract.premiumTypeCode,
+                event.contract.freeJobCode,
+                event.contract.contractNumber,
+            )
             is ContractAffairsEvent.ShowToast -> toaster.info(event.message)
             is ContractAffairsEvent.ShowError -> toaster.error(event.message)
         }

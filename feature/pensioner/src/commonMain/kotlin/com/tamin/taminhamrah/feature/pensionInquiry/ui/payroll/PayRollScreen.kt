@@ -48,7 +48,6 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.IconBox
 import com.tamin.taminhamrah.ui.components.LoadingButton
-import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.rememberCollapsingHeaderState
 import com.tamin.taminhamrah.ui.components.reservedHeight
@@ -182,7 +181,7 @@ fun PayRollContent(
                 .verticalScroll(scrollState),
         ) {
             Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
-            if (!state.hasLoadedOnce && state.isLoading) {
+            if (state.isLoading) {
                 PayRollSkeletonBodyCards(
                     modifier = Modifier
                         .padding(horizontal = Spacing.lg)
@@ -227,9 +226,6 @@ fun PayRollContent(
             )
         }
 
-        if (state.isLoading && state.hasLoadedOnce) {
-            LoadingStateOverlay()
-        }
     }
 }
 

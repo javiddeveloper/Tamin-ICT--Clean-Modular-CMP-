@@ -1,7 +1,6 @@
 package com.tamin.taminhamrah.feature.treatment.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -12,30 +11,29 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.layoutId
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
@@ -45,6 +43,8 @@ import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
 import com.tamin.taminhamrah.feature.treatment.ui.model.CoverageStatus
 import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItemPR
 import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.components.TaminPageIndicator
+import com.tamin.taminhamrah.ui.components.cssAngleGradient
 import com.tamin.taminhamrah.ui.components.shrinkOnCollapse
 import com.tamin.taminhamrah.ui.components.vanishOnCollapse
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -77,13 +77,13 @@ import taminx.core.core_ui.coverage_covered
 import taminx.core.core_ui.coverage_pending
 import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.ic_tamin_cross
-import taminx.core.core_ui.ic_tamin_ejtemaei_logo
 import taminx.core.core_ui.ic_tamin_verified
-import kotlin.math.roundToInt
 import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardChipBg
 import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardInk
 import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardInkMuted
-import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardTrackBg
+import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardDivider
+import com.tamin.taminhamrah.ui.theme.Thickness
+import com.tamin.taminhamrah.ui.theme.insuranceCardTextStyles
 
 /**
  * The electronic health-insurance card and everything that dresses one: its gradient identity,
@@ -109,6 +109,14 @@ private val DependantCardStops = listOf(
 )
 
 /**
+ * `linear-gradient(120deg, … 0%, … 55%, … 100%)`. The middle stop is at 55%, not halfway: it holds
+ * the teal across most of the card and turns to blue only near the trailing corner. Spreading the
+ * three evenly washes the whole card blue-green instead.
+ */
+private const val CARD_GRADIENT_ANGLE_DEG = 120f
+private const val CARD_GRADIENT_MID_STOP = 0.55f
+
+/**
  * The card identity for one insured person. [dependantOrdinal] is the person's position
  * among the dependants only — the main insured person ignores it and always reads teal.
  *
@@ -120,7 +128,14 @@ fun insuranceCardGradient(isDependent: Boolean, dependantOrdinal: Int = 0): Brus
     } else {
         MainInsuredCardStops
     }
-    return Brush.linearGradient(stops)
+    return cssAngleGradient(
+        angleDeg = CARD_GRADIENT_ANGLE_DEG,
+        colorStops = listOf(
+            0f to stops[0],
+            CARD_GRADIENT_MID_STOP to stops[1],
+            1f to stops[2],
+        ),
+    )
 }
 
 /**
@@ -142,6 +157,10 @@ fun InsuranceCard(
     collapseProgress: () -> Float = { 0f },
 ) {
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val text = insuranceCardTextStyles()
+    // The tile beside the branding shows who the card belongs to. Derived here rather than carried
+    // on the model: it is a rendering of the name, not a second field that could disagree with it.
+    val initial = remember(holderName) { holderName.trim().take(1) }
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -152,13 +171,14 @@ fun InsuranceCard(
         Layout(
             content = {
                 InsuranceCardBrandRow(
+                    initial = initial,
                     modifier = Modifier
                         .layoutId(CardSlot.Brand)
                         .vanishOnCollapse(collapseProgress),
                 )
                 Text(
                     text = holderName,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = text.holderName,
                     color = TaminInsuranceCardInk,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -172,7 +192,7 @@ fun InsuranceCard(
                 )
                 Text(
                     text = stringResource(Res.string.card_national_code),
-                    style = MaterialTheme.typography.labelMedium,
+                    style = text.codeLabel,
                     color = TaminInsuranceCardInkMuted,
                     modifier = Modifier
                         .layoutId(CardSlot.CodeLabel)
@@ -180,7 +200,7 @@ fun InsuranceCard(
                 )
                 NumericText(
                     text = nationalId.toPersianDigits(),
-                    style = MaterialTheme.typography.titleSmall,
+                    style = text.code,
                     color = TaminInsuranceCardInk,
                     modifier = Modifier.layoutId(CardSlot.Code),
                 )
@@ -200,9 +220,14 @@ fun InsuranceCard(
             },
         ) { measurables, constraints ->
             val width = constraints.maxWidth
-            val pad = Spacing.lg.roundToPx()
-            val md = Spacing.md.roundToPx()
-            val xs = Spacing.xs.roundToPx()
+            // `padding: 14px 16px 12px` — the card is not padded evenly, so the top, the sides
+            // and the bottom are three numbers rather than one.
+            val pad = TreatmentDimens.cardPaddingHorizontal.roundToPx()
+            val padTop = TreatmentDimens.cardPaddingTop.roundToPx()
+            val padBottom = TreatmentDimens.cardPaddingBottom.roundToPx()
+            val nameGap = TreatmentDimens.cardNameTopGap.roundToPx()
+            val codeLabelGap = TreatmentDimens.cardCodeLabelTopGap.roundToPx()
+            val codeGap = TreatmentDimens.cardCodeTopGap.roundToPx()
             val sm = Spacing.sm.roundToPx()
             val innerC = Constraints(maxWidth = (width - 2 * pad).coerceAtLeast(0))
 
@@ -214,10 +239,10 @@ fun InsuranceCard(
             val footer = measurables.slot(CardSlot.Footer).measure(Constraints.fixedWidth(width))
 
             // Expanded slots (start-offset from the start edge, top from the card top).
-            val nameExpTop = pad + brand.height + md
-            val labelExpTop = nameExpTop + name.height + xs
-            val numberExpTop = labelExpTop + label.height
-            val footerTop = numberExpTop + number.height + pad
+            val nameExpTop = padTop + brand.height + nameGap
+            val labelExpTop = nameExpTop + name.height + codeLabelGap
+            val numberExpTop = labelExpTop + label.height + codeGap
+            val footerTop = numberExpTop + number.height + padBottom
             val badgeExpTop = footerTop + (footer.height - badge.height) / 2
             val expandedH = footerTop + footer.height
 
@@ -236,7 +261,7 @@ fun InsuranceCard(
 
             layout(width, lerp(expandedH, barH, t)) {
                 // Fading pieces stay at their expanded spots (and clip as the card shrinks).
-                brand.placeRelative(pad, pad)
+                brand.placeRelative(pad, padTop)
                 label.placeRelative(pad, labelExpTop)
                 footer.placeRelative(0, footerTop)
                 // Traveling pieces glide from their expanded slot to their bar slot.
@@ -279,23 +304,60 @@ fun CoverageBadge(
     }
 }
 
+/*
+ * The card's decoration is an SVG overlay in the design, drawn on a `viewBox="0 0 340 130"` with
+ * `preserveAspectRatio="none"` and stretched over the whole card — so every coordinate below is
+ * divided by 340 on x and 130 on y and multiplied back up by the card's real size.
+ *
+ * It is three shapes, not two, and they carry three different alphas. The swoosh down the
+ * trailing edge is the one that reads as "card" rather than "rectangle"; the ellipses only soften
+ * the corners behind it.
+ */
+private const val DECOR_VIEWPORT_WIDTH = 340f
+private const val DECOR_VIEWPORT_HEIGHT = 130f
+
 /** Soft translucent swooshes that stop the gradient card reading as a flat rectangle. */
-private fun Modifier.cardDecoration(): Modifier = drawBehind {
-    val decor = TaminInsuranceCardInk.copy(alpha = TreatmentDimens.cardDecorAlpha)
-    drawOval(
-        color = decor,
-        topLeft = Offset(-size.width * 0.15f, size.height * 0.55f),
-        size = Size(size.width * 0.7f, size.height * 0.8f),
-    )
-    drawOval(
-        color = decor,
-        topLeft = Offset(size.width * 0.6f, -size.height * 0.5f),
-        size = Size(size.width * 0.6f, size.height * 0.7f),
-    )
+private fun Modifier.cardDecoration(): Modifier = drawWithCache {
+    val sx = size.width / DECOR_VIEWPORT_WIDTH
+    val sy = size.height / DECOR_VIEWPORT_HEIGHT
+
+    // M340 0 C 300 25, 330 65, 300 100 C 275 130, 340 130, 340 130 L 340 0 Z
+    // Cached rather than rebuilt per frame: it only changes when the card is measured again.
+    val swoosh = Path().apply {
+        moveTo(340f * sx, 0f)
+        cubicTo(300f * sx, 25f * sy, 330f * sx, 65f * sy, 300f * sx, 100f * sy)
+        cubicTo(275f * sx, 130f * sy, 340f * sx, 130f * sy, 340f * sx, 130f * sy)
+        close()
+    }
+
+    onDrawBehind {
+        drawPath(
+            path = swoosh,
+            color = TaminInsuranceCardInk.copy(alpha = TreatmentDimens.cardDecorSwooshAlpha),
+        )
+        // <ellipse cx="60" cy="120" rx="110" ry="45" fill="#ffffff0d" />
+        drawOval(
+            color = TaminInsuranceCardInk.copy(alpha = TreatmentDimens.cardDecorLowerAlpha),
+            topLeft = Offset(-50f * sx, 75f * sy),
+            size = Size(220f * sx, 90f * sy),
+        )
+        // <ellipse cx="300" cy="8" rx="80" ry="42" fill="#ffffff14" />
+        drawOval(
+            color = TaminInsuranceCardInk.copy(alpha = TreatmentDimens.cardDecorUpperAlpha),
+            topLeft = Offset(220f * sx, -34f * sy),
+            size = Size(160f * sx, 84f * sy),
+        )
+    }
 }
 
+/**
+ * The tile carries the holder's own initial rather than the organization's mark — the design
+ * leaves the branding to the two lines of text beside it, so the card reads as *this person's*
+ * card at a glance in a carousel where every page shares the same wording.
+ */
 @Composable
-private fun InsuranceCardBrandRow(modifier: Modifier = Modifier) {
+private fun InsuranceCardBrandRow(initial: String, modifier: Modifier = Modifier) {
+    val text = insuranceCardTextStyles()
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -306,26 +368,26 @@ private fun InsuranceCardBrandRow(modifier: Modifier = Modifier) {
                 .size(TreatmentDimens.brandTileSize)
                 .background(
                     TaminInsuranceCardChipBg,
-                    RoundedCornerShape(CornerRadius.avatarTile),
+                    RoundedCornerShape(TreatmentDimens.brandTileRadius),
                 ),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(
-                imageVector = vectorResource(Res.drawable.ic_tamin_ejtemaei_logo),
-                contentDescription = null,
-                tint = TaminInsuranceCardInk,
-                modifier = Modifier.size(TreatmentDimens.brandTileIconSize),
+            Text(
+                text = initial,
+                style = text.initial,
+                color = TaminInsuranceCardInk,
+                maxLines = 1,
             )
         }
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = stringResource(Res.string.card_org_name),
-                style = MaterialTheme.typography.labelMedium,
+                style = text.orgName,
                 color = TaminInsuranceCardInk,
             )
             Text(
                 text = stringResource(Res.string.card_subtitle),
-                style = MaterialTheme.typography.labelSmall,
+                style = text.orgSubtitle,
                 color = TaminInsuranceCardInkMuted,
             )
         }
@@ -355,15 +417,25 @@ private fun InsuranceCardFooter(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(TaminInsuranceCardTrackBg)
-            .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
+            // `border-top: 1px solid #ffffff26` and nothing else: the design separates the
+            // coverage line with a rule, not with a second wash over the gradient.
+            .drawBehind {
+                drawRect(
+                    color = TaminInsuranceCardDivider,
+                    size = Size(size.width, Thickness.border.toPx()),
+                )
+            }
+            .padding(
+                horizontal = TreatmentDimens.cardFooterPaddingHorizontal,
+                vertical = TreatmentDimens.cardFooterPaddingVertical,
+            ),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        horizontalArrangement = Arrangement.spacedBy(TreatmentDimens.cardFooterGap),
     ) {
         badge?.invoke()
         Text(
             text = coverageLabel,
-            style = MaterialTheme.typography.labelMedium,
+            style = insuranceCardTextStyles().coverage,
             color = TaminInsuranceCardInk,
             // A refusal reason is a sentence, not a status word, so it gets a second line before
             // being cut — the chip beside it still opens the full text.
@@ -465,95 +537,41 @@ fun InsuranceCardCarousel(
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            // Each card occupies TreatmentDimens.cardPeekFraction of the viewport and stays centred,
-            // so the neighboring cards peek evenly on both edges.
-            val sidePadding = maxWidth * (1 - TreatmentDimens.cardPeekFraction) / 2
+            // The design's track is inset by cardTrackPadding on both edges and each card is
+            // cardPeekFraction of what is left — so the peek is the leftover *after* that inset,
+            // not a share of the whole viewport. Measuring the fraction against the raw width
+            // instead makes the card too wide and the neighbors too thin.
+            val cardWidth =
+                (maxWidth - TreatmentDimens.cardTrackPadding * 2) * TreatmentDimens.cardPeekFraction
+
+            // Pinned to the start edge, not centred. The design's track is a `scroll-snap` row
+            // resting at scroll 0, which under RTL holds the first card against the right inset
+            // and lets the next one peek on the left. Padding both sides equally centres every
+            // card instead and opens a gutter beside the first one.
             HorizontalPager(
                 state = pagerState,
                 key = { page -> page },
-                contentPadding = PaddingValues(horizontal = sidePadding),
-                pageSpacing = Spacing.cardGap,
+                contentPadding = PaddingValues(
+                    start = TreatmentDimens.cardTrackPadding,
+                    end = (maxWidth - TreatmentDimens.cardTrackPadding - cardWidth)
+                        .coerceAtLeast(TreatmentDimens.cardTrackPadding),
+                ),
+                pageSpacing = TreatmentDimens.cardTrackGap,
                 modifier = Modifier.fillMaxWidth(),
             ) { page ->
                 card(page)
             }
         }
         if (pageCount > 1) {
-            PageIndicator(
+            TaminPageIndicator(
                 pageCount = pageCount,
                 pagerState = pagerState,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = Spacing.sm),
+                    .padding(top = TreatmentDimens.pageIndicatorTopGap),
             )
         }
     }
 }
 
-/**
- * Takes the [pagerState] rather than the current page so that swiping recomposes the dots only —
- * reading `currentPage` in the carousel above would recompose the pager and every card with it.
- *
- * A scrolling [Row] rather than a `LazyRow`: the design puts the dots inside a bordered pill, and
- * the pill has to hug them. A lazy list measures to its constraints, so it would stretch the pill
- * across the whole width. Dot counts are small — one per dependant — so nothing is gained by
- * keeping them lazy, and the strip still scrolls to hold the active dot in view.
- */
-private const val INDICATOR_TRACK_ALPHA = 0.30f
-
-@Composable
-private fun PageIndicator(
-    pageCount: Int,
-    pagerState: PagerState,
-    modifier: Modifier = Modifier,
-) {
-    val colors = LocalTaminColors.current
-    val selectedPage = pagerState.currentPage
-    val scrollState = rememberScrollState()
-    val density = LocalDensity.current
-
-    LaunchedEffect(selectedPage, pageCount) {
-        val step = with(density) {
-            (TreatmentDimens.pageIndicatorDotSize + Spacing.xs).toPx()
-        }
-        scrollState.animateScrollTo((selectedPage * step).roundToInt())
-    }
-
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        Row(
-            modifier = Modifier
-                .clip(CircleShape)
-                // A plain gray track, no outline: a tinted rim reads as a stray border against
-                // the light page. Alpha over the neutral so it holds up in both themes.
-                .background(colors.chevron.copy(alpha = INDICATOR_TRACK_ALPHA))
-                .padding(
-                    horizontal = TreatmentDimens.pageIndicatorPaddingHorizontal,
-                    vertical = TreatmentDimens.pageIndicatorPaddingVertical,
-                )
-                .widthIn(max = TreatmentDimens.pageIndicatorMaxWidth)
-                .horizontalScroll(scrollState),
-            horizontalArrangement = Arrangement.spacedBy(Spacing.xs, Alignment.CenterHorizontally),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            repeat(pageCount) { page ->
-                val isSelected = page == selectedPage
-                Box(
-                    modifier = Modifier
-                        .size(
-                            width = if (isSelected) {
-                                TreatmentDimens.pageIndicatorSelectedWidth
-                            } else {
-                                TreatmentDimens.pageIndicatorDotSize
-                            },
-                            height = TreatmentDimens.pageIndicatorDotSize,
-                        )
-                        .background(
-                            color = if (isSelected) colors.teal else colors.chevron,
-                            shape = CircleShape,
-                        ),
-                )
-            }
-        }
-    }
-}
 
