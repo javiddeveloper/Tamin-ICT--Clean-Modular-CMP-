@@ -73,6 +73,7 @@ import com.tamin.taminhamrah.feature.cartable.cartableGraph
 import com.tamin.taminhamrah.feature.changemobile.changeMobileScreen
 import com.tamin.taminhamrah.feature.changemobile.navigateToChangeMobile
 import com.tamin.taminhamrah.feature.contractaffair.CONTRACT_AFFAIRS_REFRESH_KEY
+import com.tamin.taminhamrah.feature.contractaffair.ContractPremiumPaymentRoute
 import com.tamin.taminhamrah.feature.contractaffair.contractAffairsScreen
 import com.tamin.taminhamrah.feature.contractaffair.contractPaymentCalcDetailScreen
 import com.tamin.taminhamrah.feature.contractaffair.contractPaymentHistoryScreen
@@ -81,7 +82,6 @@ import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPaymentCal
 import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPaymentHistory
 import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPremiumPayment
 import com.tamin.taminhamrah.feature.contracts.contractFlowScreen
-import com.tamin.taminhamrah.feature.contractaffair.ContractPremiumPaymentRoute
 import com.tamin.taminhamrah.feature.contracts.contractsScreen
 import com.tamin.taminhamrah.feature.contracts.flow.resolveContractTypeForEdit
 import com.tamin.taminhamrah.feature.contracts.navigateToContractFlow
@@ -125,15 +125,6 @@ import com.tamin.taminhamrah.feature.pensionSurvivor.pensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pregnancyPay.pregnancyPayScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
-import com.tamin.taminhamrah.feature.contractaffair.CONTRACT_AFFAIRS_REFRESH_KEY
-import com.tamin.taminhamrah.feature.contractaffair.contractAffairsScreen
-import com.tamin.taminhamrah.feature.contractaffair.contractPaymentHistoryScreen
-import com.tamin.taminhamrah.feature.contractaffair.contractPaymentCalcDetailScreen
-import com.tamin.taminhamrah.feature.contractaffair.contractPremiumPaymentScreen
-import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPaymentCalcDetail
-import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPaymentHistory
-import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPremiumPayment
-import com.tamin.taminhamrah.feature.payment.navigateToPayment
 import com.tamin.taminhamrah.feature.requestPaymentForIllDays.requestPaymentForIllDaysScreen
 import com.tamin.taminhamrah.feature.retirementPension.retirementPensionScreen
 import com.tamin.taminhamrah.feature.security.SecurityRoute
