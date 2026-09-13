@@ -53,10 +53,6 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.campaigns_swipe_hint
 import taminx.core.core_ui.campaigns_title
 import taminx.core.core_ui.ic_tamin_chevron_forward
-import kotlin.math.PI
-import kotlin.math.abs
-import kotlin.math.cos
-import kotlin.math.sin
 
 private val CardShape = RoundedCornerShape(CornerRadius.card)
 private val PillShape = RoundedCornerShape(CornerRadius.max)
@@ -295,10 +291,11 @@ private fun Modifier.campaignSurface(kind: CampaignKind): Modifier = this
     .drawWithCache {
         val gradient = angledLinearGradient(
             angleDeg = CampaignDimens.gradientAngleDeg,
-            start = kind.gradientStart,
-            mid = kind.gradientMid,
-            midStop = kind.gradientMidStop,
-            end = kind.gradientEnd,
+            stops = listOf(
+                0f to kind.gradientStart,
+                kind.gradientMidStop to kind.gradientMid,
+                1f to kind.gradientEnd,
+            ),
             width = size.width,
             height = size.height,
         )
@@ -324,37 +321,6 @@ private fun Modifier.campaignSurface(kind: CampaignKind): Modifier = this
             drawCircle(color = CampaignBubbleFill, radius = bubbleRadius, center = bubbleCenter)
         }
     }
-
-/**
- * A CSS `linear-gradient(<angle>deg, …)` as a Compose [Brush].
- *
- * CSS measures the angle from "to top", turning clockwise, and runs the gradient along a line
- * through the box center whose length is `|W·sin a| + |H·cos a|` — long enough that the first and
- * last stops land exactly on the corners. `Brush.linearGradient` takes two points instead, so the
- * line has to be reconstructed from the angle and the box.
- */
-private fun angledLinearGradient(
-    angleDeg: Float,
-    start: Color,
-    mid: Color,
-    midStop: Float,
-    end: Color,
-    width: Float,
-    height: Float,
-): Brush {
-    val radians = angleDeg * (PI.toFloat() / 180f)
-    val dx = sin(radians)
-    val dy = -cos(radians)
-    val half = (abs(width * dx) + abs(height * dy)) / 2f
-    val centre = Offset(width / 2f, height / 2f)
-    return Brush.linearGradient(
-        0f to start,
-        midStop to mid,
-        1f to end,
-        start = Offset(centre.x - half * dx, centre.y - half * dy),
-        end = Offset(centre.x + half * dx, centre.y + half * dy),
-    )
-}
 
 /* ---- Previews -------------------------------------------------------------------------------- */
 // The copy comes through the real mapper, so a preview that still looks right is evidence the

@@ -56,6 +56,7 @@ import com.tamin.taminhamrah.feature.weddingPresent.di.weddingPresentModule
 import com.tamin.taminhamrah.feature.payment.di.paymentModule
 import com.tamin.taminhamrah.feature.requestPaymentForIllDays.di.requestPaymentForIllDaysModule
 import com.tamin.taminhamrah.feature.pregnancyPay.di.pregnancyPayModule
+import com.tamin.taminhamrah.feature.stories.di.storiesModule
 
 import com.tamin.taminhamrah.plugin.di.pluginModule
 
@@ -141,6 +142,7 @@ val sharedModules: List<Module>
         fractionContractModule,
         weddingPresentModule,
         paymentModule,
+        storiesModule,
     )
 
 
