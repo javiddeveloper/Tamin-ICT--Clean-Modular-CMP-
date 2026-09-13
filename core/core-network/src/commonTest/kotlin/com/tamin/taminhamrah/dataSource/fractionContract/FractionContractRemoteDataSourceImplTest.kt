@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.model.fractionContract.FractionContractResultDTO
 import com.tamin.taminhamrah.model.fractionContract.FractionEligibilityDTO
 import com.tamin.taminhamrah.model.fractionContract.MakeFractionContractRequestDTO
 import com.tamin.taminhamrah.tools.BaseDTO
+import com.tamin.taminhamrah.tools.FakeIOException
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminApiException
@@ -107,7 +108,7 @@ class FractionContractRemoteDataSourceImplTest {
 
     @Test
     fun makeFractionContract_networkException_throwsNoConnection() = runTest {
-        fakeApiService.shouldThrowException = RuntimeException("network")
+        fakeApiService.shouldThrowException = FakeIOException()
 
         val exception = assertFailsWith<TaminApiException> {
             dataSource.makeFractionContract(MakeFractionContractRequestDTO(premium = "1500000"))
@@ -127,7 +128,7 @@ class FractionContractRemoteDataSourceImplTest {
 
     @Test
     fun checkAgeAndHistory_networkException_throwsNoConnection() = runTest {
-        fakeApiService.shouldThrowException = RuntimeException("network")
+        fakeApiService.shouldThrowException = FakeIOException()
 
         val exception = assertFailsWith<TaminApiException> {
             dataSource.checkAgeAndHistory()
