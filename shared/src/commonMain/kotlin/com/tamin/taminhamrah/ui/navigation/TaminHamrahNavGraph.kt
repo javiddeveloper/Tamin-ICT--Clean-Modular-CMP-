@@ -73,6 +73,7 @@ import com.tamin.taminhamrah.feature.cartable.CartableRoute
 import com.tamin.taminhamrah.feature.cartable.cartableGraph
 import com.tamin.taminhamrah.feature.changemobile.changeMobileScreen
 import com.tamin.taminhamrah.feature.changemobile.navigateToChangeMobile
+import com.tamin.taminhamrah.feature.contractaffair.ContractPremiumPaymentRoute
 import com.tamin.taminhamrah.feature.contracts.contractsScreen
 import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.deferredInstallment.deferredInstallmentScreen
@@ -121,6 +122,7 @@ import com.tamin.taminhamrah.feature.contractaffair.contractPremiumPaymentScreen
 import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPaymentCalcDetail
 import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPaymentHistory
 import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPremiumPayment
+import com.tamin.taminhamrah.feature.payment.navigateToPayment
 import com.tamin.taminhamrah.feature.requestPaymentForIllDays.requestPaymentForIllDaysScreen
 import com.tamin.taminhamrah.feature.security.SecurityRoute
 import com.tamin.taminhamrah.feature.security.securityScreen
@@ -571,6 +573,13 @@ internal fun TaminHamrahNavGraph(
                             startDate,
                             endDate,
                         )
+                    },
+                    onNavigateToPayment = { request ->
+                        navController.navigateToPayment(request) {
+                            popUpTo<ContractPremiumPaymentRoute> {
+                                inclusive = true
+                            }
+                        }
                     },
                 )
 

@@ -2877,4 +2877,5 @@
     <string name="objection_document_no_document_desc">برای این نوع درخواست، سندی در سامانه بارگذاری نشده است. برای پیگیری با شعبهٔ مربوطه تماس بگیرید.</string>
     <string name="objection_document_got_it">متوجه شدم</string>
 
+    <string name="contract_premium_payment_ticket_error">خطا در دریافت شناسه پرداخت</string>
 </resources>

@@ -9,9 +9,12 @@ import com.tamin.taminhamrah.feature.contractaffair.ui.contract.ContractAffairsI
 import com.tamin.taminhamrah.feature.contractaffair.ui.contract.ContractAffairsUiState
 import com.tamin.taminhamrah.feature.contractaffair.ui.contract.ContractOperation
 import com.tamin.taminhamrah.feature.contractaffair.ui.contract.ContractSearchFilter
+import com.tamin.taminhamrah.model.contractAffair.ContractDN
 import com.tamin.taminhamrah.model.contractAffair.ContractPR
 import com.tamin.taminhamrah.model.contractAffair.ContractStateDN
 import com.tamin.taminhamrah.model.contractAffair.ContractStatePR
+import com.tamin.taminhamrah.model.contractAffair.ContractStatusObjectDN
+import com.tamin.taminhamrah.model.contractAffair.PremiumTypeDN
 import com.tamin.taminhamrah.model.paging.PageDN
 import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
 import com.tamin.taminhamrah.useCases.contractAffair.CancelContractUseCase
@@ -175,6 +178,27 @@ class ContractAffairsViewModelTest {
         }
     }
 
+    @Test
+    fun `RefreshContracts reloads contracts list from repository`() = runTest(dispatcher) {
+        val vm = viewModel()
+
+        vm.uiState.test {
+            awaitUntil { !it.isLoading }
+
+            repository.contractsPageResult = PageDN(
+                items = listOf(contractDn()),
+                total = 1,
+            )
+
+            vm.sendIntent(ContractAffairsIntent.RefreshContracts)
+            val state = awaitUntil { it.contracts.isNotEmpty() }
+
+            assertEquals(1, state.contracts.size)
+            assertEquals("987654", state.contracts.first().contractNumber)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     private suspend fun ReceiveTurbine<ContractAffairsUiState>.awaitUntil(
         predicate: (ContractAffairsUiState) -> Boolean,
     ): ContractAffairsUiState {
@@ -202,4 +226,58 @@ private fun contractPr(
     premiumTypeCode = premiumTypeCode,
     statusCode = statusCode,
     freeJobCode = freeJobCode,
+)
+
+private fun contractDn(
+    contractNumber: Int = 987654,
+    statusCode: Int? = 1,
+    premiumTypeCode: String = "01",
+): ContractDN = ContractDN(
+    adultLetterDate = null,
+    adultLetterNumber = null,
+    age = null,
+    branchCode = null,
+    brchCodeNew = null,
+    cancelDate = null,
+    cancelUID = null,
+    canceldesc = null,
+    cityCode = null,
+    cntDrmn = "1",
+    cntFreeJobCode = "555",
+    cntIncPayDate3t4 = null,
+    cntMedicalFlag = null,
+    comment = null,
+    commissionStatus = null,
+    confirmDate = null,
+    confirmUID = null,
+    contractDate = 1756700000000L,
+    contractNumber = contractNumber,
+    contractStatus = null,
+    contractStatusObject = ContractStatusObjectDN("قرارداد فعال", statusCode),
+    creatDate = null,
+    createDate = null,
+    createUID = null,
+    eligibilityStatus = null,
+    freeJob = null,
+    guid = null,
+    guidName = null,
+    history = null,
+    insuranceId = null,
+    isStudent = null,
+    medicalExemptionStatus = null,
+    militaryServiceLicense = null,
+    mobileNumber = null,
+    natinoalCode = null,
+    physicalStatus = null,
+    premiumRate = null,
+    premiumRateCode = null,
+    premiumType = PremiumTypeDN("حرف و مشاغل آزاد", null, null, null, null),
+    premiumTypeCode = premiumTypeCode,
+    provinceCode = null,
+    provinceName = null,
+    refCode = null,
+    salary = 100000000L,
+    startDate = null,
+    statusDate = null,
+    wage = null,
 )
