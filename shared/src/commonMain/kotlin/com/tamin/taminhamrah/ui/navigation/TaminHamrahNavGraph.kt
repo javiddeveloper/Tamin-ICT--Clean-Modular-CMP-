@@ -176,10 +176,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.getString
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.error_load_menu_failed
+import taminx.core.core_ui.invalid_deep_link
 import taminx.core.core_ui.ic_home_menu
 import taminx.core.core_ui.ic_profile_menu
 import taminx.core.core_ui.ic_services_menu
@@ -550,7 +552,7 @@ internal fun TaminHamrahNavGraph(
                                 navController.navigateToFeature(flag)
                             } else {
                                 snackbarScope.launch {
-                                    snackbarHostState.showSnackbar("لینک نامعتبر است")
+                                    snackbarHostState.showSnackbar(getString(Res.string.invalid_deep_link))
                                 }
                             }
                         } else {
@@ -565,7 +567,7 @@ internal fun TaminHamrahNavGraph(
                                 }
                             } catch (e: Exception) {
                                 snackbarScope.launch {
-                                    snackbarHostState.showSnackbar("لینک نامعتبر است")
+                                    snackbarHostState.showSnackbar(getString(Res.string.invalid_deep_link))
                                 }
                             }
                         }

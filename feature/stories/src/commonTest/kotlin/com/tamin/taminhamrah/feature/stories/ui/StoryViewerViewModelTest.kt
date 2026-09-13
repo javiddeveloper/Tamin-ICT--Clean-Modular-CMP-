@@ -261,7 +261,7 @@ class StoryViewerViewModelTest {
         viewModel.sendIntent(StoryViewerIntent.Pause)
         elapse(60_000)
 
-        viewModel.sendIntent(StoryViewerIntent.Resume)
+        viewModel.sendIntent(StoryViewerIntent.Resume())
         assertFalse(viewModel.uiState.value.isPaused)
 
         // 4_200 remained of the 6_200.
@@ -318,7 +318,7 @@ class StoryViewerViewModelTest {
         viewModel.sendIntent(StoryViewerIntent.CommentFocusChanged(focused = true))
         viewModel.sendIntent(StoryViewerIntent.Pause)
 
-        viewModel.sendIntent(StoryViewerIntent.Resume)
+        viewModel.sendIntent(StoryViewerIntent.Resume())
 
         val state = viewModel.uiState.value
         assertFalse(state.isTouchHeld)
