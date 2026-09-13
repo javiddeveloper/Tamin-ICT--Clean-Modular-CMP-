@@ -31,9 +31,12 @@ class FakeContractsRepository : ContractsRepository {
     }
 
     override fun getContracts(page: Int): Flow<PagedListDN<ContractDN>> = flow { emit(PagedListDN()) }
-    override fun getContractsByPremiumType(premiumTypeCode: String, page: Int): Flow<PagedListDN<ContractDN>> =
+    override fun getContractsByPremiumType(
+        premiumTypeCode: String,
+        page: Int,
+    ): Flow<PagedListDN<ContractDN>> = flow { emit(PagedListDN()) }
+    override fun getStudentInsuranceContracts(page: Int): Flow<PagedListDN<ContractDN>> =
         flow { emit(PagedListDN()) }
-    override fun getStudentInsuranceContracts(page: Int): Flow<PagedListDN<ContractDN>> = flow { emit(PagedListDN()) }
     override fun getRegistrationInfo(): Flow<RegistrationInfoDN> = flow {
         emit(
             RegistrationInfoDN(
@@ -45,7 +48,8 @@ class FakeContractsRepository : ContractsRepository {
             ),
         )
     }
-    override fun getBranches(cityCode: String, page: Int): Flow<PagedListDN<BranchDN>> = flow { emit(PagedListDN()) }
+    override fun getBranches(cityCode: String, page: Int): Flow<PagedListDN<BranchDN>> =
+        flow { emit(PagedListDN()) }
     override fun getSpcPremiumRates(): Flow<List<PremiumRateDN>> = flow { emit(emptyList()) }
     override fun getFreeJobWages(page: Int, searchQuery: String?): Flow<PagedListDN<FreeJobDN>> =
         flow { emit(PagedListDN()) }
@@ -80,4 +84,13 @@ class FakeContractsRepository : ContractsRepository {
     }
     override fun checkInsurancePaymentStatus(systemType: String): Flow<Any?> = flow { emit(null) }
     override fun saveContact(request: SaveContactRequestDN): Flow<Any?> = flow { emit(null) }
+    override fun updateFreelanceContract(params: FreelanceMakeContractParams): Flow<Unit> =
+        flow { emit(Unit) }
+    override fun updateOptionalContract(premium: Long): Flow<Unit> = flow { emit(Unit) }
+    override fun updateFreelanceContractByGuardian(
+        params: FreelanceContractByGuardianParams,
+    ): Flow<Unit> = flow { emit(Unit) }
+    override fun updateOptionalContractByGuardian(
+        params: OptionalContractByGuardianParams,
+    ): Flow<Unit> = flow { emit(Unit) }
 }

@@ -59,6 +59,7 @@ import com.tamin.taminhamrah.ui.system.copyToClipboard
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
 import kotlinx.coroutines.flow.Flow
@@ -244,7 +245,9 @@ fun HistoryJobInfoContent(
                     horizontal = Spacing.page,
                     vertical = Spacing.md
                 ),
-                verticalArrangement = Arrangement.spacedBy(Spacing.md)
+                verticalArrangement = Arrangement.spacedBy(Spacing.md),
+                // The same give the rest of the app scrolls with.
+                overscrollEffect = rememberJellyOverscroll(),
             ) {
                 if (uiState.jobInfos.isNotEmpty()) {
                     item {
