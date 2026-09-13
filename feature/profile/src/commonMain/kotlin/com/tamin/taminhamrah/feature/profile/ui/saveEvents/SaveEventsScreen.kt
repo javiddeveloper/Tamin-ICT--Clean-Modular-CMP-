@@ -34,12 +34,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import kotlin.math.roundToInt
 import com.tamin.taminhamrah.feature.profile.model.SavedEventPR
 import com.tamin.taminhamrah.feature.profile.ui.saveEvents.contract.SaveEventsEvent
 import com.tamin.taminhamrah.feature.profile.ui.saveEvents.contract.SaveEventsIntent
@@ -57,12 +55,6 @@ import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
-import com.tamin.taminhamrah.ui.toparea.TopAreaState
-import com.tamin.taminhamrah.ui.toparea.driveTopArea
-import com.tamin.taminhamrah.ui.toparea.rememberMeasuredTopAreaState
-import com.tamin.taminhamrah.ui.toparea.reportTopAreaHeight
-import com.tamin.taminhamrah.ui.toparea.topAreaContentPadding
-import com.tamin.taminhamrah.ui.toparea.topAreaHide
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_chevron_back
@@ -98,23 +90,20 @@ internal fun SaveEventsScreen(
     val taminColors = LocalTaminColors.current
     val listState = rememberLazyListState()
 
-    val topAreaState = rememberMeasuredTopAreaState { probeState ->
-        SaveEventsHeader(
-            topAreaState = probeState,
-            onBackClicked = { onIntent(SaveEventsIntent.NavigateBack) }
-        )
-    }
-
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(taminColors.bgPage)
     ) {
+        SaveEventsHeader(
+            onBackClicked = { onIntent(SaveEventsIntent.NavigateBack) }
+        )
+
         if (!state.isLoading && state.events.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = 180.dp)
+                    .weight(1f)
             ) {
                 EmptyStateMessage(
                     icon = Icons.Filled.Bookmark,
@@ -128,15 +117,12 @@ internal fun SaveEventsScreen(
                 state = listState,
                 modifier = Modifier
                     .fillMaxSize()
-                    .driveTopArea(topAreaState, listState),
-                contentPadding = topAreaContentPadding(
-                    state = topAreaState,
-                    rest = PaddingValues(
-                        start = Spacing.page,
-                        end = Spacing.page,
-                        bottom = Spacing.xxl,
-                        top = Spacing.lg
-                    )
+                    .weight(1f),
+                contentPadding = PaddingValues(
+                    start = Spacing.page,
+                    end = Spacing.page,
+                    bottom = Spacing.xxl,
+                    top = Spacing.lg
                 ),
                 verticalArrangement = Arrangement.spacedBy(Spacing.md)
             ) {
@@ -149,20 +135,11 @@ internal fun SaveEventsScreen(
                 }
             }
         }
-
-        SaveEventsHeader(
-            topAreaState = topAreaState,
-            onBackClicked = { onIntent(SaveEventsIntent.NavigateBack) },
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .reportTopAreaHeight(topAreaState)
-        )
     }
 }
 
 @Composable
 private fun SaveEventsHeader(
-    topAreaState: TopAreaState,
     onBackClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -205,32 +182,17 @@ private fun SaveEventsHeader(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .topAreaHide(topAreaState)
-                .padding(bottom = Spacing.xl),
+                .padding(bottom = Spacing.xs),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             AnimatedRingHeaderIcon(
                 icon = Icons.Filled.Bookmark,
-                animated = !topAreaState.isMeasureProbe
+                animated = true
             )
         }
 
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .topAreaReveal(topAreaState, 20.dp)
-        )
     }
 }
-
-private fun Modifier.topAreaReveal(state: TopAreaState, height: androidx.compose.ui.unit.Dp): Modifier =
-    layout { measurable, constraints ->
-        val targetPx = height.roundToPx()
-        val revealedPx = (targetPx * state.progress).roundToInt()
-        val placeable = measurable.measure(constraints.copy(minHeight = 0, maxHeight = revealedPx.coerceAtLeast(0)))
-        layout(placeable.width, revealedPx) { placeable.place(0, 0) }
-    }
-
 
 @Composable
 private fun SaveEventCard(
