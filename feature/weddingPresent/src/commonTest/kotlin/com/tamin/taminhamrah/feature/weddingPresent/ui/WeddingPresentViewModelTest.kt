@@ -17,9 +17,11 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.error_not_valid_national_id
+import taminx.core.core_ui.error_select_check_box
+import taminx.core.core_ui.error_updating_infos
+import taminx.core.core_ui.message_select_marriage_date
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -30,13 +32,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-/**
- * Submit validation resolves Compose Multiplatform strings via `getString(Res.string…)`,
- * which needs an Android context — Robolectric provides that for JVM unit tests.
- */
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(RobolectricTestRunner::class)
-@Config(sdk = [35])
 class WeddingPresentViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -101,7 +97,7 @@ class WeddingPresentViewModelTest {
         viewModel.sendIntent(WeddingPresentIntent.Submit)
         testDispatcher.scheduler.advanceUntilIdle()
 
-        assertNotNull(viewModel.uiState.value.marriageDateError)
+        assertEquals(Res.string.message_select_marriage_date, viewModel.uiState.value.marriageDateError)
         assertNull(repository.lastSubmitRequest)
         assertFalse(viewModel.uiState.value.showSuccessDialog)
     }
@@ -118,7 +114,7 @@ class WeddingPresentViewModelTest {
         viewModel.sendIntent(WeddingPresentIntent.Submit)
         testDispatcher.scheduler.advanceUntilIdle()
 
-        assertNotNull(viewModel.uiState.value.partnerNationalCodeError)
+        assertEquals(Res.string.error_not_valid_national_id, viewModel.uiState.value.partnerNationalCodeError)
         assertNull(repository.lastSubmitRequest)
     }
 
@@ -132,7 +128,9 @@ class WeddingPresentViewModelTest {
 
         viewModel.events.test {
             viewModel.sendIntent(WeddingPresentIntent.Submit)
-            assertIs<WeddingPresentEvent.ShowToast>(awaitItem())
+            val event = awaitItem()
+            assertIs<WeddingPresentEvent.ShowToastRes>(event)
+            assertEquals(Res.string.error_select_check_box, event.message)
             cancelAndIgnoreRemainingEvents()
         }
         assertNull(repository.lastSubmitRequest)
@@ -155,9 +153,9 @@ class WeddingPresentViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         val error = failingVm.uiState.value.error
-        assertNotNull(error)
-        assertFalse(error.contains("تاریخ عقد"))
-        assertEquals("خطا در دریافت اطلاعات", error)
+        val errorRes = failingVm.uiState.value.errorRes
+        assertNull(error)
+        assertEquals(Res.string.error_updating_infos, errorRes)
         assertNull(repository.lastSubmitRequest)
     }
 
@@ -177,6 +175,30 @@ class WeddingPresentViewModelTest {
         assertEquals("0499370899", repository.lastSubmitRequest?.partnerNationalId)
         assertEquals(1_700_000_000_000L, repository.lastSubmitRequest?.weddingDateTimeStamp)
     }
+
+    @Test
+    fun submit_failure_toastsAndKeepsFormWithoutErrorDialog() = runTest(testDispatcher) {
+        repository.submitError = RuntimeException("server rejected")
+        viewModel.sendIntent(
+            WeddingPresentIntent.MarriageDatePicked(label = "۱۴۰۲/۰۱/۰۱", millis = 1_700_000_000_000L),
+        )
+        viewModel.sendIntent(WeddingPresentIntent.PartnerNationalCodeChanged("0499370899"))
+        viewModel.sendIntent(WeddingPresentIntent.CommitmentChecked(true))
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.events.test {
+            viewModel.sendIntent(WeddingPresentIntent.Submit)
+            assertIs<WeddingPresentEvent.ShowToast>(awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertNull(viewModel.uiState.value.error)
+        assertNull(viewModel.uiState.value.errorRes)
+        assertFalse(viewModel.uiState.value.showSuccessDialog)
+        assertFalse(viewModel.uiState.value.isSubmitting)
+        assertNotNull(viewModel.uiState.value.info)
+    }
 }
 
 private class FakeWeddingPresentRepository : WeddingPresentRepository {
@@ -187,6 +209,7 @@ private class FakeWeddingPresentRepository : WeddingPresentRepository {
         insuranceLastName = "رضایی",
     )
     var getInfoError: Throwable? = null
+    var submitError: Throwable? = null
     var lastSubmitRequest: WeddingPresentSubmitRequestDN? = null
 
     override fun getWeddingPresentInfo(): Flow<WeddingPresentInfoDN> = flow {
@@ -194,9 +217,10 @@ private class FakeWeddingPresentRepository : WeddingPresentRepository {
         emit(info)
     }
 
-    override fun submitWeddingPresent(request: WeddingPresentSubmitRequestDN): Flow<Unit> {
+    override fun submitWeddingPresent(request: WeddingPresentSubmitRequestDN): Flow<Unit> = flow {
         lastSubmitRequest = request
-        return flowOf(Unit)
+        submitError?.let { throw it }
+        emit(Unit)
     }
 
     override fun calculateMarriageAllowance(timeStamp: String): Flow<List<String>> =

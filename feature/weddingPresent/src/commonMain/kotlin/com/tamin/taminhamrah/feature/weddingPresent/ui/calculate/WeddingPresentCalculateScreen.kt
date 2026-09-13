@@ -45,6 +45,7 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import kotlinx.coroutines.flow.Flow
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -91,6 +92,7 @@ private fun HandleEvents(
         when (event) {
             WeddingPresentCalculateEvent.NavigateBack -> onBack()
             is WeddingPresentCalculateEvent.ShowToast -> onShowToast(event.message)
+            is WeddingPresentCalculateEvent.ShowToastRes -> onShowToast(getString(event.message))
         }
     }
 }
@@ -207,7 +209,7 @@ private fun CalculateInputCard(
             )
             state.marriageDateError?.let { error ->
                 Text(
-                    text = error,
+                    text = stringResource(error),
                     style = MaterialTheme.typography.labelSmall,
                     color = colors.dangerText,
                 )

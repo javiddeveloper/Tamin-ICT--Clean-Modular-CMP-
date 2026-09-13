@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
-import org.jetbrains.compose.resources.getString
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.wedding_present_calc_error_no_amount
 import taminx.core.core_ui.wedding_present_calc_error_select_date
@@ -54,7 +53,7 @@ class WeddingPresentCalculateViewModel(
         val state = uiState.value
         val millis = state.marriageDateMillis
         if (millis == null) {
-            emit(PartialState.DateError(getString(Res.string.wedding_present_calc_error_select_date)))
+            emit(PartialState.DateError(Res.string.wedding_present_calc_error_select_date))
             return
         }
         emit(PartialState.Calculating(true))
@@ -68,10 +67,12 @@ class WeddingPresentCalculateViewModel(
                 val averageSalaryRaw = lines.getOrNull(0).orEmpty()
                 val payableRaw = lines.getOrNull(1).orEmpty()
                 if (payableRaw.isBlank()) {
-                    val message = averageSalaryRaw.trim().ifBlank {
-                        getString(Res.string.wedding_present_calc_error_no_amount)
+                    val trimmed = averageSalaryRaw.trim()
+                    if (trimmed.isNotBlank()) {
+                        sendEvent(WeddingPresentCalculateEvent.ShowToast(trimmed))
+                    } else {
+                        sendEvent(WeddingPresentCalculateEvent.ShowToastRes(Res.string.wedding_present_calc_error_no_amount))
                     }
-                    sendEvent(WeddingPresentCalculateEvent.ShowToast(message))
                     return@collect
                 }
                 emit(

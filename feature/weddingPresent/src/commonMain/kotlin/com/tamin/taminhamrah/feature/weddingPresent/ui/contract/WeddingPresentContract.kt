@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.weddingPresent.ui.contract
 
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.weddingPresent.WeddingPresentInfoPR
+import org.jetbrains.compose.resources.StringResource
 
 @Immutable
 data class WeddingPresentUiState(
@@ -15,9 +16,10 @@ data class WeddingPresentUiState(
     val isCommitmentChecked: Boolean = false,
     val showDatePicker: Boolean = false,
     val showSuccessDialog: Boolean = false,
-    val marriageDateError: String? = null,
-    val partnerNationalCodeError: String? = null,
+    val marriageDateError: StringResource? = null,
+    val partnerNationalCodeError: StringResource? = null,
     val error: String? = null,
+    val errorRes: StringResource? = null,
 ) {
     sealed class PartialState {
         data class Loading(val isLoading: Boolean) : PartialState()
@@ -33,10 +35,11 @@ data class WeddingPresentUiState(
         data class ShowDatePicker(val show: Boolean) : PartialState()
         data class ShowSuccessDialog(val show: Boolean) : PartialState()
         data class FieldErrors(
-            val marriageDateError: String? = null,
-            val partnerNationalCodeError: String? = null,
+            val marriageDateError: StringResource? = null,
+            val partnerNationalCodeError: StringResource? = null,
         ) : PartialState()
         data class Error(val message: String?) : PartialState()
+        data class ErrorRes(val message: StringResource) : PartialState()
     }
 }
 
@@ -57,4 +60,5 @@ sealed interface WeddingPresentEvent {
     data object NavigateBack : WeddingPresentEvent
     data object NavigateToCalculate : WeddingPresentEvent
     data class ShowToast(val message: String) : WeddingPresentEvent
+    data class ShowToastRes(val message: StringResource) : WeddingPresentEvent
 }

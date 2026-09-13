@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
-import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.StringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.error_select_check_box
 import taminx.core.core_ui.error_not_valid_national_id
@@ -43,7 +43,10 @@ class WeddingPresentViewModel(
             sendEvent(WeddingPresentEvent.ShowToast(e.toSingleLineMessage()))
             emit(PartialState.Submitting(false))
             emit(PartialState.Loading(false))
-            emit(createErrorState(e.toSingleLineMessage()))
+            // Load failures need ErrorStateView + retry; submit failures stay on the form (toast only).
+            if (intent is WeddingPresentIntent.Load) {
+                emit(createErrorState(e.toSingleLineMessage()))
+            }
         }
 
     private fun handleIntentInternal(intent: WeddingPresentIntent): Flow<PartialState> = flow {
@@ -102,25 +105,25 @@ class WeddingPresentViewModel(
         val partnerCode = uiState.value.partnerNationalCode
         val info = loadedInfo
 
-        var dateError: String? = null
-        var codeError: String? = null
+        var dateError: StringResource? = null
+        var codeError: StringResource? = null
 
         if (dateMillis == null || dateMillis == 0L) {
-            dateError = getString(Res.string.message_select_marriage_date)
+            dateError = Res.string.message_select_marriage_date
         }
         if (partnerCode.length != NATIONAL_CODE_LENGTH || !isValidNationalCode(partnerCode)) {
-            codeError = getString(Res.string.error_not_valid_national_id)
+            codeError = Res.string.error_not_valid_national_id
         }
         if (dateError != null || codeError != null) {
             emit(PartialState.FieldErrors(dateError, codeError))
             return
         }
         if (!uiState.value.isCommitmentChecked) {
-            sendEvent(WeddingPresentEvent.ShowToast(getString(Res.string.error_select_check_box)))
+            sendEvent(WeddingPresentEvent.ShowToastRes(Res.string.error_select_check_box))
             return
         }
         if (info == null) {
-            emit(createErrorState(getString(Res.string.error_updating_infos)))
+            emit(PartialState.ErrorRes(Res.string.error_updating_infos))
             return
         }
 
@@ -140,9 +143,17 @@ class WeddingPresentViewModel(
         currentState: WeddingPresentUiState,
         partialState: PartialState,
     ): WeddingPresentUiState = when (partialState) {
-        is PartialState.Loading -> currentState.copy(isLoading = partialState.isLoading, error = null)
+        is PartialState.Loading -> currentState.copy(
+            isLoading = partialState.isLoading,
+            error = null,
+            errorRes = null,
+        )
         is PartialState.Submitting -> currentState.copy(isSubmitting = partialState.isSubmitting)
-        is PartialState.InfoLoaded -> currentState.copy(info = partialState.info, error = null)
+        is PartialState.InfoLoaded -> currentState.copy(
+            info = partialState.info,
+            error = null,
+            errorRes = null,
+        )
         is PartialState.DetailsExpanded -> currentState.copy(isDetailsExpanded = partialState.expanded)
         is PartialState.MarriageDateChanged -> currentState.copy(
             marriageDateLabel = partialState.label,
@@ -162,6 +173,13 @@ class WeddingPresentViewModel(
             isLoading = false,
             isSubmitting = false,
             error = partialState.message,
+            errorRes = null,
+        )
+        is PartialState.ErrorRes -> currentState.copy(
+            isLoading = false,
+            isSubmitting = false,
+            error = null,
+            errorRes = partialState.message,
         )
     }
 

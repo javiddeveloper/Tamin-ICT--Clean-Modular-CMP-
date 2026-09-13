@@ -71,6 +71,7 @@ import com.tamin.taminhamrah.ui.theme.shimmer
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.coroutines.flow.Flow
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -139,6 +140,7 @@ private fun HandleWeddingPresentEvents(
             WeddingPresentEvent.NavigateBack -> onBack()
             WeddingPresentEvent.NavigateToCalculate -> onNavigateToCalculate()
             is WeddingPresentEvent.ShowToast -> toaster.error(event.message)
+            is WeddingPresentEvent.ShowToastRes -> toaster.error(getString(event.message))
         }
     }
 }
@@ -248,7 +250,7 @@ private fun WeddingPresentContent(
     }
 
     ErrorStateView(
-        message = state.error,
+        message = state.error ?: state.errorRes?.let { stringResource(it) },
         onDismiss = onBack,
         onRetry = { onIntent(WeddingPresentIntent.Load) },
     )
@@ -391,7 +393,7 @@ private fun RequestFormSection(
                 readOnly = true,
                 isRequired = true,
                 isValid = state.marriageDateError?.let { false },
-                errorText = state.marriageDateError,
+                errorText = state.marriageDateError?.let { stringResource(it) },
                 onClick = { onIntent(WeddingPresentIntent.OpenDatePicker) },
             )
             TaminStyledTextField(
@@ -402,7 +404,7 @@ private fun RequestFormSection(
                 leadingIconPainter = painterResource(Res.drawable.ic_tamin_user),
                 isRequired = true,
                 isValid = state.partnerNationalCodeError?.let { false },
-                errorText = state.partnerNationalCodeError,
+                errorText = state.partnerNationalCodeError?.let { stringResource(it) },
                 maxLength = NATIONAL_CODE_LENGTH,
                 inputRestriction = InputRestriction.DigitsOnly,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),

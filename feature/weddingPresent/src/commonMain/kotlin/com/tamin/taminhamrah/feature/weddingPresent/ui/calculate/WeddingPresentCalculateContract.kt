@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.weddingPresent.ui.calculate
 
 import androidx.compose.runtime.Immutable
+import org.jetbrains.compose.resources.StringResource
 
 @Immutable
 data class WeddingPresentCalcResultUi(
@@ -14,7 +15,7 @@ data class WeddingPresentCalculateUiState(
     val marriageDateLabel: String = "",
     val marriageDateMillis: Long? = null,
     val showDatePicker: Boolean = false,
-    val marriageDateError: String? = null,
+    val marriageDateError: StringResource? = null,
     val isCalculating: Boolean = false,
     val result: WeddingPresentCalcResultUi? = null,
 ) {
@@ -25,7 +26,7 @@ data class WeddingPresentCalculateUiState(
         ) : PartialState
 
         data class ShowDatePicker(val show: Boolean) : PartialState
-        data class DateError(val message: String?) : PartialState
+        data class DateError(val message: StringResource?) : PartialState
         data class Calculating(val isCalculating: Boolean) : PartialState
         data class ResultLoaded(val result: WeddingPresentCalcResultUi) : PartialState
         data object ClearResult : PartialState
@@ -44,4 +45,5 @@ sealed interface WeddingPresentCalculateIntent {
 sealed interface WeddingPresentCalculateEvent {
     data object NavigateBack : WeddingPresentCalculateEvent
     data class ShowToast(val message: String) : WeddingPresentCalculateEvent
+    data class ShowToastRes(val message: StringResource) : WeddingPresentCalculateEvent
 }
