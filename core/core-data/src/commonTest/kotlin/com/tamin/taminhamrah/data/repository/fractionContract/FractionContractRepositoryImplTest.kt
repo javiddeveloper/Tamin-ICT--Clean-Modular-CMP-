@@ -85,11 +85,12 @@ class FractionContractRepositoryImplTest {
             )
         }
         val repository = FractionContractRepositoryImpl(fake)
+        val premium = "1500000"
 
-        val result = repository.makeFractionContract().first()
+        val result = repository.makeFractionContract(premium).first()
 
         assertEquals(987L, result.contractNumber)
         assertEquals(1710000000000L, result.contractDate)
-        assertEquals("this.premium", fake.lastRequest?.premium)
+        assertEquals(premium, fake.lastRequest?.premium)
     }
 }

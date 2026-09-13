@@ -6,5 +6,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface FractionContractRepository {
     fun checkAgeAndHistory(): Flow<FractionEligibilityDN?>
-    fun makeFractionContract(premium: String = "this.premium"): Flow<FractionContractResultDN>
+    fun makeFractionContract(premium: String): Flow<FractionContractResultDN>
 }

@@ -7,6 +7,6 @@ import com.tamin.taminhamrah.model.fractionContract.MakeFractionContractRequestD
 interface FractionContractRemoteDataSource {
     suspend fun checkAgeAndHistory(): FractionEligibilityDTO?
     suspend fun makeFractionContract(
-        request: MakeFractionContractRequestDTO = MakeFractionContractRequestDTO(),
+        request: MakeFractionContractRequestDTO,
     ): FractionContractResultDTO
 }

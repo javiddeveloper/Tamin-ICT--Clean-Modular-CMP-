@@ -7,6 +7,6 @@ import kotlinx.coroutines.flow.Flow
 class MakeFractionContractUseCase(
     private val fractionContractRepository: FractionContractRepository,
 ) {
-    operator fun invoke(premium: String = "this.premium"): Flow<FractionContractResultDN> =
+    operator fun invoke(premium: String): Flow<FractionContractResultDN> =
         fractionContractRepository.makeFractionContract(premium)
 }

@@ -87,11 +87,32 @@ class FractionContractRemoteDataSourceImplTest {
         val expected = FractionContractResultDTO(contractNumber = 99L, contractDate = 100L)
         fakeApiService.makeFractionContractResult =
             BaseDTO(status = 200, family = "OK", reason = "OK", data = expected)
+        val request = MakeFractionContractRequestDTO(premium = "1500000")
 
-        val result = dataSource.makeFractionContract(MakeFractionContractRequestDTO())
+        val result = dataSource.makeFractionContract(request)
 
         assertEquals(expected, result)
-        assertEquals("this.premium", fakeApiService.lastRequest?.premium)
+        assertEquals("1500000", fakeApiService.lastRequest?.premium)
+    }
+
+    @Test
+    fun makeFractionContract_errorStatus_throws() = runTest {
+        fakeApiService.makeFractionContractResult =
+            BaseDTO(status = 400, family = "CLIENT_ERROR", reason = "Bad Request", data = null)
+
+        assertFailsWith<TaminApiException> {
+            dataSource.makeFractionContract(MakeFractionContractRequestDTO(premium = "1500000"))
+        }
+    }
+
+    @Test
+    fun makeFractionContract_networkException_throwsNoConnection() = runTest {
+        fakeApiService.shouldThrowException = RuntimeException("network")
+
+        val exception = assertFailsWith<TaminApiException> {
+            dataSource.makeFractionContract(MakeFractionContractRequestDTO(premium = "1500000"))
+        }
+        assertEquals(ErrorUri.NO_CONNECTION_ERROR, exception.getTaminErrorUri())
     }
 
     @Test

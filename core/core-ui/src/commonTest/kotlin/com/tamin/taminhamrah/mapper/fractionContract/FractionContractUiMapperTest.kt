@@ -52,6 +52,37 @@ class FractionContractUiMapperTest {
     }
 
     @Test
+    fun eligibilityDn_toPresentation_provinceBlank_noLeadingComma() {
+        val presentation = FractionEligibilityDN(
+            city = "تهران",
+            organizationAddress = "شعبه-۱",
+        ).toPresentation()
+
+        assertEquals("تهران, شعبه,۱", presentation.branchAddress)
+    }
+
+    @Test
+    fun eligibilityDn_toPresentation_cityBlank_noDoubleComma() {
+        val presentation = FractionEligibilityDN(
+            provinceName = "تهران",
+            organizationAddress = "شعبه-۱",
+        ).toPresentation()
+
+        // city blank → no comma between province and address
+        assertEquals("تهرانشعبه,۱", presentation.branchAddress)
+    }
+
+    @Test
+    fun eligibilityDn_toPresentation_addressBlank_noTrailingComma() {
+        val presentation = FractionEligibilityDN(
+            provinceName = "تهران",
+            city = "کرج",
+        ).toPresentation()
+
+        assertEquals("تهران, کرج", presentation.branchAddress)
+    }
+
+    @Test
     fun contractResultDn_toPresentation_mapsCorrectly() {
         val presentation = FractionContractResultDN(
             contractNumber = 987L,

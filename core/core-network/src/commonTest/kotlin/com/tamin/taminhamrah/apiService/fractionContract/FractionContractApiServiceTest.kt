@@ -91,7 +91,9 @@ class FractionContractApiServiceTest : BaseApiTest() {
         val apiService = ktorfit.createFractionContractApiService()
 
         val response = apiService.makeFractionContract(
-            com.tamin.taminhamrah.model.fractionContract.MakeFractionContractRequestDTO()
+            com.tamin.taminhamrah.model.fractionContract.MakeFractionContractRequestDTO(
+                premium = "1500000",
+            )
         )
 
         assertEquals(200, response.status)
@@ -99,5 +101,29 @@ class FractionContractApiServiceTest : BaseApiTest() {
         assertEquals(987654321L, response.data?.contractNumber)
         assertEquals(1710000000000L, response.data?.contractDate)
         assertTrue(response.data?.contractNumber != null)
+    }
+
+    @Test
+    fun makeFractionContract_nullData_isAllowed() = runTest {
+        val jsonResponse = """
+            {
+                "status": 200,
+                "family": "SUCCESS",
+                "reason": "OK",
+                "data": null
+            }
+        """.trimIndent()
+
+        val ktorfit: Ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createFractionContractApiService()
+
+        val response = apiService.makeFractionContract(
+            com.tamin.taminhamrah.model.fractionContract.MakeFractionContractRequestDTO(
+                premium = "1500000",
+            )
+        )
+
+        assertEquals(200, response.status)
+        assertNull(response.data)
     }
 }

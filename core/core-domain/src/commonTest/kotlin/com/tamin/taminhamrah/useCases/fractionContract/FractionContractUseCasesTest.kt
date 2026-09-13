@@ -67,14 +67,15 @@ class FractionContractUseCasesTest {
             )
         }
         val useCase = MakeFractionContractUseCase(repository)
+        val premium = "1500000"
 
-        useCase().test {
+        useCase(premium).test {
             val item = awaitItem()
             assertEquals(987L, item.contractNumber)
             assertEquals(1710000000000L, item.contractDate)
             awaitComplete()
         }
 
-        assertEquals("this.premium", repository.lastPremium)
+        assertEquals(premium, repository.lastPremium)
     }
 }
