@@ -439,6 +439,42 @@ class DisabilityPensionViewModelTest {
         assertEquals(null, viewModel.uiState.value.submitTrackingCode)
     }
 
+    @Test
+    fun whenSaveDocumentDisabilityFails_showsToastAndStopsSubmitting() = runTest(testDispatcher) {
+        viewModel = buildViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+        advanceToSummaryStep()
+        viewModel.sendIntent(DisabilityPensionIntent.FinalConfirmedChanged(true))
+        testDispatcher.scheduler.advanceUntilIdle()
+        pensionRepository.saveDocumentDisabilityError = RuntimeException("upload failed")
+
+        viewModel.events.test {
+            viewModel.sendIntent(DisabilityPensionIntent.NextStepClicked)
+            val event = awaitItem()
+            assertIs<DisabilityPensionEvent.ShowToast>(event)
+        }
+        assertFalse(viewModel.uiState.value.isSubmitting)
+        assertEquals(null, viewModel.uiState.value.submitTrackingCode)
+    }
+
+    @Test
+    fun whenFinalConfirmDisabilityRequestFails_showsToastAndStopsSubmitting() = runTest(testDispatcher) {
+        viewModel = buildViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+        advanceToSummaryStep()
+        viewModel.sendIntent(DisabilityPensionIntent.FinalConfirmedChanged(true))
+        testDispatcher.scheduler.advanceUntilIdle()
+        pensionRepository.finalConfirmError = RuntimeException("confirm failed")
+
+        viewModel.events.test {
+            viewModel.sendIntent(DisabilityPensionIntent.NextStepClicked)
+            val event = awaitItem()
+            assertIs<DisabilityPensionEvent.ShowToast>(event)
+        }
+        assertFalse(viewModel.uiState.value.isSubmitting)
+        assertEquals(null, viewModel.uiState.value.submitTrackingCode)
+    }
+
     private suspend fun advanceToIdentityContactStep() {
         viewModel.sendIntent(DisabilityPensionIntent.TermsAcceptedChanged(true))
         viewModel.sendIntent(DisabilityPensionIntent.NextStepClicked)
@@ -488,6 +524,24 @@ class DisabilityPensionViewModelTest {
 
             assertTrue(state.showCommissionValidationError)
             assertEquals(DisabilityPensionStep.CommissionRecord, state.currentStep)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenCommissionRecordNextClickedWithObjection_staysOnStep() = runTest(testDispatcher) {
+        viewModel = buildViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+        advanceToCommissionRecordStep()
+
+        viewModel.sendIntent(DisabilityPensionIntent.CommissionObjectionChanged(true))
+
+        viewModel.uiState.test {
+            viewModel.sendIntent(DisabilityPensionIntent.NextStepClicked)
+            val state = expectMostRecentItem()
+            
+            assertEquals(DisabilityPensionStep.CommissionRecord, state.currentStep)
+            assertFalse(state.showCommissionValidationError)
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -585,7 +639,7 @@ class DisabilityPensionViewModelTest {
     }
 }
 
-private class FakeDisabilityPensionRepository : PensionRepository {
+internal class FakeDisabilityPensionRepository : PensionRepository {
     var disabilityPersonalInfoResult: DisabilityPersonalInfoDN = DisabilityPersonalInfoDN(
         branch = null,
         branchName = null,
@@ -647,9 +701,11 @@ private class FakeDisabilityPensionRepository : PensionRepository {
     var lastSaveDisabilityUserInfoBody: DisabilitySaveInfoDN? = null
     var lastSaveDocumentDisabilityRequestId: Long? = null
     var lastSaveDocumentDisabilityBody: DisabilitySaveDocumentDN? = null
+    var saveDocumentDisabilityError: Throwable? = null
     var lastFinalConfirmRequestId: Long? = null
     var lastFinalConfirmBody: DisabilityFinalConfirmDN? = null
     var finalConfirmResult: DisabilityRequestRefDN? = DisabilityRequestRefDN(id = 555L, refCode = "3829147205")
+    var finalConfirmError: Throwable? = null
 
     override suspend fun saveDisabilityUserInfo(body: DisabilitySaveInfoDN): Flow<DisabilityRequestRefDN?> = flow {
         lastSaveDisabilityUserInfoBody = body
@@ -659,11 +715,13 @@ private class FakeDisabilityPensionRepository : PensionRepository {
     override suspend fun finalConfirmDisabilityRequest(requestId: Long, body: DisabilityFinalConfirmDN): Flow<DisabilityRequestRefDN?> = flow {
         lastFinalConfirmRequestId = requestId
         lastFinalConfirmBody = body
+        finalConfirmError?.let { throw it }
         emit(finalConfirmResult)
     }
     override suspend fun saveDocumentDisability(requestId: Long, body: DisabilitySaveDocumentDN): Flow<String?> = flow {
         lastSaveDocumentDisabilityRequestId = requestId
         lastSaveDocumentDisabilityBody = body
+        saveDocumentDisabilityError?.let { throw it }
         emit(null)
     }
     override suspend fun getMedicalCommissionPdf(lastWorkshop: String): Flow<PdfDownloadDN> =
@@ -672,7 +730,7 @@ private class FakeDisabilityPensionRepository : PensionRepository {
         error("not used in DisabilityPensionViewModel")
 }
 
-private class FakeDisabilityPersonalRepository : PersonalRepository {
+internal class FakeDisabilityPersonalRepository : PersonalRepository {
     var dependentInfoResult: List<DisabilityDependentDN> = emptyList()
 
     override fun getDisabilityDependentInfo(filters: List<ApiFilterDN>): Flow<List<DisabilityDependentDN>> = flow {
@@ -707,7 +765,7 @@ private class FakeDisabilityPersonalRepository : PersonalRepository {
         error("not used in DisabilityPensionViewModel")
 }
 
-private class FakeDisabilityAddDependentRepository : AddDependentRepository {
+internal class FakeDisabilityAddDependentRepository : AddDependentRepository {
     var refreshDependentsResult: GeneralResultDN = GeneralResultDN()
     var refreshDependentsCallCount: Int = 0
     var refreshDependentsGate: CompletableDeferred<Unit>? = null
@@ -734,9 +792,14 @@ private class FakeDisabilityAddDependentRepository : AddDependentRepository {
         error("not used in DisabilityPensionViewModel")
     override fun addNewDependent(request: RequestAddDependentDN): Flow<GeneralResultDN> =
         error("not used in DisabilityPensionViewModel")
+    override suspend fun createRetirementRequest(authenticationsCode: Long, form: com.tamin.taminhamrah.model.pension.retirement.RetirementRequestFormDN): Flow<com.tamin.taminhamrah.model.pension.retirement.RetirementRequestCreatedDN> =
+        error("not used in DisabilityPensionViewModel")
 }
 
-private class FakeDisabilityHistoryRepository : HistoryRepository {
+internal class FakeDisabilityHistoryRepository : HistoryRepository {
+    override suspend fun getUserRole(): com.tamin.taminhamrah.model.history.UserRoleDN = error("")
+    override suspend fun sendHistoryNotice(): String? = error("")
+    override fun downloadHistoryReport(type: com.tamin.taminhamrah.model.history.HistoryCertificateType): Flow<com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN> = error("")
     var talfighInfosResult: TalfighInfoDN = TalfighInfoDN(list = emptyList(), total = 0)
 
     override suspend fun getTalfighInfos(filters: List<ApiFilterDN>): TalfighInfoDN = talfighInfosResult
@@ -755,7 +818,7 @@ private class FakeDisabilityHistoryRepository : HistoryRepository {
  * Only [uploadImage] is exercised by [com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase]
  * — the rest of [ContractsRepository] is unrelated to disability pension and stubbed to satisfy the interface.
  */
-private class FakeDisabilityContractsRepository : ContractsRepository {
+internal class FakeDisabilityContractsRepository : ContractsRepository {
     var uploadImageResult: String = "uploaded-guid"
     var shouldThrowOnUpload = false
     var uploadError: Throwable = RuntimeException("upload failed")
@@ -765,21 +828,27 @@ private class FakeDisabilityContractsRepository : ContractsRepository {
         emit(uploadImageResult)
     }
 
-    override fun getContracts(query: ApiQueryParamDN?): Flow<List<ContractDN>> =
+    override fun getContracts(page: Int): Flow<com.tamin.taminhamrah.model.util.PagedListDN<ContractDN>> =
         error("not used in DisabilityPensionViewModel")
-    override fun getContractsByPremiumType(premiumTypeCode: String): Flow<List<ContractDN>> =
+    override fun getContractsByPremiumType(premiumTypeCode: String, page: Int): Flow<com.tamin.taminhamrah.model.util.PagedListDN<ContractDN>> =
         error("not used in DisabilityPensionViewModel")
-    override fun getStudentInsuranceContracts(): Flow<List<ContractDN>> =
+    override fun getStudentInsuranceContracts(page: Int): Flow<com.tamin.taminhamrah.model.util.PagedListDN<ContractDN>> =
         error("not used in DisabilityPensionViewModel")
     override fun getRegistrationInfo(): Flow<RegistrationInfoDN> =
         error("not used in DisabilityPensionViewModel")
-    override fun getBranches(cityCode: String): Flow<List<ContractsBranchDN>> =
+    override fun getBranches(cityCode: String, page: Int): Flow<com.tamin.taminhamrah.model.util.PagedListDN<com.tamin.taminhamrah.model.contracts.BranchDN>> =
         error("not used in DisabilityPensionViewModel")
     override fun getSpcPremiumRates(): Flow<List<PremiumRateDN>> =
         error("not used in DisabilityPensionViewModel")
-    override fun getFreeJobWages(): Flow<List<FreeJobDN>> =
+    override fun getFreeJobWages(page: Int, searchQuery: String?): Flow<com.tamin.taminhamrah.model.util.PagedListDN<FreeJobDN>> =
         error("not used in DisabilityPensionViewModel")
     override fun getFreelancePremiumRange(params: FreelancePremiumRangeParams): Flow<FreelancePremiumRangeDN> =
+        error("not used in DisabilityPensionViewModel")
+    override fun getOptionalPremiumRange(): Flow<FreelancePremiumRangeDN> =
+        error("not used in DisabilityPensionViewModel")
+    override fun checkRedCrossStatus(): Flow<String> =
+        error("not used in DisabilityPensionViewModel")
+    override fun checkMedicalStudent(): Flow<String> =
         error("not used in DisabilityPensionViewModel")
     override fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Flow<Long> =
         error("not used in DisabilityPensionViewModel")
@@ -789,6 +858,10 @@ private class FakeDisabilityContractsRepository : ContractsRepository {
         error("not used in DisabilityPensionViewModel")
     override fun makeContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN> =
         error("not used in DisabilityPensionViewModel")
+    override fun updateFreelanceContract(params: FreelanceMakeContractParams): Flow<Unit> = error("")
+    override fun updateOptionalContract(premium: Long): Flow<Unit> = error("")
+    override fun updateFreelanceContractByGuardian(params: FreelanceContractByGuardianParams): Flow<Unit> = error("")
+    override fun updateOptionalContractByGuardian(params: OptionalContractByGuardianParams): Flow<Unit> = error("")
     override fun makeFreelanceContractByGuardian(
         params: FreelanceContractByGuardianParams,
     ): Flow<FreelanceContractResultDN> = error("not used in DisabilityPensionViewModel")

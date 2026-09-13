@@ -51,10 +51,17 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.orotez_protez_document_duplicate_error
+import taminx.core.core_ui.disability_pension_female_title
+import taminx.core.core_ui.disability_pension_male_title
+import taminx.core.core_ui.disability_pension_history_objection_coming_soon
 import taminx.core.core_ui.orotez_protez_document_format_error
 import taminx.core.core_ui.orotez_protez_document_pick_read_error
+import taminx.core.core_ui.orotez_protez_document_duplicate_error
 import taminx.core.core_ui.orotez_protez_document_upload_error
+
+enum class DisabilityDemandType(val code: String) {
+    DISABILITY_PENSION("01")
+}
 
 class DisabilityPensionViewModel(
     private val getDisabilityPersonalInfoUseCase: GetDisabilityPersonalInfoUseCase,
@@ -160,7 +167,7 @@ class DisabilityPensionViewModel(
                 emit(PartialState.CommissionValidationErrorChanged(false))
             }
             DisabilityPensionIntent.HistoryObjectionLinkClicked -> {
-                sendEvent(DisabilityPensionEvent.ShowToast(HISTORY_OBJECTION_COMING_SOON_MESSAGE))
+                sendEvent(DisabilityPensionEvent.ShowToast(org.jetbrains.compose.resources.getString(taminx.core.core_ui.Res.string.disability_pension_history_objection_coming_soon)))
             }
             DisabilityPensionIntent.ShowRegisteredRequestsClicked -> {
                 emit(PartialState.RegisteredRequestsSheetVisibilityChanged(true))
@@ -635,10 +642,10 @@ class DisabilityPensionViewModel(
             val fullName = listOfNotNull(personal?.firstName, personal?.lastName)
                 .joinToString(" ")
                 .ifBlank { "-" }
-            val genderTitle = if (personal?.genderDesc?.contains("زن") == true) {
-                FEMALE_TITLE
+            val genderTitle = if (personal?.genderCode == "02") {
+                org.jetbrains.compose.resources.getString(taminx.core.core_ui.Res.string.disability_pension_female_title)
             } else {
-                MALE_TITLE
+                org.jetbrains.compose.resources.getString(taminx.core.core_ui.Res.string.disability_pension_male_title)
             }
             emit(PartialState.ApplicantInfoLoaded(genderTitle = genderTitle, fullName = fullName))
             emit(PartialState.IdentityLoaded(info.toPresentation()))
@@ -687,7 +694,7 @@ class DisabilityPensionViewModel(
         emit(PartialState.RegisteredRequestsLoading(true))
         getRegisteredMedicalCommissionUseCase().collect { requests ->
             val disabilityRequests = requests
-                .filter { it.demandTypeCode == DISABILITY_DEMAND_TYPE_CODE }
+                .filter { it.demandTypeCode == DisabilityDemandType.DISABILITY_PENSION.code }
                 .map { it.toPresentation() }
                 .toImmutableList()
             emit(PartialState.RegisteredRequestsLoaded(disabilityRequests))
@@ -722,12 +729,9 @@ class DisabilityPensionViewModel(
     }
 
     private companion object {
-        const val MALE_TITLE = "آقای"
-        const val FEMALE_TITLE = "خانم"
         const val LANDLINE_PHONE_LENGTH = 11
         const val MIN_ADDRESS_LENGTH = 10
         const val DISABILITY_DEMAND_TYPE_CODE = "01"
-        const val HISTORY_OBJECTION_COMING_SOON_MESSAGE = "این امکان به‌زودی فعال می‌شود."
         const val MAX_DOCUMENT_SIZE_BYTES = 2 * 1024 * 1024
         const val SAVE_INFO_STATUS = "3"
         const val SAVE_DOCUMENT_STATUS = "4"

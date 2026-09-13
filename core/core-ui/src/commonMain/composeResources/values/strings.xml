@@ -1,5 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="disability_pension_male_title">آقای</string>
+    <string name="disability_pension_female_title">خانم</string>
+    <string name="disability_pension_history_objection_coming_soon">این امکان به‌زودی فعال می‌شود.</string>
     <string name="payroll_title">مشاهده فیش حقوقی</string>
     <string name="btn_show_payroll_pdf">نمایش فیش حقوقی (PDF)</string>
     <string name="error_unknown">خطای ناشناخته</string>
@@ -3007,3 +3010,4 @@
     <string name="disability_pension_exit_confirm_continue">ادامهٔ تکمیل فرم</string>
     <string name="contract_premium_payment_ticket_error">خطا در دریافت شناسه پرداخت</string>
 </resources>
+
