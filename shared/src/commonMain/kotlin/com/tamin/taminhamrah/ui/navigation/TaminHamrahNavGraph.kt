@@ -83,6 +83,7 @@ import com.tamin.taminhamrah.feature.developerOptions.TokenManagerRoute
 import com.tamin.taminhamrah.feature.developerOptions.debugLoginScreen
 import com.tamin.taminhamrah.feature.developerOptions.developerOptionsScreen
 import com.tamin.taminhamrah.feature.developerOptions.tokenManagerScreen
+import com.tamin.taminhamrah.feature.fractionContract.fractionContractScreen
 import com.tamin.taminhamrah.feature.girlSurvivor.girlSurvivorScreen
 import com.tamin.taminhamrah.feature.healthProfile.healthProfileScreen
 import com.tamin.taminhamrah.feature.healthProfile.navigateToHealthProfile
@@ -516,6 +517,7 @@ internal fun TaminHamrahNavGraph(
                 deferredInstallmentScreen(onBack = { navController.popBackStack() })
                 girlSurvivorScreen(onBack = { navController.popBackStack() })
                 inquiryEducationScreen(onBack = { navController.popBackStack() })
+                fractionContractScreen(onBack = { navController.popBackStack() })
                 weddingPresentScreen(
                     onBack = { navController.popBackStack() },
                     onNavigateToCalculate = { navController.navigateToWeddingPresentCalculate() },

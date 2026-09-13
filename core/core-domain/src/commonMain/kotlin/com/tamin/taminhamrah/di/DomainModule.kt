@@ -76,6 +76,8 @@ import com.tamin.taminhamrah.useCases.weddingPresent.CalculateMarriageAllowanceU
 import com.tamin.taminhamrah.useCases.weddingPresent.GetWeddingPresentInfoUseCase
 import com.tamin.taminhamrah.useCases.weddingPresent.SubmitWeddingPresentUseCase
 import com.tamin.taminhamrah.useCases.inquiryEducation.InquiryEducationCertificateUseCase
+import com.tamin.taminhamrah.useCases.fractionContract.CheckFractionAgeAndHistoryUseCase
+import com.tamin.taminhamrah.useCases.fractionContract.MakeFractionContractUseCase
 import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.CalcIllnessAmountUseCase
 import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.GetCovidResultUseCase
 import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.GetIllDaysInsuredMainInfoUseCase
@@ -379,6 +381,8 @@ val domainModule = module {
     factoryOf(::SaveShortTermOrthosisUseCase)
     factoryOf(::GetDataForEducationUseCase)
     factoryOf(::InquiryEducationCertificateUseCase)
+    factoryOf(::CheckFractionAgeAndHistoryUseCase)
+    factoryOf(::MakeFractionContractUseCase)
     factoryOf(::GetWeddingPresentInfoUseCase)
     factoryOf(::SubmitWeddingPresentUseCase)
     factoryOf(::CalculateMarriageAllowanceUseCase)
