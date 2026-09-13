@@ -404,7 +404,7 @@ fun MedicalRecordsContent(
         topBar = {
             TaminTopAppBar(
                 title = stringResource(Res.string.records_title),
-                background = taminHeroGradient(colors.topAppBarStops),
+                background = taminHeroGradient(colors.treatmentHubStops),
                 navigationIcon = {
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),

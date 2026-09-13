@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -18,11 +20,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
@@ -38,6 +40,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
 import com.tamin.taminhamrah.feature.treatment.ui.model.CoverageStatus
@@ -65,7 +68,14 @@ import com.tamin.taminhamrah.ui.theme.TaminCardTealMid
 import com.tamin.taminhamrah.ui.theme.TaminCardTealStart
 import com.tamin.taminhamrah.ui.theme.TaminCoverageBadgeBg
 import com.tamin.taminhamrah.ui.theme.TaminCoverageBadgeFg
+import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardChipBg
+import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardDivider
+import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardInk
+import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardInkMuted
 import com.tamin.taminhamrah.ui.theme.TaminRed
+import com.tamin.taminhamrah.ui.theme.Thickness
+import com.tamin.taminhamrah.ui.theme.insuranceCardTextStyles
+import com.tamin.taminhamrah.ui.theme.shimmer
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -78,12 +88,6 @@ import taminx.core.core_ui.coverage_pending
 import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.ic_tamin_cross
 import taminx.core.core_ui.ic_tamin_verified
-import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardChipBg
-import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardInk
-import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardInkMuted
-import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardDivider
-import com.tamin.taminhamrah.ui.theme.Thickness
-import com.tamin.taminhamrah.ui.theme.insuranceCardTextStyles
 
 /**
  * The electronic health-insurance card and everything that dresses one: its gradient identity,
@@ -571,6 +575,312 @@ fun InsuranceCardCarousel(
                     .padding(top = TreatmentDimens.pageIndicatorTopGap),
             )
         }
+    }
+}
+
+/**
+ * Skeleton placeholder for the brand row inside [InsuranceCardSkeleton].
+ */
+@Composable
+private fun InsuranceCardBrandRowSkeleton(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(TreatmentDimens.brandTileSize)
+                .clip(RoundedCornerShape(TreatmentDimens.brandTileRadius))
+                .shimmer(
+                    colorBase = TaminInsuranceCardInk.copy(alpha = 0.15f),
+                    colorHighlight = TaminInsuranceCardInk.copy(alpha = 0.35f),
+                ),
+        )
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(110.dp)
+                    .height(11.dp)
+                    .clip(RoundedCornerShape(CornerRadius.xs))
+                    .shimmer(
+                        colorBase = TaminInsuranceCardInk.copy(alpha = 0.15f),
+                        colorHighlight = TaminInsuranceCardInk.copy(alpha = 0.35f),
+                    ),
+            )
+            Box(
+                modifier = Modifier
+                    .width(135.dp)
+                    .height(10.dp)
+                    .clip(RoundedCornerShape(CornerRadius.xs))
+                    .shimmer(
+                        colorBase = TaminInsuranceCardInk.copy(alpha = 0.10f),
+                        colorHighlight = TaminInsuranceCardInk.copy(alpha = 0.25f),
+                    ),
+            )
+        }
+        Box(
+            modifier = Modifier
+                .size(TreatmentDimens.brandTickSize)
+                .clip(CircleShape)
+                .shimmer(
+                    colorBase = TaminInsuranceCardInk.copy(alpha = 0.15f),
+                    colorHighlight = TaminInsuranceCardInk.copy(alpha = 0.35f),
+                ),
+        )
+    }
+}
+
+/**
+ * Skeleton placeholder for the footer row inside [InsuranceCardSkeleton].
+ */
+@Composable
+private fun InsuranceCardFooterSkeleton(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .drawBehind {
+                drawRect(
+                    color = TaminInsuranceCardDivider,
+                    size = Size(size.width, Thickness.border.toPx()),
+                )
+            }
+            .padding(
+                horizontal = TreatmentDimens.cardFooterPaddingHorizontal,
+                vertical = TreatmentDimens.cardFooterPaddingVertical,
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(TreatmentDimens.cardFooterGap),
+    ) {
+        Spacer(Modifier.size(TreatmentDimens.coverageBadgeSize))
+        Box(
+            modifier = Modifier
+                .width(160.dp)
+                .height(13.dp)
+                .clip(RoundedCornerShape(CornerRadius.xs))
+                .shimmer(
+                    colorBase = TaminInsuranceCardInk.copy(alpha = 0.15f),
+                    colorHighlight = TaminInsuranceCardInk.copy(alpha = 0.35f),
+                ),
+        )
+    }
+}
+
+/**
+ * Skeleton placeholder for an electronic health-insurance card during initial load.
+ * Matches the expanded → collapsed geometry of [InsuranceCard] to eliminate layout shift.
+ */
+@Composable
+fun InsuranceCardSkeleton(
+    modifier: Modifier = Modifier,
+    background: Brush = insuranceCardGradient(isDependent = false),
+    collapseProgress: () -> Float = { 0f },
+) {
+    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(CornerRadius.cardCompact))
+            .background(background)
+            .cardDecoration(),
+    ) {
+        Layout(
+            content = {
+                InsuranceCardBrandRowSkeleton(
+                    modifier = Modifier
+                        .layoutId(CardSlot.Brand)
+                        .vanishOnCollapse(collapseProgress),
+                )
+                Box(
+                    modifier = Modifier
+                        .layoutId(CardSlot.Name)
+                        .shrinkOnCollapse(
+                            progress = collapseProgress,
+                            minScale = TreatmentDimens.cardNameCollapsedScale,
+                            rtl = rtl,
+                        )
+                        .size(width = 120.dp, height = 20.dp)
+                        .clip(RoundedCornerShape(CornerRadius.xs))
+                        .shimmer(
+                            colorBase = TaminInsuranceCardInk.copy(alpha = 0.15f),
+                            colorHighlight = TaminInsuranceCardInk.copy(alpha = 0.35f),
+                        ),
+                )
+                Box(
+                    modifier = Modifier
+                        .layoutId(CardSlot.CodeLabel)
+                        .vanishOnCollapse(collapseProgress)
+                        .size(width = 44.dp, height = 11.dp)
+                        .clip(RoundedCornerShape(CornerRadius.xs))
+                        .shimmer(
+                            colorBase = TaminInsuranceCardInk.copy(alpha = 0.10f),
+                            colorHighlight = TaminInsuranceCardInk.copy(alpha = 0.25f),
+                        ),
+                )
+                Box(
+                    modifier = Modifier
+                        .layoutId(CardSlot.Code)
+                        .size(width = 96.dp, height = 15.dp)
+                        .clip(RoundedCornerShape(CornerRadius.xs))
+                        .shimmer(
+                            colorBase = TaminInsuranceCardInk.copy(alpha = 0.15f),
+                            colorHighlight = TaminInsuranceCardInk.copy(alpha = 0.35f),
+                        ),
+                )
+                Box(
+                    modifier = Modifier
+                        .layoutId(CardSlot.Badge)
+                        .size(TreatmentDimens.coverageBadgeSize)
+                        .clip(CircleShape)
+                        .shimmer(
+                            colorBase = TaminInsuranceCardInk.copy(alpha = 0.20f),
+                            colorHighlight = TaminInsuranceCardInk.copy(alpha = 0.45f),
+                        ),
+                )
+                InsuranceCardFooterSkeleton(
+                    modifier = Modifier
+                        .layoutId(CardSlot.Footer)
+                        .vanishOnCollapse(collapseProgress),
+                )
+            },
+        ) { measurables, constraints ->
+            val width = constraints.maxWidth
+            val pad = TreatmentDimens.cardPaddingHorizontal.roundToPx()
+            val padTop = TreatmentDimens.cardPaddingTop.roundToPx()
+            val padBottom = TreatmentDimens.cardPaddingBottom.roundToPx()
+            val nameGap = TreatmentDimens.cardNameTopGap.roundToPx()
+            val codeLabelGap = TreatmentDimens.cardCodeLabelTopGap.roundToPx()
+            val codeGap = TreatmentDimens.cardCodeTopGap.roundToPx()
+            val sm = Spacing.sm.roundToPx()
+            val innerC = Constraints(maxWidth = (width - 2 * pad).coerceAtLeast(0))
+
+            val brand = measurables.slot(CardSlot.Brand).measure(innerC)
+            val name = measurables.slot(CardSlot.Name).measure(innerC)
+            val label = measurables.slot(CardSlot.CodeLabel).measure(innerC)
+            val number = measurables.slot(CardSlot.Code).measure(innerC)
+            val badge = measurables.slot(CardSlot.Badge).measure(Constraints())
+            val footer = measurables.slot(CardSlot.Footer).measure(Constraints.fixedWidth(width))
+
+            val nameExpTop = padTop + brand.height + nameGap
+            val labelExpTop = nameExpTop + name.height + codeLabelGap
+            val numberExpTop = labelExpTop + label.height + codeGap
+            val footerTop = numberExpTop + number.height + padBottom
+            val badgeExpTop = footerTop + (footer.height - badge.height) / 2
+            val expandedH = footerTop + footer.height
+
+            val barH = maxOf(badge.height, name.height, number.height) +
+                TreatmentDimens.cardBarPadding.roundToPx()
+            val badgeColTop = (barH - badge.height) / 2
+            val nameColStart = pad + badge.width + sm
+            val nameColTop = (barH - name.height) / 2
+            val numberColStart =
+                nameColStart + (name.width * TreatmentDimens.cardNameCollapsedScale).toInt() + sm
+            val numberColTop = (barH - number.height) / 2
+
+            val t = Easing.standard.transform(collapseProgress())
+
+            layout(width, lerp(expandedH, barH, t)) {
+                brand.placeRelative(pad, padTop)
+                label.placeRelative(pad, labelExpTop)
+                footer.placeRelative(0, footerTop)
+                name.placeRelative(lerp(pad, nameColStart, t), lerp(nameExpTop, nameColTop, t))
+                number.placeRelative(lerp(pad, numberColStart, t), lerp(numberExpTop, numberColTop, t))
+                badge.placeRelative(pad, lerp(badgeExpTop, badgeColTop, t))
+            }
+        }
+    }
+}
+
+/**
+ * Shimmering placeholder for [TaminPageIndicator] during initial load.
+ */
+@Composable
+fun TaminPageIndicatorSkeleton(
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        Row(
+            modifier = Modifier
+                .clip(CircleShape)
+                .background(colors.chevron.copy(alpha = 0.30f))
+                .padding(horizontal = 11.dp, vertical = 7.dp),
+            horizontalArrangement = Arrangement.spacedBy(7.dp, Alignment.CenterHorizontally),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(width = 22.dp, height = 7.dp)
+                    .clip(CircleShape)
+                    .background(colors.teal.copy(alpha = 0.7f))
+                    .shimmer(
+                        colorBase = colors.teal.copy(alpha = 0.5f),
+                        colorHighlight = colors.teal,
+                    ),
+            )
+            repeat(2) {
+                Box(
+                    modifier = Modifier
+                        .size(7.dp)
+                        .clip(CircleShape)
+                        .background(colors.chevron.copy(alpha = 0.5f))
+                        .shimmer(
+                            colorBase = colors.chevron.copy(alpha = 0.4f),
+                            colorHighlight = colors.chevron.copy(alpha = 0.8f),
+                        ),
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Skeleton carousel matching [InsuranceCardCarousel] during initial load:
+ * displays the main insured person's card, peeking dependant card, and page indicator.
+ */
+@Composable
+fun InsuranceCardCarouselSkeleton(
+    modifier: Modifier = Modifier,
+    collapseProgress: () -> Float = { 0f },
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clipToBounds(),
+        ) {
+            val cardWidth =
+                (maxWidth - TreatmentDimens.cardTrackPadding * 2) * TreatmentDimens.cardPeekFraction
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = TreatmentDimens.cardTrackPadding),
+                horizontalArrangement = Arrangement.spacedBy(TreatmentDimens.cardTrackGap),
+            ) {
+                InsuranceCardSkeleton(
+                    modifier = Modifier.width(cardWidth),
+                    background = insuranceCardGradient(isDependent = false),
+                    collapseProgress = collapseProgress,
+                )
+                InsuranceCardSkeleton(
+                    modifier = Modifier
+                        .width(cardWidth)
+                        .vanishOnCollapse(collapseProgress),
+                    background = insuranceCardGradient(isDependent = true, dependantOrdinal = 0),
+                    collapseProgress = collapseProgress,
+                )
+            }
+        }
+        TaminPageIndicatorSkeleton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = TreatmentDimens.pageIndicatorTopGap)
+                .vanishOnCollapse(collapseProgress),
+        )
     }
 }
 

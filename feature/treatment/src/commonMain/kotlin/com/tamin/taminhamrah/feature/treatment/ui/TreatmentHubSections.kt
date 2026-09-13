@@ -1,6 +1,5 @@
 package com.tamin.taminhamrah.feature.treatment.ui
 
-import com.tamin.taminhamrah.feature.treatment.ui.components.raisedCard
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -27,10 +26,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.treatment.ui.components.CategoryTile
 import com.tamin.taminhamrah.feature.treatment.ui.components.CostSummaryCard
 import com.tamin.taminhamrah.feature.treatment.ui.components.InsuranceCardCarousel
+import com.tamin.taminhamrah.feature.treatment.ui.components.InsuranceCardCarouselSkeleton
 import com.tamin.taminhamrah.feature.treatment.ui.components.PatientCard
 import com.tamin.taminhamrah.feature.treatment.ui.components.quickAccessGradient
 import com.tamin.taminhamrah.feature.treatment.ui.components.raisedShadow
@@ -43,10 +42,13 @@ import com.tamin.taminhamrah.ui.components.SectionLabel
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
-import com.tamin.taminhamrah.ui.util.ExternalAppLauncher
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.ui.theme.shimmer
+import com.tamin.taminhamrah.ui.theme.TaminOnAccentFillStrong
+import com.tamin.taminhamrah.ui.theme.TaminOnAccentInk
+import com.tamin.taminhamrah.ui.theme.TaminOnAccentInkMuted
+import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.ui.toPriceFormat
+import com.tamin.taminhamrah.ui.util.ExternalAppLauncher
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.ImmutableList
@@ -79,10 +81,6 @@ import taminx.core.core_ui.ic_tamin_misc_claims
 import taminx.core.core_ui.ic_tamin_prescriptions
 import taminx.core.core_ui.share_insured
 import taminx.core.core_ui.share_organization
-import com.tamin.taminhamrah.ui.theme.TaminOnAccentInkMuted
-import com.tamin.taminhamrah.ui.theme.TaminOnAccentFillStrong
-import com.tamin.taminhamrah.ui.theme.TaminOnAccentInk
-import com.tamin.taminhamrah.ui.theme.Thickness
 
 /**
  * The stacked sections of the treatment hub, kept out of [TreatmentScreen] so that file
@@ -105,12 +103,8 @@ internal fun PatientCarousel(
     collapseProgress: () -> Float = { 0f },
 ) {
     when {
-        isLoading && cards.isEmpty() -> Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(TreatmentDimens.cardLoadingHeight)
-                .raisedCard(CornerRadius.card)
-                .shimmer(),
+        isLoading && cards.isEmpty() -> InsuranceCardCarouselSkeleton(
+            collapseProgress = collapseProgress,
         )
 
         // A failure or an empty result still renders a card, so the carousel slot never

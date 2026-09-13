@@ -31,6 +31,7 @@ import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.components.TaminSearchField
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.taminHeroGradient
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toPriceFormat
@@ -97,6 +98,16 @@ private fun InsuranceCardCarouselPreview() {
                     ),
                 )
             }
+        }
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun InsuranceCardCarouselSkeletonPreview() {
+    PreviewRtlThemeContent {
+        Column(modifier = Modifier.background(LocalTaminColors.current.bgPage)) {
+            InsuranceCardCarouselSkeleton()
         }
     }
 }
@@ -177,6 +188,7 @@ private fun TimelineChromePreview() {
         Column(modifier = Modifier.background(LocalTaminColors.current.bgPage)) {
             TaminTopAppBar(
                 title = "سوابق درمانی",
+                background = taminHeroGradient(LocalTaminColors.current.treatmentHubStops),
                 navigationIcon = {
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
@@ -302,6 +314,7 @@ private fun MedicalCentersPreview() {
         Column(modifier = Modifier.background(colors.bgPage)) {
             TaminTopAppBar(
                 title = "مراکز طرف قرارداد",
+                background = taminHeroGradient(colors.treatmentHubStops),
                 navigationIcon = {
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),

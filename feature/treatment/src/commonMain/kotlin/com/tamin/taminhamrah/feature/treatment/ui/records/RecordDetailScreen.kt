@@ -203,6 +203,7 @@ fun RecordDetailContent(
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 TaminTopAppBar(
                     title = stringResource(Res.string.prescription_title),
+                    background = taminHeroGradient(colors.treatmentHubStops),
                     navigationIcon = {
                         TaminTopAppBarButton(
                             icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
@@ -306,7 +307,7 @@ fun RecordDetailContent(
                 TreatmentRecordPdfExport.PRESCRIPTION -> stringResource(Res.string.prescription_viewer_title)
                 TreatmentRecordPdfExport.LAB_RESULT -> stringResource(Res.string.lab_result_viewer_title)
             },
-            background = taminHeroGradient(colors.topAppBarStops),
+            background = taminHeroGradient(colors.treatmentHubStops),
             pdf = state.viewerPdf,
             downloadFailed = state.viewerDownloadFailed,
             onRequestDownload = {
