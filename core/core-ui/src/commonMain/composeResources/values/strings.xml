@@ -2695,9 +2695,6 @@
     <string name="assigner_search_branch_hint">مثلاً ۱۲</string>
     <string name="assigner_search_row_hint">مثلاً ۳</string>
 
-    <!-- Card actions -->
-    <string name="assigner_action_bases_unavailable">این پیمان شناسهٔ کامل ندارد و مبانی محاسباتی آن قابل نمایش نیست.</string>
-
     <!-- Screen B — جزئیات پیمان -->
     <string name="assigner_group_contract">اطلاعات پیمان</string>
     <string name="assigner_group_assigner">اطلاعات واگذارنده (کارگاه شما)</string>

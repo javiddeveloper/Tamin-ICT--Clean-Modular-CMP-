@@ -391,6 +391,12 @@ fun WorkshopDocumentsPanel(
      * existing form was built against; only درخواست مفاصاحساب files PDFs.
      */
     acceptsPdf: Boolean = false,
+    /**
+     * Asks for the type before opening the picker. True — the default — is how every existing form
+     * behaves; a panel with a single type it never needs to ask about passes false and the picker
+     * opens straight away under that type.
+     */
+    asksForType: Boolean = true,
 ) {
     val colors = LocalTaminColors.current
     val scope = rememberCoroutineScope()
@@ -486,12 +492,11 @@ fun WorkshopDocumentsPanel(
             TaminPrimaryButton(
                 text = stringResource(Res.string.ws_form_add_doc),
                 onClick = {
-                    // A single type leaves nothing to ask, so the picker opens straight away.
-                    val onlyType = types.singleOrNull()
-                    if (onlyType == null) {
+                    val presetType = types.firstOrNull()?.takeIf { !asksForType }
+                    if (presetType == null) {
                         isTypeSheetOpen = true
                     } else {
-                        pendingType = onlyType
+                        pendingType = presetType
                         filePicker.launch()
                     }
                 },

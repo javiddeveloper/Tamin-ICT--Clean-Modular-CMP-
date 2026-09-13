@@ -11,6 +11,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopDocumentsPanel
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormSection
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopPickerField
@@ -23,6 +24,7 @@ import com.tamin.taminhamrah.model.workshop.AssignerPartyPR
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.InputRestriction
 import com.tamin.taminhamrah.ui.components.TaminDivider
+import com.tamin.taminhamrah.ui.components.ThousandsSeparatorTransformation
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminOptionSheetItem
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminSearchableListSheet
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -158,6 +160,7 @@ internal fun SettlementTermsStep(
                 error = errors[SettlementField.TEXT1],
                 onIntent = onIntent,
                 maxLength = PERCENT_MAX_LENGTH,
+                groupsThousands = false,
             )
             if (terms.text2.isNotBlank()) {
                 SettlementFigure(
@@ -274,7 +277,12 @@ internal fun SettlementTermsStep(
     }
 }
 
-/** A typed field of this form: digits unless it says otherwise, and its error printed under it. */
+/**
+ * A typed field of this form: digits unless it says otherwise, and its error printed under it.
+ *
+ * Digits are shown grouped in thousands as they are typed, the way the old app's amount fields read;
+ * a number that is not an amount — a letter number, a percentage — passes [groupsThousands] false.
+ */
 @Composable
 internal fun SettlementTextField(
     field: SettlementField,
@@ -286,6 +294,7 @@ internal fun SettlementTextField(
     isDigits: Boolean = true,
     isRequired: Boolean = true,
     maxLength: Int = AMOUNT_MAX_LENGTH,
+    groupsThousands: Boolean = true,
 ) {
     val errorText = error?.let { stringResource(it) }
     WorkshopTextField(
@@ -299,6 +308,11 @@ internal fun SettlementTextField(
         isRequired = isRequired,
         isValid = if (errorText != null) false else null,
         errorText = errorText,
+        visualTransformation = if (isDigits && groupsThousands) {
+            ThousandsSeparatorTransformation
+        } else {
+            VisualTransformation.None
+        },
     )
 }
 
@@ -367,6 +381,7 @@ private fun SettlementSubjectImage(
         attachments = image,
         types = SettlementSubjectImageTypes,
         capacity = 1,
+        asksForType = false,
         onAdd = { fileName, bytes, _ -> onIntent(SettlementRequestIntent.AddSubjectImage(fileName, bytes)) },
         onRemove = { onIntent(SettlementRequestIntent.RemoveSubjectImage) },
         isUploading = isUploading,

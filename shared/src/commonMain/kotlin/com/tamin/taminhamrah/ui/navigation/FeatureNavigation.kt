@@ -2,7 +2,6 @@ package com.tamin.taminhamrah.ui.navigation
 
 import androidx.navigation.NavController
 import com.tamin.taminhamrah.feature.contractaffair.navigateToContractAffairs
-import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.history.navigateToHistory
 import com.tamin.taminhamrah.feature.history.navigateToHistoryJobInfo
 import com.tamin.taminhamrah.feature.historyobjection.navigateToHistoryObjection

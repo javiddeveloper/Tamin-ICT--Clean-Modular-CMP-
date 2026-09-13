@@ -305,6 +305,8 @@ private fun SettlementContractStep(
         error = errors[SettlementField.LETTER_NUMBER],
         onIntent = onIntent,
         maxLength = LETTER_NUMBER_MAX_LENGTH,
+        // A number, not an amount — grouping it would change how it reads against the letter.
+        groupsThousands = false,
     )
     SettlementDateField(
         field = SettlementField.LETTER_DATE,

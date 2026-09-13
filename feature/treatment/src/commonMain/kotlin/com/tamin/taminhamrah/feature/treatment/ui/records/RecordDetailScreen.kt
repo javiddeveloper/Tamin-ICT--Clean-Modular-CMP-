@@ -21,7 +21,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.ui.Modifier
+import com.tamin.taminhamrah.ui.theme.Duration
+import com.tamin.taminhamrah.ui.theme.Easing
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
 import com.tamin.taminhamrah.feature.treatment.ui.components.CostTotalsBar
 import com.tamin.taminhamrah.feature.treatment.ui.components.PrescriptionItemCard
@@ -241,16 +245,28 @@ fun RecordDetailContent(
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState(), overscrollEffect = rememberJellyOverscroll()),
             ) {
-                when {
-                    state.isLoading -> RecordDetailShimmerSkeleton()
-
+                val phase = when {
+                    state.isLoading -> RecordDetailPhase.Loading
                     // Guarded on error: a failed lookup knows nothing about whether the
                     // prescription has items, and saying it is empty would be a lie the dialog
                     // then contradicts.
-                    state.error == null && state.prescriptionDetailList.isEmpty() ->
+                    state.error == null && state.prescriptionDetailList.isEmpty() -> RecordDetailPhase.Empty
+                    else -> RecordDetailPhase.Items
+                }
+
+                // The skeleton hands over with a fade rather than a cut, as the hub's card does.
+                Crossfade(
+                    targetState = phase,
+                    animationSpec = tween(durationMillis = Duration.normal, easing = Easing.standard),
+                    label = "record-detail",
+                ) { shown ->
+                when (shown) {
+                    RecordDetailPhase.Loading -> RecordDetailShimmerSkeleton()
+
+                    RecordDetailPhase.Empty ->
                         TaminEmptyState(message = stringResource(Res.string.prescription_empty))
 
-                    else -> Column(
+                    RecordDetailPhase.Items -> Column(
                         modifier = Modifier.padding(Spacing.page),
                         verticalArrangement = Arrangement.spacedBy(Spacing.cardGap),
                     ) {
@@ -283,6 +299,7 @@ fun RecordDetailContent(
                         }
 
                     }
+                }
                 }
 
                 Box(modifier = Modifier.height(TreatmentDimens.bottomBarClearance))
@@ -329,6 +346,9 @@ fun RecordDetailContent(
         )
     }
 }
+
+/** What the record's body is showing — the three states it fades between. */
+private enum class RecordDetailPhase { Loading, Empty, Items }
 
 @Composable
 private fun RecordDetailShimmerSkeleton() {

@@ -21,7 +21,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.animation.core.tween
 import androidx.compose.ui.Modifier
+import com.tamin.taminhamrah.ui.theme.Duration
+import com.tamin.taminhamrah.ui.theme.Easing
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
@@ -483,7 +486,17 @@ fun MedicalRecordsContent(
 
             when {
                 state.isLoading && state.prescriptionList.isEmpty() ->
-                    item { RecordsShimmerSkeleton() }
+                    item(key = RECORDS_SKELETON_KEY) {
+                        // Fades out while the first records fade in on their own staggered entrance,
+                        // so the page hands over instead of cutting from placeholder to content.
+                        RecordsShimmerSkeleton(
+                            modifier = Modifier.animateItem(
+                                fadeInSpec = null,
+                                placementSpec = null,
+                                fadeOutSpec = tween(durationMillis = Duration.normal, easing = Easing.standard),
+                            ),
+                        )
+                    }
 
                 // Guarded on error: a failed request cannot tell an empty period from an
                 // unreachable one.
@@ -607,10 +620,12 @@ private fun recordAccent(prescType: String): RecordAccent {
     }
 }
 
+private const val RECORDS_SKELETON_KEY = "records-skeleton"
+
 @Composable
-private fun RecordsShimmerSkeleton() {
+private fun RecordsShimmerSkeleton(modifier: Modifier = Modifier) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = Spacing.page),
         verticalArrangement = Arrangement.spacedBy(Spacing.cardGap),
