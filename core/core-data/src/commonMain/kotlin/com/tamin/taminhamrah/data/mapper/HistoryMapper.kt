@@ -15,7 +15,9 @@ import com.tamin.taminhamrah.model.history.TalfighInfoItemDN
 import com.tamin.taminhamrah.model.history.UserInfoDN
 import com.tamin.taminhamrah.model.history.UserInfoDTO
 import com.tamin.taminhamrah.model.history.TalfighInfoItemDTO
+import com.tamin.taminhamrah.model.history.UserRoleDN
 import com.tamin.taminhamrah.model.history.WageDetailDN
+import com.tamin.taminhamrah.model.utils.ListData
 
 fun TalfighInfoItemDTO.toDomain(): TalfighInfoItemDN {
     return TalfighInfoItemDN(
@@ -84,6 +86,25 @@ fun DastmozdInfoDTO.toDomain(): DastmozdInfoDN {
         total = total
     )
 }
+
+/**
+ * The relation codes `login-services/logininfo` answers with, read as a role.
+ *
+ * `"05"` in the first position is a مستمری‌بگیر — the previous app's own test, kept letter for
+ * letter because the code is the server's vocabulary, not ours. The three cases are its three cases
+ * too: no list at all is a person the service has nothing on yet, while an empty list is an insured
+ * person with no other relation on file.
+ */
+fun ListData<String>.toUserRole(): UserRoleDN {
+    val codes = list ?: return UserRoleDN.UNKNOWN
+    return if (codes.firstOrNull() == PENSIONER_RELATION_CODE) {
+        UserRoleDN.PENSIONER
+    } else {
+        UserRoleDN.INSURED
+    }
+}
+
+private const val PENSIONER_RELATION_CODE = "05"
 
 fun UserInfoDTO.toDomain(): UserInfoDN {
     return UserInfoDN(

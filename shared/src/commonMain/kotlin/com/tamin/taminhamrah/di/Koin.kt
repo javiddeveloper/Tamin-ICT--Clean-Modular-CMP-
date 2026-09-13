@@ -9,7 +9,7 @@ import com.tamin.taminhamrah.data.di.dataKoinModule
 import com.tamin.taminhamrah.feature.history.di.historyModule
 
 import com.tamin.taminhamrah.feature.contracts.di.contractsModule
-
+import com.tamin.taminhamrah.feature.contractaffair.di.contractAffairModule
 import com.tamin.taminhamrah.feature.taminServices.di.TaminServicesModule
 
 import com.tamin.taminhamrah.feature.cartable.di.cartableModule
@@ -47,9 +47,12 @@ import com.tamin.taminhamrah.feature.orotezprotez.di.orotezProtezModule
 import com.tamin.taminhamrah.feature.girlSurvivor.di.girlSurvivorModule
 
 import com.tamin.taminhamrah.feature.pensionSurvivor.di.pensionSurvivorModule
+import com.tamin.taminhamrah.feature.retirementPension.di.retirementPensionModule
 
 import com.tamin.taminhamrah.feature.deferredInstallment.di.deferredInstallmentModule
 import com.tamin.taminhamrah.feature.inquiryEducation.di.inquiryEducationModule
+import com.tamin.taminhamrah.feature.fractionContract.di.fractionContractModule
+import com.tamin.taminhamrah.feature.payment.di.paymentModule
 import com.tamin.taminhamrah.feature.calculateWagePension.di.calculateWagePensionModule
 import com.tamin.taminhamrah.feature.requestPaymentForIllDays.di.requestPaymentForIllDaysModule
 import com.tamin.taminhamrah.feature.pregnancyPay.di.pregnancyPayModule
@@ -101,7 +104,7 @@ val sharedModules: List<Module>
         historyModule,
 
         contractsModule,
-
+        contractAffairModule,
         TaminServicesModule,
 
         workshopsModule,
@@ -133,7 +136,10 @@ val sharedModules: List<Module>
         pensionSurvivorModule,
 
         pregnancyPayModule,
+        retirementPensionModule,
         inquiryEducationModule,
+        fractionContractModule,
+        paymentModule,
         calculateWagePensionModule,
     )
 

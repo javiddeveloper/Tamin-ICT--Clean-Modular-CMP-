@@ -166,6 +166,12 @@ object ShimmerSize {
     val subtitleHeight = 12.dp
     val badgeWidth = 56.dp
     val badgeHeight = 24.dp
+
+    /** A whole card standing in for one the list has not loaded yet. */
+    val cardHeight = 120.dp
+
+    /** One row of a list inside a sheet. */
+    val rowHeight = 56.dp
     val uploadCardHeight = 120.dp
     val bannerHeight = 56.dp
     val rateChipHeight = 48.dp
@@ -216,9 +222,6 @@ object CampaignDimens {
     val ctaChevronSize = 13.dp
 
     val dotsTopGap = Spacing.smPlus
-    val dotGap = 5.dp
-    val dotSize = 5.dp
-    val dotActiveWidth = 18.dp
 
     // The two aria-hidden decoration circles every card carries, resolved from the design's
     // negative offsets to a center and a radius.

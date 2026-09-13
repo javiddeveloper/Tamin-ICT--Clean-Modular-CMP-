@@ -230,7 +230,7 @@ internal fun Step6DocumentSubmitStep(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = padding.calculateTopPadding())
+                    .padding(padding)
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = Spacing.lg),
             ) {
@@ -417,7 +417,6 @@ internal fun Step6DocumentSubmitStep(
                 Spacer(modifier = Modifier.height(Spacing.md))
                 InfoBanner(message = stringResource(Res.string.occurrence_submit_disclaimer))
                 Spacer(modifier = Modifier.height(Spacing.lg))
-                Spacer(modifier = Modifier.height(padding.calculateBottomPadding()))
             }
         }
     }

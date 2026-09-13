@@ -8,6 +8,7 @@ import taminx.core.core_ui.developer_options_service_account
 import taminx.core.core_ui.developer_options_service_ai
 import taminx.core.core_ui.developer_options_service_health_profile
 import taminx.core.core_ui.developer_options_service_main
+import taminx.core.core_ui.developer_options_service_tfh
 
 data class BaseUrlPreset(val label: String, val url: String)
 
@@ -17,6 +18,7 @@ fun BaseUrlKey.displayName(): String = when (this) {
     BaseUrlKey.ACCOUNT -> stringResource(Res.string.developer_options_service_account)
     BaseUrlKey.HEALTH_PROFILE -> stringResource(Res.string.developer_options_service_health_profile)
     BaseUrlKey.AI -> stringResource(Res.string.developer_options_service_ai)
+    BaseUrlKey.TFH -> stringResource(Res.string.developer_options_service_tfh)
 }
 
 /**
@@ -44,17 +46,26 @@ object BaseUrlPresets {
         BaseUrlKey.MAIN to true,
         BaseUrlKey.ACCOUNT to false,
         BaseUrlKey.HEALTH_PROFILE to true,
-        BaseUrlKey.AI to true
+        BaseUrlKey.AI to true,
+        BaseUrlKey.TFH to true
     )
 
     /**
      * Built from [BaseUrlKey.defaultValue] rather than repeated as literals, so this list cannot
-     * drift from `NetworkConstants` and cannot grow a non-shipping address by accident.
+     * drift from `NetworkConstants` and cannot grow a non-shipping address by accident — except
+     * for ACCOUNT's "Pilot" entry below, added as an explicit, accepted exception to the rule
+     * above (a public `tamin.ir` subdomain, not an internal host/IP) so the back-to-back debug
+     * login and the PKCE flow can both be pointed at the pilot IDM with one tap.
      */
     val presets: Map<BaseUrlKey, List<BaseUrlPreset>> =
         BaseUrlKey.entries.associateWith { key ->
             listOf(BaseUrlPreset(label = DEFAULT_PRESET_LABEL, url = key.defaultValue))
-        }
+        } + mapOf(
+            BaseUrlKey.ACCOUNT to listOf(
+                BaseUrlPreset(label = DEFAULT_PRESET_LABEL, url = BaseUrlKey.ACCOUNT.defaultValue),
+                BaseUrlPreset(label = "Pilot", url = "https://account-pilot.tamin.ir/auth/")
+            )
+        )
 
     private const val DEFAULT_PRESET_LABEL = "Default"
 }

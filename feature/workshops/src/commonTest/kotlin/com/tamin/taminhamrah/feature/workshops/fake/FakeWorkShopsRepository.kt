@@ -39,6 +39,9 @@ import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDN
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionQuery
+import com.tamin.taminhamrah.model.workshop.SmsMessageDN
 import com.tamin.taminhamrah.repository.WorkShopsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -66,6 +69,8 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     var recentlyAddedMembers: PagedListDN<WorkshopNewMemberDN> = PagedListDN()
     var workshopsWithoutContract: PagedListDN<WorkshopWithoutContractDN> = PagedListDN()
     var workshopContractRows: PagedListDN<WorkshopContractRowDN> = PagedListDN()
+    var workShopObjections: PagedListDN<WorkShopObjectionDN> = PagedListDN()
+    var objectionSms: PagedListDN<SmsMessageDN> = PagedListDN()
 
     var debtInquiry: WorkshopDebtInquiryDN = WorkshopDebtInquiryDN()
     var paymentPreCheck: DebitPaymentPreCheckDN = DebitPaymentPreCheckDN()
@@ -102,10 +107,20 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         private set
     var lastPaymentRequest: DebitPaymentRequestDN? = null
         private set
+    var confirmedTicket: String? = null
+        private set
     var deletedPersonalId: Long? = null
     var newMemberIsNew: Boolean = true
     var registrationResult: NewMemberRegistrationResultDN = NewMemberRegistrationResultDN()
     var lastRegistrationRequest: NewMemberRegistrationDN? = null
+        private set
+    var lastWorkShopObjectionQuery: WorkShopObjectionQuery? = null
+        private set
+    var lastObjectionSmsSeqNo: Long? = null
+        private set
+    var lastDebitObjectionPdfSeqNo: Long? = null
+        private set
+    var lastArticleSixteenReportPdfSeqNo: Long? = null
         private set
 
     override suspend fun getEmployerAgreements(
@@ -165,6 +180,10 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         paymentResult
     }
 
+    override suspend fun confirmPaymentTicket(ticket: String) {
+        answer { confirmedTicket = ticket }
+    }
+
     override suspend fun getWorkshopDebtInquiry(
         workshopId: String,
         branchCode: String,
@@ -179,11 +198,28 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     override suspend fun getObjectionElapsedDays(orderRecipeDate: String): Int =
         answer { objectionElapsedDays }
 
+    /** What was actually filed, so a test can tell «asked to confirm» from «sent». */
+    var lastDebitObjectionRequest: DebitObjectionRequestDN? = null
+        private set
+
     override suspend fun saveDebitObjection(
         request: DebitObjectionRequestDN,
-    ): DebitObjectionResultDN = answer { objectionResult }
+    ): DebitObjectionResultDN = answer {
+        lastDebitObjectionRequest = request
+        objectionResult
+    }
 
-    override suspend fun getDebitObjectionPdf(seqNo: Long): PdfDownloadDN = answer { pdf }
+    var debitObjectionPdfCallCount: Int = 0
+        private set
+    var debitObjectionPdfGate: kotlinx.coroutines.CompletableDeferred<Unit>? = null
+
+    override suspend fun getDebitObjectionPdf(seqNo: Long): PdfDownloadDN {
+        error?.let { throw it }
+        lastDebitObjectionPdfSeqNo = seqNo
+        debitObjectionPdfCallCount++
+        debitObjectionPdfGate?.await()
+        return pdf
+    }
 
     override suspend fun getRecentlyAddedMembers(
         query: WorkshopNewMemberQuery,
@@ -228,7 +264,10 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         request: ArticleSixteenSaveRequestDN,
     ): ArticleSixteenSaveResultDN = answer { articleSixteenSaveResult }
 
-    override suspend fun getArticleSixteenReportPdf(seqNo: Long): PdfDownloadDN = answer { pdf }
+    override suspend fun getArticleSixteenReportPdf(seqNo: Long): PdfDownloadDN = answer {
+        lastArticleSixteenReportPdfSeqNo = seqNo
+        pdf
+    }
 
     override suspend fun getWorkshopMembers(
         query: WorkshopMemberQuery,
@@ -242,6 +281,21 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     ): PagedListDN<WorkshopStackHolderDN> = answer {
         lastStackHolderQuery = query
         stackHolders
+    }
+
+    override suspend fun getWorkShopObjections(
+        query: WorkShopObjectionQuery,
+    ): PagedListDN<WorkShopObjectionDN> = answer {
+        lastWorkShopObjectionQuery = query
+        workShopObjections
+    }
+
+    override suspend fun getWorkShopObjectionSms(
+        seqNo: Long,
+        page: Int,
+    ): PagedListDN<SmsMessageDN> = answer {
+        lastObjectionSmsSeqNo = seqNo
+        objectionSms
     }
 
     override suspend fun requestEmployerAgreementTicket(mobile: String, email: String): String =
