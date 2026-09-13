@@ -1,0 +1,327 @@
+package com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.settlement
+
+import androidx.compose.runtime.Immutable
+import com.tamin.taminhamrah.feature.workshops.ui.model.SettlementDocumentTypes
+import com.tamin.taminhamrah.feature.workshops.ui.model.SettlementDocumentTypesWithSubcontractor
+import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachment
+import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopDocumentType
+import com.tamin.taminhamrah.model.workshop.AssignerContractPR
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminOptionSheetItem
+import com.tamin.taminhamrah.util.PersianDateFormatter
+import com.tamin.taminhamrah.util.ValidationUtils
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.PersistentMap
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import org.jetbrains.compose.resources.StringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.abs_form_err_required
+import taminx.core.core_ui.assigner_group_contract
+import taminx.core.core_ui.settlement_err_currency_rial
+import taminx.core.core_ui.settlement_err_date_order
+import taminx.core.core_ui.settlement_err_drivers
+import taminx.core.core_ui.settlement_err_equipment
+import taminx.core.core_ui.settlement_err_invalid
+import taminx.core.core_ui.settlement_owner_budget_type
+import taminx.core.core_ui.settlement_owner_contractor
+import taminx.core.core_ui.settlement_owner_employer
+import taminx.core.core_ui.settlement_step_documents
+import taminx.core.core_ui.settlement_step_terms
+import taminx.core.core_ui.settlement_supply_assigner
+import taminx.core.core_ui.settlement_supply_contractor
+import taminx.core.core_ui.settlement_supply_shared
+import taminx.core.core_ui.ws_form_err_docs
+
+/**
+ * درخواست مفاصاحساب — the old app's four-step `MafasaHesabRegisterFragment`, in three.
+ *
+ * The old first step only showed the پیمان back to the user, so it is folded into the letter step as
+ * the design's «پیمان انتخاب‌شده» card. Each step's rules are the old app's, made binding where it only
+ * printed an error and let the user carry on.
+ */
+@Immutable
+data class SettlementRequestUiState(
+    /** The پیمان being settled — what the request's id is built from. */
+    val contract: AssignerContractPR? = null,
+    val step: SettlementStep = SettlementStep.CONTRACT,
+    val isContractOpen: Boolean = true,
+    /** ASCII digits. */
+    val letterNumber: String = "",
+    val letterDate: SettlementDate? = null,
+    val startDate: SettlementDate? = null,
+    val endDate: SettlementDate? = null,
+    val hasSubcontractor: Boolean = false,
+    /** Rials, ASCII digits — as are the two below. */
+    val amount: String = "",
+    val currencyAmount: String = "",
+    val currencyInRial: String = "",
+    val attachments: PersistentList<WorkshopAttachment> = persistentListOf(),
+    val subjects: ImmutableList<TaminOptionSheetItem> = persistentListOf(),
+    val isSubjectsLoading: Boolean = false,
+    val subject: TaminOptionSheetItem? = null,
+    val terms: SettlementTerms = SettlementTerms(),
+    /**
+     * What is stopping the current step, keyed to the control that draws it. Empty until the user
+     * tries to go on — an incomplete form is not an error while it is still being filled in.
+     */
+    val errors: PersistentMap<SettlementField, StringResource> = persistentMapOf(),
+    val isUploading: Boolean = false,
+    val isSubmitting: Boolean = false,
+) {
+    val termsForm: SettlementTermsForm get() = SettlementTermsForm.of(subject?.id)
+
+    /** «پیمانکاری فرعی» is only a heading once the پیمانکار says subcontractors were used. */
+    val documentTypes: ImmutableList<WorkshopDocumentType>
+        get() = if (hasSubcontractor) SettlementDocumentTypesWithSubcontractor else SettlementDocumentTypes
+
+    val isBusy: Boolean get() = isUploading || isSubmitting
+
+    sealed interface PartialState {
+        data class Opened(val contract: AssignerContractPR) : PartialState
+        data object ContractToggled : PartialState
+        data class FieldChanged(val field: SettlementField, val value: String) : PartialState
+        data class DateChanged(val field: SettlementField, val date: SettlementDate) : PartialState
+        data class SubcontractorChanged(val hasSubcontractor: Boolean) : PartialState
+        data object SubjectsLoading : PartialState
+        data class SubjectsLoaded(val subjects: ImmutableList<TaminOptionSheetItem>) : PartialState
+        data class SubjectSelected(val subject: TaminOptionSheetItem) : PartialState
+        data class UploadingChanged(val isUploading: Boolean) : PartialState
+        data class AttachmentAdded(
+            val attachment: WorkshopAttachment,
+            val isSubjectImage: Boolean,
+        ) : PartialState
+
+        data class DocumentRemoved(val index: Int) : PartialState
+        data object SubjectImageRemoved : PartialState
+        data class StepChanged(val step: SettlementStep) : PartialState
+        data class Rejected(val errors: PersistentMap<SettlementField, StringResource>) : PartialState
+        data class SubmittingChanged(val isSubmitting: Boolean) : PartialState
+        data object Failed : PartialState
+    }
+}
+
+/** A Jalali day as the pickers hand it back. */
+@Immutable
+data class SettlementDate(val year: Int, val month: Int, val day: Int) {
+    /** `۱۴۰۳/۰۱/۲۰`, what the field prints. */
+    val label: String get() = PersianDateFormatter.format(year, month, day)
+}
+
+enum class SettlementStep(val label: StringResource) {
+    CONTRACT(Res.string.assigner_group_contract),
+    DOCUMENTS(Res.string.settlement_step_documents),
+    TERMS(Res.string.settlement_step_terms),
+}
+
+/** Every input that can be changed or be wrong, so an error lands on the control that draws it. */
+enum class SettlementField {
+    LETTER_NUMBER, LETTER_DATE, START_DATE, END_DATE, AMOUNT, CURRENCY_AMOUNT, CURRENCY_IN_RIAL,
+    DOCUMENTS, SUBJECT, OWNER, TEXT1, TEXT2, AMOUNT1, AMOUNT2, AMOUNT3, AMOUNT4,
+}
+
+/**
+ * Which conditions a موضوع کار asks for, keyed by its code — the old app's
+ * `setUiVisibilityCordingContractSubject`. Every code it does not list asks for nothing more; 13
+ * draws a yes/no there that is never read or sent, so it asks for nothing here either.
+ */
+enum class SettlementTermsForm {
+    /** 01 — who supplies the materials, the project's credit line, budget row and premium paid. */
+    PRICE_LIST,
+
+    /** 02 — who supplies the materials, and the واگذارنده's share when it is split. */
+    MATERIALS_SUPPLY,
+
+    /** 03 — the mechanical share; the manual share is what is left of 100. */
+    MECHANICAL_SHARE,
+
+    /** 04, 05, 06 — the drivers' work, taken out of the gross amount. */
+    DRIVERS,
+
+    /** 07 — equipment bought, taken out of the gross amount. */
+    EQUIPMENT,
+
+    /** 11 — the four costs of building, carrying, installing and running. */
+    BUILD_COSTS,
+
+    /** 29 — foreign equipment, in currency and in rials. */
+    FOREIGN_EQUIPMENT,
+    NONE;
+
+    companion object {
+        fun of(subjectCode: String?): SettlementTermsForm = when (subjectCode) {
+            "01" -> PRICE_LIST
+            "02" -> MATERIALS_SUPPLY
+            "03" -> MECHANICAL_SHARE
+            "04", "05", "06" -> DRIVERS
+            "07" -> EQUIPMENT
+            "11" -> BUILD_COSTS
+            "29" -> FOREIGN_EQUIPMENT
+            else -> NONE
+        }
+    }
+}
+
+/** One answer a conditions picker offers: the code the service files and the wording shown. */
+@Immutable
+data class SettlementOption(val code: String, val label: StringResource)
+
+/** «انعقاد قرارداد (تهیه مصالح به عهده)» for subject 01, in the old app's order. */
+val PriceListOwnerOptions: ImmutableList<SettlementOption> = persistentListOf(
+    SettlementOption("1", Res.string.settlement_owner_contractor),
+    SettlementOption("2", Res.string.settlement_owner_employer),
+    SettlementOption("3", Res.string.settlement_owner_budget_type),
+)
+
+/** «تهیه و تأمین مصالح مصرفی به عهده» for subject 02, in the old app's order. */
+val SupplyOwnerOptions: ImmutableList<SettlementOption> = persistentListOf(
+    SettlementOption("1", Res.string.settlement_supply_contractor),
+    SettlementOption("2", Res.string.settlement_supply_assigner),
+    SettlementOption(SHARED_SUPPLY_CODE, Res.string.settlement_supply_shared),
+)
+
+/** The one supply answer that also asks for the value of the واگذارنده's materials. */
+const val SHARED_SUPPLY_CODE = "3"
+
+/** The conditions typed so far — ASCII digits for amounts. Cleared whenever the subject changes. */
+@Immutable
+data class SettlementTerms(
+    val owner: String = "",
+    val text1: String = "",
+    val text2: String = "",
+    val amount1: String = "",
+    val amount2: String = "",
+    val amount3: String = "",
+    val amount4: String = "",
+    /** The conditions' own image, subjects 01 and 29 — at most one. */
+    val image: PersistentList<WorkshopAttachment> = persistentListOf(),
+)
+
+/**
+ * The gross amount less [deduction] — the second amount subjects 04–07 send. Computed rather than
+ * stored, so changing an amount on the first step can never leave it stale.
+ */
+fun settlementRemainder(amount: String, currencyInRial: String, deduction: String): Long =
+    (amount.toLongOrNull() ?: 0L) + (currencyInRial.toLongOrNull() ?: 0L) - (deduction.toLongOrNull() ?: 0L)
+
+sealed interface SettlementRequestIntent {
+    data class Open(val contract: AssignerContractPR) : SettlementRequestIntent
+    data object ContractToggled : SettlementRequestIntent
+    data class FieldChanged(val field: SettlementField, val value: String) : SettlementRequestIntent
+    data class DateChanged(val field: SettlementField, val date: SettlementDate) : SettlementRequestIntent
+    data class SubcontractorChanged(val hasSubcontractor: Boolean) : SettlementRequestIntent
+    data object LoadSubjects : SettlementRequestIntent
+    data class SubjectSelected(val subject: TaminOptionSheetItem) : SettlementRequestIntent
+
+    /** A picked file, with the heading the user filed it under. */
+    class AddDocument(val fileName: String, val bytes: ByteArray, val typeCode: String) :
+        SettlementRequestIntent
+
+    data class RemoveDocument(val index: Int) : SettlementRequestIntent
+    class AddSubjectImage(val fileName: String, val bytes: ByteArray) : SettlementRequestIntent
+    data object RemoveSubjectImage : SettlementRequestIntent
+
+    /** The footer: checks the step, then moves on — or, on the last one, files the request. */
+    data object Next : SettlementRequestIntent
+    data object Previous : SettlementRequestIntent
+}
+
+sealed interface SettlementRequestEvent {
+    /** Something the service refused, in its own words. */
+    data class ShowServerMessage(val message: String) : SettlementRequestEvent
+
+    /** Filed; the screen confirms and closes. */
+    data object Submitted : SettlementRequestEvent
+}
+
+/** The old app's check on شماره نامه: anything shorter was reported as wrong. */
+internal const val MIN_LETTER_NUMBER_LENGTH = 5
+
+/**
+ * What stops [step] from being left, as the old app judged it.
+ *
+ * Kept a pure function of the state, so the screen, the ViewModel and a test all read the same rules.
+ */
+internal fun SettlementRequestUiState.errorsOf(
+    step: SettlementStep,
+): PersistentMap<SettlementField, StringResource> {
+    val required = Res.string.abs_form_err_required
+    val errors = persistentMapOf<SettlementField, StringResource>().builder()
+    fun requireFilled(field: SettlementField, value: String) {
+        if (value.isBlank()) errors[field] = required
+    }
+
+    when (step) {
+        SettlementStep.CONTRACT -> {
+            when {
+                letterNumber.isBlank() -> errors[SettlementField.LETTER_NUMBER] = required
+                letterNumber.length < MIN_LETTER_NUMBER_LENGTH ->
+                    errors[SettlementField.LETTER_NUMBER] = Res.string.settlement_err_invalid
+            }
+            if (letterDate == null) errors[SettlementField.LETTER_DATE] = required
+            if (startDate == null) errors[SettlementField.START_DATE] = required
+            when {
+                endDate == null -> errors[SettlementField.END_DATE] = required
+                !ValidationUtils.isDateRangeValid(startDate?.epochMillis(), endDate.epochMillis()) ->
+                    errors[SettlementField.END_DATE] = Res.string.settlement_err_date_order
+            }
+            when {
+                amount.isBlank() -> errors[SettlementField.AMOUNT] = required
+                amount.toLongOrNull() == 0L -> errors[SettlementField.AMOUNT] = Res.string.settlement_err_invalid
+            }
+            if ((currencyAmount.toLongOrNull() ?: 0L) > 0 && (currencyInRial.toLongOrNull() ?: 0L) == 0L) {
+                errors[SettlementField.CURRENCY_IN_RIAL] = Res.string.settlement_err_currency_rial
+            }
+        }
+
+        SettlementStep.DOCUMENTS ->
+            if (attachments.isEmpty()) errors[SettlementField.DOCUMENTS] = Res.string.ws_form_err_docs
+
+        SettlementStep.TERMS -> {
+            if (subject == null) errors[SettlementField.SUBJECT] = required
+            when (termsForm) {
+                SettlementTermsForm.PRICE_LIST -> {
+                    requireFilled(SettlementField.OWNER, terms.owner)
+                    requireFilled(SettlementField.TEXT1, terms.text1)
+                    requireFilled(SettlementField.TEXT2, terms.text2)
+                    requireFilled(SettlementField.AMOUNT1, terms.amount1)
+                }
+
+                SettlementTermsForm.MATERIALS_SUPPLY -> {
+                    requireFilled(SettlementField.OWNER, terms.owner)
+                    if (terms.owner == SHARED_SUPPLY_CODE) requireFilled(SettlementField.AMOUNT1, terms.amount1)
+                }
+
+                SettlementTermsForm.MECHANICAL_SHARE -> requireFilled(SettlementField.TEXT1, terms.text1)
+
+                SettlementTermsForm.DRIVERS, SettlementTermsForm.EQUIPMENT -> when {
+                    terms.amount1.isBlank() -> errors[SettlementField.AMOUNT1] = required
+                    settlementRemainder(amount, currencyInRial, terms.amount1) <= 0 ->
+                        errors[SettlementField.AMOUNT1] = if (termsForm == SettlementTermsForm.DRIVERS) {
+                            Res.string.settlement_err_drivers
+                        } else {
+                            Res.string.settlement_err_equipment
+                        }
+                }
+
+                SettlementTermsForm.BUILD_COSTS -> {
+                    requireFilled(SettlementField.AMOUNT1, terms.amount1)
+                    requireFilled(SettlementField.AMOUNT2, terms.amount2)
+                    requireFilled(SettlementField.AMOUNT3, terms.amount3)
+                    requireFilled(SettlementField.AMOUNT4, terms.amount4)
+                }
+
+                SettlementTermsForm.FOREIGN_EQUIPMENT -> {
+                    requireFilled(SettlementField.AMOUNT1, terms.amount1)
+                    requireFilled(SettlementField.AMOUNT2, terms.amount2)
+                }
+
+                SettlementTermsForm.NONE -> Unit
+            }
+        }
+    }
+    return errors.build()
+}
+
+/** Midnight UTC of the day, which is what the range check compares. */
+internal fun SettlementDate.epochMillis(): Long = PersianDateFormatter.toEpochMillisUtc(year, month, day)

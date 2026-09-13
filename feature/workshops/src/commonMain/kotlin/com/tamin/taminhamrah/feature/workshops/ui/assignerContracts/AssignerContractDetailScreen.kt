@@ -2,7 +2,7 @@ package com.tamin.taminhamrah.feature.workshops.ui.assignerContracts
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormFooter
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopRecordCard
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopScreenShell
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
@@ -45,6 +46,7 @@ import taminx.core.core_ui.assigner_group_contract
 import taminx.core.core_ui.assigner_group_contractor
 import taminx.core.core_ui.assigner_contract_date
 import taminx.core.core_ui.ic_tamin_assigner_contracts
+import taminx.core.core_ui.settlement_title
 import taminx.core.core_ui.workshop_code
 
 /**
@@ -64,6 +66,7 @@ fun AssignerContractDetailScreen(
     contractRow: String,
     contractSequence: String,
     onBack: () -> Unit,
+    onRequestSettlement: (AssignerContractPR) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -73,22 +76,32 @@ fun AssignerContractDetailScreen(
     // never fetched in this process.
     val contracts = state.list.items
     val contract = remember(contracts, contractRow, contractSequence) {
-        contracts.firstOrNull {
-            it.contractRow == contractRow && it.contractSequence == contractSequence
-        }
+        contracts.findContract(contractRow, contractSequence)
     }
 
     AssignerContractDetailContent(
         contract = contract,
         onBack = onBack,
+        onRequestSettlement = onRequestSettlement,
         modifier = modifier,
     )
 }
+
+/**
+ * The پیمان a drill-down's route names, among the rows the list already holds. Shared by every
+ * destination addressed by ردیف and sequence, so they cannot disagree about which پیمان that is.
+ */
+internal fun List<AssignerContractPR>.findContract(
+    contractRow: String,
+    contractSequence: String,
+): AssignerContractPR? =
+    firstOrNull { it.contractRow == contractRow && it.contractSequence == contractSequence }
 
 @Composable
 fun AssignerContractDetailContent(
     contract: AssignerContractPR?,
     onBack: () -> Unit,
+    onRequestSettlement: (AssignerContractPR) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     WorkshopScreenShell(
@@ -108,7 +121,8 @@ fun AssignerContractDetailContent(
 
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .weight(1f)
+                .fillMaxWidth()
                 // A fixed three cards, not a data list — the scroll is for a short screen, not for
                 // an unbounded number of rows.
                 .verticalScroll(rememberScrollState())
@@ -125,6 +139,14 @@ fun AssignerContractDetailContent(
                 party = contract.employer,
             )
         }
+
+        // درخواست مفاصاحساب starts from the پیمان it is for — the old app's third action on the same
+        // row. Pinned here rather than as a third card button, which does not fit three labels at
+        // this width.
+        WorkshopFormFooter(
+            nextLabel = stringResource(Res.string.settlement_title),
+            onNext = { onRequestSettlement(contract) },
+        )
     }
 }
 
@@ -263,12 +285,12 @@ private val PreviewContract = AssignerContractPR(
 @PreviewRtlTheme
 @Composable
 private fun AssignerContractDetailPreview() = PreviewRtlThemeContent {
-    AssignerContractDetailContent(contract = PreviewContract, onBack = {})
+    AssignerContractDetailContent(contract = PreviewContract, onBack = {}, onRequestSettlement = {})
 }
 
 /** After process death, with nothing selected. */
 @PreviewRtlTheme
 @Composable
 private fun AssignerContractDetailEmptyPreview() = PreviewRtlThemeContent {
-    AssignerContractDetailContent(contract = null, onBack = {})
+    AssignerContractDetailContent(contract = null, onBack = {}, onRequestSettlement = {})
 }

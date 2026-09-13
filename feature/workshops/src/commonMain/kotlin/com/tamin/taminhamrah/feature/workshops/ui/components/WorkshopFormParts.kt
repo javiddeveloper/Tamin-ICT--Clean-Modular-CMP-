@@ -386,6 +386,11 @@ fun WorkshopDocumentsPanel(
      * points at the field to fill in.
      */
     isError: Boolean = false,
+    /**
+     * Lets a PDF be picked as well as an image. False — the default — keeps the image picker every
+     * existing form was built against; only درخواست مفاصاحساب files PDFs.
+     */
+    acceptsPdf: Boolean = false,
 ) {
     val colors = LocalTaminColors.current
     val scope = rememberCoroutineScope()
@@ -413,7 +418,9 @@ fun WorkshopDocumentsPanel(
         if (hasLanded) attachments.dropLast(1) else attachments
     }
 
-    val filePicker = rememberFilePickerLauncher(type = FileKitType.Image) { file ->
+    val filePicker = rememberFilePickerLauncher(
+        type = if (acceptsPdf) PdfOrImageFiles else FileKitType.Image,
+    ) { file ->
         val type = pendingType
         if (file == null || type == null) return@rememberFilePickerLauncher
         scope.launch { onAdd(file.name, file.readBytes(), type.code) }
@@ -478,7 +485,16 @@ fun WorkshopDocumentsPanel(
         if (attachments.size < capacity && !isWaving) {
             TaminPrimaryButton(
                 text = stringResource(Res.string.ws_form_add_doc),
-                onClick = { isTypeSheetOpen = true },
+                onClick = {
+                    // A single type leaves nothing to ask, so the picker opens straight away.
+                    val onlyType = types.singleOrNull()
+                    if (onlyType == null) {
+                        isTypeSheetOpen = true
+                    } else {
+                        pendingType = onlyType
+                        filePicker.launch()
+                    }
+                },
                 icon = Icons.Default.Add,
                 iconAtStart = true,
                 background = colors.successGradient,
@@ -520,6 +536,9 @@ fun WorkshopDocumentsPanel(
 
 /** How long the upload wave keeps playing after the file has actually landed. */
 private const val WAVE_TAIL_MILLIS = 1600L
+
+/** What [WorkshopDocumentsPanel] offers once it accepts PDFs: the PDF, and the images it always took. */
+private val PdfOrImageFiles = FileKitType.File(extensions = setOf("pdf", "jpg", "jpeg", "png"))
 
 /** A rule the user must know before submitting, in the design's amber. */
 @Composable

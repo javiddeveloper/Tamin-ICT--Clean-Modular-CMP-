@@ -211,6 +211,9 @@ fun WorkshopContractDTO.toDomain(): WorkshopContractDN = WorkshopContractDN(
 fun AssignerContractDTO.toDomain(): AssignerContractDN = AssignerContractDN(
     contractRow = contractRow.orEmpty(),
     contractSequence = contractSequence.orEmpty(),
+    // The پیمان's own branch, as the old app reads it for درخواست مفاصاحساب; the پیمانکار's when the
+    // service sent none, so the request id is never left a key short.
+    branchCode = (branch?.code ?: employer?.branch?.code).orEmpty(),
     contractNumber = contractNumber.orEmpty(),
     contractDate = contractDate.orEmpty(),
     contractEndDate = contractEndDate.orEmpty(),

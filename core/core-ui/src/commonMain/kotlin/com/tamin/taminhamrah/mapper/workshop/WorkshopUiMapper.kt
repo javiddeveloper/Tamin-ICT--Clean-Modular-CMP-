@@ -50,8 +50,10 @@ import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractPR
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionPR
+import com.tamin.taminhamrah.model.workshop.SettlementSubjectDN
 import com.tamin.taminhamrah.model.workshop.SmsMessageDN
 import com.tamin.taminhamrah.model.workshop.SmsMessagePR
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminOptionSheetItem
 import com.tamin.taminhamrah.ui.orDash
 import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.util.toPersianDigits
@@ -154,6 +156,7 @@ fun AssignerContractDN.toPresentation(): AssignerContractPR = AssignerContractPR
     // contract the service has never heard of.
     contractRow = contractRow,
     contractSequence = contractSequence,
+    branchCode = branchCode,
     contractNumber = contractNumber.orDashDigits(),
     contractDate = contractDate.orDashDate(),
     contractSubject = contractSubject.orDash(),
@@ -170,6 +173,15 @@ fun AssignerPartyDN.toPresentation(): AssignerPartyPR = AssignerPartyPR(
     nationalId = nationalId.orDashDigits(),
     branchName = branchName.orDash(),
     address = address.orDash(),
+)
+
+/**
+ * A موضوع کار as the picker lists it. The sheet's own option row is the whole of what it needs — a
+ * code to file under and the wording to show — so no model of its own is added for it.
+ */
+fun SettlementSubjectDN.toPresentation(): TaminOptionSheetItem = TaminOptionSheetItem(
+    id = code,
+    label = description.orDash(),
 )
 
 fun ComputationalBaseDN.toPresentation(): ComputationalBasePR = ComputationalBasePR(

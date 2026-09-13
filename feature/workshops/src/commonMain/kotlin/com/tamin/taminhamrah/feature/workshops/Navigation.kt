@@ -11,6 +11,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.AssignerCont
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.AssignerContractsViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.ComputationalBaseDetailScreen
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.ComputationalBasesScreen
+import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.settlement.SettlementRequestScreen
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsEvent
 import com.tamin.taminhamrah.feature.workshops.ui.demandDocuments.DemandDocumentsScreen
 import com.tamin.taminhamrah.feature.workshops.ui.contractRows.ContractRowsScreen
@@ -137,6 +138,16 @@ data class AssignerContractsRoute(val workshopId: String = "", val branchCode: S
  */
 @Serializable
 data class AssignerContractDetailRoute(
+    val contractRow: String,
+    val contractSequence: String,
+)
+
+/**
+ * درخواست مفاصاحساب for one پیمان, found in the list by the same two keys جزئیات پیمان is — so the form
+ * never depends on a selection having been written to state before it composed.
+ */
+@Serializable
+data class SettlementRequestRoute(
     val contractRow: String,
     val contractSequence: String,
 )
@@ -281,6 +292,25 @@ fun NavGraphBuilder.workshopsScreen(
             val route = entry.toRoute<AssignerContractDetailRoute>()
             AssignerContractDetailScreen(
                 viewModel = entry.sharedViewModel(navController),
+                contractRow = route.contractRow,
+                contractSequence = route.contractSequence,
+                onBack = { navController.popBackStack() },
+                onRequestSettlement = { contract ->
+                    navController.navigate(
+                        SettlementRequestRoute(
+                            contractRow = contract.contractRow,
+                            contractSequence = contract.contractSequence,
+                        )
+                    )
+                },
+            )
+        }
+
+        // The form has a ViewModel of its own; the list's is shared in only to find the پیمان.
+        composableWithFadeTransitions<SettlementRequestRoute> { entry ->
+            val route = entry.toRoute<SettlementRequestRoute>()
+            SettlementRequestScreen(
+                listViewModel = entry.sharedViewModel(navController),
                 contractRow = route.contractRow,
                 contractSequence = route.contractSequence,
                 onBack = { navController.popBackStack() },
