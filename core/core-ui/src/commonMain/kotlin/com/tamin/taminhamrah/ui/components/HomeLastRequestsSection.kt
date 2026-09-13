@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.model.userRequest.UserRequestPR
@@ -40,11 +42,13 @@ import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.home_see_all
 import taminx.core.core_ui.home_section_last_requests
+import taminx.core.core_ui.ic_error
+import taminx.core.core_ui.ic_info
 import taminx.core.core_ui.ic_tamin_alert_circle
 import taminx.core.core_ui.ic_tamin_check_circle
+import taminx.core.core_ui.ic_tamin_check_label
 import taminx.core.core_ui.ic_tamin_cross
 import taminx.core.core_ui.ic_tamin_edit
-import taminx.core.core_ui.ic_tamin_search
 
 @Composable
 fun HomeLastRequestsSection(
@@ -68,7 +72,7 @@ fun HomeLastRequestsSection(
                 .padding(top = Spacing.xs),
             verticalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            requests.take(3).forEach { request ->
+            requests.forEach { request ->
                 LastRequestItemCard(
                     request = request,
                     onClick = { onRequestClick(request) },
@@ -103,19 +107,19 @@ private fun LastRequestItemCard(
 
         UserRequestWorkflowStatus.SHOW_ERRORS,
         UserRequestWorkflowStatus.DISAPPROVED -> Sextuple(
-            taminColors.dangerBg,
+            taminColors.dangerBorder,
             taminColors.dangerText,
             taminColors.dangerText,
-            taminColors.dangerBg,
+            taminColors.dangerBorder,
             taminColors.dangerText,
-            Res.drawable.ic_tamin_cross,
+            Res.drawable.ic_error,
         )
 
         UserRequestWorkflowStatus.DOCUMENT_DEFECT -> Sextuple(
-            taminColors.dangerBg,
+            taminColors.dangerBorder,
             taminColors.dangerText,
             taminColors.dangerText,
-            taminColors.dangerBg,
+            taminColors.dangerBorder,
             taminColors.dangerText,
             Res.drawable.ic_tamin_alert_circle,
         )
@@ -136,7 +140,7 @@ private fun LastRequestItemCard(
             taminColors.blueText,
             taminColors.blueBg,
             taminColors.blueText,
-            Res.drawable.ic_tamin_search,
+            Res.drawable.ic_info,
         )
 
         null -> when (request.statusTone) {
@@ -149,10 +153,10 @@ private fun LastRequestItemCard(
                 Res.drawable.ic_tamin_check_circle,
             )
             UserRequestStatusTone.ERROR -> Sextuple(
-                taminColors.dangerBg,
+                taminColors.dangerBorder,
                 taminColors.dangerText,
                 taminColors.dangerText,
-                taminColors.dangerBg,
+                taminColors.dangerBorder,
                 taminColors.dangerText,
                 Res.drawable.ic_tamin_cross,
             )
@@ -162,7 +166,7 @@ private fun LastRequestItemCard(
                 taminColors.blueText,
                 taminColors.blueBg,
                 taminColors.blueText,
-                Res.drawable.ic_tamin_search,
+                Res.drawable.ic_tamin_check_label,
             )
         }
     }
@@ -218,10 +222,10 @@ private fun LastRequestItemCard(
                         .background(iconBg),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Icon(
+                    Image(
                         imageVector = vectorResource(iconRes),
                         contentDescription = null,
-                        tint = iconTint,
+                        colorFilter = ColorFilter.tint(color = iconTint),
                         modifier = Modifier.size(22.dp),
                     )
                 }
@@ -233,14 +237,15 @@ private fun LastRequestItemCard(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    Text(
+                    AutoResizeText(
+                        maxLines = 1,
                         text = request.title.ifBlank { request.requestTypeTitle },
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                         color = colorScheme.onSurface,
                     )
                     Spacer(modifier = Modifier.height(Spacing.xxs))
-                    Text(
+                    AutoResizeText(
+                        maxLines = 1,
                         text = subtitleText,
                         style = MaterialTheme.typography.bodySmall,
                         color = taminColors.textMuted,
@@ -272,20 +277,87 @@ private fun LastRequestItemCard(
 }
 
 private val samplePreviewRequests = listOf(
+    // 2: PRE_PROCESSING
     UserRequestPR(
         id = 1L,
-        refCode = "۱۰۴۸۴۰۱۸۴۹",
+        refCode = "۱۰۴۸۴۰۱۸۴۱",
+        title = "کمک هزینه ازدواج",
+        comment = "",
+        creationTime = "۱۴۰۵/۰۳/۱۲",
+        createByName = "",
+        statusDesc = "پیش‌پردازش",
+        statusCode = "2",
+        requestTypeId = 4L,
+        requestTypeTitle = "کمک هزینه ازدواج",
+    ),
+    // 6: SHOW_ERRORS
+    UserRequestPR(
+        id = 2L,
+        refCode = "۱۰۴۸۴۰۱۸۴۲",
         title = "غرامت دستمزد ایام بیماری",
         comment = "",
         creationTime = "۱۴۰۵/۰۳/۱۱",
         createByName = "",
-        statusDesc = "نقص مدارک ارسالی",
-        statusCode = "21",
+        statusDesc = "نمایش خطا",
+        statusCode = "6",
         requestTypeId = 1L,
         requestTypeTitle = "غرامت دستمزد ایام بیماری",
     ),
+    // 9: BRANCH_DELIVERED
     UserRequestPR(
-        id = 2L,
+        id = 3L,
+        refCode = "۱۰۴۸۴۰۱۸۴۳",
+        title = "درخواست بازرسی",
+        comment = "",
+        creationTime = "۱۴۰۵/۰۳/۱۰",
+        createByName = "",
+        statusDesc = "تحویل به شعبه",
+        statusCode = "9",
+        requestTypeId = 5L,
+        requestTypeTitle = "درخواست بازرسی",
+    ),
+    // 14: AWAITING_COMPLETION
+    UserRequestPR(
+        id = 4L,
+        refCode = "۱۰۴۸۳۸۴۰۰۲",
+        title = "غرامت دستمزد ایام بارداری",
+        comment = "",
+        creationTime = "۱۴۰۵/۰۲/۰۵",
+        createByName = "",
+        statusDesc = "در انتظار تکمیل اطلاعات",
+        statusCode = "14",
+        requestTypeId = 3L,
+        requestTypeTitle = "غرامت دستمزد ایام بارداری",
+    ),
+    // 16: PROCESSING_COMPLETE
+    UserRequestPR(
+        id = 5L,
+        refCode = "۱۰۴۸۴۰۱۸۴۵",
+        title = "صدور دفترچه",
+        comment = "",
+        creationTime = "۱۴۰۵/۰۳/۰۹",
+        createByName = "",
+        statusDesc = "پردازش تکمیل شد",
+        statusCode = "16",
+        requestTypeId = 6L,
+        requestTypeTitle = "صدور دفترچه",
+    ),
+    // 18: FINAL_APPROVED
+    UserRequestPR(
+        id = 6L,
+        refCode = "۱۰۴۸۴۰۱۸۴۶",
+        title = "تعهدات کوتاه مدت",
+        comment = "",
+        creationTime = "۱۴۰۵/۰۳/۰۸",
+        createByName = "",
+        statusDesc = "تایید نهایی",
+        statusCode = "18",
+        requestTypeId = 7L,
+        requestTypeTitle = "تعهدات کوتاه مدت",
+    ),
+    // 19: DISAPPROVED
+    UserRequestPR(
+        id = 7L,
         refCode = "۱۰۴۸۳۹۷۲۱۵",
         title = "درخواست بررسی مدارک ارسالی",
         comment = "",
@@ -296,17 +368,73 @@ private val samplePreviewRequests = listOf(
         requestTypeId = 2L,
         requestTypeTitle = "درخواست بررسی مدارک ارسالی",
     ),
+    // 21: DOCUMENT_DEFECT
     UserRequestPR(
-        id = 3L,
-        refCode = "۱۰۴۸۳۸۴۰۰۲",
-        title = "غرامت دستمزد ایام بارداری",
+        id = 8L,
+        refCode = "۱۰۴۸۴۰۱۸۴۹",
+        title = "غرامت دستمزد ایام بیماری",
         comment = "",
-        creationTime = "۱۴۰۵/۰۲/۰۵",
+        creationTime = "۱۴۰۵/۰۳/۱۱",
         createByName = "",
-        statusDesc = "در انتظار تکمیل اطلاعات",
-        statusCode = "14",
-        requestTypeId = 3L,
-        requestTypeTitle = "غرامت دستمزد ایام بارداری",
+        statusDesc = "نقص مدارک ارسالی",
+        statusCode = "21",
+        requestTypeId = 1L,
+        requestTypeTitle = "غرامت دستمزد ایام بیماری",
+    ),
+    // 2602: ARTICLE_SIXTEEN_APPROVED
+    UserRequestPR(
+        id = 9L,
+        refCode = "۱۰۴۸۴۰۱۸۵۰",
+        title = "کمک هزینه مراسم ترحیم",
+        comment = "",
+        creationTime = "۱۴۰۵/۰۳/۰۷",
+        createByName = "",
+        statusDesc = "تایید ماده ۱۶",
+        statusCode = "2602",
+        requestTypeId = 8L,
+        requestTypeTitle = "کمک هزینه مراسم ترحیم",
+    ),
+    // Unknown - NEUTRAL tone
+    UserRequestPR(
+        id = 10L,
+        refCode = "۱۰۴۸۴۰۱۸۵۱",
+        title = "وضعیت نامشخص - خنثی",
+        comment = "",
+        creationTime = "۱۴۰۵/۰۳/۰۶",
+        createByName = "",
+        statusDesc = "در حال بررسی اولیه",
+        statusCode = "9999",
+        requestTypeId = 9L,
+        requestTypeTitle = "سایر درخواست‌ها",
+        statusTone = UserRequestStatusTone.NEUTRAL,
+    ),
+    // Unknown - APPROVED tone
+    UserRequestPR(
+        id = 11L,
+        refCode = "۱۰۴۸۴۰۱۸۵۲",
+        title = "وضعیت نامشخص - تایید",
+        comment = "",
+        creationTime = "۱۴۰۵/۰۳/۰۵",
+        createByName = "",
+        statusDesc = "تایید استثنا",
+        statusCode = "9998",
+        requestTypeId = 9L,
+        requestTypeTitle = "سایر درخواست‌ها",
+        statusTone = UserRequestStatusTone.APPROVED,
+    ),
+    // Unknown - ERROR tone
+    UserRequestPR(
+        id = 12L,
+        refCode = "۱۰۴۸۴۰۱۸۵۳",
+        title = "وضعیت نامشخص - خطا",
+        comment = "",
+        creationTime = "۱۴۰۵/۰۳/۰۴",
+        createByName = "",
+        statusDesc = "رد استثنا",
+        statusCode = "9997",
+        requestTypeId = 9L,
+        requestTypeTitle = "سایر درخواست‌ها",
+        statusTone = UserRequestStatusTone.ERROR,
     ),
 )
 

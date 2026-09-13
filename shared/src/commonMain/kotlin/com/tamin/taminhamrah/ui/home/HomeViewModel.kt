@@ -36,7 +36,6 @@ class HomeViewModel(
     private val identityInfoUseCase: IdentityInfoUseCase,
     private val getDeservedTreatmentUseCase: GetDeservedTreatmentUseCase,
     private val getRelationTaminAllUseCase: GetRelationTaminAllUseCase,
-    private val tokenStoreManager: TokenStoreManager,
     private val getUserRequestsUseCase: GetUserRequestsUseCase,
 ) : BaseViewModel<HomeUiState, HomeUiState.HomePartialState, HomeEvent, HomeIntent>(
     initialState = HomeUiState(isLoading = true)

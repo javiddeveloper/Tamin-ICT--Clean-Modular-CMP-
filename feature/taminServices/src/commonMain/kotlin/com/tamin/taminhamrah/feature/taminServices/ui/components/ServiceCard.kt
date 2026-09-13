@@ -166,7 +166,7 @@ fun ServiceCard(
 }
 
 @Composable
-private fun AutoResizeText(
+ fun AutoResizeText(
     text: String,
     style: TextStyle,
     modifier: Modifier = Modifier,

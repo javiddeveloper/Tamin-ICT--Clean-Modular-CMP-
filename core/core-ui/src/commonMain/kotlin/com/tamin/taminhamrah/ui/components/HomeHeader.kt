@@ -164,11 +164,11 @@ fun HomeHeader(
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
             when (hasActiveRelation) {
-                true, false -> relationLabel?.let { HeaderStatusChip(text = it, dot = true) }
+                true, false -> relationLabel?.let { HeaderStatusChip(text = it, dot = true, isPositive = hasActiveRelation) }
                 null -> HeaderStatusChipShimmer(width = 96.dp)
             }
             when (hasDarmanCoverage) {
-                true, false -> darmanLabel?.let { HeaderStatusChip(text = it, dot = false) }
+                true, false -> darmanLabel?.let { HeaderStatusChip(text = it, dot = false, isPositive = hasDarmanCoverage) }
                 null -> HeaderStatusChipShimmer(width = 120.dp)
             }
         }
@@ -209,7 +209,8 @@ private fun HeaderIconButton(
 }
 
 @Composable
-private fun HeaderStatusChip(text: String, dot: Boolean) {
+private fun HeaderStatusChip(text: String, dot: Boolean, isPositive: Boolean) {
+    val toneColor = if (isPositive) LocalTaminColors.current.greenText else LocalTaminColors.current.dangerText
     Row(
         modifier = Modifier
             .clip(RoundedCornerShape(CornerRadius.max))
@@ -228,13 +229,13 @@ private fun HeaderStatusChip(text: String, dot: Boolean) {
                 modifier = Modifier
                     .size(Spacing.sm)
                     .clip(CircleShape)
-                    .background(LocalTaminColors.current.greenText),
+                    .background(toneColor),
             )
         } else {
             Icon(
                 painter = painterResource(Res.drawable.ic_tamin_shield_check),
                 contentDescription = null,
-                tint = LocalTaminColors.current.onGradient,
+                tint = toneColor,
                 modifier = Modifier.size(IconSize.small),
             )
         }
