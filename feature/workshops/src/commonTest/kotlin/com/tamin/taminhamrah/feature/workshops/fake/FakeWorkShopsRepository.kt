@@ -46,6 +46,8 @@ import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionQuery
 import com.tamin.taminhamrah.model.workshop.SmsMessageDN
+import com.tamin.taminhamrah.model.workshop.SettlementRequestDN
+import com.tamin.taminhamrah.model.workshop.SettlementSubjectDN
 import com.tamin.taminhamrah.repository.WorkShopsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -179,6 +181,29 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     override suspend fun getComputationalBasePdf(documentId: String): PdfDownloadDN = answer {
         lastPdfDocumentId = documentId
         computationalBasePdf
+    }
+
+    // --------------------------------------------------------------- درخواست مفاصاحساب
+
+    var settlementSubjects: List<SettlementSubjectDN> = emptyList()
+    var settlementPdfId: String = "pdf-id"
+    var settlementSubmitMessage: String = ""
+    var lastSettlementPdfName: String? = null
+        private set
+    var lastSettlementRequest: SettlementRequestDN? = null
+        private set
+
+    override suspend fun getSettlementSubjects(): List<SettlementSubjectDN> =
+        answer { settlementSubjects }
+
+    override suspend fun uploadSettlementPdf(fileName: String, bytes: ByteArray): String = answer {
+        lastSettlementPdfName = fileName
+        settlementPdfId
+    }
+
+    override suspend fun submitSettlementRequest(request: SettlementRequestDN): String = answer {
+        lastSettlementRequest = request
+        settlementSubmitMessage
     }
 
     override suspend fun getPaymentSheets(query: PaymentSheetQuery): PagedListDN<PaymentSheetDN> =
