@@ -67,8 +67,12 @@ import com.tamin.taminhamrah.repository.AgentRepository
 import com.tamin.taminhamrah.repository.agentRepository.AgentRepositoryImpl
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
+import com.tamin.taminhamrah.dataSource.fractionContract.FractionContractRemoteDataSource
+import com.tamin.taminhamrah.dataSource.fractionContract.FractionContractRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.inquiryEducation.InquiryEducationRemoteDataSource
 import com.tamin.taminhamrah.dataSource.inquiryEducation.InquiryEducationRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.workersPayment.WorkersPaymentRemoteDataSource
+import com.tamin.taminhamrah.dataSource.workersPayment.WorkersPaymentRemoteDataSourceImpl
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
@@ -260,6 +264,13 @@ val remoteModule = module {
         )
     }
 
+    single<WorkersPaymentRemoteDataSource> {
+        WorkersPaymentRemoteDataSourceImpl(
+            apiService = get(),
+            errorParser = get()
+        )
+    }
+
     single<InspectionRemoteDataSource> {
         InspectionRemoteDataSourceImpl(
             apiService = get(),
@@ -293,6 +304,13 @@ val remoteModule = module {
     single<InquiryEducationRemoteDataSource> {
         InquiryEducationRemoteDataSourceImpl(
             inquiryEducationApiService = get(),
+            errorParser = get()
+        )
+    }
+
+    single<FractionContractRemoteDataSource> {
+        FractionContractRemoteDataSourceImpl(
+            fractionContractApiService = get(),
             errorParser = get()
         )
     }

@@ -83,6 +83,7 @@ import com.tamin.taminhamrah.feature.developerOptions.TokenManagerRoute
 import com.tamin.taminhamrah.feature.developerOptions.debugLoginScreen
 import com.tamin.taminhamrah.feature.developerOptions.developerOptionsScreen
 import com.tamin.taminhamrah.feature.developerOptions.tokenManagerScreen
+import com.tamin.taminhamrah.feature.fractionContract.fractionContractScreen
 import com.tamin.taminhamrah.feature.girlSurvivor.girlSurvivorScreen
 import com.tamin.taminhamrah.feature.healthProfile.healthProfileScreen
 import com.tamin.taminhamrah.feature.healthProfile.navigateToHealthProfile
@@ -136,6 +137,7 @@ import com.tamin.taminhamrah.feature.taminServices.inspectionScreen
 import com.tamin.taminhamrah.feature.taminServices.occurrenceScreen
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServicesScreen
 import com.tamin.taminhamrah.feature.taminServices.sendInsuranceHistoryToInstitutionsScreen
+import com.tamin.taminhamrah.feature.taminServices.workersPaymentInfoScreen
 import com.tamin.taminhamrah.feature.taminServices.taminServicesScreen
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
 import com.tamin.taminhamrah.feature.treatment.treatmentGraph
@@ -144,16 +146,10 @@ import com.tamin.taminhamrah.feature.workshops.completeEmployerInfoScreen
 import com.tamin.taminhamrah.feature.workshops.debtObjectionStatusScreen
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
-import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
-import com.tamin.taminhamrah.feature.security.securityScreen
 import com.tamin.taminhamrah.feature.developerOptions.DeveloperOptionsRoute
-import com.tamin.taminhamrah.feature.developerOptions.developerOptionsScreen
-import com.tamin.taminhamrah.feature.settings.settingsScreen
+import com.tamin.taminhamrah.feature.payment.navigateToPayment
 import com.tamin.taminhamrah.feature.userRequest.UserRequestRoute
 import com.tamin.taminhamrah.feature.userRequest.userRequestGraph
-import com.tamin.taminhamrah.feature.workshops.completeEmployerInfoScreen
-import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
-import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.mapper.campaign.toPresentation
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
@@ -492,6 +488,13 @@ internal fun TaminHamrahNavGraph(
                     onBack = { navController.popBackStack() },
                     onDone = { navController.popBackStack() },
                 )
+                workersPaymentInfoScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenUrl = { url -> openUrl(url) },
+                    onNavigateToPayment = { request ->
+                        navController.navigateToPayment(request)
+                    },
+                )
 
                 retirementPensionScreen(onBack = { navController.popBackStack() })
                 calculatePensionScreen(onBack = { navController.popBackStack() })
@@ -513,6 +516,7 @@ internal fun TaminHamrahNavGraph(
                 deferredInstallmentScreen(onBack = { navController.popBackStack() })
                 girlSurvivorScreen(onBack = { navController.popBackStack() })
                 inquiryEducationScreen(onBack = { navController.popBackStack() })
+                fractionContractScreen(onBack = { navController.popBackStack() })
 
                 // The shared payment flow. Any feature that has been handed a gateway ticket
                 // enters it with navController.navigateToPayment(request); finishing pops back to
