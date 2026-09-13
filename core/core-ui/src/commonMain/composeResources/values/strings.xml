@@ -3048,5 +3048,43 @@
     <string name="disability_pension_exit_confirm_leave">رها می‌کنم</string>
     <string name="disability_pension_exit_confirm_continue">ادامهٔ تکمیل فرم</string>
     <string name="contract_premium_payment_ticket_error">خطا در دریافت شناسه پرداخت</string>
+    <!-- Wedding Present (هدیه ازدواج) -->
+    <string name="wedding_present_title">هدیه ازدواج</string>
+    <string name="wedding_present_subtitle">کمک‌هزینهٔ ازدواج (تعهدات کوتاه‌مدت)</string>
+    <string name="wedding_present_details_section">مشخصات درخواست</string>
+    <string name="wedding_present_request_section">درخواست هدیه ازدواج</string>
+    <string name="wedding_present_label_insurance_id">شماره بیمه</string>
+    <string name="wedding_present_label_full_name">نام و نام خانوادگی</string>
+    <string name="wedding_present_label_insurance_type">نوع بیمه</string>
+    <string name="wedding_present_label_insurance_status">وضعیت بیمه</string>
+    <string name="wedding_present_label_bank_account">شماره حساب</string>
+    <string name="wedding_present_label_bank_name">نام بانک</string>
+    <string name="wedding_present_label_branch">آخرین شعبه بیمه‌پردازی</string>
+    <string name="wedding_present_label_mobile">شماره همراه</string>
+    <string name="wedding_present_more_details">جزئیات بیشتر</string>
+    <string name="wedding_present_hide_details">بستن جزئیات بیشتر</string>
+    <string name="wedding_present_marriage_date">تاریخ عقد</string>
+    <string name="wedding_present_marriage_date_placeholder">تاریخ عقد را انتخاب کنید</string>
+    <string name="wedding_present_partner_national_code">کد ملی همسر</string>
+    <string name="wedding_present_partner_national_code_placeholder">کد ملی همسر را وارد کنید</string>
+    <string name="wedding_present_commitment_body">اینجانب با زدن دکمه «ثبت درخواست هدیه ازدواج» اعلام می‌دارم که در تاریخ اعلام‌شده برای اولین بار ازدواج نموده‌ام و تعهد می‌نمایم چنانچه خلاف آن ثابت گردد، وفق مفاد ماده ۹۷ تأمین اجتماعی می‌بایست خسارت وارده به سازمان تأمین اجتماعی را تأدیه نمایم.</string>
+    <string name="wedding_present_submit">ثبت درخواست هدیه ازدواج</string>
+    <string name="wedding_present_success_title">درخواست ثبت شد</string>
+    <string name="wedding_present_success_message">درخواست هدیه ازدواج شما با موفقیت ثبت شد</string>
+    <string name="wedding_present_success_confirm">متوجه شدم</string>
+    <string name="wedding_present_calculate_cd">محاسبه برآوردی مبلغ هدیه ازدواج</string>
+    <string name="wedding_present_calc_title">محاسبه برآوردی مبلغ هدیه ازدواج</string>
+    <string name="wedding_present_calc_subtitle">برآورد مبلغ بر پایه تاریخ عقد</string>
+    <string name="wedding_present_calc_submit">محاسبه مبلغ هدیه ازدواج</string>
+    <string name="wedding_present_calc_avg_salary">میانگین دستمزد دو سال آخر</string>
+    <string name="wedding_present_calc_payable_label">مبلغ قابل پرداخت (برآوردی)</string>
+    <string name="wedding_present_calc_payable_disclaimer">این مبلغ برآوردی است و مبلغ قطعی پس از بررسی سابقه و مدارک در شعبه تعیین می‌شود.</string>
+    <string name="wedding_present_calc_error_no_amount">انجام درخواست امکان‌پذیر نیست</string>
+    <string name="wedding_present_calc_error_select_date">تاریخ را مشخص کنید</string>
+    <string name="wedding_present_cd_back">بازگشت</string>
+    <string name="message_select_marriage_date">تاریخ عقد را وارد کنید</string>
+    <string name="error_not_valid_national_id">کد ملی معتبر نیست</string>
+    <string name="error_select_check_box">تایید تعهدنامه الزامی است</string>
+
 </resources>
 
