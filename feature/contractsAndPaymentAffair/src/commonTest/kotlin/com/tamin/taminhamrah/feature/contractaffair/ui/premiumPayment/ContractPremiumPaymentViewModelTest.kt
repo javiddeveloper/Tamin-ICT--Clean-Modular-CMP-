@@ -197,6 +197,81 @@ class ContractPremiumPaymentViewModelTest {
     }
 
     @Test
+    fun `Pay intent sends correct systemType 01 for optional insurance`() = runTest(dispatcher) {
+        repository.contractLastPaymentResult = ContractLastPaymentDN(1L, "1", null)
+        repository.contractDebitResult = ContractDebitDN(
+            total = 53_866_782L,
+            insurancePremiums = 50_000_000L,
+            previousDebit = 0L,
+            startDate = 1000L,
+            endDate = 2000L,
+            payPremiumDate = "14051001",
+            infoMessage = null,
+        )
+        contractsRepository.insurancePaymentResult = InsurancePaymentDN(
+            paymentTicket = "TICKET-12345",
+            paymentUrl = "https://tfh.tamin.ir/payment",
+            responseMessage = "OK",
+            succeed = true,
+        )
+
+        viewModel.uiState.test {
+            awaitItem()
+            viewModel.sendIntent(ContractPremiumPaymentIntent.Load("9001", "02", "بیمه اختیاری"))
+            awaitUntil { it.lastPayment != null }
+            viewModel.sendIntent(ContractPremiumPaymentIntent.Calculate)
+            awaitUntil { it.debit != null }
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        viewModel.events.test {
+            viewModel.sendIntent(ContractPremiumPaymentIntent.Pay)
+            val event = awaitItem()
+            assertTrue(event is ContractPremiumPaymentEvent.NavigateToPayment)
+            assertEquals("01", event.request.verifierReference)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `Pay intent sends correct systemType 04 for fraction insurance`() = runTest(dispatcher) {
+        repository.contractLastPaymentResult = ContractLastPaymentDN(1L, "1", null)
+        repository.contractDebitResult = ContractDebitDN(
+            total = 53_866_782L,
+            insurancePremiums = 50_000_000L,
+            previousDebit = 0L,
+            startDate = 1000L,
+            endDate = 2000L,
+            payPremiumDate = "14051001",
+            infoMessage = null,
+        )
+        contractsRepository.insurancePaymentResult = InsurancePaymentDN(
+            paymentTicket = "TICKET-12345",
+            paymentUrl = "https://tfh.tamin.ir/payment",
+            responseMessage = "OK",
+            succeed = true,
+        )
+
+        viewModel.uiState.test {
+            awaitItem()
+            viewModel.sendIntent(ContractPremiumPaymentIntent.Load("9001", "38", "تکمیل سوابق کسری از ماه"))
+            awaitUntil { it.lastPayment != null }
+            viewModel.sendIntent(ContractPremiumPaymentIntent.Calculate)
+            awaitUntil { it.debit != null }
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        viewModel.events.test {
+            viewModel.sendIntent(ContractPremiumPaymentIntent.Pay)
+            val event = awaitItem()
+            assertTrue(event is ContractPremiumPaymentEvent.NavigateToPayment)
+            assertEquals("04", event.request.verifierReference)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+
+    @Test
     fun `Pay intent emits ShowError when ticket fetch fails`() = runTest(dispatcher) {
         repository.contractDebitResult = ContractDebitDN(
             total = 53_866_782L,

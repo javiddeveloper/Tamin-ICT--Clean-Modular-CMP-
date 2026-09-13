@@ -22,6 +22,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import org.jetbrains.compose.resources.getString
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.contract_premium_payment_ticket_error
 
 /**
  * پرداخت حق بیمه (محاسبهٔ حق بیمه). Ported from `old_android`'s `InsurancePaymentViewModel`
@@ -133,7 +136,11 @@ class ContractPremiumPaymentViewModel(
 
     private fun pay(): Flow<PartialState> {
         val debit = uiState.value.debit ?: return emptyFlow()
-        val systemType = "03"
+        val systemType = when (premiumType) {
+            ContractPremiumType.OPTIONAL -> "01"
+            ContractPremiumType.FRACTION -> "04"
+            else -> "03"
+        }
         return flow {
             emit(PartialState.Paying(true))
             try {
@@ -161,7 +168,7 @@ class ContractPremiumPaymentViewModel(
                         ),
                     )
                 } else {
-                    val message = payment.responseMessage ?: "خطا در دریافت شناسه پرداخت"
+                    val message = payment.responseMessage ?: getString(Res.string.contract_premium_payment_ticket_error)
                     sendEvent(ContractPremiumPaymentEvent.ShowError(message))
                 }
             } catch (e: Exception) {
