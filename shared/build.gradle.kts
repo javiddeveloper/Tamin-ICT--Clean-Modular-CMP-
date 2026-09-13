@@ -58,6 +58,7 @@ kotlin {
             api(project(":feature:pensionSurvivor"))
             api(project(":feature:inquiryEducation"))
             api(project(":feature:fractionContract"))
+            api(project(":feature:weddingPresent"))
             api(project(":feature:payment"))
             api(project(":feature:developerOptions"))
             api(project(":feature:stories"))
