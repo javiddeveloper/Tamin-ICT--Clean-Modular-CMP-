@@ -3,6 +3,8 @@ package com.tamin.taminhamrah.feature.taminServices
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.ConstructionInsuranceRoute
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.ConstructionInsuranceViewModel
 import com.tamin.taminhamrah.feature.taminServices.occurrence.OccurrenceScreen
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.EmployerOnlineServicesRoute
@@ -31,8 +33,15 @@ data object OccurrenceRoute
 @Serializable
 data object EmployerOnlineServicesRoute
 
+@Serializable
+data object ConstructionInsuranceRoute
+
 fun NavController.navigateToTaminServices(builder: NavOptionsBuilder.() -> Unit = {}) {
     navigate(TaminServicesRoute, builder)
+}
+
+fun NavController.navigateToConstructionInsurance(builder: NavOptionsBuilder.() -> Unit = {}) {
+    navigate(ConstructionInsuranceRoute, builder)
 }
 
 fun NavController.navigateToSendInsuranceHistoryToInstitutions(builder: NavOptionsBuilder.() -> Unit = {}) {
@@ -105,6 +114,16 @@ fun NavGraphBuilder.employerOnlineServicesScreen(onBack: () -> Unit) {
     composableWithFadeTransitions<EmployerOnlineServicesRoute> {
         val viewModel: EmployerOnlineServicesViewModel = koinViewModel()
         EmployerOnlineServicesRoute(
+            viewModel = viewModel,
+            onBackClicked = onBack,
+        )
+    }
+}
+
+fun NavGraphBuilder.constructionInsuranceScreen(onBack: () -> Unit) {
+    composableWithFadeTransitions<ConstructionInsuranceRoute> {
+        val viewModel: ConstructionInsuranceViewModel = koinViewModel()
+        ConstructionInsuranceRoute(
             viewModel = viewModel,
             onBackClicked = onBack,
         )

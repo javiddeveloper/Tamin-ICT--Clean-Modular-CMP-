@@ -20,6 +20,7 @@ import com.tamin.taminhamrah.useCases.inspection.GetJobPageUseCase
 import com.tamin.taminhamrah.useCases.inspection.SubmitInspectionUseCase
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.InspectionViewModel
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.EmployerOnlineServicesViewModel
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.ConstructionInsuranceViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
@@ -49,5 +50,7 @@ val TaminServicesModule = module {
     // خدمات غیرحضوری کارفرمایان — use cases (GetUserProfileUseCase, GetEmployerAgreementsUseCase)
     // are already provided by core-domain's DomainModule.
     viewModelOf(::EmployerOnlineServicesViewModel)
+
+    viewModelOf(::ConstructionInsuranceViewModel)
 }
 

@@ -2878,4 +2878,54 @@
     <string name="objection_document_got_it">متوجه شدم</string>
 
     <string name="contract_premium_payment_ticket_error">خطا در دریافت شناسه پرداخت</string>
+
+    <!-- Construction Insurance Premium / Building Workshops -->
+    <string name="construction_insurance_title">گواهی حق بیمه ساختمانی</string>
+    <string name="construction_insurance_subtitle">پرونده‌های ساختمانی و گواهی مفاصاحساب</string>
+    <string name="label_full_name">نام و نام خانوادگی</string>
+    <string name="label_national_code">کد ملی</string>
+    <string name="label_workshop_search">جستجوی کارگاه</string>
+    <string name="file_number">شماره پرونده</string>
+    <string name="label_request_number">شماره درخواست</string>
+    <string name="label_registration_date">تاریخ ثبت</string>
+    <string name="workshop_number">شماره کارگاه</string>
+    <string name="original_registration_plate">پلاک اصلی</string>
+    <string name="part_plaque">پلاک بخش</string>
+    <string name="sub_registration_plate">پلاک فرعی</string>
+    <string name="block">بلوک</string>
+    <string name="property_construction">نوع ملک</string>
+    <string name="apartment">آپارتمان</string>
+    <string name="trade">تجاری</string>
+    <string name="postalCode">کد پستی</string>
+    <string name="label_address">آدرس</string>
+    <string name="label_calculated_amount">مبلغ محاسبه شده</string>
+    <string name="label_payment_dead_line">مهلت پرداخت</string>
+    <string name="protrusion_fee">عوارض پیش‌آمدگی</string>
+    <string name="application_fee">عوارض پذیره</string>
+    <string name="residential_service_infrastructure_fees">عوارض زیربنای خدمات مسکونی</string>
+    <string name="excess_density_surcharge">عوارض مازاد تراکم</string>
+    <string name="increase_property_value">افزایش ارزش ملک</string>
+    <string name="issuance_fencing_wall_construction_fees">عوارض احداث دیوار و حصار</string>
+    <string name="covered_clause_3_fees">عوارض بند ۳ مشمول</string>
+    <string name="article_100">ماده ۱۰۰</string>
+    <string name="meterage">متراژ</string>
+    <string name="label_debit_number">شماره بدهی</string>
+    <string name="label_payment_type">نوع پرداخت</string>
+    <string name="installment_type">تقسیطی</string>
+    <string name="cash_type">نقدی</string>
+    <string name="branch">شعبه</string>
+    <string name="branch_code">کد شعبه</string>
+    <string name="all_items">همه موارد</string>
+    <string name="btn_search">جستجو</string>
+    <string name="btn_action">عملیات</string>
+    <string name="btn_request_details">جزئیات درخواست</string>
+    <string name="notice_title">نکات مهم پیش از صدور برگ پرداخت</string>
+    <string name="notice_point_1">بر اساس محدودیت‌های تراکنشی بانک مرکزی، پرداخت آنلاین صرفاً برای مبالغ کمتر از ۵۰۰ میلیون ریال امکان‌پذیر است.</string>
+    <string name="notice_point_2">پرداخت اقساط بدهی صرفاً از طریق سامانه خدمات غیرحضوری میسر است و امکان دریافت برگ پرداخت از شعبه وجود ندارد.</string>
+    <string name="notice_point_3">در صورت پرداخت حق بیمه خارج از سامانه (غیرآنلاین)، گواهی مفاصاحساب پس از ۴۸ ساعت با زدن دکمه «گواهی پرداخت حق بیمه» صادر می‌شود.</string>
+    <string name="notice_point_4">چنانچه قصد تقسیط بدهی را دارید، از صدور برگ پرداخت عادی خودداری فرمایید.</string>
+    <string name="no_construction_files_found">هیچ پرونده ساختمانی یافت نشد.</string>
+    <string name="debit_number_allocating">در حال تخصیص شماره بدهی</string>
+    <string name="file_unit">پرونده</string>
+    <string name="operation_request_selected">عملیات درخواست انتخاب شد</string>
 </resources>

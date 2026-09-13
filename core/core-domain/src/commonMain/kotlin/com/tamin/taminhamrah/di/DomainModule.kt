@@ -267,6 +267,7 @@ import com.tamin.taminhamrah.useCases.addDependent.InquiryEducationCodeUseCase
 import com.tamin.taminhamrah.useCases.addDependent.InquiryRegistryUseCase
 import com.tamin.taminhamrah.useCases.addDependent.UploadDependentImageUseCase
 import com.tamin.taminhamrah.useCases.user.mockUseCases.MockSubdominantUseCase
+import com.tamin.taminhamrah.useCases.constructionInsurance.GetConstructionFilesUseCase
 import com.tamin.taminhamrah.useCases.versionHistory.GetVersionHistoryUseCase
 import com.tamin.taminhamrah.useCases.contactUs.GetContactUsUseCase
 import com.tamin.taminhamrah.useCases.content.GetLegalDocumentUseCase
@@ -564,5 +565,8 @@ val domainModule = module {
     factoryOf(::SubmitLegalWorkshopInfoUseCase)
     factoryOf(::RequestRealTicketUseCase)
     factoryOf(::SubmitRealWorkshopInfoUseCase)
+
+    // Construction Insurance UseCase
+    factoryOf(::GetConstructionFilesUseCase)
 }
 

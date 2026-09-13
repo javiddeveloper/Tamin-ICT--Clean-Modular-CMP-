@@ -48,6 +48,8 @@ import com.tamin.taminhamrah.apiService.calculateWagePension.CalculateWagePensio
 import com.tamin.taminhamrah.apiService.calculateWagePension.createCalculateWagePensionApiService
 import com.tamin.taminhamrah.apiService.inspection.InspectionApiService
 import com.tamin.taminhamrah.apiService.inspection.createInspectionApiService
+import com.tamin.taminhamrah.apiService.constructionInsurance.ConstructionInsuranceApiService
+import com.tamin.taminhamrah.apiService.constructionInsurance.createConstructionInsuranceApiService
 import com.tamin.taminhamrah.apiService.occurrence.OccurrenceApiService
 import com.tamin.taminhamrah.apiService.occurrence.createOccurrenceApiService
 import com.tamin.taminhamrah.apiService.employerInfo.EmployerInfoApiService
@@ -222,6 +224,11 @@ val ApiClientsModule = module {
     single<FractionContractApiService> {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.createFractionContractApiService()
+    }
+
+    single<ConstructionInsuranceApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createConstructionInsuranceApiService()
     }
 
     single<PaymentGatewayApiService> {

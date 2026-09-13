@@ -123,6 +123,8 @@ enum class FilterProperty(val key: String) {
     @SerialName("debitNumber") DEBIT_NUMBER("debitNumber"),
     @SerialName("peymanSequence") PEYMAN_SEQUENCE("peymanSequence"),
     @SerialName("seqNo") SEQ_NO("seqNo"),
+    @SerialName("fileNo") FILE_NO("fileNo"),
+    @SerialName("reqNo") REQ_NO("reqNo"),
 }
 
 

@@ -25,6 +25,7 @@ import com.tamin.taminhamrah.feature.retirementPension.navigateToRetirementPensi
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPrescription
 import com.tamin.taminhamrah.feature.contracts.navigateToContractFlow
 import com.tamin.taminhamrah.feature.contracts.flow.ContractType
+import com.tamin.taminhamrah.feature.taminServices.navigateToConstructionInsurance
 import com.tamin.taminhamrah.feature.taminServices.navigateToOccurrence
 import com.tamin.taminhamrah.feature.taminServices.navigateToInspection
 import com.tamin.taminhamrah.feature.taminServices.navigateToEmployerOnlineServices
@@ -75,6 +76,7 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
         FeatureFlag.OCCURRENCE -> navigateToOccurrence()
         FeatureFlag.LIST_OF_INSPECTIONS_PERFORMED -> navigateToInspection()
         FeatureFlag.REGISTER_AGREEMENT -> navigateToEmployerOnlineServices()
+        FeatureFlag.CONSTRUCTION_INSURANCE -> navigateToConstructionInsurance()
         FeatureFlag.OBJECTION_NON_EXISTENT_HISTORY -> navigateToHistoryObjection()
         FeatureFlag.INQUIRY_EDUCATION -> navigateToInquiryEducation()
         FeatureFlag.FRACTION_CONTRACT -> navigateToFractionContract()
