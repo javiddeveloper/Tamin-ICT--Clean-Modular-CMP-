@@ -176,8 +176,9 @@ fun AssignerContractsContent(
             entranceKey = entranceKey,
             // One workshop holds several پیمان and a ردیف repeats across workshops, so neither
             // alone is unique; the scaffold prefixes the index, which is what makes this safe as
-            // an identity rather than merely as a hint.
-            key = { it.card.workshopId + it.contractRow + it.contractSequence },
+            // an identity rather than merely as a hint. Delimited because the entrance animation
+            // reads this key unprefixed, and "12"+""+"3" would otherwise equal "1"+"2"+"3".
+            key = { "${it.card.workshopId}_${it.contractRow}_${it.contractSequence}" },
             header = header,
             empty = {
                 // Two empty states, because they mean different things: nothing has been searched

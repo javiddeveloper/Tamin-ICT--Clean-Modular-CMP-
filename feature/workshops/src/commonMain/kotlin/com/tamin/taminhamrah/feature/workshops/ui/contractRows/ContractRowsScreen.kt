@@ -186,8 +186,9 @@ fun ContractRowsContent(
             entranceKey = entranceKey,
             // Neither service guarantees a unique field: one workshop holds several rows, and the
             // row number repeats across workshops. The scaffold prefixes the index, which is what
-            // makes this safe as an identity rather than merely as a hint.
-            key = { it.workshopId + it.rowLabel },
+            // makes this safe as an identity rather than merely as a hint. Delimited because the
+            // entrance animation reads this key unprefixed, where "12"+"3" would equal "1"+"23".
+            key = { "${it.workshopId}_${it.rowLabel}" },
             header = header,
             empty = {
                 // Two different empty states, because they mean different things: nothing has been

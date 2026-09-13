@@ -23,7 +23,6 @@ import com.tamin.taminhamrah.feature.workshops.ui.objectionableDebit.Objectionab
 import com.tamin.taminhamrah.feature.workshops.ui.paymentSheets.PaymentSheetsScreen
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebit.WorkshopDebitScreen
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebtInquiry.WorkshopDebtInquiryScreen
-import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativePR
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopPR
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
