@@ -27,17 +27,18 @@ import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseDTO
+import com.tamin.taminhamrah.tools.FakeIOException
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.TaminApiException
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import io.ktor.client.statement.HttpStatement
-import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonPrimitive
 
 class PensionRemoteDataSourceImplTest {
 
@@ -123,7 +124,7 @@ private class FakePensionApiService(
         error("not used in PensionRemoteDataSourceImplTest")
 
     override suspend fun getPensionerId(): BaseDTO<ListData<PensionIdDTO>> {
-        if (shouldThrow) throw IllegalStateException("network")
+        if (shouldThrow) throw FakeIOException()
         return success(ListData(total = 1, list = listOf(PensionIdDTO(pensionerId = "123"))))
     }
 
@@ -145,7 +146,7 @@ private class FakePensionApiService(
         error("not used in PensionRemoteDataSourceImplTest")
 
     override suspend fun getPensionerPayRoll(filter: String): BaseDTO<ListData<PayRollDTO>> {
-        if (shouldThrow) throw IllegalStateException("network")
+        if (shouldThrow) throw FakeIOException()
         return success(
             ListData(
                 total = 1,
@@ -165,7 +166,7 @@ private class FakePensionApiService(
     }
 
     override suspend fun sendPayRollToInbox(filter: String): BaseDTO<JsonElement?> {
-        if (shouldThrow) throw IllegalStateException("network")
+        if (shouldThrow) throw FakeIOException()
         return success(JsonPrimitive("عملیات با موفقیت انجام شد"))
     }
 

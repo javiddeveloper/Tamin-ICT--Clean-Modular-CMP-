@@ -18,6 +18,8 @@ import com.tamin.taminhamrah.model.occurrence.OccurrenceResultDN
 import com.tamin.taminhamrah.model.occurrence.OccurrenceSubmitRequestDN
 import com.tamin.taminhamrah.model.occurrence.WorkshopItemDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.history.UserRoleDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.repository.HistoryRepository
 import com.tamin.taminhamrah.repository.occurrence.OccurrenceRepository
 import com.tamin.taminhamrah.useCases.history.GetUserInfosUseCase
@@ -432,6 +434,13 @@ class OccurrenceViewModelTest {
         override suspend fun getHistoryJobInfos(filters: List<ApiFilterDN>): Flow<HistoryJobInfoDN> = flow {
             emit(HistoryJobInfoDN(list = emptyList(), total = 0))
         }
+
+        // Added to HistoryRepository by the «کلیه سوابق» work; nothing here exercises them.
+        override suspend fun getUserRole(): UserRoleDN = error("not used in OccurrenceViewModelTest")
+        override suspend fun sendHistoryNotice(): String? = error("not used in OccurrenceViewModelTest")
+        override fun downloadHistoryReport(
+            type: HistoryCertificateType,
+        ): Flow<PdfDownloadDN> = error("not used in OccurrenceViewModelTest")
     }
 }
 

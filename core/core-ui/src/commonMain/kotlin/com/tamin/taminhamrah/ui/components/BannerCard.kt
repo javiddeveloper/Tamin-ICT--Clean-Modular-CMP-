@@ -35,7 +35,13 @@ import taminx.core.core_ui.ic_warning
 
 
 enum class BannerType {
-    Info, Warning, Error, Success
+    Info,
+    Warning,
+    Error,
+    Success,
+
+    /** A fact about the data rather than a verdict on it — the calm teal note. */
+    Tip,
 }
 
 @Composable
@@ -60,6 +66,8 @@ fun BannerCard(
         BannerType.Warning -> Triple(taminColors.orangeBg, taminColors.orangeText, vectorResource(Res.drawable.ic_warning))
         BannerType.Error -> Triple(taminColors.dangerBg, taminColors.dangerText, vectorResource(Res.drawable.ic_error))
         BannerType.Success -> Triple(taminColors.greenBg, taminColors.greenText, vectorResource(Res.drawable.ic_success))
+        // Neither good news nor bad — a fact about the data, which the design paints teal.
+        BannerType.Tip -> Triple(taminColors.tealBg, taminColors.tealText, vectorResource(Res.drawable.ic_info))
     }
 
     Row(

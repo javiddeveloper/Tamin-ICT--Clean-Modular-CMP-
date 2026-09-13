@@ -7,7 +7,9 @@ import com.tamin.taminhamrah.model.history.HistoryJobInfoDN
 import com.tamin.taminhamrah.model.history.TalfighInfoDN
 import com.tamin.taminhamrah.model.history.TalfighInfoItemDN
 import com.tamin.taminhamrah.model.history.UserInfoDN
+import com.tamin.taminhamrah.model.history.UserRoleDN
 import com.tamin.taminhamrah.model.history.WageDetailDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.repository.HistoryRepository
 import kotlinx.coroutines.flow.Flow
@@ -56,6 +58,13 @@ class FakeHistoryRepository : HistoryRepository {
     override suspend fun getUserInfos(): UserInfoDN = emptyUserInfoDN()
     override suspend fun sendToInstitution(selectedTypes: Set<HistoryCertificateType>) {}
     override suspend fun getHistoryJobInfos(filters: List<ApiFilterDN>): Flow<HistoryJobInfoDN> = flow {}
+
+    // Added to HistoryRepository by the «کلیه سوابق» work; nothing here exercises them.
+    override suspend fun getUserRole(): UserRoleDN = error("not used in retirementPension tests")
+    override suspend fun sendHistoryNotice(): String? = error("not used in retirementPension tests")
+    override fun downloadHistoryReport(
+        type: HistoryCertificateType,
+    ): Flow<PdfDownloadDN> = error("not used in retirementPension tests")
 }
 
 private fun emptyUserInfoDN() = UserInfoDN(

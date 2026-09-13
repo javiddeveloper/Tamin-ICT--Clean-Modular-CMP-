@@ -18,6 +18,7 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.offset
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.util.lerp
 import com.tamin.taminhamrah.ui.theme.Easing
@@ -163,6 +164,65 @@ fun Modifier.collapseAway(progress: () -> Float, rate: Float = 2f): Modifier =
     }
 
 /**
+ * Like [collapseAway], but only the height goes.
+ *
+ * [collapseAway] shrinks both axes, which is what a short label beside something that stays wants —
+ * it should visibly pull in from every side. A full-width row folds differently: squeezing it
+ * horizontally reads as the row being crushed, not as it leaving, and its own children re-lay out
+ * on the way. Here the piece keeps its width, fades, and gives its height back, so what follows
+ * closes up over the fade the way a header's lower deck does.
+ *
+ * [progress] is read inside the layout lambda, so a frame of the fold costs no recomposition.
+ */
+fun Modifier.collapseHeightAway(progress: () -> Float, rate: Float = 1f): Modifier =
+    layout { measurable, constraints ->
+        val placeable = measurable.measure(constraints)
+        val fade = (1f - progress() * rate).coerceIn(0f, 1f)
+        layout(placeable.width, (placeable.height * fade).roundToInt()) {
+            placeable.placeRelativeWithLayer(0, 0) { alpha = fade }
+        }
+    }
+
+/**
+ * Shrinks a line toward [minScale] as the header folds, and gives back the space it stops using.
+ *
+ * [shrinkOnCollapse] scales in the draw phase, so the piece *looks* smaller while still reserving
+ * its full size — a card folded that way keeps the height of its expanded content and reads as a
+ * mostly-empty box. This scales in the layout phase instead, so the row above closes up behind it.
+ *
+ * It also measures its content unbounded, which is what a line of mixed type needs: measured
+ * against a width it does not have, a `Text` inside is laid out to that width and clipped, so a
+ * two-digit number loses its second digit. Measure first, scale second.
+ *
+ * If the result would still be wider than the space available, the scale tightens further, so this
+ * subsumes a plain fit-to-width — there is no need to stack the two.
+ */
+fun Modifier.scaleOnCollapse(
+    progress: () -> Float,
+    minScale: Float,
+    rtl: Boolean,
+): Modifier = layout { measurable, constraints ->
+    val placeable = measurable.measure(Constraints())
+    var scale = lerp(1f, minScale, Easing.standard.transform(progress().coerceIn(0f, 1f)))
+    val max = constraints.maxWidth
+    if (max != Constraints.Infinity && placeable.width > 0 && placeable.width * scale > max) {
+        scale = max.toFloat() / placeable.width.toFloat()
+    }
+    layout((placeable.width * scale).roundToInt(), (placeable.height * scale).roundToInt()) {
+        placeable.placeRelativeWithLayer(0, 0) {
+            scaleX = scale
+            scaleY = scale
+            // Anchored to the leading edge so the line stays put as it shrinks, and to the *top*
+            // rather than the middle: the box reported above is the scaled height, so a vertically
+            // centered origin would keep drawing the line centered on the height it no longer
+            // reserves — half of it hanging below its own box, and a matching band of dead space
+            // above it. Whatever centers this line then centers the empty box, not the line.
+            transformOrigin = TransformOrigin(if (rtl) 1f else 0f, 0f)
+        }
+    }
+}
+
+/**
  * Shrinks a piece toward [minScale] as it travels, anchored to its start edge so it keeps its
  * place in the collapsed bar rather than drifting toward the middle.
  */
@@ -175,6 +235,78 @@ fun Modifier.shrinkOnCollapse(
     scaleX = scale
     scaleY = scale
     transformOrigin = TransformOrigin(if (rtl) 1f else 0f, 0.5f)
+}
+
+/**
+ * Shrinks a row of mixed type uniformly, and only when it would not otherwise fit.
+ *
+ * A line like «۱۷ سال · ۱ ماه · ۳ روز» is one figure built from eight pieces at four sizes. Left to
+ * a `Row`, each piece is measured against whatever width the pieces before it left over, and a
+ * number too wide for its share does not shrink — it *wraps*, so ۱۷ is drawn as ۱ above ۷. Capping
+ * lines does not help either: the pieces then clip one by one from the end.
+ *
+ * So the content is measured unbounded — at the size the design actually specifies — and the whole
+ * line is scaled down together when the width cannot take it. The proportions between the parts are
+ * the design's and survive; only the overall size gives. On a wide screen nothing scales at all.
+ *
+ * The scale is applied in the layout and draw phases, so a width change costs no recomposition.
+ */
+fun Modifier.scaleDownToFitWidth(): Modifier = layout { measurable, constraints ->
+    // Fully unbounded, not `constraints.copy(maxWidth = Infinity)`: the copy keeps the incoming
+    // height bounds, and a text measured under them can still be laid out against a width it was
+    // never given. `Constraints()` is what the app's other morphing cards measure their pieces
+    // with, and it is the only form that reliably reports a line's true intrinsic width.
+    val placeable = measurable.measure(Constraints())
+    val scale = if (placeable.width > constraints.maxWidth && placeable.width > 0) {
+        constraints.maxWidth.toFloat() / placeable.width.toFloat()
+    } else {
+        1f
+    }
+    val width = (placeable.width * scale).roundToInt()
+    val height = (placeable.height * scale).roundToInt()
+    layout(width, height) {
+        placeable.placeRelativeWithLayer(0, 0) {
+            scaleX = scale
+            scaleY = scale
+            // Anchored to the leading edge, so the scaled line starts where the row starts
+            // instead of drifting toward the middle as it shrinks.
+            transformOrigin = TransformOrigin(0f, 0.5f)
+        }
+    }
+}
+
+/**
+ * Bottom padding that closes as the header folds, from [expanded] to [collapsed].
+ *
+ * A header's lower padding is sized for its open state. Left fixed, a folded header keeps a band of
+ * empty ground under its last row exactly as deep as the expanded one needed, which reads as the
+ * fold having stopped short. The padding is applied during layout, so it closes without recomposing.
+ */
+fun Modifier.collapsingBottomPadding(
+    progress: () -> Float,
+    expanded: Dp,
+    collapsed: Dp,
+): Modifier = layout { measurable, constraints ->
+    val padding = lerp(expanded.toPx(), collapsed.toPx(), progress().coerceIn(0f, 1f)).roundToInt()
+    val placeable = measurable.measure(constraints.offset(vertical = -padding))
+    layout(placeable.width, placeable.height + padding) { placeable.place(0, 0) }
+}
+
+/**
+ * [collapsingBottomPadding] on both edges at once, so what it wraps stays centered as it closes.
+ *
+ * A bar whose lower padding closes while its upper one is fixed is a bar whose content drifts to
+ * the top as it folds — which reads as the fold having pushed it there rather than as the bar
+ * having tightened around it. Applied during layout, so it closes without recomposing.
+ */
+fun Modifier.collapsingVerticalPadding(
+    progress: () -> Float,
+    expanded: Dp,
+    collapsed: Dp,
+): Modifier = layout { measurable, constraints ->
+    val padding = lerp(expanded.toPx(), collapsed.toPx(), progress().coerceIn(0f, 1f)).roundToInt()
+    val placeable = measurable.measure(constraints.offset(vertical = -padding * 2))
+    layout(placeable.width, placeable.height + padding * 2) { placeable.place(0, padding) }
 }
 
 /**

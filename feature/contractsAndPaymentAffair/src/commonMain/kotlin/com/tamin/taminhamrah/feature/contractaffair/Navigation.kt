@@ -18,6 +18,7 @@ import com.tamin.taminhamrah.feature.contractaffair.ui.paymentHistory.ContractPa
 import org.koin.compose.viewmodel.koinViewModel
 import kotlinx.serialization.Serializable
 
+import com.tamin.taminhamrah.model.payment.PaymentRequestDN
 import com.tamin.taminhamrah.model.common.FeatureFlag
 
 @Serializable
@@ -130,7 +131,6 @@ fun NavGraphBuilder.contractPaymentHistoryScreen(
         )
     }
 }
-
 fun NavGraphBuilder.contractPremiumPaymentScreen(
     onBack: () -> Unit,
     onNavigateToPaymentDetails: (
@@ -138,6 +138,7 @@ fun NavGraphBuilder.contractPremiumPaymentScreen(
         startDate: Long,
         endDate: Long,
     ) -> Unit,
+    onNavigateToPayment: (PaymentRequestDN) -> Unit,
 ) {
     composableWithFadeTransitions<ContractPremiumPaymentRoute> { backStackEntry ->
         val route = backStackEntry.toRoute<ContractPremiumPaymentRoute>()
@@ -149,6 +150,7 @@ fun NavGraphBuilder.contractPremiumPaymentScreen(
             insuranceType = route.insuranceType,
             onBackClicked = onBack,
             onNavigateToPaymentDetails = onNavigateToPaymentDetails,
+            onNavigateToPayment = onNavigateToPayment,
         )
     }
 }

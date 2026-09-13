@@ -129,6 +129,10 @@ import com.tamin.taminhamrah.useCases.contracts.SaveContactUseCase
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetHistoryJobInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
+import com.tamin.taminhamrah.useCases.history.DownloadHistoryReportUseCase
+import com.tamin.taminhamrah.useCases.history.GetUserInfosUseCase
+import com.tamin.taminhamrah.useCases.history.GetUserRoleUseCase
+import com.tamin.taminhamrah.useCases.history.SendHistoryNoticeUseCase
 import com.tamin.taminhamrah.useCases.calculateWagePension.CalculateMultipleWorkshopsPensionUseCase
 import com.tamin.taminhamrah.useCases.calculateWagePension.CalculateWagePensionUseCase
 import com.tamin.taminhamrah.useCases.calculateWagePension.CheckMultipleWorkshopsUseCase
@@ -360,6 +364,10 @@ val domainModule = module {
     factoryOf(::FinalConfirmHistoryObjectionNotExistUseCase)
 
     factoryOf(::GetTalfighInfosUseCase)
+    factoryOf(::GetUserInfosUseCase)
+    factoryOf(::GetUserRoleUseCase)
+    factoryOf(::DownloadHistoryReportUseCase)
+    factoryOf(::SendHistoryNoticeUseCase)
     factoryOf(::GetDastmozdInfosUseCase)
     factoryOf(::GetHistoryJobInfosUseCase)
     factoryOf(::GetMultipleWorkshopPersonalInfoUseCase)

@@ -950,6 +950,48 @@
     <string name="orotez_protez_document_pick_read_error">خطا در خواندن فایل انتخاب‌شده.</string>
     <string name="orotez_protez_document_validation_min_count">حداقل باید ۲ مدرک بارگذاری شود.</string>
     <string name="orotez_protez_document_validation_required">بارگذاری «نسخه تجویز پزشک» و «فاکتور خرید» الزامی است.</string>
+
+    <!-- شاخص — which series the chart plots -->
+    <string name="history_metric_label">شاخص</string>
+    <string name="history_metric_both">هردو</string>
+    <string name="history_metric_wage">دستمزد</string>
+    <string name="history_metric_days">روزهای کار</string>
+    <string name="history_series_wage">دستمزد ماه</string>
+    <string name="history_series_days">روزهای کار</string>
+    <string name="history_series_max_wage">بیشینه %1$s م ریال</string>
+    <string name="history_amount_million">%1$s م ریال</string>
+    <string name="history_amount_rial">%1$s ریال</string>
+    <string name="history_series_max_days">بیشینه %1$s روز</string>
+    <string name="history_split_label">کارگاه</string>
+    <string name="history_split_chip">تفکیک کارگاه</string>
+    <string name="history_step_older">سال قدیمی‌تر</string>
+    <string name="history_step_newer">سال جدیدتر</string>
+    <string name="history_legend_no_bar">بدون سابقه، ستونی ندارد</string>
+    <string name="history_scope_all_pill">همهٔ سال‌ها · %1$s تا %2$s</string>
+    <string name="history_scope_year_pill">%1$s منبع · %2$s روز</string>
+
+    <!-- «انتخاب سال و ماه» — the year+month picker behind the toolbar's search -->
+    <string name="history_picker_action">انتخاب سال و ماه</string>
+    <string name="history_picker_title">انتخاب سال و ماه</string>
+    <string name="history_picker_hint">فقط سال بزنید تا کل سال بیاید</string>
+    <string name="history_picker_search">عدد سال را بنویسید، مثلاً ۱۳۹۵</string>
+    <string name="history_picker_year">سال</string>
+    <string name="history_picker_year_order">جدید به قدیم</string>
+    <string name="history_picker_month">ماه</string>
+    <string name="history_picker_month_optional">اختیاری</string>
+    <string name="history_picker_whole_year">کل سال</string>
+    <string name="history_picker_empty">سالی با این عدد پیدا نشد</string>
+    <string name="history_picker_no_history">بدون سابقه</string>
+    <string name="history_picker_apply_none">یک سال انتخاب کنید</string>
+    <string name="history_picker_apply_year">نمایش کل سال %1$s</string>
+    <string name="history_picker_apply_month">نمایش %1$s %2$s</string>
+    <string name="history_picker_all_years">نمایش همهٔ سال‌ها</string>
+
+    <!-- «کارگاه‌های سال» — one year's employers, as its own screen -->
+    <string name="history_workshops_title">کارگاه‌های سال %1$s</string>
+    <string name="history_workshops_caption">ریز دستمزد و شمارهٔ هر کارگاه</string>
+    <string name="history_months_breakdown">تفکیک ماه‌های سال</string>
+
     <string name="deferred_installment_title">گواهی کسر اقساط معوق</string>
     <string name="deferred_installment_subtitle">گواهی کسر اقساط برای تسهیلات بانکی</string>
     <string name="deferred_installment_step_request">درخواست گواهی</string>
@@ -1801,6 +1843,10 @@
     <string name="obj_form_check_deposit">مبلغ بدهی را به‌صورت سپردهٔ بانکی پرداخت کرده‌ام.</string>
     <string name="obj_form_check_confirm">صحت اطلاعات و مدارک ارسالی را تأیید می‌کنم.</string>
     <string name="obj_form_submit">ثبت اعتراض</string>
+    <string name="obj_form_confirm_title">ثبت نهایی اعتراض</string>
+    <string name="obj_form_confirm_body">کارفرمای محترم مدارک و مستندات ارائه شده توسط شعبه بررسی و در صورت تایید آنها، اصلاح بدهی بدون حضور در جلسه هیات بدوی انجام میگردد. بدیهی است در صورت عدم کافی بودن مستندات یا عدم تایید آنها توسط شعبه حق اعتراض به بدهی و طرح آن در هیات بدوی محفوظ می‌باشد. لذا پس از بررسی‌های معمول، نتیجه ظرف مهلت یک هفته به جنابعالی اطلاع‌رسانی خواهد شد.
+
+نتیجه بررسی‌های معمول و وضعیت رسیدگی به بدهی مورد اعتراض کارفرما پس از ثبت و تایید نهایی از طریق منوی پیگیری وضعیت اعتراض و درخواست رسیدگی این سامانه قابل مشاهده خواهد بود.</string>
     <string name="obj_form_done_body">اعتراض شما با شمارهٔ پیگیری %1$s ثبت شد و به هیئت رسیدگی ارجاع گردید.</string>
 
     <!-- درخواست رسیدگی به بدهی ماده ۱۶ -->
@@ -2959,4 +3005,5 @@
     <string name="disability_pension_exit_confirm_message">اطلاعاتی که تا این مرحله در فرم مستمری از کارافتادگی وارد کرده‌اید ذخیره نمی‌شود و در صورت خروج، باید درخواست را از ابتدا تکمیل کنید.</string>
     <string name="disability_pension_exit_confirm_leave">رها می‌کنم</string>
     <string name="disability_pension_exit_confirm_continue">ادامهٔ تکمیل فرم</string>
+    <string name="contract_premium_payment_ticket_error">خطا در دریافت شناسه پرداخت</string>
 </resources>
