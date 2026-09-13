@@ -133,6 +133,9 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     override suspend fun getAssignerContracts(query: AssignerContractQuery): PagedListDN<AssignerContractDN> = notUsed()
     override suspend fun getComputationalBases(query: ComputationalBaseQuery): PagedListDN<ComputationalBaseDN> = notUsed()
     override suspend fun getComputationalBasePdf(documentId: String): PdfDownloadDN = notUsed()
+    override suspend fun getSettlementSubjects(): List<SettlementSubjectDN> = notUsed()
+    override suspend fun uploadSettlementPdf(fileName: String, bytes: ByteArray): String = notUsed()
+    override suspend fun submitSettlementRequest(request: SettlementRequestDN): String = notUsed()
     override suspend fun getDebitReasons(page: Int): PagedListDN<DebitReasonDN> = notUsed()
     override suspend fun getWorkshopDebits(
         workshopId: String,

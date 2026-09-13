@@ -49,6 +49,8 @@ import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionQuery
 import com.tamin.taminhamrah.model.workshop.SmsMessageDN
+import com.tamin.taminhamrah.model.workshop.SettlementRequestDN
+import com.tamin.taminhamrah.model.workshop.SettlementSubjectDN
 import com.tamin.taminhamrah.repository.CityProvinceRepository
 import com.tamin.taminhamrah.repository.WorkShopsRepository
 import kotlinx.coroutines.flow.Flow
@@ -101,6 +103,9 @@ internal class FakeCascadeWorkShopsRepository : WorkShopsRepository {
         query: ComputationalBaseQuery
     ): PagedListDN<ComputationalBaseDN> = unusedValue()
     override suspend fun getComputationalBasePdf(documentId: String): PdfDownloadDN = unusedValue()
+    override suspend fun getSettlementSubjects(): List<SettlementSubjectDN> = unusedValue()
+    override suspend fun uploadSettlementPdf(fileName: String, bytes: ByteArray): String = unusedValue()
+    override suspend fun submitSettlementRequest(request: SettlementRequestDN): String = unusedValue()
     override suspend fun getPaymentSheets(query: PaymentSheetQuery): PagedListDN<PaymentSheetDN> = unusedValue()
     override suspend fun getDebitReasons(page: Int): PagedListDN<DebitReasonDN> = unusedValue()
     override suspend fun getWorkshopDebits(

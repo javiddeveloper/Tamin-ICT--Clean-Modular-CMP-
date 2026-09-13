@@ -47,6 +47,8 @@ import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionQuery
 import com.tamin.taminhamrah.model.workshop.SmsMessageDN
+import com.tamin.taminhamrah.model.workshop.SettlementRequestDN
+import com.tamin.taminhamrah.model.workshop.SettlementSubjectDN
 import com.tamin.taminhamrah.repository.WorkShopsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -178,6 +180,14 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     }
 
     override suspend fun getComputationalBasePdf(documentId: String): PdfDownloadDN = answer { pdf }
+
+    override suspend fun getSettlementSubjects(): List<SettlementSubjectDN> = answer { emptyList() }
+
+    override suspend fun uploadSettlementPdf(fileName: String, bytes: ByteArray): String =
+        answer { "" }
+
+    override suspend fun submitSettlementRequest(request: SettlementRequestDN): String =
+        answer { "" }
 
     override suspend fun getPaymentSheets(query: PaymentSheetQuery): PagedListDN<PaymentSheetDN> =
         answer {

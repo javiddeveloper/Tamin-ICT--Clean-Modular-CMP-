@@ -271,6 +271,9 @@ import com.tamin.taminhamrah.useCases.user.mockUseCases.MockSubdominantUseCase
 import com.tamin.taminhamrah.useCases.versionHistory.GetVersionHistoryUseCase
 import com.tamin.taminhamrah.useCases.contactUs.GetContactUsUseCase
 import com.tamin.taminhamrah.useCases.content.GetLegalDocumentUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetSettlementSubjectsUseCase
+import com.tamin.taminhamrah.useCases.workshops.SubmitSettlementRequestUseCase
+import com.tamin.taminhamrah.useCases.workshops.UploadSettlementPdfUseCase
 
 val domainModule = module {
     // Add Dependent UseCases
@@ -463,6 +466,9 @@ val domainModule = module {
     factoryOf(::GetAssignerContractsUseCase)
     factoryOf(::GetComputationalBasesUseCase)
     factoryOf(::GetComputationalBasePdfUseCase)
+    factoryOf(::GetSettlementSubjectsUseCase)
+    factoryOf(::UploadSettlementPdfUseCase)
+    factoryOf(::SubmitSettlementRequestUseCase)
     factoryOf(::GetContractRowsWithoutAgreementUseCase)
     factoryOf(::GetPaymentSheetsUseCase)
     factoryOf(::GetDebitReasonsUseCase)
