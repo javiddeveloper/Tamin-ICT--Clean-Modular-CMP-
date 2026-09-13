@@ -2670,6 +2670,15 @@
     <string name="wedding_present_success_message">درخواست هدیه ازدواج شما با موفقیت ثبت شد</string>
     <string name="wedding_present_success_confirm">متوجه شدم</string>
     <string name="wedding_present_calculate_cd">محاسبه برآوردی مبلغ هدیه ازدواج</string>
+    <string name="wedding_present_calc_title">محاسبه برآوردی مبلغ هدیه ازدواج</string>
+    <string name="wedding_present_calc_subtitle">برآورد مبلغ بر پایه تاریخ عقد</string>
+    <string name="wedding_present_calc_submit">محاسبه مبلغ هدیه ازدواج</string>
+    <string name="wedding_present_calc_avg_salary">میانگین دستمزد دو سال آخر</string>
+    <string name="wedding_present_calc_payable_label">مبلغ قابل پرداخت (برآوردی)</string>
+    <string name="wedding_present_calc_payable_disclaimer">این مبلغ برآوردی است و مبلغ قطعی پس از بررسی سابقه و مدارک در شعبه تعیین می‌شود.</string>
+    <string name="wedding_present_calc_error_no_amount">انجام درخواست امکان‌پذیر نیست</string>
+    <string name="wedding_present_calc_error_select_date">تاریخ را مشخص کنید</string>
+    <string name="wedding_present_cd_back">بازگشت</string>
     <string name="message_select_marriage_date">تاریخ عقد را وارد کنید</string>
     <string name="error_not_valid_national_id">کد ملی معتبر نیست</string>
     <string name="error_select_check_box">تایید تعهدنامه الزامی است</string>

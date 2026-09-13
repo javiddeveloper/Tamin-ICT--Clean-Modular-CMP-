@@ -27,6 +27,11 @@ class WeddingPresentRemoteDataSourceImpl(
         }
     }
 
+    override suspend fun calculateMarriageAllowance(timeStamp: String): List<String>? =
+        errorParser.safeCall("calculateMarriageAllowance") {
+            weddingPresentApiService.calculateMarriageAllowance(timeStamp).extractData()
+        }
+
     /** Like [extractData], but allows null [BaseDTO.data] on 2xx (legacy GeneralRes success). */
     private fun <T> BaseDTO<T>.extractNullableData(): T? {
         return when {

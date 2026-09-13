@@ -75,4 +75,24 @@ class WeddingPresentApiServiceTest : BaseApiTest() {
         assertEquals(200, response.status)
         assertNull(response.data)
     }
+
+    @Test
+    fun calculateMarriageAllowance_returnsAmounts() = runTest {
+        val jsonResponse = """
+            {
+                "status": 200,
+                "family": "SUCCESS",
+                "reason": "OK",
+                "data": ["130300000", "130300000"]
+            }
+        """.trimIndent()
+
+        val ktorfit: Ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createWeddingPresentApiService()
+
+        val response = apiService.calculateMarriageAllowance("1700000000000")
+
+        assertEquals(200, response.status)
+        assertEquals(listOf("130300000", "130300000"), response.data)
+    }
 }

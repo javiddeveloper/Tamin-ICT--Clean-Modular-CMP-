@@ -22,4 +22,10 @@ class WeddingPresentRepositoryImpl(
         weddingPresentRemoteDataSource.submitWeddingPresent(request.toDTO())
         emit(Unit)
     }
+
+    override fun calculateMarriageAllowance(timeStamp: String): Flow<List<String>> = flow {
+        emit(
+            weddingPresentRemoteDataSource.calculateMarriageAllowance(timeStamp).orEmpty(),
+        )
+    }
 }

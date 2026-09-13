@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.tools.BaseDTO
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.POST
+import de.jensklingenberg.ktorfit.http.Path
 import kotlinx.serialization.json.JsonElement
 
 interface WeddingPresentApiService {
@@ -17,4 +18,9 @@ interface WeddingPresentApiService {
     suspend fun submitWeddingPresent(
         @Body request: ShortTermMarriageRequestDTO,
     ): BaseDTO<JsonElement?>
+
+    @GET("shortterm-request/calcMarriage/{timeStamp}")
+    suspend fun calculateMarriageAllowance(
+        @Path("timeStamp") timeStamp: String,
+    ): BaseDTO<List<String>?>
 }

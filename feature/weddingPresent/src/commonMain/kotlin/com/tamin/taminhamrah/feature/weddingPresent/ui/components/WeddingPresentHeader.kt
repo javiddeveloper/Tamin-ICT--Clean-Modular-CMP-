@@ -23,7 +23,7 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.ic_request
+import taminx.core.core_ui.ic_calculator
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.wedding_present_calculate_cd
 import taminx.core.core_ui.wedding_present_subtitle
@@ -56,7 +56,7 @@ internal fun WeddingPresentHeader(
         },
         action = {
             TaminTopAppBarButton(
-                icon = vectorResource(Res.drawable.ic_request),
+                icon = vectorResource(Res.drawable.ic_calculator),
                 contentDescription = stringResource(Res.string.wedding_present_calculate_cd),
                 onClick = onCalculateClicked,
                 bordered = true,

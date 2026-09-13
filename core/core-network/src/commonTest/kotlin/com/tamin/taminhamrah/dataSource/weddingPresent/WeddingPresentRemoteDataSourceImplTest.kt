@@ -21,8 +21,11 @@ class FakeWeddingPresentApiService : WeddingPresentApiService {
         BaseDTO(status = 200, family = "OK", reason = "OK", data = WeddingPresentInfoDTO())
     var submitResult: BaseDTO<JsonElement?> =
         BaseDTO(status = 200, family = "OK", reason = "OK", data = null)
+    var calculateResult: BaseDTO<List<String>?> =
+        BaseDTO(status = 200, family = "OK", reason = "OK", data = listOf("1000", "2000"))
     var shouldThrowException: Exception? = null
     var lastSubmitRequest: ShortTermMarriageRequestDTO? = null
+    var lastCalculateTimeStamp: String? = null
 
     override suspend fun getWeddingPresentInfo(): BaseDTO<WeddingPresentInfoDTO> {
         shouldThrowException?.let { throw it }
@@ -35,6 +38,14 @@ class FakeWeddingPresentApiService : WeddingPresentApiService {
         shouldThrowException?.let { throw it }
         lastSubmitRequest = request
         return submitResult
+    }
+
+    override suspend fun calculateMarriageAllowance(
+        timeStamp: String,
+    ): BaseDTO<List<String>?> {
+        shouldThrowException?.let { throw it }
+        lastCalculateTimeStamp = timeStamp
+        return calculateResult
     }
 }
 
@@ -116,6 +127,27 @@ class WeddingPresentRemoteDataSourceImplTest {
                     weddingDateTimeStamp = 1L,
                 )
             )
+        }
+    }
+
+    @Test
+    fun calculateMarriageAllowance_success_returnsList() = runTest {
+        fakeApiService.calculateResult =
+            BaseDTO(status = 200, family = "OK", reason = "OK", data = listOf("130300000", "130300000"))
+
+        val result = dataSource.calculateMarriageAllowance("1700000000000")
+
+        assertEquals(listOf("130300000", "130300000"), result)
+        assertEquals("1700000000000", fakeApiService.lastCalculateTimeStamp)
+    }
+
+    @Test
+    fun calculateMarriageAllowance_errorStatus_throws() = runTest {
+        fakeApiService.calculateResult =
+            BaseDTO(status = 400, family = "CLIENT_ERROR", reason = "Bad Request", data = null)
+
+        assertFailsWith<TaminApiException> {
+            dataSource.calculateMarriageAllowance("1")
         }
     }
 }

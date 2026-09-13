@@ -7,4 +7,5 @@ import kotlinx.coroutines.flow.Flow
 interface WeddingPresentRepository {
     fun getWeddingPresentInfo(): Flow<WeddingPresentInfoDN>
     fun submitWeddingPresent(request: WeddingPresentSubmitRequestDN): Flow<Unit>
+    fun calculateMarriageAllowance(timeStamp: String): Flow<List<String>>
 }
