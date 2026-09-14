@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -40,7 +39,7 @@ internal fun FuneralAllowanceStepScaffold(
     content: @Composable (PaddingValues) -> Unit,
 ) {
     Scaffold(
-        modifier = modifier.fillMaxSize().imePadding(),
+        modifier = modifier.fillMaxSize(),
         topBar = {
             Surface(color = LocalTaminColors.current.bgSurface) {
                 Column {
@@ -90,12 +89,12 @@ private fun FuneralAllowanceStepIndicator(
         steps = persistentListOf(
             StepIndicatorModel(
                 title = stringResource(Res.string.funeral_allowance_applicant_info),
-                stepNumber = "۱",
+                stepNumber = "1",
                 state = if (currentIndex == 0) StepState.Active else StepState.Completed,
             ),
             StepIndicatorModel(
                 title = stringResource(Res.string.funeral_allowance_deceased_info),
-                stepNumber = "۲",
+                stepNumber = "2",
                 state = if (currentIndex >= 1) StepState.Active else StepState.Inactive,
             ),
         ),

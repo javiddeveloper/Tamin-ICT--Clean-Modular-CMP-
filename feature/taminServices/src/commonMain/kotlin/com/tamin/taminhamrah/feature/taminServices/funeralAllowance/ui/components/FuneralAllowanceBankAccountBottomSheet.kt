@@ -36,7 +36,6 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.funeral_allowance_bank_sheet_subtitle
 import taminx.core.core_ui.funeral_allowance_deposit_account
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FuneralAllowanceBankAccountBottomSheet(
     bankAccounts: List<BankAccountPR>,

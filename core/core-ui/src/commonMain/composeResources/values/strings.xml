@@ -3105,7 +3105,8 @@
     <string name="funeral_allowance_deceased_relative">نسبت متوفی</string>
     <string name="funeral_allowance_submit_request">ثبت درخواست</string>
     <string name="funeral_allowance_error_invalid_national_id">کد ملی معتبر نیست</string>
-    <string name="funeral_allowance_empty">شما دارای شرایط دریافت کمک هزینه مراسم ترحیم نمی‌باشید</string>
+    <string name="funeral_allowance_empty">اطلاعاتی برای نمایش وجود ندارد.</string>
+    <string name="funeral_allowance_not_eligible">شما دارای شرایط دریافت کمک هزینه مراسم ترحیم نمی‌باشید</string>
     <string name="funeral_allowance_registered_request_title">درخواست ثبت‌شده</string>
     <string name="funeral_allowance_death_date">تاریخ فوت</string>
     <string name="funeral_allowance_request_date">تاریخ درخواست</string>

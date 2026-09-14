@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.onStart
 import org.jetbrains.compose.resources.getString
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.funeral_allowance_error_invalid_national_id
+import taminx.core.core_ui.funeral_allowance_not_eligible
 
 class FuneralAllowanceViewModel(
     private val getBankAccountListUseCase: GetBankAccountListUseCase,
@@ -63,11 +64,6 @@ class FuneralAllowanceViewModel(
         }
     }
 
-    /**
-     * Pre-flight gate: the funeral-allowance flow can only run once the user has
-     * at least one registered bank account. Empty list -> block behind the
-     * no-bank-account dialog; otherwise continue into [loadInfo].
-     */
     private fun checkBankAccountThenLoadInfo(): Flow<PartialState> = flow {
         emit(PartialState.ClearError)
         emit(PartialState.CheckingBankAccount(true))
@@ -107,17 +103,11 @@ class FuneralAllowanceViewModel(
     private fun onNationalCodeChanged(value: String): Flow<PartialState> = flow {
         val digits = value.filter { it.isDigit() }.take(10)
         emit(PartialState.DeceasedNationalCodeChanged(digits))
-        emit(PartialState.DeceasedNationalCodeError(null))
-        // Any edit invalidates a previous eligibility result.
         emit(PartialState.DeceasedValidationCleared)
     }
 
     private fun validateDeceased(): Flow<PartialState> = flow {
         val nationalCode = uiState.value.deceasedNationalCode
-        if (!ValidationUtils.isNationalIdValid(nationalCode)) {
-            emit(PartialState.DeceasedNationalCodeError(getString(Res.string.funeral_allowance_error_invalid_national_id)))
-            return@flow
-        }
         emit(PartialState.ValidatingDeceased(true))
         try {
             val validation = validateDeceasedUseCase(nationalCode)
@@ -125,7 +115,8 @@ class FuneralAllowanceViewModel(
                 emit(PartialState.DeceasedValidated(validation.toPR()))
             } else {
                 emit(PartialState.DeceasedValidationCleared)
-                sendEvent(FuneralAllowanceEvent.ShowInfoMessage(validation.message))
+                val message = validation.message.ifBlank { getString(Res.string.funeral_allowance_not_eligible) }
+                sendEvent(FuneralAllowanceEvent.ShowInfoMessage(message))
             }
         } catch (e: Exception) {
             sendEvent(FuneralAllowanceEvent.ShowErrorToast(e.toSingleLineMessage()))
@@ -134,10 +125,6 @@ class FuneralAllowanceViewModel(
         }
     }
 
-    /**
-     * "Back" steps through the wizard; once on the first step there is nowhere left to go, so
-     * leave the screen entirely. Mirrors the occurrence flow's [goToPreviousStep].
-     */
     private fun goToPreviousStep(): Flow<PartialState> = flow {
         if (uiState.value.currentStep == FuneralAllowanceStep.APPLICANT_INFO) {
             sendEvent(FuneralAllowanceEvent.NavigateBack)
@@ -208,9 +195,6 @@ class FuneralAllowanceViewModel(
 
         is PartialState.DeceasedNationalCodeChanged ->
             currentState.copy(deceasedNationalCode = partialState.value)
-
-        is PartialState.DeceasedNationalCodeError ->
-            currentState.copy(deceasedNationalCodeError = partialState.message)
 
         is PartialState.ValidatingDeceased ->
             currentState.copy(isValidatingDeceased = partialState.inProgress)

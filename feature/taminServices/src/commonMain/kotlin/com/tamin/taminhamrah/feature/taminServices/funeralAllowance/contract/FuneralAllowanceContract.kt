@@ -56,7 +56,6 @@ data class FuneralAllowanceUiState(
         data class InfoLoaded(val info: FuneralAllowanceInfoPR, val bankAccounts: List<com.tamin.taminhamrah.model.bankAccount.BankAccountPR>) : PartialState
 
         data class DeceasedNationalCodeChanged(val value: String) : PartialState
-        data class DeceasedNationalCodeError(val message: String?) : PartialState
 
         data class ValidatingDeceased(val inProgress: Boolean) : PartialState
         data class DeceasedValidated(val validation: DeceasedValidationPR) : PartialState
@@ -64,7 +63,7 @@ data class FuneralAllowanceUiState(
 
         data class Submitting(val inProgress: Boolean) : PartialState
         data class ConfirmingCorrection(val inProgress: Boolean) : PartialState
-        
+
         data object GoToNextStep : PartialState
         data object GoToPreviousStep : PartialState
         data class BankAccountSelected(val bankAccount: com.tamin.taminhamrah.model.bankAccount.BankAccountPR) : PartialState
@@ -89,10 +88,10 @@ sealed interface FuneralAllowanceIntent {
 
     /** "استعلام شرایط" — check the deceased's eligibility. */
     data object ValidateDeceased : FuneralAllowanceIntent
-    
+
     data object GoToNextStep : FuneralAllowanceIntent
     data object GoToPreviousStep : FuneralAllowanceIntent
-    
+
     data class SelectBankAccount(val bankAccount: com.tamin.taminhamrah.model.bankAccount.BankAccountPR) : FuneralAllowanceIntent
     data class ToggleAccountConfirmation(val isConfirmed: Boolean) : FuneralAllowanceIntent
     data class ShowBankAccountBottomSheet(val show: Boolean) : FuneralAllowanceIntent

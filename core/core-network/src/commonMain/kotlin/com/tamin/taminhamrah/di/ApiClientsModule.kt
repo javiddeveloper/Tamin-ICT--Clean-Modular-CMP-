@@ -230,7 +230,6 @@ val ApiClientsModule = module {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.createFuneralAllowanceApiService()
     }
-}
 
     single<FractionContractApiService> {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))

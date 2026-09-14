@@ -69,10 +69,6 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
 import com.tamin.taminhamrah.dataSource.fractionContract.FractionContractRemoteDataSource
 import com.tamin.taminhamrah.dataSource.fractionContract.FractionContractRemoteDataSourceImpl
-import com.tamin.taminhamrah.dataSource.inspection.InspectionRemoteDataSource
-import com.tamin.taminhamrah.dataSource.inspection.InspectionRemoteDataSourceImpl
-import com.tamin.taminhamrah.dataSource.occurrence.OccurrenceRemoteDataSource
-import com.tamin.taminhamrah.dataSource.occurrence.OccurrenceRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.funeralAllowance.FuneralAllowanceRemoteDataSource
 import com.tamin.taminhamrah.dataSource.funeralAllowance.FuneralAllowanceRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.inquiryEducation.InquiryEducationRemoteDataSource

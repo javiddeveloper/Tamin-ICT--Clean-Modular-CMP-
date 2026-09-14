@@ -41,7 +41,6 @@ fun DeceasedValidationDN.toPR(): DeceasedValidationPR = DeceasedValidationPR(
     deathDate = deathDate,
 )
 
-/** Assembles the submit payload from the loaded info plus the deceased id the user entered. */
 fun FuneralAllowanceInfoPR.toSubmitParams(deceasedNationalId: String): SubmitFuneralAllowanceParamsDN =
     SubmitFuneralAllowanceParamsDN(
         deceasedNationalId = deceasedNationalId,

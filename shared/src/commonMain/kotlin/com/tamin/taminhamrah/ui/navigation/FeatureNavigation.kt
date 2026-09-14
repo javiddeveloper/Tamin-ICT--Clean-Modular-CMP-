@@ -2,7 +2,6 @@ package com.tamin.taminhamrah.ui.navigation
 
 import androidx.navigation.NavController
 import com.tamin.taminhamrah.feature.contractaffair.navigateToContractAffairs
-import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.history.navigateToHistory
 import com.tamin.taminhamrah.feature.history.navigateToHistoryJobInfo
 import com.tamin.taminhamrah.feature.historyobjection.navigateToHistoryObjection
@@ -27,11 +26,6 @@ import com.tamin.taminhamrah.feature.retirementPension.navigateToRetirementPensi
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPrescription
 import com.tamin.taminhamrah.feature.contracts.navigateToContractFlow
 import com.tamin.taminhamrah.feature.contracts.flow.ContractType
-import com.tamin.taminhamrah.feature.pensionSurvivor.navigateToPensionSurvivor
-import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToFreelanceInsuranceContract
-import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToHousewifeInsuranceContract
-import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToOptionalInsuranceContract
-import com.tamin.taminhamrah.feature.studentInsuranceContract.navigateToStudentInsuranceContract
 import com.tamin.taminhamrah.feature.taminServices.navigateToOccurrence
 import com.tamin.taminhamrah.feature.taminServices.navigateToInspection
 import com.tamin.taminhamrah.feature.taminServices.navigateToEmployerOnlineServices
