@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.font.FontWeight
@@ -50,14 +51,17 @@ import taminx.core.core_ui.ic_tamin_check_label
 import taminx.core.core_ui.ic_tamin_cross
 import taminx.core.core_ui.ic_tamin_edit
 
+import com.tamin.taminhamrah.ui.theme.shimmer
+import com.tamin.taminhamrah.ui.theme.ShimmerSize
+
 @Composable
 fun HomeLastRequestsSection(
-    requests: List<UserRequestPR>,
+    requests: List<UserRequestPR>?,
     onSeeAllClick: () -> Unit,
     onRequestClick: (UserRequestPR) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    if (requests.isEmpty()) return
+    if (requests != null && requests.isEmpty()) return
 
     Column(modifier = modifier.fillMaxWidth()) {
         SectionHeader(
@@ -72,11 +76,103 @@ fun HomeLastRequestsSection(
                 .padding(top = Spacing.xs),
             verticalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            requests.forEach { request ->
-                LastRequestItemCard(
-                    request = request,
-                    onClick = { onRequestClick(request) },
+            if (requests == null) {
+                repeat(2) {
+                    LastRequestItemCardShimmer()
+                }
+            } else {
+                requests.forEach { request ->
+                    LastRequestItemCard(
+                        request = request,
+                        onClick = { onRequestClick(request) },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LastRequestItemCardShimmer(modifier: Modifier = Modifier) {
+    Box(modifier = modifier) {
+        // Invisible real card to perfectly reserve exact height
+        LastRequestItemCard(
+            request = UserRequestPR(
+                id = 0,
+                refCode = "۱۰۴۸۴۰۱۸۴۱",
+                title = "عنوان درخواست",
+                comment = "",
+                creationTime = "۱۴۰۵/۰۳/۱۲",
+                createByName = "",
+                statusDesc = "وضعیت",
+                statusCode = "2",
+                requestTypeId = 4L,
+                requestTypeTitle = "نوع درخواست",
+            ),
+            onClick = {},
+            modifier = Modifier.alpha(0f)
+        )
+
+        // The shimmer overlay
+        val taminColors = LocalTaminColors.current
+        Row(
+            modifier = Modifier
+                .matchParentSize()
+                .clip(RoundedCornerShape(CornerRadius.lg))
+                .background(taminColors.bgSurface)
+                .border(
+                    width = 1.dp,
+                    color = taminColors.border,
+                    shape = RoundedCornerShape(CornerRadius.lg),
                 )
+        ) {
+            // Right vertical accent strip
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .fillMaxHeight()
+                    .background(taminColors.border)
+                    .shimmer(taminColors.border)
+            )
+
+            Row(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = Spacing.md, vertical = Spacing.md),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                // Icon container with soft background
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(RoundedCornerShape(CornerRadius.lg))
+                        .background(taminColors.border)
+                        .shimmer(taminColors.border)
+                )
+
+                Spacer(modifier = Modifier.width(Spacing.md))
+
+                // Title & Subtitle
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0.6f)
+                            .height(ShimmerSize.titleHeight)
+                            .clip(RoundedCornerShape(CornerRadius.sm))
+                            .shimmer(taminColors.border)
+                    )
+                    Spacer(modifier = Modifier.height(Spacing.xs))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0.4f)
+                            .height(ShimmerSize.subtitleHeight)
+                            .clip(RoundedCornerShape(CornerRadius.sm))
+                            .shimmer(taminColors.border)
+                    )
+                }
             }
         }
     }
@@ -166,7 +262,7 @@ private fun LastRequestItemCard(
                 taminColors.blueText,
                 taminColors.blueBg,
                 taminColors.blueText,
-                Res.drawable.ic_tamin_check_label,
+                Res.drawable.ic_info,
             )
         }
     }

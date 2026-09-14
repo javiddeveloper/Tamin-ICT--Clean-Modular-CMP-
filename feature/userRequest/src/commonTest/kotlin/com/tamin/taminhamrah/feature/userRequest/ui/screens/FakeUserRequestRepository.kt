@@ -30,6 +30,11 @@ class FakeUserRequestRepository : UserRequestRepository {
         emit(userRequestsResult)
     }
 
+    override suspend fun refreshUserRequests(search: UserRequestSearchParams): List<UserRequestDN> {
+        if (shouldThrowError) throw error
+        return userRequestsResult
+    }
+
     override suspend fun getRequestTypes(query: ApiQueryParamDN?): List<UserRequestTypeDN> {
         if (shouldThrowError) throw error
         return emptyList()

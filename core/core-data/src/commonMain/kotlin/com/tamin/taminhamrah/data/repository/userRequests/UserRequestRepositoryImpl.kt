@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.data.repository.userRequests
 
 import com.tamin.taminhamrah.data.local.dao.UserRequestDao
+import com.tamin.taminhamrah.data.local.entity.UserRequestEntity
 import com.tamin.taminhamrah.data.mapper.toDetails
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
@@ -35,44 +36,40 @@ internal class UserRequestRepositoryImpl(
 ) : UserRequestRepository {
 
     override fun getUserRequests(search: UserRequestSearchParams): Flow<List<UserRequestDN>> = flow {
-        val targetRef = search.refCode?.trim()?.takeIf { it.isNotEmpty() }
-        val targetTypeId = search.requestTypeId?.trim()?.takeIf { it.isNotEmpty() }
-        val isFiltered = targetRef != null || targetTypeId != null
-
-        fun List<UserRequestDN>.applySearchFilter(): List<UserRequestDN> {
-            if (!isFiltered) return this
-            return filter { req ->
-                val ref = req.refCode
-                val typeId = req.requestType?.id?.toString()
-                val matchesRef = targetRef == null || (ref != null && ref.contains(targetRef, ignoreCase = true))
-                val matchesType = targetTypeId == null || typeId == targetTypeId
-                matchesRef && matchesType
-            }
-        }
-
         val localRequests = requestDao.getUserRequests().first()
-        emit(localRequests.map { it.toDomain() }.applySearchFilter())
+        emit(localRequests.map { it.toDomain() }.applySearchFilter(search))
 
         try {
-            val response = requestRemoteDataSource.getUserRequests(buildQuery(search))
-            val remoteRequests = response.list.orEmpty().map { it.toEntity() }
-            if (isFiltered) {
-                requestDao.upsertUserRequests(remoteRequests)
-            } else {
-                requestDao.replaceAll(remoteRequests)
-            }
+            fetchAndCacheUserRequests(search)
         } catch (e: Exception) {
             if (localRequests.isEmpty()) {
                 throw e
             }
         }
 
-        emitAll(
-            requestDao.getUserRequests().map { entities ->
-                entities.map { it.toDomain() }.applySearchFilter()
-            }
-        )
+        emitAll(requestDao.getUserRequests().map { entities -> entities.map { it.toDomain() }.applySearchFilter(search) })
     }.distinctUntilChanged()
+
+    /**
+     * One-shot network refresh, for callers (like the Home sync) that need the fresh value
+     * directly rather than observing [getUserRequests]'s cache-then-network `Flow`. Still writes
+     * through to the local cache, so [getUserRequests] observers see the update too.
+     */
+    override suspend fun refreshUserRequests(search: UserRequestSearchParams): List<UserRequestDN> =
+        fetchAndCacheUserRequests(search).map { it.toDomain() }.applySearchFilter(search)
+
+    /** Fetches the remote list and writes it through to the cache; returns the cached-shape entities. */
+    private suspend fun fetchAndCacheUserRequests(search: UserRequestSearchParams): List<UserRequestEntity> {
+        val isFiltered = search.isFiltered()
+        val response = requestRemoteDataSource.getUserRequests(buildQuery(search))
+        val remoteRequests = response.list.orEmpty().map { it.toEntity() }
+        if (isFiltered) {
+            requestDao.upsertUserRequests(remoteRequests)
+        } else {
+            requestDao.replaceAll(remoteRequests)
+        }
+        return remoteRequests
+    }
 
     override suspend fun getRequestTypes(query: ApiQueryParamDN?): List<UserRequestTypeDN> {
         val effectiveQuery = query ?: apiQueryBuilder.defaultQuery()
@@ -172,5 +169,21 @@ internal class UserRequestRepositoryImpl(
         filters = UserRequestFilter.buildFilters(search),
         sorts = UserRequestSort.defaultSorts(),
     )
+}
+
+private fun UserRequestSearchParams.isFiltered(): Boolean =
+    refCode?.trim()?.takeIf { it.isNotEmpty() } != null || requestTypeId?.trim()?.takeIf { it.isNotEmpty() } != null
+
+private fun List<UserRequestDN>.applySearchFilter(search: UserRequestSearchParams): List<UserRequestDN> {
+    val targetRef = search.refCode?.trim()?.takeIf { it.isNotEmpty() }
+    val targetTypeId = search.requestTypeId?.trim()?.takeIf { it.isNotEmpty() }
+    if (targetRef == null && targetTypeId == null) return this
+    return filter { req ->
+        val ref = req.refCode
+        val typeId = req.requestType?.id?.toString()
+        val matchesRef = targetRef == null || (ref != null && ref.contains(targetRef, ignoreCase = true))
+        val matchesType = targetTypeId == null || typeId == targetTypeId
+        matchesRef && matchesType
+    }
 }
 

@@ -123,28 +123,27 @@ fun HomeHeader(
             )
         }
 
-        if (fullName == null) {
-            Box(
-                modifier = Modifier
-                    .padding(top = Spacing.xs)
-                    .height(ShimmerSize.titleHeight)
-                    .clip(RoundedCornerShape(CornerRadius.sm))
-                    .fillMaxWidth(0.55f)
-                    .shimmer(
-                        colorBase = Color.White.copy(alpha = 0.14f),
-                        colorHighlight = Color.White.copy(alpha = 0.32f),
-                    ),
-            )
-        } else {
+        Box(modifier = Modifier.padding(top = Spacing.xs)) {
             Text(
-                text = fullName,
+                text = fullName ?: "نام و نام خانوادگی",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = colors.onGradient,
+                color = if (fullName == null) Color.Transparent else colors.onGradient,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(top = Spacing.xs),
             )
+
+            if (fullName == null) {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clip(RoundedCornerShape(CornerRadius.x2l))
+                        .shimmer(
+                            colorBase = Color.White.copy(alpha = 0.14f),
+                            colorHighlight = Color.White.copy(alpha = 0.32f),
+                        )
+                )
+            }
         }
 
         val darmanLabel = when (hasDarmanCoverage) {
@@ -165,11 +164,11 @@ fun HomeHeader(
         ) {
             when (hasActiveRelation) {
                 true, false -> relationLabel?.let { HeaderStatusChip(text = it, dot = true, isPositive = hasActiveRelation) }
-                null -> HeaderStatusChipShimmer(width = 96.dp)
+                null -> HeaderStatusChip(text = stringResource(Res.string.home_chip_relation_active), dot = true, isPositive = true, isLoading = true)
             }
             when (hasDarmanCoverage) {
                 true, false -> darmanLabel?.let { HeaderStatusChip(text = it, dot = false, isPositive = hasDarmanCoverage) }
-                null -> HeaderStatusChipShimmer(width = 120.dp)
+                null -> HeaderStatusChip(text = stringResource(Res.string.home_chip_darman_covered), dot = false, isPositive = true, isLoading = true)
             }
         }
     }
@@ -209,7 +208,7 @@ private fun HeaderIconButton(
 }
 
 @Composable
-private fun HeaderStatusChip(text: String, dot: Boolean, isPositive: Boolean) {
+private fun HeaderStatusChip(text: String, dot: Boolean, isPositive: Boolean, isLoading: Boolean = false) {
     val toneColor = if (isPositive) LocalTaminColors.current.greenText else LocalTaminColors.current.dangerText
     Row(
         modifier = Modifier
@@ -220,6 +219,12 @@ private fun HeaderStatusChip(text: String, dot: Boolean, isPositive: Boolean) {
                 shape = RoundedCornerShape(CornerRadius.max),
                 color = LocalTaminColors.current.glassIconTileBorder
             )
+            .then(
+                if (isLoading) Modifier.shimmer(
+                    colorBase = Color.White.copy(alpha = 0.14f),
+                    colorHighlight = Color.White.copy(alpha = 0.32f),
+                ) else Modifier
+            )
             .padding(horizontal = Spacing.md, vertical = Spacing.xs),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
@@ -229,13 +234,13 @@ private fun HeaderStatusChip(text: String, dot: Boolean, isPositive: Boolean) {
                 modifier = Modifier
                     .size(Spacing.sm)
                     .clip(CircleShape)
-                    .background(toneColor),
+                    .background(if (isLoading) Color.Transparent else toneColor),
             )
         } else {
             Icon(
                 painter = painterResource(Res.drawable.ic_tamin_shield_check),
                 contentDescription = null,
-                tint = toneColor,
+                tint = if (isLoading) Color.Transparent else toneColor,
                 modifier = Modifier.size(IconSize.small),
             )
         }
@@ -243,31 +248,13 @@ private fun HeaderStatusChip(text: String, dot: Boolean, isPositive: Boolean) {
             text = text,
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Bold,
-            color = LocalTaminColors.current.onGradient,
+            color = if (isLoading) Color.Transparent else LocalTaminColors.current.onGradient,
             maxLines = 1,
         )
     }
 }
 
-@Composable
-private fun HeaderStatusChipShimmer(width: Dp) {
-    Box(
-        modifier = Modifier
-            .width(width)
-            .height(28.dp)
-            .clip(RoundedCornerShape(CornerRadius.max))
-            .background(Color.White.copy(alpha = 0.14f))
-            .border(
-                width = 1.dp,
-                shape = RoundedCornerShape(CornerRadius.max),
-                color = LocalTaminColors.current.glassIconTileBorder
-            )
-            .shimmer(
-                colorBase = Color.White.copy(alpha = 0.14f),
-                colorHighlight = Color.White.copy(alpha = 0.32f),
-            )
-    )
-}
+
 
 @PreviewRtlTheme
 @Composable

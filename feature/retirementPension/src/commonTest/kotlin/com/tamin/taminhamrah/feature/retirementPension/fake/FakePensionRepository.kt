@@ -9,6 +9,11 @@ import com.tamin.taminhamrah.model.pension.PensionIdDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
 import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDN
 import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityFinalConfirmDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityRequestRefDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveDocumentDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.RegisteredMedicalCommissionDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequestDN
 import com.tamin.taminhamrah.model.pension.retirement.RetirementPersonalDN
@@ -98,4 +103,19 @@ class FakePensionRepository : PensionRepository {
     override suspend fun sendEdictPensionerToMyInbox(filters: List<ApiFilterDN>): Flow<EdictPensionerInboxDN> = flow { emit(EdictPensionerInboxDN(null)) }
     override suspend fun sendPayRollToInbox(filters: List<ApiFilterDN>): Flow<PayRollInboxDN> = flow { emit(PayRollInboxDN(null)) }
     override suspend fun sendRequestInquirePensionCertificate(filters: List<ApiFilterDN>): Flow<InquirePensionCertificateDN> = flow {}
+    override suspend fun saveDisabilityUserInfo(body: DisabilitySaveInfoDN): Flow<DisabilityRequestRefDN?> = flow {}
+
+    override suspend fun finalConfirmDisabilityRequest(
+        requestId: Long,
+        body: DisabilityFinalConfirmDN
+    ): Flow<DisabilityRequestRefDN?> = flow {}
+
+    override suspend fun saveDocumentDisability(
+        requestId: Long,
+        body: DisabilitySaveDocumentDN
+    ): Flow<String?> = flow {}
+
+    override suspend fun getMedicalCommissionPdf(lastWorkshop: String): Flow<PdfDownloadDN> = flow {}
+
+    override suspend fun getRegisteredMedicalCommission(filters: List<ApiFilterDN>): Flow<List<RegisteredMedicalCommissionDN>>  = flow {}
 }

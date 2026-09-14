@@ -4,8 +4,8 @@ import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.campaign.CampaignKind
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.MainServiceDN
+import com.tamin.taminhamrah.model.home.HomeContentDN
 import com.tamin.taminhamrah.model.home.HomeServiceSection
-import com.tamin.taminhamrah.model.userRequest.UserRequestPR
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -30,19 +30,10 @@ data class HomeUiState(
      * falls back to the first non-empty section.
      */
     val selectedSection: HomeServiceSection = HomeServiceSection.FREQUENT,
-    /** Header: the user's display name, `null` until [com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase] resolves. */
-    val identityFullName: String? = null,
-    /**
-     * Header chip «بیمهٔ درمانی»: `true`/`false` once the entitlement call resolves, `null` while it
-     * hasn't (or came back empty) — the chip stays hidden rather than showing a guess.
-     */
-    val hasDarmanCoverage: Boolean? = null,
-    /** Header chip «ارتباط فعال»: `null` until the active-relation list resolves. */
-    val hasActiveRelation: Boolean? = null,
+    /** Unified offline-first data model containing UserInfo, Requests, Stories, etc. */
+    val homeContent: HomeContentDN? = null,
     /** Whether `FeatureFlag.AGENT` is on — gates the ask-bar and suggestion chips in the header. */
     val isAgentEnabled: Boolean = false,
-    /** Recent user requests (up to 3 items) for «آخرین درخواست‌ها» section. */
-    val lastRequests: List<UserRequestPR> = emptyList(),
     val error: String? = null,
 ){
     sealed interface HomePartialState {
@@ -52,11 +43,8 @@ data class HomeUiState(
             val campaigns: ImmutableList<CampaignKind>,
         ) : HomePartialState
         data class SectionSelected(val section: HomeServiceSection) : HomePartialState
-        data class IdentityLoaded(val fullName: String) : HomePartialState
-        data class DarmanCoverageLoaded(val covered: Boolean?) : HomePartialState
-        data class ActiveRelationLoaded(val hasActive: Boolean) : HomePartialState
+        data class HomeContentLoaded(val content: HomeContentDN?) : HomePartialState
         data class AgentAvailability(val enabled: Boolean) : HomePartialState
-        data class LastRequestsLoaded(val requests: List<UserRequestPR>) : HomePartialState
         data class Error(val message: String?) : HomePartialState
     }
 }

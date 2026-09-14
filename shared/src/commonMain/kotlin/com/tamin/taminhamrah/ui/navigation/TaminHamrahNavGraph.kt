@@ -113,7 +113,6 @@ import com.tamin.taminhamrah.feature.contractaffair.contractPremiumPaymentScreen
 import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPaymentCalcDetail
 import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPaymentHistory
 import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPremiumPayment
-import com.tamin.taminhamrah.feature.payment.navigateToPayment
 import com.tamin.taminhamrah.feature.requestPaymentForIllDays.requestPaymentForIllDaysScreen
 import com.tamin.taminhamrah.feature.security.SecurityRoute
 import com.tamin.taminhamrah.feature.security.securityScreen
@@ -140,7 +139,6 @@ import com.tamin.taminhamrah.feature.workshops.debtObjectionStatusScreen
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
 import com.tamin.taminhamrah.feature.developerOptions.DeveloperOptionsRoute
-import com.tamin.taminhamrah.feature.payment.navigateToPayment
 import com.tamin.taminhamrah.feature.userRequest.UserRequestRoute
 import com.tamin.taminhamrah.feature.userRequest.navigateToUserRequestDetail
 import com.tamin.taminhamrah.feature.userRequest.userRequestGraph
@@ -151,7 +149,10 @@ import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
+import com.tamin.taminhamrah.model.home.HomeContentDN
 import com.tamin.taminhamrah.model.home.HomeServiceSection
+import com.tamin.taminhamrah.model.home.RequestDN
+import com.tamin.taminhamrah.model.home.UserInfoDN
 import com.tamin.taminhamrah.model.userRequest.UserRequestPR
 import com.tamin.taminhamrah.openUrl
 import com.tamin.taminhamrah.ui.blur.AppBarScrim
@@ -176,6 +177,7 @@ import com.tamin.taminhamrah.ui.home.contract.HomeIntent
 import com.tamin.taminhamrah.ui.home.contract.HomeUiState
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.AppConfig
+import com.tamin.taminhamrah.util.PersianDateFormatter
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -413,8 +415,8 @@ internal fun TaminHamrahNavGraph(
                             }
                         },
                         onNavigateToAgent = { navController.navigateToAgent() },
-                        onNavigateToUserRequests = { refCode, requestTypeId ->
-                            navController.navigate(UserRequestRoute.List(refCode = refCode, requestTypeId = requestTypeId))
+                        onNavigateToUserRequests = { refCode->
+                            navController.navigate(UserRequestRoute.List(refCode = refCode))
                         },
                         onNavigateToUserRequestDetail = { requestId, refCode, requestTypeId, title, referenceId ->
                             navController.navigateToUserRequestDetail(
@@ -837,7 +839,7 @@ fun HomeScreen(
     onShowMessage: (String) -> Unit,
     onNavigateToAllServices: () -> Unit,
     onNavigateToAgent: () -> Unit,
-    onNavigateToUserRequests: (String?, String?) -> Unit,
+    onNavigateToUserRequests: (String?) -> Unit,
     onNavigateToUserRequestDetail: (Long, String, Long, String, String) -> Unit,
     /** Where tapping a channel on the «تازه‌ها» rail leads. */
     onOpenStory: (channelIndex: Int) -> Unit,
@@ -866,17 +868,33 @@ fun HomeScreen(
         uiState = uiState,
         onNavigateToAgent = onNavigateToAgent,
         onNavigateToAllServices = onNavigateToAllServices,
-        onNavigateToUserRequests = { onNavigateToUserRequests(null, null) },
+        onNavigateToUserRequests = { onNavigateToUserRequests(null) },
         onRequestClick = { request ->
-            onNavigateToUserRequests(request.refCode, request.requestTypeId.toString())
+            onNavigateToUserRequests(request.refCode)
         },
         onCampaignClick = { viewModel.sendIntent(HomeIntent.OnCampaignClick(it)) },
         onSectionSelected = { viewModel.sendIntent(HomeIntent.OnSectionSelected(it)) },
         onServiceClick = { viewModel.sendIntent(HomeIntent.OnServiceClick(it)) },
         onRetry = { viewModel.sendIntent(HomeIntent.LoadMenu) },
+        storyRail = {
+            // «تازه‌ها» sits directly above the campaigns, as on the design, and is full-bleed for
+            // the same reason: a row that scrolls has to be able to run a ring off the screen edge.
+            StoryRail(
+                onOpenViewer = onOpenStory,
+                modifier = Modifier
+                    .ignoreHorizontalPadding(HomeContentPadding)
+                    .padding(top = Spacing.xlg),
+            )
+        },
     )
 }
 
+/**
+ * [storyRail] is a slot rather than an inline [StoryRail] call because [StoryRail] resolves its own
+ * `StoryRailViewModel` through Koin, which is never started under Android Studio's `@Preview`
+ * renderer — embedding it directly here would crash every preview of this composable. The real
+ * screen supplies it via [HomeScreen]; a preview simply leaves it out.
+ */
 @Composable
 private fun HomeScreenContent(
     uiState: HomeUiState,
@@ -888,6 +906,7 @@ private fun HomeScreenContent(
     onSectionSelected: (HomeServiceSection) -> Unit,
     onServiceClick: (MainServiceDN) -> Unit,
     onRetry: () -> Unit,
+    storyRail: @Composable () -> Unit = {},
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -913,9 +932,9 @@ private fun HomeScreenContent(
             Box(modifier = Modifier.ignoreHorizontalPadding(HomeContentPadding)) {
                 Column {
                     HomeHeader(
-                        fullName = uiState.identityFullName,
-                        hasDarmanCoverage = uiState.hasDarmanCoverage,
-                        hasActiveRelation = uiState.hasActiveRelation,
+                        fullName = uiState.homeContent?.userInfo?.fullName,
+                        hasDarmanCoverage = uiState.homeContent?.userInfo?.hasDarmanCoverage,
+                        hasActiveRelation = uiState.homeContent?.userInfo?.hasActiveRelation,
                     )
                     if (uiState.isAgentEnabled) {
                         Spacer(modifier = Modifier.height(HomeAskBarOverlap))
@@ -953,14 +972,7 @@ private fun HomeScreenContent(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // «تازه‌ها» sits directly above the campaigns, as on the design, and is full-bleed for
-            // the same reason: a row that scrolls has to be able to run a ring off the screen edge.
-            StoryRail(
-                onOpenViewer = onOpenStory,
-                modifier = Modifier
-                    .ignoreHorizontalPadding(HomeContentPadding)
-                    .padding(top = Spacing.xlg),
-            )
+            storyRail()
 
             // The same for every role: campaigns are not filtered by the picker above.
             //
@@ -970,6 +982,7 @@ private fun HomeScreenContent(
             CampaignCarousel(
                 campaigns = uiState.campaigns.toPresentation(),
                 onCampaignClick = onCampaignClick,
+                isLoading = uiState.isLoading,
                 modifier = Modifier
                     .ignoreHorizontalPadding(HomeContentPadding)
                     .padding(top = Spacing.xlg),
@@ -983,17 +996,34 @@ private fun HomeScreenContent(
                 onSectionSelected = onSectionSelected,
                 onServiceClick = onServiceClick,
                 onSeeAll = onNavigateToAllServices,
+                isLoading = uiState.isLoading,
                 modifier = Modifier.padding(top = Spacing.lg),
             )
 
             HomeFeaturedSection(
                 services = uiState.menuItems.featuredServices(),
                 onServiceClick = onServiceClick,
+                isLoading = uiState.isLoading,
                 modifier = Modifier.padding(top = Spacing.md),
             )
 
+            val requests = uiState.homeContent?.requests?.map {
+                UserRequestPR(
+                    id = it.id.toLongOrNull() ?: 0L,
+                    refCode = it.refCode,
+                    title = it.title,
+                    comment = "",
+                    creationTime = it.date.toLongOrNull()?.let { ms -> PersianDateFormatter.formatTimestamp(ms) } ?: it.date,
+                    createByName = "",
+                    statusDesc = it.status,
+                    statusCode = "",
+                    requestTypeId = 0L,
+                    requestTypeTitle = it.title
+                )
+            }
+
             HomeLastRequestsSection(
-                requests = uiState.lastRequests,
+                requests = requests,
                 onSeeAllClick = onNavigateToUserRequests,
                 onRequestClick = onRequestClick,
                 modifier = Modifier.padding(top = Spacing.md),
@@ -1022,36 +1052,34 @@ private fun previewHomeUiState() = HomeUiState(
     menuItems = (HomeServiceSection.FREQUENT.members + HomeServiceSection.FEATURED.members)
         .distinct()
         .map { MainServiceDN(id = it.id, name = it.name, status = MenuServiceStatusDN.ACTIVE) },
-    identityFullName = "سنا حقیقی",
-    hasDarmanCoverage = true,
-    hasActiveRelation = true,
-    isAgentEnabled = true,
-    lastRequests = listOf(
-        UserRequestPR(
-            id = 1L,
-            refCode = "1048384001",
-            title = "تأییدیه پزشکی",
-            comment = "",
-            creationTime = "۱۴۰۴/۰۳/۲۸",
-            createByName = "",
-            statusDesc = "تأیید شد",
-            statusCode = "18",
-            requestTypeId = 1L,
-            requestTypeTitle = "تأییدیه پزشکی",
+    homeContent = HomeContentDN(
+        userInfo = UserInfoDN(
+            fullName = "سنا حقیقی",
+            hasDarmanCoverage = true,
+            hasActiveRelation = true
         ),
-        UserRequestPR(
-            id = 2L,
-            refCode = "1048384002",
-            title = "استعلام سوابق",
-            comment = "",
-            creationTime = "۱۴۰۴/۰۳/۲۵",
-            createByName = "",
-            statusDesc = "در حال بررسی",
-            statusCode = "2",
-            requestTypeId = 2L,
-            requestTypeTitle = "استعلام سوابق",
-        ),
+        stories = null,
+        campaigns = null,
+        quickAccess = null,
+        specialServices = null,
+        requests = listOf(
+            RequestDN(
+                id = "1048384001",
+                title = "تأییدیه پزشکی",
+                date = "۱۴۰۴/۰۳/۲۸",
+                status = "تأیید شد",
+                refCode = "1045678902"
+            ),
+            RequestDN(
+                id = "1048384002",
+                title = "استعلام سوابق",
+                date = "۱۴۰۴/۰۳/۲۵",
+                status = "در حال بررسی",
+                refCode = "1045698765"
+            )
+        )
     ),
+    isAgentEnabled = true,
 )
 
 @PreviewRtlTheme

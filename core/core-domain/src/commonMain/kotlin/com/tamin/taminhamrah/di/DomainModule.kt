@@ -285,6 +285,7 @@ import com.tamin.taminhamrah.useCases.stories.MarkStoryChannelSeenUseCase
 import com.tamin.taminhamrah.useCases.stories.ObserveStoryEngagementUseCase
 import com.tamin.taminhamrah.useCases.stories.ToggleStoryLikeUseCase
 import com.tamin.taminhamrah.useCases.stories.ToggleStorySaveUseCase
+import com.tamin.taminhamrah.repository.home.HomeRepository
 
 val domainModule = module {
     // Add Dependent UseCases
@@ -548,6 +549,9 @@ val domainModule = module {
     factoryOf(::GetPatientVisitsUseCase)
     factoryOf(::GetPatientLabsUseCase)
     factoryOf(::GetPatientImagingUseCase)
+    
+    // Home
+    factory { get<HomeRepository>() }
     factoryOf(::GetVersionHistoryUseCase)
     factoryOf(::SetThemeUseCase)
     factoryOf(::SetBiometricEnabledUseCase)

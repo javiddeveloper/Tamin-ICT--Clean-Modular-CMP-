@@ -20,7 +20,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import com.tamin.taminhamrah.ui.theme.shimmer
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -118,6 +120,7 @@ fun ServiceIconTile(
 fun HomeServiceGridTile(
     service: MainServiceDN,
     onClick: () -> Unit,
+    isLoading: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val disabled = service.status == MenuServiceStatusDN.DISABLED ||
@@ -127,12 +130,12 @@ fun HomeServiceGridTile(
 
     Column(
         modifier = modifier
-            .clickable(
+            .then(if (isLoading) Modifier else Modifier.clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 enabled = !disabled,
                 onClick = onClick,
-            )
+            ))
             .padding(vertical = Spacing.sm),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(Spacing.sm),
@@ -142,8 +145,10 @@ fun HomeServiceGridTile(
                 icon = serviceIconFor(service.icon),
                 contentDescription = service.name,
                 dimmed = disabled,
+                modifier = Modifier.alpha(if (isLoading) 0f else 1f)
             )
-            if (showDot) {
+            if (isLoading) Box(Modifier.matchParentSize().clip(RoundedCornerShape(CornerRadius.iconTile)).shimmer())
+            if (showDot && !isLoading) {
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
@@ -152,15 +157,18 @@ fun HomeServiceGridTile(
                 )
             }
         }
-        Text(
-            text = service.name.orEmpty(),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.alpha(if (disabled) 0.5f else 1f),
-        )
+        Box {
+            Text(
+                text = service.name.orEmpty(),
+                style = MaterialTheme.typography.labelMedium,
+                color = if(isLoading) Color.Transparent else MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.alpha(if (disabled && !isLoading) 0.5f else 1f),
+            )
+            if (isLoading) Box(Modifier.matchParentSize().clip(RoundedCornerShape(CornerRadius.sm)).shimmer())
+        }
     }
 }
 
@@ -170,27 +178,34 @@ fun HomeActionGridTile(
     label: String,
     icon: ImageVector,
     onClick: () -> Unit,
+    isLoading: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier
-            .clickable(
+            .then(if (isLoading) Modifier else Modifier.clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = onClick,
-            )
+            ))
             .padding(vertical = Spacing.sm),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
-        ServiceIconTile(icon = icon, contentDescription = label)
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary,
-            textAlign = TextAlign.Center,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-        )
+        Box {
+            ServiceIconTile(icon = icon, contentDescription = label, modifier = Modifier.alpha(if (isLoading) 0f else 1f))
+            if (isLoading) Box(Modifier.matchParentSize().clip(RoundedCornerShape(CornerRadius.iconTile)).shimmer())
+        }
+        Box {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = if(isLoading) Color.Transparent else MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            if (isLoading) Box(Modifier.matchParentSize().clip(RoundedCornerShape(CornerRadius.sm)).shimmer())
+        }
     }
 }

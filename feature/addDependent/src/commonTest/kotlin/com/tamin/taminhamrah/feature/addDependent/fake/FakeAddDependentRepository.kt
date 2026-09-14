@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 class FakeAddDependentRepository : AddDependentRepository {
+
+    private fun notUsed(): Nothing = error("not used here")
     var activeBranchesResult: List<BranchDN> = listOf(BranchDN(branchCode = "0101", branchName = "شعبه یک"))
     var registryDataResult: RegistryDataDN = RegistryDataDN(age = 19, firstName = "علی", lastName = "محمدی")
     var educationCodeResult: String = "دانشگاه تهران"
@@ -46,4 +48,8 @@ class FakeAddDependentRepository : AddDependentRepository {
 
     override fun addNewDependent(request: RequestAddDependentDN): Flow<GeneralResultDN> =
         flow { emit(GeneralResultDN(isSuccess = true)) }
+
+    override fun refreshDependents(): Flow<GeneralResultDN> {
+        notUsed()
+    }
 }

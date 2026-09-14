@@ -13,7 +13,6 @@ sealed interface UserRequestRoute {
     @Serializable
     data class List(
         val refCode: String? = null,
-        val requestTypeId: String? = null,
     ) : UserRequestRoute
 
     @Serializable
@@ -30,7 +29,7 @@ fun NavController.navigateToUserRequests(
     refCode: String? = null,
     requestTypeId: String? = null,
 ) {
-    navigate(UserRequestRoute.List(refCode = refCode, requestTypeId = requestTypeId))
+    navigate(UserRequestRoute.List(refCode = refCode))
 }
 
 fun NavController.navigateToUserRequestDetail(
@@ -58,7 +57,6 @@ fun NavGraphBuilder.userRequestGraph(
         val route: UserRequestRoute.List = backStackEntry.toRoute()
         UserRequestsScreen(
             refCodeFilter = route.refCode,
-            requestTypeIdFilter = route.requestTypeId,
             onBackClick = { navController.popBackStack() },
             onNavigateToDetail = { requestId, refCode, requestTypeId, title, referenceId ->
                 navController.navigateToUserRequestDetail(
