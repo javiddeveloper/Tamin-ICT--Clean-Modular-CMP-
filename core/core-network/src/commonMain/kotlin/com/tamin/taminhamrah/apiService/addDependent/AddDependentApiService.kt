@@ -58,4 +58,7 @@ interface AddDependentApiService {
     suspend fun addNewDependent(
         @Body request: RequestAddDependentDTO
     ): BaseDTO<GeneralResponseDTO>
+
+    @POST("subdominants/transfer")
+    suspend fun refreshDependents(): BaseDTO<GeneralResponseDTO>
 }
