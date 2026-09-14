@@ -15,6 +15,11 @@ import com.tamin.taminhamrah.model.pension.retirement.RetirementSaveDocumentDN
 import com.tamin.taminhamrah.model.pension.retirement.RetirementPersonalDN
 import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestCreatedDN
 import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestFormDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityFinalConfirmDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityRequestRefDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveDocumentDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.RegisteredMedicalCommissionDN
 import com.tamin.taminhamrah.model.personal.DisabilityPersonalInfoDN
 import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDN
 import com.tamin.taminhamrah.model.personal.AgeDN
@@ -190,4 +195,24 @@ class FakePensionRepository : PensionRepository {
             }
             emit(inquirePensionCertificateResult!!)
         }
+
+    override suspend fun saveDisabilityUserInfo(body: DisabilitySaveInfoDN): Flow<DisabilityRequestRefDN?> =
+        error("not used in this test")
+
+    override suspend fun finalConfirmDisabilityRequest(
+        requestId: Long,
+        body: DisabilityFinalConfirmDN
+    ): Flow<DisabilityRequestRefDN?> = error("not used in this test")
+
+    override suspend fun saveDocumentDisability(
+        requestId: Long,
+        body: DisabilitySaveDocumentDN
+    ): Flow<String?> = error("not used in this test")
+
+    override suspend fun getMedicalCommissionPdf(lastWorkshop: String): Flow<PdfDownloadDN> =
+        error("not used in this test")
+
+    override suspend fun getRegisteredMedicalCommission(
+        filters: List<ApiFilterDN>
+    ): Flow<List<RegisteredMedicalCommissionDN>> = error("not used in this test")
 }

@@ -144,6 +144,11 @@ import com.tamin.taminhamrah.useCases.calculateWagePension.CheckMultipleWorkshop
 import com.tamin.taminhamrah.useCases.calculateWagePension.GetMultipleWorkshopPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.GetDisabilityPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.personal.GetInsuredRegistrationDocListUseCase
+import com.tamin.taminhamrah.useCases.pension.SaveDisabilityUserInfoUseCase
+import com.tamin.taminhamrah.useCases.pension.FinalConfirmDisabilityRequestUseCase
+import com.tamin.taminhamrah.useCases.pension.SaveDocumentDisabilityUseCase
+import com.tamin.taminhamrah.useCases.pension.GetMedicalCommissionPdfUseCase
+import com.tamin.taminhamrah.useCases.pension.GetRegisteredMedicalCommissionUseCase
 import com.tamin.taminhamrah.useCases.personal.GetRequestSummaryUseCase
 import com.tamin.taminhamrah.useCases.personal.PutInsuredRegistrationDocListUseCase
 import com.tamin.taminhamrah.useCases.user.CheckUserIsNewUseCase
@@ -269,6 +274,7 @@ import com.tamin.taminhamrah.useCases.addDependent.GetFamilyRelationshipsFromPro
 import com.tamin.taminhamrah.useCases.addDependent.GetFamilyRelationshipsUseCase
 import com.tamin.taminhamrah.useCases.addDependent.InquiryEducationCodeUseCase
 import com.tamin.taminhamrah.useCases.addDependent.InquiryRegistryUseCase
+import com.tamin.taminhamrah.useCases.addDependent.RefreshDependentsUseCase
 import com.tamin.taminhamrah.useCases.addDependent.UploadDependentImageUseCase
 import com.tamin.taminhamrah.useCases.user.mockUseCases.MockSubdominantUseCase
 import com.tamin.taminhamrah.useCases.versionHistory.GetVersionHistoryUseCase
@@ -435,6 +441,11 @@ val domainModule = module {
     factoryOf(::GetFreeJobWagesUseCase)
     factoryOf(::UploadImageUseCase)
     factoryOf(::GetDisabilityPersonalInfoUseCase)
+    factoryOf(::SaveDisabilityUserInfoUseCase)
+    factoryOf(::FinalConfirmDisabilityRequestUseCase)
+    factoryOf(::SaveDocumentDisabilityUseCase)
+    factoryOf(::GetMedicalCommissionPdfUseCase)
+    factoryOf(::GetRegisteredMedicalCommissionUseCase)
     // Agent
     factoryOf(::SendAgentPromptUseCase)
     factoryOf(::CheckChatAllowedUseCase)
@@ -570,6 +581,7 @@ val domainModule = module {
     factoryOf(::InquiryEducationCodeUseCase)
     factoryOf(::UploadDependentImageUseCase)
     factoryOf(::AddNewDependentUseCase)
+    factoryOf(::RefreshDependentsUseCase)
 
     // Employer Info UseCases
     factoryOf(::GetLegalWorkshopUseCase)

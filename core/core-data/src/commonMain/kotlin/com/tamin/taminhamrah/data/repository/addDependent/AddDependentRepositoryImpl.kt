@@ -73,4 +73,9 @@ class AddDependentRepositoryImpl(
         val result = remoteDataSource.addNewDependent(request.toDto()).toDomain()
         emit(result)
     }
+
+    override fun refreshDependents(): Flow<GeneralResultDN> = flow {
+        val result = remoteDataSource.refreshDependents().toDomain()
+        emit(result)
+    }
 }

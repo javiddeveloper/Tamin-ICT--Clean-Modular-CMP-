@@ -177,6 +177,11 @@ private class TestPensionRepository : PensionRepository {
     override suspend fun getAuthenticationCode() = unused()
     override suspend fun sendEdictPensionerToMyInbox(filters: List<ApiFilterDN>) = unused()
     override suspend fun sendPayRollToInbox(filters: List<ApiFilterDN>) = unused()
+    override suspend fun saveDisabilityUserInfo(body: com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoDN) = unused()
+    override suspend fun finalConfirmDisabilityRequest(requestId: Long, body: com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityFinalConfirmDN) = unused()
+    override suspend fun saveDocumentDisability(requestId: Long, body: com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveDocumentDN) = unused()
+    override suspend fun getMedicalCommissionPdf(lastWorkshop: String) = unused()
+    override suspend fun getRegisteredMedicalCommission(filters: List<ApiFilterDN>) = unused()
 
     private fun unused(): Nothing = error("not used")
 }

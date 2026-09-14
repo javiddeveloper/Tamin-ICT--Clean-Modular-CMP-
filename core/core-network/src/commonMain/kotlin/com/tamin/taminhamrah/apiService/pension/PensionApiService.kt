@@ -6,6 +6,11 @@ import com.tamin.taminhamrah.model.pension.PensionIdDTO
 import com.tamin.taminhamrah.model.pension.PensionInquiryDTO
 import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDTO
 import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDTO
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityFinalConfirmRequest
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveDocumentRequest
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoRequest
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoResponseDTO
+import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.RegisteredMedicalCommissionDTO
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
 import com.tamin.taminhamrah.model.pension.retirement.RetirementPersonalDTO
@@ -128,5 +133,36 @@ interface PensionApiService {
     suspend fun sendEdictPensionerToMyInbox(
         @QueryMap parameters: Map<String, String>
     ): BaseDTO<JsonElement?>
+
+    @Headers("Content-Type: application/json")
+    @POST("disability-request")
+    suspend fun saveDisabilityUserInfo(
+        @Body body: DisabilitySaveInfoRequest
+    ): BaseDTO<DisabilitySaveInfoResponseDTO>
+
+    @Headers("Content-Type: application/json")
+    @PUT("disability-request/{requestId}")
+    suspend fun finalConfirmDisabilityRequest(
+        @Path("requestId") requestId: Long,
+        @Body body: DisabilityFinalConfirmRequest
+    ): BaseDTO<DisabilitySaveInfoResponseDTO>
+
+    @Headers("Content-Type: application/json")
+    @PUT("disability-request/{requestId}")
+    suspend fun saveDocumentDisability(
+        @Path("requestId") requestId: Long,
+        @Body body: DisabilitySaveDocumentRequest
+    ): BaseDTO<JsonElement?>
+
+    @Streaming
+    @GET("disability-request/report")
+    suspend fun getMedicalCommissionPdf(
+        @Query("lastWorkshop") lastWorkshop: String
+    ): HttpStatement
+
+    @GET("medical-committee-demand/get-last-demand-details")
+    suspend fun getRegisteredMedicalCommission(
+        @QueryMap parameters: Map<String, String>
+    ): BaseDTO<ListData<RegisteredMedicalCommissionDTO>>
 
 }

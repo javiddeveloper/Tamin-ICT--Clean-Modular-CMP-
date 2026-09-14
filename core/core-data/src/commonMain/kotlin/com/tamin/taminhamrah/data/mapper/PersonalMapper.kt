@@ -96,8 +96,9 @@ fun DisabilityDependentDTO.toDomain(): DisabilityDependentDN {
         nationalId = personal?.nationalId,
         dateOfBirth = personal?.dateOfBirth,
         fatherName = personal?.fatherName,
+        genderCode = personal?.gender?.genderCode,
         genderDesc = personal?.gender?.genderDesc,
-        relation = personal?.relation,
+        tendencyCode = tendency?.tendencyCode,
         tendencyDescription = tendency?.tendencyDescription
     )
 }
@@ -147,7 +148,8 @@ fun DisabilityPersonalDTO.toDomain(): DisabilityPersonalDN {
         idCardNumber = idCardNumber,
         cityOfIssue = cityOfIssue?.description,
         dateOfBirth = dateOfBirth,
-        genderDesc = gender?.genderDesc
+        genderDesc = gender?.genderDesc,
+        genderCode = gender?.genderCode
     )
 }
 
