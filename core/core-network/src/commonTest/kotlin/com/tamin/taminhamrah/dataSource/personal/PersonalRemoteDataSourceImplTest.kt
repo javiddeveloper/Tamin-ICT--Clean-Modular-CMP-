@@ -31,7 +31,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
 import kotlinx.io.readByteArray
 import kotlinx.serialization.json.Json
@@ -145,7 +144,7 @@ class PersonalRemoteDataSourceImplTest : BaseApiTest() {
         }
 
         assertEquals("خطا", exception.title)
-        assertTrue(exception.subtitle?.contains("مشمول") == true)
+        assertEquals(exception.subtitle?.contains("مشمول"), true)
     }
 
     @Test
@@ -369,6 +368,13 @@ private class FakePersonalApiService : PersonalApiService {
     }
 
     override suspend fun getRequestSummary(requestId: String): BaseDTO<NewInsuredSummaryDTO> {
+        shouldThrowException?.let { throw it }
+        error("Not stubbed")
+    }
+
+    override suspend fun getInsuredRegistrationDocList(
+        parameters: Map<String, String>
+    ): BaseDTO<ListData<InsuredDocDTO>> {
         shouldThrowException?.let { throw it }
         error("Not stubbed")
     }

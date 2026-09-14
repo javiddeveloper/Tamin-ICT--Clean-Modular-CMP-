@@ -104,6 +104,12 @@ interface PersonalApiService {
         @Body body: List<InsuredDocDTO>
     ): BaseDTO<String?>
 
+    /** The documents filed against a person — the list [putInsuredRegistrationDocList] replaces. */
+    @GET("documents")
+    suspend fun getInsuredRegistrationDocList(
+        @QueryMap parameters: Map<String, String>,
+    ): BaseDTO<ListData<InsuredDocDTO>>
+
     @GET("personals/summary/{requestId}")
     suspend fun getRequestSummary(
         @Path("requestId") requestId: String

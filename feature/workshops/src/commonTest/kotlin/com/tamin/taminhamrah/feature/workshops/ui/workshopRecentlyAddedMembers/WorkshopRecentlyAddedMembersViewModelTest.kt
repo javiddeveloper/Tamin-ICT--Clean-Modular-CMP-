@@ -3,8 +3,12 @@ package com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers
 import app.cash.turbine.test
 import com.tamin.taminhamrah.feature.workshops.fake.FakeWorkShopsRepository
 import com.tamin.taminhamrah.feature.workshops.ui.model.RegistrationDocumentTypes
+import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachment
+import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachmentDownloader
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachmentUploader
+import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopDocumentType
 import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersEvent.ShowMessage
+import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersEvent.ShowServerMessage
 import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersIntent.ApplySearch
 import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersIntent.Confirm
 import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersIntent.Delete
@@ -32,6 +36,7 @@ import com.tamin.taminhamrah.model.common.RoleDN
 import com.tamin.taminhamrah.model.common.UserTypeInfoDN
 import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
+import com.tamin.taminhamrah.model.personal.DocumentFileDN
 import com.tamin.taminhamrah.model.personal.GirlSurvivorConditionDN
 import com.tamin.taminhamrah.model.personal.InsuredDocDN
 import com.tamin.taminhamrah.model.personal.NewInsuredSummaryDN
@@ -58,6 +63,7 @@ import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
 import com.tamin.taminhamrah.useCases.common.GetCityUseCase
 import com.tamin.taminhamrah.useCases.common.GetJobTitleUseCase
 import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
+import com.tamin.taminhamrah.useCases.personal.GetInsuredRegistrationDocListUseCase
 import com.tamin.taminhamrah.useCases.personal.PutInsuredRegistrationDocListUseCase
 import com.tamin.taminhamrah.useCases.workshops.CheckNewMemberIsNewUseCase
 import com.tamin.taminhamrah.useCases.workshops.ConfirmRecentlyAddedMemberUseCase
@@ -75,9 +81,12 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.abs_doc_unknown
 import taminx.core.core_ui.abs_form_err_already_known
 import taminx.core.core_ui.error_image_duplicate
 import taminx.core.core_ui.new_member_cannot_edit
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -85,6 +94,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 /**
  * نام‌نویسی غیرحضوری بیمه‌شده — what reaches the service, and when.
@@ -114,6 +124,7 @@ class WorkshopRecentlyAddedMembersViewModelTest {
     /** A view model already showing the workshop's list, as the screen leaves it. */
     private fun viewModel(
         uploader: WorkshopAttachmentUploader = WorkshopAttachmentUploader { UPLOADED_GUID },
+        downloader: WorkshopAttachmentDownloader = WorkshopAttachmentDownloader { FILED_IMAGE },
     ): WorkshopRecentlyAddedMembersViewModel {
         val cities = FakeCitiesRepository()
         val jobs = FakeJobsRepository()
@@ -124,7 +135,9 @@ class WorkshopRecentlyAddedMembersViewModelTest {
             CheckNewMemberIsNewUseCase(workshops),
             CreateNewMemberRegistrationUseCase(workshops),
             uploader,
+            downloader,
             PutInsuredRegistrationDocListUseCase(documents),
+            GetInsuredRegistrationDocListUseCase(documents),
             GetCitiesUseCase(cities),
             GetCityUseCase(cities),
             GetJobTitleUseCase(jobs),
@@ -276,6 +289,93 @@ class WorkshopRecentlyAddedMembersViewModelTest {
             assertEquals(1, viewModel.uiState.value.form?.attachments?.size)
         }
 
+    // ------------------------------------------------------------------ documents already on file
+
+    /**
+     * A draft re-opens with the documents filed against it, which the row does not carry: each
+     * image read back by its guid and held as its upload would have been — a type the table does
+     * not know included, since leaving it out would delete it on save.
+     */
+    @Test
+    fun `re-opening a draft brings back the documents already on file`() = runTest(testDispatcher) {
+        documents.onFile = listOf(
+            filedDocument(ON_FILE_GUID, typeCode = "01"),
+            filedDocument(UNKNOWN_TYPE_GUID, typeCode = "99"),
+        )
+        val viewModel = viewModel()
+
+        viewModel.sendIntent(Edit(DRAFT))
+
+        assertEquals(DRAFT_PERSONAL_ID.toString(), documents.readPersonalId)
+        val form = assertNotNull(viewModel.uiState.value.form)
+        assertEquals(
+            listOf(
+                WorkshopAttachment(
+                    guid = ON_FILE_GUID,
+                    type = RegistrationDocumentTypes.first(),
+                    byteCount = FILED_IMAGE_BYTES,
+                ),
+                WorkshopAttachment(
+                    guid = UNKNOWN_TYPE_GUID,
+                    type = WorkshopDocumentType("99", Res.string.abs_doc_unknown),
+                    byteCount = FILED_IMAGE_BYTES,
+                ),
+            ),
+            form.attachments.toList(),
+        )
+    }
+
+    /**
+     * The document list is written back whole, so a re-opened draft's documents already on file
+     * go back alongside the new ones — sending only the new ones deletes the rest.
+     */
+    @Test
+    fun `filing a re-opened draft keeps the documents already on file`() = runTest(testDispatcher) {
+        documents.onFile = listOf(filedDocument(ON_FILE_GUID, typeCode = "01"))
+        val viewModel = viewModel()
+        viewModel.sendIntent(Edit(DRAFT))
+        viewModel.sendIntent(FormNext)
+        viewModel.sendIntent(FormNext)
+        attach(viewModel, typeCode = "02")
+        viewModel.sendIntent(FormConfirmedChanged(isConfirmed = true))
+
+        viewModel.sendIntent(FormNext)
+
+        val filed = assertNotNull(documents.filedDocuments)
+        assertEquals(listOf(ON_FILE_GUID, UPLOADED_GUID), filed.map { it.documentFile.id })
+        assertEquals(listOf("01", "02"), filed.map { it.documentType })
+    }
+
+    /** A draft whose documents cannot be read stays shut, so nothing can overwrite them. */
+    @Test
+    fun `a draft whose documents cannot be read is not opened`() = runTest(testDispatcher) {
+        documents.readError = IllegalStateException("documents unavailable")
+        val viewModel = viewModel()
+
+        viewModel.events.test {
+            viewModel.sendIntent(Edit(DRAFT))
+            assertTrue(awaitItem() is ShowServerMessage)
+        }
+
+        assertNull(viewModel.uiState.value.form)
+    }
+
+    /** Listing is not enough: an image that cannot be read back keeps the form shut too. */
+    @Test
+    fun `a draft whose filed image cannot be read back is not opened`() = runTest(testDispatcher) {
+        documents.onFile = listOf(filedDocument(ON_FILE_GUID, typeCode = "01"))
+        val viewModel = viewModel(
+            downloader = WorkshopAttachmentDownloader { error("image unavailable") },
+        )
+
+        viewModel.events.test {
+            viewModel.sendIntent(Edit(DRAFT))
+            assertTrue(awaitItem() is ShowServerMessage)
+        }
+
+        assertNull(viewModel.uiState.value.form)
+    }
+
     // ------------------------------------------------------------------ row actions
 
     @Test
@@ -374,6 +474,17 @@ private const val UPLOADED_GUID = "a-guid"
 private const val CREATED_PERSONAL_ID = 7L
 private const val DRAFT_PERSONAL_ID = 42L
 private const val DRAFT_REQUEST_ID = 420L
+private const val ON_FILE_GUID = "on-file-guid"
+private const val UNKNOWN_TYPE_GUID = "unknown-type-guid"
+
+/**
+ * A filed image two bytes short of the next kilobyte, whose base64 ends in two padding characters —
+ * counting the padding as data would tip it into the wrong «کیلوبایت».
+ */
+private const val FILED_IMAGE_BYTES = 2047
+
+@OptIn(ExperimentalEncodingApi::class)
+private val FILED_IMAGE = Base64.Default.encode(ByteArray(FILED_IMAGE_BYTES))
 
 /** Ten digits whose check digit adds up. */
 private const val VALID_NATIONAL_ID = "1234567891"
@@ -400,6 +511,12 @@ private val DRAFT = WorkshopNewMemberPR(
 )
 
 private val SUBMITTED = DRAFT.copy(isDraft = false, canConfirm = false)
+
+private fun filedDocument(guid: String, typeCode: String) = InsuredDocDN(
+    documentType = typeCode,
+    id = 1,
+    documentFile = DocumentFileDN(createdBy = "", id = guid, image = ""),
+)
 
 /** Knows one city, which is all the pickers and the draft need. */
 private class FakeCitiesRepository : CityProvinceRepository {
@@ -442,12 +559,24 @@ private class FakeJobsRepository : CommonRepository {
     override fun checkUserType(): Flow<UserTypeInfoDN> = unused()
 }
 
-/** Records what documents were filed, and for whom. */
+/** Answers what is on file for a person, and records what documents were filed, and for whom. */
 private class FakeDocumentsRepository : PersonalRepository {
     var filedPersonalId: String? = null
         private set
     var filedDocuments: List<InsuredDocDN>? = null
         private set
+
+    /** What a read returns; set [readError] to make it fail instead. */
+    var onFile: List<InsuredDocDN> = emptyList()
+    var readError: Throwable? = null
+    var readPersonalId: String? = null
+        private set
+
+    override fun getInsuredRegistrationDocList(personalId: String): Flow<List<InsuredDocDN>> = flow {
+        readError?.let { throw it }
+        readPersonalId = personalId
+        emit(onFile)
+    }
 
     override fun putInsuredRegistrationDocList(
         personalId: String,

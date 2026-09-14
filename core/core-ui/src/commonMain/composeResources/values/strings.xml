@@ -1964,6 +1964,8 @@
     <string name="abs_doc_07">تصویر توضیحات شناسنامه</string>
     <string name="abs_doc_05">تصویر روی کارت ملی</string>
     <string name="abs_doc_06">تصویر پشت کارت ملی</string>
+    <!-- A document already on file under a type the table above does not list. -->
+    <string name="abs_doc_unknown">مدرک</string>
     <!-- Employer Info Completion (تکمیل اطلاعات کارفرمایی) -->
     <string name="employer_info_title">تکمیل اطلاعات کارفرمایی</string>
     <string name="employer_info_subtitle">تکمیل اطلاعات هویتی کارگاه‌های شما</string>

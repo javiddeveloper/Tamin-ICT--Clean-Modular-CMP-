@@ -2,7 +2,10 @@ package com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers
 
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.model.RegistrationDocumentTypes
+import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachment
+import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachmentDownloader
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachmentUploader
+import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopDocumentType
 import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersUiState.PartialState
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
 import com.tamin.taminhamrah.model.common.isValidIranianNationalId
@@ -18,20 +21,26 @@ import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
 import com.tamin.taminhamrah.useCases.common.GetCityUseCase
 import com.tamin.taminhamrah.useCases.common.GetJobTitleUseCase
 import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
+import com.tamin.taminhamrah.useCases.personal.GetInsuredRegistrationDocListUseCase
 import com.tamin.taminhamrah.useCases.personal.PutInsuredRegistrationDocListUseCase
 import com.tamin.taminhamrah.useCases.workshops.CheckNewMemberIsNewUseCase
 import com.tamin.taminhamrah.useCases.workshops.ConfirmRecentlyAddedMemberUseCase
 import com.tamin.taminhamrah.useCases.workshops.CreateNewMemberRegistrationUseCase
 import com.tamin.taminhamrah.useCases.workshops.DeleteRecentlyAddedMemberUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetRecentlyAddedMembersUseCase
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.abs_doc_unknown
 import taminx.core.core_ui.abs_form_err_already_known
 import taminx.core.core_ui.error_image_duplicate
 import taminx.core.core_ui.new_member_cannot_edit
@@ -44,7 +53,9 @@ class WorkshopRecentlyAddedMembersViewModel(
     private val checkNewMemberIsNew: CheckNewMemberIsNewUseCase,
     private val createNewMemberRegistration: CreateNewMemberRegistrationUseCase,
     private val uploadAttachment: WorkshopAttachmentUploader,
+    private val downloadAttachment: WorkshopAttachmentDownloader,
     private val putRegistrationDocuments: PutInsuredRegistrationDocListUseCase,
+    private val getFiledDocuments: GetInsuredRegistrationDocListUseCase,
     private val getCities: GetCitiesUseCase,
     private val getCity: GetCityUseCase,
     private val getJobTitle: GetJobTitleUseCase,
@@ -228,15 +239,53 @@ class WorkshopRecentlyAddedMembersViewModel(
      *
      * A blank member is «افزودن پرسنل جدید»; a drafted one re-opens what was filled in, as far as
      * the list row carries it. A submitted registration cannot be edited at all.
+     *
+     * A draft's documents already on file are read before its form opens, not after: the last
+     * step writes the document list back whole, as the old app does, so a form that could not
+     * read them must not be the one to overwrite them. A failed read is said, and the form stays
+     * shut.
      */
     private fun edit(member: WorkshopNewMemberPR): Flow<PartialState> = flow {
         if (!member.isDraft && member.nationalId.isNotBlank()) {
             sendEvent(WorkshopRecentlyAddedMembersEvent.ShowMessage(Res.string.new_member_cannot_edit))
             return@flow
         }
-        emit(PartialState.FormChanged(member.asFormState()))
+        val personalId = member.personalId
+        val filedDocuments: PersistentList<WorkshopAttachment> = if (personalId == null) {
+            persistentListOf()
+        } else {
+            // One draft opens at a time; a second tap while its documents load would read them twice.
+            if (uiState.value.openingPersonalId != null) return@flow
+            emit(PartialState.OpeningChanged(personalId))
+            val documents = readFiledDocuments(personalId)
+            emit(PartialState.OpeningChanged(null))
+            documents
+        }
+        emit(PartialState.FormChanged(member.asFormState(filedDocuments)))
         emitAll(resolveDraftLabels(member))
+    }.catch {
+        emit(PartialState.OpeningChanged(null))
+        sendEvent(WorkshopRecentlyAddedMembersEvent.ShowServerMessage(it.toSingleLineMessage()))
     }
+
+    /**
+     * The documents already filed against [personalId], each image read back by its guid — so the
+     * form holds exactly what an upload of them would have left it holding.
+     */
+    private suspend fun readFiledDocuments(personalId: Long): PersistentList<WorkshopAttachment> =
+        coroutineScope {
+            getFiledDocuments(personalId.toString()).first()
+                .map { document ->
+                    async {
+                        downloadAttachment(
+                            guid = document.documentFile.id,
+                            type = filedDocumentType(document.documentType),
+                        )
+                    }
+                }
+                .awaitAll()
+                .toPersistentList()
+        }
 
     /**
      * Turns the codes a re-opened draft carries into the names the fields should show.
@@ -278,18 +327,22 @@ class WorkshopRecentlyAddedMembersViewModel(
     /**
      * A draft re-opened as the form that produced it.
      *
-     * Everything comes off the list row, which already carries the codes — `relation-tamins`
-     * returns the person's cities and job on the row itself, so re-opening costs no request.
-     * The row carries codes, not names, so the fields start empty and [resolveDraftLabels] fills
-     * them in as each lookup answers — a code is not a thing the user can read.
+     * The identity, cities and job come off the list row, which already carries the codes —
+     * `relation-tamins` returns the person's cities and job on the row itself. The row carries
+     * codes, not names, so the fields start empty and [resolveDraftLabels] fills them in as each
+     * lookup answers — a code is not a thing the user can read. The row does not carry the
+     * documents, so [filedDocuments] are read separately.
      */
-    private fun WorkshopNewMemberPR.asFormState(): RegistrationFormState = RegistrationFormState(
+    private fun WorkshopNewMemberPR.asFormState(
+        filedDocuments: PersistentList<WorkshopAttachment>,
+    ): RegistrationFormState = RegistrationFormState(
         firstName = firstName,
         lastName = lastName,
         nationalId = nationalId.digitsOnly(),
         birthDate = birthDate,
         startDate = startDate,
         personalId = personalId,
+        attachments = filedDocuments,
     )
 
     /**
@@ -457,20 +510,9 @@ class WorkshopRecentlyAddedMembersViewModel(
             "the last step is reached only after step two has saved the person"
         }
         emit(PartialState.FormSubmittingChanged(true))
-        putRegistrationDocuments(
-            personalId.toString(),
-            form.attachments.map { document ->
-                InsuredDocDN(
-                    documentType = document.type.code,
-                    id = 0,
-                    documentFile = DocumentFileDN(
-                        createdBy = "",
-                        id = document.guid,
-                        image = "",
-                    ),
-                )
-            },
-        ).first()
+        // The list replaces what is on file, so it carries the documents that were already there.
+        putRegistrationDocuments(personalId.toString(), form.attachments.map { it.toInsuredDoc() })
+            .first()
 
         emit(PartialState.FormChanged(null))
         // The creation returns the person, not a tracking code — the row that appears in the list
@@ -505,6 +547,9 @@ class WorkshopRecentlyAddedMembersViewModel(
         is PartialState.Busy -> currentState.copy(busyPersonalId = partialState.personalId)
         is PartialState.PendingActionChanged ->
             currentState.copy(pendingAction = partialState.pending)
+
+        is PartialState.OpeningChanged ->
+            currentState.copy(openingPersonalId = partialState.personalId)
 
         is PartialState.FormChanged -> currentState.copy(form = partialState.form)
         is PartialState.FormStepChanged -> currentState.editForm {
@@ -618,3 +663,21 @@ private const val FIRST_STEP = 1
 
 /** The step whose «مرحلهٔ بعد» puts the person on file — everything the create needs is in by then. */
 private const val SAVE_STEP = 2
+
+/**
+ * The registration type a document on file was filed under.
+ *
+ * A code the table does not list keeps a generic label rather than being dropped: the document
+ * list is written back whole, so dropping one here would delete it from the person's file. The old
+ * app kept such documents too, untitled.
+ */
+private fun filedDocumentType(code: String): WorkshopDocumentType =
+    RegistrationDocumentTypes.firstOrNull { it.code == code }
+        ?: WorkshopDocumentType(code, Res.string.abs_doc_unknown)
+
+/** An attachment as `documents/{personalId}` files it: the uploaded image's guid, under its type. */
+private fun WorkshopAttachment.toInsuredDoc(): InsuredDocDN = InsuredDocDN(
+    documentType = type.code,
+    id = 0,
+    documentFile = DocumentFileDN(createdBy = "", id = guid, image = ""),
+)
