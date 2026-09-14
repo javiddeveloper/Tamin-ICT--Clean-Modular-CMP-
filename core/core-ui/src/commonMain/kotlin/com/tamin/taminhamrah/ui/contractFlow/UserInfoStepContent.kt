@@ -167,21 +167,24 @@ fun UserInfoStepContent(
                     modifier = Modifier.weight(1f),
                 )
 
-                TaminTextField(
-                    value = userInfo.mobileNumber.toPersianDigits(),
-                    onValueChange = {},
-                    label = stringResource(Res.string.contract_field_mobile_readonly),
-                    enabled = false,
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Outlined.Lock,
-                            contentDescription = null,
-                            tint = colors.textMuted,
-                            modifier = Modifier.size(IconSize.small),
-                        )
-                    },
-                    modifier = Modifier.weight(1f),
-                )
+                // Legacy fraction hides mobile when the user has none on file.
+                if (userInfo.showMobile) {
+                    TaminTextField(
+                        value = userInfo.mobileNumber.toPersianDigits(),
+                        onValueChange = {},
+                        label = stringResource(Res.string.contract_field_mobile_readonly),
+                        enabled = false,
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Outlined.Lock,
+                                contentDescription = null,
+                                tint = colors.textMuted,
+                                modifier = Modifier.size(IconSize.small),
+                            )
+                        },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
             }
         }
     }
@@ -203,6 +206,7 @@ private fun UserInfoStepContentPopulatedPreview() {
                 zipCode = "9187654321",
                 phoneNumber = "05832245678",
                 mobileNumber = "09143018372",
+                showMobile = true,
             ),
             cities = listOf(
                 CityPR(cityCode = "021", cityName = "مشهد", provinceCode = "021"),

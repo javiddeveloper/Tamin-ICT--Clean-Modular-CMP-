@@ -3117,6 +3117,20 @@
     <string name="fraction_contract_user_info_section_title">اطلاعات تماس و محل سکونت</string>
     <string name="fraction_contract_user_info_section_subtitle">متقاضی محترم، در صورت نادرست بودن اطلاعات، می‌توانید از طریق فرم زیر نسبت به ویرایش اطلاعات خود اقدام نمایید.</string>
     <string name="fraction_contract_mobile_locked_hint">تغییر شماره همراه از این فرم امکان‌پذیر نیست؛ برای اصلاح آن به بخش «حساب کاربری» مراجعه کنید.</string>
+    <string name="fraction_contract_error_title">خطا</string>
+    <string name="fraction_contract_error_not_primary_insured">کاربر محترم این خدمت صرفا برای بیمه شدگان اصلی می باشد.</string>
+    <string name="fraction_contract_error_under_18">سن شما کمتر از ۱۸ سال می‌باشد، امکان ارائه خدمات غیر حضوری برای شما میسر نمی‌باشد.</string>
+    <string name="fraction_contract_error_active_fraction">شما در حال حاضر دارای قرارداد تکمیل سوابق کسری از ماه فعال هستید و مجاز به انعقاد مجدد قرارداد نیستید!</string>
+    <string name="fraction_contract_error_eligibility_unavailable">امکان بررسی شرایط انعقاد قرارداد وجود ندارد. لطفاً دوباره تلاش کنید.</string>
+    <string name="fraction_contract_contact_saved_title">به‌روزرسانی اطلاعات</string>
+    <string name="fraction_contract_contact_saved_message">اطلاعات شما با موفقیت به روز رسانی شد</string>
+    <string name="fraction_contract_submit_section_title">ثبت و انعقاد قرارداد</string>
+    <string name="fraction_contract_submit_section_subtitle">خلاصه قرارداد را بازبینی و تعهدنامه نهایی را تأیید کنید.</string>
+    <string name="fraction_contract_submit_rate_label">نرخ حق بیمه</string>
+    <string name="fraction_contract_submit_start_date_label">تاریخ شروع</string>
+    <string name="fraction_contract_submit_rate_value">۲۷٪</string>
+    <string name="fraction_contract_submit_conclude">انعقاد قرارداد</string>
+    <string name="fraction_contract_submit_commitment">اینجانب %1$s دارای کد ملی شماره %2$s با آگاهی کامل از مفاد آئین نامه و مقررات تکمیل سوابق کسری از ماه، و با سلامت کامل عقل، صحت اطلاعات و اسناد مربوطه را تایید می‌نمایم و چنانچه در هر زمان خلاف آن ثابت گردد، قرارداد منعقده باطل بوده و از این نظر هیچ‌گونه حقی نخواهم داشت و ملزم به جبران خسارات احتمالی وارده به سازمان تأمین‌ اجتماعی خواهم بود.\nدرخواست تکمیل سوابق کسری از ماه با نرخ %3$s و تاریخ شروع %4$s را تایید می‌نمایم.</string>
 
 </resources>
 

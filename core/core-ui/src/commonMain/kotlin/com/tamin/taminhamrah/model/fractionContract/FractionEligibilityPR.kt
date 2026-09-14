@@ -13,7 +13,7 @@ data class FractionEligibilityPR(
     val organizationAddress: String = "",
     val eligibilityStatus: Int = -1,
     val history: Int = 0,
-    val isInsurance: Boolean = false,
+    val isInsurance: Boolean? = null,
     val checkFractionMonthStatus: String = "",
     val insuranceId: String = "",
     val branchCode: String = "",

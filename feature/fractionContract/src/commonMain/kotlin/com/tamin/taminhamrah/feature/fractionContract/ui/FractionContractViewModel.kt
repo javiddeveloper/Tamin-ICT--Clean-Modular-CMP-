@@ -6,30 +6,41 @@ import com.tamin.taminhamrah.feature.fractionContract.ui.contract.FractionContra
 import com.tamin.taminhamrah.feature.fractionContract.ui.contract.FractionContractState
 import com.tamin.taminhamrah.feature.fractionContract.ui.contract.FractionContractState.PartialState
 import com.tamin.taminhamrah.feature.fractionContract.ui.contract.FractionContractStep
+import com.tamin.taminhamrah.feature.fractionContract.ui.contract.fractionEligibilityGateError
 import com.tamin.taminhamrah.mapper.common.toCityPresentation
 import com.tamin.taminhamrah.mapper.contracts.toPresentation
 import com.tamin.taminhamrah.mapper.fractionContract.toPresentation
 import com.tamin.taminhamrah.model.common.CityPR
 import com.tamin.taminhamrah.model.contractFlow.UserInfoFormPR
 import com.tamin.taminhamrah.model.contracts.SaveContactRequestDN
+import com.tamin.taminhamrah.model.fractionContract.FractionEligibilityPR
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.ui.digitsOnly
 import com.tamin.taminhamrah.useCases.contracts.GetRegistrationInfoUseCase
 import com.tamin.taminhamrah.useCases.contracts.SaveContactUseCase
 import com.tamin.taminhamrah.useCases.fractionContract.CheckFractionAgeAndHistoryUseCase
+import com.tamin.taminhamrah.useCases.fractionContract.MakeFractionContractUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
+import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.ValidationUtils
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import org.jetbrains.compose.resources.getString
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.fraction_contract_error_active_fraction
+import taminx.core.core_ui.fraction_contract_error_eligibility_unavailable
+import taminx.core.core_ui.fraction_contract_error_not_primary_insured
+import taminx.core.core_ui.fraction_contract_error_under_18
 
 class FractionContractViewModel(
     private val getRegistrationInfoUseCase: GetRegistrationInfoUseCase,
     private val checkFractionAgeAndHistoryUseCase: CheckFractionAgeAndHistoryUseCase,
     private val identityInfoUseCase: IdentityInfoUseCase,
     private val saveContactUseCase: SaveContactUseCase,
+    private val makeFractionContractUseCase: MakeFractionContractUseCase,
 ) : BaseViewModel<FractionContractState, PartialState, FractionContractEvent, FractionContractIntent>(
     initialState = FractionContractState(),
 ) {
@@ -46,12 +57,20 @@ class FractionContractViewModel(
             FractionContractIntent.OnBackClicked -> handleBack()
             FractionContractIntent.OnGuideClicked -> emit(PartialState.GuideDialogVisibility(true))
             FractionContractIntent.DismissGuideDialog -> emit(PartialState.GuideDialogVisibility(false))
+            FractionContractIntent.DismissBlockingError -> sendEvent(FractionContractEvent.NavigateBack)
+            FractionContractIntent.ConfirmContactSaved -> {
+                emit(PartialState.ContactSavedDialogVisibility(false))
+                emit(PartialState.StepChanged(FractionContractStep.Submit))
+            }
             FractionContractIntent.OnNextStepClicked -> goNext()
             FractionContractIntent.OnPreviousStepClicked -> goPrevious()
             is FractionContractIntent.SetRulesConfirmed ->
                 emit(PartialState.RulesConfirmedChanged(intent.confirmed))
             is FractionContractIntent.UpdateUserInfo ->
                 emit(PartialState.UserInfoChanged(intent.userInfo))
+            is FractionContractIntent.SetFinalConfirmed ->
+                emit(PartialState.FinalConfirmedChanged(intent.confirmed))
+            FractionContractIntent.SubmitContract -> submitContract()
         }
     }
 
@@ -65,27 +84,44 @@ class FractionContractViewModel(
             zipCode = ValidationUtils.validatePostcode(registrationInfo.zipCode.digitsOnly()),
             phoneNumber = ValidationUtils.validateLandline(registrationInfo.phoneNumber.digitsOnly()),
         )
+        val (jy, jm, jd) = PersianDateFormatter.today()
         emit(
             PartialState.DataLoaded(
                 registrationInfo = registrationInfo,
                 eligibility = eligibility,
                 userInfo = userInfo,
+                startDateLabel = PersianDateFormatter.format(jy, jm, jd),
+                savedCityName = userInfo.cityName,
             ),
         )
-        loadCities(
-            preferredCityName = eligibility?.city,
-            provinceCode = eligibility?.provinceCode,
-        )
+
+        val gateError = resolveEligibilityGateError(eligibility)
+        if (gateError != null) {
+            emit(PartialState.BlockingError(gateError))
+            return
+        }
+
+        // Legacy fraction city picker uses the national list (no province filter).
+        loadCities(preferredCityName = eligibility?.city)
     }
+
+    private suspend fun resolveEligibilityGateError(
+        eligibility: FractionEligibilityPR?,
+    ): String? = fractionEligibilityGateError(
+        eligibility = eligibility,
+        notPrimaryInsuredMessage = getString(Res.string.fraction_contract_error_not_primary_insured),
+        under18Message = getString(Res.string.fraction_contract_error_under_18),
+        activeFractionMessage = getString(Res.string.fraction_contract_error_active_fraction),
+        unavailableMessage = getString(Res.string.fraction_contract_error_eligibility_unavailable),
+    )
 
     private suspend fun FlowCollector<PartialState>.loadCities(
         preferredCityName: String?,
-        provinceCode: String?,
     ) {
         emit(PartialState.CitiesLoading(true))
         try {
             val cities = identityInfoUseCase
-                .getCities(provinceCode = provinceCode?.takeIf { it.isNotBlank() })
+                .getCities()
                 .first()
                 .toCityPresentation()
             emit(PartialState.CitiesLoaded(cities))
@@ -100,12 +136,16 @@ class FractionContractViewModel(
                             ),
                         ),
                     )
+                    if (uiState.value.savedCityName.isBlank()) {
+                        emit(PartialState.SavedCityNameChanged(matched.cityName))
+                    }
                 }
             }
         } finally {
             emit(PartialState.CitiesLoading(false))
         }
     }
+
     private fun matchPreferredCity(
         cities: List<CityPR>,
         preferredCityName: String?,
@@ -127,6 +167,7 @@ class FractionContractViewModel(
 
     private suspend fun FlowCollector<PartialState>.goNext() {
         val state = uiState.value
+        if (state.blockingErrorMessage != null) return
         when (state.currentStep) {
             FractionContractStep.Eligibility -> if (!state.isEligible) return
             FractionContractStep.Terms -> if (!state.isRulesConfirmed) return
@@ -151,16 +192,32 @@ class FractionContractViewModel(
     private fun hasContactChanged(): Boolean {
         val userInfo = uiState.value.userInfo
         val info = uiState.value.registrationInfo ?: return true
+        // Legacy changedAddressInfo also treats city rename as a change.
         return userInfo.address != info.address ||
             userInfo.zipCode.digitsOnly() != info.zipCode.digitsOnly() ||
-            userInfo.phoneNumber.digitsOnly() != info.phoneNumber.digitsOnly()
+            userInfo.phoneNumber.digitsOnly() != info.phoneNumber.digitsOnly() ||
+            userInfo.cityName != uiState.value.savedCityName
     }
 
     private suspend fun FlowCollector<PartialState>.saveContactThenAdvance() {
         emit(PartialState.SavingContact(true))
         try {
             saveContactUseCase(buildSaveContactParams()).first()
-            emit(PartialState.StepChanged(FractionContractStep.Submit))
+            val userInfo = uiState.value.userInfo
+            val currentInfo = uiState.value.registrationInfo ?: return
+            emit(
+                PartialState.ContactSaved(
+                    registrationInfo = currentInfo.copy(
+                        address = userInfo.address,
+                        zipCode = userInfo.zipCode.digitsOnly(),
+                        phoneNumber = userInfo.phoneNumber.digitsOnly(),
+                        mobileNumber = userInfo.mobileNumber.digitsOnly(),
+                        hasMobile = userInfo.showMobile,
+                    ),
+                    savedCityName = userInfo.cityName,
+                ),
+            )
+            emit(PartialState.ContactSavedDialogVisibility(true))
         } finally {
             emit(PartialState.SavingContact(false))
         }
@@ -177,7 +234,30 @@ class FractionContractViewModel(
         )
     }
 
+    private suspend fun FlowCollector<PartialState>.submitContract() {
+        val state = uiState.value
+        if (state.currentStep != FractionContractStep.Submit) return
+        if (!state.isFinalConfirmed || state.isSubmitting || state.submittedContract != null) return
+
+        emit(PartialState.Submitting(true))
+        try {
+            val result = makeFractionContractUseCase(
+                FractionContractState.MAKE_CONTRACT_PREMIUM_BODY,
+            ).first().toPresentation()
+            emit(PartialState.ContractSubmitted(result))
+            sendEvent(
+                FractionContractEvent.ShowSubmitSuccess(
+                    contractNumber = result.contractNumber,
+                    contractDate = PersianDateFormatter.formatTimestamp(result.contractDate),
+                ),
+            )
+        } finally {
+            emit(PartialState.Submitting(false))
+        }
+    }
+
     private suspend fun FlowCollector<PartialState>.goPrevious() {
+        if (uiState.value.submittedContract != null) return
         val previous = when (uiState.value.currentStep) {
             FractionContractStep.Eligibility -> return
             FractionContractStep.Terms -> FractionContractStep.Eligibility
@@ -197,6 +277,8 @@ class FractionContractViewModel(
             registrationInfo = partialState.registrationInfo,
             eligibility = partialState.eligibility,
             userInfo = partialState.userInfo,
+            startDateLabel = partialState.startDateLabel,
+            savedCityName = partialState.savedCityName,
             error = null,
         )
         is PartialState.StepChanged -> currentState.copy(currentStep = partialState.step)
@@ -205,8 +287,27 @@ class FractionContractViewModel(
         is PartialState.CitiesLoading -> currentState.copy(isCitiesLoading = partialState.isLoading)
         is PartialState.CitiesLoaded -> currentState.copy(cities = partialState.cities)
         is PartialState.SavingContact -> currentState.copy(isSavingContact = partialState.isSaving)
+        is PartialState.ContactSaved -> currentState.copy(
+            registrationInfo = partialState.registrationInfo,
+            savedCityName = partialState.savedCityName,
+        )
+        is PartialState.SavedCityNameChanged -> currentState.copy(savedCityName = partialState.savedCityName)
+        is PartialState.ContactSavedDialogVisibility ->
+            currentState.copy(showContactSavedDialog = partialState.visible)
+        is PartialState.FinalConfirmedChanged -> currentState.copy(isFinalConfirmed = partialState.confirmed)
+        is PartialState.Submitting -> currentState.copy(isSubmitting = partialState.isSubmitting)
+        is PartialState.ContractSubmitted -> currentState.copy(submittedContract = partialState.result)
         is PartialState.GuideDialogVisibility -> currentState.copy(showGuideDialog = partialState.visible)
-        is PartialState.Error -> currentState.copy(isLoading = false, error = partialState.message)
+        is PartialState.BlockingError -> currentState.copy(
+            isLoading = false,
+            blockingErrorMessage = partialState.message,
+        )
+        is PartialState.Error -> currentState.copy(
+            isLoading = false,
+            isSavingContact = false,
+            isSubmitting = false,
+            error = partialState.message,
+        )
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)

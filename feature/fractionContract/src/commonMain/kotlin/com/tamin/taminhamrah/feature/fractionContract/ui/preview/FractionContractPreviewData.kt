@@ -80,7 +80,10 @@ internal object FractionContractPreviewData {
         cities = cities,
     )
 
-    val submitStepState = eligibleState.copy(currentStep = FractionContractStep.Submit)
+    val submitStepState = eligibleState.copy(
+        currentStep = FractionContractStep.Submit,
+        startDateLabel = "1405/06/22",
+    )
 
     val loadingState = FractionContractState(isLoading = true)
 }

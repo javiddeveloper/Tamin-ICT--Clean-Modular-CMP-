@@ -39,7 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.fractionContract.ui.components.FractionContractScreenShimmer
 import com.tamin.taminhamrah.feature.fractionContract.ui.components.FractionEligibilityStep
-import com.tamin.taminhamrah.feature.fractionContract.ui.components.FractionPlaceholderStepShimmer
+import com.tamin.taminhamrah.feature.fractionContract.ui.components.FractionSubmitStep
 import com.tamin.taminhamrah.feature.fractionContract.ui.components.FractionTermsStep
 import com.tamin.taminhamrah.feature.fractionContract.ui.components.FractionUserInfoStep
 import com.tamin.taminhamrah.feature.fractionContract.ui.contract.FractionContractEvent
@@ -68,6 +68,8 @@ import com.tamin.taminhamrah.ui.components.TaminLocalPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.buttons.SquareIconButton
+import com.tamin.taminhamrah.ui.contractFlow.ContractSubmitResult
+import com.tamin.taminhamrah.ui.contractFlow.ContractSubmitResultDialog
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.HeaderDecoration
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -82,7 +84,11 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.btn_understood
 import taminx.core.core_ui.contract_rules_pdf_title
+import taminx.core.core_ui.fraction_contract_contact_saved_message
+import taminx.core.core_ui.fraction_contract_contact_saved_title
+import taminx.core.core_ui.fraction_contract_error_title
 import taminx.core.core_ui.fraction_contract_guide_body
 import taminx.core.core_ui.fraction_contract_guide_confirm
 import taminx.core.core_ui.fraction_contract_guide_title
@@ -93,9 +99,12 @@ import taminx.core.core_ui.fraction_contract_step_eligibility
 import taminx.core.core_ui.fraction_contract_step_submit
 import taminx.core.core_ui.fraction_contract_step_terms
 import taminx.core.core_ui.fraction_contract_step_user_info
+import taminx.core.core_ui.fraction_contract_submit_conclude
 import taminx.core.core_ui.fraction_contract_title
+import taminx.core.core_ui.ic_error
 import taminx.core.core_ui.ic_help
 import taminx.core.core_ui.ic_info
+import taminx.core.core_ui.ic_success
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.ic_tamin_user
@@ -107,9 +116,16 @@ import taminx.core.core_ui.step_number_4
 fun FractionContractRoute(
     viewModel: FractionContractViewModel = koinViewModel(),
     onBack: () -> Unit,
+    onNavigateToPremiumPayment: (
+        contractNumber: String,
+        premiumTypeCode: String,
+        insuranceType: String,
+    ) -> Unit = { _, _, _ -> },
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    var submitResult by remember { mutableStateOf<ContractSubmitResult?>(null) }
+    val insuranceTypeLabel = stringResource(Res.string.fraction_contract_title)
 
     LaunchedEffect(Unit) {
         viewModel.sendIntent(FractionContractIntent.InitData)
@@ -121,7 +137,34 @@ fun FractionContractRoute(
         events = viewModel.events,
         onBack = onBack,
         snackbarHostState = snackbarHostState,
+        onShowSubmitSuccess = { contractNumber, contractDate ->
+            submitResult = ContractSubmitResult.Success(
+                contractNumber = contractNumber,
+                contractDate = contractDate,
+                amount = 0L,
+                canPayOnline = true,
+            )
+        },
+        onNavigateToPremiumPayment = onNavigateToPremiumPayment,
     )
+
+    submitResult?.let { result ->
+        ContractSubmitResultDialog(
+            result = result,
+            onDismiss = {
+                submitResult = null
+                onBack()
+            },
+            onPay = { contractNumber, _ ->
+                submitResult = null
+                onNavigateToPremiumPayment(
+                    contractNumber,
+                    FractionContractState.PREMIUM_TYPE_CODE,
+                    insuranceTypeLabel,
+                )
+            },
+        )
+    }
 
     FractionContractScreen(
         state = state,
@@ -135,11 +178,25 @@ private fun HandleFractionContractEvents(
     events: Flow<FractionContractEvent>,
     onBack: () -> Unit,
     snackbarHostState: SnackbarHostState,
+    onShowSubmitSuccess: (contractNumber: String, contractDate: String) -> Unit,
+    onNavigateToPremiumPayment: (
+        contractNumber: String,
+        premiumTypeCode: String,
+        insuranceType: String,
+    ) -> Unit,
 ) {
     events.collectWithLifecycleAware { event ->
         when (event) {
             FractionContractEvent.NavigateBack -> onBack()
             is FractionContractEvent.ShowToast -> snackbarHostState.showSnackbar(event.message)
+            is FractionContractEvent.ShowSubmitSuccess ->
+                onShowSubmitSuccess(event.contractNumber, event.contractDate)
+            is FractionContractEvent.NavigateToPremiumPayment ->
+                onNavigateToPremiumPayment(
+                    event.contractNumber,
+                    event.premiumTypeCode,
+                    event.insuranceType,
+                )
         }
     }
 }
@@ -155,7 +212,8 @@ fun FractionContractScreen(
     val profileGradientBrush = remember(taminColors.profileGradientStops) {
         Brush.horizontalGradient(taminColors.profileGradientStops)
     }
-    val showBlockingError = state.error != null && state.registrationInfo == null && !state.isLoading
+    val showLoadError = state.error != null && state.registrationInfo == null && !state.isLoading
+    val hasEligibilityBlock = state.blockingErrorMessage != null
     val showInitialShimmer = state.isLoading && state.registrationInfo == null
     var showRulesPdf by remember { mutableStateOf(false) }
     var rulesPdfBytes by remember { mutableStateOf<ByteArray?>(null) }
@@ -219,7 +277,7 @@ fun FractionContractScreen(
             }
         },
         bottomBar = {
-            if (!showBlockingError && state.registrationInfo != null) {
+            if (!showLoadError && !hasEligibilityBlock && state.registrationInfo != null) {
                 FractionContractBottomBar(
                     state = state,
                     onIntent = onIntent,
@@ -233,7 +291,7 @@ fun FractionContractScreen(
                 .padding(padding),
         ) {
             when {
-                showBlockingError -> {
+                showLoadError -> {
                     ErrorStateView(
                         message = state.error.orEmpty(),
                         onRetry = { onIntent(FractionContractIntent.InitData) },
@@ -351,7 +409,26 @@ fun FractionContractScreen(
                             }
 
                             FractionContractStep.Submit -> {
-                                FractionPlaceholderStepShimmer()
+                                val info = state.registrationInfo
+                                if (info != null) {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .verticalScroll(rememberScrollState())
+                                            .padding(horizontal = Spacing.page, vertical = Spacing.md),
+                                    ) {
+                                        FractionSubmitStep(
+                                            fullName = info.fullName,
+                                            nationalId = info.nationalId,
+                                            startDate = state.startDateLabel,
+                                            isFinalConfirmed = state.isFinalConfirmed,
+                                            isSubmitting = state.isSubmitting,
+                                            onFinalConfirmedChange = {
+                                                onIntent(FractionContractIntent.SetFinalConfirmed(it))
+                                            },
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -372,6 +449,44 @@ fun FractionContractScreen(
                 TaminFilledButton(
                     text = stringResource(Res.string.fraction_contract_guide_confirm),
                     onClick = { onIntent(FractionContractIntent.DismissGuideDialog) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            },
+            dismissButton = {},
+        )
+    }
+
+    if (state.showContactSavedDialog) {
+        TaminConfirmationDialog(
+            title = stringResource(Res.string.fraction_contract_contact_saved_title),
+            description = stringResource(Res.string.fraction_contract_contact_saved_message),
+            icon = vectorResource(Res.drawable.ic_success),
+            iconTint = taminColors.greenText,
+            iconBackground = taminColors.greenBg,
+            onDismissRequest = { onIntent(FractionContractIntent.ConfirmContactSaved) },
+            confirmButton = {
+                TaminFilledButton(
+                    text = stringResource(Res.string.btn_understood),
+                    onClick = { onIntent(FractionContractIntent.ConfirmContactSaved) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            },
+            dismissButton = {},
+        )
+    }
+
+    state.blockingErrorMessage?.let { message ->
+        TaminConfirmationDialog(
+            title = stringResource(Res.string.fraction_contract_error_title),
+            description = message,
+            icon = vectorResource(Res.drawable.ic_error),
+            iconTint = taminColors.dangerText,
+            iconBackground = taminColors.dangerBg,
+            onDismissRequest = { onIntent(FractionContractIntent.DismissBlockingError) },
+            confirmButton = {
+                TaminFilledButton(
+                    text = stringResource(Res.string.btn_understood),
+                    onClick = { onIntent(FractionContractIntent.DismissBlockingError) },
                     modifier = Modifier.fillMaxWidth(),
                 )
             },
@@ -467,11 +582,15 @@ private fun FractionContractBottomBar(
             FractionContractStep.UserInfo,
             FractionContractStep.Submit,
             -> {
+                val isSubmit = state.currentStep == FractionContractStep.Submit
                 val nextEnabled = when (state.currentStep) {
                     FractionContractStep.Terms -> state.isRulesConfirmed
                     FractionContractStep.UserInfo ->
                         state.isUserInfoComplete && !state.isSavingContact
-                    FractionContractStep.Submit -> false
+                    FractionContractStep.Submit ->
+                        state.isFinalConfirmed &&
+                            !state.isSubmitting &&
+                            state.submittedContract == null
                     FractionContractStep.Eligibility -> false
                 }
                 Row(
@@ -480,15 +599,38 @@ private fun FractionContractBottomBar(
                 ) {
                     SquareIconButton(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                        onClick = { onIntent(FractionContractIntent.OnPreviousStepClicked) },
+                        onClick = {
+                            if (state.submittedContract == null && !state.isSubmitting) {
+                                onIntent(FractionContractIntent.OnPreviousStepClicked)
+                            }
+                        },
                     )
                     LoadingButton(
-                        text = stringResource(Res.string.fraction_contract_next_step),
-                        onClick = { onIntent(FractionContractIntent.OnNextStepClicked) },
+                        text = stringResource(
+                            if (isSubmit) {
+                                Res.string.fraction_contract_submit_conclude
+                            } else {
+                                Res.string.fraction_contract_next_step
+                            },
+                        ),
+                        onClick = {
+                            if (isSubmit) {
+                                onIntent(FractionContractIntent.SubmitContract)
+                            } else {
+                                onIntent(FractionContractIntent.OnNextStepClicked)
+                            }
+                        },
                         enabled = nextEnabled,
-                        isLoading = state.currentStep == FractionContractStep.UserInfo &&
-                            state.isSavingContact,
-                        icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
+                        isLoading = when (state.currentStep) {
+                            FractionContractStep.UserInfo -> state.isSavingContact
+                            FractionContractStep.Submit -> state.isSubmitting
+                            else -> false
+                        },
+                        icon = if (isSubmit) {
+                            null
+                        } else {
+                            vectorResource(Res.drawable.ic_tamin_chevron_forward)
+                        },
                         iconPosition = LoadingButtonIconPosition.TRAILING,
                         modifier = Modifier.weight(1f),
                     )

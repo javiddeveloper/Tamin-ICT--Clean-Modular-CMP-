@@ -61,11 +61,13 @@ internal fun FractionUserInfoStep(
             onPhoneNumberChange = onPhoneNumberChange,
             isLoading = isLoading,
         )
-        Text(
-            text = stringResource(Res.string.fraction_contract_mobile_locked_hint),
-            style = MaterialTheme.typography.bodySmall,
-            color = colors.textMuted,
-        )
+        if (userInfo.showMobile) {
+            Text(
+                text = stringResource(Res.string.fraction_contract_mobile_locked_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.textMuted,
+            )
+        }
     }
 }
 
