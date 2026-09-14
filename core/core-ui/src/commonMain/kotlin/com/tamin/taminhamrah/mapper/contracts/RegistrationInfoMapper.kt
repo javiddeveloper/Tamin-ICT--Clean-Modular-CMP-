@@ -16,11 +16,13 @@ fun RegistrationInfoDN.toPresentation(): RegistrationInfoPR {
         nationalId = personal?.nationalId ?: "",
         birthDateFormatted = PersianDateFormatter.formatTimestamp(personal?.dateOfBirth),
         insuranceId = insuranceId ?: "",
-        genderTitle = if (personal?.genderCode == "02") "خانم" else "آقای",
+        genderCode = personal?.genderCode.orEmpty(),
         address = contact?.address?:"",
         zipCode = contact?.zipCode?:"",
         phoneNumber = contact?.phoneNumber?:"",
         mobileNumber = mobile,
         hasMobile = mobile.isNotBlank(),
+        insuranceIdValid = insuranceIdValidity,
+        dateOfBirthEpoch = personal?.dateOfBirth,
     )
 }

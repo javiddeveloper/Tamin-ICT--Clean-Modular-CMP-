@@ -18,6 +18,19 @@ data class WorkshopListQuery(
     val pageSize: Int = WORKSHOP_PAGE_SIZE,
 )
 
+/**
+ * What one page of a ردیف پیمان list is asked for.
+ *
+ * The workshop and branch are *path segments* on both contract-row endpoints, not filter entries —
+ * which is why this carries no filter fields at all, unlike every other query here.
+ */
+data class ContractRowQuery(
+    val workshopId: String,
+    val branchCode: String,
+    val page: Int = 0,
+    val pageSize: Int = WORKSHOP_PAGE_SIZE,
+)
+
 /** Filters of the برگ پرداخت‌ها search sheet. All optional, all matched exactly. */
 data class PaymentSheetQuery(
     val workshopId: String,
@@ -80,6 +93,22 @@ data class ArticleSixteenDebtQuery(
     val branchCode: String,
     val debitNumber: String? = null,
     val agreementRow: String? = null,
+    val page: Int = 0,
+    val pageSize: Int = WORKSHOP_PAGE_SIZE,
+)
+
+/**
+ * Filters of the پیگیری وضعیت اعتراض search sheet. All optional, all matched exactly.
+ *
+ * Unlike every other list on this repository, this one has no required workshop/branch identity —
+ * it is reached from the services menu, not from a picked workshop row, and shows every objection
+ * the employer has filed across all of their workshops.
+ */
+data class WorkShopObjectionQuery(
+    val workshopId: String? = null,
+    /** شمارهٔ اعتراض — filtered on `seqNo`, see [com.tamin.taminhamrah.model.request.FilterProperty.SEQ_NO]. */
+    val objectionNumber: String? = null,
+    val debitNumber: String? = null,
     val page: Int = 0,
     val pageSize: Int = WORKSHOP_PAGE_SIZE,
 )

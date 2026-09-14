@@ -25,7 +25,6 @@ class ContractMapperTest {
         assertEquals("بیمه اختیاری ۲۷ درصد", pr.monthlyPremiumLabel)
         assertEquals("362592593", pr.monthlyIncome)
         assertTrue(pr.hasTreatmentSupport)
-        assertEquals("حمایت درمان دارد", pr.treatmentSupportText)
         assertEquals("تاسیساتی", pr.jobTitle)
         assertTrue(pr.requestDate.isNotEmpty())
     }
@@ -44,7 +43,6 @@ class ContractMapperTest {
 
         assertFalse(pr.isActive)
         assertFalse(pr.hasTreatmentSupport)
-        assertEquals("حمایت درمان ندارد", pr.treatmentSupportText)
     }
 
     @Test

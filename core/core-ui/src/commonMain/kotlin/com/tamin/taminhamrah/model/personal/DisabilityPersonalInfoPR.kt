@@ -31,6 +31,7 @@ data class DisabilityPersonalPR(
     val cityOfIssue: String,
     val dateOfBirth: String,
     val genderDesc: String,
+    val genderCode: String = "",
 )
 
 @Immutable

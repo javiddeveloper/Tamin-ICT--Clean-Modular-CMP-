@@ -1,10 +1,5 @@
-package com.tamin.taminhamrah.feature.workshops.ui
+﻿package com.tamin.taminhamrah.feature.workshops.ui
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,15 +17,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCard
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopListScaffold
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopSearchDialog
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopSearchPanel
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopSectionHeader
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopStatsCard
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopStats
+import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsEvent
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsIntent
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState
 import com.tamin.taminhamrah.feature.workshops.ui.detail.WorkshopDetailScreen
 import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
-import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
 import com.tamin.taminhamrah.feature.workshops.ui.sheets.WorkshopFilterSheet
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
@@ -61,7 +57,7 @@ import taminx.core.core_ui.workshops_title
 @Composable
 fun WorkshopsRoute(
     onBack: () -> Unit,
-    onOpenAction: (WorkshopAction, String, String, String) -> Unit,
+    onOpenAction: (WorkshopsEvent.Navigate) -> Unit,
     viewModel: WorkshopsViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -92,6 +88,7 @@ fun WorkshopsScreen(
         BackHandler { onIntent(WorkshopsIntent.DetailDismissed) }
         WorkshopDetailScreen(
             workshop = workshop,
+            actions = state.availableActions,
             onBack = { onIntent(WorkshopsIntent.DetailDismissed) },
             onAction = { action -> onIntent(WorkshopsIntent.ActionSelected(action, workshop)) },
             modifier = modifier,
@@ -163,34 +160,35 @@ fun WorkshopsScreen(
         WorkshopListScaffold(
             state = state.list,
             onLoadMore = { onIntent(WorkshopsIntent.LoadMore) },
+            onRetry = { onIntent(WorkshopsIntent.Load) },
             key = { it.workshopId + it.branchCode },
             header = {
-                Column(verticalArrangement = Arrangement.spacedBy(Spacing.lg)) {
-                    AnimatedVisibility(
-                        visible = isSearchOpen,
-                        enter = expandVertically() + fadeIn(),
-                        exit = shrinkVertically() + fadeOut(),
-                    ) {
-                        WorkshopSearchPanel(
-                            workshopId = state.workshopIdInput,
-                            branchCode = state.branchCodeInput,
-                            onWorkshopIdChange = { onIntent(WorkshopsIntent.WorkshopIdChanged(it)) },
-                            onBranchCodeChange = { onIntent(WorkshopsIntent.BranchCodeChanged(it)) },
-                            onSearch = { onIntent(WorkshopsIntent.ApplySearch) },
-                            onClear = { onIntent(WorkshopsIntent.ClearSearch) },
-                        )
-                    }
-                    WorkshopSectionHeader(
-                        count = workshops.size,
-                        isFilterActive = hasActiveFilter,
-                        onFilterClick = { onIntent(WorkshopsIntent.FilterSheetOpenChanged(true)) },
-                    )
-                }
+                WorkshopSectionHeader(
+                    count = workshops.size,
+                    isFilterActive = hasActiveFilter,
+                    onFilterClick = { onIntent(WorkshopsIntent.FilterSheetOpenChanged(true)) },
+                )
             },
-        ) { workshop ->
+        ) { workshop, itemModifier ->
             WorkshopCard(
                 workshop = workshop,
                 onOpenDetails = { onIntent(WorkshopsIntent.DetailRequested(workshop)) },
+                modifier = itemModifier,
+            )
+        }
+    }
+
+    if (isSearchOpen) {
+        WorkshopSearchDialog(
+            onDismiss = { onIntent(WorkshopsIntent.SearchOpenChanged(false)) },
+        ) {
+            WorkshopSearchPanel(
+                workshopId = state.workshopIdInput,
+                branchCode = state.branchCodeInput,
+                onWorkshopIdChange = { onIntent(WorkshopsIntent.WorkshopIdChanged(it)) },
+                onBranchCodeChange = { onIntent(WorkshopsIntent.BranchCodeChanged(it)) },
+                onSearch = { onIntent(WorkshopsIntent.ApplySearch) },
+                onClear = { onIntent(WorkshopsIntent.ClearSearch) },
             )
         }
     }

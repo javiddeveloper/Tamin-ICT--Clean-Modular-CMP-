@@ -145,7 +145,13 @@ fun PayRollHeader(
             )
             .padding(horizontal = Spacing.lg)
 
-        if (hasData) {
+        // Loading is checked first, and on every load rather than only the first: a refetch
+        // after a date or pensioner change replaces the card with its skeleton, where it used
+        // to leave the previous payslip on screen under a scrim -- numbers from the old query
+        // that read as the answer to the new one.
+        if (state.isLoading) {
+            PayRollSkeletonMainCard(modifier = cardModifier)
+        } else if (hasData) {
             PayRollMainCard(
                 state = state,
                 collapseProgress = collapseProgress,
@@ -156,9 +162,7 @@ fun PayRollHeader(
                     spotColor = TaminIdentityCardShadow,
                 ),
             )
-        } else if (!state.hasLoadedOnce && state.isLoading) {
-            PayRollSkeletonMainCard(modifier = cardModifier)
-        } else if (state.hasLoadedOnce && !state.isLoading) {
+        } else if (state.hasLoadedOnce) {
             PayRollEmptyCard(
                 onShowAll = { onIntent(PayRollIntent.ClearDateFilter) },
                 modifier = cardModifier,

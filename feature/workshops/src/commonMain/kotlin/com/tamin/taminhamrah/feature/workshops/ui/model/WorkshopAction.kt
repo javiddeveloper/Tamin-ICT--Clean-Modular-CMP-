@@ -1,8 +1,25 @@
 package com.tamin.taminhamrah.feature.workshops.ui.model
 
 import com.tamin.taminhamrah.feature.workshops.ui.components.StatusTint
+import com.tamin.taminhamrah.model.common.FeatureFlag
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.contract_rows_action_desc
+import taminx.core.core_ui.contract_rows_title
+import taminx.core.core_ui.ic_tamin_workshop_contract_rows
+import taminx.core.core_ui.ic_tamin_workshop_inquiry
+import taminx.core.core_ui.ic_tamin_workshop_payment
+import taminx.core.core_ui.ic_tamin_workshop_objection
+import taminx.core.core_ui.ic_tamin_workshop_turnover
+import taminx.core.core_ui.workshop_action_debit_turnover
+import taminx.core.core_ui.workshop_action_debit_turnover_desc
+import taminx.core.core_ui.workshop_action_debt_inquiry
+import taminx.core.core_ui.workshop_action_debt_inquiry_desc
+import taminx.core.core_ui.workshop_action_objection
+import taminx.core.core_ui.workshop_action_objection_desc
+import taminx.core.core_ui.workshop_action_payment_sheets
+import taminx.core.core_ui.workshop_action_payment_sheets_desc
 
 /**
  * The services a picked کارگاه can be taken to, in the order the menu lists them.
@@ -12,14 +29,53 @@ import org.jetbrains.compose.resources.StringResource
  * do. Every action is offered for every workshop regardless of its activity status, which is how
  * the service behaves.
  *
- * Empty for now: a row belongs here only once the screen it opens exists. The `when` in
- * `WorkshopAction.route()` is exhaustive, so the compiler refuses an action with nowhere to go —
- * which is the codebase saying a menu row and its destination are one change, and why each
- * service arrives as its own task rather than a row that quietly does nothing.
+ * A row belongs here only once the screen it opens exists: the `when` in `WorkshopAction.route()`
+ * is exhaustive, so the compiler refuses an action with nowhere to go.
  */
 enum class WorkshopAction(
     val label: StringResource,
     val description: StringResource,
     val icon: DrawableResource,
     val tint: StatusTint,
-)
+    /**
+     * The server-side switch that hides this service, or null when it has none.
+     *
+     * A service reachable from the services grid is reachable from here too, so the flag that turns
+     * it off there has to turn it off here — otherwise disabling it only closes one of two doors.
+     */
+    val featureFlag: FeatureFlag? = null,
+) {
+    PAYMENT_SHEETS(
+        label = Res.string.workshop_action_payment_sheets,
+        description = Res.string.workshop_action_payment_sheets_desc,
+        icon = Res.drawable.ic_tamin_workshop_payment,
+        tint = StatusTint.INFO,
+    ),
+    DEBIT_TURNOVER(
+        label = Res.string.workshop_action_debit_turnover,
+        description = Res.string.workshop_action_debit_turnover_desc,
+        icon = Res.drawable.ic_tamin_workshop_turnover,
+        tint = StatusTint.TEAL,
+    ),
+    DEBT_INQUIRY(
+        label = Res.string.workshop_action_debt_inquiry,
+        description = Res.string.workshop_action_debt_inquiry_desc,
+        icon = Res.drawable.ic_tamin_workshop_inquiry,
+        tint = StatusTint.MINT,
+    ),
+    OBJECTION(
+        label = Res.string.workshop_action_objection,
+        description = Res.string.workshop_action_objection_desc,
+        icon = Res.drawable.ic_tamin_workshop_objection,
+        tint = StatusTint.WARNING,
+    ),
+
+    CONTRACT_ROWS(
+        label = Res.string.contract_rows_title,
+        description = Res.string.contract_rows_action_desc,
+        icon = Res.drawable.ic_tamin_workshop_contract_rows,
+        tint = StatusTint.INFO,
+        // «اطلاعات پیمان» in the server menu — the same flag the services-grid tile routes through.
+        featureFlag = FeatureFlag.CONTRACT_INFO,
+    ),
+}

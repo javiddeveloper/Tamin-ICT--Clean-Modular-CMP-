@@ -13,10 +13,14 @@ import com.tamin.taminhamrah.data.repository.HistoryRepositoryImpl
 import com.tamin.taminhamrah.data.repository.calculateWagePension.CalculateWagePensionRepositoryImpl
 import com.tamin.taminhamrah.data.repository.VersionHistoryRepositoryImpl
 import com.tamin.taminhamrah.data.repository.contract.ContractsRepositoryImpl
+import com.tamin.taminhamrah.data.repository.contractAffair.ContractAffairRepositoryImpl
 import com.tamin.taminhamrah.data.repository.pension.PensionRepositoryImpl
 import com.tamin.taminhamrah.data.repository.userRequests.UserRequestRepositoryImpl
 import com.tamin.taminhamrah.data.repository.orotezProtez.OrotezProtezRepositoryImpl
 import com.tamin.taminhamrah.data.repository.inquiryEducation.InquiryEducationRepositoryImpl
+import com.tamin.taminhamrah.data.repository.fractionContract.FractionContractRepositoryImpl
+import com.tamin.taminhamrah.data.repository.weddingPresent.WeddingPresentRepositoryImpl
+import com.tamin.taminhamrah.data.repository.requestPaymentForIllDays.RequestPaymentForIllDaysRepositoryImpl
 import com.tamin.taminhamrah.data.repository.pregnancyPay.PregnancyPayRepositoryImpl
 import com.tamin.taminhamrah.data.repository.personal.PersonalRepositoryImpl
 import com.tamin.taminhamrah.feature.FeatureManager
@@ -29,10 +33,14 @@ import com.tamin.taminhamrah.repository.personalInbox.PersonalInboxRepository
 import com.tamin.taminhamrah.repository.HistoryRepository
 import com.tamin.taminhamrah.repository.calculateWagePension.CalculateWagePensionRepository
 import com.tamin.taminhamrah.repository.contracts.ContractsRepository
+import com.tamin.taminhamrah.repository.contractAffair.ContractAffairRepository
 import com.tamin.taminhamrah.repository.pension.PensionRepository
 import com.tamin.taminhamrah.repository.userRequest.UserRequestRepository
 import com.tamin.taminhamrah.repository.orotezProtez.OrotezProtezRepository
 import com.tamin.taminhamrah.repository.inquiryEducation.InquiryEducationRepository
+import com.tamin.taminhamrah.repository.weddingPresent.WeddingPresentRepository
+import com.tamin.taminhamrah.repository.fractionContract.FractionContractRepository
+import com.tamin.taminhamrah.repository.requestPaymentForIllDays.RequestPaymentForIllDaysRepository
 import com.tamin.taminhamrah.repository.pregnancyPay.PregnancyPayRepository
 import com.tamin.taminhamrah.repository.personal.PersonalRepository
 import com.tamin.taminhamrah.repository.health.HealthRepository
@@ -42,6 +50,10 @@ import com.tamin.taminhamrah.data.repository.ContactUsRepositoryImpl
 import com.tamin.taminhamrah.repository.ContactUsRepository
 import com.tamin.taminhamrah.data.repository.health.HealthRepositoryImpl
 import com.tamin.taminhamrah.data.repository.addDependent.AddDependentRepositoryImpl
+import com.tamin.taminhamrah.data.repository.payment.PaymentGatewayRepositoryImpl
+import com.tamin.taminhamrah.repository.payment.PaymentGatewayRepository
+import com.tamin.taminhamrah.repository.payment.PaymentReturnNotifier
+import com.tamin.taminhamrah.repository.payment.PaymentReturnNotifierImpl
 import com.tamin.taminhamrah.data.repository.WorkShopsRepositoryImpl
 import com.tamin.taminhamrah.repository.WorkShopsRepository
 import com.tamin.taminhamrah.data.repository.InspectionRepositoryImpl
@@ -52,9 +64,15 @@ import com.tamin.taminhamrah.data.repository.funeralAllowance.FuneralAllowanceRe
 import com.tamin.taminhamrah.repository.funeralAllowance.FuneralAllowanceRepository
 import com.tamin.taminhamrah.data.repository.historyObjection.HistoryObjectionRepositoryImpl
 import com.tamin.taminhamrah.repository.historyObjection.HistoryObjectionRepository
+import com.tamin.taminhamrah.data.repository.employerInfo.EmployerInfoRepositoryImpl
+import com.tamin.taminhamrah.repository.employerInfo.EmployerInfoRepository
+import com.tamin.taminhamrah.data.repository.workersPayment.WorkersPaymentRepositoryImpl
+import com.tamin.taminhamrah.repository.workersPayment.WorkersPaymentRepository
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
+import com.tamin.taminhamrah.data.repository.stories.StoryRepositoryImpl
+import com.tamin.taminhamrah.repository.stories.StoryRepository
 
 val dataKoinModule = module {
     singleOf(::FeatureManagerImpl) { bind<FeatureManager>() }
@@ -69,19 +87,28 @@ val dataKoinModule = module {
     singleOf(::CommonRepositoryImpl) { bind<CommonRepository>() }
     singleOf(::AgentChatCacheRepositoryImpl) { bind<AgentChatCacheRepository>() }
     singleOf(::WorkShopsRepositoryImpl) { bind<WorkShopsRepository>() }
+    singleOf(::PaymentGatewayRepositoryImpl) { bind<PaymentGatewayRepository>() }
+    singleOf(::PaymentReturnNotifierImpl) { bind<PaymentReturnNotifier>() }
     singleOf(::PersonalInboxRepositoryImpl) { bind<PersonalInboxRepository>() }
     singleOf(::UserRequestRepositoryImpl) { bind<UserRequestRepository>() }
     singleOf(::PersonalRepositoryImpl) { bind<PersonalRepository>() }
     singleOf(::ContractsRepositoryImpl) { bind<ContractsRepository>() }
+    singleOf(::ContractAffairRepositoryImpl) { bind<ContractAffairRepository>() }
     singleOf(::HealthRepositoryImpl) { bind<HealthRepository>() }
     singleOf(::AddDependentRepositoryImpl) { bind<AddDependentRepository>() }
     singleOf(::VersionHistoryRepositoryImpl) { bind<VersionHistoryRepository>() }
     singleOf(::ContactUsRepositoryImpl) { bind<ContactUsRepository>() }
     singleOf(::OrotezProtezRepositoryImpl) { bind<OrotezProtezRepository>() }
+    singleOf(::RequestPaymentForIllDaysRepositoryImpl) { bind<RequestPaymentForIllDaysRepository>() }
     singleOf(::OccurrenceRepositoryImpl) { bind<OccurrenceRepository>() }
     singleOf(::InspectionRepositoryImpl) { bind<InspectionRepository>() }
     singleOf(::HistoryObjectionRepositoryImpl) { bind<HistoryObjectionRepository>() }
+    singleOf(::EmployerInfoRepositoryImpl) { bind<EmployerInfoRepository>() }
     singleOf(::PregnancyPayRepositoryImpl) { bind<PregnancyPayRepository>() }
     singleOf(::InquiryEducationRepositoryImpl) { bind<InquiryEducationRepository>() }
+    singleOf(::FractionContractRepositoryImpl) { bind<FractionContractRepository>() }
+    singleOf(::WorkersPaymentRepositoryImpl) { bind<WorkersPaymentRepository>() }
+    singleOf(::WeddingPresentRepositoryImpl) { bind<WeddingPresentRepository>() }
+    singleOf(::StoryRepositoryImpl) { bind<StoryRepository>() }
     singleOf(::FuneralAllowanceRepositoryImpl) { bind<FuneralAllowanceRepository>() }
 }

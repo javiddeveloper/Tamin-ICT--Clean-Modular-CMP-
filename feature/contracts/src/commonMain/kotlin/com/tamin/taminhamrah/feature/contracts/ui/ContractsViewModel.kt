@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.contracts.ui
 
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.FeatureManager
+import com.tamin.taminhamrah.feature.contracts.ContractNewEntryFlags
 import com.tamin.taminhamrah.feature.contracts.ui.contract.ContractsEvent
 import com.tamin.taminhamrah.feature.contracts.ui.contract.ContractsIntent
 import com.tamin.taminhamrah.feature.contracts.ui.contract.ContractsUiState
@@ -37,15 +38,15 @@ class ContractsViewModel(
     private fun handleLoadContracts(): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
 
-        val contractIds = listOf(33, 34, 36, 37, 39)
-
         try {
             val menuItems = getMainMenuUseCase(AppConfig.versionName, false).first()
-            val contractOptions = menuItems.filter { it.id in contractIds }
+            val contractOptions = menuItems.filter { service ->
+                FeatureFlag.fromId(service.id) in ContractNewEntryFlags.flags
+            }
             emit(PartialState.OptionsLoaded(contractOptions))
 
-            getContractsUseCase().collect { contracts ->
-                emit(PartialState.ContractsLoaded(contracts.toPresentation()))
+            getContractsUseCase().collect { page ->
+                emit(PartialState.ContractsLoaded(page.items.toPresentation()))
             }
         } catch (e: Exception) {
             emit(PartialState.Error(e.message))

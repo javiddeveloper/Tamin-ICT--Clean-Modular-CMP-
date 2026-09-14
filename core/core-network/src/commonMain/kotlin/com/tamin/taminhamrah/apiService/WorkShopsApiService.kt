@@ -18,25 +18,40 @@ import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDTO
 import com.tamin.taminhamrah.model.workshop.DebitReasonDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmitRequestDTO
+import com.tamin.taminhamrah.model.workshop.EmployerCommitmentInfoDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeContractDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeRequestDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberConfirmResultDTO
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
+import com.tamin.taminhamrah.model.workshop.PaymentTicketInfoDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDTO
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDTO
+import com.tamin.taminhamrah.model.workshop.SmsMessageDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDTO
-import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
-import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopContractDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDTO
 import com.tamin.taminhamrah.tools.BaseDTO
+import com.tamin.taminhamrah.util.NetworkConstants
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.DELETE
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.PUT
 import de.jensklingenberg.ktorfit.http.Path
+import de.jensklingenberg.ktorfit.http.Query
 import de.jensklingenberg.ktorfit.http.QueryMap
+import de.jensklingenberg.ktorfit.http.Url
 import io.ktor.client.statement.HttpStatement
 import kotlinx.serialization.json.JsonElement
 
@@ -48,6 +63,32 @@ internal interface WorkShopsApiService {
     suspend fun getAllEmployerAgreementByNationalId(
         @QueryMap queries: Map<String, String>
     ): BaseDTO<ListData<EmployerAgreementDTO>>
+
+    // ------------------------------------------------------------------------ ردیف‌های پیمان
+
+    /**
+     * ردیف پیمان‌های a workshop that *has* a تعهدنامه — same row shape as the list above, narrowed
+     * to one workshop/branch instead of every workshop the signed-in national id holds.
+     */
+    @GET("workshop-services/get-employer-agreement-by-workshop-id-and-branch-code/{workshopId}/{branchCode}")
+    suspend fun getEmployerAgreementsByWorkshop(
+        @Path("workshopId") workshopId: String,
+        @Path("branchCode") branchCode: String,
+        @QueryMap queries: Map<String, String>,
+    ): BaseDTO<ListData<EmployerAgreementDTO>>
+
+    /**
+     * ردیف پیمان‌های a workshop with no تعهدنامه on file — a leaner row, and a different model.
+     *
+     * `contract-employer-workshop-info-…` is the service's own spelling, and the response names
+     * two fields differently from the call above; see [WorkshopContractDTO].
+     */
+    @GET("workshop-services/contract-employer-workshop-info-with-workshop-and-branch-code/{workshopId}/{branchCode}")
+    suspend fun getWorkshopContracts(
+        @Path("workshopId") workshopId: String,
+        @Path("branchCode") branchCode: String,
+        @QueryMap queries: Map<String, String>,
+    ): BaseDTO<ListData<WorkshopContractDTO>>
 
     // -------------------------------------------------------------------------- برگ پرداخت‌ها
 
@@ -97,6 +138,17 @@ internal interface WorkShopsApiService {
     suspend fun payWorkshopDebit(
         @Body request: DebitPaymentRequestDTO,
     ): BaseDTO<DebitPaymentDTO>
+
+    /**
+     * Binds a payment ticket to the signed-in user, on the gateway's own host.
+     *
+     * Absolute, because TFH is not behind this service's base URL — the caller builds the address
+     * from the gateway base URL Developer Options resolves (`BaseUrlKey.TFH`).
+     */
+    @GET
+    suspend fun getPaymentTicketInfo(
+        @Url url: String,
+    ): BaseDTO<PaymentTicketInfoDTO>
 
     // ---------------------------------------------------------------------- استعلام بدهی کارگاه
 
@@ -153,7 +205,7 @@ internal interface WorkShopsApiService {
     ): BaseDTO<JsonElement?>
 
     /**
-     * Whether this national id is someone the organisation has never registered.
+     * Whether this national id is someone the organization has never registered.
      *
      * `relation-tamins/isnew` — the registration asks before it creates, because an existing
      * person is edited rather than added again.
@@ -211,4 +263,126 @@ internal interface WorkShopsApiService {
     suspend fun getWorkshopStackHolders(
         @QueryMap queries: Map<String, String>
     ): BaseDTO<ListData<WorkshopStackHolderDTO>>
+
+    @GET("v.1/legal-stakeholders/units")
+    suspend fun getLegalRepresentativeWorkshops(
+        @QueryMap queries: Map<String, String>
+    ): BaseDTO<ListData<LegalRepresentativeWorkshopDTO>>
+
+    @GET("legal-stakeholders")
+    suspend fun getLegalRepresentatives(
+        @QueryMap queries: Map<String, String>
+    ): BaseDTO<ListData<LegalRepresentativeDTO>>
+
+    @GET("workshop-services/get-employer-agreement-by-workshop-id-and-branch-code/{workshopId}/{branchCode}")
+    suspend fun getLegalRepresentativeWorkshopContracts(
+        @Path("workshopId") workshopId: String,
+        @Path("branchCode") branchCode: String,
+        @QueryMap queries: Map<String, String>
+    ): BaseDTO<ListData<LegalRepresentativeContractDTO>>
+
+    @GET("legal-ticket")
+    suspend fun requestLegalTicket(): BaseDTO<JsonElement?>
+
+    @GET("legal-ticket/{nationalCode}")
+    suspend fun requestLegalTicketWithNationalCode(
+        @Path("nationalCode") nationalCode: String
+    ): BaseDTO<JsonElement?>
+
+    @POST("legal-ticket/validate/{ticket}")
+    suspend fun validateLegalTicket(
+        @Path("ticket") ticket: String
+    ): BaseDTO<JsonElement?>
+
+    @POST("legal-stakeholders/{ticket}")
+    suspend fun submitLegalRepresentative(
+        @Path("ticket") ticket: String,
+        @Body request: LegalRepresentativeRequestDTO,
+    ): BaseDTO<JsonElement?>
+
+    @DELETE("legal-stakeholders/{ticket}/{stackId}")
+    suspend fun deleteLegalRepresentative(
+        @Path("ticket") ticket: String,
+        @Path("stackId") stackId: Long,
+    ): BaseDTO<JsonElement?>
+
+    // ------------------------------------------------- خدمات غیرحضوری کارفرما (employerServicesAgreement)
+    //
+    // Employer → Online Services. A three-step stepper (request ticket -> verify code -> confirm
+    // agreement) plus two management-side drill-downs. See EmployerOnlineServiceDTO.kt for the flow.
+
+    /**
+     * Step 1 — درخواست کد تایید (تیکت) برای ثبت تعهد خدمات غیرحضوری.
+     *
+     * The employer enters the mobile/email they want registered; the backend sends an OTP and
+     * this returns a bare confirmation message. Called from the first stepper page when the
+     * requested contact details differ from the current ones.
+     *
+     * [filter] is the `[{property,value,operator}]` JSON array built in
+     * [com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSource.requestEmployerAgreementTicket]
+     * (`mobileNumber`, `email`, `serviceName=employerEservicesAgreement`).
+     */
+    @GET("workshop-services/request-ticket")
+    suspend fun requestEmployerAgreementTicket(
+        @Query("filter") filter: String,
+    ): BaseDTO<JsonElement?>
+
+    /**
+     * Step 2 — تایید کد و دریافت مشخصات هویتی کارفرما.
+     *
+     * Exchanges the OTP the employer typed for their identity block (نام، کد ملی، موبایل/ایمیل
+     * فعلی), which the second stepper page shows next to the newly requested values before the
+     * employer accepts the rules.
+     */
+    @GET("workshop-services/employer-info/{verificationCode}")
+    suspend fun getEmployerAgreementUserInfo(
+        @Path("verificationCode") verificationCode: String,
+    ): BaseDTO<EmployerCommitmentInfoDTO>
+
+    /**
+     * Step 2 — لیست کارگاه‌های بدون قرارداد کارفرما.
+     *
+     * Paged list shown on the second stepper page while the employer confirms the agreement.
+     * Tapping a row opens [getEmployerWorkshopContractList] for that workshop.
+     */
+    @GET("workshop-services/employer-workshops-info-with-out-contract")
+    suspend fun getEmployerWorkshopsWithoutContract(
+        @QueryMap queries: Map<String, String>,
+    ): BaseDTO<ListData<WorkshopWithoutContractDTO>>
+
+    /**
+     * پیمانکاران / قراردادهای یک کارگاه.
+     *
+     * Opened when the employer drills into a workshop — from the without-contract list (step 2)
+     * or from a registered agreement on the management side. Paged.
+     */
+    @GET("workshop-services/contract-employer-workshop-info-with-workshop-and-branch-code/{workshopId}/{branchCode}")
+    suspend fun getEmployerWorkshopContractList(
+        @Path("workshopId") workshopId: String,
+        @Path("branchCode") branchCode: String,
+        @QueryMap queries: Map<String, String>,
+    ): BaseDTO<ListData<WorkshopContractRowDTO>>
+
+    /**
+     * Step 3 — ثبت نهایی تعهد خدمات غیرحضوری کارفرما.
+     *
+     * Posted from the last stepper page once the employer ticks the قوانین checkbox. Returns a
+     * bare success message; the screen navigates back on success.
+     */
+    @POST("workshop-services/employer-agreement")
+    suspend fun submitEmployerAgreement(
+        @Body request: EmployerAgreementSubmitRequestDTO,
+    ): BaseDTO<JsonElement?>
+
+    @GET("debit-objection/objection-all")
+    suspend fun getWorkShopObjections(
+        @QueryMap queries: Map<String, String>
+    ): BaseDTO<ListData<WorkShopObjectionDTO>>
+
+    /** پیامک‌های one filed objection. `objectionCode` is the row's own `seqNo`. */
+    @GET("debit-objection/objection-detail/{objectionCode}/")
+    suspend fun getWorkShopObjectionSms(
+        @Path("objectionCode") objectionCode: Long,
+        @QueryMap queries: Map<String, String>
+    ): BaseDTO<ListData<SmsMessageDTO>>
 }

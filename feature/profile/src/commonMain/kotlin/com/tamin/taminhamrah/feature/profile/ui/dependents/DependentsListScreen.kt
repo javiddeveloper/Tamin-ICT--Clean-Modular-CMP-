@@ -55,7 +55,6 @@ import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.ErrorStateView
-import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.SectionLabel
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminDivider
@@ -64,6 +63,7 @@ import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.ShimmerCardList
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.coroutines.flow.Flow
 import androidx.compose.ui.draw.rotate
@@ -192,7 +192,14 @@ fun DependentsListScreen(
                 .navigationBarsPadding()
         ) {
             when {
-                state.isLoading && state.dependentsList.isEmpty() -> LoadingStateOverlay()
+                state.isLoading && state.dependentsList.isEmpty() -> ShimmerCardList(
+                    contentPadding = PaddingValues(
+                        top = Spacing.lg,
+                        bottom = Spacing.xxl,
+                        start = Spacing.page,
+                        end = Spacing.page
+                    )
+                )
                 state.error != null -> ErrorStateView(
                     message = state.error,
                     onRetry = { onIntent(DependentsListIntent.OnRefreshClicked) },

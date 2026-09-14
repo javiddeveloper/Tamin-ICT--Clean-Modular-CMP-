@@ -8,6 +8,8 @@ import com.tamin.taminhamrah.useCases.auth.DeepLinkManager
 import com.tamin.taminhamrah.useCases.auth.DeepLinkManagerImpl
 import com.tamin.taminhamrah.useCases.auth.ExchangeCodeForTokensUseCase
 import com.tamin.taminhamrah.useCases.auth.ExchangeCodeForTokensUseCaseImpl
+import com.tamin.taminhamrah.useCases.auth.DebugClientCredentialsLoginUseCase
+import com.tamin.taminhamrah.useCases.auth.DebugClientCredentialsLoginUseCaseImpl
 import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCase
 import com.tamin.taminhamrah.useCases.auth.HandleAuthDeepLinkUseCaseImpl
 import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCase
@@ -37,6 +39,9 @@ import com.tamin.taminhamrah.useCases.pension.SendPayRollToInboxUseCase
 import com.tamin.taminhamrah.useCases.pension.GetUserAgeUseCase
 import com.tamin.taminhamrah.useCases.pension.GetRetirementRequestInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.CheckRetirementStatusUseCase
+import com.tamin.taminhamrah.useCases.pension.GetAuthenticationCodeUseCase
+import com.tamin.taminhamrah.useCases.pension.AuthenticationAndGetPersonalInfoUseCase
+import com.tamin.taminhamrah.useCases.pension.CreateRetirementRequestUseCase
 import com.tamin.taminhamrah.useCases.pension.SendRetirementDocumentUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.DeleteMyRequestUseCase
 import com.tamin.taminhamrah.useCases.personalInbox.InboxInquiryLicenseUseCase
@@ -67,7 +72,16 @@ import com.tamin.taminhamrah.useCases.orotezProtez.GetInsuredPersonsUseCase
 import com.tamin.taminhamrah.useCases.orotezProtez.GetRequestInsuredMainInfoUseCase
 import com.tamin.taminhamrah.useCases.orotezProtez.SaveShortTermOrthosisUseCase
 import com.tamin.taminhamrah.useCases.inquiryEducation.GetDataForEducationUseCase
+import com.tamin.taminhamrah.useCases.weddingPresent.CalculateMarriageAllowanceUseCase
+import com.tamin.taminhamrah.useCases.weddingPresent.GetWeddingPresentInfoUseCase
+import com.tamin.taminhamrah.useCases.weddingPresent.SubmitWeddingPresentUseCase
 import com.tamin.taminhamrah.useCases.inquiryEducation.InquiryEducationCertificateUseCase
+import com.tamin.taminhamrah.useCases.fractionContract.CheckFractionAgeAndHistoryUseCase
+import com.tamin.taminhamrah.useCases.fractionContract.MakeFractionContractUseCase
+import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.CalcIllnessAmountUseCase
+import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.GetCovidResultUseCase
+import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.GetIllDaysInsuredMainInfoUseCase
+import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.SendRequestForIllDayUseCase
 import com.tamin.taminhamrah.useCases.pregnancyPay.CalculatePregnancyPayEstimateUseCase
 import com.tamin.taminhamrah.useCases.pregnancyPay.GetPregnancyMainInfoUseCase
 import com.tamin.taminhamrah.useCases.pregnancyPay.GetPregnancyStatusListUseCase
@@ -91,7 +105,18 @@ import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.common.GetJobTitleUseCase
 import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetContractsUseCase
+import com.tamin.taminhamrah.useCases.contractAffair.GetContractsPageUseCase
+import com.tamin.taminhamrah.useCases.contractAffair.GetContractStatesUseCase
+import com.tamin.taminhamrah.useCases.contractAffair.CancelContractUseCase
+import com.tamin.taminhamrah.useCases.contractAffair.GetContractPaymentHistoryUseCase
+import com.tamin.taminhamrah.useCases.contractAffair.DownloadContractReportUseCase
+import com.tamin.taminhamrah.useCases.contractAffair.GetContractDebitUseCase
+import com.tamin.taminhamrah.useCases.contractAffair.GetContractLastPaymentUseCase
+import com.tamin.taminhamrah.useCases.contractAffair.GetPaymentCalculationDetailsUseCase
 import com.tamin.taminhamrah.useCases.contracts.CalculateFreelanceSalaryUseCase
+import com.tamin.taminhamrah.useCases.contracts.GetOptionalPremiumRangeUseCase
+import com.tamin.taminhamrah.useCases.contracts.CheckRedCrossStatusUseCase
+import com.tamin.taminhamrah.useCases.contracts.CheckMedicalStudentUseCase
 import com.tamin.taminhamrah.useCases.contracts.CalculateOptionalSalaryUseCase
 import com.tamin.taminhamrah.useCases.contracts.CheckInsurancePaymentStatusUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetFreelancePremiumRangeUseCase
@@ -102,16 +127,27 @@ import com.tamin.taminhamrah.useCases.contracts.GetSpcPremiumRatesUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeFreelanceContractByGuardianUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeOptionalContractByGuardianUseCase
 import com.tamin.taminhamrah.useCases.contracts.MakeContractUseCase
-import com.tamin.taminhamrah.useCases.contracts.MakeFreelanceContractUseCase
+import com.tamin.taminhamrah.useCases.contracts.UpdateContractUseCase
+import com.tamin.taminhamrah.useCases.contracts.UpdateFreelanceContractByGuardianUseCase
+import com.tamin.taminhamrah.useCases.contracts.UpdateOptionalContractByGuardianUseCase
 import com.tamin.taminhamrah.useCases.contracts.SaveContactUseCase
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetHistoryJobInfosUseCase
 import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
+import com.tamin.taminhamrah.useCases.history.DownloadHistoryReportUseCase
+import com.tamin.taminhamrah.useCases.history.GetUserInfosUseCase
+import com.tamin.taminhamrah.useCases.history.GetUserRoleUseCase
+import com.tamin.taminhamrah.useCases.history.SendHistoryNoticeUseCase
 import com.tamin.taminhamrah.useCases.calculateWagePension.CalculateMultipleWorkshopsPensionUseCase
 import com.tamin.taminhamrah.useCases.calculateWagePension.CalculateWagePensionUseCase
 import com.tamin.taminhamrah.useCases.calculateWagePension.CheckMultipleWorkshopsUseCase
 import com.tamin.taminhamrah.useCases.calculateWagePension.GetMultipleWorkshopPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.GetDisabilityPersonalInfoUseCase
+import com.tamin.taminhamrah.useCases.pension.SaveDisabilityUserInfoUseCase
+import com.tamin.taminhamrah.useCases.pension.FinalConfirmDisabilityRequestUseCase
+import com.tamin.taminhamrah.useCases.pension.SaveDocumentDisabilityUseCase
+import com.tamin.taminhamrah.useCases.pension.GetMedicalCommissionPdfUseCase
+import com.tamin.taminhamrah.useCases.pension.GetRegisteredMedicalCommissionUseCase
 import com.tamin.taminhamrah.useCases.personal.GetRequestSummaryUseCase
 import com.tamin.taminhamrah.useCases.personal.PutInsuredRegistrationDocListUseCase
 import com.tamin.taminhamrah.useCases.user.CheckUserIsNewUseCase
@@ -167,6 +203,8 @@ import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenReportPdfUseCas
 import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenRequestInfoUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenWorkshopInfoUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetDebitObjectionPdfUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetContractRowsWithAgreementUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetContractRowsWithoutAgreementUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetDebitReasonsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetDebitTurnoverPdfUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetDemandDocumentsUseCase
@@ -176,7 +214,13 @@ import com.tamin.taminhamrah.useCases.workshops.GetPaymentSheetsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetRecentlyAddedMembersUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebitsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopDebtInquiryUseCase
+import com.tamin.taminhamrah.useCases.payment.CancelPaymentUseCase
+import com.tamin.taminhamrah.useCases.payment.CreatePaymentLinkUseCase
+import com.tamin.taminhamrah.useCases.payment.GetPaymentPreviewUseCase
+import com.tamin.taminhamrah.useCases.payment.VerifyPaymentUseCase
 import com.tamin.taminhamrah.useCases.workshops.PayWorkshopDebitUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetWorkShopObjectionsUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetWorkShopObjectionSmsUseCase
 import com.tamin.taminhamrah.useCases.workshops.SaveArticleSixteenRequestUseCase
 import com.tamin.taminhamrah.useCases.workshops.SaveDebitObjectionUseCase
 import com.tamin.taminhamrah.useCases.agent.SendAgentPromptUseCase
@@ -195,6 +239,18 @@ import com.tamin.taminhamrah.useCases.agent.StartAgentSessionUseCase
 import com.tamin.taminhamrah.useCases.agent.UpdateAgentSessionUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopMembersUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopStackHoldersUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetLegalRepresentativeWorkshopsUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetLegalRepresentativesUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetLegalRepresentativeWorkshopContractsUseCase
+import com.tamin.taminhamrah.useCases.workshops.RequestLegalRepresentativeTicketUseCase
+import com.tamin.taminhamrah.useCases.workshops.VerifyLegalRepresentativeTicketUseCase
+import com.tamin.taminhamrah.useCases.workshops.SubmitLegalRepresentativeUseCase
+import com.tamin.taminhamrah.useCases.workshops.DeleteLegalRepresentativeUseCase
+import com.tamin.taminhamrah.useCases.workshops.RequestEmployerAgreementTicketUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetEmployerAgreementContactInfoUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetWorkshopsWithoutContractUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetWorkshopContractRowsUseCase
+import com.tamin.taminhamrah.useCases.workshops.SubmitEmployerAgreementUseCase
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -206,15 +262,29 @@ import com.tamin.taminhamrah.useCases.treatment.GetMedicalConfirmationPDFUseCase
 import com.tamin.taminhamrah.useCases.treatment.SendToInboxMedicalConfirmationUseCase
 import com.tamin.taminhamrah.useCases.addDependent.AddNewDependentUseCase
 import com.tamin.taminhamrah.useCases.addDependent.GetActiveBranchesUseCase
+import com.tamin.taminhamrah.useCases.employerInfo.GetLegalWorkshopUseCase
+import com.tamin.taminhamrah.useCases.employerInfo.GetLegalWorkshopCeoUseCase
+import com.tamin.taminhamrah.useCases.employerInfo.RequestLegalTicketUseCase
+import com.tamin.taminhamrah.useCases.employerInfo.SubmitLegalWorkshopInfoUseCase
+import com.tamin.taminhamrah.useCases.employerInfo.RequestRealTicketUseCase
+import com.tamin.taminhamrah.useCases.employerInfo.SubmitRealWorkshopInfoUseCase
 import com.tamin.taminhamrah.useCases.addDependent.GetDependentInfoUseCase
 import com.tamin.taminhamrah.useCases.addDependent.GetFamilyRelationshipsFromProxyUseCase
 import com.tamin.taminhamrah.useCases.addDependent.GetFamilyRelationshipsUseCase
 import com.tamin.taminhamrah.useCases.addDependent.InquiryEducationCodeUseCase
 import com.tamin.taminhamrah.useCases.addDependent.InquiryRegistryUseCase
+import com.tamin.taminhamrah.useCases.addDependent.RefreshDependentsUseCase
 import com.tamin.taminhamrah.useCases.addDependent.UploadDependentImageUseCase
 import com.tamin.taminhamrah.useCases.user.mockUseCases.MockSubdominantUseCase
 import com.tamin.taminhamrah.useCases.versionHistory.GetVersionHistoryUseCase
 import com.tamin.taminhamrah.useCases.contactUs.GetContactUsUseCase
+import com.tamin.taminhamrah.useCases.content.GetLegalDocumentUseCase
+import com.tamin.taminhamrah.useCases.stories.GetStoryChannelsUseCase
+import com.tamin.taminhamrah.useCases.stories.ObserveSeenStoryChannelsUseCase
+import com.tamin.taminhamrah.useCases.stories.MarkStoryChannelSeenUseCase
+import com.tamin.taminhamrah.useCases.stories.ObserveStoryEngagementUseCase
+import com.tamin.taminhamrah.useCases.stories.ToggleStoryLikeUseCase
+import com.tamin.taminhamrah.useCases.stories.ToggleStorySaveUseCase
 
 val domainModule = module {
     // Add Dependent UseCases
@@ -229,6 +299,7 @@ val domainModule = module {
     factoryOf(::DeepLinkManagerImpl) bind DeepLinkManager::class
     factoryOf(::AuthAuthorizeUrlUseCaseImpl) bind AuthAuthorizeUrlUseCase::class
     factoryOf(::ExchangeCodeForTokensUseCaseImpl) bind ExchangeCodeForTokensUseCase::class
+    factoryOf(::DebugClientCredentialsLoginUseCaseImpl) bind DebugClientCredentialsLoginUseCase::class
     factoryOf(::HandleAuthDeepLinkUseCaseImpl) bind HandleAuthDeepLinkUseCase::class
     factoryOf(::UserProfileImageUseCase)
     factoryOf(::TaminRelationUseCase)
@@ -244,6 +315,10 @@ val domainModule = module {
     factoryOf(::GetUserAgeUseCase)
     factoryOf(::GetRetirementRequestInfoUseCase)
     factoryOf(::CheckRetirementStatusUseCase)
+    factoryOf(::GetAuthenticationCodeUseCase)
+    factoryOf(::AuthenticationAndGetPersonalInfoUseCase)
+    factoryOf(::CreateRetirementRequestUseCase)
+    factoryOf(::SendRetirementDocumentUseCase)
     factoryOf(::GetEdictPensionerUseCase)
     factoryOf(::GetEdictReportPDFUseCase)
     factoryOf(::SendEdictPensionerToMyInboxUseCase)
@@ -300,6 +375,10 @@ val domainModule = module {
     factoryOf(::FinalConfirmHistoryObjectionNotExistUseCase)
 
     factoryOf(::GetTalfighInfosUseCase)
+    factoryOf(::GetUserInfosUseCase)
+    factoryOf(::GetUserRoleUseCase)
+    factoryOf(::DownloadHistoryReportUseCase)
+    factoryOf(::SendHistoryNoticeUseCase)
     factoryOf(::GetDastmozdInfosUseCase)
     factoryOf(::GetHistoryJobInfosUseCase)
     factoryOf(::GetMultipleWorkshopPersonalInfoUseCase)
@@ -314,6 +393,15 @@ val domainModule = module {
     factoryOf(::SaveShortTermOrthosisUseCase)
     factoryOf(::GetDataForEducationUseCase)
     factoryOf(::InquiryEducationCertificateUseCase)
+    factoryOf(::CheckFractionAgeAndHistoryUseCase)
+    factoryOf(::MakeFractionContractUseCase)
+    factoryOf(::GetWeddingPresentInfoUseCase)
+    factoryOf(::SubmitWeddingPresentUseCase)
+    factoryOf(::CalculateMarriageAllowanceUseCase)
+    factoryOf(::GetIllDaysInsuredMainInfoUseCase)
+    factoryOf(::GetCovidResultUseCase)
+    factoryOf(::CalcIllnessAmountUseCase)
+    factoryOf(::SendRequestForIllDayUseCase)
     factoryOf(::GetPregnancyMainInfoUseCase)
     factoryOf(::GetPregnancyStatusListUseCase)
     factoryOf(::GetPregnancyTypeListUseCase)
@@ -323,22 +411,40 @@ val domainModule = module {
     factoryOf(::DeleteMyRequestUseCase)
     factoryOf(::InboxInquiryLicenseUseCase)
     factoryOf(::GetContractsUseCase)
+    factoryOf(::GetContractsPageUseCase)
+    factoryOf(::GetContractStatesUseCase)
+    factoryOf(::CancelContractUseCase)
+    factoryOf(::GetContractPaymentHistoryUseCase)
+    factoryOf(::DownloadContractReportUseCase)
+    factoryOf(::GetContractDebitUseCase)
+    factoryOf(::GetContractLastPaymentUseCase)
+    factoryOf(::GetPaymentCalculationDetailsUseCase)
     factoryOf(::GetRegistrationInfoUseCase)
     factoryOf(::GetBranchesUseCase)
     factoryOf(::GetSpcPremiumRatesUseCase)
     factoryOf(::GetFreelancePremiumRangeUseCase)
+    factoryOf(::GetOptionalPremiumRangeUseCase)
+    factoryOf(::CheckRedCrossStatusUseCase)
+    factoryOf(::CheckMedicalStudentUseCase)
     factoryOf(::CalculateFreelanceSalaryUseCase)
     factoryOf(::CalculateOptionalSalaryUseCase)
-    factoryOf(::MakeFreelanceContractUseCase)
     factoryOf(::MakeContractUseCase)
     factoryOf(::MakeFreelanceContractByGuardianUseCase)
     factoryOf(::MakeOptionalContractByGuardianUseCase)
+    factoryOf(::UpdateContractUseCase)
+    factoryOf(::UpdateFreelanceContractByGuardianUseCase)
+    factoryOf(::UpdateOptionalContractByGuardianUseCase)
     factoryOf(::GetInsurancePaymentUseCase)
     factoryOf(::CheckInsurancePaymentStatusUseCase)
     factoryOf(::SaveContactUseCase)
     factoryOf(::GetFreeJobWagesUseCase)
     factoryOf(::UploadImageUseCase)
     factoryOf(::GetDisabilityPersonalInfoUseCase)
+    factoryOf(::SaveDisabilityUserInfoUseCase)
+    factoryOf(::FinalConfirmDisabilityRequestUseCase)
+    factoryOf(::SaveDocumentDisabilityUseCase)
+    factoryOf(::GetMedicalCommissionPdfUseCase)
+    factoryOf(::GetRegisteredMedicalCommissionUseCase)
     // Agent
     factoryOf(::SendAgentPromptUseCase)
     factoryOf(::CheckChatAllowedUseCase)
@@ -356,6 +462,7 @@ val domainModule = module {
     factoryOf(::UpdateAgentSessionUseCase)
 
     factoryOf(::SendRetirementDocumentUseCase)
+    factoryOf(::CreateRetirementRequestUseCase)
     factoryOf(::GetRolesUseCase)
 
 
@@ -376,17 +483,29 @@ val domainModule = module {
     factoryOf(::CheckUserIsNewUseCase)
     // کارگاه‌های کارفرما — the list, then one group per action it launches
     factoryOf(::GetEmployerAgreementsUseCase)
+    factoryOf(::GetContractRowsWithAgreementUseCase)
+    factoryOf(::GetContractRowsWithoutAgreementUseCase)
     factoryOf(::GetPaymentSheetsUseCase)
     factoryOf(::GetDebitReasonsUseCase)
     factoryOf(::GetWorkshopDebitsUseCase)
     factoryOf(::GetDemandDocumentsUseCase)
     factoryOf(::GetDebitTurnoverPdfUseCase)
     factoryOf(::PayWorkshopDebitUseCase)
+
+    // Shared payment flow. VerifyPaymentUseCase collects every PaymentVerifier registered by any
+    // feature module — getAll() is what lets a feature contribute one without core-domain, or this
+    // list, having to know that the feature exists.
+    factoryOf(::GetPaymentPreviewUseCase)
+    factoryOf(::CreatePaymentLinkUseCase)
+    factoryOf(::CancelPaymentUseCase)
+    factory { VerifyPaymentUseCase(repository = get(), verifiers = getAll()) }
     factoryOf(::GetWorkshopDebtInquiryUseCase)
     factoryOf(::GetObjectionableDebitsUseCase)
     factoryOf(::CheckObjectionDeadlineUseCase)
     factoryOf(::SaveDebitObjectionUseCase)
     factoryOf(::GetDebitObjectionPdfUseCase)
+    factoryOf(::GetWorkShopObjectionsUseCase)
+    factoryOf(::GetWorkShopObjectionSmsUseCase)
     factoryOf(::GetRecentlyAddedMembersUseCase)
     factoryOf(::ConfirmRecentlyAddedMemberUseCase)
     factoryOf(::DeleteRecentlyAddedMemberUseCase)
@@ -399,6 +518,20 @@ val domainModule = module {
     factoryOf(::GetArticleSixteenReportPdfUseCase)
     factoryOf(::GetWorkshopMembersUseCase)
     factoryOf(::GetWorkshopStackHoldersUseCase)
+    factoryOf(::GetLegalRepresentativeWorkshopsUseCase)
+    factoryOf(::GetLegalRepresentativesUseCase)
+    factoryOf(::GetLegalRepresentativeWorkshopContractsUseCase)
+    factoryOf(::RequestLegalRepresentativeTicketUseCase)
+    factoryOf(::VerifyLegalRepresentativeTicketUseCase)
+    factoryOf(::SubmitLegalRepresentativeUseCase)
+    factoryOf(::DeleteLegalRepresentativeUseCase)
+    // خدمات غیرحضوری کارفرما — the employerEservicesAgreement stepper + management drill-downs
+    factoryOf(::RequestEmployerAgreementTicketUseCase)
+    factoryOf(::GetEmployerAgreementContactInfoUseCase)
+    factoryOf(::GetWorkshopsWithoutContractUseCase)
+    factoryOf(::GetWorkshopContractRowsUseCase)
+    factoryOf(::SubmitEmployerAgreementUseCase)
+    factoryOf(::GetLegalDocumentUseCase)
     factoryOf(::GetTreatmentCostsUseCase)
     factoryOf(::GetTreatmentCostsPDFUseCase)
     factoryOf(::SendToInboxTreatmentCostsUseCase)
@@ -446,5 +579,22 @@ val domainModule = module {
     factoryOf(::InquiryEducationCodeUseCase)
     factoryOf(::UploadDependentImageUseCase)
     factoryOf(::AddNewDependentUseCase)
+    factoryOf(::RefreshDependentsUseCase)
+
+    // Employer Info UseCases
+    factoryOf(::GetLegalWorkshopUseCase)
+    factoryOf(::GetLegalWorkshopCeoUseCase)
+    factoryOf(::RequestLegalTicketUseCase)
+    factoryOf(::SubmitLegalWorkshopInfoUseCase)
+    factoryOf(::RequestRealTicketUseCase)
+    factoryOf(::SubmitRealWorkshopInfoUseCase)
+
+    // Stories UseCases
+    factoryOf(::GetStoryChannelsUseCase)
+    factoryOf(::ObserveSeenStoryChannelsUseCase)
+    factoryOf(::MarkStoryChannelSeenUseCase)
+    factoryOf(::ObserveStoryEngagementUseCase)
+    factoryOf(::ToggleStoryLikeUseCase)
+    factoryOf(::ToggleStorySaveUseCase)
 }
 

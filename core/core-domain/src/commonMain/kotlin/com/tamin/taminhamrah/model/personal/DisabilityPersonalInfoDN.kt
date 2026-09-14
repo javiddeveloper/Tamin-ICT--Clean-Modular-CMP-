@@ -24,6 +24,7 @@ data class DisabilityPersonalDN(
     val cityOfIssue: String?,
     val dateOfBirth: Long?,
     val genderDesc: String?,
+    val genderCode: String? = null,
 )
 
 data class DisabilityWorkDN(

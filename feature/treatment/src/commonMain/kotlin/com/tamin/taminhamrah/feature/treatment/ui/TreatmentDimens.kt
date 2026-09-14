@@ -36,33 +36,72 @@ internal object TreatmentDimens {
     /** Header collapse scroll distance. */
     val headerCollapseDistance = 96.dp
 
-    /** How far the insured-person carousel rides up into the hub header. */
+    /** How far the insured-person carousel rides up into the hub header. `margin: -40px 0 0`. */
     val cardOverlap = 40.dp
+
+    /**
+     * What is left of the hub header below its title once the carousel has ridden up into it:
+     * the design's `padding: 16px 20px 66px` less the card's own 40px of overlap.
+     */
+    val hubHeaderUnderTitle = 26.dp
 
     /** How far the collapsed card rides up into the hub header so the header line bisects it. */
     val collapsedCardOverlap = 26.dp
 
-    // Insured-person card carousel.
+    /*
+     * Insured-person card carousel.
+     *
+     * Every length below is the design's own, in CSS pixels at its 412px frame, which map 1:1 to
+     * dp. The card is `padding: 14px 16px 12px` inside a 20px radius, its coverage line sits under
+     * a 1px rule at `padding: 9px 16px`, and the strip of dots is `padding: 7px 11px` in a pill.
+     */
+    val cardPaddingTop = 14.dp
+    val cardPaddingHorizontal = 16.dp
+    val cardPaddingBottom = 12.dp
+
+    /** `margin-top: 13px` — the gap between the brand row and the holder's name. */
+    val cardNameTopGap = 13.dp
+
+    /** `margin-top: 5px` above «کد ملی», `margin-top: 2px` above the number itself. */
+    val cardCodeLabelTopGap = 5.dp
+    val cardCodeTopGap = 2.dp
+
+    val cardFooterPaddingHorizontal = 16.dp
+    val cardFooterPaddingVertical = 9.dp
+    val cardFooterGap = 7.dp
+
     val coverageBadgeSize = 16.dp
     val coverageBadgeIconSize = 10.dp
     val brandTickSize = 24.dp
     val brandTickIconSize = 13.dp
     val cardLoadingHeight = 160.dp
-    val pageIndicatorDotSize = 6.dp
-    val pageIndicatorSelectedWidth = 16.dp
-    val pageIndicatorPaddingHorizontal = 12.dp
-    val pageIndicatorPaddingVertical = 7.dp
 
-    /** Past this the strip scrolls rather than growing the pill off the card. */
-    val pageIndicatorMaxWidth = 140.dp
-    const val cardDecorAlpha = 0.07f
+    /** `margin-top: 12px` between the cards and the strip of dots. */
+    val pageIndicatorTopGap = 12.dp
 
-    /** A card's share of the carousel viewport; the rest is the neighbors peeking. */
+    /*
+     * The three translucent shapes over the card's gradient, each at its own strength:
+     * `#ffffff12` for the swoosh down the trailing edge, `#ffffff0d` and `#ffffff14` for the two
+     * ellipses. They are not one alpha — the swoosh has to read against both ends of the wash.
+     */
+    const val cardDecorSwooshAlpha = 0.07f
+    const val cardDecorLowerAlpha = 0.05f
+    const val cardDecorUpperAlpha = 0.08f
+
+    /**
+     * `width: 87%` of the carousel track's *content* box, not of the viewport — the track itself
+     * is inset by [cardTrackPadding] on both edges first. Missing that inset is what makes the
+     * neighbors peek too little.
+     */
     const val cardPeekFraction = 0.87f
+    val cardTrackPadding = 18.dp
 
-    // Brand tile on the insurance card (the organization's mark, top of the card).
-    val brandTileSize = 34.dp
-    val brandTileIconSize = 28.dp
+    /** `gap: 12px` between two cards in the track. */
+    val cardTrackGap = 12.dp
+
+    // Brand tile on the insurance card — the holder's initial, top of the card.
+    val brandTileSize = 30.dp
+    val brandTileRadius = 10.dp
 
     /** How far the holder name shrinks by the time the card is a compact bar. */
     const val cardNameCollapsedScale = 0.88f

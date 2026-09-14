@@ -24,6 +24,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import com.tamin.taminhamrah.feature.profile.ui.identity.components.IdentityCard
 import com.tamin.taminhamrah.feature.profile.ui.identity.components.IdentityDimens
 import com.tamin.taminhamrah.feature.profile.ui.identity.components.IdentitySections
+import com.tamin.taminhamrah.feature.profile.ui.identity.components.IdentitySectionsSkeleton
 import com.tamin.taminhamrah.feature.profile.ui.identity.components.RegistryVerifiedNotice
 import com.tamin.taminhamrah.feature.profile.ui.identity.contract.IdentityInEvent
 import com.tamin.taminhamrah.feature.profile.ui.identity.contract.IdentityInIntent
@@ -34,7 +35,6 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.ErrorStateView
-import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.rememberCollapsingHeaderState
@@ -43,6 +43,7 @@ import com.tamin.taminhamrah.ui.components.reservedHeight
 import com.tamin.taminhamrah.ui.components.rideUpIntoHeader
 import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toGenderLabel
 import kotlinx.coroutines.flow.Flow
@@ -136,7 +137,9 @@ fun IdentityInScreen(
             Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
 
             when {
-                state.isLoading && sections == null -> LoadingStateOverlay()
+                state.isLoading && sections == null -> IdentitySectionsSkeleton(
+                    modifier = Modifier.padding(horizontal = Spacing.page),
+                )
 
                 sections != null -> {
                     RegistryVerifiedNotice(
@@ -162,6 +165,7 @@ fun IdentityInScreen(
         IdentityHeader(
             progress = collapse.progressProvider,
             info = info,
+            loading = state.isLoading,
             photo = state.profileImage,
             onBack = onBack,
             modifier = Modifier
@@ -181,6 +185,7 @@ fun IdentityInScreen(
 private fun IdentityHeader(
     progress: () -> Float,
     info: IdentityInfoPR?,
+    loading: Boolean,
     photo: String?,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
@@ -200,7 +205,7 @@ private fun IdentityHeader(
             },
             bottomPadding = IdentityDimens.cardOverlap + IdentityDimens.cardHeaderGap,
         )
-        if (info != null) {
+        if (info != null || loading) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -210,17 +215,29 @@ private fun IdentityHeader(
                         collapsedOverlap = IdentityDimens.cardCollapsedOverlap,
                     ),
             ) {
-                IdentityCard(
-                    lastName = info.lastName,
-                    fullName = info.fullName,
-                    fatherName = info.fatherName,
-                    ssn = info.ssn,
-                    nationalId = info.nationalId,
-                    dateOfBirth = info.dateOfBirthFormatted,
-                    photo = photo,
-                    collapseProgress = progress,
-                    modifier = Modifier.padding(horizontal = Spacing.page),
-                )
+                if (info != null) {
+                    IdentityCard(
+                        lastName = info.lastName,
+                        fullName = info.fullName,
+                        fatherName = info.fatherName,
+                        ssn = info.ssn,
+                        nationalId = info.nationalId,
+                        dateOfBirth = info.dateOfBirthFormatted,
+                        photo = photo,
+                        collapseProgress = progress,
+                        modifier = Modifier.padding(horizontal = Spacing.page),
+                    )
+                } else {
+                    // Holds the card's place while the record loads, so the header is the height
+                    // it will stay and the body below it does not jump when the card arrives.
+                    ShimmerBlock(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = Spacing.page)
+                            .height(IdentityDimens.cardExpandedHeight),
+                        cornerRadius = IdentityDimens.cardCorner,
+                    )
+                }
             }
         }
     }
@@ -232,6 +249,17 @@ fun PreviewIdentityInScreen() {
     PreviewRtlThemeContent {
         IdentityInScreen(
             state = IdentityInUiState(identityInfo = PreviewIdentity),
+            onIntent = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+fun PreviewIdentityInScreenLoading() {
+    PreviewRtlThemeContent {
+        IdentityInScreen(
+            state = IdentityInUiState(isLoading = true),
             onIntent = {},
         )
     }

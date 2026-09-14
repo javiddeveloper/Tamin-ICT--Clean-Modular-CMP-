@@ -325,6 +325,23 @@ object WorkshopTestData {
 
     val workshopStackholdersSuccess: String
         get() = readResourceFile("mocks/workshop_stackholders_success.json")
+
+    // خدمات غیرحضوری کارفرما (employerEservicesAgreement)
+
+    val employerCommitmentInfoSuccess: String
+        get() = readResourceFile("mocks/employer_commitment_info_success.json")
+
+    val employerWorkshopsWithoutContractSuccess: String
+        get() = readResourceFile("mocks/employer_workshops_without_contract_success.json")
+
+    val employerWorkshopContractRowsSuccess: String
+        get() = readResourceFile("mocks/employer_workshop_contract_rows_success.json")
+
+    val employerAgreementByWorkshopSuccess: String
+        get() = readResourceFile("mocks/employer_agreement_by_workshop_success.json")
+
+    val employerRequestTicketSuccess: String
+        get() = readResourceFile("mocks/employer_request_ticket_success.json")
 }
 
 object OccurrenceTestData {
@@ -410,5 +427,16 @@ object InspectionTestData {
 
     val inspectionSubmitSuccess: String
         get() = readResourceFile("mocks/inspection_submit_success.json")
+}
+
+object WorkersPaymentTestData {
+    val paymentInfoSuccess: String
+        get() = readResourceFile("mocks/workers_payment_info_success.json")
+
+    val payDebitSuccess: String
+        get() = readResourceFile("mocks/workers_payment_pay_debit_success.json")
+
+    val inspectTicketSuccess: String
+        get() = readResourceFile("mocks/workers_payment_inspect_ticket_success.json")
 }
 

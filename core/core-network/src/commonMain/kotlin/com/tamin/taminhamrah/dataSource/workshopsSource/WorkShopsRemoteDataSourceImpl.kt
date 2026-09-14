@@ -3,7 +3,11 @@ package com.tamin.taminhamrah.dataSource.workshopsSource
 import com.tamin.taminhamrah.apiService.WorkShopsApiService
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
+import com.tamin.taminhamrah.model.BaseUrlKey
+import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.request.FilterOperator
+import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestInfoDTO
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveRequestDTO
@@ -15,16 +19,29 @@ import com.tamin.taminhamrah.model.workshop.DebitPaymentDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDTO
 import com.tamin.taminhamrah.model.workshop.DebitReasonDTO
+import com.tamin.taminhamrah.util.NetworkConstants
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmitRequestDTO
+import com.tamin.taminhamrah.model.workshop.EmployerCommitmentInfoDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeContractDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeRequestDTO
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberConfirmResultDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDTO
+import com.tamin.taminhamrah.model.workshop.SmsMessageDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopContractDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDTO
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
@@ -32,20 +49,45 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
+import com.tamin.taminhamrah.tools.extractMessage
+import com.tamin.taminhamrah.repository.DeveloperOptionsRepository
 import com.tamin.taminhamrah.tools.readPdfChannel
+
+/** `serviceName` the `request-ticket` endpoint expects for the Employer → Online Services flow. */
+private const val EMPLOYER_ESERVICES_AGREEMENT = "employerEservicesAgreement"
 
 internal class WorkShopsRemoteDataSourceImpl(
     private val apiService: WorkShopsApiService,
     private val queryBuilder: ApiQueryBuilder,
     private val errorParser: ErrorParser,
+    private val developerOptionsRepository: DeveloperOptionsRepository,
 ) : WorkShopsRemoteDataSource {
-
+    private val legalRepresentativeListQuery = ApiQueryParamDN(page = 1, start = 0, limit = 1000)
     // ---------------------------------------------------------------- کارگاه‌های کارفرما
 
     override suspend fun getAllEmployerAgreementByNationalId(
         query: ApiQueryParamDN
     ): ListData<EmployerAgreementDTO> = call {
         apiService.getAllEmployerAgreementByNationalId(query.toQueries()).extractData()
+    }
+
+    // ------------------------------------------------------------------- ردیف‌های پیمان
+
+    override suspend fun getEmployerAgreementsByWorkshop(
+        workshopId: String,
+        branchCode: String,
+        query: ApiQueryParamDN,
+    ): ListData<EmployerAgreementDTO> = call {
+        apiService.getEmployerAgreementsByWorkshop(workshopId, branchCode, query.toQueries())
+            .extractData()
+    }
+
+    override suspend fun getWorkshopContracts(
+        workshopId: String,
+        branchCode: String,
+        query: ApiQueryParamDN,
+    ): ListData<WorkshopContractDTO> = call {
+        apiService.getWorkshopContracts(workshopId, branchCode, query.toQueries()).extractData()
     }
 
     // -------------------------------------------------------------------------- برگ پرداخت‌ها
@@ -100,6 +142,19 @@ internal class WorkShopsRemoteDataSourceImpl(
 
     override suspend fun payWorkshopDebit(request: DebitPaymentRequestDTO): DebitPaymentDTO = call {
         apiService.payWorkshopDebit(request).extractData()
+    }
+
+    override suspend fun confirmPaymentTicket(ticket: String) {
+        call {
+            // Read from Developer Options rather than the constant: this address is absolute, so
+            // it overrides whatever base URL the client it travels on was built with, and pointing
+            // "سرویس TFH" at a test host used to leave this one call on production.
+            val url = developerOptionsRepository.getEffectiveBaseUrl(BaseUrlKey.TFH) +
+                NetworkConstants.TFH_TICKET_PATH + ticket
+            // Extracted rather than ignored: that is what turns a refusal envelope into a throw,
+            // which is the whole of what this call reports.
+            apiService.getPaymentTicketInfo(url).extractData()
+        }
     }
 
     // ---------------------------------------------------------------------- استعلام بدهی کارگاه
@@ -215,6 +270,62 @@ internal class WorkShopsRemoteDataSourceImpl(
         apiService.getWorkshopStackHolders(query.toQueries()).extractData()
     }
 
+    // ------------------------------------------------- خدمات غیرحضوری کارفرما (employerEservicesAgreement)
+
+    override suspend fun requestEmployerAgreementTicket(
+        mobileNumber: String,
+        email: String,
+    ): String = call {
+        val filter = queryBuilder.buildFilterJson(
+            listOf(
+                ApiFilterDN(FilterProperty.MOBILE_NUMBER, mobileNumber, FilterOperator.EQ),
+                ApiFilterDN(FilterProperty.EMAIL, email, FilterOperator.EQ),
+                ApiFilterDN(FilterProperty.SERVICE_NAME, EMPLOYER_ESERVICES_AGREEMENT, FilterOperator.EQ),
+            )
+        )
+        apiService.requestEmployerAgreementTicket(filter).extractMessage()
+    }
+
+    override suspend fun getEmployerAgreementUserInfo(
+        verificationCode: String,
+    ): EmployerCommitmentInfoDTO = call {
+        apiService.getEmployerAgreementUserInfo(verificationCode).extractData()
+    }
+
+    override suspend fun getEmployerWorkshopsWithoutContract(
+        query: ApiQueryParamDN
+    ): ListData<WorkshopWithoutContractDTO> = call {
+        apiService.getEmployerWorkshopsWithoutContract(query.toQueries()).extractData()
+    }
+
+    override suspend fun getEmployerWorkshopContractList(
+        workshopId: String,
+        branchCode: String,
+        query: ApiQueryParamDN
+    ): ListData<WorkshopContractRowDTO> = call {
+        apiService.getEmployerWorkshopContractList(workshopId, branchCode, query.toQueries())
+            .extractData()
+    }
+
+    override suspend fun submitEmployerAgreement(
+        request: EmployerAgreementSubmitRequestDTO,
+    ): String = call {
+        apiService.submitEmployerAgreement(request).extractMessage()
+    }
+
+    override suspend fun getWorkShopObjections(
+        query: ApiQueryParamDN
+    ): ListData<WorkShopObjectionDTO> = call {
+        apiService.getWorkShopObjections(query.toQueries()).extractData()
+    }
+
+    override suspend fun getWorkShopObjectionSms(
+        objectionCode: Long,
+        query: ApiQueryParamDN,
+    ): ListData<SmsMessageDTO> = call {
+        apiService.getWorkShopObjectionSms(objectionCode, query.toQueries()).extractData()
+    }
+
     private fun ApiQueryParamDN.toQueries(): Map<String, String> = queryBuilder.buildQuery(this)
 
     /**
@@ -227,5 +338,96 @@ internal class WorkShopsRemoteDataSourceImpl(
         throw errorParser.parseGeneralError(e)
     } catch (e: Exception) {
         throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+    }
+
+    override suspend fun getLegalRepresentativeWorkshops(): ListData<LegalRepresentativeWorkshopDTO>? {
+        return try {
+            val queries = queryBuilder.buildQuery(legalRepresentativeListQuery)
+            val response = apiService.getLegalRepresentativeWorkshops(queries)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun getLegalRepresentatives(
+        workshopId: String,
+        branchCode: String
+    ): ListData<LegalRepresentativeDTO>? {
+        return try {
+            val queries = queryBuilder.buildQuery(legalRepresentativeListQuery) + mapOf(
+                "stackType" to "4",
+                "workshopId" to workshopId,
+                "branchCode" to branchCode,
+            )
+            val response = apiService.getLegalRepresentatives(queries)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun getLegalRepresentativeWorkshopContracts(
+        workshopId: String,
+        branchCode: String
+    ): ListData<LegalRepresentativeContractDTO>? {
+        return try {
+            val queries = queryBuilder.buildQuery(legalRepresentativeListQuery)
+            val response = apiService.getLegalRepresentativeWorkshopContracts(workshopId, branchCode, queries)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun requestLegalRepresentativeTicket(nationalCode: String?) {
+        try {
+            val response = if (nationalCode.isNullOrEmpty()) {
+                apiService.requestLegalTicket()
+            } else {
+                apiService.requestLegalTicketWithNationalCode(nationalCode)
+            }
+            response.extractMessage()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun verifyLegalRepresentativeTicket(ticket: String) {
+        try {
+            apiService.validateLegalTicket(ticket).extractMessage()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun submitLegalRepresentative(ticket: String, request: LegalRepresentativeRequestDTO) {
+        try {
+            apiService.submitLegalRepresentative(ticket, request).extractMessage()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
+    }
+
+    override suspend fun deleteLegalRepresentative(ticket: String, stackId: Long) {
+        try {
+            apiService.deleteLegalRepresentative(ticket, stackId).extractMessage()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
+        }
     }
 }

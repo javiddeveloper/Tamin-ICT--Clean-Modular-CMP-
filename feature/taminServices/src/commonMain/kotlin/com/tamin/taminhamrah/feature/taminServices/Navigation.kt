@@ -5,6 +5,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import com.tamin.taminhamrah.feature.taminServices.occurrence.OccurrenceScreen
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
+import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.EmployerOnlineServicesRoute
+import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.EmployerOnlineServicesViewModel
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.InspectionRoute
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.InspectionViewModel
 import com.tamin.taminhamrah.feature.taminServices.sendHistoryToInstitutions.SendHistoryToInstitutionsScreen
@@ -12,7 +14,10 @@ import com.tamin.taminhamrah.feature.taminServices.ui.TaminServicesRoute
 import com.tamin.taminhamrah.feature.taminServices.ui.TamminServicesViewModel
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.FuneralAllowanceViewModel
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.FuneralAllowanceRoute
+import com.tamin.taminhamrah.feature.taminServices.workersPayment.WorkersPaymentViewModel
+import com.tamin.taminhamrah.feature.taminServices.workersPayment.ui.WorkersPaymentRoute
 import com.tamin.taminhamrah.model.common.FeatureFlag
+import com.tamin.taminhamrah.model.payment.PaymentRequestDN
 import kotlinx.serialization.Serializable
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -32,6 +37,12 @@ data object OccurrenceRoute
 @Serializable
 data object FuneralAllowanceRoute
 
+@Serializable
+data object EmployerOnlineServicesRoute
+
+@Serializable
+data object WorkersPaymentInfoRoute
+
 fun NavController.navigateToTaminServices(builder: NavOptionsBuilder.() -> Unit = {}) {
     navigate(TaminServicesRoute, builder)
 }
@@ -46,6 +57,10 @@ fun NavController.navigateToOccurrence(builder: NavOptionsBuilder.() -> Unit = {
 
 fun NavController.navigateToFuneralAllowance(builder: NavOptionsBuilder.() -> Unit = {}) {
     navigate(FuneralAllowanceRoute, builder)
+}
+
+fun NavController.navigateToWorkersPaymentInfo(builder: NavOptionsBuilder.() -> Unit = {}) {
+    navigate(WorkersPaymentInfoRoute, builder)
 }
 
 fun NavGraphBuilder.taminServicesScreen(
@@ -113,6 +128,36 @@ fun NavGraphBuilder.funeralAllowanceScreen(
             viewModel = viewModel,
             onBackClicked = onBack,
             onNavigateToBankAccount = onNavigateToBankAccount,
+        )
+    }
+}
+
+fun NavController.navigateToEmployerOnlineServices(builder: NavOptionsBuilder.() -> Unit = {}) {
+    navigate(EmployerOnlineServicesRoute, builder)
+}
+
+fun NavGraphBuilder.employerOnlineServicesScreen(onBack: () -> Unit) {
+    composableWithFadeTransitions<EmployerOnlineServicesRoute> {
+        val viewModel: EmployerOnlineServicesViewModel = koinViewModel()
+        EmployerOnlineServicesRoute(
+            viewModel = viewModel,
+            onBackClicked = onBack,
+        )
+    }
+}
+
+fun NavGraphBuilder.workersPaymentInfoScreen(
+    onBack: () -> Unit,
+    onOpenUrl: (String) -> Unit,
+    onNavigateToPayment: (PaymentRequestDN) -> Unit,
+) {
+    composableWithFadeTransitions<WorkersPaymentInfoRoute> {
+        val viewModel: WorkersPaymentViewModel = koinViewModel()
+        WorkersPaymentRoute(
+            viewModel = viewModel,
+            onBackClicked = onBack,
+            onOpenUrl = onOpenUrl,
+            onNavigateToPayment = onNavigateToPayment,
         )
     }
 }
