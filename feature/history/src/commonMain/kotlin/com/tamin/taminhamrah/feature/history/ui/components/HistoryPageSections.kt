@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.history.ui.HistoryConstants
 import com.tamin.taminhamrah.feature.history.ui.HistoryDimens
+import com.tamin.taminhamrah.feature.history.ui.model.CareerTotalPR
 import com.tamin.taminhamrah.feature.history.ui.model.WorkshopPR
 import com.tamin.taminhamrah.mapper.history.labelRes
 import com.tamin.taminhamrah.model.history.HistoryCertificateType
@@ -62,6 +63,8 @@ import taminx.feature.history.history_many_shops_subtitle
 import taminx.feature.history.history_many_shops_title
 import taminx.feature.history.history_note_gaps
 import taminx.feature.history.history_note_span
+import taminx.feature.history.history_note_span_days
+import taminx.feature.history.history_note_span_months
 import taminx.core.core_ui.Res as CoreRes
 
 /**
@@ -71,19 +74,33 @@ import taminx.core.core_ui.Res as CoreRes
  */
 @Composable
 fun HistorySpanNote(
-    yearCount: Int,
+    careerTotal: CareerTotalPR,
     firstYear: String,
     lastYear: String,
     gapYears: Int,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    val span = stringResource(
-        Res.string.history_note_span,
-        yearCount.toString().toPersianDigits(),
-        firstYear.toPersianDigits(),
-        lastYear.toPersianDigits(),
-    )
+    val span = when {
+        careerTotal.years > 0 -> stringResource(
+            Res.string.history_note_span,
+            careerTotal.years.toString().toPersianDigits(),
+            firstYear.toPersianDigits(),
+            lastYear.toPersianDigits(),
+        )
+        careerTotal.months > 0 -> stringResource(
+            Res.string.history_note_span_months,
+            careerTotal.months.toString().toPersianDigits(),
+            firstYear.toPersianDigits(),
+            lastYear.toPersianDigits(),
+        )
+        else -> stringResource(
+            Res.string.history_note_span_days,
+            careerTotal.days.toString().toPersianDigits(),
+            firstYear.toPersianDigits(),
+            lastYear.toPersianDigits(),
+        )
+    }
     val gaps = if (gapYears > 0) {
         stringResource(Res.string.history_note_gaps, gapYears.toString().toPersianDigits())
     } else {
