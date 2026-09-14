@@ -96,6 +96,7 @@ import com.tamin.taminhamrah.feature.weddingPresent.navigateToWeddingPresentCalc
 import com.tamin.taminhamrah.feature.weddingPresent.weddingPresentCalculateScreen
 import com.tamin.taminhamrah.feature.weddingPresent.weddingPresentScreen
 import com.tamin.taminhamrah.feature.calculateWagePension.calculateWagePensionScreen
+import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
 import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
 import com.tamin.taminhamrah.feature.orotezprotez.orotezProtezScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.deservedTreatmentScreen
