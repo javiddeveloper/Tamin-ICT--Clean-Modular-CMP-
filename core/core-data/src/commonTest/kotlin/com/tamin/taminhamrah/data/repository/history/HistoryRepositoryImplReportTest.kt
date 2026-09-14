@@ -19,6 +19,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertFailsWith
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
+import com.tamin.taminhamrah.model.utils.ListData
 
 class HistoryRepositoryImplReportTest {
 
@@ -28,7 +30,7 @@ class HistoryRepositoryImplReportTest {
     @BeforeTest
     fun setup() {
         remoteDataSource = FakeHistoryRemoteDataSource()
-        repository = HistoryRepositoryImpl(remoteDataSource, FakeHistoryJobInfoDao())
+        repository = HistoryRepositoryImpl(remoteDataSource, FakeHistoryJobInfoDao(), InMemoryHistoryCacheDao())
     }
 
     // ── getUserInfos ──────────────────────────────────────────────────────────
@@ -128,6 +130,15 @@ class HistoryRepositoryImplReportTest {
             if (shouldThrowOnGetUserInfos) throw RuntimeException("Remote failure")
             return userInfoResult
         }
+
+        override suspend fun getLoginInfo(): ListData<String> =
+            ListData(total = 0, list = emptyList())
+
+        override suspend fun downloadHistoryReport(
+            type: HistoryCertificateType
+        ): PdfDownloadDTO = PdfDownloadDTO()
+
+        override suspend fun sendHistoryNotice(): String? = null
 
         override suspend fun sendToInstitution(allHistorySelected: Boolean, historyAndWageSelected: Boolean, combineHistorySelected: Boolean) {
             if (shouldThrowOnSendToInstitution) throw RuntimeException("Remote failure")

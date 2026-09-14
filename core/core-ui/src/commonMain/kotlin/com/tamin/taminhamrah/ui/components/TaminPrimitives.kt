@@ -36,13 +36,14 @@ import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -53,6 +54,10 @@ import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
+import kotlin.math.PI
+import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.sin
 import kotlin.jvm.JvmName
 import kotlin.math.PI
 import kotlin.math.abs
@@ -148,6 +153,38 @@ fun cssAngleGradient(angleDeg: Float, colors: List<Color>): Brush = cssAngleGrad
 )
 
 /**
+ * A CSS `linear-gradient(<angle>deg, …)` as a [Brush], for a box of [width] by [height] pixels.
+ *
+ * CSS measures the angle from "to top", turning clockwise, and runs the gradient along a line
+ * through the box center whose length is `|W·sin a| + |H·cos a|` — long enough that the first and
+ * last stops land exactly on the corners. [Brush.linearGradient] takes two points instead, so the
+ * line has to be reconstructed from the angle and the box.
+ *
+ * Pixel coordinates, so the result never mirrors under a right-to-left layout: a design that
+ * states an angle means that angle on screen. Callers that want the gradient to follow the
+ * reading direction want [startToEndGradient] instead.
+ *
+ * [stops] are `offset to color` pairs in the order CSS lists them.
+ */
+fun angledLinearGradient(
+    angleDeg: Float,
+    stops: List<Pair<Float, Color>>,
+    width: Float,
+    height: Float,
+): Brush {
+    val radians = angleDeg * (PI.toFloat() / 180f)
+    val dx = sin(radians)
+    val dy = -cos(radians)
+    val half = (abs(width * dx) + abs(height * dy)) / 2f
+    val centre = Offset(width / 2f, height / 2f)
+    return Brush.linearGradient(
+        colorStops = stops.toTypedArray(),
+        start = Offset(centre.x - half * dx, centre.y - half * dy),
+        end = Offset(centre.x + half * dx, centre.y + half * dy),
+    )
+}
+
+/**
  * Numeric text. Amounts, national IDs and tracking codes are always laid out
  * left-to-right, matching the `dir="ltr"` the design puts on every number even inside an
  * otherwise right-to-left page.
@@ -160,7 +197,20 @@ fun NumericText(
     modifier: Modifier = Modifier,
 ) {
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-        Text(text = text, style = style, color = color, modifier = modifier)
+        Text(
+            text = text,
+            style = style,
+            color = color,
+            modifier = modifier,
+            // A number is one token: ۱۷ broken across two lines reads as ۱ and ۷, and ۱۷ clipped
+            // to its first digit reads as ۱ — both are a different number, and the second is worse
+            // because nothing about it looks wrong. So it never wraps, and it is allowed to draw
+            // past its bounds rather than lose a digit; the caller sizes the space (see
+            // Modifier.scaleOnCollapse) so that it does not have to.
+            maxLines = 1,
+            softWrap = false,
+            overflow = TextOverflow.Visible,
+        )
     }
 }
 
@@ -208,7 +258,7 @@ fun StatusPill(
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = fontWeight),
             color = contentColor,
             maxLines = 1,
-            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }

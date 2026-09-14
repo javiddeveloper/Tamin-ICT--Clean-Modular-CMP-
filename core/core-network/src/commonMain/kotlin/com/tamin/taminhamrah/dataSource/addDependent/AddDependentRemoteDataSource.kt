@@ -36,4 +36,5 @@ interface AddDependentRemoteDataSource {
     suspend fun addNewDependent(
         request: RequestAddDependentDTO
     ): GeneralResponseDTO
+    suspend fun refreshDependents(): GeneralResponseDTO
 }
