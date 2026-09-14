@@ -3111,7 +3111,6 @@
     <string name="fraction_contract_check_no_active">قرارداد تکمیل سوابق کسری از ماه فعالی به نام شما ثبت نشده است.</string>
     <string name="fraction_contract_check_primary_insured">شما بیمه‌شده اصلی هستید و سابقه کسری از ماه در پرونده شما ثبت شده است.</string>
     <string name="fraction_contract_next_step">مرحله بعد</string>
-    <string name="fraction_contract_coming_soon">این مرحله به‌زودی اضافه می‌شود.</string>
     <string name="fraction_contract_terms_section_title">مقررات و ضوابط انعقاد قرارداد</string>
     <string name="fraction_contract_terms_section_subtitle">ضوابط قرارداد را مطالعه و سپس تعهدنامه را تأیید کنید.</string>
     <string name="fraction_contract_user_info_section_title">اطلاعات تماس و محل سکونت</string>

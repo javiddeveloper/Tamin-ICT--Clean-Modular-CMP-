@@ -54,6 +54,11 @@ fun UserInfoStepContent(
     onZipCodeChange: (String) -> Unit,
     onPhoneNumberChange: (String) -> Unit,
     isLoading: Boolean = false,
+    /**
+     * When true (fraction legacy), hide the locked mobile field if [UserInfoFormPR.showMobile]
+     * is false. Other contract flows keep the previous always-visible locked field.
+     */
+    hideMobileWhenEmpty: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     if (isLoading) {
@@ -167,8 +172,8 @@ fun UserInfoStepContent(
                     modifier = Modifier.weight(1f),
                 )
 
-                // Legacy fraction hides mobile when the user has none on file.
-                if (userInfo.showMobile) {
+                // Fraction legacy hides mobile when none is on file; other flows always show it.
+                if (!hideMobileWhenEmpty || userInfo.showMobile) {
                     TaminTextField(
                         value = userInfo.mobileNumber.toPersianDigits(),
                         onValueChange = {},

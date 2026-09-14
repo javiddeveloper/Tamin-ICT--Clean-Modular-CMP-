@@ -120,11 +120,6 @@ sealed interface FractionContractEvent {
         val contractNumber: String,
         val contractDate: String,
     ) : FractionContractEvent
-    data class NavigateToPremiumPayment(
-        val contractNumber: String,
-        val premiumTypeCode: String,
-        val insuranceType: String,
-    ) : FractionContractEvent
 }
 
 internal fun isUserInfoStepComplete(userInfo: UserInfoFormPR): Boolean {

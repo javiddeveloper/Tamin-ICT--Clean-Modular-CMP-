@@ -125,6 +125,7 @@ fun FractionContractRoute(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     var submitResult by remember { mutableStateOf<ContractSubmitResult?>(null) }
+    var skipBackOnSubmitDismiss by remember { mutableStateOf(false) }
     val insuranceTypeLabel = stringResource(Res.string.fraction_contract_title)
 
     LaunchedEffect(Unit) {
@@ -145,7 +146,6 @@ fun FractionContractRoute(
                 canPayOnline = true,
             )
         },
-        onNavigateToPremiumPayment = onNavigateToPremiumPayment,
     )
 
     submitResult?.let { result ->
@@ -153,9 +153,15 @@ fun FractionContractRoute(
             result = result,
             onDismiss = {
                 submitResult = null
-                onBack()
+                // Shared dialog always calls onDismiss after onPay — skip back so payment stays.
+                if (skipBackOnSubmitDismiss) {
+                    skipBackOnSubmitDismiss = false
+                } else {
+                    onBack()
+                }
             },
             onPay = { contractNumber, _ ->
+                skipBackOnSubmitDismiss = true
                 submitResult = null
                 onNavigateToPremiumPayment(
                     contractNumber,
@@ -179,11 +185,6 @@ private fun HandleFractionContractEvents(
     onBack: () -> Unit,
     snackbarHostState: SnackbarHostState,
     onShowSubmitSuccess: (contractNumber: String, contractDate: String) -> Unit,
-    onNavigateToPremiumPayment: (
-        contractNumber: String,
-        premiumTypeCode: String,
-        insuranceType: String,
-    ) -> Unit,
 ) {
     events.collectWithLifecycleAware { event ->
         when (event) {
@@ -191,12 +192,6 @@ private fun HandleFractionContractEvents(
             is FractionContractEvent.ShowToast -> snackbarHostState.showSnackbar(event.message)
             is FractionContractEvent.ShowSubmitSuccess ->
                 onShowSubmitSuccess(event.contractNumber, event.contractDate)
-            is FractionContractEvent.NavigateToPremiumPayment ->
-                onNavigateToPremiumPayment(
-                    event.contractNumber,
-                    event.premiumTypeCode,
-                    event.insuranceType,
-                )
         }
     }
 }

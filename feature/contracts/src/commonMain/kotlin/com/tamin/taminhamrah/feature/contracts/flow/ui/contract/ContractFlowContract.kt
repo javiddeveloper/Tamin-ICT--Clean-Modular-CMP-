@@ -20,7 +20,6 @@ import com.tamin.taminhamrah.model.contracts.ContractPR
 import com.tamin.taminhamrah.model.contracts.FreeJobDN
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoPR
 import com.tamin.taminhamrah.model.subdominant.SubdominantItemPR
-import com.tamin.taminhamrah.util.ValidationUtils
 
 data class ContractFlowUiState(
     val isLoading: Boolean = false,
@@ -286,6 +285,5 @@ internal fun isUserInfoStepComplete(userInfo: UserInfoFormPR): Boolean =
     userInfo.cityCode.isNotBlank() &&
         userInfo.cityName.isNotBlank() &&
         userInfo.address.isNotBlank() &&
-        userInfo.zipCode.isNotBlank() &&
-        ValidationUtils.isPostcodeValid(userInfo.zipCode) &&
-        ValidationUtils.isPhoneNumberValid(userInfo.phoneNumber)
+        userInfo.zipCode.length >= 10 &&
+        userInfo.phoneNumber.isNotBlank()

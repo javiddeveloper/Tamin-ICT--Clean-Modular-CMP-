@@ -60,6 +60,7 @@ internal fun FractionUserInfoStep(
             onZipCodeChange = onZipCodeChange,
             onPhoneNumberChange = onPhoneNumberChange,
             isLoading = isLoading,
+            hideMobileWhenEmpty = true,
         )
         if (userInfo.showMobile) {
             Text(
