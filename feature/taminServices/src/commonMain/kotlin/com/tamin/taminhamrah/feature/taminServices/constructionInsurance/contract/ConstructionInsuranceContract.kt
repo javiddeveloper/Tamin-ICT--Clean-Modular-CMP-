@@ -16,9 +16,19 @@ data class ConstructionInsuranceState(
     val reqNoQuery: String = "",
     val workshopIdQuery: String = "",
     val branchCodeQuery: String = "",
+    // The query actually behind [items] — a snapshot taken when a search last ran (LoadData,
+    // ExecuteSearch, Refresh, ResetSearch), not the live text field values above. Editing a field
+    // must not by itself change what the filter chip row or [items] claim to represent; only
+    // pressing جستجو (or clearing) does.
+    val appliedFileNoQuery: String = "",
+    val appliedReqNoQuery: String = "",
+    val appliedWorkshopIdQuery: String = "",
+    val appliedBranchCodeQuery: String = "",
     val isOfflineData: Boolean = false,
     val userName: String = "",
     val nationalCode: String = "",
+
+    val isNoticeVisible: Boolean = false,
 )
 
 sealed interface ConstructionInsuranceIntent {
@@ -33,6 +43,8 @@ sealed interface ConstructionInsuranceIntent {
     data object ResetSearch : ConstructionInsuranceIntent
     data class OnDetailClick(val item: ConstructionFilePR) : ConstructionInsuranceIntent
     data class OnActionClick(val item: ConstructionFilePR) : ConstructionInsuranceIntent
+
+    data object ToggleNoticeVisibility : ConstructionInsuranceIntent
 }
 
 sealed interface ConstructionInsuranceEvent {
@@ -47,7 +59,11 @@ sealed interface ConstructionInsurancePartialState {
         val nationalCode: String
     ) : ConstructionInsurancePartialState
     data class DataLoaded(
-        val items: ImmutableList<ConstructionFilePR>
+        val items: ImmutableList<ConstructionFilePR>,
+        val appliedFileNo: String = "",
+        val appliedReqNo: String = "",
+        val appliedWorkshopId: String = "",
+        val appliedBranchCode: String = "",
     ) : ConstructionInsurancePartialState
     data class SearchQueriesChanged(
         val fileNo: String,
@@ -57,4 +73,6 @@ sealed interface ConstructionInsurancePartialState {
     ) : ConstructionInsurancePartialState
     data class SearchExpandedToggled(val expanded: Boolean) : ConstructionInsurancePartialState
     data class Error(val message: String) : ConstructionInsurancePartialState
+
+    data class NoticeVisibilityToggled(val isVisible: Boolean) : ConstructionInsurancePartialState
 }

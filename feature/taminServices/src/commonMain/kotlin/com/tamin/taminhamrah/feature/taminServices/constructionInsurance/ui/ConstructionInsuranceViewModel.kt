@@ -44,7 +44,7 @@ class ConstructionInsuranceViewModel(
 
                 is ConstructionInsuranceIntent.Refresh -> {
                     emit(ConstructionInsurancePartialState.Loading(true))
-                    emitAll(fetchData(search = buildSearchParams(state)))
+                    emitAll(fetchData(search = buildSearchParams(state), appliedFrom = state))
                 }
 
                 is ConstructionInsuranceIntent.ToggleSearchExpanded -> {
@@ -97,7 +97,7 @@ class ConstructionInsuranceViewModel(
 
                 is ConstructionInsuranceIntent.ExecuteSearch -> {
                     emit(ConstructionInsurancePartialState.Loading(true))
-                    emitAll(fetchData(search = buildSearchParams(state)))
+                    emitAll(fetchData(search = buildSearchParams(state), appliedFrom = state))
                 }
 
                 is ConstructionInsuranceIntent.ResetSearch -> {
@@ -120,6 +120,10 @@ class ConstructionInsuranceViewModel(
                 is ConstructionInsuranceIntent.OnActionClick -> {
                     sendEvent(ConstructionInsuranceEvent.ShowToast(getString(Res.string.operation_request_selected)))
                 }
+
+                is ConstructionInsuranceIntent.ToggleNoticeVisibility -> {
+                    emit(ConstructionInsurancePartialState.NoticeVisibilityToggled(!state.isNoticeVisible))
+                }
             }
         }
 
@@ -139,23 +143,32 @@ class ConstructionInsuranceViewModel(
         }
     }.catch { /* degraded to blank if fails */ }
 
+    /**
+     * @param appliedFrom The state whose four query fields become the "applied" snapshot the
+     * filter chip row reads once this fetch lands — null (LoadData/ResetSearch) means no filter is
+     * applied, whatever the still-being-edited text fields currently hold.
+     */
     private fun fetchData(
-        search: ConstructionFileSearchParamsDN?
+        search: ConstructionFileSearchParamsDN?,
+        appliedFrom: ConstructionInsuranceState? = null,
     ): Flow<ConstructionInsurancePartialState> = flow {
         emitAll(
             getConstructionFilesUseCase(search)
                 .map { list ->
                     val prItems = list.map { it.toPR() }.toImmutableList()
                     ConstructionInsurancePartialState.DataLoaded(
-                        items = prItems
+                        items = prItems,
+                        appliedFileNo = appliedFrom?.fileNoQuery.orEmpty(),
+                        appliedReqNo = appliedFrom?.reqNoQuery.orEmpty(),
+                        appliedWorkshopId = appliedFrom?.workshopIdQuery.orEmpty(),
+                        appliedBranchCode = appliedFrom?.branchCodeQuery.orEmpty(),
                     ) as ConstructionInsurancePartialState
                 }
                 .catch { e ->
-                    emit(
-                        ConstructionInsurancePartialState.Error(
-                            e.message ?: getString(string.workshop_error_receive_data)
-                        )
-                    )
+                    val message = e.message ?: getString(string.workshop_error_receive_data)
+                    // No inline error view for this list — a toast is enough, per design.
+                    sendEvent(ConstructionInsuranceEvent.ShowToast(message))
+                    emit(ConstructionInsurancePartialState.Error(message))
                 }
         )
     }
@@ -193,7 +206,11 @@ class ConstructionInsuranceViewModel(
         is ConstructionInsurancePartialState.DataLoaded -> currentState.copy(
             isLoading = false,
             items = partialState.items,
-            error = null
+            error = null,
+            appliedFileNoQuery = partialState.appliedFileNo,
+            appliedReqNoQuery = partialState.appliedReqNo,
+            appliedWorkshopIdQuery = partialState.appliedWorkshopId,
+            appliedBranchCodeQuery = partialState.appliedBranchCode,
         )
 
         is ConstructionInsurancePartialState.SearchQueriesChanged -> currentState.copy(
@@ -210,6 +227,10 @@ class ConstructionInsuranceViewModel(
         is ConstructionInsurancePartialState.Error -> currentState.copy(
             isLoading = false,
             error = partialState.message
+        )
+
+        is ConstructionInsurancePartialState.NoticeVisibilityToggled -> currentState.copy(
+            isNoticeVisible = partialState.isVisible
         )
     }
 

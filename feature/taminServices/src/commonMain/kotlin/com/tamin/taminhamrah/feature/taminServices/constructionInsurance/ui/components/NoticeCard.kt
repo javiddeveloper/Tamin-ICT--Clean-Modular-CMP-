@@ -15,10 +15,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.notice_point_1
@@ -39,7 +39,7 @@ fun NoticeCard(modifier: Modifier = Modifier) {
                 text = stringResource(Res.string.notice_title),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFFB45309),
+                color = LocalTaminColors.current.orangeText,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -61,12 +61,13 @@ private fun BoxContainer(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
+    val taminColors = LocalTaminColors.current
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(Color(0xFFFFFBEB))
-            .border(1.dp, Color(0xFFFDE68A), RoundedCornerShape(16.dp))
+            .background(taminColors.orangeBg.copy(alpha = 0.3f))
+            .border(1.dp, taminColors.orangeText, RoundedCornerShape(16.dp))
     ) {
         content()
     }
@@ -74,13 +75,14 @@ private fun BoxContainer(
 
 @Composable
 private fun BulletPoint(text: String) {
+    val taminColors = LocalTaminColors.current
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.Top
     ) {
         Text(
             text = "•",
-            color = Color(0xFFB45309),
+            color = taminColors.orangeText,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold
         )
@@ -88,7 +90,7 @@ private fun BulletPoint(text: String) {
         Text(
             text = text,
             fontSize = 12.sp,
-            color = Color(0xFF92400E),
+            color = taminColors.orangeText,
             lineHeight = 18.sp
         )
     }
