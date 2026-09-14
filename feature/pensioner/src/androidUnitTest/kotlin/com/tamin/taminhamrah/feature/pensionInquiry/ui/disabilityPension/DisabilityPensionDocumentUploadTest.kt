@@ -91,8 +91,8 @@ class DisabilityPensionDocumentUploadTest {
         advanceToDocumentsStep()
         viewModel.sendIntent(DisabilityPensionIntent.DocumentImagePicked(docId, tempFile(".png", sizeBytes = 100)))
 
-        val state = awaitState { it.documentPickError != null }
-        assertNotNull(state.documentPickError)
+        val state = awaitState { it.documentPickError != null || it.documentPickErrorRes != null }
+        assertTrue(state.documentPickError != null || state.documentPickErrorRes != null)
         assertFalse(state.documents[docId] is DisabilityDocumentState.Uploaded)
     }
 
@@ -101,8 +101,8 @@ class DisabilityPensionDocumentUploadTest {
         advanceToDocumentsStep()
         viewModel.sendIntent(DisabilityPensionIntent.DocumentImagePicked(docId, tempFile(".jpg", sizeBytes = 3 * 1024 * 1024)))
 
-        val state = awaitState { it.documentPickError != null }
-        assertNotNull(state.documentPickError)
+        val state = awaitState { it.documentPickError != null || it.documentPickErrorRes != null }
+        assertTrue(state.documentPickError != null || state.documentPickErrorRes != null)
         assertFalse(state.documents[docId] is DisabilityDocumentState.Uploaded)
     }
 
@@ -117,8 +117,8 @@ class DisabilityPensionDocumentUploadTest {
 
         viewModel.sendIntent(DisabilityPensionIntent.DocumentImagePicked("appeal_commission_opinion", file2))
 
-        val state = awaitState { it.documentPickError != null }
-        assertNotNull(state.documentPickError)
+        val state = awaitState { it.documentPickError != null || it.documentPickErrorRes != null }
+        assertTrue(state.documentPickError != null || state.documentPickErrorRes != null)
     }
 
     private suspend fun advanceToDocumentsStep() {

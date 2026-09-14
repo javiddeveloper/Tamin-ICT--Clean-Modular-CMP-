@@ -51,8 +51,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.disability_pension_female_title
-import taminx.core.core_ui.disability_pension_male_title
 import taminx.core.core_ui.disability_pension_history_objection_coming_soon
 import taminx.core.core_ui.orotez_protez_document_format_error
 import taminx.core.core_ui.orotez_protez_document_pick_read_error
@@ -167,7 +165,7 @@ class DisabilityPensionViewModel(
                 emit(PartialState.CommissionValidationErrorChanged(false))
             }
             DisabilityPensionIntent.HistoryObjectionLinkClicked -> {
-                sendEvent(DisabilityPensionEvent.ShowToast(org.jetbrains.compose.resources.getString(taminx.core.core_ui.Res.string.disability_pension_history_objection_coming_soon)))
+                sendEvent(DisabilityPensionEvent.ShowToast(messageRes = taminx.core.core_ui.Res.string.disability_pension_history_objection_coming_soon))
             }
             DisabilityPensionIntent.ShowRegisteredRequestsClicked -> {
                 emit(PartialState.RegisteredRequestsSheetVisibilityChanged(true))
@@ -240,7 +238,7 @@ class DisabilityPensionViewModel(
         val fileName = file.name
         if (!isJpegFileName(fileName)) {
             deleteFileQuietly(file)
-            emit(PartialState.DocumentPickRejected(getString(Res.string.orotez_protez_document_format_error)))
+            emit(PartialState.DocumentPickRejected(messageRes = Res.string.orotez_protez_document_format_error))
             return
         }
 
@@ -248,20 +246,20 @@ class DisabilityPensionViewModel(
             file.readBytes()
         } catch (e: Exception) {
             deleteFileQuietly(file)
-            emit(PartialState.DocumentPickRejected(getString(Res.string.orotez_protez_document_pick_read_error)))
+            emit(PartialState.DocumentPickRejected(messageRes = Res.string.orotez_protez_document_pick_read_error))
             return
         }
 
         if (bytes.size > MAX_DOCUMENT_SIZE_BYTES) {
             deleteFileQuietly(file)
-            emit(PartialState.DocumentPickRejected(getString(Res.string.orotez_protez_document_format_error)))
+            emit(PartialState.DocumentPickRejected(messageRes = Res.string.orotez_protez_document_format_error))
             return
         }
 
         val duplicateOfId = findDuplicateDocumentId(excludeId = documentId, bytes = bytes)
         if (duplicateOfId != null) {
             deleteFileQuietly(file)
-            emit(PartialState.DocumentPickRejected(getString(Res.string.orotez_protez_document_duplicate_error)))
+            emit(PartialState.DocumentPickRejected(messageRes = Res.string.orotez_protez_document_duplicate_error))
             return
         }
 
@@ -272,8 +270,12 @@ class DisabilityPensionViewModel(
             val guid = uploadImageUseCase(UploadImageRequestDN(fileName = fileName, bytes = bytes)).first()
             emit(PartialState.DocumentStateChanged(documentId, DisabilityDocumentState.Uploaded(guid, file, bytes)))
         } catch (e: Exception) {
-            val message = e.toSingleLineMessage().ifBlank { getString(Res.string.orotez_protez_document_upload_error) }
-            emit(PartialState.DocumentStateChanged(documentId, DisabilityDocumentState.Failed(message, file, bytes)))
+            val message = e.toSingleLineMessage()
+            if (message.isNotBlank()) {
+                emit(PartialState.DocumentStateChanged(documentId, DisabilityDocumentState.Failed(message = message, platformFile = file, bytes = bytes)))
+            } else {
+                emit(PartialState.DocumentStateChanged(documentId, DisabilityDocumentState.Failed(messageRes = Res.string.orotez_protez_document_upload_error, platformFile = file, bytes = bytes)))
+            }
         }
     }
 
@@ -500,7 +502,7 @@ class DisabilityPensionViewModel(
         is PartialState.ProfileLoading -> currentState.copy(isProfileLoading = partialState.isProfileLoading)
         is PartialState.ApplicantInfoLoaded -> currentState.copy(
             isProfileLoading = false,
-            applicantGenderTitle = partialState.genderTitle,
+            applicantGenderCode = partialState.genderCode,
             applicantFullName = partialState.fullName,
         )
         is PartialState.TermsAcceptedChanged -> currentState.copy(isTermsAccepted = partialState.accepted)
@@ -601,8 +603,12 @@ class DisabilityPensionViewModel(
         is PartialState.DocumentStateChanged -> currentState.copy(
             documents = currentState.documents.toPersistentMap().put(partialState.documentId, partialState.state),
             documentPickError = null,
+            documentPickErrorRes = null,
         )
-        is PartialState.DocumentPickRejected -> currentState.copy(documentPickError = partialState.message)
+        is PartialState.DocumentPickRejected -> currentState.copy(
+            documentPickError = partialState.message,
+            documentPickErrorRes = partialState.messageRes,
+        )
         is PartialState.DocumentsConfirmDialogVisibilityChanged -> currentState.copy(
             showDocumentsConfirmDialog = partialState.show,
         )
@@ -642,12 +648,8 @@ class DisabilityPensionViewModel(
             val fullName = listOfNotNull(personal?.firstName, personal?.lastName)
                 .joinToString(" ")
                 .ifBlank { "-" }
-            val genderTitle = if (personal?.genderCode == "02") {
-                org.jetbrains.compose.resources.getString(taminx.core.core_ui.Res.string.disability_pension_female_title)
-            } else {
-                org.jetbrains.compose.resources.getString(taminx.core.core_ui.Res.string.disability_pension_male_title)
-            }
-            emit(PartialState.ApplicantInfoLoaded(genderTitle = genderTitle, fullName = fullName))
+            val genderCode = personal?.genderCode.orEmpty()
+            emit(PartialState.ApplicantInfoLoaded(genderCode = genderCode, fullName = fullName))
             emit(PartialState.IdentityLoaded(info.toPresentation()))
             emit(PartialState.IdentityAgeLoaded(loadAgeYears(personal?.dateOfBirth)))
         }
@@ -717,6 +719,8 @@ class DisabilityPensionViewModel(
     private fun validateLandlinePhone(value: String): LandlinePhoneError? = when {
         value.isBlank() -> LandlinePhoneError.Blank
         !value.startsWith("0") -> LandlinePhoneError.InvalidPrefix
+        // Real Iranian landline numbers always have exactly 11 digits (including the leading 0),
+        // so we enforce this strictly rather than just checking if it's less than 11.
         value.length != LANDLINE_PHONE_LENGTH -> LandlinePhoneError.InvalidLength
         else -> null
     }

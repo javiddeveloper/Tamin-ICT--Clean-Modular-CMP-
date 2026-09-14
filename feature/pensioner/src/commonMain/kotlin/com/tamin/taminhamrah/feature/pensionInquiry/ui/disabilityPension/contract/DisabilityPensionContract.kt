@@ -39,7 +39,7 @@ enum class AddressError {
 data class DisabilityPensionUiState(
     val currentStep: DisabilityPensionStep = DisabilityPensionStep.Terms,
     val isProfileLoading: Boolean = true,
-    val applicantGenderTitle: String = "",
+    val applicantGenderCode: String = "",
     val applicantFullName: String = "",
     val isTermsAccepted: Boolean = false,
     val showTermsValidationError: Boolean = false,
@@ -85,6 +85,7 @@ data class DisabilityPensionUiState(
     val activeDocumentId: String? = null,
     val showDocumentSourceSheet: Boolean = false,
     val documentPickError: String? = null,
+    val documentPickErrorRes: org.jetbrains.compose.resources.StringResource? = null,
     val showDocumentsConfirmDialog: Boolean = false,
     val isFinalConfirmed: Boolean = false,
     val showFinalConfirmationError: Boolean = false,
@@ -99,7 +100,7 @@ data class DisabilityPensionUiState(
 
     sealed interface PartialState {
         data class ProfileLoading(val isProfileLoading: Boolean) : PartialState
-        data class ApplicantInfoLoaded(val genderTitle: String, val fullName: String) : PartialState
+        data class ApplicantInfoLoaded(val genderCode: String, val fullName: String) : PartialState
         data class TermsAcceptedChanged(val accepted: Boolean) : PartialState
         data class TermsValidationErrorChanged(val show: Boolean) : PartialState
         data class RulesVisibilityChanged(val show: Boolean) : PartialState
@@ -142,7 +143,7 @@ data class DisabilityPensionUiState(
         data class DocumentSourceRequested(val documentId: String) : PartialState
         data object DocumentSourceSheetDismissed : PartialState
         data class DocumentStateChanged(val documentId: String, val state: DisabilityDocumentState) : PartialState
-        data class DocumentPickRejected(val message: String) : PartialState
+        data class DocumentPickRejected(val message: String? = null, val messageRes: org.jetbrains.compose.resources.StringResource? = null) : PartialState
         data class DocumentsConfirmDialogVisibilityChanged(val show: Boolean) : PartialState
         data class FinalConfirmedChanged(val accepted: Boolean) : PartialState
         data class FinalConfirmationErrorChanged(val show: Boolean) : PartialState
@@ -204,7 +205,7 @@ sealed interface DisabilityPensionIntent {
 }
 
 sealed interface DisabilityPensionEvent {
-    data class ShowToast(val message: String) : DisabilityPensionEvent
+    data class ShowToast(val message: String? = null, val messageRes: org.jetbrains.compose.resources.StringResource? = null) : DisabilityPensionEvent
     data object NavigateToAddDependent : DisabilityPensionEvent
     data object NavigateBack : DisabilityPensionEvent
     data class LaunchImagePicker(

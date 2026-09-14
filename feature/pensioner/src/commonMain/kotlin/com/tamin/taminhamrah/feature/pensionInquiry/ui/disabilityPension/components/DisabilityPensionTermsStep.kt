@@ -30,6 +30,8 @@ import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.disability_pension_commitment_label
 import taminx.core.core_ui.disability_pension_commitment_text
+import taminx.core.core_ui.disability_pension_female_title
+import taminx.core.core_ui.disability_pension_male_title
 import taminx.core.core_ui.disability_pension_info_notice
 import taminx.core.core_ui.disability_pension_show_rules
 import taminx.core.core_ui.disability_pension_terms_validation_error
@@ -93,10 +95,15 @@ fun DisabilityPensionTermsStep(
                 verticalAlignment = Alignment.Top,
             ) {
                 TaminStaticCheckbox(checked = state.isTermsAccepted)
+                val genderTitle = if (state.applicantGenderCode == "02") {
+                    stringResource(Res.string.disability_pension_female_title)
+                } else {
+                    stringResource(Res.string.disability_pension_male_title)
+                }
                 Text(
                     text = stringResource(
                         Res.string.disability_pension_commitment_text,
-                        state.applicantGenderTitle,
+                        genderTitle,
                         state.applicantFullName,
                     ),
                     style = MaterialTheme.typography.bodySmall,

@@ -67,7 +67,8 @@ sealed interface DisabilityDocumentState {
     ) : DisabilityDocumentState
 
     data class Failed(
-        val message: String,
+        val message: String? = null,
+        val messageRes: StringResource? = null,
         val platformFile: PlatformFile? = null,
         val bytes: ByteArray? = null,
     ) : DisabilityDocumentState

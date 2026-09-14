@@ -89,7 +89,8 @@ fun DisabilityPensionDocumentsStep(
             )
         }
 
-        state.documentPickError?.let { message ->
+        val errorMessage = state.documentPickError ?: state.documentPickErrorRes?.let { stringResource(it) }
+        errorMessage?.let { message ->
             Text(
                 text = message,
                 style = MaterialTheme.typography.bodySmall,
@@ -151,8 +152,10 @@ private fun DisabilityDocumentState.statusText(): String = when (this) {
     DisabilityDocumentState.Empty -> stringResource(Res.string.orotez_protez_document_pick_placeholder)
     is DisabilityDocumentState.Uploading -> stringResource(Res.string.orotez_protez_document_status_uploading)
     is DisabilityDocumentState.Uploaded -> stringResource(Res.string.orotez_protez_document_status_uploaded)
-    is DisabilityDocumentState.Failed ->
-        "$message ${stringResource(Res.string.orotez_protez_document_status_error_tap_to_retry)}"
+    is DisabilityDocumentState.Failed -> {
+        val resolvedMessage = message ?: messageRes?.let { stringResource(it) } ?: ""
+        "$resolvedMessage ${stringResource(Res.string.orotez_protez_document_status_error_tap_to_retry)}"
+    }
 }
 
 @PreviewRtlTheme

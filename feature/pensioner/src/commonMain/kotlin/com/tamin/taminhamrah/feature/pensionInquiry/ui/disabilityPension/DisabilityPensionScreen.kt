@@ -345,7 +345,15 @@ private fun HandleDisabilityPensionEvents(
 ) {
     events.collectWithLifecycleAware { event ->
         when (event) {
-            is DisabilityPensionEvent.ShowToast -> onShowToast(event.message)
+            is DisabilityPensionEvent.ShowToast -> {
+                if (event.message != null) {
+                    onShowToast(event.message)
+                } else if (event.messageRes != null) {
+                    scope.launch {
+                        onShowToast(org.jetbrains.compose.resources.getString(event.messageRes))
+                    }
+                }
+            }
             DisabilityPensionEvent.NavigateBack -> onNavigateBack()
             DisabilityPensionEvent.NavigateToAddDependent -> onNavigateToAddDependent()
             is DisabilityPensionEvent.LaunchImagePicker -> when (event.source) {
