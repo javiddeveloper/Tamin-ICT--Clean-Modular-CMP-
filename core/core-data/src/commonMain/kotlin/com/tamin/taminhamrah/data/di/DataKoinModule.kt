@@ -69,6 +69,8 @@ import com.tamin.taminhamrah.repository.workersPayment.WorkersPaymentRepository
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
+import com.tamin.taminhamrah.data.repository.stories.StoryRepositoryImpl
+import com.tamin.taminhamrah.repository.stories.StoryRepository
 
 val dataKoinModule = module {
     singleOf(::FeatureManagerImpl) { bind<FeatureManager>() }
@@ -105,4 +107,5 @@ val dataKoinModule = module {
     singleOf(::FractionContractRepositoryImpl) { bind<FractionContractRepository>() }
     singleOf(::WorkersPaymentRepositoryImpl) { bind<WorkersPaymentRepository>() }
     singleOf(::WeddingPresentRepositoryImpl) { bind<WeddingPresentRepository>() }
+    singleOf(::StoryRepositoryImpl) { bind<StoryRepository>() }
 }

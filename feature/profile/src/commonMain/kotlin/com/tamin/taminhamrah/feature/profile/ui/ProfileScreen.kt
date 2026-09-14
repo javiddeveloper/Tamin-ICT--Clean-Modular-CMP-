@@ -102,6 +102,7 @@ import taminx.core.core_ui.ic_send
 import taminx.core.core_ui.ic_setting
 import taminx.core.core_ui.ic_share
 import taminx.core.core_ui.ic_sun
+import taminx.core.core_ui.ic_tamin_calendar
 import taminx.core.core_ui.ic_support
 import taminx.core.core_ui.profile_active_relation
 import taminx.core.core_ui.profile_bank_account
@@ -116,6 +117,7 @@ import taminx.core.core_ui.profile_logout
 import taminx.core.core_ui.profile_personal_inbox
 import taminx.core.core_ui.profile_personal_info
 import taminx.core.core_ui.profile_requests
+import taminx.core.core_ui.profile_save_events
 import taminx.core.core_ui.profile_security
 import taminx.core.core_ui.profile_security_settings
 import taminx.core.core_ui.profile_settings
@@ -145,6 +147,7 @@ fun ProfileScreen(
     onNavigateToMyInbox: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
     onNavigateToUserRequests: () -> Unit = {},
+    onNavigateToSaveEvents: () -> Unit = {},
     onOpenUrl: (String) -> Unit = {},
     onNavigateToSecurity: () -> Unit = {},
     onNavigateToDeveloperOptions: () -> Unit = {},
@@ -179,6 +182,7 @@ fun ProfileScreen(
         onNavigateToDependentsList = onNavigateToDependentsList,
         onNavigateToSettings = onNavigateToSettings,
         onNavigateToUserRequests = onNavigateToUserRequests,
+        onNavigateToSaveEvents = onNavigateToSaveEvents,
         onOpenUrl = onOpenUrl,
         onBackClicked = onBackClicked
     )
@@ -208,6 +212,7 @@ fun HandleProfileEvents(
     onNavigateToMyInbox: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToUserRequests: () -> Unit,
+    onNavigateToSaveEvents: () -> Unit,
     onNavigateToSecurity: () -> Unit,
     onNavigateToDeveloperOptions: () -> Unit,
     onOpenUrl: (String) -> Unit,
@@ -264,6 +269,9 @@ fun HandleProfileEvents(
 
             ProfileEvent.NavigateToUserContracts ->{
                 onNavigateToUserRequests()
+            }
+            ProfileEvent.NavigateToSaveEvents -> {
+                onNavigateToSaveEvents()
             }
 
             is ProfileEvent.OpenUrl -> {
@@ -561,6 +569,16 @@ fun ProfileContent(
                                 ),
                                 showArrow = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.PERSONAL_INBOX)) }
+                            ),
+                            ListItemData(
+                                title = stringResource(Res.string.profile_save_events),
+                                leadingIconPainter = painterResource(Res.drawable.ic_tamin_calendar),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientSecondary
+                                ),
+                                showArrow = true,
+                                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.SAVE_EVENTS)) }
                             )
                         )
                     )

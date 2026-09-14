@@ -53,79 +53,6 @@ import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
 import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
 import com.tamin.taminhamrah.useCases.common.GetRecipientListUseCase
 import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
-import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
-import com.tamin.taminhamrah.useCases.file.DownloadDocumentUseCase
-import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
-import com.tamin.taminhamrah.useCases.pension.GetEdictPensionerUseCase
-import com.tamin.taminhamrah.useCases.pension.GetEdictReportPDFUseCase
-import com.tamin.taminhamrah.useCases.pension.SendEdictPensionerToMyInboxUseCase
-import com.tamin.taminhamrah.useCases.pension.GetPensionInquiryUseCase
-import com.tamin.taminhamrah.useCases.pension.SendRequestInquirePensionCertificateUseCase
-import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
-import com.tamin.taminhamrah.useCases.pension.SendRequestDeferredInstallmentCertificateUseCase
-import com.tamin.taminhamrah.useCases.pension.GetPensionerPayRollUseCase
-import com.tamin.taminhamrah.useCases.pension.GetPensionerPayRollPDFUseCase
-import com.tamin.taminhamrah.useCases.pension.SendPayRollToInboxUseCase
-import com.tamin.taminhamrah.useCases.pension.GetUserAgeUseCase
-import com.tamin.taminhamrah.useCases.pension.GetRetirementRequestInfoUseCase
-import com.tamin.taminhamrah.useCases.pension.CheckRetirementStatusUseCase
-import com.tamin.taminhamrah.useCases.pension.GetAuthenticationCodeUseCase
-import com.tamin.taminhamrah.useCases.pension.AuthenticationAndGetPersonalInfoUseCase
-import com.tamin.taminhamrah.useCases.pension.CreateRetirementRequestUseCase
-import com.tamin.taminhamrah.useCases.pension.SendRetirementDocumentUseCase
-import com.tamin.taminhamrah.useCases.personalInbox.DeleteMyRequestUseCase
-import com.tamin.taminhamrah.useCases.personalInbox.InboxInquiryLicenseUseCase
-import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxItemsPageUseCase
-import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxItemsUseCase
-import com.tamin.taminhamrah.useCases.personalInbox.GetPersonalInboxSizeUseCase
-import com.tamin.taminhamrah.useCases.personalInbox.GetMyRequestPdfUseCase
-import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestErrorsUseCase
-import com.tamin.taminhamrah.useCases.userRequest.GetSmartGuideListUseCase
-import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestTypesUseCase
-import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestsUseCase
-import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestDetailUseCase
-import com.tamin.taminhamrah.useCases.userRequest.GetShowRequestInfoUseCase
-import com.tamin.taminhamrah.useCases.userRequest.DownloadUserRequestDocumentUseCase
-import com.tamin.taminhamrah.useCases.personal.GetDeceasedInfoUseCase
-import com.tamin.taminhamrah.useCases.personal.GetAgeUseCase
-import com.tamin.taminhamrah.useCases.personal.GetPersonalInfoUseCase
-import com.tamin.taminhamrah.useCases.personal.GetDisabilityDependentInfoUseCase
-import com.tamin.taminhamrah.useCases.personal.GetConfirmSurvivorsListUseCase
-import com.tamin.taminhamrah.useCases.personal.GetFinalSurvivorPensionPDFUseCase
-import com.tamin.taminhamrah.useCases.personal.CheckGirlSurvivorConditionsUseCase
-import com.tamin.taminhamrah.useCases.personal.ConfirmGirlSurvivorUseCase
-import com.tamin.taminhamrah.useCases.personal.GetGirlSurvivorReportUseCase
-import com.tamin.taminhamrah.useCases.personal.GetSurvivorListUseCase
-import com.tamin.taminhamrah.useCases.personal.SaveSurvivorInfoUseCase
-import com.tamin.taminhamrah.useCases.personal.SubmitFinalSurvivorPensionUseCase
-import com.tamin.taminhamrah.useCases.orotezProtez.GetInsuredPersonsUseCase
-import com.tamin.taminhamrah.useCases.orotezProtez.GetRequestInsuredMainInfoUseCase
-import com.tamin.taminhamrah.useCases.orotezProtez.SaveShortTermOrthosisUseCase
-import com.tamin.taminhamrah.useCases.inquiryEducation.GetDataForEducationUseCase
-import com.tamin.taminhamrah.useCases.weddingPresent.CalculateMarriageAllowanceUseCase
-import com.tamin.taminhamrah.useCases.weddingPresent.GetWeddingPresentInfoUseCase
-import com.tamin.taminhamrah.useCases.weddingPresent.SubmitWeddingPresentUseCase
-import com.tamin.taminhamrah.useCases.inquiryEducation.InquiryEducationCertificateUseCase
-import com.tamin.taminhamrah.useCases.fractionContract.CheckFractionAgeAndHistoryUseCase
-import com.tamin.taminhamrah.useCases.fractionContract.MakeFractionContractUseCase
-import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.CalcIllnessAmountUseCase
-import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.GetCovidResultUseCase
-import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.GetIllDaysInsuredMainInfoUseCase
-import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.SendRequestForIllDayUseCase
-import com.tamin.taminhamrah.useCases.pregnancyPay.CalculatePregnancyPayEstimateUseCase
-import com.tamin.taminhamrah.useCases.pregnancyPay.GetPregnancyMainInfoUseCase
-import com.tamin.taminhamrah.useCases.pregnancyPay.GetPregnancyStatusListUseCase
-import com.tamin.taminhamrah.useCases.pregnancyPay.GetPregnancyTypeListUseCase
-import com.tamin.taminhamrah.useCases.pregnancyPay.SendPregnancyPayRequestUseCase
-import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
-import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
-import com.tamin.taminhamrah.useCases.user.GetStatusCertificateReportUseCase
-import com.tamin.taminhamrah.useCases.user.GetWageCertificateReportUseCase
-import com.tamin.taminhamrah.useCases.user.GetRecipientsUseCase
-import com.tamin.taminhamrah.useCases.user.GetIdentityInfoUseCase
-import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCase
-import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
-import com.tamin.taminhamrah.useCases.auth.SignOutUseCase
 import com.tamin.taminhamrah.useCases.common.GetRolesUseCase
 import com.tamin.taminhamrah.useCases.common.SetBiometricEnabledUseCase
 import com.tamin.taminhamrah.useCases.common.SetFontSizeUseCase
@@ -169,6 +96,8 @@ import com.tamin.taminhamrah.useCases.employerInfo.SubmitLegalWorkshopInfoUseCas
 import com.tamin.taminhamrah.useCases.employerInfo.SubmitRealWorkshopInfoUseCase
 import com.tamin.taminhamrah.useCases.file.DownloadDocumentUseCase
 import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
+import com.tamin.taminhamrah.useCases.fractionContract.CheckFractionAgeAndHistoryUseCase
+import com.tamin.taminhamrah.useCases.fractionContract.MakeFractionContractUseCase
 import com.tamin.taminhamrah.useCases.health.AddSelfDeclarativeUseCase
 import com.tamin.taminhamrah.useCases.health.GetActFrequenciesUseCase
 import com.tamin.taminhamrah.useCases.health.GetAllDrugsUseCase
@@ -261,6 +190,12 @@ import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.CalcIllnessAmount
 import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.GetCovidResultUseCase
 import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.GetIllDaysInsuredMainInfoUseCase
 import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.SendRequestForIllDayUseCase
+import com.tamin.taminhamrah.useCases.stories.GetStoryChannelsUseCase
+import com.tamin.taminhamrah.useCases.stories.MarkStoryChannelSeenUseCase
+import com.tamin.taminhamrah.useCases.stories.ObserveSeenStoryChannelsUseCase
+import com.tamin.taminhamrah.useCases.stories.ObserveStoryEngagementUseCase
+import com.tamin.taminhamrah.useCases.stories.ToggleStoryLikeUseCase
+import com.tamin.taminhamrah.useCases.stories.ToggleStorySaveUseCase
 import com.tamin.taminhamrah.useCases.treatment.DownloadLabResultPdfUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetDependantUnderEighteenUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetDeservedTreatmentUseCase
@@ -298,6 +233,9 @@ import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestErrorsUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestTypesUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestsUseCase
 import com.tamin.taminhamrah.useCases.versionHistory.GetVersionHistoryUseCase
+import com.tamin.taminhamrah.useCases.weddingPresent.CalculateMarriageAllowanceUseCase
+import com.tamin.taminhamrah.useCases.weddingPresent.GetWeddingPresentInfoUseCase
+import com.tamin.taminhamrah.useCases.weddingPresent.SubmitWeddingPresentUseCase
 import com.tamin.taminhamrah.useCases.workshops.CheckNewMemberIsNewUseCase
 import com.tamin.taminhamrah.useCases.workshops.CheckObjectionDeadlineUseCase
 import com.tamin.taminhamrah.useCases.workshops.ConfirmRecentlyAddedMemberUseCase
@@ -650,5 +588,13 @@ val domainModule = module {
     factoryOf(::SubmitLegalWorkshopInfoUseCase)
     factoryOf(::RequestRealTicketUseCase)
     factoryOf(::SubmitRealWorkshopInfoUseCase)
+
+    // Stories UseCases
+    factoryOf(::GetStoryChannelsUseCase)
+    factoryOf(::ObserveSeenStoryChannelsUseCase)
+    factoryOf(::MarkStoryChannelSeenUseCase)
+    factoryOf(::ObserveStoryEngagementUseCase)
+    factoryOf(::ToggleStoryLikeUseCase)
+    factoryOf(::ToggleStorySaveUseCase)
 }
 
