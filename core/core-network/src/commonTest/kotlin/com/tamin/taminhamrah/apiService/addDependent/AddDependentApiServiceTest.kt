@@ -182,4 +182,29 @@ class AddDependentApiServiceTest : BaseApiTest() {
         assertTrue(response.data?.isSuccess == true)
         assertEquals("کفالت با موفقیت ثبت شد", response.data?.message)
     }
+
+    @Test
+    fun refreshDependents_returnsGeneralResponse() = runTest {
+        val jsonResponse = """
+            {
+                "status": 200,
+                "family": "SUCCESS",
+                "reason": "OK",
+                "data": {
+                    "isSuccess": true,
+                    "message": "افراد تبعی بروزرسانی شدند"
+                }
+            }
+        """.trimIndent()
+
+        val ktorfit: Ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createAddDependentApiService()
+
+        val response = apiService.refreshDependents()
+
+        assertEquals(200, response.status)
+        assertNotNull(response.data)
+        assertTrue(response.data?.isSuccess == true)
+        assertEquals("افراد تبعی بروزرسانی شدند", response.data?.message)
+    }
 }

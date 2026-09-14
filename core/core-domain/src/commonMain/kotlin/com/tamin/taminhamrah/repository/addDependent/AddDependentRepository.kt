@@ -36,4 +36,5 @@ interface AddDependentRepository {
     fun addNewDependent(
         request: RequestAddDependentDN
     ): Flow<GeneralResultDN>
+    fun refreshDependents(): Flow<GeneralResultDN>
 }
