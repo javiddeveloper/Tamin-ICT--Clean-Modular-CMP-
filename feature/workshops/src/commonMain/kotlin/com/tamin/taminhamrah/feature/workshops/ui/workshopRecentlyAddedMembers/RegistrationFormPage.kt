@@ -204,6 +204,13 @@ fun RegistrationFormPage(
                 onIntent(WorkshopRecentlyAddedMembersIntent.FormOptionPicked(picker, option))
             }
         }
+        val onLoadMore = remember(onIntent, picker) {
+            if (picker == RegistrationPicker.JOB) {
+                { onIntent(WorkshopRecentlyAddedMembersIntent.FormPickerLoadMore) }
+            } else {
+                null
+            }
+        }
         WorkshopLookupSheet(
             title = stringResource(
                 when (picker) {
@@ -216,6 +223,9 @@ fun RegistrationFormPage(
             onQueryChange = onQueryChange,
             options = form.pickerOptions,
             isLoading = form.isPickerLoading,
+            isLoadingMore = form.isPickerLoadingMore,
+            canLoadMore = form.canPickerLoadMore,
+            onLoadMore = onLoadMore,
             onDismiss = onDismissPicker,
             onSelect = onSelectOption,
             label = { it.label },

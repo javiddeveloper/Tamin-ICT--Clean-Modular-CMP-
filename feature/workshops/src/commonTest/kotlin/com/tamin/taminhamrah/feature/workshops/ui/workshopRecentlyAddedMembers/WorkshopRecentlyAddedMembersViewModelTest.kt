@@ -62,7 +62,7 @@ import com.tamin.taminhamrah.repository.common.CommonRepository
 import com.tamin.taminhamrah.repository.personal.PersonalRepository
 import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
 import com.tamin.taminhamrah.useCases.common.GetCityUseCase
-import com.tamin.taminhamrah.useCases.common.GetJobTitleUseCase
+import com.tamin.taminhamrah.useCases.common.GetJobTitlePageUseCase
 import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
 import com.tamin.taminhamrah.useCases.personal.GetInsuredRegistrationDocListUseCase
 import com.tamin.taminhamrah.useCases.personal.PutInsuredRegistrationDocListUseCase
@@ -113,11 +113,14 @@ class WorkshopRecentlyAddedMembersViewModelTest {
     private lateinit var workshops: FakeWorkShopsRepository
     private lateinit var documents: FakeDocumentsRepository
 
+    private lateinit var jobs: FakeJobsRepository
+
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         workshops = FakeWorkShopsRepository()
         documents = FakeDocumentsRepository()
+        jobs = FakeJobsRepository()
     }
 
     @AfterTest
@@ -129,7 +132,6 @@ class WorkshopRecentlyAddedMembersViewModelTest {
         downloader: WorkshopAttachmentDownloader = WorkshopAttachmentDownloader { FILED_IMAGE },
     ): WorkshopRecentlyAddedMembersViewModel {
         val cities = FakeCitiesRepository()
-        val jobs = FakeJobsRepository()
         return WorkshopRecentlyAddedMembersViewModel(
             GetRecentlyAddedMembersUseCase(workshops),
             ConfirmRecentlyAddedMemberUseCase(workshops),
@@ -142,7 +144,7 @@ class WorkshopRecentlyAddedMembersViewModelTest {
             GetInsuredRegistrationDocListUseCase(documents),
             GetCitiesUseCase(cities),
             GetCityUseCase(cities),
-            GetJobTitleUseCase(jobs),
+            GetJobTitlePageUseCase(jobs),
             GetRegistrationDeclarationFormUseCase(jobs),
         ).also { it.sendIntent(Open(WORKSHOP_ID, BRANCH_CODE)) }
     }
