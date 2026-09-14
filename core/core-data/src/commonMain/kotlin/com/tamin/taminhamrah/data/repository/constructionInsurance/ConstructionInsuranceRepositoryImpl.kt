@@ -4,8 +4,12 @@ import com.tamin.taminhamrah.data.local.dao.ConstructionFileDao
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
 import com.tamin.taminhamrah.dataSource.constructionInsurance.ConstructionInsuranceRemoteDataSource
+import com.tamin.taminhamrah.model.constructionInsurance.BeneficiaryConstructionDN
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileDN
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileSearchParamsDN
+import com.tamin.taminhamrah.model.constructionInsurance.InstallmentLetterDN
+import com.tamin.taminhamrah.model.constructionInsurance.PaymentSheetConstructionFileDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.FilterOperator
@@ -46,6 +50,45 @@ internal class ConstructionInsuranceRepositoryImpl(
             }
         )
     }.distinctUntilChanged()
+
+    // Network-only from here down — see the offline-first rubric in
+    // .claude/rules/data-and-caching.md: these are per-action/per-request lookups reached from the
+    // عملیات menu, not data worth caching to Room.
+
+    override fun getBeneficiariesWorkshop(
+        requestNumber: Long?,
+        fileNumber: Long?,
+        requestDate: String?,
+    ): Flow<List<BeneficiaryConstructionDN>> = flow {
+        val result = remoteDataSource.getBeneficiariesWorkshop(requestNumber, fileNumber, requestDate)
+        emit(result.list.orEmpty().map { it.toDomain() })
+    }
+
+    override fun getPaymentSheetConstructionInfo(
+        debitNumber: String
+    ): Flow<List<PaymentSheetConstructionFileDN>> = flow {
+        val result = remoteDataSource.getPaymentSheetConstructionInfo(debitNumber)
+        emit(result.list.orEmpty().map { it.toDomain() })
+    }
+
+    override fun getCertificatePaymentSheetPdf(
+        debitNumber: String,
+        branchCode: String,
+    ): Flow<PdfDownloadDN> = flow {
+        emit(remoteDataSource.getCertificatePaymentSheetPdf(debitNumber, branchCode).toDomain())
+    }
+
+    override fun issuancePaymentSheet(debitNumber: String): Flow<String> = flow {
+        emit(remoteDataSource.issuancePaymentSheet(debitNumber))
+    }
+
+    override fun getInstallmentLetterList(
+        workshopId: String,
+        branchId: String,
+    ): Flow<List<InstallmentLetterDN>> = flow {
+        val result = remoteDataSource.getInstallmentLetterList(workshopId, branchId)
+        emit(result.list.orEmpty().map { it.toDomain() })
+    }
 
     private fun buildQuery(search: ConstructionFileSearchParamsDN?): ApiQueryParamDN {
         if (search == null) {

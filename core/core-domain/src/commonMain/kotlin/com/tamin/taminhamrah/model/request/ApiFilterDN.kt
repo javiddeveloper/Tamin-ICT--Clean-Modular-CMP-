@@ -125,6 +125,8 @@ enum class FilterProperty(val key: String) {
     @SerialName("seqNo") SEQ_NO("seqNo"),
     @SerialName("fileNo") FILE_NO("fileNo"),
     @SerialName("reqNo") REQ_NO("reqNo"),
+    /** بیمه ساختمانی — ذینفعان کارگاه (`building-workshops-owners`) filters by this date property. */
+    @SerialName("bldprdate") BUILDING_REQUEST_DATE("bldprdate"),
 }
 
 
