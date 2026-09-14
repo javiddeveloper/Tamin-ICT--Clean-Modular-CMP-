@@ -21,6 +21,9 @@ import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.W
 import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersIntent.FormFieldChanged
 import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersIntent.FormNext
 import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersIntent.FormOptionPicked
+import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersIntent.FormPickerLoadMore
+import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersIntent.FormPickerOpened
+import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersIntent.FormPickerQueryChanged
 import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersIntent.FormPrev
 import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersIntent.Open
 import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersIntent.PendingActionAccepted
@@ -49,9 +52,12 @@ import com.tamin.taminhamrah.model.personal.girlSurvivor.GirlSurvivorReportParam
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoDN
 import com.tamin.taminhamrah.model.personal.survivorDependent.SurvivorDependentDN
+import com.tamin.taminhamrah.model.paging.PageDN
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.request.FilterOperator
+import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.NewMemberRequestStatus
@@ -479,6 +485,77 @@ class WorkshopRecentlyAddedMembersViewModelTest {
         assertEquals(NewMemberRequestStatus.UNDER_REVIEW, workshops.lastNewMemberQuery?.requestStatus)
     }
 
+    // ------------------------------------------------------------------ pickers and paging
+
+    @Test
+    fun `opening the job picker loads first page and sets canPickerLoadMore true when more items exist`() =
+        runTest(testDispatcher) {
+            jobs.jobPages = mapOf(
+                0 to (1..10).map { JobTitleDN(jobCode = "$it", jobDescription = "شغل $it", status = "", statusDate = "") },
+                1 to (11..15).map { JobTitleDN(jobCode = "$it", jobDescription = "شغل $it", status = "", statusDate = "") },
+            )
+            jobs.totalJobs = 15
+            val viewModel = viewModel()
+
+            viewModel.sendIntent(Edit(WorkshopNewMemberPR()))
+            viewModel.sendIntent(FormPickerOpened(RegistrationPicker.JOB))
+
+            val form = assertNotNull(viewModel.uiState.value.form)
+            assertEquals(RegistrationPicker.JOB, form.picker)
+            assertEquals(10, form.pickerOptions.size)
+            assertTrue(form.canPickerLoadMore, "picker should be able to load more when total > loaded")
+            assertFalse(form.isPickerLoadingMore)
+        }
+
+    @Test
+    fun `FormPickerLoadMore loads the next page and appends to pickerOptions`() =
+        runTest(testDispatcher) {
+            jobs.jobPages = mapOf(
+                0 to (1..10).map { JobTitleDN(jobCode = "$it", jobDescription = "شغل $it", status = "", statusDate = "") },
+                1 to (11..15).map { JobTitleDN(jobCode = "$it", jobDescription = "شغل $it", status = "", statusDate = "") },
+            )
+            jobs.totalJobs = 15
+            val viewModel = viewModel()
+
+            viewModel.sendIntent(Edit(WorkshopNewMemberPR()))
+            viewModel.sendIntent(FormPickerOpened(RegistrationPicker.JOB))
+            viewModel.sendIntent(FormPickerLoadMore)
+
+            val form = assertNotNull(viewModel.uiState.value.form)
+            assertEquals(15, form.pickerOptions.size)
+            assertFalse(form.canPickerLoadMore, "end of list reached so canPickerLoadMore should be false")
+        }
+
+    @Test
+    fun `FormPickerQueryChanged refreshes paginator with jobDescription LIKE filter`() =
+        runTest(testDispatcher) {
+            val viewModel = viewModel()
+
+            viewModel.sendIntent(Edit(WorkshopNewMemberPR()))
+            viewModel.sendIntent(FormPickerOpened(RegistrationPicker.JOB))
+            viewModel.sendIntent(FormPickerQueryChanged("برنامه‌نویس"))
+
+            val query = assertNotNull(jobs.lastQuery)
+            val filter = assertNotNull(query.filters.firstOrNull())
+            assertEquals(FilterProperty.JOB_DESCRIPTION, filter.property)
+            assertEquals("*برنامه‌نویس*", filter.value)
+            assertEquals(FilterOperator.LIKE, filter.operator)
+        }
+
+    @Test
+    fun `opening city picker keeps canPickerLoadMore false`() =
+        runTest(testDispatcher) {
+            val viewModel = viewModel()
+
+            viewModel.sendIntent(Edit(WorkshopNewMemberPR()))
+            viewModel.sendIntent(FormPickerOpened(RegistrationPicker.BIRTH_CITY))
+
+            val form = assertNotNull(viewModel.uiState.value.form)
+            assertEquals(RegistrationPicker.BIRTH_CITY, form.picker)
+            assertEquals(1, form.pickerOptions.size)
+            assertFalse(form.canPickerLoadMore, "city pickers do not paginate")
+        }
+
     /** A blank registration taken past step one and filled in on step two, not yet saved. */
     private fun fillStepTwo(viewModel: WorkshopRecentlyAddedMembersViewModel) {
         viewModel.sendIntent(Edit(WorkshopNewMemberPR()))
@@ -566,19 +643,36 @@ private class FakeCitiesRepository : CityProvinceRepository {
 
 /** Knows one job; nothing else of the common repository is part of this screen's flows. */
 private class FakeJobsRepository : CommonRepository {
-    override fun getJobTitle(query: ApiQueryParamDN): Flow<JobTitleListDN?> = flowOf(
-        JobTitleListDN(
-            list = listOf(
-                JobTitleDN(
-                    jobCode = PROGRAMMER.code,
-                    jobDescription = PROGRAMMER.label,
-                    status = "",
-                    statusDate = "",
-                ),
+    var lastQuery: ApiQueryParamDN? = null
+    var jobPages: Map<Int, List<JobTitleDN>> = mapOf(
+        0 to listOf(
+            JobTitleDN(
+                jobCode = PROGRAMMER.code,
+                jobDescription = PROGRAMMER.label,
+                status = "",
+                statusDate = "",
             ),
-            total = 1,
         ),
     )
+    var totalJobs: Int = 1
+
+    override fun getJobTitle(query: ApiQueryParamDN): Flow<JobTitleListDN?> = flowOf(
+        JobTitleListDN(
+            list = jobPages[query.page] ?: emptyList(),
+            total = totalJobs,
+        ),
+    )
+
+    override fun getJobTitlePage(query: ApiQueryParamDN): Flow<PageDN<JobTitleDN>> = flow {
+        lastQuery = query
+        val pageNumber = query.page
+        emit(
+            PageDN(
+                items = jobPages[pageNumber] ?: emptyList(),
+                total = totalJobs,
+            ),
+        )
+    }
 
     override fun getRegistrationDeclarationForm(): Flow<ByteArray> = unused()
     override fun getBeneficiary(filters: List<ApiFilterDN>): Flow<List<BeneficiaryDN>> = unused()
