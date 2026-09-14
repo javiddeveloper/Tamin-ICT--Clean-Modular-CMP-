@@ -1,21 +1,14 @@
 package com.tamin.taminhamrah.feature.calculateWagePension.ui.components
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -24,32 +17,43 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import com.tamin.taminhamrah.model.calculateWagePension.WagePensionChartItemPR
 import com.tamin.taminhamrah.feature.calculateWagePension.ui.CalculateWagePensionPreviewData
+import com.tamin.taminhamrah.model.calculateWagePension.WagePensionChartItemPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.BarChartItem
+import com.tamin.taminhamrah.ui.components.ChartScrollBehavior
+import com.tamin.taminhamrah.ui.components.TaminBarChart
+import com.tamin.taminhamrah.ui.components.rememberChartGridLines
 import com.tamin.taminhamrah.ui.theme.ChartDimens
 import com.tamin.taminhamrah.ui.theme.CornerRadius as TaminCornerRadius
 import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.ui.theme.Thickness
+import com.tamin.taminhamrah.ui.theme.TaminHistoryBarFullBottom
+import com.tamin.taminhamrah.ui.theme.TaminHistoryBarFullSelectedBottom
+import com.tamin.taminhamrah.ui.theme.TaminHistoryBarFullSelectedTop
+import com.tamin.taminhamrah.ui.theme.TaminHistoryBarFullTop
+import com.tamin.taminhamrah.ui.theme.TaminHistoryBarPartialSelectedBottom
+import com.tamin.taminhamrah.ui.theme.TaminHistoryBarPartialSelectedTop
+import com.tamin.taminhamrah.ui.theme.TaminHistoryBarPartialYearBottom
+import com.tamin.taminhamrah.ui.theme.TaminHistoryBarPartialYearTop
+import com.tamin.taminhamrah.ui.theme.TaminHistoryZeroText
+import com.tamin.taminhamrah.ui.theme.TaminLightTextSecondary
+import com.tamin.taminhamrah.ui.theme.TaminNavy700
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.calculate_wage_pension_chart_full_year
-import taminx.core.core_ui.calculate_wage_pension_chart_months_12
-import taminx.core.core_ui.calculate_wage_pension_chart_months_6
 import taminx.core.core_ui.calculate_wage_pension_chart_partial_year
 import taminx.core.core_ui.calculate_wage_pension_chart_tap_hint
 import taminx.core.core_ui.calculate_wage_pension_history_days
@@ -164,11 +168,11 @@ internal fun CalculateWagePensionHistoryCard(
                 ) {
                     // RTL: legend on the start (right), tap hint on the end (left).
                     ChartLegendItem(
-                        color = colors.greenText,
+                        color = TaminHistoryBarFullBottom,
                         label = stringResource(Res.string.calculate_wage_pension_chart_full_year),
                     )
                     ChartLegendItem(
-                        color = colors.orangeText,
+                        color = TaminHistoryBarPartialYearBottom,
                         label = stringResource(Res.string.calculate_wage_pension_chart_partial_year),
                     )
                     Text(
@@ -234,142 +238,44 @@ private fun WagePensionBarChart(
     selectedIndex: Int?,
     onYearSelected: (Int) -> Unit,
 ) {
-    val colors = LocalTaminColors.current
-    val fullYearLabel = stringResource(Res.string.calculate_wage_pension_chart_months_12)
-    val halfYearLabel = stringResource(Res.string.calculate_wage_pension_chart_months_6)
-    val fullYearBrush = Brush.verticalGradient(
-        colors = listOf(colors.greenText.copy(alpha = 0.55f), colors.greenText),
-    )
-    val partialYearBrush = Brush.verticalGradient(
-        colors = listOf(colors.orangeText.copy(alpha = 0.55f), colors.orangeText),
-    )
-    val barShape = RoundedCornerShape(
-        topStart = ChartDimens.barCorner,
-        topEnd = ChartDimens.barCorner,
-    )
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(ChartDimens.barChartHeight),
-    ) {
-        Column(
-            modifier = Modifier
-                .width(ChartDimens.yAxisLabelWidth)
-                .fillMaxHeight()
-                .padding(end = Spacing.xs),
-            verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.End,
-        ) {
-            Text(
-                text = fullYearLabel,
-                style = MaterialTheme.typography.labelSmall,
-                color = colors.textMuted,
+    val bars = remember(items, selectedIndex) {
+        items.mapIndexed { index, item ->
+            val isFull = item.sumYear >= FullYearDays
+            val selected = selectedIndex == index
+            BarChartItem(
+                id = index.toString(),
+                label = item.hisYear.toPersianDigits(),
+                fraction = (item.sumYear / MaxChartDays).coerceIn(0f, 1f),
+                fillTop = when {
+                    selected -> if (isFull) TaminHistoryBarFullSelectedTop else TaminHistoryBarPartialSelectedTop
+                    isFull -> TaminHistoryBarFullTop
+                    else -> TaminHistoryBarPartialYearTop
+                },
+                fillBottom = when {
+                    selected -> if (isFull) TaminHistoryBarFullSelectedBottom else TaminHistoryBarPartialSelectedBottom
+                    isFull -> TaminHistoryBarFullBottom
+                    else -> TaminHistoryBarPartialYearBottom
+                },
+                labelColor = when {
+                    selected -> TaminNavy700
+                    item.sumYear > 0 -> TaminLightTextSecondary
+                    else -> TaminHistoryZeroText
+                },
+                pill = item.sumYear.toString().toPersianDigits().takeIf { selected && item.sumYear > 0 },
+                labelBold = selected,
+                enabled = item.sumYear > 0,
+                isSelected = selected,
             )
-            Text(
-                text = halfYearLabel,
-                style = MaterialTheme.typography.labelSmall,
-                color = colors.textMuted,
-                modifier = Modifier.padding(bottom = Spacing.xxxl),
-            )
-            Spacer(modifier = Modifier)
-        }
-
-        Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
-            Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                val guideColor = colors.outerBorder
-                Canvas(modifier = Modifier.fillMaxSize()) {
-                    val dashLength = Thickness.border.toPx() * 8f
-                    val dash = PathEffect.dashPathEffect(floatArrayOf(dashLength, dashLength))
-                    val y12 = size.height * 0.05f
-                    val y6 = size.height * 0.5f
-                    drawLine(
-                        color = guideColor,
-                        start = Offset(0f, y12),
-                        end = Offset(size.width, y12),
-                        strokeWidth = Thickness.border.toPx(),
-                        pathEffect = dash,
-                    )
-                    drawLine(
-                        color = guideColor,
-                        start = Offset(0f, y6),
-                        end = Offset(size.width, y6),
-                        strokeWidth = Thickness.border.toPx(),
-                        pathEffect = dash,
-                    )
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalArrangement = Arrangement.spacedBy(
-                        space = ChartDimens.barGap,
-                        alignment = Alignment.CenterHorizontally,
-                    ),
-                    verticalAlignment = Alignment.Bottom,
-                ) {
-                    items.forEachIndexed { index, item ->
-                        val isFull = item.sumYear >= FullYearDays
-                        val fraction = (item.sumYear / MaxChartDays).coerceIn(0.08f, 1f)
-                        val barBrush = if (isFull) fullYearBrush else partialYearBrush
-                        val selected = selectedIndex == index
-
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier
-                                .width(ChartDimens.barWidth)
-                                .fillMaxHeight()
-                                .clickable { onYearSelected(index) },
-                            verticalArrangement = Arrangement.Bottom,
-                        ) {
-                            Text(
-                                text = item.sumYear.toString().toPersianDigits(),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = colors.textMuted,
-                                modifier = Modifier.padding(bottom = Spacing.xs),
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .width(ChartDimens.barWidth)
-                                    .fillMaxHeight(fraction)
-                                    .then(
-                                        if (selected) {
-                                            Modifier.border(
-                                                Thickness.medium,
-                                                colors.blueText,
-                                                barShape,
-                                            )
-                                        } else {
-                                            Modifier
-                                        }
-                                    )
-                                    .background(barBrush, barShape),
-                            )
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(Spacing.sm))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(
-                    space = ChartDimens.barGap,
-                    alignment = Alignment.CenterHorizontally,
-                ),
-            ) {
-                items.forEach { item ->
-                    Text(
-                        text = item.hisYear.toPersianDigits(),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = colors.textMuted,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.width(ChartDimens.barWidth),
-                    )
-                }
-            }
-        }
+        }.toImmutableList()
     }
+
+    TaminBarChart(
+        bars = bars,
+        onBarClick = { id -> id.toIntOrNull()?.let(onYearSelected) },
+        scrollBehavior = ChartScrollBehavior.Adaptive,
+        animationKey = items.size,
+        gridLines = rememberChartGridLines(),
+    )
 }
 
 @PreviewRtlTheme

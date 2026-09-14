@@ -2,7 +2,6 @@ package com.tamin.taminhamrah.ui.navigation
 
 import androidx.navigation.NavController
 import com.tamin.taminhamrah.feature.contractaffair.navigateToContractAffairs
-import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.history.navigateToHistory
 import com.tamin.taminhamrah.feature.history.navigateToHistoryJobInfo
 import com.tamin.taminhamrah.feature.historyobjection.navigateToHistoryObjection
@@ -60,7 +59,6 @@ fun NavController.navigateToFeature(flag: FeatureFlag) {
         FeatureFlag.CALCULATE_WAGE_PENSION,
         FeatureFlag.CALCULATE_WAGE_PENSION_109 -> navigateToCalculateWagePension()
         FeatureFlag.RETIREMENT_PENSION -> navigateToRetirementPension()
-        FeatureFlag.CALCULATE_WAGE_PENSION -> navigateToCalculatePension()
         FeatureFlag.PRESCRIPTION -> navigateToPrescription()
         FeatureFlag.DESERVED_TREATMENT_101 -> navigateToDeservedTreatment()
         FeatureFlag.PAY_ROLL -> navigateToPayRoll()
