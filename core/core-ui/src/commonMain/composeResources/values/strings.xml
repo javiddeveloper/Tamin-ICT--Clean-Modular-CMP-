@@ -3114,6 +3114,9 @@
     <string name="fraction_contract_coming_soon">این مرحله به‌زودی اضافه می‌شود.</string>
     <string name="fraction_contract_terms_section_title">مقررات و ضوابط انعقاد قرارداد</string>
     <string name="fraction_contract_terms_section_subtitle">ضوابط قرارداد را مطالعه و سپس تعهدنامه را تأیید کنید.</string>
+    <string name="fraction_contract_user_info_section_title">اطلاعات تماس و محل سکونت</string>
+    <string name="fraction_contract_user_info_section_subtitle">متقاضی محترم، در صورت نادرست بودن اطلاعات، می‌توانید از طریق فرم زیر نسبت به ویرایش اطلاعات خود اقدام نمایید.</string>
+    <string name="fraction_contract_mobile_locked_hint">تغییر شماره همراه از این فرم امکان‌پذیر نیست؛ برای اصلاح آن به بخش «حساب کاربری» مراجعه کنید.</string>
 
 </resources>
 

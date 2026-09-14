@@ -41,6 +41,7 @@ import com.tamin.taminhamrah.feature.fractionContract.ui.components.FractionCont
 import com.tamin.taminhamrah.feature.fractionContract.ui.components.FractionEligibilityStep
 import com.tamin.taminhamrah.feature.fractionContract.ui.components.FractionPlaceholderStepShimmer
 import com.tamin.taminhamrah.feature.fractionContract.ui.components.FractionTermsStep
+import com.tamin.taminhamrah.feature.fractionContract.ui.components.FractionUserInfoStep
 import com.tamin.taminhamrah.feature.fractionContract.ui.contract.FractionContractEvent
 import com.tamin.taminhamrah.feature.fractionContract.ui.contract.FractionContractIntent
 import com.tamin.taminhamrah.feature.fractionContract.ui.contract.FractionContractState
@@ -303,9 +304,53 @@ fun FractionContractScreen(
                                 }
                             }
 
-                            FractionContractStep.UserInfo,
-                            FractionContractStep.Submit,
-                            -> {
+                            FractionContractStep.UserInfo -> {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .verticalScroll(rememberScrollState())
+                                        .padding(horizontal = Spacing.page, vertical = Spacing.md),
+                                ) {
+                                    FractionUserInfoStep(
+                                        userInfo = state.userInfo,
+                                        cities = state.cities,
+                                        isCitiesLoading = state.isCitiesLoading,
+                                        onCitySelected = { city ->
+                                            onIntent(
+                                                FractionContractIntent.UpdateUserInfo(
+                                                    state.userInfo.copy(
+                                                        cityCode = city.cityCode,
+                                                        cityName = city.cityName,
+                                                    ),
+                                                ),
+                                            )
+                                        },
+                                        onAddressChange = {
+                                            onIntent(
+                                                FractionContractIntent.UpdateUserInfo(
+                                                    state.userInfo.copy(address = it),
+                                                ),
+                                            )
+                                        },
+                                        onZipCodeChange = {
+                                            onIntent(
+                                                FractionContractIntent.UpdateUserInfo(
+                                                    state.userInfo.copy(zipCode = it),
+                                                ),
+                                            )
+                                        },
+                                        onPhoneNumberChange = {
+                                            onIntent(
+                                                FractionContractIntent.UpdateUserInfo(
+                                                    state.userInfo.copy(phoneNumber = it),
+                                                ),
+                                            )
+                                        },
+                                    )
+                                }
+                            }
+
+                            FractionContractStep.Submit -> {
                                 FractionPlaceholderStepShimmer()
                             }
                         }
@@ -424,7 +469,8 @@ private fun FractionContractBottomBar(
             -> {
                 val nextEnabled = when (state.currentStep) {
                     FractionContractStep.Terms -> state.isRulesConfirmed
-                    FractionContractStep.UserInfo -> true
+                    FractionContractStep.UserInfo ->
+                        state.isUserInfoComplete && !state.isSavingContact
                     FractionContractStep.Submit -> false
                     FractionContractStep.Eligibility -> false
                 }
@@ -440,7 +486,8 @@ private fun FractionContractBottomBar(
                         text = stringResource(Res.string.fraction_contract_next_step),
                         onClick = { onIntent(FractionContractIntent.OnNextStepClicked) },
                         enabled = nextEnabled,
-                        isLoading = false,
+                        isLoading = state.currentStep == FractionContractStep.UserInfo &&
+                            state.isSavingContact,
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
                         iconPosition = LoadingButtonIconPosition.TRAILING,
                         modifier = Modifier.weight(1f),

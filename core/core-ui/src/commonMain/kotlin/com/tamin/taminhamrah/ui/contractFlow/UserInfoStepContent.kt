@@ -25,11 +25,13 @@ import com.tamin.taminhamrah.model.contractFlow.UserInfoFormPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.TaminTextField
+import com.tamin.taminhamrah.ui.digitsOnly
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
+import com.tamin.taminhamrah.util.ValidationUtils
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
@@ -39,6 +41,7 @@ import taminx.core.core_ui.contract_field_phone_required
 import taminx.core.core_ui.contract_field_postal_code_required
 import taminx.core.core_ui.contract_field_residence_city
 import taminx.core.core_ui.contract_user_info_banner
+import taminx.core.core_ui.occurrence_field_home_phone_error
 import taminx.core.core_ui.occurrence_field_postal_code_error
 
 @Composable
@@ -111,14 +114,20 @@ fun UserInfoStepContent(
                     modifier = Modifier.weight(1f),
                 )
 
-                val isZipError = userInfo.zipCode.isNotEmpty() && userInfo.zipCode.length != 10
+                val isZipComplete = userInfo.zipCode.length == 10 &&
+                    ValidationUtils.isPostcodeValid(userInfo.zipCode)
+                val isZipError = userInfo.zipCode.isNotEmpty() && !isZipComplete
                 TaminTextField(
                     value = userInfo.zipCode.toPersianDigits(),
-                    onValueChange = onZipCodeChange,
+                    onValueChange = {
+                        onZipCodeChange(ValidationUtils.validatePostcode(it.digitsOnly()))
+                    },
                     label = stringResource(Res.string.contract_field_postal_code_required),
                     isError = isZipError,
                     errorMessage = if (isZipError) stringResource(Res.string.occurrence_field_postal_code_error) else null,
                     keyboardType = KeyboardType.Number,
+                    maxLength = 10,
+                    deleteOnlyWhenFull = true,
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -138,11 +147,23 @@ fun UserInfoStepContent(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.md),
             ) {
+                val isPhoneComplete = ValidationUtils.isPhoneNumberValid(userInfo.phoneNumber)
+                val isPhoneError = userInfo.phoneNumber.isNotEmpty() && !isPhoneComplete
                 TaminTextField(
                     value = userInfo.phoneNumber.toPersianDigits(),
-                    onValueChange = onPhoneNumberChange,
+                    onValueChange = {
+                        onPhoneNumberChange(ValidationUtils.validateLandline(it.digitsOnly()))
+                    },
                     label = stringResource(Res.string.contract_field_phone_required),
+                    isError = isPhoneError,
+                    errorMessage = if (isPhoneError) {
+                        stringResource(Res.string.occurrence_field_home_phone_error)
+                    } else {
+                        null
+                    },
                     keyboardType = KeyboardType.Phone,
+                    maxLength = 11,
+                    deleteOnlyWhenFull = true,
                     modifier = Modifier.weight(1f),
                 )
 
