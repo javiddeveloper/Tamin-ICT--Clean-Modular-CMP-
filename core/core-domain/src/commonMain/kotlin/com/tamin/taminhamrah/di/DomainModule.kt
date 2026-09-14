@@ -103,6 +103,7 @@ import com.tamin.taminhamrah.useCases.common.CompleteBiometricEnrollmentPromptUs
 import com.tamin.taminhamrah.useCases.common.SetFontSizeUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.common.GetJobTitleUseCase
+import com.tamin.taminhamrah.useCases.common.GetJobTitlePageUseCase
 import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetContractsUseCase
 import com.tamin.taminhamrah.useCases.contractAffair.GetContractsPageUseCase
@@ -478,6 +479,7 @@ val domainModule = module {
     factoryOf(::GetUserProfileUseCase)
     factoryOf(::GetCurrentUserUseCase)
     factoryOf(::GetJobTitleUseCase)
+    factoryOf(::GetJobTitlePageUseCase)
     factoryOf(::GetRegistrationDeclarationFormUseCase)
     factoryOf(::GetRequestSummaryUseCase)
     factoryOf(::PutInsuredRegistrationDocListUseCase)

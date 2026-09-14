@@ -12,14 +12,19 @@ import com.tamin.taminhamrah.model.common.isValidIranianNationalId
 import com.tamin.taminhamrah.model.personal.DocumentFileDN
 import com.tamin.taminhamrah.model.personal.InsuredDocDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.asPdfDownload
+import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.request.FilterOperator
+import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberPR
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberQuery
+import com.tamin.taminhamrah.paging.Paginator
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.ui.digitsOnly
 import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
 import com.tamin.taminhamrah.useCases.common.GetCityUseCase
-import com.tamin.taminhamrah.useCases.common.GetJobTitleUseCase
+import com.tamin.taminhamrah.useCases.common.GetJobTitlePageUseCase
 import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
 import com.tamin.taminhamrah.useCases.personal.GetInsuredRegistrationDocListUseCase
 import com.tamin.taminhamrah.useCases.personal.PutInsuredRegistrationDocListUseCase
@@ -39,6 +44,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.abs_doc_unknown
 import taminx.core.core_ui.abs_form_err_already_known
@@ -58,7 +64,7 @@ class WorkshopRecentlyAddedMembersViewModel(
     private val getFiledDocuments: GetInsuredRegistrationDocListUseCase,
     private val getCities: GetCitiesUseCase,
     private val getCity: GetCityUseCase,
-    private val getJobTitle: GetJobTitleUseCase,
+    private val getJobTitlePage: GetJobTitlePageUseCase,
     private val getRegistrationDeclarationForm: GetRegistrationDeclarationFormUseCase,
 ) : BaseViewModel<
     WorkshopRecentlyAddedMembersUiState,
@@ -66,6 +72,14 @@ class WorkshopRecentlyAddedMembersViewModel(
     WorkshopRecentlyAddedMembersEvent,
     WorkshopRecentlyAddedMembersIntent,
     >(initialState = WorkshopRecentlyAddedMembersUiState()) {
+
+    private val jobPaginator = Paginator(
+        loadPage = { query -> getJobTitlePage(query).first() },
+    )
+
+    init {
+        sendIntent(WorkshopRecentlyAddedMembersIntent.InitJobPaging)
+    }
 
     override fun handleIntent(
         intent: WorkshopRecentlyAddedMembersIntent,
@@ -108,6 +122,12 @@ class WorkshopRecentlyAddedMembersViewModel(
 
         is WorkshopRecentlyAddedMembersIntent.FormPickerOpened -> openPicker(intent.picker)
         is WorkshopRecentlyAddedMembersIntent.FormPickerQueryChanged -> searchPicker(intent.query)
+        WorkshopRecentlyAddedMembersIntent.FormPickerLoadMore -> flow {
+            if (uiState.value.form?.picker == RegistrationPicker.JOB) {
+                jobPaginator.loadNext()
+            }
+        }
+        WorkshopRecentlyAddedMembersIntent.InitJobPaging -> observeJobPaging()
         WorkshopRecentlyAddedMembersIntent.FormDownloadDeclaration -> downloadDeclaration()
         WorkshopRecentlyAddedMembersIntent.DeclarationViewerDismissed ->
             just(PartialState.DeclarationPdfChanged(null))
@@ -301,7 +321,7 @@ class WorkshopRecentlyAddedMembersViewModel(
         val jobCode = member.jobCode
         if (jobCode.isNotBlank()) {
             val name = runCatching {
-                getJobTitle(emptyList()).first()?.list.orEmpty()
+                getJobTitlePage(ApiQueryParamDN()).first().items
                     .firstOrNull { it.jobCode == jobCode }?.jobDescription
             }.getOrNull()
             if (name != null) {
@@ -395,13 +415,21 @@ class WorkshopRecentlyAddedMembersViewModel(
      */
     private fun openPicker(picker: RegistrationPicker?): Flow<PartialState> = flow {
         emit(PartialState.FormPickerOpened(picker))
-        if (picker != null) emitAll(loadPickerOptions(picker, query = ""))
+        if (picker == RegistrationPicker.JOB) {
+            jobPaginator.refresh(jobBaseQuery(""))
+        } else if (picker != null) {
+            emitAll(loadPickerOptions(picker, query = ""))
+        }
     }
 
     private fun searchPicker(query: String): Flow<PartialState> = flow {
         val picker = uiState.value.form?.picker ?: return@flow
         emit(PartialState.FormPickerQueryChanged(query))
-        emitAll(loadPickerOptions(picker, query))
+        if (picker == RegistrationPicker.JOB) {
+            jobPaginator.refresh(jobBaseQuery(query))
+        } else {
+            emitAll(loadPickerOptions(picker, query))
+        }
     }
 
     private fun loadPickerOptions(
@@ -409,20 +437,39 @@ class WorkshopRecentlyAddedMembersViewModel(
         query: String,
     ): Flow<PartialState> = flow {
         emit(PartialState.FormPickerLoading(true))
-        val options = when (picker) {
-            // The job list has no server-side name filter — there is no such property on the
-            // wire — so it is fetched once and narrowed here.
-            RegistrationPicker.JOB -> getJobTitle(emptyList()).first()?.list.orEmpty()
-                .filter { query.isBlank() || it.jobDescription.contains(query) }
-                .map { PickedOption(it.jobCode, it.jobDescription) }
-
-            else -> getCities(cityName = query.takeIf { it.isNotBlank() }).first()
-                .map { PickedOption(it.cityCode, it.cityName.orEmpty()) }
-        }
+        val options = getCities(cityName = query.takeIf { it.isNotBlank() }).first()
+            .map { PickedOption(it.cityCode, it.cityName.orEmpty()) }
         emit(PartialState.FormPickerOptionsLoaded(options.toPersistentList()))
     }.catch {
         emit(PartialState.FormPickerLoading(false))
         emit(reportFailure(it))
+    }
+
+    private fun observeJobPaging(): Flow<PartialState> = jobPaginator.state.map { paging ->
+        PartialState.FormPickerJobPagingChanged(
+            items = paging.items.map { PickedOption(it.jobCode, it.jobDescription) }.toPersistentList(),
+            isLoadingFirstPage = paging.isLoadingFirstPage,
+            isLoadingNextPage = paging.isLoadingNextPage,
+            endReached = paging.endReached,
+        )
+    }
+
+    /** `jobDescription LIKE "*query*"` or empty filters for blank query (matching live server capture). */
+    private fun jobBaseQuery(query: String): ApiQueryParamDN {
+        val trimmed = query.trim()
+        return if (trimmed.isBlank()) {
+            ApiQueryParamDN()
+        } else {
+            ApiQueryParamDN(
+                filters = listOf(
+                    ApiFilterDN(
+                        property = FilterProperty.JOB_DESCRIPTION,
+                        value = "*$trimmed*",
+                        operator = FilterOperator.LIKE,
+                    ),
+                ),
+            )
+        }
     }
 
     /**
@@ -620,7 +667,14 @@ class WorkshopRecentlyAddedMembersViewModel(
         }
 
         is PartialState.FormPickerOpened -> currentState.editForm {
-            copy(picker = partialState.picker, pickerQuery = "", pickerOptions = persistentListOf())
+            copy(
+                picker = partialState.picker,
+                pickerQuery = "",
+                pickerOptions = persistentListOf(),
+                isPickerLoading = false,
+                isPickerLoadingMore = false,
+                canPickerLoadMore = false,
+            )
         }
 
         is PartialState.FormPickerQueryChanged -> currentState.editForm {
@@ -632,7 +686,25 @@ class WorkshopRecentlyAddedMembersViewModel(
         }
 
         is PartialState.FormPickerOptionsLoaded -> currentState.editForm {
-            copy(isPickerLoading = false, pickerOptions = partialState.options)
+            copy(
+                isPickerLoading = false,
+                isPickerLoadingMore = false,
+                canPickerLoadMore = false,
+                pickerOptions = partialState.options,
+            )
+        }
+
+        is PartialState.FormPickerJobPagingChanged -> currentState.editForm {
+            if (picker == RegistrationPicker.JOB) {
+                copy(
+                    pickerOptions = partialState.items,
+                    isPickerLoading = partialState.isLoadingFirstPage,
+                    isPickerLoadingMore = partialState.isLoadingNextPage,
+                    canPickerLoadMore = !partialState.endReached,
+                )
+            } else {
+                this
+            }
         }
     }
 

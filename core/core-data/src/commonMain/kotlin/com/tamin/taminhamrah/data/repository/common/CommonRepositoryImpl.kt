@@ -2,28 +2,28 @@ package com.tamin.taminhamrah.data.repository.common
 
 
 import com.tamin.taminhamrah.data.local.dao.MenuDao
-import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSource
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
+import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSource
 import com.tamin.taminhamrah.model.common.BeneficiaryDN
 import com.tamin.taminhamrah.model.common.InsuranceTypeDN
-import com.tamin.taminhamrah.model.common.MainServiceDN
+import com.tamin.taminhamrah.model.common.JobTitleDN
 import com.tamin.taminhamrah.model.common.JobTitleListDN
-import com.tamin.taminhamrah.model.request.ApiFilterDN
-import com.tamin.taminhamrah.model.request.ApiQueryParamDN
-import com.tamin.taminhamrah.model.request.FilterOperator
-import com.tamin.taminhamrah.model.request.FilterProperty
+import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.model.common.RoleDN
 import com.tamin.taminhamrah.model.common.UserType
 import com.tamin.taminhamrah.model.common.UserTypeInfoDN
+import com.tamin.taminhamrah.model.paging.PageDN
+import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.request.FilterOperator
+import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.repository.common.CommonRepository
+import io.ktor.client.statement.readRawBytes
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import io.ktor.client.statement.HttpStatement
-import io.ktor.client.statement.readBytes
-import io.ktor.client.statement.readRawBytes
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
@@ -79,6 +79,20 @@ class CommonRepositoryImpl(
                         total = it.total
                     )
                 }
+            )
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    override fun getJobTitlePage(query: ApiQueryParamDN): Flow<PageDN<JobTitleDN>> = flow {
+        try {
+            val response = commonRemoteDataSource.getJobTitle(query)
+            emit(
+                PageDN(
+                    items = response?.list?.map { item -> item.toDomain() } ?: emptyList(),
+                    total = response?.total,
+                )
             )
         } catch (e: Exception) {
             throw e

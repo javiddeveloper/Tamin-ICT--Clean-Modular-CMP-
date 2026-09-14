@@ -19,6 +19,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.CircularProgressIndicator
+import com.tamin.taminhamrah.ui.paging.OnLoadMore
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -881,9 +884,21 @@ fun <T> WorkshopLookupSheet(
     onDismiss: () -> Unit,
     onSelect: (T) -> Unit,
     modifier: Modifier = Modifier,
+    canLoadMore: Boolean = false,
+    isLoadingMore: Boolean = false,
+    onLoadMore: (() -> Unit)? = null,
     label: (T) -> String = { it.toString() },
 ) {
     val colors = LocalTaminColors.current
+    val listState = rememberLazyListState()
+
+    if (onLoadMore != null) {
+        listState.OnLoadMore(
+            enabled = canLoadMore && !isLoadingMore,
+            onLoadMore = onLoadMore,
+        )
+    }
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
@@ -923,7 +938,10 @@ fun <T> WorkshopLookupSheet(
                     )
                 }
             }
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+            LazyColumn(
+                state = listState,
+                verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+            ) {
                 items(
                     count = options.size,
                     key = { index ->
@@ -945,6 +963,23 @@ fun <T> WorkshopLookupSheet(
                             .background(colors.chipBg)
                             .padding(horizontal = Spacing.lg, vertical = Spacing.md),
                     )
+                }
+
+                if (isLoadingMore) {
+                    item(key = "lookup_sheet_loading_more") {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = Spacing.md),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(Spacing.xl),
+                                strokeWidth = 2.dp,
+                                color = colors.blueText,
+                            )
+                        }
+                    }
                 }
             }
         }
