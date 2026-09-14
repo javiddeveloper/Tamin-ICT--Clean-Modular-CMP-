@@ -61,6 +61,7 @@ kotlin {
             api(project(":feature:weddingPresent"))
             api(project(":feature:payment"))
             api(project(":feature:developerOptions"))
+            api(project(":feature:stories"))
             api(libs.androidx.lifecycle.viewmodel)
             implementation(libs.ktor.client.core)
             implementation(libs.kotlinx.collections.immutable)
