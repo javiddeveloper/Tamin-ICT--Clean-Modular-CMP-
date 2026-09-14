@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers
 
+import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import com.tamin.taminhamrah.feature.workshops.fake.FakeWorkShopsRepository
 import com.tamin.taminhamrah.feature.workshops.ui.model.RegistrationDocumentTypes
@@ -70,6 +71,7 @@ import com.tamin.taminhamrah.useCases.workshops.ConfirmRecentlyAddedMemberUseCas
 import com.tamin.taminhamrah.useCases.workshops.CreateNewMemberRegistrationUseCase
 import com.tamin.taminhamrah.useCases.workshops.DeleteRecentlyAddedMemberUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetRecentlyAddedMembersUseCase
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -358,6 +360,7 @@ class WorkshopRecentlyAddedMembersViewModelTest {
         }
 
         assertNull(viewModel.uiState.value.form)
+        assertNull(viewModel.uiState.value.openingPersonalId, "a failed read must stop the progress")
     }
 
     /** Listing is not enough: an image that cannot be read back keeps the form shut too. */
@@ -374,6 +377,32 @@ class WorkshopRecentlyAddedMembersViewModelTest {
         }
 
         assertNull(viewModel.uiState.value.form)
+    }
+
+    /**
+     * While a draft's documents load its «ویرایش» shows progress, and a second tap reads nothing
+     * again; once they are in, the progress gives way to the form.
+     */
+    @Test
+    fun `a draft shows it is opening until its documents are in`() = runTest(testDispatcher) {
+        val gate = CompletableDeferred<Unit>()
+        documents.readGate = gate
+        val viewModel = viewModel()
+
+        viewModel.uiState.test {
+            viewModel.sendIntent(Edit(DRAFT))
+            val opening = awaitState { it.openingPersonalId != null }
+            assertEquals(DRAFT_PERSONAL_ID, opening.openingPersonalId)
+            assertNull(opening.form)
+
+            viewModel.sendIntent(Edit(DRAFT))
+            gate.complete(Unit)
+
+            val opened = awaitState { it.form != null }
+            assertNull(opened.openingPersonalId)
+            cancelAndIgnoreRemainingEvents()
+        }
+        assertEquals(1, documents.readCount, "a second tap must not read the documents again")
     }
 
     // ------------------------------------------------------------------ row actions
@@ -484,7 +513,7 @@ private const val UNKNOWN_TYPE_GUID = "unknown-type-guid"
 private const val FILED_IMAGE_BYTES = 2047
 
 @OptIn(ExperimentalEncodingApi::class)
-private val FILED_IMAGE = Base64.Default.encode(ByteArray(FILED_IMAGE_BYTES))
+private val FILED_IMAGE = Base64.encode(ByteArray(FILED_IMAGE_BYTES))
 
 /** Ten digits whose check digit adds up. */
 private const val VALID_NATIONAL_ID = "1234567891"
@@ -572,7 +601,14 @@ private class FakeDocumentsRepository : PersonalRepository {
     var readPersonalId: String? = null
         private set
 
+    /** Holds a read open until completed, so a test can look at the screen while it runs. */
+    var readGate: CompletableDeferred<Unit>? = null
+    var readCount: Int = 0
+        private set
+
     override fun getInsuredRegistrationDocList(personalId: String): Flow<List<InsuredDocDN>> = flow {
+        readCount++
+        readGate?.await()
         readError?.let { throw it }
         readPersonalId = personalId
         emit(onFile)
@@ -613,3 +649,13 @@ private class FakeDocumentsRepository : PersonalRepository {
 }
 
 private fun <T> unused(): Flow<T> = flow { error("not part of نام‌نویسی غیرحضوری") }
+
+/** Skips states until one matches — the state flow may pass through several on the way. */
+private suspend fun ReceiveTurbine<WorkshopRecentlyAddedMembersUiState>.awaitState(
+    predicate: (WorkshopRecentlyAddedMembersUiState) -> Boolean,
+): WorkshopRecentlyAddedMembersUiState {
+    while (true) {
+        val state = awaitItem()
+        if (predicate(state)) return state
+    }
+}

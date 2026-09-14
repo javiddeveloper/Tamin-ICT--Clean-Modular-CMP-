@@ -37,6 +37,8 @@ data class WorkshopRecentlyAddedMembersUiState(
     val isSearchOpen: Boolean = false,
     /** The row being confirmed or deleted; its actions show progress meanwhile. */
     val busyPersonalId: Long? = null,
+    /** The draft whose documents are being read before its form opens; its «ویرایش» says so. */
+    val openingPersonalId: Long? = null,
     /** The row action waiting on «آیا مطمئن هستید؟»; nothing is sent until it is answered. */
     val pendingAction: PendingMemberAction? = null,
     /** The blank declaration form, once fetched — shown in the app's PDF viewer. */
@@ -54,6 +56,7 @@ data class WorkshopRecentlyAddedMembersUiState(
         data class Applied(val search: NewMemberSearch) : PartialState
         data class SearchOpenChanged(val isOpen: Boolean) : PartialState
         data class Busy(val personalId: Long?) : PartialState
+        data class OpeningChanged(val personalId: Long?) : PartialState
         data class PendingActionChanged(val pending: PendingMemberAction?) : PartialState
 
         // --------------------------------------------------- نام‌نویسی غیرحضوری

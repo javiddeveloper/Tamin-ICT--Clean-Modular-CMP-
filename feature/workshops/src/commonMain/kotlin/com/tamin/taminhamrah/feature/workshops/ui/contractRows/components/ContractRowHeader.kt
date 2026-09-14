@@ -22,7 +22,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -42,7 +41,8 @@ import taminx.core.core_ui.contract_rows_read_only
  * The two services, as a segmented control.
  *
  * [ContractRowTab] declares the order and the copy, so this draws whatever the table holds rather
- * than naming either tab itself.
+ * than naming either tab itself. The selected tab wears the button gradient, as the
+ * اشخاص حقوقی / اشخاص حقیقی switch does.
  */
 @Composable
 fun ContractRowTabs(
@@ -68,7 +68,7 @@ fun ContractRowTabs(
                     .weight(1f)
                     .height(WorkshopDimens.contractRowTabHeight)
                     .clip(RoundedCornerShape(CornerRadius.listRow))
-                    .background(if (isSelected) colors.bgSurface else Color.Transparent)
+                    .then(if (isSelected) Modifier.background(colors.buttonGradient) else Modifier)
                     .clickable { onSelect(tab) },
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
@@ -77,7 +77,7 @@ fun ContractRowTabs(
                     text = stringResource(tab.label),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
-                    color = if (isSelected) colors.textPrimary else colors.textMuted,
+                    color = if (isSelected) colors.onGradient else colors.textMuted,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     textAlign = TextAlign.Center,
@@ -85,7 +85,11 @@ fun ContractRowTabs(
                 Text(
                     text = stringResource(tab.hint),
                     style = MaterialTheme.typography.labelSmall,
-                    color = colors.textMuted,
+                    color = if (isSelected) {
+                        colors.onGradient.copy(alpha = SELECTED_HINT_ALPHA)
+                    } else {
+                        colors.textMuted
+                    },
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     textAlign = TextAlign.Center,
@@ -94,6 +98,9 @@ fun ContractRowTabs(
         }
     }
 }
+
+/** The hint under a selected tab stays quieter than its label, on the gradient as off it. */
+private const val SELECTED_HINT_ALPHA = 0.8f
 
 /**
  * Which workshop is in force, and what the list is.

@@ -131,6 +131,7 @@ fun WorkshopRecentlyAddedMembersContent(
     val colors = LocalTaminColors.current
     val isSearchOpen = state.isSearchOpen
     val draft = state.draft
+    val openingPersonalId = state.openingPersonalId
     val workshopCode = remember(state.workshopId) {
         state.workshopId.takeIf { it.isNotBlank() }?.toPersianDigits()
     }
@@ -271,6 +272,7 @@ fun WorkshopRecentlyAddedMembersContent(
         ) { member, rowModifier ->
             NewMemberCard(
                 member = member,
+                isOpening = member.personalId != null && member.personalId == openingPersonalId,
                 onIntent = onIntent,
                 modifier = rowModifier,
             )
@@ -289,6 +291,8 @@ fun WorkshopRecentlyAddedMembersContent(
 @Composable
 private fun NewMemberCard(
     member: WorkshopNewMemberPR,
+    /** Its documents are being read before «ویرایش» opens the form. */
+    isOpening: Boolean,
     onIntent: (WorkshopRecentlyAddedMembersIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -324,6 +328,7 @@ private fun NewMemberCard(
                     text = stringResource(Res.string.new_member_edit),
                     tone = WorkshopCardButtonTone.OUTLINE,
                     onClick = onEdit,
+                    isLoading = isOpening,
                 )
                 WorkshopCardButton(
                     text = stringResource(Res.string.new_member_delete),
@@ -474,9 +479,23 @@ private fun WorkshopRecentlyAddedMembersDeleteQuestionPreview() {
     }
 }
 
+@PreviewRtlTheme
+@Composable
+private fun WorkshopRecentlyAddedMembersOpeningPreview() {
+    PreviewRtlThemeContent {
+        WorkshopRecentlyAddedMembersContent(
+            state = PreviewState.copy(openingPersonalId = PreviewDraft.personalId),
+            workshopName = PREVIEW_WORKSHOP_NAME,
+            onIntent = {},
+            onBack = {},
+        )
+    }
+}
+
 private const val PREVIEW_WORKSHOP_NAME = "آموزشگاه کامپیوتر توکلی-ایمیل"
 
 private val PreviewDraft = WorkshopNewMemberPR(
+    personalId = 1L,
     fullName = "احمد احمدی",
     nationalId = "۲۷۴۱۸۸۰۲۹۸",
     birthDate = "۱۳۷۸/۰۵/۲۶",

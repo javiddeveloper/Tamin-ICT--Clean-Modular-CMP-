@@ -14,10 +14,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
+import com.tamin.taminhamrah.ui.components.borderTrace
+import com.tamin.taminhamrah.ui.components.rememberBorderTracePhase
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -95,10 +98,17 @@ fun RowScope.WorkshopCardButton(
     tone: WorkshopCardButtonTone,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    /**
+     * The action's request is running: the outline is traced in the label's own color, and taps are
+     * dropped, since another would only start the same request again.
+     */
+    isLoading: Boolean = false,
 ) {
     val colors = LocalTaminColors.current
     val textStyle = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
     val slot = modifier.weight(1f).widthIn(min = WorkshopDimens.cardButtonMinWidth)
+    val tracePhase = if (isLoading) rememberBorderTracePhase() else null
+    val action = if (isLoading) NoAction else onClick
 
     val gradient: Brush? = when (tone) {
         WorkshopCardButtonTone.PRIMARY -> colors.buttonGradient
@@ -110,12 +120,12 @@ fun RowScope.WorkshopCardButton(
     if (gradient != null) {
         TaminPrimaryButton(
             text = text,
-            onClick = onClick,
+            onClick = action,
             background = gradient,
             height = WorkshopDimens.cardButtonHeight,
             shape = CardButtonShape,
             textStyle = textStyle,
-            modifier = slot,
+            modifier = slot.cardButtonTrace(tracePhase, Color.White),
         )
         return
     }
@@ -137,7 +147,7 @@ fun RowScope.WorkshopCardButton(
 
     TaminOutlinedButton(
         text = text,
-        onClick = onClick,
+        onClick = action,
         enabled = tone != WorkshopCardButtonTone.DISABLED,
         shape = CardButtonShape,
         height = WorkshopDimens.cardButtonHeight,
@@ -146,9 +156,17 @@ fun RowScope.WorkshopCardButton(
         containerColor = container,
         contentColor = content,
         textStyle = textStyle,
-        modifier = slot,
+        modifier = slot.cardButtonTrace(tracePhase, content),
     )
 }
+
+/** Traces a card button's outline in [color] while [phase] runs, and leaves it alone otherwise. */
+private fun Modifier.cardButtonTrace(phase: (() -> Float)?, color: Color): Modifier = when (phase) {
+    null -> this
+    else -> borderTrace(phase, color, WorkshopDimens.cardButtonBorderWidth, CornerRadius.listRow)
+}
+
+private val NoAction: () -> Unit = {}
 
 private val CardButtonShape = RoundedCornerShape(CornerRadius.listRow)
 
