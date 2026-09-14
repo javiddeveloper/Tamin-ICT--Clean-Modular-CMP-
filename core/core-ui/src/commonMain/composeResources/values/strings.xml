@@ -1791,6 +1791,17 @@
     <string name="new_member_cannot_edit">این درخواست ثبت شده است و قابل تغییر نیست.</string>
     <string name="new_member_confirmed">درخواست با کد رهگیری %1$s ثبت شد.</string>
     <string name="new_member_follow_body">درخواست با کد پیگیری %1$s در حال بررسی است. نتیجه از طریق پیامک اطلاع داده می‌شود.</string>
+    <string name="new_member_confirm_question">آیا می‌خواهید این پرسنل را تأیید کنید؟</string>
+    <string name="new_member_delete_question">آیا می‌خواهید این پرسنل را حذف کنید؟</string>
+    <string name="new_member_request_status">وضعیت درخواست</string>
+    <!-- The seven request states the search filters by; wording is the old app's search sheet. -->
+    <string name="new_member_status_awaiting_confirmation">در انتظار تایید</string>
+    <string name="new_member_status_submitted">ثبت درخواست</string>
+    <string name="new_member_status_invalid">درخواست نامعتبر</string>
+    <string name="new_member_status_needs_branch_review">درحال بررسی-نیاز به رسیدگی شعبه</string>
+    <string name="new_member_status_under_review">درحال بررسی</string>
+    <string name="new_member_status_closed_approved">مختومه-تایید نهایی</string>
+    <string name="new_member_status_closed_rejected">مختومه-عدم تایید</string>
 
     <!-- ماده ۱۶ -->
     <string name="article_sixteen_debt_amount">مبلغ بدهی (ریال)</string>

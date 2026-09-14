@@ -48,6 +48,7 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
@@ -544,6 +545,10 @@ private fun DocumentsStep(
             onIntent(WorkshopRecentlyAddedMembersIntent.FormRemoveDocument(index))
         }
     }
+    // Each type takes one image, so a type already filed is no longer offered.
+    val documentTypes = remember(form.attachments) {
+        RegistrationDocumentTypes.filterNot { form.hasDocumentOfType(it.code) }.toImmutableList()
+    }
     val onConfirmToggle = remember(onIntent, form.isConfirmed) {
         {
             onIntent(
@@ -565,7 +570,7 @@ private fun DocumentsStep(
     )
     WorkshopDocumentsPanel(
         attachments = form.attachments,
-        types = RegistrationDocumentTypes,
+        types = documentTypes,
         capacity = REGISTRATION_MAX_DOCUMENTS,
         onAdd = onAddDocument,
         onRemove = onRemoveDocument,

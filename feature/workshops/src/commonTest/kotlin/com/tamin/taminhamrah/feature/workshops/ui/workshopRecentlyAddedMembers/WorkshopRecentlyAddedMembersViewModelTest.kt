@@ -1,0 +1,486 @@
+package com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers
+
+import app.cash.turbine.test
+import com.tamin.taminhamrah.feature.workshops.fake.FakeWorkShopsRepository
+import com.tamin.taminhamrah.feature.workshops.ui.model.RegistrationDocumentTypes
+import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachmentUploader
+import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersEvent.ShowMessage
+import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersIntent.ApplySearch
+import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersIntent.Confirm
+import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersIntent.Delete
+import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersIntent.DraftChanged
+import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersIntent.Edit
+import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersIntent.FormAddDocument
+import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersIntent.FormConfirmedChanged
+import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersIntent.FormDismissed
+import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersIntent.FormFieldChanged
+import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersIntent.FormNext
+import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersIntent.FormOptionPicked
+import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersIntent.FormPrev
+import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersIntent.Open
+import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersIntent.PendingActionAccepted
+import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersIntent.PendingActionDismissed
+import com.tamin.taminhamrah.model.common.BeneficiaryDN
+import com.tamin.taminhamrah.model.common.CityDN
+import com.tamin.taminhamrah.model.common.CityListResultDN
+import com.tamin.taminhamrah.model.common.InsuranceTypeDN
+import com.tamin.taminhamrah.model.common.JobTitleDN
+import com.tamin.taminhamrah.model.common.JobTitleListDN
+import com.tamin.taminhamrah.model.common.MainServiceDN
+import com.tamin.taminhamrah.model.common.ProvinceDN
+import com.tamin.taminhamrah.model.common.RoleDN
+import com.tamin.taminhamrah.model.common.UserTypeInfoDN
+import com.tamin.taminhamrah.model.personal.AgeDN
+import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
+import com.tamin.taminhamrah.model.personal.GirlSurvivorConditionDN
+import com.tamin.taminhamrah.model.personal.InsuredDocDN
+import com.tamin.taminhamrah.model.personal.NewInsuredSummaryDN
+import com.tamin.taminhamrah.model.personal.PersonalInfoDN
+import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionDN
+import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoDN
+import com.tamin.taminhamrah.model.personal.girlSurvivor.ConfirmGirlSurvivorDN
+import com.tamin.taminhamrah.model.personal.girlSurvivor.GirlSurvivorReportParamsDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
+import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoDN
+import com.tamin.taminhamrah.model.personal.survivorDependent.SurvivorDependentDN
+import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
+import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.util.PagedListDN
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
+import com.tamin.taminhamrah.model.workshop.NewMemberRequestStatus
+import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDN
+import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberPR
+import com.tamin.taminhamrah.repository.CityProvinceRepository
+import com.tamin.taminhamrah.repository.common.CommonRepository
+import com.tamin.taminhamrah.repository.personal.PersonalRepository
+import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
+import com.tamin.taminhamrah.useCases.common.GetCityUseCase
+import com.tamin.taminhamrah.useCases.common.GetJobTitleUseCase
+import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
+import com.tamin.taminhamrah.useCases.personal.PutInsuredRegistrationDocListUseCase
+import com.tamin.taminhamrah.useCases.workshops.CheckNewMemberIsNewUseCase
+import com.tamin.taminhamrah.useCases.workshops.ConfirmRecentlyAddedMemberUseCase
+import com.tamin.taminhamrah.useCases.workshops.CreateNewMemberRegistrationUseCase
+import com.tamin.taminhamrah.useCases.workshops.DeleteRecentlyAddedMemberUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetRecentlyAddedMembersUseCase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.abs_form_err_already_known
+import taminx.core.core_ui.error_image_duplicate
+import taminx.core.core_ui.new_member_cannot_edit
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+
+/**
+ * نام‌نویسی غیرحضوری بیمه‌شده — what reaches the service, and when.
+ *
+ * Each rule pinned here costs a real record when it breaks: a person goes on file once, at step
+ * two, and is updated from then on; someone already known is refused before their documents are
+ * gathered; each document type takes one image; and a row is confirmed or deleted only once the
+ * question has been answered.
+ */
+@OptIn(ExperimentalCoroutinesApi::class)
+class WorkshopRecentlyAddedMembersViewModelTest {
+
+    private val testDispatcher = UnconfinedTestDispatcher()
+    private lateinit var workshops: FakeWorkShopsRepository
+    private lateinit var documents: FakeDocumentsRepository
+
+    @BeforeTest
+    fun setUp() {
+        Dispatchers.setMain(testDispatcher)
+        workshops = FakeWorkShopsRepository()
+        documents = FakeDocumentsRepository()
+    }
+
+    @AfterTest
+    fun tearDown() = Dispatchers.resetMain()
+
+    /** A view model already showing the workshop's list, as the screen leaves it. */
+    private fun viewModel(
+        uploader: WorkshopAttachmentUploader = WorkshopAttachmentUploader { UPLOADED_GUID },
+    ): WorkshopRecentlyAddedMembersViewModel {
+        val cities = FakeCitiesRepository()
+        val jobs = FakeJobsRepository()
+        return WorkshopRecentlyAddedMembersViewModel(
+            GetRecentlyAddedMembersUseCase(workshops),
+            ConfirmRecentlyAddedMemberUseCase(workshops),
+            DeleteRecentlyAddedMemberUseCase(workshops),
+            CheckNewMemberIsNewUseCase(workshops),
+            CreateNewMemberRegistrationUseCase(workshops),
+            uploader,
+            PutInsuredRegistrationDocListUseCase(documents),
+            GetCitiesUseCase(cities),
+            GetCityUseCase(cities),
+            GetJobTitleUseCase(jobs),
+            GetRegistrationDeclarationFormUseCase(jobs),
+        ).also { it.sendIntent(Open(WORKSHOP_ID, BRANCH_CODE)) }
+    }
+
+    // ------------------------------------------------------------------ putting the person on file
+
+    /** Step two is where the person goes on file, so a registration abandoned later can be resumed. */
+    @Test
+    fun `completing step two creates the person and moves on to the documents`() =
+        runTest(testDispatcher) {
+            workshops.registrationResult = NewMemberRegistrationResultDN(CREATED_PERSONAL_ID)
+            val viewModel = viewModel()
+
+            fillStepTwo(viewModel)
+            assertNull(workshops.lastRegistrationRequest, "nothing is filed before step two is done")
+            viewModel.sendIntent(FormNext)
+
+            val request = assertNotNull(workshops.lastRegistrationRequest)
+            assertNull(request.personalId, "a person not yet on file is created")
+            assertEquals(WORKSHOP_ID, request.workshopId)
+            val form = assertNotNull(viewModel.uiState.value.form)
+            assertEquals(REGISTRATION_FORM_STEPS, form.step)
+            assertEquals(CREATED_PERSONAL_ID, form.personalId)
+        }
+
+    @Test
+    fun `a person already known is refused before anything is created`() = runTest(testDispatcher) {
+        workshops.newMemberIsNew = false
+        val viewModel = viewModel()
+        fillStepTwo(viewModel)
+
+        viewModel.events.test {
+            viewModel.sendIntent(FormNext)
+            assertEquals(ShowMessage(Res.string.abs_form_err_already_known), awaitItem())
+        }
+
+        assertNull(workshops.lastRegistrationRequest)
+        val form = assertNotNull(viewModel.uiState.value.form)
+        assertEquals(2, form.step, "the form stays on step two")
+        assertFalse(form.isSubmitting)
+    }
+
+    /**
+     * Back on step two after saving, the person is updated under the id the create returned —
+     * creating them again would leave two `employers` records.
+     */
+    @Test
+    fun `saving step two again updates the person it created`() = runTest(testDispatcher) {
+        workshops.registrationResult = NewMemberRegistrationResultDN(CREATED_PERSONAL_ID)
+        val viewModel = viewModel()
+        fillStepTwo(viewModel)
+        viewModel.sendIntent(FormNext)
+
+        // On file now, so the is-new gate must not be asked again: if it were, this would refuse.
+        workshops.newMemberIsNew = false
+        viewModel.sendIntent(FormPrev)
+        viewModel.sendIntent(FormNext)
+
+        assertEquals(CREATED_PERSONAL_ID, workshops.lastRegistrationRequest?.personalId)
+        assertEquals(REGISTRATION_FORM_STEPS, viewModel.uiState.value.form?.step)
+    }
+
+    @Test
+    fun `a re-opened draft is updated, not registered again`() = runTest(testDispatcher) {
+        workshops.newMemberIsNew = false
+        val viewModel = viewModel()
+
+        viewModel.sendIntent(Edit(DRAFT))
+        viewModel.sendIntent(FormNext)
+        viewModel.sendIntent(FormNext)
+
+        assertEquals(DRAFT_PERSONAL_ID, workshops.lastRegistrationRequest?.personalId)
+    }
+
+    /** The row carries codes; the form must show the names they stand for. */
+    @Test
+    fun `re-opening a draft turns its city and job codes back into names`() = runTest(testDispatcher) {
+        val viewModel = viewModel()
+
+        viewModel.sendIntent(Edit(DRAFT))
+
+        val form = assertNotNull(viewModel.uiState.value.form)
+        assertEquals(TEHRAN, form.birthCity)
+        assertEquals(TEHRAN, form.issueCity)
+        assertEquals(PROGRAMMER, form.job)
+        assertEquals(DRAFT_PERSONAL_ID, form.personalId)
+    }
+
+    @Test
+    fun `the last step files the documents against the saved person and closes the form`() =
+        runTest(testDispatcher) {
+            workshops.registrationResult = NewMemberRegistrationResultDN(CREATED_PERSONAL_ID)
+            val viewModel = viewModel()
+            fillStepTwo(viewModel)
+            viewModel.sendIntent(FormNext)
+            attach(viewModel, RegistrationDocumentTypes.first().code)
+            viewModel.sendIntent(FormConfirmedChanged(isConfirmed = true))
+
+            viewModel.sendIntent(FormNext)
+
+            assertEquals(CREATED_PERSONAL_ID.toString(), documents.filedPersonalId)
+            assertEquals(listOf(UPLOADED_GUID), documents.filedDocuments?.map { it.documentFile.id })
+            assertNull(viewModel.uiState.value.form)
+        }
+
+    /** Closing the form once the person is on file brings their draft into the list. */
+    @Test
+    fun `closing a form whose person is on file reloads the list`() = runTest(testDispatcher) {
+        workshops.registrationResult = NewMemberRegistrationResultDN(CREATED_PERSONAL_ID)
+        val viewModel = viewModel()
+        fillStepTwo(viewModel)
+        viewModel.sendIntent(FormNext)
+        workshops.recentlyAddedMembers = PagedListDN(
+            items = listOf(WorkshopNewMemberDN(personalId = CREATED_PERSONAL_ID)),
+            total = 1,
+        )
+
+        viewModel.sendIntent(FormDismissed)
+
+        assertNull(viewModel.uiState.value.form)
+        assertEquals(1, viewModel.uiState.value.list.items.size)
+    }
+
+    // ------------------------------------------------------------------ documents
+
+    @Test
+    fun `a document type already filed is refused before anything is uploaded`() =
+        runTest(testDispatcher) {
+            var uploads = 0
+            val viewModel = viewModel(
+                uploader = WorkshopAttachmentUploader {
+                    uploads++
+                    UPLOADED_GUID
+                },
+            )
+            viewModel.sendIntent(Edit(WorkshopNewMemberPR()))
+            val typeCode = RegistrationDocumentTypes.first().code
+            attach(viewModel, typeCode)
+
+            viewModel.events.test {
+                attach(viewModel, typeCode)
+                assertEquals(ShowMessage(Res.string.error_image_duplicate), awaitItem())
+            }
+
+            assertEquals(1, uploads)
+            assertEquals(1, viewModel.uiState.value.form?.attachments?.size)
+        }
+
+    // ------------------------------------------------------------------ row actions
+
+    @Test
+    fun `confirm asks first and sends nothing until answered`() = runTest(testDispatcher) {
+        val viewModel = viewModel()
+
+        viewModel.sendIntent(Confirm(DRAFT))
+
+        assertEquals(
+            PendingMemberAction(DRAFT, MemberAction.CONFIRM),
+            viewModel.uiState.value.pendingAction,
+        )
+        assertNull(workshops.confirmedRequestId)
+    }
+
+    @Test
+    fun `answering yes confirms that registration`() = runTest(testDispatcher) {
+        val viewModel = viewModel()
+
+        viewModel.sendIntent(Confirm(DRAFT))
+        viewModel.sendIntent(PendingActionAccepted)
+
+        assertEquals(DRAFT_REQUEST_ID, workshops.confirmedRequestId)
+        assertNull(viewModel.uiState.value.pendingAction)
+    }
+
+    @Test
+    fun `answering no to delete deletes nothing`() = runTest(testDispatcher) {
+        val viewModel = viewModel()
+
+        viewModel.sendIntent(Delete(DRAFT))
+        viewModel.sendIntent(PendingActionDismissed)
+
+        assertNull(workshops.deletedPersonalId)
+        assertNull(viewModel.uiState.value.pendingAction)
+    }
+
+    @Test
+    fun `answering yes to delete deletes that draft`() = runTest(testDispatcher) {
+        val viewModel = viewModel()
+
+        viewModel.sendIntent(Delete(DRAFT))
+        viewModel.sendIntent(PendingActionAccepted)
+
+        assertEquals(DRAFT_PERSONAL_ID, workshops.deletedPersonalId)
+    }
+
+    /** A submitted registration is refused outright — never asked about and then turned down. */
+    @Test
+    fun `a submitted registration is refused instead of asked about`() = runTest(testDispatcher) {
+        val viewModel = viewModel()
+
+        viewModel.events.test {
+            viewModel.sendIntent(Delete(SUBMITTED))
+            assertEquals(ShowMessage(Res.string.new_member_cannot_edit), awaitItem())
+        }
+
+        assertNull(viewModel.uiState.value.pendingAction)
+    }
+
+    // ------------------------------------------------------------------ search
+
+    @Test
+    fun `searching by request status sends that status with the query`() = runTest(testDispatcher) {
+        val viewModel = viewModel()
+
+        viewModel.sendIntent(DraftChanged(NewMemberSearch(status = NewMemberRequestStatus.UNDER_REVIEW)))
+        viewModel.sendIntent(ApplySearch)
+
+        assertEquals(NewMemberRequestStatus.UNDER_REVIEW, workshops.lastNewMemberQuery?.requestStatus)
+    }
+
+    /** A blank registration taken past step one and filled in on step two, not yet saved. */
+    private fun fillStepTwo(viewModel: WorkshopRecentlyAddedMembersViewModel) {
+        viewModel.sendIntent(Edit(WorkshopNewMemberPR()))
+        viewModel.sendIntent(FormFieldChanged(RegistrationField.FIRST_NAME, "احمد"))
+        viewModel.sendIntent(FormFieldChanged(RegistrationField.LAST_NAME, "احمدی"))
+        viewModel.sendIntent(FormFieldChanged(RegistrationField.NATIONAL_ID, VALID_NATIONAL_ID))
+        viewModel.sendIntent(FormFieldChanged(RegistrationField.BIRTH_DATE, BIRTH_DATE))
+        viewModel.sendIntent(FormNext)
+        viewModel.sendIntent(FormOptionPicked(RegistrationPicker.BIRTH_CITY, TEHRAN))
+        viewModel.sendIntent(FormOptionPicked(RegistrationPicker.ISSUE_CITY, TEHRAN))
+        viewModel.sendIntent(FormOptionPicked(RegistrationPicker.JOB, PROGRAMMER))
+        viewModel.sendIntent(FormFieldChanged(RegistrationField.START_DATE, START_DATE))
+    }
+
+    private fun attach(viewModel: WorkshopRecentlyAddedMembersViewModel, typeCode: String) =
+        viewModel.sendIntent(
+            FormAddDocument(fileName = "id.jpg", bytes = ByteArray(2048), typeCode = typeCode),
+        )
+}
+
+private const val WORKSHOP_ID = "9028218513"
+private const val BRANCH_CODE = "14"
+private const val UPLOADED_GUID = "a-guid"
+private const val CREATED_PERSONAL_ID = 7L
+private const val DRAFT_PERSONAL_ID = 42L
+private const val DRAFT_REQUEST_ID = 420L
+
+/** Ten digits whose check digit adds up. */
+private const val VALID_NATIONAL_ID = "1234567891"
+private const val BIRTH_DATE = "1370/01/01"
+private const val START_DATE = "1405/01/01"
+
+private val TEHRAN = PickedOption(code = "0701", label = "تهران")
+private val PROGRAMMER = PickedOption(code = "7", label = "برنامه‌نویس")
+
+/** A drafted, confirmable row as the list hands it over: codes rather than names. */
+private val DRAFT = WorkshopNewMemberPR(
+    personalId = DRAFT_PERSONAL_ID,
+    requestId = DRAFT_REQUEST_ID,
+    isDraft = true,
+    canConfirm = true,
+    firstName = "احمد",
+    lastName = "احمدی",
+    nationalId = VALID_NATIONAL_ID,
+    birthDate = BIRTH_DATE,
+    startDate = START_DATE,
+    cityOfBirthId = TEHRAN.code,
+    cityOfIssueId = TEHRAN.code,
+    jobCode = PROGRAMMER.code,
+)
+
+private val SUBMITTED = DRAFT.copy(isDraft = false, canConfirm = false)
+
+/** Knows one city, which is all the pickers and the draft need. */
+private class FakeCitiesRepository : CityProvinceRepository {
+    private val tehran = CityDN(cityCode = TEHRAN.code, provinceCode = null, cityName = TEHRAN.label)
+
+    override fun getCities(cityName: String?, provinceCode: String?): Flow<List<CityDN>> =
+        flowOf(listOf(tehran))
+
+    override fun getCity(cityId: String): Flow<CityDN> =
+        flowOf(tehran).filter { it.cityCode == cityId }
+
+    override fun getProvinces(): Flow<List<ProvinceDN>> = unused()
+    override fun getProvince(provinceId: String): Flow<ProvinceDN> = unused()
+    override fun getCitiesByProvince(provinceCode: String): Flow<CityListResultDN> = unused()
+}
+
+/** Knows one job; nothing else of the common repository is part of this screen's flows. */
+private class FakeJobsRepository : CommonRepository {
+    override fun getJobTitle(query: ApiQueryParamDN): Flow<JobTitleListDN?> = flowOf(
+        JobTitleListDN(
+            list = listOf(
+                JobTitleDN(
+                    jobCode = PROGRAMMER.code,
+                    jobDescription = PROGRAMMER.label,
+                    status = "",
+                    statusDate = "",
+                ),
+            ),
+            total = 1,
+        ),
+    )
+
+    override fun getRegistrationDeclarationForm(): Flow<ByteArray> = unused()
+    override fun getBeneficiary(filters: List<ApiFilterDN>): Flow<List<BeneficiaryDN>> = unused()
+    override fun getMainMenu(versionCode: String, forceUpdate: Boolean): Flow<List<MainServiceDN>> =
+        unused()
+
+    override fun getRoles(): Flow<List<RoleDN>> = unused()
+    override fun getInsuranceTypes(searchText: String?): Flow<List<InsuranceTypeDN>> = unused()
+    override fun checkUserType(): Flow<UserTypeInfoDN> = unused()
+}
+
+/** Records what documents were filed, and for whom. */
+private class FakeDocumentsRepository : PersonalRepository {
+    var filedPersonalId: String? = null
+        private set
+    var filedDocuments: List<InsuredDocDN>? = null
+        private set
+
+    override fun putInsuredRegistrationDocList(
+        personalId: String,
+        docs: List<InsuredDocDN>,
+    ): Flow<String?> = flow {
+        filedPersonalId = personalId
+        filedDocuments = docs
+        emit(null)
+    }
+
+    override fun getPersonalInfo(refreshRemote: Boolean): Flow<PersonalInfoDN?> = unused()
+    override fun getDeceasedInfo(nationalId: String): Flow<DeceasedInfoDN> = unused()
+    override fun getAge(birthDate: Long): Flow<AgeDN> = unused()
+    override fun getDisabilityDependentInfo(filters: List<ApiFilterDN>): Flow<List<DisabilityDependentDN>> =
+        unused()
+
+    override fun getSurvivorList(deceasedNationalId: String): Flow<List<SurvivorDependentDN>> = unused()
+    override fun checkGirlSurvivorConditions(
+        nationalCode: String,
+        pensionerId: String,
+    ): Flow<GirlSurvivorConditionDN> = unused()
+
+    override fun getConfirmSurvivorsList(filters: List<ApiFilterDN>): Flow<List<ConfirmSurvivorDN>> = unused()
+    override fun submitFinalSurvivorPension(
+        requestId: Int,
+        body: SubmitFinalSurvivorPensionDN,
+    ): Flow<String?> = unused()
+
+    override fun saveSurvivorInfo(body: SaveSurvivorInfoDN): Flow<String?> = unused()
+    override fun getFinalSurvivorPensionPDF(): Flow<PdfDownloadDN> = unused()
+    override fun getGirlSurvivorReport(params: GirlSurvivorReportParamsDN): Flow<PdfDownloadDN> = unused()
+    override fun confirmGirlSurvivor(body: ConfirmGirlSurvivorDN): Flow<String?> = unused()
+    override fun getRequestSummary(requestId: String): Flow<NewInsuredSummaryDN?> = unused()
+}
+
+private fun <T> unused(): Flow<T> = flow { error("not part of نام‌نویسی غیرحضوری") }

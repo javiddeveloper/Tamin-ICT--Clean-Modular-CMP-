@@ -220,6 +220,19 @@ internal interface WorkShopsApiService {
         @Body request: NewMemberRegistrationDTO,
     ): BaseDTO<NewMemberRegistrationResultDTO>
 
+    /**
+     * Updates a registration already on file instead of posting a second one.
+     *
+     * The old app's `updateNewInsuredInfo` names this segment `requestId`, but re-opening a draft
+     * from the list it fills it with the person's id — the id the create returns and the list row
+     * carries — so that is what goes here.
+     */
+    @PUT("employers/{personalId}")
+    suspend fun updateNewMemberRegistration(
+        @Path("personalId") personalId: Long,
+        @Body request: NewMemberRegistrationDTO,
+    ): BaseDTO<NewMemberRegistrationResultDTO>
+
     // ---------------------------------------------------------------------- رسیدگی به بدهی ماده ۱۶
 
     @GET("debit-objection/management-workshop-debit/{workshopId}/{branchId}")

@@ -124,6 +124,11 @@ interface WorkShopsRemoteDataSource {
         request: NewMemberRegistrationDTO,
     ): NewMemberRegistrationResultDTO
 
+    suspend fun updateNewMemberRegistration(
+        personalId: Long,
+        request: NewMemberRegistrationDTO,
+    ): NewMemberRegistrationResultDTO
+
     suspend fun getWorkshopsDebtsList(
         workshopId: String,
         branchId: String,

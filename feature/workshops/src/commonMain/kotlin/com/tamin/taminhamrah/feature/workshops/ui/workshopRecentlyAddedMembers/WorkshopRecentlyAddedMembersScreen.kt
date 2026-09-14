@@ -7,9 +7,11 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.runtime.Composable
 import taminx.core.core_ui.new_member_follow_body
 import taminx.core.core_ui.abs_form_done_title
@@ -32,6 +34,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.WorkshopConstants
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButton
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButtonTone
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopListScaffold
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopPickerField
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopRecordCard
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopScreenShell
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopSearchAction
@@ -39,7 +42,10 @@ import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopSearchCard
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopSectionHeader
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopTextField
 import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
+import com.tamin.taminhamrah.feature.workshops.ui.sheets.NewMemberStatusSheet
+import com.tamin.taminhamrah.feature.workshops.ui.sheets.labelRes
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
+import com.tamin.taminhamrah.model.workshop.NewMemberRequestStatus
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
@@ -48,7 +54,10 @@ import taminx.core.core_ui.abs_form_download
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import taminx.core.core_ui.abs_form_declaration_file
 import com.tamin.taminhamrah.ui.components.DetailRow
+import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminDivider
+import com.tamin.taminhamrah.ui.components.TaminFilledButton
+import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.digitsOnly
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -58,6 +67,8 @@ import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.action_cancel
+import taminx.core.core_ui.action_confirm
 import taminx.core.core_ui.new_member_add
 import taminx.core.core_ui.new_member_birth_date
 import taminx.core.core_ui.new_member_confirm
@@ -68,6 +79,7 @@ import taminx.core.core_ui.new_member_full_name
 import taminx.core.core_ui.new_member_insurance_number
 import taminx.core.core_ui.new_member_national_id
 import taminx.core.core_ui.new_member_register_date
+import taminx.core.core_ui.new_member_request_status
 import taminx.core.core_ui.new_member_status
 import taminx.core.core_ui.workshop_action_new_member
 import taminx.core.core_ui.workshop_ten_digits
@@ -147,6 +159,15 @@ fun WorkshopRecentlyAddedMembersContent(
     val onAddMember = remember(onIntent) {
         { onIntent(WorkshopRecentlyAddedMembersIntent.Edit(NewRegistration)) }
     }
+    var isStatusSheetOpen by remember { mutableStateOf(false) }
+    val onOpenStatusSheet = remember { { isStatusSheetOpen = true } }
+    val onDismissStatusSheet = remember { { isStatusSheetOpen = false } }
+    val onSelectStatus = remember(onIntent, draft) {
+        { status: NewMemberRequestStatus? ->
+            onIntent(WorkshopRecentlyAddedMembersIntent.DraftChanged(draft.copy(status = status)))
+            isStatusSheetOpen = false
+        }
+    }
 
     // The registration is a page of this screen, not a route: it is created against the workshop
     // this list is already showing.
@@ -161,6 +182,10 @@ fun WorkshopRecentlyAddedMembersContent(
             onDismiss = onDismissDeclaration,
             title = stringResource(Res.string.abs_form_download),
         )
+    }
+
+    state.pendingAction?.let { pending ->
+        MemberActionDialog(action = pending.action, onIntent = onIntent)
     }
 
     state.form?.let { form ->
@@ -201,6 +226,12 @@ fun WorkshopRecentlyAddedMembersContent(
                             onSearch = onApplySearch,
                             onClear = onClearSearch,
                         ) {
+                            // The old search sheet's order: the state first, then the code.
+                            WorkshopPickerField(
+                                label = stringResource(Res.string.new_member_request_status),
+                                value = draft.status?.let { stringResource(it.labelRes) },
+                                onClick = onOpenStatusSheet,
+                            )
                             WorkshopTextField(
                                 label = stringResource(Res.string.new_member_national_id),
                                 value = draft.nationalId,
@@ -244,6 +275,14 @@ fun WorkshopRecentlyAddedMembersContent(
                 modifier = rowModifier,
             )
         }
+    }
+
+    if (isStatusSheetOpen) {
+        NewMemberStatusSheet(
+            selected = draft.status,
+            onDismiss = onDismissStatusSheet,
+            onSelect = onSelectStatus,
+        )
     }
 }
 
@@ -346,6 +385,46 @@ private fun NewMemberCard(
     }
 }
 
+/**
+ * «آیا مطمئن هستید؟» before a row is confirmed or deleted, as the old app asked for both — in its
+ * warning amber, since neither can be taken back from this list.
+ */
+@Composable
+private fun MemberActionDialog(
+    action: MemberAction,
+    onIntent: (WorkshopRecentlyAddedMembersIntent) -> Unit,
+) {
+    val colors = LocalTaminColors.current
+    val onAccept = remember(onIntent) {
+        { onIntent(WorkshopRecentlyAddedMembersIntent.PendingActionAccepted) }
+    }
+    val onDismiss = remember(onIntent) {
+        { onIntent(WorkshopRecentlyAddedMembersIntent.PendingActionDismissed) }
+    }
+    TaminConfirmationDialog(
+        title = stringResource(action.title),
+        description = stringResource(action.question),
+        confirmButton = {
+            TaminFilledButton(
+                text = stringResource(Res.string.action_confirm),
+                onClick = onAccept,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
+        dismissButton = {
+            TaminOutlinedButton(
+                text = stringResource(Res.string.action_cancel),
+                onClick = onDismiss,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
+        onDismissRequest = onDismiss,
+        icon = Icons.Outlined.Info,
+        iconTint = colors.orangeText,
+        iconBackground = colors.orangeBg,
+    )
+}
+
 /** An empty registration — what «افزودن پرسنل جدید» opens the form on. */
 private val NewRegistration = WorkshopNewMemberPR()
 private val AddButtonShape = RoundedCornerShape(WorkshopDimens.addButtonCorner)
@@ -356,36 +435,73 @@ private val AddButtonShape = RoundedCornerShape(WorkshopDimens.addButtonCorner)
 private fun WorkshopRecentlyAddedMembersScreenPreview() {
     PreviewRtlThemeContent {
         WorkshopRecentlyAddedMembersContent(
-            state = WorkshopRecentlyAddedMembersUiState(
-                workshopId = "0968210170",
-                list = PagedListState(
-                    items = persistentListOf(
-                        WorkshopNewMemberPR(
-                            fullName = "احمد احمدی",
-                            nationalId = "۲۷۴۱۸۸۰۲۹۸",
-                            birthDate = "۱۳۷۸/۰۵/۲۶",
-                            registerDate = "۱۴۰۵/۰۵/۲۰",
-                            statusLabel = "پیش‌نویس (ثبت نشده)",
-                            isDraft = true,
-                        ),
-                        WorkshopNewMemberPR(
-                            fullName = "زهرا کریمی",
-                            nationalId = "۰۰۸۱۴۵۲۳۹۰",
-                            birthDate = "۱۳۷۲/۰۲/۱۴",
-                            insuranceNumber = "۰۰۴۵۲۱۹۸۷۳",
-                            registerDate = "۱۴۰۵/۰۴/۱۱",
-                            statusLabel = "ثبت درخواست",
-                            isDraft = false,
-                        ),
-                    ),
-                ),
-            ),
-            workshopName = "آموزشگاه کامپیوتر توکلی-ایمیل",
+            state = PreviewState,
+            workshopName = PREVIEW_WORKSHOP_NAME,
             onIntent = {},
             onBack = {},
         )
     }
 }
+
+@PreviewRtlTheme
+@Composable
+private fun WorkshopRecentlyAddedMembersSearchPreview() {
+    PreviewRtlThemeContent {
+        WorkshopRecentlyAddedMembersContent(
+            state = PreviewState.copy(
+                isSearchOpen = true,
+                draft = NewMemberSearch(status = NewMemberRequestStatus.UNDER_REVIEW),
+            ),
+            workshopName = PREVIEW_WORKSHOP_NAME,
+            onIntent = {},
+            onBack = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun WorkshopRecentlyAddedMembersDeleteQuestionPreview() {
+    PreviewRtlThemeContent {
+        WorkshopRecentlyAddedMembersContent(
+            state = PreviewState.copy(
+                pendingAction = PendingMemberAction(PreviewDraft, MemberAction.DELETE),
+            ),
+            workshopName = PREVIEW_WORKSHOP_NAME,
+            onIntent = {},
+            onBack = {},
+        )
+    }
+}
+
+private const val PREVIEW_WORKSHOP_NAME = "آموزشگاه کامپیوتر توکلی-ایمیل"
+
+private val PreviewDraft = WorkshopNewMemberPR(
+    fullName = "احمد احمدی",
+    nationalId = "۲۷۴۱۸۸۰۲۹۸",
+    birthDate = "۱۳۷۸/۰۵/۲۶",
+    registerDate = "۱۴۰۵/۰۵/۲۰",
+    statusLabel = "پیش‌نویس (ثبت نشده)",
+    isDraft = true,
+)
+
+private val PreviewState = WorkshopRecentlyAddedMembersUiState(
+    workshopId = "0968210170",
+    list = PagedListState(
+        items = persistentListOf(
+            PreviewDraft,
+            WorkshopNewMemberPR(
+                fullName = "زهرا کریمی",
+                nationalId = "۰۰۸۱۴۵۲۳۹۰",
+                birthDate = "۱۳۷۲/۰۲/۱۴",
+                insuranceNumber = "۰۰۴۵۲۱۹۸۷۳",
+                registerDate = "۱۴۰۵/۰۴/۱۱",
+                statusLabel = "ثبت درخواست",
+                isDraft = false,
+            ),
+        ),
+    ),
+)
 
 /**
  * What the screen says back, through the app's toast host.
