@@ -68,4 +68,68 @@ Release output file name:
 - `build-logic/convention/bin/` is the IDE's compiled copy — the source of truth is `src/main/kotlin/`.
 - `hs_err_pid*.log` and `replay_pid*.log` at the repo root are leftovers from an earlier JVM crash.
 
+## Agent-shell Gradle invocations may need a loopback workaround
+
+Running `.\gradlew.bat` from an agent/automated shell on Windows can fail with
+`java.io.IOException: Unable to establish loopback connection` (JDK 21's
+`Selector.open()` → `PipeImpl` → `UnixDomainSockets.connect0` rejecting the default
+temp path). If a `gradlew` invocation fails with that exact error, set this before
+retrying (PowerShell):
+
+```powershell
+$env:_JAVA_OPTIONS="-Djdk.net.unixdomain.tmpdir=C:\gtmp"
+```
+
+`C:\gtmp` (or any short existing path) must exist first. It must be `_JAVA_OPTIONS`,
+not `GRADLE_OPTS` — the launcher, the daemon, and forked test workers all need to see
+it. This is a machine/environment issue, not a repo one — Android Studio's own Gradle
+runs are unaffected.
+
+## No static analysis tooling exists — don't add one silently
+
+There is no detekt, ktlint, or spotless configured anywhere in this repo (no Gradle
+plugin, no config file), and CI ([[CI-CD]]) doesn't run any. The only enforcement
+mechanism is the bespoke `checkNamingConvention` task ([[Naming-Conventions]], already
+wired into `check`/`compileKotlin*`/`assemble*`, but currently a no-op). Don't
+introduce detekt/ktlint/spotless as an unrequested "improvement" — that's a real
+process decision for the team, not something to add mid-task.
+
+## Testing stack — use what's actually in the project
+
+`kotlin-test`, `kotlinx-coroutines-test`, and `turbine` are available — **no MockK, no
+other mocking framework**. Match the existing style:
+
+- `kotlinx.coroutines.test.runTest`
+- `app.cash.turbine`'s `.test { awaitItem(); awaitError(); ... }`
+- Hand-written `Fake*` classes implementing the relevant interface (see
+  `core/core-domain/.../repository/personalInbox/FakePersonalInboxRepository.kt`, or
+  the inner `FakeRemoteDataSource`/`FakeDao` classes in
+  `core/core-data/.../PersonalInboxRepositoryImplTest.kt`) — not a mocking library.
+- Reuse `BaseUseCaseTest` (core-domain, sets `Dispatchers.Main` via
+  `StandardTestDispatcher`) and `BaseApiTest` (core-network, `createMockKtorfit(...)`
+  via `io.ktor.client.engine.mock.MockEngine`) where applicable instead of duplicating
+  setup.
+
+Test coverage today is uneven — only a handful of chains have real tests. Don't assume
+every repository/use case you touch already has tests to extend; check first.
+
+## Repo root hygiene
+
+The repo root tends to accumulate untracked scratch files (build logs, one-off
+scripts, generated output) and untracked tooling directories from whichever AI/agent
+tools were in use at the time. These are workspace artifacts, not repo content:
+
+- Don't delete them without being asked — they may be in-progress work.
+- Don't add new scratch/debug files to the repo root as a side effect of your own
+  work — write temporary output to a scratch/temp location instead, or clean up after
+  yourself.
+- Note: a past commit (`33a2c8471`, "remove project automation, AI agent
+  configurations, and IDE settings") deliberately stripped `.claude/`, `.obsidian/
+  app.json`/workspace state, and `.vscode/settings.json` from git history — this repo
+  has an explicit precedent of keeping AI-tool-specific configuration and IDE
+  workspace state out of version control, while `docs/vault/*.md` (this vault's actual
+  content) and root `CLAUDE.md` are treated as legitimate, trackable project
+  documentation. Keep that distinction in mind before committing any new tool-specific
+  config directory.
+
 Related: [[CI-CD]] · [[Naming-Conventions]] · [[Tech-Stack]]

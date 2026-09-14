@@ -84,8 +84,11 @@ fun NavGraphBuilder.issuanceCertificateScreen(onBack: () -> Unit, onGoHome: () -
     }
 }
 
-fun NavGraphBuilder.disabilityPensionScreen(onBack: () -> Unit) {
+fun NavGraphBuilder.disabilityPensionScreen(
+    onBack: () -> Unit,
+    onNavigateToAddDependent: () -> Unit = {},
+) {
     composableWithFadeTransitions<DisabilityPensionRoute> {
-        DisabilityPensionScreen(onBack = onBack)
+        DisabilityPensionScreen(onBack = onBack, onNavigateToAddDependent = onNavigateToAddDependent)
     }
 }

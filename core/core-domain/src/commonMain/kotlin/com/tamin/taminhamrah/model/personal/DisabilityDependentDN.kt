@@ -6,7 +6,8 @@ data class DisabilityDependentDN(
     val nationalId: String?,
     val dateOfBirth: Long?,
     val fatherName: String?,
+    val genderCode: String?,
     val genderDesc: String?,
-    val relation: String?,
+    val tendencyCode: String?,
     val tendencyDescription: String?,
 )

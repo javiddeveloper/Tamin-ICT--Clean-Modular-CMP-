@@ -4,6 +4,15 @@ import com.tamin.taminhamrah.model.pension.*
 import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDN
 import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDTO
 import com.tamin.taminhamrah.model.pension.checkRetirementStatus.*
+import com.tamin.taminhamrah.model.pension.disabilityRequest.*
+import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.CommitteeDemandInfoDocumentDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.CommitteeDemandInfoDocumentDTO
+import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.CommitteeRequestInfoDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.CommitteeRequestInfoDTO
+import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.CommitteeRequestInfoDocumentDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.CommitteeRequestInfoDocumentDTO
+import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.RegisteredMedicalCommissionDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.RegisteredMedicalCommissionDTO
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.*
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDN
@@ -259,5 +268,172 @@ fun RetirementDocumentDN.toDTO(): RetirementDocumentDTO {
 fun String?.toInquirePensionCertificateDomain(): InquirePensionCertificateDN {
     return InquirePensionCertificateDN(
         message = this
+    )
+}
+
+fun DisabilitySaveInfoDN.toDTO(): DisabilitySaveInfoRequest {
+    return DisabilitySaveInfoRequest(
+        activityType = activityType,
+        address = address,
+        age = age,
+        birthDate = birthDate,
+        branchCode = branchCode,
+        fatherName = fatherName,
+        firstName = firstName,
+        gender = gender,
+        idNumber = idNumber,
+        insuranceNumber = insuranceNumber,
+        issuePlace = issuePlace,
+        lastName = lastName,
+        managerName = managerName,
+        mobileNumber = mobileNumber,
+        nationalCode = nationalCode,
+        pensionRequestDocList = pensionRequestDocList?.map { it.toDTO() },
+        phoneNumber = phoneNumber,
+        status = status,
+        workshopAddress = workshopAddress,
+        workshopCode = workshopCode,
+        workshopName = workshopName,
+    )
+}
+
+fun DisabilityDocumentDN.toDTO(): DisabilityDocumentDTO {
+    return DisabilityDocumentDTO(
+        documentType = documentType,
+        guid = guid
+    )
+}
+
+fun DisabilitySaveInfoResponseDTO.toDomain(): DisabilityRequestRefDN? {
+    return request?.toDomain()
+}
+
+fun DisabilityRequestRefDTO.toDomain(): DisabilityRequestRefDN {
+    return DisabilityRequestRefDN(
+        id = id,
+        refCode = refCode
+    )
+}
+
+fun DisabilityFinalConfirmDN.toDTO(): DisabilityFinalConfirmRequest {
+    return DisabilityFinalConfirmRequest(
+        id = id,
+        status = status
+    )
+}
+
+fun DisabilitySaveDocumentDN.toDTO(): DisabilitySaveDocumentRequest {
+    return DisabilitySaveDocumentRequest(
+        pensionRequestDocList = pensionRequestDocList?.map { it.toDTO() },
+        status = status
+    )
+}
+
+fun RegisteredMedicalCommissionDTO.toDomain(): RegisteredMedicalCommissionDN {
+    return RegisteredMedicalCommissionDN(
+        demandInfoId = demandInfoId,
+        demandTypeCode = demandTypeCode,
+        demandSaveDate = demandSaveDate,
+        commFirstName = commFirstName,
+        commLastName = commLastName,
+        commFatherName = commFatherName,
+        commBirthDate = commBirthDate,
+        commGender = commGender,
+        commMarriageStatus = commMarriageStatus,
+        commIdNumber = commIdNumber,
+        commExpCityCode = commExpCityCode,
+        commRelationTypeCode = commRelationTypeCode,
+        commNationalCode = commNationalCode,
+        guardianNationalCode = guardianNationalCode,
+        commInsuredTypeCode = commInsuredTypeCode,
+        commResidenceCityCode = commResidenceCityCode,
+        commAddress = commAddress,
+        commMobileNumber = commMobileNumber,
+        commTelephoneNumber = commTelephoneNumber,
+        commNationality = commNationality,
+        deadDate = deadDate,
+        insuranceNumber = insuranceNumber,
+        pensionerCode = pensionerCode,
+        isuTypeCode = isuTypeCode,
+        nationalCode = nationalCode,
+        referBadviCode = referBadviCode,
+        status = status,
+        referTypeCode = referTypeCode,
+        lastJobDesc = lastJobDesc,
+        lastJobCode = lastJobCode,
+        jobHistoryDesc = jobHistoryDesc,
+        hasDrivingCertificate = hasDrivingCertificate,
+        hasVisitBeforeJob = hasVisitBeforeJob,
+        hasVisitInJob = hasVisitInJob,
+        hasHealthyCertificate = hasHealthyCertificate,
+        hasContract = hasContract,
+        hasExpertJob = hasExpertJob,
+        historyConfirm = historyConfirm,
+        militaryStatusCode = militaryStatusCode,
+        commissionInResidenceCity = commissionInResidenceCity,
+        dependencyTypeCode = dependencyTypeCode,
+        branchCode = branchCode,
+        divan = divan,
+        isConfirmed = isConfirmed,
+        refId = refId,
+        commPostalCode = commPostalCode,
+        commCaseTypeCode = commCaseTypeCode,
+        isuStatusTypeCode = isuStatusTypeCode,
+        demandStage = demandStage,
+        sendCentralCommittee = sendCentralCommittee,
+        commissionCentralId = commissionCentralId,
+        commissionPollDesc = commissionPollDesc,
+        committeeRequestInfoList = committeeRequestInfoList?.map { it.toDomain() },
+        committeeDemandInfoDocumentList = committeeDemandInfoDocumentList?.map { it.toDomain() },
+    )
+}
+
+fun CommitteeRequestInfoDTO.toDomain(): CommitteeRequestInfoDN {
+    return CommitteeRequestInfoDN(
+        requestInfoId = requestInfoId,
+        requestNumber = requestNumber,
+        committeeDemandInfo = committeeDemandInfo,
+        doctorInfoId = doctorInfoId,
+        requestSaveDate = requestSaveDate,
+        hasDrugUsage = hasDrugUsage,
+        hasSurgery = hasSurgery,
+        hasHospitalization = hasHospitalization,
+        hasOtherDoctor = hasOtherDoctor,
+        hasOtherDarman = hasOtherDarman,
+        otherDarmanDesc = otherDarmanDesc,
+        hasCommissionOtherOrgan = hasCommissionOtherOrgan,
+        hasCommissionTaminOrgan = hasCommissionTaminOrgan,
+        commissionOtherOrganDesc = commissionOtherOrganDesc,
+        hasSupportOrgan = hasSupportOrgan,
+        supportOrganDesc = supportOrganDesc,
+        bookletTypeCode = bookletTypeCode,
+        refrenceReasonCode = refrenceReasonCode,
+        darmanDocument = darmanDocument,
+        illnessDesc = illnessDesc,
+        mainDoctorFirstName = mainDoctorFirstName,
+        mainDoctorLastName = mainDoctorLastName,
+        mainDoctorSpeciality = mainDoctorSpeciality,
+        hasDrugUsageBoolean = hasDrugUsageBoolean,
+        hasSurgeryBoolean = hasSurgeryBoolean,
+        hasOtherDarmanBoolean = hasOtherDarmanBoolean,
+        committeeRequestInfoDocumentList = committeeRequestInfoDocumentList?.map { it.toDomain() },
+    )
+}
+
+fun CommitteeRequestInfoDocumentDTO.toDomain(): CommitteeRequestInfoDocumentDN {
+    return CommitteeRequestInfoDocumentDN(
+        documentId = documentId,
+        committeeRequestInfo = committeeRequestInfo,
+        documentTypeId = documentTypeId,
+        documentFileId = documentFileId
+    )
+}
+
+fun CommitteeDemandInfoDocumentDTO.toDomain(): CommitteeDemandInfoDocumentDN {
+    return CommitteeDemandInfoDocumentDN(
+        documentId = documentId,
+        committeeDemandInfo = committeeDemandInfo,
+        documentTypeId = documentTypeId,
+        documentFileId = documentFileId
     )
 }

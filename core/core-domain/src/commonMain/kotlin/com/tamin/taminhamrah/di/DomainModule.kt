@@ -72,6 +72,9 @@ import com.tamin.taminhamrah.useCases.orotezProtez.GetInsuredPersonsUseCase
 import com.tamin.taminhamrah.useCases.orotezProtez.GetRequestInsuredMainInfoUseCase
 import com.tamin.taminhamrah.useCases.orotezProtez.SaveShortTermOrthosisUseCase
 import com.tamin.taminhamrah.useCases.inquiryEducation.GetDataForEducationUseCase
+import com.tamin.taminhamrah.useCases.weddingPresent.CalculateMarriageAllowanceUseCase
+import com.tamin.taminhamrah.useCases.weddingPresent.GetWeddingPresentInfoUseCase
+import com.tamin.taminhamrah.useCases.weddingPresent.SubmitWeddingPresentUseCase
 import com.tamin.taminhamrah.useCases.inquiryEducation.InquiryEducationCertificateUseCase
 import com.tamin.taminhamrah.useCases.fractionContract.CheckFractionAgeAndHistoryUseCase
 import com.tamin.taminhamrah.useCases.fractionContract.MakeFractionContractUseCase
@@ -140,6 +143,11 @@ import com.tamin.taminhamrah.useCases.calculateWagePension.CalculateWagePensionU
 import com.tamin.taminhamrah.useCases.calculateWagePension.CheckMultipleWorkshopsUseCase
 import com.tamin.taminhamrah.useCases.calculateWagePension.GetMultipleWorkshopPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.GetDisabilityPersonalInfoUseCase
+import com.tamin.taminhamrah.useCases.pension.SaveDisabilityUserInfoUseCase
+import com.tamin.taminhamrah.useCases.pension.FinalConfirmDisabilityRequestUseCase
+import com.tamin.taminhamrah.useCases.pension.SaveDocumentDisabilityUseCase
+import com.tamin.taminhamrah.useCases.pension.GetMedicalCommissionPdfUseCase
+import com.tamin.taminhamrah.useCases.pension.GetRegisteredMedicalCommissionUseCase
 import com.tamin.taminhamrah.useCases.personal.GetRequestSummaryUseCase
 import com.tamin.taminhamrah.useCases.personal.PutInsuredRegistrationDocListUseCase
 import com.tamin.taminhamrah.useCases.user.CheckUserIsNewUseCase
@@ -265,11 +273,18 @@ import com.tamin.taminhamrah.useCases.addDependent.GetFamilyRelationshipsFromPro
 import com.tamin.taminhamrah.useCases.addDependent.GetFamilyRelationshipsUseCase
 import com.tamin.taminhamrah.useCases.addDependent.InquiryEducationCodeUseCase
 import com.tamin.taminhamrah.useCases.addDependent.InquiryRegistryUseCase
+import com.tamin.taminhamrah.useCases.addDependent.RefreshDependentsUseCase
 import com.tamin.taminhamrah.useCases.addDependent.UploadDependentImageUseCase
 import com.tamin.taminhamrah.useCases.user.mockUseCases.MockSubdominantUseCase
 import com.tamin.taminhamrah.useCases.versionHistory.GetVersionHistoryUseCase
 import com.tamin.taminhamrah.useCases.contactUs.GetContactUsUseCase
 import com.tamin.taminhamrah.useCases.content.GetLegalDocumentUseCase
+import com.tamin.taminhamrah.useCases.stories.GetStoryChannelsUseCase
+import com.tamin.taminhamrah.useCases.stories.ObserveSeenStoryChannelsUseCase
+import com.tamin.taminhamrah.useCases.stories.MarkStoryChannelSeenUseCase
+import com.tamin.taminhamrah.useCases.stories.ObserveStoryEngagementUseCase
+import com.tamin.taminhamrah.useCases.stories.ToggleStoryLikeUseCase
+import com.tamin.taminhamrah.useCases.stories.ToggleStorySaveUseCase
 
 val domainModule = module {
     // Add Dependent UseCases
@@ -380,6 +395,9 @@ val domainModule = module {
     factoryOf(::InquiryEducationCertificateUseCase)
     factoryOf(::CheckFractionAgeAndHistoryUseCase)
     factoryOf(::MakeFractionContractUseCase)
+    factoryOf(::GetWeddingPresentInfoUseCase)
+    factoryOf(::SubmitWeddingPresentUseCase)
+    factoryOf(::CalculateMarriageAllowanceUseCase)
     factoryOf(::GetIllDaysInsuredMainInfoUseCase)
     factoryOf(::GetCovidResultUseCase)
     factoryOf(::CalcIllnessAmountUseCase)
@@ -422,6 +440,11 @@ val domainModule = module {
     factoryOf(::GetFreeJobWagesUseCase)
     factoryOf(::UploadImageUseCase)
     factoryOf(::GetDisabilityPersonalInfoUseCase)
+    factoryOf(::SaveDisabilityUserInfoUseCase)
+    factoryOf(::FinalConfirmDisabilityRequestUseCase)
+    factoryOf(::SaveDocumentDisabilityUseCase)
+    factoryOf(::GetMedicalCommissionPdfUseCase)
+    factoryOf(::GetRegisteredMedicalCommissionUseCase)
     // Agent
     factoryOf(::SendAgentPromptUseCase)
     factoryOf(::CheckChatAllowedUseCase)
@@ -556,6 +579,7 @@ val domainModule = module {
     factoryOf(::InquiryEducationCodeUseCase)
     factoryOf(::UploadDependentImageUseCase)
     factoryOf(::AddNewDependentUseCase)
+    factoryOf(::RefreshDependentsUseCase)
 
     // Employer Info UseCases
     factoryOf(::GetLegalWorkshopUseCase)
@@ -564,5 +588,13 @@ val domainModule = module {
     factoryOf(::SubmitLegalWorkshopInfoUseCase)
     factoryOf(::RequestRealTicketUseCase)
     factoryOf(::SubmitRealWorkshopInfoUseCase)
+
+    // Stories UseCases
+    factoryOf(::GetStoryChannelsUseCase)
+    factoryOf(::ObserveSeenStoryChannelsUseCase)
+    factoryOf(::MarkStoryChannelSeenUseCase)
+    factoryOf(::ObserveStoryEngagementUseCase)
+    factoryOf(::ToggleStoryLikeUseCase)
+    factoryOf(::ToggleStorySaveUseCase)
 }
 
