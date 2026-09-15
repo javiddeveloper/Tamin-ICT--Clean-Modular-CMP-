@@ -83,7 +83,7 @@ fun HomeQuickAccessSection(
         HomeQuickAccessSectionContent(sections, selectedSection, onSectionSelected, onServiceClick, onSeeAll, modifier)
         return
     }
-    
+
     Box(modifier = modifier) {
         HomeQuickAccessSectionContent(previewSections, HomeServiceSection.HISTORY, {}, {}, {}, Modifier.alpha(0f))
         HomeQuickAccessSectionContent(previewSections, HomeServiceSection.HISTORY, {}, {}, {}, Modifier, isShimmer = true)
@@ -307,13 +307,12 @@ private fun FeaturedServiceCard(
             if (isLoading) Box(Modifier.matchParentSize().clip(RoundedCornerShape(CornerRadius.iconTile)).shimmer())
         }
         Box {
-            Text(
+            AutoResizeText(
                 text = service.name.orEmpty(),
                 style = MaterialTheme.typography.labelMedium,
                 color = if(isLoading) Color.Transparent else MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
             )
             if (isLoading) Box(Modifier.matchParentSize().clip(RoundedCornerShape(CornerRadius.sm)).shimmer())
         }
