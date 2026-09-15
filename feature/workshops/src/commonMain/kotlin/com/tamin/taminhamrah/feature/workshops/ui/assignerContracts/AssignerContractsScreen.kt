@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -19,7 +17,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.AssignerFilterBar
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.AssignerSearchSheet
@@ -27,6 +24,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.A
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.buildAssignerFilterText
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractFilter
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractTab
+import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractsEvent
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractsIntent
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractsUiState
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButton
@@ -38,41 +36,57 @@ import com.tamin.taminhamrah.mapper.workshop.toPresentation
 import com.tamin.taminhamrah.model.workshop.AssignerContractDN
 import com.tamin.taminhamrah.model.workshop.AssignerContractPR
 import com.tamin.taminhamrah.model.workshop.AssignerPartyDN
+import com.tamin.taminhamrah.model.workshop.AssignerPartyPR
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.StatColumn
+import com.tamin.taminhamrah.ui.components.StatDivider
+import com.tamin.taminhamrah.ui.components.StatRowCard
 import com.tamin.taminhamrah.ui.components.TaminSegmentedTabs
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.taminSurface
+import com.tamin.taminhamrah.ui.components.toast.LocalToaster
+import com.tamin.taminhamrah.ui.components.toast.error
+import com.tamin.taminhamrah.ui.components.toast.info
+import com.tamin.taminhamrah.ui.components.toast.success
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.flow.Flow
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.assigner_bases_title
+import taminx.core.core_ui.assigner_action_bases
+import taminx.core.core_ui.assigner_action_certificate
+import taminx.core.core_ui.assigner_action_detail
+import taminx.core.core_ui.assigner_action_settlement
+import taminx.core.core_ui.assigner_certificate_issued
+import taminx.core.core_ui.assigner_certificate_not_found
 import taminx.core.core_ui.assigner_contract_date
-import taminx.core.core_ui.assigner_contract_detail_title
-import taminx.core.core_ui.assigner_contracts_subtitle
 import taminx.core.core_ui.assigner_contracts_title
 import taminx.core.core_ui.assigner_count_label
+import taminx.core.core_ui.assigner_empty_active_title
+import taminx.core.core_ui.assigner_empty_finished_title
 import taminx.core.core_ui.assigner_empty_not_found_body
 import taminx.core.core_ui.assigner_empty_not_found_title
+import taminx.core.core_ui.assigner_empty_tab_body
 import taminx.core.core_ui.assigner_filter_branch
 import taminx.core.core_ui.assigner_filter_row
 import taminx.core.core_ui.assigner_filter_workshop
-import taminx.core.core_ui.assigner_search_workshop
+import taminx.core.core_ui.assigner_me_label
+import taminx.core.core_ui.assigner_select_workshop
 import taminx.core.core_ui.ic_tamin_assigner_contracts
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_search
-import taminx.core.core_ui.settlement_title
+import taminx.core.core_ui.workshop_code
 
 /**
  * واگذارندگان — the پیمان‌ها the signed-in employer assigned out.
@@ -97,6 +111,7 @@ fun AssignerContractsScreen(
     LaunchedEffect(workshopId, branchCode) {
         viewModel.sendIntent(AssignerContractsIntent.Open(workshopId, branchCode))
     }
+    HandleAssignerContractsEvents(events = viewModel.events)
 
     AssignerContractsContent(
         state = state,
@@ -107,6 +122,30 @@ fun AssignerContractsScreen(
         onRequestSettlement = onRequestSettlement,
         modifier = modifier,
     )
+}
+
+/** «گواهی صادرشده» answers with a toast: the list has no place to print a certificate. */
+@Composable
+private fun HandleAssignerContractsEvents(events: Flow<AssignerContractsEvent>) {
+    val toaster = LocalToaster.current
+    LaunchedEffect(events, toaster) {
+        events.collect { event ->
+            when (event) {
+                is AssignerContractsEvent.CertificateFound -> toaster.success(
+                    getString(
+                        Res.string.assigner_certificate_issued,
+                        event.certificate.number,
+                        event.certificate.date,
+                    )
+                )
+
+                AssignerContractsEvent.CertificateNotFound ->
+                    toaster.info(getString(Res.string.assigner_certificate_not_found))
+
+                is AssignerContractsEvent.ShowServerMessage -> toaster.error(event.message)
+            }
+        }
+    }
 }
 
 @Composable
@@ -133,6 +172,7 @@ fun AssignerContractsContent(
     // Narrowed on exactly the two inputs it is built from, so opening the sheet or typing in it
     // never re-filters the rows.
     val visible = remember(list, tab) { list.inTab(tab) }
+    val assigner = remember(list.items) { list.items.soleAssigner() }
 
     // Rows fade and rise in as they arrive; a new search or a new tab plays the entrance again,
     // later pages landing in one does not. Held in a remember because building it inline would
@@ -155,33 +195,23 @@ fun AssignerContractsContent(
             action = {
                 TaminTopAppBarButton(
                     icon = vectorResource(Res.drawable.ic_tamin_search),
-                    contentDescription = stringResource(Res.string.assigner_search_workshop),
+                    contentDescription = stringResource(Res.string.assigner_select_workshop),
                     onClick = { onIntent(AssignerContractsIntent.SearchOpenChanged(isOpen = true)) },
                 )
             },
         ) {
-            Column(
+            AnimatedRingHeaderIcon(
+                icon = vectorResource(Res.drawable.ic_tamin_assigner_contracts),
                 modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                AnimatedRingHeaderIcon(
-                    icon = vectorResource(Res.drawable.ic_tamin_assigner_contracts),
-                )
-                Text(
-                    text = stringResource(Res.string.assigner_contracts_subtitle),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = colors.textHeaderSubtitle,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(top = Spacing.sm),
-                )
-            }
+            )
         }
 
         // Keeps its place in every list state — skeleton, empty, failed — so switching tab or
         // clearing the search never takes the tabs off the screen while the rows below settle.
-        val count = visible.items.size
+        val count = list.items.size
         val header: @Composable () -> Unit = {
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
+                if (assigner != null) AssignerIdentityCard(assigner = assigner)
                 AssignerTabsRow(
                     selected = tab,
                     count = count,
@@ -210,15 +240,22 @@ fun AssignerContractsContent(
             key = { "${it.card.workshopId}_${it.contractRow}_${it.contractSequence}" },
             header = header,
             empty = {
-                // Only a search can be widened, so the line telling the user to check theirs shows
-                // only while one is applied. Resolved either way, so the number of composable
-                // calls does not change with it.
-                val body = stringResource(Res.string.assigner_empty_not_found_body)
+                // A search can be checked; a tab with nothing in it can only be switched away from.
+                val title = stringResource(
+                    when {
+                        filter != null -> Res.string.assigner_empty_not_found_title
+                        tab == AssignerContractTab.ACTIVE -> Res.string.assigner_empty_active_title
+                        else -> Res.string.assigner_empty_finished_title
+                    }
+                )
+                val body = stringResource(
+                    if (filter != null) Res.string.assigner_empty_not_found_body else Res.string.assigner_empty_tab_body
+                )
                 EmptyStateMessage(
                     icon = vectorResource(Res.drawable.ic_tamin_assigner_contracts),
-                    title = stringResource(Res.string.assigner_empty_not_found_title),
-                    subtitle = body.takeIf { filter != null },
-                    actionLabel = stringResource(Res.string.assigner_search_workshop),
+                    title = title,
+                    subtitle = body,
+                    actionLabel = stringResource(Res.string.assigner_select_workshop),
                     onAction = {
                         onIntent(AssignerContractsIntent.SearchOpenChanged(isOpen = true))
                     },
@@ -226,10 +263,9 @@ fun AssignerContractsContent(
                 )
             },
         ) { contract, itemModifier ->
-            // The same card ردیف‌های پیمان draws, with the old menu's three actions offered on the
-            // card itself rather than behind a sheet — one tap instead of three, and the same shape
-            // every other کارگاه card here uses. `dateLabel` differs because the column does:
-            // this endpoint sends تاریخ قرارداد where that one sends تاریخ تعهد.
+            // The same card ردیف‌های پیمان draws, with the design's three actions in one row.
+            // `dateLabel` differs because the column does: this endpoint sends تاریخ قرارداد where
+            // that one sends تاریخ تعهد.
             ContractRowCard(
                 row = contract.card,
                 showContact = true,
@@ -237,15 +273,14 @@ fun AssignerContractsContent(
                 modifier = itemModifier,
                 buttons = {
                     WorkshopCardButton(
-                        text = stringResource(Res.string.assigner_contract_detail_title),
-                        tone = WorkshopCardButtonTone.PRIMARY,
+                        text = stringResource(Res.string.assigner_action_detail),
+                        tone = WorkshopCardButtonTone.OUTLINE,
                         onClick = { onOpenDetail(contract) },
                     )
                     WorkshopCardButton(
-                        text = stringResource(Res.string.assigner_bases_title),
-                        // A پیمان missing any of the four keys cannot address its own bases; the
-                        // button is plainly unavailable and the line below says why, rather than
-                        // opening a screen onto another contract's records.
+                        text = stringResource(Res.string.assigner_action_bases),
+                        // A پیمان missing any of the four keys cannot address its own bases, so the
+                        // button is plainly unavailable rather than opening another contract's records.
                         tone = if (contract.canOpenBases) {
                             WorkshopCardButtonTone.OUTLINE
                         } else {
@@ -253,21 +288,29 @@ fun AssignerContractsContent(
                         },
                         onClick = { onOpenBases(contract) },
                     )
-                },
-                // On its own row: three equal buttons need 304dp and a 360dp phone gives the card
-                // 300, and «درخواست مفاصاحساب» would wrap inside a third of that.
-                secondaryButtons = {
-                    WorkshopCardButton(
-                        text = stringResource(Res.string.settlement_title),
-                        // The request is filed under an id built from the same four keys, so a row
-                        // missing one offers it disabled rather than filing under the wrong id.
-                        tone = if (contract.canRequestSettlement) {
-                            WorkshopCardButtonTone.OUTLINE
-                        } else {
-                            WorkshopCardButtonTone.DISABLED
-                        },
-                        onClick = { onRequestSettlement(contract) },
-                    )
+                    if (contract.isFinished) {
+                        // A finished پیمان takes no new request; it answers with the certificate it
+                        // was settled under.
+                        WorkshopCardButton(
+                            text = stringResource(Res.string.assigner_action_certificate),
+                            tone = WorkshopCardButtonTone.SUCCESS,
+                            onClick = {
+                                onIntent(AssignerContractsIntent.CertificateRequested(contract, announce = true))
+                            },
+                        )
+                    } else {
+                        WorkshopCardButton(
+                            text = stringResource(Res.string.assigner_action_settlement),
+                            // The request is filed under an id built from the same four keys, so a
+                            // row missing one offers it disabled rather than filing under the wrong id.
+                            tone = if (contract.canRequestSettlement) {
+                                WorkshopCardButtonTone.PRIMARY
+                            } else {
+                                WorkshopCardButtonTone.DISABLED
+                            },
+                            onClick = { onRequestSettlement(contract) },
+                        )
+                    }
                 },
             )
         }
@@ -300,7 +343,31 @@ fun AssignerContractsContent(
 }
 
 /**
- * جاری / خاتمه‌یافته, and how many پیمان the chosen one holds.
+ * «کارگاه واگذارنده» and its code — the employer's own workshop, read off the rows themselves.
+ *
+ * Every row carries both sides of its پیمان, so this is real data rather than a profile lookup. It is
+ * drawn only while every row names the same واگذارنده: across several, one name would be a claim
+ * about the others.
+ */
+@Composable
+private fun AssignerIdentityCard(assigner: AssignerPartyPR, modifier: Modifier = Modifier) {
+    StatRowCard(modifier = modifier) {
+        StatColumn(
+            value = assigner.workshopName,
+            label = stringResource(Res.string.assigner_me_label),
+            modifier = Modifier.weight(1f),
+        )
+        StatDivider()
+        StatColumn(
+            value = assigner.workshopCode,
+            label = stringResource(Res.string.workshop_code),
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+/**
+ * جاری / خاتمه‌یافته, and how many پیمان the list holds.
  *
  * The tabs are the first child, so on the RTL page they sit rightmost with the count tile at the
  * far end, as the design places them. The tile takes the strip's height rather than its own, so
@@ -358,6 +425,13 @@ private fun PagedListState<AssignerContractPR>.inTab(
     )
 }
 
+/** The one واگذارنده every row names, or null when they name several or none. */
+private fun List<AssignerContractPR>.soleAssigner(): AssignerPartyPR? =
+    map { it.assigner }
+        .distinctBy { it.workshopCode }
+        .singleOrNull()
+        ?.takeIf { it.workshopName.isNotBlank() }
+
 /**
  * «کد کارگاه X · کد شعبه Y · ردیف Z», with the parts the user left blank dropped.
  *
@@ -387,6 +461,11 @@ private fun rememberAssignerFilterText(filter: AssignerContractFilter): String {
 
 // ------------------------------------------------------------------------------- previews
 
+private val PreviewAssigner = AssignerPartyDN(
+    workshopId = "0968210170",
+    workshopName = "آموزشگاه کامپیوتر توکلی",
+)
+
 /**
  * The rows a preview draws, run through the real mapper.
  *
@@ -398,10 +477,12 @@ private val PreviewContracts = persistentListOf(
     AssignerContractDN(
         contractRow = "1",
         contractSequence = "1",
+        branchCode = "0210",
         contractNumber = "44122",
         contractDate = "14010210",
         contractEndDate = "15000101",
         contractSubject = "خدمات نظافت و پشتیبانی",
+        assigner = PreviewAssigner,
         employer = AssignerPartyDN(
             workshopId = "9028212822",
             workshopName = "دبستان کارن ۲ مجتبی غلامیان",
@@ -411,12 +492,14 @@ private val PreviewContracts = persistentListOf(
     ),
     AssignerContractDN(
         contractRow = "3",
-        // No sequence — the bases action is offered disabled, with its reason.
+        // No sequence — the bases action is offered disabled.
         contractSequence = "",
+        branchCode = "0210",
         contractNumber = "45200",
         contractDate = "14030120",
         contractEndDate = "14030601",
         contractSubject = "پیمان با کارکرد ارزی",
+        assigner = PreviewAssigner,
         employer = AssignerPartyDN(
             workshopId = "9007441260",
             workshopName = "شرکت راه‌سازی البرز شرق",
@@ -472,7 +555,7 @@ private fun AssignerContractsSearchedPreview() = PreviewRtlThemeContent {
     )
 }
 
-/** No search and nothing held — the empty state without a filter to tell the user to check. */
+/** No search and nothing held — the tab's own empty wording. */
 @PreviewRtlTheme
 @Composable
 private fun AssignerContractsNoneHeldPreview() = PreviewRtlThemeContent {

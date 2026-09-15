@@ -31,9 +31,11 @@ import taminx.core.core_ui.assigner_filter_clear
 import taminx.core.core_ui.assigner_search_branch_code_optional
 import taminx.core.core_ui.assigner_search_branch_hint
 import taminx.core.core_ui.assigner_search_contract_row_optional
+import taminx.core.core_ui.assigner_search_apply
 import taminx.core.core_ui.assigner_search_row_hint
-import taminx.core.core_ui.assigner_search_workshop
+import taminx.core.core_ui.assigner_search_subtitle
 import taminx.core.core_ui.assigner_search_workshop_hint
+import taminx.core.core_ui.assigner_select_workshop
 import taminx.core.core_ui.contract_rows_workshop_code_required
 import taminx.core.core_ui.workshop_code
 
@@ -121,7 +123,8 @@ fun AssignerSearchSheetContent(
 ) {
     val colors = LocalTaminColors.current
     WorkshopSheetBody(
-        title = stringResource(Res.string.assigner_search_workshop),
+        title = stringResource(Res.string.assigner_select_workshop),
+        subtitle = stringResource(Res.string.assigner_search_subtitle),
         modifier = modifier,
     ) {
         WorkshopTextField(
@@ -189,7 +192,7 @@ fun AssignerSearchSheetContent(
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
             TaminPrimaryButton(
-                text = stringResource(Res.string.assigner_search_workshop),
+                text = stringResource(Res.string.assigner_search_apply),
                 onClick = onApply,
                 // The ViewModel drops an apply that arrives while a page is in flight. Disabling
                 // the button is that same guard made visible, so the tap does not read as dead.

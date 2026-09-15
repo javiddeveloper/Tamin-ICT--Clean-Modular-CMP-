@@ -74,7 +74,7 @@ fun AssignerFilterBar(
         Text(
             text = filterText,
             style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.SemiBold,
             color = colors.blueText,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -110,7 +110,7 @@ fun AssignerFilterBar(
             Text(
                 text = stringResource(Res.string.assigner_filter_clear),
                 style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.SemiBold,
                 color = colors.textSecondary,
                 maxLines = 1,
             )

@@ -3,8 +3,10 @@ package com.tamin.taminhamrah.feature.workshops.ui.assignerContracts
 import app.cash.turbine.test
 import com.tamin.taminhamrah.feature.workshops.fake.FakeWorkShopsRepository
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractTab
+import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractsEvent
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractsIntent
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.ComputationalBaseKeys
+import com.tamin.taminhamrah.mapper.workshop.toPresentation
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.userRequest.RequestErrorDN
 import com.tamin.taminhamrah.model.userRequest.SmartGuideDN
@@ -22,6 +24,8 @@ import com.tamin.taminhamrah.model.workshop.BaseDocumentDN
 import com.tamin.taminhamrah.model.workshop.BaseDocumentKind
 import com.tamin.taminhamrah.model.workshop.BaseDocumentPR
 import com.tamin.taminhamrah.model.workshop.ComputationalBaseDN
+import com.tamin.taminhamrah.model.workshop.SettlementCertificateDN
+import com.tamin.taminhamrah.model.workshop.SettlementCertificatePR
 import com.tamin.taminhamrah.model.workshop.WORKSHOP_PAGE_SIZE
 import com.tamin.taminhamrah.repository.userRequest.UserRequestRepository
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
@@ -32,6 +36,7 @@ import com.tamin.taminhamrah.useCases.workshops.GetAssignerContractsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetComputationalBasePdfUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetComputationalBasesUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetEmployerAgreementsUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetSettlementCertificateUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -81,6 +86,7 @@ class AssignerContractsViewModelTest {
         getBasePdf = GetComputationalBasePdfUseCase(repository),
         downloadDocumentImage = DownloadUserRequestDocumentUseCase(documents),
         getMyWorkshops = GetEmployerAgreementsUseCase(repository),
+        getCertificate = GetSettlementCertificateUseCase(repository),
     )
 
     private fun contract(
@@ -695,6 +701,59 @@ class AssignerContractsViewModelTest {
         vm.sendIntent(AssignerContractsIntent.PreviewDismissed)
         assertNull(vm.uiState.value.preview)
     }
+
+    // --------------------------------------------------------------------- گواهی مفاصاحساب
+
+    /**
+     * «گواهی صادرشده» reports what was found, in Persian digits — and asks with the پیمانکار's
+     * workshop and the پیمان's own branch, row and number, which a transposition would still answer.
+     */
+    @Test
+    fun `a found certificate is announced with the keys the contract carries`() = runTest(testDispatcher) {
+        repository.settlementCertificate =
+            SettlementCertificateDN(serial = "1080611", number = "38-7712405", date = "14021103")
+        val contract = contract("1").copy(branchCode = "0310").toPresentation()
+
+        val vm = viewModel()
+        vm.events.test {
+            vm.sendIntent(AssignerContractsIntent.CertificateRequested(contract, announce = true))
+            assertEquals(
+                AssignerContractsEvent.CertificateFound(
+                    SettlementCertificatePR(number = "۳۸-۷۷۱۲۴۰۵", date = "۱۴۰۲/۱۱/۰۳")
+                ),
+                awaitItem(),
+            )
+        }
+        assertEquals(listOf("9028212822", "0310", "1", "44122"), repository.lastCertificateArgs)
+    }
+
+    @Test
+    fun `a contract with no certificate on file is announced as such`() = runTest(testDispatcher) {
+        val vm = viewModel()
+
+        vm.events.test {
+            vm.sendIntent(
+                AssignerContractsIntent.CertificateRequested(contract("1").toPresentation(), announce = true)
+            )
+            assertEquals(AssignerContractsEvent.CertificateNotFound, awaitItem())
+        }
+    }
+
+    /** جزئیات پیمان asks without announcing; the answer waits in state for its status line. */
+    @Test
+    fun `a silent lookup keeps the certificate against the contract it was asked for`() =
+        runTest(testDispatcher) {
+            repository.settlementCertificate = SettlementCertificateDN(serial = "1", number = "38-1", date = "14021103")
+            val contract = contract("1").toPresentation()
+
+            val vm = viewModel()
+            vm.sendIntent(AssignerContractsIntent.CertificateRequested(contract, announce = false))
+
+            val lookup = assertNotNull(vm.uiState.value.certificate)
+            assertEquals(contract, lookup.contract)
+            assertEquals("۳۸-۱", lookup.certificate?.number)
+            assertFalse(lookup.isLoading)
+        }
 
     /** Dismissing clears both the viewer and the in-flight marker. */
     @Test

@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.Ass
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractsUiState
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractsUiState.PartialState
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerSearchDraft
+import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.CertificateLookup
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.ComputationalBaseKeys
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.DocumentFailure
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.DocumentPreview
@@ -27,6 +28,7 @@ import com.tamin.taminhamrah.useCases.workshops.GetAssignerContractsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetEmployerAgreementsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetComputationalBasePdfUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetComputationalBasesUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetSettlementCertificateUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
@@ -51,6 +53,7 @@ class AssignerContractsViewModel(
     private val getBasePdf: GetComputationalBasePdfUseCase,
     private val downloadDocumentImage: DownloadUserRequestDocumentUseCase,
     private val getMyWorkshops: GetEmployerAgreementsUseCase,
+    private val getCertificate: GetSettlementCertificateUseCase,
 ) : BaseViewModel<AssignerContractsUiState, PartialState, AssignerContractsEvent, AssignerContractsIntent>(
     initialState = AssignerContractsUiState()
 ) {
@@ -113,6 +116,9 @@ class AssignerContractsViewModel(
             emit(PartialState.PreviewChanged(null))
             emit(PartialState.DocumentOpening(null))
         }
+
+        is AssignerContractsIntent.CertificateRequested ->
+            lookUpCertificate(intent.contract, intent.announce)
     }
 
     // ------------------------------------------------------------------------------ the list
@@ -373,6 +379,43 @@ class AssignerContractsViewModel(
         }
     }
 
+    // --------------------------------------------------------------------- گواهی مفاصاحساب
+
+    /**
+     * The certificate a پیمان was settled under: the clause-38 head list for its ردیف, then that row's
+     * detail — the old app's two calls.
+     *
+     * Addressed by the پیمانکار's workshop and the پیمان's own branch, the pair the request id is built
+     * from. An answer already in hand for the same پیمان is reused; a failed one is asked again.
+     */
+    private fun lookUpCertificate(
+        contract: AssignerContractPR,
+        announce: Boolean,
+    ): Flow<PartialState> = flow {
+        val known = uiState.value.certificate?.takeIf { it.contract == contract }
+        if (known?.isLoading == true) return@flow
+        val certificate = if (known != null && !known.didFail) {
+            known.certificate
+        } else {
+            emit(PartialState.CertificateLoading(contract))
+            getCertificate(
+                workshopId = contract.card.workshopId,
+                branchCode = contract.branchCode,
+                contractRow = contract.contractRow,
+                contractNumber = contract.rawContractNumber,
+            )?.toPresentation().also { emit(PartialState.CertificateLoaded(contract, it)) }
+        }
+        if (announce) {
+            sendEvent(
+                certificate?.let { AssignerContractsEvent.CertificateFound(it) }
+                    ?: AssignerContractsEvent.CertificateNotFound
+            )
+        }
+    }.catch {
+        emit(PartialState.CertificateLoaded(contract, certificate = null, didFail = true))
+        if (announce) sendEvent(AssignerContractsEvent.ShowServerMessage(it.toSingleLineMessage()))
+    }
+
     // ------------------------------------------------------------------------------ reducer
 
     override fun reduceState(
@@ -450,6 +493,22 @@ class AssignerContractsViewModel(
         is PartialState.PreviewChanged -> currentState.copy(preview = partialState.preview)
         is PartialState.DocumentFailed ->
             currentState.copy(documentFailure = partialState.failure)
+
+        is PartialState.CertificateLoading ->
+            currentState.copy(certificate = CertificateLookup(partialState.contract, isLoading = true))
+
+        is PartialState.CertificateLoaded ->
+            if (currentState.certificate?.contract == partialState.contract) {
+                currentState.copy(
+                    certificate = CertificateLookup(
+                        contract = partialState.contract,
+                        certificate = partialState.certificate,
+                        didFail = partialState.didFail,
+                    )
+                )
+            } else {
+                currentState
+            }
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)
