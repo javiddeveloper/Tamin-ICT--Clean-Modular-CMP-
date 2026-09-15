@@ -174,6 +174,9 @@ fun ContractRowsContent(
                         onChange = {
                             onIntent(ContractRowsIntent.PickerOpenChanged(isOpen = true))
                         },
+                        onClear = {
+                            onIntent(ContractRowsIntent.ClearPicker)
+                        },
                     )
                 }
             }

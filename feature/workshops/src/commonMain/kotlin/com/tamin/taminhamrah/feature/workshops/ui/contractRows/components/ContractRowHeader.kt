@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,9 +34,12 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.contract_rows_filter_change
 import taminx.core.core_ui.contract_rows_read_only
+import taminx.core.core_ui.ic_tamin_cross
+import taminx.core.core_ui.workshop_filter_clear
 
 /**
  * The two services, as a segmented control.
@@ -114,6 +118,7 @@ fun ContractRowFilterBar(
     filterText: String,
     countText: String,
     onChange: () -> Unit,
+    onClear: () -> Unit,
     modifier: Modifier = Modifier,
     /** Why the visible tab is not the one that was asked for. Null when the user chose it. */
     notice: String? = null,
@@ -128,13 +133,7 @@ fun ContractRowFilterBar(
             horizontalArrangement = Arrangement.spacedBy(WorkshopDimens.chipGap),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = filterText,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-                color = colors.blueText,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+            Row(
                 modifier = Modifier
                     .weight(1f)
                     .clip(CircleShape)
@@ -144,7 +143,33 @@ fun ContractRowFilterBar(
                         horizontal = WorkshopDimens.chipHorizontalPadding,
                         vertical = WorkshopDimens.chipVerticalPadding,
                     ),
-            )
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+            ) {
+                Text(
+                    text = filterText,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.blueText,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                )
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .clickable(onClick = onClear)
+                        .padding(Spacing.xxs),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = vectorResource(Res.drawable.ic_tamin_cross),
+                        contentDescription = stringResource(Res.string.workshop_filter_clear),
+                        tint = colors.blueText,
+                        modifier = Modifier.size(WorkshopDimens.chipCrossSize),
+                    )
+                }
+            }
             Text(
                 text = stringResource(Res.string.contract_rows_filter_change),
                 style = MaterialTheme.typography.labelSmall,
