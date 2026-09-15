@@ -16,11 +16,10 @@ An insured person objects that a **recorded** insurance period is short or wrong
 | اعتراض به سابقه کسری دار | a recorded period is **short or wrong** | this page, flags `42` / `45` |
 | اعتراض به بدهی | employer objects to a **debt** | `:feature:workshops` — see [[Debt-Objection-Status]] |
 
-## Status: Phase 1 — data vertical + feature stub
+## Status: Phase 2 — UI built
 
-Legacy source: `ObjectionInsuranceHistoryFragment` /
-`ObjectionInsuranceHistoryViewModel` in my-tamin-droid. UI / Contract / ViewModel land in a later
-session; navigation from the menu already opens a placeholder screen.
+Legacy source: `ObjectionInsuranceHistoryFragment` / `ObjectionInsuranceHistoryViewModel` /
+`ObjectionInsuranceHistoryDetailDialog` (season/month editor) in my-tamin-droid.
 
 ```
 core-network  ObjectionInsuranceApiService
@@ -32,9 +31,33 @@ core-domain   ObjectionInsuranceRepository
 core-data     ObjectionInsuranceRepositoryImpl (network-only; list limit = 60)
               data/mapper/ObjectionInsuranceMapper.kt — DTO ↔ DN
 core-ui       model/objectionInsurance/ObjectionInsuranceHistoryPR
-              mapper/objectionInsurance/ObjectionInsuranceMapper.kt — DN → PR
-feature       stub Navigation + empty Koin module + placeholder Screen
+              mapper/objectionInsurance/ObjectionInsuranceMapper.kt — DN ↔ PR (`toDomain()` added
+              for Phase 2, to rebuild the save payload from staged UI edits)
+feature       ObjectionInsuranceContract/ViewModel/Screen — see below
 ```
+
+### UI design
+
+No Claude Design mockup existed for the per-record editor or the multi-workshop picker — only the
+list screen (year-card grid) was designed. Built the rest against legacy behavior + this repo's
+own components:
+
+- **Year grid** (`ui/components/ObjectionYearGrid.kt`) — one donut-ring card per year (`Canvas`
+  `drawArc`, no chart library). Ring fraction/color/subtitle rules were read directly out of the
+  design mockup's own JS (`yearCards` builder): blue when the year has a staged edit this session,
+  else green at ≥350 declared days, else orange. Subtitle is "ویرایش‌شده" / "`N` کارگاه" (year has
+  multiple workshop records) / "`N` روز" (single record).
+- **Multi-workshop picker** — reuses the generic `TaminBottomSheet` (`CUSTOM` type,
+  `singleSelection` + `style.selectOnTap`) rather than `HistoryChartCard`'s employer-split view;
+  legacy just needs a name to disambiguate before opening one record's editor, not a comparison.
+- **Per-record editor** (`ui/components/ObjectionRecordDetailSheet.kt`) — replaces legacy's
+  four-season grouped list with one `TaminBarChart` (12 months, tap a bar to focus it, registered
+  days as the bar fill, a pill showing any pending/staged value) plus a single editable field for
+  the focused month (`TaminStyledTextField`, `InputRestriction.DigitsOnly`, clamped to that
+  Jalali month's real length via `PersianDateFormatter.daysInMonth`, leap-`اسفند` included for
+  free).
+- `PersianDateFormatter.kt` gained `toEnglishDigits()` (mirrors the existing `toPersianDigits()`)
+  since a Persian-keyboard day count has to be parsed back to ASCII before clamping.
 
 ### Endpoints (`historyprotest-services/*conflict*`)
 
