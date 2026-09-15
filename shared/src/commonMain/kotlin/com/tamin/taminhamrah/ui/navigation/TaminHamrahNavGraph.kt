@@ -92,6 +92,9 @@ import com.tamin.taminhamrah.feature.history.historyScreen
 import com.tamin.taminhamrah.feature.historyobjection.historyObjectionScreen
 import com.tamin.taminhamrah.feature.historyobjection.historyObjectionStepperScreen
 import com.tamin.taminhamrah.feature.inquiryEducation.inquiryEducationScreen
+import com.tamin.taminhamrah.feature.weddingPresent.navigateToWeddingPresentCalculate
+import com.tamin.taminhamrah.feature.weddingPresent.weddingPresentCalculateScreen
+import com.tamin.taminhamrah.feature.weddingPresent.weddingPresentScreen
 import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
 import com.tamin.taminhamrah.feature.orotezprotez.orotezProtezScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.calculatePensionScreen
@@ -129,6 +132,9 @@ import com.tamin.taminhamrah.feature.security.SecurityRoute
 import com.tamin.taminhamrah.feature.security.securityScreen
 import com.tamin.taminhamrah.feature.settings.SettingsRoute
 import com.tamin.taminhamrah.feature.settings.settingsScreen
+import com.tamin.taminhamrah.feature.stories.navigateToStoryViewer
+import com.tamin.taminhamrah.feature.stories.storyViewerScreen
+import com.tamin.taminhamrah.feature.stories.ui.rail.StoryRail
 import com.tamin.taminhamrah.feature.contracts.contractFlowScreen
 import com.tamin.taminhamrah.feature.contracts.flow.resolveContractTypeForEdit
 import com.tamin.taminhamrah.feature.contracts.navigateToContractFlow
@@ -146,6 +152,7 @@ import com.tamin.taminhamrah.feature.taminServices.navigateToPaymentSheet
 import com.tamin.taminhamrah.feature.taminServices.navigateToInstallmentLetter
 import com.tamin.taminhamrah.feature.taminServices.navigateToBeneficiaries
 import com.tamin.taminhamrah.feature.taminServices.sendInsuranceHistoryToInstitutionsScreen
+import com.tamin.taminhamrah.feature.taminServices.workersPaymentInfoScreen
 import com.tamin.taminhamrah.feature.taminServices.taminServicesScreen
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
 import com.tamin.taminhamrah.feature.treatment.treatmentGraph
@@ -154,16 +161,10 @@ import com.tamin.taminhamrah.feature.workshops.completeEmployerInfoScreen
 import com.tamin.taminhamrah.feature.workshops.debtObjectionStatusScreen
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
-import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
-import com.tamin.taminhamrah.feature.security.securityScreen
 import com.tamin.taminhamrah.feature.developerOptions.DeveloperOptionsRoute
-import com.tamin.taminhamrah.feature.developerOptions.developerOptionsScreen
-import com.tamin.taminhamrah.feature.settings.settingsScreen
+import com.tamin.taminhamrah.feature.payment.navigateToPayment
 import com.tamin.taminhamrah.feature.userRequest.UserRequestRoute
 import com.tamin.taminhamrah.feature.userRequest.userRequestGraph
-import com.tamin.taminhamrah.feature.workshops.completeEmployerInfoScreen
-import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
-import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.mapper.campaign.toPresentation
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
@@ -187,10 +188,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.getString
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.error_load_menu_failed
+import taminx.core.core_ui.invalid_deep_link
 import taminx.core.core_ui.ic_home_menu
 import taminx.core.core_ui.ic_profile_menu
 import taminx.core.core_ui.ic_services_menu
@@ -408,6 +411,7 @@ internal fun TaminHamrahNavGraph(
                         onShowMessage = { message ->
                             snackbarScope.launch { snackbarHostState.showSnackbar(message) }
                         },
+                        onOpenStory = { index -> navController.navigateToStoryViewer(index) },
                     )
                 }
 
@@ -534,6 +538,13 @@ internal fun TaminHamrahNavGraph(
                     onBack = { navController.popBackStack() },
                     onDone = { navController.popBackStack() },
                 )
+                workersPaymentInfoScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenUrl = { url -> openUrl(url) },
+                    onNavigateToPayment = { request ->
+                        navController.navigateToPayment(request)
+                    },
+                )
 
                 retirementPensionScreen(onBack = { navController.popBackStack() })
                 calculatePensionScreen(onBack = { navController.popBackStack() })
@@ -556,6 +567,11 @@ internal fun TaminHamrahNavGraph(
                 girlSurvivorScreen(onBack = { navController.popBackStack() })
                 inquiryEducationScreen(onBack = { navController.popBackStack() })
                 fractionContractScreen(onBack = { navController.popBackStack() })
+                weddingPresentScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToCalculate = { navController.navigateToWeddingPresentCalculate() },
+                )
+                weddingPresentCalculateScreen(onBack = { navController.popBackStack() })
 
                 // The shared payment flow. Any feature that has been handed a gateway ticket
                 // enters it with navController.navigateToPayment(request); finishing pops back to
@@ -564,10 +580,55 @@ internal fun TaminHamrahNavGraph(
                     navController = navController,
                     onFinished = { navController.popBackStack() },
                 )
+
+                storyViewerScreen(
+                    onClose = { navController.popBackStack() },
+                    onOpenDeepLink = { link ->
+                        val featurePrefix = "tamin://feature/"
+                        if (link.startsWith("http://", ignoreCase = true) || link.startsWith("https://", ignoreCase = true)) {
+                            // Leaves the viewer behind rather than stacking a service on top of it:
+                            // coming back from that service should land on the home page.
+                            navController.popBackStack()
+                            openUrl(link)
+                        } else if (link.startsWith(featurePrefix, ignoreCase = true)) {
+                            val flagName = link.substringAfter(featurePrefix)
+                            val flag = runCatching { FeatureFlag.valueOf(flagName) }.getOrNull()
+                            if (flag == FeatureFlag.AGENT) {
+                                navController.popBackStack()
+                                navController.navigateToAgent()
+                            } else if (flag != null) {
+                                navController.popBackStack()
+                                navController.navigateToFeature(flag)
+                            } else {
+                                snackbarScope.launch {
+                                    snackbarHostState.showSnackbar(getString(Res.string.invalid_deep_link))
+                                }
+                            }
+                        } else {
+                            val currentRoute = navController.currentDestination?.route
+                            try {
+                                navController.navigate(link) {
+                                    if (currentRoute != null) {
+                                        popUpTo(currentRoute) {
+                                            inclusive = true
+                                        }
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                snackbarScope.launch {
+                                    snackbarHostState.showSnackbar(getString(Res.string.invalid_deep_link))
+                                }
+                            }
+                        }
+                    },
+                )
                 pensionSurvivorScreen(
                     navController = navController,
                     onBack = { navController.popBackStack() })
-                disabilityPensionScreen(onBack = { navController.popBackStack() })
+                disabilityPensionScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToAddDependent = { navController.navigate(AddDependentRoute) },
+                )
 
                 historyScreen(navController = navController, onBack = { navController.popBackStack() })
                 historyJobInfoScreen(onBack = { navController.popBackStack() })
@@ -785,6 +846,8 @@ fun HomeScreen(
     // No default: a disabled feature says why through this, and a caller that omitted it used to
     // drop the message silently — the tap then did nothing at all.
     onShowMessage: (String) -> Unit,
+    /** Where tapping a channel on the «تازه‌ها» rail leads. */
+    onOpenStory: (channelIndex: Int) -> Unit,
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -879,6 +942,15 @@ fun HomeScreen(
             }
 
             Spacer(modifier = Modifier.height(8.dp))
+
+            // «تازه‌ها» sits directly above the campaigns, as on the design, and is full-bleed for
+            // the same reason: a row that scrolls has to be able to run a ring off the screen edge.
+            StoryRail(
+                onOpenViewer = onOpenStory,
+                modifier = Modifier
+                    .ignoreHorizontalPadding(HomeContentPadding)
+                    .padding(top = Spacing.xlg),
+            )
 
             // The same for every role: campaigns are not filtered by the picker above.
             //

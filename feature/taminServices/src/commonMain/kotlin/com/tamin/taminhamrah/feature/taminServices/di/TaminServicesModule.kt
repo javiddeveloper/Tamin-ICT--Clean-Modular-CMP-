@@ -3,6 +3,10 @@ package com.tamin.taminhamrah.feature.taminServices.di
 import com.tamin.taminhamrah.feature.taminServices.occurrence.OccurrenceViewModel
 import com.tamin.taminhamrah.feature.taminServices.sendHistoryToInstitutions.SendHistoryToInstitutionsViewModel
 import com.tamin.taminhamrah.feature.taminServices.ui.TamminServicesViewModel
+import com.tamin.taminhamrah.feature.taminServices.workersPayment.WorkersPaymentViewModel
+import com.tamin.taminhamrah.useCases.workersPayment.GetWorkersPaymentInfoUseCase
+import com.tamin.taminhamrah.useCases.workersPayment.InspectWorkersPaymentTicketUseCase
+import com.tamin.taminhamrah.useCases.workersPayment.PayWorkersDebitUseCase
 import com.tamin.taminhamrah.useCases.history.GetUserInfosUseCase
 import com.tamin.taminhamrah.useCases.history.SendToInstitutionUseCase
 import com.tamin.taminhamrah.useCases.occurrence.GetAllWorkshopsUseCase
@@ -25,11 +29,17 @@ import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.viewDet
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.beneficiaries.ui.BeneficiariesViewModel
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.paymentSheet.ui.PaymentSheetViewModel
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.installmentManagement.ui.InstallmentLetterViewModel
+import com.tamin.taminhamrah.feature.taminServices.verifier.ConstructionWorkersPaymentVerifier
+import com.tamin.taminhamrah.repository.payment.PaymentVerifier
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModelOf
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val TaminServicesModule = module {
+    single<PaymentVerifier>(named("constructionWorkersPaymentVerifier")) {
+        ConstructionWorkersPaymentVerifier(get())
+    }
     viewModelOf(::TamminServicesViewModel)
     factoryOf(::GetUserInfosUseCase)
     factoryOf(::SendToInstitutionUseCase)
@@ -47,6 +57,11 @@ val TaminServicesModule = module {
     factoryOf(::GetInsurancePageUseCase)
     factoryOf(::GetBranchPageUseCase)
     factoryOf(::GetJobPageUseCase)
+
+    viewModelOf(::WorkersPaymentViewModel)
+    factoryOf(::GetWorkersPaymentInfoUseCase)
+    factoryOf(::PayWorkersDebitUseCase)
+    factoryOf(::InspectWorkersPaymentTicketUseCase)
     factoryOf(::SubmitInspectionUseCase)
     factoryOf(::GetInspectionReportPDFUseCase)
     viewModelOf(::InspectionViewModel)

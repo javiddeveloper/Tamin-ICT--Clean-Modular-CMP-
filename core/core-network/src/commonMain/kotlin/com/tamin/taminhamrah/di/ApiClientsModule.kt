@@ -52,12 +52,16 @@ import com.tamin.taminhamrah.apiService.constructionInsurance.ConstructionInsura
 import com.tamin.taminhamrah.apiService.constructionInsurance.createConstructionInsuranceApiService
 import com.tamin.taminhamrah.apiService.occurrence.OccurrenceApiService
 import com.tamin.taminhamrah.apiService.occurrence.createOccurrenceApiService
+import com.tamin.taminhamrah.apiService.workersPayment.WorkersPaymentApiService
+import com.tamin.taminhamrah.apiService.workersPayment.createWorkersPaymentApiService
 import com.tamin.taminhamrah.apiService.employerInfo.EmployerInfoApiService
 import com.tamin.taminhamrah.apiService.employerInfo.createEmployerInfoApiService
 import com.tamin.taminhamrah.apiService.fractionContract.FractionContractApiService
 import com.tamin.taminhamrah.apiService.fractionContract.createFractionContractApiService
 import com.tamin.taminhamrah.apiService.inquiryEducation.InquiryEducationApiService
 import com.tamin.taminhamrah.apiService.inquiryEducation.createInquiryEducationApiService
+import com.tamin.taminhamrah.apiService.weddingPresent.WeddingPresentApiService
+import com.tamin.taminhamrah.apiService.weddingPresent.createWeddingPresentApiService
 import com.tamin.taminhamrah.model.BaseUrlKey
 import com.tamin.taminhamrah.repository.DeveloperOptionsRepository
 import de.jensklingenberg.ktorfit.Ktorfit
@@ -229,6 +233,16 @@ val ApiClientsModule = module {
     single<ConstructionInsuranceApiService> {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.createConstructionInsuranceApiService()
+    }
+
+    single<WorkersPaymentApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createWorkersPaymentApiService()
+    }
+
+    single<WeddingPresentApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createWeddingPresentApiService()
     }
 
     single<PaymentGatewayApiService> {

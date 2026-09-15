@@ -361,8 +361,8 @@
         },
         {
             "id": 47,
-            "name": "اطلاعات پرداختی کارگران",
-            "icon": "student_inquiry",
+            "name": "پرداخت حق بیمه کارگران ساختمانی",
+            "icon": "worker-insurance-payment",
             "status": "ACTIVE",
             "showRole": [
                 1

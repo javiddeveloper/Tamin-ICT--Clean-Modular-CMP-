@@ -152,6 +152,7 @@ class ProfileViewModel(
             ProfileMenuItem.SHARE -> sendEvent(ProfileEvent.ShareAppLink("https://hamrah.tamin.ir/"))
             ProfileMenuItem.SUPPORT -> sendEvent(ProfileEvent.Support("1420"))
             ProfileMenuItem.REQUESTS -> sendEvent(ProfileEvent.NavigateToUserContracts)
+            ProfileMenuItem.SAVE_EVENTS -> sendEvent(ProfileEvent.NavigateToSaveEvents)
             else -> sendEvent(ProfileEvent.ShowToast("به زودی: ${item.name}"))
         }
         return emptyFlow()

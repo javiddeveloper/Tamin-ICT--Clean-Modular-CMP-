@@ -62,6 +62,7 @@ Colors, spacing, radius: [[Theme]] — never hardcode `Color`, `.dp`, or UI copy
 | `:feature:inquiryEducation` | `feature/inquiryEducation` | `…feature.inquiryEducation` |
 | `:feature:fractionContract` | `feature/fractionContract` | `…feature.fractionContract` — تکمیل سوابق کسری از ماه (Phase 1 stub) |
 | `:feature:pensionSurvivor` | `feature/pensionSurvivor` | `…feature.pensionSurvivor` |
+| `:feature:stories` | `feature/stories` | `…feature.stories` — «تازه‌ها» rail + story viewer, [[Stories]] |
 | `:feature:payment` | `feature/payment` | `…feature.payment` — the shared payment flow, see [[Payments]] |
 
 ### Layout of a feature module
