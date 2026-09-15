@@ -1,39 +1,26 @@
 package com.tamin.taminhamrah.feature.workshops.ui.assignerContracts
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractsIntent
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.DocumentFailure
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.DocumentPreview
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopRecordCard
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopScreenShell
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.model.workshop.BaseDocumentCategory
@@ -43,18 +30,16 @@ import com.tamin.taminhamrah.model.workshop.ComputationalBasePR
 import com.tamin.taminhamrah.model.workshop.label
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.ListGroupView
 import com.tamin.taminhamrah.ui.components.ListItemBadge
 import com.tamin.taminhamrah.ui.components.ListItemColors
 import com.tamin.taminhamrah.ui.components.ListItemData
-import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminImageViewer
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
-import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
-import com.tamin.taminhamrah.ui.theme.Duration
-import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.ImmutableList
@@ -64,21 +49,23 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.assigner_base_detail_subtitle
 import taminx.core.core_ui.assigner_base_detail_title
+import taminx.core.core_ui.assigner_base_period
 import taminx.core.core_ui.assigner_bases_empty_body
 import taminx.core.core_ui.assigner_bases_empty_title
-import taminx.core.core_ui.assigner_documents_empty
 import taminx.core.core_ui.assigner_document_open_failed
 import taminx.core.core_ui.assigner_document_unavailable
+import taminx.core.core_ui.assigner_documents_empty
 import taminx.core.core_ui.assigner_documents_title
-import taminx.core.core_ui.ic_tamin_chevron_down
+import taminx.core.core_ui.assigner_field_amount
+import taminx.core.core_ui.assigner_field_letter_number
+import taminx.core.core_ui.assigner_field_period
 import taminx.core.core_ui.ic_tamin_computational_base
 import taminx.core.core_ui.ic_tamin_document_image
 import taminx.core.core_ui.ic_tamin_workshop_contract_rows
 
 /**
- * جزئیات مبنا — one مبنای محاسباتی, its amount, and the documents filed with it.
+ * جزئیات مبنا — one مبنای محاسباتی's figures, then the documents filed with it.
  *
  * The documents arrived with the base row, so the section is populated without a request; only
  * *opening* one fetches, and each kind goes to a different endpoint and a different viewer.
@@ -140,16 +127,37 @@ fun ComputationalBaseDetailContent(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(WorkshopDimens.listContentPadding),
+            verticalArrangement = Arrangement.spacedBy(Spacing.smd),
         ) {
-            BaseSummaryCard(
+            BaseFiguresCard(
                 letterNumber = base.letterNumber,
-                sendDate = base.sendDate,
+                periodStart = base.periodStart,
+                periodEnd = base.periodEnd,
                 amount = base.amount,
-                documents = base.documents,
-                openingDocumentId = openingDocumentId,
-                failure = failure,
-                onOpenDocument = { onIntent(AssignerContractsIntent.DocumentTapped(it)) },
             )
+
+            Text(
+                text = stringResource(Res.string.assigner_documents_title),
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = LocalTaminColors.current.textPrimary,
+                modifier = Modifier.padding(top = Spacing.sm),
+            )
+            if (base.documents.isEmpty()) {
+                Text(
+                    text = stringResource(Res.string.assigner_documents_empty),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = LocalTaminColors.current.textMuted,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            } else {
+                DocumentList(
+                    documents = base.documents,
+                    openingDocumentId = openingDocumentId,
+                    failure = failure,
+                    onOpen = { onIntent(AssignerContractsIntent.DocumentTapped(it)) },
+                )
+            }
         }
     }
 
@@ -163,134 +171,40 @@ fun ComputationalBaseDetailContent(
 }
 
 /**
- * The one card جزئیات مبنا is built around: the سند line, the amount, then the documents.
+ * شمارهٔ سند, دورهٔ کارکرد and مبلغ کارکرد, as the design's card lists them.
  *
- * Takes the base's fields rather than the base, so the collapsible section below does not redraw
- * because an unrelated field of the state changed.
+ * The period row is left out when the service sent no period, rather than printing a dash under a
+ * label that promises one.
  */
 @Composable
-private fun BaseSummaryCard(
+private fun BaseFiguresCard(
     letterNumber: String,
-    sendDate: String,
+    periodStart: String,
+    periodEnd: String,
     amount: String,
-    documents: ImmutableList<BaseDocumentPR>,
-    openingDocumentId: String?,
-    failure: DocumentFailure?,
-    onOpenDocument: (BaseDocumentPR) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val colors = LocalTaminColors.current
-    // Open on arrival: the documents are the reason this screen exists, and they arrived with
-    // the row, so collapsing them behind a tap hides the whole point of the page.
-    var isExpanded by remember { mutableStateOf(true) }
-
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .taminSurface(WorkshopDimens.cardCorner)
-            .padding(
-                horizontal = WorkshopDimens.cardHorizontalPadding,
-                vertical = WorkshopDimens.cardTopPadding,
-            ),
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = stringResource(
-                    Res.string.assigner_base_detail_subtitle,
-                    letterNumber,
-                    sendDate,
-                ),
-                style = MaterialTheme.typography.labelMedium,
-                color = colors.textMuted,
-                modifier = Modifier.weight(1f),
-            )
-            NumericText(
-                text = amount,
-                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
-                color = colors.blueText,
+    val hasPeriod = periodStart.isNotBlank() && periodEnd.isNotBlank()
+    WorkshopRecordCard(modifier = modifier) {
+        DetailRow(
+            label = stringResource(Res.string.assigner_field_letter_number),
+            value = letterNumber,
+            verticalPadding = WorkshopDimens.cellVerticalPadding,
+        )
+        if (hasPeriod) {
+            TaminDivider()
+            DetailRow(
+                label = stringResource(Res.string.assigner_field_period),
+                value = stringResource(Res.string.assigner_base_period, periodStart, periodEnd),
+                numeric = false,
+                verticalPadding = WorkshopDimens.cellVerticalPadding,
             )
         }
-
-        DocumentsToggle(
-            isExpanded = isExpanded,
-            onToggle = { isExpanded = !isExpanded },
-            modifier = Modifier.padding(top = Spacing.smd),
-        )
-
-        if (isExpanded) {
-            if (documents.isEmpty()) {
-                Text(
-                    text = stringResource(Res.string.assigner_documents_empty),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = colors.textMuted,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = Spacing.smd),
-                )
-            } else {
-                DocumentList(
-                    documents = documents,
-                    openingDocumentId = openingDocumentId,
-                    failure = failure,
-                    onOpen = onOpenDocument,
-                    modifier = Modifier.padding(top = Spacing.smd),
-                )
-            }
-        }
-    }
-}
-
-/** «مستندات پیوست‌شده» and the chevron that turns over when the section opens. */
-@Composable
-private fun DocumentsToggle(
-    isExpanded: Boolean,
-    onToggle: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val colors = LocalTaminColors.current
-    val rotation by animateFloatAsState(
-        targetValue = if (isExpanded) ChevronOpenDegrees else 0f,
-        animationSpec = tween(Duration.fast),
-        label = "documentsChevron",
-    )
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onToggle)
-            // `border-top:1px dashed` in the design — the one rule that separates the amount from
-            // its attachments.
-            .drawBehind {
-                drawLine(
-                    color = colors.divider,
-                    start = Offset.Zero,
-                    end = Offset(size.width, 0f),
-                    strokeWidth = DashedRuleWidth.toPx(),
-                    pathEffect = DashedRule,
-                )
-            }
-            .padding(top = Spacing.smd),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = stringResource(Res.string.assigner_documents_title),
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.Bold,
-            color = colors.textPrimary,
-            modifier = Modifier.weight(1f),
-        )
-        Icon(
-            imageVector = vectorResource(Res.drawable.ic_tamin_chevron_down),
-            contentDescription = null,
-            tint = colors.chevron,
-            // Read inside graphicsLayer, so a frame of the turn costs no recomposition.
-            modifier = Modifier
-                .size(IconSize.small)
-                .graphicsLayer { rotationZ = rotation },
+        TaminDivider()
+        DetailRow(
+            label = stringResource(Res.string.assigner_field_amount),
+            value = amount,
+            verticalPadding = WorkshopDimens.cellVerticalPadding,
         )
     }
 }
@@ -396,7 +310,6 @@ private fun DocumentList(
 
     ListGroupView(
         items = items,
-        containerBackgroundColor = colors.bgPage,
         showDividers = false,
         itemContentPadding = DocumentRowPadding,
         modifier = modifier.fillMaxWidth(),
@@ -437,13 +350,6 @@ private fun DocumentViewer(
     }
 }
 
-/** `transform:rotate(180deg)` once the documents section is open. */
-private const val ChevronOpenDegrees = 180f
-
-/** Hoisted: a path effect allocated per frame is a path effect allocated for nothing. */
-private val DashedRule = PathEffect.dashPathEffect(floatArrayOf(6f, 6f))
-private val DashedRuleWidth = 1.dp
-
 private const val PdfFilePrefix = "computational_base_"
 private const val PdfFileSuffix = ".pdf"
 
@@ -459,6 +365,9 @@ private val PreviewBase = ComputationalBasePR(
     letterNumber = "۱۲۰۴۴",
     sendDate = "۱۴۰۰/۱۲/۱۵",
     amount = "۸۴,۰۰۰,۰۰۰ ریال",
+    amountRials = 84_000_000L,
+    periodStart = "۱۴۰۰/۰۷/۰۱",
+    periodEnd = "۱۴۰۰/۰۹/۳۰",
     documentCount = "۲",
     documents = persistentListOf(
         BaseDocumentPR(
@@ -487,12 +396,17 @@ private fun ComputationalBaseDetailPreview() = PreviewRtlThemeContent {
     )
 }
 
-/** A مبنا filed with nothing attached — the section opens onto its own sentence, not a gap. */
+/** A مبنا filed with nothing attached, and no period sent — its own sentence, and no period row. */
 @PreviewRtlTheme
 @Composable
 private fun ComputationalBaseDetailNoDocumentsPreview() = PreviewRtlThemeContent {
     ComputationalBaseDetailContent(
-        base = PreviewBase.copy(documents = persistentListOf(), documentCount = "۰"),
+        base = PreviewBase.copy(
+            documents = persistentListOf(),
+            documentCount = "۰",
+            periodStart = "",
+            periodEnd = "",
+        ),
         openingDocumentId = null,
         failure = null,
         preview = null,

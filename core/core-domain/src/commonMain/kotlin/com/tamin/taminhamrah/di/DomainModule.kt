@@ -288,6 +288,7 @@ import com.tamin.taminhamrah.useCases.stories.ToggleStorySaveUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetAssignerContractsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetComputationalBasePdfUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetComputationalBasesUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetSettlementCertificateUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetSettlementSubjectsUseCase
 import com.tamin.taminhamrah.useCases.workshops.SubmitSettlementRequestUseCase
 import com.tamin.taminhamrah.useCases.workshops.UploadSettlementPdfUseCase
@@ -494,6 +495,7 @@ val domainModule = module {
     factoryOf(::GetComputationalBasesUseCase)
     factoryOf(::GetComputationalBasePdfUseCase)
     factoryOf(::GetSettlementSubjectsUseCase)
+    factoryOf(::GetSettlementCertificateUseCase)
     factoryOf(::UploadSettlementPdfUseCase)
     factoryOf(::SubmitSettlementRequestUseCase)
     factoryOf(::GetContractRowsWithoutAgreementUseCase)

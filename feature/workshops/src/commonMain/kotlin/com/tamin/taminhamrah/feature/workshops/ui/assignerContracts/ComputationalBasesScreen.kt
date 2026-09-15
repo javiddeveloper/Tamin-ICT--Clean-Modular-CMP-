@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.workshops.ui.assignerContracts
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,13 +22,16 @@ import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.Com
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopListScaffold
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopScreenShell
 import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
+import com.tamin.taminhamrah.mapper.workshop.declaredTotal
 import com.tamin.taminhamrah.model.workshop.ComputationalBasePR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.ListGroupView
+import com.tamin.taminhamrah.ui.components.ListItemBadge
 import com.tamin.taminhamrah.ui.components.ListItemData
 import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.components.StatTile
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -35,17 +39,19 @@ import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.assigner_base_letter_number
-import taminx.core.core_ui.assigner_base_summary
+import taminx.core.core_ui.assigner_base_document_badge
+import taminx.core.core_ui.assigner_base_documents_count
+import taminx.core.core_ui.assigner_base_period
 import taminx.core.core_ui.assigner_bases_empty_body
 import taminx.core.core_ui.assigner_bases_empty_title
 import taminx.core.core_ui.assigner_bases_title
+import taminx.core.core_ui.assigner_bases_total
 import taminx.core.core_ui.assigner_contract_subtitle
 import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.ic_tamin_computational_base
 
 /**
- * مبانی محاسباتی — the bases filed under one پیمان.
+ * مبانی محاسباتی — the bases filed under one پیمان, and what they declare in total.
  *
  * The four keys the service is addressed with travel in the **route**, not in shared state, so the
  * screen can refetch after process death and cannot be opened against a پیمان it was not given.
@@ -75,7 +81,6 @@ fun ComputationalBasesScreen(
     }
     LaunchedEffect(keys) { viewModel.sendIntent(AssignerContractsIntent.OpenBases(keys)) }
 
-
     ComputationalBasesContent(
         bases = state.bases,
         workshopName = workshopName,
@@ -97,26 +102,44 @@ fun ComputationalBasesContent(
     onOpenBaseDetail: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val colors = LocalTaminColors.current
+    // A sum of the rows in hand would be a smaller number presented as the whole, so the tile waits
+    // until the last page is in.
+    val items = bases.items
+    val isComplete = !bases.isLoading && !bases.isLoadingMore && !bases.hasMore
+    val total = remember(items, isComplete) { if (isComplete) items.declaredTotal() else null }
+
     WorkshopScreenShell(
         title = stringResource(Res.string.assigner_bases_title),
         onBack = onBack,
         modifier = modifier,
     ) {
-        // The design puts the پیمان's identity as a muted line above the list rather than in
-        // the hero, and it keeps its place through every list state.
+        // The پیمان's identity as a muted line, then the total — both keep their place through
+        // every list state.
         val subtitle = stringResource(
             Res.string.assigner_contract_subtitle,
             workshopName,
             rowLabel,
         )
+        val totalLabel = stringResource(Res.string.assigner_bases_total)
         WorkshopListScaffold(
             header = {
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = LocalTaminColors.current.textMuted,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
+                    Text(
+                        text = subtitle,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = colors.textMuted,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    StatTile(
+                        label = totalLabel,
+                        amount = total,
+                        containerColor = colors.blueBg,
+                        contentColor = colors.blueText,
+                        labelColor = colors.textMuted,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             },
             state = bases,
             onLoadMore = { onIntent(AssignerContractsIntent.LoadMoreBases) },
@@ -145,15 +168,12 @@ fun ComputationalBasesContent(
 }
 
 /**
- * One مبنا: its سند number, when it was sent, how many documents hang off it, and its amount.
+ * One مبنا: the period it covers with its سند number beside it, how many documents it carries, and
+ * its amount.
  *
- * Drawn through the shared [ListGroupView] rather than a fourth bespoke card in this feature — the
- * design's row is a title, a muted line under it, a trailing value and a chevron, which is exactly
- * what a list row already is.
- *
- * The design labels the middle line «دوره». The service sends no such column; `senddate` — the
- * «تاریخ ارسال مبانی محاسباتی» the old app puts on this same row — is what actually arrives, so
- * that is what is shown, with the document count beside it as the design has it.
+ * Drawn through the shared [ListGroupView] — a title with a badge, a muted line, a trailing value
+ * and a chevron is exactly what a list row already is. A base the service sent no period for is
+ * titled by its تاریخ ارسال instead, the one date it does carry.
  */
 @Composable
 private fun ComputationalBaseRow(
@@ -162,23 +182,26 @@ private fun ComputationalBaseRow(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    val title = stringResource(Res.string.assigner_base_letter_number, base.letterNumber)
-    val summary = stringResource(
-        Res.string.assigner_base_summary,
-        base.sendDate,
-        base.documentCount,
-    )
+    val period = stringResource(Res.string.assigner_base_period, base.periodStart, base.periodEnd)
+    val title = if (base.periodStart.isNotBlank() && base.periodEnd.isNotBlank()) period else base.sendDate
+    val badgeText = stringResource(Res.string.assigner_base_document_badge, base.letterNumber)
+    val summary = stringResource(Res.string.assigner_base_documents_count, base.documentCount)
     val chevron = vectorResource(Res.drawable.ic_tamin_chevron_forward)
     val amount = base.amount
 
     // Built inside a remember for the same reason the scaffold's entrance key is: a fresh
     // ListItemData every recomposition would cost ListGroupView its ability to skip, and the
     // trailing slot is a lambda that would be a new instance each time.
-    val items = remember(title, summary, amount, chevron, colors, onOpen) {
+    val items = remember(title, badgeText, summary, amount, chevron, colors, onOpen) {
         persistentListOf(
             ListItemData(
                 title = title,
                 subtitle = summary,
+                badge = ListItemBadge(
+                    text = badgeText,
+                    backgroundColor = colors.blueBg,
+                    textColor = colors.blueText,
+                ),
                 onClick = onOpen,
                 customTrailingContent = {
                     Row(
@@ -188,7 +211,7 @@ private fun ComputationalBaseRow(
                         NumericText(
                             text = amount,
                             style = MaterialTheme.typography.labelMedium
-                                .copy(fontWeight = FontWeight.Bold),
+                                .copy(fontWeight = FontWeight.SemiBold),
                             color = colors.blueText,
                         )
                         Icon(
@@ -221,12 +244,17 @@ private val PreviewBases = persistentListOf(
         letterNumber = "۱۲۰۴۴",
         sendDate = "۱۴۰۰/۱۲/۱۵",
         amount = "۸۴,۰۰۰,۰۰۰ ریال",
+        amountRials = 84_000_000L,
+        periodStart = "۱۴۰۰/۰۷/۰۱",
+        periodEnd = "۱۴۰۰/۰۹/۳۰",
         documentCount = "۲",
     ),
+    // No period sent — titled by its تاریخ ارسال.
     ComputationalBasePR(
         letterNumber = "۱۲۱۹۰",
         sendDate = "۱۴۰۱/۰۱/۲۰",
         amount = "۹۱,۵۰۰,۰۰۰ ریال",
+        amountRials = 91_500_000L,
         documentCount = "۱",
     ),
 )
@@ -237,7 +265,7 @@ private fun ComputationalBasesFilledPreview() = PreviewRtlThemeContent {
     ComputationalBasesContent(
         bases = PagedListState(items = PreviewBases, total = 2),
         workshopName = "دبستان کارن ۲ مجتبی غلامیان",
-        rowLabel = "ردیف ۱",
+        rowLabel = "۱",
         onIntent = {},
         onBack = {},
         onOpenBaseDetail = {},
@@ -251,7 +279,7 @@ private fun ComputationalBasesEmptyPreview() = PreviewRtlThemeContent {
     ComputationalBasesContent(
         bases = PagedListState(),
         workshopName = "شرکت راه‌سازی البرز شرق",
-        rowLabel = "ردیف ۳",
+        rowLabel = "۳",
         onIntent = {},
         onBack = {},
         onOpenBaseDetail = {},
@@ -264,7 +292,7 @@ private fun ComputationalBasesLoadingPreview() = PreviewRtlThemeContent {
     ComputationalBasesContent(
         bases = PagedListState(isLoading = true),
         workshopName = "دبستان کارن ۲ مجتبی غلامیان",
-        rowLabel = "ردیف ۱",
+        rowLabel = "۱",
         onIntent = {},
         onBack = {},
         onOpenBaseDetail = {},

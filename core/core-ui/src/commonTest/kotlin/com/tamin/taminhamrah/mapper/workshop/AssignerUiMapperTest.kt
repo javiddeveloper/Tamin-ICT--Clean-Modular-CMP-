@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.model.workshop.BaseDocumentCategory
 import com.tamin.taminhamrah.model.workshop.BaseDocumentDN
 import com.tamin.taminhamrah.model.workshop.BaseDocumentKind
 import com.tamin.taminhamrah.model.workshop.ComputationalBaseDN
+import com.tamin.taminhamrah.model.workshop.SettlementCertificateDN
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -91,6 +92,43 @@ class AssignerUiMapperTest {
         assertTrue(zero.amount.contains("ریال"))
         assertFalse(missing.amount.contains("ریال"))
         assertNotEquals(zero.amount, missing.amount)
+    }
+
+    /** The raw amount survives next to the formatted one, so the bases can be added up. */
+    @Test
+    fun theRawAmountIsKeptForTheTotal() {
+        assertEquals(840_000_000L, ComputationalBaseDN(amount = 840_000_000L).toPresentation().amountRials)
+        assertEquals(null, ComputationalBaseDN(amount = null).toPresentation().amountRials)
+    }
+
+    /** The total adds what was sent and skips what was not; with nothing sent it is a gap, not ۰. */
+    @Test
+    fun theDeclaredTotalAddsOnlyTheAmountsSent() {
+        val bases = listOf(840_000L, null, 160_000L).map { ComputationalBaseDN(amount = it).toPresentation() }
+
+        assertEquals(ComputationalBaseDN(amount = 1_000_000L).toPresentation().amount, bases.declaredTotal())
+        assertEquals(
+            ComputationalBaseDN(amount = null).toPresentation().amount,
+            listOf(ComputationalBaseDN(amount = null).toPresentation()).declaredTotal(),
+        )
+    }
+
+    /** A base with no period leaves both ends blank, so the row drops the line instead of «— تا —». */
+    @Test
+    fun aMissingPeriodStaysBlank() {
+        val base = ComputationalBaseDN(letterNumber = "1").toPresentation()
+
+        assertEquals("", base.periodStart)
+        assertEquals("", base.periodEnd)
+    }
+
+    @Test
+    fun aCertificatePrintsItsNumberInPersianAndSeparatesItsDate() {
+        val certificate = SettlementCertificateDN(serial = "1080611", number = "38-7712405", date = "14021103")
+            .toPresentation()
+
+        assertEquals("۳۸-۷۷۱۲۴۰۵", certificate.number)
+        assertEquals("۱۴۰۲/۱۱/۰۳", certificate.date)
     }
 
     /** Each of the four codes the old app names gets its heading; anything else is still shown. */
