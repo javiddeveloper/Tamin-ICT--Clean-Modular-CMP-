@@ -24,6 +24,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.objectionableDebit.Objectionab
 import com.tamin.taminhamrah.feature.workshops.ui.paymentSheets.PaymentSheetsScreen
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebit.WorkshopDebitScreen
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebtInquiry.WorkshopDebtInquiryScreen
+import com.tamin.taminhamrah.model.workshop.AssignerContractPR
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativePR
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopPR
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
@@ -180,6 +181,21 @@ data class ComputationalBasesRoute(
 @Serializable
 data class ComputationalBaseDetailRoute(val letterNumber: String)
 
+/** مبانی محاسباتی of this پیمان. Offered only when all four keys are present, so never a partial set. */
+private fun AssignerContractPR.basesRoute() = ComputationalBasesRoute(
+    workshopId = card.workshopId,
+    branchCode = card.branchCode,
+    contractRow = contractRow,
+    contractSequence = contractSequence,
+    workshopName = card.name,
+    rowLabel = card.rowLabel,
+)
+
+private fun AssignerContractPR.settlementRoute() = SettlementRequestRoute(
+    contractRow = contractRow,
+    contractSequence = contractSequence,
+)
+
 @Serializable
 data class WorkshopDebtInquiryRoute(
     val workshopId: String,
@@ -271,29 +287,11 @@ fun NavGraphBuilder.workshopsScreen(
                         )
                     )
                 },
-                // The row the sheet was raised for arrives with the callback. The action is
-                // disabled unless all four keys are present, so this cannot address a partial set.
-                onOpenBases = { contract ->
-                    navController.navigate(
-                        ComputationalBasesRoute(
-                            workshopId = contract.card.workshopId,
-                            branchCode = contract.card.branchCode,
-                            contractRow = contract.contractRow,
-                            contractSequence = contract.contractSequence,
-                            workshopName = contract.card.name,
-                            rowLabel = contract.card.rowLabel,
-                        )
-                    )
-                },
+                // The action is disabled unless all four keys are present, so this cannot address a
+                // partial set.
+                onOpenBases = { navController.navigate(it.basesRoute()) },
                 // Disabled on the card unless the four keys of the request id are present.
-                onRequestSettlement = { contract ->
-                    navController.navigate(
-                        SettlementRequestRoute(
-                            contractRow = contract.contractRow,
-                            contractSequence = contract.contractSequence,
-                        )
-                    )
-                },
+                onRequestSettlement = { navController.navigate(it.settlementRoute()) },
             )
         }
 
@@ -304,14 +302,8 @@ fun NavGraphBuilder.workshopsScreen(
                 contractRow = route.contractRow,
                 contractSequence = route.contractSequence,
                 onBack = { navController.popBackStack() },
-                onRequestSettlement = { contract ->
-                    navController.navigate(
-                        SettlementRequestRoute(
-                            contractRow = contract.contractRow,
-                            contractSequence = contract.contractSequence,
-                        )
-                    )
-                },
+                onOpenBases = { navController.navigate(it.basesRoute()) },
+                onRequestSettlement = { navController.navigate(it.settlementRoute()) },
             )
         }
 
@@ -323,6 +315,8 @@ fun NavGraphBuilder.workshopsScreen(
                 contractRow = route.contractRow,
                 contractSequence = route.contractSequence,
                 onBack = { navController.popBackStack() },
+                // Straight to the پیمان‌ها, whether the form was opened from the list or from جزئیات.
+                onDone = { navController.popBackStack<AssignerContractsRoute>(inclusive = false) },
             )
         }
 

@@ -46,6 +46,7 @@ import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionQuery
 import com.tamin.taminhamrah.model.workshop.SmsMessageDN
+import com.tamin.taminhamrah.model.workshop.SettlementCertificateDN
 import com.tamin.taminhamrah.model.workshop.SettlementRequestDN
 import com.tamin.taminhamrah.model.workshop.SettlementSubjectDN
 import com.tamin.taminhamrah.repository.WorkShopsRepository
@@ -204,6 +205,22 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     override suspend fun submitSettlementRequest(request: SettlementRequestDN): String = answer {
         lastSettlementRequest = request
         settlementSubmitMessage
+    }
+
+    var settlementCertificate: SettlementCertificateDN? = null
+
+    /** workshopId, branchCode, contractRow, contractNumber — as the last certificate call sent them. */
+    var lastCertificateArgs: List<String>? = null
+        private set
+
+    override suspend fun getSettlementCertificate(
+        workshopId: String,
+        branchCode: String,
+        contractRow: String,
+        contractNumber: String,
+    ): SettlementCertificateDN? = answer {
+        lastCertificateArgs = listOf(workshopId, branchCode, contractRow, contractNumber)
+        settlementCertificate
     }
 
     override suspend fun getPaymentSheets(query: PaymentSheetQuery): PagedListDN<PaymentSheetDN> =
