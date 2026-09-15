@@ -189,6 +189,7 @@ fun UserRequestsContent(
                 item {
                     UserRequestFilterPanel(
                         refCode = state.refCode,
+                        selectedTypeId = state.selectedRequestTypeId,
                         selectedTypeName = state.selectedRequestTypeName,
                         requestTypes = state.requestTypes,
                         onRefCodeChanged = { onIntent(UserRequestsIntent.UpdateRefCode(it)) },
