@@ -1,6 +1,5 @@
 package com.tamin.taminhamrah.ui.components
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -24,12 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.geometry.CornerRadius as DrawCornerRadius
 import com.tamin.taminhamrah.mapper.campaign.toPresentation
 import com.tamin.taminhamrah.model.campaign.CampaignKind
 import com.tamin.taminhamrah.model.campaign.CampaignPR
@@ -58,10 +53,6 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.campaigns_swipe_hint
 import taminx.core.core_ui.campaigns_title
 import taminx.core.core_ui.ic_tamin_chevron_forward
-import kotlin.math.PI
-import kotlin.math.abs
-import kotlin.math.cos
-import kotlin.math.sin
 
 private val CardShape = RoundedCornerShape(CornerRadius.card)
 private val PillShape = RoundedCornerShape(CornerRadius.max)
@@ -144,9 +135,9 @@ fun CampaignCarousel(
         }
 
         if (pageCount > 1) {
-            CampaignDots(
-                pagerState = pagerState,
+            TaminPageIndicator(
                 pageCount = pageCount,
+                pagerState = pagerState,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(top = CampaignDimens.dotsTopGap),
@@ -276,57 +267,6 @@ private fun CampaignCard(
     }
 }
 
-/**
- * Takes the [pagerState] rather than the current page, and reads it **in the draw phase**.
- *
- * A swipe therefore costs this strip one redraw: no recomposition, and no relayout either. Reading
- * `currentPage` during composition — here or, worse, in the carousel above — would recompose on
- * every page change, and a row of per-dot `Box`es would then re-measure because the active dot is
- * a different width from the rest. The strip's own width never changes: exactly one dot is wide,
- * whichever it is.
- *
- * The width snaps rather than interpolating, which is what the design does — `cpIdx` is
- * `Math.round(scrollLeft / step)`, so the active dot changes at the halfway point and never
- * part-way.
- */
-@Composable
-private fun CampaignDots(
-    pagerState: PagerState,
-    pageCount: Int,
-    modifier: Modifier = Modifier,
-) {
-    val colors = LocalTaminColors.current
-    val activeColor = colors.blueText
-    val idleColor = colors.campaignDotIdle
-    val stripWidth = CampaignDimens.dotActiveWidth +
-        (CampaignDimens.dotSize + CampaignDimens.dotGap) * (pageCount - 1)
-
-    Canvas(
-        modifier = modifier.size(width = stripWidth, height = CampaignDimens.dotSize),
-    ) {
-        val gap = CampaignDimens.dotGap.toPx()
-        val idleWidth = CampaignDimens.dotSize.toPx()
-        val activeWidth = CampaignDimens.dotActiveWidth.toPx()
-        val radius = DrawCornerRadius(size.height / 2f)
-        val rtl = layoutDirection == LayoutDirection.Rtl
-        val current = pagerState.currentPage
-
-        var offset = 0f
-        repeat(pageCount) { page ->
-            val selected = page == current
-            val width = if (selected) activeWidth else idleWidth
-            // The first dot belongs to the first page, which under RTL is the rightmost one.
-            val left = if (rtl) size.width - offset - width else offset
-            drawRoundRect(
-                color = if (selected) activeColor else idleColor,
-                topLeft = Offset(left, 0f),
-                size = Size(width, size.height),
-                cornerRadius = radius,
-            )
-            offset += width + gap
-        }
-    }
-}
 
 /**
  * Everything a campaign card is made of below its content: the shadow it casts, the rounded clip,
@@ -351,10 +291,11 @@ private fun Modifier.campaignSurface(kind: CampaignKind): Modifier = this
     .drawWithCache {
         val gradient = angledLinearGradient(
             angleDeg = CampaignDimens.gradientAngleDeg,
-            start = kind.gradientStart,
-            mid = kind.gradientMid,
-            midStop = kind.gradientMidStop,
-            end = kind.gradientEnd,
+            stops = listOf(
+                0f to kind.gradientStart,
+                kind.gradientMidStop to kind.gradientMid,
+                1f to kind.gradientEnd,
+            ),
             width = size.width,
             height = size.height,
         )
@@ -380,37 +321,6 @@ private fun Modifier.campaignSurface(kind: CampaignKind): Modifier = this
             drawCircle(color = CampaignBubbleFill, radius = bubbleRadius, center = bubbleCenter)
         }
     }
-
-/**
- * A CSS `linear-gradient(<angle>deg, …)` as a Compose [Brush].
- *
- * CSS measures the angle from "to top", turning clockwise, and runs the gradient along a line
- * through the box center whose length is `|W·sin a| + |H·cos a|` — long enough that the first and
- * last stops land exactly on the corners. `Brush.linearGradient` takes two points instead, so the
- * line has to be reconstructed from the angle and the box.
- */
-private fun angledLinearGradient(
-    angleDeg: Float,
-    start: Color,
-    mid: Color,
-    midStop: Float,
-    end: Color,
-    width: Float,
-    height: Float,
-): Brush {
-    val radians = angleDeg * (PI.toFloat() / 180f)
-    val dx = sin(radians)
-    val dy = -cos(radians)
-    val half = (abs(width * dx) + abs(height * dy)) / 2f
-    val centre = Offset(width / 2f, height / 2f)
-    return Brush.linearGradient(
-        0f to start,
-        midStop to mid,
-        1f to end,
-        start = Offset(centre.x - half * dx, centre.y - half * dy),
-        end = Offset(centre.x + half * dx, centre.y + half * dy),
-    )
-}
 
 /* ---- Previews -------------------------------------------------------------------------------- */
 // The copy comes through the real mapper, so a preview that still looks right is evidence the

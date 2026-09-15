@@ -12,6 +12,13 @@ import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDTO
 import com.tamin.taminhamrah.model.pension.sendRetirementDocument.RetirementSaveDocumentRequest
 import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDTO
 import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDTO
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityFinalConfirmRequest
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveDocumentRequest
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoRequest
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoResponseDTO
+import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.RegisteredMedicalCommissionDTO
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestCreatedDTO
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestFormDTO
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
 import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestPersonal.DisabilityPersonalInfoDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
@@ -147,6 +154,12 @@ private class FakePensionRemoteDataSource(
     override suspend fun getRetirementRequestInfo(filter: List<ApiFilterDN>): ListData<RetirementRequestDTO> =
         error("not used in PensionRepositoryImplTest")
 
+    override suspend fun createRetirementRequest(
+        authenticationsCode: Long,
+        form: RetirementRequestFormDTO
+    ): RetirementRequestCreatedDTO =
+        error("not used in PensionRepositoryImplTest")
+
     override suspend fun checkRetirementStatus(): RetirementStatusDTO =
         error("not used in PensionRepositoryImplTest")
 
@@ -169,4 +182,27 @@ private class FakePensionRemoteDataSource(
         error("not used in PensionRepositoryImplTest")
 
     override suspend fun sendPayRollToInbox(filter: List<ApiFilterDN>): String? = sendPayRollToInboxResult
+
+    override suspend fun saveDisabilityUserInfo(body: DisabilitySaveInfoRequest): DisabilitySaveInfoResponseDTO =
+        error("not used in PensionRepositoryImplTest")
+
+    override suspend fun finalConfirmDisabilityRequest(
+        requestId: Long,
+        body: DisabilityFinalConfirmRequest
+    ): DisabilitySaveInfoResponseDTO =
+        error("not used in PensionRepositoryImplTest")
+
+    override suspend fun saveDocumentDisability(
+        requestId: Long,
+        body: DisabilitySaveDocumentRequest
+    ): String? =
+        error("not used in PensionRepositoryImplTest")
+
+    override suspend fun getMedicalCommissionPdf(lastWorkshop: String): PdfDownloadDTO =
+        error("not used in PensionRepositoryImplTest")
+
+    override suspend fun getRegisteredMedicalCommission(
+        query: ApiQueryParamDN
+    ): ListData<RegisteredMedicalCommissionDTO> =
+        error("not used in PensionRepositoryImplTest")
 }

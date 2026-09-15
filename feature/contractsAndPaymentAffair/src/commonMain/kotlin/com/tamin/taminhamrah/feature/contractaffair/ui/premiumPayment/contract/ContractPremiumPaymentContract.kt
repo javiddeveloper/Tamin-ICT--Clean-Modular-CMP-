@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.feature.contractaffair.ui.premiumPayment.contract
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.contractAffair.ContractDebitPR
 import com.tamin.taminhamrah.model.contractAffair.ContractLastPaymentPR
+import com.tamin.taminhamrah.model.payment.PaymentRequestDN
 
 /** دورهٔ پرداخت stepper bounds — 1..12 months, matching `old_android`'s `InsurancePaymentFragment`. */
 internal const val MIN_PAYMENT_MONTHS = 1
@@ -15,7 +16,7 @@ internal const val MAX_PAYMENT_MONTHS = 12
  * [contractNumber] / [premiumTypeCode] / [insuranceType] arrive as route arguments. [lastPayment]
  * seeds the «تا تاریخ … پرداخت شده است» banner; [debit] is the محاسبهٔ حق بیمه result card and is
  * cleared whenever [months] changes. The bottom «پرداخت حق بیمه» CTA is enabled once [debit] exists
- * but its action is intentionally not wired yet (SEP online-payment deferred).
+ * and fetches the payment ticket to navigate to payment checkout.
  */
 @Immutable
 data class ContractPremiumPaymentUiState(
@@ -27,12 +28,13 @@ data class ContractPremiumPaymentUiState(
     val lastPayment: ContractLastPaymentPR? = null,
     val months: Int = MIN_PAYMENT_MONTHS,
     val isCalculating: Boolean = false,
+    val isPaying: Boolean = false,
     val debit: ContractDebitPR? = null,
     val error: String? = null,
 ) {
-    val canDecrement: Boolean get() = months > MIN_PAYMENT_MONTHS
-    val canIncrement: Boolean get() = months < MAX_PAYMENT_MONTHS
-    val canPay: Boolean get() = debit != null
+    val canDecrement: Boolean get() = months > MIN_PAYMENT_MONTHS && !isPaying
+    val canIncrement: Boolean get() = months < MAX_PAYMENT_MONTHS && !isPaying
+    val canPay: Boolean get() = debit != null && !isPaying && !isCalculating
 
     sealed interface PartialState {
         data class HeaderSeeded(
@@ -46,7 +48,8 @@ data class ContractPremiumPaymentUiState(
         data class LastPaymentLoaded(val lastPayment: ContractLastPaymentPR) : PartialState
         data class MonthsChanged(val months: Int) : PartialState
         data class Calculating(val calculating: Boolean) : PartialState
-        data class DebitCalculated(val debit: ContractDebitPR) : PartialState
+        data class Paying(val isPaying: Boolean) : PartialState
+        data class DebitCalculated(val debit: ContractDebitPR?) : PartialState
         data class Error(val message: String?) : PartialState
     }
 }
@@ -64,9 +67,10 @@ sealed interface ContractPremiumPaymentIntent {
     data object Calculate : ContractPremiumPaymentIntent
     data object OpenPaymentDetails : ContractPremiumPaymentIntent
 
-    /** پرداخت حق بیمه — deliberately a no-op for now (SEP online-payment not in scope). */
+    /** پرداخت حق بیمه — requests gateway ticket and triggers navigation to checkout. */
     data object Pay : ContractPremiumPaymentIntent
     data object Retry : ContractPremiumPaymentIntent
+    data object OnResumed : ContractPremiumPaymentIntent
     data object OnBackClicked : ContractPremiumPaymentIntent
 }
 
@@ -74,6 +78,9 @@ sealed interface ContractPremiumPaymentEvent {
     data object NavigateBack : ContractPremiumPaymentEvent
     data class ShowError(val message: String) : ContractPremiumPaymentEvent
     data class ShowWarning(val message: String) : ContractPremiumPaymentEvent
+
+    /** Navigate to shared payment flow. */
+    data class NavigateToPayment(val request: PaymentRequestDN) : ContractPremiumPaymentEvent
 
     /** جزئیات برگ پرداخت — open the ریز محاسبه screen for the calculated period. */
     data class NavigateToPaymentDetails(

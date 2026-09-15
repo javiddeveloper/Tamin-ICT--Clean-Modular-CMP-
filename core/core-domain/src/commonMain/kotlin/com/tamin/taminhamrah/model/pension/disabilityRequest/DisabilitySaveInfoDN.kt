@@ -1,0 +1,25 @@
+package com.tamin.taminhamrah.model.pension.disabilityRequest
+
+data class DisabilitySaveInfoDN(
+    val activityType: String? = null,
+    val address: String? = null,
+    val age: String? = null,
+    val birthDate: Long? = null,
+    val branchCode: String? = null,
+    val fatherName: String? = null,
+    val firstName: String? = null,
+    val gender: String? = null,
+    val idNumber: String? = null,
+    val insuranceNumber: String? = null,
+    val issuePlace: String? = null,
+    val lastName: String? = null,
+    val managerName: String? = null,
+    val mobileNumber: String? = null,
+    val nationalCode: String? = null,
+    val pensionRequestDocList: List<DisabilityDocumentDN>? = null,
+    val phoneNumber: String? = null,
+    val status: String? = null,
+    val workshopAddress: String? = null,
+    val workshopCode: String? = null,
+    val workshopName: String? = null,
+)

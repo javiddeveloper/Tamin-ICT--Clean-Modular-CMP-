@@ -6,16 +6,17 @@ import com.tamin.taminhamrah.model.inquiryEducation.EducationDependentPersonalDT
 import com.tamin.taminhamrah.model.inquiryEducation.EducationDependentRelationDTO
 import com.tamin.taminhamrah.model.inquiryEducation.EducationDependentsListDTO
 import com.tamin.taminhamrah.tools.BaseDTO
+import com.tamin.taminhamrah.tools.FakeIOException
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminApiException
 import com.tamin.taminhamrah.tools.errorHandling.getTaminErrorUri
-import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
+import kotlinx.coroutines.test.runTest
 
 class FakeInquiryEducationApiService : InquiryEducationApiService {
     var getDataForEducationResult: BaseDTO<EducationDependentsListDTO> =
@@ -117,7 +118,7 @@ class InquiryEducationRemoteDataSourceImplTest {
 
     @Test
     fun getDataForEducation_networkException_throwsNoConnection() = runTest {
-        fakeApiService.shouldThrowException = RuntimeException("network")
+        fakeApiService.shouldThrowException = FakeIOException()
 
         val exception = assertFailsWith<TaminApiException> {
             dataSource.getDataForEducation()

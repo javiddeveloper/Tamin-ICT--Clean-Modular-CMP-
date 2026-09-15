@@ -13,6 +13,13 @@ import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertif
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequestDN
 import com.tamin.taminhamrah.model.pension.retirement.RetirementSaveDocumentDN
 import com.tamin.taminhamrah.model.pension.retirement.RetirementPersonalDN
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestCreatedDN
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestFormDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityFinalConfirmDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityRequestRefDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveDocumentDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.RegisteredMedicalCommissionDN
 import com.tamin.taminhamrah.model.personal.DisabilityPersonalInfoDN
 import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDN
 import com.tamin.taminhamrah.model.personal.AgeDN
@@ -31,7 +38,7 @@ class FakePensionRepository : PensionRepository {
     var userAgeResult: AgeDN? = null
     var disabilityPersonalInfoResult: DisabilityPersonalInfoDN? = null
     var edictPdfReportResult : PdfDownloadDN? = null
-    var payRollPDFResult: com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN? = null
+    var payRollPDFResult: PdfDownloadDN? = null
     var retirementRequestInfoResult: List<RetirementRequestDN> = emptyList()
     var retirementStatusResult: RetirementStatusDN? = null
     var authenticationAndGetPersonalInfoResult: RetirementPersonalDN? = null
@@ -96,7 +103,7 @@ class FakePensionRepository : PensionRepository {
     }
 
 
-    override suspend fun pensionerPayRollPDF(filters: List<ApiFilterDN>): Flow<com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN> =
+    override suspend fun pensionerPayRollPDF(filters: List<ApiFilterDN>): Flow<PdfDownloadDN> =
         flow {
             if (shouldThrowError) {
                 throw error!!
@@ -117,6 +124,22 @@ class FakePensionRepository : PensionRepository {
             throw error!!
         }
         emit(retirementRequestInfoResult)
+    }
+
+    var createRetirementRequestResult: RetirementRequestCreatedDN? = null
+    var lastCreateRetirementRequestForm: RetirementRequestFormDN? = null
+    var lastCreateRetirementTicketCode: Long? = null
+
+    override suspend fun createRetirementRequest(
+        authenticationsCode: Long,
+        form: RetirementRequestFormDN
+    ): Flow<RetirementRequestCreatedDN> = flow {
+        lastCreateRetirementTicketCode = authenticationsCode
+        lastCreateRetirementRequestForm = form
+        if (shouldThrowError) {
+            throw error!!
+        }
+        emit(createRetirementRequestResult!!)
     }
 
     override suspend fun checkRetirementStatus(): Flow<RetirementStatusDN> = flow {
@@ -172,4 +195,24 @@ class FakePensionRepository : PensionRepository {
             }
             emit(inquirePensionCertificateResult!!)
         }
+
+    override suspend fun saveDisabilityUserInfo(body: DisabilitySaveInfoDN): Flow<DisabilityRequestRefDN?> =
+        error("not used in this test")
+
+    override suspend fun finalConfirmDisabilityRequest(
+        requestId: Long,
+        body: DisabilityFinalConfirmDN
+    ): Flow<DisabilityRequestRefDN?> = error("not used in this test")
+
+    override suspend fun saveDocumentDisability(
+        requestId: Long,
+        body: DisabilitySaveDocumentDN
+    ): Flow<String?> = error("not used in this test")
+
+    override suspend fun getMedicalCommissionPdf(lastWorkshop: String): Flow<PdfDownloadDN> =
+        error("not used in this test")
+
+    override suspend fun getRegisteredMedicalCommission(
+        filters: List<ApiFilterDN>
+    ): Flow<List<RegisteredMedicalCommissionDN>> = error("not used in this test")
 }

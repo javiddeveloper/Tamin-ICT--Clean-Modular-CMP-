@@ -2,9 +2,7 @@ package com.tamin.taminhamrah.feature.workshops.ui.model
 
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
-import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
 import com.tamin.taminhamrah.util.toPersianDigits
-import kotlinx.coroutines.flow.first
 
 /**
  * A file a workshop form has attached, and what the service knows it by.
@@ -29,7 +27,15 @@ data class WorkshopAttachment(
  * نام‌نویسی — so the upload lives here once instead of in each ViewModel. The shared
  * `upload-image` endpoint is the same one addDependent and occurrence reporting use.
  */
-class WorkshopAttachmentUploader(private val uploadImage: UploadImageUseCase) {
+class WorkshopAttachmentUploader(
+    /**
+     * Puts one image on the server and hands back the guid it is known by.
+     *
+     * A function rather than the use case itself, so nothing downstream of a workshop form —
+     * a test included — has to know that the guid comes out of the contracts' repository.
+     */
+    private val uploadImage: suspend (UploadImageRequestDN) -> String,
+) {
 
     /**
      * @param typeCode the code the user filed the image under, from [types].
@@ -45,7 +51,7 @@ class WorkshopAttachmentUploader(private val uploadImage: UploadImageUseCase) {
         val type = requireNotNull(types.firstOrNull { it.code == typeCode }) {
             "Unknown document type '$typeCode'"
         }
-        val guid = uploadImage(UploadImageRequestDN(fileName = fileName, bytes = bytes)).first()
+        val guid = uploadImage(UploadImageRequestDN(fileName = fileName, bytes = bytes))
         return WorkshopAttachment(guid = guid, type = type, size = bytes.size.asKilobytes())
     }
 }
