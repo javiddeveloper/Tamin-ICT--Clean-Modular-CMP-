@@ -237,6 +237,11 @@ class WorkshopRecentlyAddedMembersViewModelTest {
         assertEquals(TEHRAN, form.issueCity)
         assertEquals(PROGRAMMER, form.job)
         assertEquals(DRAFT_PERSONAL_ID, form.personalId)
+        // Looked up by its code, not searched for on the first page of every job.
+        assertEquals(
+            listOf(ApiFilterDN(FilterProperty.JOB_CODE, PROGRAMMER.code, FilterOperator.EQUAL)),
+            jobs.lastQuery?.filters,
+        )
     }
 
     @Test

@@ -44,7 +44,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.transform
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.abs_doc_unknown
 import taminx.core.core_ui.abs_form_err_already_known
@@ -320,8 +320,13 @@ class WorkshopRecentlyAddedMembersViewModel(
 
         val jobCode = member.jobCode
         if (jobCode.isNotBlank()) {
+            // Asked for by code, as the old app does: an unfiltered first page holds ten of the
+            // thousands of jobs, so any other job would never be found there.
+            val byCode = ApiQueryParamDN(
+                filters = listOf(ApiFilterDN(FilterProperty.JOB_CODE, jobCode, FilterOperator.EQUAL)),
+            )
             val name = runCatching {
-                getJobTitlePage(ApiQueryParamDN()).first().items
+                getJobTitlePage(byCode).first().items
                     .firstOrNull { it.jobCode == jobCode }?.jobDescription
             }.getOrNull()
             if (name != null) {
@@ -445,13 +450,19 @@ class WorkshopRecentlyAddedMembersViewModel(
         emit(reportFailure(it))
     }
 
-    private fun observeJobPaging(): Flow<PartialState> = jobPaginator.state.map { paging ->
-        PartialState.FormPickerJobPagingChanged(
-            items = paging.items.map { PickedOption(it.jobCode, it.jobDescription) }.toPersistentList(),
-            isLoadingFirstPage = paging.isLoadingFirstPage,
-            isLoadingNextPage = paging.isLoadingNextPage,
-            endReached = paging.endReached,
+    private fun observeJobPaging(): Flow<PartialState> = jobPaginator.state.transform { paging ->
+        emit(
+            PartialState.FormPickerJobPagingChanged(
+                items = paging.items.map { PickedOption(it.jobCode, it.jobDescription) }.toPersistentList(),
+                isLoadingFirstPage = paging.isLoadingFirstPage,
+                isLoadingNextPage = paging.isLoadingNextPage,
+                endReached = paging.endReached,
+            ),
         )
+        // The paginator keeps a failure in its state instead of throwing, so without this a job
+        // search that failed would read as a search that found nothing. Said the way a failed
+        // city search is.
+        paging.error?.let { emit(reportFailure(it)) }
     }
 
     /** `jobDescription LIKE "*query*"` or empty filters for blank query (matching live server capture). */
