@@ -34,12 +34,17 @@ After sending, the client calls `track` every `eta` seconds until `status` is `D
   "data": {
     "canStartChat": true,
     "chatToken": "eyJhbGciOi...",
-    "errorMessage": null
+    "errorMessage": null,
+    "canSendVoice": true,
+    "ttl": 3600
   }
 }
 ```
 
-`canStartChat: false` closes the screen and shows `errorMessage`.
+- The whole answer is cached (`AgentAccessStore`), a refusal included; a transport failure keeps the last answer. The cached token is dropped **before** each check.
+- `canStartChat: false` hides the assistant's entry point and the screen shows `errorMessage`; no conversation is created.
+- `canSendVoice` enables the microphone. `ttl` is read but not acted on (same as the native app).
+- Checked when home is shown and when the assistant opens.
 
 ---
 
@@ -49,22 +54,37 @@ After sending, the client calls `track` every `eta` seconds until `status` is `D
 
 | Part | Type | Notes |
 |---|---|---|
+| `file` | `audio/wav` | **optional** — only for a voice message; sent **first** |
 | `data` | `application/json` | the body below |
-| `file` | `audio/mp4` | **optional** — only when the user sent a voice message |
+
+Every key is always written, nulls included (native Gson used `serializeNulls`); `AgentRequestDTO.toRequestBody` encodes with `encodeDefaults` and `explicitNulls` on, because the app's shared `Json` drops both.
 
 ```json
 {
   "prompt": "سابقه بیمه من را نشان بده",
-  "sessionId": "sess-123",
-  "lastEntity": "doctorName:ali, proficiency:heart",
+  "sessionId": "category_356ad05a-…",
+  "lastEntity": "",
   "chatToken": "eyJhbGciOi...",
-  "userType": "INSURED"
+  "userType": "INSURED",
+  "personal_info": { "national_id": "0012345678", "pensioner_id": null, "first_name": "…", "last_name": "…" },
+  "prompt_type": "text",
+  "state": null,
+  "history": [],
+  "device_type": "MOBILE",
+  "response_type": "show_to_user"
 }
 ```
 
-- `sessionId` is `null` on the first message; the server returns it and the client sends it back on the next one.
-- `lastEntity` preserves conversation continuity and is echoed back verbatim from the previous response.
+- `chatToken` is read from `AgentAccessStore` at send time, not from the screen.
+- `userType`: `ANONYMOUS` without a login, otherwise the stored type (`INSURED`, `PENSIONER`, `temporary`).
+- **Expired token** — HTTP 400, or a body containing `INVALID_OR_EXPIRED_CHAT_TOKEN` (or `INVALID_OR_EXPIRED_TOKEN`), raises `ChatTokenExpiredException` in `AiChatTokenPlugin`. `SendAgentPromptUseCase` checks chat permission once and resends with the new token; a refusal ends the prompt with the server's reason; a second rejection fails.
+- `sessionId` is the **local conversation id** (`category_<uuid>`, the `agent_sessions` row id), sent from the first message on. The server keys its memory of the chat on it; the `sessionId` in the answer is not used. Without a cached conversation (identity unknown) a per-conversation id is generated in memory.
+- `lastEntity`, `state`, `history` come from the previous answer and are sent back untouched; `""` / `null` / `[]` when there is none. An answer without one of them keeps the previous value. The app never reads `state` or `history` (their shape changes, e.g. `pending_form` as a string or an object); they are stored as raw JSON in `agent_sessions.agentState` / `agentHistory`, so a reopened chat continues where it stopped.
+- `personal_info` comes from `GetAgentPersonalInfoUseCase`: national id and name from the cached identity, `pensioner_id` only for pensioners (looked up once per national id). The whole block is `null` without a login or a real national id; a failed pensioner lookup sends `pensioner_id: null` rather than blocking the prompt.
+- `prompt_type` is `voice` when a `file` part is attached, otherwise `text`.
+- The multipart body is buffered into a `ByteArrayContent` before sending; Ktor's streamed multipart is a one-shot OkHttp body, which Chucker shows as "(body is empty)".
 - When a voice message is sent, `prompt` is empty and the text must be extracted from the audio file.
+- **Voice format is fixed: WAV, 16 kHz, mono, 16-bit PCM, file name `<uuid>.wav`** (`WavFormat`), as the native app recorded with WaveRecorder. The server's firewall rejects other audio: an `.m4a` (`audio/mp4`) upload came back **403 with an HTML "عدم امکان دسترسی" page**, never reaching the assistant. Android records with `AudioRecord` and writes the RIFF header on stop; iOS uses `AVAudioRecorder` with linear PCM. On the Android emulator the microphone records silence unless host audio input is enabled, and the server then answers «پیام شما خالی است».
 
 **Response (request accepted):**
 
@@ -108,12 +128,41 @@ Allowed values of `data.status`:
 |---|---|
 | `PENDING` | keep polling |
 | `DONE` | render `result.entities` |
-| `FAILED` | error message with a retry button |
+| `FAILED` | `data.message` (or a default text) with a retry button |
 | `CANCEL` | stop generation |
 
 ---
 
 ## 5. Entity — the unit of response
+
+> `stepNumber` / `itemType` are also accepted as `step_number` / `item_type` (the server sends snake_case), `sessionId` also as `session_id`. `result.render_mode` is `SERVER` when entities carry rendered markdown.
+
+### 5.0 Markdown entity (`render_mode: SERVER`)
+
+```json
+{
+  "key": "general_response",
+  "item_type": "markdown",
+  "step_number": 1,
+  "message_id": "…",
+  "data": [
+    { "item_type": "markdown_item", "format": "markdown", "content_version": "1", "text": "### عنوان
+
+…" },
+    { "item_type": "prompt_item", "prompt": "سؤال بعدی" }
+  ]
+}
+```
+
+No service runs for it and its key's flag is not checked; blank texts are dropped. Syntax, formulas and links: [[Agent-Markdown]]. Links use `[label](@key)` (keys in `DeepLinkKey`), `agent://prompt?text=…` or `https://*.tamin.ir`; there is no `TOOLBAR_TITLE` — the app uses the menu's name. See [[Deep-Links]].
+
+### Link items
+
+```json
+{ "item_type": "deeplink", "action_type": "local_deeplink", "deeplink": { "to": "contract_freelance" }, "title": "مشاغل آزاد" }
+```
+
+Appended as a button to the answer; an unknown `to` sends `title` as a prompt.
 
 Each entity produces **one bubble** in chat, displayed one at a time in array order.
 
@@ -298,7 +347,9 @@ Implemented keys:
 | General | `general_response` · `message` · `law` |
 | Screen entry | `disability_pension` · `deferred_installment_certificate` · `register_contract` · `complete_info_of_real_workshop` · `patient_history` |
 
-An unknown key is not an error; if it carries a `message` it is rendered as plain text.
+An unknown key is not an error; if it carries a `message` it is rendered as markdown. `workers_payment` is also accepted as `worker_payment`.
+
+Client service answers are markdown built from the server's `message` (as the title) and the data; see [[Agent-Markdown]] for each key's rules.
 
 ---
 
