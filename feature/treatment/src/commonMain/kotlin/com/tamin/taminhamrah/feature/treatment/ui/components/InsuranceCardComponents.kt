@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,7 +64,14 @@ import com.tamin.taminhamrah.ui.theme.TaminCardTealMid
 import com.tamin.taminhamrah.ui.theme.TaminCardTealStart
 import com.tamin.taminhamrah.ui.theme.TaminCoverageBadgeBg
 import com.tamin.taminhamrah.ui.theme.TaminCoverageBadgeFg
-import com.tamin.taminhamrah.ui.theme.TaminRed
+import com.tamin.taminhamrah.ui.theme.TaminCoverageRejectedBadgeBg
+import com.tamin.taminhamrah.ui.theme.TaminCoverageRejectedBadgeFg
+import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardChipBg
+import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardDivider
+import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardInk
+import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardInkMuted
+import com.tamin.taminhamrah.ui.theme.Thickness
+import com.tamin.taminhamrah.ui.theme.insuranceCardTextStyles
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -78,12 +84,6 @@ import taminx.core.core_ui.coverage_pending
 import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.ic_tamin_cross
 import taminx.core.core_ui.ic_tamin_verified
-import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardChipBg
-import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardInk
-import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardInkMuted
-import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardDivider
-import com.tamin.taminhamrah.ui.theme.Thickness
-import com.tamin.taminhamrah.ui.theme.insuranceCardTextStyles
 
 /**
  * The electronic health-insurance card and everything that dresses one: its gradient identity,
@@ -504,8 +504,8 @@ private fun CoverageStatus.cardStyle(
             badge = {
                 CoverageBadge(
                     icon = vectorResource(Res.drawable.ic_tamin_cross),
-                    containerColor = TaminRed,
-                    contentColor = TaminInsuranceCardInk,
+                    containerColor = TaminCoverageRejectedBadgeBg,
+                    contentColor = TaminCoverageRejectedBadgeFg,
                 )
             },
         )
@@ -548,14 +548,23 @@ fun InsuranceCardCarousel(
             // resting at scroll 0, which under RTL holds the first card against the right inset
             // and lets the next one peek on the left. Padding both sides equally centres every
             // card instead and opens a gutter beside the first one.
-            HorizontalPager(
-                state = pagerState,
-                key = { page -> page },
-                contentPadding = PaddingValues(
+            //
+            // A lone card is the exception: with no neighbor to peek, pinning it leaves an empty
+            // strip on one side. It spans the track instead — centred, and on the same gutters as
+            // the sections below it.
+            val trackPadding = if (pageCount > 1) {
+                PaddingValues(
                     start = TreatmentDimens.cardTrackPadding,
                     end = (maxWidth - TreatmentDimens.cardTrackPadding - cardWidth)
                         .coerceAtLeast(TreatmentDimens.cardTrackPadding),
-                ),
+                )
+            } else {
+                PaddingValues(horizontal = TreatmentDimens.cardTrackPadding)
+            }
+            HorizontalPager(
+                state = pagerState,
+                key = { page -> page },
+                contentPadding = trackPadding,
                 pageSpacing = TreatmentDimens.cardTrackGap,
                 modifier = Modifier.fillMaxWidth(),
             ) { page ->

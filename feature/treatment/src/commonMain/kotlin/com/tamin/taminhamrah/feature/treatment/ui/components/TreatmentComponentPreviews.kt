@@ -20,6 +20,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import kotlinx.collections.immutable.persistentListOf
+import com.tamin.taminhamrah.feature.treatment.ui.model.CoverageStatus
+import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItemPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.IconTile
@@ -95,6 +97,27 @@ private fun InsuranceCardCarouselPreview() {
                         isDependent = page > 0,
                         dependantOrdinal = page - 1,
                     ),
+                )
+            }
+        }
+    }
+}
+
+/** No dependants and no coverage: one centred card, wearing the refusal badge. */
+@PreviewRtlTheme
+@Composable
+private fun InsuranceCardSingleRejectedPreview() {
+    val patient = PatientItemPR(nationalId = "0079542318", fullName = "علی رضایی", isDependent = false)
+    PreviewRtlThemeContent {
+        Column(modifier = Modifier.background(LocalTaminColors.current.bgPage)) {
+            InsuranceCardCarousel(
+                pageCount = 1,
+                pagerState = rememberPagerState { 1 },
+            ) {
+                PatientCard(
+                    patient = patient,
+                    status = CoverageStatus.Rejected("وضعیت حمایت‌های درمانی: برخوردار نیستید"),
+                    dependantOrdinal = 0,
                 )
             }
         }

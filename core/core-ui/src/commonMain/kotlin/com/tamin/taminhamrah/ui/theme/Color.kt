@@ -40,9 +40,14 @@ val TaminCardAmberStart = Color(0xFFF4A83D)
 val TaminCardAmberMid = Color(0xFFE08A00)
 val TaminCardAmberEnd = Color(0xFFB96B00)
 
-// Coverage badge on the insurance card footer.
+// Coverage badge on the insurance card footer: a mint disc with a deep-green tick when covered,
+// and its counterpart when not — a soft rose disc with a deep-red cross. The same light-disc,
+// dark-glyph pairing, so a refusal reads as a status on the card's gradient rather than as a
+// saturated red alarm stamped on top of it.
 val TaminCoverageBadgeBg = Color(0xFF4BE3A0)
 val TaminCoverageBadgeFg = Color(0xFF0B5F4F)
+val TaminCoverageRejectedBadgeBg = Color(0xFFFF8F8F)
+val TaminCoverageRejectedBadgeFg = Color(0xFF7A1212)
 
 // ---- Semantic accents ----
 val TaminGreen = Color(0xFF03AD5F)       // success / active dot
