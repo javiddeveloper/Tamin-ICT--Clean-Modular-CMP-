@@ -61,6 +61,10 @@ class SettlementRequestViewModel(
         SettlementRequestIntent.RemoveSubjectImage -> just(PartialState.SubjectImageRemoved)
         SettlementRequestIntent.Next -> next()
         SettlementRequestIntent.Previous -> previous()
+        is SettlementRequestIntent.StepSelected -> flow {
+            // Forward stays behind «مرحلهٔ بعد», where the step's rules are checked.
+            if (intent.step < uiState.value.step) emit(PartialState.StepChanged(intent.step))
+        }
     }
 
     private fun just(partialState: PartialState): Flow<PartialState> = flow { emit(partialState) }
@@ -157,10 +161,10 @@ class SettlementRequestViewModel(
             return@flow
         }
         val contract = state.contract ?: return@flow
+        if (state.isSubmitting) return@flow
         emit(PartialState.SubmittingChanged(true))
         submitSettlementRequest(state.toRequest(contract))
-        emit(PartialState.SubmittingChanged(false))
-        sendEvent(SettlementRequestEvent.Submitted)
+        emit(PartialState.Submitted)
     }.catch {
         emit(PartialState.SubmittingChanged(false))
         sendEvent(SettlementRequestEvent.ShowServerMessage(it.toSingleLineMessage()))
@@ -179,8 +183,10 @@ class SettlementRequestViewModel(
         PartialState.ContractToggled -> currentState.copy(isContractOpen = !currentState.isContractOpen)
         is PartialState.FieldChanged -> currentState.withField(partialState.field, partialState.value)
         is PartialState.DateChanged -> currentState.withDate(partialState.field, partialState.date)
-        is PartialState.SubcontractorChanged ->
-            currentState.copy(hasSubcontractor = partialState.hasSubcontractor)
+        is PartialState.SubcontractorChanged -> currentState.copy(
+            hasSubcontractor = partialState.hasSubcontractor,
+            errors = currentState.errors.remove(SettlementField.SUBCONTRACTOR),
+        )
 
         PartialState.SubjectsLoading -> currentState.copy(isSubjectsLoading = true)
         is PartialState.SubjectsLoaded ->
@@ -198,6 +204,7 @@ class SettlementRequestViewModel(
             currentState.copy(
                 isUploading = false,
                 terms = currentState.terms.copy(image = persistentListOf(partialState.attachment)),
+                errors = currentState.errors.remove(SettlementField.SUBJECT_IMAGE),
             )
         } else {
             currentState.copy(
@@ -218,6 +225,7 @@ class SettlementRequestViewModel(
 
         is PartialState.Rejected -> currentState.copy(errors = partialState.errors)
         is PartialState.SubmittingChanged -> currentState.copy(isSubmitting = partialState.isSubmitting)
+        PartialState.Submitted -> currentState.copy(isSubmitting = false, isSubmitted = true)
         PartialState.Failed ->
             currentState.copy(isUploading = false, isSubmitting = false, isSubjectsLoading = false)
     }
@@ -252,8 +260,10 @@ private fun SettlementRequestUiState.withField(
         SettlementField.LETTER_DATE,
         SettlementField.START_DATE,
         SettlementField.END_DATE,
+        SettlementField.SUBCONTRACTOR,
         SettlementField.DOCUMENTS,
         SettlementField.SUBJECT,
+        SettlementField.SUBJECT_IMAGE,
         -> this
     }
 }
@@ -287,7 +297,7 @@ private fun SettlementRequestUiState.toRequest(contract: AssignerContractPR): Se
         letterDate = letterDate.isoGregorian(),
         startDate = startDate.isoGregorian(),
         endDate = endDate.isoGregorian(),
-        hasSubcontractor = hasSubcontractor,
+        hasSubcontractor = hasSubcontractor == true,
         amount = amount.toLongOrNull() ?: 0L,
         currencyAmount = currencyAmount.toLongOrNull() ?: 0L,
         currencyAmountInRial = currencyInRial.toLongOrNull() ?: 0L,

@@ -13,7 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopDocumentsPanel
-import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormSection
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormBanner
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopPickerField
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopRecordCard
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopTextField
@@ -57,8 +57,8 @@ import taminx.core.core_ui.settlement_price_list_owner
 import taminx.core.core_ui.settlement_price_list_owner_hint
 import taminx.core.core_ui.settlement_services_amount
 import taminx.core.core_ui.settlement_subject
+import taminx.core.core_ui.settlement_subject_none_note
 import taminx.core.core_ui.settlement_supply_owner
-import taminx.core.core_ui.settlement_terms_section
 import taminx.core.core_ui.settlement_transport_price
 
 /**
@@ -84,7 +84,6 @@ internal fun SettlementTermsStep(
     val subjectLabel = stringResource(Res.string.settlement_subject)
     var isSubjectSheetOpen by rememberSaveable { mutableStateOf(false) }
 
-    WorkshopFormSection(title = stringResource(Res.string.settlement_terms_section))
     SettlementChoiceField(
         label = subjectLabel,
         value = subject?.label,
@@ -130,7 +129,12 @@ internal fun SettlementTermsStep(
                 error = errors[SettlementField.AMOUNT1],
                 onIntent = onIntent,
             )
-            SettlementSubjectImage(image = terms.image, isUploading = isUploading, onIntent = onIntent)
+            SettlementSubjectImage(
+                image = terms.image,
+                isUploading = isUploading,
+                isError = SettlementField.SUBJECT_IMAGE in errors,
+                onIntent = onIntent,
+            )
         }
 
         SettlementTermsForm.MATERIALS_SUPPLY -> {
@@ -257,10 +261,18 @@ internal fun SettlementTermsStep(
                 error = errors[SettlementField.AMOUNT2],
                 onIntent = onIntent,
             )
-            SettlementSubjectImage(image = terms.image, isUploading = isUploading, onIntent = onIntent)
+            SettlementSubjectImage(
+                image = terms.image,
+                isUploading = isUploading,
+                isError = SettlementField.SUBJECT_IMAGE in errors,
+                onIntent = onIntent,
+            )
         }
 
-        SettlementTermsForm.NONE -> Unit
+        // Said rather than left blank, so an empty step does not read as a form that failed to load.
+        SettlementTermsForm.NONE -> if (subject != null) {
+            WorkshopFormBanner(text = stringResource(Res.string.settlement_subject_none_note))
+        }
     }
 
     if (isSubjectSheetOpen) {
@@ -290,6 +302,7 @@ internal fun SettlementTextField(
     value: String,
     error: StringResource?,
     onIntent: (SettlementRequestIntent) -> Unit,
+    modifier: Modifier = Modifier,
     placeholder: String = "",
     isDigits: Boolean = true,
     isRequired: Boolean = true,
@@ -301,6 +314,7 @@ internal fun SettlementTextField(
         label = label,
         value = value,
         onValueChange = { onIntent(SettlementRequestIntent.FieldChanged(field, it)) },
+        modifier = modifier,
         placeholder = placeholder,
         keyboardType = if (isDigits) KeyboardType.Number else KeyboardType.Text,
         inputRestriction = if (isDigits) InputRestriction.DigitsOnly else InputRestriction.None,
@@ -323,6 +337,7 @@ internal fun SettlementChoiceField(
     value: String?,
     error: StringResource?,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
     isDate: Boolean = false,
 ) {
     val errorText = error?.let { stringResource(it) }
@@ -330,6 +345,7 @@ internal fun SettlementChoiceField(
         label = label,
         value = value,
         onClick = onClick,
+        modifier = modifier,
         isDate = isDate,
         isRequired = true,
         isValid = if (errorText != null) false else null,
@@ -375,6 +391,7 @@ private fun SettlementOptionField(
 private fun SettlementSubjectImage(
     image: ImmutableList<WorkshopAttachment>,
     isUploading: Boolean,
+    isError: Boolean,
     onIntent: (SettlementRequestIntent) -> Unit,
 ) {
     WorkshopDocumentsPanel(
@@ -385,6 +402,7 @@ private fun SettlementSubjectImage(
         onAdd = { fileName, bytes, _ -> onIntent(SettlementRequestIntent.AddSubjectImage(fileName, bytes)) },
         onRemove = { onIntent(SettlementRequestIntent.RemoveSubjectImage) },
         isUploading = isUploading,
+        isError = isError,
     )
 }
 
@@ -405,7 +423,7 @@ internal fun SettlementFigure(text: String, modifier: Modifier = Modifier) {
     Text(
         text = text,
         style = MaterialTheme.typography.labelLarge,
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.SemiBold,
         color = LocalTaminColors.current.greenText,
         modifier = modifier,
     )

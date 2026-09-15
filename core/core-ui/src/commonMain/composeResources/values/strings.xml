@@ -2670,7 +2670,6 @@
 
     <!-- واگذارندگان (assigner contracts) -->
     <string name="assigner_contracts_title">واگذارندگان</string>
-    <string name="assigner_contracts_subtitle">لیست ردیف پیمان‌های کارگاه</string>
     <string name="assigner_contracts_action_desc">پیمان‌هایی که واگذارندهٔ آن‌ها هستید</string>
     <string name="assigner_contract_detail_title">جزئیات پیمان</string>
     <string name="assigner_bases_title">مبانی محاسباتی</string>
@@ -2680,8 +2679,11 @@
     <string name="assigner_empty_no_search_title">کارگاهی جست‌وجو نشده است</string>
     <string name="assigner_empty_no_search_body">برای مشاهدهٔ ردیف پیمان‌ها، کد کارگاه را جست‌وجو کنید.</string>
     <string name="assigner_empty_not_found_title">نتیجه‌ای یافت نشد</string>
-    <string name="assigner_empty_not_found_body">کد کارگاه یا فیلترها را بررسی کنید و دوباره جست‌وجو کنید.</string>
-    <string name="assigner_search_workshop">جست‌وجوی کارگاه</string>
+    <string name="assigner_empty_not_found_body">کد کارگاه یا کد شعبه را بررسی کنید و دوباره جست‌وجو کنید.</string>
+    <string name="assigner_empty_active_title">پیمان جاری ندارید</string>
+    <string name="assigner_empty_finished_title">پیمان خاتمه‌یافته ندارید</string>
+    <string name="assigner_empty_tab_body">پیمان‌های این وضعیت در کارگاه انتخاب‌شده ثبت نشده است. کارگاه دیگری را انتخاب کنید.</string>
+    <string name="assigner_select_workshop">انتخاب کارگاه</string>
     <string name="assigner_filter_label">جست‌وجو</string>
     <string name="assigner_filter_workshop">کد کارگاه %1$s</string>
     <string name="assigner_filter_branch">کد شعبه %1$s</string>
@@ -2692,19 +2694,32 @@
     <string name="assigner_tab_active">جاری</string>
     <string name="assigner_tab_finished">خاتمه‌یافته</string>
     <string name="assigner_count_label">واگذارنده</string>
+    <string name="assigner_me_label">کارگاه واگذارنده</string>
+    <string name="assigner_action_detail">جزئیات</string>
+    <string name="assigner_action_bases">مبانی</string>
+    <string name="assigner_action_settlement">مفاصاحساب</string>
+    <string name="assigner_action_certificate">گواهی صادرشده</string>
 
     <!-- Search sheet -->
+    <string name="assigner_search_subtitle">ردیف پیمان‌ها بر اساس کارگاه و شعبه نمایش داده می‌شود.</string>
+    <string name="assigner_search_apply">مشاهدهٔ ردیف پیمان‌ها</string>
     <string name="assigner_search_branch_code_optional">کد شعبه (اختیاری)</string>
     <string name="assigner_search_contract_row_optional">ردیف پیمان (اختیاری)</string>
-    <string name="assigner_search_workshop_hint">شمارهٔ ۱۰ رقمی کارگاه</string>
-    <string name="assigner_search_branch_hint">مثلاً ۱۲</string>
+    <string name="assigner_search_workshop_hint">۱۰ رقم</string>
+    <string name="assigner_search_branch_hint">۴ رقم</string>
     <string name="assigner_search_row_hint">مثلاً ۳</string>
 
     <!-- Screen B — جزئیات پیمان -->
     <string name="assigner_group_contract">اطلاعات پیمان</string>
-    <string name="assigner_group_assigner">اطلاعات واگذارنده (کارگاه شما)</string>
+    <string name="assigner_group_assigner">اطلاعات واگذارنده</string>
     <string name="assigner_group_contractor">اطلاعات پیمانکار</string>
     <string name="assigner_field_contract_row">ردیف پیمان</string>
+    <string name="assigner_field_contract_sequence">توالی پیمان</string>
+    <string name="assigner_status_active_note">این پیمان فعال است؛ پس از پایان عملیات می‌توانید درخواست صدور مفاصاحساب ثبت کنید.</string>
+    <string name="assigner_status_finished_note">این پیمان خاتمه یافته است و امکان ثبت درخواست جدید مفاصاحساب ندارد.</string>
+    <string name="assigner_certificate_issued">گواهی مفاصاحساب %1$s در تاریخ %2$s صادر شده است.</string>
+    <string name="assigner_certificate_not_found">گواهی مفاصاحسابی برای این پیمان ثبت نشده است.</string>
+    <string name="assigner_finished_cannot_request">برای پیمان خاتمه‌یافته امکان ثبت درخواست جدید وجود ندارد.</string>
     <string name="assigner_field_contract_number">شمارهٔ قرارداد</string>
     <string name="assigner_field_contract_subject">موضوع پیمان</string>
     <string name="assigner_field_workshop_name">نام کارگاه</string>
@@ -2713,13 +2728,17 @@
     <string name="assigner_field_address">نشانی</string>
 
     <!-- Screen C — مبانی محاسباتی -->
-    <string name="assigner_base_letter_number">شمارهٔ سند %1$s</string>
-    <string name="assigner_base_summary">%1$s · %2$s سند</string>
     <string name="assigner_bases_empty_title">مبنای محاسباتی ثبت نشده است</string>
-    <string name="assigner_bases_empty_body">برای این پیمان هنوز مبنای محاسباتی ارسال نشده است.</string>
+    <string name="assigner_bases_empty_body">برای این پیمان هنوز صورت‌وضعیتی از سوی شعبه ثبت نشده. پس از ثبت، سوابق در همین صفحه نمایش داده می‌شود.</string>
+    <string name="assigner_bases_total">جمع کارکرد اعلامی</string>
+    <string name="assigner_base_period">%1$s تا %2$s</string>
+    <string name="assigner_base_document_badge">سند %1$s</string>
+    <string name="assigner_base_documents_count">%1$s مستند</string>
 
     <!-- Screen D — جزئیات مبنا -->
-    <string name="assigner_base_detail_subtitle">شمارهٔ سند %1$s · %2$s</string>
+    <string name="assigner_field_letter_number">شمارهٔ سند</string>
+    <string name="assigner_field_period">دورهٔ کارکرد</string>
+    <string name="assigner_field_amount">مبلغ کارکرد</string>
     <string name="assigner_documents_title">مستندات پیوست‌شده</string>
     <string name="assigner_documents_empty">مستندی پیوست نشده است</string>
     <string name="assigner_document_unavailable">در دسترس نیست</string>
@@ -2734,27 +2753,36 @@
 
     <!-- واگذارندگان — درخواست مفاصاحساب. Wording is the old app's unless the design names it. -->
     <string name="settlement_title">درخواست مفاصاحساب</string>
-    <string name="settlement_step_documents">مستندات</string>
-    <string name="settlement_step_terms">شرایط قرارداد</string>
+    <string name="settlement_step_contract">اطلاعات قرارداد</string>
+    <string name="settlement_step_letter">اعلام مشخصات نامه و ارسال آن</string>
+    <string name="settlement_step_documents">بارگذاری مدارک</string>
+    <string name="settlement_step_terms">شرایط قرارداد با توجه به موضوع کار</string>
     <string name="settlement_selected_contract">پیمان انتخاب‌شده</string>
+    <string name="settlement_contract_row_sequence">ردیف / توالی پیمان</string>
     <string name="settlement_contractor_name">نام پیمانکار</string>
     <string name="settlement_contractor_workshop">کد کارگاه پیمانکار</string>
-    <string name="settlement_letter_section">اعلام مشخصات نامه</string>
-    <string name="settlement_letter_number">شماره نامه</string>
+    <string name="settlement_contractor_branch">شعبهٔ پیمانکار</string>
+    <string name="settlement_contract_info_note">این اطلاعات از پروندهٔ پیمان خوانده می‌شود و قابل ویرایش نیست. در مرحلهٔ بعد مشخصات نامهٔ درخواست و مبالغ کارکرد را وارد می‌کنید.</string>
+    <string name="settlement_letter_number">شمارهٔ نامه</string>
     <string name="settlement_letter_date">تاریخ نامه</string>
     <string name="settlement_start_date">تاریخ شروع قرارداد</string>
-    <string name="settlement_end_date">تاریخ خاتمه عملیات اجرایی پیمان</string>
-    <string name="settlement_has_subcontractor">مقاطعه کار جهت اجرای پروژه از پیمانکاران فرعی استفاده نموده است؟</string>
+    <string name="settlement_end_date">تاریخ اجرای عملیات پیمان</string>
+    <string name="settlement_has_subcontractor">آیا پیمان، پیمانکار جزء دارد؟</string>
+    <string name="settlement_subcontractor_hint">پاسخ «بله» نوع مستند «مستندات لیست فهرست» را در مرحلهٔ بارگذاری فعال می‌کند.</string>
     <string name="settlement_yes">بله</string>
     <string name="settlement_no">خیر</string>
-    <string name="settlement_amount">مبلغ ریالی ناخالص کارکرد</string>
-    <string name="settlement_amount_hint">قطعی، تعدیل، ما به التفاوت مصالح و…</string>
+    <string name="settlement_amount">مبلغ ناخالص کارکرد (ریال)</string>
     <string name="settlement_foreign_exchange_note">در صورتی که قرارداد فاقد کارکرد ارزی می‌باشد، نیازی به تکمیل مبلغ ارزی و معادل آن نمی‌باشد.</string>
-    <string name="settlement_currency_amount">مبلغ ارزی</string>
+    <string name="settlement_currency_amount">مبلغ ارزی کارکرد</string>
     <string name="settlement_currency_in_rial">معادل ریالی مبلغ ارزی</string>
-    <string name="settlement_total">مجموع کل ناخالص کارکرد: %1$s ریال</string>
-    <string name="settlement_terms_section">شرایط قرارداد با توجه به موضوع کار</string>
-    <string name="settlement_subject">موضوع کار</string>
+    <string name="settlement_total">جمع کل کارکرد پیمان: %1$s ریال</string>
+    <string name="settlement_documents_hint">دست‌کم یک مستند لازم است. نوع مستند را پیش از انتخاب فایل مشخص کنید.</string>
+    <string name="settlement_doc_letter">مستندات نامه</string>
+    <string name="settlement_doc_supplement">مستندات مدارک الحاقیه</string>
+    <string name="settlement_doc_final_status">مستندات صورت‌وضعیت قطعی</string>
+    <string name="settlement_doc_subcontractor">مستندات لیست فهرست</string>
+    <string name="settlement_subject">موضوع کار پیمان</string>
+    <string name="settlement_subject_none_note">این موضوع کار به اطلاعات تکمیلی نیاز ندارد. برای ارسال درخواست، «ثبت مفاصاحساب» را بزنید.</string>
     <string name="settlement_price_list_owner">انعقاد قرارداد (تهیه مصالح به عهده)</string>
     <string name="settlement_price_list_owner_hint">انعقاد قرارداد بر اساس فهرست بهاء پایه سازمان برنامه و بودجه</string>
     <string name="settlement_owner_contractor">پیمانکار</string>
@@ -2789,8 +2817,12 @@
     <string name="settlement_err_currency_rial">لطفاً ریالی که معادل ارزی است را وارد نمایید!</string>
     <string name="settlement_err_drivers">مبلغ کارکرد رانندگان در اختیار پیمانکار وارد شده از مبلغ ناخالص کارکرد بزرگ‌تر است!</string>
     <string name="settlement_err_equipment">هزینه خرید تجهیزات از مبلغ ناخالص کارکرد بزرگ‌تر است!</string>
+    <string name="settlement_err_build_sum">مجموع مبالغ وارد‌شده از مبلغ ناخالص کارکرد بزرگ‌تر است!</string>
+    <string name="settlement_err_subcontractor">لطفاً وضعیت پیمانکار جزء را مشخص کنید.</string>
     <string name="settlement_submit">ثبت مفاصاحساب</string>
     <string name="settlement_submitted">اطلاعات با موفقیت ارسال شد</string>
+    <string name="settlement_done_body">درخواست صدور مفاصاحساب ماده ۳۸ ثبت شد. نتیجهٔ بررسی شعبه از طریق کارتابل و پیامک اعلام می‌شود.</string>
+    <string name="settlement_done_back">بازگشت به فهرست پیمان‌ها</string>
 
     <!-- Shared payment flow (feature:payment) -->
     <string name="payment_title">پرداخت</string>

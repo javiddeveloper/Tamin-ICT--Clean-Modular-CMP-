@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.useCases.workshops
 
+import com.tamin.taminhamrah.model.workshop.SettlementCertificateDN
 import com.tamin.taminhamrah.model.workshop.SettlementRequestDN
 import com.tamin.taminhamrah.model.workshop.SettlementSubjectDN
 import com.tamin.taminhamrah.repository.WorkShopsRepository
@@ -24,4 +25,18 @@ class UploadSettlementPdfUseCase(private val repository: WorkShopsRepository) {
 class SubmitSettlementRequestUseCase(private val repository: WorkShopsRepository) {
     suspend operator fun invoke(request: SettlementRequestDN): String =
         repository.submitSettlementRequest(request)
+}
+
+/**
+ * The مفاصاحساب certificate issued for a پیمان, or null when none is on file — what «گواهی صادرشده»
+ * reports for a خاتمه‌یافته پیمان.
+ */
+class GetSettlementCertificateUseCase(private val repository: WorkShopsRepository) {
+    suspend operator fun invoke(
+        workshopId: String,
+        branchCode: String,
+        contractRow: String,
+        contractNumber: String,
+    ): SettlementCertificateDN? =
+        repository.getSettlementCertificate(workshopId, branchCode, contractRow, contractNumber)
 }
