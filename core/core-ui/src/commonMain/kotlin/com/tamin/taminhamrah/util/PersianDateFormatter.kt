@@ -28,6 +28,15 @@ fun String.toPersianDigits(): String = map { char ->
     if (char in '0'..'9') PERSIAN_ZERO + (char - '0') else char
 }.joinToString("")
 
+/**
+ * Converts Persian-Indic digits (`۰`–`۹`) in this string back to ASCII `0`–`9`, leaving every
+ * other character untouched. The inverse of [toPersianDigits] — needed wherever a user can type
+ * digits on a Persian keyboard into a field the app then parses as a number.
+ */
+fun String.toEnglishDigits(): String = map { char ->
+    if (char in PERSIAN_ZERO..PERSIAN_ZERO + 9) '0' + (char - PERSIAN_ZERO) else char
+}.joinToString("")
+
 fun String.toFormattedDate(): String =
     try {
         if (length == 8) {
