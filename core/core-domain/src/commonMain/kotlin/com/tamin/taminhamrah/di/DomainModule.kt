@@ -224,7 +224,11 @@ import com.tamin.taminhamrah.useCases.workshops.GetWorkShopObjectionSmsUseCase
 import com.tamin.taminhamrah.useCases.workshops.SaveArticleSixteenRequestUseCase
 import com.tamin.taminhamrah.useCases.workshops.SaveDebitObjectionUseCase
 import com.tamin.taminhamrah.useCases.agent.SendAgentPromptUseCase
+import com.tamin.taminhamrah.useCases.agent.GetAgentPersonalInfoUseCase
+import com.tamin.taminhamrah.useCases.agent.GetAgentPersonalInfoUseCaseImpl
+import com.tamin.taminhamrah.useCases.agent.CancelAgentRequestUseCase
 import com.tamin.taminhamrah.useCases.agent.CheckChatAllowedUseCase
+import com.tamin.taminhamrah.useCases.agent.ObserveAgentAvailabilityUseCase
 import com.tamin.taminhamrah.useCases.agent.DeleteAgentSessionUseCase
 import com.tamin.taminhamrah.useCases.agent.DeletePendingAgentMessagesUseCase
 import com.tamin.taminhamrah.useCases.agent.GetCachedMessagesUseCase
@@ -286,6 +290,9 @@ import com.tamin.taminhamrah.useCases.stories.ObserveStoryEngagementUseCase
 import com.tamin.taminhamrah.useCases.stories.ToggleStoryLikeUseCase
 import com.tamin.taminhamrah.useCases.stories.ToggleStorySaveUseCase
 
+import com.tamin.taminhamrah.deeplink.DeepLinkDispatcher
+import com.tamin.taminhamrah.deeplink.ResolveDeepLinkUseCase
+
 val domainModule = module {
     // Add Dependent UseCases
     factoryOf(::GetActiveBranchesUseCase)
@@ -297,6 +304,8 @@ val domainModule = module {
     factoryOf(::AddNewDependentUseCase)
     factoryOf(::GetDependentInfoUseCase)
     factoryOf(::DeepLinkManagerImpl) bind DeepLinkManager::class
+    single { DeepLinkDispatcher() }
+    factoryOf(::ResolveDeepLinkUseCase)
     factoryOf(::AuthAuthorizeUrlUseCaseImpl) bind AuthAuthorizeUrlUseCase::class
     factoryOf(::ExchangeCodeForTokensUseCaseImpl) bind ExchangeCodeForTokensUseCase::class
     factoryOf(::DebugClientCredentialsLoginUseCaseImpl) bind DebugClientCredentialsLoginUseCase::class
@@ -447,7 +456,11 @@ val domainModule = module {
     factoryOf(::GetRegisteredMedicalCommissionUseCase)
     // Agent
     factoryOf(::SendAgentPromptUseCase)
+    // A single: it remembers the pensioner id it looked up, per national id.
+    single<GetAgentPersonalInfoUseCase> { GetAgentPersonalInfoUseCaseImpl(get(), get(), get()) }
     factoryOf(::CheckChatAllowedUseCase)
+    factoryOf(::ObserveAgentAvailabilityUseCase)
+    factoryOf(::CancelAgentRequestUseCase)
     // Agent conversation cache
     factory<GetCurrentUserNationalCodeUseCase> { GetCurrentUserNationalCodeUseCaseImpl(get()) }
     factoryOf(::PruneEmptyAgentSessionUseCase)
