@@ -123,7 +123,6 @@ fun PaymentSheetScreen(
     val colors = LocalTaminColors.current
     val toaster = LocalToaster.current
     var showIssueConfirm by remember { mutableStateOf(false) }
-    var showPdfViewer by remember { mutableStateOf(false) }
 
     state.issuanceMessage?.let { message ->
         LaunchedEffect(message) { toaster.success(message) }
@@ -156,10 +155,7 @@ fun PaymentSheetScreen(
                 ) {
                     TaminOutlinedButton(
                         text = stringResource(CoreRes.string.btn_download_certificate),
-                        onClick = {
-                            showPdfViewer = true
-                            onIntent(PaymentSheetIntent.DownloadCertificate)
-                        },
+                        onClick = { onIntent(PaymentSheetIntent.DownloadCertificate) },
                         icon = Icons.Filled.Description,
                         modifier = Modifier.weight(1f),
                     )
@@ -220,14 +216,14 @@ fun PaymentSheetScreen(
         )
     }
 
-    if (showPdfViewer) {
+    if (state.showPdfViewer) {
         TaminPdfViewer(
             fileName = "payment_certificate_${state.debitNumber}.pdf",
             pdf = state.pdfDownload,
             downloadFailed = state.pdfDownloadFailed,
             title = stringResource(CoreRes.string.btn_download_certificate),
             onRequestDownload = { onIntent(PaymentSheetIntent.DownloadCertificate) },
-            onDismiss = { showPdfViewer = false },
+            onDismiss = { onIntent(PaymentSheetIntent.DismissPdfViewer) },
         )
     }
 }

@@ -22,6 +22,10 @@ data class PaymentSheetUiState(
     val items: ImmutableList<PaymentSheetConstructionFilePR> = persistentListOf(),
     val error: String? = null,
 
+    // Same shape as ContractAffairsUiState's PDF fields — showPdfViewer is ViewModel-owned state,
+    // not local Compose state, so DismissPdfViewer can clear pdfDownload/pdfDownloadFailed through
+    // the normal MVI loop instead of leaving stale data behind for the next open.
+    val showPdfViewer: Boolean = false,
     val isPdfLoading: Boolean = false,
     val pdfDownload: PdfDownloadPR? = null,
     val pdfDownloadFailed: Boolean = false,
@@ -36,8 +40,9 @@ data class PaymentSheetUiState(
         data class Error(val message: String?) : PartialState
         data class Loaded(val items: ImmutableList<PaymentSheetConstructionFilePR>) : PartialState
 
+        data class PdfViewerVisibility(val visible: Boolean) : PartialState
         data class PdfLoading(val loading: Boolean) : PartialState
-        data class PdfLoaded(val pdf: PdfDownloadPR) : PartialState
+        data class PdfLoaded(val pdf: PdfDownloadPR?) : PartialState
         data class PdfFailed(val failed: Boolean) : PartialState
 
         data class IssuanceLoading(val loading: Boolean) : PartialState
@@ -51,6 +56,7 @@ sealed interface PaymentSheetIntent {
     data class Load(val debitNumber: String, val branchCode: String) : PaymentSheetIntent
     data object Retry : PaymentSheetIntent
     data object DownloadCertificate : PaymentSheetIntent
+    data object DismissPdfViewer : PaymentSheetIntent
     data object IssuePaymentSheet : PaymentSheetIntent
     data object OnBackClicked : PaymentSheetIntent
 }

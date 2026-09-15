@@ -49,6 +49,12 @@ class PaymentSheetViewModel(
 
             PaymentSheetIntent.DownloadCertificate -> downloadCertificate()
 
+            PaymentSheetIntent.DismissPdfViewer -> flow {
+                emit(PartialState.PdfViewerVisibility(false))
+                emit(PartialState.PdfLoaded(null))
+                emit(PartialState.PdfFailed(false))
+            }
+
             PaymentSheetIntent.IssuePaymentSheet -> issuePaymentSheet()
 
             PaymentSheetIntent.OnBackClicked -> {
@@ -74,6 +80,7 @@ class PaymentSheetViewModel(
 
     /** «گواهی پرداخت حق بیمه» — mirrors `IssuanceAndManagementPaymentSheetFragment.btnPaymentCertificate`. */
     private fun downloadCertificate(): Flow<PartialState> = flow {
+        emit(PartialState.PdfViewerVisibility(true))
         emit(PartialState.PdfFailed(false))
         emit(PartialState.PdfLoading(true))
         try {
@@ -127,6 +134,12 @@ class PaymentSheetViewModel(
             isLoading = false,
             items = partialState.items,
             error = null,
+        )
+
+        is PartialState.PdfViewerVisibility -> currentState.copy(
+            showPdfViewer = partialState.visible,
+            pdfDownload = if (partialState.visible) currentState.pdfDownload else null,
+            pdfDownloadFailed = if (partialState.visible) currentState.pdfDownloadFailed else false,
         )
 
         is PartialState.PdfLoading -> currentState.copy(isPdfLoading = partialState.loading)
