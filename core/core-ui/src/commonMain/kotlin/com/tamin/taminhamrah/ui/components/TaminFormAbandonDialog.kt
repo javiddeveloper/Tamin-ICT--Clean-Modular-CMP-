@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -19,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.Dialog
@@ -54,79 +56,98 @@ fun TaminFormAbandonDialog(
     onDismissRequest: () -> Unit = onStay,
     modifier: Modifier = Modifier,
 ) {
-    val colors = LocalTaminColors.current
-
     Dialog(
         onDismissRequest = onDismissRequest,
         properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
-        Card(
-            modifier = modifier
+        TaminFormAbandonDialogCard(
+            formName = formName,
+            onStay = onStay,
+            onAbandon = onAbandon,
+            modifier = modifier,
+        )
+    }
+}
+
+/**
+ * Card body without [Dialog]. Preview surfaces cannot host a real dialog window, so this is
+ * what the preview renders (and what [TaminFormAbandonDialog] places inside the dialog).
+ */
+@Composable
+internal fun TaminFormAbandonDialogCard(
+    formName: String,
+    onStay: () -> Unit,
+    onAbandon: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.xl),
+        shape = RoundedCornerShape(CornerRadius.cardCompact),
+        colors = CardDefaults.cardColors(containerColor = colors.bgSurface),
+        elevation = CardDefaults.cardElevation(defaultElevation = Elevation.md),
+    ) {
+        Column(
+            modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = Spacing.xl),
-            shape = RoundedCornerShape(CornerRadius.cardCompact),
-            colors = CardDefaults.cardColors(containerColor = colors.bgSurface),
-            elevation = CardDefaults.cardElevation(defaultElevation = Elevation.md),
+                .padding(Spacing.xl),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Column(
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(Spacing.xl),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                    .size(IconSize.xxlarge)
+                    .clip(RoundedCornerShape(CornerRadius.cardCompact))
+                    .background(colors.orangeBg),
+                contentAlignment = Alignment.Center,
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(IconSize.xxlarge)
-                        .clip(RoundedCornerShape(CornerRadius.cardCompact))
-                        .background(colors.orangeBg),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        imageVector = vectorResource(Res.drawable.ic_tamin_alert_triangle),
-                        contentDescription = null,
-                        tint = colors.orangeText,
-                        modifier = Modifier.size(IconSize.badge),
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(Spacing.lg))
-
-                TaminText(
-                    text = stringResource(Res.string.form_abandon_title, formName),
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = colors.textPrimary,
-                    textAlign = TextAlign.Center,
+                Icon(
+                    imageVector = vectorResource(Res.drawable.ic_tamin_alert_triangle),
+                    contentDescription = null,
+                    tint = colors.orangeText,
+                    modifier = Modifier.size(IconSize.badge),
                 )
+            }
 
-                Spacer(modifier = Modifier.height(Spacing.sm))
+            Spacer(modifier = Modifier.height(Spacing.lg))
 
-                TaminText(
-                    text = stringResource(Res.string.form_abandon_description, formName),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.textSecondary,
-                    textAlign = TextAlign.Center,
+            TaminText(
+                text = stringResource(Res.string.form_abandon_title, formName),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = colors.textPrimary,
+                textAlign = TextAlign.Center,
+            )
+
+            Spacer(modifier = Modifier.height(Spacing.sm))
+
+            TaminText(
+                text = stringResource(Res.string.form_abandon_description, formName),
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.textSecondary,
+                textAlign = TextAlign.Center,
+            )
+
+            Spacer(modifier = Modifier.height(Spacing.xl))
+
+            // RTL: first child sits on the right — Stay (primary) then Leave (danger outline).
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+            ) {
+                TaminFilledButton(
+                    text = stringResource(Res.string.form_abandon_stay),
+                    onClick = onStay,
+                    modifier = Modifier.weight(1f),
                 )
-
-                Spacer(modifier = Modifier.height(Spacing.xl))
-
-                // RTL: first child sits on the right — Stay (primary) then Leave (danger outline).
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-                ) {
-                    TaminFilledButton(
-                        text = stringResource(Res.string.form_abandon_stay),
-                        onClick = onStay,
-                        modifier = Modifier.weight(1f),
-                    )
-                    TaminOutlinedButton(
-                        text = stringResource(Res.string.form_abandon_leave),
-                        onClick = onAbandon,
-                        modifier = Modifier.weight(1f),
-                        borderColor = colors.dangerBorder,
-                        contentColor = colors.dangerText,
-                    )
-                }
+                TaminOutlinedButton(
+                    text = stringResource(Res.string.form_abandon_leave),
+                    onClick = onAbandon,
+                    modifier = Modifier.weight(0.5f),
+                    borderColor = colors.dangerBorder,
+                    contentColor = colors.dangerText,
+                )
             }
         }
     }
@@ -136,10 +157,17 @@ fun TaminFormAbandonDialog(
 @Composable
 private fun TaminFormAbandonDialogPreview() {
     PreviewRtlThemeContent {
-        TaminFormAbandonDialog(
-            formName = "انعقاد قرارداد بیمه اختیاری",
-            onStay = {},
-            onAbandon = {},
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.45f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            TaminFormAbandonDialogCard(
+                formName = "انعقاد قرارداد بیمه اختیاری",
+                onStay = {},
+                onAbandon = {},
+            )
+        }
     }
 }
