@@ -155,15 +155,25 @@ fun RecordDetailContent(
     val record = state.prescriptionList.firstOrNull { it.noteHeadEprescID == noteHeadId }
 
     /*
-     * The record's total, added up from the items on screen rather than read off the price
-     * endpoint. Two reasons: that endpoint returns nothing for plenty of records -- which is why
-     * the total was simply absent -- and a figure that disagrees with the tiles printed on each
-     * item above it is worse than no figure at all.
+     * The record's totals as the price endpoint reports them, which is what the old app shows and
+     * what the records list totals from, so a record reads the same on both screens. Its
+     * `requestPrice` can include charges no single item carries, which is why adding up the items
+     * fell short of it.
+     *
+     * The items stand in, added up, only while the price is not there. It used to be absent for
+     * every record: its request was queued behind the items' never-ending flow and never sent.
      *
      * Inside a remember so a scroll or a dialog does not re-add the whole list.
      */
-    val totals = remember(state.prescriptionDetailList) {
-        state.prescriptionDetailList.fold(RecordCostTotals()) { running, item ->
+    val price = state.prescriptionPriceList.firstOrNull()
+    val totals = remember(price, state.prescriptionDetailList) {
+        price?.let {
+            RecordCostTotals(
+                insuredShare = it.headInsuPayment.toLongOrNull() ?: 0L,
+                organizationShare = it.headSsoPayment.toLongOrNull() ?: 0L,
+                total = it.requestPrice.toLongOrNull() ?: 0L,
+            )
+        } ?: state.prescriptionDetailList.fold(RecordCostTotals()) { running, item ->
             RecordCostTotals(
                 insuredShare = running.insuredShare + (item.ssoPayment.toLongOrNull() ?: 0L),
                 organizationShare = running.organizationShare + (item.insurancePayment.toLongOrNull() ?: 0L),

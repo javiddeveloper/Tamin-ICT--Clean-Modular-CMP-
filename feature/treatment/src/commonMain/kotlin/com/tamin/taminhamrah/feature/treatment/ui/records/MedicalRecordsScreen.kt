@@ -534,13 +534,12 @@ private fun LazyListScope.recordTimeline(
                 title = stringResource(Res.string.records_doctor_named, record.docName),
                 subtitle = record.location.ifBlank { record.specDesc },
                 // The list endpoint carries no amount, so «سهم شما» comes from the per-record
-                // price lookup; it reads as unknown until that arrives. Old app: the insured's
-                // share is headSsoPayment (headInsuPayment is the organization's share).
-                // The list endpoint carries no amount, so the share comes from the per-record
-                // price lookup. It shimmers only while that lookup is out; once it is back, a
-                // record with no price shows the absent marker rather than shimmering forever.
+                // price lookup, where the insured's share is headInsuPayment (see
+                // ElectronicPrescriptionPricePR). It shimmers only while that lookup is out; once
+                // it is back, a record with no price shows the absent marker rather than
+                // shimmering forever.
                 shareAmount = prices[record.noteHeadEprescID]
-                    ?.headSsoPayment
+                    ?.headInsuPayment
                     ?.toLongOrNull()
                     ?.toPriceFormat()
                     ?: UNKNOWN_AMOUNT.takeIf { !isLoadingPrices },
@@ -577,9 +576,9 @@ private fun RecordsTotals(
     val pending = prices.isEmpty() && isLoadingPrices
     CostTotalsBar(
         insuredShareLabel = stringResource(Res.string.share_insured),
-        insuredShareAmount = prices.totalOf { it.headSsoPayment }.takeUnless { pending },
+        insuredShareAmount = prices.totalOf { it.headInsuPayment }.takeUnless { pending },
         organizationShareLabel = stringResource(Res.string.share_organization),
-        organizationShareAmount = prices.totalOf { it.headInsuPayment }.takeUnless { pending },
+        organizationShareAmount = prices.totalOf { it.headSsoPayment }.takeUnless { pending },
         totalLabel = stringResource(Res.string.amount_total),
         totalAmount = prices.totalOf { it.requestPrice }.takeUnless { pending },
     )

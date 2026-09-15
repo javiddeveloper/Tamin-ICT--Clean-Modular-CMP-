@@ -26,10 +26,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 
 class PrescriptionsViewModel(
     private val identityInfoUseCase: IdentityInfoUseCase,
@@ -151,28 +154,34 @@ class PrescriptionsViewModel(
         }
     }.catch { emit(PartialState.Error(it.toSingleLineMessage())) }
 
+    /**
+     * Opens a record: its items and its price, side by side.
+     *
+     * Both repositories answer from the cache and then keep watching it, so neither flow ever
+     * completes. Collected one after the other, the price request was never made at all — the
+     * items held the coroutine for as long as the screen was open. Merged, each runs on its own.
+     */
     private fun selectPrescription(intent: PrescriptionsIntent.SelectPrescription): Flow<PartialState> = flow {
         emit(PartialState.PrescriptionSelected(intent.noteHeadID))
         emit(PartialState.Loading(true))
         val nationalCode = getLoggedNationalCode()
 
-        try {
-            // Raw patient code and flagSata; the repository encodes "self" and an absent flagSata
-            // the way the endpoint expects.
-            getElectronicPrescriptionDetailUseCase(intent.noteHeadID, nationalCode, intent.nationalCode, intent.flagSata, intent.type).collect { list ->
-                emit(PartialState.PrescriptionDetailsLoaded(list.toPresentation()))
-            }
-        } catch (e: Exception) {
-            emit(PartialState.Error(e.toSingleLineMessage()))
-        }
+        // Raw patient code and flagSata; the repository encodes "self" and an absent flagSata
+        // the way the endpoint expects.
+        val details: Flow<PartialState> = getElectronicPrescriptionDetailUseCase(
+            intent.noteHeadID, nationalCode, intent.nationalCode, intent.flagSata, intent.type,
+        ).map { PartialState.PrescriptionDetailsLoaded(it.toPresentation()) }
+        val prices: Flow<PartialState> = getElectronicPrescriptionPriceUseCase(intent.noteHeadID, nationalCode)
+            .map { PartialState.PrescriptionPricesLoaded(it.toPresentation()) }
 
-        try {
-            getElectronicPrescriptionPriceUseCase(intent.noteHeadID, nationalCode).collect { list ->
-                emit(PartialState.PrescriptionPricesLoaded(list.toPresentation()))
-            }
-        } catch (e: Exception) {
-            // Price is supplementary to the prescription details; ignore its failure.
-        }
+        emitAll(
+            merge(
+                details.catch { emit(PartialState.Error(it.toSingleLineMessage())) },
+                // Supplementary to the items: without a price the screen totals the items instead,
+                // so a failure here is not the screen's failure.
+                prices.catch { },
+            ),
+        )
     }
 
     /**
@@ -244,7 +253,9 @@ class PrescriptionsViewModel(
         is PartialState.Error -> currentState.copy(isLoading = false, error = partialState.message)
         is PartialState.PrescriptionsLoaded -> currentState.copy(isLoading = false, prescriptionList = partialState.list)
         is PartialState.PrescriptionDetailsLoaded -> currentState.copy(isLoading = false, prescriptionDetailList = partialState.list)
-        is PartialState.PrescriptionPricesLoaded -> currentState.copy(isLoading = false, prescriptionPriceList = partialState.list.toImmutableList())
+        // Not the end of loading: the price can land before the items it prices, and clearing the
+        // flag then would show the empty state for a record that has items on the way.
+        is PartialState.PrescriptionPricesLoaded -> currentState.copy(prescriptionPriceList = partialState.list.toImmutableList())
         is PartialState.ViewerPdfChanged -> currentState.copy(
             isLoading = false,
             viewerPdf = partialState.pdf,
@@ -254,7 +265,13 @@ class PrescriptionsViewModel(
             isLoading = false,
             viewerDownloadFailed = true,
         )
-        is PartialState.PrescriptionSelected -> currentState.copy(selectedNoteHeadId = partialState.noteHeadID)
+        // The previous record's items and price go with it, so a slow answer for this one cannot
+        // leave the last record's totals under its heading.
+        is PartialState.PrescriptionSelected -> currentState.copy(
+            selectedNoteHeadId = partialState.noteHeadID,
+            prescriptionDetailList = emptyList(),
+            prescriptionPriceList = persistentListOf(),
+        )
         is PartialState.RecordPricesLoaded -> currentState.copy(
             recordPrices = (currentState.recordPrices + partialState.prices).toImmutableMap(),
         )

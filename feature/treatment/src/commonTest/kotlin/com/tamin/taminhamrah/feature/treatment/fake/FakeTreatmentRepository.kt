@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDetailDN
 import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionPriceDN
 import com.tamin.taminhamrah.model.treatment.MedicalConfirmationDN
 import com.tamin.taminhamrah.repository.treatment.TreatmentRepository
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
@@ -62,10 +63,20 @@ class FakeTreatmentRepository : TreatmentRepository {
         emit(prescriptionListResultByType[requestTypeId] ?: prescriptionListResult)
     }
 
+    /**
+     * Makes the detail flow behave as the real repository's does: answer, then keep watching the
+     * cache and never complete. Off by default, so existing tests keep their finite flow.
+     */
+    var prescriptionDetailKeepsWatching = false
+
     override suspend fun getElectronicPrescriptionDetail(
         noteHeadID: String, nationalCode: String, patientNationalCode: String,
         flagSata: String, type: String
-    ): Flow<List<ElectronicPrescriptionDetailDN>> = result(prescriptionDetailResult)
+    ): Flow<List<ElectronicPrescriptionDetailDN>> = flow {
+        if (shouldThrowError) throw error
+        emit(prescriptionDetailResult)
+        if (prescriptionDetailKeepsWatching) awaitCancellation()
+    }
 
     override suspend fun getElectronicPrescriptionPrice(
         noteHeadID: String, nationalCode: String
