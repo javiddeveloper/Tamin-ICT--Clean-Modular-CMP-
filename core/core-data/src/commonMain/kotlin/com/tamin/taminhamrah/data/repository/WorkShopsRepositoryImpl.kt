@@ -38,6 +38,7 @@ import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetQuery
+import com.tamin.taminhamrah.model.workshop.SettlementCertificateDN
 import com.tamin.taminhamrah.model.workshop.SettlementRequestDN
 import com.tamin.taminhamrah.model.workshop.SettlementSubjectDN
 import com.tamin.taminhamrah.model.workshop.WORKSHOP_PAGE_SIZE
@@ -174,6 +175,33 @@ class WorkShopsRepositoryImpl(
 
     override suspend fun submitSettlementRequest(request: SettlementRequestDN): String =
         remoteDataSource.submitSettlementRequest(request.requestId(), request.toDto())
+
+    /**
+     * Two reads, as the old app's مفاصاحساب ماده ۳۸ screens make them: the certificates filed under
+     * the ردیف, then the detail of the one belonging to this پیمان.
+     */
+    override suspend fun getSettlementCertificate(
+        workshopId: String,
+        branchCode: String,
+        contractRow: String,
+        contractNumber: String,
+    ): SettlementCertificateDN? {
+        val certificates = remoteDataSource
+            .getSettlementCertificates(workshopId, branchCode, contractRow, pageQuery(page = 0))
+            .list.orEmpty()
+            .filter { !it.clearanceSerial.isNullOrBlank() }
+        // One ردیف can carry several پیمان, so the contract number picks this one; a lone certificate
+        // that names no number at all is taken as this پیمان's.
+        val certificate = certificates.firstOrNull { it.contractNumber?.trim() == contractNumber.trim() }
+            ?: certificates.singleOrNull()?.takeIf { it.contractNumber.isNullOrBlank() }
+            ?: return null
+        val serial = certificate.clearanceSerial.orEmpty()
+        return remoteDataSource
+            .getSettlementCertificateDetail(workshopId, branchCode, contractRow, serial, pageQuery(page = 0))
+            .list.orEmpty()
+            .firstOrNull()
+            .toDomain(serial)
+    }
 
     // -------------------------------------------------------------------- برگ پرداخت‌ها
 

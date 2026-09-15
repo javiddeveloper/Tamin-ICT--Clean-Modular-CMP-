@@ -29,6 +29,7 @@ import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetQuery
+import com.tamin.taminhamrah.model.workshop.SettlementCertificateDN
 import com.tamin.taminhamrah.model.workshop.SettlementRequestDN
 import com.tamin.taminhamrah.model.workshop.SettlementSubjectDN
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
@@ -74,7 +75,7 @@ interface WorkShopsRepository {
 
     // ---------------------------------------------------------------------------- واگذارندگان
 
-    /** پیمان‌هایی که کارفرما واگذارندهٔ آن‌هاست, narrowed by کد کارگاه / کد شعبه / ردیف. */
+    /** پیمان‌هایی که کارفرما واگذارندهٔ آن‌هاست، narrowed by کد کارگاه / کد شعبه / ردیف. */
     suspend fun getAssignerContracts(
         query: AssignerContractQuery,
     ): PagedListDN<AssignerContractDN>
@@ -95,6 +96,20 @@ interface WorkShopsRepository {
 
     /** Files a درخواست مفاصاحساب; returns the service's confirmation. */
     suspend fun submitSettlementRequest(request: SettlementRequestDN): String
+
+    /**
+     * The مفاصاحساب certificate issued for one پیمان, or null when none is on file.
+     *
+     * [workshopId] is the پیمانکار's کد کارگاه and [branchCode] the پیمان's own branch — the keys the
+     * old app's مفاصاحساب ماده ۳۸ list is addressed with. [contractNumber] picks this پیمان out of the
+     * certificates its ردیف holds.
+     */
+    suspend fun getSettlementCertificate(
+        workshopId: String,
+        branchCode: String,
+        contractRow: String,
+        contractNumber: String,
+    ): SettlementCertificateDN?
 
     // -------------------------------------------------------------------------- برگ پرداخت‌ها
 

@@ -9,11 +9,15 @@ import com.tamin.taminhamrah.model.workshop.AssignerContractQuery
 import com.tamin.taminhamrah.model.workshop.AssignerPartyDTO
 import com.tamin.taminhamrah.model.workshop.ComputationalBaseDTO
 import com.tamin.taminhamrah.model.workshop.ComputationalBaseQuery
+import com.tamin.taminhamrah.model.workshop.SettlementCertificateDN
+import com.tamin.taminhamrah.model.workshop.SettlementCertificateDTO
+import com.tamin.taminhamrah.model.workshop.SettlementCertificateDetailDTO
 import com.tamin.taminhamrah.model.workshop.WORKSHOP_PAGE_SIZE
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 /**
  * [WorkShopsRepositoryImpl] for واگذارندگان.
@@ -136,6 +140,48 @@ class WorkShopsRepositoryAssignerContractsTest {
         assertEquals(emptyList(), remote.lastBasesArgs?.query?.filters)
     }
 
+    /**
+     * One ردیف can hold several پیمان, so the contract number picks the certificate — and the detail
+     * is asked for by that row's serial, not by whichever row was listed first.
+     */
+    @Test
+    fun `a settlement certificate is picked by contract number and read by its serial`() = runTest {
+        remote.certificates = ListData(
+            total = 2,
+            list = listOf(
+                SettlementCertificateDTO(clearanceSerial = "111", contractNumber = "45200", contractRow = "1"),
+                SettlementCertificateDTO(clearanceSerial = "222", contractNumber = "44122", contractRow = "1"),
+            ),
+        )
+        remote.certificateDetail = ListData(
+            total = 1,
+            list = listOf(
+                SettlementCertificateDetailDTO(
+                    clearanceSerial = "222",
+                    clearanceNumber = "38-7712405",
+                    clearanceDate = "14021103",
+                ),
+            ),
+        )
+
+        val certificate = repository.getSettlementCertificate("9028212822", "0310", "1", "44122")
+
+        assertEquals(listOf("9028212822", "0310", "1"), remote.lastCertificateArgs)
+        assertEquals("222", remote.lastDetailSerial)
+        assertEquals(SettlementCertificateDN(serial = "222", number = "38-7712405", date = "14021103"), certificate)
+    }
+
+    @Test
+    fun `no certificate for the contract answers null without asking for a detail`() = runTest {
+        remote.certificates = ListData(
+            total = 1,
+            list = listOf(SettlementCertificateDTO(clearanceSerial = "111", contractNumber = "45200")),
+        )
+
+        assertNull(repository.getSettlementCertificate("9028212822", "0310", "1", "44122"))
+        assertNull(remote.lastDetailSerial)
+    }
+
     /** What the bases endpoint was called with, as one value so a transposition is visible. */
     private data class BasesArgs(
         val workshopId: String,
@@ -168,6 +214,32 @@ class WorkShopsRepositoryAssignerContractsTest {
         ): ListData<ComputationalBaseDTO> {
             lastBasesArgs = BasesArgs(workshopId, contractRow, brchCode, contractSequence, query)
             return bases
+        }
+
+        var certificates: ListData<SettlementCertificateDTO> = ListData()
+        var certificateDetail: ListData<SettlementCertificateDetailDTO> = ListData()
+        var lastCertificateArgs: List<String>? = null
+        var lastDetailSerial: String? = null
+
+        override suspend fun getSettlementCertificates(
+            workshopId: String,
+            branchCode: String,
+            contractRow: String,
+            query: ApiQueryParamDN,
+        ): ListData<SettlementCertificateDTO> {
+            lastCertificateArgs = listOf(workshopId, branchCode, contractRow)
+            return certificates
+        }
+
+        override suspend fun getSettlementCertificateDetail(
+            workshopId: String,
+            branchCode: String,
+            contractRow: String,
+            serial: String,
+            query: ApiQueryParamDN,
+        ): ListData<SettlementCertificateDetailDTO> {
+            lastDetailSerial = serial
+            return certificateDetail
         }
     }
 }

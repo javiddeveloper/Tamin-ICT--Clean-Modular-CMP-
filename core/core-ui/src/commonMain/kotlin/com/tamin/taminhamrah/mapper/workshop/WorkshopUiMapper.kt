@@ -50,6 +50,8 @@ import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractPR
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionPR
+import com.tamin.taminhamrah.model.workshop.SettlementCertificateDN
+import com.tamin.taminhamrah.model.workshop.SettlementCertificatePR
 import com.tamin.taminhamrah.model.workshop.SettlementSubjectDN
 import com.tamin.taminhamrah.model.workshop.SmsMessageDN
 import com.tamin.taminhamrah.model.workshop.SmsMessagePR
@@ -158,6 +160,8 @@ fun AssignerContractDN.toPresentation(): AssignerContractPR = AssignerContractPR
     contractSequence = contractSequence,
     branchCode = branchCode,
     contractNumber = contractNumber.orDashDigits(),
+    rawContractNumber = contractNumber,
+    sequenceLabel = contractSequence.orDashDigits(),
     contractDate = contractDate.orDashDate(),
     contractSubject = contractSubject.orDash(),
     // Ended only once its end date is behind today. A blank or unparseable date reads as still in
@@ -184,10 +188,19 @@ fun SettlementSubjectDN.toPresentation(): TaminOptionSheetItem = TaminOptionShee
     label = description.orDash(),
 )
 
+fun SettlementCertificateDN.toPresentation(): SettlementCertificatePR = SettlementCertificatePR(
+    number = number.orDashDigits(),
+    date = date.orDashDate(),
+)
+
 fun ComputationalBaseDN.toPresentation(): ComputationalBasePR = ComputationalBasePR(
     letterNumber = letterNumber.orDashDigits(),
     sendDate = sendDate.orDashTimestamp(),
     amount = amount.orDashAmount(),
+    amountRials = amount,
+    // Blank rather than dashed: a base with no period drops that line instead of printing «— تا —».
+    periodStart = PersianDateFormatter.formatTimestamp(startDate),
+    periodEnd = PersianDateFormatter.formatTimestamp(endDate),
     // Zero is a real answer here and prints as ۰, unlike an amount: the row says «۰ سند» and the
     // detail screen's documents section is then legitimately empty.
     documentCount = documents.size.toString().toPersianDigits(),
@@ -440,6 +453,15 @@ private fun Long?.orDashTimestamp(): String = PersianDateFormatter.formatTimesta
  * zero are different answers, and the dash is the one that does not claim a figure.
  */
 private fun Long?.orDashAmount(): String = this?.let { "${it.toPriceFormat()} ریال" }.orDash()
+
+/**
+ * «جمع کارکرد اعلامی» — the bases' amounts added up, printed the way each row prints its own.
+ *
+ * A base the service sent no amount for adds nothing; when none of them has one the total is a gap,
+ * not ۰ ریال.
+ */
+fun List<ComputationalBasePR>.declaredTotal(): String =
+    mapNotNull { it.amountRials }.takeIf { it.isNotEmpty() }?.sum().orDashAmount()
 
 fun LegalRepresentativeWorkshopDN.toPresentation(): LegalRepresentativeWorkshopPR {
     return LegalRepresentativeWorkshopPR(
