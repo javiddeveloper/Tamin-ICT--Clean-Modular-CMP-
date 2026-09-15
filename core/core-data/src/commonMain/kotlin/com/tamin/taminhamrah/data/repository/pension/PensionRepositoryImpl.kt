@@ -11,6 +11,11 @@ import com.tamin.taminhamrah.model.pension.PensionInquiryDN
 import com.tamin.taminhamrah.model.pension.PayRollDN
 import com.tamin.taminhamrah.model.pension.PayRollInboxDN
 import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityFinalConfirmDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityRequestRefDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveDocumentDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.RegisteredMedicalCommissionDN
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDN
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequestDN
@@ -20,6 +25,7 @@ import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestCreatedDN
 import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestFormDN
 import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.personal.DisabilityPersonalInfoDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.pension.PensionRepository
@@ -137,4 +143,37 @@ class PensionRepositoryImpl(
             val remoteData = pensionRemoteDataSource.sendRequestInquirePensionCertificate(filters)
             emit(remoteData.toInquirePensionCertificateDomain())
         }
+
+    override suspend fun saveDisabilityUserInfo(body: DisabilitySaveInfoDN): Flow<DisabilityRequestRefDN?> = flow {
+        val remoteData = pensionRemoteDataSource.saveDisabilityUserInfo(body.toDTO())
+        emit(remoteData.toDomain())
+    }
+
+    override suspend fun finalConfirmDisabilityRequest(
+        requestId: Long,
+        body: DisabilityFinalConfirmDN
+    ): Flow<DisabilityRequestRefDN?> = flow {
+        val remoteData = pensionRemoteDataSource.finalConfirmDisabilityRequest(requestId, body.toDTO())
+        emit(remoteData.toDomain())
+    }
+
+    override suspend fun saveDocumentDisability(
+        requestId: Long,
+        body: DisabilitySaveDocumentDN
+    ): Flow<String?> = flow {
+        val remoteData = pensionRemoteDataSource.saveDocumentDisability(requestId, body.toDTO())
+        emit(remoteData)
+    }
+
+    override suspend fun getMedicalCommissionPdf(lastWorkshop: String): Flow<PdfDownloadDN> = flow {
+        val remoteData = pensionRemoteDataSource.getMedicalCommissionPdf(lastWorkshop)
+        emit(remoteData.toDomain())
+    }
+
+    override suspend fun getRegisteredMedicalCommission(
+        filters: List<ApiFilterDN>
+    ): Flow<List<RegisteredMedicalCommissionDN>> = flow {
+        val remoteData = pensionRemoteDataSource.getRegisteredMedicalCommission(ApiQueryParamDN(filters = filters))
+        emit(remoteData.list?.map { it.toDomain() } ?: emptyList())
+    }
 }

@@ -26,6 +26,11 @@ import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestCreatedDN
 import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestFormDN
 import com.tamin.taminhamrah.model.pension.retirement.RetirementSaveDocumentDN
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityFinalConfirmDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityRequestRefDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveDocumentDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoDN
+import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.RegisteredMedicalCommissionDN
 import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.personal.DisabilityPersonalInfoDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
@@ -414,6 +419,16 @@ private class FakeIssuanceCertificatePensionRepository : PensionRepository {
     override suspend fun sendPayRollToInbox(filters: List<ApiFilterDN>): Flow<PayRollInboxDN> =
         error("not used in IssuanceCertificateViewModel")
     override suspend fun sendRequestInquirePensionCertificate(filters: List<ApiFilterDN>): Flow<InquirePensionCertificateDN> =
+        error("not used in IssuanceCertificateViewModel")
+    override suspend fun saveDisabilityUserInfo(body: DisabilitySaveInfoDN): Flow<DisabilityRequestRefDN?> =
+        error("not used in IssuanceCertificateViewModel")
+    override suspend fun finalConfirmDisabilityRequest(requestId: Long, body: DisabilityFinalConfirmDN): Flow<DisabilityRequestRefDN?> =
+        error("not used in IssuanceCertificateViewModel")
+    override suspend fun saveDocumentDisability(requestId: Long, body: DisabilitySaveDocumentDN): Flow<String?> =
+        error("not used in IssuanceCertificateViewModel")
+    override suspend fun getMedicalCommissionPdf(lastWorkshop: String): Flow<PdfDownloadDN> =
+        error("not used in IssuanceCertificateViewModel")
+    override suspend fun getRegisteredMedicalCommission(filters: List<ApiFilterDN>): Flow<List<RegisteredMedicalCommissionDN>> =
         error("not used in IssuanceCertificateViewModel")
 }
 
