@@ -138,6 +138,7 @@ class PaginatorTest {
         assertEquals(1, loader.requestedQueries.size)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `concurrent loadNext calls issue a single request`() = runTest {
         val gate = CompletableDeferred<Unit>()
@@ -278,6 +279,7 @@ class PaginatorTest {
         assertEquals(listOf("a", "b"), paginator.state.value.items)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `refresh supersedes a page that is still in flight`() = runTest {
         val gate = CompletableDeferred<Unit>()
@@ -313,6 +315,7 @@ class PaginatorTest {
         assertEquals(listOf(filter), loader.requestedQueries.last().filters)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `state stream reports loading before the loaded page`() = runTest {
         val gate = CompletableDeferred<Unit>()
@@ -320,7 +323,7 @@ class PaginatorTest {
         val paginator = paginatorOf(loader)
 
         paginator.state.test {
-            assertEquals(PaginationState<String>(), awaitItem())
+            assertEquals(PaginationState(), awaitItem())
 
             launch { paginator.loadNext() }
             runCurrent()
@@ -339,6 +342,7 @@ class PaginatorTest {
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `appending a page reports the footer flag not the full screen one`() = runTest {
         val gate = CompletableDeferred<Unit>()
