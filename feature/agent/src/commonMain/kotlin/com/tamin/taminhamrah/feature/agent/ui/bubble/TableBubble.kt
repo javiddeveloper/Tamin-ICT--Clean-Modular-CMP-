@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -33,11 +34,17 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
  * for the two- and three-column answers that make up most replies. Wider tables keep
  * their columns readable and scroll horizontally instead of squeezing text into
  * unreadable slivers — the chat itself never scrolls sideways.
+ *
+ * @param renderCell turns a header or cell string into the text drawn, e.g. inline markdown with
+ *   tappable links; plain by default
+ * @param cellContent draws a body cell itself instead, e.g. a button for a link; null draws text
  */
 @Composable
 fun TableBubble(
     content: ChatBubbleContent.Table,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    renderCell: (String) -> AnnotatedString = { AnnotatedString(it) },
+    cellContent: (@Composable (cell: String) -> Unit)? = null,
 ) {
     val taminColors = LocalTaminColors.current
     if (content.columns.isEmpty()) return
@@ -67,10 +74,12 @@ fun TableBubble(
 
             val grid: @Composable () -> Unit = {
                 Column {
-                    TableHeader(content.columns, columnWidth)
+                    TableHeader(content.columns.map(renderCell), columnWidth)
                     content.rows.forEachIndexed { index, row ->
                         TableBodyRow(
                             cells = row.cells,
+                            renderCell = renderCell,
+                            cellContent = cellContent,
                             columnCount = columnCount,
                             columnWidth = columnWidth,
                             isStriped = index % 2 == 1
@@ -89,7 +98,7 @@ fun TableBubble(
 }
 
 @Composable
-private fun TableHeader(columns: List<String>, columnWidth: Dp?) {
+private fun TableHeader(columns: List<AnnotatedString>, columnWidth: Dp?) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -115,6 +124,8 @@ private fun TableHeader(columns: List<String>, columnWidth: Dp?) {
 @Composable
 private fun TableBodyRow(
     cells: List<String>,
+    renderCell: (String) -> AnnotatedString,
+    cellContent: (@Composable (cell: String) -> Unit)?,
     columnCount: Int,
     columnWidth: Dp?,
     isStriped: Boolean
@@ -133,15 +144,21 @@ private fun TableBodyRow(
     ) {
         // Pad short rows so cells stay aligned with their headers.
         repeat(columnCount) { index ->
-            Text(
-                text = cells.getOrElse(index) { "-" },
-                style = MaterialTheme.typography.bodySmall,
-                color = taminColors.textPrimary,
-                maxLines = 3,
-                modifier = Modifier
-                    .cellWidth(columnWidth, this@Row)
-                    .padding(horizontal = 8.dp)
-            )
+            val cell = cells.getOrElse(index) { "-" }
+            val cellModifier = Modifier
+                .cellWidth(columnWidth, this@Row)
+                .padding(horizontal = 8.dp)
+            if (cellContent != null) {
+                Box(modifier = cellModifier) { cellContent(cell) }
+            } else {
+                Text(
+                    text = renderCell(cell),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = taminColors.textPrimary,
+                    maxLines = MAX_CELL_LINES,
+                    modifier = cellModifier,
+                )
+            }
         }
     }
 }
@@ -151,6 +168,9 @@ private fun Modifier.cellWidth(
     columnWidth: Dp?,
     scope: androidx.compose.foundation.layout.RowScope
 ): Modifier = if (columnWidth != null) width(columnWidth) else with(scope) { weight(1f) }
+
+/** Enough for a short link label or a long value; a cell rarely needs more. */
+private const val MAX_CELL_LINES = 4
 
 /** Narrower than this and Persian labels start wrapping into unreadable columns. */
 private val MIN_COLUMN_WIDTH = 96.dp
