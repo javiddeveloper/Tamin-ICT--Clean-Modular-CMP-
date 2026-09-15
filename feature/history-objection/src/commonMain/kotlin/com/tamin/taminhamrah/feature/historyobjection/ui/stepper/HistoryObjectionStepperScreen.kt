@@ -31,7 +31,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -60,6 +62,7 @@ import com.tamin.taminhamrah.ui.components.StepIndicatorModel
 import com.tamin.taminhamrah.ui.components.StepState
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
+import com.tamin.taminhamrah.ui.components.TaminFormAbandonDialog
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetResult
@@ -185,6 +188,7 @@ private fun HistoryObjectionStepperContent(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
+    var showAbandonDialog by remember { mutableStateOf(false) }
 
     BackHandler(onBack = { onIntent(HistoryObjectionStepperIntent.OnBackClicked) })
 
@@ -209,7 +213,7 @@ private fun HistoryObjectionStepperContent(
                         TaminTopAppBarButton(
                             icon = vectorResource(Res.drawable.ic_close),
                             contentDescription = null,
-                            onClick = onNavigateHome,
+                            onClick = { showAbandonDialog = true },
                             bordered = true
                         )
                     }
@@ -337,6 +341,17 @@ private fun HistoryObjectionStepperContent(
     if (state.hasSubmitted) {
         HistoryObjectionSubmitSuccessDialog(
             onAcknowledged = { onIntent(HistoryObjectionStepperIntent.OnSubmitSuccessAcknowledged) },
+        )
+    }
+
+    if (showAbandonDialog) {
+        TaminFormAbandonDialog(
+            formName = stringResource(Res.string.history_objection_title),
+            onStay = { showAbandonDialog = false },
+            onAbandon = {
+                showAbandonDialog = false
+                onNavigateHome()
+            },
         )
     }
 }

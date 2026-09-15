@@ -261,6 +261,8 @@ sealed interface RetirementPensionIntent {
     data object StartRequest : RetirementPensionIntent
     data object OpenTrack : RetirementPensionIntent
     data object Back : RetirementPensionIntent
+    /** Close (X) on the form — always asks before discarding. */
+    data object CloseClicked : RetirementPensionIntent
     data object LeaveConfirmed : RetirementPensionIntent
     data class GoToStep(val step: RetirementStep) : RetirementPensionIntent
     data object NextStep : RetirementPensionIntent

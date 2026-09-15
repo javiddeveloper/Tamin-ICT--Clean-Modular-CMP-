@@ -332,7 +332,7 @@ private fun RetirementHeader(
             TaminTopAppBarButton(
                 icon = vectorResource(Res.drawable.ic_tamin_cross),
                 contentDescription = null,
-                onClick = { onIntent(RetirementPensionIntent.Back) },
+                onClick = { onIntent(RetirementPensionIntent.CloseClicked) },
                 bordered = true,
             )
         },

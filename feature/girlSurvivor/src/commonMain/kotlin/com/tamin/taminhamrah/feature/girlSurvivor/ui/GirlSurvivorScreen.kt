@@ -53,6 +53,7 @@ import com.tamin.taminhamrah.ui.components.StepState
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminBottomBar
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
+import com.tamin.taminhamrah.ui.components.TaminFormAbandonDialog
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
@@ -105,6 +106,7 @@ fun GirlSurvivorScreen(
             if (state.currentStep == GirlSurvivorStep.Details) onBack()
             else viewModel.sendIntent(GirlSurvivorIntent.GoToPreviousStep)
         },
+        onClose = onBack,
         onIntent = viewModel::sendIntent,
         onDownloadPdf = { showPdfViewer = true },
     )
@@ -150,10 +152,12 @@ private fun HandleGirlSurvivorEvents(
 private fun GirlSurvivorContent(
     state: GirlSurvivorUiState,
     onBack: () -> Unit,
+    onClose: () -> Unit,
     onIntent: (GirlSurvivorIntent) -> Unit,
     onDownloadPdf: () -> Unit,
 ) {
     val taminColors = LocalTaminColors.current
+    var showAbandonDialog by remember { mutableStateOf(false) }
     val headerBrush = remember(taminColors.profileGradientStops) {
         Brush.horizontalGradient(taminColors.profileGradientStops)
     }
@@ -206,7 +210,7 @@ private fun GirlSurvivorContent(
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_cross),
                         contentDescription = null,
-                        onClick = onBack,
+                        onClick = { showAbandonDialog = true },
                         bordered = true,
                     )
                 },
@@ -289,6 +293,17 @@ private fun GirlSurvivorContent(
                 }
             }
         }
+    }
+
+    if (showAbandonDialog) {
+        TaminFormAbandonDialog(
+            formName = stringResource(Res.string.girl_survivor_title),
+            onStay = { showAbandonDialog = false },
+            onAbandon = {
+                showAbandonDialog = false
+                onClose()
+            },
+        )
     }
 }
 
