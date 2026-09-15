@@ -179,7 +179,7 @@ private val PreviewChannel = StoryChannelPR(
             title = "تأمین‌من به‌روز شد",
             body = "پرداخت حق بیمه، مشاهدهٔ سوابق و دریافت فیش، همه در یک صفحه جمع شده است.",
             media = StoryMediaPR.None,
-            cta = StoryCtaPR("دیدن سوابق من", "tamin://feature/WAGE_AND_HISTORY"),
+            cta = StoryCtaPR("دیدن سوابق من", "@wage_and_history"),
         ),
         StoryItemPR(
             id = "pr:1",

@@ -39,7 +39,7 @@ internal fun testChannel(
             } else {
                 StoryMediaDN.None
             },
-            cta = if (index in ctaIndices) StoryCtaDN("cta", "tamin://feature/AGENT") else null,
+            cta = if (index in ctaIndices) StoryCtaDN("cta", "@agent") else null,
         )
     },
 )

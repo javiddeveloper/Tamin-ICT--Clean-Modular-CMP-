@@ -1,5 +1,7 @@
 package com.tamin.taminhamrah.feature.stories.ui.viewer
 
+import com.tamin.taminhamrah.deeplink.DeepLinkSource
+import com.tamin.taminhamrah.ui.deeplink.LocalDeepLinkHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -145,11 +147,11 @@ private val CtaShape = RoundedCornerShape(CornerRadius.xl)
 fun StoryViewerScreen(
     channelIndex: Int,
     onClose: () -> Unit,
-    onOpenDeepLink: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: StoryViewerViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val deepLinkHandler = LocalDeepLinkHandler.current
 
     var likeAnimationTrigger by remember { androidx.compose.runtime.mutableStateOf(0) }
 
@@ -160,7 +162,10 @@ fun StoryViewerScreen(
     viewModel.events.collectWithLifecycleAware { event ->
         when (event) {
             StoryViewerEvent.Close -> onClose()
-            is StoryViewerEvent.OpenDeepLink -> onOpenDeepLink(event.deepLink)
+            // The viewer closes only once the link really opens a service or page, so coming back
+            // lands on home; a blocked service keeps the story on screen and the gate says why.
+            is StoryViewerEvent.OpenDeepLink ->
+                deepLinkHandler.open(event.deepLink, DeepLinkSource.APP_CONTENT, onOpened = onClose)
             StoryViewerEvent.ShowLikeAnimation -> {
                 likeAnimationTrigger++
             }
