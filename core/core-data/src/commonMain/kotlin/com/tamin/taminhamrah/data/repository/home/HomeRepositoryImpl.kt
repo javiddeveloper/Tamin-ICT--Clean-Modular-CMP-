@@ -9,12 +9,17 @@ import com.tamin.taminhamrah.data.local.entity.RequestEntity
 import com.tamin.taminhamrah.data.local.entity.SpecialServiceEntity
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
+import com.tamin.taminhamrah.model.common.FeatureFlag
+import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.home.*
 import com.tamin.taminhamrah.repository.UserRepository
+import com.tamin.taminhamrah.repository.common.CommonRepository
 import com.tamin.taminhamrah.repository.treatment.TreatmentRepository
+import com.tamin.taminhamrah.repository.home.HomeContentPlaceholders
 import com.tamin.taminhamrah.repository.home.HomeRepository
 import com.tamin.taminhamrah.repository.stories.StoryRepository
 import com.tamin.taminhamrah.repository.userRequest.UserRequestRepository
+import com.tamin.taminhamrah.util.AppConfig
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -29,6 +34,7 @@ class HomeRepositoryImpl(
     private val treatmentRepository: TreatmentRepository,
     private val requestsRepository: UserRequestRepository,
     private val storyRepository: StoryRepository,
+    private val commonRepository: CommonRepository,
 ) : HomeRepository {
 
     override fun getHomeContent(): Flow<HomeContentDN?> {
@@ -43,9 +49,9 @@ class HomeRepositoryImpl(
                         )
                     },
                     stories = it.stories?.map { channel -> channel.toDomain() },
-                    campaigns = it.campaigns?.map { camp -> CampaignDN(camp.id, camp.title, camp.bannerUrl) },
-                    quickAccess = it.quickAccess?.map { qa -> QuickAccessDN(qa.id, qa.title, qa.iconUrl) },
-                    specialServices = it.specialServices?.map { ss -> SpecialServiceDN(ss.id, ss.title, ss.iconUrl) },
+                    campaigns = it.campaigns?.mapNotNull { camp -> camp.toDomain() },
+                    quickAccess = it.quickAccess?.mapNotNull { qa -> qa.toDomain() },
+                    specialServices = it.specialServices?.mapNotNull { ss -> ss.toDomain() },
                     requests = it.requests?.map { req -> RequestDN(req.id, req.title, req.date, req.status,req.refCode) }
                 )
             }
@@ -68,11 +74,17 @@ class HomeRepositoryImpl(
         // StoryRepository loads its (currently bundled) catalogue once and keeps re-emitting it, so
         // a plain first() reliably returns the loaded list without needing the take(2) dance above.
         val storiesDeferred = async { runCatching { storyRepository.getChannels().firstOrNull() }.getOrNull() }
+        // The menu supplies the display title for the placeholder campaigns/quickAccess/specialServices
+        // below — same (currently mocked) source the rest of the app reads service names from.
+        val menuDeferred = async {
+            runCatching { commonRepository.getMainMenu(AppConfig.versionName, false).firstOrNull() }.getOrNull()
+        }
 
         val identity = identityDeferred.await()
         val requests = requestsDeferred.await()
         val activeRelation = activeRelationDeferred.await()
         val stories = storiesDeferred.await()
+        val menu = menuDeferred.await()
 
         val nationalCode = identity?.nationalId
         val darmanCoverage = nationalCode?.let {
@@ -114,18 +126,25 @@ class HomeRepositoryImpl(
         // to whatever is already cached if this particular fetch failed.
         val storyEntities = stories?.map { it.toEntity() } ?: currentContent?.stories
 
-        // Mock data for unimplemented features as requested
-        val mockCampaigns = listOf(
-            CampaignEntity("1", "کمپین بیمه زنان خانه‌دار", null)
-        )
-        val mockQuickAccess = listOf(
-            QuickAccessEntity("1", "سوابق", null),
-            QuickAccessEntity("2", "فیش حقوقی", null)
-        )
-        val mockSpecialServices = listOf(
-            SpecialServiceEntity("1", "کارگران ساختمانی", null),
-            SpecialServiceEntity("2", "قراردادهای من", null)
-        )
+        // Placeholder rows for unimplemented features: which flags to show is decided once in
+        // HomeContentPlaceholders (core-domain); the title comes from the real menu row for that
+        // flag, not from a literal here. A flag the menu doesn't (yet) carry is skipped rather than
+        // shown with a blank title. Falls back to whatever is already cached if the menu fetch failed.
+        val mockCampaigns = menu?.let { m ->
+            HomeContentPlaceholders.campaignFlags.mapNotNull { flag ->
+                m.titleOf(flag)?.let { title -> CampaignEntity(flagId = flag.id, title = title, bannerUrl = null) }
+            }
+        } ?: currentContent?.campaigns
+        val mockQuickAccess = menu?.let { m ->
+            HomeContentPlaceholders.quickAccessFlags.mapNotNull { flag ->
+                m.titleOf(flag)?.let { title -> QuickAccessEntity(flagId = flag.id, title = title, iconUrl = null) }
+            }
+        } ?: currentContent?.quickAccess
+        val mockSpecialServices = menu?.let { m ->
+            HomeContentPlaceholders.specialServiceFlags.mapNotNull { flag ->
+                m.titleOf(flag)?.let { title -> SpecialServiceEntity(flagId = flag.id, title = title, iconUrl = null) }
+            }
+        } ?: currentContent?.specialServices
 
         val homeContentEntity = HomeContentEntity(
             id = 1,
@@ -140,4 +159,6 @@ class HomeRepositoryImpl(
         // Save everything atomically to Room
         dao.insertOrUpdate(homeContentEntity)
     }
+
+    private fun List<MainServiceDN>.titleOf(flag: FeatureFlag): String? = find { it.id == flag.id }?.name
 }

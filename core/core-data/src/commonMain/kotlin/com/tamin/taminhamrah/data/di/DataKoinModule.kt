@@ -110,5 +110,5 @@ val dataKoinModule = module {
     singleOf(::WorkersPaymentRepositoryImpl) { bind<WorkersPaymentRepository>() }
     singleOf(::WeddingPresentRepositoryImpl) { bind<WeddingPresentRepository>() }
     singleOf(::StoryRepositoryImpl) { bind<StoryRepository>() }
-    single<HomeRepository> { HomeRepositoryImpl(get(), get(), get(), get(), get()) }
+    single<HomeRepository> { HomeRepositoryImpl(get(), get(), get(), get(), get(), get()) }
 }

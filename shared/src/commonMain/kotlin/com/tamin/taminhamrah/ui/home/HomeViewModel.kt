@@ -15,7 +15,8 @@ import com.tamin.taminhamrah.model.common.featureStatusOf
 import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.ui.home.contract.*
 import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
-import com.tamin.taminhamrah.repository.home.HomeRepository
+import com.tamin.taminhamrah.useCases.home.GetHomeContentUseCase
+import com.tamin.taminhamrah.useCases.home.SyncHomeContentUseCase
 import kotlinx.coroutines.launch
 import com.tamin.taminhamrah.util.AppConfig
 import kotlinx.collections.immutable.ImmutableList
@@ -34,7 +35,8 @@ import kotlinx.coroutines.flow.merge
 class HomeViewModel(
     private val getMainMenuUseCase: GetMainMenuUseCase,
     private val featureManager: FeatureManager,
-    private val homeRepository: HomeRepository,
+    private val getHomeContentUseCase: GetHomeContentUseCase,
+    private val syncHomeContentUseCase: SyncHomeContentUseCase,
     private val tokenStoreManager: TokenStoreManager,
 ) : BaseViewModel<HomeUiState, HomeUiState.HomePartialState, HomeEvent, HomeIntent>(
     initialState = HomeUiState(isLoading = true)
@@ -49,7 +51,7 @@ class HomeViewModel(
                 .distinctUntilChanged()
                 .collectLatest {
                     try {
-                        homeRepository.syncHomeContent()
+                        syncHomeContentUseCase()
                     } catch (e: Exception) {
                         // Ignore sync errors and fallback to cached data
                     }
@@ -73,7 +75,7 @@ class HomeViewModel(
                 )
             }
             is HomeIntent.LoadLastRequests -> {
-                // Deprecated: Requests are now handled by LoadHeader via HomeRepository
+                // Deprecated: Requests are now handled by LoadHeader via GetHomeContentUseCase
             }
             is HomeIntent.OnServiceClick -> {
                 handleServiceClick(intent.service)
@@ -93,7 +95,7 @@ class HomeViewModel(
      * error instead of routing through [createErrorState].
      */
     private fun homeContentFlow(): Flow<HomeUiState.HomePartialState> =
-        homeRepository.getHomeContent()
+        getHomeContentUseCase()
             .map { HomeUiState.HomePartialState.HomeContentLoaded(it) }
             .catch { }
 

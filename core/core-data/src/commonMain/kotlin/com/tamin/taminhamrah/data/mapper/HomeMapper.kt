@@ -1,9 +1,16 @@
 package com.tamin.taminhamrah.data.mapper
 
+import com.tamin.taminhamrah.data.local.entity.CampaignEntity
+import com.tamin.taminhamrah.data.local.entity.QuickAccessEntity
+import com.tamin.taminhamrah.data.local.entity.SpecialServiceEntity
 import com.tamin.taminhamrah.data.local.entity.StoryChannelEntity
 import com.tamin.taminhamrah.data.local.entity.StoryCtaEntity
 import com.tamin.taminhamrah.data.local.entity.StoryItemEntity
 import com.tamin.taminhamrah.data.local.entity.StoryMediaEntity
+import com.tamin.taminhamrah.model.common.FeatureFlag
+import com.tamin.taminhamrah.model.home.CampaignDN
+import com.tamin.taminhamrah.model.home.QuickAccessDN
+import com.tamin.taminhamrah.model.home.SpecialServiceDN
 import com.tamin.taminhamrah.model.stories.StoryChannelDN
 import com.tamin.taminhamrah.model.stories.StoryCtaDN
 import com.tamin.taminhamrah.model.stories.StoryItemDN
@@ -60,3 +67,12 @@ fun StoryMediaDN.toEntity(): StoryMediaEntity = when (this) {
 }
 
 fun StoryCtaDN.toEntity(): StoryCtaEntity = StoryCtaEntity(label = label, deepLink = deepLink)
+
+/**
+ * A cached row whose [CampaignEntity.flagId] no longer matches a known [FeatureFlag] (the flag was
+ * retired) has nothing left to render, so it is dropped rather than surfaced with a null identity —
+ * callers should use `mapNotNull` over these.
+ */
+fun CampaignEntity.toDomain(): CampaignDN? = FeatureFlag.fromId(flagId)?.let { CampaignDN(it, title, bannerUrl) }
+fun QuickAccessEntity.toDomain(): QuickAccessDN? = FeatureFlag.fromId(flagId)?.let { QuickAccessDN(it, title, iconUrl) }
+fun SpecialServiceEntity.toDomain(): SpecialServiceDN? = FeatureFlag.fromId(flagId)?.let { SpecialServiceDN(it, title, iconUrl) }

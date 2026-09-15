@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.model.home
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.MainServiceDN
+import com.tamin.taminhamrah.repository.home.HomeServiceMembership
 import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.StringResource
 import taminx.core.core_ui.Res
@@ -50,92 +51,42 @@ enum class HomeServiceSection(
     FREQUENT(
         titleRes = Res.string.home_section_frequent,
         placement = SectionPlacement.QUICK_ACCESS,
-        members = listOf(
-            FeatureFlag.CONTRACTS,          // پرداخت  — "امور قراردادها و پرداخت" (35); TODO confirm
-            FeatureFlag.PRESCRIPTION,       // نسخه
-            FeatureFlag.PAY_ROLL,           // فیش حقوقی
-            FeatureFlag.MERGE_HISTORY,      // سوابق  — TODO confirm: id 6 / 7 / 8
-            FeatureFlag.FREELANCE_INSURANCE, // حق بیمه — no exact menu match; TODO confirm
-            FeatureFlag.BANK_ACCOUNT_LIST,  // حساب بانکی
-            FeatureFlag.VIEW_SHORT_TERM,    // درخواست‌ها — TODO confirm
-        ),
+        members = HomeServiceMembership.frequent,
     ),
 
     /** سابقه — matches the design's «سابقه» chip. */
     HISTORY(
         titleRes = Res.string.home_section_history,
         placement = SectionPlacement.QUICK_ACCESS,
-        members = listOf(
-            FeatureFlag.COMBINED_RECORD,                       // کلیه سوابق  — TODO confirm: id 6 / 7 / 8
-            FeatureFlag.SEND_INSURANCE_HISTORY_TO_INSTITUTION, // اعلام سابقه
-            FeatureFlag.FRACTION_CONTRACT,                     // کسری از ماه
-            FeatureFlag.OBJECTION_NON_EXISTENT_HISTORY,        // اعتراض سابقه — TODO confirm: id 10 vs 42
-            FeatureFlag.VIEW_TITLE_JOB,                        // عناوین شغلی
-            FeatureFlag.LIST_OF_INSPECTIONS_PERFORMED,         // بازرسی‌ها
-            FeatureFlag.INQUIRY_EDUCATION,                     // گواهی تحصیل
-        ),
+        members = HomeServiceMembership.history,
     ),
 
     /** کمک‌هزینه — matches the design's «کمک‌هزینه» chip. */
     AID(
         titleRes = Res.string.home_section_aid,
         placement = SectionPlacement.QUICK_ACCESS,
-        members = listOf(
-            FeatureFlag.WEDDING_PRESENT,             // هدیه ازدواج
-            FeatureFlag.REQUEST_FOR_PREGNANCY_PAY,   // بارداری
-            FeatureFlag.OROTEZ_PROTEZ,               // اورتز و پروتز
-            FeatureFlag.REQUEST_PAYMENT_FOR_ILL_DAYS, // غرامت بیماری
-            FeatureFlag.REQUEST_FUNERAL_GRANT,       // مراسم ترحیم
-            FeatureFlag.OCCURRENCE,                  // اعلام حادثه
-            FeatureFlag.OPTIONAL_INSURANCE,          // بیمه اختیاری
-        ),
+        members = HomeServiceMembership.aid,
     ),
 
     /** مستمری */
     PENSIONER(
         titleRes = Res.string.home_section_pensioner,
         placement = SectionPlacement.QUICK_ACCESS,
-        members = listOf(
-            FeatureFlag.RETIREMENT_PENSION,
-            FeatureFlag.PENSION_INQUIRY,
-            FeatureFlag.PAY_ROLL,
-            FeatureFlag.EDICT_PENSIONER,
-            FeatureFlag.ISSUANCE_WAGE_CERTIFICATE,
-            FeatureFlag.DEFERRED_INSTALLMENT_CERTIFICATE,
-            FeatureFlag.GIRL_SURVIVOR,
-            FeatureFlag.DISABILITY_PENSION,
-        ),
+        members = HomeServiceMembership.pensioner,
     ),
 
     /** کارفرما */
     EMPLOYER(
         titleRes = Res.string.home_section_employer,
         placement = SectionPlacement.QUICK_ACCESS,
-        members = listOf(
-            FeatureFlag.WORKSHOPS,
-            FeatureFlag.CONTRACT_INFO,
-            FeatureFlag.ASSIGNER_CONTRACT,
-            FeatureFlag.COMPLETE_WORKSHOP_INFO,
-            FeatureFlag.STACK_HOLDER_LIST,
-            FeatureFlag.FOLLOW_PROTEST_STATUS,
-            FeatureFlag.REGISTER_AGREEMENT,
-            FeatureFlag.PERFORMED_INSPECTION,
-            FeatureFlag.INSTALLMENT_DEBT,
-            FeatureFlag.CONSTRUCTION_INSURANCE,
-            FeatureFlag.OCCURRENCE,
-            FeatureFlag.LAWS,
-        ),
+        members = HomeServiceMembership.employer,
     ),
 
     /** خدمات ویژه — the three cards above the chip row. */
     FEATURED(
         titleRes = Res.string.home_section_featured,
         placement = SectionPlacement.FEATURED,
-        members = listOf(
-            FeatureFlag.VIEW_TITLE_JOB,
-            FeatureFlag.OCCURRENCE,
-            FeatureFlag.REQUEST_FOR_PREGNANCY_PAY,
-        ),
+        members = HomeServiceMembership.featured,
     ),
     ;
 

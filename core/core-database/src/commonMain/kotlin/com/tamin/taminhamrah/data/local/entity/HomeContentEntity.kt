@@ -69,23 +69,26 @@ data class StoryCtaEntity(
     val deepLink: String?
 )
 
+/** Mirrors [com.tamin.taminhamrah.model.home.CampaignDN] — [flagId] is a [com.tamin.taminhamrah.model.common.FeatureFlag] id, not a free-standing key. */
 @Serializable
 data class CampaignEntity(
-    val id: String,
+    val flagId: Int,
     val title: String,
     val bannerUrl: String?
 )
 
+/** Mirrors [com.tamin.taminhamrah.model.home.QuickAccessDN]. */
 @Serializable
 data class QuickAccessEntity(
-    val id: String,
+    val flagId: Int,
     val title: String,
     val iconUrl: String?
 )
 
+/** Mirrors [com.tamin.taminhamrah.model.home.SpecialServiceDN]. */
 @Serializable
 data class SpecialServiceEntity(
-    val id: String,
+    val flagId: Int,
     val title: String,
     val iconUrl: String?
 )
