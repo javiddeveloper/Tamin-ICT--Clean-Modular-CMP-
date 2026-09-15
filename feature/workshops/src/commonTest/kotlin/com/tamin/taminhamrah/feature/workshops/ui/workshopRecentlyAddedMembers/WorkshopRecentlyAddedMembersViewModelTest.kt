@@ -510,6 +510,11 @@ class WorkshopRecentlyAddedMembersViewModelTest {
             assertEquals(10, form.pickerOptions.size)
             assertTrue(form.canPickerLoadMore, "picker should be able to load more when total > loaded")
             assertFalse(form.isPickerLoadingMore)
+            // A blank search is `jobDescription LIKE "*"`, as the old app sends it — not no filter.
+            assertEquals(
+                listOf(ApiFilterDN(FilterProperty.JOB_DESCRIPTION, "*", FilterOperator.LIKE)),
+                jobs.lastQuery?.filters,
+            )
         }
 
     @Test
@@ -661,12 +666,7 @@ private class FakeJobsRepository : CommonRepository {
     )
     var totalJobs: Int = 1
 
-    override fun getJobTitle(query: ApiQueryParamDN): Flow<JobTitleListDN?> = flowOf(
-        JobTitleListDN(
-            list = jobPages[query.page] ?: emptyList(),
-            total = totalJobs,
-        ),
-    )
+    override fun getJobTitle(query: ApiQueryParamDN): Flow<JobTitleListDN?> = unused()
 
     override fun getJobTitlePage(query: ApiQueryParamDN): Flow<PageDN<JobTitleDN>> = flow {
         lastQuery = query

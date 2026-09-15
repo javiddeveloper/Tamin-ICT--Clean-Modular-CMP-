@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -449,10 +448,11 @@ private fun AppliedFiltersRow(
                 color = colors.textSecondary,
             )
             Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = stringResource(Res.string.objection_status_remove_filters),
+                imageVector = vectorResource(Res.drawable.ic_tamin_cross),
+                // «حذف» beside it already names the action; a description here is read out twice.
+                contentDescription = null,
                 tint = colors.textSecondary,
-                modifier = Modifier.size(IconSize.small),
+                modifier = Modifier.size(WorkshopDimens.chipCrossSize),
             )
         }
     }

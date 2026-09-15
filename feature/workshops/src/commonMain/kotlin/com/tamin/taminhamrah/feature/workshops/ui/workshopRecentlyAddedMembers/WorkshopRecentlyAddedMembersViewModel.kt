@@ -465,23 +465,16 @@ class WorkshopRecentlyAddedMembersViewModel(
         paging.error?.let { emit(reportFailure(it)) }
     }
 
-    /** `jobDescription LIKE "*query*"` or empty filters for blank query (matching live server capture). */
-    private fun jobBaseQuery(query: String): ApiQueryParamDN {
-        val trimmed = query.trim()
-        return if (trimmed.isBlank()) {
-            ApiQueryParamDN()
-        } else {
-            ApiQueryParamDN(
-                filters = listOf(
-                    ApiFilterDN(
-                        property = FilterProperty.JOB_DESCRIPTION,
-                        value = "*$trimmed*",
-                        operator = FilterOperator.LIKE,
-                    ),
-                ),
-            )
-        }
-    }
+    /** `jobDescription LIKE "*query*"`, and `LIKE "*"` for a blank one — what the old app sends. */
+    private fun jobBaseQuery(query: String): ApiQueryParamDN = ApiQueryParamDN(
+        filters = listOf(
+            ApiFilterDN(
+                property = FilterProperty.JOB_DESCRIPTION,
+                value = query.trim().takeIf { it.isNotEmpty() }?.let { "*$it*" } ?: "*",
+                operator = FilterOperator.LIKE,
+            ),
+        ),
+    )
 
     /**
      * Sends the picked image up and keeps only the guid that comes back.

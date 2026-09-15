@@ -66,6 +66,7 @@ import com.tamin.taminhamrah.ui.components.document.TaminDocumentUploadState
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.paging.OnLoadMore
 import com.tamin.taminhamrah.ui.paging.PagingFooter
+import com.tamin.taminhamrah.ui.paging.rememberDebouncedQuery
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -871,7 +872,7 @@ fun WorkshopDocumentTypeSheet(
  * A searchable list of values a field is chosen from — a city, a job.
  *
  * Searched rather than scrolled: both lookups run to thousands of rows, and the service is asked
- * again as the query changes rather than every row being pulled down once.
+ * again once typing pauses rather than every row being pulled down once.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -891,6 +892,7 @@ fun <T> WorkshopLookupSheet(
 ) {
     val colors = LocalTaminColors.current
     val listState = rememberLazyListState()
+    var text by rememberDebouncedQuery(query, onQueryChange)
 
     if (onLoadMore != null) {
         listState.OnLoadMore(
@@ -923,8 +925,8 @@ fun <T> WorkshopLookupSheet(
             )
             WorkshopTextField(
                 label = title,
-                value = query,
-                onValueChange = onQueryChange,
+                value = text,
+                onValueChange = { text = it },
                 keyboardType = KeyboardType.Text,
                 inputRestriction = InputRestriction.None,
             )

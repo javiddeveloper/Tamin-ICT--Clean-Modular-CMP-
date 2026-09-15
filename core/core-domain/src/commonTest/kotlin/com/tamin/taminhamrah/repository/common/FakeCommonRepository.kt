@@ -24,6 +24,7 @@ class FakeCommonRepository : CommonRepository {
     var getRolesError: Throwable = RuntimeException("Roles Error")
     var jobTitleResult: JobTitleListDN? = null
     var jobTitlePageResult: PageDN<JobTitleDN>? = null
+    var getJobTitleError: Throwable = RuntimeException("Job Title Error")
     var registrationDeclarationFormResult: ByteArray = byteArrayOf()
     var registrationDeclarationFormError: Throwable = RuntimeException("PDF Error")
     var insuranceTypesResult: List<InsuranceTypeDN> = emptyList()
@@ -56,12 +57,12 @@ class FakeCommonRepository : CommonRepository {
     }
 
     override fun getJobTitle(query: ApiQueryParamDN): Flow<JobTitleListDN?> = flow {
-        if (shouldThrowError) throw getBeneficiaryError
+        if (shouldThrowError) throw getJobTitleError
         emit(jobTitleResult)
     }
 
     override fun getJobTitlePage(query: ApiQueryParamDN): Flow<PageDN<JobTitleDN>> = flow {
-        if (shouldThrowError) throw getBeneficiaryError
+        if (shouldThrowError) throw getJobTitleError
         val explicit = jobTitlePageResult
         if (explicit != null) {
             emit(explicit)

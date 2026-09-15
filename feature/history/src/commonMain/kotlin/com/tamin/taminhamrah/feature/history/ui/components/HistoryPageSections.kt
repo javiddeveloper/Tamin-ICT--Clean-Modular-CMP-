@@ -81,26 +81,18 @@ fun HistorySpanNote(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    val span = when {
-        careerTotal.years > 0 -> stringResource(
-            Res.string.history_note_span,
-            careerTotal.years.toString().toPersianDigits(),
-            firstYear.toPersianDigits(),
-            lastYear.toPersianDigits(),
-        )
-        careerTotal.months > 0 -> stringResource(
-            Res.string.history_note_span_months,
-            careerTotal.months.toString().toPersianDigits(),
-            firstYear.toPersianDigits(),
-            lastYear.toPersianDigits(),
-        )
-        else -> stringResource(
-            Res.string.history_note_span_days,
-            careerTotal.days.toString().toPersianDigits(),
-            firstYear.toPersianDigits(),
-            lastYear.toPersianDigits(),
-        )
+    // The largest whole unit of the same total the card above prints, so the two cannot disagree.
+    val (spanTemplate, spanCount) = when {
+        careerTotal.years > 0 -> Res.string.history_note_span to careerTotal.years
+        careerTotal.months > 0 -> Res.string.history_note_span_months to careerTotal.months
+        else -> Res.string.history_note_span_days to careerTotal.days
     }
+    val span = stringResource(
+        spanTemplate,
+        spanCount.toString().toPersianDigits(),
+        firstYear.toPersianDigits(),
+        lastYear.toPersianDigits(),
+    )
     val gaps = if (gapYears > 0) {
         stringResource(Res.string.history_note_gaps, gapYears.toString().toPersianDigits())
     } else {

@@ -86,17 +86,13 @@ class CommonRepositoryImpl(
     }
 
     override fun getJobTitlePage(query: ApiQueryParamDN): Flow<PageDN<JobTitleDN>> = flow {
-        try {
-            val response = commonRemoteDataSource.getJobTitle(query)
-            emit(
-                PageDN(
-                    items = response?.list?.map { item -> item.toDomain() } ?: emptyList(),
-                    total = response?.total,
-                )
+        val response = commonRemoteDataSource.getJobTitle(query)
+        emit(
+            PageDN(
+                items = response?.list?.map { item -> item.toDomain() } ?: emptyList(),
+                total = response?.total,
             )
-        } catch (e: Exception) {
-            throw e
-        }
+        )
     }
 
     override fun getRoles(): Flow<List<RoleDN>> = flow {
