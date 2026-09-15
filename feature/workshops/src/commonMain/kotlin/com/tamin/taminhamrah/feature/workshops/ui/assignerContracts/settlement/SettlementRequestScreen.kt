@@ -2,6 +2,9 @@ package com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.settlement
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -11,77 +14,86 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.AssignerContractsViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.findContract
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButton
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButtonTone
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopDocumentsPanel
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFieldSlot
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormBanner
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormFooter
-import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormSection
-import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormStep
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopReviewGroup
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopReviewRow
-import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopScreenShell
-import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopStepper
 import com.tamin.taminhamrah.feature.workshops.ui.model.SETTLEMENT_MAX_DOCUMENTS
+import com.tamin.taminhamrah.feature.workshops.ui.model.SettlementDocumentTypesWithSubcontractor
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachment
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopDocumentType
+import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
 import com.tamin.taminhamrah.model.workshop.AssignerContractDN
 import com.tamin.taminhamrah.model.workshop.AssignerContractPR
 import com.tamin.taminhamrah.model.workshop.AssignerPartyDN
-import com.tamin.taminhamrah.feature.workshops.ui.model.SettlementDocumentTypesWithSubcontractor
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
+import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
+import com.tamin.taminhamrah.ui.components.TaminHeroStepProgress
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
-import com.tamin.taminhamrah.ui.components.TaminSegmentedTabs
+import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
+import com.tamin.taminhamrah.ui.components.TaminTopAppBar
+import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminOptionSheetItem
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
-import com.tamin.taminhamrah.ui.components.toast.success
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.assigner_contract_date
+import taminx.core.core_ui.assigner_contract_subtitle
 import taminx.core.core_ui.assigner_empty_no_search_body
 import taminx.core.core_ui.assigner_empty_no_search_title
 import taminx.core.core_ui.assigner_field_contract_number
-import taminx.core.core_ui.assigner_field_contract_row
 import taminx.core.core_ui.assigner_field_contract_subject
 import taminx.core.core_ui.ic_tamin_assigner_contracts
+import taminx.core.core_ui.ic_tamin_check
+import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.ic_tamin_cross
 import taminx.core.core_ui.settlement_amount
-import taminx.core.core_ui.settlement_amount_hint
+import taminx.core.core_ui.settlement_contract_info_note
+import taminx.core.core_ui.settlement_contract_row_sequence
+import taminx.core.core_ui.settlement_contractor_branch
 import taminx.core.core_ui.settlement_contractor_name
 import taminx.core.core_ui.settlement_contractor_workshop
 import taminx.core.core_ui.settlement_currency_amount
 import taminx.core.core_ui.settlement_currency_in_rial
+import taminx.core.core_ui.settlement_documents_hint
+import taminx.core.core_ui.settlement_done_back
+import taminx.core.core_ui.settlement_done_body
 import taminx.core.core_ui.settlement_end_date
 import taminx.core.core_ui.settlement_foreign_exchange_note
 import taminx.core.core_ui.settlement_has_subcontractor
 import taminx.core.core_ui.settlement_letter_date
 import taminx.core.core_ui.settlement_letter_number
-import taminx.core.core_ui.settlement_letter_section
 import taminx.core.core_ui.settlement_no
 import taminx.core.core_ui.settlement_selected_contract
 import taminx.core.core_ui.settlement_start_date
-import taminx.core.core_ui.settlement_step_documents
+import taminx.core.core_ui.settlement_subcontractor_hint
 import taminx.core.core_ui.settlement_submit
 import taminx.core.core_ui.settlement_submitted
 import taminx.core.core_ui.settlement_title
@@ -90,12 +102,14 @@ import taminx.core.core_ui.settlement_yes
 import taminx.core.core_ui.ws_form_next
 
 /**
- * درخواست مفاصاحساب for one پیمان.
+ * درخواست مفاصاحساب for one پیمان — the design's four steps under the hero progress bar.
  *
  * The پیمان is found in the list this screen was opened from, by the two keys its route carries —
  * the way جزئیات پیمان finds it — so nothing is fetched to show it and no stale selection can be
  * drawn. It is null only after process death, which the screen says rather than offering a form with
  * no پیمان behind it.
+ *
+ * @param onDone leaves for the list of پیمان‌ها — the close control, and the confirmation once filed.
  */
 @Composable
 fun SettlementRequestScreen(
@@ -103,6 +117,7 @@ fun SettlementRequestScreen(
     contractRow: String,
     contractSequence: String,
     onBack: () -> Unit,
+    onDone: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SettlementRequestViewModel = koinViewModel(),
 ) {
@@ -116,32 +131,25 @@ fun SettlementRequestScreen(
     LaunchedEffect(contract) {
         if (contract != null) viewModel.sendIntent(SettlementRequestIntent.Open(contract))
     }
-    HandleSettlementRequestEvents(events = viewModel.events, onSubmitted = onBack)
+    HandleSettlementRequestEvents(events = viewModel.events)
 
     SettlementRequestContent(
         contract = contract,
         state = state,
         onIntent = viewModel::sendIntent,
         onBack = onBack,
+        onDone = onDone,
         modifier = modifier,
     )
 }
 
 @Composable
-private fun HandleSettlementRequestEvents(
-    events: Flow<SettlementRequestEvent>,
-    onSubmitted: () -> Unit,
-) {
+private fun HandleSettlementRequestEvents(events: Flow<SettlementRequestEvent>) {
     val toaster = LocalToaster.current
-    val latestOnSubmitted by rememberUpdatedState(onSubmitted)
     LaunchedEffect(events, toaster) {
         events.collect { event ->
             when (event) {
                 is SettlementRequestEvent.ShowServerMessage -> toaster.error(event.message)
-                SettlementRequestEvent.Submitted -> {
-                    toaster.success(getString(Res.string.settlement_submitted))
-                    latestOnSubmitted()
-                }
             }
         }
     }
@@ -159,21 +167,20 @@ fun SettlementRequestContent(
     state: SettlementRequestUiState,
     onIntent: (SettlementRequestIntent) -> Unit,
     onBack: () -> Unit,
+    onDone: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val step = state.step
-    // The system back gesture walks the steps as «مرحلهٔ قبل» does, and leaves only from the first.
-    BackHandler(enabled = step != SettlementStep.CONTRACT) {
-        onIntent(SettlementRequestIntent.Previous)
-    }
+    Column(modifier = modifier.fillMaxSize()) {
+        SettlementHeader(
+            step = step,
+            workshopName = contract?.card?.name,
+            rowLabel = contract?.card?.rowLabel,
+            onIntent = onIntent,
+            onBack = onBack,
+            onClose = onDone,
+        )
 
-    WorkshopScreenShell(
-        title = stringResource(Res.string.settlement_title),
-        onBack = onBack,
-        workshopName = contract?.card?.name,
-        workshopCode = contract?.card?.workshopCodeLabel,
-        modifier = modifier,
-    ) {
         if (contract == null) {
             EmptyStateMessage(
                 icon = vectorResource(Res.drawable.ic_tamin_assigner_contracts),
@@ -181,10 +188,8 @@ fun SettlementRequestContent(
                 subtitle = stringResource(Res.string.assigner_empty_no_search_body),
                 showIconTile = true,
             )
-            return@WorkshopScreenShell
+            return@Column
         }
-
-        SettlementStepper(step = step)
 
         val scrollState = rememberScrollState()
         // Each step opens at its own top, not wherever the previous one was left.
@@ -201,9 +206,17 @@ fun SettlementRequestContent(
             verticalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
             when (step) {
-                SettlementStep.CONTRACT -> SettlementContractStep(
-                    contract = contract,
-                    isContractOpen = state.isContractOpen,
+                SettlementStep.CONTRACT -> {
+                    WorkshopReviewGroup(
+                        title = stringResource(Res.string.settlement_selected_contract),
+                        rows = rememberContractRows(contract),
+                        isOpen = state.isContractOpen,
+                        onToggle = { onIntent(SettlementRequestIntent.ContractToggled) },
+                    )
+                    WorkshopFormBanner(text = stringResource(Res.string.settlement_contract_info_note))
+                }
+
+                SettlementStep.LETTER -> SettlementLetterStep(
                     letterNumber = state.letterNumber,
                     letterDate = state.letterDate,
                     startDate = state.startDate,
@@ -260,84 +273,138 @@ fun SettlementRequestContent(
             isBusy = state.isBusy,
         )
     }
+
+    if (state.isSubmitted) SettlementDoneDialog(onDone = onDone)
 }
 
-/** اطلاعات پیمان — مستندات — شرایط قرارداد, with the finished rungs ticked. */
+/**
+ * The gradient bar with the design's hero progress: the step's title, «مرحلهٔ N از ۴», four segments
+ * of which the passed ones go back, and the پیمان this request is for.
+ */
 @Composable
-private fun SettlementStepper(step: SettlementStep) {
-    val labels = SettlementStep.entries.map { stringResource(it.label) }
-    val steps = remember(step, labels) {
-        SettlementStep.entries.mapIndexed { index, entry ->
-            WorkshopFormStep(label = labels[index], isDone = entry < step, isCurrent = entry == step)
-        }.toImmutableList()
+private fun SettlementHeader(
+    step: SettlementStep,
+    workshopName: String?,
+    rowLabel: String?,
+    onIntent: (SettlementRequestIntent) -> Unit,
+    onBack: () -> Unit,
+    onClose: () -> Unit,
+) {
+    val colors = LocalTaminColors.current
+    val headerGradient = remember(colors.profileGradientStops) {
+        Brush.horizontalGradient(colors.profileGradientStops)
     }
-    WorkshopStepper(steps = steps)
+    TaminTopAppBar(
+        title = stringResource(Res.string.settlement_title),
+        background = headerGradient,
+        navigationIcon = {
+            TaminTopAppBarButton(
+                icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                contentDescription = null,
+                onClick = onBack,
+            )
+        },
+        action = {
+            TaminTopAppBarButton(
+                icon = vectorResource(Res.drawable.ic_tamin_cross),
+                contentDescription = null,
+                onClick = onClose,
+            )
+        },
+    ) {
+        TaminHeroStepProgress(
+            stepTitle = stringResource(step.label),
+            currentStep = step.ordinal + 1,
+            totalSteps = SettlementStep.entries.size,
+            // Every segment up to this one is lit, as the design fills them.
+            maxReachedStep = step.ordinal + 1,
+            onStepClick = { onIntent(SettlementRequestIntent.StepSelected(SettlementStep.entries[it - 1])) },
+            stepSubtitle = if (workshopName != null && rowLabel != null) {
+                stringResource(Res.string.assigner_contract_subtitle, workshopName, rowLabel)
+            } else {
+                null
+            },
+            modifier = Modifier.padding(top = Spacing.md),
+        )
+    }
 }
 
-/** «پیمان انتخاب‌شده», then the letter the request is filed under and the amounts it declares. */
+/** The seven cells the design's «پیمان انتخاب‌شده» card lists, rebuilt only when the پیمان changes. */
 @Composable
-private fun SettlementContractStep(
-    contract: AssignerContractPR,
-    isContractOpen: Boolean,
+private fun rememberContractRows(contract: AssignerContractPR): ImmutableList<WorkshopReviewRow> {
+    val number = stringResource(Res.string.assigner_field_contract_number)
+    val date = stringResource(Res.string.assigner_contract_date)
+    val rowSequence = stringResource(Res.string.settlement_contract_row_sequence)
+    val subject = stringResource(Res.string.assigner_field_contract_subject)
+    val contractorName = stringResource(Res.string.settlement_contractor_name)
+    val contractorWorkshop = stringResource(Res.string.settlement_contractor_workshop)
+    val contractorBranch = stringResource(Res.string.settlement_contractor_branch)
+    return remember(contract, number, date, rowSequence, subject, contractorName, contractorWorkshop, contractorBranch) {
+        persistentListOf(
+            WorkshopReviewRow(number, contract.contractNumber),
+            WorkshopReviewRow(date, contract.contractDate),
+            WorkshopReviewRow(rowSequence, contract.card.rowLabel + ROW_SEQUENCE_SEPARATOR + contract.sequenceLabel),
+            WorkshopReviewRow(subject, contract.contractSubject, isNumeric = false),
+            WorkshopReviewRow(contractorName, contract.employer.workshopName, isNumeric = false),
+            WorkshopReviewRow(contractorWorkshop, contract.employer.workshopCode),
+            WorkshopReviewRow(contractorBranch, contract.employer.branchName, isNumeric = false),
+        )
+    }
+}
+
+/** The letter the request is filed under, the period it covers and the amounts it declares. */
+@Composable
+private fun SettlementLetterStep(
     letterNumber: String,
     letterDate: SettlementDate?,
     startDate: SettlementDate?,
     endDate: SettlementDate?,
-    hasSubcontractor: Boolean,
+    hasSubcontractor: Boolean?,
     amount: String,
     currencyAmount: String,
     currencyInRial: String,
-    errors: kotlinx.collections.immutable.ImmutableMap<SettlementField, StringResource>,
+    errors: ImmutableMap<SettlementField, StringResource>,
     onIntent: (SettlementRequestIntent) -> Unit,
 ) {
-    WorkshopReviewGroup(
-        title = stringResource(Res.string.settlement_selected_contract),
-        rows = rememberContractRows(contract),
-        isOpen = isContractOpen,
-        onToggle = { onIntent(SettlementRequestIntent.ContractToggled) },
-    )
-
-    WorkshopFormSection(title = stringResource(Res.string.settlement_letter_section))
-    SettlementTextField(
-        field = SettlementField.LETTER_NUMBER,
-        label = stringResource(Res.string.settlement_letter_number),
-        value = letterNumber,
-        error = errors[SettlementField.LETTER_NUMBER],
-        onIntent = onIntent,
-        maxLength = LETTER_NUMBER_MAX_LENGTH,
-        // A number, not an amount — grouping it would change how it reads against the letter.
-        groupsThousands = false,
-    )
-    SettlementDateField(
-        field = SettlementField.LETTER_DATE,
-        label = stringResource(Res.string.settlement_letter_date),
-        date = letterDate,
-        error = errors[SettlementField.LETTER_DATE],
-        onIntent = onIntent,
-    )
-    SettlementDateField(
-        field = SettlementField.START_DATE,
-        label = stringResource(Res.string.settlement_start_date),
-        date = startDate,
-        error = errors[SettlementField.START_DATE],
-        onIntent = onIntent,
-    )
-    SettlementDateField(
-        field = SettlementField.END_DATE,
-        label = stringResource(Res.string.settlement_end_date),
-        date = endDate,
-        error = errors[SettlementField.END_DATE],
-        onIntent = onIntent,
-        // A پیمان's operations can end after today; the old app opened this one picker 100 years out.
-        allowFuture = true,
-    )
-
-    WorkshopFieldSlot(label = stringResource(Res.string.settlement_has_subcontractor)) {
-        TaminSegmentedTabs(
-            options = YesNo,
-            selected = hasSubcontractor,
-            onSelect = { onIntent(SettlementRequestIntent.SubcontractorChanged(it)) },
-            label = { stringResource(if (it) Res.string.settlement_yes else Res.string.settlement_no) },
+    SettlementFieldPair {
+        SettlementTextField(
+            field = SettlementField.LETTER_NUMBER,
+            label = stringResource(Res.string.settlement_letter_number),
+            value = letterNumber,
+            error = errors[SettlementField.LETTER_NUMBER],
+            onIntent = onIntent,
+            maxLength = LETTER_NUMBER_MAX_LENGTH,
+            // A number, not an amount — grouping it would change how it reads against the letter.
+            groupsThousands = false,
+            modifier = Modifier.weight(1f),
+        )
+        SettlementDateField(
+            field = SettlementField.LETTER_DATE,
+            label = stringResource(Res.string.settlement_letter_date),
+            date = letterDate,
+            error = errors[SettlementField.LETTER_DATE],
+            onIntent = onIntent,
+            modifier = Modifier.weight(1f),
+        )
+    }
+    SettlementFieldPair {
+        SettlementDateField(
+            field = SettlementField.START_DATE,
+            label = stringResource(Res.string.settlement_start_date),
+            date = startDate,
+            error = errors[SettlementField.START_DATE],
+            onIntent = onIntent,
+            modifier = Modifier.weight(1f),
+        )
+        SettlementDateField(
+            field = SettlementField.END_DATE,
+            label = stringResource(Res.string.settlement_end_date),
+            date = endDate,
+            error = errors[SettlementField.END_DATE],
+            onIntent = onIntent,
+            // A پیمان's operations can end after today; the old app opened this one picker 100 years out.
+            allowFuture = true,
+            modifier = Modifier.weight(1f),
         )
     }
 
@@ -347,46 +414,83 @@ private fun SettlementContractStep(
         value = amount,
         error = errors[SettlementField.AMOUNT],
         onIntent = onIntent,
-        placeholder = stringResource(Res.string.settlement_amount_hint),
     )
-    WorkshopFormBanner(text = stringResource(Res.string.settlement_foreign_exchange_note))
-    SettlementTextField(
-        field = SettlementField.CURRENCY_AMOUNT,
-        label = stringResource(Res.string.settlement_currency_amount),
-        value = currencyAmount,
-        error = null,
+    SettlementFieldPair {
+        SettlementTextField(
+            field = SettlementField.CURRENCY_AMOUNT,
+            label = stringResource(Res.string.settlement_currency_amount),
+            value = currencyAmount,
+            error = null,
+            onIntent = onIntent,
+            isRequired = false,
+            modifier = Modifier.weight(1f),
+        )
+        SettlementTextField(
+            field = SettlementField.CURRENCY_IN_RIAL,
+            label = stringResource(Res.string.settlement_currency_in_rial),
+            value = currencyInRial,
+            error = errors[SettlementField.CURRENCY_IN_RIAL],
+            onIntent = onIntent,
+            isRequired = false,
+            modifier = Modifier.weight(1f),
+        )
+    }
+    SettlementHint(stringResource(Res.string.settlement_foreign_exchange_note))
+
+    SettlementSubcontractorField(
+        hasSubcontractor = hasSubcontractor,
+        error = errors[SettlementField.SUBCONTRACTOR],
         onIntent = onIntent,
-        isRequired = false,
     )
-    SettlementTextField(
-        field = SettlementField.CURRENCY_IN_RIAL,
-        label = stringResource(Res.string.settlement_currency_in_rial),
-        value = currencyInRial,
-        error = errors[SettlementField.CURRENCY_IN_RIAL],
-        onIntent = onIntent,
-        isRequired = false,
-    )
+    SettlementHint(stringResource(Res.string.settlement_subcontractor_hint))
+
     SettlementTotal(amount = amount, currencyInRial = currencyInRial)
 }
 
-/** The six cells the design's «پیمان انتخاب‌شده» card lists, rebuilt only when the پیمان changes. */
+/** Two fields side by side, as the design halves the letter step's rows. */
 @Composable
-private fun rememberContractRows(contract: AssignerContractPR): ImmutableList<WorkshopReviewRow> {
-    val row = stringResource(Res.string.assigner_field_contract_row)
-    val number = stringResource(Res.string.assigner_field_contract_number)
-    val date = stringResource(Res.string.assigner_contract_date)
-    val subject = stringResource(Res.string.assigner_field_contract_subject)
-    val contractorName = stringResource(Res.string.settlement_contractor_name)
-    val contractorWorkshop = stringResource(Res.string.settlement_contractor_workshop)
-    return remember(contract, row, number, date, subject, contractorName, contractorWorkshop) {
-        persistentListOf(
-            WorkshopReviewRow(row, contract.card.rowLabel),
-            WorkshopReviewRow(number, contract.contractNumber),
-            WorkshopReviewRow(date, contract.contractDate),
-            WorkshopReviewRow(subject, contract.contractSubject, isNumeric = false),
-            WorkshopReviewRow(contractorName, contract.employer.workshopName, isNumeric = false),
-            WorkshopReviewRow(contractorWorkshop, contract.employer.workshopCode),
-        )
+private fun SettlementFieldPair(content: @Composable RowScope.() -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        verticalAlignment = Alignment.Top,
+        content = content,
+    )
+}
+
+/**
+ * «آیا پیمان، پیمانکار جزء دارد؟» — neither answer chosen until the user picks one.
+ *
+ * The card buttons rather than the segmented tabs: the tabs always light one option, and this
+ * question has no default answer.
+ */
+@Composable
+private fun SettlementSubcontractorField(
+    hasSubcontractor: Boolean?,
+    error: StringResource?,
+    onIntent: (SettlementRequestIntent) -> Unit,
+) {
+    WorkshopFieldSlot(
+        label = stringResource(Res.string.settlement_has_subcontractor),
+        isRequired = true,
+        errorText = error?.let { stringResource(it) },
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(WorkshopDimens.cardButtonGap),
+        ) {
+            // بله first, so the RTL row puts it on the right, where the old app's radio group had it.
+            WorkshopCardButton(
+                text = stringResource(Res.string.settlement_yes),
+                tone = if (hasSubcontractor == true) WorkshopCardButtonTone.PRIMARY else WorkshopCardButtonTone.OUTLINE,
+                onClick = { onIntent(SettlementRequestIntent.SubcontractorChanged(true)) },
+            )
+            WorkshopCardButton(
+                text = stringResource(Res.string.settlement_no),
+                tone = if (hasSubcontractor == false) WorkshopCardButtonTone.PRIMARY else WorkshopCardButtonTone.OUTLINE,
+                onClick = { onIntent(SettlementRequestIntent.SubcontractorChanged(false)) },
+            )
+        }
     }
 }
 
@@ -398,6 +502,7 @@ private fun SettlementDateField(
     date: SettlementDate?,
     error: StringResource?,
     onIntent: (SettlementRequestIntent) -> Unit,
+    modifier: Modifier = Modifier,
     allowFuture: Boolean = false,
 ) {
     var isPicking by rememberSaveable { mutableStateOf(false) }
@@ -407,6 +512,7 @@ private fun SettlementDateField(
         error = error,
         onClick = { isPicking = true },
         isDate = true,
+        modifier = modifier,
     )
     if (isPicking) {
         TaminJalaliDatePicker(
@@ -422,16 +528,14 @@ private fun SettlementDateField(
     }
 }
 
-/** «مجموع کل ناخالص کارکرد», worked out as the two rial amounts are typed. */
+/** «جمع کل کارکرد پیمان», worked out as the two rial amounts are typed; absent until there is one. */
 @Composable
 private fun SettlementTotal(amount: String, currencyInRial: String) {
-    val total = remember(amount, currencyInRial) {
-        ((amount.toLongOrNull() ?: 0L) + (currencyInRial.toLongOrNull() ?: 0L)).toPriceFormat()
-    }
-    SettlementFigure(text = stringResource(Res.string.settlement_total, total))
+    val total = remember(amount, currencyInRial) { settlementGross(amount, currencyInRial) }
+    if (total > 0) SettlementFigure(text = stringResource(Res.string.settlement_total, total.toPriceFormat()))
 }
 
-/** The request's evidence, as images or PDFs, each filed under one of the four headings. */
+/** The request's evidence, as images or PDFs, each filed under one of the design's headings. */
 @Composable
 private fun SettlementDocumentsStep(
     attachments: ImmutableList<WorkshopAttachment>,
@@ -440,7 +544,7 @@ private fun SettlementDocumentsStep(
     isError: Boolean,
     onIntent: (SettlementRequestIntent) -> Unit,
 ) {
-    WorkshopFormSection(title = stringResource(Res.string.settlement_step_documents))
+    SettlementHint(stringResource(Res.string.settlement_documents_hint))
     WorkshopDocumentsPanel(
         attachments = attachments,
         types = types,
@@ -455,10 +559,33 @@ private fun SettlementDocumentsStep(
     )
 }
 
-/** بله first, so the RTL row puts it on the right, where the old app's radio group had it. */
-private val YesNo: ImmutableList<Boolean> = persistentListOf(true, false)
+/** «اطلاعات با موفقیت ارسال شد» — the one way out of a filed request, back to the پیمان‌ها. */
+@Composable
+private fun SettlementDoneDialog(onDone: () -> Unit) {
+    val colors = LocalTaminColors.current
+    TaminConfirmationDialog(
+        title = stringResource(Res.string.settlement_submitted),
+        description = stringResource(Res.string.settlement_done_body),
+        icon = vectorResource(Res.drawable.ic_tamin_check),
+        iconTint = colors.greenText,
+        iconBackground = colors.greenBg,
+        confirmButton = {
+            TaminPrimaryButton(
+                text = stringResource(Res.string.settlement_done_back),
+                onClick = onDone,
+                background = colors.successGradient,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
+        dismissButton = {},
+        onDismissRequest = onDone,
+    )
+}
 
 private const val LETTER_NUMBER_MAX_LENGTH = 20
+
+/** «ردیف / توالی» reads as one value, the design's `row + ' / ' + seq`. */
+private const val ROW_SEQUENCE_SEPARATOR = " / "
 
 // ------------------------------------------------------------------------------- previews
 
@@ -494,19 +621,42 @@ private val PreviewFilled = SettlementRequestUiState(
 @PreviewRtlTheme
 @Composable
 private fun SettlementContractStepPreview() = PreviewRtlThemeContent {
-    SettlementRequestContent(contract = PreviewContract, state = PreviewFilled, onIntent = {}, onBack = {})
-}
-
-/** «مرحلهٔ بعد» pressed on an empty form — every error comes from the real rules. */
-@PreviewRtlTheme
-@Composable
-private fun SettlementContractStepErrorsPreview() = PreviewRtlThemeContent {
-    val empty = SettlementRequestUiState(contract = PreviewContract, currencyAmount = "1200")
     SettlementRequestContent(
         contract = PreviewContract,
-        state = empty.copy(errors = empty.errorsOf(SettlementStep.CONTRACT)),
+        state = PreviewFilled,
         onIntent = {},
         onBack = {},
+        onDone = {},
+    )
+}
+
+@PreviewRtlTheme
+@Composable
+private fun SettlementLetterStepPreview() = PreviewRtlThemeContent {
+    SettlementRequestContent(
+        contract = PreviewContract,
+        state = PreviewFilled.copy(step = SettlementStep.LETTER),
+        onIntent = {},
+        onBack = {},
+        onDone = {},
+    )
+}
+
+/** «مرحلهٔ بعد» pressed on an empty letter step — every error comes from the real rules. */
+@PreviewRtlTheme
+@Composable
+private fun SettlementLetterStepErrorsPreview() = PreviewRtlThemeContent {
+    val empty = SettlementRequestUiState(
+        contract = PreviewContract,
+        step = SettlementStep.LETTER,
+        currencyAmount = "1200",
+    )
+    SettlementRequestContent(
+        contract = PreviewContract,
+        state = empty.copy(errors = empty.errorsOf(SettlementStep.LETTER)),
+        onIntent = {},
+        onBack = {},
+        onDone = {},
     )
 }
 
@@ -519,11 +669,12 @@ private fun SettlementDocumentsStepPreview() = PreviewRtlThemeContent {
             step = SettlementStep.DOCUMENTS,
             attachments = persistentListOf(
                 WorkshopAttachment("guid-1", SettlementDocumentTypesWithSubcontractor[0], "۲۴۸"),
-                WorkshopAttachment("pdf-1", SettlementDocumentTypesWithSubcontractor[3], "۱٬۱۰۲", isPdf = true),
+                WorkshopAttachment("pdf-1", SettlementDocumentTypesWithSubcontractor[2], "۱٬۱۰۲", isPdf = true),
             ),
         ),
         onIntent = {},
         onBack = {},
+        onDone = {},
     )
 }
 
@@ -540,10 +691,11 @@ private fun SettlementTermsDriversPreview() = PreviewRtlThemeContent {
         ),
         onIntent = {},
         onBack = {},
+        onDone = {},
     )
 }
 
-/** Subject 11 — the پیمانکار's own address and id, then four costs. */
+/** Subject 11 — the پیمانکار's own address and id, then four costs, while the request is filed. */
 @PreviewRtlTheme
 @Composable
 private fun SettlementTermsBuildCostsPreview() = PreviewRtlThemeContent {
@@ -556,12 +708,41 @@ private fun SettlementTermsBuildCostsPreview() = PreviewRtlThemeContent {
         ),
         onIntent = {},
         onBack = {},
+        onDone = {},
     )
+}
+
+/** A subject that asks for nothing more — the note that says so. */
+@PreviewRtlTheme
+@Composable
+private fun SettlementTermsNonePreview() = PreviewRtlThemeContent {
+    SettlementRequestContent(
+        contract = PreviewContract,
+        state = PreviewFilled.copy(
+            step = SettlementStep.TERMS,
+            subject = TaminOptionSheetItem(id = "08", label = "خدمات مشاوره"),
+        ),
+        onIntent = {},
+        onBack = {},
+        onDone = {},
+    )
+}
+
+@PreviewRtlTheme
+@Composable
+private fun SettlementDoneDialogPreview() = PreviewRtlThemeContent {
+    SettlementDoneDialog(onDone = {})
 }
 
 /** After process death, with the list gone. */
 @PreviewRtlTheme
 @Composable
 private fun SettlementMissingContractPreview() = PreviewRtlThemeContent {
-    SettlementRequestContent(contract = null, state = SettlementRequestUiState(), onIntent = {}, onBack = {})
+    SettlementRequestContent(
+        contract = null,
+        state = SettlementRequestUiState(),
+        onIntent = {},
+        onBack = {},
+        onDone = {},
+    )
 }

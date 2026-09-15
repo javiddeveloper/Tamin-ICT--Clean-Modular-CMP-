@@ -1,5 +1,7 @@
 package com.tamin.taminhamrah.data.mapper
 
+import com.tamin.taminhamrah.model.workshop.SettlementCertificateDN
+import com.tamin.taminhamrah.model.workshop.SettlementCertificateDetailDTO
 import com.tamin.taminhamrah.model.workshop.SettlementDocumentDTO
 import com.tamin.taminhamrah.model.workshop.SettlementRequestDN
 import com.tamin.taminhamrah.model.workshop.SettlementRequestDTO
@@ -17,6 +19,17 @@ fun SettlementSubjectDTO.toDomain(): SettlementSubjectDN = SettlementSubjectDN(
     code = code.orEmpty(),
     description = description.orEmpty(),
 )
+
+/**
+ * A certificate from its detail row. The receiver is nullable because the detail call can answer with
+ * no row for a serial the list did name; the certificate is still on file, so [serial] alone stands.
+ */
+fun SettlementCertificateDetailDTO?.toDomain(serial: String): SettlementCertificateDN =
+    SettlementCertificateDN(
+        serial = this?.clearanceSerial?.takeIf { it.isNotBlank() } ?: serial,
+        number = this?.clearanceNumber.orEmpty(),
+        date = this?.clearanceDate.orEmpty(),
+    )
 
 /**
  * The id `update-request-issuance-invoices38/{id}` is addressed with: five keys joined by `TT`, in the

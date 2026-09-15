@@ -49,3 +49,15 @@ data class SettlementDocumentDN(
     val categoryCode: String,
     val isPdf: Boolean,
 )
+
+/**
+ * A مفاصاحساب ماده ۳۸ certificate on file for a پیمان.
+ *
+ * [number] and [date] are blank when the service listed the certificate but its detail carried no
+ * such column; [date] is compact Jalali (`14020103`), separated at the presentation edge.
+ */
+data class SettlementCertificateDN(
+    val serial: String,
+    val number: String,
+    val date: String,
+)

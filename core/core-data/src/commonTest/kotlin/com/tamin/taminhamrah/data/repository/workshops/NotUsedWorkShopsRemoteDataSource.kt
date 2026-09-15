@@ -33,6 +33,8 @@ internal abstract class NotUsedWorkShopsRemoteDataSource : WorkShopsRemoteDataSo
     override suspend fun getSettlementSubjects(query: ApiQueryParamDN): ListData<SettlementSubjectDTO> = notUsed()
     override suspend fun uploadSettlementPdf(fileName: String, bytes: ByteArray): String = notUsed()
     override suspend fun submitSettlementRequest(id: String, request: SettlementRequestDTO): String = notUsed()
+    override suspend fun getSettlementCertificates(workshopId: String, branchCode: String, contractRow: String, query: ApiQueryParamDN): ListData<SettlementCertificateDTO> = notUsed()
+    override suspend fun getSettlementCertificateDetail(workshopId: String, branchCode: String, contractRow: String, serial: String, query: ApiQueryParamDN): ListData<SettlementCertificateDetailDTO> = notUsed()
     override suspend fun getWorkshopPaymentSheets(query: ApiQueryParamDN): ListData<PaymentSheetDTO> = notUsed()
     override suspend fun getDebitReasons(query: ApiQueryParamDN): ListData<DebitReasonDTO> = notUsed()
     override suspend fun getWorkshopDebitList(workshopId: String, branchCode: String, query: ApiQueryParamDN): ListData<WorkShopDebtDTO> = notUsed()

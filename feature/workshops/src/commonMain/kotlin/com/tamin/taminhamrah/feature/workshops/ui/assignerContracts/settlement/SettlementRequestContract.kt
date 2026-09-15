@@ -17,16 +17,19 @@ import kotlinx.collections.immutable.persistentMapOf
 import org.jetbrains.compose.resources.StringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.abs_form_err_required
-import taminx.core.core_ui.assigner_group_contract
+import taminx.core.core_ui.settlement_err_build_sum
 import taminx.core.core_ui.settlement_err_currency_rial
 import taminx.core.core_ui.settlement_err_date_order
 import taminx.core.core_ui.settlement_err_drivers
 import taminx.core.core_ui.settlement_err_equipment
 import taminx.core.core_ui.settlement_err_invalid
+import taminx.core.core_ui.settlement_err_subcontractor
 import taminx.core.core_ui.settlement_owner_budget_type
 import taminx.core.core_ui.settlement_owner_contractor
 import taminx.core.core_ui.settlement_owner_employer
+import taminx.core.core_ui.settlement_step_contract
 import taminx.core.core_ui.settlement_step_documents
+import taminx.core.core_ui.settlement_step_letter
 import taminx.core.core_ui.settlement_step_terms
 import taminx.core.core_ui.settlement_supply_assigner
 import taminx.core.core_ui.settlement_supply_contractor
@@ -34,11 +37,13 @@ import taminx.core.core_ui.settlement_supply_shared
 import taminx.core.core_ui.ws_form_err_docs
 
 /**
- * درخواست مفاصاحساب — the old app's four-step `MafasaHesabRegisterFragment`, in three.
+ * درخواست مفاصاحساب — the old app's four-step `MafasaHesabRegisterFragment`, step for step, which is
+ * also how the design lays it out.
  *
- * The old first step only showed the پیمان back to the user, so it is folded into the letter step as
- * the design's «پیمان انتخاب‌شده» card. Each step's rules are the old app's, made binding where it only
- * printed an error and let the user carry on.
+ * Each step's rules are the old app's, made binding where it only printed an error and let the user
+ * carry on. Four go further than the old app did, as the design asks: the subcontractor question has
+ * to be answered, subjects 01 and 29 need their image, and subject 11's four costs may not add up to
+ * more than the gross amount.
  */
 @Immutable
 data class SettlementRequestUiState(
@@ -51,7 +56,8 @@ data class SettlementRequestUiState(
     val letterDate: SettlementDate? = null,
     val startDate: SettlementDate? = null,
     val endDate: SettlementDate? = null,
-    val hasSubcontractor: Boolean = false,
+    /** Null until the user answers — there is no default answer to «پیمانکار جزء». */
+    val hasSubcontractor: Boolean? = null,
     /** Rials, ASCII digits — as are the two below. */
     val amount: String = "",
     val currencyAmount: String = "",
@@ -68,12 +74,14 @@ data class SettlementRequestUiState(
     val errors: PersistentMap<SettlementField, StringResource> = persistentMapOf(),
     val isUploading: Boolean = false,
     val isSubmitting: Boolean = false,
+    /** Filed. The screen answers with its confirmation, which is what leaves the form. */
+    val isSubmitted: Boolean = false,
 ) {
     val termsForm: SettlementTermsForm get() = SettlementTermsForm.of(subject?.id)
 
-    /** «پیمانکاری فرعی» is only a heading once the پیمانکار says subcontractors were used. */
+    /** «مستندات لیست فهرست» is only offered once the پیمانکار says subcontractors were used. */
     val documentTypes: ImmutableList<WorkshopDocumentType>
-        get() = if (hasSubcontractor) SettlementDocumentTypesWithSubcontractor else SettlementDocumentTypes
+        get() = if (hasSubcontractor == true) SettlementDocumentTypesWithSubcontractor else SettlementDocumentTypes
 
     val isBusy: Boolean get() = isUploading || isSubmitting
 
@@ -97,6 +105,7 @@ data class SettlementRequestUiState(
         data class StepChanged(val step: SettlementStep) : PartialState
         data class Rejected(val errors: PersistentMap<SettlementField, StringResource>) : PartialState
         data class SubmittingChanged(val isSubmitting: Boolean) : PartialState
+        data object Submitted : PartialState
         data object Failed : PartialState
     }
 }
@@ -108,16 +117,19 @@ data class SettlementDate(val year: Int, val month: Int, val day: Int) {
     val label: String get() = PersianDateFormatter.format(year, month, day)
 }
 
+/** The four steps, in order, titled as the old app and the design both title them. */
 enum class SettlementStep(val label: StringResource) {
-    CONTRACT(Res.string.assigner_group_contract),
+    CONTRACT(Res.string.settlement_step_contract),
+    LETTER(Res.string.settlement_step_letter),
     DOCUMENTS(Res.string.settlement_step_documents),
     TERMS(Res.string.settlement_step_terms),
 }
 
 /** Every input that can be changed or be wrong, so an error lands on the control that draws it. */
 enum class SettlementField {
-    LETTER_NUMBER, LETTER_DATE, START_DATE, END_DATE, AMOUNT, CURRENCY_AMOUNT, CURRENCY_IN_RIAL,
-    DOCUMENTS, SUBJECT, OWNER, TEXT1, TEXT2, AMOUNT1, AMOUNT2, AMOUNT3, AMOUNT4,
+    LETTER_NUMBER, LETTER_DATE, START_DATE, END_DATE, SUBCONTRACTOR, AMOUNT, CURRENCY_AMOUNT,
+    CURRENCY_IN_RIAL, DOCUMENTS, SUBJECT, OWNER, TEXT1, TEXT2, AMOUNT1, AMOUNT2, AMOUNT3, AMOUNT4,
+    SUBJECT_IMAGE,
 }
 
 /**
@@ -199,10 +211,14 @@ data class SettlementTerms(
 
 /**
  * The gross amount less [deduction] — the second amount subjects 04–07 send. Computed rather than
- * stored, so changing an amount on the first step can never leave it stale.
+ * stored, so changing an amount on the letter step can never leave it stale.
  */
 fun settlementRemainder(amount: String, currencyInRial: String, deduction: String): Long =
-    (amount.toLongOrNull() ?: 0L) + (currencyInRial.toLongOrNull() ?: 0L) - (deduction.toLongOrNull() ?: 0L)
+    settlementGross(amount, currencyInRial) - (deduction.toLongOrNull() ?: 0L)
+
+/** مبلغ ناخالص کارکرد plus the rial value of the currency part — what every guard is measured against. */
+fun settlementGross(amount: String, currencyInRial: String): Long =
+    (amount.toLongOrNull() ?: 0L) + (currencyInRial.toLongOrNull() ?: 0L)
 
 sealed interface SettlementRequestIntent {
     data class Open(val contract: AssignerContractPR) : SettlementRequestIntent
@@ -224,21 +240,21 @@ sealed interface SettlementRequestIntent {
     /** The footer: checks the step, then moves on — or, on the last one, files the request. */
     data object Next : SettlementRequestIntent
     data object Previous : SettlementRequestIntent
+
+    /** A tapped segment of the progress bar; only a step already passed can be gone back to. */
+    data class StepSelected(val step: SettlementStep) : SettlementRequestIntent
 }
 
 sealed interface SettlementRequestEvent {
     /** Something the service refused, in its own words. */
     data class ShowServerMessage(val message: String) : SettlementRequestEvent
-
-    /** Filed; the screen confirms and closes. */
-    data object Submitted : SettlementRequestEvent
 }
 
 /** The old app's check on شماره نامه: anything shorter was reported as wrong. */
 internal const val MIN_LETTER_NUMBER_LENGTH = 5
 
 /**
- * What stops [step] from being left, as the old app judged it.
+ * What stops [step] from being left.
  *
  * Kept a pure function of the state, so the screen, the ViewModel and a test all read the same rules.
  */
@@ -252,7 +268,10 @@ internal fun SettlementRequestUiState.errorsOf(
     }
 
     when (step) {
-        SettlementStep.CONTRACT -> {
+        // Read back to the user, not asked for.
+        SettlementStep.CONTRACT -> Unit
+
+        SettlementStep.LETTER -> {
             when {
                 letterNumber.isBlank() -> errors[SettlementField.LETTER_NUMBER] = required
                 letterNumber.length < MIN_LETTER_NUMBER_LENGTH ->
@@ -272,6 +291,9 @@ internal fun SettlementRequestUiState.errorsOf(
             if ((currencyAmount.toLongOrNull() ?: 0L) > 0 && (currencyInRial.toLongOrNull() ?: 0L) == 0L) {
                 errors[SettlementField.CURRENCY_IN_RIAL] = Res.string.settlement_err_currency_rial
             }
+            if (hasSubcontractor == null) {
+                errors[SettlementField.SUBCONTRACTOR] = Res.string.settlement_err_subcontractor
+            }
         }
 
         SettlementStep.DOCUMENTS ->
@@ -285,6 +307,7 @@ internal fun SettlementRequestUiState.errorsOf(
                     requireFilled(SettlementField.TEXT1, terms.text1)
                     requireFilled(SettlementField.TEXT2, terms.text2)
                     requireFilled(SettlementField.AMOUNT1, terms.amount1)
+                    if (terms.image.isEmpty()) errors[SettlementField.SUBJECT_IMAGE] = required
                 }
 
                 SettlementTermsForm.MATERIALS_SUPPLY -> {
@@ -309,11 +332,17 @@ internal fun SettlementRequestUiState.errorsOf(
                     requireFilled(SettlementField.AMOUNT2, terms.amount2)
                     requireFilled(SettlementField.AMOUNT3, terms.amount3)
                     requireFilled(SettlementField.AMOUNT4, terms.amount4)
+                    val costs = listOf(terms.amount1, terms.amount2, terms.amount3, terms.amount4)
+                        .sumOf { it.toLongOrNull() ?: 0L }
+                    if (SettlementField.AMOUNT1 !in errors && costs > settlementGross(amount, currencyInRial)) {
+                        errors[SettlementField.AMOUNT1] = Res.string.settlement_err_build_sum
+                    }
                 }
 
                 SettlementTermsForm.FOREIGN_EQUIPMENT -> {
                     requireFilled(SettlementField.AMOUNT1, terms.amount1)
                     requireFilled(SettlementField.AMOUNT2, terms.amount2)
+                    if (terms.image.isEmpty()) errors[SettlementField.SUBJECT_IMAGE] = required
                 }
 
                 SettlementTermsForm.NONE -> Unit
