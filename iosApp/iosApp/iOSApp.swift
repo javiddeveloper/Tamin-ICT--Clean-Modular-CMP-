@@ -11,6 +11,11 @@ struct iOSApp: App {
         WindowGroup {
             ComposeView()
                 .ignoresSafeArea()
+                // Same routing as MainActivity.handleIntent: payment return, login, and
+                // mytamin://feature links, which pass the feature flag gate.
+                .onOpenURL { url in
+                    IncomingUrlKt.handleIncomingUrl(url: url.absoluteString)
+                }
         }
     }
 }

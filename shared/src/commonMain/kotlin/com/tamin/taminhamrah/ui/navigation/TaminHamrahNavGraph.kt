@@ -41,6 +41,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -66,7 +67,14 @@ import androidx.navigation.compose.rememberNavController
 import com.tamin.taminhamrah.feature.FeatureManager
 import com.tamin.taminhamrah.feature.addDependent.AddDependentRoute
 import com.tamin.taminhamrah.feature.addDependent.addDependentGraph
-import com.tamin.taminhamrah.feature.agent.AgentDestination
+import com.tamin.taminhamrah.deeplink.DeepLinkDispatcher
+import com.tamin.taminhamrah.deeplink.DeepLinkKey
+import com.tamin.taminhamrah.useCases.agent.ObserveAgentAvailabilityUseCase
+import com.tamin.taminhamrah.deeplink.DeepLinkResolution
+import com.tamin.taminhamrah.deeplink.DeepLinkSource
+import com.tamin.taminhamrah.deeplink.ResolveDeepLinkUseCase
+import com.tamin.taminhamrah.ui.deeplink.DeepLinkHandler
+import com.tamin.taminhamrah.ui.deeplink.LocalDeepLinkHandler
 import com.tamin.taminhamrah.feature.agent.agentScreen
 import com.tamin.taminhamrah.feature.agent.navigateToAgent
 import com.tamin.taminhamrah.feature.cartable.CartableRoute
@@ -195,6 +203,7 @@ import taminx.core.core_ui.please_login_to_your_account
 import taminx.core.core_ui.retry
 import taminx.core.core_ui.select_group
 import taminx.core.core_ui.tab_agent
+import taminx.core.core_ui.deep_link_feature_unavailable
 import taminx.core.core_ui.tab_home
 import taminx.core.core_ui.tab_profile
 import taminx.core.core_ui.tab_services
@@ -232,11 +241,9 @@ internal fun TaminHamrahNavGraph(
     val isProfileSelected = currentDestination?.hasRoute<ProfileRoute.Main>() == true
     val isHomeSelected = currentDestination?.hasRoute<Route.Home>() == true
 
-    // بررسی Feature Flag سراسری Agent برای کنترل نمایش FAB
-    val featureManager: FeatureManager = koinInject()
-    val isAgentEnabled by featureManager
-        .getFeatureStatus(FeatureFlag.AGENT)
-        .map { it is FeatureStatus.Enabled }
+    // The assistant's entry point needs both the AGENT menu flag and the server's chat permission.
+    val observeAgentAvailability: ObserveAgentAvailabilityUseCase = koinInject()
+    val isAgentEnabled by remember(observeAgentAvailability) { observeAgentAvailability() }
         .collectAsState(initial = false)
     val currentTab = currentDestination.toBottomTab()
     val isBottomBarVisible = currentTab != BottomTab.OTHER
@@ -299,6 +306,47 @@ internal fun TaminHamrahNavGraph(
     val hazeState = remember { HazeState(initialBlurEnabled = true) }
     val snackbarHostState = remember { SnackbarHostState() }
     val snackbarScope = rememberCoroutineScope()
+
+    // Every link — from the OS, a story or the assistant — is resolved here, through the one gate
+    // that reads the feature flag. [beforeOpen] runs only once the link is known to open something,
+    // so a blocked link leaves the caller's screen where it was.
+    val deepLinkDispatcher: DeepLinkDispatcher = koinInject()
+    val resolveDeepLink: ResolveDeepLinkUseCase = koinInject()
+    val deepLinkHandler = remember(deepLinkDispatcher) {
+        DeepLinkHandler { uri, source, onOpened -> deepLinkDispatcher.submit(uri, source, onOpened) }
+    }
+    // A menu tap on a service with no screen yet says so instead of doing nothing.
+    val openService: (FeatureFlag) -> Unit = { flag ->
+        if (!navController.navigateToFeature(flag)) {
+            snackbarScope.launch { snackbarHostState.showSnackbar(getString(Res.string.deep_link_feature_unavailable)) }
+        }
+    }
+    val openDeepLink: suspend (String, DeepLinkSource, () -> Unit) -> Unit = { uri, source, beforeOpen ->
+        when (val resolution = resolveDeepLink(uri, source)) {
+            is DeepLinkResolution.OpenFeature -> {
+                resolution.notice?.let { snackbarHostState.showSnackbar(it) }
+                if (!navController.navigateToDeepLink(resolution.key, resolution.args, beforeOpen)) {
+                    snackbarHostState.showSnackbar(getString(Res.string.deep_link_feature_unavailable))
+                }
+            }
+            is DeepLinkResolution.OpenWeb -> {
+                beforeOpen()
+                openUrl(resolution.url)
+            }
+            is DeepLinkResolution.Blocked -> snackbarHostState.showSnackbar(
+                resolution.message ?: getString(Res.string.deep_link_feature_unavailable)
+            )
+            is DeepLinkResolution.SendPrompt,
+            DeepLinkResolution.Invalid -> snackbarHostState.showSnackbar(getString(Res.string.invalid_deep_link))
+        }
+    }
+    // Links wait in the dispatcher until there is a signed-in session to open them in.
+    LaunchedEffect(isLoggedIn) {
+        if (isLoggedIn) {
+            deepLinkDispatcher.links.collect { link -> openDeepLink(link.uri, link.source, link.onOpened) }
+        }
+    }
+
     Scaffold(
         contentWindowInsets = WindowInsets(0),
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -328,7 +376,7 @@ internal fun TaminHamrahNavGraph(
                         trailingButton = if (isAgentEnabled) {
                             {
                                 AgentOrbButton(
-                                    onClick = { navController.navigateToAgent() },
+                                    onClick = { deepLinkHandler.open(AGENT_DEEP_LINK, DeepLinkSource.APP_CONTENT) },
                                     contentDescription = agentLabel,
                                 )
                             }
@@ -384,6 +432,7 @@ internal fun TaminHamrahNavGraph(
             }
         }
     ) { paddingValues ->
+      CompositionLocalProvider(LocalDeepLinkHandler provides deepLinkHandler) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -397,7 +446,7 @@ internal fun TaminHamrahNavGraph(
             ) {
                 composableWithFadeTransitions<Route.Home> {
                     HomeScreen(
-                        onNavigateToService = { flag -> navController.navigateToFeature(flag) },
+                        onNavigateToService = openService,
                         onNavigateToWeb = { url -> openUrl(url) },
                         onShowMessage = { message ->
                             snackbarScope.launch { snackbarHostState.showSnackbar(message) }
@@ -472,7 +521,7 @@ internal fun TaminHamrahNavGraph(
                 )
 
                 taminServicesScreen(
-                    onNavigateToService = { flag -> navController.navigateToFeature(flag) },
+                    onNavigateToService = openService,
                     onOpenUrl = { url -> openUrl(url) },
                     onBackClicked = { navController.popBackStack() }
                 )
@@ -540,47 +589,7 @@ internal fun TaminHamrahNavGraph(
                     onFinished = { navController.popBackStack() },
                 )
 
-                storyViewerScreen(
-                    onClose = { navController.popBackStack() },
-                    onOpenDeepLink = { link ->
-                        val featurePrefix = "tamin://feature/"
-                        if (link.startsWith("http://", ignoreCase = true) || link.startsWith("https://", ignoreCase = true)) {
-                            // Leaves the viewer behind rather than stacking a service on top of it:
-                            // coming back from that service should land on the home page.
-                            navController.popBackStack()
-                            openUrl(link)
-                        } else if (link.startsWith(featurePrefix, ignoreCase = true)) {
-                            val flagName = link.substringAfter(featurePrefix)
-                            val flag = runCatching { FeatureFlag.valueOf(flagName) }.getOrNull()
-                            if (flag == FeatureFlag.AGENT) {
-                                navController.popBackStack()
-                                navController.navigateToAgent()
-                            } else if (flag != null) {
-                                navController.popBackStack()
-                                navController.navigateToFeature(flag)
-                            } else {
-                                snackbarScope.launch {
-                                    snackbarHostState.showSnackbar(getString(Res.string.invalid_deep_link))
-                                }
-                            }
-                        } else {
-                            val currentRoute = navController.currentDestination?.route
-                            try {
-                                navController.navigate(link) {
-                                    if (currentRoute != null) {
-                                        popUpTo(currentRoute) {
-                                            inclusive = true
-                                        }
-                                    }
-                                }
-                            } catch (e: Exception) {
-                                snackbarScope.launch {
-                                    snackbarHostState.showSnackbar(getString(Res.string.invalid_deep_link))
-                                }
-                            }
-                        }
-                    },
-                )
+                storyViewerScreen(onClose = { navController.popBackStack() })
                 pensionSurvivorScreen(
                     navController = navController,
                     onBack = { navController.popBackStack() })
@@ -594,17 +603,13 @@ internal fun TaminHamrahNavGraph(
 
                 contractsScreen(
                     onBack = { navController.popBackStack() },
-                    onNavigateToService = { flag ->
-                        navController.navigateToFeature(flag)
-                    },
+                    onNavigateToService = openService,
                     onOpenUrl = { url -> openUrl(url) }
                 )
 
                 contractAffairsScreen(
                     onBack = { navController.popBackStack() },
-                    onNavigateToService = { flag ->
-                    navController.navigateToFeature(flag)
-                },
+                    onNavigateToService = openService,
                     onOpenUrl =  { url -> openUrl(url) },
                     onNavigateToPaymentHistory = { contractNumber, insuranceType ->
                         navController.navigateToContractPaymentHistory(contractNumber, insuranceType)
@@ -673,25 +678,7 @@ internal fun TaminHamrahNavGraph(
                     },
                 )
 
-                // Maps the assistant's destination ids to real routes. Ids come from
-                // AgentDestination; anything unmapped is ignored rather than crashing.
-                agentScreen(
-                    onNavigateToDestination = { destination ->
-                        when (destination) {
-                            AgentDestination.DISABILITY_PENSION -> navController.navigateToDisabilityPension()
-                            AgentDestination.DEFERRED_INSTALLMENT -> navController.navigateToDeferredInstallment()
-                            AgentDestination.CONTRACTS -> navController.navigateToContracts()
-                            AgentDestination.WORKSHOPS -> navController.navigateToWorkshops()
-                            AgentDestination.PRESCRIPTION -> navController.navigateToPrescription()
-                            AgentDestination.DESERVED_TREATMENT -> navController.navigateToDeservedTreatment()
-                            AgentDestination.PENSION_SURVIVOR -> navController.navigateToPensionSurvivor()
-                            // Remaining AgentDestination ids have no screen in this app yet.
-                            // Until they do, the assistant must not offer a button for them —
-                            // see DeepLinkAgentService.
-                            else -> Unit
-                        }
-                    }
-                )
+                agentScreen(onNavigateBack = { navController.popBackStack() })
 
                 securityScreen(onNavigateBack = { navController.popBackStack() })
 
@@ -750,6 +737,7 @@ internal fun TaminHamrahNavGraph(
                 }
             }
         }
+      }
     }
 
     if (showLoginBottomSheet) {
@@ -778,6 +766,9 @@ internal fun TaminHamrahNavGraph(
         )
     }
 }
+
+/** The orb opens the assistant through the deep link gate, so the flag is re-checked on tap. */
+private val AGENT_DEEP_LINK = "@" + DeepLinkKey.AGENT.key
 
 /** What the placeholder home column insets its content by; the carousel needs to know it. */
 private val HomeContentPadding = 16.dp
@@ -810,6 +801,10 @@ fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.sendIntent(HomeIntent.RefreshAgentAccess)
+    }
 
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
