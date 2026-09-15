@@ -15,6 +15,10 @@ import taminx.core.core_ui.abs_doc_05
 import taminx.core.core_ui.abs_doc_06
 import taminx.core.core_ui.abs_doc_07
 import taminx.core.core_ui.abs_doc_08
+import taminx.core.core_ui.settlement_doc_final_status
+import taminx.core.core_ui.settlement_doc_letter
+import taminx.core.core_ui.settlement_doc_subcontractor
+import taminx.core.core_ui.settlement_doc_supplement
 import taminx.core.core_ui.settlement_subject_image
 import taminx.core.core_ui.ws_article_sixteen_doc_1
 import taminx.core.core_ui.ws_article_sixteen_doc_10
@@ -127,19 +131,18 @@ val RegistrationDocumentTypes: ImmutableList<WorkshopDocumentType> = persistentL
 const val REGISTRATION_MAX_DOCUMENTS = 8
 
 /**
- * انواع مستندات مفاصاحساب — what a درخواست مفاصاحساب files its documents under, in the old app's order.
+ * انواع مستندات مفاصاحساب — what a درخواست مفاصاحساب files its documents under, in the design's order.
  *
- * The codes and headings are [BaseDocumentCategory]'s: a request files under exactly the four headings
- * a filed مبنا later lists its documents by, so the two are one table. «پیمانکاری فرعی» (`2`) is only
- * offered once the پیمانکار says subcontractors were used — [SettlementDocumentTypes] is the list
- * without it.
+ * The codes are [BaseDocumentCategory]'s, so a filed مبنا later lists these documents under its own
+ * four headings; the wording is the request form's. «مستندات لیست فهرست» (`2`) is only offered once
+ * the پیمانکار says subcontractors were used — [SettlementDocumentTypes] is the list without it.
  */
-val SettlementDocumentTypesWithSubcontractor: ImmutableList<WorkshopDocumentType> = listOf(
-    BaseDocumentCategory.LETTER,
-    BaseDocumentCategory.SUPPLEMENT,
-    BaseDocumentCategory.SUBCONTRACTOR,
-    BaseDocumentCategory.FINAL_STATUS,
-).map { WorkshopDocumentType(it.code, it.title) }.toImmutableList()
+val SettlementDocumentTypesWithSubcontractor: ImmutableList<WorkshopDocumentType> = persistentListOf(
+    WorkshopDocumentType(BaseDocumentCategory.LETTER.code, Res.string.settlement_doc_letter),
+    WorkshopDocumentType(BaseDocumentCategory.SUPPLEMENT.code, Res.string.settlement_doc_supplement),
+    WorkshopDocumentType(BaseDocumentCategory.FINAL_STATUS.code, Res.string.settlement_doc_final_status),
+    WorkshopDocumentType(BaseDocumentCategory.SUBCONTRACTOR.code, Res.string.settlement_doc_subcontractor),
+)
 
 val SettlementDocumentTypes: ImmutableList<WorkshopDocumentType> =
     SettlementDocumentTypesWithSubcontractor

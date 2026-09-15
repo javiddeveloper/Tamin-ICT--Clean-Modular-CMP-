@@ -31,6 +31,8 @@ import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
 import com.tamin.taminhamrah.model.workshop.PaymentTicketInfoDTO
+import com.tamin.taminhamrah.model.workshop.SettlementCertificateDTO
+import com.tamin.taminhamrah.model.workshop.SettlementCertificateDetailDTO
 import com.tamin.taminhamrah.model.workshop.SettlementRequestDTO
 import com.tamin.taminhamrah.model.workshop.SettlementSubjectDTO
 import com.tamin.taminhamrah.model.workshop.SmsMessageDTO
@@ -143,6 +145,32 @@ internal interface WorkShopsApiService {
     suspend fun getComputationalBasePdf(
         @Path("documentId") documentId: String,
     ): HttpStatement
+
+    /**
+     * مفاصاحساب‌های ماده ۳۸ issued under one ردیف پیمان — the old app's `getClause38List`.
+     *
+     * [mafasaStatus] and [contractNumber] are path segments the old client always fills with `-`, its
+     * "no filter" placeholder; the caller picks the پیمان out of the list itself.
+     */
+    @GET("workshop-services/mad38-head/{workshopCode}/{branchCode}/{contractRow}/{mafasaStatus}/{contractNumber}")
+    suspend fun getSettlementCertificates(
+        @Path("workshopCode") workshopCode: String,
+        @Path("branchCode") branchCode: String,
+        @Path("contractRow") contractRow: String,
+        @Path("mafasaStatus") mafasaStatus: String,
+        @Path("contractNumber") contractNumber: String,
+        @QueryMap queries: Map<String, String>,
+    ): BaseDTO<ListData<SettlementCertificateDTO>>
+
+    /** One certificate, by the serial [getSettlementCertificates] listed it under — `getClause38Detail`. */
+    @GET("workshop-services/mad38-detail/{workshopCode}/{branchCode}/{contractRow}/{mafasaSerialNo}")
+    suspend fun getSettlementCertificateDetail(
+        @Path("workshopCode") workshopCode: String,
+        @Path("branchCode") branchCode: String,
+        @Path("contractRow") contractRow: String,
+        @Path("mafasaSerialNo") serial: String,
+        @QueryMap queries: Map<String, String>,
+    ): BaseDTO<ListData<SettlementCertificateDetailDTO>>
 
     // ------------------------------------------------------------- درخواست مفاصاحساب
 

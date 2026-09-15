@@ -32,6 +32,8 @@ import com.tamin.taminhamrah.model.workshop.NewMemberConfirmResultDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
+import com.tamin.taminhamrah.model.workshop.SettlementCertificateDTO
+import com.tamin.taminhamrah.model.workshop.SettlementCertificateDetailDTO
 import com.tamin.taminhamrah.model.workshop.SettlementRequestDTO
 import com.tamin.taminhamrah.model.workshop.SettlementSubjectDTO
 import com.tamin.taminhamrah.model.workshop.SmsMessageDTO
@@ -65,6 +67,9 @@ import kotlinx.serialization.json.jsonPrimitive
 
 /** `serviceName` the `request-ticket` endpoint expects for the Employer → Online Services flow. */
 private const val EMPLOYER_ESERVICES_AGREEMENT = "employerEservicesAgreement"
+
+/** What the old client puts in a `mad38-head` path segment it does not filter on. */
+private const val UNFILTERED_PATH_SEGMENT = "-"
 
 internal class WorkShopsRemoteDataSourceImpl(
     private val apiService: WorkShopsApiService,
@@ -139,6 +144,39 @@ internal class WorkShopsRemoteDataSourceImpl(
         query: ApiQueryParamDN,
     ): ListData<SettlementSubjectDTO> = call {
         apiService.getSettlementSubjects(query.toQueries()).extractData()
+    }
+
+    override suspend fun getSettlementCertificates(
+        workshopId: String,
+        branchCode: String,
+        contractRow: String,
+        query: ApiQueryParamDN,
+    ): ListData<SettlementCertificateDTO> = call {
+        apiService.getSettlementCertificates(
+            workshopCode = workshopId,
+            branchCode = branchCode,
+            contractRow = contractRow,
+            // The old client sends its "no filter" value for both, hardcoded there too.
+            mafasaStatus = UNFILTERED_PATH_SEGMENT,
+            contractNumber = UNFILTERED_PATH_SEGMENT,
+            queries = query.toQueries(),
+        ).extractData()
+    }
+
+    override suspend fun getSettlementCertificateDetail(
+        workshopId: String,
+        branchCode: String,
+        contractRow: String,
+        serial: String,
+        query: ApiQueryParamDN,
+    ): ListData<SettlementCertificateDetailDTO> = call {
+        apiService.getSettlementCertificateDetail(
+            workshopCode = workshopId,
+            branchCode = branchCode,
+            contractRow = contractRow,
+            serial = serial,
+            queries = query.toQueries(),
+        ).extractData()
     }
 
     override suspend fun uploadSettlementPdf(fileName: String, bytes: ByteArray): String = call {

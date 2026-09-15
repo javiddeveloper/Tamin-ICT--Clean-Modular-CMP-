@@ -26,6 +26,8 @@ import com.tamin.taminhamrah.model.workshop.NewMemberConfirmResultDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
+import com.tamin.taminhamrah.model.workshop.SettlementCertificateDTO
+import com.tamin.taminhamrah.model.workshop.SettlementCertificateDetailDTO
 import com.tamin.taminhamrah.model.workshop.SettlementRequestDTO
 import com.tamin.taminhamrah.model.workshop.SettlementSubjectDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
@@ -98,6 +100,23 @@ interface WorkShopsRemoteDataSource {
 
     /** Files a درخواست مفاصاحساب under [id]; returns the service's confirmation. */
     suspend fun submitSettlementRequest(id: String, request: SettlementRequestDTO): String
+
+    /** مفاصاحساب‌های ماده ۳۸ of one ردیف پیمان, as the service lists them. */
+    suspend fun getSettlementCertificates(
+        workshopId: String,
+        branchCode: String,
+        contractRow: String,
+        query: ApiQueryParamDN,
+    ): ListData<SettlementCertificateDTO>
+
+    /** The certificate [getSettlementCertificates] listed under [serial]. */
+    suspend fun getSettlementCertificateDetail(
+        workshopId: String,
+        branchCode: String,
+        contractRow: String,
+        serial: String,
+        query: ApiQueryParamDN,
+    ): ListData<SettlementCertificateDetailDTO>
 
     suspend fun getWorkshopPaymentSheets(
         query: ApiQueryParamDN

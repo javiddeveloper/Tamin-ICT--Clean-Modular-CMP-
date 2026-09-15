@@ -238,6 +238,8 @@ fun ComputationalBaseDTO.toDomain(): ComputationalBaseDN = ComputationalBaseDN(
     letterNumber = letterNumber.orEmpty(),
     sendDate = sendDate,
     amount = amount,
+    startDate = startDate,
+    endDate = endDate,
     documents = documents.orEmpty().map { it.toDomain() },
 )
 
