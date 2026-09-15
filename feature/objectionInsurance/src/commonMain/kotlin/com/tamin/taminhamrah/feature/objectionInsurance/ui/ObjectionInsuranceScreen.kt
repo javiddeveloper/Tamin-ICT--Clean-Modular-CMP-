@@ -27,13 +27,13 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -42,21 +42,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.runtime.LaunchedEffect
-import com.tamin.taminhamrah.ui.components.NumericText
-import com.tamin.taminhamrah.ui.theme.TaminHamrahShapes
 import com.tamin.taminhamrah.feature.objectionInsurance.ui.components.ObjectionYearGrid
+import com.tamin.taminhamrah.feature.objectionInsurance.ui.components.ObjectionYearGridSkeleton
 import com.tamin.taminhamrah.feature.objectionInsurance.ui.contract.ObjectionInsuranceEvent
 import com.tamin.taminhamrah.feature.objectionInsurance.ui.contract.ObjectionInsuranceIntent
 import com.tamin.taminhamrah.feature.objectionInsurance.ui.contract.ObjectionInsuranceUiState
 import com.tamin.taminhamrah.feature.objectionInsurance.ui.contract.StagedYearChipPR
+import com.tamin.taminhamrah.feature.objectionInsurance.ui.preview.previewLoadedRecords
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.ErrorStateView
+import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
@@ -66,7 +66,10 @@ import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.TaminHamrahShapes
+import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -90,6 +93,8 @@ import taminx.core.core_ui.objection_insurance_submit_confirmation_message
 import taminx.core.core_ui.objection_insurance_submit_confirmation_title
 import taminx.core.core_ui.objection_insurance_success_title
 import taminx.core.core_ui.objection_insurance_success_tracking_label
+import taminx.core.core_ui.objection_insurance_title
+import taminx.core.core_ui.objection_insurance_years_count
 import taminx.core.core_ui.objection_insurance_years_section_title
 
 private val DescriptionFieldHeight = 96.dp
@@ -117,7 +122,14 @@ fun ObjectionInsuranceScreen(
             delta = uiState.detailDelta,
             showValidationError = uiState.detailShowValidationError,
             hasDraft = uiState.detailDraft.isNotEmpty(),
-            onMonthValueChanged = { month, value -> viewModel.sendIntent(ObjectionInsuranceIntent.OnMonthValueChanged(month, value)) },
+            onMonthValueChanged = { month, value ->
+                viewModel.sendIntent(
+                    ObjectionInsuranceIntent.OnMonthValueChanged(
+                        month,
+                        value
+                    )
+                )
+            },
             onClearDraftClicked = { viewModel.sendIntent(ObjectionInsuranceIntent.OnDetailResetClicked) },
             onSaveClicked = { viewModel.sendIntent(ObjectionInsuranceIntent.OnDetailConfirmClicked) },
             onBack = { viewModel.sendIntent(ObjectionInsuranceIntent.OnDetailSheetDismissed) },
@@ -126,7 +138,13 @@ fun ObjectionInsuranceScreen(
         workshopPickerYear != null -> ObjectionWorkshopPickerScreen(
             year = workshopPickerYear,
             rows = uiState.workshopPickerRows,
-            onRowClicked = { recordIndex -> viewModel.sendIntent(ObjectionInsuranceIntent.OnWorkshopPicked(recordIndex)) },
+            onRowClicked = { recordIndex ->
+                viewModel.sendIntent(
+                    ObjectionInsuranceIntent.OnWorkshopPicked(
+                        recordIndex
+                    )
+                )
+            },
             onBack = { viewModel.sendIntent(ObjectionInsuranceIntent.OnWorkshopPickerDismissed) },
         )
 
@@ -168,7 +186,10 @@ fun ObjectionInsuranceScreen(
 }
 
 @Composable
-private fun HandleObjectionInsuranceEvents(events: Flow<ObjectionInsuranceEvent>, onBack: () -> Unit) {
+private fun HandleObjectionInsuranceEvents(
+    events: Flow<ObjectionInsuranceEvent>,
+    onBack: () -> Unit
+) {
     events.collectWithLifecycleAware { event ->
         when (event) {
             ObjectionInsuranceEvent.NavigateBack -> onBack()
@@ -190,7 +211,7 @@ private fun ObjectionInsuranceContent(
         contentWindowInsets = WindowInsets(0),
         topBar = {
             TaminTopAppBar(
-                title = "",
+                title = stringResource(Res.string.objection_insurance_title),
                 navigationIcon = {
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
@@ -230,14 +251,23 @@ private fun ObjectionInsuranceContent(
                 ),
         ) {
             if (state.isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.xxl),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator(color = colors.blueText)
-                }
+                ObjectionYearGridSkeleton()
             } else if (!state.hasActiveRequest) {
-                SectionTitle(stringResource(Res.string.objection_insurance_years_section_title))
+                Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+                    SectionTitle(
+                        stringResource(
+                            Res.string.objection_insurance_years_section_title
+                        )
+                    )
+                    StatusPill(
+                        text = stringResource(
+                            Res.string.objection_insurance_years_count,
+                            state.yearCards.size.toString().toPersianDigits(),
+                        ),
+                        containerColor = colors.blueBg,
+                        contentColor = colors.blueText,
+                    )
+                }
                 Spacer(modifier = Modifier.height(Spacing.sm))
                 ObjectionYearGrid(
                     cards = state.yearCards,
@@ -250,7 +280,13 @@ private fun ObjectionInsuranceContent(
                     Spacer(modifier = Modifier.height(Spacing.sm))
                     StagedYearsRow(
                         chips = state.stagedYearChips,
-                        onRemove = { indices -> onIntent(ObjectionInsuranceIntent.OnStagedChipRemoveClicked(indices)) },
+                        onRemove = { indices ->
+                            onIntent(
+                                ObjectionInsuranceIntent.OnStagedChipRemoveClicked(
+                                    indices
+                                )
+                            )
+                        },
                     )
                     Spacer(modifier = Modifier.height(Spacing.lg))
                 } else {
@@ -311,7 +347,12 @@ private fun DescriptionField(value: String, onValueChange: (String) -> Unit) {
                 .height(DescriptionFieldHeight)
                 .clip(TaminHamrahShapes.large)
                 .border(1.dp, colors.border, TaminHamrahShapes.large),
-            placeholder = { TaminText(text = stringResource(Res.string.objection_insurance_description_placeholder), color = colors.textMuted) },
+            placeholder = {
+                TaminText(
+                    text = stringResource(Res.string.objection_insurance_description_placeholder),
+                    color = colors.textMuted
+                )
+            },
             shape = TaminHamrahShapes.large,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = Color.Transparent,
@@ -328,7 +369,10 @@ private fun DescriptionField(value: String, onValueChange: (String) -> Unit) {
 @Composable
 private fun SectionTitle(text: String) {
     val colors = LocalTaminColors.current
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(7.dp)
+    ) {
         Box(
             modifier = Modifier
                 .size(width = 3.dp, height = 15.dp)
@@ -344,7 +388,10 @@ private fun SectionTitle(text: String) {
 }
 
 @Composable
-private fun StagedYearsRow(chips: ImmutableList<StagedYearChipPR>, onRemove: (ImmutableList<Int>) -> Unit) {
+private fun StagedYearsRow(
+    chips: ImmutableList<StagedYearChipPR>,
+    onRemove: (ImmutableList<Int>) -> Unit
+) {
     val colors = LocalTaminColors.current
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -526,12 +573,52 @@ private fun TrackingNumberDialog(trackingNumber: String, onAcknowledge: () -> Un
 }
 
 @PreviewRtlTheme
-@Preview
 @Composable
-private fun ObjectionInsuranceScreenPreview() {
+private fun ObjectionInsuranceLoadingPreview() {
+    PreviewRtlThemeContent {
+        ObjectionInsuranceContent(
+            state = ObjectionInsuranceUiState(isLoading = true),
+            onIntent = {},
+            onBack = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun ObjectionInsuranceEmptyPreview() {
     PreviewRtlThemeContent {
         ObjectionInsuranceContent(
             state = ObjectionInsuranceUiState(),
+            onIntent = {},
+            onBack = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun ObjectionInsuranceLoadedPreview() {
+    PreviewRtlThemeContent {
+        ObjectionInsuranceContent(
+            state = ObjectionInsuranceUiState(records = previewLoadedRecords()),
+            onIntent = {},
+            onBack = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun ObjectionInsuranceStagedPreview() {
+    PreviewRtlThemeContent {
+        ObjectionInsuranceContent(
+            state = ObjectionInsuranceUiState(
+                records = previewLoadedRecords(),
+                edits = persistentMapOf(
+                    0 to persistentMapOf(0 to "28"),
+                ),
+            ),
             onIntent = {},
             onBack = {},
         )

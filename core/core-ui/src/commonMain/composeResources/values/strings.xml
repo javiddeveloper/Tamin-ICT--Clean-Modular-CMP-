@@ -3092,6 +3092,7 @@
     <string name="objection_insurance_title">اعتراض به سابقهٔ دارای کسری کارکرد</string>
     <string name="objection_insurance_banner">سالی را که روزهای کارکرد آن کمتر از واقعیت ثبت شده انتخاب کنید و کارکرد صحیح هر ماه را اظهار نمایید.</string>
     <string name="objection_insurance_years_section_title">سال‌های سابقهٔ شما</string>
+    <string name="objection_insurance_years_count">%1$s سال</string>
     <string name="objection_insurance_staged_section_title">سال‌های ویرایش‌شده</string>
     <string name="objection_insurance_description_placeholder">دلیل اعتراض خود را بنویسید…</string>
     <string name="objection_insurance_empty_hint">در هر بار می‌توانید به چند سال اعتراض ثبت کنید. تا اعلام نتیجهٔ این درخواست، امکان ثبت درخواست جدید نیست.</string>

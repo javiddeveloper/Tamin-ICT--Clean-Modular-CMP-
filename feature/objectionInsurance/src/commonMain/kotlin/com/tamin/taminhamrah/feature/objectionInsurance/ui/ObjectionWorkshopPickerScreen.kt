@@ -34,6 +34,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.objectionInsurance.ui.contract.ObjectionWorkshopPickerRowPR
+import com.tamin.taminhamrah.feature.objectionInsurance.ui.mapper.buildWorkshopPickerRows
+import com.tamin.taminhamrah.feature.objectionInsurance.ui.preview.previewLoadedRecords
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
@@ -202,4 +206,22 @@ private fun Badge(text: String, background: Color, contentColor: Color) {
             .background(background)
             .padding(horizontal = 8.dp, vertical = 3.dp),
     )
+}
+
+@PreviewRtlTheme
+@Composable
+private fun ObjectionWorkshopPickerPreview() {
+    val records = previewLoadedRecords()
+    PreviewRtlThemeContent {
+        ObjectionWorkshopPickerScreen(
+            year = "1389",
+            rows = buildWorkshopPickerRows(
+                records = records,
+                edits = mapOf(3 to mapOf(0 to "20")),
+                year = "1389",
+            ),
+            onRowClicked = {},
+            onBack = {},
+        )
+    }
 }

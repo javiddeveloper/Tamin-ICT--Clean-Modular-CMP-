@@ -38,14 +38,21 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.objectionInsurance.ui.contract.ObjectionDelta
 import com.tamin.taminhamrah.feature.objectionInsurance.ui.contract.ObjectionMonthBarPR
 import com.tamin.taminhamrah.feature.objectionInsurance.ui.contract.ObjectionMonthRowPR
 import com.tamin.taminhamrah.feature.objectionInsurance.ui.contract.ObjectionSeasonGroupPR
+import com.tamin.taminhamrah.feature.objectionInsurance.ui.mapper.buildDetailDelta
+import com.tamin.taminhamrah.feature.objectionInsurance.ui.mapper.buildMonthBars
+import com.tamin.taminhamrah.feature.objectionInsurance.ui.mapper.buildSeasonGroups
 import com.tamin.taminhamrah.feature.objectionInsurance.ui.mapper.registeredMonthValues
+import com.tamin.taminhamrah.feature.objectionInsurance.ui.preview.previewHistoryRecord
 import com.tamin.taminhamrah.model.objectionInsurance.ObjectionInsuranceHistoryPR
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
@@ -290,7 +297,7 @@ private fun ChartCard(bars: ImmutableList<ObjectionMonthBarPR>, registeredTotal:
             (1..MONTHS_IN_YEAR).forEach { month ->
                 NumericText(
                     text = month.toString().toPersianDigits(),
-                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp , textAlign = TextAlign.Center),
                     color = colors.textMuted,
                     modifier = Modifier.weight(1f),
                 )
@@ -425,7 +432,7 @@ private fun MonthTableRow(row: ObjectionMonthRowPR, onValueChanged: (String) -> 
             } else {
                 stringResource(Res.string.objection_insurance_month_not_registered)
             },
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, fontSize = 10.5.sp),
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, fontSize = 10.5.sp, textAlign = TextAlign.Center),
             color = if (row.isRegistered) colors.textSecondary else colors.textMuted,
             modifier = Modifier.width(RegisteredColumnWidth),
         )
@@ -534,3 +541,24 @@ private val RegisteredColumnWidth = 74.dp
 private val DeclaredColumnWidth = 66.dp
 private val InputWidth = 62.dp
 private val InputHeight = 36.dp
+
+@PreviewRtlTheme
+@Composable
+private fun ObjectionRecordDetailPreview() {
+    val record = previewHistoryRecord(year = "1403", monthDays = List(12) { 20 })
+    val draft = mapOf(0 to "28", 1 to "25")
+    PreviewRtlThemeContent {
+        ObjectionRecordDetailScreen(
+            record = record,
+            seasonGroups = buildSeasonGroups(record, draft),
+            chartBars = buildMonthBars(record, draft),
+            delta = buildDetailDelta(record, draft),
+            showValidationError = false,
+            hasDraft = true,
+            onMonthValueChanged = { _, _ -> },
+            onClearDraftClicked = {},
+            onSaveClicked = {},
+            onBack = {},
+        )
+    }
+}

@@ -32,6 +32,9 @@ import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.objectionInsurance.ui.contract.ObjectionYearCardPR
 import com.tamin.taminhamrah.feature.objectionInsurance.ui.contract.ObjectionYearSubtitle
 import com.tamin.taminhamrah.feature.objectionInsurance.ui.contract.YearCompletionStatus
+import com.tamin.taminhamrah.feature.objectionInsurance.ui.preview.previewYearCards
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -171,5 +174,24 @@ private fun ObjectionYearCard(card: ObjectionYearCardPR, onClick: () -> Unit, mo
             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, fontSize = 9.sp),
             color = if (card.status == YearCompletionStatus.Edited) colors.blueText else colors.textMuted,
         )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun ObjectionYearGridPreview() {
+    PreviewRtlThemeContent {
+        ObjectionYearGrid(
+            cards = previewYearCards(),
+            onCardClick = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun ObjectionYearGridSkeletonPreview() {
+    PreviewRtlThemeContent {
+        ObjectionYearGridSkeleton()
     }
 }
