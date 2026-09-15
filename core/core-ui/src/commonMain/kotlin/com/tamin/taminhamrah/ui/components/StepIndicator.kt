@@ -178,7 +178,8 @@
                         StepConnector(
                             filled = step.state == StepState.Completed,
                             trackColor = colors.outerBorder,
-                            fillColor = colors.greenText
+                            fillColor = colors.greenText,
+
                         )
                         Spacer(Modifier.width(Spacing.xs))
                     }
@@ -188,14 +189,14 @@
     }
 
     @Composable
-    private fun StepConnector(filled: Boolean, trackColor: Color, fillColor: Color) {
+    private fun StepConnector(modifier: Modifier = Modifier, filled: Boolean, trackColor: Color, fillColor: Color) {
         val fillFraction by animateFloatAsState(
             targetValue = if (filled) 1f else 0f,
             animationSpec = tween(ConnectorFillDurationMs, easing = FastOutSlowInEasing)
         )
         Box(
-            modifier = Modifier
-                .padding(top = Spacing.smd)
+            modifier = modifier
+                .padding(top = Spacing.xl)
                 .height(IconSize.stepperConnectorHeight)
                 .width(IconSize.stepperConnectorWidth)
                 .clip(CircleShape)
