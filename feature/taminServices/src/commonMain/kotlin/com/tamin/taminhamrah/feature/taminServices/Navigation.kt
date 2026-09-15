@@ -3,8 +3,17 @@ package com.tamin.taminhamrah.feature.taminServices
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
+import androidx.navigation.toRoute
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.beneficiaries.ui.BeneficiariesRoute
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.beneficiaries.ui.BeneficiariesViewModel
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.installmentManagement.ui.InstallmentLetterRoute
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.installmentManagement.ui.InstallmentLetterViewModel
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.paymentSheet.ui.PaymentSheetRoute
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.paymentSheet.ui.PaymentSheetViewModel
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.ConstructionInsuranceRoute
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.ConstructionInsuranceViewModel
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.viewDetail.ui.ViewDetailRequestRoute
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.viewDetail.ui.ViewDetailRequestViewModel
 import com.tamin.taminhamrah.feature.taminServices.occurrence.OccurrenceScreen
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.EmployerOnlineServicesRoute
@@ -36,12 +45,44 @@ data object EmployerOnlineServicesRoute
 @Serializable
 data object ConstructionInsuranceRoute
 
+/** نمایش جزییات درخواست — عملیات option "۱" / the list row's «جزئیات درخواست» button. */
+@Serializable
+data class ViewDetailRequestRoute(val fileNumber: Long?, val requestNumber: Long?)
+
+/** صدور و مدیریت برگه پرداخت — عملیات option "۲". */
+@Serializable
+data class PaymentSheetRoute(val debitNumber: String, val branchCode: String)
+
+/** مدیریت پرداخت اقساط — عملیات option "۳". */
+@Serializable
+data class InstallmentLetterRoute(val workshopId: String, val branchId: String)
+
+/** ذینفعان کارگاه — عملیات option "۴". */
+@Serializable
+data class BeneficiariesRoute(val requestNumber: Long?, val fileNumber: Long?, val requestDate: String?)
+
 fun NavController.navigateToTaminServices(builder: NavOptionsBuilder.() -> Unit = {}) {
     navigate(TaminServicesRoute, builder)
 }
 
 fun NavController.navigateToConstructionInsurance(builder: NavOptionsBuilder.() -> Unit = {}) {
     navigate(ConstructionInsuranceRoute, builder)
+}
+
+fun NavController.navigateToViewDetailRequest(fileNumber: Long?, requestNumber: Long?) {
+    navigate(ViewDetailRequestRoute(fileNumber, requestNumber))
+}
+
+fun NavController.navigateToPaymentSheet(debitNumber: String, branchCode: String) {
+    navigate(PaymentSheetRoute(debitNumber, branchCode))
+}
+
+fun NavController.navigateToInstallmentLetter(workshopId: String, branchId: String) {
+    navigate(InstallmentLetterRoute(workshopId, branchId))
+}
+
+fun NavController.navigateToBeneficiaries(requestNumber: Long?, fileNumber: Long?, requestDate: String?) {
+    navigate(BeneficiariesRoute(requestNumber, fileNumber, requestDate))
 }
 
 fun NavController.navigateToSendInsuranceHistoryToInstitutions(builder: NavOptionsBuilder.() -> Unit = {}) {
@@ -120,11 +161,74 @@ fun NavGraphBuilder.employerOnlineServicesScreen(onBack: () -> Unit) {
     }
 }
 
-fun NavGraphBuilder.constructionInsuranceScreen(onBack: () -> Unit) {
+fun NavGraphBuilder.constructionInsuranceScreen(
+    onBack: () -> Unit,
+    onNavigateToViewDetail: (fileNumber: Long?, requestNumber: Long?) -> Unit,
+    onNavigateToPaymentSheet: (debitNumber: String, branchCode: String) -> Unit,
+    onNavigateToInstallmentLetter: (workshopId: String, branchId: String) -> Unit,
+    onNavigateToBeneficiaries: (requestNumber: Long?, fileNumber: Long?, requestDate: String?) -> Unit,
+) {
     composableWithFadeTransitions<ConstructionInsuranceRoute> {
         val viewModel: ConstructionInsuranceViewModel = koinViewModel()
         ConstructionInsuranceRoute(
             viewModel = viewModel,
+            onBackClicked = onBack,
+            onNavigateToViewDetail = onNavigateToViewDetail,
+            onNavigateToPaymentSheet = onNavigateToPaymentSheet,
+            onNavigateToInstallmentLetter = onNavigateToInstallmentLetter,
+            onNavigateToBeneficiaries = onNavigateToBeneficiaries,
+        )
+    }
+}
+
+fun NavGraphBuilder.viewDetailRequestScreen(onBack: () -> Unit) {
+    composableWithFadeTransitions<ViewDetailRequestRoute> { backStackEntry ->
+        val route = backStackEntry.toRoute<ViewDetailRequestRoute>()
+        val viewModel: ViewDetailRequestViewModel = koinViewModel()
+        ViewDetailRequestRoute(
+            viewModel = viewModel,
+            fileNumber = route.fileNumber,
+            requestNumber = route.requestNumber,
+            onBackClicked = onBack,
+        )
+    }
+}
+
+fun NavGraphBuilder.paymentSheetScreen(onBack: () -> Unit) {
+    composableWithFadeTransitions<PaymentSheetRoute> { backStackEntry ->
+        val route = backStackEntry.toRoute<PaymentSheetRoute>()
+        val viewModel: PaymentSheetViewModel = koinViewModel()
+        PaymentSheetRoute(
+            viewModel = viewModel,
+            debitNumber = route.debitNumber,
+            branchCode = route.branchCode,
+            onBackClicked = onBack,
+        )
+    }
+}
+
+fun NavGraphBuilder.installmentLetterScreen(onBack: () -> Unit) {
+    composableWithFadeTransitions<InstallmentLetterRoute> { backStackEntry ->
+        val route = backStackEntry.toRoute<InstallmentLetterRoute>()
+        val viewModel: InstallmentLetterViewModel = koinViewModel()
+        InstallmentLetterRoute(
+            viewModel = viewModel,
+            workshopId = route.workshopId,
+            branchId = route.branchId,
+            onBackClicked = onBack,
+        )
+    }
+}
+
+fun NavGraphBuilder.beneficiariesScreen(onBack: () -> Unit) {
+    composableWithFadeTransitions<BeneficiariesRoute> { backStackEntry ->
+        val route = backStackEntry.toRoute<BeneficiariesRoute>()
+        val viewModel: BeneficiariesViewModel = koinViewModel()
+        BeneficiariesRoute(
+            viewModel = viewModel,
+            requestNumber = route.requestNumber,
+            fileNumber = route.fileNumber,
+            requestDate = route.requestDate,
             onBackClicked = onBack,
         )
     }

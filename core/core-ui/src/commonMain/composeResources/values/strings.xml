@@ -2932,4 +2932,38 @@
     <string name="construction_insurance_filter_clear">حذف</string>
     <string name="construction_insurance_search_empty_title">پرونده‌ای با این مشخصات یافت نشد</string>
     <string name="construction_insurance_search_empty_subtitle">فیلتر را حذف کنید یا مشخصات دیگری را جستجو کنید.</string>
+
+    <!-- Construction Insurance — عملیات menu + its 4 destination screens -->
+    <string name="action_menu_payment_sheet">صدور و مدیریت برگه پرداخت</string>
+    <string name="action_menu_installment">مدیریت پرداخت اقساط</string>
+    <string name="action_menu_beneficiaries">ذینفعان کارگاه</string>
+
+    <string name="view_detail_request_title">جزئیات درخواست</string>
+
+    <string name="payment_sheet_title">صدور و مدیریت برگه پرداخت</string>
+    <string name="label_order_number">شماره ردیف</string>
+    <string name="label_payment_code">شناسه پرداخت</string>
+    <string name="label_payment_sheet_amount">مبلغ برگه پرداخت</string>
+    <string name="label_payment_status">وضعیت</string>
+    <string name="label_payment_date">تاریخ پرداخت</string>
+    <string name="btn_download_certificate">گواهی پرداخت حق بیمه</string>
+    <string name="btn_issue_payment_sheet">صدور برگه پرداخت</string>
+    <string name="issue_payment_sheet_confirm_title">صدور برگه پرداخت</string>
+    <string name="issue_payment_sheet_confirm_message">آیا از صدور برگه پرداخت جدید برای این بدهی اطمینان دارید؟</string>
+    <string name="payment_sheet_empty">برگه پرداختی برای این بدهی ثبت نشده است.</string>
+
+    <string name="installment_letter_title">مدیریت پرداخت اقساط</string>
+    <string name="label_debit_step">مرحله بدهی</string>
+    <string name="label_debit_status">وضعیت بدهی</string>
+    <string name="label_debit_start_date">تاریخ شروع</string>
+    <string name="label_debit_end_date">تاریخ پایان</string>
+    <string name="label_remaining_amount">مانده بدهی</string>
+    <string name="installment_letter_empty">برگه اقساطی یافت نشد.</string>
+
+    <string name="beneficiaries_title">ذینفعان کارگاه</string>
+    <string name="label_owner_type">نوع مالکیت</string>
+    <string name="label_mobile">شماره موبایل</string>
+    <string name="owner_type_owner">مالک</string>
+    <string name="owner_type_applicant">متقاضی</string>
+    <string name="beneficiaries_empty">ذینفعی برای این کارگاه ثبت نشده است.</string>
 </resources>

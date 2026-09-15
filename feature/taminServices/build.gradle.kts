@@ -17,6 +17,10 @@ kotlin {
             implementation(libs.filekit.core)
             implementation(libs.filekit.compose)
             implementation(libs.filekit.dialog.compose)
+            // PdfDownloadPR (core-ui) exposes io.ktor.utils.io.ByteReadChannel publicly — needed on
+            // this module's own classpath to reference it (e.g. PaymentSheetViewModel), same as
+            // feature/contractsAndPaymentAffair's identical dependency for the same reason.
+            implementation(libs.ktor.client.core)
         }
 
         androidMain.dependencies {

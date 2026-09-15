@@ -1,7 +1,6 @@
 package com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui
 
-
-import androidx.compose.animation.rememberSplineBasedDecay
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,34 +9,24 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.contract.ConstructionInsuranceEvent
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.contract.ConstructionInsuranceIntent
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.contract.ConstructionInsuranceState
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.components.ConstructionInsuranceAction
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.components.ConstructionFileCard
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.components.ConstructionInsuranceHeader
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.components.ConstructionInsuranceListSkeleton
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.components.ConstructionSearchCard
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.components.ConstructionSearchEmptyState
@@ -48,65 +37,57 @@ import com.tamin.taminhamrah.model.constructionInsurance.WorkshopIdInfoPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
-import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
-import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.TaminEmptyState
-import com.tamin.taminhamrah.ui.components.TaminTopAppBar
-import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.coloredShadow
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.ToasterState
 import com.tamin.taminhamrah.ui.components.toast.error
-import com.tamin.taminhamrah.ui.motion.ScrollMotionState
-import com.tamin.taminhamrah.ui.motion.motionFade
-import com.tamin.taminhamrah.ui.motion.motionParallax
-import com.tamin.taminhamrah.ui.motion.motionScale
-import com.tamin.taminhamrah.ui.motion.rememberMotionSnapFlingBehavior
-import com.tamin.taminhamrah.ui.motion.rememberScrollMotionState
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
+import com.tamin.taminhamrah.ui.toparea.TopAreaState
+import com.tamin.taminhamrah.ui.toparea.driveTopArea
+import com.tamin.taminhamrah.ui.toparea.reportTopAreaHeight
+import com.tamin.taminhamrah.ui.toparea.rememberMeasuredTopAreaState
+import com.tamin.taminhamrah.ui.toparea.topAreaContentPadding
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
-import taminx.core.core_ui.action_back
-import taminx.core.core_ui.construction_insurance_subtitle
-import taminx.core.core_ui.construction_insurance_title
 import taminx.core.core_ui.no_construction_files_found
-import androidx.compose.ui.unit.lerp as dpLerp
 import taminx.core.core_ui.Res as CoreRes
 
 @Composable
 fun ConstructionInsuranceRoute(
     viewModel: ConstructionInsuranceViewModel,
     onBackClicked: () -> Unit,
+    onNavigateToViewDetail: (fileNumber: Long?, requestNumber: Long?) -> Unit,
+    onNavigateToPaymentSheet: (debitNumber: String, branchCode: String) -> Unit,
+    onNavigateToInstallmentLetter: (workshopId: String, branchId: String) -> Unit,
+    onNavigateToBeneficiaries: (requestNumber: Long?, fileNumber: Long?, requestDate: String?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val lazyListState = rememberLazyListState()
-    val motionState = rememberScrollMotionState(maxMotionDistance = 120.dp)
     val toaster = LocalToaster.current
-
-    LaunchedEffect(motionState, lazyListState) {
-        motionState.observeLazyListState(lazyListState)
-    }
 
     ConstructionInsuranceEvents(
         events = viewModel.events,
-        toaster = toaster
+        toaster = toaster,
+        onNavigateToViewDetail = onNavigateToViewDetail,
     )
 
     ConstructionInsuranceScreen(
         state = uiState,
-        lazyListState = lazyListState,
-        motionState = motionState,
         onBackClicked = onBackClicked,
         onIntent = viewModel::sendIntent,
+        onNavigateToViewDetail = onNavigateToViewDetail,
+        onNavigateToPaymentSheet = onNavigateToPaymentSheet,
+        onNavigateToInstallmentLetter = onNavigateToInstallmentLetter,
+        onNavigateToBeneficiaries = onNavigateToBeneficiaries,
         modifier = modifier
     )
 }
@@ -115,6 +96,7 @@ fun ConstructionInsuranceRoute(
 fun ConstructionInsuranceEvents(
     events: Flow<ConstructionInsuranceEvent>,
     toaster: ToasterState,
+    onNavigateToViewDetail: (fileNumber: Long?, requestNumber: Long?) -> Unit,
 ) {
     events.collectWithLifecycleAware { event ->
         when (event) {
@@ -123,6 +105,7 @@ fun ConstructionInsuranceEvents(
             }
 
             is ConstructionInsuranceEvent.NavigateToDetails -> {
+                onNavigateToViewDetail(event.item.fileNumber, event.item.requestNumber)
             }
         }
     }
@@ -131,232 +114,244 @@ fun ConstructionInsuranceEvents(
 @Composable
 fun ConstructionInsuranceScreen(
     state: ConstructionInsuranceState,
-    lazyListState: LazyListState,
-    motionState: ScrollMotionState,
     onBackClicked: () -> Unit,
     onIntent: (ConstructionInsuranceIntent) -> Unit,
+    onNavigateToViewDetail: (fileNumber: Long?, requestNumber: Long?) -> Unit = { _, _ -> },
+    onNavigateToPaymentSheet: (debitNumber: String, branchCode: String) -> Unit = { _, _ -> },
+    onNavigateToInstallmentLetter: (workshopId: String, branchId: String) -> Unit = { _, _ -> },
+    onNavigateToBeneficiaries: (requestNumber: Long?, fileNumber: Long?, requestDate: String?) -> Unit =
+        { _, _, _ -> },
     modifier: Modifier = Modifier
 ) {
     val taminColors = LocalTaminColors.current
-    val headerProgress = motionState.progress
     val hasActiveFilter = state.appliedFileNoQuery.isNotBlank() ||
         state.appliedReqNoQuery.isNotBlank() ||
         state.appliedWorkshopIdQuery.isNotBlank() ||
         state.appliedBranchCodeQuery.isNotBlank()
-    val decaySpec = rememberSplineBasedDecay<Float>()
-    val profileGradientBrush = remember(taminColors.profileGradientStops) {
-        Brush.horizontalGradient(taminColors.profileGradientStops)
+
+    // Folds the header's ring icon + subtitle from the list's own drag, snapping to open/closed on
+    // release — the user-info card below it stays fully shown, pinned above the list. The drag
+    // budget is measured from this exact header + card block. See docs/vault/TopArea-System.md
+    // (same shape as feature/taminServices' EmployerOnlineServicesScreen).
+    val hasIdentity = state.userName.isNotBlank() || state.nationalCode.isNotBlank()
+    val topArea = rememberMeasuredTopAreaState(key = hasIdentity) { probeState ->
+        ConstructionInsuranceTopArea(
+            userName = state.userName,
+            nationalCode = state.nationalCode,
+            onBackClicked = onBackClicked,
+            topAreaState = probeState,
+        )
     }
-    val snapFlingBehavior = rememberMotionSnapFlingBehavior(
-        lazyListState = lazyListState,
-        motionState = motionState,
-        decayAnimationSpec = decaySpec
-    )
+    val listState = rememberLazyListState()
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        containerColor = taminColors.bgPage,
-        topBar = {
-            Box(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    TaminTopAppBar(
-                        title = "",
-                        navigationIcon = {
-                            TaminTopAppBarButton(
-                                icon = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(CoreRes.string.action_back),
-                                onClick = onBackClicked,
-                                bordered = true
-                            )
-                        },
-                        background = profileGradientBrush,
-                        bottomPadding = dpLerp(Spacing.xxxl, Spacing.sm, headerProgress)
-                    ) {
-                        Box(modifier = Modifier.fillMaxWidth()) {
-                            DecorativeBackgroundCircle(
-                                size = 190.dp,
-                                xOffset = 450.dp,
-                                yOffset = (-150).dp
-                            )
-
-                            Text(
-                                text = stringResource(CoreRes.string.construction_insurance_title),
-                                style = MaterialTheme.typography.titleLarge,
-                                color = Color.White,
-                                modifier = Modifier
-                                    .align(Alignment.TopCenter)
-                                    .offset(y = (-30).dp)
-                                    .motionFade(
-                                        motionState,
-                                        startProgress = 0.2f,
-                                        endProgress = 0.7f
-                                    )
-                                    .motionParallax(motionState, parallaxDistance = 20.dp)
-                            )
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = dpLerp(Spacing.lg, Spacing.none, headerProgress))
-                                    .motionParallax(motionState, parallaxDistance = 45.dp)
-                                    .motionScale(
-                                        state = motionState,
-                                        minScale = 0.8f,
-                                        maxScale = 1f,
-                                        transformOrigin = TransformOrigin(0.5f, 0.5f)
-                                    ),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                AnimatedRingHeaderIcon(icon = Icons.Outlined.Home)
-                                Spacer(modifier = Modifier.height(Spacing.xs))
-                                Text(
-                                    text = stringResource(CoreRes.string.construction_insurance_subtitle),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = Color.White.copy(alpha = 0.85f),
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                        }
-                        Spacer(
-                            modifier = Modifier.height(
-                                dpLerp(Spacing.sm, Spacing.none, headerProgress)
-                            )
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(dpLerp(Spacing.xxxl, 25.dp, headerProgress)))
-                }
-
-                ConstructionUserInfoCard(
-                    userName = state.userName,
-                    nationalCode = state.nationalCode,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(horizontal = Spacing.page)
-                        .coloredShadow(
-                            color = taminColors.shadowSubtle,
-                            borderRadius = CornerRadius.lg,
-                            blurRadius = Elevation.lg,
-                            offsetY = Spacing.xs
-                        )
-                )
-            }
-        }
-    ) { paddingValues ->
-        Box(
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(taminColors.bgPage),
+    ) {
+        LazyColumn(
+            state = listState,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .driveTopArea(topArea, listState),
+            contentPadding = topAreaContentPadding(
+                state = topArea,
+                rest = PaddingValues(horizontal = Spacing.page, vertical = Spacing.md),
+            ),
+            verticalArrangement = Arrangement.spacedBy(Spacing.md),
+            overscrollEffect = rememberJellyOverscroll(),
         ) {
-            LazyColumn(
-                state = lazyListState,
-                flingBehavior = snapFlingBehavior,
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(
-                    horizontal = Spacing.page,
-                    vertical = Spacing.md
-                ),
-                verticalArrangement = Arrangement.spacedBy(Spacing.md),
-                overscrollEffect = rememberJellyOverscroll(),
-            ) {
+            item {
+                ConstructionSearchCard(
+                    itemCount = state.items.size,
+                    isExpanded = state.isSearchExpanded,
+                    isNoticeVisible = state.isNoticeVisible,
+                    fileNoQuery = state.fileNoQuery,
+                    reqNoQuery = state.reqNoQuery,
+                    workshopIdQuery = state.workshopIdQuery,
+                    branchCodeQuery = state.branchCodeQuery,
+                    onToggleExpanded = {
+                        onIntent(
+                            ConstructionInsuranceIntent.ToggleSearchExpanded(
+                                it
+                            )
+                        )
+                    },
+                    onFileNoChanged = {
+                        onIntent(
+                            ConstructionInsuranceIntent.OnFileNoQueryChanged(
+                                it
+                            )
+                        )
+                    },
+                    onReqNoChanged = {
+                        onIntent(
+                            ConstructionInsuranceIntent.OnReqNoQueryChanged(
+                                it
+                            )
+                        )
+                    },
+                    onWorkshopIdChanged = {
+                        onIntent(
+                            ConstructionInsuranceIntent.OnWorkshopIdQueryChanged(
+                                it
+                            )
+                        )
+                    },
+                    onBranchCodeChanged = {
+                        onIntent(
+                            ConstructionInsuranceIntent.OnBranchCodeQueryChanged(
+                                it
+                            )
+                        )
+                    },
+                    onExecuteSearch = { onIntent(ConstructionInsuranceIntent.ExecuteSearch) },
+                    onResetSearch = { onIntent(ConstructionInsuranceIntent.ResetSearch) },
+                    onInfoIconClicked = {
+                        onIntent(ConstructionInsuranceIntent.ToggleNoticeVisibility)
+                    }
+                )
+            }
+
+            if (state.isLoading && state.items.isEmpty()) {
                 item {
-                    ConstructionSearchCard(
-                        itemCount = state.items.size,
-                        isExpanded = state.isSearchExpanded,
-                        isNoticeVisible = state.isNoticeVisible,
-                        fileNoQuery = state.fileNoQuery,
-                        reqNoQuery = state.reqNoQuery,
-                        workshopIdQuery = state.workshopIdQuery,
-                        branchCodeQuery = state.branchCodeQuery,
-                        onToggleExpanded = {
-                            onIntent(
-                                ConstructionInsuranceIntent.ToggleSearchExpanded(
-                                    it
-                                )
-                            )
+                    ConstructionInsuranceListSkeleton(modifier = Modifier.padding(top = Spacing.sm))
+                }
+            }
+            if (!state.isLoading && state.error == null) {
+                if (hasActiveFilter) {
+                    item {
+                        ConstructionSearchFilterChipRow(
+                            fileNoQuery = state.appliedFileNoQuery,
+                            reqNoQuery = state.appliedReqNoQuery,
+                            workshopIdQuery = state.appliedWorkshopIdQuery,
+                            branchCodeQuery = state.appliedBranchCodeQuery,
+                            onClear = { onIntent(ConstructionInsuranceIntent.ResetSearch) },
+                        )
+                    }
+                }
+
+                items(
+                    items = state.items,
+                    key = { it.fileNumber ?: it.hashCode() }
+                ) { file ->
+                    ConstructionFileCard(
+                        item = file,
+                        onDetailClick = { onIntent(ConstructionInsuranceIntent.OnDetailClick(file)) },
+                        onActionSelect = { action ->
+                            when (action) {
+                                ConstructionInsuranceAction.PaymentSheet ->
+                                    onNavigateToPaymentSheet(
+                                        file.debitNumber.orEmpty(),
+                                        file.workshopInfo?.brhCode.orEmpty(),
+                                    )
+
+                                ConstructionInsuranceAction.InstallmentLetter ->
+                                    onNavigateToInstallmentLetter(
+                                        file.workshopInfo?.workshopId.orEmpty(),
+                                        file.workshopInfo?.brhCode.orEmpty(),
+                                    )
+
+                                ConstructionInsuranceAction.Beneficiaries ->
+                                    onNavigateToBeneficiaries(file.requestNumber, file.fileNumber, file.requestDate)
+                            }
                         },
-                        onFileNoChanged = {
-                            onIntent(
-                                ConstructionInsuranceIntent.OnFileNoQueryChanged(
-                                    it
-                                )
-                            )
-                        },
-                        onReqNoChanged = {
-                            onIntent(
-                                ConstructionInsuranceIntent.OnReqNoQueryChanged(
-                                    it
-                                )
-                            )
-                        },
-                        onWorkshopIdChanged = {
-                            onIntent(
-                                ConstructionInsuranceIntent.OnWorkshopIdQueryChanged(
-                                    it
-                                )
-                            )
-                        },
-                        onBranchCodeChanged = {
-                            onIntent(
-                                ConstructionInsuranceIntent.OnBranchCodeQueryChanged(
-                                    it
-                                )
-                            )
-                        },
-                        onExecuteSearch = { onIntent(ConstructionInsuranceIntent.ExecuteSearch) },
-                        onResetSearch = { onIntent(ConstructionInsuranceIntent.ResetSearch) },
-                        onInfoIconClicked = {
-                            onIntent(ConstructionInsuranceIntent.ToggleNoticeVisibility)
-                        }
                     )
                 }
+            }
 
-                if (state.isLoading && state.items.isEmpty()) {
-                    item {
-                        ConstructionInsuranceListSkeleton(modifier = Modifier.padding(top = Spacing.sm))
-                    }
-                }
-                if (!state.isLoading && state.error == null) {
+            if (!state.isLoading && state.error == null && state.items.isEmpty()) {
+                item {
                     if (hasActiveFilter) {
-                        item {
-                            ConstructionSearchFilterChipRow(
-                                fileNoQuery = state.appliedFileNoQuery,
-                                reqNoQuery = state.appliedReqNoQuery,
-                                workshopIdQuery = state.appliedWorkshopIdQuery,
-                                branchCodeQuery = state.appliedBranchCodeQuery,
-                                onClear = { onIntent(ConstructionInsuranceIntent.ResetSearch) },
-                            )
-                        }
-                    }
-
-                    items(
-                        items = state.items,
-                        key = { it.fileNumber ?: it.hashCode() }
-                    ) { file ->
-                        ConstructionFileCard(item = file)
+                        ConstructionSearchEmptyState(modifier = Modifier.padding(top = Spacing.md))
+                    } else {
+                        TaminEmptyState(
+                            message = stringResource(CoreRes.string.no_construction_files_found),
+                            modifier = Modifier.padding(top = Spacing.xxl),
+                        )
                     }
                 }
-
-                if (!state.isLoading && state.error == null && state.items.isEmpty()) {
-                    item {
-                        if (hasActiveFilter) {
-                            ConstructionSearchEmptyState(modifier = Modifier.padding(top = Spacing.md))
-                        } else {
-                            TaminEmptyState(
-                                message = stringResource(CoreRes.string.no_construction_files_found),
-                                modifier = Modifier.padding(top = Spacing.xxl),
-                            )
-                        }
-                    }
-                }
-
             }
+        }
 
-            if (state.isLoading && state.items.isNotEmpty()) {
-                LoadingStateOverlay()
-            }
+        // The real, interactive top area floats over the list and reports its own rendered height
+        // back so the list reserves exactly the space it occupies.
+        ConstructionInsuranceTopArea(
+            userName = state.userName,
+            nationalCode = state.nationalCode,
+            onBackClicked = onBackClicked,
+            topAreaState = topArea,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .reportTopAreaHeight(topArea),
+        )
+
+        if (state.isLoading && state.items.isNotEmpty()) {
+            LoadingStateOverlay()
         }
     }
 }
 
+/** How much the user-info card rides up into the header gradient, straddling the seam. */
+private val UserInfoCardOverhang = 40.dp
+
+/**
+ * The list screen's floating top area: the folding gradient header (back, ring icon, subtitle)
+ * with the کاربر identity card riding up [UserInfoCardOverhang] into its gradient to straddle the
+ * seam. Composed twice — once off-screen by [rememberMeasuredTopAreaState] to measure the fold
+ * budget, once for real over the list with [reportTopAreaHeight]. Mirrors
+ * `EmployerOnlineServicesScreen`'s `EmployerOnlineServicesTopArea`.
+ */
+@Composable
+private fun ConstructionInsuranceTopArea(
+    userName: String,
+    nationalCode: String,
+    onBackClicked: () -> Unit,
+    topAreaState: TopAreaState,
+    modifier: Modifier = Modifier,
+) {
+    val taminColors = LocalTaminColors.current
+    Column(modifier = modifier.fillMaxWidth()) {
+        ConstructionInsuranceHeader(
+            onBackClicked = onBackClicked,
+            topAreaState = topAreaState,
+            heroCardOverlap = UserInfoCardOverhang,
+        )
+        ConstructionUserInfoCard(
+            userName = userName,
+            nationalCode = nationalCode,
+            // Rides up into the header's reserved bottom space so it straddles the seam, and
+            // reports a height reduced by the same overlap so reportTopAreaHeight sees the true
+            // footprint instead of counting the overlap twice as reserved list space.
+            modifier = Modifier
+                .straddlePreviousSibling(UserInfoCardOverhang)
+                .padding(horizontal = Spacing.page)
+                .coloredShadow(
+                    color = taminColors.shadowSubtle,
+                    borderRadius = CornerRadius.lg,
+                    blurRadius = Elevation.lg,
+                    offsetY = Spacing.xs,
+                ),
+        )
+        Spacer(Modifier.height(Spacing.sm))
+    }
+}
+
+/**
+ * Shifts this child up by [overlap] to overlap the previous sibling's bottom edge, while reporting
+ * a height reduced by that same amount — so a parent measuring total column height (here,
+ * [reportTopAreaHeight]) sees the true visual footprint instead of double-counting the overlap.
+ * Same helper as `EmployerOnlineServicesScreen`/`LegalRepresentativeWorkshopsScreen`, independently
+ * re-declared file-local here too rather than extracted — see docs/vault/TopArea-System.md.
+ */
+private fun Modifier.straddlePreviousSibling(overlap: Dp): Modifier = layout { measurable, constraints ->
+    val placeable = measurable.measure(constraints)
+    val overlapPx = overlap.roundToPx()
+    val reportedHeight = (placeable.height - overlapPx).coerceAtLeast(0)
+    layout(placeable.width, reportedHeight) {
+        placeable.placeRelative(0, -overlapPx)
+    }
+}
 
 private val previewItems = persistentListOf(
     ConstructionFilePR(
@@ -431,16 +426,12 @@ private val previewItems = persistentListOf(
 @Composable
 private fun ConstructionInsuranceScreenPreview() {
     PreviewRtlThemeContent {
-        val lazyListState = rememberLazyListState()
-        val motionState = rememberScrollMotionState(maxMotionDistance = 120.dp)
         ConstructionInsuranceScreen(
             state = ConstructionInsuranceState(
                 userName = "حسین توکلی کرمانی",
                 nationalCode = "۴۴۷۹۸۹۰۸۸۲",
                 items = previewItems,
             ),
-            lazyListState = lazyListState,
-            motionState = motionState,
             onBackClicked = {},
             onIntent = {}
         )
@@ -451,16 +442,12 @@ private fun ConstructionInsuranceScreenPreview() {
 @Composable
 private fun ConstructionInsuranceScreenPreviewDark() {
     TaminHamrahTheme(darkTheme = true) {
-        val lazyListState = rememberLazyListState()
-        val motionState = rememberScrollMotionState(maxMotionDistance = 120.dp)
         ConstructionInsuranceScreen(
             state = ConstructionInsuranceState(
                 userName = "حسین توکلی کرمانی",
                 nationalCode = "۴۴۷۹۸۹۰۸۸۲",
                 items = previewItems,
             ),
-            lazyListState = lazyListState,
-            motionState = motionState,
             onBackClicked = {},
             onIntent = {}
         )
@@ -471,16 +458,12 @@ private fun ConstructionInsuranceScreenPreviewDark() {
 @Composable
 private fun ConstructionInsuranceScreenEmptyPreview() {
     PreviewRtlThemeContent {
-        val lazyListState = rememberLazyListState()
-        val motionState = rememberScrollMotionState(maxMotionDistance = 120.dp)
         ConstructionInsuranceScreen(
             state = ConstructionInsuranceState(
                 userName = "حسین توکلی کرمانی",
                 nationalCode = "۴۴۷۹۸۹۰۸۸۲",
                 items = emptyList<ConstructionFilePR>().toImmutableList(),
             ),
-            lazyListState = lazyListState,
-            motionState = motionState,
             onBackClicked = {},
             onIntent = {}
         )
@@ -491,8 +474,6 @@ private fun ConstructionInsuranceScreenEmptyPreview() {
 @Composable
 private fun ConstructionInsuranceScreenLoadingPreview() {
     PreviewRtlThemeContent {
-        val lazyListState = rememberLazyListState()
-        val motionState = rememberScrollMotionState(maxMotionDistance = 120.dp)
         ConstructionInsuranceScreen(
             state = ConstructionInsuranceState(
                 userName = "حسین توکلی کرمانی",
@@ -500,8 +481,6 @@ private fun ConstructionInsuranceScreenLoadingPreview() {
                 isLoading = true,
                 items = emptyList<ConstructionFilePR>().toImmutableList(),
             ),
-            lazyListState = lazyListState,
-            motionState = motionState,
             onBackClicked = {},
             onIntent = {}
         )
@@ -512,8 +491,6 @@ private fun ConstructionInsuranceScreenLoadingPreview() {
 @Composable
 private fun ConstructionInsuranceScreenSearchEmptyPreview() {
     PreviewRtlThemeContent {
-        val lazyListState = rememberLazyListState()
-        val motionState = rememberScrollMotionState(maxMotionDistance = 120.dp)
         ConstructionInsuranceScreen(
             state = ConstructionInsuranceState(
                 userName = "حسین توکلی کرمانی",
@@ -524,8 +501,6 @@ private fun ConstructionInsuranceScreenSearchEmptyPreview() {
                 appliedFileNoQuery = "4479890882",
                 appliedWorkshopIdQuery = "9028222442",
             ),
-            lazyListState = lazyListState,
-            motionState = motionState,
             onBackClicked = {},
             onIntent = {}
         )
@@ -536,8 +511,6 @@ private fun ConstructionInsuranceScreenSearchEmptyPreview() {
 @Composable
 private fun ConstructionInsuranceScreenSearchResultsPreview() {
     PreviewRtlThemeContent {
-        val lazyListState = rememberLazyListState()
-        val motionState = rememberScrollMotionState(maxMotionDistance = 120.dp)
         ConstructionInsuranceScreen(
             state = ConstructionInsuranceState(
                 userName = "حسین توکلی کرمانی",
@@ -546,8 +519,6 @@ private fun ConstructionInsuranceScreenSearchResultsPreview() {
                 fileNoQuery = "4479890882",
                 appliedFileNoQuery = "4479890882",
             ),
-            lazyListState = lazyListState,
-            motionState = motionState,
             onBackClicked = {},
             onIntent = {}
         )

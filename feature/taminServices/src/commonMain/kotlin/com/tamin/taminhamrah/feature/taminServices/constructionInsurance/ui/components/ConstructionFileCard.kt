@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.com
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,6 +16,10 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -25,6 +30,7 @@ import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFilePR
 import com.tamin.taminhamrah.model.constructionInsurance.WorkshopIdInfoPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.RecordActionMenu
 import com.tamin.taminhamrah.ui.components.IconPosition
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.StatusPill
@@ -60,15 +66,17 @@ private const val RIAL_UNIT = "ریال"
  * `EmployerAgreementCard` (`coloredShadow` + `taminSurface`, `bgPage`-tinted `InfoBox` tiles) rather
  * than a `Card` with elevation, and every color comes from [LocalTaminColors] so both themes hold.
  *
- * جزئیات درخواست and عملیات are inert for now — wired once those flows are designed.
  */
 @Composable
 fun ConstructionFileCard(
     item: ConstructionFilePR,
     modifier: Modifier = Modifier,
+    onDetailClick: () -> Unit = {},
+    onActionSelect: (ConstructionInsuranceAction) -> Unit = {},
 ) {
     val colors = LocalTaminColors.current
     val isInstallment = item.debitStatusCode == INSTALLMENT_DEBIT_STATUS_CODE
+    var menuOpen by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -157,7 +165,7 @@ fun ConstructionFileCard(
         ) {
             TaminOutlinedButton(
                 text = stringResource(Res.string.btn_request_details),
-                onClick = { /* no-op for now — wired once the detail flow is designed */ },
+                onClick = onDetailClick,
                 icon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 iconPosition = IconPosition.Start,
                 height = ButtonHeight,
@@ -167,15 +175,30 @@ fun ConstructionFileCard(
                 contentColor = colors.blueText,
                 modifier = Modifier.weight(AmountTileWeight),
             )
-            TaminFilledButton(
-                text = stringResource(Res.string.btn_action),
-                onClick = { /* no-op for now — wired once the action flow is designed */ },
-                icon = Icons.Default.Settings,
-                height = ButtonHeight,
-                textStyle = MaterialTheme.typography.labelMedium,
-                background = Brush.linearGradient(listOf(TaminNavy300, TaminNavy900)),
-                modifier = Modifier.weight(1f),
-            )
+
+            // Weight belongs on the Box: TaminFilledButton fills its width from the inside, so an
+            // unweighted wrapper would take the whole row and starve جزئیات درخواست — same idiom
+            // RecordCard's own عملیات button uses.
+            Box(modifier = Modifier.weight(1f)) {
+                TaminFilledButton(
+                    text = stringResource(Res.string.btn_action),
+                    onClick = { menuOpen = true },
+                    icon = Icons.Default.Settings,
+                    height = ButtonHeight,
+                    textStyle = MaterialTheme.typography.labelMedium,
+                    background = Brush.linearGradient(listOf(TaminNavy300, TaminNavy900)),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                RecordActionMenu(
+                    expanded = menuOpen,
+                    items = constructionInsuranceActions(item = item),
+                    onDismiss = { menuOpen = false },
+                    onSelect = { action ->
+                        menuOpen = false
+                        onActionSelect(action)
+                    },
+                )
+            }
         }
     }
 }

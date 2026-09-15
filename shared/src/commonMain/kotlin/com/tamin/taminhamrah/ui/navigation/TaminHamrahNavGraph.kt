@@ -137,6 +137,14 @@ import com.tamin.taminhamrah.feature.taminServices.inspectionScreen
 import com.tamin.taminhamrah.feature.taminServices.occurrenceScreen
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServicesScreen
 import com.tamin.taminhamrah.feature.taminServices.constructionInsuranceScreen
+import com.tamin.taminhamrah.feature.taminServices.viewDetailRequestScreen
+import com.tamin.taminhamrah.feature.taminServices.paymentSheetScreen
+import com.tamin.taminhamrah.feature.taminServices.installmentLetterScreen
+import com.tamin.taminhamrah.feature.taminServices.beneficiariesScreen
+import com.tamin.taminhamrah.feature.taminServices.navigateToViewDetailRequest
+import com.tamin.taminhamrah.feature.taminServices.navigateToPaymentSheet
+import com.tamin.taminhamrah.feature.taminServices.navigateToInstallmentLetter
+import com.tamin.taminhamrah.feature.taminServices.navigateToBeneficiaries
 import com.tamin.taminhamrah.feature.taminServices.sendInsuranceHistoryToInstitutionsScreen
 import com.tamin.taminhamrah.feature.taminServices.taminServicesScreen
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
@@ -488,6 +496,34 @@ internal fun TaminHamrahNavGraph(
                 )
 
                 constructionInsuranceScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToViewDetail = { fileNumber, requestNumber ->
+                        navController.navigateToViewDetailRequest(fileNumber, requestNumber)
+                    },
+                    onNavigateToPaymentSheet = { debitNumber, branchCode ->
+                        navController.navigateToPaymentSheet(debitNumber, branchCode)
+                    },
+                    onNavigateToInstallmentLetter = { workshopId, branchId ->
+                        navController.navigateToInstallmentLetter(workshopId, branchId)
+                    },
+                    onNavigateToBeneficiaries = { requestNumber, fileNumber, requestDate ->
+                        navController.navigateToBeneficiaries(requestNumber, fileNumber, requestDate)
+                    },
+                )
+
+                viewDetailRequestScreen(
+                    onBack = { navController.popBackStack() }
+                )
+
+                paymentSheetScreen(
+                    onBack = { navController.popBackStack() }
+                )
+
+                installmentLetterScreen(
+                    onBack = { navController.popBackStack() }
+                )
+
+                beneficiariesScreen(
                     onBack = { navController.popBackStack() }
                 )
 
