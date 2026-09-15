@@ -47,6 +47,12 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.util.toPersianDigits
+import com.tamin.taminhamrah.deeplink.DeepLinkParser
+import com.tamin.taminhamrah.deeplink.DeepLinkSource
+import com.tamin.taminhamrah.deeplink.ParsedDeepLink
+import com.tamin.taminhamrah.feature.agent.ui.markdown.MarkdownContent
+import com.tamin.taminhamrah.feature.agent.markdown.MarkdownParser
+import com.tamin.taminhamrah.ui.deeplink.LocalDeepLinkHandler
 import com.tamin.taminhamrah.feature.agent.audio.rememberMicPermission
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
 import com.tamin.taminhamrah.feature.agent.ui.bubble.ChartBubble
@@ -77,15 +83,12 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.agent_not_allowed_default
+import taminx.core.core_ui.agent_not_allowed_title
 import kotlin.math.roundToInt
-
-/**
- * Navigation hand-off for [ChatBubbleContent.DeepLink] bubbles. The host supplies a
- * lambda that maps an `AgentDestination` id to a real route; the default is a no-op
- * so previews and tests render without navigation.
- */
-val LocalAgentNavigator = staticCompositionLocalOf<(String) -> Unit> { {} }
 
 // ─── AgentScreen ──────────────────────────────────────────────────────────────
 
@@ -93,9 +96,9 @@ val LocalAgentNavigator = staticCompositionLocalOf<(String) -> Unit> { {} }
 fun AgentScreen(
     viewModel: AgentViewModel = koinViewModel(),
     onNavigateBack: () -> Unit = {},
-    onNavigateToDestination: (String) -> Unit = {},
     onShareText: (String) -> Unit = {}
 ) {
+    val deepLinkHandler = LocalDeepLinkHandler.current
     val uiState by viewModel.uiState.collectAsState()
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
@@ -145,7 +148,8 @@ fun AgentScreen(
             when (event) {
                 is AgentEvent.ScrollToBottom -> requestScrollToBottom()
                 is AgentEvent.ShowError -> { /* handled via bubble */ }
-                is AgentEvent.NavigateToDeepLink -> onNavigateToDestination(event.destination)
+                is AgentEvent.NavigateToDeepLink ->
+                    deepLinkHandler.open(event.destination.toAgentDeepLink(), DeepLinkSource.AGENT)
                 is AgentEvent.NavigateToWebView -> { /* External navigation */ }
                 is AgentEvent.ShareText -> onShareText(event.text)
             }
@@ -156,17 +160,17 @@ fun AgentScreen(
         viewModel.sendIntent(AgentIntent.CheckPermission)
     }
 
-    // Provided via a CompositionLocal rather than threaded through five layers of
-    // composables, since only the leaf DeepLink bubble consumes it.
-    CompositionLocalProvider(LocalAgentNavigator provides onNavigateToDestination) {
-        AgentContent(
-            uiState = uiState,
-            listState = listState,
-            onIntent = { viewModel.sendIntent(it) },
-            onRequestScroll = requestScrollToBottom
-        )
-    }
+    AgentContent(
+        uiState = uiState,
+        listState = listState,
+        onIntent = { viewModel.sendIntent(it) },
+        onRequestScroll = requestScrollToBottom
+    )
 }
+
+/** A bare destination key becomes the `@key` form; a full link is passed through unchanged. */
+internal fun String.toAgentDeepLink(): String =
+    if (startsWith("@") || contains("://")) this else "@$this"
 
 @Composable
 private fun AgentContent(
@@ -329,11 +333,10 @@ private fun ChatLayout(
         // ── Bottom input: global scrim gradient behind, solid pill on top ──
         // The typing/processing indicator is rendered once inside the LazyColumn above.
         //
-        // Inset handling: the window is resized above the IME by the system, so this bar must
-        // NOT add any `ime` padding itself — doing so applies the keyboard height twice and
-        // pushes the bar a full keyboard above the keyboard. Only the navigation bar is
-        // padded here; while the keyboard is open that inset is 0 (the IME covers it), so the
-        // bar lands directly on top of the keyboard.
+        // Inset handling: the activity is edge-to-edge, so the window is NOT resized for the
+        // keyboard (adjustResize has no effect) and the bar must lift itself. The union of the
+        // keyboard and navigation-bar insets is the larger of the two: above the keyboard while
+        // it is open, above the navigation bar otherwise — never both added together.
         //
         // onSizeChanged sits before the padding so it reports the bar's *total* occupied
         // height (content + insets); the chat list reserves exactly that much space.
@@ -344,7 +347,7 @@ private fun ChatLayout(
                 .fillMaxWidth()
                 .onSizeChanged { inputBarHeightPx = it.height }
                 .background(AppBarScrim.bottomGradient)
-                .windowInsetsPadding(WindowInsets.navigationBars)
+                .windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars))
         ) {
             val barPadding = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 8.dp)
             when {
@@ -364,6 +367,7 @@ private fun ChatLayout(
                 else -> AgentInputBar(
                     isGenerating = uiState.isGenerating,
                     isEnabled = !uiState.isOffline,
+                    isVoiceEnabled = uiState.canSendVoice,
                     onSend = { onIntent(AgentIntent.SendTextPrompt(it)) },
                     onCancel = { onIntent(AgentIntent.CancelGeneration) },
                     onStartVoice = {
@@ -953,6 +957,34 @@ private fun nextWordBoundary(s: String, from: Int): Int {
     return i
 }
 
+/** An assistant markdown answer whose links are routed like every other link in the chat. */
+@Composable
+private fun AgentMarkdown(
+    text: String,
+    isAnimating: Boolean,
+    contentColor: androidx.compose.ui.graphics.Color,
+    onIntent: (AgentIntent) -> Unit,
+    onRequestScroll: () -> Unit,
+    onAnimationFinished: () -> Unit,
+) {
+    val deepLinkHandler = LocalDeepLinkHandler.current
+    MarkdownContent(
+        text = text,
+        isAnimating = isAnimating,
+        contentColor = contentColor,
+        onRequestScroll = onRequestScroll,
+        onAnimationFinished = onAnimationFinished,
+        onLinkClick = { link ->
+            // A prompt link continues the conversation; everything else leaves through
+            // the app's deep link gate, which applies the target's feature flag.
+            when (val parsed = DeepLinkParser.parse(link, DeepLinkSource.AGENT)) {
+                is ParsedDeepLink.Prompt -> onIntent(AgentIntent.SendTextPrompt(parsed.text))
+                else -> deepLinkHandler.open(link, DeepLinkSource.AGENT)
+            }
+        },
+    )
+}
+
 /**
  * Parses a single line of markdown into a styled AnnotatedString.
  *
@@ -1234,7 +1266,18 @@ private fun BubbleContentRenderer(
             )
         }
 
-        is ChatBubbleContent.Text -> {
+        // A plain message carrying a link (e.g. a general_response in CLIENT mode) is drawn as
+        // markdown, so its links become buttons instead of raw `[label](@key)` text.
+        is ChatBubbleContent.Text -> if (MarkdownParser.containsLink(content.message)) {
+            AgentMarkdown(
+                text = content.message,
+                isAnimating = isTypingAnimating,
+                contentColor = contentColor,
+                onIntent = onIntent,
+                onRequestScroll = onRequestScroll,
+                onAnimationFinished = onAnimationFinished,
+            )
+        } else {
             val textStyle = MaterialTheme.typography.bodyMedium.copy(
                 color = contentColor,
                 lineHeight = 22.sp
@@ -1246,6 +1289,15 @@ private fun BubbleContentRenderer(
                 onAnimationFinished()
             }
         }
+
+        is ChatBubbleContent.Markdown -> AgentMarkdown(
+            text = content.text,
+            isAnimating = isTypingAnimating,
+            contentColor = contentColor,
+            onIntent = onIntent,
+            onRequestScroll = onRequestScroll,
+            onAnimationFinished = onAnimationFinished,
+        )
 
         is ChatBubbleContent.KeyValue -> {
             Column(
@@ -1321,9 +1373,9 @@ private fun BubbleContentRenderer(
         }
 
         is ChatBubbleContent.DeepLink -> {
-            val navigate = LocalAgentNavigator.current
+            val deepLinkHandler = LocalDeepLinkHandler.current
             OutlinedButton(
-                onClick = { navigate(content.destination) },
+                onClick = { deepLinkHandler.open(content.destination.toAgentDeepLink(), DeepLinkSource.AGENT) },
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
             ) {
@@ -1443,7 +1495,9 @@ private fun AgentInputBar(
     onCancel: () -> Unit,
     onStartVoice: () -> Unit = {},
     /** False while the service is unreachable — the field stays visible but inert. */
-    isEnabled: Boolean = true
+    isEnabled: Boolean = true,
+    /** The server decides per user whether voice prompts are allowed (`canSendVoice`). */
+    isVoiceEnabled: Boolean = true
 ) {
     var text by remember { mutableStateOf("") }
     val taminColors = LocalTaminColors.current
@@ -1518,7 +1572,7 @@ private fun AgentInputBar(
                         } else if (isTyping) {
                             onSend(text.trim())
                             text = ""
-                        } else {
+                        } else if (isVoiceEnabled) {
                             onStartVoice()
                         }
                     },
@@ -1535,7 +1589,8 @@ private fun AgentInputBar(
                         targetState = when {
                             isGenerating -> 2
                             isTyping -> 1
-                            else -> 0
+                            isVoiceEnabled -> 0
+                            else -> 1
                         },
                         label = "send_mic_anim"
                     ) { state ->
@@ -1654,14 +1709,14 @@ private fun NotAllowedMessage(message: String?) {
         ) {
             Text("🚫", fontSize = 48.sp)
             Text(
-                text = "دسترسی محدود",
+                text = stringResource(Res.string.agent_not_allowed_title),
                 style = MaterialTheme.typography.titleLarge.copy(
                     color = taminColors.textPrimary,
                     fontWeight = FontWeight.Bold
                 )
             )
             Text(
-                text = message ?: "دستیار هوشمند برای شما فعال نیست.",
+                text = message ?: stringResource(Res.string.agent_not_allowed_default),
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = taminColors.textSecondary,
                     textAlign = TextAlign.Center
@@ -1776,6 +1831,7 @@ private fun AgentBubbleFooter(item: ChatItem, onIntent: (AgentIntent) -> Unit) {
 private fun extractTextFromItem(item: ChatItem): String {
     return when (val content = item.content) {
         is ChatBubbleContent.Text -> content.message
+        is ChatBubbleContent.Markdown -> content.text
         is ChatBubbleContent.KeyValue -> {
             buildString {
                 content.title?.let { appendLine(it) }
