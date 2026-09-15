@@ -33,8 +33,12 @@ import kotlinx.coroutines.flow.map
  * (or delete the mock branch + [ConstructionInsuranceMockData]) once real API testing is possible
  * — the original cache-then-network / network-only implementations are kept intact below each flag
  * check.
+ *
+ * `internal var` rather than `private const val` so [ConstructionInsuranceRepositoryImplTest]
+ * (same module's commonTest, a Gradle "friend" source set) can flip it to `false` to exercise the
+ * real Room/network code paths without changing the app's own default (still `true`).
  */
-private const val USE_MOCK_DATA = true
+internal var USE_MOCK_DATA = true
 
 internal class ConstructionInsuranceRepositoryImpl(
     private val remoteDataSource: ConstructionInsuranceRemoteDataSource,

@@ -3,9 +3,24 @@ package com.tamin.taminhamrah.feature.taminServices.constructionInsurance
 import app.cash.turbine.test
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.contract.ConstructionInsuranceIntent
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.ConstructionInsuranceViewModel
+import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDN
+import com.tamin.taminhamrah.model.bankAccount.BankAccountDN
+import com.tamin.taminhamrah.model.certificate.RecipientDN
+import com.tamin.taminhamrah.model.constructionInsurance.BeneficiaryConstructionDN
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileDN
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileSearchParamsDN
+import com.tamin.taminhamrah.model.constructionInsurance.InstallmentLetterDN
+import com.tamin.taminhamrah.model.constructionInsurance.PaymentSheetConstructionFileDN
+import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDN
 import com.tamin.taminhamrah.model.identity.IdentityInfoDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
+import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.subdominant.SubdominantDN
+import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
+import com.tamin.taminhamrah.model.user.CurrentUserDN
+import com.tamin.taminhamrah.model.user.EditMobileResponseDN
+import com.tamin.taminhamrah.model.user.TaminRelationDN
+import com.tamin.taminhamrah.model.user.UserProfileDN
 import com.tamin.taminhamrah.repository.UserRepository
 import com.tamin.taminhamrah.repository.constructionInsurance.ConstructionInsuranceRepository
 import com.tamin.taminhamrah.useCases.constructionInsurance.GetConstructionFilesUseCase
@@ -100,8 +115,31 @@ private class FakeConstructionInsuranceRepository : ConstructionInsuranceReposit
         ConstructionFileDN(
             fileNumber = 124037L,
             requestNumber = 881902L,
+            requestDate = null,
+            workshopInfo = null,
+            postalCode = null,
+            address = null,
+            mainPlaque = null,
+            subPlaque = null,
+            block = null,
+            propertyConstruction = null,
+            apartment = null,
+            trade = null,
+            partPlaque = null,
+            sumOfComplications = null,
+            debitNumber = null,
             totalPayment = 486000000L,
-            debitStatusCode = "51"
+            meterage = null,
+            debitStatusCode = "51",
+            protrusion = null,
+            applicationFees = null,
+            residentialServiceInfrastructureFees = null,
+            excessDensitySurchargeFees = null,
+            increasePropertyValue = null,
+            issuanceFencingWallConstructionFees = null,
+            coveredClause3Fees = null,
+            article100 = null,
+            paymentDeadLine = null,
         )
     )
     var searchParam: ConstructionFileSearchParamsDN? = null
@@ -112,9 +150,43 @@ private class FakeConstructionInsuranceRepository : ConstructionInsuranceReposit
         searchParam = search
         emit(files)
     }
+
+    override fun getBeneficiariesWorkshop(
+        requestNumber: Long?,
+        fileNumber: Long?,
+        requestDate: String?,
+    ): Flow<List<BeneficiaryConstructionDN>> = flow {
+        emit(emptyList())
+    }
+
+    override fun getPaymentSheetConstructionInfo(debitNumber: String): Flow<List<PaymentSheetConstructionFileDN>> =
+        flow {
+            emit(emptyList())
+        }
+
+    override fun getCertificatePaymentSheetPdf(
+        debitNumber: String,
+        branchCode: String
+    ): Flow<PdfDownloadDN> = flow {
+        emit(PdfDownloadDN(pdf = null))
+    }
+
+    override fun issuancePaymentSheet(debitNumber: String): Flow<String> = flow {
+        emit("OK")
+    }
+
+    override fun getInstallmentLetterList(
+        workshopId: String,
+        branchId: String
+    ): Flow<List<InstallmentLetterDN>> = flow {
+        emit(emptyList())
+    }
 }
 
 private class FakeUserRepository : UserRepository {
+
+    private fun notUsed(): Nothing = error("not used")
+
     override fun getIdentityInfo(): Flow<IdentityInfoDN> {
         return flowOf(
             IdentityInfoDN(
@@ -136,51 +208,84 @@ private class FakeUserRepository : UserRepository {
         )
     }
 
-    override suspend fun getUserProfile(): com.tamin.taminhamrah.model.user.UserProfileDN {
-        TODO("Not required")
+    override suspend fun getUserProfileImage(): Flow<String> {
+        notUsed()
     }
 
-    override suspend fun getRecipients(): List<com.tamin.taminhamrah.model.user.RecipientDN> {
-        TODO("Not required")
+    override suspend fun fetchTaminRelation(): Flow<TaminRelationDN> {
+        notUsed()
     }
 
-    override suspend fun getInsuredActiveBranch(): com.tamin.taminhamrah.model.user.InsuredActiveBranchDN {
-        TODO("Not required")
+    override suspend fun sendImageRequest(branchCode: String, serialId: String): Flow<String> {
+        notUsed()
     }
 
-    override suspend fun getRelationTaminAll(): List<com.tamin.taminhamrah.model.user.RelationTaminAllDN> {
-        TODO("Not required")
+    override suspend fun changeMobile(mobileNumber: String): Flow<EditMobileResponseDN> {
+        notUsed()
     }
 
-    override suspend fun getStatusCertificateReport(): com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN {
-        TODO("Not required")
+    override suspend fun verifyChangeMobileCode(
+        mobile: String,
+        otp: String,
+        otpHashCode: String
+    ): Flow<String> {
+        notUsed()
     }
 
-    override suspend fun getWageCertificateReport(requestNumber: String): com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN {
-        TODO("Not required")
+    override suspend fun getSubDominantsInfo(filters: List<ApiFilterDN>): Flow<SubdominantDN> {
+        notUsed()
     }
 
-    override suspend fun changeMobile(mobile: String): String {
-        TODO("Not required")
+    override suspend fun getBankAccountList(filters: List<ApiFilterDN>): Flow<List<BankAccountDN>> {
+        notUsed()
     }
 
-    override suspend fun verifyChangeMobile(mobile: String, otp: String): String {
-        TODO("Not required")
+    override suspend fun getInsuredActiveBranch(): Flow<List<InsuredActiveBranchDN>> {
+        notUsed()
     }
 
-    override suspend fun sendImageRequest(guid: String): String {
-        TODO("Not required")
+    override suspend fun getRelationTaminAll(filters: List<ApiFilterDN>): Flow<List<ActiveRelationDN>> {
+        notUsed()
     }
 
-    override suspend fun checkUserIsNew(): Boolean {
-        TODO("Not required")
+    override fun getElectronicFile(filters: List<ApiFilterDN>): Flow<List<ElectronicFileDN>> {
+        notUsed()
     }
 
-    override suspend fun getSubdominant(): com.tamin.taminhamrah.model.user.SubdominantDN {
-        TODO("Not required")
+    override suspend fun downloadDocument(url: String): PdfDownloadDN {
+        notUsed()
     }
 
-    override suspend fun getTaminRelation(): com.tamin.taminhamrah.model.user.TaminRelationDN {
-        TODO("Not required")
+    override suspend fun getUserProfile(): Flow<UserProfileDN> {
+        notUsed()
+    }
+
+    override suspend fun getCurrentUser(): Flow<CurrentUserDN> {
+        notUsed()
+    }
+
+    override fun checkUserIsNew(nationalId: String): Flow<Boolean> {
+        notUsed()
+    }
+
+    override suspend fun registerBankAccount(
+        accountNumber: String,
+        bankCode: String,
+        accountTypeCode: String,
+        startDateMillis: Long,
+    ): Flow<String?> {
+        notUsed()
+    }
+
+    override suspend fun getStatusCertificateReport(filters: List<ApiFilterDN>): Flow<String> {
+        notUsed()
+    }
+
+    override suspend fun getWageCertificateReport(filters: List<ApiFilterDN>): Flow<String> {
+        notUsed()
+    }
+
+    override suspend fun getRecipients(filters: List<ApiFilterDN>): Flow<List<RecipientDN>> {
+        notUsed()
     }
 }
