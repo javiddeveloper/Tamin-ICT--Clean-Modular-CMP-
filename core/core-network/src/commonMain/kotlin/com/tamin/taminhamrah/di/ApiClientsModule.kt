@@ -38,6 +38,8 @@ import com.tamin.taminhamrah.apiService.personal.PersonalApiService
 import com.tamin.taminhamrah.apiService.personal.createPersonalApiService
 import com.tamin.taminhamrah.apiService.historyObjection.HistoryObjectionApiService
 import com.tamin.taminhamrah.apiService.historyObjection.createHistoryObjectionApiService
+import com.tamin.taminhamrah.apiService.objectionInsurance.ObjectionInsuranceApiService
+import com.tamin.taminhamrah.apiService.objectionInsurance.createObjectionInsuranceApiService
 import com.tamin.taminhamrah.apiService.userRequest.createUserRequestApiService
 import com.tamin.taminhamrah.apiService.treatment.TreatmentApiService
 import com.tamin.taminhamrah.apiService.treatment.createTreatmentApiService
@@ -159,6 +161,11 @@ val ApiClientsModule = module {
     single<HistoryObjectionApiService> {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.createHistoryObjectionApiService()
+    }
+
+    single<ObjectionInsuranceApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createObjectionInsuranceApiService()
     }
 
     single<PersonalInboxApiService>(named("personalInboxApiService")) {

@@ -193,6 +193,11 @@ import com.tamin.taminhamrah.useCases.historyObjection.DeleteHistoryObjectionNot
 import com.tamin.taminhamrah.useCases.historyObjection.FinalConfirmHistoryObjectionNotExistUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.GetHistoryObjectionNotExistRequestsUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.SaveHistoryObjectionNotExistRequestUseCase
+import com.tamin.taminhamrah.useCases.objectionInsurance.CheckObjectionInsuranceStatusConflictUseCase
+import com.tamin.taminhamrah.useCases.objectionInsurance.ConfirmObjectionInsuranceConflictUseCase
+import com.tamin.taminhamrah.useCases.objectionInsurance.FinalConfirmObjectionInsuranceConflictUseCase
+import com.tamin.taminhamrah.useCases.objectionInsurance.GetObjectionInsuranceHistoriesUseCase
+import com.tamin.taminhamrah.useCases.objectionInsurance.SaveObjectionInsuranceConflictUseCase
 import com.tamin.taminhamrah.useCases.workshops.CheckObjectionDeadlineUseCase
 import com.tamin.taminhamrah.useCases.workshops.CheckNewMemberIsNewUseCase
 import com.tamin.taminhamrah.useCases.workshops.CreateNewMemberRegistrationUseCase
@@ -373,6 +378,11 @@ val domainModule = module {
     factoryOf(::DeleteHistoryObjectionNotExistRequestUseCase)
     factoryOf(::ConfirmHistoryObjectionNotExistUseCase)
     factoryOf(::FinalConfirmHistoryObjectionNotExistUseCase)
+    factoryOf(::CheckObjectionInsuranceStatusConflictUseCase)
+    factoryOf(::GetObjectionInsuranceHistoriesUseCase)
+    factoryOf(::SaveObjectionInsuranceConflictUseCase)
+    factoryOf(::ConfirmObjectionInsuranceConflictUseCase)
+    factoryOf(::FinalConfirmObjectionInsuranceConflictUseCase)
 
     factoryOf(::GetTalfighInfosUseCase)
     factoryOf(::GetUserInfosUseCase)

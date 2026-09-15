@@ -41,7 +41,8 @@ tags: [moc]
 ## Domain
 
 - [[Feature-Flags]] — dynamic menu, `FeatureFlag`, `FeatureManager`
-- [[History-Objection]] — اعتراض به سوابق ناموجود, and why its repository is still a stub ⚠️
+- [[History-Objection]] — اعتراض به سوابق ناموجود
+- [[Objection-Insurance]] — اعتراض به سابقه کسری‌دار (Phase 1 data + stub)
 - [[Disability-Pension-Status]] — مستمری از کارافتادگی, network/domain/usecase layer done, UI not started ⚠️
 - [[Debt-Objection-Status]] — پیگیری وضعیت اعتراض به بدهی, `:feature:workshops` → `ui/objectionStatus`
 - [[Stories]] — «تازه‌ها» rail and the full-screen story viewer (front-end only, mock catalogue) ⚠️

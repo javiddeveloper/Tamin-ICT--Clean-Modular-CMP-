@@ -92,6 +92,7 @@ import com.tamin.taminhamrah.feature.history.historyScreen
 import com.tamin.taminhamrah.feature.historyobjection.historyObjectionScreen
 import com.tamin.taminhamrah.feature.historyobjection.historyObjectionStepperScreen
 import com.tamin.taminhamrah.feature.inquiryEducation.inquiryEducationScreen
+import com.tamin.taminhamrah.feature.objectionInsurance.objectionInsuranceScreen
 import com.tamin.taminhamrah.feature.weddingPresent.navigateToWeddingPresentCalculate
 import com.tamin.taminhamrah.feature.weddingPresent.weddingPresentCalculateScreen
 import com.tamin.taminhamrah.feature.weddingPresent.weddingPresentScreen
@@ -525,6 +526,7 @@ internal fun TaminHamrahNavGraph(
                 deferredInstallmentScreen(onBack = { navController.popBackStack() })
                 girlSurvivorScreen(onBack = { navController.popBackStack() })
                 inquiryEducationScreen(onBack = { navController.popBackStack() })
+                objectionInsuranceScreen(onBack = { navController.popBackStack() })
                 fractionContractScreen(onBack = { navController.popBackStack() })
                 weddingPresentScreen(
                     onBack = { navController.popBackStack() },

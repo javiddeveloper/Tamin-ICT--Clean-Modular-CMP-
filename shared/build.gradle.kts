@@ -57,6 +57,7 @@ kotlin {
             api(project(":feature:requestPaymentForIllDays"))
             api(project(":feature:pensionSurvivor"))
             api(project(":feature:inquiryEducation"))
+            api(project(":feature:objectionInsurance"))
             api(project(":feature:fractionContract"))
             api(project(":feature:weddingPresent"))
             api(project(":feature:payment"))

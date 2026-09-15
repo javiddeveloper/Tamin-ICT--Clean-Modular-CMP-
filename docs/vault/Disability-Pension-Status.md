@@ -129,9 +129,9 @@ on) instead of the old bare `Int` step constant.
     `ObjectionInsuranceHistoryFragment`/`action_to_objectionInsuranceHistoryFragment`, which is a
     **different** model (`ObjectionInsuranceHistoryModel`) from the already-ported
     `:feature:history-objection` (`NotExistRequestDN`, flag `10`, "اعتراض به سوابق ناموجود") —
-    see [[History-Objection]]'s flag `42` row ("اعتراض به سابقه کسری دار", not implemented). Do
+    see [[Objection-Insurance]] (flags `42`/`45`, Phase 1 data + stub). Do
     not wire this link to `:feature:history-objection`'s route; they are not the same feature
-    despite the similar Persian label, and flag `42`'s backend/UI hasn't been ported here yet.
+    despite the similar Persian label.
   - **"نظر کمیسیون پزشکی"** — a two-option radio choice (`hasCommissionObjection: Boolean?`,
     `null` = unanswered). Selecting "بله، معترض هستم" shows a `BannerCard(Warning)` explaining the
     objection must be filed in person at a branch, and disables "مرحلهٔ بعدی" — the *only* step in

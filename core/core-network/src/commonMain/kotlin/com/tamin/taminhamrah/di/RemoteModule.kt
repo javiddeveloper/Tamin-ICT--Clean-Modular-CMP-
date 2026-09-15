@@ -31,6 +31,8 @@ import com.tamin.taminhamrah.dataSource.employerInfo.EmployerInfoRemoteDataSourc
 import com.tamin.taminhamrah.dataSource.employerInfo.EmployerInfoRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.historyObjection.HistoryObjectionRemoteDataSource
 import com.tamin.taminhamrah.dataSource.historyObjection.HistoryObjectionRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.objectionInsurance.ObjectionInsuranceRemoteDataSource
+import com.tamin.taminhamrah.dataSource.objectionInsurance.ObjectionInsuranceRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.historySource.HistoryRemoteDataSource
 import com.tamin.taminhamrah.dataSource.historySource.HistoryRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.inbox.PersonalInboxRemoteDataSource
@@ -173,6 +175,14 @@ val remoteModule = module {
     single<HistoryObjectionRemoteDataSource> {
         HistoryObjectionRemoteDataSourceImpl(
             historyObjectionApiService = get(),
+            apiQueryBuilder = get(),
+            errorParser = get()
+        )
+    }
+
+    single<ObjectionInsuranceRemoteDataSource> {
+        ObjectionInsuranceRemoteDataSourceImpl(
+            objectionInsuranceApiService = get(),
             apiQueryBuilder = get(),
             errorParser = get()
         )
