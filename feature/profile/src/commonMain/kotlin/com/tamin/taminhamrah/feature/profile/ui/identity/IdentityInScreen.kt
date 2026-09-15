@@ -217,8 +217,8 @@ private fun IdentityHeader(
             ) {
                 if (info != null) {
                     IdentityCard(
+                        firstName = info.firstName,
                         lastName = info.lastName,
-                        fullName = info.fullName,
                         fatherName = info.fatherName,
                         ssn = info.ssn,
                         nationalId = info.nationalId,

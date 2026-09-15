@@ -550,8 +550,7 @@ fun InsuranceCardCarousel(
             // card instead and opens a gutter beside the first one.
             //
             // A lone card is the exception: with no neighbor to peek, pinning it leaves an empty
-            // strip on one side. It spans the track instead — centred, and on the same gutters as
-            // the sections below it.
+            // strip on one side. It keeps the carousel's card width and sits centred instead.
             val trackPadding = if (pageCount > 1) {
                 PaddingValues(
                     start = TreatmentDimens.cardTrackPadding,
@@ -559,7 +558,7 @@ fun InsuranceCardCarousel(
                         .coerceAtLeast(TreatmentDimens.cardTrackPadding),
                 )
             } else {
-                PaddingValues(horizontal = TreatmentDimens.cardTrackPadding)
+                PaddingValues(horizontal = (maxWidth - cardWidth) / 2)
             }
             HorizontalPager(
                 state = pagerState,
