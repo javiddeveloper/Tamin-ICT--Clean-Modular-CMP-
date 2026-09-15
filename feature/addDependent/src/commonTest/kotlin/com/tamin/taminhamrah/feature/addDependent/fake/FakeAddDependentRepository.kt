@@ -46,4 +46,7 @@ class FakeAddDependentRepository : AddDependentRepository {
 
     override fun addNewDependent(request: RequestAddDependentDN): Flow<GeneralResultDN> =
         flow { emit(GeneralResultDN(isSuccess = true)) }
+
+    override fun refreshDependents(): Flow<GeneralResultDN> =
+        flow { emit(GeneralResultDN(isSuccess = true)) }
 }
