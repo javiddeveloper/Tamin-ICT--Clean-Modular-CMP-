@@ -93,6 +93,13 @@ data class ComputationalBaseDTO(
     @SerialName("senddate") val sendDate: Long? = null,
     /** مبلغ ناخالص کارکرد، rials. */
     @SerialName("cntamount") val amount: Long? = null,
+    /**
+     * Epoch millis — the start of the work the base declares. The old app prints it as «تاریخ شروع
+     * قرارداد» on the base's letter section; together with [endDate] it is the base's period.
+     */
+    @SerialName("startDate") val startDate: Long? = null,
+    /** Epoch millis — «تاریخ خاتمه عملیات اجرایی پیمان» on the same section. */
+    @SerialName("endDate") val endDate: Long? = null,
     /** The پیمان this belongs to — read for the row's own identity, not re-displayed. */
     @SerialName("contract") val contract: ComputationalBaseContractDTO? = null,
     /** The attached documents. Empty is a real answer: a base can be filed without any. */

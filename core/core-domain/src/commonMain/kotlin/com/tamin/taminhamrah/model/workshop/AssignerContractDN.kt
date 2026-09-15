@@ -53,6 +53,10 @@ data class ComputationalBaseDN(
     val sendDate: Long? = null,
     /** مبلغ ناخالص کارکرد, rials. Null and zero are different answers — see the mapper. */
     val amount: Long? = null,
+    /** Epoch millis; the period the base declares starts here. Null when the service sent none. */
+    val startDate: Long? = null,
+    /** Epoch millis; the period ends here. Null when the service sent none. */
+    val endDate: Long? = null,
     val documents: List<BaseDocumentDN> = emptyList(),
 )
 

@@ -36,6 +36,10 @@ data class AssignerContractPR(
     val branchCode: String = "",
     /** شمارهٔ قرارداد, Persian digits. */
     val contractNumber: String = "",
+    /** The same number raw — what picks this پیمان out of its ردیف's مفاصاحساب certificates. */
+    val rawContractNumber: String = "",
+    /** توالی پیمان, Persian digits — [contractSequence] for reading. */
+    val sequenceLabel: String = "",
     /** تاریخ قرارداد, `۱۴۰۱/۰۲/۱۰`. */
     val contractDate: String = "",
     /** موضوع پیمان — prose, so it is not digit-converted. */
@@ -81,6 +85,15 @@ data class AssignerPartyPR(
     val address: String = "",
 )
 
+/** A مفاصاحساب certificate on file for a خاتمه‌یافته پیمان, as «گواهی صادرشده» reports it. */
+@Immutable
+data class SettlementCertificatePR(
+    /** Persian digits, dashed when the service sent none. */
+    val number: String = "",
+    /** `۱۴۰۲/۰۱/۰۳`, dashed when the service sent none. */
+    val date: String = "",
+)
+
 /** One مبنای محاسباتی row, and the documents its detail screen lists. */
 @Immutable
 data class ComputationalBasePR(
@@ -90,6 +103,12 @@ data class ComputationalBasePR(
     val sendDate: String = "",
     /** مبلغ with «ریال», grouped and in Persian digits. */
     val amount: String = "",
+    /** The same amount in rials, for adding the bases up; null when the service sent none. */
+    val amountRials: Long? = null,
+    /** Where the base's period starts, `۱۴۰۲/۰۱/۰۱`; blank when the service sent none. */
+    val periodStart: String = "",
+    /** Where it ends; blank when the service sent none. */
+    val periodEnd: String = "",
     /** How many documents are attached, in Persian digits — the row prints «N سند». */
     val documentCount: String = "",
     val documents: ImmutableList<BaseDocumentPR> = persistentListOf(),

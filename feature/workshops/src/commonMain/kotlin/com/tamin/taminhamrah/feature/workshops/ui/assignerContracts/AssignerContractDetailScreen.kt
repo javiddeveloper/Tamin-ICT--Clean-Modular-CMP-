@@ -2,35 +2,46 @@ package com.tamin.taminhamrah.feature.workshops.ui.assignerContracts
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormFooter
-import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopRecordCard
+import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractsIntent
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButton
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButtonTone
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormBanner
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopReviewGroup
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopReviewRow
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopScreenShell
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.model.workshop.AssignerContractPR
 import com.tamin.taminhamrah.model.workshop.AssignerPartyPR
 import com.tamin.taminhamrah.model.workshop.ContractRowPR
+import com.tamin.taminhamrah.model.workshop.SettlementCertificatePR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
-import com.tamin.taminhamrah.ui.components.TaminDivider
-import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.components.toast.LocalToaster
+import com.tamin.taminhamrah.ui.components.toast.info
 import com.tamin.taminhamrah.ui.theme.Spacing
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.assigner_bases_title
+import taminx.core.core_ui.assigner_certificate_issued
+import taminx.core.core_ui.assigner_contract_date
 import taminx.core.core_ui.assigner_contract_detail_title
 import taminx.core.core_ui.assigner_empty_no_search_body
 import taminx.core.core_ui.assigner_empty_no_search_title
@@ -38,27 +49,29 @@ import taminx.core.core_ui.assigner_field_address
 import taminx.core.core_ui.assigner_field_branch
 import taminx.core.core_ui.assigner_field_contract_number
 import taminx.core.core_ui.assigner_field_contract_row
+import taminx.core.core_ui.assigner_field_contract_sequence
 import taminx.core.core_ui.assigner_field_contract_subject
 import taminx.core.core_ui.assigner_field_national_id
 import taminx.core.core_ui.assigner_field_workshop_name
+import taminx.core.core_ui.assigner_finished_cannot_request
 import taminx.core.core_ui.assigner_group_assigner
 import taminx.core.core_ui.assigner_group_contract
 import taminx.core.core_ui.assigner_group_contractor
-import taminx.core.core_ui.assigner_contract_date
+import taminx.core.core_ui.assigner_status_active_note
+import taminx.core.core_ui.assigner_status_finished_note
 import taminx.core.core_ui.ic_tamin_assigner_contracts
 import taminx.core.core_ui.settlement_title
 import taminx.core.core_ui.workshop_code
 
 /**
- * جزئیات پیمان — three grouped blocks of label/value cells.
+ * جزئیات پیمان — where the پیمان stands, then three collapsible groups: the پیمان, your own کارگاه,
+ * and the پیمانکار.
  *
- * No request of its own: everything here arrived with the list row, which is why tapping through
- * is instant and why the screen has no loading state. The پیمان is found in the list by the ردیف
- * and sequence its route carries, so this screen can never be composed against a stale selection;
- * it is null only after process death, which the screen says rather than drawing a page of dashes.
- *
- * The middle group is **your own** کارگاه: the response carries both sides of the پیمان, so the
- * design's hardcoded `agMyWs()` block is real data here, not a profile lookup.
+ * No request for the groups: everything arrived with the list row, which is why tapping through is
+ * instant. The پیمان is found in the list by the ردیف and sequence its route carries, so this screen
+ * can never be composed against a stale selection; it is null only after process death, which the
+ * screen says rather than drawing a page of dashes. A خاتمه‌یافته پیمان also asks for the certificate
+ * it was settled under, and prints it in the status line.
  */
 @Composable
 fun AssignerContractDetailScreen(
@@ -66,23 +79,37 @@ fun AssignerContractDetailScreen(
     contractRow: String,
     contractSequence: String,
     onBack: () -> Unit,
+    onOpenBases: (AssignerContractPR) -> Unit,
     onRequestSettlement: (AssignerContractPR) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     // Found in the list this screen was opened from, by the two keys its route carries — the same
-    // shape مبانی محاسباتی and جزئیات مبنا use. Null only after process death, when that list was
-    // never fetched in this process.
+    // shape مبانی محاسباتی and جزئیات مبنا use.
     val contracts = state.list.items
     val contract = remember(contracts, contractRow, contractSequence) {
         contracts.findContract(contractRow, contractSequence)
     }
+    LaunchedEffect(contract) {
+        if (contract?.isFinished == true) {
+            viewModel.sendIntent(AssignerContractsIntent.CertificateRequested(contract, announce = false))
+        }
+    }
+    val lookup = state.certificate
+    val certificate = remember(lookup, contract) { lookup?.takeIf { it.contract == contract }?.certificate }
+
+    // The design keeps «درخواست مفاصاحساب» on a خاتمه‌یافته پیمان and answers the tap, rather than
+    // hiding the action and leaving the user to wonder where it went.
+    val toaster = LocalToaster.current
+    val finishedMessage = stringResource(Res.string.assigner_finished_cannot_request)
 
     AssignerContractDetailContent(
         contract = contract,
+        certificate = certificate,
         onBack = onBack,
-        onRequestSettlement = onRequestSettlement,
+        onOpenBases = onOpenBases,
+        onRequestSettlement = { if (it.isFinished) toaster.info(finishedMessage) else onRequestSettlement(it) },
         modifier = modifier,
     )
 }
@@ -100,7 +127,9 @@ internal fun List<AssignerContractPR>.findContract(
 @Composable
 fun AssignerContractDetailContent(
     contract: AssignerContractPR?,
+    certificate: SettlementCertificatePR?,
     onBack: () -> Unit,
+    onOpenBases: (AssignerContractPR) -> Unit,
     onRequestSettlement: (AssignerContractPR) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -119,136 +148,117 @@ fun AssignerContractDetailContent(
             return@WorkshopScreenShell
         }
 
+        // The first group opens on arrival, as the design has it; the other two wait for a tap.
+        var isContractOpen by rememberSaveable { mutableStateOf(true) }
+        var isAssignerOpen by rememberSaveable { mutableStateOf(false) }
+        var isContractorOpen by rememberSaveable { mutableStateOf(false) }
+
         Column(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                // A fixed three cards, not a data list — the scroll is for a short screen, not for
-                // an unbounded number of rows.
+                // A fixed handful of groups, not a data list — the scroll is for a short screen.
                 .verticalScroll(rememberScrollState())
                 .padding(WorkshopDimens.listContentPadding),
             verticalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
-            ContractInfoCard(contract = contract)
-            PartyCard(
+            WorkshopFormBanner(
+                text = when {
+                    !contract.isFinished -> stringResource(Res.string.assigner_status_active_note)
+                    certificate != null -> stringResource(
+                        Res.string.assigner_certificate_issued,
+                        certificate.number,
+                        certificate.date,
+                    )
+
+                    else -> stringResource(Res.string.assigner_status_finished_note)
+                },
+            )
+            WorkshopReviewGroup(
+                title = stringResource(Res.string.assigner_group_contract),
+                rows = rememberContractRows(contract),
+                isOpen = isContractOpen,
+                onToggle = { isContractOpen = !isContractOpen },
+            )
+            WorkshopReviewGroup(
                 title = stringResource(Res.string.assigner_group_assigner),
-                party = contract.assigner,
+                rows = rememberPartyRows(contract.assigner),
+                isOpen = isAssignerOpen,
+                onToggle = { isAssignerOpen = !isAssignerOpen },
             )
-            PartyCard(
+            WorkshopReviewGroup(
                 title = stringResource(Res.string.assigner_group_contractor),
-                party = contract.employer,
+                rows = rememberPartyRows(contract.employer),
+                isOpen = isContractorOpen,
+                onToggle = { isContractorOpen = !isContractorOpen },
             )
-        }
 
-        // درخواست مفاصاحساب starts from the پیمان it is for — the old app's third action on the same
-        // row, offered here as well as on the list card. Left out for a پیمان missing a key of the
-        // request id, the same rule the card applies.
-        if (contract.canRequestSettlement) {
-            WorkshopFormFooter(
-                nextLabel = stringResource(Res.string.settlement_title),
-                onNext = { onRequestSettlement(contract) },
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(WorkshopDimens.cardButtonGap),
+            ) {
+                WorkshopCardButton(
+                    text = stringResource(Res.string.assigner_bases_title),
+                    tone = if (contract.canOpenBases) {
+                        WorkshopCardButtonTone.OUTLINE
+                    } else {
+                        WorkshopCardButtonTone.DISABLED
+                    },
+                    onClick = { onOpenBases(contract) },
+                )
+                WorkshopCardButton(
+                    text = stringResource(Res.string.settlement_title),
+                    // Live on a خاتمه‌یافته پیمان so the tap can say why; disabled only for a پیمان
+                    // missing a key of the request id.
+                    tone = if (contract.isFinished || contract.canRequestSettlement) {
+                        WorkshopCardButtonTone.PRIMARY
+                    } else {
+                        WorkshopCardButtonTone.DISABLED
+                    },
+                    onClick = { onRequestSettlement(contract) },
+                )
+            }
         }
     }
 }
 
-/** «اطلاعات پیمان» — the four cells that describe the agreement itself. */
+/** «اطلاعات پیمان» — the five cells that describe the agreement itself. */
 @Composable
-private fun ContractInfoCard(
-    contract: AssignerContractPR,
-    modifier: Modifier = Modifier,
-) {
-    val colors = LocalTaminColors.current
-    WorkshopRecordCard(modifier = modifier) {
-        GroupTitle(stringResource(Res.string.assigner_group_contract))
-        DetailRow(
-            label = stringResource(Res.string.assigner_field_contract_row),
-            value = contract.card.rowLabel,
-            verticalPadding = WorkshopDimens.cellVerticalPadding,
-        )
-        TaminDivider()
-        DetailRow(
-            label = stringResource(Res.string.assigner_field_contract_number),
-            value = contract.contractNumber,
-            verticalPadding = WorkshopDimens.cellVerticalPadding,
-        )
-        TaminDivider()
-        DetailRow(
-            label = stringResource(Res.string.assigner_contract_date),
-            value = contract.contractDate,
-            valueColor = colors.blueText,
-            verticalPadding = WorkshopDimens.cellVerticalPadding,
-        )
-        TaminDivider()
-        DetailRow(
-            label = stringResource(Res.string.assigner_field_contract_subject),
-            value = contract.contractSubject,
+private fun rememberContractRows(contract: AssignerContractPR): ImmutableList<WorkshopReviewRow> {
+    val row = stringResource(Res.string.assigner_field_contract_row)
+    val sequence = stringResource(Res.string.assigner_field_contract_sequence)
+    val number = stringResource(Res.string.assigner_field_contract_number)
+    val date = stringResource(Res.string.assigner_contract_date)
+    val subject = stringResource(Res.string.assigner_field_contract_subject)
+    return remember(contract, row, sequence, number, date, subject) {
+        persistentListOf(
+            WorkshopReviewRow(row, contract.card.rowLabel),
+            WorkshopReviewRow(sequence, contract.sequenceLabel),
+            WorkshopReviewRow(number, contract.contractNumber),
+            WorkshopReviewRow(date, contract.contractDate),
             // Prose, so it stays in the page's own direction rather than being forced LTR.
-            numeric = false,
-            verticalPadding = WorkshopDimens.cellVerticalPadding,
+            WorkshopReviewRow(subject, contract.contractSubject, isNumeric = false),
         )
     }
 }
 
-/**
- * One side of the پیمان — واگذارنده or پیمانکار, the same five cells either way.
- *
- * Takes the party and its heading rather than the whole contract, so a card redraws only when the
- * side it shows changes.
- */
+/** One side of the پیمان — واگذارنده or پیمانکار, the same five cells either way. */
 @Composable
-private fun PartyCard(
-    title: String,
-    party: AssignerPartyPR,
-    modifier: Modifier = Modifier,
-) {
-    WorkshopRecordCard(modifier = modifier) {
-        GroupTitle(title)
-        DetailRow(
-            label = stringResource(Res.string.assigner_field_workshop_name),
-            value = party.workshopName,
-            numeric = false,
-            verticalPadding = WorkshopDimens.cellVerticalPadding,
-        )
-        TaminDivider()
-        DetailRow(
-            label = stringResource(Res.string.workshop_code),
-            value = party.workshopCode,
-            verticalPadding = WorkshopDimens.cellVerticalPadding,
-        )
-        TaminDivider()
-        DetailRow(
-            label = stringResource(Res.string.assigner_field_national_id),
-            value = party.nationalId,
-            verticalPadding = WorkshopDimens.cellVerticalPadding,
-        )
-        TaminDivider()
-        DetailRow(
-            label = stringResource(Res.string.assigner_field_branch),
-            value = party.branchName,
-            numeric = false,
-            verticalPadding = WorkshopDimens.cellVerticalPadding,
-        )
-        TaminDivider()
-        DetailRow(
-            label = stringResource(Res.string.assigner_field_address),
-            value = party.address,
-            numeric = false,
-            verticalPadding = WorkshopDimens.cellVerticalPadding,
+private fun rememberPartyRows(party: AssignerPartyPR): ImmutableList<WorkshopReviewRow> {
+    val name = stringResource(Res.string.assigner_field_workshop_name)
+    val code = stringResource(Res.string.workshop_code)
+    val nationalId = stringResource(Res.string.assigner_field_national_id)
+    val branch = stringResource(Res.string.assigner_field_branch)
+    val address = stringResource(Res.string.assigner_field_address)
+    return remember(party, name, code, nationalId, branch, address) {
+        persistentListOf(
+            WorkshopReviewRow(name, party.workshopName, isNumeric = false),
+            WorkshopReviewRow(code, party.workshopCode),
+            WorkshopReviewRow(nationalId, party.nationalId),
+            WorkshopReviewRow(branch, party.branchName, isNumeric = false),
+            WorkshopReviewRow(address, party.address, isNumeric = false),
         )
     }
-}
-
-/** The heading the design prints inside each card, above its first cell. */
-@Composable
-private fun GroupTitle(text: String, modifier: Modifier = Modifier) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodySmall,
-        fontWeight = FontWeight.Bold,
-        color = LocalTaminColors.current.textPrimary,
-        modifier = modifier.padding(bottom = Spacing.xxs),
-    )
 }
 
 // ------------------------------------------------------------------------------- previews
@@ -264,7 +274,9 @@ private val PreviewContract = AssignerContractPR(
     ),
     contractRow = "1",
     contractSequence = "1",
+    branchCode = "0210",
     contractNumber = "۴۴۱۲۲",
+    sequenceLabel = "۱",
     contractDate = "۱۴۰۱/۰۲/۱۰",
     contractSubject = "خدمات نظافت و پشتیبانی",
     assigner = AssignerPartyPR(
@@ -286,13 +298,38 @@ private val PreviewContract = AssignerContractPR(
 
 @PreviewRtlTheme
 @Composable
-private fun AssignerContractDetailPreview() = PreviewRtlThemeContent {
-    AssignerContractDetailContent(contract = PreviewContract, onBack = {}, onRequestSettlement = {})
+private fun AssignerContractDetailActivePreview() = PreviewRtlThemeContent {
+    AssignerContractDetailContent(
+        contract = PreviewContract,
+        certificate = null,
+        onBack = {},
+        onOpenBases = {},
+        onRequestSettlement = {},
+    )
+}
+
+/** خاتمه‌یافته, with the certificate it was settled under in the status line. */
+@PreviewRtlTheme
+@Composable
+private fun AssignerContractDetailCertificatePreview() = PreviewRtlThemeContent {
+    AssignerContractDetailContent(
+        contract = PreviewContract.copy(isFinished = true),
+        certificate = SettlementCertificatePR(number = "۳۸-۷۷۱۲۴۰۵", date = "۱۴۰۲/۱۱/۰۳"),
+        onBack = {},
+        onOpenBases = {},
+        onRequestSettlement = {},
+    )
 }
 
 /** After process death, with nothing selected. */
 @PreviewRtlTheme
 @Composable
 private fun AssignerContractDetailEmptyPreview() = PreviewRtlThemeContent {
-    AssignerContractDetailContent(contract = null, onBack = {}, onRequestSettlement = {})
+    AssignerContractDetailContent(
+        contract = null,
+        certificate = null,
+        onBack = {},
+        onOpenBases = {},
+        onRequestSettlement = {},
+    )
 }

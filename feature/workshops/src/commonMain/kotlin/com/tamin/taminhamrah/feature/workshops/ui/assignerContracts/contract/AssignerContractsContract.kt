@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.model.workshop.AssignerContractPR
 import com.tamin.taminhamrah.model.workshop.BaseDocumentKind
 import com.tamin.taminhamrah.model.workshop.BaseDocumentPR
 import com.tamin.taminhamrah.model.workshop.ComputationalBasePR
+import com.tamin.taminhamrah.model.workshop.SettlementCertificatePR
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -151,6 +152,8 @@ data class AssignerContractsUiState(
     val preview: DocumentPreview? = null,
     /** The document whose last fetch failed, and why. Cleared when it is tried again. */
     val documentFailure: DocumentFailure? = null,
+    /** The last «گواهی مفاصاحساب» asked for, and its answer. One at a time: one پیمان is on screen. */
+    val certificate: CertificateLookup? = null,
 ) {
     sealed interface PartialState {
         // ------------------------------------------------------------------------ the list
@@ -210,8 +213,32 @@ data class AssignerContractsUiState(
         data class DocumentOpening(val documentId: String?) : PartialState
         data class PreviewChanged(val preview: DocumentPreview?) : PartialState
         data class DocumentFailed(val failure: DocumentFailure?) : PartialState
+
+        // ------------------------------------------------------------- گواهی مفاصاحساب
+        data class CertificateLoading(val contract: AssignerContractPR) : PartialState
+
+        /** [contract] is the one asked about, so an answer for a پیمان since left is dropped. */
+        data class CertificateLoaded(
+            val contract: AssignerContractPR,
+            val certificate: SettlementCertificatePR?,
+            val didFail: Boolean = false,
+        ) : PartialState
     }
 }
+
+/**
+ * The certificate lookup for one پیمان.
+ *
+ * [certificate] null with [isLoading] and [didFail] both false is an answer — the service holds no
+ * certificate for it — and is not asked again; a failed lookup is.
+ */
+@Immutable
+data class CertificateLookup(
+    val contract: AssignerContractPR,
+    val isLoading: Boolean = false,
+    val certificate: SettlementCertificatePR? = null,
+    val didFail: Boolean = false,
+)
 
 sealed interface AssignerContractsIntent {
     /**
@@ -251,14 +278,28 @@ sealed interface AssignerContractsIntent {
     /** The PDF viewer's own retry button; the open preview carries everything a refetch needs. */
     data object RetryDocument : AssignerContractsIntent
     data object PreviewDismissed : AssignerContractsIntent
+
+    /**
+     * Looks up the certificate a خاتمه‌یافته پیمان was settled under.
+     *
+     * [announce] is «گواهی صادرشده» on the list, which reports the answer; جزئیات پیمان asks without
+     * it and prints the answer in its status line.
+     */
+    data class CertificateRequested(
+        val contract: AssignerContractPR,
+        val announce: Boolean,
+    ) : AssignerContractsIntent
 }
 
 /**
- * Nothing leaves this screen.
+ * What «گواهی صادرشده» found.
  *
- * Navigation is the nav graph's, driven by the row that was tapped. The one thing that has to be
- * *said* — a document that would not open — is said on the row it belongs to and stays there, which
- * a toast could not do: it names which of several attachments failed, and it survives long enough
- * to be read.
+ * Navigation is the nav graph's, and a document that would not open is said on its own row. The
+ * certificate is the one answer with nowhere on the list to sit, so it is announced. The copy is the
+ * screen's: the events carry the values, and the screen resolves the wording.
  */
-sealed interface AssignerContractsEvent
+sealed interface AssignerContractsEvent {
+    data class CertificateFound(val certificate: SettlementCertificatePR) : AssignerContractsEvent
+    data object CertificateNotFound : AssignerContractsEvent
+    data class ShowServerMessage(val message: String) : AssignerContractsEvent
+}
