@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.objectionInsurance.ui
 
 import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.skipItems
 import app.cash.turbine.test
 import com.tamin.taminhamrah.feature.objectionInsurance.fake.FakeObjectionInsuranceRepository
 import com.tamin.taminhamrah.feature.objectionInsurance.ui.contract.ObjectionInsuranceIntent
@@ -54,6 +55,7 @@ class ObjectionInsuranceViewModelTest {
         val viewModel = createViewModel()
 
         viewModel.uiState.test {
+            skipItems(1) // discard the pre-Load initial state replay
             viewModel.sendIntent(ObjectionInsuranceIntent.Load)
             val state = awaitUntil { !it.isLoading }
             assertTrue(state.hasActiveRequest)
@@ -72,6 +74,7 @@ class ObjectionInsuranceViewModelTest {
         val viewModel = createViewModel()
 
         viewModel.uiState.test {
+            skipItems(1) // discard the pre-Load initial state replay
             viewModel.sendIntent(ObjectionInsuranceIntent.Load)
             val state = awaitUntil { !it.isLoading }
             assertEquals(3, state.records.size)
