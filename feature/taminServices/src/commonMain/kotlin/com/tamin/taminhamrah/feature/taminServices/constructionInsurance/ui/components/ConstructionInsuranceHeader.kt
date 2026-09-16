@@ -82,6 +82,11 @@ internal fun ConstructionInsuranceHeader(
             },
         ) {
             Box(modifier = Modifier.fillMaxWidth()) {
+                DecorativeBackgroundCircle(
+                    size = 190.dp,
+                    xOffset = 450.dp,
+                    yOffset = (-150).dp,
+                )
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -89,11 +94,6 @@ internal fun ConstructionInsuranceHeader(
                         .padding(horizontal = Spacing.page, vertical = Spacing.smPlus),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    DecorativeBackgroundCircle(
-                        size = 190.dp,
-                        xOffset = 450.dp,
-                        yOffset = (-150).dp,
-                    )
                     // Rendered statically while this header is one of rememberMeasuredTopAreaState's
                     // off-screen measure probes — its size doesn't depend on the ring animation.
                     AnimatedRingHeaderIcon(
