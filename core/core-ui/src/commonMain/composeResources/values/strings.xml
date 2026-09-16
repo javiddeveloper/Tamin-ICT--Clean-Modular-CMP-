@@ -820,6 +820,7 @@
     <string name="step_number_1">۱</string>
     <string name="step_number_2">۲</string>
     <string name="step_number_3">۳</string>
+    <string name="step_number_4">۴</string>
 
     <!-- Version History -->
     <string name="profile_version_history_last_updated">آخرین به‌روزرسانی: %1$s</string>
@@ -3098,6 +3099,48 @@
     <string name="message_select_marriage_date">تاریخ عقد را وارد کنید</string>
     <string name="error_not_valid_national_id">کد ملی معتبر نیست</string>
     <string name="error_select_check_box">تایید تعهدنامه الزامی است</string>
+
+    <!-- Fraction contract (تکمیل سوابق کسری از ماه) -->
+    <string name="fraction_contract_title">تکمیل سوابق کسری از ماه</string>
+    <string name="fraction_contract_guide_title">راهنمای این خدمت</string>
+    <string name="fraction_contract_guide_body">چنانچه در یک یا چند ماه، سابقه پرداخت حق بیمه شما کمتر از ۳۱ روز ثبت شده باشد، با انعقاد این قرارداد می‌توانید کسری روزهای آن ماه‌ها را پرداخت کنید تا سابقه آن ماه کامل محسوب شود.</string>
+    <string name="fraction_contract_guide_confirm">متوجه شدم</string>
+    <string name="fraction_contract_header_national_id">کد ملی %1$s</string>
+    <string name="fraction_contract_header_birth">تولد %1$s</string>
+    <string name="fraction_contract_step_eligibility">احراز شرایط</string>
+    <string name="fraction_contract_step_terms">ضوابط</string>
+    <string name="fraction_contract_step_user_info">اطلاعات کاربر</string>
+    <string name="fraction_contract_step_submit">ثبت قرارداد</string>
+    <string name="fraction_contract_eligibility_section_title">اطلاعات بیمه‌ای و احراز شرایط</string>
+    <string name="fraction_contract_eligibility_section_subtitle">اطلاعات بیمه‌ای و نتیجه بررسی شرایط انعقاد قرارداد را در این مرحله مشاهده می‌کنید.</string>
+    <string name="fraction_contract_label_insurance_id">شماره بیمه</string>
+    <string name="fraction_contract_label_branch">شعبه تأمین اجتماعی</string>
+    <string name="fraction_contract_label_contract_type">نوع قرارداد</string>
+    <string name="fraction_contract_eligible_message">متقاضی محترم، شما به علت «%1$s» دارای شرایط لازم برای عقد قرارداد تکمیل سوابق کسری از ماه هستید.</string>
+    <string name="fraction_contract_ineligible_message">متقاضی محترم، شما به علت «%1$s» فاقد شرایط لازم برای عقد قرارداد تکمیل سوابق کسری از ماه هستید.</string>
+    <string name="fraction_contract_check_age">سن شما %1$s سال است و از حداکثر سن مجاز (۵۰ سال تمام) کمتر است.</string>
+    <string name="fraction_contract_check_no_active">قرارداد تکمیل سوابق کسری از ماه فعالی به نام شما ثبت نشده است.</string>
+    <string name="fraction_contract_check_primary_insured">شما بیمه‌شده اصلی هستید و سابقه کسری از ماه در پرونده شما ثبت شده است.</string>
+    <string name="fraction_contract_next_step">مرحله بعد</string>
+    <string name="fraction_contract_terms_section_title">مقررات و ضوابط انعقاد قرارداد</string>
+    <string name="fraction_contract_terms_section_subtitle">ضوابط قرارداد را مطالعه و سپس تعهدنامه را تأیید کنید.</string>
+    <string name="fraction_contract_user_info_section_title">اطلاعات تماس و محل سکونت</string>
+    <string name="fraction_contract_user_info_section_subtitle">متقاضی محترم، در صورت نادرست بودن اطلاعات، می‌توانید از طریق فرم زیر نسبت به ویرایش اطلاعات خود اقدام نمایید.</string>
+    <string name="fraction_contract_mobile_locked_hint">تغییر شماره همراه از این فرم امکان‌پذیر نیست؛ برای اصلاح آن به بخش «حساب کاربری» مراجعه کنید.</string>
+    <string name="fraction_contract_error_title">خطا</string>
+    <string name="fraction_contract_error_not_primary_insured">کاربر محترم این خدمت صرفا برای بیمه شدگان اصلی می باشد.</string>
+    <string name="fraction_contract_error_under_18">سن شما کمتر از ۱۸ سال می‌باشد، امکان ارائه خدمات غیر حضوری برای شما میسر نمی‌باشد.</string>
+    <string name="fraction_contract_error_active_fraction">شما در حال حاضر دارای قرارداد تکمیل سوابق کسری از ماه فعال هستید و مجاز به انعقاد مجدد قرارداد نیستید!</string>
+    <string name="fraction_contract_error_eligibility_unavailable">امکان بررسی شرایط انعقاد قرارداد وجود ندارد. لطفاً دوباره تلاش کنید.</string>
+    <string name="fraction_contract_contact_saved_title">به‌روزرسانی اطلاعات</string>
+    <string name="fraction_contract_contact_saved_message">اطلاعات شما با موفقیت به روز رسانی شد</string>
+    <string name="fraction_contract_submit_section_title">ثبت و انعقاد قرارداد</string>
+    <string name="fraction_contract_submit_section_subtitle">خلاصه قرارداد را بازبینی و تعهدنامه نهایی را تأیید کنید.</string>
+    <string name="fraction_contract_submit_rate_label">نرخ حق بیمه</string>
+    <string name="fraction_contract_submit_start_date_label">تاریخ شروع</string>
+    <string name="fraction_contract_submit_rate_value">۲۷٪</string>
+    <string name="fraction_contract_submit_conclude">انعقاد قرارداد</string>
+    <string name="fraction_contract_submit_commitment">اینجانب %1$s دارای کد ملی شماره %2$s با آگاهی کامل از مفاد آئین نامه و مقررات تکمیل سوابق کسری از ماه، و با سلامت کامل عقل، صحت اطلاعات و اسناد مربوطه را تایید می‌نمایم و چنانچه در هر زمان خلاف آن ثابت گردد، قرارداد منعقده باطل بوده و از این نظر هیچ‌گونه حقی نخواهم داشت و ملزم به جبران خسارات احتمالی وارده به سازمان تأمین‌ اجتماعی خواهم بود.\nدرخواست تکمیل سوابق کسری از ماه با نرخ %3$s و تاریخ شروع %4$s را تایید می‌نمایم.</string>
 
 </resources>
 
