@@ -484,6 +484,15 @@ val TaminHistoryChipBorder = Color(0x33FFFFFF)
 val TaminHistoryChipSelectedBorder = Color(0xFFFFFFFF)
 val TaminHistoryChipText = Color(0xE6FFFFFF)
 val TaminHistoryChipTextDisabled = Color(0x66FFFFFF)
+
+/**
+ * The sweep across a year chip that has not arrived yet.
+ *
+ * Its own token rather than the shimmer's default grey: these chips sit on the hero's blue, where
+ * a surface-coloured placeholder reads as a solid light box rather than as glass waiting to fill.
+ * [TaminHistoryChipBg] is the trough, and this is the crest passing over it.
+ */
+val TaminHistoryChipShimmer = Color(0x59FFFFFF)
 val TaminHistoryHeroCaption = Color(0xA8FFFFFF)
 val TaminHistoryHeroChipBg = Color(0x1AFFFFFF)
 val TaminHistoryHeroChipBorder = Color(0x2EFFFFFF)

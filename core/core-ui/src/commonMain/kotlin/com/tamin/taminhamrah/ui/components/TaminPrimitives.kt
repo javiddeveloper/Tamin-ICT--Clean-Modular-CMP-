@@ -31,10 +31,10 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.LinearGradientShader
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -54,10 +54,6 @@ import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
-import kotlin.math.PI
-import kotlin.math.abs
-import kotlin.math.cos
-import kotlin.math.sin
 import kotlin.jvm.JvmName
 import kotlin.math.PI
 import kotlin.math.abs
@@ -188,6 +184,12 @@ fun angledLinearGradient(
  * Numeric text. Amounts, national IDs and tracking codes are always laid out
  * left-to-right, matching the `dir="ltr"` the design puts on every number even inside an
  * otherwise right-to-left page.
+ *
+ * **Digits and punctuation only.** This flips the whole paragraph, not just the digits, so a
+ * Persian word anywhere in [text] is laid out relative to a left-to-right paragraph and lands on
+ * the far side of its own number — «۱۲ روز» prints as «روز ۱۲». A number *with a unit* is two
+ * pieces: a [NumericText] for the figure and an ordinary `Text` for the word beside it, the way
+ * `WageText` does it. A whole sentence that merely contains numbers is an ordinary `Text`.
  */
 @Composable
 fun NumericText(

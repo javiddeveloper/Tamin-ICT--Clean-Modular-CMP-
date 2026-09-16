@@ -56,6 +56,9 @@ object HistoryConstants {
     /** Above this many years the design narrows the bars and drops their labels for an axis. */
     const val DENSE_BAR_THRESHOLD = 12
 
+    /** Slots on the hero's year strip: «همه», then the years or the «more» chip. */
+    const val YEAR_CHIP_SLOTS = 4
+
     /** A month with nothing recorded, which the sheet prints rather than leaving blank. */
     const val EMPTY_MONTH = "00"
 
@@ -73,7 +76,7 @@ object HistoryConstants {
     /** Stands in for the number while «%s روز» is resolved once instead of per bar. */
     const val PLACEHOLDER_DAYS = "#"
 
-    /** How far down the hero's gradient its middle colour sits. */
+    /** How far down the hero's gradient its middle color sits. */
     const val HERO_MID_STOP = 0.58f
 
     /** The unit beside an amount is quieter than the amount. */

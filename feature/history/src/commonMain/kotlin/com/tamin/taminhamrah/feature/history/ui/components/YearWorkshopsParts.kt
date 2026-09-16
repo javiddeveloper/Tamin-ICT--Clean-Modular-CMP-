@@ -218,13 +218,16 @@ internal fun WorkshopCard(workshop: WorkshopPR) {
                     color = colors.textSecondary,
                     modifier = Modifier.width(HistoryDimens.monthColumnWidth),
                 )
-                NumericText(
+                // «۱۲ روز» is a number *and a word*, so it stays in the page's own direction —
+                // NumericText would force it left-to-right and print «روز ۱۲».
+                Text(
                     text = stringResource(
                         Res.string.history_combined_year_days,
                         worked.days.toString().toPersianDigits(),
                     ),
                     style = MaterialTheme.typography.labelSmall,
                     color = colors.textSecondary,
+                    maxLines = 1,
                 )
                 Box(modifier = Modifier.weight(1f))
                 WageText(
