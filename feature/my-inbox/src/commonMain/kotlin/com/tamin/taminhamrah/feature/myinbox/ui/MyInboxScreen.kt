@@ -13,13 +13,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.FiberManualRecord
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.MaterialTheme
@@ -31,7 +29,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -51,7 +48,6 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
-import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.SegmentedRadialGauge
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
@@ -65,14 +61,15 @@ import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.components.toast.success
-import com.tamin.taminhamrah.ui.paging.OnLoadMore
-import com.tamin.taminhamrah.ui.paging.PagingFooter
 import com.tamin.taminhamrah.ui.motion.rememberMotionSnapFlingBehavior
 import com.tamin.taminhamrah.ui.motion.rememberScrollMotionState
+import com.tamin.taminhamrah.ui.paging.OnLoadMore
+import com.tamin.taminhamrah.ui.paging.PagingFooter
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
@@ -305,7 +302,10 @@ private fun MyInboxContent(
                             color = colors.textMuted
                         )
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            NumericText(
+                            // Text, not NumericText: this is «۱۲ مگابایت» — a figure with a word
+                            // after it. NumericText flips the paragraph left-to-right, which puts
+                            // the unit in front of its own number: «مگابایت ۱۲».
+                            Text(
                                 text = state.size?.usageLabel ?: stringResource(Res.string.inbox_usage_zero),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = colors.textPrimary
@@ -316,7 +316,7 @@ private fun MyInboxContent(
                                 color = colors.textMuted,
                                 modifier = Modifier.padding(horizontal = 4.dp)
                             )
-                            NumericText(
+                            Text(
                                 text = state.size?.totalLabel ?: stringResource(Res.string.inbox_total_default),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colors.textMuted

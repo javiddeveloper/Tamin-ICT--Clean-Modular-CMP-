@@ -437,7 +437,9 @@ fun WorkshopDocumentsPanel(
                 color = colors.textPrimary,
             )
             val shape = remember { RoundedCornerShape(CornerRadius.max) }
-            NumericText(
+            // Text, not NumericText: «۲ از ۵» is two figures with a Persian word between them, and
+            // forcing the paragraph left-to-right pulls «از» off to one side of both.
+            Text(
                 text = stringResource(
                     Res.string.ws_form_docs_count,
                     attachments.size.toString().toPersianDigits(),
