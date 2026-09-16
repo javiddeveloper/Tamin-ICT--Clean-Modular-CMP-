@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.objectionInsurance.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.rememberScrollState
@@ -41,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -205,6 +208,12 @@ private fun ObjectionInsuranceContent(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
+    val scrollState = rememberScrollState()
+    val imeVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
+    // Fold on the first pixel of downward scroll, only unfold once back at the very
+    // top -- not merely "not scrolling right now", which flickered open mid-list on
+    // every momentary pause.
+    val bannerVisible = !imeVisible && scrollState.value == 0
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -229,7 +238,11 @@ private fun ObjectionInsuranceContent(
                     )
                 },
             ) {
-                ObjectionInsuranceBanner()
+                // Fixed row (title/nav/action) above stays put; only this content slot
+                // folds away on keyboard-open or list-scroll.
+                AnimatedVisibility(visible = bannerVisible) {
+                    ObjectionInsuranceBanner()
+                }
             }
         },
         bottomBar = {
@@ -242,7 +255,7 @@ private fun ObjectionInsuranceContent(
             modifier = Modifier
                 .fillMaxSize()
                 .background(colors.bgPage)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
                 .padding(
                     top = innerPadding.calculateTopPadding() + Spacing.md,
                     bottom = innerPadding.calculateBottomPadding() + Spacing.lg,

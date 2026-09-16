@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.objectionInsurance.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.rememberScrollState
@@ -34,6 +36,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -118,6 +121,12 @@ fun ObjectionRecordDetailScreen(
 ) {
     val colors = LocalTaminColors.current
     val registeredTotal = remember(record) { record.registeredMonthValues().sum() }
+    val scrollState = rememberScrollState()
+    val imeVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
+    // Fold on the first pixel of downward scroll, only unfold once back at the very
+    // top -- not merely "not scrolling right now", which flickered open mid-list on
+    // every momentary pause.
+    val infoCardVisible = !imeVisible && scrollState.value == 0
 
     Scaffold(
         modifier = modifier.fillMaxSize().imePadding(),
@@ -134,7 +143,11 @@ fun ObjectionRecordDetailScreen(
                     )
                 },
             ) {
-                RecordInfoCard(record)
+                // Fixed row (title/nav) above stays put; only this content slot folds
+                // away on keyboard-open or list-scroll.
+                AnimatedVisibility(visible = infoCardVisible) {
+                    RecordInfoCard(record)
+                }
             }
         },
         bottomBar = {
@@ -150,7 +163,7 @@ fun ObjectionRecordDetailScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(colors.bgPage)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
                 .padding(
                     top = innerPadding.calculateTopPadding() + Spacing.md,
                     bottom = innerPadding.calculateBottomPadding() + Spacing.lg,
