@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah
 
+import com.tamin.taminhamrah.deeplink.DeepLinkKey
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -52,7 +53,8 @@ class MainActivity : FragmentActivity() {
             lifecycleScope.launch { paymentReturnNotifier.notifyReturn(ticket) }
             return
         }
-        if (data.host == FEATURE_HOST) {
+        // mytamin://feature/<key>, or a native-era link naming the screen as its host.
+        if (data.host == FEATURE_HOST || DeepLinkKey.fromKey(data.host.orEmpty()) != null) {
             deepLinkDispatcher.submit(data.toString(), DeepLinkSource.SYSTEM)
             return
         }

@@ -53,6 +53,19 @@ class DeepLinkParserTest {
     }
 
     @Test
+    fun `native era links that name the screen as the host still resolve, with their arguments`() {
+        val link = assertIs<ParsedDeepLink.Feature>(
+            DeepLinkParser.parse("mytamin://prescription_detail?ARG_NOTE_HEAD_ELECTRONIC_PRESCRIPTION=12", DeepLinkSource.SYSTEM)
+        )
+        assertEquals(DeepLinkKey.PRESCRIPTION_DETAIL, link.key)
+        assertEquals("12", link.args["ARG_NOTE_HEAD_ELECTRONIC_PRESCRIPTION"])
+        assertEquals(
+            DeepLinkKey.WORKERS_PAYMENT_INFO,
+            assertIs<ParsedDeepLink.Feature>(DeepLinkParser.parse("mytamin://workers_payment_info", DeepLinkSource.SYSTEM)).key,
+        )
+    }
+
+    @Test
     fun `unknown keys, unknown schemes and blanks are invalid`() {
         listOf(
             "@group_payment",

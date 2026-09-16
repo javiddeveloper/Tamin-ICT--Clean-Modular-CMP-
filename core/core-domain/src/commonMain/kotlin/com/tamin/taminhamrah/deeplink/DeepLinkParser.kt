@@ -61,6 +61,8 @@ object DeepLinkParser {
 
         return when {
             scheme in FEATURE_SCHEMES && host == HOST_FEATURE -> feature(afterHost.removePrefix("/"))
+            // The native app's external links named the screen as the host: mytamin://prescription_detail?…
+            scheme in FEATURE_SCHEMES && DeepLinkKey.fromKey(host) != null -> feature(host + afterHost)
             scheme == "agent" && host == HOST_NAV -> feature(afterHost.removePrefix("/"))
             scheme == "agent" && host == HOST_PROMPT -> prompt(afterHost)
             scheme == "https" || scheme == "http" -> web(link, scheme, host, source)

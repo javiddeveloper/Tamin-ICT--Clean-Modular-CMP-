@@ -55,7 +55,7 @@ It applies exactly the rule a menu tap on the home screen applies, so a link can
 
 ## Delivery
 
-- **Android** — `AndroidManifest.xml` has an intent filter for `mytamin://feature`; `MainActivity.handleIntent` submits it with `DeepLinkSource.SYSTEM`. `login` and `payment_callback` keep their own handling.
+- **Android** — `AndroidManifest.xml` has an intent filter for `mytamin://feature`, plus the native app's external bare-host links `mytamin://prescription_detail` and `mytamin://workers_payment_info` (a known key as the host is parsed like `feature/<key>`); `MainActivity.handleIntent` submits both with `DeepLinkSource.SYSTEM`. `login` and `payment_callback` keep their own handling.
 - **iOS** — `iOSApp.swift` `.onOpenURL` → `IncomingUrlKt.handleIncomingUrl(url)` (`shared/src/iosMain/.../ui/IncomingUrl.kt`), which routes payment return, login and feature links the same way as Android. Only compiled on macOS; not verified on Windows builds.
 - **Cold start / logged out** — `DeepLinkDispatcher` buffers links; the nav graph collects them only while `isLoggedIn`, so a link opened before login runs after it.
 - **Stories** — like the assistant, the viewer calls `LocalDeepLinkHandler` with `DeepLinkSource.APP_CONTENT` and `onOpened = close`, so the viewer closes only if the gate lets the link through.

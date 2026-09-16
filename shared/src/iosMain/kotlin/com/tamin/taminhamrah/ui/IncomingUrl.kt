@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.ui
 
+import com.tamin.taminhamrah.deeplink.DeepLinkKey
 import com.tamin.taminhamrah.deeplink.DeepLinkDispatcher
 import com.tamin.taminhamrah.deeplink.DeepLinkSource
 import com.tamin.taminhamrah.repository.payment.PaymentReturnNotifier
@@ -23,7 +24,12 @@ fun handleIncomingUrl(url: String) {
             incomingUrlScope.launch { koin.get<PaymentReturnNotifier>().notifyReturn(ticket) }
         }
         FEATURE_HOST -> koin.get<DeepLinkDispatcher>().submit(url, DeepLinkSource.SYSTEM)
-        else -> incomingUrlScope.launch { koin.get<HandleAuthDeepLinkUseCase>()(url) }
+        // A native-era link naming the screen as its host goes through the same gate.
+        else -> if (DeepLinkKey.fromKey(host) != null) {
+            koin.get<DeepLinkDispatcher>().submit(url, DeepLinkSource.SYSTEM)
+        } else {
+            incomingUrlScope.launch { koin.get<HandleAuthDeepLinkUseCase>()(url) }
+        }
     }
 }
 
