@@ -1,7 +1,6 @@
 package com.tamin.taminhamrah.ui.navigation
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -73,12 +72,24 @@ import com.tamin.taminhamrah.feature.cartable.CartableRoute
 import com.tamin.taminhamrah.feature.cartable.cartableGraph
 import com.tamin.taminhamrah.feature.changemobile.changeMobileScreen
 import com.tamin.taminhamrah.feature.changemobile.navigateToChangeMobile
+import com.tamin.taminhamrah.feature.contractaffair.CONTRACT_AFFAIRS_REFRESH_KEY
 import com.tamin.taminhamrah.feature.contractaffair.ContractPremiumPaymentRoute
+import com.tamin.taminhamrah.feature.contractaffair.contractAffairsScreen
+import com.tamin.taminhamrah.feature.contractaffair.contractPaymentCalcDetailScreen
+import com.tamin.taminhamrah.feature.contractaffair.contractPaymentHistoryScreen
+import com.tamin.taminhamrah.feature.contractaffair.contractPremiumPaymentScreen
+import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPaymentCalcDetail
+import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPaymentHistory
+import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPremiumPayment
+import com.tamin.taminhamrah.feature.contracts.contractFlowScreen
 import com.tamin.taminhamrah.feature.contracts.contractsScreen
+import com.tamin.taminhamrah.feature.contracts.flow.resolveContractTypeForEdit
+import com.tamin.taminhamrah.feature.contracts.navigateToContractFlow
 import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.deferredInstallment.deferredInstallmentScreen
 import com.tamin.taminhamrah.feature.deferredInstallment.navigateToDeferredInstallment
 import com.tamin.taminhamrah.feature.developerOptions.DebugLoginRoute
+import com.tamin.taminhamrah.feature.developerOptions.DeveloperOptionsRoute
 import com.tamin.taminhamrah.feature.developerOptions.TokenManagerRoute
 import com.tamin.taminhamrah.feature.developerOptions.debugLoginScreen
 import com.tamin.taminhamrah.feature.developerOptions.developerOptionsScreen
@@ -92,11 +103,13 @@ import com.tamin.taminhamrah.feature.history.historyScreen
 import com.tamin.taminhamrah.feature.historyobjection.historyObjectionScreen
 import com.tamin.taminhamrah.feature.historyobjection.historyObjectionStepperScreen
 import com.tamin.taminhamrah.feature.inquiryEducation.inquiryEducationScreen
-import com.tamin.taminhamrah.feature.weddingPresent.navigateToWeddingPresentCalculate
-import com.tamin.taminhamrah.feature.weddingPresent.weddingPresentCalculateScreen
-import com.tamin.taminhamrah.feature.weddingPresent.weddingPresentScreen
+import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
 import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
 import com.tamin.taminhamrah.feature.orotezprotez.orotezProtezScreen
+import com.tamin.taminhamrah.feature.payment.PaymentRoute
+import com.tamin.taminhamrah.feature.payment.navigateToPayment
+import com.tamin.taminhamrah.feature.payment.paymentGraph
+import com.tamin.taminhamrah.feature.payment.paymentSandboxScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.calculatePensionScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.deservedTreatmentScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.disabilityPensionScreen
@@ -105,29 +118,16 @@ import com.tamin.taminhamrah.feature.pensionInquiry.issuanceCertificateScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeservedTreatment
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDisabilityPension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPrescription
-import com.tamin.taminhamrah.feature.payment.PaymentRoute
-import com.tamin.taminhamrah.feature.payment.paymentGraph
-import com.tamin.taminhamrah.feature.payment.navigateToPayment
-import com.tamin.taminhamrah.feature.payment.paymentSandboxScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.payrollScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.prescriptionScreen
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.pensionStatusInquiryGraph
 import com.tamin.taminhamrah.feature.pensionSurvivor.navigateToPensionSurvivor
 import com.tamin.taminhamrah.feature.pensionSurvivor.pensionSurvivorScreen
-import com.tamin.taminhamrah.feature.retirementPension.retirementPensionScreen
 import com.tamin.taminhamrah.feature.pregnancyPay.pregnancyPayScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
-import com.tamin.taminhamrah.feature.contractaffair.CONTRACT_AFFAIRS_REFRESH_KEY
-import com.tamin.taminhamrah.feature.contractaffair.contractAffairsScreen
-import com.tamin.taminhamrah.feature.contractaffair.contractPaymentHistoryScreen
-import com.tamin.taminhamrah.feature.contractaffair.contractPaymentCalcDetailScreen
-import com.tamin.taminhamrah.feature.contractaffair.contractPremiumPaymentScreen
-import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPaymentCalcDetail
-import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPaymentHistory
-import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPremiumPayment
-import com.tamin.taminhamrah.feature.payment.navigateToPayment
 import com.tamin.taminhamrah.feature.requestPaymentForIllDays.requestPaymentForIllDaysScreen
+import com.tamin.taminhamrah.feature.retirementPension.retirementPensionScreen
 import com.tamin.taminhamrah.feature.security.SecurityRoute
 import com.tamin.taminhamrah.feature.security.securityScreen
 import com.tamin.taminhamrah.feature.settings.SettingsRoute
@@ -135,33 +135,28 @@ import com.tamin.taminhamrah.feature.settings.settingsScreen
 import com.tamin.taminhamrah.feature.stories.navigateToStoryViewer
 import com.tamin.taminhamrah.feature.stories.storyViewerScreen
 import com.tamin.taminhamrah.feature.stories.ui.rail.StoryRail
-import com.tamin.taminhamrah.feature.contracts.contractFlowScreen
-import com.tamin.taminhamrah.feature.contracts.flow.resolveContractTypeForEdit
-import com.tamin.taminhamrah.feature.contracts.navigateToContractFlow
 import com.tamin.taminhamrah.feature.taminServices.TaminServicesRoute
+import com.tamin.taminhamrah.feature.taminServices.employerOnlineServicesScreen
 import com.tamin.taminhamrah.feature.taminServices.inspectionScreen
 import com.tamin.taminhamrah.feature.taminServices.occurrenceScreen
-import com.tamin.taminhamrah.feature.taminServices.employerOnlineServicesScreen
 import com.tamin.taminhamrah.feature.taminServices.sendInsuranceHistoryToInstitutionsScreen
-import com.tamin.taminhamrah.feature.taminServices.workersPaymentInfoScreen
 import com.tamin.taminhamrah.feature.taminServices.taminServicesScreen
+import com.tamin.taminhamrah.feature.taminServices.workersPaymentInfoScreen
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
 import com.tamin.taminhamrah.feature.treatment.treatmentGraph
-import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
-import com.tamin.taminhamrah.feature.workshops.completeEmployerInfoScreen
-import com.tamin.taminhamrah.feature.workshops.debtObjectionStatusScreen
-import com.tamin.taminhamrah.feature.workshops.workshopsScreen
-import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
-import com.tamin.taminhamrah.feature.developerOptions.DeveloperOptionsRoute
-import com.tamin.taminhamrah.feature.payment.navigateToPayment
 import com.tamin.taminhamrah.feature.userRequest.UserRequestRoute
 import com.tamin.taminhamrah.feature.userRequest.userRequestGraph
+import com.tamin.taminhamrah.feature.weddingPresent.navigateToWeddingPresentCalculate
+import com.tamin.taminhamrah.feature.weddingPresent.weddingPresentCalculateScreen
+import com.tamin.taminhamrah.feature.weddingPresent.weddingPresentScreen
+import com.tamin.taminhamrah.feature.workshops.completeEmployerInfoScreen
+import com.tamin.taminhamrah.feature.workshops.debtObjectionStatusScreen
+import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
+import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.mapper.campaign.toPresentation
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
-import com.tamin.taminhamrah.model.history.HistoryMonthStatusPR
-import com.tamin.taminhamrah.model.history.HistorySummaryPR
 import com.tamin.taminhamrah.openUrl
 import com.tamin.taminhamrah.ui.blur.AppBarScrim
 import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
@@ -178,24 +173,21 @@ import com.tamin.taminhamrah.ui.home.contract.HomeEvent
 import com.tamin.taminhamrah.ui.home.contract.HomeIntent
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.AppConfig
-import com.tamin.taminhamrah.util.PersianDateFormatter
-import com.tamin.taminhamrah.util.toPersianDigits
 import dev.chrisbanes.haze.HazeState
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.getString
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.error_load_menu_failed
-import taminx.core.core_ui.invalid_deep_link
 import taminx.core.core_ui.ic_home_menu
 import taminx.core.core_ui.ic_profile_menu
 import taminx.core.core_ui.ic_services_menu
 import taminx.core.core_ui.ic_treatment_menu
+import taminx.core.core_ui.invalid_deep_link
 import taminx.core.core_ui.login_required_desc
 import taminx.core.core_ui.login_to_tamin_man
 import taminx.core.core_ui.please_login_to_your_account
@@ -909,36 +901,44 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // خلاصهٔ سابقه, above the campaigns exactly as the design orders the page.
-            //
-            // Insured users only: a pensioner has no premium to pay and an employer pays for other
-            // people, so the year of "premiums registered against you" reads as neither's.
-            //
-            // TODO(EM-2563): swap the placeholder for the year the history feature loads. Only the
-            //  `summary` argument and the three callbacks change; the card itself is final.
-            if (selectedType == InsuredUserType) {
-                if (uiState.isLoading) {
-                    HistorySummaryCardSkeleton(modifier = Modifier.padding(top = Spacing.xlg))
-                } else {
-                    HistorySummaryCard(
-                        summary = rememberPlaceholderHistorySummary(),
-                        onCardClick = {},
-                        onYearClick = {},
-                        onDetailsClick = {},
-                        onFollowUpClick = {},
-                        modifier = Modifier.padding(top = Spacing.xlg),
-                    )
-                }
-            }
-
-            // «تازه‌ها» sits directly above the campaigns, as on the design, and is full-bleed for
-            // the same reason: a row that scrolls has to be able to run a ring off the screen edge.
+            // «تازه‌ها» is full-bleed on purpose: a row that scrolls has to be able to run a ring
+            // off the screen edge.
             StoryRail(
                 onOpenViewer = onOpenStory,
                 modifier = Modifier
                     .ignoreHorizontalPadding(HomeContentPadding)
                     .padding(top = Spacing.xlg),
             )
+
+            // خلاصهٔ سابقه, between «تازه‌ها» and the campaigns exactly as the design orders them.
+            //
+            // Insured users only: a pensioner has no premium to pay and an employer pays for other
+            // people, so the year of "premiums registered against you" reads as neither's.
+            //
+            // Nothing at all once the load has answered with no year — someone not yet insured has
+            // no summary to show, and an empty card would only say so at the size of a full one.
+            // The warning row is icon-and-text, as the design draws it: «پیگیری» is not offered
+            // here, so `onFollowUpClick` stays null.
+            if (selectedType == InsuredUserType) {
+                val summary = uiState.historySummary
+                when {
+                    uiState.isHistorySummaryLoading ->
+                        HistorySummaryCardSkeleton(modifier = Modifier.padding(top = Spacing.xlg))
+
+                    summary != null -> {
+                        val openHistory = remember(viewModel) {
+                            { viewModel.sendIntent(HomeIntent.OnHistorySummaryClick) }
+                        }
+                        HistorySummaryCard(
+                            summary = summary,
+                            onCardClick = openHistory,
+                            onYearClick = openHistory,
+                            onDetailsClick = openHistory,
+                            modifier = Modifier.padding(top = Spacing.xlg),
+                        )
+                    }
+                }
+            }
 
             // The same for every role: campaigns are not filtered by the picker above.
             //
@@ -1062,35 +1062,3 @@ fun HomeScreen(
 /** The «بیمه شدگان» entry of the home page's role picker — the only role خلاصهٔ سابقه belongs to. */
 private const val InsuredUserType = 1
 
-/**
- * The year the خلاصهٔ سابقه card shows until the history service arrives with a real one.
- *
- * TODO(EM-2563): delete this and read the summary from the history feature's state.
- *
- * The shape is the design's own sample — three registered months, three unpaid — but the year and
- * the current month are real, so the card cannot be mistaken for a screenshot while it is on the
- * device.
- */
-@Composable
-private fun rememberPlaceholderHistorySummary(): HistorySummaryPR = remember {
-    val currentMonthIndex = PersianDateFormatter.today().second - 1
-    val sample = listOf(
-        HistoryMonthStatusPR.Unpaid,
-        HistoryMonthStatusPR.Unpaid,
-        HistoryMonthStatusPR.Registered,
-        HistoryMonthStatusPR.Registered,
-        HistoryMonthStatusPR.Unpaid,
-        HistoryMonthStatusPR.Registered,
-    )
-    HistorySummaryPR(
-        yearLabel = PersianDateFormatter.currentJalaliYear().toString().toPersianDigits(),
-        months = List(HistorySummaryPR.MONTHS_IN_YEAR) { index ->
-            when {
-                index > currentMonthIndex -> HistoryMonthStatusPR.Upcoming
-                else -> sample[index % sample.size]
-            }
-        }.toImmutableList(),
-        currentMonthIndex = currentMonthIndex,
-        lastRegisteredMonth = PersianDateFormatter.monthNames.getOrNull(currentMonthIndex),
-    )
-}

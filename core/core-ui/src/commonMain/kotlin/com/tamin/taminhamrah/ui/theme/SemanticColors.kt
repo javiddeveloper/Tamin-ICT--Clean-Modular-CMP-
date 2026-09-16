@@ -128,8 +128,8 @@ data class TaminColors(
     // خلاصهٔ سابقه — the home page's history summary card. Its blues are a shade of their own
     // rather than the brand primaries, so they are named here instead of borrowed from a token
     // that would drag the card along the next time the primary palette moves.
-    val historyCardBorder: Color,
-    val historyCardShadow: Color,
+    val historySummaryBorder: Color,
+    val historySummaryShadow: Color,
     val historyCardDivider: Color,
     /** The soft radial wash in the card's top corner. */
     val historyGlow: Color,
@@ -171,8 +171,8 @@ data class TaminColors(
     // scheme already carries, and the page reads those rather than restating them.
     /** The wash at the top of the career-duration card, above [bgSurface]. */
     val historyCardBgStart: Color,
-    val historyCardBorder: Color,
-    val historyCardShadow: Color,
+    val historyDurationCardBorder: Color,
+    val historyDurationCardShadow: Color,
     /** The blue the card's headline figure and its step arrows are drawn in. */
     val historyAccent: Color,
     /** The quietest of the three duration figures. */
@@ -229,8 +229,8 @@ data class TaminColors(
 
 val LightTaminColors = TaminColors(
     historyCardBgStart = TaminHistoryDurationCardBgStart,
-    historyCardBorder = TaminHistoryDurationCardBorder,
-    historyCardShadow = TaminHistoryDurationShadow,
+    historyDurationCardBorder = TaminHistoryDurationCardBorder,
+    historyDurationCardShadow = TaminHistoryDurationShadow,
     historyAccent = TaminHistoryDurationFigureMajor,
     historyFigureLeast = TaminHistoryDurationFigureLeast,
     historyPanelStart = TaminHistorySubChartBgStart,
@@ -341,8 +341,8 @@ val LightTaminColors = TaminColors(
     topAppBarStops = listOf(TaminTeal900, TaminTeal500),
     treatmentHubStops = listOf(TaminTeal900, TaminTeal700),
     profileGradientStops = listOf(TaminNavy900, TaminNavy700),
-    historyCardBorder = HistoryCardBorder,
-    historyCardShadow = HistoryCardShadow,
+    historySummaryBorder = HistoryCardBorder,
+    historySummaryShadow = HistoryCardShadow,
     historyCardDivider = HistoryCardDivider,
     historyGlow = HistoryCardGlow,
     historyYearPillBorder = HistoryYearPillBorder,
@@ -395,8 +395,8 @@ val LightTaminColors = TaminColors(
 
 val DarkTaminColors = TaminColors(
     historyCardBgStart = TaminDarkHistoryPanel,
-    historyCardBorder = TaminDarkBorder,
-    historyCardShadow = TaminDarkShadow,
+    historyDurationCardBorder = TaminDarkBorder,
+    historyDurationCardShadow = TaminDarkShadow,
     historyAccent = TaminDarkBlueText,
     historyFigureLeast = TaminDarkTextSecondary,
     historyPanelStart = TaminDarkHistoryPanel,
@@ -511,8 +511,8 @@ val DarkTaminColors = TaminColors(
     topAppBarStops = listOf(TaminDarkHeroStart, TaminDarkHeroEnd),
     treatmentHubStops = listOf(TaminDarkHeroStart, TaminDarkHeroEnd),
     profileGradientStops = listOf(TaminDarkHeroStart, TaminDarkHeroEnd),
-    historyCardBorder = TaminDarkBorder,
-    historyCardShadow = HistoryDarkCardShadow,
+    historySummaryBorder = TaminDarkBorder,
+    historySummaryShadow = HistoryDarkCardShadow,
     historyCardDivider = TaminDarkDivider,
     historyGlow = HistoryDarkCardGlow,
     historyYearPillBorder = TaminDarkBorder,
