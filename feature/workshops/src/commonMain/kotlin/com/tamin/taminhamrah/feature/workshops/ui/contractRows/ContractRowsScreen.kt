@@ -174,6 +174,9 @@ fun ContractRowsContent(
                         onChange = {
                             onIntent(ContractRowsIntent.PickerOpenChanged(isOpen = true))
                         },
+                        onClear = {
+                            onIntent(ContractRowsIntent.ClearPicker)
+                        },
                     )
                 }
             }
@@ -231,13 +234,13 @@ fun ContractRowsContent(
             showBranchCodeError = state.showBranchCodeError,
             isApplying = list.isLoading,
             myWorkshops = state.myWorkshops,
-            myWorkshopsTotal = state.myWorkshopsTotal,
             canReset = applied != null,
             onWorkshopIdChange = { onIntent(ContractRowsIntent.DraftWorkshopIdChanged(it)) },
             onBranchCodeChange = { onIntent(ContractRowsIntent.DraftBranchCodeChanged(it)) },
             onQuickPick = { id, branch ->
                 onIntent(ContractRowsIntent.QuickPicked(id, branch))
             },
+            onLoadMoreWorkshops = { onIntent(ContractRowsIntent.LoadMoreMyWorkshops) },
             onApply = { onIntent(ContractRowsIntent.ApplyPicker) },
             onReset = { onIntent(ContractRowsIntent.ClearPicker) },
             onDismiss = { onIntent(ContractRowsIntent.PickerOpenChanged(isOpen = false)) },

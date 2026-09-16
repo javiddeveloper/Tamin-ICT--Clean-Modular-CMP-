@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,13 +27,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import com.tamin.taminhamrah.model.workshop.NewMemberRequestStatus
 import com.tamin.taminhamrah.model.workshop.WorkshopActivityStatus
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.new_member_request_status
+import taminx.core.core_ui.new_member_status_awaiting_confirmation
+import taminx.core.core_ui.new_member_status_closed_approved
+import taminx.core.core_ui.new_member_status_closed_rejected
+import taminx.core.core_ui.new_member_status_invalid
+import taminx.core.core_ui.new_member_status_needs_branch_review
+import taminx.core.core_ui.new_member_status_submitted
+import taminx.core.core_ui.new_member_status_under_review
+import taminx.core.core_ui.workshop_all_items
 import taminx.core.core_ui.workshop_filter_clear
 import taminx.core.core_ui.workshop_filter_title
 import taminx.core.core_ui.workshop_status_active
@@ -40,13 +52,72 @@ import taminx.core.core_ui.workshop_status_inactive
 import taminx.core.core_ui.workshop_status_semi_active
 
 /** فیلتر براساس فعالیت کارگاه. The chosen option is ticked, which the old sheet never showed. */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WorkshopFilterSheet(
     selected: WorkshopActivityStatus?,
     onDismiss: () -> Unit,
     onSelect: (WorkshopActivityStatus?) -> Unit,
     modifier: Modifier = Modifier,
+) {
+    OptionSheet(
+        title = stringResource(Res.string.workshop_filter_title),
+        onDismiss = onDismiss,
+        modifier = modifier,
+    ) {
+        SheetRow(
+            label = stringResource(Res.string.workshop_filter_clear),
+            isSelected = selected == null,
+            onClick = { onSelect(null) },
+        )
+        WorkshopActivityStatus.entries.forEach { status ->
+            SheetRow(
+                label = stringResource(status.label),
+                isSelected = selected == status,
+                onClick = { onSelect(status) },
+            )
+        }
+    }
+}
+
+/**
+ * وضعیت درخواست — what نام‌نویسی غیرحضوری بیمه‌شده is searched by. Listed in the old app's order,
+ * which is the enum's; null is «همهٔ موارد».
+ */
+@Composable
+fun NewMemberStatusSheet(
+    selected: NewMemberRequestStatus?,
+    onDismiss: () -> Unit,
+    onSelect: (NewMemberRequestStatus?) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    OptionSheet(
+        title = stringResource(Res.string.new_member_request_status),
+        onDismiss = onDismiss,
+        modifier = modifier,
+    ) {
+        SheetRow(
+            label = stringResource(Res.string.workshop_all_items),
+            isSelected = selected == null,
+            onClick = { onSelect(null) },
+        )
+        NewMemberRequestStatus.entries.forEach { status ->
+            SheetRow(
+                label = stringResource(status.labelRes),
+                isSelected = selected == status,
+                onClick = { onSelect(status) },
+            )
+        }
+    }
+}
+
+/** A titled sheet of [SheetRow]s — the frame every option sheet here shares. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun OptionSheet(
+    title: String,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+    rows: @Composable ColumnScope.() -> Unit,
 ) {
     val colors = LocalTaminColors.current
     ModalBottomSheet(
@@ -63,25 +134,13 @@ fun WorkshopFilterSheet(
             verticalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
             Text(
-                text = stringResource(Res.string.workshop_filter_title),
+                text = title,
                 style = MaterialTheme.typography.titleSmall,
                 color = colors.textPrimary,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = Spacing.sm),
             )
-
-            SheetRow(
-                label = stringResource(Res.string.workshop_filter_clear),
-                isSelected = selected == null,
-                onClick = { onSelect(null) },
-            )
-            WorkshopActivityStatus.entries.forEach { status ->
-                SheetRow(
-                    label = stringResource(status.label),
-                    isSelected = selected == status,
-                    onClick = { onSelect(status) },
-                )
-            }
+            rows()
         }
     }
 }
@@ -136,4 +195,16 @@ private val WorkshopActivityStatus.label
         WorkshopActivityStatus.ACTIVE -> Res.string.workshop_status_active
         WorkshopActivityStatus.SEMI_ACTIVE -> Res.string.workshop_status_semi_active
         WorkshopActivityStatus.INACTIVE -> Res.string.workshop_status_inactive
+    }
+
+/** The label each registration state is listed under — in its sheet and on the field it fills. */
+internal val NewMemberRequestStatus.labelRes: StringResource
+    get() = when (this) {
+        NewMemberRequestStatus.AWAITING_CONFIRMATION -> Res.string.new_member_status_awaiting_confirmation
+        NewMemberRequestStatus.SUBMITTED -> Res.string.new_member_status_submitted
+        NewMemberRequestStatus.INVALID -> Res.string.new_member_status_invalid
+        NewMemberRequestStatus.NEEDS_BRANCH_REVIEW -> Res.string.new_member_status_needs_branch_review
+        NewMemberRequestStatus.UNDER_REVIEW -> Res.string.new_member_status_under_review
+        NewMemberRequestStatus.CLOSED_APPROVED -> Res.string.new_member_status_closed_approved
+        NewMemberRequestStatus.CLOSED_REJECTED -> Res.string.new_member_status_closed_rejected
     }

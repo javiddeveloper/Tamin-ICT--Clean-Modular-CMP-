@@ -1796,6 +1796,17 @@
     <string name="new_member_cannot_edit">این درخواست ثبت شده است و قابل تغییر نیست.</string>
     <string name="new_member_confirmed">درخواست با کد رهگیری %1$s ثبت شد.</string>
     <string name="new_member_follow_body">درخواست با کد پیگیری %1$s در حال بررسی است. نتیجه از طریق پیامک اطلاع داده می‌شود.</string>
+    <string name="new_member_confirm_question">آیا می‌خواهید این پرسنل را تأیید کنید؟</string>
+    <string name="new_member_delete_question">آیا می‌خواهید این پرسنل را حذف کنید؟</string>
+    <string name="new_member_request_status">وضعیت درخواست</string>
+    <!-- The seven request states the search filters by; wording is the old app's search sheet. -->
+    <string name="new_member_status_awaiting_confirmation">در انتظار تایید</string>
+    <string name="new_member_status_submitted">ثبت درخواست</string>
+    <string name="new_member_status_invalid">درخواست نامعتبر</string>
+    <string name="new_member_status_needs_branch_review">درحال بررسی-نیاز به رسیدگی شعبه</string>
+    <string name="new_member_status_under_review">درحال بررسی</string>
+    <string name="new_member_status_closed_approved">مختومه-تایید نهایی</string>
+    <string name="new_member_status_closed_rejected">مختومه-عدم تایید</string>
 
     <!-- ماده ۱۶ -->
     <string name="article_sixteen_debt_amount">مبلغ بدهی (ریال)</string>
@@ -1958,6 +1969,8 @@
     <string name="abs_doc_07">تصویر توضیحات شناسنامه</string>
     <string name="abs_doc_05">تصویر روی کارت ملی</string>
     <string name="abs_doc_06">تصویر پشت کارت ملی</string>
+    <!-- A document already on file under a type the table above does not list. -->
+    <string name="abs_doc_unknown">مدرک</string>
     <!-- Employer Info Completion (تکمیل اطلاعات کارفرمایی) -->
     <string name="employer_info_title">تکمیل اطلاعات کارفرمایی</string>
     <string name="employer_info_subtitle">تکمیل اطلاعات هویتی کارگاه‌های شما</string>
@@ -2454,7 +2467,6 @@
     <string name="contract_rows_four_digits">۴ رقم</string>
     <string name="contract_rows_workshop_code_required">لطفاً کد کارگاه را وارد کنید.</string>
     <string name="contract_rows_my_workshops">کارگاه‌های شما</string>
-    <string name="contract_rows_my_workshops_partial">%1$s کارگاه از %2$s نمایش داده شده — بقیه را با شمارهٔ کارگاه جست‌وجو کنید.</string>
     <string name="contract_rows_apply">مشاهدهٔ ردیف پیمان‌ها</string>
     <string name="contract_rows_reset">حذف</string>
     <!-- Contract flow -->
@@ -2827,7 +2839,6 @@
     <string name="objection_status_title">پیگیری وضعیت اعتراض به بدهی</string>
     <string name="objection_status_subtitle">وضعیت اعتراض‌های ثبت‌شدهٔ شما</string>
     <string name="objection_status_search">جستجو</string>
-    <string name="objection_status_search_field">جستجوی اعتراض</string>
     <string name="objection_status_search_title">جستجو در اعتراض‌ها</string>
     <string name="objection_status_stat_count">اعتراض</string>
     <string name="objection_status_identity_national_id">کد ملی</string>

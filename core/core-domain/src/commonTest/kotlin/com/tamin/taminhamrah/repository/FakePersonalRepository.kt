@@ -103,6 +103,12 @@ class FakePersonalRepository : PersonalRepository {
         emit(saveSurvivorInfoResult)
     }
 
+    var insuredRegistrationDocListResult: List<InsuredDocDN> = emptyList()
+    override fun getInsuredRegistrationDocList(personalId: String): Flow<List<InsuredDocDN>> = flow {
+        if (shouldThrowError) throw error
+        emit(insuredRegistrationDocListResult)
+    }
+
     var putInsuredRegistrationDocListResult: String? = "success"
     override fun putInsuredRegistrationDocList(
         personalId: String,
