@@ -297,7 +297,7 @@ class ContractRowsViewModelTest {
         vm.sendIntent(ContractRowsIntent.PickerOpenChanged(isOpen = true))
 
         vm.uiState.test {
-            assertEquals(1, awaitItem().myWorkshops.size)
+            assertEquals(1, awaitItem().myWorkshops.items.size)
         }
     }
 
@@ -543,19 +543,30 @@ class ContractRowsViewModelTest {
         }
     }
 
-    /** The quick-pick states its cap rather than stopping silently at one page. */
+    /** The quick-pick pages in the rest as it is scrolled rather than stopping silently at one page. */
     @Test
-    fun `the quick pick reports how many workshops it is not showing`() = runTest(testDispatcher) {
-        repository.employerAgreements = PagedListDN(listOf(agreementRow("1")), total = 24)
+    fun `the quick pick pages in the rest of the workshops`() = runTest(testDispatcher) {
+        fun workshops(from: Int, count: Int) = List(count) {
+            EmployerAgreementDN(
+                contractRow = "1",
+                workshop = WorkshopSummaryDN(workshopId = "${from + it}", branchCode = "0210"),
+            )
+        }
+        val total = WORKSHOP_PAGE_SIZE + 3
+        repository.employerAgreements = PagedListDN(workshops(0, WORKSHOP_PAGE_SIZE), total)
 
         val vm = viewModel()
         vm.sendIntent(ContractRowsIntent.PickerOpenChanged(isOpen = true))
+        assertEquals(WORKSHOP_PAGE_SIZE, vm.uiState.value.myWorkshops.items.size)
+        assertTrue(vm.uiState.value.myWorkshops.canLoadMore)
 
-        vm.uiState.test {
-            val state = awaitItem()
-            assertEquals(1, state.myWorkshops.size)
-            assertEquals(24, state.myWorkshopsTotal)
-        }
+        repository.employerAgreements = PagedListDN(workshops(WORKSHOP_PAGE_SIZE, 3), total)
+        vm.sendIntent(ContractRowsIntent.LoadMoreMyWorkshops)
+
+        val state = vm.uiState.value.myWorkshops
+        assertEquals(total, state.items.size)
+        assertFalse(state.canLoadMore)
+        assertEquals(1, repository.lastWorkshopListQuery?.page)
     }
 
     /**
@@ -574,7 +585,8 @@ class ContractRowsViewModelTest {
         vm.uiState.test {
             val state = awaitItem()
             assertTrue(state.isPickerOpen)
-            assertTrue(state.myWorkshops.isEmpty())
+            assertTrue(state.myWorkshops.items.isEmpty())
+            assertFalse(state.myWorkshops.canLoadMore)
             assertNull(state.list.error)
         }
     }

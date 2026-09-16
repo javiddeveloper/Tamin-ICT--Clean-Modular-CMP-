@@ -41,6 +41,15 @@ sealed interface ChatBubbleContent {
     data class Text(val message: String) : Textual
 
     /**
+     * A markdown answer — rendered by the server, or built by a client service in the same
+     * shape. Stored as the raw text and split into blocks only when drawn, so a better renderer
+     * also improves conversations already in history.
+     */
+    @Serializable
+    @SerialName("markdown")
+    data class Markdown(val text: String) : Textual
+
+    /**
      * A titled block: a short header line above the body text — the shape most service
      * answers take ("سابقه شما", then the explanation).
      */

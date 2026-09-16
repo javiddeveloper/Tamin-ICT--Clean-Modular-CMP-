@@ -2,16 +2,17 @@ package com.tamin.taminhamrah.repository.common
 
 import com.tamin.taminhamrah.model.common.BeneficiaryDN
 import com.tamin.taminhamrah.model.common.InsuranceTypeDN
+import com.tamin.taminhamrah.model.common.JobTitleDN
+import com.tamin.taminhamrah.model.common.JobTitleListDN
 import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.common.RoleDN
-import com.tamin.taminhamrah.model.common.JobTitleListDN
 import com.tamin.taminhamrah.model.common.UserType
 import com.tamin.taminhamrah.model.common.UserTypeInfoDN
+import com.tamin.taminhamrah.model.paging.PageDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import io.ktor.client.statement.HttpStatement
 
 class FakeCommonRepository : CommonRepository {
     var beneficiaryResult: List<BeneficiaryDN> = emptyList()
@@ -22,6 +23,8 @@ class FakeCommonRepository : CommonRepository {
     var rolesResult: List<RoleDN> = emptyList()
     var getRolesError: Throwable = RuntimeException("Roles Error")
     var jobTitleResult: JobTitleListDN? = null
+    var jobTitlePageResult: PageDN<JobTitleDN>? = null
+    var getJobTitleError: Throwable = RuntimeException("Job Title Error")
     var registrationDeclarationFormResult: ByteArray = byteArrayOf()
     var registrationDeclarationFormError: Throwable = RuntimeException("PDF Error")
     var insuranceTypesResult: List<InsuranceTypeDN> = emptyList()
@@ -54,8 +57,20 @@ class FakeCommonRepository : CommonRepository {
     }
 
     override fun getJobTitle(query: ApiQueryParamDN): Flow<JobTitleListDN?> = flow {
-        if (shouldThrowError) throw getBeneficiaryError
+        if (shouldThrowError) throw getJobTitleError
         emit(jobTitleResult)
+    }
+
+    override fun getJobTitlePage(query: ApiQueryParamDN): Flow<PageDN<JobTitleDN>> = flow {
+        if (shouldThrowError) throw getJobTitleError
+        val explicit = jobTitlePageResult
+        if (explicit != null) {
+            emit(explicit)
+        } else {
+            getJobTitle(query).collect { response ->
+                emit(PageDN(items = response?.list ?: emptyList(), total = response?.total))
+            }
+        }
     }
 
     override fun getRoles(): Flow<List<RoleDN>> = flow {

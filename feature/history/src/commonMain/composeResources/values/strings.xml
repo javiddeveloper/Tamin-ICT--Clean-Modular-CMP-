@@ -54,7 +54,9 @@
     <string name="history_concurrent_note">در ماه‌های نشان‌دار همزمان از %1$s کارگاه لیست رد شده است.</string>
     <string name="history_month_wage_total">جمع دستمزد این ماه</string>
     <string name="history_rial">ریال</string>
-    <string name="history_note_span">%1$s سال دارای سابقه از %2$s تا %3$s</string>
+    <string name="history_note_span">%1$s سال سابقه در بازه %2$s تا %3$s</string>
+    <string name="history_note_span_months">%1$s ماه سابقه در بازه %2$s تا %3$s</string>
+    <string name="history_note_span_days">%1$s روز سابقه در بازه %2$s تا %3$s</string>
     <string name="history_note_gaps">؛ %1$s سال میان این بازه بدون سابقهٔ ثبت‌شده است.</string>
     <string name="history_many_shops_title">%1$s کارگاه در این سال</string>
     <string name="history_many_shops_subtitle">ریز دستمزد و شمارهٔ هر کارگاه</string>
