@@ -44,10 +44,10 @@ class SendAgentPromptUseCase(
     }
 
     private suspend fun FlowCollector<AgentPollingState>.retryWithFreshToken(request: AgentRequest) {
-        val allowed = refreshLock.withLock { checkChatAllowed().getOrNull() }
-        val token = allowed?.takeIf { it.canStartChat }?.chatToken
+        val refreshed = refreshLock.withLock { freshToken(staleToken = request.chatToken) }
+        val token = refreshed.token
         if (token.isNullOrBlank()) {
-            emit(AgentPollingState.Failed(allowed?.errorMessage))
+            emit(AgentPollingState.Failed(refreshed.errorMessage))
             return
         }
         try {
@@ -56,6 +56,25 @@ class SendAgentPromptUseCase(
             emit(AgentPollingState.Failed(null))
         }
     }
+
+    /**
+     * A token newer than [staleToken]. Prompts that hit the expired token together queue on the
+     * lock; the first one asks the server, and the ones behind it find its token already stored and
+     * use that instead of asking again.
+     */
+    private suspend fun freshToken(staleToken: String?): RefreshedToken {
+        val stored = agentAccessStore.access.value
+        if (stored != null && stored.canStartChat && !stored.chatToken.isNullOrBlank() && stored.chatToken != staleToken) {
+            return RefreshedToken(token = stored.chatToken, errorMessage = null)
+        }
+        val allowed = checkChatAllowed().getOrNull()
+        return RefreshedToken(
+            token = allowed?.takeIf { it.canStartChat }?.chatToken,
+            errorMessage = allowed?.errorMessage,
+        )
+    }
+
+    private class RefreshedToken(val token: String?, val errorMessage: String?)
 
     /** The native app's rule: no session means anonymous; otherwise the stored user type. */
     private fun resolveUserType(): String {

@@ -1,5 +1,8 @@
 package com.tamin.taminhamrah.useCases.agent
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.delay
 import com.tamin.taminhamrah.model.agent.AgentAccessDN
 import com.tamin.taminhamrah.model.agent.AgentPersonalInfoDN
 import com.tamin.taminhamrah.model.agent.AgentPollingState
@@ -22,8 +25,12 @@ class FakePromptAgentRepository(
     private val expiredTokens: Set<String?> = emptySet(),
     private val chatAllowed: Result<ChatAllowedDN> =
         Result.success(ChatAllowedDN(canStartChat = true, chatToken = "fresh", errorMessage = null)),
+    /** How long the permission check takes, so concurrent prompts can overlap it. */
+    private val checkDelayMs: Long = 0,
 ) : AgentRepository {
     val sent = mutableListOf<AgentRequest>()
+    var permissionChecks = 0
+        private set
 
     override fun sendPrompt(request: AgentRequest): Flow<AgentPollingState> = flow {
         sent.add(request)
@@ -32,7 +39,11 @@ class FakePromptAgentRepository(
     }
 
     override suspend fun cancelRequest(requestId: String): Result<Unit> = Result.success(Unit)
-    override suspend fun checkChatAllowed(): Result<ChatAllowedDN> = chatAllowed
+    override suspend fun checkChatAllowed(): Result<ChatAllowedDN> {
+        permissionChecks++
+        delay(checkDelayMs)
+        return chatAllowed
+    }
 }
 
 class SendAgentPromptUseCaseTest {
@@ -139,6 +150,42 @@ class SendAgentPromptUseCaseTest {
 
         val sent = repository.sent.single()
         assertEquals(listOf("category_1", "fish", "{\"v\":1}", "[]"), listOf(sent.sessionId, sent.lastEntity, sent.state, sent.history))
+    }
+
+    @Test
+    fun `prompts that hit the expired token together refresh it once and all resend with the new one`() = runTest {
+        // A prompt that starts while the refresh is running finds the token cleared; the server
+        // rejects a missing token the same way it rejects an expired one.
+        val repository = FakePromptAgentRepository(states = done, expiredTokens = setOf("stale", null), checkDelayMs = 100)
+        val send = useCase(repository, FakeAgentAccessStore(access("stale")))
+
+        val results = listOf(
+            async { send(AgentRequest(prompt = "a")).toList() },
+            async { send(AgentRequest(prompt = "b")).toList() },
+            async { send(AgentRequest(prompt = "c")).toList() },
+        ).awaitAll()
+
+        assertEquals(1, repository.permissionChecks)
+        assertEquals(listOf(done, done, done), results)
+        assertEquals(listOf("fresh", "fresh", "fresh"), repository.sent.map { it.chatToken }.takeLast(3))
+    }
+
+    @Test
+    fun `a prompt waiting behind a refused refresh asks again rather than reusing nothing`() = runTest {
+        val repository = FakePromptAgentRepository(
+            expiredTokens = setOf("stale", null),
+            chatAllowed = Result.success(ChatAllowedDN(canStartChat = false, chatToken = null, errorMessage = "دسترسی ندارید")),
+            checkDelayMs = 100,
+        )
+        val send = useCase(repository, FakeAgentAccessStore(access("stale")))
+
+        val results = listOf(
+            async { send(AgentRequest(prompt = "a")).toList() },
+            async { send(AgentRequest(prompt = "b")).toList() },
+        ).awaitAll()
+
+        assertEquals(2, repository.permissionChecks)
+        assertEquals(List(2) { listOf(AgentPollingState.Failed("دسترسی ندارید")) }, results)
     }
 
     @Test
