@@ -47,7 +47,7 @@ class FractionContractUiMapperTest {
 
         assertEquals("", presentation.newAge)
         assertEquals(-1, presentation.eligibilityStatus)
-        assertEquals(false, presentation.isInsurance)
+        assertEquals(null, presentation.isInsurance)
         assertEquals("", presentation.branchAddress)
     }
 
