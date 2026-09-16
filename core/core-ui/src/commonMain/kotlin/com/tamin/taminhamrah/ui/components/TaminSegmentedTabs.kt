@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -65,6 +66,11 @@ fun <T> TaminSegmentedTabs(
     onSelect: (T) -> Unit,
     label: @Composable (T) -> String,
     modifier: Modifier = Modifier,
+    /**
+     * A short count beside each option's label — «جاری ۶». Null, the default, draws the labels
+     * alone.
+     */
+    badge: (@Composable (T) -> String)? = null,
 ) {
     val colors = LocalTaminColors.current
     val position by animateFloatAsState(
@@ -120,14 +126,34 @@ fun <T> TaminSegmentedTabs(
                         ),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(
-                        text = label(option),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = if (isSelected) colors.onGradient else colors.textSecondary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
+                    val textColor = if (isSelected) colors.onGradient else colors.textSecondary
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.xs, Alignment.CenterHorizontally),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = label(option),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = textColor,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false),
+                        )
+                        if (badge != null) {
+                            Text(
+                                text = badge(option),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = textColor,
+                                maxLines = 1,
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .background(if (isSelected) colors.glassIconTileBg else colors.border)
+                                    .padding(horizontal = Spacing.xs, vertical = Spacing.xxs),
+                            )
+                        }
+                    }
                 }
             }
         }

@@ -97,6 +97,9 @@ fun AssignerSearchSheet(
     }
 }
 
+/** `flex:1.4` against the branch field's `flex:1`. */
+private const val WORKSHOP_CODE_FIELD_WEIGHT = 1.4f
+
 /**
  * The sheet's body, apart from the sheet.
  *
@@ -127,28 +130,26 @@ fun AssignerSearchSheetContent(
         subtitle = stringResource(Res.string.assigner_search_subtitle),
         modifier = modifier,
     ) {
-        WorkshopTextField(
-            label = stringResource(Res.string.workshop_code),
-            value = workshopId,
-            onValueChange = { onWorkshopIdChange(it.digitsOnly()) },
-            placeholder = stringResource(Res.string.assigner_search_workshop_hint),
-            maxLength = WorkshopConstants.ASSIGNER_WORKSHOP_CODE_LENGTH,
-            isRequired = true,
-            // Only ever false once the button has been pressed on a blank field: the border must
-            // not turn red while the field is still being typed into.
-            isValid = if (showWorkshopIdError) false else null,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = Spacing.smd),
-        )
-
+        // The design's pair — کد کارگاه the wider — with ردیف پیمان, kept by decision, under it.
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = Spacing.sm),
+                .padding(top = Spacing.smd),
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             verticalAlignment = Alignment.Top,
         ) {
+            WorkshopTextField(
+                label = stringResource(Res.string.workshop_code),
+                value = workshopId,
+                onValueChange = { onWorkshopIdChange(it.digitsOnly()) },
+                placeholder = stringResource(Res.string.assigner_search_workshop_hint),
+                maxLength = WorkshopConstants.ASSIGNER_WORKSHOP_CODE_LENGTH,
+                isRequired = true,
+                // Only ever false once the button has been pressed on a blank field: the border must
+                // not turn red while the field is still being typed into.
+                isValid = if (showWorkshopIdError) false else null,
+                modifier = Modifier.weight(WORKSHOP_CODE_FIELD_WEIGHT),
+            )
             WorkshopTextField(
                 label = stringResource(Res.string.assigner_search_branch_code_optional),
                 value = branchCode,
@@ -157,15 +158,18 @@ fun AssignerSearchSheetContent(
                 maxLength = WorkshopConstants.ASSIGNER_BRANCH_CODE_LENGTH,
                 modifier = Modifier.weight(1f),
             )
-            WorkshopTextField(
-                label = stringResource(Res.string.assigner_search_contract_row_optional),
-                value = contractRow,
-                onValueChange = { onContractRowChange(it.digitsOnly()) },
-                placeholder = stringResource(Res.string.assigner_search_row_hint),
-                maxLength = WorkshopConstants.ASSIGNER_CONTRACT_ROW_LENGTH,
-                modifier = Modifier.weight(1f),
-            )
         }
+
+        WorkshopTextField(
+            label = stringResource(Res.string.assigner_search_contract_row_optional),
+            value = contractRow,
+            onValueChange = { onContractRowChange(it.digitsOnly()) },
+            placeholder = stringResource(Res.string.assigner_search_row_hint),
+            maxLength = WorkshopConstants.ASSIGNER_CONTRACT_ROW_LENGTH,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = Spacing.sm),
+        )
 
         WorkshopQuickPickList(
             workshops = myWorkshops,

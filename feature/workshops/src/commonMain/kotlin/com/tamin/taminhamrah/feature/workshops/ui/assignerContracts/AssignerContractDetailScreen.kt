@@ -16,6 +16,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.AssignerStatusPill
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractsIntent
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButton
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButtonTone
@@ -33,6 +34,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.info
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -43,6 +45,7 @@ import taminx.core.core_ui.assigner_bases_title
 import taminx.core.core_ui.assigner_certificate_issued
 import taminx.core.core_ui.assigner_contract_date
 import taminx.core.core_ui.assigner_contract_detail_title
+import taminx.core.core_ui.assigner_contract_subtitle
 import taminx.core.core_ui.assigner_empty_no_search_body
 import taminx.core.core_ui.assigner_empty_no_search_title
 import taminx.core.core_ui.assigner_field_address
@@ -56,10 +59,15 @@ import taminx.core.core_ui.assigner_field_workshop_name
 import taminx.core.core_ui.assigner_finished_cannot_request
 import taminx.core.core_ui.assigner_group_assigner
 import taminx.core.core_ui.assigner_group_contract
+import taminx.core.core_ui.assigner_group_contract_preview
 import taminx.core.core_ui.assigner_group_contractor
 import taminx.core.core_ui.assigner_status_active_note
 import taminx.core.core_ui.assigner_status_finished_note
 import taminx.core.core_ui.ic_tamin_assigner_contracts
+import taminx.core.core_ui.ic_tamin_computational_base
+import taminx.core.core_ui.ic_tamin_document_lines
+import taminx.core.core_ui.ic_tamin_user
+import taminx.core.core_ui.ic_tamin_workshop
 import taminx.core.core_ui.settlement_title
 import taminx.core.core_ui.workshop_code
 
@@ -133,9 +141,15 @@ fun AssignerContractDetailContent(
     onRequestSettlement: (AssignerContractPR) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val subtitle = if (contract != null) {
+        stringResource(Res.string.assigner_contract_subtitle, contract.card.name, contract.card.rowLabel)
+    } else {
+        null
+    }
     WorkshopScreenShell(
         title = stringResource(Res.string.assigner_contract_detail_title),
         onBack = onBack,
+        subtitle = subtitle,
         modifier = modifier,
     ) {
         if (contract == null) {
@@ -148,6 +162,7 @@ fun AssignerContractDetailContent(
             return@WorkshopScreenShell
         }
 
+        val colors = LocalTaminColors.current
         // The first group opens on arrival, as the design has it; the other two wait for a tap.
         var isContractOpen by rememberSaveable { mutableStateOf(true) }
         var isAssignerOpen by rememberSaveable { mutableStateOf(false) }
@@ -173,24 +188,44 @@ fun AssignerContractDetailContent(
 
                     else -> stringResource(Res.string.assigner_status_finished_note)
                 },
+                leading = { AssignerStatusPill(isFinished = contract.isFinished) },
             )
             WorkshopReviewGroup(
                 title = stringResource(Res.string.assigner_group_contract),
                 rows = rememberContractRows(contract),
                 isOpen = isContractOpen,
                 onToggle = { isContractOpen = !isContractOpen },
+                icon = vectorResource(Res.drawable.ic_tamin_document_lines),
+                iconTint = colors.blueText,
+                iconBackground = colors.blueBg,
+                preview = stringResource(
+                    Res.string.assigner_group_contract_preview,
+                    contract.contractNumber,
+                    contract.contractDate,
+                ),
+                showCount = false,
             )
             WorkshopReviewGroup(
                 title = stringResource(Res.string.assigner_group_assigner),
                 rows = rememberPartyRows(contract.assigner),
                 isOpen = isAssignerOpen,
                 onToggle = { isAssignerOpen = !isAssignerOpen },
+                icon = vectorResource(Res.drawable.ic_tamin_workshop),
+                iconTint = colors.tealText,
+                iconBackground = colors.tealBg,
+                preview = contract.assigner.workshopName,
+                showCount = false,
             )
             WorkshopReviewGroup(
                 title = stringResource(Res.string.assigner_group_contractor),
                 rows = rememberPartyRows(contract.employer),
                 isOpen = isContractorOpen,
                 onToggle = { isContractorOpen = !isContractorOpen },
+                icon = vectorResource(Res.drawable.ic_tamin_user),
+                iconTint = colors.orangeText,
+                iconBackground = colors.orangeBg,
+                preview = contract.employer.workshopName,
+                showCount = false,
             )
 
             Row(
@@ -200,11 +235,12 @@ fun AssignerContractDetailContent(
                 WorkshopCardButton(
                     text = stringResource(Res.string.assigner_bases_title),
                     tone = if (contract.canOpenBases) {
-                        WorkshopCardButtonTone.OUTLINE
+                        WorkshopCardButtonTone.TEAL
                     } else {
                         WorkshopCardButtonTone.DISABLED
                     },
                     onClick = { onOpenBases(contract) },
+                    icon = vectorResource(Res.drawable.ic_tamin_computational_base),
                 )
                 WorkshopCardButton(
                     text = stringResource(Res.string.settlement_title),

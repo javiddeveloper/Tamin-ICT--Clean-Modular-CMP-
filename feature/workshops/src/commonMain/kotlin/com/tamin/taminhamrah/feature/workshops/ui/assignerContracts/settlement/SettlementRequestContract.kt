@@ -17,13 +17,20 @@ import kotlinx.collections.immutable.persistentMapOf
 import org.jetbrains.compose.resources.StringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.abs_form_err_required
+import taminx.core.core_ui.settlement_err_amount_required
 import taminx.core.core_ui.settlement_err_build_sum
 import taminx.core.core_ui.settlement_err_currency_rial
 import taminx.core.core_ui.settlement_err_date_order
+import taminx.core.core_ui.settlement_err_dates_required
+import taminx.core.core_ui.settlement_err_documents
 import taminx.core.core_ui.settlement_err_drivers
 import taminx.core.core_ui.settlement_err_equipment
 import taminx.core.core_ui.settlement_err_invalid
+import taminx.core.core_ui.settlement_err_letter_number_invalid
+import taminx.core.core_ui.settlement_err_letter_number_required
 import taminx.core.core_ui.settlement_err_subcontractor
+import taminx.core.core_ui.settlement_err_subject_required
+import taminx.core.core_ui.settlement_err_terms_incomplete
 import taminx.core.core_ui.settlement_owner_budget_type
 import taminx.core.core_ui.settlement_owner_contractor
 import taminx.core.core_ui.settlement_owner_employer
@@ -351,6 +358,44 @@ internal fun SettlementRequestUiState.errorsOf(
     }
     return errors.build()
 }
+
+/** The share the مکانیکی and دستی percentages divide between them. */
+internal const val SETTLEMENT_FULL_SHARE = 100
+
+/**
+ * The one line the footer prints when a step is refused: the design's own sentence for the first
+ * problem, in the order the design checks them. The fields themselves only turn red.
+ */
+internal fun SettlementRequestUiState.bannerError(): StringResource? {
+    if (errors.isEmpty()) return null
+    val required = Res.string.abs_form_err_required
+    return when (step) {
+        SettlementStep.CONTRACT -> null
+        SettlementStep.LETTER -> when {
+            SettlementField.LETTER_NUMBER in errors ->
+                if (errors[SettlementField.LETTER_NUMBER] == required) {
+                    Res.string.settlement_err_letter_number_required
+                } else {
+                    Res.string.settlement_err_letter_number_invalid
+                }
+
+            DateFields.any { errors[it] == required } -> Res.string.settlement_err_dates_required
+            SettlementField.END_DATE in errors -> errors[SettlementField.END_DATE]
+            SettlementField.AMOUNT in errors -> Res.string.settlement_err_amount_required
+            SettlementField.CURRENCY_IN_RIAL in errors -> errors[SettlementField.CURRENCY_IN_RIAL]
+            else -> errors[SettlementField.SUBCONTRACTOR] ?: errors.values.first()
+        }
+
+        SettlementStep.DOCUMENTS -> Res.string.settlement_err_documents
+        SettlementStep.TERMS -> when {
+            SettlementField.SUBJECT in errors -> Res.string.settlement_err_subject_required
+            errors.values.any { it == required } -> Res.string.settlement_err_terms_incomplete
+            else -> errors.values.first()
+        }
+    }
+}
+
+private val DateFields = listOf(SettlementField.LETTER_DATE, SettlementField.START_DATE, SettlementField.END_DATE)
 
 /** Midnight UTC of the day, which is what the range check compares. */
 internal fun SettlementDate.epochMillis(): Long = PersianDateFormatter.toEpochMillisUtc(year, month, day)

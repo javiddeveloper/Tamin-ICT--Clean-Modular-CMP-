@@ -42,7 +42,12 @@ import kotlinx.coroutines.test.setMain
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.settlement_err_build_sum
 import taminx.core.core_ui.settlement_err_date_order
+import taminx.core.core_ui.settlement_err_dates_required
 import taminx.core.core_ui.settlement_err_drivers
+import taminx.core.core_ui.settlement_err_letter_number_invalid
+import taminx.core.core_ui.settlement_err_letter_number_required
+import taminx.core.core_ui.settlement_err_subject_required
+import taminx.core.core_ui.settlement_err_terms_incomplete
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -275,6 +280,50 @@ class SettlementRequestViewModelTest {
 
         assertEquals(IMAGE_GUID, assertNotNull(repository.lastSettlementRequest).subjectImageGuid)
     }
+
+    /** The fields only turn red; the footer names the first problem, in the order the design checks. */
+    @Test
+    fun `the letter banner names the first problem in the design's order`() = runTest(testDispatcher) {
+        val viewModel = opened()
+        viewModel.reachLetter()
+
+        viewModel.sendIntent(Next)
+        assertEquals(Res.string.settlement_err_letter_number_required, viewModel.uiState.value.bannerError())
+
+        viewModel.sendIntent(FieldChanged(LETTER_NUMBER, "1234"))
+        viewModel.sendIntent(Next)
+        assertEquals(Res.string.settlement_err_letter_number_invalid, viewModel.uiState.value.bannerError())
+
+        viewModel.sendIntent(FieldChanged(LETTER_NUMBER, "12345"))
+        viewModel.sendIntent(Next)
+        assertEquals(Res.string.settlement_err_dates_required, viewModel.uiState.value.bannerError())
+
+        viewModel.fillLetterStep()
+        viewModel.sendIntent(DateChanged(END_DATE, SettlementDate(1401, 1, 1)))
+        viewModel.sendIntent(Next)
+        assertEquals(Res.string.settlement_err_date_order, viewModel.uiState.value.bannerError())
+    }
+
+    @Test
+    fun `the terms banner asks for the subject, then every field, then names the guard`() =
+        runTest(testDispatcher) {
+            val viewModel = opened()
+            viewModel.reachTerms(amount = "1000")
+
+            viewModel.sendIntent(Next)
+            assertEquals(Res.string.settlement_err_subject_required, viewModel.uiState.value.bannerError())
+
+            viewModel.sendIntent(SubjectSelected(BUILD_COSTS_SUBJECT))
+            viewModel.sendIntent(Next)
+            assertEquals(Res.string.settlement_err_terms_incomplete, viewModel.uiState.value.bannerError())
+
+            viewModel.sendIntent(FieldChanged(AMOUNT1, "900"))
+            viewModel.sendIntent(FieldChanged(AMOUNT2, "900"))
+            viewModel.sendIntent(FieldChanged(AMOUNT3, "0"))
+            viewModel.sendIntent(FieldChanged(AMOUNT4, "0"))
+            viewModel.sendIntent(Next)
+            assertEquals(Res.string.settlement_err_build_sum, viewModel.uiState.value.bannerError())
+        }
 
     @Test
     fun `submitting sends every step's answers and confirms it`() = runTest(testDispatcher) {

@@ -102,12 +102,12 @@ class SettlementRequestViewModel(
         }
         val digits = raw.digitsOnly()
         if (form == SettlementTermsForm.MECHANICAL_SHARE && field == SettlementField.TEXT1) {
-            val share = digits.toIntOrNull()?.coerceAtMost(FULL_SHARE)
+            val share = digits.toIntOrNull()?.coerceAtMost(SETTLEMENT_FULL_SHARE)
             emit(PartialState.FieldChanged(SettlementField.TEXT1, share?.toString().orEmpty()))
             emit(
                 PartialState.FieldChanged(
                     SettlementField.TEXT2,
-                    share?.let { (FULL_SHARE - it).toString() }.orEmpty(),
+                    share?.let { (SETTLEMENT_FULL_SHARE - it).toString() }.orEmpty(),
                 ),
             )
             return@flow
@@ -232,9 +232,6 @@ class SettlementRequestViewModel(
 
     override fun createErrorState(message: String): PartialState = PartialState.Failed
 }
-
-/** The share the مکانیکی and دستی percentages divide between them. */
-private const val FULL_SHARE = 100
 
 /** Applies a typed value to its field, and let's go of whatever error that field was showing. */
 private fun SettlementRequestUiState.withField(

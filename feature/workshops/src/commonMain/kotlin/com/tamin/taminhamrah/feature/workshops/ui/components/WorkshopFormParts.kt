@@ -43,12 +43,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachment
@@ -247,6 +250,14 @@ fun WorkshopReviewGroup(
     onToggle: () -> Unit,
     modifier: Modifier = Modifier,
     onEdit: (() -> Unit)? = null,
+    /** A tinted glyph ahead of the title. Null, the default, draws the title alone. */
+    icon: ImageVector? = null,
+    iconTint: Color = Color.Unspecified,
+    iconBackground: Color = Color.Unspecified,
+    /** One muted line under the title — the group at a glance. Null, the default, draws none. */
+    preview: String? = null,
+    /** The «N مورد» beside the title. True, the default, keeps it. */
+    showCount: Boolean = true,
 ) {
     val colors = LocalTaminColors.current
     val rotation by animateFloatAsState(
@@ -268,22 +279,54 @@ fun WorkshopReviewGroup(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.ExtraBold,
-                color = colors.textPrimary,
-                modifier = Modifier.weight(1f),
-            )
-            Text(
-                text = stringResource(
-                    Res.string.ws_form_group_count,
-                    rows.size.toString().toPersianDigits(),
-                ),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-                color = colors.textMuted,
-            )
+            if (icon != null) {
+                Box(
+                    modifier = Modifier
+                        .size(IconSize.badge)
+                        .clip(RoundedCornerShape(CornerRadius.md))
+                        .background(iconBackground),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = iconTint,
+                        modifier = Modifier.size(IconSize.small),
+                    )
+                }
+            }
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .then(if (preview != null) Modifier.padding(vertical = Spacing.sm) else Modifier),
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = colors.textPrimary,
+                )
+                if (preview != null) {
+                    Text(
+                        text = preview,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = colors.textMuted,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+            if (showCount) {
+                Text(
+                    text = stringResource(
+                        Res.string.ws_form_group_count,
+                        rows.size.toString().toPersianDigits(),
+                    ),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.textMuted,
+                )
+            }
             Icon(
                 imageVector = vectorResource(Res.drawable.ic_tamin_chevron_down),
                 contentDescription = null,
@@ -714,8 +757,13 @@ fun WorkshopFormFooter(
     onPrev: (() -> Unit)? = null,
     /** While true the forward action shows the app's spinner and refuses further taps. */
     isBusy: Boolean = false,
+    /** The forward button's glyph. Null, the default, is the chevron every form points on with. */
+    nextIcon: ImageVector? = null,
+    /** The forward button's fill. Null, the default, is the app's primary gradient. */
+    nextBackground: Brush? = null,
 ) {
     val colors = LocalTaminColors.current
+    val chevron = vectorResource(Res.drawable.ic_tamin_chevron_forward)
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -758,8 +806,9 @@ fun WorkshopFormFooter(
             isLoading = isBusy,
             enabled = !isBusy,
             // Points the way on: autoMirrored, so under RTL it draws "‹" as the design has it.
-            icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
+            icon = nextIcon ?: chevron,
             iconPosition = LoadingButtonIconPosition.TRAILING,
+            background = nextBackground,
             height = FooterButtonHeight,
             shape = RoundedCornerShape(FooterButtonCorner),
             modifier = Modifier.weight(NextButtonWeight),
@@ -768,7 +817,7 @@ fun WorkshopFormFooter(
 }
 
 /** The dashed rule the design puts above a card's footer control. */
-private fun Modifier.dashedTopRule(color: Color): Modifier =
+internal fun Modifier.dashedTopRule(color: Color): Modifier =
     drawBehind {
         drawLine(
             color = color,
@@ -966,32 +1015,48 @@ fun <T> WorkshopLookupSheet(
 
 /** Something the user needs to know before starting, in the design's blue. */
 @Composable
-fun WorkshopFormBanner(text: String, modifier: Modifier = Modifier) {
+fun WorkshopFormBanner(
+    text: String,
+    modifier: Modifier = Modifier,
+    /** The blue information box, the default, or the green one that says nothing more is needed. */
+    tone: WorkshopBannerTone = WorkshopBannerTone.INFO,
+    /** Drawn in place of the tone's icon — a status pill, say. Null, the default, keeps the icon. */
+    leading: (@Composable () -> Unit)? = null,
+) {
     val colors = LocalTaminColors.current
     val shape = remember { RoundedCornerShape(CornerRadius.chip) }
+    val isSuccess = tone == WorkshopBannerTone.SUCCESS
     Row(
         modifier = modifier
             .fillMaxWidth()
             .clip(shape)
-            .background(colors.blueBg)
-            .border(Thickness.border, colors.blueBorder, shape)
+            .background(if (isSuccess) colors.greenBg else colors.blueBg)
+            .border(Thickness.border, if (isSuccess) colors.greenBorder else colors.blueBorder, shape)
             .padding(horizontal = NoteHorizontalPadding, vertical = NoteVerticalPadding),
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        verticalAlignment = if (leading != null) Alignment.CenterVertically else Alignment.Top,
     ) {
-        Icon(
-            imageVector = vectorResource(Res.drawable.ic_info),
-            contentDescription = null,
-            tint = colors.blueText,
-            modifier = Modifier.size(IconSize.small),
-        )
+        if (leading != null) {
+            leading()
+        } else {
+            Icon(
+                imageVector = vectorResource(if (isSuccess) Res.drawable.ic_tamin_check else Res.drawable.ic_info),
+                contentDescription = null,
+                tint = if (isSuccess) colors.greenText else colors.blueText,
+                modifier = Modifier.size(IconSize.small),
+            )
+        }
         Text(
             text = text,
             style = MaterialTheme.typography.labelSmall,
-            color = colors.textSecondary,
+            color = if (isSuccess) colors.greenText else colors.textSecondary,
             lineHeight = NoteLineHeight,
         )
     }
 }
+
+/** How a [WorkshopFormBanner] reads. */
+enum class WorkshopBannerTone { INFO, SUCCESS }
 
 /** A lookup waits as four row-shaped blocks — about a sheet's worth before it scrolls. */
 private const val LookupShimmerRows = 4

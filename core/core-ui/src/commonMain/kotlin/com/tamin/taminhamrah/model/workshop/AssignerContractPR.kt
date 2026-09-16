@@ -5,13 +5,13 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.StringResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.assigner_doc_category_final_status
-import taminx.core.core_ui.assigner_doc_category_letter
 import taminx.core.core_ui.assigner_doc_category_other
-import taminx.core.core_ui.assigner_doc_category_subcontractor
-import taminx.core.core_ui.assigner_doc_category_supplement
 import taminx.core.core_ui.assigner_doc_kind_image
 import taminx.core.core_ui.assigner_doc_kind_pdf
+import taminx.core.core_ui.settlement_doc_final_status
+import taminx.core.core_ui.settlement_doc_letter
+import taminx.core.core_ui.settlement_doc_subcontractor
+import taminx.core.core_ui.settlement_doc_supplement
 
 /**
  * One پیمان as the واگذارندگان screens draw it.
@@ -141,10 +141,10 @@ enum class BaseDocumentCategory(val code: String, val title: StringResource) {
      * heading, which dropped a letter filed as a PDF from every section; it is shown here instead,
      * opened by the viewer its type calls for. `AssignerUiMapperTest` pins the choice.
      */
-    LETTER("1", Res.string.assigner_doc_category_letter),
-    SUBCONTRACTOR("2", Res.string.assigner_doc_category_subcontractor),
-    SUPPLEMENT("3", Res.string.assigner_doc_category_supplement),
-    FINAL_STATUS("4", Res.string.assigner_doc_category_final_status),
+    LETTER("1", Res.string.settlement_doc_letter),
+    SUBCONTRACTOR("2", Res.string.settlement_doc_subcontractor),
+    SUPPLEMENT("3", Res.string.settlement_doc_supplement),
+    FINAL_STATUS("4", Res.string.settlement_doc_final_status),
 
     /**
      * A code outside the four the old app groups.

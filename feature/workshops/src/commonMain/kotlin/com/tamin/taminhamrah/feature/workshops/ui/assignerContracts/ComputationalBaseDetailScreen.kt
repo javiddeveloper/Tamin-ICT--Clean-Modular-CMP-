@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractsIntent
@@ -49,7 +50,9 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.assigner_base_detail_header
 import taminx.core.core_ui.assigner_base_detail_title
+import taminx.core.core_ui.assigner_base_document_badge
 import taminx.core.core_ui.assigner_base_period
 import taminx.core.core_ui.assigner_bases_empty_body
 import taminx.core.core_ui.assigner_bases_empty_title
@@ -107,9 +110,19 @@ fun ComputationalBaseDetailContent(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // «سند N · دوره», or «سند N» alone when the service sent no period.
+    val subtitle = if (base != null) {
+        val badge = stringResource(Res.string.assigner_base_document_badge, base.letterNumber)
+        val period = stringResource(Res.string.assigner_base_period, base.periodStart, base.periodEnd)
+        val withPeriod = stringResource(Res.string.assigner_base_detail_header, base.letterNumber, period)
+        if (base.periodStart.isNotBlank() && base.periodEnd.isNotBlank()) withPeriod else badge
+    } else {
+        null
+    }
     WorkshopScreenShell(
         title = stringResource(Res.string.assigner_base_detail_title),
         onBack = onBack,
+        subtitle = subtitle,
         modifier = modifier,
     ) {
         if (base == null) {
@@ -140,7 +153,7 @@ fun ComputationalBaseDetailContent(
                 text = stringResource(Res.string.assigner_documents_title),
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = LocalTaminColors.current.textPrimary,
+                color = LocalTaminColors.current.textSecondary,
                 modifier = Modifier.padding(top = Spacing.sm),
             )
             if (base.documents.isEmpty()) {
@@ -276,7 +289,8 @@ private fun DocumentList(
                 subtitle = when {
                     isUnavailable -> null
                     didFail -> failure.message?.takeIf { it.isNotBlank() } ?: genericFailure
-                    else -> if (isImage) imageLabel else pdfLabel
+                    // «فایل PDF · شناسه», as the design names each attachment.
+                    else -> (if (isImage) imageLabel else pdfLabel) + DOCUMENT_ID_SEPARATOR + document.documentId
                 },
                 // The same badge the profile hangs off a row: what the row *is*, without making
                 // the user tap it to find out.
@@ -299,11 +313,12 @@ private fun DocumentList(
                 // is *unavailable* does not, because it cannot succeed.
                 enabled = openingDocumentId == null && !isUnavailable,
                 onClick = { onOpen(document) },
-                colors = if (didFail) {
-                    ListItemColors(subtitleColor = colors.dangerText)
-                } else {
-                    ListItemColors()
-                },
+                // An image in blue, a PDF in red — the design's two tiles.
+                colors = ListItemColors(
+                    subtitleColor = if (didFail) colors.dangerText else Color.Unspecified,
+                    leadingIconBackgroundColor = if (isImage) colors.blueBg else colors.dangerBg,
+                    leadingIconTintColor = if (isImage) colors.blueText else colors.dangerText,
+                ),
             )
         }.toImmutableList()
     }
@@ -349,6 +364,9 @@ private fun DocumentViewer(
         )
     }
 }
+
+/** Joins a document's kind to its id — the same separator the rest of the feature's lines use. */
+private const val DOCUMENT_ID_SEPARATOR = " · "
 
 private const val PdfFilePrefix = "computational_base_"
 private const val PdfFileSuffix = ".pdf"

@@ -2685,7 +2685,7 @@
     <string name="assigner_empty_finished_title">پیمان خاتمه‌یافته ندارید</string>
     <string name="assigner_empty_tab_body">پیمان‌های این وضعیت در کارگاه انتخاب‌شده ثبت نشده است. کارگاه دیگری را انتخاب کنید.</string>
     <string name="assigner_select_workshop">انتخاب کارگاه</string>
-    <string name="assigner_filter_label">جست‌وجو</string>
+    <string name="assigner_filter_change">تغییر</string>
     <string name="assigner_filter_workshop">کد کارگاه %1$s</string>
     <string name="assigner_filter_branch">کد شعبه %1$s</string>
     <string name="assigner_filter_row">ردیف %1$s</string>
@@ -2700,6 +2700,7 @@
     <string name="assigner_action_bases">مبانی</string>
     <string name="assigner_action_settlement">مفاصاحساب</string>
     <string name="assigner_action_certificate">گواهی صادرشده</string>
+    <string name="assigner_card_subtitle">پیمانکار · %1$s</string>
 
     <!-- Search sheet -->
     <string name="assigner_search_subtitle">ردیف پیمان‌ها بر اساس کارگاه و شعبه نمایش داده می‌شود.</string>
@@ -2727,6 +2728,7 @@
     <string name="assigner_field_national_id">کد ملی/شناسهٔ ملی</string>
     <string name="assigner_field_branch">شعبه</string>
     <string name="assigner_field_address">نشانی</string>
+    <string name="assigner_group_contract_preview">قرارداد %1$s · %2$s</string>
 
     <!-- Screen C — مبانی محاسباتی -->
     <string name="assigner_bases_empty_title">مبنای محاسباتی ثبت نشده است</string>
@@ -2740,17 +2742,14 @@
     <string name="assigner_field_letter_number">شمارهٔ سند</string>
     <string name="assigner_field_period">دورهٔ کارکرد</string>
     <string name="assigner_field_amount">مبلغ کارکرد</string>
+    <string name="assigner_base_detail_header">سند %1$s · %2$s</string>
     <string name="assigner_documents_title">مستندات پیوست‌شده</string>
     <string name="assigner_documents_empty">مستندی پیوست نشده است</string>
     <string name="assigner_document_unavailable">در دسترس نیست</string>
     <string name="assigner_document_open_failed">دریافت سند ناموفق بود</string>
-    <string name="assigner_doc_category_letter">مدارک تصاویر نامه</string>
-    <string name="assigner_doc_category_subcontractor">مدارک پیمانکاری فرعی</string>
-    <string name="assigner_doc_category_supplement">مدارک الحاقیه افزایش مدت یا مبلغ قرارداد</string>
-    <string name="assigner_doc_category_final_status">مدارک صورت وضعیت قطعی</string>
     <string name="assigner_doc_category_other">سایر مدارک</string>
     <string name="assigner_doc_kind_image">تصویر</string>
-    <string name="assigner_doc_kind_pdf">PDF</string>
+    <string name="assigner_doc_kind_pdf">فایل PDF</string>
 
     <!-- واگذارندگان — درخواست مفاصاحساب. Wording is the old app's unless the design names it. -->
     <string name="settlement_title">درخواست مفاصاحساب</string>
@@ -2776,7 +2775,9 @@
     <string name="settlement_foreign_exchange_note">در صورتی که قرارداد فاقد کارکرد ارزی می‌باشد، نیازی به تکمیل مبلغ ارزی و معادل آن نمی‌باشد.</string>
     <string name="settlement_currency_amount">مبلغ ارزی کارکرد</string>
     <string name="settlement_currency_in_rial">معادل ریالی مبلغ ارزی</string>
-    <string name="settlement_total">جمع کل کارکرد پیمان: %1$s ریال</string>
+    <string name="settlement_total_label">جمع کل کارکرد پیمان</string>
+    <string name="settlement_total_hint">ناخالص + معادل ریالی ارز</string>
+    <string name="settlement_amount_rial">%1$s ریال</string>
     <string name="settlement_documents_hint">دست‌کم یک مستند لازم است. نوع مستند را پیش از انتخاب فایل مشخص کنید.</string>
     <string name="settlement_doc_letter">مستندات نامه</string>
     <string name="settlement_doc_supplement">مستندات مدارک الحاقیه</string>
@@ -2784,6 +2785,8 @@
     <string name="settlement_doc_subcontractor">مستندات لیست فهرست</string>
     <string name="settlement_subject">موضوع کار پیمان</string>
     <string name="settlement_subject_none_note">این موضوع کار به اطلاعات تکمیلی نیاز ندارد. برای ارسال درخواست، «ثبت مفاصاحساب» را بزنید.</string>
+    <string name="settlement_subject_search_hint">جست‌وجو در موضوع‌ها…</string>
+    <string name="settlement_subject_search_empty">موضوعی با این عبارت یافت نشد.</string>
     <string name="settlement_price_list_owner">انعقاد قرارداد (تهیه مصالح به عهده)</string>
     <string name="settlement_price_list_owner_hint">انعقاد قرارداد بر اساس فهرست بهاء پایه سازمان برنامه و بودجه</string>
     <string name="settlement_owner_contractor">پیمانکار</string>
@@ -2799,12 +2802,14 @@
     <string name="settlement_supply_shared">قسمتی از مصالح توسط پیمانکار و قسمتی توسط واگذارنده کار تأمین شده است</string>
     <string name="settlement_assigner_materials_value">ارزش مصالح واگذارنده (ریال)</string>
     <string name="settlement_mechanical_percent">درصد مکانیکی</string>
-    <string name="settlement_manual_percent">درصد دستی: %1$s</string>
+    <string name="settlement_manual_percent_label">درصد دستی</string>
+    <string name="settlement_percent_value">%1$s٪</string>
     <string name="settlement_drivers_price">مبلغ کارکرد رانندگان</string>
     <string name="settlement_drivers_price_hint">مبلغ کارکرد انجام شده توسط رانندگان در اختیار پیمانکار (ریال)</string>
-    <string name="settlement_owner_drivers_amount">مبلغ کارکرد انجام شده توسط رانندگان خود مالک: %1$s ریال</string>
+    <string name="settlement_owner_drivers_label">مبلغ کارکرد انجام شده توسط رانندگان خود مالک</string>
     <string name="settlement_equipment_price">هزینه خرید تجهیزات غیر از مواد مصرفی</string>
-    <string name="settlement_services_amount">هزینه خدمات، اجرا و مصالح مصرفی: %1$s ریال</string>
+    <string name="settlement_services_label">هزینه خدمات، اجرا و مصالح مصرفی</string>
+    <string name="settlement_value_missing">—</string>
     <string name="settlement_contractor_address">آدرس کارگاه ثابت پیمانکار</string>
     <string name="settlement_build_price">هزینه ساخت (ریال)</string>
     <string name="settlement_transport_price">هزینه حمل (ریال)</string>
@@ -2820,6 +2825,13 @@
     <string name="settlement_err_equipment">هزینه خرید تجهیزات از مبلغ ناخالص کارکرد بزرگ‌تر است!</string>
     <string name="settlement_err_build_sum">مجموع مبالغ وارد‌شده از مبلغ ناخالص کارکرد بزرگ‌تر است!</string>
     <string name="settlement_err_subcontractor">لطفاً وضعیت پیمانکار جزء را مشخص کنید.</string>
+    <string name="settlement_err_letter_number_required">لطفاً شمارهٔ نامه را وارد کنید.</string>
+    <string name="settlement_err_letter_number_invalid">شمارهٔ نامهٔ وارد‌شده معتبر نیست.</string>
+    <string name="settlement_err_dates_required">لطفاً تاریخ نامه، شروع قرارداد و اجرای عملیات پیمان را کامل وارد کنید.</string>
+    <string name="settlement_err_amount_required">لطفاً مبلغ ناخالص کارکرد را وارد کنید.</string>
+    <string name="settlement_err_documents">لطفا مدارک را بارگذاری نمایید.</string>
+    <string name="settlement_err_subject_required">لطفاً موضوع کار پیمان را انتخاب کنید.</string>
+    <string name="settlement_err_terms_incomplete">لطفاً همهٔ فیلدهای این بخش را تکمیل کنید.</string>
     <string name="settlement_submit">ثبت مفاصاحساب</string>
     <string name="settlement_submitted">اطلاعات با موفقیت ارسال شد</string>
     <string name="settlement_done_body">درخواست صدور مفاصاحساب ماده ۳۸ ثبت شد. نتیجهٔ بررسی شعبه از طریق کارتابل و پیامک اعلام می‌شود.</string>

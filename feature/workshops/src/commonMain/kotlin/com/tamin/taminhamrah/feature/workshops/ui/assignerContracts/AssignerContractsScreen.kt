@@ -1,5 +1,7 @@
 package com.tamin.taminhamrah.feature.workshops.ui.assignerContracts
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,14 +12,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.AssignerContractCard
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.AssignerFilterBar
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.AssignerSearchSheet
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.AssignerSearchSheetContent
@@ -27,11 +34,9 @@ import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.Ass
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractsEvent
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractsIntent
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractsUiState
-import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButton
-import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButtonTone
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopListScaffold
-import com.tamin.taminhamrah.feature.workshops.ui.contractRows.components.ContractRowCard
 import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
+import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
 import com.tamin.taminhamrah.model.workshop.AssignerContractDN
 import com.tamin.taminhamrah.model.workshop.AssignerContractPR
@@ -48,7 +53,6 @@ import com.tamin.taminhamrah.ui.components.StatRowCard
 import com.tamin.taminhamrah.ui.components.TaminSegmentedTabs
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.components.toast.info
@@ -56,6 +60,7 @@ import com.tamin.taminhamrah.ui.components.toast.success
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -64,13 +69,8 @@ import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.assigner_action_bases
-import taminx.core.core_ui.assigner_action_certificate
-import taminx.core.core_ui.assigner_action_detail
-import taminx.core.core_ui.assigner_action_settlement
 import taminx.core.core_ui.assigner_certificate_issued
 import taminx.core.core_ui.assigner_certificate_not_found
-import taminx.core.core_ui.assigner_contract_date
 import taminx.core.core_ui.assigner_contracts_title
 import taminx.core.core_ui.assigner_count_label
 import taminx.core.core_ui.assigner_empty_active_title
@@ -173,6 +173,8 @@ fun AssignerContractsContent(
     // never re-filters the rows.
     val visible = remember(list, tab) { list.inTab(tab) }
     val assigner = remember(list.items) { list.items.soleAssigner() }
+    val activeCount = remember(list.items) { list.items.count { !it.isFinished } }
+    val finishedCount = list.items.size - activeCount
 
     // Rows fade and rise in as they arrive; a new search or a new tab plays the entrance again,
     // later pages landing in one does not. Held in a remember because building it inline would
@@ -185,6 +187,8 @@ fun AssignerContractsContent(
         TaminTopAppBar(
             title = stringResource(Res.string.assigner_contracts_title),
             background = headerGradient,
+            // Deeper while the workshop card has a seam to straddle.
+            bottomPadding = if (assigner != null) WorkshopDimens.headerBottomPadding else Spacing.page,
             navigationIcon = {
                 TaminTopAppBarButton(
                     icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
@@ -206,20 +210,31 @@ fun AssignerContractsContent(
             )
         }
 
+        if (assigner != null) {
+            AssignerIdentityCard(
+                assigner = assigner,
+                modifier = Modifier
+                    .straddlePreviousSibling(WorkshopDimens.statsCardOverlap)
+                    .padding(horizontal = Spacing.page),
+            )
+        }
+
         // Keeps its place in every list state — skeleton, empty, failed — so switching tab or
         // clearing the search never takes the tabs off the screen while the rows below settle.
         val count = list.items.size
         val header: @Composable () -> Unit = {
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
-                if (assigner != null) AssignerIdentityCard(assigner = assigner)
                 AssignerTabsRow(
                     selected = tab,
                     count = count,
+                    activeCount = activeCount,
+                    finishedCount = finishedCount,
                     onSelect = { onIntent(AssignerContractsIntent.TabSelected(it)) },
                 )
                 if (filter != null) {
                     AssignerFilterBar(
                         filterText = rememberAssignerFilterText(filter),
+                        onEdit = { onIntent(AssignerContractsIntent.SearchOpenChanged(isOpen = true)) },
                         onClear = { onIntent(AssignerContractsIntent.ClearSearch) },
                     )
                 }
@@ -263,55 +278,15 @@ fun AssignerContractsContent(
                 )
             },
         ) { contract, itemModifier ->
-            // The same card ردیف‌های پیمان draws, with the design's three actions in one row.
-            // `dateLabel` differs because the column does: this endpoint sends تاریخ قرارداد where
-            // that one sends تاریخ تعهد.
-            ContractRowCard(
-                row = contract.card,
-                showContact = true,
-                dateLabel = Res.string.assigner_contract_date,
-                modifier = itemModifier,
-                buttons = {
-                    WorkshopCardButton(
-                        text = stringResource(Res.string.assigner_action_detail),
-                        tone = WorkshopCardButtonTone.OUTLINE,
-                        onClick = { onOpenDetail(contract) },
-                    )
-                    WorkshopCardButton(
-                        text = stringResource(Res.string.assigner_action_bases),
-                        // A پیمان missing any of the four keys cannot address its own bases, so the
-                        // button is plainly unavailable rather than opening another contract's records.
-                        tone = if (contract.canOpenBases) {
-                            WorkshopCardButtonTone.OUTLINE
-                        } else {
-                            WorkshopCardButtonTone.DISABLED
-                        },
-                        onClick = { onOpenBases(contract) },
-                    )
-                    if (contract.isFinished) {
-                        // A finished پیمان takes no new request; it answers with the certificate it
-                        // was settled under.
-                        WorkshopCardButton(
-                            text = stringResource(Res.string.assigner_action_certificate),
-                            tone = WorkshopCardButtonTone.SUCCESS,
-                            onClick = {
-                                onIntent(AssignerContractsIntent.CertificateRequested(contract, announce = true))
-                            },
-                        )
-                    } else {
-                        WorkshopCardButton(
-                            text = stringResource(Res.string.assigner_action_settlement),
-                            // The request is filed under an id built from the same four keys, so a
-                            // row missing one offers it disabled rather than filing under the wrong id.
-                            tone = if (contract.canRequestSettlement) {
-                                WorkshopCardButtonTone.PRIMARY
-                            } else {
-                                WorkshopCardButtonTone.DISABLED
-                            },
-                            onClick = { onRequestSettlement(contract) },
-                        )
-                    }
+            AssignerContractCard(
+                contract = contract,
+                onOpenDetail = { onOpenDetail(contract) },
+                onOpenBases = { onOpenBases(contract) },
+                onRequestSettlement = { onRequestSettlement(contract) },
+                onShowCertificate = {
+                    onIntent(AssignerContractsIntent.CertificateRequested(contract, announce = true))
                 },
+                modifier = itemModifier,
             )
         }
     }
@@ -343,10 +318,10 @@ fun AssignerContractsContent(
 }
 
 /**
- * «کارگاه واگذارنده» and its code — the employer's own workshop, read off the rows themselves.
+ * «کارگاه واگذارنده» and its code — the employer's own workshop, read off the rows themselves, on the
+ * card that straddles the header's seam.
  *
- * Every row carries both sides of its پیمان, so this is real data rather than a profile lookup. It is
- * drawn only while every row names the same واگذارنده: across several, one name would be a claim
+ * Drawn only while every row names the same واگذارنده: across several, one name would be a claim
  * about the others.
  */
 @Composable
@@ -355,19 +330,21 @@ private fun AssignerIdentityCard(assigner: AssignerPartyPR, modifier: Modifier =
         StatColumn(
             value = assigner.workshopName,
             label = stringResource(Res.string.assigner_me_label),
+            highlight = true,
             modifier = Modifier.weight(1f),
         )
         StatDivider()
         StatColumn(
             value = assigner.workshopCode,
             label = stringResource(Res.string.workshop_code),
+            highlight = true,
             modifier = Modifier.weight(1f),
         )
     }
 }
 
 /**
- * جاری / خاتمه‌یافته, and how many پیمان the list holds.
+ * جاری / خاتمه‌یافته with how many each holds, and how many پیمان the list holds in all.
  *
  * The tabs are the first child, so on the RTL page they sit rightmost with the count tile at the
  * far end, as the design places them. The tile takes the strip's height rather than its own, so
@@ -377,9 +354,13 @@ private fun AssignerIdentityCard(assigner: AssignerPartyPR, modifier: Modifier =
 private fun AssignerTabsRow(
     selected: AssignerContractTab,
     count: Int,
+    activeCount: Int,
+    finishedCount: Int,
     onSelect: (AssignerContractTab) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val colors = LocalTaminColors.current
+    val cellShape = remember { RoundedCornerShape(CornerRadius.xl) }
     Row(
         modifier = modifier.fillMaxWidth().height(IntrinsicSize.Min),
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
@@ -389,18 +370,24 @@ private fun AssignerTabsRow(
             selected = selected,
             onSelect = onSelect,
             label = { stringResource(it.label) },
+            badge = {
+                (if (it == AssignerContractTab.ACTIVE) activeCount else finishedCount).toString().toPersianDigits()
+            },
             modifier = Modifier.weight(1f),
         )
         Box(
             modifier = Modifier
                 .fillMaxHeight()
-                .taminSurface(CornerRadius.xl)
+                .clip(cellShape)
+                .background(colors.blueBg)
+                .border(Thickness.border, colors.blueBorder, cellShape)
                 .padding(horizontal = Spacing.md),
             contentAlignment = Alignment.Center,
         ) {
             StatColumn(
                 value = count.toString().toPersianDigits(),
                 label = stringResource(Res.string.assigner_count_label),
+                highlight = true,
             )
         }
     }
@@ -431,6 +418,21 @@ private fun List<AssignerContractPR>.soleAssigner(): AssignerPartyPR? =
         .distinctBy { it.workshopCode }
         .singleOrNull()
         ?.takeIf { it.workshopName.isNotBlank() }
+
+/**
+ * Shifts this child up by [overlap] to straddle the previous sibling's bottom edge, reporting a
+ * height reduced by the same amount so the column below does not reserve the overlap twice. The
+ * file-local idiom `ObjectionStatusScreen` and `LegalRepresentativeWorkshopsScreen` use for their
+ * own identity cards.
+ */
+private fun Modifier.straddlePreviousSibling(overlap: Dp): Modifier = layout { measurable, constraints ->
+    val placeable = measurable.measure(constraints)
+    val overlapPx = overlap.roundToPx()
+    val reportedHeight = (placeable.height - overlapPx).coerceAtLeast(0)
+    layout(placeable.width, reportedHeight) {
+        placeable.placeRelative(0, -overlapPx)
+    }
+}
 
 /**
  * «کد کارگاه X · کد شعبه Y · ردیف Z», with the parts the user left blank dropped.
@@ -488,6 +490,7 @@ private val PreviewContracts = persistentListOf(
             workshopName = "دبستان کارن ۲ مجتبی غلامیان",
             address = "بجنورد، خیابان طالقانی، کوچهٔ ۱۲، پلاک ۴",
             branchCode = "0210",
+            branchName = "شعبهٔ ۲ بجنورد",
         ),
     ),
     AssignerContractDN(
@@ -504,6 +507,7 @@ private val PreviewContracts = persistentListOf(
             workshopId = "9007441260",
             workshopName = "شرکت راه‌سازی البرز شرق",
             branchCode = "0210",
+            branchName = "شعبهٔ ۲ بجنورد",
         ),
     ),
 ).map { it.toPresentation() }.toImmutableList()
@@ -539,7 +543,7 @@ private fun AssignerContractsFinishedPreview() = PreviewRtlThemeContent {
     )
 }
 
-/** A search applied on top of the full list — the chip under the tabs, and «حذف» beside it. */
+/** A search applied on top of the full list — the chip under the tabs, «تغییر» and the cross. */
 @PreviewRtlTheme
 @Composable
 private fun AssignerContractsSearchedPreview() = PreviewRtlThemeContent {

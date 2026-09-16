@@ -1,5 +1,14 @@
 package com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.settlement
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -8,26 +17,30 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopBannerTone
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopDocumentsPanel
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFieldSlot
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormBanner
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopPickerField
-import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopRecordCard
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopTextField
 import com.tamin.taminhamrah.feature.workshops.ui.model.SettlementSubjectImageTypes
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachment
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.model.workshop.AssignerPartyPR
-import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.InputRestriction
-import com.tamin.taminhamrah.ui.components.TaminDivider
+import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.ThousandsSeparatorTransformation
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminOptionSheetItem
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminSearchableListSheet
+import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.ImmutableList
@@ -36,6 +49,7 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.assigner_field_national_id
+import taminx.core.core_ui.settlement_amount_rial
 import taminx.core.core_ui.settlement_assigner_materials_value
 import taminx.core.core_ui.settlement_budget_row
 import taminx.core.core_ui.settlement_build_price
@@ -48,24 +62,29 @@ import taminx.core.core_ui.settlement_execution_price
 import taminx.core.core_ui.settlement_foreign_equipment
 import taminx.core.core_ui.settlement_installation_price
 import taminx.core.core_ui.settlement_insurance_paid
-import taminx.core.core_ui.settlement_manual_percent
+import taminx.core.core_ui.settlement_manual_percent_label
 import taminx.core.core_ui.settlement_mechanical_percent
-import taminx.core.core_ui.settlement_owner_drivers_amount
+import taminx.core.core_ui.settlement_owner_drivers_label
+import taminx.core.core_ui.settlement_percent_value
 import taminx.core.core_ui.settlement_plan_number
 import taminx.core.core_ui.settlement_plan_number_hint
 import taminx.core.core_ui.settlement_price_list_owner
 import taminx.core.core_ui.settlement_price_list_owner_hint
-import taminx.core.core_ui.settlement_services_amount
+import taminx.core.core_ui.settlement_services_label
 import taminx.core.core_ui.settlement_subject
 import taminx.core.core_ui.settlement_subject_none_note
+import taminx.core.core_ui.settlement_subject_search_empty
+import taminx.core.core_ui.settlement_subject_search_hint
 import taminx.core.core_ui.settlement_supply_owner
 import taminx.core.core_ui.settlement_transport_price
+import taminx.core.core_ui.settlement_value_missing
 
 /**
  * «شرایط قرارداد با توجه به موضوع کار» — the موضوع کار, then whatever that subject asks for.
  *
- * Every control is one of the کارگاه forms already draw: the picker field, the typed field, the upload
- * box and the record card. Emits straight into the step's column, so it adds no layout of its own.
+ * Laid out as the design lays each subject out: paired fields side by side, what the form works out
+ * for the user in a teal read-only field, and what it only reads back in a gray one. Emits straight
+ * into the step's column, so it adds no layout of its own.
  */
 @Composable
 internal fun SettlementTermsStep(
@@ -77,6 +96,8 @@ internal fun SettlementTermsStep(
     terms: SettlementTerms,
     /** The gross amount less the deduction subjects 04–07 type; ignored by every other subject. */
     remainder: Long,
+    /** The gross amount itself — with none typed yet, a remainder has nothing to be worked out from. */
+    gross: Long,
     isUploading: Boolean,
     errors: ImmutableMap<SettlementField, StringResource>,
     onIntent: (SettlementRequestIntent) -> Unit,
@@ -105,23 +126,27 @@ internal fun SettlementTermsStep(
                 onSelect = { onIntent(SettlementRequestIntent.FieldChanged(SettlementField.OWNER, it)) },
             )
             SettlementHint(stringResource(Res.string.settlement_price_list_owner_hint))
-            SettlementTextField(
-                field = SettlementField.TEXT1,
-                label = stringResource(Res.string.settlement_plan_number),
-                value = terms.text1,
-                error = errors[SettlementField.TEXT1],
-                onIntent = onIntent,
-                isDigits = false,
-            )
+            SettlementFieldPair {
+                SettlementTextField(
+                    field = SettlementField.TEXT1,
+                    label = stringResource(Res.string.settlement_plan_number),
+                    value = terms.text1,
+                    error = errors[SettlementField.TEXT1],
+                    onIntent = onIntent,
+                    isDigits = false,
+                    modifier = Modifier.weight(1f),
+                )
+                SettlementTextField(
+                    field = SettlementField.TEXT2,
+                    label = stringResource(Res.string.settlement_budget_row),
+                    value = terms.text2,
+                    error = errors[SettlementField.TEXT2],
+                    onIntent = onIntent,
+                    isDigits = false,
+                    modifier = Modifier.weight(1f),
+                )
+            }
             SettlementHint(stringResource(Res.string.settlement_plan_number_hint))
-            SettlementTextField(
-                field = SettlementField.TEXT2,
-                label = stringResource(Res.string.settlement_budget_row),
-                value = terms.text2,
-                error = errors[SettlementField.TEXT2],
-                onIntent = onIntent,
-                isDigits = false,
-            )
             SettlementTextField(
                 field = SettlementField.AMOUNT1,
                 label = stringResource(Res.string.settlement_insurance_paid),
@@ -156,7 +181,7 @@ internal fun SettlementTermsStep(
             }
         }
 
-        SettlementTermsForm.MECHANICAL_SHARE -> {
+        SettlementTermsForm.MECHANICAL_SHARE -> SettlementFieldPair {
             SettlementTextField(
                 field = SettlementField.TEXT1,
                 label = stringResource(Res.string.settlement_mechanical_percent),
@@ -165,12 +190,17 @@ internal fun SettlementTermsStep(
                 onIntent = onIntent,
                 maxLength = PERCENT_MAX_LENGTH,
                 groupsThousands = false,
+                modifier = Modifier.weight(1f),
             )
-            if (terms.text2.isNotBlank()) {
-                SettlementFigure(
-                    stringResource(Res.string.settlement_manual_percent, terms.text2.toPersianDigits()),
-                )
-            }
+            SettlementValueField(
+                label = stringResource(Res.string.settlement_manual_percent_label),
+                value = stringResource(
+                    Res.string.settlement_percent_value,
+                    (SETTLEMENT_FULL_SHARE - (terms.text1.toIntOrNull() ?: 0)).toString().toPersianDigits(),
+                ),
+                isCalculated = true,
+                modifier = Modifier.weight(1f),
+            )
         }
 
         SettlementTermsForm.DRIVERS, SettlementTermsForm.EQUIPMENT -> {
@@ -185,82 +215,89 @@ internal fun SettlementTermsStep(
                 onIntent = onIntent,
             )
             if (isDrivers) SettlementHint(stringResource(Res.string.settlement_drivers_price_hint))
-            // What is left once the deduction is out; the error line under the field says why when
-            // there is nothing left.
-            if (terms.amount1.isNotBlank() && remainder > 0) {
-                SettlementFigure(
-                    stringResource(
-                        if (isDrivers) {
-                            Res.string.settlement_owner_drivers_amount
-                        } else {
-                            Res.string.settlement_services_amount
-                        },
-                        remainder.toPriceFormat(),
-                    ),
-                )
-            }
+            // What is left once the deduction is out, worked out as it is typed.
+            SettlementValueField(
+                label = stringResource(
+                    if (isDrivers) Res.string.settlement_owner_drivers_label else Res.string.settlement_services_label,
+                ),
+                value = if (gross > 0) {
+                    stringResource(Res.string.settlement_amount_rial, remainder.coerceAtLeast(0).toPriceFormat())
+                } else {
+                    stringResource(Res.string.settlement_value_missing)
+                },
+                isCalculated = true,
+            )
         }
 
         SettlementTermsForm.BUILD_COSTS -> {
-            WorkshopRecordCard {
-                DetailRow(
-                    label = stringResource(Res.string.settlement_contractor_address),
-                    value = contractor.address,
-                    numeric = false,
-                    verticalPadding = WorkshopDimens.cellVerticalPadding,
+            SettlementValueField(
+                label = stringResource(Res.string.settlement_contractor_address),
+                value = contractor.address,
+                isCalculated = false,
+                numeric = false,
+            )
+            SettlementValueField(
+                label = stringResource(Res.string.assigner_field_national_id),
+                value = contractor.nationalId,
+                isCalculated = false,
+            )
+            SettlementFieldPair {
+                SettlementTextField(
+                    field = SettlementField.AMOUNT1,
+                    label = stringResource(Res.string.settlement_build_price),
+                    value = terms.amount1,
+                    error = errors[SettlementField.AMOUNT1],
+                    onIntent = onIntent,
+                    modifier = Modifier.weight(1f),
                 )
-                TaminDivider()
-                DetailRow(
-                    label = stringResource(Res.string.assigner_field_national_id),
-                    value = contractor.nationalId,
-                    verticalPadding = WorkshopDimens.cellVerticalPadding,
+                SettlementTextField(
+                    field = SettlementField.AMOUNT2,
+                    label = stringResource(Res.string.settlement_transport_price),
+                    value = terms.amount2,
+                    error = errors[SettlementField.AMOUNT2],
+                    onIntent = onIntent,
+                    modifier = Modifier.weight(1f),
                 )
             }
-            SettlementTextField(
-                field = SettlementField.AMOUNT1,
-                label = stringResource(Res.string.settlement_build_price),
-                value = terms.amount1,
-                error = errors[SettlementField.AMOUNT1],
-                onIntent = onIntent,
-            )
-            SettlementTextField(
-                field = SettlementField.AMOUNT2,
-                label = stringResource(Res.string.settlement_transport_price),
-                value = terms.amount2,
-                error = errors[SettlementField.AMOUNT2],
-                onIntent = onIntent,
-            )
-            SettlementTextField(
-                field = SettlementField.AMOUNT3,
-                label = stringResource(Res.string.settlement_installation_price),
-                value = terms.amount3,
-                error = errors[SettlementField.AMOUNT3],
-                onIntent = onIntent,
-            )
-            SettlementTextField(
-                field = SettlementField.AMOUNT4,
-                label = stringResource(Res.string.settlement_execution_price),
-                value = terms.amount4,
-                error = errors[SettlementField.AMOUNT4],
-                onIntent = onIntent,
-            )
+            SettlementFieldPair {
+                SettlementTextField(
+                    field = SettlementField.AMOUNT3,
+                    label = stringResource(Res.string.settlement_installation_price),
+                    value = terms.amount3,
+                    error = errors[SettlementField.AMOUNT3],
+                    onIntent = onIntent,
+                    modifier = Modifier.weight(1f),
+                )
+                SettlementTextField(
+                    field = SettlementField.AMOUNT4,
+                    label = stringResource(Res.string.settlement_execution_price),
+                    value = terms.amount4,
+                    error = errors[SettlementField.AMOUNT4],
+                    onIntent = onIntent,
+                    modifier = Modifier.weight(1f),
+                )
+            }
         }
 
         SettlementTermsForm.FOREIGN_EQUIPMENT -> {
-            SettlementTextField(
-                field = SettlementField.AMOUNT1,
-                label = stringResource(Res.string.settlement_foreign_equipment),
-                value = terms.amount1,
-                error = errors[SettlementField.AMOUNT1],
-                onIntent = onIntent,
-            )
-            SettlementTextField(
-                field = SettlementField.AMOUNT2,
-                label = stringResource(Res.string.settlement_equivalent_rial),
-                value = terms.amount2,
-                error = errors[SettlementField.AMOUNT2],
-                onIntent = onIntent,
-            )
+            SettlementFieldPair {
+                SettlementTextField(
+                    field = SettlementField.AMOUNT1,
+                    label = stringResource(Res.string.settlement_foreign_equipment),
+                    value = terms.amount1,
+                    error = errors[SettlementField.AMOUNT1],
+                    onIntent = onIntent,
+                    modifier = Modifier.weight(1f),
+                )
+                SettlementTextField(
+                    field = SettlementField.AMOUNT2,
+                    label = stringResource(Res.string.settlement_equivalent_rial),
+                    value = terms.amount2,
+                    error = errors[SettlementField.AMOUNT2],
+                    onIntent = onIntent,
+                    modifier = Modifier.weight(1f),
+                )
+            }
             SettlementSubjectImage(
                 image = terms.image,
                 isUploading = isUploading,
@@ -271,7 +308,10 @@ internal fun SettlementTermsStep(
 
         // Said rather than left blank, so an empty step does not read as a form that failed to load.
         SettlementTermsForm.NONE -> if (subject != null) {
-            WorkshopFormBanner(text = stringResource(Res.string.settlement_subject_none_note))
+            WorkshopFormBanner(
+                text = stringResource(Res.string.settlement_subject_none_note),
+                tone = WorkshopBannerTone.SUCCESS,
+            )
         }
     }
 
@@ -285,13 +325,16 @@ internal fun SettlementTermsStep(
             },
             onDismiss = { isSubjectSheetOpen = false },
             isLoading = isSubjectsLoading,
+            searchPlaceholder = stringResource(Res.string.settlement_subject_search_hint),
+            emptyMessage = stringResource(Res.string.settlement_subject_search_empty),
         )
     }
 }
 
 /**
- * A typed field of this form: digits unless it says otherwise, and its error printed under it.
+ * A typed field of this form: digits unless it says otherwise.
  *
+ * A field with something wrong only turns red; the footer's banner says what, in the design's words.
  * Digits are shown grouped in thousands as they are typed, the way the old app's amount fields read;
  * a number that is not an amount — a letter number, a percentage — passes [groupsThousands] false.
  */
@@ -309,7 +352,6 @@ internal fun SettlementTextField(
     maxLength: Int = AMOUNT_MAX_LENGTH,
     groupsThousands: Boolean = true,
 ) {
-    val errorText = error?.let { stringResource(it) }
     WorkshopTextField(
         label = label,
         value = value,
@@ -320,8 +362,7 @@ internal fun SettlementTextField(
         inputRestriction = if (isDigits) InputRestriction.DigitsOnly else InputRestriction.None,
         maxLength = maxLength,
         isRequired = isRequired,
-        isValid = if (errorText != null) false else null,
-        errorText = errorText,
+        isValid = if (error != null) false else null,
         visualTransformation = if (isDigits && groupsThousands) {
             ThousandsSeparatorTransformation
         } else {
@@ -340,7 +381,6 @@ internal fun SettlementChoiceField(
     modifier: Modifier = Modifier,
     isDate: Boolean = false,
 ) {
-    val errorText = error?.let { stringResource(it) }
     WorkshopPickerField(
         label = label,
         value = value,
@@ -348,9 +388,59 @@ internal fun SettlementChoiceField(
         modifier = modifier,
         isDate = isDate,
         isRequired = true,
-        isValid = if (errorText != null) false else null,
-        errorText = errorText,
+        isValid = if (error != null) false else null,
     )
+}
+
+/** Two fields side by side, as the design halves a row with `width:calc(50% - …)`. */
+@Composable
+internal fun SettlementFieldPair(content: @Composable RowScope.() -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        verticalAlignment = Alignment.Top,
+        content = content,
+    )
+}
+
+/**
+ * A value the user reads rather than types: teal when the form worked it out, gray when it only
+ * reads it back from the پیمان.
+ */
+@Composable
+private fun SettlementValueField(
+    label: String,
+    value: String,
+    isCalculated: Boolean,
+    modifier: Modifier = Modifier,
+    numeric: Boolean = true,
+) {
+    val colors = LocalTaminColors.current
+    val shape = remember { RoundedCornerShape(CornerRadius.lg) }
+    val contentColor = if (isCalculated) colors.tealText else colors.textTertiary
+    WorkshopFieldSlot(label = label, modifier = modifier) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(shape)
+                .background(if (isCalculated) colors.tealBg else colors.bgPage)
+                .border(
+                    Thickness.border,
+                    if (isCalculated) colors.tealText.copy(alpha = WorkshopDimens.cardButtonOutlineAlpha) else colors.border,
+                    shape,
+                )
+                .padding(
+                    horizontal = WorkshopDimens.fieldHorizontalPadding,
+                    vertical = WorkshopDimens.fieldVerticalPadding,
+                ),
+        ) {
+            if (numeric) {
+                NumericText(text = value, style = MaterialTheme.typography.labelLarge, color = contentColor)
+            } else {
+                Text(text = value, style = MaterialTheme.typography.labelMedium, color = contentColor)
+            }
+        }
+    }
 }
 
 /** A short fixed list of answers, offered in the app's option sheet with no search to type into. */
@@ -413,18 +503,6 @@ internal fun SettlementHint(text: String, modifier: Modifier = Modifier) {
         text = text,
         style = MaterialTheme.typography.labelSmall,
         color = LocalTaminColors.current.textTertiary,
-        modifier = modifier,
-    )
-}
-
-/** A figure the form works out for the user — a total, a remainder, a share. */
-@Composable
-internal fun SettlementFigure(text: String, modifier: Modifier = Modifier) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.labelLarge,
-        fontWeight = FontWeight.SemiBold,
-        color = LocalTaminColors.current.greenText,
         modifier = modifier,
     )
 }

@@ -1,14 +1,17 @@
 package com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.settlement
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -18,7 +21,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.AssignerContractsViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.findContract
@@ -27,7 +32,9 @@ import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButtonT
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopDocumentsPanel
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFieldSlot
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormBanner
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormError
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormFooter
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopHeaderTitle
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopReviewGroup
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopReviewRow
 import com.tamin.taminhamrah.feature.workshops.ui.model.SETTLEMENT_MAX_DOCUMENTS
@@ -42,6 +49,7 @@ import com.tamin.taminhamrah.model.workshop.AssignerPartyDN
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
+import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminHeroStepProgress
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
@@ -51,6 +59,7 @@ import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminOptionSheetItem
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
+import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toPriceFormat
@@ -75,6 +84,7 @@ import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_cross
 import taminx.core.core_ui.settlement_amount
+import taminx.core.core_ui.settlement_amount_rial
 import taminx.core.core_ui.settlement_contract_info_note
 import taminx.core.core_ui.settlement_contract_row_sequence
 import taminx.core.core_ui.settlement_contractor_branch
@@ -97,7 +107,8 @@ import taminx.core.core_ui.settlement_subcontractor_hint
 import taminx.core.core_ui.settlement_submit
 import taminx.core.core_ui.settlement_submitted
 import taminx.core.core_ui.settlement_title
-import taminx.core.core_ui.settlement_total
+import taminx.core.core_ui.settlement_total_hint
+import taminx.core.core_ui.settlement_total_label
 import taminx.core.core_ui.settlement_yes
 import taminx.core.core_ui.ws_form_next
 
@@ -171,6 +182,7 @@ fun SettlementRequestContent(
     modifier: Modifier = Modifier,
 ) {
     val step = state.step
+    val colors = LocalTaminColors.current
     Column(modifier = modifier.fillMaxSize()) {
         SettlementHeader(
             step = step,
@@ -241,6 +253,7 @@ fun SettlementRequestContent(
                     val amount = state.amount
                     val currencyInRial = state.currencyInRial
                     val deduction = state.terms.amount1
+                    val gross = remember(amount, currencyInRial) { settlementGross(amount, currencyInRial) }
                     val remainder = remember(amount, currencyInRial, deduction) {
                         settlementRemainder(amount, currencyInRial, deduction)
                     }
@@ -252,6 +265,7 @@ fun SettlementRequestContent(
                         form = state.termsForm,
                         terms = state.terms,
                         remainder = remainder,
+                        gross = gross,
                         isUploading = state.isUploading,
                         errors = state.errors,
                         onIntent = onIntent,
@@ -260,10 +274,19 @@ fun SettlementRequestContent(
             }
         }
 
+        // The design's one line above the buttons: the first problem, in its own words.
+        val bannerError = state.bannerError()
+        if (bannerError != null) {
+            WorkshopFormError(
+                text = stringResource(bannerError),
+                modifier = Modifier.padding(horizontal = Spacing.page, vertical = Spacing.sm),
+            )
+        }
+
+        val isLastStep = step == SettlementStep.TERMS
+        val checkIcon = vectorResource(Res.drawable.ic_tamin_check)
         WorkshopFormFooter(
-            nextLabel = stringResource(
-                if (step == SettlementStep.TERMS) Res.string.settlement_submit else Res.string.ws_form_next,
-            ),
+            nextLabel = stringResource(if (isLastStep) Res.string.settlement_submit else Res.string.ws_form_next),
             onNext = { onIntent(SettlementRequestIntent.Next) },
             onPrev = if (step == SettlementStep.CONTRACT) {
                 null
@@ -271,6 +294,9 @@ fun SettlementRequestContent(
                 { onIntent(SettlementRequestIntent.Previous) }
             },
             isBusy = state.isBusy,
+            // Filing is the green, ticked button; every step before it points on.
+            nextIcon = if (isLastStep) checkIcon else null,
+            nextBackground = if (isLastStep) colors.successGradient else null,
         )
     }
 
@@ -278,8 +304,8 @@ fun SettlementRequestContent(
 }
 
 /**
- * The gradient bar with the design's hero progress: the step's title, «مرحلهٔ N از ۴», four segments
- * of which the passed ones go back, and the پیمان this request is for.
+ * The gradient bar with the design's hero progress: the request's title and the پیمان it is for,
+ * then the step's title, «مرحلهٔ N از ۴», and four segments of which the passed ones go back.
  */
 @Composable
 private fun SettlementHeader(
@@ -294,8 +320,15 @@ private fun SettlementHeader(
     val headerGradient = remember(colors.profileGradientStops) {
         Brush.horizontalGradient(colors.profileGradientStops)
     }
+    val title = stringResource(Res.string.settlement_title)
+    val subtitle = if (workshopName != null && rowLabel != null) {
+        stringResource(Res.string.assigner_contract_subtitle, workshopName, rowLabel)
+    } else {
+        null
+    }
     TaminTopAppBar(
-        title = stringResource(Res.string.settlement_title),
+        title = title,
+        titleContent = subtitle?.let { line -> { WorkshopHeaderTitle(title = title, subtitle = line) } },
         background = headerGradient,
         navigationIcon = {
             TaminTopAppBarButton(
@@ -319,11 +352,6 @@ private fun SettlementHeader(
             // Every segment up to this one is lit, as the design fills them.
             maxReachedStep = step.ordinal + 1,
             onStepClick = { onIntent(SettlementRequestIntent.StepSelected(SettlementStep.entries[it - 1])) },
-            stepSubtitle = if (workshopName != null && rowLabel != null) {
-                stringResource(Res.string.assigner_contract_subtitle, workshopName, rowLabel)
-            } else {
-                null
-            },
             modifier = Modifier.padding(top = Spacing.md),
         )
     }
@@ -439,23 +467,11 @@ private fun SettlementLetterStep(
 
     SettlementSubcontractorField(
         hasSubcontractor = hasSubcontractor,
-        error = errors[SettlementField.SUBCONTRACTOR],
         onIntent = onIntent,
     )
     SettlementHint(stringResource(Res.string.settlement_subcontractor_hint))
 
-    SettlementTotal(amount = amount, currencyInRial = currencyInRial)
-}
-
-/** Two fields side by side, as the design halves the letter step's rows. */
-@Composable
-private fun SettlementFieldPair(content: @Composable RowScope.() -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-        verticalAlignment = Alignment.Top,
-        content = content,
-    )
+    SettlementTotalCard(amount = amount, currencyInRial = currencyInRial)
 }
 
 /**
@@ -467,13 +483,11 @@ private fun SettlementFieldPair(content: @Composable RowScope.() -> Unit) {
 @Composable
 private fun SettlementSubcontractorField(
     hasSubcontractor: Boolean?,
-    error: StringResource?,
     onIntent: (SettlementRequestIntent) -> Unit,
 ) {
     WorkshopFieldSlot(
         label = stringResource(Res.string.settlement_has_subcontractor),
         isRequired = true,
-        errorText = error?.let { stringResource(it) },
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -528,11 +542,49 @@ private fun SettlementDateField(
     }
 }
 
-/** «جمع کل کارکرد پیمان», worked out as the two rial amounts are typed; absent until there is one. */
+/**
+ * «جمع کل کارکرد پیمان» on the design's navy card — worked out as the two rial amounts are typed, and
+ * absent until there is one.
+ */
 @Composable
-private fun SettlementTotal(amount: String, currencyInRial: String) {
+private fun SettlementTotalCard(amount: String, currencyInRial: String) {
     val total = remember(amount, currencyInRial) { settlementGross(amount, currencyInRial) }
-    if (total > 0) SettlementFigure(text = stringResource(Res.string.settlement_total, total.toPriceFormat()))
+    if (total <= 0) return
+    val colors = LocalTaminColors.current
+    val background = remember(colors.profileGradientStops) {
+        Brush.horizontalGradient(colors.profileGradientStops)
+    }
+    val shape = remember { RoundedCornerShape(CornerRadius.lg) }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(background)
+            .padding(horizontal = Spacing.md, vertical = Spacing.smPlus),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
+        ) {
+            Text(
+                text = stringResource(Res.string.settlement_total_label),
+                style = MaterialTheme.typography.labelSmall,
+                color = colors.textHeaderSubtitle,
+            )
+            Text(
+                text = stringResource(Res.string.settlement_total_hint),
+                style = MaterialTheme.typography.labelSmall,
+                color = colors.textHeaderSubtitle,
+            )
+        }
+        NumericText(
+            text = stringResource(Res.string.settlement_amount_rial, total.toPriceFormat()),
+            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+            color = colors.onGradient,
+        )
+    }
 }
 
 /** The request's evidence, as images or PDFs, each filed under one of the design's headings. */
@@ -573,7 +625,7 @@ private fun SettlementDoneDialog(onDone: () -> Unit) {
             TaminPrimaryButton(
                 text = stringResource(Res.string.settlement_done_back),
                 onClick = onDone,
-                background = colors.successGradient,
+                background = colors.buttonGradient,
                 modifier = Modifier.fillMaxWidth(),
             )
         },
@@ -642,7 +694,7 @@ private fun SettlementLetterStepPreview() = PreviewRtlThemeContent {
     )
 }
 
-/** «مرحلهٔ بعد» pressed on an empty letter step — every error comes from the real rules. */
+/** «مرحلهٔ بعد» pressed on an empty letter step — red fields, and the banner from the real rules. */
 @PreviewRtlTheme
 @Composable
 private fun SettlementLetterStepErrorsPreview() = PreviewRtlThemeContent {
@@ -712,7 +764,24 @@ private fun SettlementTermsBuildCostsPreview() = PreviewRtlThemeContent {
     )
 }
 
-/** A subject that asks for nothing more — the note that says so. */
+/** Subject 03 — the مکانیکی share typed, the دستی share worked out beside it. */
+@PreviewRtlTheme
+@Composable
+private fun SettlementTermsMechanicalPreview() = PreviewRtlThemeContent {
+    SettlementRequestContent(
+        contract = PreviewContract,
+        state = PreviewFilled.copy(
+            step = SettlementStep.TERMS,
+            subject = TaminOptionSheetItem(id = "03", label = "پیمان‌های مکانیکی"),
+            terms = SettlementTerms(text1 = "35", text2 = "65"),
+        ),
+        onIntent = {},
+        onBack = {},
+        onDone = {},
+    )
+}
+
+/** A subject that asks for nothing more — the green note that says so. */
 @PreviewRtlTheme
 @Composable
 private fun SettlementTermsNonePreview() = PreviewRtlThemeContent {

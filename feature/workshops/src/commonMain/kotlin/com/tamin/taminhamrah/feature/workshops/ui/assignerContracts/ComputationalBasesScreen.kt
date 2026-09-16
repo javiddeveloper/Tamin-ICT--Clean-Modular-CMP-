@@ -1,14 +1,12 @@
 package com.tamin.taminhamrah.feature.workshops.ui.assignerContracts
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -112,34 +110,21 @@ fun ComputationalBasesContent(
     WorkshopScreenShell(
         title = stringResource(Res.string.assigner_bases_title),
         onBack = onBack,
+        subtitle = stringResource(Res.string.assigner_contract_subtitle, workshopName, rowLabel),
         modifier = modifier,
     ) {
-        // The پیمان's identity as a muted line, then the total — both keep their place through
-        // every list state.
-        val subtitle = stringResource(
-            Res.string.assigner_contract_subtitle,
-            workshopName,
-            rowLabel,
-        )
+        // The total keeps its place through every list state.
         val totalLabel = stringResource(Res.string.assigner_bases_total)
         WorkshopListScaffold(
             header = {
-                Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
-                    Text(
-                        text = subtitle,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = colors.textMuted,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    StatTile(
-                        label = totalLabel,
-                        amount = total,
-                        containerColor = colors.blueBg,
-                        contentColor = colors.blueText,
-                        labelColor = colors.textMuted,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
+                StatTile(
+                    label = totalLabel,
+                    amount = total,
+                    containerColor = colors.bgSurface,
+                    contentColor = colors.textPrimary,
+                    labelColor = colors.textMuted,
+                    modifier = Modifier.fillMaxWidth(),
+                )
             },
             state = bases,
             onLoadMore = { onIntent(AssignerContractsIntent.LoadMoreBases) },
@@ -199,8 +184,8 @@ private fun ComputationalBaseRow(
                 subtitle = summary,
                 badge = ListItemBadge(
                     text = badgeText,
-                    backgroundColor = colors.blueBg,
-                    textColor = colors.blueText,
+                    backgroundColor = colors.bgPage,
+                    textColor = colors.textSecondary,
                 ),
                 onClick = onOpen,
                 customTrailingContent = {

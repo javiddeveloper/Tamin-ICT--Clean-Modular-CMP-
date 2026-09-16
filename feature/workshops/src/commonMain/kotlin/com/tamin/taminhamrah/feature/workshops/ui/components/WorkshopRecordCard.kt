@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
@@ -79,15 +80,24 @@ fun WorkshopRecordCard(
     }
 }
 
-/** How a card's action reads. The design gives each a fill, a text color and an outline. */
+/**
+ * How a card's action reads. The design gives each a fill, a text color and an outline.
+ *
+ * [NEUTRAL], [INFO], [SUCCESS_SOFT] and [TEAL] are the quieter tinted chips واگذارندگان draws: page
+ * gray, pale blue, pale green, and a white chip in teal.
+ */
 @Immutable
-enum class WorkshopCardButtonTone { PRIMARY, OUTLINE, SUCCESS, DANGER, ALERT, NOTICE, DISABLED }
+enum class WorkshopCardButtonTone {
+    PRIMARY, OUTLINE, SUCCESS, DANGER, ALERT, NOTICE, DISABLED, NEUTRAL, INFO, SUCCESS_SOFT, TEAL,
+}
 
 /**
  * One action inside a [WorkshopRecordCard].
  *
  * Shorter and tighter than a page-level button — `min-height:42px; radius:13px; 12px/700` — and
  * always sharing the row's width equally with its siblings.
+ *
+ * @param icon a glyph ahead of the label. Null, the default, draws the label alone.
  */
 @Composable
 fun RowScope.WorkshopCardButton(
@@ -95,6 +105,7 @@ fun RowScope.WorkshopCardButton(
     tone: WorkshopCardButtonTone,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
 ) {
     val colors = LocalTaminColors.current
     val shape = RoundedCornerShape(CornerRadius.listRow)
@@ -112,6 +123,8 @@ fun RowScope.WorkshopCardButton(
         TaminPrimaryButton(
             text = text,
             onClick = onClick,
+            icon = icon,
+            iconAtStart = true,
             background = gradient,
             height = WorkshopDimens.cardButtonHeight,
             shape = shape,
@@ -133,12 +146,20 @@ fun RowScope.WorkshopCardButton(
         WorkshopCardButtonTone.NOTICE ->
             Triple(colors.orangeBg, colors.orangeText, colors.orangeText.copy(alpha = WorkshopDimens.cardButtonOutlineAlpha))
 
+        WorkshopCardButtonTone.NEUTRAL -> Triple(colors.bgPage, colors.textTertiary, colors.border)
+        WorkshopCardButtonTone.INFO -> Triple(colors.blueBg, colors.blueText, colors.blueBorder)
+        WorkshopCardButtonTone.SUCCESS_SOFT -> Triple(colors.greenBg, colors.greenText, colors.greenBorder)
+        WorkshopCardButtonTone.TEAL -> Triple(colors.bgSurface, colors.tealText, colors.border)
+
         else -> Triple(colors.bgSurface, colors.textMuted, colors.border)
     }
 
     TaminOutlinedButton(
         text = text,
         onClick = onClick,
+        // The default position is ahead of the label, which under RTL is the right-hand side the
+        // design draws it on.
+        icon = icon,
         enabled = tone != WorkshopCardButtonTone.DISABLED,
         shape = shape,
         height = WorkshopDimens.cardButtonHeight,
