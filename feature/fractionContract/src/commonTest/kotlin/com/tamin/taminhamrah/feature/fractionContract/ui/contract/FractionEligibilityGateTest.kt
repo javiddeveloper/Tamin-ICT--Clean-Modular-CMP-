@@ -130,6 +130,11 @@ class FractionUserInfoStepCompleteTest {
     }
 
     @Test
+    fun mobileNumberAsLandline_returnsFalse() {
+        assertFalse(isUserInfoStepComplete(form(phoneNumber = "09123456789")))
+    }
+
+    @Test
     fun persianDigitsInZipAndPhone_stillComplete() {
         assertTrue(
             isUserInfoStepComplete(

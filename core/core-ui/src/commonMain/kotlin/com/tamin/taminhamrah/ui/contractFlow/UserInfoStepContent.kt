@@ -59,6 +59,11 @@ fun UserInfoStepContent(
      * is false. Other contract flows keep the previous always-visible locked field.
      */
     hideMobileWhenEmpty: Boolean = false,
+    /**
+     * When true, show postal-code and landline validation errors in the form fields.
+     * Fraction contract enables this; other contract flows keep the previous behaviour.
+     */
+    validateContactFields: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     if (isLoading) {
@@ -121,7 +126,9 @@ fun UserInfoStepContent(
 
                 val isZipComplete = userInfo.zipCode.length == 10 &&
                     ValidationUtils.isPostcodeValid(userInfo.zipCode)
-                val isZipError = userInfo.zipCode.isNotEmpty() && !isZipComplete
+                val isZipError = validateContactFields &&
+                    userInfo.zipCode.isNotEmpty() &&
+                    !isZipComplete
                 TaminTextField(
                     value = userInfo.zipCode.toPersianDigits(),
                     onValueChange = {
@@ -152,8 +159,10 @@ fun UserInfoStepContent(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.md),
             ) {
-                val isPhoneComplete = ValidationUtils.isPhoneNumberValid(userInfo.phoneNumber)
-                val isPhoneError = userInfo.phoneNumber.isNotEmpty() && !isPhoneComplete
+                val isPhoneComplete = ValidationUtils.isLandlineNumberValid(userInfo.phoneNumber)
+                val isPhoneError = validateContactFields &&
+                    userInfo.phoneNumber.isNotEmpty() &&
+                    !isPhoneComplete
                 TaminTextField(
                     value = userInfo.phoneNumber.toPersianDigits(),
                     onValueChange = {

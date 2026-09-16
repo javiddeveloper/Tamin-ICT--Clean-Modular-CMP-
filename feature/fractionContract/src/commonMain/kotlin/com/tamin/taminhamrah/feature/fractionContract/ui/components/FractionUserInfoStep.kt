@@ -61,6 +61,7 @@ internal fun FractionUserInfoStep(
             onPhoneNumberChange = onPhoneNumberChange,
             isLoading = isLoading,
             hideMobileWhenEmpty = true,
+            validateContactFields = true,
         )
         if (userInfo.showMobile) {
             Text(

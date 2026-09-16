@@ -131,7 +131,7 @@ internal fun isUserInfoStepComplete(userInfo: UserInfoFormPR): Boolean {
         userInfo.address.isNotBlank() &&
         zip.length == 10 &&
         ValidationUtils.isPostcodeValid(zip) &&
-        ValidationUtils.isPhoneNumberValid(phone)
+        ValidationUtils.isLandlineNumberValid(phone)
 }
 
 /**
@@ -157,6 +157,7 @@ internal fun fractionEligibilityGateError(
     }
     if (ageYears < 18) return under18Message
     if (eligibility.checkFractionMonthStatus != "1") {
+        // Legacy showed a blank dialog here; we intentionally surface a real message instead.
         return eligibility.checkFractionMonthStatus.ifBlank { unavailableMessage }
     }
     if (eligibility.insuranceTypeCode == FractionContractState.PREMIUM_TYPE_CODE) {
