@@ -1519,6 +1519,16 @@
     <string name="inspection_request_success_dismiss_button">متوجه شدم</string>
     <string name="inspection_request_success_tracking_label">کد رهگیری</string>
 
+    <string name="workshop_inspection_title">بازرسی‌های کارگاه</string>
+    <string name="workshop_inspection_subtitle">بازرسی‌های انجام‌شده در کارگاه‌های شما</string>
+    <string name="workshop_inspection_banner_subtitle">گزارش هر بازرسی قابل دریافت است؛ اعتراض تنها برای بازرسی واجد شرط.</string>
+    <string name="workshop_inspection_note">اعتراض به بازرسی فقط برای آخرین بازرسی انجام‌شده سال جاری امکان‌پذیر است. جهت اعتراض به بدهی‌های خود از منوی مدیریت بدهی و گزینهٔ اعتراض به بدهی اقدام نمایید.</string>
+    <string name="workshop_inspection_empty_title">بازرسی‌ای ثبت نشده است</string>
+    <string name="workshop_inspection_empty_subtitle">تا این لحظه بازرسی‌ای از کارگاه‌های شما در سامانه ثبت نشده است.</string>
+    <string name="workshop_inspection_search_empty_subtitle">فیلتر را حذف کنید و همهٔ بازرسی‌ها را ببینید.</string>
+    <string name="workshop_inspection_search_action_content_description">جست‌وجو در بازرسی‌ها</string>
+    <string name="workshop_inspection_report_filename_format">workshop_inspection_report_%1$s.pdf</string>
+
     <!-- ===================== Employer Online Services (خدمات غیرحضوری کارفرمایان) ===================== -->
     <string name="employer_online_services_title">خدمات غیرحضوری کارفرمایان</string>
     <string name="employer_online_services_subtitle">تعهدنامه‌های خدمات غیرحضوری شما</string>

@@ -30,6 +30,13 @@ class InspectionRepositoryImpl(
         emit(PageDN(items = data.list.orEmpty().map { it.toDN() }, total = data.total))
     }
 
+    override fun getWorkshopInspectionsPage(
+        query: ApiQueryParamDN
+    ): Flow<PageDN<InspectionPerformedDN>> = flow {
+        val data = remoteDataSource.getAllManager(query)
+        emit(PageDN(items = data.list.orEmpty().map { it.toDN() }, total = data.total))
+    }
+
     override fun getBranchesPage(
         query: ApiQueryParamDN
     ): Flow<PageDN<BranchDN>> = flow {

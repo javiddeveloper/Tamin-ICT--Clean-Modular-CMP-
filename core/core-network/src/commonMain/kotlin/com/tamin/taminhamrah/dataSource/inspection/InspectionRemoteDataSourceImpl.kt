@@ -38,6 +38,22 @@ internal class InspectionRemoteDataSourceImpl(
         }
     }
 
+    override suspend fun getAllManager(
+        query: ApiQueryParamDN
+    ): ListData<InspectionPerformedDTO> {
+        val queries = queryBuilder.buildQuery(query)
+        return try {
+            val response = apiService.getAllManager(queries)
+            response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
     override suspend fun getBranches(
         query: ApiQueryParamDN
     ): ListData<BranchDTO> {
