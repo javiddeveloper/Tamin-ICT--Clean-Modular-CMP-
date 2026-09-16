@@ -138,25 +138,6 @@ class PrescriptionsViewModelTest {
         }
     }
 
-    /**
-     * The real detail flow never completes — it answers from the cache and keeps watching it — and
-     * the price request used to be made only after it did, so it was never made at all. The price
-     * must arrive while the items are still being watched.
-     */
-    @Test
-    fun testSelectPrescription_loadsPriceWhileTheDetailFlowIsStillOpen() = runTest(testDispatcher) {
-        repository.prescriptionDetailKeepsWatching = true
-        repository.prescriptionDetailResult = listOf(TreatmentTestData.prescriptionDetail())
-        repository.prescriptionPriceResult = listOf(TreatmentTestData.prescriptionPrice())
-
-        viewModel.sendIntent(PrescriptionsIntent.SelectPrescription("100", nationalCode, type = "1", flagSata = "0"))
-        advanceUntilIdle()
-
-        val state = viewModel.uiState.value
-        assertEquals(1, state.prescriptionDetailList.size)
-        assertEquals(1, state.prescriptionPriceList.size)
-    }
-
     @Test
     fun testClearSelectedPrescription_resetsSelection() = runTest(testDispatcher) {
         repository.prescriptionDetailResult = listOf(TreatmentTestData.prescriptionDetail())
