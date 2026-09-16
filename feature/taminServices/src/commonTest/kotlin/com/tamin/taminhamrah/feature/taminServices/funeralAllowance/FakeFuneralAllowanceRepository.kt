@@ -35,8 +35,6 @@ class FakeFuneralAllowanceRepository : FuneralAllowanceRepository {
         relationship = "همسر",
         isEligible = true,
         message = "دارای شرایط می‌باشید",
-        dependentStatus = "همسر",
-        deathDate = "۱۴۰۵/۰۱/۱۰",
     )
     var submitResult: String = "درخواست شما ثبت شد"
     var confirmResult: String = "درخواست شما ثبت شد"

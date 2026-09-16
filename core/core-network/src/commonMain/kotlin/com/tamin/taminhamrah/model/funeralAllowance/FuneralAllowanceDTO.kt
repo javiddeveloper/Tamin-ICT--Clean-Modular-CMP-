@@ -102,13 +102,13 @@ data class FuneralShorttermRequestDTO(
  * keyed object. [fromPositional] is the single place in the codebase that knows the slot map —
  * nothing above the remote data source ever sees the raw list or an index.
  *
- * Slot map (legacy, `data[i]`):
+ * Slot map (legacy, `data[i]`) — matches `DeceasedInfoResponse`/`getDeceasedInfo()` in
+ * `old_android`/`D:\my-tamin` exactly; legacy never reads past `[7]`, so no other slot is decoded
+ * here either:
  * - `[4]` deceased full name
  * - `[5]` relationship to the insured
  * - `[6]` eligibility flag (`"1"` = eligible)
  * - `[7]` message, shown when not eligible
- * - `[9]` dependent status
- * - `[13]` death date, normally `yyyyMMdd` (formatted by the domain mapper, not here)
  *
  * Null-safety: a null list, a list shorter than the highest slot, and `null` entries all collapse
  * to `""` (via [List.getOrNull] + [orEmpty]). [isEligible] additionally requires at least
@@ -120,9 +120,6 @@ data class DeceasedValidationDTO(
     val relationship: String = "",
     val isEligible: Boolean = false,
     val message: String = "",
-    val dependentStatus: String = "",
-    /** Raw backend value, normally `yyyyMMdd`; formatting happens in the domain mapper. */
-    val deathDateRaw: String = "",
 ) {
     companion object {
         /** Legacy gate: fewer entries than this and the response can't be trusted as "eligible". */
@@ -133,8 +130,6 @@ data class DeceasedValidationDTO(
         private const val SLOT_RELATIONSHIP = 5
         private const val SLOT_ELIGIBLE_FLAG = 6
         private const val SLOT_MESSAGE = 7
-        private const val SLOT_DEPENDENT_STATUS = 9
-        private const val SLOT_DEATH_DATE = 13
 
         fun fromPositional(raw: List<String?>?): DeceasedValidationDTO {
             val slots = raw.orEmpty()
@@ -145,8 +140,6 @@ data class DeceasedValidationDTO(
                 isEligible = slots.size >= MIN_ELIGIBILITY_ENTRIES &&
                     slot(SLOT_ELIGIBLE_FLAG) == ELIGIBLE_FLAG,
                 message = slot(SLOT_MESSAGE),
-                dependentStatus = slot(SLOT_DEPENDENT_STATUS),
-                deathDateRaw = slot(SLOT_DEATH_DATE),
             )
         }
     }

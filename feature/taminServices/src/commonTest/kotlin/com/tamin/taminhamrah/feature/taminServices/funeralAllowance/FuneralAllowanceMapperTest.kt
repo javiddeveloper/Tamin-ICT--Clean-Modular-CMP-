@@ -57,16 +57,12 @@ class FuneralAllowanceMapperTest {
             relationship = "همسر",
             isEligible = true,
             message = "دارای شرایط می‌باشید",
-            dependentStatus = "همسر",
-            deathDate = "۱۴۰۵/۰۱/۱۰",
         ).toPR()
 
         assertEquals("زهرا رضایی", pr.deceasedFullName)
         assertEquals("همسر", pr.relationship)
         assertEquals(true, pr.isEligible)
         assertEquals("دارای شرایط می‌باشید", pr.message)
-        assertEquals("همسر", pr.dependentStatus)
-        assertEquals("۱۴۰۵/۰۱/۱۰", pr.deathDate)
     }
 
     @Test

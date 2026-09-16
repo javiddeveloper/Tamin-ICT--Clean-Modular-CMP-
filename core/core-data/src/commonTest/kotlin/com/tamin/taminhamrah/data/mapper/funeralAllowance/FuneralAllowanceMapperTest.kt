@@ -96,28 +96,18 @@ class FuneralAllowanceMapperTest {
     }
 
     @Test
-    fun deceasedValidationDto_toDomain_copiesFieldsAndFormatsYyyymmddDeathDate() {
+    fun deceasedValidationDto_toDomain_copiesFields() {
         val domain = DeceasedValidationDTO(
             fullName = "زهرا رضایی",
             relationship = "همسر",
             isEligible = true,
             message = "دارای شرایط",
-            dependentStatus = "همسر",
-            deathDateRaw = "14050110",
         ).toDomain()
 
         assertEquals("زهرا رضایی", domain.deceasedFullName)
         assertEquals("همسر", domain.relationship)
         assertTrue(domain.isEligible)
         assertEquals("دارای شرایط", domain.message)
-        assertEquals("همسر", domain.dependentStatus)
-        assertEquals("1405/01/10", domain.deathDate)
-    }
-
-    @Test
-    fun deceasedValidationDto_toDomain_leavesANonYyyymmddDeathDateUntouched() {
-        assertEquals("1405/01/10", DeceasedValidationDTO(deathDateRaw = "1405/01/10").toDomain().deathDate)
-        assertEquals("", DeceasedValidationDTO(deathDateRaw = "").toDomain().deathDate)
     }
 
     @Test

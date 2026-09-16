@@ -54,7 +54,7 @@ class FuneralAllowanceUseCasesTest : BaseUseCaseTest() {
     fun `ValidateDeceasedUseCase forwards the national code and returns the validation`() = runTest {
         val expected = DeceasedValidationDN(
             deceasedFullName = "زهرا رضایی", relationship = "همسر", isEligible = true,
-            message = "", dependentStatus = "همسر", deathDate = "۱۴۰۵/۰۱/۱۰",
+            message = "",
         )
         repository.validateResult = expected
 

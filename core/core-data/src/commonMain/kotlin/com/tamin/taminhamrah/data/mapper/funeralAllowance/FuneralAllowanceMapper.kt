@@ -56,17 +56,4 @@ internal fun DeceasedValidationDTO.toDomain(): DeceasedValidationDN = DeceasedVa
     relationship = relationship,
     isEligible = isEligible,
     message = message,
-    dependentStatus = dependentStatus,
-    deathDate = formatFuneralDeathDate(deathDateRaw),
 )
-
-/**
- * Backend death date arrives as `yyyyMMdd`; render it `yyyy/MM/dd`. Any other shape (already
- * formatted, empty, unexpected length) is passed through untouched — mirrors legacy.
- */
-private fun formatFuneralDeathDate(raw: String): String =
-    if (raw.length == 8) {
-        "${raw.substring(0, 4)}/${raw.substring(4, 6)}/${raw.substring(6, 8)}"
-    } else {
-        raw
-    }

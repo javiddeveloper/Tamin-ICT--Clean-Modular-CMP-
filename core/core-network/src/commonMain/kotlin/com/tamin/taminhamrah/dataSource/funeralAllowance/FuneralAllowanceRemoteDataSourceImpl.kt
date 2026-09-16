@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
+import kotlinx.coroutines.CancellationException
 
 internal class FuneralAllowanceRemoteDataSourceImpl(
     private val apiService: FuneralAllowanceApiService,
@@ -20,6 +21,8 @@ internal class FuneralAllowanceRemoteDataSourceImpl(
             apiService.getFuneralAllowanceInfo().extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
@@ -32,6 +35,8 @@ internal class FuneralAllowanceRemoteDataSourceImpl(
             DeceasedValidationDTO.fromPositional(apiService.validateDeceased(nationalCode).extractData())
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
@@ -44,6 +49,8 @@ internal class FuneralAllowanceRemoteDataSourceImpl(
             apiService.submitFuneralAllowanceRequest(request).extractMessage()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
@@ -56,6 +63,8 @@ internal class FuneralAllowanceRemoteDataSourceImpl(
             apiService.confirmAccountCorrection(requestId).extractMessage()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)

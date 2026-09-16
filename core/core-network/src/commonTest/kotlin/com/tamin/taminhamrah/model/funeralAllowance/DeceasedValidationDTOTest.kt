@@ -9,7 +9,8 @@ import kotlin.test.assertTrue
  * [DeceasedValidationDTO.fromPositional] decodes the bare positional string array the backend
  * returns from `shortterm/validateFuneral/{nationalCode}` (native `DeceasedInfoResponse`). The slot
  * map and the "at least 8 entries and `data[6] == \"1\"`" eligibility rule are legacy behaviour, so
- * each edge — including every null/short/garbled shape — is pinned here.
+ * each edge — including every null/short/garbled shape — is pinned here. Legacy never reads past
+ * `[7]`, so this DTO doesn't decode anything past it either.
  */
 class DeceasedValidationDTOTest {
 
@@ -18,18 +19,12 @@ class DeceasedValidationDTOTest {
         relationship: String? = "همسر",
         eligibleFlag: String? = "1",
         message: String? = "دارای شرایط می‌باشید",
-        dependentStatus: String? = "همسر",
-        deathDate: String? = "14050110",
     ): List<String?> = listOf(
         "0", "1", "2", "3",   // [0..3] unused
         name,                 // [4]
         relationship,         // [5]
         eligibleFlag,         // [6]
         message,              // [7]
-        "8",                  // [8] unused
-        dependentStatus,      // [9]
-        "10", "11", "12",     // [10..12] unused
-        deathDate,            // [13]
     )
 
     @Test
@@ -39,15 +34,7 @@ class DeceasedValidationDTOTest {
         assertEquals("زهرا رضایی", result.fullName)
         assertEquals("همسر", result.relationship)
         assertEquals("دارای شرایط می‌باشید", result.message)
-        assertEquals("همسر", result.dependentStatus)
-        assertEquals("14050110", result.deathDateRaw)
         assertTrue(result.isEligible)
-    }
-
-    @Test
-    fun fromPositional_keepsTheDeathDateRaw_formattingHappensInTheDomainMapper() {
-        assertEquals("14050110", DeceasedValidationDTO.fromPositional(raw(deathDate = "14050110")).deathDateRaw)
-        assertEquals("1405/01/10", DeceasedValidationDTO.fromPositional(raw(deathDate = "1405/01/10")).deathDateRaw)
     }
 
     @Test
@@ -76,21 +63,17 @@ class DeceasedValidationDTOTest {
         assertEquals("", result.fullName)
         assertEquals("", result.relationship)
         assertEquals("", result.message)
-        assertEquals("", result.dependentStatus)
-        assertEquals("", result.deathDateRaw)
     }
 
     @Test
     fun fromPositional_toleratesNullEntries() {
         val result = DeceasedValidationDTO.fromPositional(
-            raw(name = null, relationship = null, message = null, dependentStatus = null, deathDate = null),
+            raw(name = null, relationship = null, message = null),
         )
 
         assertEquals("", result.fullName)
         assertEquals("", result.relationship)
         assertEquals("", result.message)
-        assertEquals("", result.dependentStatus)
-        assertEquals("", result.deathDateRaw)
         // A null name/etc. must not affect the eligibility gate.
         assertTrue(result.isEligible)
     }
@@ -101,7 +84,6 @@ class DeceasedValidationDTOTest {
 
         assertFalse(result.isEligible)
         assertEquals("", result.fullName)
-        assertEquals("", result.deathDateRaw)
     }
 
     @Test
@@ -110,6 +92,5 @@ class DeceasedValidationDTOTest {
 
         assertFalse(result.isEligible)
         assertEquals("", result.fullName)
-        assertEquals("", result.deathDateRaw)
     }
 }

@@ -31,10 +31,11 @@ import kotlin.test.assertTrue
 
 /**
  * Covers the funeral-allowance wizard: the pre-flight bank-account gate fired from `init`, the
- * deceased eligibility inquiry (eligible / not-eligible), step navigation (including "back off the
- * first step leaves the screen"), the terminal submit, and the bank-account-correction re-submit.
- * A valid Iranian national id ("1234567891") is used everywhere the ViewModel runs the checksum,
- * so the invalid-id branch (which reaches `getString`) is never exercised here.
+ * eligibility inquiry (eligible / not-eligible), step navigation (including "back off the first
+ * step leaves the screen"), the terminal submit, and the bank-account-correction re-submit.
+ * A valid Iranian national id ("1234567891") is used wherever the ViewModel runs the checksum, so
+ * the invalid-id branch (which reaches `getString` and needs an Android context to resolve it —
+ * see `feature/taminServices/build.gradle.kts`'s Robolectric setup) is never exercised here.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class FuneralAllowanceViewModelTest {
@@ -70,13 +71,11 @@ class FuneralAllowanceViewModelTest {
     // ── Pre-flight bank-account gate (fired from init) ────────────────────────
 
     @Test
-    fun `init loads info and auto-selects an active bank account when the user has one`() = runTest(testDispatcher) {
+    fun `init loads info when the user has a bank account`() = runTest(testDispatcher) {
         val state = viewModel.uiState.value
 
         assertNotNull(state.info)
         assertEquals("علی رضایی", state.info?.fullName)
-        assertEquals(1, state.bankAccounts.size)
-        assertNotNull(state.selectedBankAccount)
         assertFalse(state.isLoading)
         assertFalse(state.showNoBankAccountDialog)
         assertNull(state.errorMessage)
@@ -109,13 +108,28 @@ class FuneralAllowanceViewModelTest {
     }
 
     @Test
+    fun `init records an error when loading info fails`() = runTest(testDispatcher) {
+        funeralRepository.shouldThrowError = true
+        funeralRepository.error = RuntimeException("info load failed")
+
+        viewModel = buildViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertNotNull(state.errorMessage)
+        assertNull(state.info)
+        assertFalse(state.isLoading)
+    }
+
+    @Test
     fun `Retry reloads info after a transient failure`() = runTest(testDispatcher) {
-        userRepository.bankAccountListError = RuntimeException("transient")
+        funeralRepository.shouldThrowError = true
+        funeralRepository.error = RuntimeException("transient")
         viewModel = buildViewModel()
         testDispatcher.scheduler.advanceUntilIdle()
         assertNull(viewModel.uiState.value.info)
 
-        userRepository.bankAccountListError = null
+        funeralRepository.shouldThrowError = false
         viewModel.sendIntent(FuneralAllowanceIntent.Retry)
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -137,7 +151,7 @@ class FuneralAllowanceViewModelTest {
     fun `ValidateDeceased with an eligible result stores the validation`() = runTest(testDispatcher) {
         funeralRepository.validateResult = DeceasedValidationDN(
             deceasedFullName = "زهرا رضایی", relationship = "همسر", isEligible = true,
-            message = "", dependentStatus = "همسر", deathDate = "۱۴۰۵/۰۱/۱۰",
+            message = "",
         )
 
         viewModel.sendIntent(FuneralAllowanceIntent.DeceasedNationalCodeChanged("1234567891"))
@@ -147,6 +161,7 @@ class FuneralAllowanceViewModelTest {
 
         val state = viewModel.uiState.value
         assertEquals("1234567891", funeralRepository.lastValidateNationalCode)
+        assertNull(state.deceasedNationalCodeError)
         assertNotNull(state.deceasedValidation)
         assertEquals(true, state.deceasedValidation?.isEligible)
         assertEquals("زهرا رضایی", state.deceasedValidation?.deceasedFullName)
@@ -157,7 +172,7 @@ class FuneralAllowanceViewModelTest {
     fun `ValidateDeceased with an ineligible result clears the validation and emits an info message`() = runTest(testDispatcher) {
         funeralRepository.validateResult = DeceasedValidationDN(
             deceasedFullName = "زهرا رضایی", relationship = "همسر", isEligible = false,
-            message = "متوفی در سوابق افراد تبعی شما ثبت نشده است", dependentStatus = "", deathDate = "",
+            message = "متوفی در سوابق افراد تبعی شما ثبت نشده است",
         )
         viewModel.sendIntent(FuneralAllowanceIntent.DeceasedNationalCodeChanged("1234567891"))
         testDispatcher.scheduler.advanceUntilIdle()
@@ -192,11 +207,11 @@ class FuneralAllowanceViewModelTest {
     // ── Step navigation ─────────────────────────────────────────────────────
 
     @Test
-    fun `GoToNextStep advances to the deceased and bank info step`() = runTest(testDispatcher) {
+    fun `GoToNextStep advances to the deceased info step`() = runTest(testDispatcher) {
         viewModel.sendIntent(FuneralAllowanceIntent.GoToNextStep)
         testDispatcher.scheduler.advanceUntilIdle()
 
-        assertEquals(FuneralAllowanceStep.DECEASED_AND_BANK_INFO, viewModel.uiState.value.currentStep)
+        assertEquals(FuneralAllowanceStep.DECEASED_INFO, viewModel.uiState.value.currentStep)
     }
 
     @Test
@@ -219,42 +234,19 @@ class FuneralAllowanceViewModelTest {
         assertEquals(FuneralAllowanceStep.APPLICANT_INFO, viewModel.uiState.value.currentStep)
     }
 
-    // ── Bank account selection / confirmation ────────────────────────────────
-
-    @Test
-    fun `SelectBankAccount replaces the selection and closes the sheet`() = runTest(testDispatcher) {
-        val other = viewModel.uiState.value.selectedBankAccount!!.copy(id = 42L)
-
-        viewModel.sendIntent(FuneralAllowanceIntent.SelectBankAccount(other))
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        assertEquals(42L, viewModel.uiState.value.selectedBankAccount?.id)
-        assertFalse(viewModel.uiState.value.showBankAccountBottomSheet)
-    }
-
-    @Test
-    fun `ToggleAccountConfirmation flips the confirmation flag`() = runTest(testDispatcher) {
-        viewModel.sendIntent(FuneralAllowanceIntent.ToggleAccountConfirmation(true))
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        assertTrue(viewModel.uiState.value.isAccountConfirmed)
-    }
-
     // ── Submit ──────────────────────────────────────────────────────────────
 
     @Test
-    fun `SubmitRequest with everything confirmed maps params and emits the success message`() = runTest(testDispatcher) {
+    fun `SubmitRequest with an eligible validation maps params and emits the success message`() = runTest(testDispatcher) {
         funeralRepository.validateResult = DeceasedValidationDN(
             deceasedFullName = "زهرا رضایی", relationship = "همسر", isEligible = true,
-            message = "", dependentStatus = "همسر", deathDate = "۱۴۰۵/۰۱/۱۰",
+            message = "",
         )
         funeralRepository.submitResult = "درخواست شما ثبت شد"
 
         viewModel.sendIntent(FuneralAllowanceIntent.DeceasedNationalCodeChanged("1234567891"))
         testDispatcher.scheduler.advanceUntilIdle()
         viewModel.sendIntent(FuneralAllowanceIntent.ValidateDeceased)
-        testDispatcher.scheduler.advanceUntilIdle()
-        viewModel.sendIntent(FuneralAllowanceIntent.ToggleAccountConfirmation(true))
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.events.test {
@@ -273,17 +265,8 @@ class FuneralAllowanceViewModelTest {
     }
 
     @Test
-    fun `SubmitRequest does nothing until the account is confirmed`() = runTest(testDispatcher) {
-        funeralRepository.validateResult = DeceasedValidationDN(
-            deceasedFullName = "زهرا رضایی", relationship = "همسر", isEligible = true,
-            message = "", dependentStatus = "همسر", deathDate = "",
-        )
-        viewModel.sendIntent(FuneralAllowanceIntent.DeceasedNationalCodeChanged("1234567891"))
-        testDispatcher.scheduler.advanceUntilIdle()
-        viewModel.sendIntent(FuneralAllowanceIntent.ValidateDeceased)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // isAccountConfirmed is still false -> canSubmitRequest is false -> submit is a no-op.
+    fun `SubmitRequest does nothing until the deceased is validated as eligible`() = runTest(testDispatcher) {
+        // No ValidateDeceased intent sent -> deceasedValidation is null -> canSubmitRequest is false.
         viewModel.sendIntent(FuneralAllowanceIntent.SubmitRequest)
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -295,13 +278,11 @@ class FuneralAllowanceViewModelTest {
     fun `SubmitRequest failure emits an error toast and resets the submitting flag`() = runTest(testDispatcher) {
         funeralRepository.validateResult = DeceasedValidationDN(
             deceasedFullName = "زهرا رضایی", relationship = "همسر", isEligible = true,
-            message = "", dependentStatus = "همسر", deathDate = "",
+            message = "",
         )
         viewModel.sendIntent(FuneralAllowanceIntent.DeceasedNationalCodeChanged("1234567891"))
         testDispatcher.scheduler.advanceUntilIdle()
         viewModel.sendIntent(FuneralAllowanceIntent.ValidateDeceased)
-        testDispatcher.scheduler.advanceUntilIdle()
-        viewModel.sendIntent(FuneralAllowanceIntent.ToggleAccountConfirmation(true))
         testDispatcher.scheduler.advanceUntilIdle()
 
         funeralRepository.shouldThrowError = true

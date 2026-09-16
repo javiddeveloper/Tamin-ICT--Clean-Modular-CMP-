@@ -79,14 +79,12 @@ class FuneralAllowanceRepositoryImplTest {
     }
 
     @Test
-    fun validateDeceased_mapsDtoToDomainAndFormatsDeathDate() = runTest {
+    fun validateDeceased_mapsDtoToDomain() = runTest {
         remoteDataSource.validateResult = DeceasedValidationDTO(
             fullName = "زهرا رضایی",
             relationship = "همسر",
             isEligible = true,
             message = "دارای شرایط",
-            dependentStatus = "همسر",
-            deathDateRaw = "14050110",
         )
 
         val result = repository.validateDeceased("0055667788")
@@ -95,20 +93,15 @@ class FuneralAllowanceRepositoryImplTest {
         assertTrue(result.isEligible)
         assertEquals("زهرا رضایی", result.deceasedFullName)
         assertEquals("همسر", result.relationship)
-        assertEquals("1405/01/10", result.deathDate)
     }
 
     @Test
-    fun validateDeceased_passesThroughIneligibleAndNonYyyymmddDate() = runTest {
-        remoteDataSource.validateResult = DeceasedValidationDTO(
-            isEligible = false,
-            deathDateRaw = "1405/01/10",
-        )
+    fun validateDeceased_passesThroughIneligible() = runTest {
+        remoteDataSource.validateResult = DeceasedValidationDTO(isEligible = false)
 
         val result = repository.validateDeceased("0055667788")
 
         assertTrue(!result.isEligible)
-        assertEquals("1405/01/10", result.deathDate)
     }
 
     @Test

@@ -86,8 +86,7 @@ class FuneralAllowanceRemoteDataSourceImplTest {
     @Test
     fun validateDeceased_success_forwardsCodeAndDecodesPositionalArray() = runTest {
         val raw = listOf<String?>(
-            "0", "1", "2", "3", "زهرا رضایی", "همسر", "1", "دارای شرایط", "8", "همسر",
-            "10", "11", "12", "14050110",
+            "0", "1", "2", "3", "زهرا رضایی", "همسر", "1", "دارای شرایط",
         )
         apiService.validateResult = BaseDTO(status = 200, family = "OK", reason = "OK", data = raw)
 
@@ -98,7 +97,6 @@ class FuneralAllowanceRemoteDataSourceImplTest {
         assertEquals("همسر", result.relationship)
         assertTrue(result.isEligible)
         assertEquals("دارای شرایط", result.message)
-        assertEquals("14050110", result.deathDateRaw)
     }
 
     @Test
@@ -113,7 +111,6 @@ class FuneralAllowanceRemoteDataSourceImplTest {
         assertTrue(!result.isEligible)
         assertEquals("زهرا", result.fullName)
         assertEquals("", result.relationship)
-        assertEquals("", result.deathDateRaw)
     }
 
     @Test

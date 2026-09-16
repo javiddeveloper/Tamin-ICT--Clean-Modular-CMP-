@@ -37,8 +37,6 @@ fun DeceasedValidationDN.toPR(): DeceasedValidationPR = DeceasedValidationPR(
     relationship = relationship,
     isEligible = isEligible,
     message = message,
-    dependentStatus = dependentStatus,
-    deathDate = deathDate,
 )
 
 fun FuneralAllowanceInfoPR.toSubmitParams(deceasedNationalId: String): SubmitFuneralAllowanceParamsDN =

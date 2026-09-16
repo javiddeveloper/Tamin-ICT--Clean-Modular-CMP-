@@ -2,8 +2,6 @@ package com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.componen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,15 +13,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,7 +40,6 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.funeral_allowance_account_confirmation
 import taminx.core.core_ui.funeral_allowance_account_number
 import taminx.core.core_ui.funeral_allowance_applicant_info
 import taminx.core.core_ui.funeral_allowance_bank_issue_desc
@@ -57,8 +49,6 @@ import taminx.core.core_ui.funeral_allowance_deceased_info
 import taminx.core.core_ui.funeral_allowance_deceased_inquired_info
 import taminx.core.core_ui.funeral_allowance_deceased_national_code
 import taminx.core.core_ui.funeral_allowance_deceased_national_code_hint
-import taminx.core.core_ui.funeral_allowance_dependent_status
-import taminx.core.core_ui.funeral_allowance_deposit_account
 import taminx.core.core_ui.funeral_allowance_eligibility_banner
 import taminx.core.core_ui.funeral_allowance_fix_bank_account
 import taminx.core.core_ui.funeral_allowance_full_name
@@ -71,7 +61,6 @@ import taminx.core.core_ui.funeral_allowance_registered_request_title
 import taminx.core.core_ui.funeral_allowance_relationship_with_insured
 import taminx.core.core_ui.funeral_allowance_request_date
 import taminx.core.core_ui.funeral_allowance_request_status
-import taminx.core.core_ui.funeral_allowance_select_hint
 
 @Composable
 fun Step1ApplicantInfo(
@@ -105,9 +94,8 @@ fun Step1ApplicantInfo(
 }
 
 @Composable
-fun Step2DeceasedAndBankInfo(
+fun Step2DeceasedInfo(
     uiState: FuneralAllowanceUiState,
-    onIntent: (FuneralAllowanceIntent) -> Unit,
 ) {
     val taminColors = LocalTaminColors.current
     val deceasedValidation = uiState.deceasedValidation
@@ -142,76 +130,6 @@ fun Step2DeceasedAndBankInfo(
                 label = stringResource(Res.string.funeral_allowance_relationship_with_insured),
                 value = deceasedValidation?.relationship?.ifBlank { "—" } ?: "—",
                 numeric = false,
-            )
-            HorizontalDivider(thickness = Thickness.border, color = taminColors.divider)
-            DetailRow(
-                label = stringResource(Res.string.funeral_allowance_death_date),
-                value = deceasedValidation?.deathDate?.ifBlank { "—" } ?: "—",
-            )
-            HorizontalDivider(thickness = Thickness.border, color = taminColors.divider)
-            DetailRow(
-                label = stringResource(Res.string.funeral_allowance_dependent_status),
-                value = deceasedValidation?.dependentStatus?.ifBlank { "—" } ?: "—",
-                numeric = false,
-            )
-        }
-
-        // Bank Account Selection
-        val selected = uiState.selectedBankAccount
-        val bankName =
-            selected?.bank?.label?.let { stringResource(it) } ?: selected?.bankNameFallback ?: ""
-        val accountType = selected?.accountType?.label?.let { stringResource(it) }
-            ?: selected?.accountTypeNameFallback ?: ""
-        val title = if (accountType.isNotBlank()) "$bankName - $accountType" else bankName
-        val displayValue = if (selected != null) {
-            if (title.isNotBlank()) "$title - ${selected.accountNumber}" else selected.accountNumber
-        } else {
-            ""
-        }
-
-        TaminStyledTextField(
-            value = displayValue,
-            onValueChange = {},
-            label = stringResource(Res.string.funeral_allowance_deposit_account),
-            placeholder = stringResource(Res.string.funeral_allowance_select_hint),
-            leadingIcon = Icons.Outlined.Home,
-            trailingIcon = Icons.Default.KeyboardArrowDown,
-            readOnly = true,
-            isRequired = true,
-            onClick = { onIntent(FuneralAllowanceIntent.ShowBankAccountBottomSheet(true)) }
-        )
-
-        // Confirmation Checkbox
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .border(1.dp, taminColors.border, RoundedCornerShape(12.dp))
-                .background(taminColors.bgSurface)
-                .clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() }) {
-                    onIntent(
-                        FuneralAllowanceIntent.ToggleAccountConfirmation(!uiState.isAccountConfirmed)
-                    )
-                }
-                .padding(8.dp),
-            verticalAlignment = Alignment.Top
-        ) {
-            Checkbox(
-                checked = uiState.isAccountConfirmed,
-                onCheckedChange = { onIntent(FuneralAllowanceIntent.ToggleAccountConfirmation(it)) },
-                colors = CheckboxDefaults.colors(
-                    checkedColor = taminColors.blueText,
-                    uncheckedColor = taminColors.border
-                )
-            )
-            Spacer(modifier = Modifier.width(Spacing.xs))
-            TaminText(
-                modifier = Modifier.padding(top = 13.dp),
-                text = stringResource(Res.string.funeral_allowance_account_confirmation),
-                color = taminColors.textSecondary,
-                style = MaterialTheme.typography.titleSmall,
             )
         }
     }
@@ -461,7 +379,7 @@ private fun Step1BankAccountIssuePreview() {
 private fun Step2Preview() {
     PreviewRtlThemeContent {
         Column(modifier = Modifier.background(LocalTaminColors.current.bgPage).padding(16.dp)) {
-            Step2DeceasedAndBankInfo(
+            Step2DeceasedInfo(
                 uiState = FuneralAllowanceUiState(
                     deceasedNationalCode = "0039073041",
                     deceasedValidation = com.tamin.taminhamrah.feature.taminServices.funeralAllowance.model.DeceasedValidationPR(
@@ -469,23 +387,8 @@ private fun Step2Preview() {
                         relationship = "همسر",
                         isEligible = true,
                         message = "دارای شرایط می باشید",
-                        dependentStatus = "مستمري بگير بازنشسته",
-                        deathDate = "1405/01/10"
                     ),
-                    selectedBankAccount = com.tamin.taminhamrah.model.bankAccount.BankAccountPR(
-                        id = 1,
-                        bank = null,
-                        bankNameFallback = "بانک ملت",
-                        accountType = null,
-                        accountTypeNameFallback = "کوتاه‌مدت",
-                        accountNumber = "1234567890",
-                        startDate = null,
-                        endDate = null,
-                        isActive = true
-                    ),
-                    isAccountConfirmed = true
                 ),
-                onIntent = {}
             )
         }
     }

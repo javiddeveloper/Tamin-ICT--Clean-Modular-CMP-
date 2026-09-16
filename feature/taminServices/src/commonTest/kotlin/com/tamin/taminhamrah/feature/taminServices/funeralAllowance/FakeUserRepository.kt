@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.flowOf
 /**
  * Minimal [UserRepository] fake for [com.tamin.taminhamrah.feature.taminServices.funeralAllowance.FuneralAllowanceViewModel]
  * tests — only [getBankAccountList] is exercised (the pre-flight "does the user have an account?"
- * gate and the deposit-account picker). Everything else is an empty/no-op stub.
+ * gate). Everything else is an empty/no-op stub.
  */
 class FakeUserRepository : UserRepository {
 

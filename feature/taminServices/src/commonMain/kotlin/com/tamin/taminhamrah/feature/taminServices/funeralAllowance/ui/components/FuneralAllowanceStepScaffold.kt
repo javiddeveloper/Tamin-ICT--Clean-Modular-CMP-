@@ -74,7 +74,7 @@ internal fun FuneralAllowanceStepScaffold(
 
 /**
  * Two-step progress header ([FuneralAllowanceStep.APPLICANT_INFO] then
- * [FuneralAllowanceStep.DECEASED_AND_BANK_INFO]) rendered with the shared
+ * [FuneralAllowanceStep.DECEASED_INFO]) rendered with the shared
  * [StepIndicator] — the same component orotez-protez uses. There is no third step.
  */
 @Composable

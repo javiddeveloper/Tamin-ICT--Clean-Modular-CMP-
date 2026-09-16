@@ -32,6 +32,4 @@ data class DeceasedValidationPR(
     val relationship: String,
     val isEligible: Boolean,
     val message: String,
-    val dependentStatus: String,
-    val deathDate: String,
 )

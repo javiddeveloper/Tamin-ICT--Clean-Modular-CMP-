@@ -40,7 +40,8 @@ data class RegisteredFuneralRequestDN(
  * Result of `shortterm/validateFuneral/{nationalCode}`. The backend's raw positional string array
  * is decoded into named fields by `DeceasedValidationDTO.fromPositional` in core-network; this is
  * the mapped domain view. [isEligible] mirrors legacy (the raw list must carry at least 8 entries
- * and `data[6] == "1"`); [deathDate] is already formatted `yyyy/MM/dd` by the DTO→domain mapper.
+ * and `data[6] == "1"`). Only the fields legacy's `DeceasedInfoResponse` reads are carried here —
+ * see `DeceasedValidationDTO`'s KDoc.
  */
 data class DeceasedValidationDN(
     val deceasedFullName: String,
@@ -48,8 +49,6 @@ data class DeceasedValidationDN(
     val isEligible: Boolean,
     /** Backend message, shown when [isEligible] is false. */
     val message: String,
-    val dependentStatus: String,
-    val deathDate: String,
 )
 
 /** Everything needed to POST `funeral-no-presence/saveShorttremFuneral`. */

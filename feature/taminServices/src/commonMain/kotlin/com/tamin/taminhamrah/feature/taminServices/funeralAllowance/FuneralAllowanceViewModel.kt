@@ -8,8 +8,6 @@ import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.contract.Fun
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.contract.FuneralAllowanceUiState.PartialState
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.model.toPR
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.model.toSubmitParams
-import com.tamin.taminhamrah.mapper.bankAccount.toPresentation
-import com.tamin.taminhamrah.model.bankAccount.BankAccountDN
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCase
 import com.tamin.taminhamrah.useCases.funeralAllowance.ConfirmFuneralAccountCorrectionUseCase
@@ -17,6 +15,7 @@ import com.tamin.taminhamrah.useCases.funeralAllowance.GetFuneralAllowanceInfoUs
 import com.tamin.taminhamrah.useCases.funeralAllowance.SubmitFuneralAllowanceRequestUseCase
 import com.tamin.taminhamrah.useCases.funeralAllowance.ValidateDeceasedUseCase
 import com.tamin.taminhamrah.util.ValidationUtils
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
@@ -51,9 +50,6 @@ class FuneralAllowanceViewModel(
         is FuneralAllowanceIntent.ConfirmAccountCorrection -> confirmAccountCorrection()
         is FuneralAllowanceIntent.GoToNextStep -> flow { emit(PartialState.GoToNextStep) }
         is FuneralAllowanceIntent.GoToPreviousStep -> goToPreviousStep()
-        is FuneralAllowanceIntent.SelectBankAccount -> flow { emit(PartialState.BankAccountSelected(intent.bankAccount)) }
-        is FuneralAllowanceIntent.ToggleAccountConfirmation -> flow { emit(PartialState.AccountConfirmationToggled(intent.isConfirmed)) }
-        is FuneralAllowanceIntent.ShowBankAccountBottomSheet -> flow { emit(PartialState.ShowBankAccountBottomSheet(intent.show)) }
         is FuneralAllowanceIntent.NavigateToBankAccount -> flow {
             emit(PartialState.DismissNoBankAccountDialog)
             sendEvent(FuneralAllowanceEvent.NavigateToBankAccount)
@@ -69,6 +65,8 @@ class FuneralAllowanceViewModel(
         emit(PartialState.CheckingBankAccount(true))
         val bankAccounts = try {
             getBankAccountListUseCase().first()
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(PartialState.CheckingBankAccount(false))
             val message = e.toSingleLineMessage()
@@ -81,13 +79,15 @@ class FuneralAllowanceViewModel(
             emit(PartialState.NoBankAccount)
             return@flow
         }
-        emitAll(loadInfo(bankAccounts))
+        emitAll(loadInfo())
     }
 
-    private fun loadInfo(bankAccounts: List<BankAccountDN>): Flow<PartialState> = flow {
+    private fun loadInfo(): Flow<PartialState> = flow {
         try {
             val info = getFuneralAllowanceInfoUseCase()
-            emit(PartialState.InfoLoaded(info.toPR(), bankAccounts.map { it.toPresentation() }))
+            emit(PartialState.InfoLoaded(info.toPR()))
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             val message = e.toSingleLineMessage()
             emit(PartialState.Error(message))
@@ -103,11 +103,17 @@ class FuneralAllowanceViewModel(
     private fun onNationalCodeChanged(value: String): Flow<PartialState> = flow {
         val digits = value.filter { it.isDigit() }.take(10)
         emit(PartialState.DeceasedNationalCodeChanged(digits))
+        emit(PartialState.DeceasedNationalCodeError(null))
         emit(PartialState.DeceasedValidationCleared)
     }
 
     private fun validateDeceased(): Flow<PartialState> = flow {
         val nationalCode = uiState.value.deceasedNationalCode
+        if (!ValidationUtils.isNationalCodeValid(nationalCode)) {
+            emit(PartialState.DeceasedNationalCodeError(getString(Res.string.funeral_allowance_error_invalid_national_id)))
+            return@flow
+        }
+        emit(PartialState.DeceasedNationalCodeError(null))
         emit(PartialState.ValidatingDeceased(true))
         try {
             val validation = validateDeceasedUseCase(nationalCode)
@@ -118,6 +124,8 @@ class FuneralAllowanceViewModel(
                 val message = validation.message.ifBlank { getString(Res.string.funeral_allowance_not_eligible) }
                 sendEvent(FuneralAllowanceEvent.ShowInfoMessage(message))
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             sendEvent(FuneralAllowanceEvent.ShowErrorToast(e.toSingleLineMessage()))
         } finally {
@@ -142,6 +150,8 @@ class FuneralAllowanceViewModel(
             val params = info.toSubmitParams(state.deceasedNationalCode)
             val message = submitFuneralAllowanceRequestUseCase(params)
             sendEvent(FuneralAllowanceEvent.ShowSuccessMessage(message))
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             sendEvent(FuneralAllowanceEvent.ShowErrorToast(e.toSingleLineMessage()))
         } finally {
@@ -159,6 +169,8 @@ class FuneralAllowanceViewModel(
         try {
             val message = confirmFuneralAccountCorrectionUseCase(requestId.toString())
             sendEvent(FuneralAllowanceEvent.ShowSuccessMessage(message))
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             sendEvent(FuneralAllowanceEvent.ShowErrorToast(e.toSingleLineMessage()))
         } finally {
@@ -185,16 +197,18 @@ class FuneralAllowanceViewModel(
 
         is PartialState.DismissNoBankAccountDialog ->
             currentState.copy(showNoBankAccountDialog = false)
+
         is PartialState.InfoLoaded -> currentState.copy(
             isLoading = false,
             errorMessage = null,
             info = partialState.info,
-            bankAccounts = partialState.bankAccounts,
-            selectedBankAccount = partialState.bankAccounts.firstOrNull { it.isActive } ?: partialState.bankAccounts.firstOrNull(),
         )
 
         is PartialState.DeceasedNationalCodeChanged ->
             currentState.copy(deceasedNationalCode = partialState.value)
+
+        is PartialState.DeceasedNationalCodeError ->
+            currentState.copy(deceasedNationalCodeError = partialState.message)
 
         is PartialState.ValidatingDeceased ->
             currentState.copy(isValidatingDeceased = partialState.inProgress)
@@ -214,16 +228,6 @@ class FuneralAllowanceViewModel(
         )
         is PartialState.GoToPreviousStep -> currentState.copy(
             currentStep = FuneralAllowanceStep.values().getOrNull(currentState.currentStep.ordinal - 1) ?: currentState.currentStep
-        )
-        is PartialState.BankAccountSelected -> currentState.copy(
-            selectedBankAccount = partialState.bankAccount,
-            showBankAccountBottomSheet = false
-        )
-        is PartialState.AccountConfirmationToggled -> currentState.copy(
-            isAccountConfirmed = partialState.isConfirmed
-        )
-        is PartialState.ShowBankAccountBottomSheet -> currentState.copy(
-            showBankAccountBottomSheet = partialState.show
         )
 
         is PartialState.Error -> currentState.copy(

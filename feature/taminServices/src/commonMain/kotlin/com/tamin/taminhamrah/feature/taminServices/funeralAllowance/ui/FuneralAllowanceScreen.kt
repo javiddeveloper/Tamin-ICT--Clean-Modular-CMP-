@@ -27,14 +27,13 @@ import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.contract.Fun
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.contract.FuneralAllowanceUiState
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.model.FuneralAllowanceInfoPR
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.model.RegisteredFuneralRequestPR
-import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.components.FuneralAllowanceBankAccountBottomSheet
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.components.FuneralAllowanceEligibilitySuccessDialog
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.components.FuneralAllowanceRequestSubmittedDialog
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.components.FuneralAllowanceStep1ShimmerSkeleton
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.components.FuneralAllowanceStepScaffold
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.components.FuneralMessageDialog
 import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.components.Step1ApplicantInfo
-import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.components.Step2DeceasedAndBankInfo
+import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.components.Step2DeceasedInfo
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
@@ -144,7 +143,7 @@ private data class DialogMessage(val message: String, val navigateBackOnDismiss:
  * Mirrors the occurrence flow's exit guard.
  */
 private val STEPS_REQUIRING_EXIT_CONFIRMATION = setOf(
-    FuneralAllowanceStep.DECEASED_AND_BANK_INFO,
+    FuneralAllowanceStep.DECEASED_INFO,
 )
 
 @Composable
@@ -290,7 +289,7 @@ internal fun FuneralAllowanceScreen(
                             )
                         }
 
-                        FuneralAllowanceStep.DECEASED_AND_BANK_INFO -> {
+                        FuneralAllowanceStep.DECEASED_INFO -> {
                             if (uiState.showBankAccountIssueFlow) {
                                 // Normally shouldn't reach step 2 if there's an issue, but just in case
                                 Step1ApplicantInfo(
@@ -298,9 +297,8 @@ internal fun FuneralAllowanceScreen(
                                     onIntent
                                 )
                             } else {
-                                Step2DeceasedAndBankInfo(
+                                Step2DeceasedInfo(
                                     uiState = uiState,
-                                    onIntent = onIntent,
                                 )
                             }
                         }
@@ -308,15 +306,6 @@ internal fun FuneralAllowanceScreen(
                 }
             }
         }
-    }
-
-    if (uiState.showBankAccountBottomSheet) {
-       FuneralAllowanceBankAccountBottomSheet(
-            bankAccounts = uiState.bankAccounts,
-            selectedAccount = uiState.selectedBankAccount,
-            onSelect = { onIntent(FuneralAllowanceIntent.SelectBankAccount(it)) },
-            onDismiss = { onIntent(FuneralAllowanceIntent.ShowBankAccountBottomSheet(false)) }
-        )
     }
 }
 
@@ -375,7 +364,7 @@ private fun FuneralAllowanceScreenBankIssuePreview() {
 }
 
 private val PreviewStep2State = FuneralAllowanceUiState(
-    currentStep = com.tamin.taminhamrah.feature.taminServices.funeralAllowance.contract.FuneralAllowanceStep.DECEASED_AND_BANK_INFO,
+    currentStep = com.tamin.taminhamrah.feature.taminServices.funeralAllowance.contract.FuneralAllowanceStep.DECEASED_INFO,
     info = PreviewInfo,
     deceasedNationalCode = "0039073041",
     deceasedValidation = com.tamin.taminhamrah.feature.taminServices.funeralAllowance.model.DeceasedValidationPR(
@@ -383,21 +372,7 @@ private val PreviewStep2State = FuneralAllowanceUiState(
         relationship = "همسر",
         isEligible = true,
         message = "دارای شرایط می‌باشید",
-        dependentStatus = "مستمری‌بگیر بازنشسته",
-        deathDate = "۱۴۰۵/۰۱/۱۰",
     ),
-    selectedBankAccount = com.tamin.taminhamrah.model.bankAccount.BankAccountPR(
-        id = 1,
-        bank = null,
-        bankNameFallback = "بانک ملت",
-        accountType = null,
-        accountTypeNameFallback = "کوتاه‌مدت",
-        accountNumber = "1234567890",
-        startDate = null,
-        endDate = null,
-        isActive = true,
-    ),
-    isAccountConfirmed = true,
 )
 
 @PreviewRtlTheme
