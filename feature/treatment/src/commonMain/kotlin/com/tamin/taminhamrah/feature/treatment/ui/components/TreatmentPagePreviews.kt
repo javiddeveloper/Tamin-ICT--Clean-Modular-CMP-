@@ -40,7 +40,6 @@ import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.components.TaminSearchField
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import com.tamin.taminhamrah.ui.components.taminHeroGradient
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toPriceFormat
@@ -100,7 +99,6 @@ private fun TreatmentHubPagePreview() {
             TaminTopAppBar(
                 title = "درمان",
                 centerTitle = false,
-                background = taminHeroGradient(LocalTaminColors.current.treatmentHubStops),
                 action = {
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_search),
@@ -325,7 +323,6 @@ private fun RecordDetailPagePreview() {
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
             TaminTopAppBar(
                 title = "نسخهٔ الکترونیک",
-                background = taminHeroGradient(LocalTaminColors.current.treatmentHubStops),
                 navigationIcon = { BackButton() },
                 action = {
                     TaminTopAppBarButton(
@@ -386,7 +383,6 @@ private fun RecordDetailVisitPagePreview() {
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
             TaminTopAppBar(
                 title = "تاییدیهٔ پزشکی",
-                background = taminHeroGradient(LocalTaminColors.current.treatmentHubStops),
                 navigationIcon = { BackButton() },
             )
             Column(
@@ -477,7 +473,6 @@ private fun MedicalCentresPagePreview() {
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
             TaminTopAppBar(
                 title = "مراکز طرف قرارداد",
-                background = taminHeroGradient(LocalTaminColors.current.treatmentHubStops),
                 navigationIcon = { BackButton() },
             ) {
                 TaminSearchField(
@@ -534,7 +529,6 @@ private fun MedicalCentresEmptyPagePreview() {
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
             TaminTopAppBar(
                 title = "مراکز طرف قرارداد",
-                background = taminHeroGradient(LocalTaminColors.current.treatmentHubStops),
                 navigationIcon = { BackButton() },
             ) {
                 TaminSearchField(

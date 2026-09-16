@@ -21,10 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.animation.core.tween
 import androidx.compose.ui.Modifier
-import com.tamin.taminhamrah.ui.theme.Duration
-import com.tamin.taminhamrah.ui.theme.Easing
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
@@ -407,7 +404,7 @@ fun MedicalRecordsContent(
         topBar = {
             TaminTopAppBar(
                 title = stringResource(Res.string.records_title),
-                background = taminHeroGradient(colors.treatmentHubStops),
+                background = taminHeroGradient(colors.topAppBarStops),
                 navigationIcon = {
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
@@ -486,17 +483,7 @@ fun MedicalRecordsContent(
 
             when {
                 state.isLoading && state.prescriptionList.isEmpty() ->
-                    item(key = RECORDS_SKELETON_KEY) {
-                        // Fades out while the first records fade in on their own staggered entrance,
-                        // so the page hands over instead of cutting from placeholder to content.
-                        RecordsShimmerSkeleton(
-                            modifier = Modifier.animateItem(
-                                fadeInSpec = null,
-                                placementSpec = null,
-                                fadeOutSpec = tween(durationMillis = Duration.normal, easing = Easing.standard),
-                            ),
-                        )
-                    }
+                    item { RecordsShimmerSkeleton() }
 
                 // Guarded on error: a failed request cannot tell an empty period from an
                 // unreachable one.
@@ -620,12 +607,10 @@ private fun recordAccent(prescType: String): RecordAccent {
     }
 }
 
-private const val RECORDS_SKELETON_KEY = "records-skeleton"
-
 @Composable
-private fun RecordsShimmerSkeleton(modifier: Modifier = Modifier) {
+private fun RecordsShimmerSkeleton() {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = Spacing.page),
         verticalArrangement = Arrangement.spacedBy(Spacing.cardGap),

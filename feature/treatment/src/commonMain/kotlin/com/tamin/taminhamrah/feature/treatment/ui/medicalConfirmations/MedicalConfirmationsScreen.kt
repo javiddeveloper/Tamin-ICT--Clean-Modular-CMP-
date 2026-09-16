@@ -133,7 +133,7 @@ fun MedicalConfirmationsScreen(
                     if (selectedDetail != null) Res.string.confirmations_details_title
                     else Res.string.category_approvals
                 ),
-                background = taminHeroGradient(colors.treatmentHubStops),
+                background = taminHeroGradient(colors.topAppBarStops),
                 navigationIcon = {
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),

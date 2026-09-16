@@ -1,7 +1,6 @@
 package com.tamin.taminhamrah.feature.treatment.ui
 
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.tween
+import com.tamin.taminhamrah.feature.treatment.ui.components.raisedCard
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -28,10 +27,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.treatment.ui.components.CategoryTile
 import com.tamin.taminhamrah.feature.treatment.ui.components.CostSummaryCard
 import com.tamin.taminhamrah.feature.treatment.ui.components.InsuranceCardCarousel
-import com.tamin.taminhamrah.feature.treatment.ui.components.InsuranceCardCarouselSkeleton
 import com.tamin.taminhamrah.feature.treatment.ui.components.PatientCard
 import com.tamin.taminhamrah.feature.treatment.ui.components.quickAccessGradient
 import com.tamin.taminhamrah.feature.treatment.ui.components.raisedShadow
@@ -42,17 +41,12 @@ import com.tamin.taminhamrah.ui.components.ListItemColors
 import com.tamin.taminhamrah.ui.components.ListItemData
 import com.tamin.taminhamrah.ui.components.SectionLabel
 import com.tamin.taminhamrah.ui.theme.CornerRadius
-import com.tamin.taminhamrah.ui.theme.Duration
-import com.tamin.taminhamrah.ui.theme.Easing
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
-import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.ui.theme.TaminOnAccentFillStrong
-import com.tamin.taminhamrah.ui.theme.TaminOnAccentInk
-import com.tamin.taminhamrah.ui.theme.TaminOnAccentInkMuted
-import com.tamin.taminhamrah.ui.theme.Thickness
-import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.ui.util.ExternalAppLauncher
+import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.shimmer
+import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.ImmutableList
@@ -85,6 +79,10 @@ import taminx.core.core_ui.ic_tamin_misc_claims
 import taminx.core.core_ui.ic_tamin_prescriptions
 import taminx.core.core_ui.share_insured
 import taminx.core.core_ui.share_organization
+import com.tamin.taminhamrah.ui.theme.TaminOnAccentInkMuted
+import com.tamin.taminhamrah.ui.theme.TaminOnAccentFillStrong
+import com.tamin.taminhamrah.ui.theme.TaminOnAccentInk
+import com.tamin.taminhamrah.ui.theme.Thickness
 
 /**
  * The stacked sections of the treatment hub, kept out of [TreatmentScreen] so that file
@@ -106,57 +104,44 @@ internal fun PatientCarousel(
     onRetry: () -> Unit = {},
     collapseProgress: () -> Float = { 0f },
 ) {
-    val phase = when {
-        isLoading && cards.isEmpty() -> CarouselPhase.Loading
-        cards.isEmpty() -> CarouselPhase.Placeholder
-        else -> CarouselPhase.Cards
-    }
+    when {
+        isLoading && cards.isEmpty() -> Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(TreatmentDimens.cardLoadingHeight)
+                .raisedCard(CornerRadius.card)
+                .shimmer(),
+        )
 
-    // The skeleton hands over with a fade, not a cut. It is laid out to the card's own geometry, so
-    // only the paint changes: the gray placeholder dissolves into the gradient card where it stands.
-    Crossfade(
-        targetState = phase,
-        animationSpec = tween(durationMillis = Duration.normal, easing = Easing.standard),
-        label = "patientCarousel",
-    ) { shown ->
-        when (shown) {
-            CarouselPhase.Loading -> InsuranceCardCarouselSkeleton(
-                collapseProgress = collapseProgress,
-            )
+        // A failure or an empty result still renders a card, so the carousel slot never
+        // collapses into a bare line of text.
+        cards.isEmpty() -> PatientPlaceholderCard(
+            message = error ?: stringResource(Res.string.hub_empty_patients),
+            isError = error != null,
+            onRetry = onRetry,
+        )
 
-            // A failure or an empty result still renders a card, so the carousel slot never
-            // collapses into a bare line of text.
-            CarouselPhase.Placeholder -> PatientPlaceholderCard(
-                message = error ?: stringResource(Res.string.hub_empty_patients),
-                isError = error != null,
-                onRetry = onRetry,
-            )
-
-            CarouselPhase.Cards -> {
-                val cardLambda: @Composable (Int) -> Unit = remember(cards, collapseProgress) {
-                    { page ->
-                        cards.getOrNull(page)?.let { card ->
-                            PatientCard(
-                                patient = card.patient,
-                                status = card.coverage,
-                                dependantOrdinal = card.dependantOrdinal,
-                                collapseProgress = collapseProgress,
-                            )
-                        }
+        else -> {
+            val cardLambda: @Composable (Int) -> Unit = remember(cards, collapseProgress) {
+                { page ->
+                    cards.getOrNull(page)?.let { card ->
+                        PatientCard(
+                            patient = card.patient,
+                            status = card.coverage,
+                            dependantOrdinal = card.dependantOrdinal,
+                            collapseProgress = collapseProgress,
+                        )
                     }
                 }
-                InsuranceCardCarousel(
-                    pageCount = cards.size,
-                    pagerState = pagerState,
-                    card = cardLambda,
-                )
             }
+            InsuranceCardCarousel(
+                pageCount = cards.size,
+                pagerState = pagerState,
+                card = cardLambda,
+            )
         }
     }
 }
-
-/** What the carousel slot is showing — the three states it fades between. */
-private enum class CarouselPhase { Loading, Placeholder, Cards }
 
 /**
  * Stands in for the insurance card when there is nobody to show.

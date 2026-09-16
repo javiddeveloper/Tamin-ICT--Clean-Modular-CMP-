@@ -1,6 +1,5 @@
 package com.tamin.taminhamrah.feature.treatment.ui.components
 
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -24,10 +23,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.animation.core.tween
 import androidx.compose.ui.Modifier
-import com.tamin.taminhamrah.ui.theme.Duration
-import com.tamin.taminhamrah.ui.theme.Easing
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -111,16 +107,7 @@ internal fun CertificateList(
         overscrollEffect = rememberJellyOverscroll(),
     ) {
         when {
-            isLoading && certificates.isEmpty() -> item(key = COSTS_SKELETON_KEY) {
-                // Fades out while the certificates fade in on their own staggered entrance.
-                CostsShimmerSkeleton(
-                    modifier = Modifier.animateItem(
-                        fadeInSpec = null,
-                        placementSpec = null,
-                        fadeOutSpec = tween(durationMillis = Duration.normal, easing = Easing.standard),
-                    ),
-                )
-            }
+            isLoading && certificates.isEmpty() -> item { CostsShimmerSkeleton() }
 
             error != null -> item { CostsErrorState(message = error) }
 
@@ -421,12 +408,10 @@ private fun CostsErrorState(message: String) {
     }
 }
 
-private const val COSTS_SKELETON_KEY = "costs-skeleton"
-
 @Composable
-private fun CostsShimmerSkeleton(modifier: Modifier = Modifier) {
+private fun CostsShimmerSkeleton() {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = Spacing.page, vertical = Spacing.md),
         verticalArrangement = Arrangement.spacedBy(Spacing.cardGap),
