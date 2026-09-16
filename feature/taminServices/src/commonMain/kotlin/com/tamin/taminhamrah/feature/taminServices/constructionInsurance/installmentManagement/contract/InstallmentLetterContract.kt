@@ -37,4 +37,5 @@ sealed interface InstallmentLetterIntent {
 
 sealed interface InstallmentLetterEvent {
     data object NavigateBack : InstallmentLetterEvent
+    data class ShowError(val message: String) : InstallmentLetterEvent
 }

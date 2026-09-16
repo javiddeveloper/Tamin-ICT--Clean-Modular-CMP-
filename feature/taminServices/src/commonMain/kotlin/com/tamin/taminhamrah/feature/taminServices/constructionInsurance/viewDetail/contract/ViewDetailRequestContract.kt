@@ -38,4 +38,5 @@ sealed interface ViewDetailRequestIntent {
 
 sealed interface ViewDetailRequestEvent {
     data object NavigateBack : ViewDetailRequestEvent
+    data class ShowError(val message: String) : ViewDetailRequestEvent
 }

@@ -45,4 +45,5 @@ sealed interface BeneficiariesIntent {
 
 sealed interface BeneficiariesEvent {
     data object NavigateBack : BeneficiariesEvent
+    data class ShowError(val message: String) : BeneficiariesEvent
 }

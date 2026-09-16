@@ -3111,6 +3111,9 @@
     <string name="action_menu_beneficiaries">ذینفعان کارگاه</string>
 
     <string name="view_detail_request_title">جزئیات درخواست</string>
+    <string name="view_detail_section_file_info">اطلاعات کلی پرونده</string>
+    <string name="view_detail_section_request_info">اطلاعات پلاک و درخواست</string>
+    <string name="view_detail_section_computing_info">اطلاعات محاسباتی و کارمزدها</string>
 
     <string name="payment_sheet_title">صدور و مدیریت برگه پرداخت</string>
     <string name="label_order_number">شماره ردیف</string>
@@ -3138,6 +3141,7 @@
     <string name="owner_type_owner">مالک</string>
     <string name="owner_type_applicant">متقاضی</string>
     <string name="beneficiaries_empty">ذینفعی برای این کارگاه ثبت نشده است.</string>
+    <string name="beneficiaries_count">%1$s نفر</string>
     <!-- Wedding Present (هدیه ازدواج) -->
     <string name="wedding_present_title">هدیه ازدواج</string>
     <string name="wedding_present_subtitle">کمک‌هزینهٔ ازدواج (تعهدات کوتاه‌مدت)</string>

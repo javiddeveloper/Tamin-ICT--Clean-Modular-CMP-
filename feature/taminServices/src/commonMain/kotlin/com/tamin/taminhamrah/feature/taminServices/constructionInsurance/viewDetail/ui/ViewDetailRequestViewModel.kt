@@ -60,7 +60,11 @@ class ViewDetailRequestViewModel(
         emitAll(
             getConstructionFilesUseCase(search)
                 .map { list -> PartialState.Loaded(list.map { it.toPR() }.toImmutableList()) as PartialState }
-                .catch { e -> emit(PartialState.Error(e.toSingleLineMessage())) }
+                .catch { e ->
+                    val message = e.toSingleLineMessage()
+                    sendEvent(ViewDetailRequestEvent.ShowError(message))
+                    emit(PartialState.Error(message))
+                }
         )
         emit(PartialState.Loading(false))
     }

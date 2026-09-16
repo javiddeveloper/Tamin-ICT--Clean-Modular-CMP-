@@ -314,7 +314,7 @@ private object ConstructionInsuranceMockData {
                 paymentCode = "3600${debitNumber.takeLast(6)}0$i",
                 paymentSheetAmount = if (i == 5) 0L else 500_000L * (i + 1),
                 status = paymentStatuses[i % paymentStatuses.size],
-                paymentDate = if (i % 3 == 1) null else "14021${10 + i}",
+                paymentDate = if (i % 3 == 1) null else "140210${10 + i}",
                 buildingRequest = if (i == 5) {
                     null
                 } else {

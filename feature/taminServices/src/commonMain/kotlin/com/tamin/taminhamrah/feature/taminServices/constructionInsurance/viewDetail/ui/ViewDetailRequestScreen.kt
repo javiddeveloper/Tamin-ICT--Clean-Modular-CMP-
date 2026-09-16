@@ -1,24 +1,45 @@
 package com.tamin.taminhamrah.feature.taminServices.constructionInsurance.viewDetail.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.viewDetail.contract.ViewDetailRequestEvent
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.viewDetail.contract.ViewDetailRequestIntent
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.viewDetail.contract.ViewDetailRequestUiState
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.viewDetail.ui.components.ViewDetailRequestSkeleton
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFilePR
 import com.tamin.taminhamrah.model.constructionInsurance.EnumTextColor
 import com.tamin.taminhamrah.model.constructionInsurance.KeyValueModel
@@ -27,22 +48,30 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.DetailRow
+import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
-import com.tamin.taminhamrah.ui.components.TaminEmptyState
-import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import com.tamin.taminhamrah.ui.components.taminSurface
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import com.tamin.taminhamrah.ui.components.coloredShadow
+import com.tamin.taminhamrah.ui.components.toast.LocalToaster
+import com.tamin.taminhamrah.ui.components.toast.ToasterState
+import com.tamin.taminhamrah.ui.components.toast.error
+import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
-import taminx.core.core_ui.Res as CoreRes
+import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.action_back
-import taminx.core.core_ui.action_retry
+import taminx.core.core_ui.action_hide_details
+import taminx.core.core_ui.action_show_details
+import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.no_construction_files_found
 import taminx.core.core_ui.view_detail_request_title
+import taminx.core.core_ui.view_detail_section_computing_info
+import taminx.core.core_ui.view_detail_section_file_info
+import taminx.core.core_ui.view_detail_section_request_info
+import taminx.core.core_ui.Res as CoreRes
 
 @Composable
 fun ViewDetailRequestRoute(
@@ -53,16 +82,13 @@ fun ViewDetailRequestRoute(
     modifier: Modifier = Modifier,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val toaster = LocalToaster.current
 
     LaunchedEffect(Unit) {
         viewModel.sendIntent(ViewDetailRequestIntent.Load(fileNumber, requestNumber))
     }
 
-    viewModel.events.collectWithLifecycleAware { event ->
-        when (event) {
-            ViewDetailRequestEvent.NavigateBack -> onBackClicked()
-        }
-    }
+    ViewDetailRequestEvents(events = viewModel.events, toaster = toaster, onBackClicked = onBackClicked)
 
     ViewDetailRequestScreen(
         state = uiState,
@@ -70,6 +96,20 @@ fun ViewDetailRequestRoute(
         onBackClicked = onBackClicked,
         modifier = modifier,
     )
+}
+
+@Composable
+fun ViewDetailRequestEvents(
+    events: Flow<ViewDetailRequestEvent>,
+    toaster: ToasterState,
+    onBackClicked: () -> Unit,
+) {
+    events.collectWithLifecycleAware { event ->
+        when (event) {
+            ViewDetailRequestEvent.NavigateBack -> onBackClicked()
+            is ViewDetailRequestEvent.ShowError -> toaster.error(event.message)
+        }
+    }
 }
 
 @Composable
@@ -105,25 +145,32 @@ fun ViewDetailRequestScreen(
         ) {
             val file = state.file
             when {
-                state.error != null && file == null -> ViewDetailErrorState(
-                    message = state.error,
-                    onRetry = { onIntent(ViewDetailRequestIntent.Retry) },
+
+                file == null && state.isLoading -> ViewDetailRequestSkeleton(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = Spacing.page, vertical = Spacing.md),
                 )
 
-                file == null && !state.isLoading -> TaminEmptyState(
-                    message = stringResource(CoreRes.string.no_construction_files_found),
-                    modifier = Modifier.padding(top = Spacing.xxl),
+                file == null && !state.isLoading -> EmptyStateMessage(
+                    icon = Icons.AutoMirrored.Outlined.ReceiptLong,
+                    title = stringResource(CoreRes.string.no_construction_files_found),
+                    showIconTile = true,
+                    modifier = Modifier.align(Alignment.Center),
                 )
 
                 file != null -> ViewDetailContent(file = file)
             }
 
-            if (state.isLoading) {
+            if (state.isLoading && file != null) {
                 LoadingStateOverlay()
             }
         }
     }
 }
+
+private val SectionShadowBlur = 26.dp
+private val SectionShadowOffsetY = 10.dp
 
 @Composable
 private fun ViewDetailContent(file: ConstructionFilePR, modifier: Modifier = Modifier) {
@@ -132,32 +179,99 @@ private fun ViewDetailContent(file: ConstructionFilePR, modifier: Modifier = Mod
         contentPadding = PaddingValues(horizontal = Spacing.page, vertical = Spacing.md),
         verticalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
-        item { KeyValueSection(items = file.getDetailConstructionFile()) }
-        item { KeyValueSection(items = file.getRequestInfo()) }
-        item { KeyValueSection(items = file.getComputingInfo()) }
+        item {
+            ExpandableDetailCard(
+                title = stringResource(CoreRes.string.view_detail_section_file_info),
+                items = file.getDetailConstructionFile(),
+            )
+        }
+        item {
+            ExpandableDetailCard(
+                title = stringResource(CoreRes.string.view_detail_section_request_info),
+                items = file.getRequestInfo(),
+            )
+        }
+        item {
+            ExpandableDetailCard(
+                title = stringResource(CoreRes.string.view_detail_section_computing_info),
+                items = file.getComputingInfo(),
+            )
+        }
     }
 }
 
 @Composable
-private fun KeyValueSection(items: List<KeyValueModel>, modifier: Modifier = Modifier) {
+private fun ExpandableDetailCard(
+    title: String,
+    items: List<KeyValueModel>,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+    var expanded by rememberSaveable(title) { mutableStateOf(false) }
+    val rotation by animateFloatAsState(
+        targetValue = if (expanded) -90f else 90f,
+        label = "view-detail-section-chevron",
+    )
+
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .taminSurface()
-            .padding(Spacing.lg),
-        verticalArrangement = Arrangement.spacedBy(Spacing.xs),
-    ) {
-        items.forEach { kv ->
-            val label = kv.keyResId?.let { stringResource(it) } ?: kv.keyString.orEmpty()
-            val value = kv.valueResId?.let { stringResource(it) } ?: kv.value
-            DetailRow(
-                label = label,
-                value = value,
-                valueColor = colorFor(kv.textColor),
-                // Many of these rows are free text (address, payment type) rather than a numeric
-                // code, and NumericText forces single-line LTR — wrong for Persian prose.
-                numeric = false,
+            .coloredShadow(
+                color = colors.shadowSubtle,
+                borderRadius = CornerRadius.card,
+                blurRadius = SectionShadowBlur,
+                offsetY = SectionShadowOffsetY,
             )
+            .clip(RoundedCornerShape(CornerRadius.lg))
+            .background(colors.bgSurface)
+            .border(1.dp, colors.border, RoundedCornerShape(CornerRadius.lg)),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { expanded = !expanded }
+                .padding(horizontal = Spacing.lg, vertical = Spacing.md),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = colors.textPrimary,
+            )
+            Icon(
+                imageVector = vectorResource(CoreRes.drawable.ic_tamin_chevron_back),
+                contentDescription = stringResource(
+                    if (expanded) CoreRes.string.action_hide_details else CoreRes.string.action_show_details,
+                ),
+                tint = colors.blueText,
+                modifier = Modifier
+                    .size(Spacing.lg)
+                    .graphicsLayer { rotationZ = rotation },
+            )
+        }
+
+        AnimatedVisibility(visible = expanded) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = Spacing.lg)
+                    .padding(bottom = Spacing.md),
+                verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+            ) {
+                items.forEach { kv ->
+                    val label = kv.keyResId?.let { stringResource(it) } ?: kv.keyString.orEmpty()
+                    val value = kv.valueResId?.let { stringResource(it) } ?: kv.value
+                    DetailRow(
+                        label = label,
+                        value = value,
+                        valueColor = colorFor(kv.textColor),
+                        numeric = kv.numeric,
+                        unit = kv.unit,
+                    )
+                }
+            }
         }
     }
 }
@@ -171,26 +285,17 @@ private fun colorFor(textColor: EnumTextColor) = when (textColor) {
     EnumTextColor.BLUE -> LocalTaminColors.current.blueText
 }
 
-@Composable
-private fun ViewDetailErrorState(message: String, onRetry: () -> Unit, modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(Spacing.page),
-        verticalArrangement = Arrangement.spacedBy(Spacing.md),
-    ) {
-        Text(text = message, color = LocalTaminColors.current.dangerText)
-        TaminOutlinedButton(text = stringResource(CoreRes.string.action_retry), onClick = onRetry)
-    }
-}
-
 // ─── Preview ──────────────────────────────────────────────────────────────────
 
 private val PreviewFile = ConstructionFilePR(
     fileNumber = 4479890882L,
     requestNumber = 123456789L,
     requestDate = "14020901",
-    workshopInfo = WorkshopIdInfoPR(workshopRegisterDate = "14020901", workshopId = "9028222442", brhCode = "6400"),
+    workshopInfo = WorkshopIdInfoPR(
+        workshopRegisterDate = "14020901",
+        workshopId = "9028222442",
+        brhCode = "6400"
+    ),
     postalCode = "9187955511",
     address = "مشهد - بلوار وکیل آباد",
     mainPlaque = 12,
@@ -212,7 +317,11 @@ private val PreviewFile = ConstructionFilePR(
 private fun ViewDetailRequestScreenPreview() {
     PreviewRtlThemeContent {
         ViewDetailRequestScreen(
-            state = ViewDetailRequestUiState(items = kotlinx.collections.immutable.persistentListOf(PreviewFile)),
+            state = ViewDetailRequestUiState(
+                items = kotlinx.collections.immutable.persistentListOf(
+                    PreviewFile
+                )
+            ),
             onIntent = {},
             onBackClicked = {},
         )
@@ -225,6 +334,18 @@ private fun ViewDetailRequestScreenLoadingPreview() {
     PreviewRtlThemeContent {
         ViewDetailRequestScreen(
             state = ViewDetailRequestUiState(isLoading = true),
+            onIntent = {},
+            onBackClicked = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun ViewDetailRequestScreenEmptyPreview() {
+    PreviewRtlThemeContent {
+        ViewDetailRequestScreen(
+            state = ViewDetailRequestUiState(),
             onIntent = {},
             onBackClicked = {},
         )
