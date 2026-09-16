@@ -574,7 +574,16 @@ internal fun TaminHamrahNavGraph(
                 deferredInstallmentScreen(onBack = { navController.popBackStack() })
                 girlSurvivorScreen(onBack = { navController.popBackStack() })
                 inquiryEducationScreen(onBack = { navController.popBackStack() })
-                fractionContractScreen(onBack = { navController.popBackStack() })
+                fractionContractScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToPremiumPayment = { contractNumber, premiumTypeCode, insuranceType ->
+                        navController.navigateToContractPremiumPayment(
+                            contractNumber,
+                            premiumTypeCode,
+                            insuranceType,
+                        )
+                    },
+                )
                 weddingPresentScreen(
                     onBack = { navController.popBackStack() },
                     onNavigateToCalculate = { navController.navigateToWeddingPresentCalculate() },
