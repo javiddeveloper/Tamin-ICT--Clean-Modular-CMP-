@@ -43,6 +43,7 @@ import com.tamin.taminhamrah.feature.girlSurvivor.ui.contract.GirlSurvivorStep
 import com.tamin.taminhamrah.feature.girlSurvivor.ui.contract.GirlSurvivorUiState
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
+import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.IconBox
 import com.tamin.taminhamrah.ui.components.LoadingButton
@@ -158,6 +159,7 @@ private fun GirlSurvivorContent(
 ) {
     val taminColors = LocalTaminColors.current
     var showAbandonDialog by remember { mutableStateOf(false) }
+    BackHandler { showAbandonDialog = true }
     val headerBrush = remember(taminColors.profileGradientStops) {
         Brush.horizontalGradient(taminColors.profileGradientStops)
     }

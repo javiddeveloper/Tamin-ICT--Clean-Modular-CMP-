@@ -42,6 +42,7 @@ import com.tamin.taminhamrah.feature.contracts.flow.ui.contract.ContractFlowInte
 import com.tamin.taminhamrah.feature.contracts.flow.ui.contract.ContractFlowUiState
 import com.tamin.taminhamrah.feature.contracts.flow.ui.contract.isUserInfoStepComplete
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
 import com.tamin.taminhamrah.ui.components.TaminBottomBar
@@ -217,6 +218,7 @@ fun ContractFlowScreenContent(
     val totalSteps = steps.size.coerceAtLeast(1)
     val screenTitle = state.config?.screenTitleRes?.let { stringResource(it) }.orEmpty()
     var showAbandonDialog by remember { mutableStateOf(false) }
+    BackHandler { showAbandonDialog = true }
     val isEditInfoStep =
         state.isEditingExistingContract && state.currentStep == ContractStep.STEP_REGISTRATION
     val stepTitle = if (isEditInfoStep) {

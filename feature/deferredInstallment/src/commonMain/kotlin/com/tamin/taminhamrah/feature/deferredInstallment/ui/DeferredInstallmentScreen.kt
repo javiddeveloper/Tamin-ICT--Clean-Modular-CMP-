@@ -168,17 +168,17 @@ fun DeferredInstallmentScreen(
         onBackClicked = onBackClicked,
     )
 
+    var showAbandonDialog by remember { mutableStateOf(false) }
+
     val handleBack: () -> Unit = {
         if (uiState.currentStep == DeferredInstallmentStep.CertificateRequest) {
-            onBackClicked()
+            showAbandonDialog = true
         } else {
             viewModel.sendIntent(DeferredInstallmentIntent.BackToPreviousStep)
         }
     }
 
     BackHandler(onBack = handleBack)
-
-    var showAbandonDialog by remember { mutableStateOf(false) }
 
     DeferredInstallmentContent(
         state = uiState,
