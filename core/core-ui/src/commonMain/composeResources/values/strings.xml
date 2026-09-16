@@ -1483,7 +1483,8 @@
     <string name="inspection_request_prev_step">مرحلهٔ قبل</string>
     <string name="inspection_request_objection_title">ثبت اعتراض</string>
     <string name="inspection_request_selection_empty">موردی یافت نشد</string>
-    <string name="inspection_request_step2_section_title">اطلاعات کارگاه محل اشتغال</string>
+    <string name="inspection_request_step2_section_title">اطلاعات کارگاه</string>
+    <string name="inspection_request_step2_section_banner">اطلاعات کارگاه از بازرسی انتخاب‌شده پر شده است؛ در صورت نیاز ویرایش کنید.</string>
     <string name="inspection_request_field_workshop_name">نام کارگاه</string>
     <string name="inspection_request_field_workshop_name_placeholder">نام کارگاه محل اشتغال</string>
     <string name="inspection_request_field_workshop_phone_optional">تلفن کارگاه (اختیاری)</string>
