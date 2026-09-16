@@ -78,6 +78,25 @@ class CommonRepositoryImplTest {
         assertEquals(UserType.PENSIONER.name, tokenStoreManager.storedUserType)
     }
 
+    @Test
+    fun `getJobTitlePage fetches and maps to PageDN`() = runTest {
+        remoteDataSource.jobTitleResult = ListData(
+            list = listOf(
+                JobTitleDTO(jobCode = "101", jobDescription = "برنامه‌نویس", status = "1", statusDate = "1402/01/01"),
+            ),
+            total = 100,
+        )
+
+        repository.getJobTitlePage(ApiQueryParamDN(page = 0, limit = 10)).test {
+            val page = awaitItem()
+            assertEquals(1, page.items.size)
+            assertEquals("101", page.items.first().jobCode)
+            assertEquals("برنامه‌نویس", page.items.first().jobDescription)
+            assertEquals(100, page.total)
+            awaitComplete()
+        }
+    }
+
     // Fakes
     private class FakeRemoteDataSource : CommonRemoteDataSource {
         var checkInsuredInfoResult = UserInsuredInfoDTO()
@@ -112,8 +131,10 @@ class CommonRepositoryImplTest {
         override suspend fun getRegistrationDeclarationForm(): HttpStatement =
             throw NotImplementedError("not used by these tests")
 
+        var jobTitleResult: ListData<JobTitleDTO>? = null
+
         override suspend fun getJobTitle(query: ApiQueryParamDN): ListData<JobTitleDTO>? =
-            throw NotImplementedError("not used by these tests")
+            jobTitleResult
     }
 
     private class FakeMenuDao : MenuDao {

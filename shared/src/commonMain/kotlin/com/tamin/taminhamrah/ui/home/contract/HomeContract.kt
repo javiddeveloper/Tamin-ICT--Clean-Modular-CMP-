@@ -53,6 +53,8 @@ data class HomeUiState(
 
 sealed interface HomeIntent {
     object LoadMenu : HomeIntent
+    /** Re-asks whether this user may chat with the assistant; runs whenever home is shown. */
+    object RefreshAgentAccess : HomeIntent
     object LoadHeader : HomeIntent
     object LoadLastRequests : HomeIntent
     data class OnServiceClick(val service: MainServiceDN) : HomeIntent

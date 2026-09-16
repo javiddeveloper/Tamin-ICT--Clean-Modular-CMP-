@@ -10,8 +10,10 @@ import com.tamin.taminhamrah.model.common.BeneficiaryDN
 import com.tamin.taminhamrah.model.common.InsuranceTypeDN
 import com.tamin.taminhamrah.model.common.UserType
 import com.tamin.taminhamrah.model.common.UserTypeInfoDN
+import com.tamin.taminhamrah.model.common.JobTitleDN
 import com.tamin.taminhamrah.model.common.JobTitleListDN
 import com.tamin.taminhamrah.model.common.MainServiceDN
+import com.tamin.taminhamrah.model.paging.PageDN
 import com.tamin.taminhamrah.model.pension.EdictPensionerDN
 import com.tamin.taminhamrah.model.pension.EdictPensionerInboxDN
 import com.tamin.taminhamrah.model.pension.InquirePensionCertificateDN
@@ -343,6 +345,7 @@ private class FakeDeferredInstallmentCommonRepository : CommonRepository {
         error("not used")
     override fun getRegistrationDeclarationForm(): Flow<ByteArray> = error("not used")
     override fun getJobTitle(query: ApiQueryParamDN): Flow<JobTitleListDN?> = error("not used")
+    override fun getJobTitlePage(query: ApiQueryParamDN): Flow<PageDN<JobTitleDN>> = error("not used")
     override fun getRoles(): Flow<List<com.tamin.taminhamrah.model.common.RoleDN>> = error("not used")
     override fun getInsuranceTypes(searchText: String?): Flow<List<InsuranceTypeDN>> {
         error("not used")

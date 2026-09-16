@@ -3,10 +3,6 @@ package com.tamin.taminhamrah.ui.home
 import androidx.lifecycle.viewModelScope
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.FeatureManager
-import com.tamin.taminhamrah.mapper.home.hasActiveRelation
-import com.tamin.taminhamrah.mapper.home.toDarmanCoveredOrNull
-import com.tamin.taminhamrah.mapper.identity.toPresentation
-import com.tamin.taminhamrah.mapper.userRequest.toPresentation
 import com.tamin.taminhamrah.model.campaign.CampaignKind
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
@@ -14,6 +10,7 @@ import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.common.featureStatusOf
 import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.ui.home.contract.*
+import com.tamin.taminhamrah.useCases.agent.CheckChatAllowedUseCase
 import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
 import com.tamin.taminhamrah.useCases.home.GetHomeContentUseCase
 import com.tamin.taminhamrah.useCases.home.SyncHomeContentUseCase
@@ -27,13 +24,13 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 
 class HomeViewModel(
     private val getMainMenuUseCase: GetMainMenuUseCase,
+    private val checkChatAllowedUseCase: CheckChatAllowedUseCase,
     private val featureManager: FeatureManager,
     private val getHomeContentUseCase: GetHomeContentUseCase,
     private val syncHomeContentUseCase: SyncHomeContentUseCase,
@@ -82,6 +79,11 @@ class HomeViewModel(
             }
             is HomeIntent.OnCampaignClick -> {
                 handleFeatureClick(intent.flag)
+            }
+            is HomeIntent.RefreshAgentAccess -> {
+                // Like the native dashboard: the answer is cached by the use case and drives the
+                // assistant's entry point. A failure keeps the last known answer, so it is ignored.
+                checkChatAllowedUseCase()
             }
             is HomeIntent.OnSectionSelected -> {
                 emit(HomeUiState.HomePartialState.SectionSelected(intent.section))

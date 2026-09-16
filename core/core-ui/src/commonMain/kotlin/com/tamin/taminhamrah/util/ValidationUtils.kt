@@ -5,6 +5,9 @@ package com.tamin.taminhamrah.util
  */
 object ValidationUtils {
 
+    /** Legacy `Utility.checkPhoneNumber` landline pattern — area code `0[1-8][1-9]{2}` + 7 digits. */
+    private val LANDLINE_REGEX = Regex("^0[1-8][1-9]{2}\\d{7}$")
+
     /**
      * Filters input to only digit characters and caps length to 11 digits.
      */
@@ -38,16 +41,25 @@ object ValidationUtils {
 
     /**
      * Returns true if phone number is exactly 11 digits.
+     *
+     * Prefer [isLandlineNumberValid] for fixed-line numbers and [isMobileNumberValid] for mobiles.
      */
     fun isPhoneNumberValid(phone: String): Boolean {
         return phone.length == 11
     }
 
     /**
-     * Returns true if landline is empty or exactly 11 digits.
+     * Returns true when [phone] matches the legacy Iranian landline pattern.
+     */
+    fun isLandlineNumberValid(phone: String): Boolean {
+        return LANDLINE_REGEX.matches(phone)
+    }
+
+    /**
+     * Returns true if landline is empty or matches the legacy landline pattern.
      */
     fun isLandlineValid(landline: String): Boolean {
-        return landline.isEmpty() || landline.length == 11
+        return landline.isEmpty() || isLandlineNumberValid(landline)
     }
 
     /**

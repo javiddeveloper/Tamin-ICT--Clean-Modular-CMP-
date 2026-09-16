@@ -3,6 +3,8 @@ package com.tamin.taminhamrah.feature.agent.di
 import com.tamin.taminhamrah.feature.agent.service.AgentActionDispatcher
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceRegistry
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceUseCase
+import com.tamin.taminhamrah.feature.agent.service.base.AgentStrings
+import com.tamin.taminhamrah.feature.agent.service.base.ComposeAgentStrings
 import com.tamin.taminhamrah.feature.agent.audio.createVoicePlayer
 import com.tamin.taminhamrah.feature.agent.audio.createVoiceRecorder
 import com.tamin.taminhamrah.feature.agent.service.impl.AppointmentAgentService
@@ -11,8 +13,8 @@ import com.tamin.taminhamrah.feature.agent.service.impl.DastmozdInfosAgentServic
 import com.tamin.taminhamrah.feature.agent.service.impl.DeepLinkAgentService
 import com.tamin.taminhamrah.feature.agent.service.impl.DependentsAgentService
 import com.tamin.taminhamrah.feature.agent.service.impl.EdictAgentService
+import com.tamin.taminhamrah.feature.agent.service.impl.EligiblePensionAgentService
 import com.tamin.taminhamrah.feature.agent.service.impl.GeneralResponseAgentService
-import com.tamin.taminhamrah.feature.agent.service.impl.IllnessAgentService
 import com.tamin.taminhamrah.feature.agent.service.impl.JobHistoryAgentService
 import com.tamin.taminhamrah.feature.agent.service.impl.LawAgentService
 import com.tamin.taminhamrah.feature.agent.service.impl.MedicalEntitlementAgentService
@@ -36,6 +38,9 @@ val agentModule = module {
     single { com.tamin.taminhamrah.feature.agent.audio.MediaPlaybackCoordinator() }
     factory { createVoiceRecorder() }
     factory { createVoicePlayer() }
+
+    // Labels for service answers, read from strings.xml.
+    single<AgentStrings> { ComposeAgentStrings() }
 
     // 1. Service Registry
     // Koin uses getAll to find all implementations of AgentServiceUseCase
@@ -63,6 +68,7 @@ val agentModule = module {
 
     // ── Pension ───────────────────────────────────────────────────────────────
     singleOf(::PensionInquiryAgentService) { bind<AgentServiceUseCase>() }
+    singleOf(::EligiblePensionAgentService) { bind<AgentServiceUseCase>() }
 
     // ── Pay / Payslip ─────────────────────────────────────────────────────────
     singleOf(::PayRollAgentService) { bind<AgentServiceUseCase>() }
@@ -78,9 +84,6 @@ val agentModule = module {
     singleOf(::TreatmentCostAgentService)  { bind<AgentServiceUseCase>() }
     singleOf(::MedicalEntitlementAgentService) { bind<AgentServiceUseCase>() }
 
-    // ── Illness (placeholder — routes to dedicated screens) ───────────────────
-    singleOf(::IllnessAgentService) { bind<AgentServiceUseCase>() }
-
     // ── Appointment ───────────────────────────────────────────────────────────
     singleOf(::AppointmentAgentService) { bind<AgentServiceUseCase>() }
 
@@ -94,7 +97,7 @@ val agentModule = module {
     // ── General / Misc ────────────────────────────────────────────────────────
     singleOf(::GeneralResponseAgentService) { bind<AgentServiceUseCase>() }
 
-    // ── Deep Link (form flows & screens not yet in KMP) ───────────────────────
+    // ── Deep Link: keys answered by opening a screen (incl. illness) ──────────
     singleOf(::DeepLinkAgentService) { bind<AgentServiceUseCase>() }
 
     // Demo-only, paired with the showcase fixture; remove with AgentActionKey.SHOWCASE.
