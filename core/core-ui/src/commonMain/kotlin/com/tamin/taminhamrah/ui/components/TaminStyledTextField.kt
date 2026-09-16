@@ -114,18 +114,18 @@ fun TaminStyledTextField(
         }
     }
 
-    Box(modifier = modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            if (label.isNotBlank() || isRequired) {
-                TaminText(
-                    text = annotatedLabel,
-                    fontSize = 12.5.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = taminColors.textTertiary,
-                    modifier = Modifier.padding(bottom = 6.dp)
-                )
-            }
+    Column(modifier = modifier.fillMaxWidth()) {
+        if (label.isNotBlank() || isRequired) {
+            TaminText(
+                text = annotatedLabel,
+                fontSize = 12.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = taminColors.textTertiary,
+                modifier = Modifier.padding(bottom = 6.dp)
+            )
+        }
 
+        Box(modifier = Modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -188,25 +188,25 @@ fun TaminStyledTextField(
                 }
             }
 
-            if (isValid == false && !errorText.isNullOrEmpty()) {
-                Row(modifier = Modifier.padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(imageVector = Icons.Default.Error, contentDescription = stringResource(Res.string.error_content_description), tint = taminColors.dangerText, modifier = Modifier.size(14.dp))
-                    Spacer(modifier = Modifier.width(6.dp))
-                    TaminText(text = errorText, fontSize = 11.5.sp, fontWeight = FontWeight.Bold, color = taminColors.dangerText)
-                }
+            if (onClick != null) {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clip(RoundedCornerShape(13.dp))
+                        .clickable(
+                            indication = if (clickIndication) ripple() else null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) { onClick() }
+                )
             }
         }
 
-        if (onClick != null) {
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .clip(RoundedCornerShape(13.dp))
-                    .clickable(
-                        indication = if (clickIndication) ripple() else null,
-                        interactionSource = remember { MutableInteractionSource() }
-                    ) { onClick() }
-            )
+        if (isValid == false && !errorText.isNullOrEmpty()) {
+            Row(modifier = Modifier.padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                Icon(imageVector = Icons.Default.Error, contentDescription = stringResource(Res.string.error_content_description), tint = taminColors.dangerText, modifier = Modifier.size(14.dp))
+                Spacer(modifier = Modifier.width(6.dp))
+                TaminText(text = errorText, fontSize = 11.5.sp, fontWeight = FontWeight.Bold, color = taminColors.dangerText)
+            }
         }
     }
 }

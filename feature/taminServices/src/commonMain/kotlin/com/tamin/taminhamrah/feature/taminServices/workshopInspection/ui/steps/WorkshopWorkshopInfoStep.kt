@@ -155,7 +155,7 @@ internal fun WorkshopWorkshopInfoStep(
                 )
             }
 
-            Spacer(Modifier.height(Spacing.lg))
+            Spacer(Modifier.height(Spacing.smPlus))
 
             TaminStyledTextField(
                 value = step.workshopName,

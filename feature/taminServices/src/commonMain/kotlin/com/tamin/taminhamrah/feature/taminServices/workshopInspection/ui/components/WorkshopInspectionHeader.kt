@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.taminServices.workshopInspection.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,8 +25,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.GlassIconTile
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
@@ -82,6 +85,7 @@ internal fun WorkshopInspectionHeader(
                     icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                     contentDescription = null,
                     onClick = onBackClicked,
+                    bordered = true
                 )
             },
             action = {
@@ -89,6 +93,7 @@ internal fun WorkshopInspectionHeader(
                     icon = vectorResource(Res.drawable.ic_tamin_search),
                     contentDescription = stringResource(Res.string.workshop_inspection_search_action_content_description),
                     onClick = onSearchClicked,
+                    bordered = true
                 )
             },
         ) {
@@ -99,26 +104,15 @@ internal fun WorkshopInspectionHeader(
                     .topAreaHide(topAreaState)
                     .clip(RoundedCornerShape(CornerRadius.card))
                     .background(taminColors.glassIconTileBg)
+                    .border(1.dp, taminColors.glassIconTileBorder, RoundedCornerShape(CornerRadius.card))
                     .padding(Spacing.md),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(IconSize.largePlus)
-                        .background(
-                            color = taminColors.onGradient.copy(alpha = 0.2f),
-                            shape = RoundedCornerShape(CornerRadius.chip),
-                        ),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Assignment,
-                        contentDescription = null,
-                        tint = taminColors.onGradient,
-                    )
-                }
-
+                GlassIconTile(
+                    modifier = Modifier.size(IconSize.xlarge),
+                    icon = Icons.Outlined.Assignment,
+                )
                 Column(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
@@ -130,7 +124,7 @@ internal fun WorkshopInspectionHeader(
                     )
                     Text(
                         text = stringResource(Res.string.workshop_inspection_banner_subtitle),
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelMedium.copy(fontSize = 11.sp),
                         color = taminColors.onGradient.copy(alpha = 0.85f),
                     )
                 }
