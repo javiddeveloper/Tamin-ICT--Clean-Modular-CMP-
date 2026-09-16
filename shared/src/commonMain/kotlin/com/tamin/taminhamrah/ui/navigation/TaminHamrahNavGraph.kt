@@ -182,6 +182,9 @@ private fun NavDestination?.toBottomTab(): BottomTab = when {
     else -> BottomTab.OTHER
 }
 
+/** The orb opens the assistant through the deep link gate, so the flag is re-checked on tap. */
+private val AGENT_DEEP_LINK = "@" + DeepLinkKey.AGENT.key
+
 @Composable
 internal fun TaminHamrahNavGraph(
     isLoggedIn: Boolean,
