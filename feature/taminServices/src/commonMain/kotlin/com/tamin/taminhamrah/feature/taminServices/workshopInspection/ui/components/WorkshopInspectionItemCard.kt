@@ -188,13 +188,12 @@ internal fun WorkshopInspectionItemCard(
             }
         }
 
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = Spacing.xlg)
                 .padding(top = Spacing.md, bottom = Spacing.lg),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+            verticalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
             val rotation = animateFloatAsState(
                 targetValue = if (expanded) CHEVRON_OPEN_DEGREES else CHEVRON_CLOSED_DEGREES,
@@ -202,25 +201,32 @@ internal fun WorkshopInspectionItemCard(
             )
 
             // Row order (RTL, so first child renders rightmost): details toggle, then the report
-            // document button, then the objection button last.
-            TaminOutlinedButton(
-                height = 48.dp,
-                textStyle = MaterialTheme.typography.titleSmall,
-                text = stringResource(if (expanded) Res.string.action_hide_details else Res.string.action_show_details),
-                onClick = { expanded = !expanded },
-                icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                iconModifier = Modifier.size(5.dp).graphicsLayer { rotationZ = rotation.value },
-                containerColor = colors.bgPage,
-                borderColor = Color.Transparent,
-                contentColor = colors.blueText,
-                iconPosition = IconPosition.End,
-                modifier = Modifier.weight(1f),
-            )
+            // document button. The objection CTA gets its own full-width row below instead of
+            // squeezing into a three-way split — cramped with three equal-weight buttons.
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+            ) {
+                TaminOutlinedButton(
+                    height = 48.dp,
+                    textStyle = MaterialTheme.typography.titleSmall,
+                    text = stringResource(if (expanded) Res.string.action_hide_details else Res.string.action_show_details),
+                    onClick = { expanded = !expanded },
+                    icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                    iconModifier = Modifier.size(5.dp).graphicsLayer { rotationZ = rotation.value },
+                    containerColor = colors.bgPage,
+                    borderColor = Color.Transparent,
+                    contentColor = colors.blueText,
+                    iconPosition = IconPosition.End,
+                    modifier = Modifier.weight(1f),
+                )
 
-            ReportIconButton(
-                modifier = Modifier.weight(1f),
-                onClick = { onDownloadReportClicked(item.inspectionNo) },
-            )
+                ReportIconButton(
+                    modifier = Modifier.weight(1f),
+                    onClick = { onDownloadReportClicked(item.inspectionNo) },
+                )
+            }
 
             if (item.isObjectable) {
                 TaminFilledButton(
@@ -231,7 +237,7 @@ internal fun WorkshopInspectionItemCard(
                     icon = vectorResource(Res.drawable.ic_warning),
                     iconPosition = IconPosition.End,
                     modifier = Modifier
-                        .weight(1f)
+                        .fillMaxWidth()
                         .height(48.dp),
                 )
             }
