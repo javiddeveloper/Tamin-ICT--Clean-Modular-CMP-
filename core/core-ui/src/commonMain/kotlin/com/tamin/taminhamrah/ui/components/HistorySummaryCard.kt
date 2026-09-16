@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -30,7 +31,6 @@ import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -62,8 +62,8 @@ import taminx.core.core_ui.history_summary_unpaid_warning
 import taminx.core.core_ui.history_summary_year
 import taminx.core.core_ui.ic_tamin_calendar_check
 import taminx.core.core_ui.ic_tamin_check
-import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.ic_tamin_chevron_down
+import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.ic_warning
 
 /**
@@ -190,6 +190,10 @@ fun HistorySummaryCardSkeleton(modifier: Modifier = Modifier) {
             }
         }
 
+        // The month names are left blank but their lane is not: rotated names are a tall band, and
+        // a skeleton that skipped it would hand the page a 62dp jolt the moment the year arrived.
+        Spacer(modifier = Modifier.height(MonthLabelTopGap + RotatedLabelLane))
+
         HistoryCardFooterDivider(colors = colors)
         Spacer(modifier = Modifier.height(FooterPaddingVertical))
     }
@@ -215,14 +219,14 @@ private fun HistoryCardShell(
         modifier = modifier
             .fillMaxWidth()
             .coloredShadow(
-                color = colors.historyCardShadow,
+                color = colors.historySummaryShadow,
                 borderRadius = CornerRadius.card,
                 blurRadius = ShadowBlur,
                 offsetY = ShadowOffsetY,
             )
             .clip(RoundedCornerShape(CornerRadius.card))
             .background(colors.bgSurface)
-            .border(BorderThickness, colors.historyCardBorder, RoundedCornerShape(CornerRadius.card))
+            .border(BorderThickness, colors.historySummaryBorder, RoundedCornerShape(CornerRadius.card))
             .drawWithCache {
                 val radius = GlowSize.toPx() / 2f
                 val brush = Brush.radialGradient(
@@ -482,29 +486,35 @@ private fun HistoryMonthStrip(
         }
     }
 
-    // Abbreviated off the one month table the app has, rather than a second list of twelve names
-    // that could drift from it. Remembered because the map is constant for the life of the strip.
-    val labels = remember {
-        PersianDateFormatter.monthNames.map { it.take(MonthLabelLength) }
-    }
-
+    // Whole month names, turned on their side exactly as «کلیه سوابق» draws its own month axis —
+    // same helper, same lane height, so the two pages spell the year the same way. Twelve names do
+    // not fit a card's width lying down, and the three-letter abbreviation the design used cannot
+    // tell شهریور from شهر… at a glance.
     Row(
         modifier = Modifier
             .padding(horizontal = CardPadding)
             .padding(top = MonthLabelTopGap)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .height(RotatedLabelLane),
         horizontalArrangement = Arrangement.spacedBy(MonthCellGap),
+        verticalAlignment = Alignment.Top,
     ) {
-        labels.forEachIndexed { index, name ->
+        PersianDateFormatter.monthNames.forEachIndexed { index, name ->
             val isCurrent = index == currentMonthIndex
-            TaminText(
-                text = name,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = if (isCurrent) FontWeight.ExtraBold else FontWeight.Bold,
-                color = if (isCurrent) colors.blueText else colors.textSecondary,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.weight(1f),
-            )
+            Box(
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+                contentAlignment = Alignment.TopCenter,
+            ) {
+                TaminText(
+                    text = name,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = if (isCurrent) FontWeight.ExtraBold else FontWeight.Bold,
+                    color = if (isCurrent) colors.blueText else colors.textSecondary,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    modifier = Modifier.rotateVertically(),
+                )
+            }
         }
     }
 }
@@ -760,7 +770,6 @@ private val MonthStripTopGap = 12.dp
 private val MonthLabelTopGap = 5.dp
 
 /** The design labels each month with its first three letters — دی simply has two. */
-private const val MonthLabelLength = 3
 private val MonthCellGap = 3.dp
 private val MonthCellHeight = 30.dp
 private val MonthCellRadius = 9.dp

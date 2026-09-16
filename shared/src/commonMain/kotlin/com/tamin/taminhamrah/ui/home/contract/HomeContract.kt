@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.campaign.CampaignKind
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.MainServiceDN
+import com.tamin.taminhamrah.model.history.HistorySummaryPR
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -21,6 +22,20 @@ data class HomeUiState(
      * `ImmutableList<CampaignPR>` filled in from the wire and nothing below it moves.
      */
     val campaigns: ImmutableList<CampaignKind> = persistentListOf(),
+    /**
+     * خلاصهٔ سابقه for the newest year on record, or null when there is none to summarize — a
+     * person with no insured year, or one the service refuses to answer for at all (a کارفرما and a
+     * مستمری‌بگیر have no premiums of their own).
+     */
+    val historySummary: HistorySummaryPR? = null,
+    /**
+     * The summary's own load, which runs beside the menu's rather than inside it.
+     *
+     * Separate from [isLoading] because they finish at different times and mean different things:
+     * the menu decides whether the page has anything on it, while this decides only whether the one
+     * card shows its skeleton.
+     */
+    val isHistorySummaryLoading: Boolean = true,
     val error: String? = null
 ){
     sealed interface HomePartialState {
@@ -29,6 +44,8 @@ data class HomeUiState(
             val menuItems: List<MainServiceDN>,
             val campaigns: ImmutableList<CampaignKind>,
         ) : HomePartialState
+        /** Null is an answer: the load finished and there is no year to show. */
+        data class HistorySummaryLoaded(val summary: HistorySummaryPR?) : HomePartialState
         data class Error(val message: String?) : HomePartialState
     }
 }
@@ -37,8 +54,11 @@ data class HomeUiState(
 
 sealed interface HomeIntent {
     object LoadMenu : HomeIntent
+    object LoadHistorySummary : HomeIntent
     data class OnServiceClick(val service: MainServiceDN) : HomeIntent
     data class OnCampaignClick(val flag: FeatureFlag) : HomeIntent
+    /** Anywhere on خلاصهٔ سابقه — the card, its year pill and «جزئیات ماه‌به‌ماه» all open سوابق. */
+    object OnHistorySummaryClick : HomeIntent
 }
 
 sealed interface HomeEvent {
