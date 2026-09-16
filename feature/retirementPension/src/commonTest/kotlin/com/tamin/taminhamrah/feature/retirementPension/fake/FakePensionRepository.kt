@@ -103,19 +103,23 @@ class FakePensionRepository : PensionRepository {
     override suspend fun sendEdictPensionerToMyInbox(filters: List<ApiFilterDN>): Flow<EdictPensionerInboxDN> = flow { emit(EdictPensionerInboxDN(null)) }
     override suspend fun sendPayRollToInbox(filters: List<ApiFilterDN>): Flow<PayRollInboxDN> = flow { emit(PayRollInboxDN(null)) }
     override suspend fun sendRequestInquirePensionCertificate(filters: List<ApiFilterDN>): Flow<InquirePensionCertificateDN> = flow {}
-    override suspend fun saveDisabilityUserInfo(body: DisabilitySaveInfoDN): Flow<DisabilityRequestRefDN?> = flow {}
+    override suspend fun saveDisabilityUserInfo(body: DisabilitySaveInfoDN): Flow<DisabilityRequestRefDN?> =
+        error("not used in this test")
 
     override suspend fun finalConfirmDisabilityRequest(
         requestId: Long,
         body: DisabilityFinalConfirmDN
-    ): Flow<DisabilityRequestRefDN?> = flow {}
+    ): Flow<DisabilityRequestRefDN?> = error("not used in this test")
 
     override suspend fun saveDocumentDisability(
         requestId: Long,
         body: DisabilitySaveDocumentDN
-    ): Flow<String?> = flow {}
+    ): Flow<String?> = error("not used in this test")
 
-    override suspend fun getMedicalCommissionPdf(lastWorkshop: String): Flow<PdfDownloadDN> = flow {}
+    override suspend fun getMedicalCommissionPdf(lastWorkshop: String): Flow<PdfDownloadDN> =
+        error("not used in this test")
 
-    override suspend fun getRegisteredMedicalCommission(filters: List<ApiFilterDN>): Flow<List<RegisteredMedicalCommissionDN>> = flow {}
+    override suspend fun getRegisteredMedicalCommission(
+        filters: List<ApiFilterDN>
+    ): Flow<List<RegisteredMedicalCommissionDN>> = error("not used in this test")
 }
