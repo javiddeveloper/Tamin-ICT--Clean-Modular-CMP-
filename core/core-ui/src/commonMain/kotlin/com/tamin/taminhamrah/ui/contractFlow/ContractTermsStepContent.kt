@@ -78,18 +78,19 @@ fun ContractTermsStepContent(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            Text(
-                text = buildInfoBannerText(),
-                style = MaterialTheme.typography.bodyMedium,
-                color = colors.textPrimary,
-                modifier = Modifier.weight(1f),
-            )
             Icon(
                 imageVector = Icons.Outlined.Info,
                 contentDescription = null,
                 tint = colors.blueText,
                 modifier = Modifier.size(IconSize.medium),
             )
+            Text(
+                text = buildInfoBannerText(),
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.textPrimary,
+                modifier = Modifier.weight(1f),
+            )
+
         }
 
 
@@ -97,7 +98,7 @@ fun ContractTermsStepContent(
             text = stringResource(Res.string.contract_terms_view_rules_btn),
             onClick = onShowRules,
             icon = vectorResource(Res.drawable.ic_tamin_print),
-            iconPosition = IconPosition.Start,
+            iconPosition = IconPosition.End,
             shape = RoundedCornerShape(CornerRadius.lg),
             height = 50.dp,
             modifier = Modifier.fillMaxWidth(),
