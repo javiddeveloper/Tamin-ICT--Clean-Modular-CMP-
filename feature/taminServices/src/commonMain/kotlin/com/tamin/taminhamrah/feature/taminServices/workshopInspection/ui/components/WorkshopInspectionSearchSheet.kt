@@ -15,6 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
+import com.tamin.taminhamrah.ui.components.IconPosition
 import com.tamin.taminhamrah.ui.components.InputRestriction
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
@@ -23,7 +25,9 @@ import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_tamin_search
 import taminx.core.core_ui.inspection_id
 import taminx.core.core_ui.inspection_search_button
 import taminx.core.core_ui.inspection_search_clear_button
@@ -71,43 +75,51 @@ internal fun WorkshopInspectionSearchSheet(
                 text = stringResource(Res.string.inspection_search_sheet_title),
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 color = taminColors.textPrimary,
+                textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            TaminStyledTextField(
-                value = workshopCodeQuery,
-                onValueChange = onWorkshopCodeQueryChange,
-                label = stringResource(Res.string.inspection_workshop_code),
-                placeholder = optionalHint,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                inputRestriction = InputRestriction.DigitsOnly,
-                maxLength = MAX_WORKSHOP_CODE_LENGTH,
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-            )
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+            ) {
+                TaminStyledTextField(
+                    value = workshopCodeQuery,
+                    onValueChange = onWorkshopCodeQueryChange,
+                    label = stringResource(Res.string.inspection_workshop_code),
+                    placeholder = optionalHint,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    inputRestriction = InputRestriction.DigitsOnly,
+                    maxLength = MAX_WORKSHOP_CODE_LENGTH,
+                    modifier = Modifier.weight(1f),
+                )
 
-            TaminStyledTextField(
-                value = inspectionIdQuery,
-                onValueChange = onInspectionIdQueryChange,
-                label = stringResource(Res.string.inspection_id),
-                placeholder = optionalHint,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                inputRestriction = InputRestriction.DigitsOnly,
-                maxLength = MAX_INSPECTION_ID_LENGTH,
-                modifier = Modifier.fillMaxWidth(),
-            )
+                TaminStyledTextField(
+                    value = inspectionIdQuery,
+                    onValueChange = onInspectionIdQueryChange,
+                    label = stringResource(Res.string.inspection_id),
+                    placeholder = optionalHint,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    inputRestriction = InputRestriction.DigitsOnly,
+                    maxLength = MAX_INSPECTION_ID_LENGTH,
+                    modifier = Modifier.weight(1f),
+                )
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm, bottom = Spacing.lg),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.md),
             ) {
-                TaminOutlinedButton(
-                    text = stringResource(Res.string.inspection_search_clear_button),
-                    onClick = onClear,
-                    modifier = Modifier.weight(1f),
-                )
                 TaminFilledButton(
                     text = stringResource(Res.string.inspection_search_button),
                     onClick = onApply,
+                    icon = vectorResource(Res.drawable.ic_tamin_search),
+                    iconPosition = IconPosition.End,
+                    modifier = Modifier.weight(1f),
+                )
+                TaminOutlinedButton(
+                    text = stringResource(Res.string.inspection_search_clear_button),
+                    onClick = onClear,
                     modifier = Modifier.weight(1f),
                 )
             }
