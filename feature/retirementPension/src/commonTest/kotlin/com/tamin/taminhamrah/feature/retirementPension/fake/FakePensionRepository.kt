@@ -103,7 +103,6 @@ class FakePensionRepository : PensionRepository {
     override suspend fun sendEdictPensionerToMyInbox(filters: List<ApiFilterDN>): Flow<EdictPensionerInboxDN> = flow { emit(EdictPensionerInboxDN(null)) }
     override suspend fun sendPayRollToInbox(filters: List<ApiFilterDN>): Flow<PayRollInboxDN> = flow { emit(PayRollInboxDN(null)) }
     override suspend fun sendRequestInquirePensionCertificate(filters: List<ApiFilterDN>): Flow<InquirePensionCertificateDN> = flow {}
-
     override suspend fun saveDisabilityUserInfo(body: DisabilitySaveInfoDN): Flow<DisabilityRequestRefDN?> =
         error("not used in this test")
 

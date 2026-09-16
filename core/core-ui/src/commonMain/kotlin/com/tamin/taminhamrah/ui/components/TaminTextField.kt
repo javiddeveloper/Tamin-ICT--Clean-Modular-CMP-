@@ -13,12 +13,19 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -56,6 +63,13 @@ fun TaminTextField(
     isError: Boolean = false,
     errorMessage: String? = null,
     keyboardType: KeyboardType = KeyboardType.Text,
+    maxLength: Int? = null,
+    /**
+     * When [value] already has [maxLength] characters, only deletions are accepted. Insertions and
+     * in-place replacements are ignored until the user shortens the field, then typing can continue
+     * up to [maxLength] again.
+     */
+    deleteOnlyWhenFull: Boolean = false,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
     textStyle: TextStyle = LocalTextStyle.current,
@@ -69,6 +83,20 @@ fun TaminTextField(
 ) {
     val colors = LocalTaminColors.current
     val showError = isError || errorMessage != null
+    var textFieldValue by remember {
+        mutableStateOf(TextFieldValue(text = value, selection = TextRange(value.length)))
+    }
+
+    // Keep the field in sync when the caller filters/clamps to the same logical value — otherwise
+    // Compose leaves the over-length keystroke visible because `value` did not change.
+    LaunchedEffect(value) {
+        if (value != textFieldValue.text) {
+            textFieldValue = TextFieldValue(
+                text = value,
+                selection = TextRange(value.length),
+            )
+        }
+    }
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -87,8 +115,33 @@ fun TaminTextField(
         // the same rounded rect read as one doubled hairline.
         val outline = Color.Transparent.takeIf { animateErrorBorder }
         OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
+            value = textFieldValue,
+            onValueChange = { incoming ->
+                val proposed = incoming.text
+                val next = when {
+                    maxLength == null -> proposed
+                    deleteOnlyWhenFull && value.length >= maxLength && proposed.length >= value.length ->
+                        value
+                    else -> proposed.take(maxLength)
+                }
+                textFieldValue = when {
+                    next == value && proposed != value ->
+                        TextFieldValue(text = value, selection = TextRange(value.length))
+                    next.length < proposed.length ->
+                        TextFieldValue(text = next, selection = TextRange(next.length))
+                    else ->
+                        incoming.copy(
+                            text = next,
+                            selection = TextRange(
+                                incoming.selection.start.coerceIn(0, next.length),
+                                incoming.selection.end.coerceIn(0, next.length),
+                            ),
+                        )
+                }
+                if (next != value) {
+                    onValueChange(next)
+                }
+            },
             enabled = enabled,
             readOnly = readOnly,
             singleLine = singleLine,
