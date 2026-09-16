@@ -816,6 +816,9 @@ fun HistoryContent(
             onStepNewer = onStepNewer,
             collapseProgress = collapse.progressProvider,
             hasYears = uiState.years.isNotEmpty(),
+            // The same condition the body's own skeleton uses, so the head and the page below it
+            // stop waiting at the same moment rather than one strip at a time.
+            loading = uiState.isLoading && uiState.years.isEmpty(),
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .onSizeChanged { headerHeightPx = it.height },
