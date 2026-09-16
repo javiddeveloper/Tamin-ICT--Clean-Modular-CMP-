@@ -218,7 +218,6 @@ fun ContractFlowScreenContent(
     val totalSteps = steps.size.coerceAtLeast(1)
     val screenTitle = state.config?.screenTitleRes?.let { stringResource(it) }.orEmpty()
     var showAbandonDialog by remember { mutableStateOf(false) }
-    BackHandler { showAbandonDialog = true }
     val isEditInfoStep =
         state.isEditingExistingContract && state.currentStep == ContractStep.STEP_REGISTRATION
     val stepTitle = if (isEditInfoStep) {
@@ -245,10 +244,11 @@ fun ContractFlowScreenContent(
     val handleNavigateBack: () -> Unit = {
         when {
             state.isEditMode -> onIntent(ContractFlowIntent.GoToPreviousStep)
-            steps.isFirstStep(state.currentStep) -> onBack()
+            steps.isFirstStep(state.currentStep) -> showAbandonDialog = true
             else -> onIntent(ContractFlowIntent.GoToPreviousStep)
         }
     }
+    BackHandler(onBack = handleNavigateBack)
 
     Scaffold(
         modifier = modifier.fillMaxSize(),

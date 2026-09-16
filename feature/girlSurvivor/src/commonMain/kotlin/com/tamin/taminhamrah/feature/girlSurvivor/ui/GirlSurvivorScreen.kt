@@ -103,10 +103,6 @@ fun GirlSurvivorScreen(
 
     GirlSurvivorContent(
         state = state,
-        onBack = {
-            if (state.currentStep == GirlSurvivorStep.Details) onBack()
-            else viewModel.sendIntent(GirlSurvivorIntent.GoToPreviousStep)
-        },
         onClose = onBack,
         onIntent = viewModel::sendIntent,
         onDownloadPdf = { showPdfViewer = true },
@@ -152,14 +148,20 @@ private fun HandleGirlSurvivorEvents(
 @Composable
 private fun GirlSurvivorContent(
     state: GirlSurvivorUiState,
-    onBack: () -> Unit,
     onClose: () -> Unit,
     onIntent: (GirlSurvivorIntent) -> Unit,
     onDownloadPdf: () -> Unit,
 ) {
     val taminColors = LocalTaminColors.current
     var showAbandonDialog by remember { mutableStateOf(false) }
-    BackHandler { showAbandonDialog = true }
+    val handleBack: () -> Unit = {
+        if (state.currentStep == GirlSurvivorStep.Details) {
+            showAbandonDialog = true
+        } else {
+            onIntent(GirlSurvivorIntent.GoToPreviousStep)
+        }
+    }
+    BackHandler(onBack = handleBack)
     val headerBrush = remember(taminColors.profileGradientStops) {
         Brush.horizontalGradient(taminColors.profileGradientStops)
     }
@@ -204,7 +206,7 @@ private fun GirlSurvivorContent(
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                         contentDescription = null,
-                        onClick = onBack,
+                        onClick = handleBack,
                         bordered = true,
                     )
                 },
