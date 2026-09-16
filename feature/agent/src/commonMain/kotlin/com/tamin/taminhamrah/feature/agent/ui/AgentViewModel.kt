@@ -988,7 +988,8 @@ class AgentViewModel(
 
     override fun onCleared() {
         isRecordingActive.value = false
-        voiceRecorder.stop()
+        // Nobody will send a recording left behind, so it is dropped without waiting for its file.
+        voiceRecorder.cancel()
         voicePlayer.release()
         super.onCleared()
     }

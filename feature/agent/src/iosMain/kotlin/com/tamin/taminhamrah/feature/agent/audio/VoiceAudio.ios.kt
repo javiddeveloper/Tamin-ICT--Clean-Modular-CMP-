@@ -96,12 +96,22 @@ private class IosVoiceRecorder : VoiceRecorder {
         }
     }
 
-    override fun stop() {
+    override suspend fun stop() {
+        finish(discard = false)
+    }
+
+    override fun cancel() {
+        finish(discard = true)
+    }
+
+    /** AVAudioRecorder finishes its file inside `stop`, so neither path has anything to wait for. */
+    private fun finish(discard: Boolean) {
         if (!_isRecording.value) return
         _isRecording.value = false
         scope?.cancel()
         scope = null
         runCatching { recorder?.stop() }
+        if (discard) runCatching { recorder?.deleteRecording() }
         recorder = null
         _amplitude.value = 0
     }

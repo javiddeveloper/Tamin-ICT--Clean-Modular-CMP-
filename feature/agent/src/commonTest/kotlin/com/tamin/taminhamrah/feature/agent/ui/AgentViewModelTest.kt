@@ -45,8 +45,10 @@ class FakeVoiceRecorder : com.tamin.taminhamrah.feature.agent.audio.VoiceRecorde
     override val amplitude = MutableStateFlow(0)
     override val isRecording = MutableStateFlow(false)
     override fun start(filePath: String) { isRecording.value = true }
-    override fun stop() { isRecording.value = false }
-    override fun newRecordingPath(): String = "/tmp/fake_voice.m4a"
+    var cancelled = false
+    override suspend fun stop() { isRecording.value = false }
+    override fun cancel() { cancelled = true; isRecording.value = false }
+    override fun newRecordingPath(): String = "/tmp/fake_voice.wav"
 }
 
 class FakeVoicePlayer : com.tamin.taminhamrah.feature.agent.audio.VoicePlayer {
