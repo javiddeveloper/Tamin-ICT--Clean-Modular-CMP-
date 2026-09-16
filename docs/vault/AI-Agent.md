@@ -6,7 +6,15 @@ tags: [architecture, domain]
 
 Design notes for rewriting the AI assistant on Kotlin Multiplatform. The goal is to remove the architectural bottlenecks of the native Android version and reach a modular, scalable system that is integrated with the rest of the app. Absorbed from the former `documents/agent.md`.
 
-The wire format is documented separately in [[AI-Agent-API-Contract]].
+The wire format is documented separately in [[AI-Agent-API-Contract]]. How answers are written and drawn: [[Agent-Markdown]]. How its buttons open screens: [[Deep-Links]].
+
+## 0. What is built (September 2026)
+
+- **Answers are markdown.** Server-rendered entities and every client service produce `ChatBubbleContent.Markdown`; the renderer lives in `feature/agent/.../markdown` (pure parser) and `ui/markdown` (Compose).
+- **Access and token.** `CheckChatAllowedUseCase` caches the chat-allowed answer in `AgentAccessStore` (core-datastore; cleared on logout). `ObserveAgentAvailabilityUseCase` = `FeatureFlag.AGENT` enabled **and** the cached permission — it drives the bottom-bar orb, and home refreshes the permission each time it is shown. Prompts read the token from the store; an expired token is refreshed once by `SendAgentPromptUseCase`.
+- **Screen.** A refusal shows the reason and creates no conversation; a failed check leaves the chat offline until Retry checks again; Cancel stops polling and calls `request/cancel`; the mic follows `canSendVoice`.
+- **Links.** Buttons go through `LocalDeepLinkHandler`, so the flag is checked when tapped. The old `AgentDestination` ids are gone.
+- **Still a fake.** `RemoteModule` binds `AgentRemoteDataSourceFakeImpl`; the real implementation is kept in step but not switched on.
 
 ## 1. Form generation without duplication (SDUI and embedded items)
 

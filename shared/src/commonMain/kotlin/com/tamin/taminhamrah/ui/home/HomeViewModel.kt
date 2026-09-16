@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.common.featureStatusOf
 import com.tamin.taminhamrah.ui.home.contract.*
+import com.tamin.taminhamrah.useCases.agent.CheckChatAllowedUseCase
 import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
 import com.tamin.taminhamrah.util.AppConfig
 import kotlinx.collections.immutable.ImmutableList
@@ -20,7 +21,8 @@ import kotlinx.coroutines.flow.map
 
 class HomeViewModel(
     private val getMainMenuUseCase: GetMainMenuUseCase,
-    private val featureManager: FeatureManager
+    private val featureManager: FeatureManager,
+    private val checkChatAllowedUseCase: CheckChatAllowedUseCase,
 ) : BaseViewModel<HomeUiState, HomeUiState.HomePartialState, HomeEvent, HomeIntent>(
     initialState = HomeUiState(isLoading = true)
 ) {
@@ -44,6 +46,11 @@ class HomeViewModel(
             }
             is HomeIntent.OnCampaignClick -> {
                 handleFeatureClick(intent.flag)
+            }
+            is HomeIntent.RefreshAgentAccess -> {
+                // Like the native dashboard: the answer is cached by the use case and drives the
+                // assistant's entry point. A failure keeps the last known answer, so it is ignored.
+                checkChatAllowedUseCase()
             }
         }
     }

@@ -11,7 +11,7 @@ import com.tamin.taminhamrah.apiService.VersionHistoryApiServiceImpl
 import com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSource
 import com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSource
-import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSourceFakeImpl
+import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.paymentSource.FakePaymentGatewayRemoteDataSource
 import com.tamin.taminhamrah.dataSource.paymentSource.PaymentGatewayRemoteDataSource
 import com.tamin.taminhamrah.dataSource.paymentSource.PaymentGatewayRemoteDataSourceImpl
@@ -240,14 +240,10 @@ val remoteModule = module {
     }
 
     single<AgentRemoteDataSource> {
-        // Fake agent responses while the real API is being finished.
-        // Swap to the AgentRemoteDataSourceImpl below to hit the live service:
-        //   AgentRemoteDataSourceImpl(
-        //       agentApiService = get(named("agentApiService")),
-        //       errorParser = get(),
-        //       json = get()
-        //   )
-        AgentRemoteDataSourceFakeImpl(
+        // The live assistant. AgentRemoteDataSourceFakeImpl serves local fixtures for offline work.
+        AgentRemoteDataSourceImpl(
+            agentApiService = get(named("agentApiService")),
+            errorParser = get(),
             json = get()
         )
     }

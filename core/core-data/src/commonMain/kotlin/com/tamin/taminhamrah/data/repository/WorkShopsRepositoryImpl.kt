@@ -222,8 +222,16 @@ class WorkShopsRepositoryImpl(
 
     override suspend fun createNewMemberRegistration(
         request: NewMemberRegistrationDN,
-    ): NewMemberRegistrationResultDN =
-        remoteDataSource.createNewMemberRegistration(request.toDto()).toDomain()
+    ): NewMemberRegistrationResultDN {
+        val body = request.toDto()
+        val personalId = request.personalId
+        val result = if (personalId == null) {
+            remoteDataSource.createNewMemberRegistration(body)
+        } else {
+            remoteDataSource.updateNewMemberRegistration(personalId, body)
+        }
+        return result.toDomain()
+    }
 
     // ------------------------------------------------------------------------- ماده ۱۶
 

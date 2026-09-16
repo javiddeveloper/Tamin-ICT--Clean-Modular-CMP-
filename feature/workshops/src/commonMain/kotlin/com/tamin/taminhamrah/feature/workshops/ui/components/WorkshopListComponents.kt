@@ -346,7 +346,7 @@ internal fun WorkshopCodeRow(
         )
         Row(
             modifier = Modifier
-                .clip(RoundedCornerShape(WorkshopDimens.codeChipCorner))
+                .clip(CodeChipShape)
                 .clickable(enabled = code.isNotBlank()) {
                     copy()
                     isCopied = true
@@ -400,7 +400,7 @@ fun CardExpandToggle(
     collapseLabel: StringResource = Res.string.workshop_card_collapse,
 ) {
     val colors = LocalTaminColors.current
-    val rotation by animateFloatAsState(if (isExpanded) WorkshopDimens.toggleHalfTurn else 0f, label = "chevron")
+    val rotation = animateFloatAsState(if (isExpanded) WorkshopDimens.toggleHalfTurn else 0f, label = "chevron")
 
     Row(
         modifier = modifier
@@ -435,8 +435,11 @@ fun CardExpandToggle(
             modifier = Modifier
                 .padding(start = Spacing.tabSelector)
                 .size(WorkshopDimens.toggleChevronSize)
-                .graphicsLayer { rotationZ = rotation },
+                .graphicsLayer { rotationZ = rotation.value },
         )
     }
 }
+
+private val CodeChipShape = RoundedCornerShape(WorkshopDimens.codeChipCorner)
+
 

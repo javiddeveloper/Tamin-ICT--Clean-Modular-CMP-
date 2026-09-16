@@ -29,20 +29,19 @@ import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
 import com.tamin.taminhamrah.model.workshop.PaymentTicketInfoDTO
-import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
-import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDTO
-import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDTO
 import com.tamin.taminhamrah.model.workshop.SmsMessageDTO
+import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopContractDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDTO
-import com.tamin.taminhamrah.model.workshop.WorkshopContractDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDTO
 import com.tamin.taminhamrah.tools.BaseDTO
-import com.tamin.taminhamrah.util.NetworkConstants
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.DELETE
 import de.jensklingenberg.ktorfit.http.GET
@@ -218,6 +217,19 @@ internal interface WorkShopsApiService {
     /** Creates the registration. `employers`, as the old app posts it. */
     @POST("employers")
     suspend fun createNewMemberRegistration(
+        @Body request: NewMemberRegistrationDTO,
+    ): BaseDTO<NewMemberRegistrationResultDTO>
+
+    /**
+     * Updates a registration already on file instead of posting a second one.
+     *
+     * The old app's `updateNewInsuredInfo` names this segment `requestId`, but re-opening a draft
+     * from the list it fills it with the person's id — the id the create returns and the list row
+     * carries — so that is what goes here.
+     */
+    @PUT("employers/{personalId}")
+    suspend fun updateNewMemberRegistration(
+        @Path("personalId") personalId: Long,
         @Body request: NewMemberRegistrationDTO,
     ): BaseDTO<NewMemberRegistrationResultDTO>
 

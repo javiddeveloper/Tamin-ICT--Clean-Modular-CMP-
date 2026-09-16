@@ -27,6 +27,8 @@ Read the relevant page there before searching the codebase:
 | Dynamic menu and FeatureFlag | `docs/vault/Feature-Flags.md` |
 | AI assistant architecture | `docs/vault/AI-Agent.md` |
 | AI assistant JSON contract | `docs/vault/AI-Agent-API-Contract.md` |
+| Assistant markdown, formulas, service answers | `docs/vault/Agent-Markdown.md` |
+| Deep links and the feature-flag gate | `docs/vault/Deep-Links.md` |
 | Persian domain term ↔ name in code | `docs/vault/Glossary.md` |
 
 All documentation is written in English. The vault uses Obsidian-style `[[…]]` links, which resolve to the file name without its extension.

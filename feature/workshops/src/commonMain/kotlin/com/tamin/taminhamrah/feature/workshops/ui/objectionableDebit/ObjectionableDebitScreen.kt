@@ -1,15 +1,16 @@
 package com.tamin.taminhamrah.feature.workshops.ui.objectionableDebit
 
-import androidx.compose.runtime.Composable
 import taminx.core.core_ui.obj_form_done_body
 import org.jetbrains.compose.resources.getString
 import kotlinx.coroutines.flow.Flow
 import com.tamin.taminhamrah.ui.components.toast.success
 import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -75,10 +76,14 @@ fun ObjectionableDebitScreen(
 
     HandleObjectionableDebitEvents(viewModel.events)
 
+    val onIntent = remember(viewModel) {
+        { intent: ObjectionableDebitIntent -> viewModel.sendIntent(intent) }
+    }
+
     ObjectionableDebitContent(
         state = state,
         workshopName = workshopName,
-        onIntent = viewModel::sendIntent,
+        onIntent = onIntent,
         onBack = onBack,
         modifier = modifier,
     )
@@ -92,45 +97,65 @@ fun ObjectionableDebitContent(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val workshopCode = remember(state.workshopId) {
+        state.workshopId.takeIf { it.isNotBlank() }?.toPersianDigits()
+    }
+    val safeWorkshopName = remember(workshopName) {
+        workshopName.takeIf { it.isNotBlank() }
+    }
+
     // ثبت اعتراض is a page of this screen, not a route: only this ViewModel holds the domain row
     // the objection is filed against.
     // The already-filed objection, rendered by the app's own viewer rather than dropped into
     // Downloads unseen — it saves a copy itself.
     state.viewerPdf?.let { pdf ->
+        val onDismissViewer = remember(onIntent) {
+            { onIntent(ObjectionableDebitIntent.DismissViewer) }
+        }
         TaminPdfViewer(
             fileName = stringResource(Res.string.objection_pdf_file, state.workshopId),
             pdf = pdf,
             downloadFailed = false,
             onRequestDownload = {},
-            onDismiss = { onIntent(ObjectionableDebitIntent.DismissViewer) },
+            onDismiss = onDismissViewer,
             title = stringResource(Res.string.workshop_action_objection),
         )
     }
 
     state.form?.let { form ->
-        BackHandler { onIntent(ObjectionableDebitIntent.FormDismissed) }
+        val onDismissForm = remember(onIntent) {
+            { onIntent(ObjectionableDebitIntent.FormDismissed) }
+        }
+        BackHandler(onBack = onDismissForm)
         ObjectionFormPage(
             form = form,
             workshopName = workshopName,
-            workshopCode = state.workshopId.takeIf { it.isNotBlank() }?.toPersianDigits(),
+            workshopCode = workshopCode,
             onIntent = onIntent,
-            onBack = { onIntent(ObjectionableDebitIntent.FormDismissed) },
+            onBack = onDismissForm,
             modifier = modifier,
         )
         return
     }
 
+    val onLoadMore = remember(onIntent) {
+        { onIntent(ObjectionableDebitIntent.LoadMore) }
+    }
+    val onRetry = remember(onIntent) {
+        { onIntent(ObjectionableDebitIntent.Retry) }
+    }
+
     WorkshopScreenShell(
         title = stringResource(Res.string.workshop_action_objection),
         onBack = onBack,
-        workshopName = workshopName.takeIf { it.isNotBlank() },
-        workshopCode = state.workshopId.takeIf { it.isNotBlank() }?.toPersianDigits(),
+        workshopName = safeWorkshopName,
+        workshopCode = workshopCode,
         modifier = modifier,
     ) {
         WorkshopListScaffold(
             state = state.list,
-            onLoadMore = { onIntent(ObjectionableDebitIntent.LoadMore) },
-            onRetry = { onIntent(ObjectionableDebitIntent.Retry) },
+            onLoadMore = onLoadMore,
+            onRetry = onRetry,
             key = { it.debitNumber },
             header = {
                 WorkshopSectionHeader(
@@ -141,7 +166,9 @@ fun ObjectionableDebitContent(
         ) { debt, rowModifier ->
             ObjectionableDebtCard(
                 debt = debt,
-                onAction = { onIntent(ObjectionableDebitIntent.RowAction(debt)) },
+                onAction = remember(debt, onIntent) {
+                    { onIntent(ObjectionableDebitIntent.RowAction(debt)) }
+                },
                 modifier = rowModifier,
             )
         }
@@ -156,12 +183,13 @@ private fun ObjectionableDebtCard(
 ) {
     val colors = LocalTaminColors.current
     var isExpanded by rememberSaveable(debt.debitNumber) { mutableStateOf(false) }
+    val onToggle = remember { { isExpanded = !isExpanded } }
     val kind = debt.objectionKind
 
     WorkshopRecordCard(
         modifier = modifier,
         isExpanded = isExpanded,
-        onToggle = { isExpanded = !isExpanded },
+        onToggle = onToggle,
         buttons = {
             WorkshopCardButton(
                 text = stringResource(kind.label),

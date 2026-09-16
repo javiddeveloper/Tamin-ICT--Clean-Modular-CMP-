@@ -20,8 +20,17 @@ interface VoiceRecorder {
     /** Begins recording into [filePath] (a path returned by [newRecordingPath]). */
     fun start(filePath: String)
 
-    /** Stops and finalizes the current recording. Safe to call when idle. */
-    fun stop()
+    /**
+     * Stops and finalizes the current recording, returning once the file is complete and can be
+     * read. Suspends rather than blocks: finishing the file may take a moment. Safe when idle.
+     */
+    suspend fun stop()
+
+    /**
+     * Abandons the current recording without waiting and deletes its file, e.g. when the screen
+     * goes away mid-recording. Never blocks, so it is safe from `onCleared`. Safe when idle.
+     */
+    fun cancel()
 
     /** A fresh, unique absolute file path inside the platform cache directory. */
     fun newRecordingPath(): String

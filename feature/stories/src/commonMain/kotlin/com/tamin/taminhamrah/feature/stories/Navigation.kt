@@ -24,20 +24,17 @@ fun NavController.navigateToStoryViewer(channelIndex: Int, navOptions: NavOption
 }
 
 /**
- * @param onOpenDeepLink where a slide's call to action leads. Carries a deep link rather than
- *   navigating from here: the story feature must not import another feature, and the host is also
- *   where the deep link is resolved.
+ * A slide's call to action is a deep link handed to `LocalDeepLinkHandler`, like the assistant's
+ * buttons: the host's gate checks the service's feature flag when it is tapped.
  */
 fun NavGraphBuilder.storyViewerScreen(
     onClose: () -> Unit,
-    onOpenDeepLink: (String) -> Unit,
 ) {
     composableWithFadeTransitions<StoryViewerRoute> { backStackEntry ->
         val route = backStackEntry.toRoute<StoryViewerRoute>()
         StoryViewerScreen(
             channelIndex = route.channelIndex,
             onClose = onClose,
-            onOpenDeepLink = onOpenDeepLink,
         )
     }
 }

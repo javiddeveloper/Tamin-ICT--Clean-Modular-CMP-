@@ -25,13 +25,27 @@ import taminx.core.core_ui.tab_visit
  * The label lives here too, so the id, the name and the record's capabilities are one table rather
  * than three that drift the first time one is edited.
  */
-enum class RecordType(val id: String, val label: StringResource) {
-    PHARMACY("0", Res.string.tab_pharmacy),
-    MEDICINE("1", Res.string.tab_medicine),
-    PARACLINIC("2", Res.string.tab_paraclinic),
-    VISIT("3", Res.string.tab_visit),
-    MEDICAL_SERVICE("5", Res.string.tab_medical_service),
+enum class RecordType(val id: String) {
+    PHARMACY("0"),
+    MEDICINE("1"),
+    PARACLINIC("2"),
+    VISIT("3"),
+    MEDICAL_SERVICE("5"),
     ;
+
+    /**
+     * Resolved lazily — Compose Multiplatform shards string accessors across `StringN` files, so
+     * putting [Res.string] in the enum constructor breaks `testReleaseUnitTest` whenever a stale
+     * compile still points at the previous shard (`NoSuchMethodError` → `ExceptionInInitializerError`).
+     */
+    val label: StringResource
+        get() = when (this) {
+            PHARMACY -> Res.string.tab_pharmacy
+            MEDICINE -> Res.string.tab_medicine
+            PARACLINIC -> Res.string.tab_paraclinic
+            VISIT -> Res.string.tab_visit
+            MEDICAL_SERVICE -> Res.string.tab_medical_service
+        }
 
     companion object {
         /** `null` for an id the endpoint has grown since; the caller shows the raw value then. */
@@ -48,9 +62,8 @@ enum class RecordType(val id: String, val label: StringResource) {
  * داروخانه (`0`) is not a tab: it only ever labeled a record, never filtered.
  */
 @Serializable
-enum class RecordTab(val label: StringResource, val requestTypeIds: List<String>) {
+enum class RecordTab(val requestTypeIds: List<String>) {
     ALL(
-        label = Res.string.tab_all,
         requestTypeIds = listOf(
             RecordType.MEDICINE.id,
             RecordType.VISIT.id,
@@ -58,11 +71,21 @@ enum class RecordTab(val label: StringResource, val requestTypeIds: List<String>
             RecordType.MEDICAL_SERVICE.id,
         ),
     ),
-    MEDICINE(Res.string.tab_medicine, listOf(RecordType.MEDICINE.id)),
-    VISIT(Res.string.tab_visit, listOf(RecordType.VISIT.id)),
-    PARACLINIC(Res.string.tab_paraclinic, listOf(RecordType.PARACLINIC.id)),
-    MEDICAL_SERVICE(Res.string.tab_medical_service, listOf(RecordType.MEDICAL_SERVICE.id)),
+    MEDICINE(listOf(RecordType.MEDICINE.id)),
+    VISIT(listOf(RecordType.VISIT.id)),
+    PARACLINIC(listOf(RecordType.PARACLINIC.id)),
+    MEDICAL_SERVICE(listOf(RecordType.MEDICAL_SERVICE.id)),
     ;
+
+    /** See [RecordType.label] — kept off the constructor so JVM unit tests can load the enum. */
+    val label: StringResource
+        get() = when (this) {
+            ALL -> Res.string.tab_all
+            MEDICINE -> Res.string.tab_medicine
+            VISIT -> Res.string.tab_visit
+            PARACLINIC -> Res.string.tab_paraclinic
+            MEDICAL_SERVICE -> Res.string.tab_medical_service
+        }
 
     companion object {
         /** The default landing tab: «همه». */
