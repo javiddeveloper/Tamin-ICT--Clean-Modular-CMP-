@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.useCases.agent
 
+import kotlin.coroutines.cancellation.CancellationException
 import com.tamin.taminhamrah.model.agent.AgentPersonalInfoDN
 import com.tamin.taminhamrah.model.common.UserType
 import com.tamin.taminhamrah.repository.TokenStoreManager
@@ -31,7 +32,13 @@ class GetAgentPersonalInfoUseCaseImpl(
 
     override suspend operator fun invoke(): AgentPersonalInfoDN? {
         if (tokenStoreManager.getToken().isNullOrBlank()) return null
-        val identity = runCatching { userRepository.getIdentityInfo().firstOrNull() }.getOrNull()
+        val identity = try {
+            userRepository.getIdentityInfo().firstOrNull()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            null
+        }
         val nationalId = identity?.nationalId?.takeIf { it.isNotBlank() && it != NO_NATIONAL_ID } ?: return null
         return AgentPersonalInfoDN(
             nationalId = nationalId,
@@ -44,9 +51,13 @@ class GetAgentPersonalInfoUseCaseImpl(
     private suspend fun pensionerId(nationalId: String): String? = lock.withLock {
         if (UserType.fromNameOrNull(tokenStoreManager.getUserType()) != UserType.PENSIONER) return null
         pensionerIdFor?.takeIf { it.first == nationalId }?.let { return it.second }
-        val id = runCatching { pensionRepository.getPensionerId().firstOrNull()?.firstOrNull()?.pensionerId }
-            .getOrElse { return null }
-            ?.takeIf { it.isNotBlank() }
+        val id = try {
+            pensionRepository.getPensionerId().firstOrNull()?.firstOrNull()?.pensionerId
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            return null
+        }?.takeIf { it.isNotBlank() }
         pensionerIdFor = nationalId to id
         id
     }

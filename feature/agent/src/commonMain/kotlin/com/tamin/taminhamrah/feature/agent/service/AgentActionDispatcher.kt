@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.agent.service
 
+import kotlin.coroutines.cancellation.CancellationException
 import com.tamin.taminhamrah.deeplink.DeepLinkKey
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceParams
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceRegistry
@@ -106,6 +107,9 @@ class AgentActionDispatcher(
             } else {
                 result
             }
+        } catch (e: CancellationException) {
+            // A service already rethrows cancellation; turning it into an error here would hide it.
+            throw e
         } catch (e: Exception) {
             AgentServiceResult.Error(
                 message = e.message ?: "Service execution error",

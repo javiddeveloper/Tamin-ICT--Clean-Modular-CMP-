@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.apiService.agent
 
+import kotlin.coroutines.cancellation.CancellationException
 import com.tamin.taminhamrah.model.agent.ChatTokenExpiredException
 import io.ktor.client.call.save
 import io.ktor.client.plugins.api.Send
@@ -26,7 +27,13 @@ val AiChatTokenPlugin = createClientPlugin("AiChatTokenPlugin") {
         val savedCall = call.save()
         val response = savedCall.response
         val body = if (response.status == HttpStatusCode.OK || response.status == HttpStatusCode.BadRequest) {
-            runCatching { response.bodyAsText() }.getOrDefault("")
+            try {
+                response.bodyAsText()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                ""
+            }
         } else {
             ""
         }

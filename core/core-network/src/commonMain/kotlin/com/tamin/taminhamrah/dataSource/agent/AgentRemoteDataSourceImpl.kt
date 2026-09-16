@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.dataSource.agent
 
+import kotlin.coroutines.cancellation.CancellationException
 import com.tamin.taminhamrah.apiService.agent.AgentApiService
 import com.tamin.taminhamrah.model.agent.AgentRequestDTO
 import com.tamin.taminhamrah.model.agent.ChatTokenExpiredException
@@ -57,6 +58,9 @@ internal class AgentRemoteDataSourceImpl(
             agentApiService.checkChatAllowed()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            // A request cancelled because the user left is not a connection error.
+            throw e
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
@@ -104,6 +108,9 @@ internal class AgentRemoteDataSourceImpl(
             throw e
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            // A request cancelled because the user left is not a connection error.
+            throw e
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
@@ -122,6 +129,9 @@ internal class AgentRemoteDataSourceImpl(
             throw e
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            // A request cancelled because the user left is not a connection error.
+            throw e
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
@@ -134,6 +144,9 @@ internal class AgentRemoteDataSourceImpl(
             agentApiService.trackRequest(requestId)
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            // A request cancelled because the user left is not a connection error.
+            throw e
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
@@ -146,6 +159,9 @@ internal class AgentRemoteDataSourceImpl(
             agentApiService.cancelRequest(requestId)
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            // A request cancelled because the user left is not a connection error.
+            throw e
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
