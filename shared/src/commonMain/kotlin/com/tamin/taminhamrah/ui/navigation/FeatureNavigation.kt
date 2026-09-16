@@ -117,7 +117,7 @@ fun NavController.navigateToFeature(flag: FeatureFlag, beforeOpen: () -> Unit = 
         FeatureFlag.WEDDING_PRESENT -> screen { navigateToWeddingPresent() }
         FeatureFlag.CALCULATE_MARRIAGE_ALLOWANCE -> screen { navigateToWeddingPresentCalculate() }
         FeatureFlag.REQUEST_FOR_PREGNANCY_PAY -> screen { navigateToPregnancyPay() }
-        FeatureFlag.REQUEST_FUNERAL_GRANT -> navigateToFuneralAllowance()
+        FeatureFlag.REQUEST_FUNERAL_GRANT -> screen {navigateToFuneralAllowance() }
         else -> return false
     }
     beforeOpen()
