@@ -120,7 +120,7 @@ fun ObjectionRecordDetailScreen(
     val registeredTotal = remember(record) { record.registeredMonthValues().sum() }
 
     Scaffold(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize().imePadding(),
         contentWindowInsets = WindowInsets(0),
         topBar = {
             TaminTopAppBar(
