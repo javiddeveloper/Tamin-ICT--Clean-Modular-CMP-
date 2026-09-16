@@ -14,10 +14,10 @@ import kotlin.test.assertTrue
 class WorkshopInspectionContractTest {
 
     @Test
-    fun `step1 is valid with blank mobile, landline and email`() {
+    fun `step1 is invalid when mobile is blank`() {
         val state = WorkshopInspectionUiState(identityContact = IdentityContactStepState())
 
-        assertTrue(state.isRequestStep1Valid)
+        assertFalse(state.isRequestStep1Valid)
     }
 
     @Test
@@ -27,6 +27,15 @@ class WorkshopInspectionContractTest {
         )
 
         assertFalse(state.isRequestStep1Valid)
+    }
+
+    @Test
+    fun `step1 is valid with a valid mobile and blank landline, email`() {
+        val state = WorkshopInspectionUiState(
+            identityContact = IdentityContactStepState(mobile = "09123456789"),
+        )
+
+        assertTrue(state.isRequestStep1Valid)
     }
 
     private val validWorkshopInfo = WorkshopInfoStepState(

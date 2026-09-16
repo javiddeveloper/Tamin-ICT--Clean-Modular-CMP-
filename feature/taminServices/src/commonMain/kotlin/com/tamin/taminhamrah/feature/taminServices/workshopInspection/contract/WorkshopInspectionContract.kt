@@ -17,10 +17,6 @@ import kotlinx.collections.immutable.toImmutableList
 
 private const val MIN_REQUEST_DESCRIPTION_LENGTH = 10
 
-private fun isPhoneNumberAcceptable(phone: String): Boolean {
-    return phone.isEmpty() || isPhoneNumberValid(phone)
-}
-
 /**
  * The list's client-side search filter — see [WorkshopInspectionUiState.filteredInspections].
  * There is no confirmed backend support for filtering `inspection-header/get-all-manager` by these
@@ -84,8 +80,10 @@ data class WorkshopInspectionUiState(
             }.toImmutableList()
         }
 
+    // Unlike the insured-side flow this is ported from, the employer/workshop objection wizard
+    // requires a mobile number rather than treating it as optional.
     val isRequestStep1Valid: Boolean
-        get() = isPhoneNumberAcceptable(identityContact.mobile) &&
+        get() = isPhoneNumberValid(identityContact.mobile) &&
             ValidationUtils.isLandlineValid(identityContact.landline) &&
             ValidationUtils.isEmailValid(identityContact.email)
 

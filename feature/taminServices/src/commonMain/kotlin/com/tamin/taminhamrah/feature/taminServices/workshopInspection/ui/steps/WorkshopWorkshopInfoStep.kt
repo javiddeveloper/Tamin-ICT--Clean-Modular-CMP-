@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.taminServices.workshopInspection.ui.steps
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionRequestErrorSource
 import com.tamin.taminhamrah.feature.taminServices.inspection.contract.WorkshopInfoStepState
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionRequestErrorWrapper
@@ -63,8 +65,6 @@ import taminx.core.core_ui.inspection_request_field_job_title
 import taminx.core.core_ui.inspection_request_field_job_title_placeholder
 import taminx.core.core_ui.inspection_request_field_workshop_address
 import taminx.core.core_ui.inspection_request_field_workshop_address_placeholder
-import taminx.core.core_ui.inspection_request_field_workshop_code
-import taminx.core.core_ui.inspection_request_field_workshop_code_placeholder
 import taminx.core.core_ui.inspection_request_field_workshop_name
 import taminx.core.core_ui.inspection_request_field_workshop_name_placeholder
 import taminx.core.core_ui.inspection_request_field_workshop_phone_error
@@ -105,6 +105,8 @@ internal fun WorkshopWorkshopInfoStep(
         modifier = modifier,
         primaryText = stringResource(Res.string.inspection_request_next_step),
         primaryEnabled = uiState.isRequestStep2Valid && !uiState.isLoading,
+        // See WorkshopIdentityContactStep for why this is always false rather than omitted.
+        isPrimaryLoading = false,
         onPrimaryClick = { onIntent(WorkshopInspectionIntent.GoToNextRequestStep) },
         secondaryText = stringResource(Res.string.inspection_request_prev_step),
         onSecondaryClick = onBack,
@@ -142,6 +144,7 @@ internal fun WorkshopWorkshopInfoStep(
                             ),
                             containerColor = colors.blueBg,
                             textColor = colors.blueText,
+                            border = BorderStroke(width = 1.dp, color = colors.blueBorder),
                         )
                     }
                 }
@@ -170,12 +173,11 @@ internal fun WorkshopWorkshopInfoStep(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.md),
             ) {
                 TaminStyledTextField(
-                    value = step.workshopCode,
-                    onValueChange = {},
-                    label = stringResource(Res.string.inspection_request_field_workshop_code),
-                    placeholder = stringResource(Res.string.inspection_request_field_workshop_code_placeholder),
-                    isRequired = false,
-                    readOnly = true,
+                    value = step.employerName,
+                    onValueChange = { value -> update { it.copy(employerName = value) } },
+                    label = stringResource(Res.string.inspection_request_field_employer_name),
+                    placeholder = stringResource(Res.string.inspection_request_field_employer_name_placeholder),
+                    isRequired = true,
                     modifier = Modifier.weight(1f),
                 )
                 TaminStyledTextField(
@@ -192,16 +194,6 @@ internal fun WorkshopWorkshopInfoStep(
                     modifier = Modifier.weight(1f),
                 )
             }
-
-            Spacer(Modifier.height(Spacing.lg))
-
-            TaminStyledTextField(
-                value = step.employerName,
-                onValueChange = { value -> update { it.copy(employerName = value) } },
-                label = stringResource(Res.string.inspection_request_field_employer_name),
-                placeholder = stringResource(Res.string.inspection_request_field_employer_name_placeholder),
-                isRequired = true,
-            )
 
             Spacer(Modifier.height(Spacing.lg))
 

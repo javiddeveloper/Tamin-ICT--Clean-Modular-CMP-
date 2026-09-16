@@ -9,19 +9,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionRequestErrorSource
 import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionRequestStep
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionRequestSuccessDialog
@@ -32,11 +24,12 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.StepIndicator
 import com.tamin.taminhamrah.ui.components.StepIndicatorModel
 import com.tamin.taminhamrah.ui.components.StepState
-import com.tamin.taminhamrah.ui.components.TaminText
+import com.tamin.taminhamrah.ui.components.TaminTopAppBar
+import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
 import com.tamin.taminhamrah.ui.components.toast.AppToastHost
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.ui.components.topbars.TaminTopAppBar
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.stringResource
@@ -44,10 +37,10 @@ import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.close_content_description
 import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.inspection_request_description_label_objection
 import taminx.core.core_ui.inspection_request_objection_title
 import taminx.core.core_ui.inspection_request_step1_label
 import taminx.core.core_ui.inspection_request_step2_label
-import taminx.core.core_ui.inspection_request_step3_label
 
 /**
  * The "ثبت اعتراض به بازرسی" wizard for the employer/workshop list. Always an objection request —
@@ -66,7 +59,9 @@ internal fun WorkshopInspectionRequestScreen(
     val taminColors = LocalTaminColors.current
     val step1Label = stringResource(Res.string.inspection_request_step1_label)
     val step2Label = stringResource(Res.string.inspection_request_step2_label)
-    val step3Label = stringResource(Res.string.inspection_request_step3_label)
+    // "شرح اعتراض", not the generic "شرح درخواست" label the insured-side flow uses for this step —
+    // this screen is always an objection, never a plain inspection request.
+    val step3Label = stringResource(Res.string.inspection_request_description_label_objection)
     val title = stringResource(Res.string.inspection_request_objection_title)
     val onBack = { onIntent(WorkshopInspectionIntent.GoToPreviousRequestStep) }
 
@@ -95,39 +90,27 @@ internal fun WorkshopInspectionRequestScreen(
             .fillMaxSize()
             .background(taminColors.bgPage),
     ) {
-        Surface(color = taminColors.bgSurface, shadowElevation = 0.dp) {
-            Column(modifier = Modifier.statusBarsPadding()) {
-                TaminTopAppBar(
-                    title = {
-                        TaminText(
-                            text = title,
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp,
-                            ),
-                        )
-                    },
-                    navigationIcon = {
-                        Icon(
-                            imageVector = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                            contentDescription = null,
-                            tint = taminColors.textPrimary,
-                            modifier = Modifier.size(24.dp),
-                        )
-                    },
-                    onNavigationClick = onBack,
-                    actionIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = stringResource(Res.string.close_content_description),
-                            tint = taminColors.textPrimary,
-                            modifier = Modifier.size(22.dp),
-                        )
-                    },
-                    onActionClick = onClose,
+        TaminTopAppBar(
+            title = title,
+            background = taminTopAppBarGradient(taminColors.profileGradientStops),
+            bottomPadding = Spacing.smPlus,
+            navigationIcon = {
+                TaminTopAppBarButton(
+                    icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                    contentDescription = null,
+                    onClick = onBack,
+                    bordered = true,
                 )
-            }
-        }
+            },
+            action = {
+                TaminTopAppBarButton(
+                    icon = Icons.Default.Close,
+                    contentDescription = stringResource(Res.string.close_content_description),
+                    onClick = onClose,
+                    bordered = true,
+                )
+            },
+        )
 
         StepIndicator(
             steps = steps,

@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.taminServices.workshopInspection.ui.steps
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionRequestStepScaffold
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.InfoBanner
 import com.tamin.taminhamrah.feature.taminServices.workshopInspection.contract.WorkshopInspectionIntent
@@ -35,7 +37,6 @@ import taminx.core.core_ui.inspection_request_description_label_objection
 import taminx.core.core_ui.inspection_request_description_placeholder_objection
 import taminx.core.core_ui.inspection_request_prev_step
 import taminx.core.core_ui.inspection_request_source_chip_format
-import taminx.core.core_ui.inspection_request_step3_label
 import taminx.core.core_ui.inspection_request_submit_objection_button
 
 private const val MAX_DESCRIPTION_LENGTH = 600
@@ -92,7 +93,7 @@ internal fun WorkshopRequestDescriptionStep(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 TaminText(
-                    text = stringResource(Res.string.inspection_request_step3_label),
+                    text = stringResource(Res.string.inspection_request_description_label_objection),
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 )
                 if (!uiState.requestInspectionNo.isNullOrBlank()) {
@@ -103,6 +104,7 @@ internal fun WorkshopRequestDescriptionStep(
                         ),
                         containerColor = colors.blueBg,
                         textColor = colors.blueText,
+                        border = BorderStroke(width = 1.dp, color = colors.blueBorder),
                     )
                 }
             }
@@ -114,6 +116,7 @@ internal fun WorkshopRequestDescriptionStep(
                 onValueChange = { onIntent(WorkshopInspectionIntent.UpdateRequestDescription(it)) },
                 placeholder = stringResource(Res.string.inspection_request_description_placeholder_objection),
                 label = stringResource(Res.string.inspection_request_description_label_objection),
+                isRequired = true,
                 maxLength = MAX_DESCRIPTION_LENGTH,
             )
 

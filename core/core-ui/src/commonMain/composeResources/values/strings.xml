@@ -1473,6 +1473,7 @@
     <string name="inspection_request_field_national_code">کد ملی</string>
     <string name="inspection_request_field_full_name">نام و نام خانوادگی</string>
     <string name="inspection_request_field_mobile_optional">شمارهٔ تلفن همراه (اختیاری)</string>
+    <string name="inspection_request_field_mobile_required">شمارهٔ تلفن همراه</string>
     <string name="inspection_request_field_mobile_error">شماره همراه معتبر نیست</string>
     <string name="inspection_request_field_email_optional">پست الکترونیک (اختیاری)</string>
     <string name="inspection_request_field_email_error">ایمیل معتبر نیست</string>

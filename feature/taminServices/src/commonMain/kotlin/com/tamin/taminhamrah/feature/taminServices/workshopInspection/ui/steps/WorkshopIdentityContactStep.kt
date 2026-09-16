@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.taminServices.workshopInspection.ui.steps
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionRequestErrorSource
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.IdentityContactShimmerSkeleton
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionRequestErrorWrapper
@@ -40,7 +42,7 @@ import taminx.core.core_ui.inspection_request_field_email_optional
 import taminx.core.core_ui.inspection_request_field_landline_error
 import taminx.core.core_ui.inspection_request_field_landline_optional
 import taminx.core.core_ui.inspection_request_field_mobile_error
-import taminx.core.core_ui.inspection_request_field_mobile_optional
+import taminx.core.core_ui.inspection_request_field_mobile_required
 import taminx.core.core_ui.inspection_request_field_national_code
 import taminx.core.core_ui.inspection_request_field_full_name
 import taminx.core.core_ui.inspection_request_field_placeholder
@@ -65,6 +67,11 @@ internal fun WorkshopIdentityContactStep(
         modifier = modifier,
         primaryText = stringResource(Res.string.inspection_request_next_step),
         primaryEnabled = uiState.isRequestStep1Valid && !uiState.isLoading,
+        // Non-null routes the primary button through LoadingButton, whose default gradient is
+        // taminColors.buttonGradient — the orotez-protez-style wash this wizard's design calls
+        // for, unlike TaminBottomActionBar's plain-TaminFilledButton path (heroGradient). This
+        // step never actually loads on its own click, so the value is always false.
+        isPrimaryLoading = false,
         onPrimaryClick = { onIntent(WorkshopInspectionIntent.GoToNextRequestStep) },
         secondaryText = stringResource(Res.string.inspection_request_prev_step),
         onSecondaryClick = onBack,
@@ -102,6 +109,7 @@ internal fun WorkshopIdentityContactStep(
                             ),
                             containerColor = colors.blueBg,
                             textColor = colors.blueText,
+                            border = BorderStroke(width = 1.dp, color = colors.blueBorder),
                         )
                     }
                 }
@@ -113,17 +121,17 @@ internal fun WorkshopIdentityContactStep(
                     horizontalArrangement = Arrangement.spacedBy(Spacing.md),
                 ) {
                     TaminStyledTextField(
-                        value = step.nationalCode,
+                        value = step.fullName,
                         onValueChange = {},
-                        label = stringResource(Res.string.inspection_request_field_national_code),
+                        label = stringResource(Res.string.inspection_request_field_full_name),
                         placeholder = placeholder,
                         readOnly = true,
                         modifier = Modifier.weight(1f),
                     )
                     TaminStyledTextField(
-                        value = step.fullName,
+                        value = step.nationalCode,
                         onValueChange = {},
-                        label = stringResource(Res.string.inspection_request_field_full_name),
+                        label = stringResource(Res.string.inspection_request_field_national_code),
                         placeholder = placeholder,
                         readOnly = true,
                         modifier = Modifier.weight(1f),
@@ -135,8 +143,9 @@ internal fun WorkshopIdentityContactStep(
                 TaminStyledTextField(
                     value = step.mobile,
                     onValueChange = { onIntent(WorkshopInspectionIntent.UpdateIdentityContact(step.copy(mobile = it))) },
-                    label = stringResource(Res.string.inspection_request_field_mobile_optional),
+                    label = stringResource(Res.string.inspection_request_field_mobile_required),
                     placeholder = placeholder,
+                    isRequired = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     inputRestriction = InputRestriction.DigitsOnly,
                     maxLength = 11,

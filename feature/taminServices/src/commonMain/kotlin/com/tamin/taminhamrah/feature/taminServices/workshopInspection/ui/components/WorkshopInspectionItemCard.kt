@@ -67,6 +67,7 @@ import taminx.core.core_ui.inspection_download_report_short
 import taminx.core.core_ui.inspection_id
 import taminx.core.core_ui.inspection_insurance_no
 import taminx.core.core_ui.inspection_relation_type
+import taminx.core.core_ui.inspection_request_field_national_code
 import taminx.core.core_ui.inspection_status_objectable
 import taminx.core.core_ui.inspection_status_objection_expired
 import taminx.core.core_ui.inspection_submit_objection
@@ -96,12 +97,6 @@ internal fun WorkshopInspectionItemCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .coloredShadow(
-                color = colors.shadowSubtle,
-                borderRadius = CornerRadius.card,
-                blurRadius = 26.dp,
-                offsetY = 10.dp
-            )
             .taminSurface(),
     ) {
         Row(
@@ -174,11 +169,17 @@ internal fun WorkshopInspectionItemCard(
                     )
 
                     DetailGridRow(
-                        labelStart = stringResource(Res.string.inspection_insurance_no),
-                        valueStart = item.insuranceNo.ifBlank { "—" },
-                        labelEnd = stringResource(Res.string.inspection_relation_type),
-                        valueEnd = item.relationType,
-                        numericEnd = false,
+                        labelStart = stringResource(Res.string.inspection_relation_type),
+                        valueStart = item.relationType,
+                        numericStart = false,
+                        labelEnd = stringResource(Res.string.inspection_request_field_national_code),
+                        valueEnd = item.nationalCode,
+                    )
+
+                    InfoBox(
+                        label = stringResource(Res.string.inspection_insurance_no),
+                        value = item.insuranceNo.ifBlank { "—" },
+                        modifier = Modifier.fillMaxWidth(),
                     )
 
                     InfoBox(
@@ -204,20 +205,8 @@ internal fun WorkshopInspectionItemCard(
                 label = "workshop-inspection-card-chevron",
             )
 
-            if (item.isObjectable) {
-                TaminFilledButton(
-                    text = stringResource(Res.string.inspection_submit_objection),
-                    textStyle = MaterialTheme.typography.titleSmall,
-                    onClick = onSubmitObjectionClicked,
-                    background = colors.iconGradientSuccess,
-                    icon = vectorResource(Res.drawable.ic_warning),
-                    iconPosition = IconPosition.End,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp),
-                )
-            }
-
+            // Row order (RTL, so first child renders rightmost): details toggle, then the report
+            // document button, then the objection button last.
             TaminOutlinedButton(
                 height = 48.dp,
                 textStyle = MaterialTheme.typography.titleSmall,
@@ -235,6 +224,20 @@ internal fun WorkshopInspectionItemCard(
             ReportIconButton(
                 onClick = { onDownloadReportClicked(item.inspectionNo) },
             )
+
+            if (item.isObjectable) {
+                TaminFilledButton(
+                    text = stringResource(Res.string.inspection_submit_objection),
+                    textStyle = MaterialTheme.typography.titleSmall,
+                    onClick = onSubmitObjectionClicked,
+                    background = colors.iconGradientSuccess,
+                    icon = vectorResource(Res.drawable.ic_warning),
+                    iconPosition = IconPosition.End,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
+                )
+            }
         }
     }
 }

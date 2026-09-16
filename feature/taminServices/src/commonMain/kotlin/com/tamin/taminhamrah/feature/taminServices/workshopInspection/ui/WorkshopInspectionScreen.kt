@@ -291,11 +291,6 @@ internal fun WorkshopInspectionScreen(
                             },
                             modifier = Modifier
                                 .padding(horizontal = Spacing.lg)
-                                .staggeredItemEntrance(
-                                    index = index,
-                                    key = item.inspectionNo,
-                                    state = staggerState
-                                ),
                         )
                     }
 
