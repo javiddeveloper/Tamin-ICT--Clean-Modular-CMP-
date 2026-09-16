@@ -14,7 +14,6 @@ import com.tamin.taminhamrah.useCases.payment.CancelPaymentUseCase
 import com.tamin.taminhamrah.useCases.payment.CreatePaymentLinkUseCase
 import com.tamin.taminhamrah.useCases.payment.GetPaymentPreviewUseCase
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -67,7 +66,6 @@ private class FakeGatewayRepository : PaymentGatewayRepository {
  */
 class PaymentCheckoutViewModelTest {
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     private val testDispatcher = UnconfinedTestDispatcher()
     private val repository = FakeGatewayRepository()
 
@@ -78,11 +76,9 @@ class PaymentCheckoutViewModelTest {
         getCurrentUserNationalCode = GetCurrentUserNationalCodeUseCase { nationalCode },
     )
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @BeforeTest
     fun setUp() = Dispatchers.setMain(testDispatcher)
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @AfterTest
     fun tearDown() = Dispatchers.resetMain()
 

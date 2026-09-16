@@ -298,11 +298,15 @@ class AssignerContractsViewModel(
      * already did, and `TaminImageViewer` now does too — so neither kind leaves the tap looking
      * like it did nothing while a download runs.
      *
-     * A failure also lands on the **row**, carrying the service's own words, so it survives
-     * dismissing the viewer and names which of several attachments is unavailable. `upload-image`
-     * answers a missing document with «داده ای با اطلاعات شناسه … یافت نشد.», which says far more
-     * than any line this screen could write, and `BaseDTO.rawErrorText` already lifts it onto the
-     * exception. Tapping the row again clears the failure and retries.
+     * A failure also lands on the **row**, carrying whatever reason the exception holds, so it
+     * survives dismissing the viewer and names which of several attachments is unavailable. Tapping
+     * the row again clears the failure and retries.
+     *
+     * The image route is the shared `upload-image` one, typed `BaseDTO<String>` for every caller. A
+     * failure envelope puts an object in `data`, which that type cannot read, so a missing image
+     * currently arrives as a generic failure rather than the service's «… یافت نشد» — the row stays
+     * retryable instead of being marked unavailable. Retyping it would change درخواست‌های من's errors
+     * too, so it is left to that feature.
      */
     private fun openDocument(
         documentId: String,

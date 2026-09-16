@@ -17,8 +17,6 @@ import com.tamin.taminhamrah.tools.BaseDTO
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
-import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.jsonPrimitive
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 
@@ -79,10 +77,7 @@ class UserRequestRemoteDataSourceImpl(
     }
 
     override suspend fun downloadDocument(guid: String): String {
-        // `data` is a JSON string on success and an object on failure; only the success shape has
-        // anything to unwrap. Anything else reads as "no document", which the caller reports.
         return fetchData { requestApiService.downloadDocument(guid) }
-            .jsonPrimitive.contentOrNull.orEmpty()
     }
 
     private suspend fun <T> fetchListData(
