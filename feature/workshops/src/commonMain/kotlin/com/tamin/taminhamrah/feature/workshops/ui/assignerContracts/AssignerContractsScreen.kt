@@ -1,25 +1,15 @@
 package com.tamin.taminhamrah.feature.workshops.ui.assignerContracts
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Dp
@@ -28,6 +18,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.A
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.AssignerFilterBar
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.AssignerSearchSheet
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.AssignerSearchSheetContent
+import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.AssignerTabsRow
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.buildAssignerFilterText
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractFilter
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractTab
@@ -50,17 +41,14 @@ import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.StatColumn
 import com.tamin.taminhamrah.ui.components.StatDivider
 import com.tamin.taminhamrah.ui.components.StatRowCard
-import com.tamin.taminhamrah.ui.components.TaminSegmentedTabs
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.components.toast.info
 import com.tamin.taminhamrah.ui.components.toast.success
-import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -72,7 +60,6 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.assigner_certificate_issued
 import taminx.core.core_ui.assigner_certificate_not_found
 import taminx.core.core_ui.assigner_contracts_title
-import taminx.core.core_ui.assigner_count_label
 import taminx.core.core_ui.assigner_empty_active_title
 import taminx.core.core_ui.assigner_empty_finished_title
 import taminx.core.core_ui.assigner_empty_not_found_body
@@ -340,56 +327,6 @@ private fun AssignerIdentityCard(assigner: AssignerPartyPR, modifier: Modifier =
             highlight = true,
             modifier = Modifier.weight(1f),
         )
-    }
-}
-
-/**
- * جاری / خاتمه‌یافته with how many each holds, and how many پیمان the list holds in all.
- *
- * The tabs are the first child, so on the RTL page they sit rightmost with the count tile at the
- * far end, as the design places them. The tile takes the strip's height rather than its own, so
- * the two read as one row.
- */
-@Composable
-private fun AssignerTabsRow(
-    selected: AssignerContractTab,
-    count: Int,
-    activeCount: Int,
-    finishedCount: Int,
-    onSelect: (AssignerContractTab) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val colors = LocalTaminColors.current
-    val cellShape = remember { RoundedCornerShape(CornerRadius.xl) }
-    Row(
-        modifier = modifier.fillMaxWidth().height(IntrinsicSize.Min),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-    ) {
-        TaminSegmentedTabs(
-            options = AssignerContractTab.all,
-            selected = selected,
-            onSelect = onSelect,
-            label = { stringResource(it.label) },
-            badge = {
-                (if (it == AssignerContractTab.ACTIVE) activeCount else finishedCount).toString().toPersianDigits()
-            },
-            modifier = Modifier.weight(1f),
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .clip(cellShape)
-                .background(colors.blueBg)
-                .border(Thickness.border, colors.blueBorder, cellShape)
-                .padding(horizontal = Spacing.md),
-            contentAlignment = Alignment.Center,
-        ) {
-            StatColumn(
-                value = count.toString().toPersianDigits(),
-                label = stringResource(Res.string.assigner_count_label),
-                highlight = true,
-            )
-        }
     }
 }
 
