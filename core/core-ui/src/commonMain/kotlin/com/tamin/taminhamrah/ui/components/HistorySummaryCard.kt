@@ -46,6 +46,7 @@ import com.tamin.taminhamrah.ui.theme.TaminColors
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.toPersianDigits
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -466,7 +467,7 @@ private fun HistoryProgressBar(
 @Composable
 private fun HistoryMonthStrip(
     colors: TaminColors,
-    months: List<HistoryMonthStatusPR>,
+    months: ImmutableList<HistoryMonthStatusPR>,
     currentMonthIndex: Int,
 ) {
     Row(

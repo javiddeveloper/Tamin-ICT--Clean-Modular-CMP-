@@ -923,9 +923,13 @@ fun HomeScreen(
                 val summary = uiState.historySummary
                 when {
                     uiState.isHistorySummaryLoading ->
-                        HistorySummaryCardSkeleton(modifier = Modifier.padding(top = Spacing.xlg))
+                        HistorySummaryCardSkeleton(modifier = HistorySummaryPadding)
 
                     summary != null -> {
+                        // Hoisted: the card's three actions are one action, and a lambda built at
+                        // the call site would capture `viewModel` — which is not a stable type, so
+                        // the compiler cannot memoize it and the card would recompose on every
+                        // emission of `uiState` instead of only when its own year changes.
                         val openHistory = remember(viewModel) {
                             { viewModel.sendIntent(HomeIntent.OnHistorySummaryClick) }
                         }
@@ -934,7 +938,7 @@ fun HomeScreen(
                             onCardClick = openHistory,
                             onYearClick = openHistory,
                             onDetailsClick = openHistory,
-                            modifier = Modifier.padding(top = Spacing.xlg),
+                            modifier = HistorySummaryPadding,
                         )
                     }
                 }
@@ -1061,4 +1065,14 @@ fun HomeScreen(
 
 /** The «بیمه شدگان» entry of the home page's role picker — the only role خلاصهٔ سابقه belongs to. */
 private const val InsuredUserType = 1
+
+/**
+ * The gap above خلاصهٔ سابقه, built once rather than per recomposition.
+ *
+ * A `Modifier.padding(...)` written at the call site is a fresh instance every time the page
+ * recomposes. It still compares equal, so it does not by itself stop the card from skipping — but
+ * the card and its skeleton are two call sites for one constant, and this is the shape the rest of
+ * the page should follow.
+ */
+private val HistorySummaryPadding = Modifier.padding(top = Spacing.xlg)
 
