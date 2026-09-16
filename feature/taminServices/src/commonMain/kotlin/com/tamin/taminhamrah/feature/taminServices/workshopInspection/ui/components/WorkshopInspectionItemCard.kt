@@ -5,6 +5,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -58,12 +59,12 @@ import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.action_hide_details
 import taminx.core.core_ui.action_show_details
+import taminx.core.core_ui.document_viewer_title
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_warning
 import taminx.core.core_ui.inspection_activity_type
 import taminx.core.core_ui.inspection_branch
 import taminx.core.core_ui.inspection_date
-import taminx.core.core_ui.inspection_download_report_short
 import taminx.core.core_ui.inspection_id
 import taminx.core.core_ui.inspection_insurance_no
 import taminx.core.core_ui.inspection_relation_type
@@ -103,7 +104,7 @@ internal fun WorkshopInspectionItemCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = Spacing.xlg)
-                .padding(top = Spacing.lg, bottom = Spacing.sm),
+                .padding(top = Spacing.md, bottom = Spacing.sm),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
@@ -175,18 +176,13 @@ internal fun WorkshopInspectionItemCard(
                         labelEnd = stringResource(Res.string.inspection_request_field_national_code),
                         valueEnd = item.nationalCode,
                     )
-
-                    InfoBox(
-                        label = stringResource(Res.string.inspection_insurance_no),
-                        value = item.insuranceNo.ifBlank { "—" },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-
-                    InfoBox(
-                        label = stringResource(Res.string.inspection_activity_type),
-                        value = item.activityDesc,
-                        numeric = false,
-                        modifier = Modifier.fillMaxWidth(),
+                    DetailGridRow(
+                        labelStart = stringResource(Res.string.inspection_insurance_no),
+                        valueStart = item.insuranceNo.ifBlank { "—" },
+                        numericStart = false,
+                        labelEnd = stringResource(Res.string.inspection_activity_type),
+                        valueEnd = item.activityDesc,
+                        numericEnd = false,
                     )
                 }
             }
@@ -222,6 +218,7 @@ internal fun WorkshopInspectionItemCard(
             )
 
             ReportIconButton(
+                modifier = Modifier.weight(1f),
                 onClick = { onDownloadReportClicked(item.inspectionNo) },
             )
 
@@ -251,15 +248,21 @@ private fun ReportIconButton(
     Row(
         modifier = modifier
             .height(48.dp)
-            .background(color = colors.chipBg, shape = RoundedCornerShape(CornerRadius.lg))
+            .border(width = 1.dp, color = colors.border, shape = RoundedCornerShape(CornerRadius.iconTile))
             .clickable(onClick = onClick)
             .padding(horizontal = Spacing.md),
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
     ) {
         Icon(
             imageVector = Icons.Outlined.Description,
-            tint = colors.blueText,
-            contentDescription = stringResource(Res.string.inspection_download_report_short),
+            tint = colors.textSecondary,
+            contentDescription = null,
+        )
+        Text(
+            text = stringResource(Res.string.document_viewer_title),
+            style = MaterialTheme.typography.titleSmall,
+            color = colors.textSecondary,
         )
     }
 }
@@ -281,7 +284,7 @@ private fun InfoBox(
             .background(colors.bgPage, shape = RoundedCornerShape(CornerRadius.xl))
             .then(if (copy != null) Modifier.clickable(onClick = copy) else Modifier)
             .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.Top,
     ) {
         Column(
             modifier = Modifier.weight(1f),
@@ -307,7 +310,6 @@ private fun InfoBox(
             }
         }
         if (copyValue != null) {
-            Spacer(modifier = Modifier.width(Spacing.xs))
             CopyIconButton(
                 value = copyValue,
                 label = label,
