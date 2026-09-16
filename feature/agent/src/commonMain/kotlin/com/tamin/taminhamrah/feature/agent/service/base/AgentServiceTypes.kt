@@ -34,7 +34,7 @@ sealed class AgentServiceResult {
     object NoHandler : AgentServiceResult()
 
     /** This service is disabled for the current user (FeatureFlag) */
-    data class FeatureDisabled(val message: String) : AgentServiceResult()
+    data class FeatureDisabled(val message: String?) : AgentServiceResult()
 
     /** Execution error */
     data class Error(val message: String, val cause: Throwable? = null) : AgentServiceResult()

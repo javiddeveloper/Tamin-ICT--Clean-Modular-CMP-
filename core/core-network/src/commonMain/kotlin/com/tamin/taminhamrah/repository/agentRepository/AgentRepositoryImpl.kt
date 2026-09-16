@@ -2,18 +2,29 @@ package com.tamin.taminhamrah.repository.agentRepository
 
 import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSource
 import com.tamin.taminhamrah.model.agent.AgentActionKey
+import com.tamin.taminhamrah.model.agent.AgentDataItemDTO
+import com.tamin.taminhamrah.model.agent.AgentItemType
+import com.tamin.taminhamrah.model.agent.AgentRenderMode
 import com.tamin.taminhamrah.model.agent.AgentPollingState
 import com.tamin.taminhamrah.model.agent.AgentRequest
+import com.tamin.taminhamrah.model.agent.AgentPersonalInfoDN
+import com.tamin.taminhamrah.model.agent.AgentPersonalInfoDTO
+import com.tamin.taminhamrah.model.agent.AgentPromptTypeDTO
 import com.tamin.taminhamrah.model.agent.AgentRequestDTO
 import com.tamin.taminhamrah.model.agent.AgentResponseDTO
 import com.tamin.taminhamrah.model.agent.AgentResponseDN
 import com.tamin.taminhamrah.model.agent.AiEntityDN
 import com.tamin.taminhamrah.model.agent.ChatAllowedDN
+import com.tamin.taminhamrah.model.agent.ChatTokenExpiredException
 import com.tamin.taminhamrah.repository.AgentRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
 
 /**
  * Implementation of [AgentRepository] with Kotlin Flow-based polling mechanism.
@@ -29,6 +40,7 @@ class AgentRepositoryImpl(
 ) : AgentRepository {
 
     companion object {
+        private val markdownJson = Json { ignoreUnknownKeys = true }
         private const val MAX_POLLS = 5
         private const val MAX_POLL_DELAY_MS = 30_000L
     }
@@ -74,7 +86,7 @@ class AgentRepositoryImpl(
                     return@flow
                 }
                 "FAILED" -> {
-                    emit(AgentPollingState.Failed("عملیات ناموفق بود"))
+                    emit(AgentPollingState.Failed(trackData.message?.takeIf { it.isNotBlank() }))
                     return@flow
                 }
                 "CANCEL" -> {
@@ -90,9 +102,11 @@ class AgentRepositoryImpl(
         }
 
         // 4. Timeout after MAX_POLLS
-        emit(AgentPollingState.Failed("عملیات ناموفق بود"))
+        emit(AgentPollingState.Failed())
     }.catch { e ->
-        emit(AgentPollingState.Failed("عملیات ناموفق بود"))
+        // An expired chat token is not a failure yet: SendAgentPromptUseCase refreshes and resends.
+        if (e is ChatTokenExpiredException) throw e
+        emit(AgentPollingState.Failed())
     }
 
     override suspend fun cancelRequest(requestId: String): Result<Unit> {
@@ -112,7 +126,8 @@ class AgentRepositoryImpl(
                 ChatAllowedDN(
                     canStartChat = data?.canStartChat ?: false,
                     chatToken = data?.chatToken,
-                    errorMessage = data?.errorMessage
+                    errorMessage = data?.errorMessage,
+                    canSendVoice = data?.canSendVoice ?: false,
                 )
             )
         } catch (e: Exception) {
@@ -125,25 +140,63 @@ class AgentRepositoryImpl(
     private fun AgentRequest.toDTO() = AgentRequestDTO(
         prompt = prompt,
         sessionId = sessionId,
-        lastEntity = lastEntity,
-        chatToken = chatToken
+        lastEntity = lastEntity.orEmpty(),
+        chatToken = chatToken,
+        userType = userType,
+        personalInfo = personalInfo?.toDTO(),
+        promptType = if (isVoice) AgentPromptTypeDTO.VOICE else AgentPromptTypeDTO.TEXT,
+        state = state.parseJsonOrNull(),
+        history = history.parseJsonOrNull() ?: JsonArray(emptyList()),
     )
+
+    private fun AgentPersonalInfoDN.toDTO() = AgentPersonalInfoDTO(
+        nationalId = nationalId,
+        pensionerId = pensionerId,
+        firstName = firstName,
+        lastName = lastName,
+    )
+
+    /** Stored conversation JSON back into a tree; anything unreadable is sent as absent. */
+    private fun String?.parseJsonOrNull(): JsonElement? =
+        this?.let { runCatching { markdownJson.parseToJsonElement(it) }.getOrNull() }
+            ?.takeUnless { it is JsonNull }
+
+    private fun JsonElement?.toJsonStringOrNull(): String? =
+        this?.takeUnless { it is JsonNull }?.toString()
 
     private fun AgentResponseDTO.toDomain(): AgentResponseDN {
         return AgentResponseDN(
             sessionId = sessionId,
             lastEntity = lastEntity,
             entities = entities?.mapIndexed { index, entity ->
+                val itemType = AgentItemType.fromWireName(entity.itemType)
                 AiEntityDN(
                     action = AgentActionKey.fromString(entity.key),
                     stepNumber = entity.stepNumber ?: index,
                     payload = entity.payload,
                     data = entity.data,
                     message = entity.message,
-                    itemType = entity.itemType
+                    itemType = itemType,
+                    markdown = if (itemType == AgentItemType.MARKDOWN) entity.data.markdownTexts() else emptyList()
                 )
             }?.sortedBy { it.stepNumber } ?: emptyList(),
-            message = message
+            message = message,
+            renderMode = AgentRenderMode.fromWireName(renderMode),
+            state = state.toJsonStringOrNull(),
+            history = history.toJsonStringOrNull(),
         )
+    }
+
+    /** The non-blank `text` of every `markdown_item` in [this]; anything malformed is skipped. */
+    private fun JsonElement?.markdownTexts(): List<String> {
+        val items = this as? JsonArray ?: return emptyList()
+        return items.mapNotNull { element ->
+            val item = runCatching { markdownJson.decodeFromJsonElement(AgentDataItemDTO.serializer(), element) }
+                .getOrNull()
+                ?: return@mapNotNull null
+            item.text?.trim()?.takeIf {
+                it.isNotEmpty() && AgentItemType.fromWireName(item.itemType) == AgentItemType.MARKDOWN_ITEM
+            }
+        }
     }
 }

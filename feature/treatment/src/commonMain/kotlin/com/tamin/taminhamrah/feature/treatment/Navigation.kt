@@ -66,6 +66,34 @@ sealed interface TreatmentRoute {
     ) : TreatmentRoute
 }
 
+/** «نسخه‌های الکترونیک»: the records screen on its medicine tab, for the selected patient. */
+fun NavController.navigateToPrescriptions() {
+    navigate(TreatmentRoute.MedicalRecords(tab = RecordTab.MEDICINE))
+}
+
+/**
+ * One prescription's detail, e.g. from an assistant link. The link does not carry the doctor, date
+ * or tracking code the records list would pass, so the detail header shows them as unknown.
+ */
+fun NavController.navigateToPrescriptionDetail(
+    patientNationalCode: String,
+    noteHeadId: String,
+    type: String,
+    flagSata: String,
+) {
+    navigate(
+        TreatmentRoute.RecordDetail(
+            nationalCode = patientNationalCode,
+            noteHeadId = noteHeadId,
+            type = type,
+            flagSata = flagSata,
+            docName = "",
+            prescDate = "",
+            trackingCode = "",
+        )
+    )
+}
+
 fun NavGraphBuilder.treatmentGraph(
     navController: NavController,
     onBack: () -> Unit,

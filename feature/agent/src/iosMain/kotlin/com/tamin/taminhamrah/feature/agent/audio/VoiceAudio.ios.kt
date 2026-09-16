@@ -19,7 +19,9 @@ import platform.AVFAudio.AVAudioPlayer
 import platform.AVFAudio.AVAudioRecorder
 import platform.AVFAudio.AVAudioSession
 import platform.AVFAudio.AVAudioSessionCategoryPlayAndRecord
-import platform.AVFAudio.AVEncoderAudioQualityKey
+import platform.AVFAudio.AVLinearPCMBitDepthKey
+import platform.AVFAudio.AVLinearPCMIsBigEndianKey
+import platform.AVFAudio.AVLinearPCMIsFloatKey
 import platform.AVFAudio.AVFormatIDKey
 import platform.AVFAudio.AVNumberOfChannelsKey
 import platform.AVFAudio.AVSampleRateKey
@@ -33,9 +35,8 @@ import platform.Foundation.NSURL
 import platform.Foundation.NSUUID
 import kotlin.math.pow
 
-// kAudioFormatMPEG4AAC fourcc ('aac ') — hardcoded to avoid an AudioToolbox cinterop import.
-private const val K_AUDIO_FORMAT_MPEG4_AAC = 1633772320L
-private const val AV_AUDIO_QUALITY_HIGH = 96L // AVAudioQualityHigh
+// kAudioFormatLinearPCM fourcc ('lpcm') — hardcoded to avoid an AudioToolbox cinterop import.
+private const val K_AUDIO_FORMAT_LINEAR_PCM = 1819304813L
 
 private const val AMPLITUDE_POLL_MS = 80L
 private const val POSITION_POLL_MS = 100L
@@ -62,11 +63,15 @@ private class IosVoiceRecorder : VoiceRecorder {
         if (_isRecording.value) return
         configureSession()
         val url = NSURL.fileURLWithPath(filePath)
+        // WAV, 16 kHz mono 16-bit little-endian PCM ([WavFormat]); the .wav path makes
+        // AVAudioRecorder write a RIFF file.
         val settings = mapOf<Any?, Any?>(
-            AVFormatIDKey to NSNumber(unsignedInt = K_AUDIO_FORMAT_MPEG4_AAC.toUInt()),
-            AVSampleRateKey to NSNumber(double = 44_100.0),
-            AVNumberOfChannelsKey to NSNumber(int = 1),
-            AVEncoderAudioQualityKey to NSNumber(long = AV_AUDIO_QUALITY_HIGH)
+            AVFormatIDKey to NSNumber(unsignedInt = K_AUDIO_FORMAT_LINEAR_PCM.toUInt()),
+            AVSampleRateKey to NSNumber(double = WavFormat.SAMPLE_RATE.toDouble()),
+            AVNumberOfChannelsKey to NSNumber(int = WavFormat.CHANNELS),
+            AVLinearPCMBitDepthKey to NSNumber(int = WavFormat.BITS_PER_SAMPLE),
+            AVLinearPCMIsFloatKey to NSNumber(bool = false),
+            AVLinearPCMIsBigEndianKey to NSNumber(bool = false),
         )
         val rec = AVAudioRecorder(uRL = url, settings = settings, error = null) ?: return
         rec.meteringEnabled = true
@@ -91,18 +96,28 @@ private class IosVoiceRecorder : VoiceRecorder {
         }
     }
 
-    override fun stop() {
+    override suspend fun stop() {
+        finish(discard = false)
+    }
+
+    override fun cancel() {
+        finish(discard = true)
+    }
+
+    /** AVAudioRecorder finishes its file inside `stop`, so neither path has anything to wait for. */
+    private fun finish(discard: Boolean) {
         if (!_isRecording.value) return
         _isRecording.value = false
         scope?.cancel()
         scope = null
         runCatching { recorder?.stop() }
+        if (discard) runCatching { recorder?.deleteRecording() }
         recorder = null
         _amplitude.value = 0
     }
 
     override fun newRecordingPath(): String {
-        return agentCacheDir() + "/voice_" + NSUUID().UUIDString() + ".m4a"
+        return agentCacheDir() + "/" + NSUUID().UUIDString() + "." + WavFormat.EXTENSION
     }
 }
 

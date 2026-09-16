@@ -170,6 +170,8 @@ data class TaminColors(
     // Solid tint derived from the AI-assistant gradient family — used for blur tints
     // and fallbacks where a single color (not a Brush) is required.
     val aiAssistantTint: Color,
+    /** The assistant's neon accent — a focused chat field's glow and turning border. */
+    val aiAssistantNeonStops: List<Color>,
     val verifiedBadgeBg: Color,
     val buttonGradient: Brush,
     /** Confirming fill — «تأیید و ارسال». */
@@ -317,6 +319,7 @@ val LightTaminColors = TaminColors(
         listOf(TaminPurple900, TaminPurple700, Color(0xFF3F5BD9), TaminNavy700)
     ),
     aiAssistantTint = TaminPurple900,
+    aiAssistantNeonStops = listOf(TaminPurple700, TaminNeonBlue, TaminTeal500, TaminPurple700),
     shadowPrimary = Primary700.copy(alpha = 0.5f),
     shadowSubtle = Gray900.copy(alpha = 0.1f),
 
@@ -476,6 +479,7 @@ val DarkTaminColors = TaminColors(
     txtNatProfile = TaminLightTextSubProfile,
     shadowAvatarProfile = Color.Black,
     aiAssistantTint = TaminPurple900,
+    aiAssistantNeonStops = listOf(TaminPurple700, TaminNeonBlue, TaminTeal500, TaminPurple700),
     grey900 = Color(0xFFE2E8F0),
     warning = Color(0xFFFBBF24),
     fuchsiaBlue = Color(0xFFB79AEE),

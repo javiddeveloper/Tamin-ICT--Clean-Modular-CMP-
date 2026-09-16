@@ -59,8 +59,19 @@ interface AgentChatDao {
     @Query("UPDATE agent_sessions SET title = :title WHERE id = :sessionId")
     suspend fun updateSessionTitle(sessionId: String, title: String)
 
-    @Query("UPDATE agent_sessions SET lastEntity = :lastEntity WHERE id = :sessionId")
-    suspend fun updateSessionLastEntity(sessionId: String, lastEntity: String?)
+    @Query(
+        """
+        UPDATE agent_sessions
+        SET lastEntity = :lastEntity, agentState = :agentState, agentHistory = :agentHistory
+        WHERE id = :sessionId
+        """
+    )
+    suspend fun updateSessionContext(
+        sessionId: String,
+        lastEntity: String?,
+        agentState: String?,
+        agentHistory: String?,
+    )
 
     /** Bumps recency and the message counter after a message lands. */
     @Query(

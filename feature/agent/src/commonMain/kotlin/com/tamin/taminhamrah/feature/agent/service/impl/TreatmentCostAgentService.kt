@@ -3,72 +3,79 @@ package com.tamin.taminhamrah.feature.agent.service.impl
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceParams
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceResult
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceUseCase
+import com.tamin.taminhamrah.feature.agent.service.base.AgentStrings
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
-import com.tamin.taminhamrah.feature.agent.service.base.buildBubbles
-import com.tamin.taminhamrah.feature.agent.service.base.formatAmount
-import com.tamin.taminhamrah.feature.agent.service.base.toKeyValueRows
+import com.tamin.taminhamrah.feature.agent.service.base.agentMarkdown
 import com.tamin.taminhamrah.model.agent.AgentActionKey
 import com.tamin.taminhamrah.model.treatment.TreatmentCostDN
-import com.tamin.taminhamrah.ui.orDash
+import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsUseCase
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.firstOrNull
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.agent_empty_treatment_costs
+import taminx.core.core_ui.agent_error_treatment_costs
+import taminx.core.core_ui.agent_label_admission_date
+import taminx.core.core_ui.agent_label_estimated_pay_date
+import taminx.core.core_ui.agent_label_health_center
+import taminx.core.core_ui.agent_label_other_costs
+import taminx.core.core_ui.agent_label_patient_name
+import taminx.core.core_ui.agent_label_pay_status
+import taminx.core.core_ui.agent_label_payment_amount
+import taminx.core.core_ui.agent_label_rejection_reason
+import taminx.core.core_ui.agent_label_service_cost
+import taminx.core.core_ui.agent_label_service_date
+import taminx.core.core_ui.agent_label_status
+import taminx.core.core_ui.agent_label_tracking_code
+import taminx.core.core_ui.agent_value_rial
 
 /**
- * Displays treatment cost certificates — گواهی هزینه درمان (tcr_price_certificate).
- *
- * Ported from old_Android's TreatmentCostUseCase.
+ * Miscellaneous treatment cost claims — خسارت متفرقه — ported from the native
+ * `TreatmentCostsUseCase`, which asked for the ten most recent claims.
  */
 class TreatmentCostAgentService(
     private val getTreatmentCostsUseCase: GetTreatmentCostsUseCase,
+    private val strings: AgentStrings,
 ) : AgentServiceUseCase {
 
-    override val supportedKeys: List<AgentActionKey> = listOf(
-        AgentActionKey.TREATMENT_COST
-    )
+    override val supportedKeys: List<AgentActionKey> = listOf(AgentActionKey.TREATMENT_COST)
 
-    override suspend fun execute(params: AgentServiceParams): AgentServiceResult {
-        return try {
-            val list = getTreatmentCostsUseCase().firstOrNull().orEmpty()
-
-            if (list.isEmpty()) {
-                return AgentServiceResult.Success(
-                    params.buildBubbles { add(ChatBubbleContent.Text("گواهی هزینه درمانی یافت نشد.")) }
-                )
+    override suspend fun execute(params: AgentServiceParams): AgentServiceResult = try {
+        val list = getTreatmentCostsUseCase().firstOrNull().orEmpty().take(MAX_CLAIMS)
+        val markdown = agentMarkdown {
+            heading(params.message)
+            if (list.isEmpty()) paragraph(strings.get(Res.string.agent_empty_treatment_costs))
+            list.forEach { claim ->
+                fields(rows(claim))
+                rule()
             }
-
-            val rows = mutableListOf<Pair<String, String>>()
-            list.forEachIndexed { index, item ->
-                rows.addAll(item.toRows())
-                if (index < list.lastIndex) rows.add(ROW_SEP to "")
-            }
-
-            AgentServiceResult.Success(
-                params.buildBubbles {
-                    add(ChatBubbleContent.KeyValue(
-                        title = params.message?.takeIf { it.isNotBlank() } ?: "گواهی هزینه درمان",
-                        items = rows.toKeyValueRows()
-                    ))
-                }
-            )
-        } catch (e: Exception) {
-            AgentServiceResult.Error("خطا در دریافت گواهی هزینه درمان: ${e.message}", e)
         }
+        AgentServiceResult.Success(listOf(ChatBubbleContent.Markdown(markdown)))
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        AgentServiceResult.Error(strings.get(Res.string.agent_error_treatment_costs), e)
     }
 
-    private fun TreatmentCostDN.toRows(): List<Pair<String, String>> = buildList {
-        nameFamil?.takeIf { it.isNotBlank() }?.let  { add("نام بیمار" to it) }
-        datePaz?.takeIf { it.isNotBlank() }?.let     { add("تاریخ پذیرش" to it) }
-        serviceDate?.takeIf { it.isNotBlank() }?.let { add("تاریخ خدمت" to it) }
-        healthcenterName?.takeIf { it.isNotBlank() }?.let { add("مرکز درمانی" to it) }
-        statusDesc?.takeIf { it.isNotBlank() }?.let  { add("وضعیت" to it) }
-        payStatusDesc?.takeIf { it.isNotBlank() }?.let { add("وضعیت پرداخت" to it) }
-        payPrice?.toLongOrNull()?.let { add("مبلغ پرداخت" to "${it.formatAmount()} ریال") }
-        payService?.toLongOrNull()?.let { add("هزینه خدمت" to "${it.formatAmount()} ریال") }
-        payOtherService?.toLongOrNull()?.let { add("سایر هزینه‌ها" to "${it.formatAmount()} ریال") }
-        rahgiriCode?.takeIf { it.isNotBlank() }?.let { add("کد رهگیری" to it) }
-        estimatePayDate?.takeIf { it.isNotBlank() }?.let { add("تاریخ پرداخت تخمینی" to it) }
-        returnReason?.takeIf { it.isNotBlank() }?.let { add("علت رد" to it) }
-    }
+    private suspend fun rows(claim: TreatmentCostDN): List<Pair<String, String?>> = listOf(
+        strings.get(Res.string.agent_label_patient_name) to claim.nameFamil,
+        strings.get(Res.string.agent_label_admission_date) to claim.datePaz,
+        strings.get(Res.string.agent_label_service_date) to claim.serviceDate,
+        strings.get(Res.string.agent_label_health_center) to claim.healthcenterName,
+        strings.get(Res.string.agent_label_status) to claim.statusDesc,
+        strings.get(Res.string.agent_label_pay_status) to claim.payStatusDesc,
+        strings.get(Res.string.agent_label_payment_amount) to rial(claim.payPrice),
+        strings.get(Res.string.agent_label_service_cost) to rial(claim.payService),
+        strings.get(Res.string.agent_label_other_costs) to rial(claim.payOtherService),
+        strings.get(Res.string.agent_label_tracking_code) to claim.rahgiriCode,
+        strings.get(Res.string.agent_label_estimated_pay_date) to claim.estimatePayDate,
+        strings.get(Res.string.agent_label_rejection_reason) to claim.returnReason,
+    ).filter { !it.second.isNullOrBlank() }
 
-    private companion object { const val ROW_SEP = "────────────────" }
+    private suspend fun rial(amount: String?): String? =
+        amount?.toLongOrNull()?.let { strings.get(Res.string.agent_value_rial, it.toPriceFormat()) }
+
+    private companion object {
+        const val MAX_CLAIMS = 10
+    }
 }

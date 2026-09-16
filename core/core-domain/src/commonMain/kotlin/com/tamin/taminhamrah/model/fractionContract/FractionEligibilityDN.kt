@@ -8,7 +8,7 @@ data class FractionEligibilityDN(
     val organizationAddress: String? = null,
     val eligibilityStatus: Int? = null,
     val history: Int? = null,
-    val isInsurance: Boolean = false,
+    val isInsurance: Boolean? = null,
     val checkFractionMonthStatus: String? = null,
     val insuranceId: String? = null,
     val branchCode: String? = null,

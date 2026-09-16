@@ -2,7 +2,11 @@ package com.tamin.taminhamrah.model.agent
 
 import com.tamin.taminhamrah.model.common.FeatureFlag
 
-enum class AgentActionKey(val key: String) {
+/**
+ * The service keys the assistant sends. [aliases] are other spellings the server has used for the
+ * same key; lookups ignore surrounding whitespace.
+ */
+enum class AgentActionKey(val key: String, vararg val aliases: String) {
 
     GENERAL_RESPONSE("general_response"),
     MESSAGE("message"),
@@ -41,6 +45,7 @@ enum class AgentActionKey(val key: String) {
     CALCILLNESS_REP_LAST("calcIllness_rep_last"),
     REPILLNESS("repIllness"),
     REPILLNESS_LAST("repIllness_last"),
+    ILLNESS_COMPENSATION("illness_compensation"),
 
     TREATMENT_COST("tcr_price_certificate"),
     INCIDENTAL_DAMAGES("Incidental_damages"),
@@ -67,8 +72,19 @@ enum class AgentActionKey(val key: String) {
     EDIT_BANK_ACCOUNT_CANCEL("edit_bank_account_cancel"),
 
     PROFILE_INFO("profile_info"),
+    EDIT_PROFILE("edit_profile"),
+    EDIT_PROFILE_INFO_SUBMIT("edit_profile_info_submit"),
+    EDIT_PROFILE_INFO_CANCEL("edit_profile_info_cancel"),
 
-    WORKER_PAYMENT("worker_payment"),
+    EDIT_ADDRESS("edit_address"),
+    EDIT_ADDRESS_GET("edit_address_get"),
+    EDIT_ADDRESS_SELECT("edit_address_select"),
+    EDIT_ADDRESS_ADD("edit_address_add"),
+    EDIT_ADDRESS_SUBMIT("edit_address_submit"),
+    EDIT_ADDRESS_DELETE("edit_address_delete"),
+    EDIT_ADDRESS_CANCEL("edit_address_cancel"),
+
+    WORKER_PAYMENT("workers_payment", "worker_payment"),
 
     EXTEND_EDUCATION("extend_education"),
     EXTEND_EDUCATION_GET("extend_education_get"),
@@ -107,6 +123,7 @@ enum class AgentActionKey(val key: String) {
     DEFFERED_INSTALLMENT_CERTIFICATE("deferred_installment_certificate"),
     CONFIRMATION_MEDICAL_AUTHORITIES("confirmation_medical_authorities"),
     DISABILITY_PENSION("disability_pension"),
+    PENSION_SURVIVOR("pension_survivor"),
     REGISTER_CONTRACT("register_contract"),
 
     /** Demo-only: drives the showcase fixture that renders one of each bubble type. */
@@ -116,8 +133,8 @@ enum class AgentActionKey(val key: String) {
 
     companion object {
         fun fromString(key: String?): AgentActionKey {
-            if (key == null) return UNKNOWN
-            return entries.find { it.key == key } ?: UNKNOWN
+            val value = key?.trim()?.takeIf { it.isNotEmpty() } ?: return UNKNOWN
+            return entries.find { it.key == value || value in it.aliases } ?: UNKNOWN
         }
     }
 }
@@ -198,8 +215,23 @@ fun AgentActionKey.toFeatureFlag(): FeatureFlag? = when (this) {
     // Laws
     AgentActionKey.LAW -> FeatureFlag.LAWS
 
-    // Disability Pension
+    // Disability / survivor pension
     AgentActionKey.DISABILITY_PENSION -> FeatureFlag.DISABILITY_PENSION
+    AgentActionKey.PENSION_SURVIVOR -> FeatureFlag.REQUEST_PENSION_BY_SURVIVOR
+
+    // Illness
+    AgentActionKey.ILLNESS_COMPENSATION,
+    AgentActionKey.REPILLNESS,
+    AgentActionKey.REPILLNESS_LAST,
+    AgentActionKey.CALCILLNESS_REP,
+    AgentActionKey.CALCILLNESS_REP_LAST -> FeatureFlag.REQUEST_PAYMENT_FOR_ILL_DAYS
+    AgentActionKey.CALCULATE_ILLNESS,
+    AgentActionKey.DASTMOZD_INFOS_CALCILLNESS_PENSIONER -> FeatureFlag.CALCULATE_WAGE_ILL_DAYS
+
+    // Screens reached through a deep link
+    AgentActionKey.DEFFERED_INSTALLMENT_CERTIFICATE -> FeatureFlag.DEFERRED_INSTALLMENT_CERTIFICATE
+    AgentActionKey.REGISTER_CONTRACT -> FeatureFlag.CONTRACTS
+    AgentActionKey.WORKER_PAYMENT -> FeatureFlag.WORKERS_PAYMENT_INFO
 
     // General messages — no check required
     AgentActionKey.GENERAL_RESPONSE,

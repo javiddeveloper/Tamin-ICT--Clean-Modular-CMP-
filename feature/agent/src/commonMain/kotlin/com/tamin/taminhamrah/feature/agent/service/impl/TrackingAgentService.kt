@@ -3,95 +3,66 @@ package com.tamin.taminhamrah.feature.agent.service.impl
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceParams
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceResult
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceUseCase
+import com.tamin.taminhamrah.feature.agent.service.base.AgentStrings
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
-import com.tamin.taminhamrah.feature.agent.service.base.buildBubbles
-import com.tamin.taminhamrah.feature.agent.service.base.filterValue
-import com.tamin.taminhamrah.feature.agent.service.base.formatAmount
-import com.tamin.taminhamrah.feature.agent.service.base.toKeyValueRows
+import com.tamin.taminhamrah.feature.agent.service.base.agentMarkdown
+import com.tamin.taminhamrah.feature.agent.service.base.dateRange
+import com.tamin.taminhamrah.feature.agent.service.impl.prescription.PrescriptionQuery
+import com.tamin.taminhamrah.feature.agent.service.impl.prescription.rows
 import com.tamin.taminhamrah.model.agent.AgentActionKey
-import com.tamin.taminhamrah.model.treatment.ElectronicPrescriptionDN
-import com.tamin.taminhamrah.ui.orDash
-import com.tamin.taminhamrah.useCases.treatment.GetElectronicPrescriptionListUseCase
 import com.tamin.taminhamrah.useCases.agent.GetCurrentUserNationalCodeUseCase
-import kotlinx.coroutines.flow.firstOrNull
+import com.tamin.taminhamrah.useCases.treatment.GetElectronicPrescriptionListUseCase
+import kotlinx.coroutines.CancellationException
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.agent_empty_tracking_code
+import taminx.core.core_ui.agent_error_national_code
+import taminx.core.core_ui.agent_error_tracking_code
 
 /**
- * Displays electronic prescription tracking codes — کد پیگیری.
+ * Prescription tracking codes — کد پیگیری — ported from the native `TrackingCodeUseCase` /
+ * `LastTrackingCodeUseCase`.
  *
- * Ported from old_Android's TrackingCodeUseCase / LastTrackingCodeUseCase.
- * Uses [GetElectronicPrescriptionListUseCase] with a default 7-day window if no
- * date filters are provided by the AI.
+ * Dates from the assistant are Jalali `YYYYMMDD` and are turned into the epoch-millis window the
+ * endpoint expects (the earlier port passed them through raw, which the service cannot read).
+ * `last_tracking_code` keeps only the newest prescription.
  */
 class TrackingAgentService(
-    private val getElectronicPrescriptionListUseCase: GetElectronicPrescriptionListUseCase,
+    getElectronicPrescriptionListUseCase: GetElectronicPrescriptionListUseCase,
     private val getCurrentUserNationalCodeUseCase: GetCurrentUserNationalCodeUseCase,
+    private val strings: AgentStrings,
 ) : AgentServiceUseCase {
+
+    private val query = PrescriptionQuery(getElectronicPrescriptionListUseCase)
 
     override val supportedKeys: List<AgentActionKey> = listOf(
         AgentActionKey.TRACKING_CODE,
         AgentActionKey.LAST_TRACKING_CODE
     )
 
-    override suspend fun execute(params: AgentServiceParams): AgentServiceResult {
-        return try {
-            val nationalCode = getCurrentUserNationalCodeUseCase() ?: return AgentServiceResult.Error("کد ملی یافت نشد.")
-
-            // Default window: last 7 days
-            val nowMs = kotlinx.datetime.Clock.System.now().toEpochMilliseconds()
-            val sevenDaysMs = 7L * 24 * 60 * 60 * 1000
-
-            val startDate = params.filterValue("startDate") ?: (nowMs - sevenDaysMs).toString()
-            val endDate   = params.filterValue("endDate")   ?: nowMs.toString()
-
-            val list = getElectronicPrescriptionListUseCase(
-                requestTypeId       = "1",
-                nationalCode        = nationalCode,
-                patientNationalCode = "0",
-                startDate           = startDate,
-                endDate             = endDate
-            ).firstOrNull().orEmpty()
-
-            if (list.isEmpty()) {
-                return AgentServiceResult.Success(
-                    params.buildBubbles { add(ChatBubbleContent.Text("متاسفانه کد پیگیری یافت نشد.")) }
-                )
-            }
-
-            // LAST variant: only the most recent item
-            val records = if (params.requestedKey == AgentActionKey.LAST_TRACKING_CODE) {
-                listOf(list.maxByOrNull { it.prescDate?.toLongOrNull() ?: 0L } ?: list.first())
+    override suspend fun execute(params: AgentServiceParams): AgentServiceResult = try {
+        val nationalCode = getCurrentUserNationalCodeUseCase()
+        if (nationalCode == null) {
+            AgentServiceResult.Error(strings.get(Res.string.agent_error_national_code))
+        } else {
+            val list = query.inRange(nationalCode, params.dateRange())
+            val shown = if (params.requestedKey == AgentActionKey.LAST_TRACKING_CODE) {
+                listOfNotNull(list.maxByOrNull { it.prescDate?.toLongOrNull() ?: 0L })
             } else {
                 list
             }
-
-            val rows = mutableListOf<Pair<String, String>>()
-            records.forEachIndexed { index, item ->
-                rows.addAll(item.toRows())
-                if (index < records.lastIndex) rows.add(ROW_SEP to "")
-            }
-
-            AgentServiceResult.Success(
-                params.buildBubbles {
-                    add(ChatBubbleContent.KeyValue(
-                        title = params.message?.takeIf { it.isNotBlank() } ?: "کد پیگیری",
-                        items = rows.toKeyValueRows()
-                    ))
+            val markdown = agentMarkdown {
+                heading(params.message)
+                if (shown.isEmpty()) paragraph(strings.get(Res.string.agent_empty_tracking_code))
+                shown.forEach { prescription ->
+                    fields(prescription.rows(strings))
+                    rule()
                 }
-            )
-        } catch (e: Exception) {
-            AgentServiceResult.Error("خطا در دریافت کد پیگیری: ${e.message}", e)
+            }
+            AgentServiceResult.Success(listOf(ChatBubbleContent.Markdown(markdown)))
         }
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        AgentServiceResult.Error(strings.get(Res.string.agent_error_tracking_code), e)
     }
-
-    private fun ElectronicPrescriptionDN.toRows(): List<Pair<String, String>> = buildList {
-        trackingCode?.let { add("کد پیگیری" to it.toString()) }
-        prescDate?.let { add("تاریخ نسخه" to it) }
-        prescName?.let { if (it.isNotBlank()) add("نوع نسخه" to it) }
-        docName?.let { if (it.isNotBlank()) add("پزشک" to it) }
-        specDesc?.let { if (it.isNotBlank()) add("تخصص" to it) }
-        patientName?.let { if (it.isNotBlank()) add("بیمار" to it) }
-        location?.let { if (it.isNotBlank()) add("محل ارائه" to it) }
-    }
-
-    private companion object { const val ROW_SEP = "────────────────" }
 }

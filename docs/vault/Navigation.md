@@ -57,6 +57,8 @@ val vm = backStackEntry.sharedViewModel<XViewModel>(navController) // shared acr
 
 `FeatureFlag` (from the server) → `navigateToFeature(flag)` → the `navigateToXxx()` function each feature exports. Full detail in [[Feature-Flags]].
 
+`navigateToFeature` does **not** check the flag and returns `false` when no screen exists. Menu taps check the flag in their view models; every link (OS, stories, assistant) goes through `ResolveDeepLinkUseCase` via `LocalDeepLinkHandler` — see [[Deep-Links]]. Never call `navigateToFeature` from a link directly.
+
 ## The bottom bar's centre slot
 
 `FloatingGlassNavigationBar` clips its content to the glass pill, so a row item **cannot** rise
