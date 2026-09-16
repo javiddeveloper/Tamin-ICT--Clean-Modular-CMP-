@@ -18,10 +18,10 @@ data class NewMemberRegistrationDN(
     val startDate: String,
     val workshopId: String,
     val branchCode: String,
-    /** Set when a saved draft is being edited, so the service updates that person. */
+    /** Set once the person is on file, so the service updates that person instead of adding one. */
     val personalId: Long? = null,
 )
 
-/** What the service answers a create with; [personalId] is what documents are filed against. */
+/** What the service answers a create or update with; [personalId] is what documents are filed against. */
 data class NewMemberRegistrationResultDN(val personalId: Long? = null)
 

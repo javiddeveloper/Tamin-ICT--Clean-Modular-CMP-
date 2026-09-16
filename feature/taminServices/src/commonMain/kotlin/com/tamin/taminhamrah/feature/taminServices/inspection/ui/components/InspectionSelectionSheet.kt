@@ -23,10 +23,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,10 +34,10 @@ import com.tamin.taminhamrah.ui.components.CustomSearchBar
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.paging.OnLoadMore
 import com.tamin.taminhamrah.ui.paging.PagingFooter
+import com.tamin.taminhamrah.ui.paging.rememberDebouncedQuery
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.inspection_request_selection_empty
@@ -52,7 +49,6 @@ data class InspectionSelectionOption(
     val title: String,
 )
 
-private const val SEARCH_DEBOUNCE_MS = 300L
 private const val SELECTION_FOOTER_KEY = "selection_paging_footer"
 
 /**
@@ -85,12 +81,7 @@ internal fun InspectionSelectionSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val listState = rememberLazyListState()
 
-    var text by remember { mutableStateOf(query) }
-    LaunchedEffect(text) {
-        if (text == query) return@LaunchedEffect
-        delay(SEARCH_DEBOUNCE_MS)
-        onQueryChange(text)
-    }
+    var text by rememberDebouncedQuery(query, onQueryChange)
 
     listState.OnLoadMore(enabled = !endReached && pagingError == null && !isLoadingFirstPage) {
         onLoadMore()

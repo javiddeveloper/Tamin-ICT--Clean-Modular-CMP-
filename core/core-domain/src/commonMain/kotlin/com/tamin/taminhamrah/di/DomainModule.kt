@@ -103,6 +103,7 @@ import com.tamin.taminhamrah.useCases.common.CompleteBiometricEnrollmentPromptUs
 import com.tamin.taminhamrah.useCases.common.SetFontSizeUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.common.GetJobTitleUseCase
+import com.tamin.taminhamrah.useCases.common.GetJobTitlePageUseCase
 import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetContractsUseCase
 import com.tamin.taminhamrah.useCases.contractAffair.GetContractsPageUseCase
@@ -143,6 +144,7 @@ import com.tamin.taminhamrah.useCases.calculateWagePension.CalculateWagePensionU
 import com.tamin.taminhamrah.useCases.calculateWagePension.CheckMultipleWorkshopsUseCase
 import com.tamin.taminhamrah.useCases.calculateWagePension.GetMultipleWorkshopPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.GetDisabilityPersonalInfoUseCase
+import com.tamin.taminhamrah.useCases.personal.GetInsuredRegistrationDocListUseCase
 import com.tamin.taminhamrah.useCases.pension.SaveDisabilityUserInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.FinalConfirmDisabilityRequestUseCase
 import com.tamin.taminhamrah.useCases.pension.SaveDocumentDisabilityUseCase
@@ -490,9 +492,11 @@ val domainModule = module {
     factoryOf(::GetUserProfileUseCase)
     factoryOf(::GetCurrentUserUseCase)
     factoryOf(::GetJobTitleUseCase)
+    factoryOf(::GetJobTitlePageUseCase)
     factoryOf(::GetRegistrationDeclarationFormUseCase)
     factoryOf(::GetRequestSummaryUseCase)
     factoryOf(::PutInsuredRegistrationDocListUseCase)
+    factoryOf(::GetInsuredRegistrationDocListUseCase)
     factoryOf(::CheckUserIsNewUseCase)
     // کارگاه‌های کارفرما — the list, then one group per action it launches
     factoryOf(::GetEmployerAgreementsUseCase)
