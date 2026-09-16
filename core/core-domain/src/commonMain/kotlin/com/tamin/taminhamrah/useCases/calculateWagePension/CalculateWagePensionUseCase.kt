@@ -29,13 +29,19 @@ class CalculateWagePensionUseCase {
             premiumYears = roundedPremiumYears
         )
 
+        val (historyYears, historyMonths, historyDays) = normalizeHistoryDuration(
+            years = firstItem?.historyYears ?: 0,
+            months = firstItem?.historyMonths ?: 0,
+            days = firstItem?.historyDays ?: 0,
+        )
+
         return WagePensionCalculationDN(
             premiumPaymentHistoryYear = premiumPaymentHistoryYear,
             averageSalaryLastTwoYears = averageSalary,
             eligibleAmountPension = eligibleAmount,
-            historyYears = firstItem?.historyYears ?: 0,
-            historyMonths = firstItem?.historyMonths ?: 0,
-            historyDays = firstItem?.historyDays ?: 0,
+            historyYears = historyYears,
+            historyMonths = historyMonths,
+            historyDays = historyDays,
             totalHistoryDays = totalHistoryDays,
             chartItems = talfigh.list.orEmpty().map { item ->
                 WagePensionChartItemDN(
@@ -48,6 +54,23 @@ class CalculateWagePensionUseCase {
             },
             legalFloorApplied = legalFloorApplied,
         )
+    }
+
+    /**
+     * Carries days into months (≥ [DAYS_IN_MONTH]) and months into years (≥ [MONTHS_IN_YEAR]),
+     * matching legacy `Utility.normalizeHistoryDuration` before display.
+     */
+    private fun normalizeHistoryDuration(
+        years: Int,
+        months: Int,
+        days: Int,
+    ): Triple<Int, Int, Int> {
+        var normalizedYears = years
+        var normalizedMonths = months + days / DAYS_IN_MONTH
+        val normalizedDays = days % DAYS_IN_MONTH
+        normalizedYears += normalizedMonths / MONTHS_IN_YEAR
+        normalizedMonths %= MONTHS_IN_YEAR
+        return Triple(normalizedYears, normalizedMonths, normalizedDays)
     }
 
     private fun calculateAmounts(

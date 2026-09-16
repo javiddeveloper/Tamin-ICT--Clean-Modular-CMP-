@@ -69,6 +69,11 @@ class CalculateWagePensionViewModel(
         if (uiState.value.isLoading) return
         emit(PartialState.Loading(true))
         val talfigh = getTalfighInfosUseCase()
+        // Legacy short-circuits when insurance history is empty — never hits the wage endpoint.
+        if (talfigh.list.isNullOrEmpty()) {
+            emit(PartialState.Loading(false))
+            return
+        }
         val dastmozd = getDastmozdInfosUseCase()
         val calculation = calculateWagePensionUseCase(talfigh, dastmozd).toPresentation()
         emit(PartialState.CalculationLoaded(calculation))
