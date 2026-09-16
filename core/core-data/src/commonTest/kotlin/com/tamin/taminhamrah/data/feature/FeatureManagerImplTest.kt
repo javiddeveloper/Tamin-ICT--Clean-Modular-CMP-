@@ -2,12 +2,14 @@ package com.tamin.taminhamrah.data.feature
 
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
+import com.tamin.taminhamrah.model.common.JobTitleDN
 import com.tamin.taminhamrah.model.common.JobTitleListDN
 import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.model.common.RoleDN
 import com.tamin.taminhamrah.model.common.UserType
 import com.tamin.taminhamrah.model.common.UserTypeInfoDN
+import com.tamin.taminhamrah.model.paging.PageDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.common.CommonRepository
 import kotlinx.coroutines.flow.Flow
@@ -33,6 +35,10 @@ class FakeRepositoryForFeatureManager : CommonRepository {
 
     override fun getJobTitle(query: ApiQueryParamDN): Flow<JobTitleListDN?> = flow {
         emit(null)
+    }
+
+    override fun getJobTitlePage(query: ApiQueryParamDN): Flow<PageDN<JobTitleDN>> = flow {
+        emit(PageDN(items = emptyList(), total = 0))
     }
 
     override fun getRoles(): Flow<List<RoleDN>> = flow {

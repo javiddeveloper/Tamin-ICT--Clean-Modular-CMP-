@@ -17,7 +17,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -74,7 +73,6 @@ fun WorkshopSearchCard(
     fields: @Composable ColumnScope.() -> Unit,
 ) {
     val colors = LocalTaminColors.current
-    val actionShape = RoundedCornerShape(CornerRadius.chip)
     val actionTextStyle = MaterialTheme.typography.bodySmall.copy(
         fontWeight = FontWeight.ExtraBold,
     )
@@ -95,7 +93,7 @@ fun WorkshopSearchCard(
                 onClick = onSearch,
                 background = colors.buttonGradient,
                 height = WorkshopDimens.panelButtonHeight,
-                shape = actionShape,
+                shape = SearchActionShape,
                 textStyle = actionTextStyle,
                 modifier = Modifier.weight(1f),
             )
@@ -103,7 +101,7 @@ fun WorkshopSearchCard(
                 text = stringResource(Res.string.workshop_all_items),
                 onClick = onClear,
                 height = WorkshopDimens.panelButtonHeight,
-                shape = actionShape,
+                shape = SearchActionShape,
                 borderWidth = WorkshopDimens.panelButtonBorderWidth,
                 borderColor = colors.blueBorder,
                 containerColor = colors.bgSurface,
@@ -296,7 +294,6 @@ fun WorkshopFilterChips(
 ) {
     if (chips.isEmpty()) return
     val colors = LocalTaminColors.current
-    val shape = remember { RoundedCornerShape(CornerRadius.max) }
 
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -306,9 +303,9 @@ fun WorkshopFilterChips(
         chips.forEachIndexed { index, chip ->
             Row(
                 modifier = Modifier
-                    .clip(shape)
+                    .clip(FilterChipShape)
                     .background(colors.blueBg)
-                    .border(Thickness.border, colors.blueBorder, shape)
+                    .border(Thickness.border, colors.blueBorder, FilterChipShape)
                     .clickable { onRemove(index) }
                     .padding(horizontal = WorkshopDimens.chipHorizontalPadding, vertical = WorkshopDimens.chipVerticalPadding),
                 verticalAlignment = Alignment.CenterVertically,
@@ -387,10 +384,9 @@ fun PersonSearchPanel(
 @Composable
 private fun Modifier.fieldBox(isError: Boolean = false): Modifier {
     val colors = LocalTaminColors.current
-    val shape = RoundedCornerShape(CornerRadius.listRow)
     return this
         .defaultMinSize(minHeight = WorkshopDimens.fieldHeight)
-        .clip(shape)
+        .clip(FieldBoxShape)
         .background(colors.bgPage)
         // core-ui's own border animation — the one TaminStyledTextField draws — so a picker that
         // is wrong flashes exactly like a text field that is.
@@ -406,4 +402,9 @@ private fun Modifier.fieldBox(isError: Boolean = false): Modifier {
             vertical = WorkshopDimens.fieldVerticalPadding,
         )
 }
+
+private val SearchActionShape = RoundedCornerShape(CornerRadius.chip)
+private val FilterChipShape = RoundedCornerShape(CornerRadius.max)
+private val FieldBoxShape = RoundedCornerShape(CornerRadius.listRow)
+
 

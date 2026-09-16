@@ -6,16 +6,25 @@ import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.model.utils.ListData
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.SmsMessageDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionQuery
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
-/** Only what `getWorkShopObjections`/`getWorkShopObjectionSms` need; everything else throws via the base. */
+/** Only what the objection lookups and registration create-or-update need; everything else throws via the base. */
 private class FakeWorkShopsRemoteDataSource : NotUsedWorkShopsRemoteDataSource() {
     var lastObjectionsQuery: ApiQueryParamDN? = null
+        private set
+    var createdRegistration: NewMemberRegistrationDTO? = null
+        private set
+    var updatedPersonalId: Long? = null
         private set
     var lastSmsSeqNo: Long? = null
         private set
@@ -31,6 +40,21 @@ private class FakeWorkShopsRemoteDataSource : NotUsedWorkShopsRemoteDataSource()
     ): ListData<SmsMessageDTO> {
         lastSmsSeqNo = objectionCode
         return ListData(list = emptyList(), total = 0)
+    }
+
+    override suspend fun createNewMemberRegistration(
+        request: NewMemberRegistrationDTO,
+    ): NewMemberRegistrationResultDTO {
+        createdRegistration = request
+        return NewMemberRegistrationResultDTO(id = CREATED_PERSONAL_ID)
+    }
+
+    override suspend fun updateNewMemberRegistration(
+        personalId: Long,
+        request: NewMemberRegistrationDTO,
+    ): NewMemberRegistrationResultDTO {
+        updatedPersonalId = personalId
+        return NewMemberRegistrationResultDTO(id = personalId)
     }
 }
 
@@ -85,4 +109,42 @@ class WorkShopsRepositoryImplTest {
 
         assertEquals(1403008720L, remote.lastSmsSeqNo)
     }
+
+    @Test
+    fun createNewMemberRegistration_createsAPersonNotYetOnFile() = runTest {
+        val result = repository.createNewMemberRegistration(registration(personalId = null))
+
+        assertNotNull(remote.createdRegistration)
+        assertNull(remote.updatedPersonalId)
+        assertEquals(CREATED_PERSONAL_ID, result.personalId)
+    }
+
+    /**
+     * A person already on file is updated under their own id. Creating them again adds a second
+     * `employers` record for the same person — the duplicate a re-opened draft used to leave.
+     */
+    @Test
+    fun createNewMemberRegistration_updatesAPersonAlreadyOnFile() = runTest {
+        val result = repository.createNewMemberRegistration(registration(personalId = 42L))
+
+        assertEquals(42L, remote.updatedPersonalId)
+        assertNull(remote.createdRegistration)
+        assertEquals(42L, result.personalId)
+    }
+
+    private fun registration(personalId: Long?) = NewMemberRegistrationDN(
+        firstName = "احمد",
+        lastName = "احمدی",
+        nationalId = "1234567891",
+        dateOfBirth = "1370/01/01",
+        cityOfBirthId = "0701",
+        cityOfIssueId = "0701",
+        jobCode = "7",
+        startDate = "1405/01/01",
+        workshopId = "9028218513",
+        branchCode = "14",
+        personalId = personalId,
+    )
 }
+
+private const val CREATED_PERSONAL_ID = 7L

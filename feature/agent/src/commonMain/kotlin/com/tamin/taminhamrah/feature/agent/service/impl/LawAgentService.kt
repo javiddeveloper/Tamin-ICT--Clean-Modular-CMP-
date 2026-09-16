@@ -3,96 +3,66 @@ package com.tamin.taminhamrah.feature.agent.service.impl
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceParams
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceResult
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceUseCase
+import com.tamin.taminhamrah.feature.agent.service.base.AgentStrings
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
+import com.tamin.taminhamrah.feature.agent.service.base.agentMarkdown
 import com.tamin.taminhamrah.model.agent.AgentActionKey
+import com.tamin.taminhamrah.model.agent.AgentItemType
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.decodeFromJsonElement
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.agent_empty_law
 
+/** One law returned for the `law` key. Unknown fields are ignored. */
 @Serializable
 data class LawItemDTO(
-    val item_type: String? = null,
-    val name: String? = null,
-    val reference: String? = null,
-    val content: String? = null
+    @SerialName("item_type") val itemType: String? = null,
+    @SerialName("name") val name: String? = null,
+    @SerialName("reference") val reference: String? = null,
+    @SerialName("content") val content: String? = null,
+    @SerialName("url") val url: String? = null,
 )
 
 /**
- * Dedicated handler for the "Law Search" service in the chatbot.
- *
- * Supports two data formats from the backend:
- *  1. rawData: Array of LawItemDTO (item_type = "law_item") — real backend format
- *  2. payload: Object with "description" field — simple/test format
- *
- * When both are absent, returns a ServiceError bubble.
+ * Laws and regulations — قوانین — returned by the assistant itself, ported from the native
+ * `LawUseCase`. Each `law_item` becomes a titled section; a `payload.description` is used when the
+ * server sends plain text instead.
  */
 class LawAgentService(
-    private val json: Json
+    private val json: Json,
+    private val strings: AgentStrings,
 ) : AgentServiceUseCase {
 
     override val supportedKeys = listOf(AgentActionKey.LAW)
 
     override suspend fun execute(params: AgentServiceParams): AgentServiceResult {
-        val rawData = params.rawData
-        val payload = params.payload
+        val laws = params.rawData
+            ?.let { runCatching { json.decodeFromJsonElement<List<LawItemDTO>>(it) }.getOrNull() }
+            .orEmpty()
+            .filter { AgentItemType.fromWireName(it.itemType) == AgentItemType.LAW_ITEM }
+        val description = ((params.payload as? JsonObject)?.get(DESCRIPTION) as? JsonPrimitive)?.content
 
-        // No data at all → error bubble
-        if (rawData == null && payload == null) {
-            return AgentServiceResult.Success(
-                bubbles = listOf(ChatBubbleContent.ServiceError("اطلاعات قانون دریافت نشد."))
-            )
-        }
-
-        val bubbles = mutableListOf<ChatBubbleContent>()
-
-        // Prepend the AI message if present
-        if (!params.message.isNullOrBlank()) {
-            bubbles.add(ChatBubbleContent.Text(params.message))
-        }
-
-        // ── Strategy 1: rawData as a list of LawItemDTO (real backend) ──────────
-        if (rawData != null) {
-            val laws = try {
-                json.decodeFromJsonElement<List<LawItemDTO>>(rawData)
-            } catch (e: Exception) {
-                emptyList()
-            }
-
-            val lawItems = laws.filter { it.item_type == "law_item" }
-            if (lawItems.isNotEmpty()) {
-                val sb = StringBuilder()
-                lawItems.forEachIndexed { index, law ->
-                    val lawName = law.name?.replace(")", "")?.trim() ?: "${index + 1}"
-                    sb.append("- **").append(lawName).append("**: ").append(law.content ?: "").append("\n")
+        val markdown = agentMarkdown {
+            heading(params.message)
+            when {
+                laws.isNotEmpty() -> laws.forEach { law ->
+                    subheading(law.name)
+                    paragraph(law.content)
+                    law.reference?.let { paragraph(it) }
+                    rule()
                 }
-                bubbles.add(ChatBubbleContent.Text(sb.toString().trimEnd()))
-                return AgentServiceResult.Success(bubbles)
+                !description.isNullOrBlank() -> paragraph(description)
+                else -> paragraph(strings.get(Res.string.agent_empty_law))
             }
         }
+        return AgentServiceResult.Success(listOf(ChatBubbleContent.Markdown(markdown)))
+    }
 
-        // ── Strategy 2: payload as { "description": "..." } ──────────────────────
-        if (payload != null) {
-            val description = try {
-                payload.jsonObject["description"]?.jsonPrimitive?.content
-            } catch (e: Exception) {
-                null
-            }
-
-            if (!description.isNullOrBlank()) {
-                bubbles.add(ChatBubbleContent.Text(description))
-                return AgentServiceResult.Success(bubbles)
-            }
-        }
-
-        // Nothing useful found
-        if (bubbles.isEmpty()) {
-            return AgentServiceResult.Success(
-                bubbles = listOf(ChatBubbleContent.ServiceError("اطلاعات قانون دریافت نشد."))
-            )
-        }
-
-        return AgentServiceResult.Success(bubbles)
+    private companion object {
+        const val DESCRIPTION = "description"
     }
 }

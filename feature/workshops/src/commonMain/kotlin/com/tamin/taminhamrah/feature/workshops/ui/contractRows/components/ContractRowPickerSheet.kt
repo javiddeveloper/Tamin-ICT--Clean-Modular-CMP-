@@ -1,6 +1,8 @@
 package com.tamin.taminhamrah.feature.workshops.ui.contractRows.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,36 +14,48 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopConstants
-import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopQuickPickList
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopTextField
+import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.digitsOnly
+import com.tamin.taminhamrah.ui.paging.OnLoadMore
+import com.tamin.taminhamrah.ui.paging.PagingFooter
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import kotlinx.collections.immutable.ImmutableList
+import com.tamin.taminhamrah.ui.theme.Thickness
+import com.tamin.taminhamrah.util.toPersianDigits
+import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.contract_rows_apply
 import taminx.core.core_ui.contract_rows_branch_code_required_hint
 import taminx.core.core_ui.contract_rows_four_digits
+import taminx.core.core_ui.contract_rows_my_workshops
 import taminx.core.core_ui.contract_rows_pick_workshop
 import taminx.core.core_ui.contract_rows_pick_workshop_hint
 import taminx.core.core_ui.contract_rows_reset
@@ -69,21 +83,23 @@ fun ContractRowPickerSheet(
     showWorkshopIdError: Boolean,
     showBranchCodeError: Boolean,
     isApplying: Boolean,
-    myWorkshops: ImmutableList<WorkshopPR>,
-    myWorkshopsTotal: Int,
+    myWorkshops: PagedListState<WorkshopPR>,
     canReset: Boolean,
     onWorkshopIdChange: (String) -> Unit,
     onBranchCodeChange: (String) -> Unit,
     onQuickPick: (String, String) -> Unit,
+    onLoadMoreWorkshops: () -> Unit,
     onApply: () -> Unit,
     onReset: () -> Unit,
     onDismiss: () -> Unit,
 ) {
+    val colors = LocalTaminColors.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         dragHandle = null,
+        containerColor = colors.bgSurface,
     ) {
         ContractRowPickerContent(
             workshopId = workshopId,
@@ -92,11 +108,11 @@ fun ContractRowPickerSheet(
             showBranchCodeError = showBranchCodeError,
             isApplying = isApplying,
             myWorkshops = myWorkshops,
-            myWorkshopsTotal = myWorkshopsTotal,
             canReset = canReset,
             onWorkshopIdChange = onWorkshopIdChange,
             onBranchCodeChange = onBranchCodeChange,
             onQuickPick = onQuickPick,
+            onLoadMoreWorkshops = onLoadMoreWorkshops,
             onApply = onApply,
             onReset = onReset,
         )
@@ -116,31 +132,31 @@ fun ContractRowPickerContent(
     showWorkshopIdError: Boolean,
     showBranchCodeError: Boolean,
     isApplying: Boolean,
-    myWorkshops: ImmutableList<WorkshopPR>,
-    myWorkshopsTotal: Int,
+    myWorkshops: PagedListState<WorkshopPR>,
     canReset: Boolean,
     onWorkshopIdChange: (String) -> Unit,
     onBranchCodeChange: (String) -> Unit,
     onQuickPick: (String, String) -> Unit,
+    onLoadMoreWorkshops: () -> Unit,
     onApply: () -> Unit,
     onReset: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
+    val workshopsListState = rememberLazyListState()
+    workshopsListState.OnLoadMore(
+        enabled = myWorkshops.canLoadMore,
+        onLoadMore = onLoadMoreWorkshops,
+    )
     Column(
         modifier = modifier
             .fillMaxWidth()
-            // کارگاه‌های شما is up to a full page of workshops, and on a short screen that pushed
-            // «مشاهدهٔ ردیف پیمان‌ها» past the bottom edge with no way to reach it — the sheet had
-            // no scroll of its own. Bounded at one page, so a plain scroll is right here; a lazy
-            // list inside a sheet that already scrolls would nest two scrollers.
-            .verticalScroll(rememberScrollState())
             .padding(horizontal = Spacing.page)
             .padding(
                 top = Spacing.smd,
-                bottom = Spacing.page,
-            )
-            .padding(WindowInsets.navigationBars.asPaddingValues()),
+                bottom = WindowInsets.navigationBars.asPaddingValues()
+                    .calculateBottomPadding() + Spacing.lg,
+            ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         // The sheet's own handle is switched off above, so the design's grabber is drawn here.
@@ -204,12 +220,44 @@ fun ContractRowPickerContent(
             )
         }
 
-        WorkshopQuickPickList(
-            workshops = myWorkshops,
-            total = myWorkshopsTotal,
-            selectedWorkshopId = workshopId,
-            onPick = onQuickPick,
-        )
+        // Absent rather than empty: with no workshops to offer, a heading over nothing reads as a
+        // list that failed to load.
+        if (myWorkshops.items.isNotEmpty()) {
+            Text(
+                text = stringResource(Res.string.contract_rows_my_workshops),
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                color = colors.textSecondary,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = Spacing.smd, bottom = Spacing.sm),
+            )
+            LazyColumn(
+                state = workshopsListState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f, fill = false),
+                verticalArrangement = Arrangement.spacedBy(WorkshopDimens.contractRowTileGap),
+            ) {
+                items(
+                    items = myWorkshops.items,
+                    key = { "${it.workshopId}_${it.branchCode}" },
+                ) { workshop ->
+                    QuickPickRow(
+                        name = workshop.name,
+                        codeLabel = workshop.codeLabel,
+                        isSelected = workshop.workshopId == workshopId &&
+                            (branchCode.isBlank() || workshop.branchCode == branchCode),
+                        onPick = { onQuickPick(workshop.workshopId, workshop.branchCode) },
+                    )
+                }
+                if (myWorkshops.isLoadingMore) {
+                    item(key = LOADING_MORE_KEY) {
+                        PagingFooter(isLoadingNextPage = true, error = null, onRetry = {})
+                    }
+                }
+            }
+        }
 
         Row(
             modifier = Modifier
@@ -242,4 +290,107 @@ fun ContractRowPickerContent(
             }
         }
     }
+}
+
+/** One کارگاههای شما row: picking it fills both fields at once, branch included. */
+@Composable
+private fun QuickPickRow(
+    name: String,
+    codeLabel: String,
+    isSelected: Boolean,
+    onPick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+    val shape = remember { RoundedCornerShape(CornerRadius.md) }
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .clickable(onClick = onPick)
+            .background(if (isSelected) colors.blueBg else colors.chipBg)
+            .then(
+                if (isSelected) {
+                    Modifier.border(Thickness.border, colors.blueBorder, shape)
+                } else {
+                    Modifier
+                },
+            )
+            .padding(horizontal = Spacing.lg, vertical = Spacing.md),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.smPlus),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = name,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold,
+            color = if (isSelected) colors.blueText else colors.textPrimary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f),
+        )
+        NumericText(
+            text = codeLabel,
+            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+            color = if (isSelected) colors.blueText else colors.textMuted,
+        )
+    }
+}
+
+/** The footer row's key; the workshop rows are keyed `workshopId_branchCode`, so it cannot clash. */
+private const val LOADING_MORE_KEY = "loading_more"
+
+private val PreviewWorkshops = persistentListOf(
+    WorkshopPR(
+        workshopId = "6318210573",
+        branchCode = "6310",
+        name = "دبستان غیر دولتی کارن",
+        codeLabel = "6318210573".toPersianDigits(),
+    ),
+    WorkshopPR(
+        workshopId = "9058214238",
+        branchCode = "6310",
+        name = "دبستان کارن ( مجتبی غلامیان )",
+        codeLabel = "9058214238".toPersianDigits(),
+    ),
+)
+
+@PreviewRtlTheme
+@Composable
+private fun ContractRowPickerContentPreview() = PreviewRtlThemeContent {
+    ContractRowPickerContent(
+        workshopId = "9058214238",
+        branchCode = "6310",
+        showWorkshopIdError = false,
+        showBranchCodeError = false,
+        isApplying = false,
+        myWorkshops = PagedListState(items = PreviewWorkshops),
+        canReset = true,
+        onWorkshopIdChange = {},
+        onBranchCodeChange = {},
+        onQuickPick = { _, _ -> },
+        onLoadMoreWorkshops = {},
+        onApply = {},
+        onReset = {},
+    )
+}
+
+@PreviewRtlTheme
+@Composable
+private fun ContractRowPickerContentLoadingMorePreview() = PreviewRtlThemeContent {
+    ContractRowPickerContent(
+        workshopId = "",
+        branchCode = "",
+        showWorkshopIdError = false,
+        showBranchCodeError = false,
+        isApplying = false,
+        myWorkshops = PagedListState(items = PreviewWorkshops, hasMore = true, isLoadingMore = true),
+        canReset = false,
+        onWorkshopIdChange = {},
+        onBranchCodeChange = {},
+        onQuickPick = { _, _ -> },
+        onLoadMoreWorkshops = {},
+        onApply = {},
+        onReset = {},
+    )
 }

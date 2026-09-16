@@ -178,6 +178,11 @@ interface WorkShopsRepository {
      */
     suspend fun checkNewMemberIsNew(nationalId: String): Boolean
 
+    /**
+     * Files the registration: a person not yet on file is created, and one whose
+     * [NewMemberRegistrationDN.personalId] is set is updated in place — creating it again would
+     * add a second `employers` record for the same person.
+     */
     suspend fun createNewMemberRegistration(
         request: NewMemberRegistrationDN,
     ): NewMemberRegistrationResultDN

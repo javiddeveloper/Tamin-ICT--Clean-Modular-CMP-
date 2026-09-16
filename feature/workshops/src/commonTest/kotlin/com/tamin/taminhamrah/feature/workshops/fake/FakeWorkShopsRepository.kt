@@ -117,6 +117,8 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     var confirmedTicket: String? = null
         private set
     var deletedPersonalId: Long? = null
+    var confirmedRequestId: Long? = null
+        private set
     var newMemberIsNew: Boolean = true
     var registrationResult: NewMemberRegistrationResultDN = NewMemberRegistrationResultDN()
     var lastRegistrationRequest: NewMemberRegistrationDN? = null
@@ -307,8 +309,10 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         recentlyAddedMembers
     }
 
-    override suspend fun confirmRecentlyAddedMember(requestId: Long): String =
-        answer { confirmReferenceCode }
+    override suspend fun confirmRecentlyAddedMember(requestId: Long): String = answer {
+        confirmedRequestId = requestId
+        confirmReferenceCode
+    }
 
     override suspend fun deleteRecentlyAddedMember(personalId: Long) {
         answer { deletedPersonalId = personalId }

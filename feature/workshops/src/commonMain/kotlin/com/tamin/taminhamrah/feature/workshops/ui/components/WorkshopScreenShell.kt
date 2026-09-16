@@ -138,14 +138,13 @@ private fun WorkshopIdentityCard(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    val shape = remember { RoundedCornerShape(CornerRadius.xl) }
     Row(
         modifier = modifier
             .fillMaxWidth()
             .padding(top = Spacing.md)
-            .clip(shape)
+            .clip(IdentityCardShape)
             .background(colors.glassIconTileBg)
-            .border(Thickness.border, colors.glassIconTileBorder, shape)
+            .border(Thickness.border, colors.glassIconTileBorder, IdentityCardShape)
             .padding(horizontal = Spacing.md, vertical = Spacing.smPlus),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.smPlus),
@@ -153,7 +152,7 @@ private fun WorkshopIdentityCard(
         Box(
             modifier = Modifier
                 .size(WorkshopDimens.identityIconTile)
-                .clip(RoundedCornerShape(CornerRadius.lg))
+                .clip(IdentityIconTileShape)
                 .background(colors.glassIconTileBg),
             contentAlignment = Alignment.Center,
         ) {
@@ -191,4 +190,8 @@ private fun WorkshopIdentityCard(
         }
     }
 }
+
+private val IdentityCardShape = RoundedCornerShape(CornerRadius.xl)
+private val IdentityIconTileShape = RoundedCornerShape(CornerRadius.lg)
+
 

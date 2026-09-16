@@ -10,6 +10,7 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopListSkeleton
@@ -60,11 +61,15 @@ fun WorkshopDebtInquiryScreen(
         viewModel.sendIntent(WorkshopDebtInquiryIntent.Open(workshopId, branchCode))
     }
 
+    val onRetry = remember(viewModel) {
+        { viewModel.sendIntent(WorkshopDebtInquiryIntent.Retry) }
+    }
+
     WorkshopDebtInquiryContent(
         state = state,
         workshopName = workshopName,
         onBack = onBack,
-        onRetry = { viewModel.sendIntent(WorkshopDebtInquiryIntent.Retry) },
+        onRetry = onRetry,
         modifier = modifier,
     )
 }
@@ -77,11 +82,18 @@ fun WorkshopDebtInquiryContent(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val workshopCode = remember(state.workshopId) {
+        state.workshopId.takeIf { it.isNotBlank() }?.toPersianDigits()
+    }
+    val safeWorkshopName = remember(workshopName) {
+        workshopName.takeIf { it.isNotBlank() }
+    }
+
     WorkshopScreenShell(
         title = stringResource(Res.string.workshop_action_debt_inquiry),
         onBack = onBack,
-        workshopName = workshopName.takeIf { it.isNotBlank() },
-        workshopCode = state.workshopId.takeIf { it.isNotBlank() }?.toPersianDigits(),
+        workshopName = safeWorkshopName,
+        workshopCode = workshopCode,
         modifier = modifier,
     ) {
         val inquiry = state.inquiry

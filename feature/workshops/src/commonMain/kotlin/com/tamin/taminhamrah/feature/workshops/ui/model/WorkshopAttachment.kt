@@ -21,13 +21,17 @@ data class WorkshopAttachment(
     val size: String,
     /** Went up as a PDF rather than an image — which route took it, and so how a request names it. */
     val isPdf: Boolean = false,
-)
+) {
+    /** An image of [byteCount] bytes, sized the way the upload box prints it. */
+    constructor(guid: String, type: WorkshopDocumentType, byteCount: Int, isPdf: Boolean = false) :
+        this(guid = guid, type = type, size = byteCount.asKilobytes(), isPdf = isPdf)
+}
 
 /**
  * Puts a picked image on the server and names what came back.
  *
  * All three workshop forms attach evidence the same way — ثبت اعتراض, درخواست رسیدگی and
- * نام‌نویسی — so the upload lives here once instead of in each ViewModel. The shared
+ * نامنویسی — so the upload lives here once instead of in each ViewModel. The shared
  * `upload-image` endpoint is the same one addDependent and occurrence reporting use.
  */
 class WorkshopAttachmentUploader(
@@ -66,10 +70,44 @@ class WorkshopAttachmentUploader(
         return WorkshopAttachment(
             guid = guid,
             type = type,
-            size = bytes.size.asKilobytes(),
+            byteCount = bytes.size,
             isPdf = pdfRoute != null,
         )
     }
+}
+
+/**
+ * Reads back an image the service already holds, as the [WorkshopAttachment] an upload of it
+ * would have produced.
+ *
+ * The counterpart of [WorkshopAttachmentUploader] for a form re-opened on documents already on
+ * file: the same `upload-image` store, read by the guid each document was filed under.
+ */
+class WorkshopAttachmentDownloader(
+    /**
+     * The image's raw base64 payload for a guid, as the service returns it.
+     *
+     * A function rather than the use case itself, for the same reason the uploader takes one.
+     */
+    private val downloadImage: suspend (guid: String) -> String,
+) {
+
+    /** @throws IllegalStateException if the service has no image for [guid]. */
+    suspend operator fun invoke(guid: String, type: WorkshopDocumentType): WorkshopAttachment {
+        val payload = downloadImage(guid)
+        check(payload.isNotBlank()) { "No image on file for '$guid'" }
+        return WorkshopAttachment(guid = guid, type = type, byteCount = decodedByteCount(payload))
+    }
+}
+
+/**
+ * How many bytes a base64 payload decodes to, counted rather than decoded: only the size is kept,
+ * and decoding a whole photograph on the caller's thread to learn it is wasted work.
+ */
+private fun decodedByteCount(base64: String): Int {
+    val length = base64.count { !it.isWhitespace() }
+    val padding = base64.trimEnd().takeLastWhile { it == '=' }.length
+    return length / 4 * 3 - padding
 }
 
 /**

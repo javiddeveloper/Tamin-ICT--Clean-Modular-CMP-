@@ -30,10 +30,10 @@ import com.tamin.taminhamrah.model.workshop.SettlementCertificateDTO
 import com.tamin.taminhamrah.model.workshop.SettlementCertificateDetailDTO
 import com.tamin.taminhamrah.model.workshop.SettlementRequestDTO
 import com.tamin.taminhamrah.model.workshop.SettlementSubjectDTO
-import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
-import com.tamin.taminhamrah.model.workshop.WorkshopContractDTO
-import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDTO
 import com.tamin.taminhamrah.model.workshop.SmsMessageDTO
+import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopContractDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDTO
@@ -49,14 +49,14 @@ interface WorkShopsRemoteDataSource {
         query: ApiQueryParamDN
     ): ListData<EmployerAgreementDTO>
 
-    /** ردیف پیمان‌های one workshop that has a تعهدنامه. */
+    /** ردیف پیمانهای one workshop that has a تعهدنامه. */
     suspend fun getEmployerAgreementsByWorkshop(
         workshopId: String,
         branchCode: String,
         query: ApiQueryParamDN,
     ): ListData<EmployerAgreementDTO>
 
-    /** ردیف پیمان‌های one workshop with no تعهدنامه — a different row model. */
+    /** ردیف پیمانهای one workshop with no تعهدنامه — a different row model. */
     suspend fun getWorkshopContracts(
         workshopId: String,
         branchCode: String,
@@ -66,7 +66,7 @@ interface WorkShopsRemoteDataSource {
     // ---------------------------------------------------------------------------- واگذارندگان
 
     /**
-     * پیمان‌هایی که کارفرما واگذارندهٔ آن‌هاست.
+     * پیمانهایی که کارفرما واگذارندهٔ آنهاست.
      *
      * Unlike the two calls above, the identity travels in [query]'s filter array rather than in the
      * path — the repository builds those clauses, so a blank code widens the result instead of
@@ -101,7 +101,7 @@ interface WorkShopsRemoteDataSource {
     /** Files a درخواست مفاصاحساب under [id]; returns the service's confirmation. */
     suspend fun submitSettlementRequest(id: String, request: SettlementRequestDTO): String
 
-    /** مفاصاحساب‌های ماده ۳۸ of one ردیف پیمان, as the service lists them. */
+    /** مفاصاحسابهای ماده ۳۸ of one ردیف پیمان, as the service lists them. */
     suspend fun getSettlementCertificates(
         workshopId: String,
         branchCode: String,
@@ -182,6 +182,11 @@ interface WorkShopsRemoteDataSource {
     suspend fun checkNewMemberIsNew(nationalId: String): Boolean
 
     suspend fun createNewMemberRegistration(
+        request: NewMemberRegistrationDTO,
+    ): NewMemberRegistrationResultDTO
+
+    suspend fun updateNewMemberRegistration(
+        personalId: Long,
         request: NewMemberRegistrationDTO,
     ): NewMemberRegistrationResultDTO
 

@@ -63,17 +63,17 @@ import kotlinx.serialization.json.JsonElement
 
 internal interface WorkShopsApiService {
 
-    // ---------------------------------------------------------------- کارگاه‌های کارفرما (the list)
+    // ---------------------------------------------------------------- کارگاههای کارفرما (the list)
 
     @GET("workshop-services/employer/get-all-employer-agreement-by-national-id")
     suspend fun getAllEmployerAgreementByNationalId(
         @QueryMap queries: Map<String, String>
     ): BaseDTO<ListData<EmployerAgreementDTO>>
 
-    // ------------------------------------------------------------------------ ردیف‌های پیمان
+    // ------------------------------------------------------------------------ ردیفهای پیمان
 
     /**
-     * ردیف پیمان‌های a workshop that *has* a تعهدنامه — same row shape as the list above, narrowed
+     * ردیف پیمانهای a workshop that *has* a تعهدنامه — same row shape as the list above, narrowed
      * to one workshop/branch instead of every workshop the signed-in national id holds.
      */
     @GET("workshop-services/get-employer-agreement-by-workshop-id-and-branch-code/{workshopId}/{branchCode}")
@@ -84,7 +84,7 @@ internal interface WorkShopsApiService {
     ): BaseDTO<ListData<EmployerAgreementDTO>>
 
     /**
-     * ردیف پیمان‌های a workshop with no تعهدنامه on file — a leaner row, and a different model.
+     * ردیف پیمانهای a workshop with no تعهدنامه on file — a leaner row, and a different model.
      *
      * `contract-employer-workshop-info-…` is the service's own spelling, and the response names
      * two fields differently from the call above; see [WorkshopContractDTO].
@@ -98,19 +98,19 @@ internal interface WorkShopsApiService {
 
     // ---------------------------------------------------------------------------- واگذارندگان
     //
-    // پیمان‌هایی که کارفرمای واردشده «واگذارنده»ی آن‌هاست, plus the computational bases filed under
+    // پیمانهایی که کارفرمای واردشده «واگذارنده»ی آنهاست, plus the computational bases filed under
     // each and the documents attached to those.
     //
     // `requestissuanceinvoices38` is all lower case with no separators. That is the published
     // route, not a typo — the tidy spelling 404s. Do not let a formatter or a rename touch it.
 
     /**
-     * لیست پیمان‌های واگذارنده, paged.
+     * لیست پیمانهای واگذارنده, paged.
      *
      * The workshop, branch and ردیف are **filter clauses**, not path segments — they travel inside
      * the `filter` array `query` already carries (`workshop.workshopId`, `workshop.branchCode`,
      * `contractRow`). A blank one is simply omitted and widens the result; it does not address a
-     * different route the way it does on the ردیف‌های پیمان endpoints.
+     * different route the way it does on the ردیفهای پیمان endpoints.
      */
     @GET("requestissuanceinvoices38/assignersContracts-request-issuance-invoices38")
     suspend fun getAssignerContracts(
@@ -147,7 +147,7 @@ internal interface WorkShopsApiService {
     ): HttpStatement
 
     /**
-     * مفاصاحساب‌های ماده ۳۸ issued under one ردیف پیمان — the old app's `getClause38List`.
+     * مفاصاحسابهای ماده ۳۸ issued under one ردیف پیمان — the old app's `getClause38List`.
      *
      * [mafasaStatus] and [contractNumber] are path segments the old client always fills with `-`, its
      * "no filter" placeholder; the caller picks the پیمان out of the list itself.
@@ -204,11 +204,7 @@ internal interface WorkShopsApiService {
         @Body request: SettlementRequestDTO,
     ): BaseDTO<JsonElement?>
 
-    // The image half of the same pair reuses the shared `upload-image` route, which answers with a
-    // base64 payload rather than bytes; `UserRequestApiService.downloadDocument` already declares
-    // it, so nothing is added here for it.
-
-    // -------------------------------------------------------------------------- برگ پرداخت‌ها
+    // -------------------------------------------------------------------------- برگ پرداختها
 
     @GET("workshop-services/payment-sheets")
     suspend fun getWorkshopPaymentSheets(
@@ -339,6 +335,19 @@ internal interface WorkShopsApiService {
         @Body request: NewMemberRegistrationDTO,
     ): BaseDTO<NewMemberRegistrationResultDTO>
 
+    /**
+     * Updates a registration already on file instead of posting a second one.
+     *
+     * The old app's `updateNewInsuredInfo` names this segment `requestId`, but re-opening a draft
+     * from the list it fills it with the person's id — the id the create returns and the list row
+     * carries — so that is what goes here.
+     */
+    @PUT("employers/{personalId}")
+    suspend fun updateNewMemberRegistration(
+        @Path("personalId") personalId: Long,
+        @Body request: NewMemberRegistrationDTO,
+    ): BaseDTO<NewMemberRegistrationResultDTO>
+
     // ---------------------------------------------------------------------- رسیدگی به بدهی ماده ۱۶
 
     @GET("debit-objection/management-workshop-debit/{workshopId}/{branchId}")
@@ -458,7 +467,7 @@ internal interface WorkShopsApiService {
     ): BaseDTO<EmployerCommitmentInfoDTO>
 
     /**
-     * Step 2 — لیست کارگاه‌های بدون قرارداد کارفرما.
+     * Step 2 — لیست کارگاههای بدون قرارداد کارفرما.
      *
      * Paged list shown on the second stepper page while the employer confirms the agreement.
      * Tapping a row opens [getEmployerWorkshopContractList] for that workshop.
@@ -497,7 +506,7 @@ internal interface WorkShopsApiService {
         @QueryMap queries: Map<String, String>
     ): BaseDTO<ListData<WorkShopObjectionDTO>>
 
-    /** پیامک‌های one filed objection. `objectionCode` is the row's own `seqNo`. */
+    /** پیامکهای one filed objection. `objectionCode` is the row's own `seqNo`. */
     @GET("debit-objection/objection-detail/{objectionCode}/")
     suspend fun getWorkShopObjectionSms(
         @Path("objectionCode") objectionCode: Long,

@@ -1,137 +1,62 @@
 package com.tamin.taminhamrah.feature.agent.service.impl
 
+import com.tamin.taminhamrah.deeplink.DeepLinkKey
+import com.tamin.taminhamrah.feature.FeatureManager
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceParams
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceResult
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceUseCase
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
-import com.tamin.taminhamrah.feature.agent.service.base.buildBubbles
-import com.tamin.taminhamrah.feature.agent.AgentDestination
+import com.tamin.taminhamrah.feature.agent.service.base.agentMarkdown
+import com.tamin.taminhamrah.feature.agent.service.base.appLink
 import com.tamin.taminhamrah.model.agent.AgentActionKey
 
 /**
- * Entry-point services that hand the user off to a full screen instead of
- * answering inline.
+ * Keys that hand the user to a screen of the app instead of answering in the chat — the native
+ * entry-point use cases (disability pension, wedding present, illness compensation, …).
  *
- * Only actions whose destination screen actually exists in this app are mapped
- * (see [AgentDestination]); the host maps the destination id to a real route.
- *
- * A key belongs here only if no other service answers it with real data. The registry
- * resolves a key with `firstOrNull`, so a key claimed twice would be silently decided by
- * registration order — AgentServiceKeyCoverageTest guards against that.
- *
- * Deliberately not mapped: PATIENT_HISTORY (PatientHistoryAgentService fetches the real
- * prescriptions), BOOKLET (MedicalEntitlementAgentService returns the entitlement rows)
- * and MESSAGE (GeneralResponseAgentService renders the assistant's own text).
+ * The answer is the server's title and one button. The button's label is the menu's name for the
+ * service, and the link goes through the deep link gate, so a disabled service cannot be entered
+ * from here either. Keys whose screen does not exist in this app are not listed, so the dispatcher
+ * shows the server's text without a dead button.
  */
-class DeepLinkAgentService : AgentServiceUseCase {
+class DeepLinkAgentService(
+    private val featureManager: FeatureManager,
+) : AgentServiceUseCase {
 
     override val supportedKeys: List<AgentActionKey> = DESTINATIONS.keys.toList()
 
     override suspend fun execute(params: AgentServiceParams): AgentServiceResult {
-        val target = DESTINATIONS[params.requestedKey] ?: return AgentServiceResult.NoHandler
-
-        return AgentServiceResult.Success(
-            params.buildBubbles {
-                val description = params.message?.takeIf { it.isNotBlank() } ?: target.description
-                add(ChatBubbleContent.Text(description))
-                add(
-                    ChatBubbleContent.DeepLink(
-                        title = target.actionText,
-                        destination = target.destination
-                    )
-                )
-            }
-        )
+        val destination = DESTINATIONS[params.requestedKey] ?: return AgentServiceResult.NoHandler
+        val label = featureManager.getFeatureTitle(destination.flag) ?: params.message
+        val markdown = agentMarkdown {
+            heading(params.message)
+            label?.let { links(listOf(it to appLink(destination.key))) }
+        }
+        return AgentServiceResult.Success(listOfNotNull(markdown.takeIf { it.isNotBlank() }?.let(ChatBubbleContent::Markdown)))
     }
 
-    private data class Target(
-        val destination: String,
-        val actionText: String,
-        val description: String
-    )
-
     private companion object {
-        val DESTINATIONS: Map<AgentActionKey, Target> = mapOf(
-
-            // ── Contracts & Legal ──────────────────────────────────────────
-            AgentActionKey.DISABILITY_PENSION to Target(
-                destination = AgentDestination.DISABILITY_PENSION,
-                actionText  = "برقراری مستمری از کارافتادگی",
-                description = "برای ثبت درخواست برقراری مستمری از کارافتادگی، روی دکمه زیر بزنید."
-            ),
-            AgentActionKey.DEFFERED_INSTALLMENT_CERTIFICATE to Target(
-                destination = AgentDestination.DEFERRED_INSTALLMENT,
-                actionText  = "گواهی اقساط معوق",
-                description = "برای دریافت گواهی اقساط معوق، روی دکمه زیر بزنید."
-            ),
-            AgentActionKey.REGISTER_CONTRACT to Target(
-                destination = AgentDestination.CONTRACTS,
-                actionText  = "انعقاد قرارداد بیمه",
-                description = "برای انعقاد قرارداد بیمه، روی دکمه زیر بزنید."
-            ),
-            AgentActionKey.COMPLETE_INFO_OF_REAL_WORKSHOP to Target(
-                destination = AgentDestination.WORKSHOPS,
-                actionText  = "اطلاعات کارگاه",
-                description = "برای مشاهده و تکمیل اطلاعات کارگاه، روی دکمه زیر بزنید."
-            ),
-
-            // ── Social Benefits ────────────────────────────────────────────
-            AgentActionKey.WEDDING_PRESENT to Target(
-                destination = AgentDestination.WEDDING_PRESENT,
-                actionText  = "کمک هزینه ازدواج",
-                description = "برای دریافت کمک هزینه ازدواج، روی دکمه زیر بزنید."
-            ),
-            AgentActionKey.FUNERAL_ALLOWANCE_GET to Target(
-                destination = AgentDestination.FUNERAL_ALLOWANCE,
-                actionText  = "کمک هزینه کفن و دفن",
-                description = "برای دریافت کمک هزینه کفن و دفن، روی دکمه زیر بزنید."
-            ),
-            AgentActionKey.PREGNANCY_PAY to Target(
-                destination = AgentDestination.PREGNANCY_PAY,
-                actionText  = "غرامت بارداری و زایمان",
-                description = "برای دریافت غرامت بارداری و زایمان، روی دکمه زیر بزنید."
-            ),
-            AgentActionKey.SHORT_TERM_ORTHOSIS to Target(
-                destination = AgentDestination.SHORT_TERM_ORTHOSIS,
-                actionText  = "ارتز و پرتز کوتاه‌مدت",
-                description = "برای درخواست ارتز و پرتز کوتاه‌مدت، روی دکمه زیر بزنید."
-            ),
-            AgentActionKey.OCCURRENCE_REPORT to Target(
-                destination = AgentDestination.OCCURRENCE_REPORT,
-                actionText  = "گزارش حادثه ناشی از کار",
-                description = "برای ثبت گزارش حادثه ناشی از کار، روی دکمه زیر بزنید."
-            ),
-
-            // ── Health ─────────────────────────────────────────────────────
-            AgentActionKey.CONFIRMATION_MEDICAL_AUTHORITIES to Target(
-                destination = AgentDestination.MEDICAL_AUTHORITIES,
-                actionText  = "تأیید مراجع درمانی",
-                description = "برای مشاهده تأییدیه مراجع درمانی، روی دکمه زیر بزنید."
-            ),
-
-            // ── Profile Edits ──────────────────────────────────────────────
-            AgentActionKey.EDIT_PHONE_NUMBER to Target(
-                destination = AgentDestination.EDIT_PHONE,
-                actionText  = "ویرایش شماره موبایل",
-                description = "برای ویرایش شماره موبایل، روی دکمه زیر بزنید."
-            ),
-            AgentActionKey.EDIT_BANK_ACCOUNT_NUMBER to Target(
-                destination = AgentDestination.EDIT_BANK_ACCOUNT,
-                actionText  = "ویرایش شماره حساب بانکی",
-                description = "برای ویرایش شماره حساب بانکی، روی دکمه زیر بزنید."
-            ),
-            AgentActionKey.EXTEND_EDUCATION to Target(
-                destination = AgentDestination.EXTEND_EDUCATION,
-                actionText  = "استعلام ادامه تحصیل",
-                description = "برای ثبت استعلام ادامه تحصیل، روی دکمه زیر بزنید."
-            ),
-
-            // ── Workers ────────────────────────────────────────────────────
-            AgentActionKey.WORKER_PAYMENT to Target(
-                destination = AgentDestination.WORKERS_PAYMENT,
-                actionText  = "پرداخت بیمه کارگران",
-                description = "برای مشاهده پرداخت بیمه کارگران، روی دکمه زیر بزنید."
-            )
+        val DESTINATIONS: Map<AgentActionKey, DeepLinkKey> = mapOf(
+            AgentActionKey.DISABILITY_PENSION to DeepLinkKey.DISABILITY_PENSION,
+            AgentActionKey.DEFFERED_INSTALLMENT_CERTIFICATE to DeepLinkKey.DEFERRED_INSTALLMENT_CERTIFICATE,
+            AgentActionKey.REGISTER_CONTRACT to DeepLinkKey.CONTRACT_LIST,
+            AgentActionKey.COMPLETE_INFO_OF_REAL_WORKSHOP to DeepLinkKey.COMPLETE_WORKSHOP_INFO,
+            AgentActionKey.WEDDING_PRESENT to DeepLinkKey.WEDDING_PRESENT,
+            AgentActionKey.FUNERAL_ALLOWANCE_GET to DeepLinkKey.REQUEST_FUNERAL_GRANT,
+            AgentActionKey.PREGNANCY_PAY to DeepLinkKey.PREGNANCY_PAY,
+            AgentActionKey.SHORT_TERM_ORTHOSIS to DeepLinkKey.OROTEZ_PROTEZ,
+            AgentActionKey.OCCURRENCE_REPORT to DeepLinkKey.OCCURRENCE_REPORT,
+            AgentActionKey.EXTEND_EDUCATION to DeepLinkKey.INQUIRY_EDUCATION,
+            AgentActionKey.WORKER_PAYMENT to DeepLinkKey.WORKERS_PAYMENT_INFO,
+            AgentActionKey.PENSION_SURVIVOR to DeepLinkKey.PENSION_SURVIVOR,
+            // Illness: calculating the compensation and requesting it each have their own screen.
+            AgentActionKey.CALCULATE_ILLNESS to DeepLinkKey.CALCULATE_WAGE_ILL_DAYS,
+            AgentActionKey.DASTMOZD_INFOS_CALCILLNESS_PENSIONER to DeepLinkKey.CALCULATE_WAGE_ILL_DAYS,
+            AgentActionKey.ILLNESS_COMPENSATION to DeepLinkKey.REQUEST_PAYMENT_ILL_DAYS,
+            AgentActionKey.REPILLNESS to DeepLinkKey.REQUEST_PAYMENT_ILL_DAYS,
+            AgentActionKey.REPILLNESS_LAST to DeepLinkKey.REQUEST_PAYMENT_ILL_DAYS,
+            AgentActionKey.CALCILLNESS_REP to DeepLinkKey.REQUEST_PAYMENT_ILL_DAYS,
+            AgentActionKey.CALCILLNESS_REP_LAST to DeepLinkKey.REQUEST_PAYMENT_ILL_DAYS,
         )
     }
 }

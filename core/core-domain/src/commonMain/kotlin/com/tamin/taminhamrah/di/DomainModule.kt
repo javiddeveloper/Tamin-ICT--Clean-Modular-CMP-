@@ -103,6 +103,7 @@ import com.tamin.taminhamrah.useCases.common.CompleteBiometricEnrollmentPromptUs
 import com.tamin.taminhamrah.useCases.common.SetFontSizeUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.common.GetJobTitleUseCase
+import com.tamin.taminhamrah.useCases.common.GetJobTitlePageUseCase
 import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetContractsUseCase
 import com.tamin.taminhamrah.useCases.contractAffair.GetContractsPageUseCase
@@ -143,6 +144,7 @@ import com.tamin.taminhamrah.useCases.calculateWagePension.CalculateWagePensionU
 import com.tamin.taminhamrah.useCases.calculateWagePension.CheckMultipleWorkshopsUseCase
 import com.tamin.taminhamrah.useCases.calculateWagePension.GetMultipleWorkshopPersonalInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.GetDisabilityPersonalInfoUseCase
+import com.tamin.taminhamrah.useCases.personal.GetInsuredRegistrationDocListUseCase
 import com.tamin.taminhamrah.useCases.pension.SaveDisabilityUserInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.FinalConfirmDisabilityRequestUseCase
 import com.tamin.taminhamrah.useCases.pension.SaveDocumentDisabilityUseCase
@@ -224,7 +226,11 @@ import com.tamin.taminhamrah.useCases.workshops.GetWorkShopObjectionSmsUseCase
 import com.tamin.taminhamrah.useCases.workshops.SaveArticleSixteenRequestUseCase
 import com.tamin.taminhamrah.useCases.workshops.SaveDebitObjectionUseCase
 import com.tamin.taminhamrah.useCases.agent.SendAgentPromptUseCase
+import com.tamin.taminhamrah.useCases.agent.GetAgentPersonalInfoUseCase
+import com.tamin.taminhamrah.useCases.agent.GetAgentPersonalInfoUseCaseImpl
+import com.tamin.taminhamrah.useCases.agent.CancelAgentRequestUseCase
 import com.tamin.taminhamrah.useCases.agent.CheckChatAllowedUseCase
+import com.tamin.taminhamrah.useCases.agent.ObserveAgentAvailabilityUseCase
 import com.tamin.taminhamrah.useCases.agent.DeleteAgentSessionUseCase
 import com.tamin.taminhamrah.useCases.agent.DeletePendingAgentMessagesUseCase
 import com.tamin.taminhamrah.useCases.agent.GetCachedMessagesUseCase
@@ -293,6 +299,9 @@ import com.tamin.taminhamrah.useCases.workshops.GetSettlementSubjectsUseCase
 import com.tamin.taminhamrah.useCases.workshops.SubmitSettlementRequestUseCase
 import com.tamin.taminhamrah.useCases.workshops.UploadSettlementPdfUseCase
 
+import com.tamin.taminhamrah.deeplink.DeepLinkDispatcher
+import com.tamin.taminhamrah.deeplink.ResolveDeepLinkUseCase
+
 val domainModule = module {
     // Add Dependent UseCases
     factoryOf(::GetActiveBranchesUseCase)
@@ -304,6 +313,8 @@ val domainModule = module {
     factoryOf(::AddNewDependentUseCase)
     factoryOf(::GetDependentInfoUseCase)
     factoryOf(::DeepLinkManagerImpl) bind DeepLinkManager::class
+    single { DeepLinkDispatcher() }
+    factoryOf(::ResolveDeepLinkUseCase)
     factoryOf(::AuthAuthorizeUrlUseCaseImpl) bind AuthAuthorizeUrlUseCase::class
     factoryOf(::ExchangeCodeForTokensUseCaseImpl) bind ExchangeCodeForTokensUseCase::class
     factoryOf(::DebugClientCredentialsLoginUseCaseImpl) bind DebugClientCredentialsLoginUseCase::class
@@ -454,7 +465,11 @@ val domainModule = module {
     factoryOf(::GetRegisteredMedicalCommissionUseCase)
     // Agent
     factoryOf(::SendAgentPromptUseCase)
+    // A single: it remembers the pensioner id it looked up, per national id.
+    single<GetAgentPersonalInfoUseCase> { GetAgentPersonalInfoUseCaseImpl(get(), get(), get()) }
     factoryOf(::CheckChatAllowedUseCase)
+    factoryOf(::ObserveAgentAvailabilityUseCase)
+    factoryOf(::CancelAgentRequestUseCase)
     // Agent conversation cache
     factory<GetCurrentUserNationalCodeUseCase> { GetCurrentUserNationalCodeUseCaseImpl(get()) }
     factoryOf(::PruneEmptyAgentSessionUseCase)
@@ -484,9 +499,11 @@ val domainModule = module {
     factoryOf(::GetUserProfileUseCase)
     factoryOf(::GetCurrentUserUseCase)
     factoryOf(::GetJobTitleUseCase)
+    factoryOf(::GetJobTitlePageUseCase)
     factoryOf(::GetRegistrationDeclarationFormUseCase)
     factoryOf(::GetRequestSummaryUseCase)
     factoryOf(::PutInsuredRegistrationDocListUseCase)
+    factoryOf(::GetInsuredRegistrationDocListUseCase)
     factoryOf(::CheckUserIsNewUseCase)
     // کارگاه‌های کارفرما — the list, then one group per action it launches
     factoryOf(::GetEmployerAgreementsUseCase)

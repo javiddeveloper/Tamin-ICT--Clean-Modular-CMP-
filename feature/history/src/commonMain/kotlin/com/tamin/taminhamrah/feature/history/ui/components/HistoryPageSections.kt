@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.history.ui.HistoryConstants
 import com.tamin.taminhamrah.feature.history.ui.HistoryDimens
+import com.tamin.taminhamrah.feature.history.ui.model.CareerTotalPR
 import com.tamin.taminhamrah.feature.history.ui.model.WorkshopPR
 import com.tamin.taminhamrah.mapper.history.labelRes
 import com.tamin.taminhamrah.model.history.HistoryCertificateType
@@ -62,6 +63,8 @@ import taminx.feature.history.history_many_shops_subtitle
 import taminx.feature.history.history_many_shops_title
 import taminx.feature.history.history_note_gaps
 import taminx.feature.history.history_note_span
+import taminx.feature.history.history_note_span_days
+import taminx.feature.history.history_note_span_months
 import taminx.core.core_ui.Res as CoreRes
 
 /**
@@ -71,16 +74,22 @@ import taminx.core.core_ui.Res as CoreRes
  */
 @Composable
 fun HistorySpanNote(
-    yearCount: Int,
+    careerTotal: CareerTotalPR,
     firstYear: String,
     lastYear: String,
     gapYears: Int,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
+    // The largest whole unit of the same total the card above prints, so the two cannot disagree.
+    val (spanTemplate, spanCount) = when {
+        careerTotal.years > 0 -> Res.string.history_note_span to careerTotal.years
+        careerTotal.months > 0 -> Res.string.history_note_span_months to careerTotal.months
+        else -> Res.string.history_note_span_days to careerTotal.days
+    }
     val span = stringResource(
-        Res.string.history_note_span,
-        yearCount.toString().toPersianDigits(),
+        spanTemplate,
+        spanCount.toString().toPersianDigits(),
         firstYear.toPersianDigits(),
         lastYear.toPersianDigits(),
     )

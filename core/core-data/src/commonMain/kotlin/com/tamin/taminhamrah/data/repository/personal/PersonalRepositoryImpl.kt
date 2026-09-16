@@ -1,28 +1,28 @@
 package com.tamin.taminhamrah.data.repository.personal
 
 import com.tamin.taminhamrah.data.local.dao.PersonalDao
-import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toDTO
+import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
 import com.tamin.taminhamrah.dataSource.personal.PersonalRemoteDataSource
 import com.tamin.taminhamrah.model.personal.AgeDN
 import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
-import com.tamin.taminhamrah.model.personal.DocumentFileDTO
 import com.tamin.taminhamrah.model.personal.GirlSurvivorConditionDN
 import com.tamin.taminhamrah.model.personal.InsuredDocDN
-import com.tamin.taminhamrah.model.personal.InsuredDocDTO
 import com.tamin.taminhamrah.model.personal.NewInsuredSummaryDN
 import com.tamin.taminhamrah.model.personal.PersonalInfoDN
 import com.tamin.taminhamrah.model.personal.SubmitFinalSurvivorPensionDN
-import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoDN
-import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
-import com.tamin.taminhamrah.model.personal.survivorDependent.SurvivorDependentDN
-import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
 import com.tamin.taminhamrah.model.personal.deceasedInfo.DeceasedInfoDN
 import com.tamin.taminhamrah.model.personal.girlSurvivor.ConfirmGirlSurvivorDN
 import com.tamin.taminhamrah.model.personal.girlSurvivor.GirlSurvivorReportParamsDN
+import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
+import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.SaveSurvivorInfoDN
+import com.tamin.taminhamrah.model.personal.survivorDependent.SurvivorDependentDN
+import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.request.FilterOperator
+import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.repository.personal.PersonalRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -30,7 +30,6 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlin.collections.map
 
 class PersonalRepositoryImpl(
     private val personalRemoteDataSource: PersonalRemoteDataSource,
@@ -144,8 +143,24 @@ class PersonalRepositoryImpl(
         emit(personalRemoteDataSource.putInsuredRegistrationDocList(personalId, dtos))
     }
 
+    override fun getInsuredRegistrationDocList(personalId: String): Flow<List<InsuredDocDN>> = flow {
+        val query = ApiQueryParamDN(
+            limit = WHOLE_DOCUMENT_LIST,
+            filters = listOf(
+                ApiFilterDN(FilterProperty.PERSONAL_ID, personalId, FilterOperator.EQUAL),
+            ),
+        )
+        emit(personalRemoteDataSource.getInsuredRegistrationDocList(query).map { it.toDomain() })
+    }
+
     override fun getRequestSummary(requestId: String): Flow<NewInsuredSummaryDN?> = flow {
         val response = personalRemoteDataSource.getRequestSummary(requestId)
         emit(response?.toDomain())
     }
 }
+
+/**
+ * Enough to read a person's documents in one page. The list is written back whole, so a page that
+ * stopped short would delete the rest on the next save.
+ */
+private const val WHOLE_DOCUMENT_LIST = 1000

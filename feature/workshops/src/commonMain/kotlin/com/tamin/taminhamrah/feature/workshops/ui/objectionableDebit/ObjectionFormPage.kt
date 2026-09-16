@@ -97,10 +97,42 @@ fun ObjectionFormPage(
         )
     }
 
+    val safeWorkshopName = remember(workshopName) {
+        workshopName.takeIf { it.isNotBlank() }
+    }
+
+    val onToggleDebt = remember(form.isDebtOpen, onIntent) {
+        { onIntent(ObjectionableDebitIntent.FormDebtOpenChanged(!form.isDebtOpen)) }
+    }
+    val onAddDocument = remember(onIntent) {
+        { fileName: String, bytes: ByteArray, typeCode: String ->
+            onIntent(ObjectionableDebitIntent.FormAddDocument(fileName, bytes, typeCode))
+        }
+    }
+    val onRemoveDocument = remember(onIntent) {
+        { index: Int ->
+            onIntent(ObjectionableDebitIntent.FormRemoveDocument(index))
+        }
+    }
+    val onDescriptionChange = remember(onIntent) {
+        { text: String ->
+            onIntent(ObjectionableDebitIntent.FormDescriptionChanged(text))
+        }
+    }
+    val onToggleDeposit = remember(form.isDeposit, onIntent) {
+        { onIntent(ObjectionableDebitIntent.FormDepositChanged(!form.isDeposit)) }
+    }
+    val onToggleConfirmed = remember(form.isConfirmed, onIntent) {
+        { onIntent(ObjectionableDebitIntent.FormConfirmedChanged(!form.isConfirmed)) }
+    }
+    val onSubmit = remember(onIntent) {
+        { onIntent(ObjectionableDebitIntent.FormSubmit) }
+    }
+
     WorkshopScreenShell(
         title = stringResource(Res.string.obj_form_title),
         onBack = onBack,
-        workshopName = workshopName.takeIf { it.isNotBlank() },
+        workshopName = safeWorkshopName,
         workshopCode = workshopCode,
         modifier = modifier,
     ) {
@@ -128,23 +160,15 @@ fun ObjectionFormPage(
                 title = stringResource(Res.string.obj_form_group_debt),
                 rows = debtRows,
                 isOpen = form.isDebtOpen,
-                onToggle = {
-                    onIntent(ObjectionableDebitIntent.FormDebtOpenChanged(!form.isDebtOpen))
-                },
+                onToggle = onToggleDebt,
             )
 
             WorkshopDocumentsPanel(
                 attachments = form.attachments,
                 types = ObjectionDocumentTypes,
                 capacity = OBJECTION_MAX_DOCUMENTS,
-                onAdd = { fileName, bytes, typeCode ->
-                    onIntent(
-                        ObjectionableDebitIntent.FormAddDocument(fileName, bytes, typeCode),
-                    )
-                },
-                onRemove = { index ->
-                    onIntent(ObjectionableDebitIntent.FormRemoveDocument(index))
-                },
+                onAdd = onAddDocument,
+                onRemove = onRemoveDocument,
                 isUploading = form.isUploading,
                 isError = form.isDocumentsError,
             )
@@ -152,25 +176,19 @@ fun ObjectionFormPage(
             WorkshopFormTextArea(
                 label = stringResource(Res.string.obj_form_area_label),
                 value = form.description,
-                onValueChange = {
-                    onIntent(ObjectionableDebitIntent.FormDescriptionChanged(it))
-                },
+                onValueChange = onDescriptionChange,
                 placeholder = stringResource(Res.string.obj_form_area_hint),
             )
 
             WorkshopFormCheck(
                 label = stringResource(Res.string.obj_form_check_deposit),
                 isChecked = form.isDeposit,
-                onToggle = {
-                    onIntent(ObjectionableDebitIntent.FormDepositChanged(!form.isDeposit))
-                },
+                onToggle = onToggleDeposit,
             )
             WorkshopFormCheck(
                 label = stringResource(Res.string.obj_form_check_confirm),
                 isChecked = form.isConfirmed,
-                onToggle = {
-                    onIntent(ObjectionableDebitIntent.FormConfirmedChanged(!form.isConfirmed))
-                },
+                onToggle = onToggleConfirmed,
             )
 
             // The missing-document rule is drawn round the panel; this is what is left.
@@ -181,7 +199,7 @@ fun ObjectionFormPage(
 
         WorkshopFormFooter(
             nextLabel = stringResource(Res.string.obj_form_submit),
-            onNext = { onIntent(ObjectionableDebitIntent.FormSubmit) },
+            onNext = onSubmit,
             isBusy = form.isBusy,
         )
     }
@@ -204,24 +222,26 @@ private fun ObjectionSubmitConfirmDialog(
     onIntent: (ObjectionableDebitIntent) -> Unit,
 ) {
     val colors = LocalTaminColors.current
+    val onConfirm = remember(onIntent) { { onIntent(ObjectionableDebitIntent.FormConfirmAccepted) } }
+    val onDismiss = remember(onIntent) { { onIntent(ObjectionableDebitIntent.FormConfirmDismissed) } }
     TaminConfirmationDialog(
         title = stringResource(Res.string.obj_form_confirm_title),
         description = stringResource(Res.string.obj_form_confirm_body),
         confirmButton = {
             TaminFilledButton(
                 text = stringResource(Res.string.action_confirm),
-                onClick = { onIntent(ObjectionableDebitIntent.FormConfirmAccepted) },
+                onClick = onConfirm,
                 modifier = Modifier.fillMaxWidth(),
             )
         },
         dismissButton = {
             TaminOutlinedButton(
                 text = stringResource(Res.string.action_cancel),
-                onClick = { onIntent(ObjectionableDebitIntent.FormConfirmDismissed) },
+                onClick = onDismiss,
                 modifier = Modifier.fillMaxWidth(),
             )
         },
-        onDismissRequest = { onIntent(ObjectionableDebitIntent.FormConfirmDismissed) },
+        onDismissRequest = onDismiss,
         icon = Icons.Outlined.Info,
         iconTint = colors.orangeText,
         iconBackground = colors.orangeBg,

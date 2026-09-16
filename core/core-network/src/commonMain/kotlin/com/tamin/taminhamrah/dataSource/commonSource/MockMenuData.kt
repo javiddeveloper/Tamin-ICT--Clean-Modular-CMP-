@@ -37,7 +37,7 @@ val mockMenuData = listOf(
     MainServiceDto(id = 39, name = "تکمیل سوابق کسری از ماه", showRole = listOf(1), icon = "employer_info", status = MenuServiceStatus.ACTIVE),
     MainServiceDto(id = 40, name = "درخواست مستمری بازماندگان", showRole = listOf(1), icon = "survivors", status = MenuServiceStatus.ACTIVE),
     MainServiceDto(id = 41, name = "مستمری بازنشستگی", showRole = listOf(1), icon = "ticket", status = MenuServiceStatus.ACTIVE),
-    MainServiceDto(id = 42, name = "اعتراض به سابقه کسری دار", showRole = listOf(1), icon = "objecting_history_bugs", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 42, name = "اعتراض به سابقه کسری دار", showRole = listOf(1), icon = "objecting_history_bugs", status = MenuServiceStatus.TEMPORARY_DISABLED, message = "این سرویس موقتاً در دسترس نیست"),
     MainServiceDto(id = 46, name = "پرونده الکترونیک من", showRole = listOf(1), icon = "student_inquiry", status = MenuServiceStatus.ACTIVE),
     MainServiceDto(id = 47, name = "پرداخت حق بیمه کارگران ساختمانی", showRole = listOf(1), icon = "worker-insurance-payment", status = MenuServiceStatus.ACTIVE),
 
