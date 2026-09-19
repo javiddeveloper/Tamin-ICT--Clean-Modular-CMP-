@@ -12,8 +12,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -29,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.girlSurvivor.ui.components.GirlSurvivorCommitmentStep
 import com.tamin.taminhamrah.feature.girlSurvivor.ui.components.GirlSurvivorDetailsSkeleton
@@ -58,6 +61,7 @@ import com.tamin.taminhamrah.ui.toparea.rememberMeasuredTopAreaState
 import com.tamin.taminhamrah.ui.toparea.reportTopAreaHeight
 import com.tamin.taminhamrah.ui.toparea.topAreaContentSpacer
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -155,6 +159,15 @@ private fun GirlSurvivorContent(
 
     LaunchedEffect(state.currentStep) {
         scrollState.scrollTo(0)
+    }
+
+    // Keyboard / bring-into-view can land a tiny scroll without a fling. After the inset settles,
+    // snap the header to a real edge so it never sits partially folded.
+    val imeBottomPx = WindowInsets.ime.getBottom(LocalDensity.current)
+    LaunchedEffect(imeBottomPx) {
+        if (imeBottomPx <= 0) return@LaunchedEffect
+        delay(48)
+        topArea.settleToNearestEdge()
     }
 
     val steps = remember(state.currentStep) {

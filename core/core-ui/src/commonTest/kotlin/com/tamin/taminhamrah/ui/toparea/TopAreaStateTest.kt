@@ -27,6 +27,9 @@ class TopAreaStateTest {
     private fun TopAreaState.unfoldBy(dy: Float): Offset =
         connection(alwaysForward).onPostScroll(Offset.Zero, Offset(0f, dy), NestedScrollSource.UserInput)
 
+    private fun TopAreaState.foldBySideEffect(dy: Float): Offset =
+        connection(alwaysForward).onPreScroll(Offset(0f, dy), NestedScrollSource.SideEffect)
+
     @Test
     fun `folding consumes the drag 1 to 1 away from the boundaries`() {
         val state = stateOf(maxOffsetPx = 100f)
@@ -145,5 +148,27 @@ class TopAreaStateTest {
 
         assertEquals(0f, underShot.progress)
         assertEquals(1f, overShot.progress)
+    }
+
+    @Test
+    fun `programmatic SideEffect scrolls do not partially fold the header`() {
+        val state = stateOf(maxOffsetPx = 100f)
+
+        val consumed = state.foldBySideEffect(dy = -40f)
+
+        assertEquals(Offset.Zero, consumed)
+        assertEquals(0f, state.rawOffsetPx)
+        assertEquals(0f, state.progress)
+    }
+
+    @Test
+    fun `a SideEffect scroll does not add onto an existing mid-fold`() {
+        val state = stateOf(maxOffsetPx = 100f)
+        state.foldBy(dy = -30f)
+
+        val consumed = state.foldBySideEffect(dy = -40f)
+
+        assertEquals(Offset.Zero, consumed)
+        assertEquals(30f, state.rawOffsetPx)
     }
 }

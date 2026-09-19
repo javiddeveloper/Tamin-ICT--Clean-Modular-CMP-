@@ -109,6 +109,11 @@ Net effect: drag down into content → header folds under the finger, in lock-st
 fully closed, then the list itself starts scrolling. Drag back up → list scrolls to its top first,
 then the header unfolds. Let go mid-gesture → header snaps to whichever side it was headed.
 
+Programmatic scrolls (IME bring-into-view when a field is focused, relocate, inset resize) are
+**ignored** for folding — they would otherwise nudge the header a few pixels closed with no fling
+to snap it, leaving it stuck mid-fold. Only `NestedScrollSource.UserInput` drives the fold; release
+mid-gesture still snaps to the nearest edge via `onPreFling`.
+
 ## Use case: `feature/profile`'s Active Relation screen
 
 This is the one real screen wired up today — a solid template to copy.
