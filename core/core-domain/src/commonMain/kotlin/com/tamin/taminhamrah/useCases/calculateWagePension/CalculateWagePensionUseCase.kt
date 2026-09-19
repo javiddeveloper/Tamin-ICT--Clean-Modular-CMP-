@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.model.calculateWagePension.BASIC_WAGE
 import com.tamin.taminhamrah.model.calculateWagePension.DAYS_IN_MONTH
 import com.tamin.taminhamrah.model.calculateWagePension.DAYS_IN_YEAR
 import com.tamin.taminhamrah.model.calculateWagePension.MONTHS_IN_TWO_YEARS
+import com.tamin.taminhamrah.model.calculateWagePension.MONTHS_IN_YEAR
 import com.tamin.taminhamrah.model.calculateWagePension.TWO_YEAR_DAYS
 import com.tamin.taminhamrah.model.calculateWagePension.WagePensionCalculationDN
 import com.tamin.taminhamrah.model.calculateWagePension.WagePensionChartItemDN
@@ -23,32 +24,59 @@ class CalculateWagePensionUseCase {
         val premiumPaymentHistoryYear = totalHistoryDays.toDouble() / DAYS_IN_YEAR
         val roundedPremiumYears = roundHalfEvenToTwoDecimals(premiumPaymentHistoryYear)
 
-        val (averageSalary, eligibleAmount) = calculateAmounts(
+        val (averageSalary, eligibleAmount, legalFloorApplied) = calculateAmounts(
             list = dastmozd.list.orEmpty(),
             premiumYears = roundedPremiumYears
+        )
+
+        val (historyYears, historyMonths, historyDays) = normalizeHistoryDuration(
+            years = firstItem?.historyYears ?: 0,
+            months = firstItem?.historyMonths ?: 0,
+            days = firstItem?.historyDays ?: 0,
         )
 
         return WagePensionCalculationDN(
             premiumPaymentHistoryYear = premiumPaymentHistoryYear,
             averageSalaryLastTwoYears = averageSalary,
             eligibleAmountPension = eligibleAmount,
-            historyYears = firstItem?.historyYears ?: 0,
-            historyMonths = firstItem?.historyMonths ?: 0,
-            historyDays = firstItem?.historyDays ?: 0,
+            historyYears = historyYears,
+            historyMonths = historyMonths,
+            historyDays = historyDays,
             totalHistoryDays = totalHistoryDays,
             chartItems = talfigh.list.orEmpty().map { item ->
                 WagePensionChartItemDN(
                     hisYear = item.hisYear.orEmpty(),
-                    sumYear = item.sumYear ?: 0
+                    sumYear = item.sumYear ?: 0,
+                    months = List(MONTHS_IN_YEAR) { index ->
+                        item.months.getOrNull(index)?.toIntOrNull() ?: 0
+                    },
                 )
-            }
+            },
+            legalFloorApplied = legalFloorApplied,
         )
+    }
+
+    /**
+     * Carries days into months (≥ [DAYS_IN_MONTH]) and months into years (≥ [MONTHS_IN_YEAR]),
+     * matching legacy `Utility.normalizeHistoryDuration` before display.
+     */
+    private fun normalizeHistoryDuration(
+        years: Int,
+        months: Int,
+        days: Int,
+    ): Triple<Int, Int, Int> {
+        var normalizedYears = years
+        var normalizedMonths = months + days / DAYS_IN_MONTH
+        val normalizedDays = days % DAYS_IN_MONTH
+        normalizedYears += normalizedMonths / MONTHS_IN_YEAR
+        normalizedMonths %= MONTHS_IN_YEAR
+        return Triple(normalizedYears, normalizedMonths, normalizedDays)
     }
 
     private fun calculateAmounts(
         list: List<DastmozdInfoItemDN>,
         premiumYears: Double
-    ): Pair<Long, Long> {
+    ): Triple<Long, Long, Boolean> {
         val listDays = ArrayList<String>()
         val listWages = ArrayList<String>()
 
@@ -73,16 +101,19 @@ class CalculateWagePensionUseCase {
 
         val averageSalary = ceil(sumWages / MONTHS_IN_TWO_YEARS)
         var eligibleAmount = ceil((averageSalary / DAYS_IN_MONTH) * premiumYears)
+        var legalFloorApplied = false
         if (premiumYears >= 20 && eligibleAmount < BASIC_WAGE) {
             eligibleAmount = BASIC_WAGE.toDouble()
+            legalFloorApplied = true
         }
         if (premiumYears < 20) {
             val minWage = (premiumYears / DAYS_IN_MONTH) * BASIC_WAGE
             if (eligibleAmount < minWage) {
                 eligibleAmount = minWage
+                legalFloorApplied = true
             }
         }
-        return averageSalary.toLong() to eligibleAmount.toLong()
+        return Triple(averageSalary.toLong(), eligibleAmount.toLong(), legalFloorApplied)
     }
 }
 
