@@ -24,6 +24,7 @@ import com.tamin.taminhamrah.ui.components.borderTrace
 import com.tamin.taminhamrah.ui.components.rememberBorderTracePhase
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import org.jetbrains.compose.resources.StringResource
 import taminx.core.core_ui.Res
@@ -86,8 +87,8 @@ fun WorkshopRecordCard(
 /**
  * How a card's action reads. The design gives each a fill, a text color and an outline.
  *
- * [NEUTRAL], [INFO], [SUCCESS_SOFT] and [TEAL] are the quieter tinted chips واگذارندگان draws: page
- * gray, pale blue, pale green, and a white chip in teal.
+ * [INFO], [SUCCESS_SOFT], [TEAL] and [TEAL_SOFT] are the quieter tinted chips واگذارندگان draws: pale
+ * blue, pale green, a white chip in teal, and a pale teal one.
  */
 @Immutable
 enum class WorkshopCardButtonTone {
@@ -98,10 +99,10 @@ enum class WorkshopCardButtonTone {
     ALERT,
     NOTICE,
     DISABLED,
-    NEUTRAL,
     INFO,
     SUCCESS_SOFT,
     TEAL,
+    TEAL_SOFT,
 }
 
 /**
@@ -111,6 +112,9 @@ enum class WorkshopCardButtonTone {
  * always sharing the row's width equally with its siblings.
  *
  * @param icon a glyph ahead of the label. Null, the default, draws the label alone.
+ * @param compact the design's smaller chip — an 11sp label and a 13dp glyph — for a row of three
+ *   whose labels would otherwise run into the outline. The glyph shrinks on the outlined tones only;
+ *   no compact row uses a gradient one.
  */
 @Composable
 fun RowScope.WorkshopCardButton(
@@ -119,6 +123,7 @@ fun RowScope.WorkshopCardButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
+    compact: Boolean = false,
     /**
      * The action's request is running: the outline is traced in the label's own color, and taps are
      * dropped, since another would only start the same request again.
@@ -126,7 +131,8 @@ fun RowScope.WorkshopCardButton(
     isLoading: Boolean = false,
 ) {
     val colors = LocalTaminColors.current
-    val textStyle = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
+    val textStyle = (if (compact) MaterialTheme.typography.labelSmall else MaterialTheme.typography.labelMedium)
+        .copy(fontWeight = FontWeight.Bold)
     val slot = modifier.weight(1f).widthIn(min = WorkshopDimens.cardButtonMinWidth)
     val tracePhase = if (isLoading) rememberBorderTracePhase() else null
     val action = if (isLoading) NoAction else onClick
@@ -165,10 +171,11 @@ fun RowScope.WorkshopCardButton(
         WorkshopCardButtonTone.NOTICE ->
             Triple(colors.orangeBg, colors.orangeText, colors.orangeText.copy(alpha = WorkshopDimens.cardButtonOutlineAlpha))
 
-        WorkshopCardButtonTone.NEUTRAL -> Triple(colors.bgPage, colors.textTertiary, colors.border)
         WorkshopCardButtonTone.INFO -> Triple(colors.blueBg, colors.blueText, colors.blueBorder)
         WorkshopCardButtonTone.SUCCESS_SOFT -> Triple(colors.greenBg, colors.greenText, colors.greenBorder)
         WorkshopCardButtonTone.TEAL -> Triple(colors.bgSurface, colors.tealText, colors.border)
+        WorkshopCardButtonTone.TEAL_SOFT ->
+            Triple(colors.tealBg, colors.tealText, colors.tealText.copy(alpha = WorkshopDimens.cardButtonOutlineAlpha))
 
         else -> Triple(colors.bgSurface, colors.textMuted, colors.border)
     }
@@ -185,6 +192,7 @@ fun RowScope.WorkshopCardButton(
         containerColor = container,
         contentColor = content,
         textStyle = textStyle,
+        iconSize = if (compact) WorkshopDimens.cardButtonCompactIcon else IconSize.medium,
         modifier = slot.cardButtonTrace(tracePhase, content),
     )
 }

@@ -38,7 +38,6 @@ import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.contract_rows_my_workshops
-import taminx.core.core_ui.contract_rows_my_workshops_partial
 
 /**
  * The parts every کارگاه bottom sheet in this design opens with.
@@ -140,18 +139,7 @@ fun WorkshopQuickPickList(
                 .fillMaxWidth()
                 .padding(top = Spacing.smd, bottom = Spacing.sm),
         )
-        if (total > workshops.size) {
-            Text(
-                text = stringResource(
-                    Res.string.contract_rows_my_workshops_partial,
-                    workshops.size.toString().toPersianDigits(),
-                    total.toString().toPersianDigits(),
-                ),
-                style = MaterialTheme.typography.labelSmall,
-                color = colors.textMuted,
-                modifier = Modifier.fillMaxWidth().padding(bottom = Spacing.sm),
-            )
-        }
+
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(WorkshopDimens.contractRowTileGap),
