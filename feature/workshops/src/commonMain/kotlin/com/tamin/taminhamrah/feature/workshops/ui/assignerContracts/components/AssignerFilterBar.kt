@@ -51,16 +51,13 @@ internal fun buildAssignerFilterText(
 
 /**
  * Which workshop the list is showing, drawn as ردیف‌های پیمان draws its own: a blue chip carrying the
- * line, and «تغییر» beside it to reopen the search.
- *
- * @param onClear drops the search from inside the chip. Null draws no cross, for a line that names
- *   the واگذارنده rather than a search there is anything to clear.
+ * line and the cross that drops the search, and «تغییر» beside it to reopen the search.
  */
 @Composable
 fun AssignerFilterBar(
     filterText: String,
     onEdit: () -> Unit,
-    onClear: (() -> Unit)?,
+    onClear: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
@@ -91,21 +88,19 @@ fun AssignerFilterBar(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f),
             )
-            if (onClear != null) {
-                Box(
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .clickable(onClick = onClear)
-                        .padding(Spacing.xxs),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        imageVector = vectorResource(Res.drawable.ic_tamin_cross),
-                        contentDescription = stringResource(Res.string.assigner_filter_clear),
-                        tint = colors.blueText,
-                        modifier = Modifier.size(WorkshopDimens.chipCrossSize),
-                    )
-                }
+            Box(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .clickable(onClick = onClear)
+                    .padding(Spacing.xxs),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = vectorResource(Res.drawable.ic_tamin_cross),
+                    contentDescription = stringResource(Res.string.assigner_filter_clear),
+                    tint = colors.blueText,
+                    modifier = Modifier.size(WorkshopDimens.chipCrossSize),
+                )
             }
         }
         Text(

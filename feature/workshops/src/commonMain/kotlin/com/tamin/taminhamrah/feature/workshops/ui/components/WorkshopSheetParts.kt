@@ -14,27 +14,30 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
 import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.paging.OnLoadMore
+import com.tamin.taminhamrah.ui.paging.PagingFooter
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
-import com.tamin.taminhamrah.util.toPersianDigits
-import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.contract_rows_my_workshops
@@ -64,10 +67,9 @@ fun WorkshopSheetGrabber(modifier: Modifier = Modifier) {
 /**
  * A sheet's body: page insets, the navigation-bar inset, the grabber, a title, and its content.
  *
- * The column scrolls because a sheet that does not can push its own primary button past the bottom
- * edge on a short screen — a bug this design already shipped once. Every sheet here holds a bounded
- * number of rows, so a plain scroll is right; a lazy list inside a sheet that already scrolls would
- * nest two scrollers.
+ * The body itself does not scroll: [WorkshopQuickPickList] is the one part that does, and it gives
+ * way with `weight(fill = false)`, so on a short screen the list shrinks rather than pushing the
+ * sheet's primary button past the bottom edge.
  */
 @Composable
 fun WorkshopSheetBody(
@@ -80,10 +82,12 @@ fun WorkshopSheetBody(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
             .padding(horizontal = Spacing.page)
-            .padding(top = Spacing.smd, bottom = Spacing.page)
-            .padding(WindowInsets.navigationBars.asPaddingValues()),
+            .padding(
+                top = Spacing.smd,
+                bottom = WindowInsets.navigationBars.asPaddingValues()
+                    .calculateBottomPadding() + Spacing.lg,
+            ),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
     ) {
@@ -109,54 +113,68 @@ fun WorkshopSheetBody(
 }
 
 /**
- * کارگاه‌های شما — the employer's own workshops, offered above a sheet's code fields.
+ * کارگاه‌های شما — the employer's own workshops, offered above a sheet's code fields and paged in as
+ * the list is scrolled.
  *
  * Both search sheets under کارگاه‌های کارفرما ask for a کد کارگاه, and typing a ten-digit number
  * from memory is the worst part of either. Picking a row fills the code *and* its branch in one go.
  *
- * Absent rather than empty when there is nothing to offer: a heading over no rows reads as a list
- * that failed to load. [total] is the employer's real count — the sheet asks for one page, so when
- * it holds more the shortfall is stated rather than paged away, because the fields above still
- * reach any workshop by number and a list that silently stops at ten looks complete.
+ * The list is the sheet's only scrolling part, and it takes what height is left rather than all it
+ * could, so the fields above and the button below stay put. Absent rather than empty when there is
+ * nothing to offer: a heading over no rows reads as a list that failed to load.
  */
 @Composable
-fun WorkshopQuickPickList(
-    workshops: ImmutableList<WorkshopPR>,
-    total: Int,
+fun ColumnScope.WorkshopQuickPickList(
+    workshops: PagedListState<WorkshopPR>,
     selectedWorkshopId: String,
+    selectedBranchCode: String,
     onPick: (workshopId: String, branchCode: String) -> Unit,
-    modifier: Modifier = Modifier,
+    onLoadMore: () -> Unit,
 ) {
-    if (workshops.isEmpty()) return
+    val listState = rememberLazyListState()
+    listState.OnLoadMore(
+        enabled = workshops.canLoadMore,
+        onLoadMore = onLoadMore,
+    )
+    if (workshops.items.isEmpty()) return
     val colors = LocalTaminColors.current
-    Column(modifier = modifier.fillMaxWidth()) {
-        Text(
-            text = stringResource(Res.string.contract_rows_my_workshops),
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Bold,
-            color = colors.textSecondary,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = Spacing.smd, bottom = Spacing.sm),
-        )
-
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(WorkshopDimens.contractRowTileGap),
-        ) {
-            workshops.forEach { workshop ->
-                WorkshopQuickPickRow(
-                    name = workshop.name,
-                    codeLabel = workshop.codeLabel,
-                    isSelected = workshop.workshopId == selectedWorkshopId,
-                    onPick = { onPick(workshop.workshopId, workshop.branchCode) },
-                )
+    Text(
+        text = stringResource(Res.string.contract_rows_my_workshops),
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.Bold,
+        color = colors.textSecondary,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = Spacing.smd, bottom = Spacing.sm),
+    )
+    LazyColumn(
+        state = listState,
+        modifier = Modifier
+            .fillMaxWidth()
+            .weight(1f, fill = false),
+        verticalArrangement = Arrangement.spacedBy(WorkshopDimens.contractRowTileGap),
+    ) {
+        items(
+            items = workshops.items,
+            key = { "${it.workshopId}_${it.branchCode}" },
+        ) { workshop ->
+            WorkshopQuickPickRow(
+                name = workshop.name,
+                codeLabel = workshop.codeLabel,
+                isSelected = workshop.workshopId == selectedWorkshopId &&
+                    (selectedBranchCode.isBlank() || workshop.branchCode == selectedBranchCode),
+                onPick = { onPick(workshop.workshopId, workshop.branchCode) },
+            )
+        }
+        if (workshops.isLoadingMore) {
+            item(key = LOADING_MORE_KEY) {
+                PagingFooter(isLoadingNextPage = true, error = null, onRetry = {})
             }
         }
     }
 }
 
-/** One کارگاه‌های شما row: picking it fills both codes at once, branch included. */
+/** One کارگاه‌های شما row: picking it fills both fields at once, branch included. */
 @Composable
 private fun WorkshopQuickPickRow(
     name: String,
@@ -166,37 +184,40 @@ private fun WorkshopQuickPickRow(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    val shape = remember { RoundedCornerShape(CornerRadius.chip) }
+    val shape = remember { RoundedCornerShape(CornerRadius.md) }
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(if (isSelected) colors.blueBg else colors.bgSurface, shape)
-            .border(
-                Thickness.border,
-                if (isSelected) colors.blueBorder else colors.border,
-                shape,
-            )
+            .clip(shape)
             .clickable(onClick = onPick)
-            .padding(
-                horizontal = WorkshopDimens.fieldHorizontalPadding,
-                vertical = WorkshopDimens.fieldVerticalPadding,
-            ),
+            .background(if (isSelected) colors.blueBg else colors.chipBg)
+            .then(
+                if (isSelected) {
+                    Modifier.border(Thickness.border, colors.blueBorder, shape)
+                } else {
+                    Modifier
+                },
+            )
+            .padding(horizontal = Spacing.lg, vertical = Spacing.md),
         horizontalArrangement = Arrangement.spacedBy(Spacing.smPlus),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = name,
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Bold,
-            color = colors.textPrimary,
+            color = if (isSelected) colors.blueText else colors.textPrimary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
         NumericText(
             text = codeLabel,
-            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-            color = colors.textMuted,
+            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+            color = if (isSelected) colors.blueText else colors.textMuted,
         )
     }
 }
+
+/** The footer row's key; the workshop rows are keyed `workshopId_branchCode`, so it cannot clash. */
+private const val LOADING_MORE_KEY = "loading_more"

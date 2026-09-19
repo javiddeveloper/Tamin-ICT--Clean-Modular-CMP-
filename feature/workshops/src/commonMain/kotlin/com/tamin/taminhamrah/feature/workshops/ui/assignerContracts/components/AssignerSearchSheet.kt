@@ -24,7 +24,7 @@ import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.digitsOnly
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import kotlinx.collections.immutable.ImmutableList
+import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.assigner_filter_clear
@@ -62,12 +62,12 @@ fun AssignerSearchSheet(
     showWorkshopIdError: Boolean,
     isApplying: Boolean,
     canReset: Boolean,
-    myWorkshops: ImmutableList<WorkshopPR>,
-    myWorkshopsTotal: Int,
+    myWorkshops: PagedListState<WorkshopPR>,
     onWorkshopIdChange: (String) -> Unit,
     onBranchCodeChange: (String) -> Unit,
     onContractRowChange: (String) -> Unit,
     onQuickPick: (String, String) -> Unit,
+    onLoadMoreWorkshops: () -> Unit,
     onApply: () -> Unit,
     onReset: () -> Unit,
     onDismiss: () -> Unit,
@@ -86,11 +86,11 @@ fun AssignerSearchSheet(
             isApplying = isApplying,
             canReset = canReset,
             myWorkshops = myWorkshops,
-            myWorkshopsTotal = myWorkshopsTotal,
             onWorkshopIdChange = onWorkshopIdChange,
             onBranchCodeChange = onBranchCodeChange,
             onContractRowChange = onContractRowChange,
             onQuickPick = onQuickPick,
+            onLoadMoreWorkshops = onLoadMoreWorkshops,
             onApply = onApply,
             onReset = onReset,
         )
@@ -114,12 +114,12 @@ fun AssignerSearchSheetContent(
     showWorkshopIdError: Boolean,
     isApplying: Boolean,
     canReset: Boolean,
-    myWorkshops: ImmutableList<WorkshopPR>,
-    myWorkshopsTotal: Int,
+    myWorkshops: PagedListState<WorkshopPR>,
     onWorkshopIdChange: (String) -> Unit,
     onBranchCodeChange: (String) -> Unit,
     onContractRowChange: (String) -> Unit,
     onQuickPick: (String, String) -> Unit,
+    onLoadMoreWorkshops: () -> Unit,
     onApply: () -> Unit,
     onReset: () -> Unit,
     modifier: Modifier = Modifier,
@@ -173,9 +173,10 @@ fun AssignerSearchSheetContent(
 
         WorkshopQuickPickList(
             workshops = myWorkshops,
-            total = myWorkshopsTotal,
             selectedWorkshopId = workshopId,
+            selectedBranchCode = branchCode,
             onPick = onQuickPick,
+            onLoadMore = onLoadMoreWorkshops,
         )
 
         // One message under all three, not on the field: the design puts it there, and only one of

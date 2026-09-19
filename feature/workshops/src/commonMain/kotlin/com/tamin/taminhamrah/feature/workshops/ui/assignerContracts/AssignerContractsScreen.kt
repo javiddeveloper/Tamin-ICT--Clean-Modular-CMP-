@@ -202,16 +202,12 @@ fun AssignerContractsContent(
                     onSelect = { onIntent(AssignerContractsIntent.TabSelected(it)) },
                 )
                 // Whose پیمان‌ها these are, and the search narrowing them, in the chip ردیف‌های پیمان
-                // shows its workshop in. Only a search can be cleared.
+                // shows its workshop in. The cross always drops the search and reloads the full list.
                 if (filter != null || assigner != null) {
                     AssignerFilterBar(
                         filterText = rememberAssignerChipText(assigner, filter),
                         onEdit = { onIntent(AssignerContractsIntent.SearchOpenChanged(isOpen = true)) },
-                        onClear = if (filter != null) {
-                            { onIntent(AssignerContractsIntent.ClearSearch) }
-                        } else {
-                            null
-                        },
+                        onClear = { onIntent(AssignerContractsIntent.ClearSearch) },
                     )
                 }
             }
@@ -277,13 +273,13 @@ fun AssignerContractsContent(
             isApplying = list.isLoading,
             canReset = filter != null,
             myWorkshops = state.myWorkshops,
-            myWorkshopsTotal = state.myWorkshopsTotal,
             onWorkshopIdChange = { onIntent(AssignerContractsIntent.DraftWorkshopIdChanged(it)) },
             onBranchCodeChange = { onIntent(AssignerContractsIntent.DraftBranchCodeChanged(it)) },
             onContractRowChange = { onIntent(AssignerContractsIntent.DraftContractRowChanged(it)) },
             onQuickPick = { id, branch ->
                 onIntent(AssignerContractsIntent.QuickPicked(id, branch))
             },
+            onLoadMoreWorkshops = { onIntent(AssignerContractsIntent.LoadMoreMyWorkshops) },
             onApply = { onIntent(AssignerContractsIntent.ApplySearch) },
             onReset = { onIntent(AssignerContractsIntent.ClearSearch) },
             onDismiss = {
@@ -528,18 +524,18 @@ private fun AssignerSearchSheetPreview() = PreviewRtlThemeContent {
         showWorkshopIdError = true,
         isApplying = false,
         canReset = true,
-        myWorkshops = PreviewWorkshops,
-        myWorkshopsTotal = 8,
+        myWorkshops = PagedListState(items = PreviewWorkshops),
         onWorkshopIdChange = {},
         onBranchCodeChange = {},
         onContractRowChange = {},
         onQuickPick = { _, _ -> },
+        onLoadMoreWorkshops = {},
         onApply = {},
         onReset = {},
     )
 }
 
-/** کارگاه‌های شما as the sheet offers them — two of the employer's eight, so the shortfall shows. */
+/** کارگاه‌های شما as the sheet offers them. */
 private val PreviewWorkshops = persistentListOf(
     WorkshopPR(
         workshopId = "9028212822",

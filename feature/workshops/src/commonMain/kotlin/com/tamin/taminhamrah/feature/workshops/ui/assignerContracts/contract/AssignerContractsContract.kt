@@ -10,7 +10,6 @@ import com.tamin.taminhamrah.model.workshop.ComputationalBasePR
 import com.tamin.taminhamrah.model.workshop.SettlementCertificatePR
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import org.jetbrains.compose.resources.StringResource
 import taminx.core.core_ui.Res
@@ -133,16 +132,12 @@ data class AssignerContractsUiState(
     val tab: AssignerContractTab = AssignerContractTab.ACTIVE,
     val draft: AssignerSearchDraft = AssignerSearchDraft(),
     val isSearchOpen: Boolean = false,
-    /** کارگاه‌های شما — the quick-pick rows, fetched the first time the sheet opens. */
-    val myWorkshops: ImmutableList<WorkshopPR> = persistentListOf(),
     /**
-     * How many workshops the employer actually holds, against how many the quick-pick lists.
-     *
-     * The sheet asks for one page, so an employer with more than fits never sees the rest. The
-     * three fields still reach any workshop by number, so the cap is stated rather than paged
-     * away — a silent partial list is the part that misleads.
+     * کارگاه‌های شما — the quick-pick rows, fetched the first time the sheet opens and paged in as
+     * its list is scrolled, as ردیف‌های پیمان pages its own. A list that silently stops at one-page
+     * reads as complete.
      */
-    val myWorkshopsTotal: Int = 0,
+    val myWorkshops: PagedListState<WorkshopPR> = PagedListState(),
     val bases: PagedListState<ComputationalBasePR> = PagedListState(),
     /** Which پیمان [bases] holds, so returning to a screen already loaded does not refetch. */
     val basesKeys: ComputationalBaseKeys? = null,
@@ -183,10 +178,8 @@ data class AssignerContractsUiState(
         ) : PartialState
 
         data class WorkshopIdErrorChanged(val isVisible: Boolean) : PartialState
-        data class MyWorkshopsLoaded(
-            val workshops: ImmutableList<WorkshopPR>,
-            val total: Int,
-        ) : PartialState
+        data object MyWorkshopsLoadingMore : PartialState
+        data class MyWorkshopsLoaded(val workshops: PagedListState<WorkshopPR>) : PartialState
 
         // ------------------------------------------------------------------ the drill-downs
         data class BasesLoading(val keys: ComputationalBaseKeys) : PartialState
@@ -258,6 +251,9 @@ sealed interface AssignerContractsIntent {
     data class DraftContractRowChanged(val value: String) : AssignerContractsIntent
     /** Picking a کارگاه‌های شما row fills the code and its branch at once. */
     data class QuickPicked(val workshopId: String, val branchCode: String) : AssignerContractsIntent
+
+    /** کارگاه‌های شما was scrolled to its end. */
+    data object LoadMoreMyWorkshops : AssignerContractsIntent
     data object ApplySearch : AssignerContractsIntent
     data object ClearSearch : AssignerContractsIntent
 
