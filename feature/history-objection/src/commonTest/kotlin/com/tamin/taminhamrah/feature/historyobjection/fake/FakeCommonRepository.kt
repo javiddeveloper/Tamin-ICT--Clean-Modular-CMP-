@@ -2,11 +2,13 @@ package com.tamin.taminhamrah.feature.historyobjection.fake
 
 import com.tamin.taminhamrah.model.common.BeneficiaryDN
 import com.tamin.taminhamrah.model.common.InsuranceTypeDN
+import com.tamin.taminhamrah.model.common.JobTitleDN
 import com.tamin.taminhamrah.model.common.JobTitleListDN
 import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.common.RoleDN
 import com.tamin.taminhamrah.model.common.UserType
 import com.tamin.taminhamrah.model.common.UserTypeInfoDN
+import com.tamin.taminhamrah.model.paging.PageDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.common.CommonRepository
@@ -31,6 +33,7 @@ class FakeCommonRepository : CommonRepository {
     override fun getMainMenu(versionCode: String, forceUpdate: Boolean): Flow<List<MainServiceDN>> = flow { emit(emptyList()) }
     override fun getRegistrationDeclarationForm(): Flow<ByteArray> = flow { emit(byteArrayOf()) }
     override fun getJobTitle(query: ApiQueryParamDN): Flow<JobTitleListDN?> = flow { emit(null) }
+    override fun getJobTitlePage(query: ApiQueryParamDN): Flow<PageDN<JobTitleDN>> = flow { emit(PageDN(items = emptyList(), total = 0)) }
     override fun getRoles(): Flow<List<RoleDN>> = flow { emit(emptyList()) }
     override fun checkUserType(): Flow<UserTypeInfoDN> = flow { emit(userTypeResult) }
 }

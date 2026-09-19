@@ -8,6 +8,13 @@ package com.tamin.taminhamrah.model.workshop
  * the presentation edge.
  */
 data class EmployerAgreementDN(
+    /**
+     * ردیف پیمان of this agreement, from `pymseq`.
+     *
+     * Not the same field as [WorkshopSummaryDN.contractRow]: this one belongs to the *agreement*,
+     * that one to the workshop record nested inside it. The ردیف پیمان list shows this one.
+     */
+    val contractRow: String = "",
     val startDate: String = "",
     val commitmentDate: String = "",
     val email: String = "",
@@ -29,8 +36,25 @@ data class WorkshopSummaryDN(
     val contractRow: String = "",
     /** The branch *office* code, which is what the card labels کد شعبه — not [branchCode]. */
     val branchOfficeCode: String = "",
+    val branchTitle: String = "",
     val branchOfficeName: String = "",
-    /** حقیقی / حقوقی. */
+    /**
+     * `01` حقیقی / `02` حقوقی.
+     *
+     * Kept alongside [characterDescription] because only a حقوقی workshop may have its identity
+     * details completed, and that decision cannot be made on the description: the service spells
+     * it with an Arabic ي ("حقيقي"), so matching on the text is a spelling coincidence away from
+     * offering the form to the wrong workshops.
+     */
+    val characterCode: String = "",
+    /**
+     * The حقوقی workshop's own national id, blank for a حقیقی one.
+     *
+     * Not shown anywhere; it is carried because `pay-normal-debit` sends it beside
+     * [characterCode], and the payment screen has no other way to reach the workshop record.
+     */
+    val legalNationalId: String = "",
+    /** حقیقی / حقوقی, as the service words it — for display only. */
     val characterDescription: String = "",
     val workshopTypeDescription: String = "",
     val statusCode: String = "",

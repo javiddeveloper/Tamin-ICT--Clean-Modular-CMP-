@@ -3,24 +3,46 @@ package com.tamin.taminhamrah.feature.agent.service.impl
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceParams
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceResult
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceUseCase
+import com.tamin.taminhamrah.feature.agent.service.base.AgentStrings
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
-import com.tamin.taminhamrah.feature.agent.service.base.toKeyValueRows
-import com.tamin.taminhamrah.feature.agent.service.base.buildBubbles
-import com.tamin.taminhamrah.feature.agent.service.base.formatAmount
+import com.tamin.taminhamrah.feature.agent.service.base.agentMarkdown
 import com.tamin.taminhamrah.model.agent.AgentActionKey
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
-import com.tamin.taminhamrah.ui.orDash
+import com.tamin.taminhamrah.model.pension.PensionerStatusDN
+import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.useCases.pension.GetPensionInquiryUseCase
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.firstOrNull
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.agent_empty_pension_inquiry
+import taminx.core.core_ui.agent_error_pension_inquiry
+import taminx.core.core_ui.agent_label_branch_code
+import taminx.core.core_ui.agent_label_edict_type
+import taminx.core.core_ui.agent_label_full_name
+import taminx.core.core_ui.agent_label_gender
+import taminx.core.core_ui.agent_label_insurance_number
+import taminx.core.core_ui.agent_label_national_code
+import taminx.core.core_ui.agent_label_organization_unit
+import taminx.core.core_ui.agent_label_payment_amount
+import taminx.core.core_ui.agent_label_payment_date
+import taminx.core.core_ui.agent_label_pension_end_date
+import taminx.core.core_ui.agent_label_pension_number
+import taminx.core.core_ui.agent_label_pension_start_date
+import taminx.core.core_ui.agent_label_status
+import taminx.core.core_ui.agent_not_pensioner
+import taminx.core.core_ui.agent_value_rial
 
 /**
- * Pension inquiry results (استعلام مستمری).
+ * Pension inquiry — استعلام وضعیت مستمری — ported from the native `PensionInquiryAllUseCase` /
+ * `PensionInquireLastUseCase`.
  *
- * Ported from old_Android's `PensionInquiryAllUseCase` / `PensionInquireLastUseCase` —
- * the "_LAST" variant returns only the most recent record.
+ * - A first row whose status is [PensionerStatusDN.NOT_PENSIONER] means the user is not a pensioner.
+ * - `pension_inquiry_all` shows every row; `pension_inquiry_last` shows the last row's paid amount,
+ *   which is the single value the native "last" answer carried.
  */
 class PensionInquiryAgentService(
-    private val getPensionInquiryUseCase: GetPensionInquiryUseCase
+    private val getPensionInquiryUseCase: GetPensionInquiryUseCase,
+    private val strings: AgentStrings,
 ) : AgentServiceUseCase {
 
     override val supportedKeys: List<AgentActionKey> = listOf(
@@ -28,60 +50,45 @@ class PensionInquiryAgentService(
         AgentActionKey.PENSION_INQUIRY_LAST
     )
 
-    override suspend fun execute(params: AgentServiceParams): AgentServiceResult {
-        return try {
-            val list = getPensionInquiryUseCase().firstOrNull().orEmpty()
-
-            if (list.isEmpty()) {
-                return AgentServiceResult.Success(
-                    params.buildBubbles {
-                        add(ChatBubbleContent.Text(params.message ?: "اطلاعات مستمری یافت نشد."))
-                    }
-                )
-            }
-
-            // The dispatcher passes the concrete key, so "last" narrows to a single record.
-            val isLastOnly = params.isLastVariant()
-            val records = if (isLastOnly) listOf(list.first()) else list
-
-            val rows = mutableListOf<Pair<String, String>>()
-            records.forEachIndexed { index, item ->
-                rows.addAll(item.toRows())
-                if (index < records.lastIndex) rows.add(ROW_SEPARATOR to "")
-            }
-
-            AgentServiceResult.Success(
-                params.buildBubbles {
-                    add(
-                        ChatBubbleContent.KeyValue(
-                            title = params.message?.takeIf { it.isNotBlank() } ?: "اطلاعات مستمری",
-                            items = rows.toKeyValueRows()
-                        )
-                    )
+    override suspend fun execute(params: AgentServiceParams): AgentServiceResult = try {
+        val list = getPensionInquiryUseCase().firstOrNull().orEmpty()
+        val markdown = agentMarkdown {
+            heading(params.message)
+            when {
+                list.isEmpty() -> paragraph(strings.get(Res.string.agent_empty_pension_inquiry))
+                PensionerStatusDN.fromCode(list.first().statusDesc) == PensionerStatusDN.NOT_PENSIONER ->
+                    paragraph(strings.get(Res.string.agent_not_pensioner))
+                params.requestedKey == AgentActionKey.PENSION_INQUIRY_LAST ->
+                    fields(listOf(strings.get(Res.string.agent_label_payment_amount) to list.last().amount()))
+                else -> list.forEach { item ->
+                    fields(item.rows())
+                    rule()
                 }
-            )
-        } catch (e: Exception) {
-            AgentServiceResult.Error("خطا در دریافت اطلاعات مستمری: ${e.message}", e)
+            }
         }
+        AgentServiceResult.Success(listOf(ChatBubbleContent.Markdown(markdown)))
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        AgentServiceResult.Error(strings.get(Res.string.agent_error_pension_inquiry), e)
     }
 
-    private fun PensionInquiryDN.toRows(): List<Pair<String, String>> = listOf(
-        "نام و نام خانوادگی" to fullName.orDash(),
-        "نوع مستمری‌بگیر" to pensionerType.orDash(),
-        "شماره بیمه" to insuranceNumber.orDash(),
-        "کد ملی" to nationalId.orDash(),
-        "نام شعبه" to branchName.orDash(),
-        "وضعیت" to statusDesc.orDash(),
-        "تاریخ برقراری" to pensionerBaseDate.orDash(),
-        "تاریخ پرداخت" to paymentDate.orDash(),
-        "مبلغ پرداختی" to paymentAmount.formatAmount()
+    private suspend fun PensionInquiryDN.rows(): List<Pair<String, String?>> = listOf(
+        strings.get(Res.string.agent_label_organization_unit) to branchName,
+        strings.get(Res.string.agent_label_full_name) to fullName,
+        strings.get(Res.string.agent_label_pension_number) to pensionerRisUid,
+        strings.get(Res.string.agent_label_insurance_number) to insuranceNumber,
+        strings.get(Res.string.agent_label_national_code) to nationalId,
+        strings.get(Res.string.agent_label_edict_type) to (pensionerTypeDesc ?: pensionerType),
+        strings.get(Res.string.agent_label_payment_date) to paymentDate,
+        strings.get(Res.string.agent_label_pension_start_date) to pensionerBaseDate,
+        strings.get(Res.string.agent_label_status) to statusDesc,
+        strings.get(Res.string.agent_label_branch_code) to branchCode,
+        strings.get(Res.string.agent_label_gender) to sexDesc,
+        strings.get(Res.string.agent_label_pension_end_date) to pensionEndDate,
+        strings.get(Res.string.agent_label_payment_amount) to amount(),
     )
 
-    private companion object {
-        const val ROW_SEPARATOR = "----------------"
-    }
+    private suspend fun PensionInquiryDN.amount(): String? =
+        paymentAmount?.let { strings.get(Res.string.agent_value_rial, it.toLong().toPriceFormat()) }
 }
-
-/** True when the AI asked for the "last" variant of a paired action key. */
-internal fun AgentServiceParams.isLastVariant(): Boolean =
-    requestedKey?.key?.endsWith("_last") == true

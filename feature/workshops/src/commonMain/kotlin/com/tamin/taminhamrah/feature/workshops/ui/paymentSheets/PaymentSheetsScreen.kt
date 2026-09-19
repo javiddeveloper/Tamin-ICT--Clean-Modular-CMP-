@@ -1,10 +1,5 @@
 package com.tamin.taminhamrah.feature.workshops.ui.paymentSheets
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -43,6 +38,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopPickerField
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopRecordCard
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopScreenShell
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopSearchCard
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopSearchDialog
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopSectionHeader
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopTextField
 import com.tamin.taminhamrah.feature.workshops.ui.components.colors
@@ -156,38 +152,38 @@ fun PaymentSheetsContent(
         WorkshopListScaffold(
             state = state.list,
             onLoadMore = { onIntent(PaymentSheetsIntent.LoadMore) },
+            onRetry = { onIntent(PaymentSheetsIntent.Load) },
             key = { it.debitNumber + it.agreementRow },
             header = {
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
-                    AnimatedVisibility(
-                        visible = state.isSearchOpen,
-                        enter = expandVertically() + fadeIn(),
-                        exit = shrinkVertically() + fadeOut(),
-                    ) {
-                        PaymentSheetsSearchPanel(
-                            filters = state.draft,
-                            onFiltersChange = {
-                                onIntent(PaymentSheetsIntent.DraftChanged(it))
-                            },
-                            onSearch = { onIntent(PaymentSheetsIntent.ApplyFilters) },
-                            onClear = { onIntent(PaymentSheetsIntent.ClearFilters) },
-                            onOpenStatusPicker = { showStatusSheet = true },
-                            onOpenReasonPicker = {
-                                onIntent(PaymentSheetsIntent.LoadDebitReasons)
-                                showReasonSheet = true
-                            },
-                            onOpenDateFromPicker = { showDateFromPicker = true },
-                            onOpenDateToPicker = { showDateToPicker = true },
-                        )
-                    }
                     WorkshopSectionHeader(
                         title = stringResource(Res.string.workshop_action_payment_sheets),
                         count = state.list.items.size,
                     )
                 }
             },
-        ) { sheet ->
-            PaymentSheetCard(sheet = sheet)
+        ) { sheet, itemModifier ->
+            PaymentSheetCard(sheet = sheet, modifier = itemModifier)
+        }
+    }
+
+    if (state.isSearchOpen) {
+        WorkshopSearchDialog(
+            onDismiss = { onIntent(PaymentSheetsIntent.SearchOpenChanged(false)) },
+        ) {
+            PaymentSheetsSearchPanel(
+                filters = state.draft,
+                onFiltersChange = { onIntent(PaymentSheetsIntent.DraftChanged(it)) },
+                onSearch = { onIntent(PaymentSheetsIntent.ApplyFilters) },
+                onClear = { onIntent(PaymentSheetsIntent.ClearFilters) },
+                onOpenStatusPicker = { showStatusSheet = true },
+                onOpenReasonPicker = {
+                    onIntent(PaymentSheetsIntent.LoadDebitReasons)
+                    showReasonSheet = true
+                },
+                onOpenDateFromPicker = { showDateFromPicker = true },
+                onOpenDateToPicker = { showDateToPicker = true },
+            )
         }
     }
 

@@ -60,7 +60,7 @@ private val HEADER_BUTTON_ICON_SIZE = 18.dp
  * It draws behind the status bar, so the host must not consume the top window inset —
  * otherwise the bar is pushed down and the system strip is left showing the page color.
  *
- * Colors default to the theme's top-app-bar stops, which already differ between light
+ * Colors default to the theme's profile gradient stops, which already differ between light
  * and dark, so screens normally pass none of them.
  */
 @Composable
@@ -138,7 +138,7 @@ fun TaminTopAppBar(
                     Text(
                         text = title,
                         style = MaterialTheme.typography.titleLarge,
-                        color = Color.White,
+                        color = LocalTaminColors.current.onGradient,
                         textAlign = if (centerTitle) TextAlign.Center else TextAlign.Start,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -153,9 +153,11 @@ fun TaminTopAppBar(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 HeaderSlot(
+                    hasContent = navigationIcon != null,
                     modifier = Modifier.onSizeChanged { navCapWidth = it.width },
                 ) { navigationIcon?.invoke() }
                 HeaderSlot(
+                    hasContent = action != null,
                     modifier = Modifier.onSizeChanged { actionCapWidth = it.width },
                 ) { action?.invoke() }
             }
@@ -165,8 +167,9 @@ fun TaminTopAppBar(
 }
 
 /**
- * The bar's wash, sweeping left to right. Stops come from the theme, so it follows light
- * and dark without the caller choosing colors.
+ * The bar's wash, sweeping left to right. Stops default to [TaminColors.profileGradientStops]
+ * (navy in light, hero teal in dark) so general screens match the rest of the app. Medical /
+ * treatment callers that need the teal wash pass [TaminColors.topAppBarStops] explicitly.
  *
  * Deliberately *not* direction-aware: the bar runs the opposite way to the cards beneath
  * it, which do follow the reading direction. Routing this through `startToEndGradient`
@@ -174,17 +177,34 @@ fun TaminTopAppBar(
  */
 @Composable
 fun taminTopAppBarGradient(
-    stops: List<Color> = LocalTaminColors.current.topAppBarStops,
+    stops: List<Color> = LocalTaminColors.current.profileGradientStops,
 ): Brush = Brush.horizontalGradient(stops)
+
+/** The design's hero angle: `linear-gradient(160deg, …)` — near vertical, dark stop at the top. */
+const val HERO_GRADIENT_ANGLE_DEG = 160f
+
+/**
+ * The bar's wash as the design actually draws it — a `160deg` sweep, so the dark stop sits along
+ * the top edge behind the status bar and the light one runs out along the bottom.
+ *
+ * Separate from [taminTopAppBarGradient] rather than replacing it: every hero in the design is
+ * 160deg, but the app has painted them left-to-right everywhere for long enough that swapping the
+ * default would move every screen at once. Callers adopt this one screen at a time.
+ */
+@Composable
+fun taminHeroGradient(
+    stops: List<Color> = LocalTaminColors.current.profileGradientStops,
+): Brush = cssAngleGradient(HERO_GRADIENT_ANGLE_DEG, stops)
 
 /**
  * Translucent chip holding a single bar icon — a back chevron, a search or share action.
  * The design gives every one of these the same container, so the bar owns it rather than
  * leaving each caller to rebuild it.
  *
- * The colors default to the treatment header's white-on-teal. A caller placing one of these on a
- * plain surface — a sheet's close button, say — overrides them rather than hand-rolling a second
- * kind of icon button, so the size, shape and touch target stay the app's single answer.
+ * Defaults to [TaminColors.onGradient] so content stays readable on the brand wash in both
+ * themes. A caller placing one of these on a plain surface — a sheet's close button, say —
+ * overrides them rather than hand-rolling a second kind of icon button, so the size, shape
+ * and touch target stay the app's single answer.
  */
 @Composable
 fun TaminTopAppBarButton(
@@ -194,9 +214,9 @@ fun TaminTopAppBarButton(
     modifier: Modifier = Modifier,
     bordered: Boolean = false,
     shape: Shape = RoundedCornerShape(CornerRadius.chip),
-    containerColor: Color = Color.White.copy(alpha = 0.125f),
-    contentColor: Color = Color.White,
-    borderColor: Color = Color.White.copy(alpha = 0.2f),
+    containerColor: Color = LocalTaminColors.current.onGradient.copy(alpha = 0.125f),
+    contentColor: Color = LocalTaminColors.current.onGradient,
+    borderColor: Color = LocalTaminColors.current.onGradient.copy(alpha = 0.2f),
 ) {
 
     Box(
@@ -230,12 +250,25 @@ fun TaminTopAppBarButton(
  * a bar has an icon on one side only. It has to grow past that when a caller supplies more than one
  * action, though: pinning it to [HEADER_BUTTON_SIZE] silently clipped everything after the first
  * button, so a bar with a download and a share showed only the download.
+ *
+ * An *empty* cap reserves no *width*: a bar with no buttons at all has nothing for the title to
+ * clear, and holding a button's width open on both sides pushed a start-aligned title 44dp further
+ * in than the design puts it — which is what made the treatment hub's «درمان» sit adrift of the
+ * edge. The minimum *height* stays unconditional either way, so no bar changes height: a screen's
+ * shimmer skeleton draws a button-less bar while the real screen behind it has a back button, and
+ * relaxing the height too would drop the placeholder 12dp and jump when the content arrived.
  */
 @Composable
-private fun HeaderSlot(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+private fun HeaderSlot(
+    hasContent: Boolean,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
     Box(
-        modifier = modifier
-            .defaultMinSize(minWidth = HEADER_BUTTON_SIZE, minHeight = HEADER_BUTTON_SIZE),
+        modifier = modifier.defaultMinSize(
+            minWidth = if (hasContent) HEADER_BUTTON_SIZE else Dp.Unspecified,
+            minHeight = HEADER_BUTTON_SIZE,
+        ),
         contentAlignment = Alignment.Center,
         content = { content() },
     )

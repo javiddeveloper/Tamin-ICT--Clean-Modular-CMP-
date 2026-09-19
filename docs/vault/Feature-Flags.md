@@ -58,12 +58,42 @@ What happens when a user taps a service (for example "housewives' insurance"):
 4. **Events** — if the state allows entry (`Enabled` or `EnabledWithError`), the ViewModel emits a `NavigateToService(flag)` event back to the UI. For `WebView` it emits `NavigateToWeb`.
 5. **NavGraph** — `TaminHamrahNavGraph.kt` decides, based on the `FeatureFlag`, which Compose Navigation call to make (e.g. `navController.navigateToHousewifeInsuranceContract()`), via `FeatureNavigation.kt`.
 
+### Links use the same gate
+
+A deep link, a story call-to-action or an assistant button never navigates on its own: `ResolveDeepLinkUseCase` reads the same `FeatureStatus` and blocks a disabled, temporarily disabled or missing service (and blocks when the menu cannot be read). Details in [[Deep-Links]].
+
+`AGENT(2000)` is two-stage everywhere: the flag **and** the server's cached chat permission (`ObserveAgentAvailabilityUseCase` for the orb, `ResolveDeepLinkUseCase` for links). See [[AI-Agent]].
+
 ### Why this is data-driven
 
 - Menus stay fully dynamic.
 - Adding a service later needs no sweeping UI logic changes.
 - Availability and error messages take effect from the server without shipping a new app version.
 - Routing errors and view handling are centralized in `FeatureManager`.
+
+## 5a. `STACK_HOLDER_LIST(1005)` — legal representative introduction, not `workshopStackholders`
+
+`STACK_HOLDER_LIST(1005)` (in the employer `1001`–`1012` range) routes to
+`feature:workshops`' `ui/legalRepresentative/**` flow — "معرفی نماینده اشخاص
+حقوقی" (introducing a representative for a legal-entity employer). Wired via
+`navigateToLegalRepresentativeWorkshops()` in `FeatureNavigation.kt`.
+
+⚠️ Do not confuse this with `feature:workshops/ui/workshopStackholders`
+(`GetWorkshopStackHoldersUseCase`, endpoint `workshop-services/workshop-stackholders/get-all`)
+— that is a **separate, pre-existing, read-only** feature (a simple
+nationalId/mobile list) with no relation to legal representatives, no OTP, and
+no add/edit/delete. The two happen to share the word "stakeholder/stack
+holder" in their naming, purely coincidentally (`WorkshopStackHolderDN` came
+first); nothing currently links them and none of the flag id `1005` overlaps
+with the flag that fronts `workshopStackholders` — searching for "stackholder"
+across the module will surface both, so check which feature you actually mean
+before touching either.
+
+The legal-representative flow's own API family (`legal-stakeholders`,
+`v.1/legal-stakeholders/units`, `legal-ticket*`) is a distinct, OTP-gated
+contract ported from `old_android`'s `ui.home.services.employer.legalStackHolders`
+package — see that package for the original behavior if the contract needs
+re-verifying against a live backend.
 
 ## 6. The AI Agent flag
 

@@ -20,7 +20,10 @@ data class AgentSessionEntity(
     val lastMessageAt: Long,
     val messageCount: Int = 0,
     /** Server conversation context carried into the next request. */
-    val lastEntity: String? = null
+    val lastEntity: String? = null,
+    /** The server's conversation state and history, as the JSON it sent. */
+    val agentState: String? = null,
+    val agentHistory: String? = null,
 )
 
 /**

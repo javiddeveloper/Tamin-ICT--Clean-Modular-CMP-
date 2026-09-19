@@ -37,7 +37,7 @@ com.tamin.taminhamrah.data.local.AppDatabase / MyDatabase / TestDatabase
 com.omooooori… / com.riox432…                          ← leftovers from the original template
 ```
 
-⚠️ Any Entity change generates the next version's JSON in the schema folder, and that file must be committed. The active schema is currently at `TaminXDatabase/2.json` (`TaminXDatabase` `@Database version = 2`). Do not ignore `core/core-database/schemas/` — Room schema files belong in git.
+⚠️ Any Entity change generates the next version's JSON in the schema folder, and that file must be committed. The active schema is currently at `TaminXDatabase/4.json` (`TaminXDatabase` `@Database version = 4`; version 4 added `agent_sessions.agentState` / `agentHistory`). Migration is destructive (`fallbackToDestructiveMigration`), so a version bump wipes the local cache. Do not ignore `core/core-database/schemas/` — Room schema files belong in git.
 
 ## What the database is for
 

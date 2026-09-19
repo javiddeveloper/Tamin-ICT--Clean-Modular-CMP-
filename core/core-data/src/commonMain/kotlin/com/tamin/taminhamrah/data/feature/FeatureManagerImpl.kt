@@ -3,8 +3,7 @@ package com.tamin.taminhamrah.data.feature
 import com.tamin.taminhamrah.feature.FeatureManager
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
-import com.tamin.taminhamrah.model.common.MainServiceDN
-import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
+import com.tamin.taminhamrah.model.common.featureStatusOf
 import com.tamin.taminhamrah.repository.common.CommonRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -14,10 +13,7 @@ class FeatureManagerImpl(
     private val commonRepository: CommonRepository
 ) : FeatureManager {
     override fun getFeatureStatus(flag: FeatureFlag): Flow<FeatureStatus> {
-        return commonRepository.getMainMenu("", false).map { menu ->
-            val item = menu.find { it.id == flag.id }
-            mapToFeatureStatus(item)
-        }
+        return commonRepository.getMainMenu("", false).map { menu -> menu.featureStatusOf(flag) }
     }
 
     override suspend fun isFeatureEnabled(flag: FeatureFlag): Boolean {
@@ -37,18 +33,12 @@ class FeatureManagerImpl(
         }
     }
 
-    private fun mapToFeatureStatus(item: MainServiceDN?): FeatureStatus {
-        if (item == null) return FeatureStatus.Disabled(null)
-        if (item.active == false) return FeatureStatus.Disabled(item.message)
-
-        return when (item.status) {
-            MenuServiceStatusDN.ACTIVE -> FeatureStatus.Enabled
-            MenuServiceStatusDN.TEMPORARY_DISABLED -> FeatureStatus.TemporaryDisabled(item.message)
-            MenuServiceStatusDN.DISABLED -> FeatureStatus.Disabled(item.message)
-            MenuServiceStatusDN.COMPLETELY_DISABLED -> FeatureStatus.Disabled(item.message)
-            MenuServiceStatusDN.ENABLED_WITH_ERROR -> FeatureStatus.EnabledWithError(item.message)
-            MenuServiceStatusDN.WEB_VIEW -> item.url?.let { FeatureStatus.WebView(it) } ?: FeatureStatus.Enabled
-            null -> FeatureStatus.Enabled
+    override suspend fun getFeatureTitle(flag: FeatureFlag): String? {
+        return try {
+            val menu = commonRepository.getMainMenu("", false).first()
+            menu.find { it.id == flag.id }?.name?.takeIf { it.isNotBlank() }
+        } catch (e: Exception) {
+            null
         }
     }
 }

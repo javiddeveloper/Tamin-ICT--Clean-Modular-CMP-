@@ -37,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopStats
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
+import com.tamin.taminhamrah.ui.components.CopyIconButton
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.StatusPill
@@ -155,16 +156,25 @@ fun WorkshopSectionHeader(
     modifier: Modifier = Modifier,
     title: String = stringResource(Res.string.workshop_list_title),
     count: Int? = null,
+    /**
+     * Makes the heading copy this when tapped, and shows the copy glyph beside it.
+     *
+     * The raw value rather than the one the heading prints, for the reason [DetailRow] gives: a
+     * code shown in Persian digits has to be copied in ASCII ones.
+     */
+    copyValue: String? = null,
     isFilterActive: Boolean = false,
     onFilterClick: (() -> Unit)? = null,
 ) {
     val colors = LocalTaminColors.current
+    val copy = copyValue?.let { rememberCopyAction(it) }
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Row(
+            modifier = if (copy != null) Modifier.clickable(onClick = copy) else Modifier,
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
@@ -174,6 +184,9 @@ fun WorkshopSectionHeader(
                 color = colors.textPrimary,
                 fontWeight = FontWeight.Bold,
             )
+            if (copyValue != null) {
+                CopyIconButton(value = copyValue, label = title, interactive = false)
+            }
             if (count != null) {
                 NumericText(
                     text = count.toString().toPersianDigits(),
@@ -333,7 +346,7 @@ internal fun WorkshopCodeRow(
         )
         Row(
             modifier = Modifier
-                .clip(RoundedCornerShape(WorkshopDimens.codeChipCorner))
+                .clip(CodeChipShape)
                 .clickable(enabled = code.isNotBlank()) {
                     copy()
                     isCopied = true
@@ -387,7 +400,7 @@ fun CardExpandToggle(
     collapseLabel: StringResource = Res.string.workshop_card_collapse,
 ) {
     val colors = LocalTaminColors.current
-    val rotation by animateFloatAsState(if (isExpanded) WorkshopDimens.toggleHalfTurn else 0f, label = "chevron")
+    val rotation = animateFloatAsState(if (isExpanded) WorkshopDimens.toggleHalfTurn else 0f, label = "chevron")
 
     Row(
         modifier = modifier
@@ -422,8 +435,11 @@ fun CardExpandToggle(
             modifier = Modifier
                 .padding(start = Spacing.tabSelector)
                 .size(WorkshopDimens.toggleChevronSize)
-                .graphicsLayer { rotationZ = rotation },
+                .graphicsLayer { rotationZ = rotation.value },
         )
     }
 }
+
+private val CodeChipShape = RoundedCornerShape(WorkshopDimens.codeChipCorner)
+
 

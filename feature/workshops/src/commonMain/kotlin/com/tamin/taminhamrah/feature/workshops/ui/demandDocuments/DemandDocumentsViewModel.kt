@@ -59,16 +59,19 @@ class DemandDocumentsViewModel(
         return loadPage(page = list.nextPage)
     }
 
-    private fun downloadPdf(): Flow<PartialState> = flow {
+    /**
+     * The viewer asks for this once it is open and finds nothing cached, so there is no in-flight
+     * guard to write: it asks once per opening.
+     *
+     * A failure is reported to the viewer alone. Emitting [PartialState.Error] here would put the
+     * *list* into its error state and take the documents off the screen because a PDF was
+     * unavailable.
+     */
+    private fun downloadPdf(): Flow<PartialState> = flow<PartialState> {
         val state = uiState.value
-        emit(PartialState.Downloading(true))
-        emit(PartialState.ViewerPdfChanged(null))
         val pdf = getDebitTurnoverPdf(state.debitNumber, state.branchCode)
         emit(PartialState.ViewerPdfChanged(pdf.toPresentation()))
-    }.catch {
-        emit(PartialState.Error(it.toSingleLineMessage()))
-        emit(PartialState.DownloadFailed)
-    }
+    }.catch { emit(PartialState.DownloadFailed) }
 
     override fun reduceState(
         currentState: DemandDocumentsUiState,
@@ -82,26 +85,17 @@ class DemandDocumentsViewModel(
         PartialState.Loading -> currentState.copy(list = currentState.list.loading())
         PartialState.LoadingMore -> currentState.copy(list = currentState.list.loadingMore())
         is PartialState.Error -> currentState.copy(
-            isDownloading = false,
             list = currentState.list.failed(partialState.message),
         )
 
         is PartialState.Loaded -> currentState.copy(list = partialState.list)
-        is PartialState.Downloading -> currentState.copy(
-            isDownloading = partialState.isDownloading,
-            downloadFailed = false,
-        )
 
         is PartialState.ViewerPdfChanged -> currentState.copy(
-            isDownloading = false,
             viewerPdf = partialState.pdf,
             downloadFailed = false,
         )
 
-        PartialState.DownloadFailed -> currentState.copy(
-            isDownloading = false,
-            downloadFailed = true,
-        )
+        PartialState.DownloadFailed -> currentState.copy(downloadFailed = true)
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)

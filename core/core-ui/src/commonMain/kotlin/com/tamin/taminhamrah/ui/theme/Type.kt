@@ -2,9 +2,12 @@ package com.tamin.taminhamrah.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 
 /**
@@ -135,4 +138,126 @@ fun taminHamrahTypography(): Typography {
 private fun TextStyle.withAppDefaults(fontFamily: FontFamily): TextStyle = this.copy(
     fontFamily = fontFamily,
     fontFeatureSettings = DEFAULT_FONT_FEATURES
+)
+
+/**
+ * Type for the home campaigns carousel
+ * ([com.tamin.taminhamrah.ui.components.CampaignCarousel]).
+ *
+ * Declared here rather than assembled at the call site for two reasons. None of the design's sizes
+ * — 8.5 / 10.5 / 15.5 / 16 — has a role in [taminHamrahTypography]. And leaving the rest to
+ * `LocalTextStyle`, which Material3 sets to `bodyLarge`, would drag its 27.2sp line height onto an
+ * 8.5sp pill, so every style names its own. Each one takes [applicationFont] and
+ * [DEFAULT_FONT_FEATURES] the same way the roles above do.
+ *
+ * ⚠️ **700 and 800 are synthesized.** [applicationFont] registers Light, Normal, Medium and
+ * SemiBold only — there is no Bold or ExtraBold file in `composeResources/font/`. That is true of
+ * the whole app (`titleLarge`, `headlineLarge` and ~350 call sites already ask for 700 or 800), so
+ * these weights match their surroundings rather than quietly diverging. Dropping `bold.ttf` and
+ * `extra_bold.ttf` in and registering them would fix every one of those at once.
+ */
+@Immutable
+data class CampaignTextStyles(
+    val sectionTitle: TextStyle,
+    val sectionHint: TextStyle,
+    val badge: TextStyle,
+    val cardTitle: TextStyle,
+    val body: TextStyle,
+    val ctaLabel: TextStyle,
+    val caption: TextStyle,
+)
+
+@Composable
+fun campaignTextStyles(): CampaignTextStyles {
+    val fontFamily = applicationFont()
+    return remember(fontFamily) { campaignTextStyles(fontFamily) }
+}
+
+private fun campaignTextStyles(fontFamily: FontFamily) = CampaignTextStyles(
+    sectionTitle = campaignStyle(fontFamily, 16.sp, 19.sp, weight = 700),
+    sectionHint = campaignStyle(fontFamily, 10.5.sp, 13.sp, weight = 600),
+    badge = campaignStyle(fontFamily, 8.5.sp, 11.sp, weight = 800),
+    cardTitle = campaignStyle(
+        fontFamily,
+        fontSize = 15.5.sp,
+        lineHeight = 19.sp,
+        weight = 800,
+        letterSpacing = (-0.2).sp,
+    ),
+    // line-height: 1.8
+    body = campaignStyle(fontFamily, 10.5.sp, 18.9.sp, weight = 500),
+    ctaLabel = campaignStyle(fontFamily, 10.5.sp, 13.sp, weight = 800),
+    caption = campaignStyle(fontFamily, 8.5.sp, 11.sp, weight = 600),
+)
+
+private fun campaignStyle(
+    fontFamily: FontFamily,
+    fontSize: TextUnit,
+    lineHeight: TextUnit,
+    weight: Int,
+    letterSpacing: TextUnit = 0.sp,
+) = TextStyle(
+    fontFamily = fontFamily,
+    fontFeatureSettings = DEFAULT_FONT_FEATURES,
+    fontWeight = FontWeight(weight),
+    fontSize = fontSize,
+    lineHeight = lineHeight,
+    letterSpacing = letterSpacing,
+)
+
+/**
+ * Type for the electronic health-insurance card
+ * ([com.tamin.taminhamrah.feature.treatment.ui.components.InsuranceCard]).
+ *
+ * Declared here for the same two reasons as [CampaignTextStyles]: none of the design's sizes —
+ * 9 / 10.5 / 11.5 / 13 / 14.5 — has a role in [taminHamrahTypography], and leaving the rest to
+ * `LocalTextStyle` would drag `bodyLarge`'s 27.2sp line height onto a 9sp caption.
+ *
+ * Weights are the mock's own: 800 where it says so, 400 where it says nothing (the design frame
+ * sets no base weight, so an unstated weight is normal). The same ⚠️ as [CampaignTextStyles]
+ * applies — 700 and 800 are synthesized, since no Bold or ExtraBold face is registered.
+ */
+@Immutable
+data class InsuranceCardTextStyles(
+    /** The holder's initial, in the tile at the top of the card. */
+    val initial: TextStyle,
+    val orgName: TextStyle,
+    val orgSubtitle: TextStyle,
+    val holderName: TextStyle,
+    val codeLabel: TextStyle,
+    val code: TextStyle,
+    val coverage: TextStyle,
+)
+
+@Composable
+fun insuranceCardTextStyles(): InsuranceCardTextStyles {
+    val fontFamily = applicationFont()
+    return remember(fontFamily) { insuranceCardTextStyles(fontFamily) }
+}
+
+private fun insuranceCardTextStyles(fontFamily: FontFamily) = InsuranceCardTextStyles(
+    initial = cardStyle(fontFamily, 13.sp, 16.sp, weight = 800),
+    orgName = cardStyle(fontFamily, 11.5.sp, 15.sp, weight = 800),
+    orgSubtitle = cardStyle(fontFamily, 9.sp, 12.sp, weight = 400),
+    holderName = cardStyle(fontFamily, 14.5.sp, 19.sp, weight = 800),
+    codeLabel = cardStyle(fontFamily, 9.sp, 12.sp, weight = 400),
+    // font: 700 11.5px 'JetBrains Mono'; letter-spacing: .5px. There is no mono face in the app,
+    // so the code keeps the UI font — its `tnum` feature already holds the digits to one width.
+    code = cardStyle(fontFamily, 11.5.sp, 15.sp, weight = 700, letterSpacing = 0.5.sp),
+    coverage = cardStyle(fontFamily, 10.5.sp, 14.sp, weight = 700),
+)
+
+private fun cardStyle(
+    fontFamily: FontFamily,
+    fontSize: TextUnit,
+    lineHeight: TextUnit,
+    weight: Int,
+    letterSpacing: TextUnit = 0.sp,
+) = TextStyle(
+    fontFamily = fontFamily,
+    fontFeatureSettings = DEFAULT_FONT_FEATURES,
+    fontWeight = FontWeight(weight),
+    fontSize = fontSize,
+    lineHeight = lineHeight,
+    letterSpacing = letterSpacing,
 )

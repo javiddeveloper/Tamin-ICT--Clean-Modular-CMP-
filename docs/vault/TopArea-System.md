@@ -30,10 +30,19 @@ for it instead of every feature hand-rolling its own `NestedScrollConnection`.
 > ⚠️ There is an **older, separate** system for header motion: `ScrollMotionState`
 > (`core-ui/.../ui/motion/ScrollMotionState.kt`, comments in Persian), still used by
 > `feature/profile/ProfileScreen`, `feature/my-inbox/MyInboxScreen`, and
-> `feature/history/HistoryJobInfoScreen`. TopArea is the newer replacement — so far the only real
-> consumer is `feature/profile`'s `ActiveRelationScreen` (see the use case below). Don't mix the
+> `feature/history/HistoryJobInfoScreen`. TopArea is the newer replacement. Don't mix the
 > two in one screen; when touching one of the three older screens, that's a separate decision
 > (ask the user) rather than a silent migration.
+
+Real consumers so far: `feature/profile`'s `ActiveRelationScreen` (see the use case below);
+`feature/workshops`'s `LegalRepresentativeWorkshopsScreen` (معرفی نماینده اشخاص حقوقی's hub page —
+folding header + a `straddlePreviousSibling` identity card, file-local, not shared); and
+`feature/workshops`'s `ObjectionStatusScreen` (پیگیری وضعیت اعتراض's list page), wired up to match
+`LegalRepresentativeWorkshopsScreen` on explicit request — same `straddlePreviousSibling` idiom,
+independently re-declared file-local there too rather than extracted, following that same
+precedent. If a fourth screen needs this "folding header + pinned identity card" shape, that
+repetition is worth revisiting — extract `straddlePreviousSibling` into this package rather than
+writing a fourth copy.
 
 ## Mental model
 

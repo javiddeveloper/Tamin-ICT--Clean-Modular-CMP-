@@ -3,17 +3,21 @@ package com.tamin.taminhamrah.feature.agent.service.impl
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceParams
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceResult
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceUseCase
+import com.tamin.taminhamrah.feature.agent.service.base.AgentStrings
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
-import com.tamin.taminhamrah.feature.agent.service.base.buildBubbles
 import com.tamin.taminhamrah.model.agent.AgentActionKey
+import kotlinx.serialization.json.JsonArray
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.agent_not_understood
 
 /**
- * Handles conversational (non-data) responses from the AI.
- *
- * Ported from old_Android's `GeneralResponseUseCase` + `MessageUseCase`: both simply
- * render the model's message text and surface any follow-up prompt suggestions.
+ * Conversational answers — `general_response` and `message` — ported from the native
+ * `GeneralResponseUseCase` / `MessageUseCase`. The server's text is markdown and is shown as sent;
+ * the native "{name} عزیز" greeting is not added.
  */
-class GeneralResponseAgentService : AgentServiceUseCase {
+class GeneralResponseAgentService(
+    private val strings: AgentStrings,
+) : AgentServiceUseCase {
 
     override val supportedKeys: List<AgentActionKey> = listOf(
         AgentActionKey.GENERAL_RESPONSE,
@@ -21,18 +25,11 @@ class GeneralResponseAgentService : AgentServiceUseCase {
     )
 
     override suspend fun execute(params: AgentServiceParams): AgentServiceResult {
-        val bubbles = params.buildBubbles {
-            val message = params.message
-            if (!message.isNullOrBlank()) {
-                add(ChatBubbleContent.Text(message))
-            }
+        val text = params.message?.takeIf { it.isNotBlank() }
+        // Without text the entity may still carry buttons or prompts; the dispatcher adds those.
+        if (text == null && (params.rawData as? JsonArray)?.isNotEmpty() == true) {
+            return AgentServiceResult.Success(emptyList())
         }
-
-        if (bubbles.isEmpty()) {
-            return AgentServiceResult.Success(
-                listOf(ChatBubbleContent.Text("متوجه نشدم. لطفاً درخواستتان را واضح‌تر بفرمایید."))
-            )
-        }
-        return AgentServiceResult.Success(bubbles)
+        return AgentServiceResult.Success(listOf(ChatBubbleContent.Markdown(text ?: strings.get(Res.string.agent_not_understood))))
     }
 }

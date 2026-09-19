@@ -1,0 +1,38 @@
+{
+  "totalAmount": 8940000,
+  "totalPenalty": 1341000,
+  "totalPremium": 7599000,
+  "total": 1,
+  "list": [
+    {
+      "pay": false,
+      "payable": true,
+      "fines": true,
+      "year": "1404",
+      "month": "05",
+      "days": "31",
+      "professional": "7112",
+      "professionalTitle": "بنّای سفت‌کار",
+      "rate": "1.9",
+      "amount": 7599000,
+      "amountFines": "1341000",
+      "fromDate": 1753900200000,
+      "toDate": 1756492200000,
+      "fromDatePersian": "14040501",
+      "toDatePersian": "14040531",
+      "intDate": 14040501,
+      "paymentDate": null,
+      "monthTitle": "حق بیمه مرداد",
+      "type": "Premium",
+      "dastMoazd": 2312000,
+      "payDay": 5541850,
+      "paymentStatus": "",
+      "fromDateToDate": "1404050114040531",
+      "payableDes": "هست",
+      "fishStatus": "دارد",
+      "maharatStatus": "دارد",
+      "bazresiStatus": "دارد",
+      "kargarStatus": "فعال می‌باشد."
+    }
+  ]
+}

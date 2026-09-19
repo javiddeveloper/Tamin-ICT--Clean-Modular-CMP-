@@ -1,5 +1,9 @@
 package com.tamin.taminhamrah.repository
 
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeContractListDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeListDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeRequestDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeWorkshopListDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtQuery
@@ -12,23 +16,33 @@ import com.tamin.taminhamrah.model.workshop.DebitObjectionResultDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDN
+import com.tamin.taminhamrah.model.workshop.ContractRowQuery
 import com.tamin.taminhamrah.model.workshop.DebitReasonDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmissionDN
+import com.tamin.taminhamrah.model.workshop.EmployerContactInfoDN
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetQuery
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
+import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDN
+import com.tamin.taminhamrah.model.workshop.WorkshopContractDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDN
 import com.tamin.taminhamrah.model.workshop.WorkshopListQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDN
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberQuery
-import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
-import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDN
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDN
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderQuery
+import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDN
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
+import kotlinx.coroutines.flow.Flow
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionQuery
+import com.tamin.taminhamrah.model.workshop.SmsMessageDN
 
 /**
  * Everything the کارگاه‌های کارفرما feature reads and writes.
@@ -39,6 +53,18 @@ import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
 interface WorkShopsRepository {
 
     suspend fun getEmployerAgreements(query: WorkshopListQuery): PagedListDN<EmployerAgreementDN>
+
+    // ------------------------------------------------------------------------ ردیف‌های پیمان
+
+    /** ردیف پیمان‌های one workshop that has a تعهدنامه — seven fields per row. */
+    suspend fun getContractRowsWithAgreement(
+        query: ContractRowQuery,
+    ): PagedListDN<EmployerAgreementDN>
+
+    /** ردیف پیمان‌های one workshop with no تعهدنامه — four fields per row, a different model. */
+    suspend fun getContractRowsWithoutAgreement(
+        query: ContractRowQuery,
+    ): PagedListDN<WorkshopContractDN>
 
     // -------------------------------------------------------------------------- برگ پرداخت‌ها
 
@@ -65,6 +91,9 @@ interface WorkShopsRepository {
     suspend fun checkDebitPayment(debitNumber: String, branchCode: String): DebitPaymentPreCheckDN
 
     suspend fun payWorkshopDebit(request: DebitPaymentRequestDN): DebitPaymentDN
+
+    /** Binds [ticket] to the signed-in user on the gateway; throws when the gateway refuses it. */
+    suspend fun confirmPaymentTicket(ticket: String)
 
     // ---------------------------------------------------------------------- استعلام بدهی کارگاه
 
@@ -97,13 +126,18 @@ interface WorkShopsRepository {
     suspend fun deleteRecentlyAddedMember(personalId: Long)
 
     /**
-     * Whether the organisation has never registered this national id.
+     * Whether the organization has never registered this national id.
      *
      * `relation-tamins/isnew` answers a bare boolean — there is no id in the reply, so a
      * person it already knows is reported, not silently reused.
      */
     suspend fun checkNewMemberIsNew(nationalId: String): Boolean
 
+    /**
+     * Files the registration: a person not yet on file is created, and one whose
+     * [NewMemberRegistrationDN.personalId] is set is updated in place — creating it again would
+     * add a second `employers` record for the same person.
+     */
     suspend fun createNewMemberRegistration(
         request: NewMemberRegistrationDN,
     ): NewMemberRegistrationResultDN
@@ -130,4 +164,50 @@ interface WorkShopsRepository {
     suspend fun getWorkshopStackHolders(
         query: WorkshopStackHolderQuery,
     ): PagedListDN<WorkshopStackHolderDN>
+
+    fun getLegalRepresentativeWorkshops(): Flow<LegalRepresentativeWorkshopListDN?>
+    fun getLegalRepresentatives(
+        workshopId: String,
+        branchCode: String
+    ): Flow<LegalRepresentativeListDN?>
+    fun getLegalRepresentativeWorkshopContracts(
+        workshopId: String,
+        branchCode: String
+    ): Flow<LegalRepresentativeContractListDN?>
+
+    suspend fun requestLegalRepresentativeTicket(nationalCode: String? = null)
+
+    suspend fun verifyLegalRepresentativeTicket(ticket: String)
+
+    suspend fun submitLegalRepresentative(ticket: String, request: LegalRepresentativeRequestDN)
+
+    suspend fun deleteLegalRepresentative(ticket: String, stakeId: Long)
+
+    // ------------------------------------------------- خدمات غیرحضوری کارفرما (employerServicesAgreement)
+
+    /**
+     * Step 1 — request the OTP ticket. Builds the `mobileNumber`/`email`/`serviceName` filter
+     * internally; returns the backend's bare confirmation message.
+     */
+    suspend fun requestEmployerAgreementTicket(mobile: String, email: String): String
+
+    /** Step 2 — exchange the entered OTP for the employer's identity block. */
+    suspend fun getEmployerAgreementContactInfo(verificationCode: String): EmployerContactInfoDN
+
+    /** Step 2 — one page of the employer's workshops that have no contract yet. */
+    suspend fun getWorkshopsWithoutContract(page: Int = 0): PagedListDN<WorkshopWithoutContractDN>
+
+    /** Contract / پیمانکار rows of one workshop. */
+    suspend fun getWorkshopContractRows(
+        workshopId: String,
+        branchCode: String,
+        page: Int = 0,
+    ): PagedListDN<WorkshopContractRowDN>
+
+    /** Step 3 — submit the final agreement. Returns the backend's bare success message. */
+    suspend fun submitEmployerAgreement(request: EmployerAgreementSubmissionDN): String
+
+    suspend fun getWorkShopObjections(query: WorkShopObjectionQuery): PagedListDN<WorkShopObjectionDN>
+
+    suspend fun getWorkShopObjectionSms(seqNo: Long, page: Int = 0): PagedListDN<SmsMessageDN>
 }

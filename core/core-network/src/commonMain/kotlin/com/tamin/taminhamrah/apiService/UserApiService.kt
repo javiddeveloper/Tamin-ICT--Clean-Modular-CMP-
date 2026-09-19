@@ -14,7 +14,6 @@ import com.tamin.taminhamrah.model.bankAccount.BankAccountDTO
 import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDTO
 import com.tamin.taminhamrah.model.subDominant.SubDominantResponseDTO
 import com.tamin.taminhamrah.model.subDominant.insuredActiveBranch.InsuredActiveBranchDTO
-import com.tamin.taminhamrah.model.user.EditMobileResponseDto
 import com.tamin.taminhamrah.model.user.TaminRelationDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.user.VerifyMobileRequest
@@ -65,14 +64,34 @@ internal interface UserApiService {
         @Field("grant_type") grantType: String = "authorization_code",
         @Field("code") codeFromServer: String = "",
         @Field("code_verifier") codeVerifier: String = "",
-        @Field("audience") audience: String = "https://es.tamin.ir,https://eservices.tamin.ir",
+        @Field("audience") audience: String = NetworkConstants.DEFAULT_AUDIENCE,
     ): TokenResponseDto
 
+
+    /**
+     * Debug-only "back-to-back" login: a trusted client authenticates itself with its own
+     * client_id/client_secret instead of the PKCE authorization_code flow. Gated to debug builds
+     * by [com.tamin.taminhamrah.util.AppConfig.isDebug] at the call site (`DebugLoginViewModel`) —
+     * never reachable from a release build's UI.
+     */
+    @FormUrlEncoded
+    @POST
+    suspend fun debugClientCredentialsLogin(
+        @Url url: String,
+        @Field("grant_type") grantType: String = "client_credentials",
+        @Field("client_id") clientId: String,
+        @Field("client_secret") clientSecret: String,
+        // The same audience list [signIn] asks for. Without it the token is minted for the main
+        // API alone, and every call to the payment gateway's own host (`https://tfh.tamin.ir`)
+        // comes back 403 -- which looked like an intermittent payment failure, because it only
+        // happened while Developer Options had this login active.
+        @Field("audience") audience: String = NetworkConstants.DEFAULT_AUDIENCE,
+    ): TokenResponseDto
 
     @GET
     suspend fun signOut(
         @Header(HeaderConstant.AUTHORIZATION) token: String,
-        @Url url: String = "${NetworkConstants.BASE_URL_ACCOUNT}signout",
+        @Url url: String,
         @Query("redirect_uri") redirectUrl: String = "https://eservices.tamin.ir/view/index.html?redirect_uri=https://eservices.tamin.ir/auth/access",
         @Query("response_type") responseType: String = "assertion",
         @Query("client_id") clientId: String = NetworkConstants.CLIENT_ID
@@ -81,7 +100,7 @@ internal interface UserApiService {
     @FormUrlEncoded
     @POST
     suspend fun revokeToken(
-        @Url url: String = "${NetworkConstants.BASE_URL_ACCOUNT}revoke",
+        @Url url: String,
         @Header(HeaderConstant.AUTHORIZATION) accessToken: String?,
         @Field("refresh_token") refreshToken: String?
     )
@@ -93,7 +112,7 @@ internal interface UserApiService {
         @Field("grant_type") grantType: String = "refresh_token",
         @Field("refresh_token") refreshToken: String,
         @Field("client_id") clientId: String = NetworkConstants.CLIENT_ID,
-        @Field("audience") audience: String = "https://es.tamin.ir,https://eservices.tamin.ir"
+        @Field("audience") audience: String = NetworkConstants.DEFAULT_AUDIENCE
     ): TokenResponseDto
 
     @GET
@@ -101,14 +120,14 @@ internal interface UserApiService {
 //        @Header("Referer") referer: String,
         @Url url: String,
         @Query("mobile") mobile: String
-    ): BaseDTO<EditMobileResponseDto>
+    ): BaseDTO<JsonElement?>
 
     @POST
     suspend fun verifyChangeMobileCode(
 //        @Header("Referer") referer: String,
         @Url url:String,
         @Body loginRequest: VerifyMobileRequest,
-    ): BaseDTO<String>
+    ): BaseDTO<JsonElement?>
 
 
     @GET("personals/subdominant")

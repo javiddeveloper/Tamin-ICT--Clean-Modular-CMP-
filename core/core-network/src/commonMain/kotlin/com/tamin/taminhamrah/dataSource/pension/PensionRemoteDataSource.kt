@@ -4,7 +4,14 @@ import com.tamin.taminhamrah.model.pension.EdictPensionerDTO
 import com.tamin.taminhamrah.model.pension.PensionIdDTO
 import com.tamin.taminhamrah.model.pension.PensionInquiryDTO
 import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDTO
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestCreatedDTO
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestFormDTO
 import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDTO
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityFinalConfirmRequest
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveDocumentRequest
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoRequest
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoResponseDTO
+import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.RegisteredMedicalCommissionDTO
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequest
@@ -37,6 +44,11 @@ interface PensionRemoteDataSource {
     suspend fun getAuthenticationCode(): AuthenticationTicketDTO
 
     suspend fun getRetirementRequestInfo(filter: List<ApiFilterDN>) :ListData<RetirementRequestDTO>
+    suspend fun createRetirementRequest(
+        authenticationsCode: Long,
+        form: RetirementRequestFormDTO
+    ): RetirementRequestCreatedDTO
+
     suspend fun checkRetirementStatus(): RetirementStatusDTO
     suspend fun getDisabilityPersonalInfo(): DisabilityPersonalInfoDTO
     suspend fun sendRequestInquirePensionCertificate(filter: List<ApiFilterDN>) : String?
@@ -55,4 +67,10 @@ interface PensionRemoteDataSource {
     suspend fun sendPayRollToInbox(
         filter: List<ApiFilterDN>
     ): String?
+
+    suspend fun saveDisabilityUserInfo(body: DisabilitySaveInfoRequest): DisabilitySaveInfoResponseDTO
+    suspend fun finalConfirmDisabilityRequest(requestId: Long, body: DisabilityFinalConfirmRequest): DisabilitySaveInfoResponseDTO
+    suspend fun saveDocumentDisability(requestId: Long, body: DisabilitySaveDocumentRequest): String?
+    suspend fun getMedicalCommissionPdf(lastWorkshop: String): PdfDownloadDTO
+    suspend fun getRegisteredMedicalCommission(query: ApiQueryParamDN): ListData<RegisteredMedicalCommissionDTO>
 }

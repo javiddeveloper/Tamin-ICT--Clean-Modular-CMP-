@@ -16,6 +16,8 @@ import com.tamin.taminhamrah.model.contracts.OptionalContractByGuardianRequestDT
 import com.tamin.taminhamrah.model.contracts.PremiumRateDTO
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDTO
 import com.tamin.taminhamrah.model.contracts.SaveContactRequestDTO
+import com.tamin.taminhamrah.model.contracts.UpdateOptionalContractByGuardianRequestDTO
+import com.tamin.taminhamrah.model.contracts.UpdateOptionalContractDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
@@ -94,6 +96,42 @@ class ContractsRemoteDataSourceImpl(
                 spcRateCode = params.spcRateCode,
                 freeJobCode = params.freeJobCode,
             ).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun getOptionalPremiumRange(): FreelancePremiumRangeDTO {
+        return try {
+            contractsApiService.getOptionalPremiumRange().extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun checkRedCrossStatus(): String {
+        return try {
+            contractsApiService.checkRedCrossStatus().extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun checkMedicalStudent(): String {
+        return try {
+            contractsApiService.checkMedicalStudent().extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
@@ -211,6 +249,86 @@ class ContractsRemoteDataSourceImpl(
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
+    }
+
+    override suspend fun updateFreelanceContract(
+        premium: Long,
+        request: FreelanceMakeContractRequestDTO,
+    ) {
+        try {
+            val response = contractsApiService.updateFreelanceContract(premium, request)
+            if (response.status !in 200..299) {
+                throw TaminErrorUriException(
+                    ErrorUri.fromString("CLIENT_ERROR: ${response.reason}"),
+                )
+            }
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
+            )
+        }
+    }
+
+    override suspend fun updateOptionalContract(
+        premium: Long,
+        request: UpdateOptionalContractDTO,
+    ) {
+        try {
+            val response = contractsApiService.updateOptionalContract(premium, request)
+            if (response.status !in 200..299) {
+                throw TaminErrorUriException(
+                    ErrorUri.fromString("CLIENT_ERROR: ${response.reason}"),
+                )
+            }
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
+            )
+        }
+    }
+
+    override suspend fun updateFreelanceContractByGuardian(
+        premium: Long,
+        request: ContractByGuardianRequestDTO,
+    ) {
+        try {
+            val response = contractsApiService.updateFreelanceContractByGuardian(premium, request)
+            if (response.status !in 200..299) {
+                throw TaminErrorUriException(
+                    ErrorUri.fromString("CLIENT_ERROR: ${response.reason}"),
+                )
+            }
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
+            )
+        }
+    }
+
+    override suspend fun updateOptionalContractByGuardian(
+        premium: Long,
+        request: UpdateOptionalContractByGuardianRequestDTO,
+    ) {
+        try {
+            val response = contractsApiService.updateOptionalContractByGuardian(premium, request)
+            if (response.status !in 200..299) {
+                throw TaminErrorUriException(
+                    ErrorUri.fromString("CLIENT_ERROR: ${response.reason}"),
+                )
+            }
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
             )
         }
     }
