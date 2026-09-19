@@ -2708,7 +2708,6 @@
     <string name="assigner_tab_active">جاری</string>
     <string name="assigner_tab_finished">خاتمه‌یافته</string>
     <string name="assigner_count_label">واگذارنده</string>
-    <string name="assigner_me_label">کارگاه واگذارنده</string>
     <string name="assigner_action_detail">جزئیات</string>
     <string name="assigner_action_bases">مبانی</string>
     <string name="assigner_action_settlement">مفاصاحساب</string>
@@ -2734,7 +2733,6 @@
     <string name="assigner_status_finished_note">این پیمان خاتمه یافته است و امکان ثبت درخواست جدید مفاصاحساب ندارد.</string>
     <string name="assigner_certificate_issued">گواهی مفاصاحساب %1$s در تاریخ %2$s صادر شده است.</string>
     <string name="assigner_certificate_not_found">گواهی مفاصاحسابی برای این پیمان ثبت نشده است.</string>
-    <string name="assigner_finished_cannot_request">برای پیمان خاتمه‌یافته امکان ثبت درخواست جدید وجود ندارد.</string>
     <string name="assigner_field_contract_number">شمارهٔ قرارداد</string>
     <string name="assigner_field_contract_subject">موضوع پیمان</string>
     <string name="assigner_field_workshop_name">نام کارگاه</string>

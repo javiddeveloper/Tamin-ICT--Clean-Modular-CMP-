@@ -55,6 +55,7 @@ internal abstract class NotUsedWorkShopsRemoteDataSource : WorkShopsRemoteDataSo
     override suspend fun deleteRecentlyAddedMember(personalId: Long) = notUsed()
     override suspend fun checkNewMemberIsNew(nationalId: String): Boolean = notUsed()
     override suspend fun createNewMemberRegistration(request: NewMemberRegistrationDTO): NewMemberRegistrationResultDTO = notUsed()
+    override suspend fun updateNewMemberRegistration(personalId: Long, request: NewMemberRegistrationDTO): NewMemberRegistrationResultDTO = notUsed()
     override suspend fun getWorkshopsDebtsList(workshopId: String, branchId: String, query: ApiQueryParamDN): ListData<WorkshopsDebtListModelDTO> = notUsed()
     override suspend fun getArticleSixteenWorkshopInfo(workshopId: String, branchCode: String): ArticleSixteenWorkshopInfoDTO = notUsed()
     override suspend fun getArticleSixteenRequestInfo(objectionNumber: Long): ArticleSixteenRequestInfoDTO = notUsed()
