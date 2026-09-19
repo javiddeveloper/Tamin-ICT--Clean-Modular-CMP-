@@ -11,7 +11,6 @@ import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.repository.addDependent.AddDependentRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 
 class FakeAddDependentRepository : AddDependentRepository {
 
@@ -19,6 +18,7 @@ class FakeAddDependentRepository : AddDependentRepository {
     var activeBranchesResult: List<BranchDN> = listOf(BranchDN(branchCode = "0101", branchName = "شعبه یک"))
     var registryDataResult: RegistryDataDN = RegistryDataDN(age = 19, firstName = "علی", lastName = "محمدی")
     var educationCodeResult: String = "دانشگاه تهران"
+    var refreshDependentsResult: GeneralResultDN = GeneralResultDN(isSuccess = true)
 
     override fun getDependentInfo(): Flow<List<DependentInfoDN>> = flow { emit(emptyList()) }
 
@@ -50,5 +50,5 @@ class FakeAddDependentRepository : AddDependentRepository {
     override fun addNewDependent(request: RequestAddDependentDN): Flow<GeneralResultDN> =
         flow { emit(GeneralResultDN(isSuccess = true)) }
 
-    override fun refreshDependents(): Flow<GeneralResultDN> = flowOf()
+    override fun refreshDependents(): Flow<GeneralResultDN> = flow { emit(refreshDependentsResult) }
 }

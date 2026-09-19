@@ -87,6 +87,11 @@ import com.tamin.taminhamrah.feature.historyobjection.historyObjectionScreen
 import com.tamin.taminhamrah.feature.historyobjection.historyObjectionStepperScreen
 import com.tamin.taminhamrah.feature.inquiryEducation.inquiryEducationScreen
 import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
+import com.tamin.taminhamrah.feature.weddingPresent.navigateToWeddingPresentCalculate
+import com.tamin.taminhamrah.feature.weddingPresent.weddingPresentCalculateScreen
+import com.tamin.taminhamrah.feature.weddingPresent.weddingPresentScreen
+import com.tamin.taminhamrah.feature.calculateWagePension.calculateWagePensionScreen
+import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
 import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
 import com.tamin.taminhamrah.feature.orotezprotez.orotezProtezScreen
 import com.tamin.taminhamrah.feature.payment.PaymentRoute
@@ -109,6 +114,14 @@ import com.tamin.taminhamrah.feature.pensionSurvivor.pensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pregnancyPay.pregnancyPayScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
+import com.tamin.taminhamrah.feature.contractaffair.CONTRACT_AFFAIRS_REFRESH_KEY
+import com.tamin.taminhamrah.feature.contractaffair.contractAffairsScreen
+import com.tamin.taminhamrah.feature.contractaffair.contractPaymentHistoryScreen
+import com.tamin.taminhamrah.feature.contractaffair.contractPaymentCalcDetailScreen
+import com.tamin.taminhamrah.feature.contractaffair.contractPremiumPaymentScreen
+import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPaymentCalcDetail
+import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPaymentHistory
+import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPremiumPayment
 import com.tamin.taminhamrah.feature.requestPaymentForIllDays.requestPaymentForIllDaysScreen
 import com.tamin.taminhamrah.feature.retirementPension.retirementPensionScreen
 import com.tamin.taminhamrah.feature.security.SecurityRoute
@@ -136,6 +149,10 @@ import com.tamin.taminhamrah.feature.workshops.completeEmployerInfoScreen
 import com.tamin.taminhamrah.feature.workshops.debtObjectionStatusScreen
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
+import com.tamin.taminhamrah.feature.developerOptions.DeveloperOptionsRoute
+import com.tamin.taminhamrah.feature.userRequest.UserRequestRoute
+import com.tamin.taminhamrah.feature.userRequest.userRequestGraph
+import com.tamin.taminhamrah.mapper.campaign.toPresentation
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.openUrl
@@ -537,8 +554,8 @@ internal fun TaminHamrahNavGraph(
                     },
                 )
 
+                calculateWagePensionScreen(onBack = { navController.popBackStack() })
                 retirementPensionScreen(onBack = { navController.popBackStack() })
-                calculatePensionScreen(onBack = { navController.popBackStack() })
                 prescriptionScreen(onBack = { navController.popBackStack() })
                 deservedTreatmentScreen(onBack = { navController.popBackStack() })
                 payrollScreen(onBack = { navController.popBackStack() })
