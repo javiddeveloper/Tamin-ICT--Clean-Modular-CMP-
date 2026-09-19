@@ -43,6 +43,10 @@ import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionPR
 import com.tamin.taminhamrah.model.workshop.SmsMessageDN
 import com.tamin.taminhamrah.model.workshop.SmsMessagePR
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.article_42
+import taminx.core.core_ui.article_43
+import taminx.core.core_ui.article_44
 import com.tamin.taminhamrah.ui.orDash
 import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.util.toPersianDigits
@@ -261,11 +265,18 @@ fun WorkshopsDebtListModelDN.toPresentation(): ArticleSixteenDebtPR = ArticleSix
     executiveNotifyDateLabel = executiveNotifyDate.orDashDate(),
     status = status,
     seqNo = seqNo,
+    proceedingType = when (kindDoc.trim()) {
+        "1" -> Res.string.article_42
+        "2" -> Res.string.article_43
+        "3" -> Res.string.article_44
+        else -> null
+    },
 )
 
 fun ArticleSixteenWorkshopInfoDN.toPresentation(): ArticleSixteenWorkshopInfoPR = ArticleSixteenWorkshopInfoPR(
     workshopId = workshopId.orDashDigits(),
     workshopName = workshopName.orDash(),
+    branchCode = branchCode.orDashDigits(),
     employerName = employerName.orDash(),
     character = character.orDash(),
     address = address.orDash(),
