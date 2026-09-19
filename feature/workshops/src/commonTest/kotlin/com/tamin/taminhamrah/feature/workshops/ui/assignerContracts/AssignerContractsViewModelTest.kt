@@ -823,6 +823,9 @@ class AssignerContractsViewModelTest {
         override fun getUserRequests(search: UserRequestSearchParams): Flow<List<UserRequestDN>> =
             flowOf(emptyList())
 
+        override suspend fun refreshUserRequests(search: UserRequestSearchParams): List<UserRequestDN> =
+            emptyList()
+
         override suspend fun getRequestTypes(query: ApiQueryParamDN?): List<UserRequestTypeDN> = notUsed()
         override suspend fun getRequestErrors(requestId: Long): List<RequestErrorDN> = notUsed()
         override suspend fun getSmartGuideList(params: SmartGuideSearchParams): List<SmartGuideDN> = notUsed()
