@@ -11,11 +11,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.layout.layout
-import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.AssignerContractCard
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.AssignerFilterBar
+import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.FilterSeparator
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.AssignerSearchSheet
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.AssignerSearchSheetContent
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.AssignerTabsRow
@@ -27,7 +26,6 @@ import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.Ass
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractsUiState
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopListScaffold
 import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
-import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
 import com.tamin.taminhamrah.model.workshop.AssignerContractDN
 import com.tamin.taminhamrah.model.workshop.AssignerContractPR
@@ -38,9 +36,6 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
-import com.tamin.taminhamrah.ui.components.StatColumn
-import com.tamin.taminhamrah.ui.components.StatDivider
-import com.tamin.taminhamrah.ui.components.StatRowCard
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
@@ -68,12 +63,10 @@ import taminx.core.core_ui.assigner_empty_tab_body
 import taminx.core.core_ui.assigner_filter_branch
 import taminx.core.core_ui.assigner_filter_row
 import taminx.core.core_ui.assigner_filter_workshop
-import taminx.core.core_ui.assigner_me_label
 import taminx.core.core_ui.assigner_select_workshop
 import taminx.core.core_ui.ic_tamin_assigner_contracts
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_search
-import taminx.core.core_ui.workshop_code
 
 /**
  * واگذارندگان — the پیمان‌ها the signed-in employer assigned out.
@@ -174,8 +167,7 @@ fun AssignerContractsContent(
         TaminTopAppBar(
             title = stringResource(Res.string.assigner_contracts_title),
             background = headerGradient,
-            // Deeper while the workshop card has a seam to straddle.
-            bottomPadding = if (assigner != null) WorkshopDimens.headerBottomPadding else Spacing.page,
+            bottomPadding = Spacing.page,
             navigationIcon = {
                 TaminTopAppBarButton(
                     icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
@@ -197,15 +189,6 @@ fun AssignerContractsContent(
             )
         }
 
-        if (assigner != null) {
-            AssignerIdentityCard(
-                assigner = assigner,
-                modifier = Modifier
-                    .straddlePreviousSibling(WorkshopDimens.statsCardOverlap)
-                    .padding(horizontal = Spacing.page),
-            )
-        }
-
         // Keeps its place in every list state — skeleton, empty, failed — so switching tab or
         // clearing the search never takes the tabs off the screen while the rows below settle.
         val count = list.items.size
@@ -218,11 +201,17 @@ fun AssignerContractsContent(
                     finishedCount = finishedCount,
                     onSelect = { onIntent(AssignerContractsIntent.TabSelected(it)) },
                 )
-                if (filter != null) {
+                // Whose پیمان‌ها these are, and the search narrowing them, in the chip ردیف‌های پیمان
+                // shows its workshop in. Only a search can be cleared.
+                if (filter != null || assigner != null) {
                     AssignerFilterBar(
-                        filterText = rememberAssignerFilterText(filter),
+                        filterText = rememberAssignerChipText(assigner, filter),
                         onEdit = { onIntent(AssignerContractsIntent.SearchOpenChanged(isOpen = true)) },
-                        onClear = { onIntent(AssignerContractsIntent.ClearSearch) },
+                        onClear = if (filter != null) {
+                            { onIntent(AssignerContractsIntent.ClearSearch) }
+                        } else {
+                            null
+                        },
                     )
                 }
             }
@@ -305,32 +294,6 @@ fun AssignerContractsContent(
 }
 
 /**
- * «کارگاه واگذارنده» and its code — the employer's own workshop, read off the rows themselves, on the
- * card that straddles the header's seam.
- *
- * Drawn only while every row names the same واگذارنده: across several, one name would be a claim
- * about the others.
- */
-@Composable
-private fun AssignerIdentityCard(assigner: AssignerPartyPR, modifier: Modifier = Modifier) {
-    StatRowCard(modifier = modifier) {
-        StatColumn(
-            value = assigner.workshopName,
-            label = stringResource(Res.string.assigner_me_label),
-            highlight = true,
-            modifier = Modifier.weight(1f),
-        )
-        StatDivider()
-        StatColumn(
-            value = assigner.workshopCode,
-            label = stringResource(Res.string.workshop_code),
-            highlight = true,
-            modifier = Modifier.weight(1f),
-        )
-    }
-}
-
-/**
  * The list narrowed to one tab, with its loading flags kept honest for what is left.
  *
  * Every page is fetched up front, so a tab can only be empty mid-load because its rows are on a page
@@ -357,17 +320,15 @@ private fun List<AssignerContractPR>.soleAssigner(): AssignerPartyPR? =
         ?.takeIf { it.workshopName.isNotBlank() }
 
 /**
- * Shifts this child up by [overlap] to straddle the previous sibling's bottom edge, reporting a
- * height reduced by the same amount so the column below does not reserve the overlap twice. The
- * file-local idiom `ObjectionStatusScreen` and `LegalRepresentativeWorkshopsScreen` use for their
- * own identity cards.
+ * The chip's line: the واگذارنده's name when every row names the same one, then the search when one
+ * is applied, or else that واگذارنده's own code.
  */
-private fun Modifier.straddlePreviousSibling(overlap: Dp): Modifier = layout { measurable, constraints ->
-    val placeable = measurable.measure(constraints)
-    val overlapPx = overlap.roundToPx()
-    val reportedHeight = (placeable.height - overlapPx).coerceAtLeast(0)
-    layout(placeable.width, reportedHeight) {
-        placeable.placeRelative(0, -overlapPx)
+@Composable
+private fun rememberAssignerChipText(assigner: AssignerPartyPR?, filter: AssignerContractFilter?): String {
+    val search = filter?.let { rememberAssignerFilterText(it) }
+    val code = assigner?.let { stringResource(Res.string.assigner_filter_workshop, it.workshopCode) }
+    return remember(assigner, search, code) {
+        listOfNotNull(assigner?.workshopName, search ?: code).joinToString(FilterSeparator)
     }
 }
 

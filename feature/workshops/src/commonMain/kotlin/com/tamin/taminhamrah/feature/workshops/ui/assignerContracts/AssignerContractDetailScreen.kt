@@ -32,8 +32,6 @@ import com.tamin.taminhamrah.model.workshop.SettlementCertificatePR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
-import com.tamin.taminhamrah.ui.components.toast.LocalToaster
-import com.tamin.taminhamrah.ui.components.toast.info
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.ImmutableList
@@ -56,7 +54,6 @@ import taminx.core.core_ui.assigner_field_contract_sequence
 import taminx.core.core_ui.assigner_field_contract_subject
 import taminx.core.core_ui.assigner_field_national_id
 import taminx.core.core_ui.assigner_field_workshop_name
-import taminx.core.core_ui.assigner_finished_cannot_request
 import taminx.core.core_ui.assigner_group_assigner
 import taminx.core.core_ui.assigner_group_contract
 import taminx.core.core_ui.assigner_group_contract_preview
@@ -107,17 +104,12 @@ fun AssignerContractDetailScreen(
     val lookup = state.certificate
     val certificate = remember(lookup, contract) { lookup?.takeIf { it.contract == contract }?.certificate }
 
-    // The design keeps «درخواست مفاصاحساب» on a خاتمه‌یافته پیمان and answers the tap, rather than
-    // hiding the action and leaving the user to wonder where it went.
-    val toaster = LocalToaster.current
-    val finishedMessage = stringResource(Res.string.assigner_finished_cannot_request)
-
     AssignerContractDetailContent(
         contract = contract,
         certificate = certificate,
         onBack = onBack,
         onOpenBases = onOpenBases,
-        onRequestSettlement = { if (it.isFinished) toaster.info(finishedMessage) else onRequestSettlement(it) },
+        onRequestSettlement = onRequestSettlement,
         modifier = modifier,
     )
 }
@@ -242,17 +234,20 @@ fun AssignerContractDetailContent(
                     onClick = { onOpenBases(contract) },
                     icon = vectorResource(Res.drawable.ic_tamin_computational_base),
                 )
-                WorkshopCardButton(
-                    text = stringResource(Res.string.settlement_title),
-                    // Live on a خاتمه‌یافته پیمان so the tap can say why; disabled only for a پیمان
-                    // missing a key of the request id.
-                    tone = if (contract.isFinished || contract.canRequestSettlement) {
-                        WorkshopCardButtonTone.PRIMARY
-                    } else {
-                        WorkshopCardButtonTone.DISABLED
-                    },
-                    onClick = { onRequestSettlement(contract) },
-                )
+                // A خاتمه‌یافته پیمان takes no new request, so it is not offered one; its certificate
+                // is in the status line above.
+                if (!contract.isFinished) {
+                    WorkshopCardButton(
+                        text = stringResource(Res.string.settlement_title),
+                        // Disabled only for a پیمان missing a key of the request id.
+                        tone = if (contract.canRequestSettlement) {
+                            WorkshopCardButtonTone.PRIMARY
+                        } else {
+                            WorkshopCardButtonTone.DISABLED
+                        },
+                        onClick = { onRequestSettlement(contract) },
+                    )
+                }
             }
         }
     }

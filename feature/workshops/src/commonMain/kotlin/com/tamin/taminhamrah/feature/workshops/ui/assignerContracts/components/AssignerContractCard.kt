@@ -145,17 +145,20 @@ fun AssignerContractCard(
         ) {
             WorkshopCardButton(
                 text = stringResource(Res.string.assigner_action_detail),
-                tone = WorkshopCardButtonTone.NEUTRAL,
+                // Each action its own color: جزئیات amber, مبانی teal, and the third blue or green.
+                tone = WorkshopCardButtonTone.NOTICE,
                 onClick = onOpenDetail,
                 icon = vectorResource(Res.drawable.ic_tamin_document_lines),
+                compact = true,
             )
             WorkshopCardButton(
                 text = stringResource(Res.string.assigner_action_bases),
                 // A پیمان missing any of the four keys cannot address its own bases, so the button is
                 // plainly unavailable rather than opening another contract's records.
-                tone = if (contract.canOpenBases) WorkshopCardButtonTone.NEUTRAL else WorkshopCardButtonTone.DISABLED,
+                tone = if (contract.canOpenBases) WorkshopCardButtonTone.TEAL_SOFT else WorkshopCardButtonTone.DISABLED,
                 onClick = onOpenBases,
                 icon = vectorResource(Res.drawable.ic_tamin_computational_base),
+                compact = true,
             )
             if (contract.isFinished) {
                 WorkshopCardButton(
@@ -163,6 +166,7 @@ fun AssignerContractCard(
                     tone = WorkshopCardButtonTone.SUCCESS_SOFT,
                     onClick = onShowCertificate,
                     icon = vectorResource(Res.drawable.ic_tamin_check),
+                    compact = true,
                 )
             } else {
                 WorkshopCardButton(
@@ -172,6 +176,7 @@ fun AssignerContractCard(
                     tone = if (contract.canRequestSettlement) WorkshopCardButtonTone.INFO else WorkshopCardButtonTone.DISABLED,
                     onClick = onRequestSettlement,
                     icon = vectorResource(Res.drawable.ic_tamin_objection_document),
+                    compact = true,
                 )
             }
         }
