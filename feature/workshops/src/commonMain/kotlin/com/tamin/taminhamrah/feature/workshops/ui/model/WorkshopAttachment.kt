@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.workshops.ui.model
 
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
+import com.tamin.taminhamrah.ui.looksLikePdf
 import com.tamin.taminhamrah.util.toPersianDigits
 
 /**
@@ -18,17 +19,19 @@ data class WorkshopAttachment(
     val type: WorkshopDocumentType,
     /** Whole kilobytes, in Persian digits — what the upload box prints beside the name. */
     val size: String,
+    /** Went up as a PDF rather than an image — which route took it, and so how a request names it. */
+    val isPdf: Boolean = false,
 ) {
     /** An image of [byteCount] bytes, sized the way the upload box prints it. */
-    constructor(guid: String, type: WorkshopDocumentType, byteCount: Int) :
-        this(guid = guid, type = type, size = byteCount.asKilobytes())
+    constructor(guid: String, type: WorkshopDocumentType, byteCount: Int, isPdf: Boolean = false) :
+        this(guid = guid, type = type, size = byteCount.asKilobytes(), isPdf = isPdf)
 }
 
 /**
  * Puts a picked image on the server and names what came back.
  *
  * All three workshop forms attach evidence the same way — ثبت اعتراض, درخواست رسیدگی and
- * نام‌نویسی — so the upload lives here once instead of in each ViewModel. The shared
+ * نامنویسی — so the upload lives here once instead of in each ViewModel. The shared
  * `upload-image` endpoint is the same one addDependent and occurrence reporting use.
  */
 class WorkshopAttachmentUploader(
@@ -51,12 +54,25 @@ class WorkshopAttachmentUploader(
         bytes: ByteArray,
         typeCode: String,
         types: List<WorkshopDocumentType>,
+        /**
+         * Where a PDF goes, for the one form that files them (درخواست مفاصاحساب). Null — the default —
+         * sends every file to `upload-image`, which is all the other forms let the user pick.
+         */
+        uploadPdf: (suspend (UploadImageRequestDN) -> String)? = null,
     ): WorkshopAttachment {
         val type = requireNotNull(types.firstOrNull { it.code == typeCode }) {
             "Unknown document type '$typeCode'"
         }
-        val guid = uploadImage(UploadImageRequestDN(fileName = fileName, bytes = bytes))
-        return WorkshopAttachment(guid = guid, type = type, byteCount = bytes.size)
+        val request = UploadImageRequestDN(fileName = fileName, bytes = bytes)
+        // Decided by the bytes, not the name: a picker's extension filter is a hint, the header is not.
+        val pdfRoute = uploadPdf?.takeIf { bytes.looksLikePdf() }
+        val guid = pdfRoute?.invoke(request) ?: uploadImage(request)
+        return WorkshopAttachment(
+            guid = guid,
+            type = type,
+            byteCount = bytes.size,
+            isPdf = pdfRoute != null,
+        )
     }
 }
 

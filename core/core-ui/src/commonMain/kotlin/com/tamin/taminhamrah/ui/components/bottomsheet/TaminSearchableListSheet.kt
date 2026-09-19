@@ -16,7 +16,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -43,15 +42,22 @@ import com.tamin.taminhamrah.ui.paging.OnLoadMore
 import com.tamin.taminhamrah.ui.paging.PagingFooter
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.ShimmerBlock
+import com.tamin.taminhamrah.ui.theme.ShimmerCardList
+import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.active_relation_search_placeholder
 import taminx.core.core_ui.no_items_found
+import kotlin.time.Duration.Companion.milliseconds
 
 private val DefaultListHeight = 400.dp
 private val DefaultLoadingHeight = 200.dp
+
+/** As many shimmering rows as fit [DefaultLoadingHeight] with their gaps. */
+private const val LOADING_SHIMMER_ROWS = 3
 private const val DefaultSearchDebounceMs = 0L
 
 /**
@@ -220,8 +226,8 @@ fun <T> SearchableListSheetContent(
 
     LaunchedEffect(localQuery, usesServerSearch, searchDebounceMs) {
         if (!usesServerSearch) return@LaunchedEffect
-        if (searchDebounceMs > 0) delay(searchDebounceMs)
-        onSearchQueryChange?.invoke(localQuery)
+        if (searchDebounceMs > 0) delay(searchDebounceMs.milliseconds)
+        onSearchQueryChange.invoke(localQuery)
     }
 
     val filteredItems = remember(items, currentQuery, showSearch, usesServerSearch) {
@@ -272,7 +278,7 @@ fun <T> SearchableListSheetContent(
                     if (!usesServerSearch) {
                         onSearchQueryChange?.invoke(newQuery)
                     } else if (searchDebounceMs <= 0) {
-                        onSearchQueryChange?.invoke(newQuery)
+                        onSearchQueryChange.invoke(newQuery)
                     }
                 },
                 placeHolder = searchPlaceholder,
@@ -282,14 +288,15 @@ fun <T> SearchableListSheetContent(
         }
 
         when {
-            isLoading && filteredItems.isEmpty() -> Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(loadingHeight),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator(color = taminColors.blueText)
-            }
+            // Rows of the list's own rhythm stand in for it while it loads, rather than a spinner.
+            isLoading && filteredItems.isEmpty() -> ShimmerCardList(
+                modifier = Modifier.height(loadingHeight),
+                count = LOADING_SHIMMER_ROWS,
+                cardHeight = ShimmerSize.fieldHeight,
+                cornerRadius = CornerRadius.md,
+                spacing = Spacing.sm,
+                contentPadding = PaddingValues(horizontal = Spacing.lg),
+            )
 
             filteredItems.isEmpty() -> TaminEmptyState(
                 message = emptyMessage,
@@ -323,10 +330,21 @@ fun <T> SearchableListSheetContent(
                             color = taminColors.border,
                         )
                     }
-                    if (isLoadingMore || loadMoreError != null) {
+                    if (isLoadingMore) {
+                        item(key = "paging_footer") {
+                            ShimmerBlock(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = Spacing.lg, vertical = Spacing.sm)
+                                    .height(ShimmerSize.fieldHeight),
+                                cornerRadius = CornerRadius.md,
+                            )
+                        }
+                    } else if (loadMoreError != null) {
+                        // The footer's retry row; only the wait itself is a shimmer.
                         item(key = "paging_footer") {
                             PagingFooter(
-                                isLoadingNextPage = isLoadingMore,
+                                isLoadingNextPage = false,
                                 error = loadMoreError,
                                 onRetry = { onRetryLoadMore?.invoke() ?: onLoadMore?.invoke() },
                             )

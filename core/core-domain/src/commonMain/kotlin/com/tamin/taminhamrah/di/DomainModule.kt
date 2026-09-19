@@ -24,6 +24,8 @@ import com.tamin.taminhamrah.useCases.common.GetInsuranceTypesUseCase
 import com.tamin.taminhamrah.useCases.common.CheckUserTypeUseCase
 import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
 import com.tamin.taminhamrah.useCases.file.GetElectronicFileUseCase
+import com.tamin.taminhamrah.useCases.home.GetHomeContentUseCase
+import com.tamin.taminhamrah.useCases.home.SyncHomeContentUseCase
 import com.tamin.taminhamrah.useCases.file.DownloadDocumentUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.pension.GetEdictPensionerUseCase
@@ -291,6 +293,14 @@ import com.tamin.taminhamrah.useCases.stories.MarkStoryChannelSeenUseCase
 import com.tamin.taminhamrah.useCases.stories.ObserveStoryEngagementUseCase
 import com.tamin.taminhamrah.useCases.stories.ToggleStoryLikeUseCase
 import com.tamin.taminhamrah.useCases.stories.ToggleStorySaveUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetAssignerContractsUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetComputationalBasePdfUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetComputationalBasesUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetSettlementCertificateUseCase
+import com.tamin.taminhamrah.useCases.workshops.GetSettlementSubjectsUseCase
+import com.tamin.taminhamrah.useCases.workshops.SubmitSettlementRequestUseCase
+import com.tamin.taminhamrah.useCases.workshops.UploadSettlementPdfUseCase
+import com.tamin.taminhamrah.repository.home.HomeRepository
 
 import com.tamin.taminhamrah.deeplink.DeepLinkDispatcher
 import com.tamin.taminhamrah.deeplink.ResolveDeepLinkUseCase
@@ -371,6 +381,8 @@ val domainModule = module {
     factoryOf(::VerifyChangeMobileUseCase)
     factoryOf(::GetBeneficiaryUseCase)
     factoryOf(::GetMainMenuUseCase)
+    factoryOf(::GetHomeContentUseCase)
+    factoryOf(::SyncHomeContentUseCase)
     factoryOf(::GetUserRequestsUseCase)
     factoryOf(::GetUserRequestTypesUseCase)
     factoryOf(::GetUserRequestErrorsUseCase)
@@ -501,6 +513,13 @@ val domainModule = module {
     // کارگاه‌های کارفرما — the list, then one group per action it launches
     factoryOf(::GetEmployerAgreementsUseCase)
     factoryOf(::GetContractRowsWithAgreementUseCase)
+    factoryOf(::GetAssignerContractsUseCase)
+    factoryOf(::GetComputationalBasesUseCase)
+    factoryOf(::GetComputationalBasePdfUseCase)
+    factoryOf(::GetSettlementSubjectsUseCase)
+    factoryOf(::GetSettlementCertificateUseCase)
+    factoryOf(::UploadSettlementPdfUseCase)
+    factoryOf(::SubmitSettlementRequestUseCase)
     factoryOf(::GetContractRowsWithoutAgreementUseCase)
     factoryOf(::GetPaymentSheetsUseCase)
     factoryOf(::GetDebitReasonsUseCase)
@@ -565,6 +584,9 @@ val domainModule = module {
     factoryOf(::GetPatientVisitsUseCase)
     factoryOf(::GetPatientLabsUseCase)
     factoryOf(::GetPatientImagingUseCase)
+
+    // Home
+    factory { get<HomeRepository>() }
     factoryOf(::GetVersionHistoryUseCase)
     factoryOf(::SetThemeUseCase)
     factoryOf(::SetBiometricEnabledUseCase)

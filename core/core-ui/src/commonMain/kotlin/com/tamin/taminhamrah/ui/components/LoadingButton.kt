@@ -36,6 +36,7 @@ import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.shimmer
 
 
 enum class LoadingButtonIconPosition {
@@ -56,6 +57,11 @@ fun LoadingButton(
     contentColor: Color? = null,
     height: Dp = ButtonDimens.height,
     shape: Shape = RoundedCornerShape(CornerRadius.xl),
+    /**
+     * Shows [isLoading] as a sheen passing over the button instead of a spinner, keeping the icon in
+     * place. False — the default — keeps the spinner every existing caller shows.
+     */
+    shimmerWhileLoading: Boolean = false,
 ) {
     val taminColors = LocalTaminColors.current
     val backgroundBrush = background ?: if (enabled) {
@@ -78,6 +84,16 @@ fun LoadingButton(
             .height(height)
             .clip(shape)
             .background(backgroundBrush)
+            .then(
+                if (isLoading && shimmerWhileLoading) {
+                    Modifier.shimmer(
+                        colorBase = Color.Transparent,
+                        colorHighlight = contentColor.copy(alpha = LOADING_SHEEN_ALPHA),
+                    )
+                } else {
+                    Modifier
+                },
+            )
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = ripple(),
@@ -100,7 +116,7 @@ fun LoadingButton(
             val indicator = @Composable {
                 Box(modifier = Modifier.size(IconSize.medium), contentAlignment = Alignment.Center) {
                     Crossfade(targetState = isLoading, animationSpec = tween(300)) { loading ->
-                        if (loading) {
+                        if (loading && !shimmerWhileLoading) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(ButtonDimens.loadingIndicatorSize),
                                 color = contentColor,
@@ -120,7 +136,7 @@ fun LoadingButton(
             // Reserving the indicator's slot when there's nothing to show in it (no icon, not
             // loading) pushes the label off-center — the whole point of centering the button's
             // text. Only give it space once there's actually an icon or spinner to draw.
-            val showIndicator = isLoading || icon != null
+            val showIndicator = (isLoading && !shimmerWhileLoading) || icon != null
             if (iconPosition == LoadingButtonIconPosition.LEADING) {
                 if (showIndicator) indicator()
                 label()
@@ -131,6 +147,9 @@ fun LoadingButton(
         }
     }
 }
+
+/** How bright the loading sheen is at its peak, over the button's own fill. */
+private const val LOADING_SHEEN_ALPHA = 0.35f
 
 @PreviewRtlTheme
 @Composable

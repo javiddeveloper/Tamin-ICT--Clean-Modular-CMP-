@@ -1,8 +1,10 @@
 package com.tamin.taminhamrah.feature.workshops.ui.model
 
 import androidx.compose.runtime.Immutable
+import com.tamin.taminhamrah.model.workshop.BaseDocumentCategory
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import org.jetbrains.compose.resources.StringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.abs_doc_01
@@ -13,6 +15,11 @@ import taminx.core.core_ui.abs_doc_05
 import taminx.core.core_ui.abs_doc_06
 import taminx.core.core_ui.abs_doc_07
 import taminx.core.core_ui.abs_doc_08
+import taminx.core.core_ui.settlement_doc_final_status
+import taminx.core.core_ui.settlement_doc_letter
+import taminx.core.core_ui.settlement_doc_subcontractor
+import taminx.core.core_ui.settlement_doc_supplement
+import taminx.core.core_ui.settlement_subject_image
 import taminx.core.core_ui.ws_article_sixteen_doc_1
 import taminx.core.core_ui.ws_article_sixteen_doc_10
 import taminx.core.core_ui.ws_article_sixteen_doc_2
@@ -122,3 +129,33 @@ val RegistrationDocumentTypes: ImmutableList<WorkshopDocumentType> = persistentL
 
 /** The upload ceiling نام‌نویسی enforces — one image per type. */
 const val REGISTRATION_MAX_DOCUMENTS = 8
+
+/**
+ * انواع مستندات مفاصاحساب — what a درخواست مفاصاحساب files its documents under, in the design's order.
+ *
+ * The codes are [BaseDocumentCategory]'s, so a filed مبنا later lists these documents under its own
+ * four headings; the wording is the request form's. «مستندات لیست فهرست» (`2`) is only offered once
+ * the پیمانکار says subcontractors were used — [SettlementDocumentTypes] is the list without it.
+ */
+val SettlementDocumentTypesWithSubcontractor: ImmutableList<WorkshopDocumentType> = persistentListOf(
+    WorkshopDocumentType(BaseDocumentCategory.LETTER.code, Res.string.settlement_doc_letter),
+    WorkshopDocumentType(BaseDocumentCategory.SUPPLEMENT.code, Res.string.settlement_doc_supplement),
+    WorkshopDocumentType(BaseDocumentCategory.FINAL_STATUS.code, Res.string.settlement_doc_final_status),
+    WorkshopDocumentType(BaseDocumentCategory.SUBCONTRACTOR.code, Res.string.settlement_doc_subcontractor),
+)
+
+val SettlementDocumentTypes: ImmutableList<WorkshopDocumentType> =
+    SettlementDocumentTypesWithSubcontractor
+        .filterNot { it.code == BaseDocumentCategory.SUBCONTRACTOR.code }
+        .toImmutableList()
+
+/**
+ * The ceiling درخواست مفاصاحساب enforces. The old app set none; the upload box needs one, and ten is
+ * more than two files under each of its four headings.
+ */
+const val SETTLEMENT_MAX_DOCUMENTS = 10
+
+/** The conditions' own image (subjects 01 and 29) — one file, with nothing to ask about its type. */
+val SettlementSubjectImageTypes: ImmutableList<WorkshopDocumentType> = persistentListOf(
+    WorkshopDocumentType("subject", Res.string.settlement_subject_image),
+)

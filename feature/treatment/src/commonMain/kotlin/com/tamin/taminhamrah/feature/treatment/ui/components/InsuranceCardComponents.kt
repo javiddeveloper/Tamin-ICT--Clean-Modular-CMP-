@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,7 +64,13 @@ import com.tamin.taminhamrah.ui.theme.TaminCardTealMid
 import com.tamin.taminhamrah.ui.theme.TaminCardTealStart
 import com.tamin.taminhamrah.ui.theme.TaminCoverageBadgeBg
 import com.tamin.taminhamrah.ui.theme.TaminCoverageBadgeFg
+import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardChipBg
+import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardDivider
+import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardInk
+import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardInkMuted
 import com.tamin.taminhamrah.ui.theme.TaminRed
+import com.tamin.taminhamrah.ui.theme.Thickness
+import com.tamin.taminhamrah.ui.theme.insuranceCardTextStyles
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -78,12 +83,6 @@ import taminx.core.core_ui.coverage_pending
 import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.ic_tamin_cross
 import taminx.core.core_ui.ic_tamin_verified
-import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardChipBg
-import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardInk
-import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardInkMuted
-import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardDivider
-import com.tamin.taminhamrah.ui.theme.Thickness
-import com.tamin.taminhamrah.ui.theme.insuranceCardTextStyles
 
 /**
  * The electronic health-insurance card and everything that dresses one: its gradient identity,

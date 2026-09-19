@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopConstants
 import com.tamin.taminhamrah.feature.workshops.ui.model.PersonSearch
@@ -192,6 +193,8 @@ fun WorkshopTextField(
     isRequired: Boolean = false,
     isValid: Boolean? = null,
     errorText: String? = null,
+    /** Passed through; None, the default, draws the value as typed. */
+    visualTransformation: VisualTransformation = VisualTransformation.None,
 ) {
     TaminStyledTextField(
         value = value,
@@ -205,6 +208,7 @@ fun WorkshopTextField(
         isValid = isValid,
         errorText = errorText,
         modifier = modifier,
+        visualTransformation = visualTransformation,
     )
 }
 

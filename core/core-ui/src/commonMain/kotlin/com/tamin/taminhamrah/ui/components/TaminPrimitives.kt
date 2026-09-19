@@ -627,6 +627,8 @@ fun TaminOutlinedButton(
     disabledContentColor: Color = LocalTaminColors.current.textMuted,
     textStyle: TextStyle = MaterialTheme.typography.titleMedium,
     iconPosition: IconPosition? = null,
+    /** The glyph's size. Defaults to the medium icon every existing caller draws. */
+    iconSize: Dp = IconSize.medium,
 ) {
     val currentBorderColor = if (enabled) borderColor else disabledBorderColor
     val currentContainerColor = if (enabled) containerColor else disabledContainerColor
@@ -661,7 +663,7 @@ fun TaminOutlinedButton(
                 imageVector = icon,
                 contentDescription = null,
                 tint = currentContentColor,
-                modifier = Modifier.size(IconSize.medium).then(iconModifier),
+                modifier = Modifier.size(iconSize).then(iconModifier),
             )
         }
 
@@ -676,7 +678,7 @@ fun TaminOutlinedButton(
                 imageVector = icon,
                 contentDescription = null,
                 tint = currentContentColor,
-                modifier = Modifier.size(IconSize.medium).then(iconModifier),
+                modifier = Modifier.size(iconSize).then(iconModifier),
             )
         }
     }
