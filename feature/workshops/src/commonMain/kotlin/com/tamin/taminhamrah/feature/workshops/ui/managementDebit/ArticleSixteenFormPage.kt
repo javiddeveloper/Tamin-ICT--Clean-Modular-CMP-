@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -24,10 +26,15 @@ import com.tamin.taminhamrah.feature.workshops.ui.model.ArticleSixteenDocumentTy
 import com.tamin.taminhamrah.model.workshop.ARTICLE_SIXTEEN_MAX_DOCUMENTS
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
+import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.article_43
+import taminx.core.core_ui.article_sixteen_action_fix_request
+import taminx.core.core_ui.ws_dialog_ok
 import taminx.core.core_ui.article_sixteen_executive_notify_date
 import taminx.core.core_ui.article_sixteen_form_account_code
 import taminx.core.core_ui.article_sixteen_form_address
@@ -46,6 +53,8 @@ import taminx.core.core_ui.article_sixteen_form_step_review
 import taminx.core.core_ui.article_sixteen_form_submit
 import taminx.core.core_ui.article_sixteen_form_title
 import taminx.core.core_ui.article_sixteen_form_workshop_name
+import taminx.core.core_ui.article_sixteen_proceeding_type
+import taminx.core.core_ui.article_sixteen_resubmit_warning
 import taminx.core.core_ui.obj_form_period_from
 import taminx.core.core_ui.obj_form_period_to
 import taminx.core.core_ui.payment_sheet_agreement_row
@@ -121,6 +130,24 @@ fun ArticleSixteenFormPage(
             isBusy = form.isBusy,
         )
     }
+
+    if (form.isResubmitNoticeOpen) {
+        val dismiss = { onIntent(ManagementDebitIntent.FormResubmitNoticeDismissed) }
+        TaminConfirmationDialog(
+            title = stringResource(Res.string.article_sixteen_action_fix_request),
+            description = stringResource(Res.string.article_sixteen_resubmit_warning),
+            icon = Icons.Outlined.Info,
+            confirmButton = {
+                TaminFilledButton(
+                    text = stringResource(Res.string.ws_dialog_ok),
+                    onClick = dismiss,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            },
+            dismissButton = {},
+            onDismissRequest = dismiss,
+        )
+    }
 }
 
 /** Step one: the debt, and the workshop it belongs to. */
@@ -138,8 +165,10 @@ private fun ReviewStep(
     val periodToLabel = stringResource(Res.string.obj_form_period_to)
     val amountLabel = stringResource(Res.string.workshop_debt_amount)
     val notifyLabel = stringResource(Res.string.article_sixteen_executive_notify_date)
-    val debtRows = remember(debt, accountCodeLabel) {
-        persistentListOf(
+    val proceedingTypeLabel = stringResource(Res.string.article_sixteen_proceeding_type)
+    val proceedingTypeText = debt.proceedingType?.let { stringResource(it) }
+    val debtRows = remember(debt, accountCodeLabel, proceedingTypeText) {
+        val base = persistentListOf(
             WorkshopReviewRow(accountCodeLabel, debt.debitNumberLabel),
             WorkshopReviewRow(agreementRowLabel, debt.agreementRow),
             WorkshopReviewRow(periodFromLabel, debt.fromDate),
@@ -147,6 +176,11 @@ private fun ReviewStep(
             WorkshopReviewRow(amountLabel, debt.amount),
             WorkshopReviewRow(notifyLabel, debt.executiveNotifyDateLabel),
         )
+        if (proceedingTypeText != null) {
+            base.add(WorkshopReviewRow(proceedingTypeLabel, proceedingTypeText, isNumeric = false))
+        } else {
+            base
+        }
     }
 
     val employerLabel = stringResource(Res.string.article_sixteen_form_employer_name)
@@ -250,7 +284,25 @@ private fun ArticleSixteenFormDocumentsPreview() {
     }
 }
 
-private val PreviewDebt = com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtPR(
+@PreviewRtlTheme
+@Composable
+private fun ArticleSixteenFormResubmitPreview() {
+    PreviewRtlThemeContent {
+        ArticleSixteenFormPage(
+            form = ArticleSixteenFormState(
+                debt = PreviewDebt,
+                workshopInfo = PreviewInfo,
+                isResubmitNoticeOpen = true,
+            ),
+            workshopName = "آموزشگاه کامپیوتر توکلی-ایمیل",
+            workshopCode = "۰۹۶۸۲۱۰۱۷۰",
+            onIntent = {},
+            onBack = {},
+        )
+    }
+}
+
+private val PreviewDebt =com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtPR(
     debitNumber = "0960961008971",
     debitNumberLabel = "۰۹۶۰۹۶۱۰۰۸۹۷۱",
     executiveNotifyDateLabel = "۱۴۰۵/۰۵/۲۵",
@@ -258,6 +310,7 @@ private val PreviewDebt = com.tamin.taminhamrah.model.workshop.ArticleSixteenDeb
     fromDate = "۱۳۹۶/۰۷/۰۱",
     toDate = "۱۳۹۷/۰۶/۳۱",
     agreementRow = "۰۹۶۰۰۰۰۲",
+    proceedingType = Res.string.article_43,
 )
 
 private val PreviewInfo = ArticleSixteenWorkshopInfoPR(

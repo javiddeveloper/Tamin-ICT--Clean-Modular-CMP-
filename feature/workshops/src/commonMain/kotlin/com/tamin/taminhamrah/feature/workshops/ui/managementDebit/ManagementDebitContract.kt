@@ -11,6 +11,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtPR
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestStatus
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoPR
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import org.jetbrains.compose.resources.StringResource
@@ -32,14 +33,14 @@ data class ManagementDebitUiState(
     val applied: ArticleSixteenSearch = ArticleSixteenSearch(),
     val isSearchOpen: Boolean = false,
     val statusFilter: ArticleSixteenRequestStatus? = null,
-    /** The row whose action sheet is open, or null while it is closed. */
-    val actionsFor: ArticleSixteenDebtPR? = null,
     val isBusy: Boolean = false,
     val viewerPdf: PdfDownloadPR? = null,
     /** پیام کارشناس, once fetched for a نقص مدارک row. */
     val expertMessage: String? = null,
     /** درخواست رسیدگی به بدهی, once a row has asked for it. */
     val form: ArticleSixteenFormState? = null,
+    /** The tracking code of the request just filed, held until its dialog is dismissed. */
+    val filedReferenceCode: String? = null,
 ) {
     /** What the list shows: the loaded rows, narrowed by the status filter when one is picked. */
     val visibleDebts: ImmutableList<ArticleSixteenDebtPR>
@@ -62,7 +63,6 @@ data class ManagementDebitUiState(
         data class Applied(val search: ArticleSixteenSearch) : PartialState
         data class SearchOpenChanged(val isOpen: Boolean) : PartialState
         data class StatusFilterChanged(val status: ArticleSixteenRequestStatus?) : PartialState
-        data class ActionsForChanged(val debt: ArticleSixteenDebtPR?) : PartialState
         data class Busy(val isBusy: Boolean) : PartialState
         data class ViewerPdfChanged(val pdf: PdfDownloadPR?) : PartialState
 
@@ -71,15 +71,15 @@ data class ManagementDebitUiState(
         data class FormStepChanged(val step: Int) : PartialState
         data class FormDebtOpenChanged(val isOpen: Boolean) : PartialState
         data class FormWorkshopOpenChanged(val isOpen: Boolean) : PartialState
-        data class FormWorkshopInfoLoaded(val info: ArticleSixteenWorkshopInfoPR) :
-            PartialState
         data class FormConfirmedChanged(val isConfirmed: Boolean) : PartialState
         data class FormAttachmentAdded(val attachment: WorkshopAttachment) : PartialState
         data class FormAttachmentRemoved(val index: Int) : PartialState
         data object FormSubmitRejected : PartialState
         data class FormUploadingChanged(val isUploading: Boolean) : PartialState
         data class FormSubmittingChanged(val isSubmitting: Boolean) : PartialState
+        data object FormResubmitNoticeDismissed : PartialState
         data class ExpertMessageChanged(val message: String?) : PartialState
+        data class FiledChanged(val referenceCode: String?) : PartialState
     }
 }
 
@@ -110,11 +110,16 @@ data class ArticleSixteenFormState(
     val hasTriedSubmit: Boolean = false,
     val isUploading: Boolean = false,
     val isSubmitting: Boolean = false,
+    /**
+     * The one-resubmission warning an اصلاح درخواست opens with, as the old app showed it: a
+     * نقص مدارک request can be corrected only once.
+     */
+    val isResubmitNoticeOpen: Boolean = false,
 ) {
     val isBusy: Boolean get() = isUploading || isSubmitting
     val isLastStep: Boolean get() = step == ARTICLE_SIXTEEN_FORM_STEPS
 
-    /** Which rule is stopping the submit, or null once none is. */
+    /** Which rule is stopping to submit, or null once none is. */
     val error: StringResource?
         get() = when {
             !hasTriedSubmit || !isLastStep -> null
@@ -132,16 +137,6 @@ data class ArticleSixteenFormState(
         get() = error == Res.string.ws_form_err_docs
 }
 
-/** The workshop and employer the request is about, as its first step prints them. */
-@Immutable
-data class ArticleSixteenWorkshopInfoPR(
-    val workshopName: String = "",
-    val workshopCode: String = "",
-    val branchCode: String = "",
-    val employerName: String = "",
-    val address: String = "",
-)
-
 /** How many steps درخواست رسیدگی به بدهی has. */
 const val ARTICLE_SIXTEEN_FORM_STEPS = 2
 
@@ -158,12 +153,12 @@ sealed interface ManagementDebitIntent {
     data class DraftChanged(val draft: ArticleSixteenSearch) : ManagementDebitIntent
     data object ApplySearch : ManagementDebitIntent
     data object ClearSearch : ManagementDebitIntent
+
+    /** Applies [search] as it stands — what removing one of the applied-search chips does. */
+    data class ReplaceSearch(val search: ArticleSixteenSearch) : ManagementDebitIntent
     data class StatusFilterChanged(val status: ArticleSixteenRequestStatus?) : ManagementDebitIntent
 
-    data class ActionsRequested(val debt: ArticleSixteenDebtPR) : ManagementDebitIntent
-    data object ActionsDismissed : ManagementDebitIntent
-
-    /** درخواست رسیدگی — allowed only inside the one-day window after ابلاغ اجراییه. */
+    /** درخواست رسیدگی — allowed only inside the one-year window after ابلاغ اجراییه. */
     data class RequestReview(val debt: ArticleSixteenDebtPR) : ManagementDebitIntent
 
     /** اصلاح درخواست — the same form, told it is correcting a نقص مدارک request. */
@@ -177,9 +172,11 @@ sealed interface ManagementDebitIntent {
 
     data object DismissViewer : ManagementDebitIntent
     data object DismissExpertMessage : ManagementDebitIntent
+    data object DismissFiled : ManagementDebitIntent
 
     // ------------------------------------------------ درخواست رسیدگی به بدهی
     data object FormDismissed : ManagementDebitIntent
+    data object FormResubmitNoticeDismissed : ManagementDebitIntent
     data object FormNext : ManagementDebitIntent
     data object FormPrev : ManagementDebitIntent
     data class FormDebtOpenChanged(val isOpen: Boolean) : ManagementDebitIntent
@@ -206,9 +203,5 @@ sealed interface ManagementDebitEvent {
      */
     data class ShowServerMessage(val message: String) : ManagementDebitEvent
 
-
     data class ShowMessage(val message: StringResource) : ManagementDebitEvent
-
-    /** Filed, with the tracking code the service returned. */
-    data class ArticleSixteenFiled(val referenceCode: String) : ManagementDebitEvent
 }
