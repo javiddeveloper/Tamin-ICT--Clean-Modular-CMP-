@@ -12,6 +12,8 @@ import com.tamin.taminhamrah.feature.taminServices.inspection.ui.InspectionViewM
 import com.tamin.taminhamrah.feature.taminServices.sendHistoryToInstitutions.SendHistoryToInstitutionsScreen
 import com.tamin.taminhamrah.feature.taminServices.ui.TaminServicesRoute
 import com.tamin.taminhamrah.feature.taminServices.ui.TamminServicesViewModel
+import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.FuneralAllowanceViewModel
+import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.ui.FuneralAllowanceRoute
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.WorkersPaymentViewModel
 import com.tamin.taminhamrah.feature.taminServices.workersPayment.ui.WorkersPaymentRoute
 import com.tamin.taminhamrah.model.common.FeatureFlag
@@ -31,6 +33,10 @@ data object InspectionRoute
 @Serializable
 data object OccurrenceRoute
 
+
+@Serializable
+data object FuneralAllowanceRoute
+
 @Serializable
 data object EmployerOnlineServicesRoute
 
@@ -47,6 +53,10 @@ fun NavController.navigateToSendInsuranceHistoryToInstitutions(builder: NavOptio
 
 fun NavController.navigateToOccurrence(builder: NavOptionsBuilder.() -> Unit = {}) {
     navigate(OccurrenceRoute, builder)
+}
+
+fun NavController.navigateToFuneralAllowance(builder: NavOptionsBuilder.() -> Unit = {}) {
+    navigate(FuneralAllowanceRoute, builder)
 }
 
 fun NavController.navigateToWorkersPaymentInfo(builder: NavOptionsBuilder.() -> Unit = {}) {
@@ -103,6 +113,21 @@ fun NavGraphBuilder.occurrenceScreen(
         OccurrenceScreen(
             onBack = onBack,
             onDone = onDone,
+        )
+    }
+}
+
+
+fun NavGraphBuilder.funeralAllowanceScreen(
+    onBack: () -> Unit,
+    onNavigateToBankAccount: () -> Unit,
+) {
+    composableWithFadeTransitions<FuneralAllowanceRoute> {
+        val viewModel: FuneralAllowanceViewModel = koinViewModel()
+        FuneralAllowanceRoute(
+            viewModel = viewModel,
+            onBackClicked = onBack,
+            onNavigateToBankAccount = onNavigateToBankAccount,
         )
     }
 }
