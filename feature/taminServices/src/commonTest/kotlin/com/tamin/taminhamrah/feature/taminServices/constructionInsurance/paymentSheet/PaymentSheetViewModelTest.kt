@@ -9,8 +9,10 @@ import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileDN
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileSearchParamsDN
 import com.tamin.taminhamrah.model.constructionInsurance.InstallmentLetterDN
 import com.tamin.taminhamrah.model.constructionInsurance.PaymentSheetConstructionFileDN
+import com.tamin.taminhamrah.model.paging.PageDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.constructionInsurance.ConstructionInsuranceRepository
 import com.tamin.taminhamrah.useCases.constructionInsurance.GetCertificatePaymentSheetPdfUseCase
 import com.tamin.taminhamrah.useCases.constructionInsurance.GetPaymentSheetConstructionInfoUseCase
@@ -240,12 +242,12 @@ private class FakeConstructionInsuranceRepository : ConstructionInsuranceReposit
         emit(constructionFilesResult)
     }
 
-    override fun getBeneficiariesWorkshop(
-        requestNumber: Long?,
-        fileNumber: Long?,
-        requestDate: String?,
-    ): Flow<List<BeneficiaryConstructionDN>> = flow {
-        emit(beneficiariesResult)
+    override fun getConstructionFilesPage(query: ApiQueryParamDN): Flow<PageDN<ConstructionFileDN>> = flow {
+        emit(PageDN(items = constructionFilesResult, total = constructionFilesResult.size))
+    }
+
+    override fun getBeneficiariesWorkshopPage(query: ApiQueryParamDN): Flow<PageDN<BeneficiaryConstructionDN>> = flow {
+        emit(PageDN(items = beneficiariesResult, total = beneficiariesResult.size))
     }
 
     override fun getPaymentSheetConstructionInfo(debitNumber: String): Flow<List<PaymentSheetConstructionFileDN>> = flow {
@@ -267,7 +269,11 @@ private class FakeConstructionInsuranceRepository : ConstructionInsuranceReposit
         emit(issuanceMessageResult)
     }
 
-    override fun getInstallmentLetterList(workshopId: String, branchId: String): Flow<List<InstallmentLetterDN>> = flow {
-        emit(installmentLettersResult)
+    override fun getInstallmentLetterListPage(
+        workshopId: String,
+        branchId: String,
+        query: ApiQueryParamDN,
+    ): Flow<PageDN<InstallmentLetterDN>> = flow {
+        emit(PageDN(items = installmentLettersResult, total = installmentLettersResult.size))
     }
 }

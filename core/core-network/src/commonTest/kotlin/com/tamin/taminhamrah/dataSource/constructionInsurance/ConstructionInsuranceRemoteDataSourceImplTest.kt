@@ -7,7 +7,10 @@ import com.tamin.taminhamrah.model.constructionInsurance.BeneficiaryConstruction
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileDTO
 import com.tamin.taminhamrah.model.constructionInsurance.InstallmentLetterDTO
 import com.tamin.taminhamrah.model.constructionInsurance.PaymentSheetConstructionFileDTO
+import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.request.FilterOperator
+import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseDTO
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilderImpl
@@ -47,6 +50,7 @@ class FakeConstructionInsuranceApiService : ConstructionInsuranceApiService {
     var lastIssuanceDebitNumber: String? = null
     var lastInstallmentWorkshopId: String? = null
     var lastInstallmentBranchId: String? = null
+    var lastInstallmentParameters: Map<String, String>? = null
 
     override suspend fun getConstructionFiles(parameters: Map<String, String>): BaseDTO<ListData<ConstructionFileDTO>> {
         shouldThrowException?.let { throw it }
@@ -54,7 +58,9 @@ class FakeConstructionInsuranceApiService : ConstructionInsuranceApiService {
         return constructionFilesResult
     }
 
-    override suspend fun getBeneficiariesWorkshop(parameters: Map<String, String>): BaseDTO<ListData<BeneficiaryConstructionDTO>> {
+    override suspend fun getBeneficiariesWorkshop(
+        parameters: Map<String, String>
+    ): BaseDTO<ListData<BeneficiaryConstructionDTO>> {
         shouldThrowException?.let { throw it }
         lastBeneficiariesParameters = parameters
         return beneficiariesResult
@@ -85,6 +91,7 @@ class FakeConstructionInsuranceApiService : ConstructionInsuranceApiService {
         shouldThrowException?.let { throw it }
         lastInstallmentWorkshopId = workshopId
         lastInstallmentBranchId = branchId
+        lastInstallmentParameters = parameters
         return installmentLettersResult
     }
 }
@@ -116,23 +123,32 @@ class ConstructionInsuranceRemoteDataSourceImplTest : BaseApiTest() {
     }
 
     @Test
-    fun getBeneficiariesWorkshop_success_buildsFiltersForNonNullParameters() = runTest {
+    fun getConstructionFiles_alwaysSendsPositionOne() = runTest {
+        dataSource.getConstructionFiles(ApiQueryParamDN())
+
+        assertEquals("1", fakeApiService.lastConstructionFilesParameters?.get("position"))
+    }
+
+    @Test
+    fun getBeneficiariesWorkshop_success_forwardsFilters() = runTest {
         val expected = listOf(BeneficiaryConstructionDTO(name = "علی"))
         fakeApiService.beneficiariesResult =
             BaseDTO(status = 200, family = "SUCCESSFUL", reason = "OK", data = ListData(total = 1, list = expected))
+        val query = ApiQueryParamDN(
+            filters = listOf(ApiFilterDN(FilterProperty.REQ_NO, "123", FilterOperator.EQ))
+        )
 
-        val result = dataSource.getBeneficiariesWorkshop(requestNumber = 123L, fileNumber = 456L, requestDate = "14020901")
+        val result = dataSource.getBeneficiariesWorkshop(query)
 
         assertEquals(expected, result.list)
         assertNotNull(fakeApiService.lastBeneficiariesParameters)
     }
 
     @Test
-    fun getBeneficiariesWorkshop_omitsZeroAndNullFilters() = runTest {
-        // requestNumber == 0L and both other params null must not crash buildQuery.
-        dataSource.getBeneficiariesWorkshop(requestNumber = 0L, fileNumber = null, requestDate = null)
+    fun getBeneficiariesWorkshop_alwaysSendsPositionOne() = runTest {
+        dataSource.getBeneficiariesWorkshop(ApiQueryParamDN())
 
-        assertNotNull(fakeApiService.lastBeneficiariesParameters)
+        assertEquals("1", fakeApiService.lastBeneficiariesParameters?.get("position"))
     }
 
     @Test
@@ -164,11 +180,18 @@ class ConstructionInsuranceRemoteDataSourceImplTest : BaseApiTest() {
         fakeApiService.installmentLettersResult =
             BaseDTO(status = 200, family = "SUCCESSFUL", reason = "OK", data = ListData(total = 1, list = expected))
 
-        val result = dataSource.getInstallmentLetterList("14020901", "6400")
+        val result = dataSource.getInstallmentLetterList("14020901", "6400", ApiQueryParamDN())
 
         assertEquals(expected, result.list)
         assertEquals("14020901", fakeApiService.lastInstallmentWorkshopId)
         assertEquals("6400", fakeApiService.lastInstallmentBranchId)
+    }
+
+    @Test
+    fun getInstallmentLetterList_doesNotSendPositionParam() = runTest {
+        dataSource.getInstallmentLetterList("14020901", "6400", ApiQueryParamDN())
+
+        assertEquals(null, fakeApiService.lastInstallmentParameters?.get("position"))
     }
 
     @Test
@@ -215,7 +238,7 @@ class ConstructionInsuranceRemoteDataSourceImplTest : BaseApiTest() {
         fakeApiService.shouldThrowException = TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
 
         val exception = assertFailsWith<TaminApiException> {
-            dataSource.getInstallmentLetterList("14020901", "6400")
+            dataSource.getInstallmentLetterList("14020901", "6400", ApiQueryParamDN())
         }
 
         assertEquals("خطای اتصال", exception.title)

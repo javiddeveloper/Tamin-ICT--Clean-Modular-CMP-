@@ -9,9 +9,11 @@ import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileDN
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileSearchParamsDN
 import com.tamin.taminhamrah.model.constructionInsurance.InstallmentLetterDN
 import com.tamin.taminhamrah.model.constructionInsurance.PaymentSheetConstructionFileDN
+import com.tamin.taminhamrah.model.paging.PageDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.constructionInsurance.ConstructionInsuranceRepository
-import com.tamin.taminhamrah.useCases.constructionInsurance.GetInstallmentLetterListUseCase
+import com.tamin.taminhamrah.useCases.constructionInsurance.GetInstallmentLetterListPageUseCase
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -19,6 +21,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -46,18 +49,18 @@ class InstallmentLetterViewModelTest {
     }
 
     private fun buildViewModel() = InstallmentLetterViewModel(
-        getInstallmentLetterListUseCase = GetInstallmentLetterListUseCase(fakeRepository),
+        getInstallmentLetterListPageUseCase = GetInstallmentLetterListPageUseCase(fakeRepository),
+    )
+
+    private fun sampleLetter(debitNumber: String = "77640000001") = InstallmentLetterDN(
+        workshopId = "14020901", debitNumber = debitNumber, debitStepDescription = "قسط اول",
+        debitStatusDescription = "پرداخت شده", debitStartDate = "14021001", debitEndDate = "14031001",
+        remainingAmount = 400_000L, debitNumberOld = null,
     )
 
     @Test
     fun load_populatesItemsAndSeedsHeader() = runTest {
-        fakeRepository.installmentLettersResult = listOf(
-            InstallmentLetterDN(
-                workshopId = "14020901", debitNumber = "77640000001", debitStepDescription = "قسط اول",
-                debitStatusDescription = "پرداخت شده", debitStartDate = "14021001", debitEndDate = "14031001",
-                remainingAmount = 400_000L, debitNumberOld = null,
-            )
-        )
+        fakeRepository.allLetters = listOf(sampleLetter())
         val viewModel = buildViewModel()
 
         viewModel.sendIntent(InstallmentLetterIntent.Load(workshopId = "14020901", branchId = "6400"))
@@ -68,8 +71,8 @@ class InstallmentLetterViewModelTest {
         assertEquals("14020901", state.workshopId)
         assertEquals("6400", state.branchId)
         assertFalse(state.isLoading)
-        assertEquals("14020901", fakeRepository.lastInstallmentWorkshopId)
-        assertEquals("6400", fakeRepository.lastInstallmentBranchId)
+        assertEquals("14020901", fakeRepository.lastWorkshopId)
+        assertEquals("6400", fakeRepository.lastBranchId)
     }
 
     @Test
@@ -84,31 +87,46 @@ class InstallmentLetterViewModelTest {
 
     @Test
     fun load_error_setsErrorState() = runTest {
-        fakeRepository.shouldThrowError = true
+        fakeRepository.shouldThrowOnPage = true
         val viewModel = buildViewModel()
 
         viewModel.sendIntent(InstallmentLetterIntent.Load(workshopId = "1", branchId = "1"))
 
-        assertNotNull(viewModel.uiState.value.error)
+        assertNotNull(viewModel.uiState.value.paginationError)
         assertFalse(viewModel.uiState.value.isLoading)
     }
 
     @Test
-    fun retry_reloadsInstallmentLetters() = runTest {
+    fun loadNextPage_appendsTheSecondPageAndDetectsEndOfList() = runTest {
+        fakeRepository.allLetters = (1..15).map { sampleLetter(debitNumber = "7764000000$it") }
+        val viewModel = buildViewModel()
+
+        viewModel.sendIntent(InstallmentLetterIntent.Load(workshopId = "1", branchId = "1"))
+        assertEquals(10, viewModel.uiState.value.items.size)
+        assertFalse(viewModel.uiState.value.endReached)
+
+        viewModel.sendIntent(InstallmentLetterIntent.LoadNextPage)
+
+        assertEquals(15, viewModel.uiState.value.items.size)
+        assertTrue(viewModel.uiState.value.endReached)
+    }
+
+    @Test
+    fun retryNextPage_recoversAfterAFailedPage() = runTest {
+        fakeRepository.allLetters = (1..15).map { sampleLetter(debitNumber = "7764000000$it") }
         val viewModel = buildViewModel()
         viewModel.sendIntent(InstallmentLetterIntent.Load(workshopId = "1", branchId = "1"))
 
-        fakeRepository.installmentLettersResult = listOf(
-            InstallmentLetterDN(
-                workshopId = "1", debitNumber = "77100000001", debitStepDescription = null,
-                debitStatusDescription = null, debitStartDate = null, debitEndDate = null,
-                remainingAmount = 0L, debitNumberOld = null,
-            )
-        )
-        viewModel.sendIntent(InstallmentLetterIntent.Retry)
+        fakeRepository.shouldThrowOnPage = true
+        viewModel.sendIntent(InstallmentLetterIntent.LoadNextPage)
+        assertEquals(10, viewModel.uiState.value.items.size)
+        assertNotNull(viewModel.uiState.value.paginationError)
 
-        assertEquals(1, viewModel.uiState.value.items.size)
-        assertEquals("77100000001", viewModel.uiState.value.items.first().debitNumber)
+        fakeRepository.shouldThrowOnPage = false
+        viewModel.sendIntent(InstallmentLetterIntent.RetryNextPage)
+
+        assertEquals(15, viewModel.uiState.value.items.size)
+        assertEquals(null, viewModel.uiState.value.paginationError)
     }
 
     @Test
@@ -128,22 +146,22 @@ private class FakeConstructionInsuranceRepository : ConstructionInsuranceReposit
     var paymentSheetsResult: List<PaymentSheetConstructionFileDN> = emptyList()
     var certificatePdfResult: PdfDownloadDN = PdfDownloadDN(pdf = null)
     var issuanceMessageResult: String = "OK"
-    var installmentLettersResult: List<InstallmentLetterDN> = emptyList()
+    var allLetters: List<InstallmentLetterDN> = emptyList()
 
-    var shouldThrowError = false
-    var lastInstallmentWorkshopId: String? = null
-    var lastInstallmentBranchId: String? = null
+    var shouldThrowOnPage = false
+    var lastWorkshopId: String? = null
+    var lastBranchId: String? = null
 
     override fun getConstructionFiles(search: ConstructionFileSearchParamsDN?): Flow<List<ConstructionFileDN>> = flow {
         emit(constructionFilesResult)
     }
 
-    override fun getBeneficiariesWorkshop(
-        requestNumber: Long?,
-        fileNumber: Long?,
-        requestDate: String?,
-    ): Flow<List<BeneficiaryConstructionDN>> = flow {
-        emit(beneficiariesResult)
+    override fun getConstructionFilesPage(query: ApiQueryParamDN): Flow<PageDN<ConstructionFileDN>> = flow {
+        emit(PageDN(items = constructionFilesResult, total = constructionFilesResult.size))
+    }
+
+    override fun getBeneficiariesWorkshopPage(query: ApiQueryParamDN): Flow<PageDN<BeneficiaryConstructionDN>> = flow {
+        emit(PageDN(items = beneficiariesResult, total = beneficiariesResult.size))
     }
 
     override fun getPaymentSheetConstructionInfo(debitNumber: String): Flow<List<PaymentSheetConstructionFileDN>> = flow {
@@ -158,10 +176,17 @@ private class FakeConstructionInsuranceRepository : ConstructionInsuranceReposit
         emit(issuanceMessageResult)
     }
 
-    override fun getInstallmentLetterList(workshopId: String, branchId: String): Flow<List<InstallmentLetterDN>> = flow {
-        lastInstallmentWorkshopId = workshopId
-        lastInstallmentBranchId = branchId
-        if (shouldThrowError) throw RuntimeException("Error")
-        emit(installmentLettersResult)
+    override fun getInstallmentLetterListPage(
+        workshopId: String,
+        branchId: String,
+        query: ApiQueryParamDN,
+    ): Flow<PageDN<InstallmentLetterDN>> = flow {
+        lastWorkshopId = workshopId
+        lastBranchId = branchId
+        if (shouldThrowOnPage) error("network")
+        val start = query.start
+        val end = (start + query.limit).coerceAtMost(allLetters.size)
+        val slice = if (start >= allLetters.size) emptyList() else allLetters.subList(start, end)
+        emit(PageDN(items = slice, total = allLetters.size))
     }
 }

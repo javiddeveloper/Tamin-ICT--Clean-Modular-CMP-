@@ -6,18 +6,23 @@ import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.benefic
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.beneficiaries.contract.BeneficiariesUiState
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.beneficiaries.contract.BeneficiariesUiState.PartialState
 import com.tamin.taminhamrah.mapper.toPR
+import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.request.FilterOperator
+import com.tamin.taminhamrah.model.request.FilterProperty
+import com.tamin.taminhamrah.paging.Paginator
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
-import com.tamin.taminhamrah.useCases.constructionInsurance.GetBeneficiariesWorkshopUseCase
+import com.tamin.taminhamrah.useCases.constructionInsurance.GetBeneficiariesWorkshopPageUseCase
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 
 class BeneficiariesViewModel(
-    private val getBeneficiariesWorkshopUseCase: GetBeneficiariesWorkshopUseCase,
+    private val getBeneficiariesWorkshopPageUseCase: GetBeneficiariesWorkshopPageUseCase,
 ) : BaseViewModel<BeneficiariesUiState, PartialState, BeneficiariesEvent, BeneficiariesIntent>(
     initialState = BeneficiariesUiState()
 ) {
@@ -26,6 +31,10 @@ class BeneficiariesViewModel(
     private var fileNumber: Long? = null
     private var requestDate: String? = null
     private var hasLoaded = false
+
+    private val paginator = Paginator(
+        loadPage = { query -> getBeneficiariesWorkshopPageUseCase(query).first() },
+    )
 
     override fun handleIntent(intent: BeneficiariesIntent): Flow<PartialState> =
         when (intent) {
@@ -37,11 +46,17 @@ class BeneficiariesViewModel(
                     requestNumber = intent.requestNumber
                     fileNumber = intent.fileNumber
                     requestDate = intent.requestDate
-                    loadBeneficiaries(seed = intent)
+                    merge(
+                        flow { emit(PartialState.HeaderSeeded(requestNumber, fileNumber, requestDate)) },
+                        observePaging(),
+                        flow { paginator.refresh(query = buildQuery()) },
+                    )
                 }
             }
 
-            BeneficiariesIntent.Retry -> loadBeneficiaries(seed = null)
+            BeneficiariesIntent.LoadNextPage -> flow { paginator.loadNext() }
+
+            BeneficiariesIntent.RetryNextPage -> flow { paginator.retry() }
 
             BeneficiariesIntent.OnBackClicked -> {
                 sendEvent(BeneficiariesEvent.NavigateBack)
@@ -49,21 +64,33 @@ class BeneficiariesViewModel(
             }
         }
 
-    private fun loadBeneficiaries(seed: BeneficiariesIntent.Load?): Flow<PartialState> = flow {
-        seed?.let {
-            emit(PartialState.HeaderSeeded(it.requestNumber, it.fileNumber, it.requestDate))
+    /** [requestNumber]/[fileNumber] of `0` mean "not provided", same as the old app's convention. */
+    private fun buildQuery(): ApiQueryParamDN {
+        val filters = mutableListOf<ApiFilterDN>()
+        requestNumber?.takeIf { it != 0L }?.let {
+            filters.add(ApiFilterDN(FilterProperty.REQ_NO, it.toString(), FilterOperator.EQ))
         }
-        emit(PartialState.Loading(true))
-        emitAll(
-            getBeneficiariesWorkshopUseCase(requestNumber, fileNumber, requestDate)
-                .map { list -> PartialState.Loaded(list.map { it.toPR() }.toImmutableList()) as PartialState }
-                .catch { e ->
-                    val message = e.toSingleLineMessage()
-                    sendEvent(BeneficiariesEvent.ShowError(message))
-                    emit(PartialState.Error(message))
-                }
+        fileNumber?.takeIf { it != 0L }?.let {
+            filters.add(ApiFilterDN(FilterProperty.FILE_NO, it.toString(), FilterOperator.EQ))
+        }
+        requestDate?.takeIf { it.isNotBlank() }?.let {
+            filters.add(ApiFilterDN(FilterProperty.BUILDING_REQUEST_DATE, it, FilterOperator.EQ))
+        }
+        return ApiQueryParamDN(filters = filters)
+    }
+
+    private fun observePaging(): Flow<PartialState> = paginator.state.map { paging ->
+        val errorMessage = paging.error?.toSingleLineMessage()
+        if (errorMessage != null && paging.items.isEmpty()) {
+            sendEvent(BeneficiariesEvent.ShowError(errorMessage))
+        }
+        PartialState.PagingChanged(
+            items = paging.items.map { it.toPR() }.toImmutableList(),
+            isLoadingFirstPage = paging.isLoadingFirstPage,
+            isLoadingNextPage = paging.isLoadingNextPage,
+            endReached = paging.endReached,
+            error = errorMessage,
         )
-        emit(PartialState.Loading(false))
     }
 
     override fun reduceState(
@@ -76,15 +103,16 @@ class BeneficiariesViewModel(
             requestDate = partialState.requestDate,
         )
 
-        is PartialState.Loading -> currentState.copy(isLoading = partialState.isLoading)
+        is PartialState.PagingChanged -> currentState.copy(
+            items = partialState.items,
+            isLoading = partialState.isLoadingFirstPage,
+            isLoadingNextPage = partialState.isLoadingNextPage,
+            endReached = partialState.endReached,
+            error = null,
+            paginationError = partialState.error,
+        )
 
         is PartialState.Error -> currentState.copy(isLoading = false, error = partialState.message)
-
-        is PartialState.Loaded -> currentState.copy(
-            isLoading = false,
-            items = partialState.items,
-            error = null,
-        )
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)

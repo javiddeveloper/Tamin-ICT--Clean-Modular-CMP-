@@ -7,7 +7,7 @@ import kotlinx.collections.immutable.persistentListOf
 
 /**
  * ذینفعان کارگاه — عملیات menu option "۴". Reached with the file/request identifiers of the row
- * that was acted on; loaded via `GetBeneficiariesWorkshopUseCase`
+ * that was acted on; loaded via `GetBeneficiariesWorkshopPageUseCase`
  * (`bld-request-services/building-workshops-owners`).
  */
 @Immutable
@@ -15,9 +15,16 @@ data class BeneficiariesUiState(
     val requestNumber: Long? = null,
     val fileNumber: Long? = null,
     val requestDate: String? = null,
+    /** True only while the first page is in flight — drives the full-screen skeleton. */
     val isLoading: Boolean = false,
     val items: ImmutableList<BeneficiaryConstructionPR> = persistentListOf(),
     val error: String? = null,
+    /** True while a further page is in flight — drives the list-footer spinner, not the skeleton. */
+    val isLoadingNextPage: Boolean = false,
+    /** No more pages left to ask for, or none exist yet — hides the load-more trigger. */
+    val endReached: Boolean = false,
+    /** A page request past the first one failed — shown in the list footer with a retry action. */
+    val paginationError: String? = null,
 ) {
     sealed interface PartialState {
         data class HeaderSeeded(
@@ -25,9 +32,14 @@ data class BeneficiariesUiState(
             val fileNumber: Long?,
             val requestDate: String?,
         ) : PartialState
-        data class Loading(val isLoading: Boolean) : PartialState
+        data class PagingChanged(
+            val items: ImmutableList<BeneficiaryConstructionPR>,
+            val isLoadingFirstPage: Boolean,
+            val isLoadingNextPage: Boolean,
+            val endReached: Boolean,
+            val error: String?,
+        ) : PartialState
         data class Error(val message: String?) : PartialState
-        data class Loaded(val items: ImmutableList<BeneficiaryConstructionPR>) : PartialState
     }
 }
 
@@ -39,7 +51,8 @@ sealed interface BeneficiariesIntent {
         val requestDate: String?,
     ) : BeneficiariesIntent
 
-    data object Retry : BeneficiariesIntent
+    data object LoadNextPage : BeneficiariesIntent
+    data object RetryNextPage : BeneficiariesIntent
     data object OnBackClicked : BeneficiariesIntent
 }
 

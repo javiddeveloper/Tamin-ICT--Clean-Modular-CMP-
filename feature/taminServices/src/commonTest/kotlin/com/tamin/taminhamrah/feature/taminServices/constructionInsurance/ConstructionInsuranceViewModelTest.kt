@@ -13,8 +13,11 @@ import com.tamin.taminhamrah.model.constructionInsurance.InstallmentLetterDN
 import com.tamin.taminhamrah.model.constructionInsurance.PaymentSheetConstructionFileDN
 import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDN
 import com.tamin.taminhamrah.model.identity.IdentityInfoDN
+import com.tamin.taminhamrah.model.paging.PageDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
 import com.tamin.taminhamrah.model.user.CurrentUserDN
@@ -23,7 +26,7 @@ import com.tamin.taminhamrah.model.user.TaminRelationDN
 import com.tamin.taminhamrah.model.user.UserProfileDN
 import com.tamin.taminhamrah.repository.UserRepository
 import com.tamin.taminhamrah.repository.constructionInsurance.ConstructionInsuranceRepository
-import com.tamin.taminhamrah.useCases.constructionInsurance.GetConstructionFilesUseCase
+import com.tamin.taminhamrah.useCases.constructionInsurance.GetConstructionFilesPageUseCase
 import com.tamin.taminhamrah.useCases.user.GetIdentityInfoUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -61,7 +64,7 @@ class ConstructionInsuranceViewModelTest {
     }
 
     private fun buildViewModel() = ConstructionInsuranceViewModel(
-        getConstructionFilesUseCase = GetConstructionFilesUseCase(fakeRepository),
+        getConstructionFilesPageUseCase = GetConstructionFilesPageUseCase(fakeRepository),
         getIdentityInfoUseCase = GetIdentityInfoUseCase(fakeUserRepository)
     )
 
@@ -80,25 +83,33 @@ class ConstructionInsuranceViewModelTest {
     }
 
     @Test
-    fun executeSearch_passesSearchParametersToUseCase() = runTest {
+    fun executeSearch_forwardsSearchFieldsAsEqFiltersToThePageQuery() = runTest {
         val viewModel = buildViewModel()
 
         viewModel.sendIntent(ConstructionInsuranceIntent.OnFileNoQueryChanged("1234"))
         viewModel.sendIntent(ConstructionInsuranceIntent.OnReqNoQueryChanged("5678"))
         viewModel.sendIntent(ConstructionInsuranceIntent.ExecuteSearch)
 
-        assertEquals("1234", fakeRepository.searchParam?.fileNo)
-        assertEquals("5678", fakeRepository.searchParam?.reqNo)
+        val filters = fakeRepository.lastPageQuery?.filters.orEmpty()
+        assertEquals(FilterProperty.FILE_NO, filters.getOrNull(0)?.property)
+        assertEquals("1234", filters.getOrNull(0)?.value)
+        assertEquals(FilterProperty.REQ_NO, filters.getOrNull(1)?.property)
+        assertEquals("5678", filters.getOrNull(1)?.value)
+        assertEquals("1234", viewModel.uiState.value.appliedFileNoQuery)
+        assertEquals("5678", viewModel.uiState.value.appliedReqNoQuery)
     }
 
     @Test
-    fun resetSearch_clearsQueries() = runTest {
+    fun resetSearch_clearsQueriesAndAppliedFiltersAndRefreshesUnfiltered() = runTest {
         val viewModel = buildViewModel()
 
         viewModel.sendIntent(ConstructionInsuranceIntent.OnFileNoQueryChanged("1234"))
+        viewModel.sendIntent(ConstructionInsuranceIntent.ExecuteSearch)
         viewModel.sendIntent(ConstructionInsuranceIntent.ResetSearch)
 
         assertEquals("", viewModel.uiState.value.fileNoQuery)
+        assertEquals("", viewModel.uiState.value.appliedFileNoQuery)
+        assertTrue(fakeRepository.lastPageQuery?.filters.orEmpty().isEmpty())
     }
 
     @Test
@@ -108,10 +119,69 @@ class ConstructionInsuranceViewModelTest {
         viewModel.sendIntent(ConstructionInsuranceIntent.ToggleSearchExpanded(true))
         assertTrue(viewModel.uiState.value.isSearchExpanded)
     }
+
+    @Test
+    fun loadNextPage_appendsTheSecondPageAndDetectsEndOfList() = runTest {
+        fakeRepository.allFiles = (1..15L).map { createFile(fileNumber = it) }
+        val viewModel = buildViewModel()
+
+        assertEquals(10, viewModel.uiState.value.items.size)
+        assertFalse(viewModel.uiState.value.endReached)
+
+        viewModel.sendIntent(ConstructionInsuranceIntent.LoadNextPage)
+
+        assertEquals(15, viewModel.uiState.value.items.size)
+        assertTrue(viewModel.uiState.value.endReached)
+    }
+
+    @Test
+    fun retryNextPage_recoversAfterAFailedPage() = runTest {
+        fakeRepository.allFiles = (1..15L).map { createFile(fileNumber = it) }
+        val viewModel = buildViewModel()
+        fakeRepository.shouldThrowOnPage = true
+
+        viewModel.sendIntent(ConstructionInsuranceIntent.LoadNextPage)
+        assertEquals(10, viewModel.uiState.value.items.size)
+
+        fakeRepository.shouldThrowOnPage = false
+        viewModel.sendIntent(ConstructionInsuranceIntent.RetryNextPage)
+
+        assertEquals(15, viewModel.uiState.value.items.size)
+    }
+
+    private fun createFile(fileNumber: Long) = ConstructionFileDN(
+        fileNumber = fileNumber,
+        requestNumber = 881902L,
+        requestDate = null,
+        workshopInfo = null,
+        postalCode = null,
+        address = null,
+        mainPlaque = null,
+        subPlaque = null,
+        block = null,
+        propertyConstruction = null,
+        apartment = null,
+        trade = null,
+        partPlaque = null,
+        sumOfComplications = null,
+        debitNumber = null,
+        totalPayment = 486000000L,
+        meterage = null,
+        debitStatusCode = "51",
+        protrusion = null,
+        applicationFees = null,
+        residentialServiceInfrastructureFees = null,
+        excessDensitySurchargeFees = null,
+        increasePropertyValue = null,
+        issuanceFencingWallConstructionFees = null,
+        coveredClause3Fees = null,
+        article100 = null,
+        paymentDeadLine = null,
+    )
 }
 
 private class FakeConstructionInsuranceRepository : ConstructionInsuranceRepository {
-    var files = listOf(
+    var allFiles = listOf(
         ConstructionFileDN(
             fileNumber = 124037L,
             requestNumber = 881902L,
@@ -142,21 +212,26 @@ private class FakeConstructionInsuranceRepository : ConstructionInsuranceReposit
             paymentDeadLine = null,
         )
     )
-    var searchParam: ConstructionFileSearchParamsDN? = null
+    var lastPageQuery: ApiQueryParamDN? = null
+    var shouldThrowOnPage = false
 
     override fun getConstructionFiles(
         search: ConstructionFileSearchParamsDN?
     ): Flow<List<ConstructionFileDN>> = flow {
-        searchParam = search
-        emit(files)
+        emit(allFiles)
     }
 
-    override fun getBeneficiariesWorkshop(
-        requestNumber: Long?,
-        fileNumber: Long?,
-        requestDate: String?,
-    ): Flow<List<BeneficiaryConstructionDN>> = flow {
-        emit(emptyList())
+    override fun getConstructionFilesPage(query: ApiQueryParamDN): Flow<PageDN<ConstructionFileDN>> = flow {
+        lastPageQuery = query
+        if (shouldThrowOnPage) error("network")
+        val start = query.start
+        val end = (start + query.limit).coerceAtMost(allFiles.size)
+        val slice = if (start >= allFiles.size) emptyList() else allFiles.subList(start, end)
+        emit(PageDN(items = slice, total = allFiles.size))
+    }
+
+    override fun getBeneficiariesWorkshopPage(query: ApiQueryParamDN): Flow<PageDN<BeneficiaryConstructionDN>> = flow {
+        emit(PageDN(items = emptyList(), total = 0))
     }
 
     override fun getPaymentSheetConstructionInfo(debitNumber: String): Flow<List<PaymentSheetConstructionFileDN>> =
@@ -175,11 +250,12 @@ private class FakeConstructionInsuranceRepository : ConstructionInsuranceReposit
         emit("OK")
     }
 
-    override fun getInstallmentLetterList(
+    override fun getInstallmentLetterListPage(
         workshopId: String,
-        branchId: String
-    ): Flow<List<InstallmentLetterDN>> = flow {
-        emit(emptyList())
+        branchId: String,
+        query: ApiQueryParamDN,
+    ): Flow<PageDN<InstallmentLetterDN>> = flow {
+        emit(PageDN(items = emptyList(), total = 0))
     }
 }
 

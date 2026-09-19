@@ -7,27 +7,34 @@ import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.contrac
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.contract.ConstructionInsuranceState
 import com.tamin.taminhamrah.mapper.toPR
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileSearchParamsDN
-import com.tamin.taminhamrah.useCases.constructionInsurance.GetConstructionFilesUseCase
+import com.tamin.taminhamrah.model.constructionInsurance.toApiQueryParam
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.paging.Paginator
+import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
+import com.tamin.taminhamrah.useCases.constructionInsurance.GetConstructionFilesPageUseCase
 import com.tamin.taminhamrah.useCases.user.GetIdentityInfoUseCase
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import org.jetbrains.compose.resources.getString
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.Res.string
 import taminx.core.core_ui.operation_request_selected
-import taminx.core.core_ui.workshop_error_receive_data
 
 class ConstructionInsuranceViewModel(
-    private val getConstructionFilesUseCase: GetConstructionFilesUseCase,
+    private val getConstructionFilesPageUseCase: GetConstructionFilesPageUseCase,
     private val getIdentityInfoUseCase: GetIdentityInfoUseCase,
 ) : BaseViewModel<ConstructionInsuranceState, ConstructionInsurancePartialState, ConstructionInsuranceEvent, ConstructionInsuranceIntent>(
     initialState = ConstructionInsuranceState(isLoading = true)
 ) {
+
+    private val paginator = Paginator(
+        loadPage = { query -> getConstructionFilesPageUseCase(query).first() },
+    )
 
     init {
         sendIntent(ConstructionInsuranceIntent.LoadData)
@@ -38,13 +45,11 @@ class ConstructionInsuranceViewModel(
             val state = uiState.value
             when (intent) {
                 is ConstructionInsuranceIntent.LoadData -> {
-                    emit(ConstructionInsurancePartialState.Loading(true))
-                    emitAll(merge(loadIdentity(), fetchData(search = null)))
+                    emitAll(merge(loadIdentity(), observePaging(), flow { paginator.loadNext() }))
                 }
 
                 is ConstructionInsuranceIntent.Refresh -> {
-                    emit(ConstructionInsurancePartialState.Loading(true))
-                    emitAll(fetchData(search = buildSearchParams(state), appliedFrom = state))
+                    emitAll(applySearch(state))
                 }
 
                 is ConstructionInsuranceIntent.ToggleSearchExpanded -> {
@@ -96,8 +101,7 @@ class ConstructionInsuranceViewModel(
                 }
 
                 is ConstructionInsuranceIntent.ExecuteSearch -> {
-                    emit(ConstructionInsurancePartialState.Loading(true))
-                    emitAll(fetchData(search = buildSearchParams(state), appliedFrom = state))
+                    emitAll(applySearch(state))
                 }
 
                 is ConstructionInsuranceIntent.ResetSearch -> {
@@ -109,8 +113,8 @@ class ConstructionInsuranceViewModel(
                             branchCode = ""
                         )
                     )
-                    emit(ConstructionInsurancePartialState.Loading(true))
-                    emitAll(fetchData(search = null))
+                    emit(ConstructionInsurancePartialState.AppliedQueryChanged())
+                    paginator.refresh(query = ApiQueryParamDN())
                 }
 
                 is ConstructionInsuranceIntent.OnDetailClick -> {
@@ -123,6 +127,14 @@ class ConstructionInsuranceViewModel(
 
                 is ConstructionInsuranceIntent.ToggleNoticeVisibility -> {
                     emit(ConstructionInsurancePartialState.NoticeVisibilityToggled(!state.isNoticeVisible))
+                }
+
+                is ConstructionInsuranceIntent.LoadNextPage -> {
+                    paginator.loadNext()
+                }
+
+                is ConstructionInsuranceIntent.RetryNextPage -> {
+                    paginator.retry()
                 }
             }
         }
@@ -144,32 +156,33 @@ class ConstructionInsuranceViewModel(
     }.catch { /* degraded to blank if fails */ }
 
     /**
-     * @param appliedFrom The state whose four query fields become the "applied" snapshot the
-     * filter chip row reads once this fetch lands — null (LoadData/ResetSearch) means no filter is
-     * applied, whatever the still-being-edited text fields currently hold.
+     * The four query fields of [state] become both the new "applied" snapshot (for the filter chip
+     * row) and the paginator's next base query — a blank field is simply omitted as a filter, so an
+     * all-blank [state] naturally clears back to an unfiltered list.
      */
-    private fun fetchData(
-        search: ConstructionFileSearchParamsDN?,
-        appliedFrom: ConstructionInsuranceState? = null,
-    ): Flow<ConstructionInsurancePartialState> = flow {
-        emitAll(
-            getConstructionFilesUseCase(search)
-                .map { list ->
-                    val prItems = list.map { it.toPR() }.toImmutableList()
-                    ConstructionInsurancePartialState.DataLoaded(
-                        items = prItems,
-                        appliedFileNo = appliedFrom?.fileNoQuery.orEmpty(),
-                        appliedReqNo = appliedFrom?.reqNoQuery.orEmpty(),
-                        appliedWorkshopId = appliedFrom?.workshopIdQuery.orEmpty(),
-                        appliedBranchCode = appliedFrom?.branchCodeQuery.orEmpty(),
-                    ) as ConstructionInsurancePartialState
-                }
-                .catch { e ->
-                    val message = e.message ?: getString(string.workshop_error_receive_data)
-                    // No inline error view for this list — a toast is enough, per design.
-                    sendEvent(ConstructionInsuranceEvent.ShowToast(message))
-                    emit(ConstructionInsurancePartialState.Error(message))
-                }
+    private fun applySearch(state: ConstructionInsuranceState): Flow<ConstructionInsurancePartialState> = flow {
+        emit(
+            ConstructionInsurancePartialState.AppliedQueryChanged(
+                appliedFileNo = state.fileNoQuery,
+                appliedReqNo = state.reqNoQuery,
+                appliedWorkshopId = state.workshopIdQuery,
+                appliedBranchCode = state.branchCodeQuery,
+            )
+        )
+        paginator.refresh(query = buildSearchParams(state).toApiQueryParam())
+    }
+
+    private fun observePaging(): Flow<ConstructionInsurancePartialState> = paginator.state.map { paging ->
+        val errorMessage = paging.error?.toSingleLineMessage()
+        if (errorMessage != null && paging.items.isEmpty()) {
+            sendEvent(ConstructionInsuranceEvent.ShowToast(errorMessage))
+        }
+        ConstructionInsurancePartialState.PagingChanged(
+            items = paging.items.map { it.toPR() }.toImmutableList(),
+            isLoadingFirstPage = paging.isLoadingFirstPage,
+            isLoadingNextPage = paging.isLoadingNextPage,
+            endReached = paging.endReached,
+            error = errorMessage,
         )
     }
 
@@ -193,20 +206,21 @@ class ConstructionInsuranceViewModel(
         currentState: ConstructionInsuranceState,
         partialState: ConstructionInsurancePartialState
     ): ConstructionInsuranceState = when (partialState) {
-        is ConstructionInsurancePartialState.Loading -> currentState.copy(
-            isLoading = partialState.isLoading,
-            error = null
-        )
-
         is ConstructionInsurancePartialState.IdentityLoaded -> currentState.copy(
             userName = partialState.userName,
             nationalCode = partialState.nationalCode
         )
 
-        is ConstructionInsurancePartialState.DataLoaded -> currentState.copy(
-            isLoading = false,
+        is ConstructionInsurancePartialState.PagingChanged -> currentState.copy(
             items = partialState.items,
+            isLoading = partialState.isLoadingFirstPage,
+            isLoadingNextPage = partialState.isLoadingNextPage,
+            endReached = partialState.endReached,
             error = null,
+            paginationError = partialState.error,
+        )
+
+        is ConstructionInsurancePartialState.AppliedQueryChanged -> currentState.copy(
             appliedFileNoQuery = partialState.appliedFileNo,
             appliedReqNoQuery = partialState.appliedReqNo,
             appliedWorkshopIdQuery = partialState.appliedWorkshopId,

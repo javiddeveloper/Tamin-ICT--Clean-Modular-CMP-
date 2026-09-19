@@ -9,9 +9,12 @@ import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileDN
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileSearchParamsDN
 import com.tamin.taminhamrah.model.constructionInsurance.InstallmentLetterDN
 import com.tamin.taminhamrah.model.constructionInsurance.PaymentSheetConstructionFileDN
+import com.tamin.taminhamrah.model.paging.PageDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.repository.constructionInsurance.ConstructionInsuranceRepository
-import com.tamin.taminhamrah.useCases.constructionInsurance.GetBeneficiariesWorkshopUseCase
+import com.tamin.taminhamrah.useCases.constructionInsurance.GetBeneficiariesWorkshopPageUseCase
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -19,6 +22,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -46,18 +50,18 @@ class BeneficiariesViewModelTest {
     }
 
     private fun buildViewModel() = BeneficiariesViewModel(
-        getBeneficiariesWorkshopUseCase = GetBeneficiariesWorkshopUseCase(fakeRepository),
+        getBeneficiariesWorkshopPageUseCase = GetBeneficiariesWorkshopPageUseCase(fakeRepository),
+    )
+
+    private fun sampleBeneficiary(nationalCode: String = "0930123450") = BeneficiaryConstructionDN(
+        nationalCode = nationalCode, ownerType = "01", requestNumber = 123L,
+        fileNumber = 456L, requestDate = "14020901", name = "علی",
+        lastName = "توکلی", mobile = "09123456700",
     )
 
     @Test
     fun load_populatesItemsAndSeedsHeader() = runTest {
-        fakeRepository.beneficiariesResult = listOf(
-            BeneficiaryConstructionDN(
-                nationalCode = "0930123450", ownerType = "01", requestNumber = 123L,
-                fileNumber = 456L, requestDate = "14020901", name = "علی",
-                lastName = "توکلی", mobile = "09123456700",
-            )
-        )
+        fakeRepository.allBeneficiaries = listOf(sampleBeneficiary())
         val viewModel = buildViewModel()
 
         viewModel.sendIntent(BeneficiariesIntent.Load(requestNumber = 123L, fileNumber = 456L, requestDate = "14020901"))
@@ -68,7 +72,16 @@ class BeneficiariesViewModelTest {
         assertEquals(123L, state.requestNumber)
         assertEquals(456L, state.fileNumber)
         assertFalse(state.isLoading)
-        assertEquals(123L, fakeRepository.lastBeneficiariesRequestNumber)
+    }
+
+    @Test
+    fun load_forwardsNonZeroIdentifiersAsEqFilters() = runTest {
+        val viewModel = buildViewModel()
+
+        viewModel.sendIntent(BeneficiariesIntent.Load(requestNumber = 123L, fileNumber = 0L, requestDate = null))
+
+        val filterProperties = fakeRepository.lastPageQuery?.filters.orEmpty().map { it.property }
+        assertEquals(listOf(FilterProperty.REQ_NO), filterProperties)
     }
 
     @Test
@@ -83,30 +96,46 @@ class BeneficiariesViewModelTest {
 
     @Test
     fun load_error_setsErrorState() = runTest {
-        fakeRepository.shouldThrowError = true
+        fakeRepository.shouldThrowOnPage = true
         val viewModel = buildViewModel()
 
         viewModel.sendIntent(BeneficiariesIntent.Load(requestNumber = 1L, fileNumber = 1L, requestDate = null))
 
-        assertNotNull(viewModel.uiState.value.error)
+        assertNotNull(viewModel.uiState.value.paginationError)
         assertFalse(viewModel.uiState.value.isLoading)
     }
 
     @Test
-    fun retry_reloadsBeneficiaries() = runTest {
+    fun loadNextPage_appendsTheSecondPageAndDetectsEndOfList() = runTest {
+        fakeRepository.allBeneficiaries = (1..15).map { sampleBeneficiary(nationalCode = "093012345$it") }
         val viewModel = buildViewModel()
-        viewModel.sendIntent(BeneficiariesIntent.Load(requestNumber = 1L, fileNumber = 1L, requestDate = null))
 
-        fakeRepository.beneficiariesResult = listOf(
-            BeneficiaryConstructionDN(
-                nationalCode = null, ownerType = "02", requestNumber = 1L, fileNumber = 1L,
-                requestDate = null, name = "زهرا", lastName = "احمدی", mobile = null,
-            )
-        )
-        viewModel.sendIntent(BeneficiariesIntent.Retry)
+        viewModel.sendIntent(BeneficiariesIntent.Load(requestNumber = null, fileNumber = null, requestDate = null))
+        assertEquals(10, viewModel.uiState.value.items.size)
+        assertFalse(viewModel.uiState.value.endReached)
 
-        assertEquals(1, viewModel.uiState.value.items.size)
-        assertEquals("زهرا", viewModel.uiState.value.items.first().name)
+        viewModel.sendIntent(BeneficiariesIntent.LoadNextPage)
+
+        assertEquals(15, viewModel.uiState.value.items.size)
+        assertTrue(viewModel.uiState.value.endReached)
+    }
+
+    @Test
+    fun retryNextPage_recoversAfterAFailedPage() = runTest {
+        fakeRepository.allBeneficiaries = (1..15).map { sampleBeneficiary(nationalCode = "093012345$it") }
+        val viewModel = buildViewModel()
+        viewModel.sendIntent(BeneficiariesIntent.Load(requestNumber = null, fileNumber = null, requestDate = null))
+
+        fakeRepository.shouldThrowOnPage = true
+        viewModel.sendIntent(BeneficiariesIntent.LoadNextPage)
+        assertEquals(10, viewModel.uiState.value.items.size)
+        assertNotNull(viewModel.uiState.value.paginationError)
+
+        fakeRepository.shouldThrowOnPage = false
+        viewModel.sendIntent(BeneficiariesIntent.RetryNextPage)
+
+        assertEquals(15, viewModel.uiState.value.items.size)
+        assertEquals(null, viewModel.uiState.value.paginationError)
     }
 
     @Test
@@ -122,27 +151,30 @@ class BeneficiariesViewModelTest {
 
 private class FakeConstructionInsuranceRepository : ConstructionInsuranceRepository {
     var constructionFilesResult: List<ConstructionFileDN> = emptyList()
-    var beneficiariesResult: List<BeneficiaryConstructionDN> = emptyList()
+    var allBeneficiaries: List<BeneficiaryConstructionDN> = emptyList()
     var paymentSheetsResult: List<PaymentSheetConstructionFileDN> = emptyList()
     var certificatePdfResult: PdfDownloadDN = PdfDownloadDN(pdf = null)
     var issuanceMessageResult: String = "OK"
     var installmentLettersResult: List<InstallmentLetterDN> = emptyList()
 
-    var shouldThrowError = false
-    var lastBeneficiariesRequestNumber: Long? = null
+    var shouldThrowOnPage = false
+    var lastPageQuery: ApiQueryParamDN? = null
 
     override fun getConstructionFiles(search: ConstructionFileSearchParamsDN?): Flow<List<ConstructionFileDN>> = flow {
         emit(constructionFilesResult)
     }
 
-    override fun getBeneficiariesWorkshop(
-        requestNumber: Long?,
-        fileNumber: Long?,
-        requestDate: String?,
-    ): Flow<List<BeneficiaryConstructionDN>> = flow {
-        lastBeneficiariesRequestNumber = requestNumber
-        if (shouldThrowError) throw RuntimeException("Error")
-        emit(beneficiariesResult)
+    override fun getConstructionFilesPage(query: ApiQueryParamDN): Flow<PageDN<ConstructionFileDN>> = flow {
+        emit(PageDN(items = constructionFilesResult, total = constructionFilesResult.size))
+    }
+
+    override fun getBeneficiariesWorkshopPage(query: ApiQueryParamDN): Flow<PageDN<BeneficiaryConstructionDN>> = flow {
+        lastPageQuery = query
+        if (shouldThrowOnPage) error("network")
+        val start = query.start
+        val end = (start + query.limit).coerceAtMost(allBeneficiaries.size)
+        val slice = if (start >= allBeneficiaries.size) emptyList() else allBeneficiaries.subList(start, end)
+        emit(PageDN(items = slice, total = allBeneficiaries.size))
     }
 
     override fun getPaymentSheetConstructionInfo(debitNumber: String): Flow<List<PaymentSheetConstructionFileDN>> = flow {
@@ -157,7 +189,11 @@ private class FakeConstructionInsuranceRepository : ConstructionInsuranceReposit
         emit(issuanceMessageResult)
     }
 
-    override fun getInstallmentLetterList(workshopId: String, branchId: String): Flow<List<InstallmentLetterDN>> = flow {
-        emit(installmentLettersResult)
+    override fun getInstallmentLetterListPage(
+        workshopId: String,
+        branchId: String,
+        query: ApiQueryParamDN,
+    ): Flow<PageDN<InstallmentLetterDN>> = flow {
+        emit(PageDN(items = installmentLettersResult, total = installmentLettersResult.size))
     }
 }

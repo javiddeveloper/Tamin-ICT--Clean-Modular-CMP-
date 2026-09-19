@@ -25,12 +25,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 
-/**
- * Exercises the real cache-then-network ([getConstructionFiles]) and network-only (every other
- * method) code paths of [ConstructionInsuranceRepositoryImpl] — not the `USE_MOCK_DATA` UI-testing
- * scaffold that sits in front of them. [USE_MOCK_DATA] is flipped to `false` for the duration of
- * this test class and restored afterwards so the app's own default (mock data on) is unaffected.
- */
 class ConstructionInsuranceRepositoryImplTest {
 
     private lateinit var remoteDataSource: FakeConstructionInsuranceRemoteDataSource
@@ -104,12 +98,6 @@ class ConstructionInsuranceRepositoryImplTest {
     fun `getConstructionFiles should forward non-blank search fields as EQ filters`() = runTest {
         val search = ConstructionFileSearchParamsDN(fileNo = "1234", reqNo = "5678", workshopId = null, branchCode = null)
 
-        // .first() would cancel the flow right after its first (local-cache) emission, before the
-        // flow body ever reaches the remote call below it. Here local and remote both resolve to
-        // an empty list, so the post-remote re-emission is swallowed by .distinctUntilChanged() —
-        // there is only ever one item on the wire — but the remote call (and buildQuery(search))
-        // has already run by the time it arrives, since Turbine's unlimited buffer never makes the
-        // producer wait on a slow consumer.
         repository.getConstructionFiles(search).test {
             awaitItem()
             cancelAndIgnoreRemainingEvents()
@@ -120,17 +108,52 @@ class ConstructionInsuranceRepositoryImplTest {
     }
 
     @Test
-    fun `getBeneficiariesWorkshop should emit mapped beneficiaries from remote`() = runTest {
+    fun `getConstructionFilesPage should emit remote items with the backend total`() = runTest {
+        remoteDataSource.constructionFilesResult =
+            ListData(total = 37, list = listOf(createFileDTO(fileNumber = 2L)))
+        val query = ApiQueryParamDN(page = 1, start = 0, limit = 10)
+
+        repository.getConstructionFilesPage(query).test {
+            val page = awaitItem()
+            assertEquals(listOf(2L), page.items.map { it.fileNumber })
+            assertEquals(37, page.total)
+            awaitComplete()
+        }
+        assertEquals(query, remoteDataSource.lastQuery)
+    }
+
+    @Test
+    fun `getConstructionFilesPage should propagate remote errors`() = runTest {
+        remoteDataSource.shouldThrowError = true
+
+        repository.getConstructionFilesPage(ApiQueryParamDN()).test {
+            awaitError()
+        }
+    }
+
+    @Test
+    fun `getBeneficiariesWorkshopPage should emit mapped items with the backend total`() = runTest {
         remoteDataSource.beneficiariesResult = ListData(
-            total = 1,
+            total = 12,
             list = listOf(BeneficiaryConstructionDTO(name = "علی", lastName = "توکلی"))
         )
+        val query = ApiQueryParamDN(page = 1, start = 0, limit = 10)
 
-        val result = repository.getBeneficiariesWorkshop(requestNumber = 1L, fileNumber = 2L, requestDate = null).first()
+        val page = repository.getBeneficiariesWorkshopPage(query).first()
 
-        assertEquals(1, result.size)
-        assertEquals("علی", result.first().name)
-        assertEquals(1L, remoteDataSource.lastBeneficiariesRequestNumber)
+        assertEquals(1, page.items.size)
+        assertEquals("علی", page.items.first().name)
+        assertEquals(12, page.total)
+        assertEquals(query, remoteDataSource.lastBeneficiariesQuery)
+    }
+
+    @Test
+    fun `getBeneficiariesWorkshopPage should propagate remote errors`() = runTest {
+        remoteDataSource.shouldThrowError = true
+
+        assertFailsWith<RuntimeException> {
+            repository.getBeneficiariesWorkshopPage(ApiQueryParamDN()).first()
+        }
     }
 
     @Test
@@ -182,18 +205,30 @@ class ConstructionInsuranceRepositoryImplTest {
     }
 
     @Test
-    fun `getInstallmentLetterList should emit mapped installment letters from remote`() = runTest {
+    fun `getInstallmentLetterListPage should emit mapped items with the backend total`() = runTest {
         remoteDataSource.installmentLettersResult = ListData(
-            total = 1,
+            total = 5,
             list = listOf(InstallmentLetterDTO(debitNumber = "77640000001", remainingAmount = 400_000L))
         )
+        val query = ApiQueryParamDN(page = 0, start = 0, limit = 10)
 
-        val result = repository.getInstallmentLetterList("14020901", "6400").first()
+        val page = repository.getInstallmentLetterListPage("14020901", "6400", query).first()
 
-        assertEquals(1, result.size)
-        assertEquals("77640000001", result.first().debitNumber)
+        assertEquals(1, page.items.size)
+        assertEquals("77640000001", page.items.first().debitNumber)
+        assertEquals(5, page.total)
         assertEquals("14020901", remoteDataSource.lastInstallmentWorkshopId)
         assertEquals("6400", remoteDataSource.lastInstallmentBranchId)
+        assertEquals(query, remoteDataSource.lastInstallmentQuery)
+    }
+
+    @Test
+    fun `getInstallmentLetterListPage should propagate remote errors`() = runTest {
+        remoteDataSource.shouldThrowError = true
+
+        assertFailsWith<RuntimeException> {
+            repository.getInstallmentLetterListPage("1", "2", ApiQueryParamDN()).first()
+        }
     }
 
     private fun createFileDTO(fileNumber: Long) = ConstructionFileDTO(
@@ -225,13 +260,14 @@ class ConstructionInsuranceRepositoryImplTest {
         var thrownError: Throwable = RuntimeException("Remote failure")
 
         var lastQuery: ApiQueryParamDN? = null
-        var lastBeneficiariesRequestNumber: Long? = null
+        var lastBeneficiariesQuery: ApiQueryParamDN? = null
         var lastPaymentSheetDebitNumber: String? = null
         var lastCertificateDebitNumber: String? = null
         var lastCertificateBranchCode: String? = null
         var lastIssuanceDebitNumber: String? = null
         var lastInstallmentWorkshopId: String? = null
         var lastInstallmentBranchId: String? = null
+        var lastInstallmentQuery: ApiQueryParamDN? = null
 
         override suspend fun getConstructionFiles(query: ApiQueryParamDN): ListData<ConstructionFileDTO> {
             lastQuery = query
@@ -239,12 +275,8 @@ class ConstructionInsuranceRepositoryImplTest {
             return constructionFilesResult
         }
 
-        override suspend fun getBeneficiariesWorkshop(
-            requestNumber: Long?,
-            fileNumber: Long?,
-            requestDate: String?,
-        ): ListData<BeneficiaryConstructionDTO> {
-            lastBeneficiariesRequestNumber = requestNumber
+        override suspend fun getBeneficiariesWorkshop(query: ApiQueryParamDN): ListData<BeneficiaryConstructionDTO> {
+            lastBeneficiariesQuery = query
             if (shouldThrowError) throw thrownError
             return beneficiariesResult
         }
@@ -268,9 +300,14 @@ class ConstructionInsuranceRepositoryImplTest {
             return issuanceMessageResult
         }
 
-        override suspend fun getInstallmentLetterList(workshopId: String, branchId: String): ListData<InstallmentLetterDTO> {
+        override suspend fun getInstallmentLetterList(
+            workshopId: String,
+            branchId: String,
+            query: ApiQueryParamDN,
+        ): ListData<InstallmentLetterDTO> {
             lastInstallmentWorkshopId = workshopId
             lastInstallmentBranchId = branchId
+            lastInstallmentQuery = query
             if (shouldThrowError) throw thrownError
             return installmentLettersResult
         }

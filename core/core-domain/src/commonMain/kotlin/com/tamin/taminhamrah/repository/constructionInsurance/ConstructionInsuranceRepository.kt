@@ -5,7 +5,9 @@ import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileDN
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileSearchParamsDN
 import com.tamin.taminhamrah.model.constructionInsurance.InstallmentLetterDN
 import com.tamin.taminhamrah.model.constructionInsurance.PaymentSheetConstructionFileDN
+import com.tamin.taminhamrah.model.paging.PageDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import kotlinx.coroutines.flow.Flow
 
 interface ConstructionInsuranceRepository {
@@ -13,12 +15,14 @@ interface ConstructionInsuranceRepository {
         search: ConstructionFileSearchParamsDN? = null
     ): Flow<List<ConstructionFileDN>>
 
-    /** ذینفعان کارگاه — network-only, reached from the عملیات menu's «ذینفعان کارگاه» option. */
-    fun getBeneficiariesWorkshop(
-        requestNumber: Long?,
-        fileNumber: Long?,
-        requestDate: String? = null,
-    ): Flow<List<BeneficiaryConstructionDN>>
+    /** پرونده‌های ساختمانی list screen — paged version of [getConstructionFiles], per [[Pagination]]. */
+    fun getConstructionFilesPage(query: ApiQueryParamDN): Flow<PageDN<ConstructionFileDN>>
+
+    /**
+     * ذینفعان کارگاه — network-only, reached from the عملیات menu's «ذینفعان کارگاه» option. Paged
+     * per [[Pagination]]; [query]'s filters carry request/file number and request date.
+     */
+    fun getBeneficiariesWorkshopPage(query: ApiQueryParamDN): Flow<PageDN<BeneficiaryConstructionDN>>
 
     /** صدور و مدیریت برگه پرداخت — payment sheets already issued for [debitNumber]. */
     fun getPaymentSheetConstructionInfo(debitNumber: String): Flow<List<PaymentSheetConstructionFileDN>>
@@ -29,6 +33,10 @@ interface ConstructionInsuranceRepository {
     /** صدور برگه پرداخت. Emits the server's confirmation message on success, throws on failure. */
     fun issuancePaymentSheet(debitNumber: String): Flow<String>
 
-    /** مدیریت پرداخت اقساط — installment (debit) letters for one workshop/branch. */
-    fun getInstallmentLetterList(workshopId: String, branchId: String): Flow<List<InstallmentLetterDN>>
+    /** مدیریت پرداخت اقساط — installment (debit) letters for one workshop/branch. Paged per [[Pagination]]. */
+    fun getInstallmentLetterListPage(
+        workshopId: String,
+        branchId: String,
+        query: ApiQueryParamDN,
+    ): Flow<PageDN<InstallmentLetterDN>>
 }

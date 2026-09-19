@@ -1,16 +1,14 @@
 package com.tamin.taminhamrah.useCases.constructionInsurance
 
 import com.tamin.taminhamrah.model.constructionInsurance.BeneficiaryConstructionDN
+import com.tamin.taminhamrah.model.paging.PageDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.constructionInsurance.ConstructionInsuranceRepository
 import kotlinx.coroutines.flow.Flow
 
-class GetBeneficiariesWorkshopUseCase(
+class GetBeneficiariesWorkshopPageUseCase(
     private val repository: ConstructionInsuranceRepository
 ) {
-    operator fun invoke(
-        requestNumber: Long?,
-        fileNumber: Long?,
-        requestDate: String? = null,
-    ): Flow<List<BeneficiaryConstructionDN>> =
-        repository.getBeneficiariesWorkshop(requestNumber, fileNumber, requestDate)
+    operator fun invoke(query: ApiQueryParamDN): Flow<PageDN<BeneficiaryConstructionDN>> =
+        repository.getBeneficiariesWorkshopPage(query)
 }

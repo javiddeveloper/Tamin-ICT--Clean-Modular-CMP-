@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -50,6 +51,8 @@ import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.ToasterState
 import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.orDash
+import com.tamin.taminhamrah.ui.paging.OnLoadMore
+import com.tamin.taminhamrah.ui.paging.PagingFooter
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -58,7 +61,6 @@ import com.tamin.taminhamrah.util.toFormattedDate
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.action_back
-import taminx.core.core_ui.action_retry
 import taminx.core.core_ui.deferred_installment_rial
 import taminx.core.core_ui.installment_letter_empty
 import taminx.core.core_ui.installment_letter_title
@@ -119,6 +121,13 @@ fun InstallmentLetterScreen(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
+    val listState = rememberLazyListState()
+
+    listState.OnLoadMore(
+        enabled = !state.endReached && state.paginationError == null,
+    ) {
+        onIntent(InstallmentLetterIntent.LoadNextPage)
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -143,6 +152,13 @@ fun InstallmentLetterScreen(
                     modifier = Modifier.fillMaxSize(),
                 )
 
+                state.items.isEmpty() && state.paginationError != null -> PagingFooter(
+                    isLoadingNextPage = false,
+                    error = state.paginationError,
+                    onRetry = { onIntent(InstallmentLetterIntent.RetryNextPage) },
+                    modifier = Modifier.align(Alignment.Center),
+                )
+
                 state.items.isEmpty() -> EmptyStateMessage(
                     icon = Icons.AutoMirrored.Outlined.ReceiptLong,
                     title = stringResource(CoreRes.string.installment_letter_empty),
@@ -151,6 +167,7 @@ fun InstallmentLetterScreen(
                 )
 
                 else -> LazyColumn(
+                    state = listState,
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(
                         horizontal = Spacing.page,
@@ -162,6 +179,13 @@ fun InstallmentLetterScreen(
                         items = state.items,
                         key = { it.debitNumber ?: it.hashCode() }) { letter ->
                         InstallmentLetterCard(item = letter)
+                    }
+                    item {
+                        PagingFooter(
+                            isLoadingNextPage = state.isLoadingNextPage,
+                            error = state.paginationError,
+                            onRetry = { onIntent(InstallmentLetterIntent.RetryNextPage) },
+                        )
                     }
                 }
             }

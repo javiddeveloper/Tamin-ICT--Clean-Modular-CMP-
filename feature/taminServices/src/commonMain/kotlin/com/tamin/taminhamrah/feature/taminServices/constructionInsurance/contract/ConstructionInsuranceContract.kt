@@ -7,10 +7,17 @@ import kotlinx.collections.immutable.persistentListOf
 
 @Immutable
 data class ConstructionInsuranceState(
+    /** True only while the first page is in flight — drives the full-screen skeleton. */
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val items: ImmutableList<ConstructionFilePR> = persistentListOf(),
     val error: String? = null,
+    /** True while a further page is in flight — drives the list-footer spinner, not the skeleton. */
+    val isLoadingNextPage: Boolean = false,
+    /** No more pages left to ask for, or none exist yet — hides the load-more trigger. */
+    val endReached: Boolean = false,
+    /** A page request past the first one failed — shown in the list footer with a retry action. */
+    val paginationError: String? = null,
     val isSearchExpanded: Boolean = false,
     val fileNoQuery: String = "",
     val reqNoQuery: String = "",
@@ -45,6 +52,8 @@ sealed interface ConstructionInsuranceIntent {
     data class OnActionClick(val item: ConstructionFilePR) : ConstructionInsuranceIntent
 
     data object ToggleNoticeVisibility : ConstructionInsuranceIntent
+    data object LoadNextPage : ConstructionInsuranceIntent
+    data object RetryNextPage : ConstructionInsuranceIntent
 }
 
 sealed interface ConstructionInsuranceEvent {
@@ -53,13 +62,18 @@ sealed interface ConstructionInsuranceEvent {
 }
 
 sealed interface ConstructionInsurancePartialState {
-    data class Loading(val isLoading: Boolean) : ConstructionInsurancePartialState
     data class IdentityLoaded(
         val userName: String,
         val nationalCode: String
     ) : ConstructionInsurancePartialState
-    data class DataLoaded(
+    data class PagingChanged(
         val items: ImmutableList<ConstructionFilePR>,
+        val isLoadingFirstPage: Boolean,
+        val isLoadingNextPage: Boolean,
+        val endReached: Boolean,
+        val error: String?,
+    ) : ConstructionInsurancePartialState
+    data class AppliedQueryChanged(
         val appliedFileNo: String = "",
         val appliedReqNo: String = "",
         val appliedWorkshopId: String = "",

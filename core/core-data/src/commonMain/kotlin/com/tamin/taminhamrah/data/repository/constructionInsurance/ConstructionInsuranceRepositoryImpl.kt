@@ -11,6 +11,7 @@ import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileSearchP
 import com.tamin.taminhamrah.model.constructionInsurance.InstallmentLetterDN
 import com.tamin.taminhamrah.model.constructionInsurance.PaymentSheetConstructionFileDN
 import com.tamin.taminhamrah.model.constructionInsurance.WorkshopIdInfoDN
+import com.tamin.taminhamrah.model.paging.PageDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
@@ -57,13 +58,24 @@ internal class ConstructionInsuranceRepositoryImpl(
         }.distinctUntilChanged()
     }
 
-    override fun getBeneficiariesWorkshop(
-        requestNumber: Long?,
-        fileNumber: Long?,
-        requestDate: String?,
-    ): Flow<List<BeneficiaryConstructionDN>> = flow {
-        val result = remoteDataSource.getBeneficiariesWorkshop(requestNumber, fileNumber, requestDate)
-        emit(result.list.orEmpty().map { it.toDomain() })
+    override fun getConstructionFilesPage(query: ApiQueryParamDN): Flow<PageDN<ConstructionFileDN>> = flow {
+        val response = remoteDataSource.getConstructionFiles(query)
+        emit(
+            PageDN(
+                items = response.list.orEmpty().map { it.toDomain() },
+                total = response.total,
+            )
+        )
+    }
+
+    override fun getBeneficiariesWorkshopPage(query: ApiQueryParamDN): Flow<PageDN<BeneficiaryConstructionDN>> = flow {
+        val response = remoteDataSource.getBeneficiariesWorkshop(query)
+        emit(
+            PageDN(
+                items = response.list.orEmpty().map { it.toDomain() },
+                total = response.total,
+            )
+        )
     }
 
     override fun getPaymentSheetConstructionInfo(
@@ -84,12 +96,18 @@ internal class ConstructionInsuranceRepositoryImpl(
         emit(remoteDataSource.issuancePaymentSheet(debitNumber))
     }
 
-    override fun getInstallmentLetterList(
+    override fun getInstallmentLetterListPage(
         workshopId: String,
         branchId: String,
-    ): Flow<List<InstallmentLetterDN>> = flow {
-        val result = remoteDataSource.getInstallmentLetterList(workshopId, branchId)
-        emit(result.list.orEmpty().map { it.toDomain() })
+        query: ApiQueryParamDN,
+    ): Flow<PageDN<InstallmentLetterDN>> = flow {
+        val response = remoteDataSource.getInstallmentLetterList(workshopId, branchId, query)
+        emit(
+            PageDN(
+                items = response.list.orEmpty().map { it.toDomain() },
+                total = response.total,
+            )
+        )
     }
 
     private fun buildQuery(search: ConstructionFileSearchParamsDN?): ApiQueryParamDN {

@@ -6,18 +6,19 @@ import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.install
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.installmentManagement.contract.InstallmentLetterUiState
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.installmentManagement.contract.InstallmentLetterUiState.PartialState
 import com.tamin.taminhamrah.mapper.toPR
+import com.tamin.taminhamrah.paging.Paginator
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
-import com.tamin.taminhamrah.useCases.constructionInsurance.GetInstallmentLetterListUseCase
+import com.tamin.taminhamrah.useCases.constructionInsurance.GetInstallmentLetterListPageUseCase
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 
 class InstallmentLetterViewModel(
-    private val getInstallmentLetterListUseCase: GetInstallmentLetterListUseCase,
+    private val getInstallmentLetterListPageUseCase: GetInstallmentLetterListPageUseCase,
 ) : BaseViewModel<InstallmentLetterUiState, PartialState, InstallmentLetterEvent, InstallmentLetterIntent>(
     initialState = InstallmentLetterUiState()
 ) {
@@ -25,6 +26,10 @@ class InstallmentLetterViewModel(
     private var workshopId: String = ""
     private var branchId: String = ""
     private var hasLoaded = false
+
+    private val paginator = Paginator(
+        loadPage = { query -> getInstallmentLetterListPageUseCase(workshopId, branchId, query).first() },
+    )
 
     override fun handleIntent(intent: InstallmentLetterIntent): Flow<PartialState> =
         when (intent) {
@@ -35,11 +40,17 @@ class InstallmentLetterViewModel(
                     hasLoaded = true
                     workshopId = intent.workshopId
                     branchId = intent.branchId
-                    loadInstallmentLetters(seed = intent)
+                    merge(
+                        flow { emit(PartialState.HeaderSeeded(workshopId, branchId)) },
+                        observePaging(),
+                        flow { paginator.loadNext() },
+                    )
                 }
             }
 
-            InstallmentLetterIntent.Retry -> loadInstallmentLetters(seed = null)
+            InstallmentLetterIntent.LoadNextPage -> flow { paginator.loadNext() }
+
+            InstallmentLetterIntent.RetryNextPage -> flow { paginator.retry() }
 
             InstallmentLetterIntent.OnBackClicked -> {
                 sendEvent(InstallmentLetterEvent.NavigateBack)
@@ -47,19 +58,18 @@ class InstallmentLetterViewModel(
             }
         }
 
-    private fun loadInstallmentLetters(seed: InstallmentLetterIntent.Load?): Flow<PartialState> = flow {
-        seed?.let { emit(PartialState.HeaderSeeded(it.workshopId, it.branchId)) }
-        emit(PartialState.Loading(true))
-        emitAll(
-            getInstallmentLetterListUseCase(workshopId, branchId)
-                .map { list -> PartialState.Loaded(list.map { it.toPR() }.toImmutableList()) as PartialState }
-                .catch { e ->
-                    val message = e.toSingleLineMessage()
-                    sendEvent(InstallmentLetterEvent.ShowError(message))
-                    emit(PartialState.Error(message))
-                }
+    private fun observePaging(): Flow<PartialState> = paginator.state.map { paging ->
+        val errorMessage = paging.error?.toSingleLineMessage()
+        if (errorMessage != null && paging.items.isEmpty()) {
+            sendEvent(InstallmentLetterEvent.ShowError(errorMessage))
+        }
+        PartialState.PagingChanged(
+            items = paging.items.map { it.toPR() }.toImmutableList(),
+            isLoadingFirstPage = paging.isLoadingFirstPage,
+            isLoadingNextPage = paging.isLoadingNextPage,
+            endReached = paging.endReached,
+            error = errorMessage,
         )
-        emit(PartialState.Loading(false))
     }
 
     override fun reduceState(
@@ -71,15 +81,16 @@ class InstallmentLetterViewModel(
             branchId = partialState.branchId,
         )
 
-        is PartialState.Loading -> currentState.copy(isLoading = partialState.isLoading)
+        is PartialState.PagingChanged -> currentState.copy(
+            items = partialState.items,
+            isLoading = partialState.isLoadingFirstPage,
+            isLoadingNextPage = partialState.isLoadingNextPage,
+            endReached = partialState.endReached,
+            error = null,
+            paginationError = partialState.error,
+        )
 
         is PartialState.Error -> currentState.copy(isLoading = false, error = partialState.message)
-
-        is PartialState.Loaded -> currentState.copy(
-            isLoading = false,
-            items = partialState.items,
-            error = null,
-        )
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)

@@ -44,6 +44,8 @@ import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.ToasterState
 import com.tamin.taminhamrah.ui.components.toast.error
+import com.tamin.taminhamrah.ui.paging.OnLoadMore
+import com.tamin.taminhamrah.ui.paging.PagingFooter
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -143,6 +145,12 @@ fun ConstructionInsuranceScreen(
         )
     }
     val listState = rememberLazyListState()
+
+    listState.OnLoadMore(
+        enabled = !state.endReached && state.paginationError == null,
+    ) {
+        onIntent(ConstructionInsuranceIntent.LoadNextPage)
+    }
 
     Box(
         modifier = modifier
@@ -258,9 +266,28 @@ fun ConstructionInsuranceScreen(
                         },
                     )
                 }
+
+                if (state.items.isNotEmpty()) {
+                    item {
+                        PagingFooter(
+                            isLoadingNextPage = state.isLoadingNextPage,
+                            error = state.paginationError,
+                            onRetry = { onIntent(ConstructionInsuranceIntent.RetryNextPage) },
+                        )
+                    }
+                }
             }
 
-            if (!state.isLoading && state.error == null && state.items.isEmpty()) {
+            if (state.items.isEmpty() && state.paginationError != null && !state.isLoading) {
+                item {
+                    PagingFooter(
+                        isLoadingNextPage = false,
+                        error = state.paginationError,
+                        onRetry = { onIntent(ConstructionInsuranceIntent.RetryNextPage) },
+                        modifier = Modifier.padding(top = Spacing.xxl),
+                    )
+                }
+            } else if (!state.isLoading && state.error == null && state.items.isEmpty()) {
                 item {
                     if (hasActiveFilter) {
                         ConstructionSearchEmptyState(modifier = Modifier.padding(top = Spacing.md))

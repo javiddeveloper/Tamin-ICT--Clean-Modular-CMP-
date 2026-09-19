@@ -1,5 +1,10 @@
 package com.tamin.taminhamrah.model.constructionInsurance
 
+import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.request.FilterOperator
+import com.tamin.taminhamrah.model.request.FilterProperty
+
 data class ConstructionFileDN(
     val fileNumber: Long?,
     val requestNumber: Long?,
@@ -42,3 +47,24 @@ data class ConstructionFileSearchParamsDN(
     val workshopId: String?,
     val branchCode: String?,
 )
+
+/**
+ * Same EQ filters the non-paged construction-file lookup builds internally — shared here so the
+ * paged list use case (and its `Paginator` base query) doesn't redo the mapping.
+ */
+fun ConstructionFileSearchParamsDN?.toApiQueryParam(): ApiQueryParamDN {
+    val filters = mutableListOf<ApiFilterDN>()
+    this?.fileNo?.takeIf { it.isNotBlank() }?.let {
+        filters.add(ApiFilterDN(FilterProperty.FILE_NO, it, FilterOperator.EQ))
+    }
+    this?.reqNo?.takeIf { it.isNotBlank() }?.let {
+        filters.add(ApiFilterDN(FilterProperty.REQ_NO, it, FilterOperator.EQ))
+    }
+    this?.workshopId?.takeIf { it.isNotBlank() }?.let {
+        filters.add(ApiFilterDN(FilterProperty.WORKSHOP_ID, it, FilterOperator.EQ))
+    }
+    this?.branchCode?.takeIf { it.isNotBlank() }?.let {
+        filters.add(ApiFilterDN(FilterProperty.WORKSHOP_BRANCH_CODE, it, FilterOperator.EQ))
+    }
+    return ApiQueryParamDN(filters = filters)
+}

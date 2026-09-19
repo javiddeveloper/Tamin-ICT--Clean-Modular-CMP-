@@ -7,10 +7,7 @@ import com.tamin.taminhamrah.model.constructionInsurance.InstallmentLetterDTO
 import com.tamin.taminhamrah.model.constructionInsurance.PaymentSheetConstructionFileDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
-import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
-import com.tamin.taminhamrah.model.request.FilterOperator
-import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
@@ -19,6 +16,13 @@ import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
 import com.tamin.taminhamrah.tools.readPdfChannel
+
+/**
+ * Sent by the legacy native app on every `getConstructionFiles`/`getBeneficiariesWorkshop` call
+ * (`ConstructionInsurancePremiumViewModel`, `D:\my-tamin`) — a fixed literal unrelated to the real
+ * `page`/`start`/`limit` paging params below, kept for backend parity.
+ */
+private val POSITION_PARAM = "position" to "1"
 
 internal class ConstructionInsuranceRemoteDataSourceImpl(
     private val apiService: ConstructionInsuranceApiService,
@@ -29,26 +33,11 @@ internal class ConstructionInsuranceRemoteDataSourceImpl(
     override suspend fun getConstructionFiles(
         query: ApiQueryParamDN
     ): ListData<ConstructionFileDTO> = call {
-        apiService.getConstructionFiles(queryBuilder.buildQuery(query)).extractData()
+        apiService.getConstructionFiles(queryBuilder.buildQuery(query) + POSITION_PARAM).extractData()
     }
 
-    override suspend fun getBeneficiariesWorkshop(
-        requestNumber: Long?,
-        fileNumber: Long?,
-        requestDate: String?,
-    ): ListData<BeneficiaryConstructionDTO> = call {
-        val filters = mutableListOf<ApiFilterDN>()
-        if (requestNumber != null && requestNumber != 0L) {
-            filters.add(ApiFilterDN(FilterProperty.REQ_NO, requestNumber.toString(), FilterOperator.EQ))
-        }
-        if (fileNumber != null && fileNumber != 0L) {
-            filters.add(ApiFilterDN(FilterProperty.FILE_NO, fileNumber.toString(), FilterOperator.EQ))
-        }
-        if (!requestDate.isNullOrBlank()) {
-            filters.add(ApiFilterDN(FilterProperty.BUILDING_REQUEST_DATE, requestDate, FilterOperator.EQ))
-        }
-        val queries = queryBuilder.buildQuery(ApiQueryParamDN(filters = filters))
-        apiService.getBeneficiariesWorkshop(queries).extractData()
+    override suspend fun getBeneficiariesWorkshop(query: ApiQueryParamDN): ListData<BeneficiaryConstructionDTO> = call {
+        apiService.getBeneficiariesWorkshop(queryBuilder.buildQuery(query) + POSITION_PARAM).extractData()
     }
 
     override suspend fun getPaymentSheetConstructionInfo(
@@ -75,9 +64,9 @@ internal class ConstructionInsuranceRemoteDataSourceImpl(
     override suspend fun getInstallmentLetterList(
         workshopId: String,
         branchId: String,
+        query: ApiQueryParamDN,
     ): ListData<InstallmentLetterDTO> = call {
-        val queries = queryBuilder.buildQuery(ApiQueryParamDN())
-        apiService.getInstallmentLetterList(workshopId, branchId, queries).extractData()
+        apiService.getInstallmentLetterList(workshopId, branchId, queryBuilder.buildQuery(query)).extractData()
     }
 
     private suspend fun <T> call(block: suspend () -> T): T = try {

@@ -277,11 +277,12 @@ import com.tamin.taminhamrah.useCases.addDependent.RefreshDependentsUseCase
 import com.tamin.taminhamrah.useCases.addDependent.UploadDependentImageUseCase
 import com.tamin.taminhamrah.useCases.user.mockUseCases.MockSubdominantUseCase
 import com.tamin.taminhamrah.useCases.constructionInsurance.GetConstructionFilesUseCase
-import com.tamin.taminhamrah.useCases.constructionInsurance.GetBeneficiariesWorkshopUseCase
+import com.tamin.taminhamrah.useCases.constructionInsurance.GetConstructionFilesPageUseCase
+import com.tamin.taminhamrah.useCases.constructionInsurance.GetBeneficiariesWorkshopPageUseCase
 import com.tamin.taminhamrah.useCases.constructionInsurance.GetPaymentSheetConstructionInfoUseCase
 import com.tamin.taminhamrah.useCases.constructionInsurance.GetCertificatePaymentSheetPdfUseCase
 import com.tamin.taminhamrah.useCases.constructionInsurance.IssuancePaymentSheetUseCase
-import com.tamin.taminhamrah.useCases.constructionInsurance.GetInstallmentLetterListUseCase
+import com.tamin.taminhamrah.useCases.constructionInsurance.GetInstallmentLetterListPageUseCase
 import com.tamin.taminhamrah.useCases.versionHistory.GetVersionHistoryUseCase
 import com.tamin.taminhamrah.useCases.contactUs.GetContactUsUseCase
 import com.tamin.taminhamrah.useCases.content.GetLegalDocumentUseCase
@@ -597,11 +598,12 @@ val domainModule = module {
 
     // Construction Insurance UseCase
     factoryOf(::GetConstructionFilesUseCase)
-    factoryOf(::GetBeneficiariesWorkshopUseCase)
+    factoryOf(::GetConstructionFilesPageUseCase)
+    factoryOf(::GetBeneficiariesWorkshopPageUseCase)
     factoryOf(::GetPaymentSheetConstructionInfoUseCase)
     factoryOf(::GetCertificatePaymentSheetPdfUseCase)
     factoryOf(::IssuancePaymentSheetUseCase)
-    factoryOf(::GetInstallmentLetterListUseCase)
+    factoryOf(::GetInstallmentLetterListPageUseCase)
 
     // Stories UseCases
     factoryOf(::GetStoryChannelsUseCase)

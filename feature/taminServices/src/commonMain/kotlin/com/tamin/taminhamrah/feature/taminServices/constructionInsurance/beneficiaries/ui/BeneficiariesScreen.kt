@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -50,6 +51,8 @@ import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.ToasterState
 import com.tamin.taminhamrah.ui.components.toast.error
+import com.tamin.taminhamrah.ui.paging.OnLoadMore
+import com.tamin.taminhamrah.ui.paging.PagingFooter
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -59,7 +62,6 @@ import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.action_back
-import taminx.core.core_ui.action_retry
 import taminx.core.core_ui.beneficiaries_count
 import taminx.core.core_ui.beneficiaries_empty
 import taminx.core.core_ui.beneficiaries_title
@@ -118,6 +120,13 @@ fun BeneficiariesScreen(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
+    val listState = rememberLazyListState()
+
+    listState.OnLoadMore(
+        enabled = !state.endReached && state.paginationError == null,
+    ) {
+        onIntent(BeneficiariesIntent.LoadNextPage)
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -142,6 +151,13 @@ fun BeneficiariesScreen(
                     modifier = Modifier.fillMaxSize(),
                 )
 
+                state.items.isEmpty() && state.paginationError != null -> PagingFooter(
+                    isLoadingNextPage = false,
+                    error = state.paginationError,
+                    onRetry = { onIntent(BeneficiariesIntent.RetryNextPage) },
+                    modifier = Modifier.align(Alignment.Center),
+                )
+
                 state.items.isEmpty() -> EmptyStateMessage(
                     icon = Icons.Filled.Groups,
                     title = stringResource(CoreRes.string.beneficiaries_empty),
@@ -150,6 +166,7 @@ fun BeneficiariesScreen(
                 )
 
                 else -> LazyColumn(
+                    state = listState,
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(
                         horizontal = Spacing.page,
@@ -170,6 +187,13 @@ fun BeneficiariesScreen(
                         items = state.items,
                         key = { it.nationalCode ?: it.hashCode() }) { beneficiary ->
                         BeneficiaryCard(item = beneficiary)
+                    }
+                    item {
+                        PagingFooter(
+                            isLoadingNextPage = state.isLoadingNextPage,
+                            error = state.paginationError,
+                            onRetry = { onIntent(BeneficiariesIntent.RetryNextPage) },
+                        )
                     }
                 }
             }
