@@ -1,13 +1,13 @@
 package com.tamin.taminhamrah.feature.workshops.ui.managementDebit
 
-import androidx.compose.runtime.mutableStateMapOf
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.managementDebit.ManagementDebitUiState.PartialState
 import com.tamin.taminhamrah.feature.workshops.ui.model.ArticleSixteenDocumentTypes
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachmentUploader
 import com.tamin.taminhamrah.mapper.personal.toPresentation
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
-import com.tamin.taminhamrah.model.workshop.ARTICLE_SIXTEEN_FILING_WINDOW_DAYS
+import com.tamin.taminhamrah.model.workshop.ARTICLE_SIXTEEN_FILING_WINDOW_YEARS
+import com.tamin.taminhamrah.model.workshop.ARTICLE_SIXTEEN_DAYS_PER_YEAR
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtPR
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtQuery
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveRequestDN
@@ -20,7 +20,6 @@ import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenRequestInfoUseC
 import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenWorkshopInfoUseCase
 import com.tamin.taminhamrah.useCases.workshops.SaveArticleSixteenRequestUseCase
 import com.tamin.taminhamrah.util.PersianDateFormatter
-import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
@@ -48,7 +47,7 @@ class ManagementDebitViewModel(
      * The domain rows the presentation rows were built from, kept so the submission works on the
      * debt the service sent rather than on its formatted copy.
      */
-    private val debtsByNumber = mutableStateMapOf<String, WorkshopsDebtListModelDN>()
+    private val debtsByNumber = mutableMapOf<String, WorkshopsDebtListModelDN>()
 
     override fun handleIntent(intent: ManagementDebitIntent): Flow<PartialState> = when (intent) {
         is ManagementDebitIntent.Open -> open(intent)
@@ -60,19 +59,20 @@ class ManagementDebitViewModel(
         is ManagementDebitIntent.DraftChanged -> flow { emit(PartialState.DraftChanged(intent.draft)) }
         ManagementDebitIntent.ApplySearch -> applySearch(uiState.value.draft)
         ManagementDebitIntent.ClearSearch -> applySearch(ArticleSixteenSearch())
+        is ManagementDebitIntent.ReplaceSearch -> applySearch(intent.search)
         is ManagementDebitIntent.StatusFilterChanged ->
             flow { emit(PartialState.StatusFilterChanged(intent.status)) }
 
-        is ManagementDebitIntent.ActionsRequested ->
-            flow { emit(PartialState.ActionsForChanged(intent.debt)) }
-
-        ManagementDebitIntent.ActionsDismissed -> flow { emit(PartialState.ActionsForChanged(null)) }
         is ManagementDebitIntent.RequestReview -> requestReview(intent.debt)
-        is ManagementDebitIntent.FixRequest -> fixRequest(intent.debt)
+        is ManagementDebitIntent.FixRequest -> openForm(intent.debt, isResubmission = true)
         is ManagementDebitIntent.ShowRequestPdf -> showRequestPdf(intent.debt)
         is ManagementDebitIntent.ShowExpertMessage -> showExpertMessage(intent.debt)
         ManagementDebitIntent.DismissViewer -> flow { emit(PartialState.ViewerPdfChanged(null)) }
+        ManagementDebitIntent.DismissFiled -> just(PartialState.FiledChanged(null))
         ManagementDebitIntent.FormDismissed -> flow { emit(PartialState.FormChanged(null)) }
+        ManagementDebitIntent.FormResubmitNoticeDismissed ->
+            just(PartialState.FormResubmitNoticeDismissed)
+
         ManagementDebitIntent.FormNext -> formNext()
         ManagementDebitIntent.FormPrev -> just(
             PartialState.FormStepChanged((currentStep() - 1).coerceAtLeast(FIRST_STEP)),
@@ -145,29 +145,24 @@ class ManagementDebitViewModel(
     }
 
     /**
-     * A first request is only accepted within a day of ابلاغ اجراییه.
+     * A first request is only accepted while ابلاغ اجراییه is recent enough — see
+     * [ARTICLE_SIXTEEN_FILING_WINDOW_YEARS] for how the old app counts that.
      *
      * There is no `diff-days` endpoint for ماده ۱۶, so the count is taken from the device clock. A
      * row whose date the service did not send cannot be checked, and is refused rather than let
-     * through — the deadline is the service's rule, not a formality.
+     * through — the deadline is the service's rule, not a formality. A correction (اصلاح درخواست)
+     * answers a request already inside the window, so it is not checked again.
      */
     private fun requestReview(debt: ArticleSixteenDebtPR): Flow<PartialState> = flow {
-        emit(PartialState.ActionsForChanged(null))
         val elapsed = PersianDateFormatter.daysSince(debt.executiveNotifyDate)
-        if (elapsed == null || elapsed > ARTICLE_SIXTEEN_FILING_WINDOW_DAYS) {
+        if (elapsed == null || elapsed / ARTICLE_SIXTEEN_DAYS_PER_YEAR > ARTICLE_SIXTEEN_FILING_WINDOW_YEARS) {
             sendEvent(ManagementDebitEvent.ShowMessage(Res.string.article_sixteen_deadline_passed))
             return@flow
         }
-        emitAll(openForm(debt))
-    }
-
-    private fun fixRequest(debt: ArticleSixteenDebtPR): Flow<PartialState> = flow {
-        emit(PartialState.ActionsForChanged(null))
-        emitAll(openForm(debt))
+        emitAll(openForm(debt, isResubmission = false))
     }
 
     private fun showRequestPdf(debt: ArticleSixteenDebtPR): Flow<PartialState> = flow {
-        emit(PartialState.ActionsForChanged(null))
         val seqNo = debt.seqNo
         if (seqNo == null) {
             sendEvent(ManagementDebitEvent.ShowMessage(Res.string.workshop_error_receive_data))
@@ -176,23 +171,25 @@ class ManagementDebitViewModel(
         emit(PartialState.Busy(true))
         emit(PartialState.ViewerPdfChanged(getArticleSixteenReportPdf(seqNo).toPresentation()))
     }.catch {
-        emit(PartialState.Busy(false))
         emit(reportFailure(it))
     }
 
     private fun showExpertMessage(debt: ArticleSixteenDebtPR): Flow<PartialState> = flow {
-        emit(PartialState.ActionsForChanged(null))
         val seqNo = debt.seqNo
         if (seqNo == null) {
             sendEvent(ManagementDebitEvent.ShowMessage(Res.string.workshop_error_receive_data))
             return@flow
         }
         emit(PartialState.Busy(true))
-        val info = getArticleSixteenRequestInfo(seqNo)
+        val message = getArticleSixteenRequestInfo(seqNo).defectDescription
         emit(PartialState.Busy(false))
-        emit(PartialState.ExpertMessageChanged(info.defectDescription))
+        // A reviewer who wrote nothing would open an empty dialog; the old app said so instead.
+        if (message.isBlank()) {
+            sendEvent(ManagementDebitEvent.ShowMessage(Res.string.workshop_error_receive_data))
+            return@flow
+        }
+        emit(PartialState.ExpertMessageChanged(message))
     }.catch {
-        emit(PartialState.Busy(false))
         emit(reportFailure(it))
     }
 
@@ -204,28 +201,30 @@ class ManagementDebitViewModel(
     private fun currentStep(): Int = uiState.value.form?.step ?: FIRST_STEP
 
     /**
-     * Opens the request on a debt, with the workshop block its first step reviews.
+     * Opens the request on a debt once the workshop block its first step reviews has arrived.
      *
-     * The workshop lookup is allowed to fail quietly: it fills a review panel, and losing it is
-     * not a reason to refuse a request the deadline check has already allowed.
+     * As in the old app, a request does not start without it: a lookup the service refuses, or
+     * answers with no data, leaves the list where it was and says why.
      */
-    private fun openForm(debt: ArticleSixteenDebtPR): Flow<PartialState> = flow {
+    private fun openForm(
+        debt: ArticleSixteenDebtPR,
+        isResubmission: Boolean,
+    ): Flow<PartialState> = flow {
         val state = uiState.value
-        emit(PartialState.FormChanged(ArticleSixteenFormState(debt = debt)))
-        val info = runCatching {
-            getArticleSixteenWorkshopInfo(state.workshopId, state.branchCode)
-        }.getOrNull() ?: return@flow
+        emit(PartialState.Busy(true))
+        val info = getArticleSixteenWorkshopInfo(state.workshopId, state.branchCode)
+        emit(PartialState.Busy(false))
         emit(
-            PartialState.FormWorkshopInfoLoaded(
-                ArticleSixteenWorkshopInfoPR(
-                    workshopName = info.workshopName,
-                    workshopCode = info.workshopId.toPersianDigits(),
-                    branchCode = info.branchCode.toPersianDigits(),
-                    employerName = info.employerName,
-                    address = info.address,
+            PartialState.FormChanged(
+                ArticleSixteenFormState(
+                    debt = debt,
+                    workshopInfo = info.toPresentation(),
+                    isResubmitNoticeOpen = isResubmission,
                 ),
             ),
         )
+    }.catch {
+        emit(reportFailure(it))
     }
 
     /** «مرحلهٔ بعد» on step one, and the submission on the last. */
@@ -288,7 +287,7 @@ class ManagementDebitViewModel(
             ),
         )
         emit(PartialState.FormChanged(null))
-        sendEvent(ManagementDebitEvent.ArticleSixteenFiled(result.referenceCode))
+        emit(PartialState.FiledChanged(result.referenceCode))
         emitAll(loadPage(page = 0))
     }.catch {
         emit(PartialState.FormSubmittingChanged(false))
@@ -317,7 +316,6 @@ class ManagementDebitViewModel(
         is PartialState.Applied -> currentState.copy(applied = partialState.search)
         is PartialState.SearchOpenChanged -> currentState.copy(isSearchOpen = partialState.isOpen)
         is PartialState.StatusFilterChanged -> currentState.copy(statusFilter = partialState.status)
-        is PartialState.ActionsForChanged -> currentState.copy(actionsFor = partialState.debt)
         is PartialState.Busy -> currentState.copy(isBusy = partialState.isBusy)
         is PartialState.FormChanged -> currentState.copy(form = partialState.form)
         is PartialState.FormStepChanged -> currentState.editForm {
@@ -332,9 +330,6 @@ class ManagementDebitViewModel(
             copy(isWorkshopOpen = partialState.isOpen)
         }
 
-        is PartialState.FormWorkshopInfoLoaded -> currentState.editForm {
-            copy(workshopInfo = partialState.info)
-        }
         is PartialState.FormConfirmedChanged -> currentState.editForm {
             copy(isConfirmed = partialState.isConfirmed, hasTriedSubmit = false)
         }
@@ -360,6 +355,14 @@ class ManagementDebitViewModel(
             copy(isSubmitting = partialState.isSubmitting)
         }
 
+        PartialState.FormResubmitNoticeDismissed -> currentState.editForm {
+            copy(isResubmitNoticeOpen = false)
+        }
+
+        is PartialState.FiledChanged -> currentState.copy(
+            filedReferenceCode = partialState.referenceCode,
+        )
+
         is PartialState.ViewerPdfChanged -> currentState.copy(
             isBusy = false,
             viewerPdf = partialState.pdf,
@@ -372,17 +375,15 @@ class ManagementDebitViewModel(
     }
 
     /**
-     * A failure the user must see now.
+     * A failed row action or form step, in the service's words.
      *
-     * With a form open the list is not on screen, so its error state is not either; the
-     * message is raised as an event instead and the toast host shows it.
+     * Always a toast, never the list's error state: with rows on screen that state is not drawn
+     * (a failed «مشاهده درخواست» used to do nothing visible), and with rows gone it would replace a
+     * list that loaded fine with an error about something else.
      */
     private fun reportFailure(throwable: Throwable): PartialState {
-        val message = throwable.toSingleLineMessage()
-        if (uiState.value.form != null) {
-            sendEvent(ManagementDebitEvent.ShowServerMessage(message))
-        }
-        return PartialState.Error(message)
+        sendEvent(ManagementDebitEvent.ShowServerMessage(throwable.toSingleLineMessage()))
+        return PartialState.Busy(false)
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)

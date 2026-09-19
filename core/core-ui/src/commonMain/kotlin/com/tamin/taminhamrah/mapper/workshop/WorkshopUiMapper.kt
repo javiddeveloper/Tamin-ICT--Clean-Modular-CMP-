@@ -49,6 +49,11 @@ import com.tamin.taminhamrah.util.toPersianDigits
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.toJalaliDateLabel
 
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.article_42
+import taminx.core.core_ui.article_43
+import taminx.core.core_ui.article_44
+
 /**
  * Domain → presentation for کارگاه‌های کارفرما.
  *
@@ -261,11 +266,18 @@ fun WorkshopsDebtListModelDN.toPresentation(): ArticleSixteenDebtPR = ArticleSix
     executiveNotifyDateLabel = executiveNotifyDate.orDashDate(),
     status = status,
     seqNo = seqNo,
+    proceedingType = when (kindDoc.trim()) {
+        "1" -> Res.string.article_42
+        "2" -> Res.string.article_43
+        "3" -> Res.string.article_44
+        else -> null
+    },
 )
 
 fun ArticleSixteenWorkshopInfoDN.toPresentation(): ArticleSixteenWorkshopInfoPR = ArticleSixteenWorkshopInfoPR(
     workshopId = workshopId.orDashDigits(),
     workshopName = workshopName.orDash(),
+    branchCode = branchCode.orDashDigits(),
     employerName = employerName.orDash(),
     character = character.orDash(),
     address = address.orDash(),

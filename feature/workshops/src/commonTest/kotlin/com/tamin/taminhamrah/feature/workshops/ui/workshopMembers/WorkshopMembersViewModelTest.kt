@@ -103,6 +103,7 @@ class WorkshopMembersViewModelTest {
             viewModel.sendIntent(WorkshopMembersIntent.Open(WORKSHOP_ID, BRANCH_CODE))
             awaitUntil { it.list.items.size == WORKSHOP_PAGE_SIZE }
 
+            repository.members = membersPage(count = WORKSHOP_PAGE_SIZE, total = 30, from = WORKSHOP_PAGE_SIZE)
             viewModel.sendIntent(WorkshopMembersIntent.LoadMore)
             val appended = awaitUntil { it.list.items.size > WORKSHOP_PAGE_SIZE }
 
@@ -137,6 +138,7 @@ class WorkshopMembersViewModelTest {
             awaitItem()
             viewModel.sendIntent(WorkshopMembersIntent.Open(WORKSHOP_ID, BRANCH_CODE))
             awaitUntil { it.list.items.isNotEmpty() }
+            repository.members = membersPage(count = WORKSHOP_PAGE_SIZE, total = 30, from = WORKSHOP_PAGE_SIZE)
             viewModel.sendIntent(WorkshopMembersIntent.LoadMore)
             awaitUntil { it.list.items.size > WORKSHOP_PAGE_SIZE }
 
@@ -217,6 +219,30 @@ class WorkshopMembersViewModelTest {
     }
 
     @Test
+    fun `removing one search chip keeps the other and reloads with it`() = runTest(testDispatcher) {
+        repository.members = membersPage(count = 1, total = 1)
+
+        viewModel.uiState.test {
+            awaitItem()
+            viewModel.sendIntent(WorkshopMembersIntent.Open(WORKSHOP_ID, BRANCH_CODE))
+            awaitUntil { it.list.items.isNotEmpty() }
+            val both = PersonSearch(nationalId = "0024567891", insuranceNumber = "0010517475")
+            viewModel.sendIntent(WorkshopMembersIntent.DraftChanged(both))
+            viewModel.sendIntent(WorkshopMembersIntent.ApplySearch)
+            awaitUntil { it.applied == both }
+
+            viewModel.sendIntent(WorkshopMembersIntent.ReplaceSearch(both.copy(nationalId = "")))
+            val narrowed = awaitUntil { it.applied.nationalId.isBlank() }
+
+            assertEquals("0010517475", narrowed.applied.insuranceNumber)
+            assertEquals(narrowed.applied, narrowed.draft)
+            assertNull(repository.lastMemberQuery?.nationalId)
+            assertEquals("0010517475", repository.lastMemberQuery?.insuranceNumber)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun `a refused request becomes the list's error, in the service's words`() = runTest(testDispatcher) {
         repository.error = TaminApiException(title = "دسترسی مجاز نیست")
 
@@ -269,13 +295,18 @@ class WorkshopMembersViewModelTest {
         }
     }
 
-    private fun membersPage(count: Int, total: Int) = PagedListDN(
+    /**
+     * [count] distinct people, numbered from [from]. A second page must hold different people:
+     * the list drops a row identical to one already shown, so a repeated page appends nothing.
+     */
+    private fun membersPage(count: Int, total: Int, from: Int = 0) = PagedListDN(
         items = List(count) {
+            val n = from + it
             WorkshopMemberDN(
-                insuranceNumber = "1000000$it",
+                insuranceNumber = "1000000$n",
                 firstName = "کارمند",
-                lastName = "شماره $it",
-                nationalId = "002456789$it",
+                lastName = "شماره $n",
+                nationalId = "002456789$n",
             )
         },
         total = total,

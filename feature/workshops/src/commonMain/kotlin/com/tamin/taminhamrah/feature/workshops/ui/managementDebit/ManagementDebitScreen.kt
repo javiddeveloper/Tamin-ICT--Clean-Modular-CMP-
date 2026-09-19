@@ -6,14 +6,21 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import taminx.core.core_ui.ws_dialog_ok
 import taminx.core.core_ui.article_sixteen_form_done_body
+import taminx.core.core_ui.article_sixteen_form_done_title
+import taminx.core.core_ui.ic_tamin_check
 import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.vectorResource
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
-import com.tamin.taminhamrah.ui.components.toast.success
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFilterChips
+import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import androidx.compose.runtime.LaunchedEffect
@@ -52,20 +59,23 @@ import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.runtime.remember
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopPickerField
+import com.tamin.taminhamrah.feature.workshops.ui.components.label
+import com.tamin.taminhamrah.feature.workshops.ui.sheets.ArticleSixteenStatusSheet
+import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
+import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.article_sixteen_action_expert_message
 import taminx.core.core_ui.article_sixteen_action_fix_request
 import taminx.core.core_ui.article_sixteen_action_request
+import taminx.core.core_ui.article_sixteen_action_show_request
 import taminx.core.core_ui.article_sixteen_debt_amount
 import taminx.core.core_ui.article_sixteen_debt_remaining
 import taminx.core.core_ui.article_sixteen_executive_notify_date
 import taminx.core.core_ui.article_sixteen_request_status
-import taminx.core.core_ui.article_sixteen_status_approved
-import taminx.core.core_ui.article_sixteen_status_document_defect
-import taminx.core.core_ui.article_sixteen_status_none
-import taminx.core.core_ui.article_sixteen_status_rejected
-import taminx.core.core_ui.article_sixteen_status_submitted
-import taminx.core.core_ui.article_sixteen_status_unknown
 import taminx.core.core_ui.payment_sheet_agreement_row
 import taminx.core.core_ui.payment_sheet_debit_number
 import taminx.core.core_ui.workshop_action_article_sixteen
@@ -113,6 +123,7 @@ fun ManagementDebitContent(
 ) {
     val isSearchOpen = state.isSearchOpen
     val draft = state.draft
+    var isStatusSheetOpen by rememberSaveable { mutableStateOf(false) }
 
     // درخواست رسیدگی is a page of this screen, not a route: only this ViewModel holds the domain
     // row the request is filed against.
@@ -124,6 +135,48 @@ fun ManagementDebitContent(
             onRequestDownload = {},
             onDismiss = { onIntent(ManagementDebitIntent.DismissViewer) },
             title = stringResource(Res.string.workshop_action_article_sixteen),
+        )
+    }
+
+    state.expertMessage?.let { message ->
+        TaminConfirmationDialog(
+            title = stringResource(Res.string.article_sixteen_action_expert_message),
+            description = message,
+            icon = Icons.Outlined.Info,
+            confirmButton = {
+                TaminFilledButton(
+                    text = stringResource(Res.string.ws_dialog_ok),
+                    onClick = { onIntent(ManagementDebitIntent.DismissExpertMessage) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            },
+            dismissButton = {},
+            onDismissRequest = { onIntent(ManagementDebitIntent.DismissExpertMessage) },
+        )
+    }
+
+    // A dialog rather than a toast, as the design and the old app both show it: the tracking code
+    // is what the employer follows the request up with, and a toast is gone before it is copied.
+    state.filedReferenceCode?.let { referenceCode ->
+        val colors = LocalTaminColors.current
+        TaminConfirmationDialog(
+            title = stringResource(Res.string.article_sixteen_form_done_title),
+            description = stringResource(
+                Res.string.article_sixteen_form_done_body,
+                referenceCode.toPersianDigits(),
+            ),
+            icon = vectorResource(Res.drawable.ic_tamin_check),
+            iconTint = colors.teal,
+            iconBackground = colors.greenBg,
+            confirmButton = {
+                TaminFilledButton(
+                    text = stringResource(Res.string.ws_dialog_ok),
+                    onClick = { onIntent(ManagementDebitIntent.DismissFiled) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            },
+            dismissButton = {},
+            onDismissRequest = { onIntent(ManagementDebitIntent.DismissFiled) },
         )
     }
 
@@ -140,78 +193,128 @@ fun ManagementDebitContent(
         return
     }
 
-    WorkshopScreenShell(
-        title = stringResource(Res.string.workshop_action_article_sixteen),
-        onBack = onBack,
-        workshopName = state.workshopName.takeIf { it.isNotBlank() },
-        workshopCode = state.workshopId.takeIf { it.isNotBlank() }?.toPersianDigits(),
-        action = {
-            WorkshopSearchAction(
-                onClick = { onIntent(ManagementDebitIntent.SearchOpenChanged(!isSearchOpen)) },
-            )
-        },
-        modifier = modifier,
-    ) {
-        WorkshopListScaffold(
-            state = state.list,
-            onLoadMore = { onIntent(ManagementDebitIntent.LoadMore) },
-            key = { it.debitNumber },
-            header = {
-                Column(verticalArrangement = Arrangement.spacedBy(Spacing.cardGap)) {
-                    AnimatedVisibility(
-                        visible = isSearchOpen,
-                        enter = expandVertically() + fadeIn(),
-                        exit = shrinkVertically() + fadeOut(),
-                    ) {
-                        WorkshopSearchCard(
-                            onSearch = { onIntent(ManagementDebitIntent.ApplySearch) },
-                            onClear = { onIntent(ManagementDebitIntent.ClearSearch) },
+    // What the list is narrowed by, each removable on its own. The status filter is listed too:
+    // it is picked inside the search panel, and once that folds away nothing else shows it is on.
+    val applied = state.applied
+    val statusLabel = state.statusFilter?.let { stringResource(it.label) }
+    val filters = remember(applied, statusLabel) {
+        buildList {
+            applied.debitNumber.takeIf { it.isNotBlank() }?.let {
+                add(it.toPersianDigits() to ManagementDebitIntent.ReplaceSearch(applied.copy(debitNumber = "")))
+            }
+            applied.agreementRow.takeIf { it.isNotBlank() }?.let {
+                add(it.toPersianDigits() to ManagementDebitIntent.ReplaceSearch(applied.copy(agreementRow = "")))
+            }
+            statusLabel?.let { add(it to ManagementDebitIntent.StatusFilterChanged(null)) }
+        }
+    }
+    val filterChips = remember(filters) { filters.map { it.first }.toImmutableList() }
+
+    Box(modifier = modifier) {
+        WorkshopScreenShell(
+            title = stringResource(Res.string.workshop_action_article_sixteen),
+            onBack = onBack,
+            workshopName = state.workshopName.takeIf { it.isNotBlank() },
+            workshopCode = state.workshopId.takeIf { it.isNotBlank() }?.toPersianDigits(),
+            action = {
+                WorkshopSearchAction(
+                    onClick = { onIntent(ManagementDebitIntent.SearchOpenChanged(!isSearchOpen)) },
+                )
+            },
+        ) {
+            // visibleDebts filters on every read; narrow once per list or filter change.
+            val visibleDebts = remember(state.list.items, state.statusFilter) { state.visibleDebts }
+            val displayedList = remember(state.list, visibleDebts) {
+                state.list.copy(items = visibleDebts)
+            }
+            WorkshopListScaffold(
+                state = displayedList,
+                onLoadMore = { onIntent(ManagementDebitIntent.LoadMore) },
+                key = { it.debitNumber },
+                header = {
+                    Column(verticalArrangement = Arrangement.spacedBy(Spacing.cardGap)) {
+                        AnimatedVisibility(
+                            visible = isSearchOpen,
+                            enter = expandVertically() + fadeIn(),
+                            exit = shrinkVertically() + fadeOut(),
                         ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(WorkshopDimens.fieldGap),
+                            WorkshopSearchCard(
+                                onSearch = { onIntent(ManagementDebitIntent.ApplySearch) },
+                                onClear = {
+                                    onIntent(ManagementDebitIntent.ClearSearch)
+                                    onIntent(ManagementDebitIntent.StatusFilterChanged(null))
+                                },
                             ) {
-                                WorkshopTextField(
-                                    label = stringResource(Res.string.payment_sheet_debit_number),
-                                    value = draft.debitNumber,
-                                    onValueChange = {
-                                        onIntent(
-                                            ManagementDebitIntent.DraftChanged(
-                                                draft.copy(debitNumber = it.digitsOnly()),
-                                            ),
-                                        )
-                                    },
-                                    modifier = Modifier.weight(1f),
+                                WorkshopPickerField(
+                                    label = stringResource(Res.string.article_sixteen_request_status),
+                                    value = state.statusFilter?.let { stringResource(it.label) },
+                                    onClick = { isStatusSheetOpen = true },
                                 )
-                                WorkshopTextField(
-                                    label = stringResource(Res.string.payment_sheet_agreement_row),
-                                    value = draft.agreementRow,
-                                    onValueChange = {
-                                        onIntent(
-                                            ManagementDebitIntent.DraftChanged(
-                                                draft.copy(agreementRow = it.digitsOnly()),
-                                            ),
-                                        )
-                                    },
-                                    modifier = Modifier.weight(1f),
-                                )
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(WorkshopDimens.fieldGap),
+                                ) {
+                                    WorkshopTextField(
+                                        label = stringResource(Res.string.payment_sheet_debit_number),
+                                        value = draft.debitNumber,
+                                        onValueChange = {
+                                            onIntent(
+                                                ManagementDebitIntent.DraftChanged(
+                                                    draft.copy(debitNumber = it.digitsOnly()),
+                                                ),
+                                            )
+                                        },
+                                        modifier = Modifier.weight(1f),
+                                    )
+                                    WorkshopTextField(
+                                        label = stringResource(Res.string.payment_sheet_agreement_row),
+                                        value = draft.agreementRow,
+                                        onValueChange = {
+                                            onIntent(
+                                                ManagementDebitIntent.DraftChanged(
+                                                    draft.copy(agreementRow = it.digitsOnly()),
+                                                ),
+                                            )
+                                        },
+                                        modifier = Modifier.weight(1f),
+                                    )
+                                }
                             }
                         }
+                        WorkshopSectionHeader(
+                            title = stringResource(Res.string.workshop_action_article_sixteen),
+                            count = visibleDebts.size,
+                        )
+                        WorkshopFilterChips(
+                            chips = filterChips,
+                            onRemove = { index -> onIntent(filters[index].second) },
+                        )
                     }
-                    WorkshopSectionHeader(
-                        title = stringResource(Res.string.workshop_action_article_sixteen),
-                        count = state.visibleDebts.size,
-                    )
-                }
-            },
-        ) { debt ->
-            ArticleSixteenDebtCard(
-                debt = debt,
-                onRequest = { onIntent(ManagementDebitIntent.RequestReview(debt)) },
-                onFix = { onIntent(ManagementDebitIntent.FixRequest(debt)) },
-                onExpertMessage = { onIntent(ManagementDebitIntent.ShowExpertMessage(debt)) },
-            )
+                },
+            ) { debt, rowModifier ->
+                ArticleSixteenDebtCard(
+                    debt = debt,
+                    onRequest = { onIntent(ManagementDebitIntent.RequestReview(debt)) },
+                    onFix = { onIntent(ManagementDebitIntent.FixRequest(debt)) },
+                    onExpertMessage = { onIntent(ManagementDebitIntent.ShowExpertMessage(debt)) },
+                    onShowPdf = { onIntent(ManagementDebitIntent.ShowRequestPdf(debt)) },
+                    modifier = rowModifier,
+                )
+            }
         }
+        // مشاهده درخواست and پیام کارشناس each wait on a request before anything opens.
+        if (state.isBusy) LoadingStateOverlay()
+    }
+
+    if (isStatusSheetOpen) {
+        ArticleSixteenStatusSheet(
+            selected = state.statusFilter,
+            onDismiss = { isStatusSheetOpen = false },
+            onSelect = { status ->
+                onIntent(ManagementDebitIntent.StatusFilterChanged(status))
+                isStatusSheetOpen = false
+            },
+        )
     }
 }
 
@@ -221,11 +324,11 @@ private fun ArticleSixteenDebtCard(
     onRequest: () -> Unit,
     onFix: () -> Unit,
     onExpertMessage: () -> Unit,
+    onShowPdf: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
     var isExpanded by rememberSaveable(debt.debitNumber) { mutableStateOf(false) }
-    val hasRequest = debt.status != ArticleSixteenRequestStatus.NONE
     val (_, statusColor) = debt.status.tint.colors()
 
     WorkshopRecordCard(
@@ -233,23 +336,33 @@ private fun ArticleSixteenDebtCard(
         isExpanded = isExpanded,
         onToggle = { isExpanded = !isExpanded },
         buttons = {
-            if (hasRequest) {
-                WorkshopCardButton(
-                    text = stringResource(Res.string.article_sixteen_action_expert_message),
-                    tone = WorkshopCardButtonTone.NOTICE,
-                    onClick = onExpertMessage,
-                )
-                WorkshopCardButton(
-                    text = stringResource(Res.string.article_sixteen_action_fix_request),
-                    tone = WorkshopCardButtonTone.PRIMARY,
-                    onClick = onFix,
-                )
-            } else {
-                WorkshopCardButton(
-                    text = stringResource(Res.string.article_sixteen_action_request),
-                    tone = WorkshopCardButtonTone.PRIMARY,
-                    onClick = onRequest,
-                )
+            when (debt.status) {
+                ArticleSixteenRequestStatus.NONE -> {
+                    WorkshopCardButton(
+                        text = stringResource(Res.string.article_sixteen_action_request),
+                        tone = WorkshopCardButtonTone.PRIMARY,
+                        onClick = onRequest,
+                    )
+                }
+                ArticleSixteenRequestStatus.DOCUMENT_DEFECT -> {
+                    WorkshopCardButton(
+                        text = stringResource(Res.string.article_sixteen_action_expert_message),
+                        tone = WorkshopCardButtonTone.NOTICE,
+                        onClick = onExpertMessage,
+                    )
+                    WorkshopCardButton(
+                        text = stringResource(Res.string.article_sixteen_action_fix_request),
+                        tone = WorkshopCardButtonTone.PRIMARY,
+                        onClick = onFix,
+                    )
+                }
+                else -> {
+                    WorkshopCardButton(
+                        text = stringResource(Res.string.article_sixteen_action_show_request),
+                        tone = WorkshopCardButtonTone.PRIMARY,
+                        onClick = onShowPdf,
+                    )
+                }
             }
         },
     ) {
@@ -310,17 +423,6 @@ private fun ArticleSixteenDebtCard(
     }
 }
 
-/** The wording each request state is listed under. */
-private val ArticleSixteenRequestStatus.label
-    get() = when (this) {
-        ArticleSixteenRequestStatus.SUBMITTED -> Res.string.article_sixteen_status_submitted
-        ArticleSixteenRequestStatus.DOCUMENT_DEFECT -> Res.string.article_sixteen_status_document_defect
-        ArticleSixteenRequestStatus.REJECTED -> Res.string.article_sixteen_status_rejected
-        ArticleSixteenRequestStatus.APPROVED -> Res.string.article_sixteen_status_approved
-        ArticleSixteenRequestStatus.NONE -> Res.string.article_sixteen_status_none
-        ArticleSixteenRequestStatus.UNKNOWN -> Res.string.article_sixteen_status_unknown
-    }
-
 @PreviewRtlTheme
 @Composable
 private fun ManagementDebitScreenPreview() {
@@ -329,6 +431,7 @@ private fun ManagementDebitScreenPreview() {
             state = ManagementDebitUiState(
                 workshopId = "0968210170",
                 workshopName = "آموزشگاه کامپیوتر توکلی-ایمیل",
+                applied = ArticleSixteenSearch(agreementRow = "09600002"),
                 list = PagedListState(
                     items = persistentListOf(
                         ArticleSixteenDebtPR(
@@ -341,6 +444,30 @@ private fun ManagementDebitScreenPreview() {
                             toDate = "۱۳۹۷/۰۶/۳۱",
                             agreementRow = "۰۹۶۰۰۰۰۲",
                             status = ArticleSixteenRequestStatus.NONE,
+                        ),
+                        ArticleSixteenDebtPR(
+                            debitNumber = "0960961008972",
+                            debitNumberLabel = "۰۹۶۰۹۶۱۰۰۸۹۷۲",
+                            executiveNotifyDateLabel = "۱۴۰۵/۰۴/۱۵",
+                            amount = "۲۵٬۰۰۰٬۰۰۰",
+                            remainingAmount = "۲۰٬۰۰۰٬۰۰۰",
+                            fromDate = "۱۳۹۷/۰۱/۰۱",
+                            toDate = "۱۳۹۷/۱۲/۲۹",
+                            agreementRow = "۰۹۶۰۰۰۰۳",
+                            status = ArticleSixteenRequestStatus.DOCUMENT_DEFECT,
+                            seqNo = 101L,
+                        ),
+                        ArticleSixteenDebtPR(
+                            debitNumber = "0960961008973",
+                            debitNumberLabel = "۰۹۶۰۹۶۱۰۰۸۹۷۳",
+                            executiveNotifyDateLabel = "۱۴۰۵/۰۳/۱۰",
+                            amount = "۵۰٬۰۰۰٬۰۰۰",
+                            remainingAmount = "۵۰٬۰۰۰٬۰۰۰",
+                            fromDate = "۱۳۹۸/۰۱/۰۱",
+                            toDate = "۱۳۹۸/۰۶/۳۱",
+                            agreementRow = "۰۹۶۰۰۰۰۴",
+                            status = ArticleSixteenRequestStatus.SUBMITTED,
+                            seqNo = 102L,
                         ),
                     ),
                 ),
@@ -359,11 +486,7 @@ private fun HandleManagementDebitEvents(events: Flow<ManagementDebitEvent>) {
         events.collect { event ->
             when (event) {
                 is ManagementDebitEvent.ShowServerMessage -> toaster.error(event.message)
-
                 is ManagementDebitEvent.ShowMessage -> toaster.error(getString(event.message))
-                is ManagementDebitEvent.ArticleSixteenFiled -> toaster.success(
-                    getString(Res.string.article_sixteen_form_done_body, event.referenceCode),
-                )
             }
         }
     }

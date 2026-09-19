@@ -35,6 +35,9 @@ sealed interface WorkshopMembersIntent {
     data class DraftChanged(val draft: PersonSearch) : WorkshopMembersIntent
     data object ApplySearch : WorkshopMembersIntent
     data object ClearSearch : WorkshopMembersIntent
+
+    /** Applies [search] as it stands — what removing one of the applied-search chips does. */
+    data class ReplaceSearch(val search: PersonSearch) : WorkshopMembersIntent
 }
 
 sealed interface WorkshopMembersEvent

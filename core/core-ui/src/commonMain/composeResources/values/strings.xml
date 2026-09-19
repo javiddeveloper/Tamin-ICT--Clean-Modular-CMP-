@@ -1862,22 +1862,30 @@
     <string name="article_sixteen_status_submitted">ثبت درخواست</string>
     <string name="article_sixteen_status_document_defect">نقص مدارک</string>
     <string name="article_sixteen_status_rejected">رد درخواست</string>
-    <string name="article_sixteen_status_approved">تایید درخواست</string>
+    <string name="article_sixteen_status_approved">تأیید درخواست</string>
     <string name="article_sixteen_status_unknown">نامشخص</string>
     <string name="article_sixteen_status_none">بدون درخواست</string>
     <string name="article_sixteen_action_request">درخواست رسیدگی به بدهی</string>
     <string name="article_sixteen_action_expert_message">پیام کارشناس</string>
     <string name="article_sixteen_action_fix_request">اصلاح درخواست</string>
-    <string name="article_sixteen_deadline_passed">مهلت ثبت درخواست برای این بدهی به پایان رسیده است.</string>
+    <string name="article_sixteen_action_show_request">مشاهده درخواست</string>
+    <string name="article_sixteen_proceeding_type">نوع رسیدگی</string>
+    <string name="article_42">ماده ۴۲</string>
+    <string name="article_43">ماده ۴۳</string>
+    <string name="article_44">ماده ۴۴</string>
+    <string name="article_sixteen_deadline_passed">به دلیل گذشت بیش از یک سال از تاریخ ابلاغ اجراییهٔ این بدهی، امکان ثبت درخواست رسیدگی وجود ندارد.</string>
+    <string name="article_sixteen_resubmit_warning">کارفرمای گرامی، ارسال مجدد مستندات در خصوص بدهی صرفاً برای یک‌بار امکان‌پذیر است؛ لذا خواهشمند است دقت لازم را در این خصوص معمول دارید.</string>
+    <string name="article_sixteen_no_debt_title">نتیجهٔ پردازش</string>
+    <string name="article_sixteen_no_debt_body">لیست بدهی برای این کارگاه یافت نشد.</string>
 
     <!-- کارکنان / ذینفعان -->
     <string name="member_insurance_number">شماره بیمه</string>
     <string name="member_full_name">نام و نام خانوادگی</string>
     <string name="member_national_id">کد ملی</string>
-    <string name="member_id_card_number">شماره شناسنامه</string>
+    <string name="member_id_card_number">شمارهٔ شناسنامه</string>
     <string name="member_father_name">نام پدر</string>
     <string name="member_nationality">ملیت</string>
-    <string name="member_leaving_status">وضعیت ترک کار</string>
+    <string name="member_leaving_status">وضعیت</string>
     <string name="member_leaving_date">تاریخ ترک کار</string>
     <string name="stackholder_type">نوع ذینفع</string>
     <string name="stackholder_birth_date">تاریخ تولد</string>
@@ -1894,6 +1902,7 @@
     <string name="ws_form_doc_type_title">نوع مدرک را انتخاب کنید</string>
     <string name="ws_form_err_docs">بارگذاری حداقل یک مدرک الزامی است.</string>
     <string name="ws_form_err_agree">لطفاً تعهدنامه را تأیید کنید.</string>
+    <string name="ws_dialog_ok">باشه</string>
 
     <!-- ثبت اعتراض به بدهی -->
     <string name="obj_form_title">ثبت اعتراض به بدهی</string>
@@ -1911,6 +1920,7 @@
     <string name="obj_form_confirm_body">کارفرمای محترم مدارک و مستندات ارائه شده توسط شعبه بررسی و در صورت تایید آنها، اصلاح بدهی بدون حضور در جلسه هیات بدوی انجام میگردد. بدیهی است در صورت عدم کافی بودن مستندات یا عدم تایید آنها توسط شعبه حق اعتراض به بدهی و طرح آن در هیات بدوی محفوظ می‌باشد. لذا پس از بررسی‌های معمول، نتیجه ظرف مهلت یک هفته به جنابعالی اطلاع‌رسانی خواهد شد.
 
 نتیجه بررسی‌های معمول و وضعیت رسیدگی به بدهی مورد اعتراض کارفرما پس از ثبت و تایید نهایی از طریق منوی پیگیری وضعیت اعتراض و درخواست رسیدگی این سامانه قابل مشاهده خواهد بود.</string>
+    <string name="obj_form_done_title">اعتراض ثبت شد</string>
     <string name="obj_form_done_body">اعتراض شما با شمارهٔ پیگیری %1$s ثبت شد و به هیئت رسیدگی ارجاع گردید.</string>
 
     <!-- درخواست رسیدگی به بدهی ماده ۱۶ -->
@@ -1927,10 +1937,11 @@
     <string name="article_sixteen_form_employer_name">نام کارفرما</string>
     <string name="article_sixteen_form_workshop_name">نام کارگاه</string>
     <string name="article_sixteen_form_address">نشانی</string>
-    <string name="article_sixteen_form_note_window">رسیدگی به بدهی موضوع ماده ۱۶ آیین‌نامهٔ هیئت‌ها تنها برای بدهی‌هایی امکان‌پذیر است که از تاریخ ابلاغ اجراییه بیش از یک روز نگذشته باشد.</string>
+    <string name="article_sixteen_form_note_window">رسیدگی به بدهی موضوع ماده ۱۶ آیین‌نامهٔ هیئت‌ها تنها برای بدهی‌هایی امکان‌پذیر است که از تاریخ ابلاغ اجراییه بیش از یک سال نگذشته باشد.</string>
     <string name="article_sixteen_form_note_result">در صورت تأیید، نتیجه از طریق کارتابل درخواست‌ها و پیامک اطلاع داده می‌شود.</string>
     <string name="article_sixteen_form_check">مفاد فوق را مطالعه کردم و صحت مدارک ارسالی را تأیید می‌کنم.</string>
     <string name="article_sixteen_form_submit">ثبت درخواست</string>
+    <string name="article_sixteen_form_done_title">درخواست شما ثبت شد</string>
     <string name="article_sixteen_form_done_body">درخواست رسیدگی به بدهی ماده ۱۶ با کد پیگیری %1$s ثبت شد.</string>
 
     <!-- انواع مدرک اعتراض — codes are the service's own, mirrored from the old app's asset -->

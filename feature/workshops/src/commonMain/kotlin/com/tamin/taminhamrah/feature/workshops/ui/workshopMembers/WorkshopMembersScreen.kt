@@ -17,12 +17,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.workshops.ui.components.PersonSearchPanel
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFilterChips
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopListScaffold
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopRecordCard
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopScreenShell
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopSearchAction
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopSectionHeader
 import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
+import com.tamin.taminhamrah.feature.workshops.ui.model.PersonSearch
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -33,6 +35,7 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
@@ -86,6 +89,19 @@ fun WorkshopMembersContent(
 ) {
     val isSearchOpen = state.isSearchOpen
     val draft = state.draft
+    // What the list is narrowed by, each removable on its own — the design lists the values.
+    val applied = state.applied
+    val filters = remember(applied) {
+        buildList {
+            applied.nationalId.takeIf { it.isNotBlank() }?.let {
+                add(it.toPersianDigits() to WorkshopMembersIntent.ReplaceSearch(applied.copy(nationalId = "")))
+            }
+            applied.insuranceNumber.takeIf { it.isNotBlank() }?.let {
+                add(it.toPersianDigits() to WorkshopMembersIntent.ReplaceSearch(applied.copy(insuranceNumber = "")))
+            }
+        }
+    }
+    val filterChips = remember(filters) { filters.map { it.first }.toImmutableList() }
 
     WorkshopScreenShell(
         title = stringResource(Res.string.workshop_action_members),
@@ -104,7 +120,8 @@ fun WorkshopMembersContent(
         WorkshopListScaffold(
             state = state.list,
             onLoadMore = { onIntent(WorkshopMembersIntent.LoadMore) },
-            key = { it.insuranceNumber + it.nationalId },
+            // No key: a person who left and was taken on again is two rows with the same
+            // insurance number and national id, and a repeated key crashes the list.
             header = {
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.cardGap)) {
                     AnimatedVisibility(
@@ -123,9 +140,13 @@ fun WorkshopMembersContent(
                         title = stringResource(Res.string.workshop_action_members),
                         count = state.list.items.size,
                     )
+                    WorkshopFilterChips(
+                        chips = filterChips,
+                        onRemove = { index -> onIntent(filters[index].second) },
+                    )
                 }
             },
-        ) { member -> WorkshopMemberCard(member) }
+        ) { member, rowModifier -> WorkshopMemberCard(member, modifier = rowModifier) }
     }
 }
 
@@ -135,7 +156,7 @@ private fun WorkshopMemberCard(member: WorkshopMemberPR, modifier: Modifier = Mo
     var isExpanded by rememberSaveable(member.nationalId) { mutableStateOf(false) }
     // «اشتغال» is the one status the design draws in green; everything else is a person who has
     // left, which it draws in red.
-    val statusColor = remember(member.leavingWorkStatus, colors) {
+    val statusColor = remember(member.isEmployed, colors) {
         if (member.isEmployed) colors.springGreenText else colors.dangerText
     }
 
@@ -207,21 +228,23 @@ private fun WorkshopMemberCard(member: WorkshopMemberPR, modifier: Modifier = Mo
 private fun WorkshopMembersScreenPreview() {
     PreviewRtlThemeContent {
         WorkshopMembersContent(
+            state = WorkshopMembersUiState(workshopId = "0968210170", list = PreviewMembers),
+            workshopName = "آموزشگاه کامپیوتر توکلی-ایمیل",
+            onIntent = {},
+            onBack = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun WorkshopMembersSearchedPreview() {
+    PreviewRtlThemeContent {
+        WorkshopMembersContent(
             state = WorkshopMembersUiState(
                 workshopId = "0968210170",
-                list = PagedListState(
-                    items = persistentListOf(
-                        WorkshopMemberPR(
-                            insuranceNumber = "۰۰۱۰۵۱۷۴۷۵",
-                            fullName = "حسین توکلی کرمانی",
-                            nationalId = "۴۴۷۹۸۹۰۸۸۲",
-                            idCardNumber = "۴",
-                            fatherName = "عزیزالله",
-                            nationality = "ایرانی",
-                            leavingWorkStatus = "اشتغال",
-                        ),
-                    ),
-                ),
+                list = PreviewMembers,
+                applied = PersonSearch(nationalId = "4479890882"),
             ),
             workshopName = "آموزشگاه کامپیوتر توکلی-ایمیل",
             onIntent = {},
@@ -229,3 +252,42 @@ private fun WorkshopMembersScreenPreview() {
         )
     }
 }
+
+/** The design's three sample rows: two at work, one who has left. */
+private val PreviewMembers = PagedListState(
+    items = persistentListOf(
+        WorkshopMemberPR(
+            insuranceNumber = "۰۰۱۰۵۱۷۴۷۵",
+            fullName = "حسین توکلی کرمانی",
+            nationalId = "۴۴۷۹۸۹۰۸۸۲",
+            idCardNumber = "۴",
+            fatherName = "عزیزالله",
+            nationality = "ایرانی",
+            leavingWorkStatus = "اشتغال",
+            leavingWorkDate = "—",
+            isEmployed = true,
+        ),
+        WorkshopMemberPR(
+            insuranceNumber = "۰۰۱۳۵۴۶۳۱۹",
+            fullName = "محمد دربندی",
+            nationalId = "۰۰۶۱۶۶۶۵۷۲",
+            idCardNumber = "۱۲",
+            fatherName = "رحمت‌الله",
+            nationality = "ایرانی",
+            leavingWorkStatus = "اشتغال",
+            leavingWorkDate = "—",
+            isEmployed = true,
+        ),
+        WorkshopMemberPR(
+            insuranceNumber = "۰۰۲۱۹۱۱۷۶۴",
+            fullName = "محسن داودی",
+            nationalId = "۳۷۷۰۱۲۷۹۳۵",
+            idCardNumber = "۷",
+            fatherName = "اکبر",
+            nationality = "ایرانی",
+            leavingWorkStatus = "ترک کار",
+            leavingWorkDate = "۱۴۰۴/۱۲/۲۹",
+            isEmployed = false,
+        ),
+    ),
+)

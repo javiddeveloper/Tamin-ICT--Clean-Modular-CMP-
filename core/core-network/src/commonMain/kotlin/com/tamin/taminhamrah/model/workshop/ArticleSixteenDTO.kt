@@ -24,7 +24,8 @@ data class ArticleSixteenWorkshopInfoDTO(
 @Serializable
 data class ArticleSixteenRequestInfoDTO(
     @SerialName("defectDesc") val defectDescription: String? = null,
-    @SerialName("objectionPhotos") val objectionPhotos: List<ArticleSixteenPhotoDTO> = emptyList(),
+    // Nullable: the service can send `null`, which a defaulted non-null list does not survive.
+    @SerialName("objectionPhotos") val objectionPhotos: List<ArticleSixteenPhotoDTO>? = null,
 )
 
 @Serializable

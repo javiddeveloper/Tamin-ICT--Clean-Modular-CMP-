@@ -32,6 +32,7 @@ class WorkshopMembersViewModel(
         is WorkshopMembersIntent.DraftChanged -> flow { emit(PartialState.DraftChanged(intent.draft)) }
         WorkshopMembersIntent.ApplySearch -> applySearch(uiState.value.draft)
         WorkshopMembersIntent.ClearSearch -> applySearch(PersonSearch())
+        is WorkshopMembersIntent.ReplaceSearch -> applySearch(intent.search)
     }
 
     private fun open(intent: WorkshopMembersIntent.Open): Flow<PartialState> = flow {
