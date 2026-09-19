@@ -204,12 +204,13 @@ fun ManagementDebitContent(
                     )
                 }
             },
-        ) { debt ->
+        ) { debt, rowModifier ->
             ArticleSixteenDebtCard(
                 debt = debt,
                 onRequest = { onIntent(ManagementDebitIntent.RequestReview(debt)) },
                 onFix = { onIntent(ManagementDebitIntent.FixRequest(debt)) },
                 onExpertMessage = { onIntent(ManagementDebitIntent.ShowExpertMessage(debt)) },
+                modifier = rowModifier,
             )
         }
     }
