@@ -1,45 +1,49 @@
 package com.tamin.taminhamrah.ui.navigation
 
 import androidx.navigation.NavController
+import com.tamin.taminhamrah.deeplink.DeepLinkKey
+import com.tamin.taminhamrah.deeplink.PrescriptionDetailLink
 import com.tamin.taminhamrah.feature.agent.navigateToAgent
 import com.tamin.taminhamrah.feature.contractaffair.navigateToContractAffairs
+import com.tamin.taminhamrah.feature.contracts.flow.ContractType
+import com.tamin.taminhamrah.feature.contracts.navigateToContractFlow
+import com.tamin.taminhamrah.feature.deferredInstallment.navigateToDeferredInstallment
+import com.tamin.taminhamrah.feature.girlSurvivor.navigateToGirlSurvivor
 import com.tamin.taminhamrah.feature.history.navigateToHistory
 import com.tamin.taminhamrah.feature.history.navigateToHistoryJobInfo
 import com.tamin.taminhamrah.feature.historyobjection.navigateToHistoryObjection
-import com.tamin.taminhamrah.feature.deferredInstallment.navigateToDeferredInstallment
+import com.tamin.taminhamrah.feature.inquiryEducation.navigateToInquiryEducation
 import com.tamin.taminhamrah.feature.orotezprotez.navigateToOrotezProtez
-import com.tamin.taminhamrah.feature.requestPaymentForIllDays.navigateToRequestPaymentForIllDays
-import com.tamin.taminhamrah.feature.pregnancyPay.navigateToPregnancyPay
 import com.tamin.taminhamrah.feature.calculateWagePension.navigateToCalculateWagePension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeservedTreatment
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDisabilityPension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToEdict
-import com.tamin.taminhamrah.feature.girlSurvivor.navigateToGirlSurvivor
-import com.tamin.taminhamrah.feature.inquiryEducation.navigateToInquiryEducation
-import com.tamin.taminhamrah.feature.weddingPresent.navigateToWeddingPresent
-import com.tamin.taminhamrah.feature.weddingPresent.navigateToWeddingPresentCalculate
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToIssuanceCertificate
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPayRoll
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.navigateToPensionStatusInquiry
 import com.tamin.taminhamrah.feature.pensionSurvivor.navigateToPensionSurvivor
+import com.tamin.taminhamrah.feature.pregnancyPay.navigateToPregnancyPay
+import com.tamin.taminhamrah.feature.requestPaymentForIllDays.navigateToRequestPaymentForIllDays
 import com.tamin.taminhamrah.feature.retirementPension.navigateToRetirementPension
+import com.tamin.taminhamrah.feature.taminServices.navigateToEmployerOnlineServices
+import com.tamin.taminhamrah.feature.taminServices.navigateToInspection
 import com.tamin.taminhamrah.feature.treatment.navigateToPrescriptionDetail
 import com.tamin.taminhamrah.feature.treatment.navigateToPrescriptions
-import com.tamin.taminhamrah.deeplink.DeepLinkKey
-import com.tamin.taminhamrah.deeplink.PrescriptionDetailLink
 import com.tamin.taminhamrah.feature.contracts.navigateToContractFlow
-import com.tamin.taminhamrah.feature.contracts.flow.ContractType
 import com.tamin.taminhamrah.feature.taminServices.navigateToConstructionInsurance
 import com.tamin.taminhamrah.feature.taminServices.navigateToOccurrence
-import com.tamin.taminhamrah.feature.taminServices.navigateToInspection
-import com.tamin.taminhamrah.feature.taminServices.navigateToEmployerOnlineServices
 import com.tamin.taminhamrah.feature.taminServices.navigateToSendInsuranceHistoryToInstitutions
-import com.tamin.taminhamrah.feature.workshops.navigateToContractRows
 import com.tamin.taminhamrah.feature.taminServices.navigateToWorkersPaymentInfo
-import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
+import com.tamin.taminhamrah.feature.treatment.navigateToPrescriptionDetail
+import com.tamin.taminhamrah.feature.treatment.navigateToPrescriptions
+import com.tamin.taminhamrah.feature.weddingPresent.navigateToWeddingPresent
+import com.tamin.taminhamrah.feature.weddingPresent.navigateToWeddingPresentCalculate
+import com.tamin.taminhamrah.feature.workshops.navigateToAssignerContracts
 import com.tamin.taminhamrah.feature.workshops.navigateToCompleteEmployerInfo
-import com.tamin.taminhamrah.feature.workshops.navigateToLegalRepresentativeWorkshops
+import com.tamin.taminhamrah.feature.workshops.navigateToContractRows
 import com.tamin.taminhamrah.feature.workshops.navigateToDebtObjectionStatus
+import com.tamin.taminhamrah.feature.workshops.navigateToLegalRepresentativeWorkshops
+import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.model.common.FeatureFlag
 
 /**
@@ -78,6 +82,8 @@ fun NavController.navigateToFeature(flag: FeatureFlag, beforeOpen: () -> Unit = 
         FeatureFlag.WORKSHOPS -> screen { navigateToWorkshops() }
         // «اطلاعات پیمان» in the server menu; the screen it opens is titled «ردیف‌های پیمان».
         FeatureFlag.CONTRACT_INFO -> screen { navigateToContractRows() }
+        // «واگذارندگان» (1003) — the پیمان‌ها this employer assigned out.
+        FeatureFlag.ASSIGNER_CONTRACT -> screen { navigateToAssignerContracts() }
         FeatureFlag.COMPLETE_WORKSHOP_INFO -> screen { navigateToCompleteEmployerInfo() }
         FeatureFlag.STACK_HOLDER_LIST -> screen { navigateToLegalRepresentativeWorkshops() }
         FeatureFlag.CONTRACTS -> screen { navigateToContractAffairs() }

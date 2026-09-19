@@ -1,0 +1,30 @@
+<!--
+  Traced from the design's own `#ic-assignor` symbol: two nodes exchanging work, drawn as a pair of
+  circles with an arrow running each way between them. Stroke-only on a 24-unit grid with round
+  caps, matching the neighbouring workshop action icons; the colour is a placeholder and every use
+  tints it.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:pathData="M2.6 9.6 h8.2 l-2.6 -2.6 M21.4 15.4 h-8.2 l2.6 2.6"
+        android:strokeWidth="1.9"
+        android:strokeColor="#FF000000"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M3.6 15.6 a3 3 0 1 0 6 0 a3 3 0 1 0 -6 0 z"
+        android:strokeWidth="1.7"
+        android:strokeColor="#FF000000"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M14.4 8.4 a3 3 0 1 0 6 0 a3 3 0 1 0 -6 0 z"
+        android:strokeWidth="1.7"
+        android:strokeColor="#FF000000"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

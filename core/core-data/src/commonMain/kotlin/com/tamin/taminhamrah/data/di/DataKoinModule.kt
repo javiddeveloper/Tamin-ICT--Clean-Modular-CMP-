@@ -23,6 +23,7 @@ import com.tamin.taminhamrah.data.repository.weddingPresent.WeddingPresentReposi
 import com.tamin.taminhamrah.data.repository.requestPaymentForIllDays.RequestPaymentForIllDaysRepositoryImpl
 import com.tamin.taminhamrah.data.repository.pregnancyPay.PregnancyPayRepositoryImpl
 import com.tamin.taminhamrah.data.repository.personal.PersonalRepositoryImpl
+import com.tamin.taminhamrah.data.repository.home.HomeRepositoryImpl
 import com.tamin.taminhamrah.feature.FeatureManager
 import com.tamin.taminhamrah.repository.UserRepository
 import com.tamin.taminhamrah.repository.CityProvinceRepository
@@ -68,6 +69,7 @@ import com.tamin.taminhamrah.data.repository.workersPayment.WorkersPaymentReposi
 import com.tamin.taminhamrah.repository.workersPayment.WorkersPaymentRepository
 import com.tamin.taminhamrah.data.repository.constructionInsurance.ConstructionInsuranceRepositoryImpl
 import com.tamin.taminhamrah.repository.constructionInsurance.ConstructionInsuranceRepository
+import com.tamin.taminhamrah.repository.home.HomeRepository
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
@@ -110,5 +112,6 @@ val dataKoinModule = module {
     singleOf(::WorkersPaymentRepositoryImpl) { bind<WorkersPaymentRepository>() }
     singleOf(::WeddingPresentRepositoryImpl) { bind<WeddingPresentRepository>() }
     singleOf(::StoryRepositoryImpl) { bind<StoryRepository>() }
+    single<HomeRepository> { HomeRepositoryImpl(get(), get(), get(), get(), get(), get()) }
     singleOf(::ConstructionInsuranceRepositoryImpl) { bind<ConstructionInsuranceRepository>() }
 }

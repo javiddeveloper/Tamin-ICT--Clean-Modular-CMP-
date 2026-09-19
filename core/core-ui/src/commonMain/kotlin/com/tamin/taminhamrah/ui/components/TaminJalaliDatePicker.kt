@@ -69,10 +69,16 @@ private const val EDGE_FADE_STOP = 1f / VISIBLE_ROWS
 
 /**
  * The floor of the year wheel — the conventional start for Jalali pickers in Iranian apps. The
- * ceiling is today: every date this picker collects (birthdate, prescription date, a record
+ * ceiling is today: nearly every date this picker collects (birthdate, prescription date, a record
  * search range) is a date that has already happened, so a future one is never a valid answer.
  */
 private const val FIRST_YEAR = 1300
+
+/**
+ * How far past this year the wheel reaches for a caller that allows future dates — the old app's
+ * `setMaxYear(100)` on the one field that needed it, a پیمان's end date.
+ */
+private const val FUTURE_YEARS = 100
 
 /**
  * The last month the month wheel offers for [year]: the whole year for any past year, and only up
@@ -116,6 +122,11 @@ fun TaminJalaliDatePicker(
     onDismiss: () -> Unit,
     onConfirm: (year: Int, month: Int, day: Int) -> Unit,
     initial: Triple<Int, Int, Int> = PersianDateFormatter.today(),
+    /**
+     * Lets the wheels run past today. False — the default — keeps the today ceiling every existing
+     * caller was built against.
+     */
+    allowFuture: Boolean = false,
 ) {
     val colors = LocalTaminColors.current
     ModalBottomSheet(
@@ -129,6 +140,7 @@ fun TaminJalaliDatePicker(
             onDismiss = onDismiss,
             onConfirm = onConfirm,
             initial = initial,
+            allowFuture = allowFuture,
             modifier = Modifier.navigationBarsPadding(),
         )
     }
@@ -142,24 +154,26 @@ private fun JalaliDatePickerContent(
     onConfirm: (year: Int, month: Int, day: Int) -> Unit,
     initial: Triple<Int, Int, Int>,
     modifier: Modifier = Modifier,
+    allowFuture: Boolean = false,
 ) {
     val colors = LocalTaminColors.current
     val today = remember { PersianDateFormatter.today() }
     val (todayYear, todayMonth, todayDay) = today
+    val lastYear = if (allowFuture) todayYear + FUTURE_YEARS else todayYear
 
-    // A caller that hands in a future date still opens on a selectable one.
-    var year by remember { mutableIntStateOf(initial.first.coerceAtMost(todayYear)) }
+    // A caller that hands in a date past the last year still opens on a selectable one.
+    var year by remember { mutableIntStateOf(initial.first.coerceAtMost(lastYear)) }
     var month by remember { mutableIntStateOf(initial.second) }
     var day by remember { mutableIntStateOf(initial.third) }
 
-    val years = remember(todayYear) {
-        (FIRST_YEAR..todayYear).map { it.toString().toPersianDigits() }.toImmutableList()
+    val years = remember(lastYear) {
+        (FIRST_YEAR..lastYear).map { it.toString().toPersianDigits() }.toImmutableList()
     }
 
     // Each wheel is cut back to today once the wheels above it sit on the current year/month, so a
     // future date cannot be spun to in the first place. Trimming beats validating after the fact:
     // there is nothing to reject and no error to explain.
-    val lastMonth = lastSelectableMonth(
+    val lastMonth = if (allowFuture) PersianDateFormatter.monthNames.size else lastSelectableMonth(
         year = year,
         todayYear = todayYear,
         todayMonth = todayMonth,
@@ -171,7 +185,7 @@ private fun JalaliDatePickerContent(
     }
 
     val daysInMonth = PersianDateFormatter.daysInMonth(year, clampedMonth)
-    val lastDay = lastSelectableDay(
+    val lastDay = if (allowFuture) daysInMonth else lastSelectableDay(
         year = year,
         month = clampedMonth,
         todayYear = todayYear,

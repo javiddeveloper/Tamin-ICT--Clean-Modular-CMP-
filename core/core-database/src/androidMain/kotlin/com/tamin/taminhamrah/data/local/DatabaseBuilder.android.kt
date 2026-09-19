@@ -19,6 +19,7 @@ import com.tamin.taminhamrah.data.local.dao.HealthDao
 import com.tamin.taminhamrah.data.local.dao.AgentChatDao
 import com.tamin.taminhamrah.data.local.dao.HistoryCacheDao
 import com.tamin.taminhamrah.data.local.dao.HistoryJobInfoDao
+import com.tamin.taminhamrah.data.local.dao.HomeContentDao
 import com.tamin.taminhamrah.data.local.dao.VersionHistoryDao
 import com.tamin.taminhamrah.data.local.dao.ConstructionFileDao
 
@@ -42,6 +43,7 @@ actual abstract class TaminXDatabase : RoomDatabase() {
     actual abstract fun historyJobInfoDao(): HistoryJobInfoDao
     actual abstract fun historyCacheDao(): HistoryCacheDao
     actual abstract fun constructionFileDao(): ConstructionFileDao
+    actual abstract fun homeContentDao(): HomeContentDao
 }
 
 fun getDatabaseBuilder(context: Context): RoomDatabase.Builder<TaminXDatabase> {
