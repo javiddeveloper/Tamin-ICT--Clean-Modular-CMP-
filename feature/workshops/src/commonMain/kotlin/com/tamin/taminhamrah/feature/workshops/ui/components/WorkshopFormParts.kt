@@ -767,6 +767,11 @@ fun WorkshopFormFooter(
     nextIcon: ImageVector? = null,
     /** The forward button's fill. Null, the default, is the app's primary gradient. */
     nextBackground: Brush? = null,
+    /**
+     * Shows [isBusy] as a shimmer passing over the forward button instead of the spinner. False —
+     * the default — keeps the spinner every existing form shows.
+     */
+    shimmerWhileBusy: Boolean = false,
 ) {
     val colors = LocalTaminColors.current
     val chevron = vectorResource(Res.drawable.ic_tamin_chevron_forward)
@@ -817,6 +822,7 @@ fun WorkshopFormFooter(
             background = nextBackground,
             height = FooterButtonHeight,
             shape = FooterButtonShape,
+            shimmerWhileLoading = shimmerWhileBusy,
             modifier = Modifier.weight(NextButtonWeight),
         )
     }

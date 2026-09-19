@@ -294,6 +294,8 @@ fun SettlementRequestContent(
                 { onIntent(SettlementRequestIntent.Previous) }
             },
             isBusy = state.isBusy,
+            // واگذارندگان shows every wait as a shimmer, the submit included.
+            shimmerWhileBusy = true,
             // Filing is the green, ticked button; every step before it points on.
             nextIcon = if (isLastStep) checkIcon else null,
             nextBackground = if (isLastStep) colors.successGradient else null,

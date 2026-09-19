@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -36,6 +37,8 @@ import com.tamin.taminhamrah.ui.paging.OnLoadMore
 import com.tamin.taminhamrah.ui.paging.PagingFooter
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.ShimmerBlock
+import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import org.jetbrains.compose.resources.stringResource
@@ -130,6 +133,11 @@ fun ColumnScope.WorkshopQuickPickList(
     selectedBranchCode: String,
     onPick: (workshopId: String, branchCode: String) -> Unit,
     onLoadMore: () -> Unit,
+    /**
+     * Shows the next page arriving as a shimmering row instead of the paging spinner. False — the
+     * default — keeps the spinner ردیف‌های پیمان shows.
+     */
+    shimmerLoadingMore: Boolean = false,
 ) {
     val listState = rememberLazyListState()
     listState.OnLoadMore(
@@ -168,7 +176,16 @@ fun ColumnScope.WorkshopQuickPickList(
         }
         if (workshops.isLoadingMore) {
             item(key = LOADING_MORE_KEY) {
-                PagingFooter(isLoadingNextPage = true, error = null, onRetry = {})
+                if (shimmerLoadingMore) {
+                    ShimmerBlock(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(ShimmerSize.fieldHeight),
+                        cornerRadius = CornerRadius.md,
+                    )
+                } else {
+                    PagingFooter(isLoadingNextPage = true, error = null, onRetry = {})
+                }
             }
         }
     }

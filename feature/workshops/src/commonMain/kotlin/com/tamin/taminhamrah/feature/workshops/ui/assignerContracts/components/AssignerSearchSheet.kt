@@ -177,6 +177,7 @@ fun AssignerSearchSheetContent(
             selectedBranchCode = branchCode,
             onPick = onQuickPick,
             onLoadMore = onLoadMoreWorkshops,
+            shimmerLoadingMore = true,
         )
 
         // One message under all three, not on the field: the design puts it there, and only one of
