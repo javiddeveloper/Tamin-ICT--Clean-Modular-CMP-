@@ -6,7 +6,8 @@ import kotlinx.serialization.Serializable
 /**
  * One record's price, as `patient-history/price` reports it.
  *
- * The field names do not say whose share is whose, and the old app read them the wrong way round.
+ * The field names do not say whose share is whose, and the KMP port originally read them the wrong
+ * way round (the legacy app displayed them correctly despite its confusing view-binding names).
  * Checked against live data: every item's `ssoPayment` is its patient share, and they add up to
  * [headInsuPayment] exactly, while [headSsoPayment] is [requestPrice] less that.
  */

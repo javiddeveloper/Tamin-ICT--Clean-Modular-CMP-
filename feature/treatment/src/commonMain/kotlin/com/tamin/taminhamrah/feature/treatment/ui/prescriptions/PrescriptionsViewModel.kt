@@ -20,6 +20,7 @@ import com.tamin.taminhamrah.util.getSixMonthsAgoTimestamp
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
@@ -67,6 +68,8 @@ class PrescriptionsViewModel(
      */
     private suspend fun getLoggedNationalCode(): String = try {
         identityInfoUseCase().first().nationalId?.takeIf { it.isNotBlank() } ?: NO_NATIONAL_CODE
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Exception) {
         NO_NATIONAL_CODE
     }
@@ -202,6 +205,8 @@ class PrescriptionsViewModel(
                         .first()
                         .firstOrNull()
                         ?.let { price -> prices[noteHeadId] = price.toPresentation() }
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (e: Exception) {
                     // A record without a price stays unpriced rather than failing the whole load.
                 }
@@ -221,6 +226,8 @@ class PrescriptionsViewModel(
             getPrescriptionPdfFileUseCase(intent.prescriptionID).collect { pdfDn ->
                 emit(PartialState.ViewerPdfChanged(pdfDn.toPresentation()))
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
             emit(PartialState.ViewerDownloadFailed)
@@ -238,6 +245,8 @@ class PrescriptionsViewModel(
             downloadLabResultPdfUseCase(patientID, noteHeadEprescID, currentUserNationalCode).collect { pdfDn ->
                 emit(PartialState.ViewerPdfChanged(pdfDn.toPresentation()))
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
             emit(PartialState.ViewerDownloadFailed)
