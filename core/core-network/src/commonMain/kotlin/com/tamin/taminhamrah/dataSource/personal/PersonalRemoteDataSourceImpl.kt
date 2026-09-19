@@ -143,6 +143,13 @@ class PersonalRemoteDataSourceImpl(
             personalApiService.putInsuredRegistrationDocList(personalId, body).extractData()
         }
 
+    override suspend fun getInsuredRegistrationDocList(query: ApiQueryParamDN): List<InsuredDocDTO> =
+        errorParser.safeCall("getInsuredRegistrationDocList") {
+            personalApiService.getInsuredRegistrationDocList(
+                queryBuilder.buildQuery(query)
+            ).extractData().list ?: emptyList()
+        }
+
     override suspend fun getRequestSummary(requestId: String): NewInsuredSummaryDTO? =
         errorParser.safeCall("getRequestSummary") {
             personalApiService.getRequestSummary(requestId).extractData()

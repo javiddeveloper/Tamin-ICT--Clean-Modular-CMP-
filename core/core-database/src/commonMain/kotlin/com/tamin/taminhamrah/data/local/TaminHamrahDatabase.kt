@@ -100,7 +100,7 @@ import com.tamin.taminhamrah.data.local.dao.ConstructionFileDao
         HistoryWageRowEntity::class,
         ConstructionFileEntity::class,
     ],
-    version = 3,
+    version = 4,
 )
 @ConstructedBy(TaminXDatabaseConstructor::class)
 @TypeConverters(TaminHamrahConverters::class)

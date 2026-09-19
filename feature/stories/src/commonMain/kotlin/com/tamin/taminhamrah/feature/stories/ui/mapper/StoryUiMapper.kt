@@ -1,5 +1,8 @@
 package com.tamin.taminhamrah.feature.stories.ui.mapper
 
+import com.tamin.taminhamrah.deeplink.DeepLinkParser
+import com.tamin.taminhamrah.deeplink.DeepLinkSource
+import com.tamin.taminhamrah.deeplink.ParsedDeepLink
 import androidx.compose.ui.graphics.Color
 import com.tamin.taminhamrah.feature.stories.ui.model.StoryChannelPR
 import com.tamin.taminhamrah.feature.stories.ui.model.StoryCtaPR
@@ -68,7 +71,11 @@ private fun StoryMediaDN.toPresentation(): StoryMediaPR = when (this) {
     is StoryMediaDN.BundledVideo -> StoryMediaPR.Video(Res.getUri(path))
 }
 
-private fun StoryCtaDN.toPresentation() = StoryCtaPR(label = label, deepLink = deepLink)
+/** A link the app cannot resolve shows no button, rather than one that does nothing. */
+private fun StoryCtaDN.toPresentation() = StoryCtaPR(
+    label = label,
+    deepLink = deepLink?.takeIf { DeepLinkParser.parse(it, DeepLinkSource.APP_CONTENT) != ParsedDeepLink.Invalid },
+)
 
 /**
  * A channel's look, keyed by the identity the source gives it.

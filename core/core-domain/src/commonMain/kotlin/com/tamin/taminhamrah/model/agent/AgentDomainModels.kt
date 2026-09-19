@@ -22,8 +22,11 @@ sealed class AgentPollingState {
     /** Processing complete and response is ready */
     data class Done(val response: AgentResponseDN) : AgentPollingState()
 
-    /** Processing failed */
-    data class Failed(val message: String) : AgentPollingState()
+    /**
+     * Processing failed. [message] is the server's own explanation when it gave one; the UI
+     * falls back to its generic failure text when it is null.
+     */
+    data class Failed(val message: String? = null) : AgentPollingState()
 
     /** User or system cancelled the request */
     object Cancelled : AgentPollingState()
@@ -31,12 +34,18 @@ sealed class AgentPollingState {
 
 /**
  * Model for the complete Agent response after polling is finished.
+ *
+ * [state] and [history] are the server's conversation memory as the JSON it sent; the app never
+ * reads them, it only sends them back with the next prompt.
  */
 data class AgentResponseDN(
     val sessionId: String?,
     val lastEntity: String?,
     val entities: List<AiEntityDN>,
-    val message: String? = null
+    val message: String? = null,
+    val renderMode: AgentRenderMode = AgentRenderMode.CLIENT,
+    val state: String? = null,
+    val history: String? = null,
 )
 
 /**
@@ -47,7 +56,8 @@ data class AgentResponseDN(
  * @param payload Data provided by AI for service execution
  * @param data Direct output (if AI has full data)
  * @param message Optional text message
- * @param itemType Display type: "button" | "key_value" | "message" | "form" | ...
+ * @param itemType What the entity carries; [AgentItemType.MARKDOWN] means it is already rendered
+ * @param markdown The non-blank markdown texts of a [AgentItemType.MARKDOWN] entity, in order
  */
 data class AiEntityDN(
     val action: AgentActionKey,
@@ -55,7 +65,8 @@ data class AiEntityDN(
     val payload: JsonElement?,
     val data: JsonElement?,
     val message: String?,
-    val itemType: String?
+    val itemType: AgentItemType?,
+    val markdown: List<String> = emptyList(),
 )
 
 /**
@@ -64,5 +75,6 @@ data class AiEntityDN(
 data class ChatAllowedDN(
     val canStartChat: Boolean,
     val chatToken: String?,
-    val errorMessage: String?
+    val errorMessage: String?,
+    val canSendVoice: Boolean = false,
 )
