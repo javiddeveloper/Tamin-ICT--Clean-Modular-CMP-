@@ -24,6 +24,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopScreenShell
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopStepper
 import com.tamin.taminhamrah.feature.workshops.ui.model.ArticleSixteenDocumentTypes
 import com.tamin.taminhamrah.model.workshop.ARTICLE_SIXTEEN_MAX_DOCUMENTS
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
@@ -192,7 +193,7 @@ private fun ReviewStep(
         persistentListOf(
             WorkshopReviewRow(employerLabel, info.employerName, isNumeric = false),
             WorkshopReviewRow(nameLabel, info.workshopName, isNumeric = false),
-            WorkshopReviewRow(codeLabel, info.workshopCode),
+            WorkshopReviewRow(codeLabel, info.workshopId),
             WorkshopReviewRow(branchLabel, info.branchCode),
             WorkshopReviewRow(addressLabel, info.address, isNumeric = false),
         )
@@ -315,7 +316,7 @@ private val PreviewDebt =com.tamin.taminhamrah.model.workshop.ArticleSixteenDebt
 
 private val PreviewInfo = ArticleSixteenWorkshopInfoPR(
     workshopName = "آموزشگاه کامپیوتر توکلی-ایمیل",
-    workshopCode = "۰۹۶۸۲۱۰۱۷۰",
+    workshopId = "۰۹۶۸۲۱۰۱۷۰",
     branchCode = "۰۰۱۰",
     employerName = "حسین توکلی کرمانی",
     address = "تهران، خیابان ولیعصر، پلاک ۱۲۴۸، طبقهٔ سوم",

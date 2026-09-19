@@ -421,7 +421,7 @@ fun ArticleSixteenWorkshopInfoDTO.toDomain(): ArticleSixteenWorkshopInfoDN = Art
 
 fun ArticleSixteenRequestInfoDTO.toDomain(): ArticleSixteenRequestInfoDN = ArticleSixteenRequestInfoDN(
     defectDescription = defectDescription.orEmpty(),
-    documents = objectionPhotos.mapNotNull { it.toDomainOrNull() },
+    documents = objectionPhotos.orEmpty().mapNotNull { it.toDomainOrNull() },
 )
 
 /** A document with no guid cannot be addressed, so it is dropped rather than carried as blank. */

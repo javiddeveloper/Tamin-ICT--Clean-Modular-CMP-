@@ -35,6 +35,7 @@ import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
@@ -114,6 +115,22 @@ fun NewMemberStatusSheet(
 }
 
 /**
+ * What the ماده ۱۶ status filter offers, in the old app's order: its «فیلتر براساس وضعیت درخواست»
+ * lists these and no «بدون درخواست».
+ *
+ * «نامشخص» selects the rows the card itself labels «نامشخص». In the old app every status it did
+ * not model read «نامشخص», and its filter matched a missing status — the rows the design now
+ * calls «بدون درخواست».
+ */
+private val ArticleSixteenStatusFilters = persistentListOf(
+    ArticleSixteenRequestStatus.SUBMITTED,
+    ArticleSixteenRequestStatus.DOCUMENT_DEFECT,
+    ArticleSixteenRequestStatus.REJECTED,
+    ArticleSixteenRequestStatus.APPROVED,
+    ArticleSixteenRequestStatus.UNKNOWN,
+)
+
+/**
  * وضعیت درخواست رسیدگی به بدهی ماده ۱۶.
  */
 @Composable
@@ -133,7 +150,7 @@ fun ArticleSixteenStatusSheet(
             isSelected = selected == null,
             onClick = { onSelect(null) },
         )
-        ArticleSixteenRequestStatus.entries.filter { it != ArticleSixteenRequestStatus.UNKNOWN }.forEach { status ->
+        ArticleSixteenStatusFilters.forEach { status ->
             SheetRow(
                 label = stringResource(status.label),
                 isSelected = selected == status,
