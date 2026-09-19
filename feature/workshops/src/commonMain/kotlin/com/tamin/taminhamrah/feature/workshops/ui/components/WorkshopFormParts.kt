@@ -496,7 +496,10 @@ fun WorkshopDocumentsPanel(
                 fontWeight = FontWeight.Bold,
                 color = colors.textPrimary,
             )
-            NumericText(
+            // A plain Text, in the page's own direction: «۰ از ۱۰» is a sentence, not a number, and
+            // NumericText's forced LTR would reorder «از» between the two digit runs so the badge
+            // read «از ۱۰ ۰».
+            Text(
                 text = stringResource(
                     Res.string.ws_form_docs_count,
                     attachments.size.toString().toPersianDigits(),
@@ -504,6 +507,7 @@ fun WorkshopDocumentsPanel(
                 ),
                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                 color = colors.blueText,
+                maxLines = 1,
                 modifier = Modifier
                     .clip(DocsBadgeShape)
                     .background(colors.blueBg)
