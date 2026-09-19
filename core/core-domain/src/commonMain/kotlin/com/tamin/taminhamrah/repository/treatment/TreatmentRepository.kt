@@ -8,6 +8,13 @@ interface TreatmentRepository {
     suspend fun getDeservedTreatment(nationalCode: String): Flow<List<DeservedTreatmentDN>>
 
     /**
+     * One-shot network refresh, for callers that need the fresh value directly rather than
+     * observing [getDeservedTreatment]'s cache-then-network `Flow`. Still writes through to the
+     * local cache, so [getDeservedTreatment] observers see the update too.
+     */
+    suspend fun refreshDeservedTreatment(nationalCode: String): List<DeservedTreatmentDN>
+
+    /**
      * [patientNationalCode] is the person whose records are wanted — pass [nationalCode] itself for
      * the insured, or a dependant's code. The impl encodes "self" as the endpoint expects.
      */

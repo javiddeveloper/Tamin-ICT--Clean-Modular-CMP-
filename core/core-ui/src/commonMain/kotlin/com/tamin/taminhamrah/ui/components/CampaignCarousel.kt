@@ -19,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
@@ -31,6 +32,7 @@ import com.tamin.taminhamrah.model.campaign.CampaignPR
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.theme.shimmer
 import com.tamin.taminhamrah.ui.theme.CampaignBadgeBorder
 import com.tamin.taminhamrah.ui.theme.CampaignBadgeFill
 import com.tamin.taminhamrah.ui.theme.CampaignBodyInk
@@ -78,11 +80,13 @@ fun CampaignCarousel(
     campaigns: ImmutableList<CampaignPR>,
     onCampaignClick: (FeatureFlag) -> Unit,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
     horizontalPadding: Dp = Spacing.page,
 ) {
-    if (campaigns.isEmpty()) return
+    if (campaigns.isEmpty() && !isLoading) return
 
-    val pageCount = campaigns.size
+    val shownCampaigns = if (isLoading) AllCampaignKinds.toPresentation() else campaigns
+    val pageCount = shownCampaigns.size
     val pagerState = rememberPagerState(pageCount = { pageCount })
     // Remembers which cards have already entered, so a page the pager disposes and recomposes on
     // scroll reappears instantly instead of playing its entrance a second time.
@@ -106,7 +110,7 @@ fun CampaignCarousel(
 
         HorizontalPager(
             state = pagerState,
-            key = { page -> campaigns[page].kind },
+            key = { page -> shownCampaigns[page].kind },
             contentPadding = PaddingValues(
                 start = horizontalPadding,
                 end = horizontalPadding + CampaignDimens.cardNarrowing,
@@ -118,11 +122,12 @@ fun CampaignCarousel(
             verticalAlignment = Alignment.Top,
             modifier = Modifier.padding(vertical = CampaignDimens.trackVerticalPadding),
         ) { page ->
-            val campaign = campaigns[page]
+            val campaign = shownCampaigns[page]
             CampaignCard(
                 campaign = campaign,
                 type = type,
                 onClick = onCampaignClick,
+                isLoading = isLoading,
                 // Applied here rather than passed in: StaggeredEntranceState holds a mutable set
                 // and reads as unstable, so handing it to the card would cost the card its ability
                 // to skip. A Modifier does not.
@@ -172,6 +177,25 @@ private fun CampaignHeader(
 
 @Composable
 private fun CampaignCard(
+    campaign: CampaignPR,
+    type: CampaignTextStyles,
+    onClick: (FeatureFlag) -> Unit,
+    isLoading: Boolean = false,
+    modifier: Modifier = Modifier,
+) {
+    if (!isLoading) {
+        CampaignCardContent(campaign, type, onClick, modifier)
+        return
+    }
+    
+    Box(modifier = modifier) {
+        CampaignCardContent(campaign, type, onClick, Modifier.alpha(0f))
+        Box(Modifier.matchParentSize().clip(CardShape).shimmer())
+    }
+}
+
+@Composable
+private fun CampaignCardContent(
     campaign: CampaignPR,
     type: CampaignTextStyles,
     onClick: (FeatureFlag) -> Unit,

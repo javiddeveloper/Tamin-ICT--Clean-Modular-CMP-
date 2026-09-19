@@ -30,6 +30,11 @@ class FakeTreatmentRepository : TreatmentRepository {
         emit(getDeservedTreatmentResult)
     }
 
+    override suspend fun refreshDeservedTreatment(nationalCode: String): List<DeservedTreatmentDN> {
+        if (shouldThrowError) throw error
+        return getDeservedTreatmentResult
+    }
+
     override suspend fun getElectronicPrescriptionList(
         requestTypeId: String, nationalCode: String, patientNationalCode: String,
         startDate: String, endDate: String
