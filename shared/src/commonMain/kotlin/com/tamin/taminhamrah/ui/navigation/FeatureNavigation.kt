@@ -79,7 +79,7 @@ fun NavController.navigateToFeature(flag: FeatureFlag, beforeOpen: () -> Unit = 
         // «اطلاعات پیمان» in the server menu; the screen it opens is titled «ردیف‌های پیمان».
         FeatureFlag.CONTRACT_INFO -> screen { navigateToContractRows() }
         // «واگذارندگان» (1003) — the پیمان‌ها this employer assigned out.
-        FeatureFlag.ASSIGNER_CONTRACT -> navigateToAssignerContracts()
+        FeatureFlag.ASSIGNER_CONTRACT -> screen { navigateToAssignerContracts() }
         FeatureFlag.COMPLETE_WORKSHOP_INFO -> screen { navigateToCompleteEmployerInfo() }
         FeatureFlag.STACK_HOLDER_LIST -> screen { navigateToLegalRepresentativeWorkshops() }
         FeatureFlag.CONTRACTS -> screen { navigateToContractAffairs() }

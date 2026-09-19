@@ -1,18 +1,28 @@
 package com.tamin.taminhamrah.feature.workshops.ui.assignerContracts
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractsIntent
@@ -20,19 +30,20 @@ import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.Com
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopListScaffold
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopScreenShell
 import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
+import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.mapper.workshop.declaredTotal
 import com.tamin.taminhamrah.model.workshop.ComputationalBasePR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
-import com.tamin.taminhamrah.ui.components.ListGroupView
-import com.tamin.taminhamrah.ui.components.ListItemBadge
-import com.tamin.taminhamrah.ui.components.ListItemData
 import com.tamin.taminhamrah.ui.components.NumericText
-import com.tamin.taminhamrah.ui.components.StatTile
+import com.tamin.taminhamrah.ui.components.StatusPill
+import com.tamin.taminhamrah.ui.components.taminSurface
+import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.shimmer
 import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -117,14 +128,35 @@ fun ComputationalBasesContent(
         val totalLabel = stringResource(Res.string.assigner_bases_total)
         WorkshopListScaffold(
             header = {
-                StatTile(
-                    label = totalLabel,
-                    amount = total,
-                    containerColor = colors.bgSurface,
-                    contentColor = colors.textPrimary,
-                    labelColor = colors.textMuted,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                // The design's tile: a caption over the figure, both at the start edge.
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .taminSurface(CornerRadius.xl)
+                        .padding(horizontal = Spacing.smd, vertical = Spacing.smd),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+                ) {
+                    Text(
+                        text = totalLabel,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = colors.textMuted,
+                    )
+                    if (total != null) {
+                        NumericText(
+                            text = total,
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                            color = colors.textPrimary,
+                        )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(TOTAL_SHIMMER_WIDTH)
+                                .height(IconSize.small)
+                                .clip(RoundedCornerShape(CornerRadius.md))
+                                .shimmer(),
+                        )
+                    }
+                }
             },
             state = bases,
             onLoadMore = { onIntent(AssignerContractsIntent.LoadMoreBases) },
@@ -153,13 +185,13 @@ fun ComputationalBasesContent(
 }
 
 /**
- * One مبنا: the period it covers with its سند number beside it, how many documents it carries, and
- * its amount.
+ * One مبنا as the design's card draws it: the period it covers, its «سند N» pill and how many
+ * documents it carries under that, then its amount and a chevron.
  *
- * Drawn through the shared [ListGroupView] — a title with a badge, a muted line, a trailing value
- * and a chevron is exactly what a list row already is. A base the service sent no period for is
- * titled by its تاریخ ارسال instead, the one date it does carry.
+ * A base the service sent no period for is titled by its تاریخ ارسال instead, the one date it does
+ * carry.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ComputationalBaseRow(
     base: ComputationalBasePR,
@@ -169,58 +201,67 @@ private fun ComputationalBaseRow(
     val colors = LocalTaminColors.current
     val period = stringResource(Res.string.assigner_base_period, base.periodStart, base.periodEnd)
     val title = if (base.periodStart.isNotBlank() && base.periodEnd.isNotBlank()) period else base.sendDate
-    val badgeText = stringResource(Res.string.assigner_base_document_badge, base.letterNumber)
-    val summary = stringResource(Res.string.assigner_base_documents_count, base.documentCount)
-    val chevron = vectorResource(Res.drawable.ic_tamin_chevron_forward)
-    val amount = base.amount
-
-    // Built inside a remember for the same reason the scaffold's entrance key is: a fresh
-    // ListItemData every recomposition would cost ListGroupView its ability to skip, and the
-    // trailing slot is a lambda that would be a new instance each time.
-    val items = remember(title, badgeText, summary, amount, chevron, colors, onOpen) {
-        persistentListOf(
-            ListItemData(
-                title = title,
-                subtitle = summary,
-                badge = ListItemBadge(
-                    text = badgeText,
-                    backgroundColor = colors.bgPage,
-                    textColor = colors.textSecondary,
-                ),
-                onClick = onOpen,
-                customTrailingContent = {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        NumericText(
-                            text = amount,
-                            style = MaterialTheme.typography.labelMedium
-                                .copy(fontWeight = FontWeight.SemiBold),
-                            color = colors.blueText,
-                        )
-                        Icon(
-                            imageVector = chevron,
-                            contentDescription = null,
-                            tint = colors.chevron,
-                            modifier = Modifier.size(IconSize.small),
-                        )
-                    }
-                },
+    val shape = remember { RoundedCornerShape(WorkshopDimens.cardCorner) }
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .taminSurface(WorkshopDimens.cardCorner)
+            .clip(shape)
+            .clickable(onClick = onOpen)
+            .padding(BaseRowPadding),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = colors.textPrimary,
             )
+            // A period is longer than the design's month, so the سند pill moves under it, beside
+            // the count, and the two wrap rather than squeeze each other to an ellipsis.
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+            ) {
+                StatusPill(
+                    text = stringResource(Res.string.assigner_base_document_badge, base.letterNumber),
+                    containerColor = colors.bgPage,
+                    contentColor = colors.textSecondary,
+                    verticalPadding = Spacing.xs,
+                )
+                // The count in the blue pill profile gives its افراد تبعی.
+                StatusPill(
+                    text = stringResource(Res.string.assigner_base_documents_count, base.documentCount),
+                    containerColor = colors.blueBg,
+                    contentColor = colors.blueText,
+                    verticalPadding = Spacing.xs,
+                )
+            }
+        }
+        NumericText(
+            text = base.amount,
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+            color = colors.textPrimary,
+        )
+        Icon(
+            imageVector = vectorResource(Res.drawable.ic_tamin_chevron_forward),
+            contentDescription = null,
+            tint = colors.chevron,
+            modifier = Modifier.size(IconSize.small),
         )
     }
-
-    ListGroupView(
-        items = items,
-        showDividers = false,
-        itemContentPadding = BaseRowPadding,
-        modifier = modifier.fillMaxWidth(),
-    )
 }
 
-/** `padding:12px 14px` inside the design's base row. */
+/** `padding:11px 12px` inside the design's base row. */
 private val BaseRowPadding = PaddingValues(horizontal = Spacing.md, vertical = Spacing.smd)
+
+/** How much of the tile's width the total's placeholder takes while the last page is still coming. */
+private const val TOTAL_SHIMMER_WIDTH = 0.5f
 
 // ------------------------------------------------------------------------------- previews
 

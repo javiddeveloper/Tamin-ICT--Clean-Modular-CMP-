@@ -28,7 +28,6 @@ import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.contract_rows_address
@@ -47,27 +46,18 @@ import taminx.core.core_ui.contract_rows_workshop_number
  * not a variant of the same one, so bending the shared card into it would cost every other screen
  * a flag it does not want.
  *
- * On ردیف‌های پیمان the card is inert — no ripple, no chevron, no click target. The old app wired
- * an `onItemClickListener` into both of its adapters and never called it; that reproduces what the
- * screen actually does rather than what its plumbing implied. واگذارندگان offers its two
- * destinations as [buttons] on the card itself, which is what every other کارگاه card here does.
+ * The card is inert by design — no ripple, no chevron, no click target. The old app wired an
+ * `onItemClickListener` into both of its adapters and never called it; this reproduces what the
+ * screen actually does rather than what its plumbing implied.
  *
  * [showContact] follows the tab, not the row: only the تعهدنامه‌دار service sends the contact
  * columns, so on the other tab the block is absent rather than dashed.
- *
- * @param dateLabel what the second tile is called. ردیف‌های پیمان reads تاریخ تعهد off the
- *   agreement; واگذارندگان reads تاریخ قرارداد off the پیمان, and they are different columns.
- * @param buttons the card's own actions, laid out in one equal-width row the way
- *   [com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopRecordCard] lays out its own.
- *   Null — the default — leaves the card inert, which is what ردیف‌های پیمان wants.
  */
 @Composable
 fun ContractRowCard(
     row: ContractRowPR,
     showContact: Boolean,
     modifier: Modifier = Modifier,
-    dateLabel: StringResource = Res.string.contract_rows_commitment_date,
-    buttons: (@Composable RowScope.() -> Unit)? = null,
 ) {
     val colors = LocalTaminColors.current
     Column(
@@ -108,36 +98,30 @@ fun ContractRowCard(
                 modifier = Modifier.weight(1f),
             )
             ContractRowTile(
-                label = stringResource(dateLabel),
+                label = stringResource(Res.string.contract_rows_commitment_date),
                 value = row.commitmentDate,
                 modifier = Modifier.weight(1f),
             )
         }
 
         if (showContact) {
-            // Blank, not dashed, is how a service that never sends these columns at all is told
-            // apart from one that sent them empty. ردیف‌های پیمان dashes them, so this row always
-            // draws there; واگذارندگان leaves them blank and the row is dropped entirely rather
-            // than printing two permanent «—» tiles.
-            if (row.mobile.isNotBlank() || row.email.isNotBlank()) {
-                TileRow(modifier = Modifier.padding(top = WorkshopDimens.contractRowTileGap)) {
-                    ContractRowTile(
-                        label = stringResource(Res.string.contract_rows_mobile),
-                        value = row.mobile,
-                        modifier = Modifier.weight(1f),
-                    )
-                    ContractRowTile(
-                        label = stringResource(Res.string.contract_rows_email),
-                        value = row.email,
-                        // An address, not a number. The theme's `ss01` would paint its digits as
-                        // Persian glyphs, so `…۲۰۲۰@gmail.com` is what the user reads back
-                        // and retypes — and it is not the address. Confirmed against a live row.
-                        latinDigits = true,
-                        // The design ellipses this one cell rather than wrapping it.
-                        singleLine = true,
-                        modifier = Modifier.weight(1f),
-                    )
-                }
+            TileRow(modifier = Modifier.padding(top = WorkshopDimens.contractRowTileGap)) {
+                ContractRowTile(
+                    label = stringResource(Res.string.contract_rows_mobile),
+                    value = row.mobile,
+                    modifier = Modifier.weight(1f),
+                )
+                ContractRowTile(
+                    label = stringResource(Res.string.contract_rows_email),
+                    value = row.email,
+                    // An address, not a number. The theme's `ss01` would paint its digits as
+                    // Persian glyphs, so `…۲۰۲۰@gmail.com` is what the user reads back and
+                    // retypes — and it is not the address. Confirmed against a live row.
+                    latinDigits = true,
+                    // The design ellipses this one cell rather than wrapping it.
+                    singleLine = true,
+                    modifier = Modifier.weight(1f),
+                )
             }
 
             // Dropped entirely when the service sent no address: a full-width dash claims more
@@ -152,16 +136,6 @@ fun ContractRowCard(
                         .padding(top = WorkshopDimens.contractRowTileGap),
                 )
             }
-        }
-
-        if (buttons != null) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = WorkshopDimens.cardButtonsTopMargin),
-                horizontalArrangement = Arrangement.spacedBy(WorkshopDimens.cardButtonGap),
-                content = buttons,
-            )
         }
     }
 }

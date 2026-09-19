@@ -297,7 +297,7 @@ private fun DocumentList(
                 badge = if (isUnavailable) {
                     ListItemBadge(
                         text = unavailableLabel,
-                        backgroundColor = colors.dangerBg,
+                        backgroundColor = colors.dangerBorder,
                         textColor = colors.dangerText,
                     )
                 } else {
@@ -313,10 +313,12 @@ private fun DocumentList(
                 // is *unavailable* does not, because it cannot succeed.
                 enabled = openingDocumentId == null && !isUnavailable,
                 onClick = { onOpen(document) },
-                // An image in blue, a PDF in red — the design's two tiles.
+                // An image in blue, a PDF in red — the design's two tiles. The PDF tile takes
+                // dangerBorder: the theme's dangerBg is the plain surface in light mode, and would leave
+                // the glyph with no tile at all; dangerBorder carries the design's own #FDECEC.
                 colors = ListItemColors(
                     subtitleColor = if (didFail) colors.dangerText else Color.Unspecified,
-                    leadingIconBackgroundColor = if (isImage) colors.blueBg else colors.dangerBg,
+                    leadingIconBackgroundColor = if (isImage) colors.blueBg else colors.dangerBorder,
                     leadingIconTintColor = if (isImage) colors.blueText else colors.dangerText,
                 ),
             )
