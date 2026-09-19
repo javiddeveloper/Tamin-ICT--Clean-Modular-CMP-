@@ -8,11 +8,19 @@ import com.tamin.taminhamrah.model.workshop.PaymentSheetStatus
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionStatus
 import com.tamin.taminhamrah.model.workshop.WorkshopActivityStatus
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import org.jetbrains.compose.resources.StringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.article_sixteen_status_approved
+import taminx.core.core_ui.article_sixteen_status_document_defect
+import taminx.core.core_ui.article_sixteen_status_none
+import taminx.core.core_ui.article_sixteen_status_rejected
+import taminx.core.core_ui.article_sixteen_status_submitted
+import taminx.core.core_ui.article_sixteen_status_unknown
 
 /**
- * Which of the theme's colour pairs a workshop status — or an action's icon tile — is drawn in.
+ * Which of the theme's color pairs a workshop status — or an action's icon tile — is drawn in.
  *
- * The buckets are named by meaning, not by colour, so the palette can move without every screen
+ * The buckets are named by meaning, not by color, so the palette can move without every screen
  * that spelled "green" having to move with it. The status *word* always comes from the service —
  * only the tint is decided here.
  */
@@ -58,6 +66,16 @@ val ArticleSixteenRequestStatus.tint: StatusTint
         ArticleSixteenRequestStatus.REJECTED -> StatusTint.NEGATIVE
         ArticleSixteenRequestStatus.SUBMITTED -> StatusTint.INFO
         ArticleSixteenRequestStatus.NONE, ArticleSixteenRequestStatus.UNKNOWN -> StatusTint.NEUTRAL
+    }
+
+val ArticleSixteenRequestStatus.label: StringResource
+    get() = when (this) {
+        ArticleSixteenRequestStatus.SUBMITTED -> Res.string.article_sixteen_status_submitted
+        ArticleSixteenRequestStatus.DOCUMENT_DEFECT -> Res.string.article_sixteen_status_document_defect
+        ArticleSixteenRequestStatus.REJECTED -> Res.string.article_sixteen_status_rejected
+        ArticleSixteenRequestStatus.APPROVED -> Res.string.article_sixteen_status_approved
+        ArticleSixteenRequestStatus.NONE -> Res.string.article_sixteen_status_none
+        ArticleSixteenRequestStatus.UNKNOWN -> Res.string.article_sixteen_status_unknown
     }
 
 val WorkShopObjectionStatus.tint: StatusTint

@@ -14,6 +14,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.Computationa
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.settlement.SettlementRequestScreen
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsEvent
 import com.tamin.taminhamrah.feature.workshops.ui.demandDocuments.DemandDocumentsScreen
+import com.tamin.taminhamrah.feature.workshops.ui.managementDebit.ManagementDebitScreen
 import com.tamin.taminhamrah.feature.workshops.ui.contractRows.ContractRowsScreen
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.add.AddLegalRepresentativeScreen
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.list.LegalRepresentativeListScreen
@@ -213,6 +214,13 @@ data class ObjectionableDebitRoute(
 
 @Serializable
 data class WorkshopRecentlyAddedMembersRoute(
+    val workshopId: String,
+    val branchCode: String,
+    val workshopName: String = "",
+)
+
+@Serializable
+data class ManagementDebitRoute(
     val workshopId: String,
     val branchCode: String,
     val workshopName: String = "",
@@ -521,6 +529,15 @@ fun NavGraphBuilder.workshopsScreen(
             onBack = { navController.popBackStack() },
         )
     }
+    composableWithFadeTransitions<ManagementDebitRoute> { entry ->
+        val route = entry.toRoute<ManagementDebitRoute>()
+        ManagementDebitScreen(
+            workshopId = route.workshopId,
+            branchCode = route.branchCode,
+            workshopName = route.workshopName,
+            onBack = { navController.popBackStack() },
+        )
+    }
 }
 
 /**
@@ -549,4 +566,6 @@ private fun WorkshopsEvent.Navigate.route(): Any = when (action) {
         ObjectionableDebitRoute(workshopId, branchCode, workshopName)
     WorkshopAction.NEW_MEMBER ->
         WorkshopRecentlyAddedMembersRoute(workshopId, branchCode, workshopName)
+    WorkshopAction.ARTICLE_SIXTEEN ->
+        ManagementDebitRoute(workshopId, branchCode, workshopName)
 }
