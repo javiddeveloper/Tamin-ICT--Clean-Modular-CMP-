@@ -22,6 +22,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
@@ -53,6 +55,11 @@ fun WorkshopScreenShell(
     workshopName: String? = null,
     workshopCode: String? = null,
     action: (@Composable () -> Unit)? = null,
+    /**
+     * One muted line under the title — which record the screen is about. Null, the default, draws
+     * the title alone, as every existing screen does.
+     */
+    subtitle: String? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val colors = LocalTaminColors.current
@@ -64,6 +71,7 @@ fun WorkshopScreenShell(
     Column(modifier = modifier.fillMaxSize()) {
         TaminTopAppBar(
             title = title,
+            titleContent = subtitle?.let { line -> { WorkshopHeaderTitle(title = title, subtitle = line) } },
             background = headerGradient,
             navigationIcon = {
                 // Both chevrons are autoMirrored, so under RTL the one named "back" is the ">"
@@ -81,6 +89,41 @@ fun WorkshopScreenShell(
             }
         }
         content()
+    }
+}
+
+/**
+ * A gradient bar's title with one muted line under it, both centred the way the bar centres a plain
+ * title — for the headers that name the record they are about.
+ */
+@Composable
+internal fun WorkshopHeaderTitle(
+    title: String,
+    subtitle: String,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            color = colors.onGradient,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Text(
+            text = subtitle,
+            style = MaterialTheme.typography.labelSmall,
+            color = colors.textHeaderSubtitle,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
 

@@ -15,6 +15,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.text.font.FontWeight
@@ -90,12 +92,12 @@ fun ContractRowCard(
         }
 
         TileRow(modifier = Modifier.padding(top = Spacing.sm)) {
-            Tile(
+            ContractRowTile(
                 label = stringResource(Res.string.contract_rows_workshop_number),
                 value = row.workshopCodeLabel,
                 modifier = Modifier.weight(1f),
             )
-            Tile(
+            ContractRowTile(
                 label = stringResource(Res.string.contract_rows_commitment_date),
                 value = row.commitmentDate,
                 modifier = Modifier.weight(1f),
@@ -104,12 +106,12 @@ fun ContractRowCard(
 
         if (showContact) {
             TileRow(modifier = Modifier.padding(top = WorkshopDimens.contractRowTileGap)) {
-                Tile(
+                ContractRowTile(
                     label = stringResource(Res.string.contract_rows_mobile),
                     value = row.mobile,
                     modifier = Modifier.weight(1f),
                 )
-                Tile(
+                ContractRowTile(
                     label = stringResource(Res.string.contract_rows_email),
                     value = row.email,
                     // An address, not a number. The theme's `ss01` would paint its digits as
@@ -125,7 +127,7 @@ fun ContractRowCard(
             // Dropped entirely when the service sent no address: a full-width dash claims more
             // about the gap than the design does.
             if (row.address.isNotBlank()) {
-                Tile(
+                ContractRowTile(
                     label = stringResource(Res.string.contract_rows_address),
                     value = row.address,
                     numeric = false,
@@ -158,7 +160,7 @@ private fun TileRow(
  * page — a workshop number laid out RTL reads back to front.
  */
 @Composable
-private fun Tile(
+internal fun ContractRowTile(
     label: String,
     value: String,
     modifier: Modifier = Modifier,
@@ -172,6 +174,8 @@ private fun Tile(
      */
     latinDigits: Boolean = false,
     singleLine: Boolean = false,
+    /** The value's color. Unspecified, the default, is the card's primary text. */
+    valueColor: Color = Color.Unspecified,
 ) {
     val colors = LocalTaminColors.current
     Column(
@@ -200,7 +204,7 @@ private fun Tile(
                 text = value,
                 style = valueStyle,
                 fontWeight = FontWeight.Bold,
-                color = colors.textPrimary,
+                color = valueColor.takeOrElse { colors.textPrimary },
                 maxLines = if (singleLine) 1 else Int.MAX_VALUE,
                 overflow = TextOverflow.Ellipsis,
                 modifier = if (numeric) Modifier.fillMaxWidth() else Modifier,
