@@ -88,14 +88,22 @@ class TopAreaState internal constructor(
             rawOffsetPx >= maxOffsetPx / 2f -> maxOffsetPx
             else -> 0f
         }
+        animateTo(target, initialVelocity = -scrollVelocityY)
+    }
+
+    /** Springs to the fully collapsed edge. No-op when already collapsed. */
+    fun collapseFully() {
+        if (rawOffsetPx >= maxOffsetPx) return
+        animateTo(maxOffsetPx)
+    }
+
+    private fun animateTo(target: Float, initialVelocity: Float = 0f) {
         settleJob?.cancel()
         settleJob = scope.launch {
             animate(
                 initialValue = rawOffsetPx,
                 targetValue = target,
-                // Negated because `scrollVelocityY`'s sign is scroll-delta convention (see the
-                // class doc), the opposite of rawOffsetPx's own increasing-while-folding direction.
-                initialVelocity = -scrollVelocityY,
+                initialVelocity = initialVelocity,
                 animationSpec = SnapSpec,
             ) { value, _ -> rawOffsetPx = value }
         }

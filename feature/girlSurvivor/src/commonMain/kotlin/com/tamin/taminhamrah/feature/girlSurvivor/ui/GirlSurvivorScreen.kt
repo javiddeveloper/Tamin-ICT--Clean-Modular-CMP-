@@ -61,7 +61,6 @@ import com.tamin.taminhamrah.ui.toparea.rememberMeasuredTopAreaState
 import com.tamin.taminhamrah.ui.toparea.reportTopAreaHeight
 import com.tamin.taminhamrah.ui.toparea.topAreaContentSpacer
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -161,13 +160,10 @@ private fun GirlSurvivorContent(
         scrollState.scrollTo(0)
     }
 
-    // Keyboard / bring-into-view can land a tiny scroll without a fling. After the inset settles,
-    // snap the header to a real edge so it never sits partially folded.
+    // Collapse the hero when the keyboard opens so form fields keep room under the slim bar.
     val imeBottomPx = WindowInsets.ime.getBottom(LocalDensity.current)
-    LaunchedEffect(imeBottomPx) {
-        if (imeBottomPx <= 0) return@LaunchedEffect
-        delay(48)
-        topArea.settleToNearestEdge()
+    LaunchedEffect(imeBottomPx > 0) {
+        if (imeBottomPx > 0) topArea.collapseFully()
     }
 
     val steps = remember(state.currentStep) {
