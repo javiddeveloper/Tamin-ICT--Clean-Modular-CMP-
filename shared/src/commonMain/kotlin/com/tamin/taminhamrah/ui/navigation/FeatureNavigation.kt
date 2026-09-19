@@ -3,7 +3,6 @@ package com.tamin.taminhamrah.ui.navigation
 import androidx.navigation.NavController
 import com.tamin.taminhamrah.feature.agent.navigateToAgent
 import com.tamin.taminhamrah.feature.contractaffair.navigateToContractAffairs
-import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.history.navigateToHistory
 import com.tamin.taminhamrah.feature.history.navigateToHistoryJobInfo
 import com.tamin.taminhamrah.feature.historyobjection.navigateToHistoryObjection
@@ -11,7 +10,7 @@ import com.tamin.taminhamrah.feature.deferredInstallment.navigateToDeferredInsta
 import com.tamin.taminhamrah.feature.orotezprotez.navigateToOrotezProtez
 import com.tamin.taminhamrah.feature.requestPaymentForIllDays.navigateToRequestPaymentForIllDays
 import com.tamin.taminhamrah.feature.pregnancyPay.navigateToPregnancyPay
-import com.tamin.taminhamrah.feature.pensionInquiry.navigateToCalculatePension
+import com.tamin.taminhamrah.feature.calculateWagePension.navigateToCalculateWagePension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeservedTreatment
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDisabilityPension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToEdict
@@ -88,8 +87,9 @@ fun NavController.navigateToFeature(flag: FeatureFlag, beforeOpen: () -> Unit = 
         FeatureFlag.OPTIONAL_INSURANCE -> screen { navigateToContractFlow(ContractType.OPTIONAL) }
         FeatureFlag.HOUSEWIFE_INSURANCE -> screen { navigateToContractFlow(ContractType.HOUSEWIFE) }
         FeatureFlag.PENSION_INQUIRY -> screen { navigateToPensionStatusInquiry() }
+        FeatureFlag.CALCULATE_WAGE_PENSION,
+        FeatureFlag.CALCULATE_WAGE_PENSION_109 -> screen { navigateToCalculateWagePension() }
         FeatureFlag.RETIREMENT_PENSION -> screen { navigateToRetirementPension() }
-        FeatureFlag.CALCULATE_WAGE_PENSION -> screen { navigateToCalculatePension() }
         // «نسخه‌های الکترونیک» lives in the treatment tab; the pensioner module's PrescriptionScreen
         // is an empty placeholder and showed a blank page.
         FeatureFlag.PRESCRIPTION -> screen { navigateToPrescriptions() }

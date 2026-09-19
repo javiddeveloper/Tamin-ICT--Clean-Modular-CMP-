@@ -22,7 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -39,6 +38,7 @@ import com.tamin.taminhamrah.util.toFormattedDate
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.active_relation_active
 import taminx.core.core_ui.active_relation_disconnected_badge
@@ -50,6 +50,8 @@ import taminx.core.core_ui.active_relation_start_date
 import taminx.core.core_ui.active_relation_status
 import taminx.core.core_ui.active_relation_verified_badge
 import taminx.core.core_ui.ic_send
+import taminx.core.core_ui.ic_tamin_check
+import taminx.core.core_ui.ic_tamin_cross
 
 @Composable
 internal fun ActiveRelationItemCard(
@@ -59,14 +61,11 @@ internal fun ActiveRelationItemCard(
 ) {
     val taminColors = LocalTaminColors.current
 
-    val topHeaderGradientColor = if (item.isActive) listOf(
-        taminColors.greenBorder.copy(alpha = 0.3f),
-        taminColors.greenBorder.copy(alpha = 0.2f),
-        taminColors.greenBorder.copy(alpha = 0.1f)
-    ) else listOf(
-        taminColors.border.copy(alpha = 0.3f),
-        taminColors.border.copy(alpha = 0.1f)
-    )
+    val topHeaderBackgroundColor = if (item.isActive) {
+        taminColors.greenBg
+    } else {
+        taminColors.border.copy(alpha = 0.12f)
+    }
 
     Card(
         modifier = modifier
@@ -86,12 +85,8 @@ internal fun ActiveRelationItemCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(
-                        brush = Brush.linearGradient(
-                            topHeaderGradientColor
-                        )
-                    )
-                    .padding(Spacing.lg),
+                    .background(topHeaderBackgroundColor)
+                    .padding(horizontal = Spacing.lg, vertical = Spacing.md),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -228,7 +223,8 @@ private fun VerifiedBadge(modifier: Modifier = Modifier) {
         modifier = modifier,
         containerColor = taminColors.bgSurface,
         textColor = taminColors.springGreenText,
-        border = BorderStroke(width = 1.dp, color = taminColors.greenBorder)
+        border = BorderStroke(width = 1.dp, color = taminColors.greenBorder),
+        icon = vectorResource(Res.drawable.ic_tamin_check)
     )
 }
 
@@ -240,7 +236,8 @@ private fun InactiveBadge(modifier: Modifier = Modifier) {
         modifier = modifier,
         containerColor = taminColors.bgPage,
         textColor = taminColors.textMuted,
-        border = BorderStroke(width = 1.dp, color = taminColors.border)
+        border = BorderStroke(width = 1.dp, color = taminColors.border),
+        icon = vectorResource(Res.drawable.ic_tamin_cross)
     )
 }
 
