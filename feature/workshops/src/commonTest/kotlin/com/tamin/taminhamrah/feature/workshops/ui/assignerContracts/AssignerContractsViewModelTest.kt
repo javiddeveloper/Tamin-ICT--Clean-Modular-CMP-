@@ -323,9 +323,9 @@ class AssignerContractsViewModelTest {
 
         vm.uiState.test {
             val state = awaitItem()
-            assertEquals(2, state.myWorkshops.size)
-            // The employer's real count, so the sheet can say the list is partial.
-            assertEquals(8, state.myWorkshopsTotal)
+            assertEquals(2, state.myWorkshops.items.size)
+            // The employer's real count, so the list knows there is more to page in.
+            assertEquals(8, state.myWorkshops.total)
         }
 
         // Re-opening must not re-fetch: the rows are already in hand. Proven by changing what the
@@ -334,8 +334,29 @@ class AssignerContractsViewModelTest {
         vm.sendIntent(AssignerContractsIntent.SearchOpenChanged(isOpen = false))
         vm.sendIntent(AssignerContractsIntent.SearchOpenChanged(isOpen = true))
 
-        assertEquals(2, vm.uiState.value.myWorkshops.size)
-        assertEquals(8, vm.uiState.value.myWorkshopsTotal)
+        assertEquals(2, vm.uiState.value.myWorkshops.items.size)
+        assertEquals(8, vm.uiState.value.myWorkshops.total)
+    }
+
+    /** The quick-pick pages in the rest as it is scrolled rather than stopping silently at one page. */
+    @Test
+    fun `the quick pick pages in the rest of the workshops`() = runTest(testDispatcher) {
+        fun workshops(from: Int, count: Int) = List(count) { myWorkshop("${from + it}") }
+        val total = WORKSHOP_PAGE_SIZE + 3
+        repository.employerAgreements = PagedListDN(workshops(0, WORKSHOP_PAGE_SIZE), total)
+
+        val vm = viewModel()
+        vm.sendIntent(AssignerContractsIntent.SearchOpenChanged(isOpen = true))
+        assertEquals(WORKSHOP_PAGE_SIZE, vm.uiState.value.myWorkshops.items.size)
+        assertTrue(vm.uiState.value.myWorkshops.canLoadMore)
+
+        repository.employerAgreements = PagedListDN(workshops(WORKSHOP_PAGE_SIZE, 3), total)
+        vm.sendIntent(AssignerContractsIntent.LoadMoreMyWorkshops)
+
+        val state = vm.uiState.value.myWorkshops
+        assertEquals(total, state.items.size)
+        assertFalse(state.canLoadMore)
+        assertEquals(1, repository.lastWorkshopListQuery?.page)
     }
 
     /**
@@ -352,7 +373,7 @@ class AssignerContractsViewModelTest {
         val vm = viewModel()
         vm.sendIntent(AssignerContractsIntent.SearchOpenChanged(isOpen = true))
 
-        assertEquals(2, vm.uiState.value.myWorkshops.size)
+        assertEquals(2, vm.uiState.value.myWorkshops.items.size)
     }
 
     /** Picking a row fills the code *and* its branch, which is the whole point of the list. */
@@ -389,7 +410,9 @@ class AssignerContractsViewModelTest {
         vm.uiState.test {
             val state = awaitItem()
             assertTrue(state.isSearchOpen)
-            assertTrue(state.myWorkshops.isEmpty())
+            assertTrue(state.myWorkshops.items.isEmpty())
+            // A failing page stops paging, so it is not asked for again on every scroll.
+            assertFalse(state.myWorkshops.canLoadMore)
             // Nothing was requested for the list itself, so it must not read as failed.
             assertFalse(state.list.isFailed)
         }

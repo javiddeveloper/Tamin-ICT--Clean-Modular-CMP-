@@ -28,6 +28,7 @@ import com.tamin.taminhamrah.model.workshop.BaseDocumentCategory
 import com.tamin.taminhamrah.model.workshop.BaseDocumentKind
 import com.tamin.taminhamrah.model.workshop.BaseDocumentPR
 import com.tamin.taminhamrah.model.workshop.ComputationalBasePR
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseStatus
 import com.tamin.taminhamrah.model.workshop.label
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
@@ -61,11 +62,15 @@ import taminx.core.core_ui.assigner_document_unavailable
 import taminx.core.core_ui.assigner_documents_empty
 import taminx.core.core_ui.assigner_documents_title
 import taminx.core.core_ui.assigner_field_amount
+import taminx.core.core_ui.assigner_field_estimated_order
+import taminx.core.core_ui.assigner_field_final_order
 import taminx.core.core_ui.assigner_field_letter_number
 import taminx.core.core_ui.assigner_field_period
+import taminx.core.core_ui.assigner_field_status
 import taminx.core.core_ui.ic_tamin_computational_base
 import taminx.core.core_ui.ic_tamin_document_image
 import taminx.core.core_ui.ic_tamin_workshop_contract_rows
+import taminx.core.core_ui.settlement_value_missing
 
 /**
  * جزئیات مبنا — one مبنای محاسباتی's figures, then the documents filed with it.
@@ -143,10 +148,13 @@ fun ComputationalBaseDetailContent(
             verticalArrangement = Arrangement.spacedBy(Spacing.smd),
         ) {
             BaseFiguresCard(
+                status = base.status,
                 letterNumber = base.letterNumber,
                 periodStart = base.periodStart,
                 periodEnd = base.periodEnd,
                 amount = base.amount,
+                finalOrderNumber = base.finalOrderNumber,
+                estimatedOrderNumber = base.estimatedOrderNumber,
             )
 
             Text(
@@ -184,21 +192,35 @@ fun ComputationalBaseDetailContent(
 }
 
 /**
- * شمارهٔ سند, دورهٔ کارکرد and مبلغ کارکرد, as the design's card lists them.
+ * The base's وضعیت, then شمارهٔ سند, دورهٔ کارکرد and مبلغ کارکرد as the design's card lists them, and
+ * the two debt orders the old app lists under them.
  *
+ * وضعیت leads and is the one emphasized value, as the old app sets it in bold: it is what the user
+ * opens a base to find out — whether it was rejected, is waiting on a debt order, or has been settled.
  * The period row is left out when the service sent no period, rather than printing a dash under a
  * label that promises one.
  */
 @Composable
 private fun BaseFiguresCard(
+    status: ComputationalBaseStatus?,
     letterNumber: String,
     periodStart: String,
     periodEnd: String,
     amount: String,
+    finalOrderNumber: String,
+    estimatedOrderNumber: String,
     modifier: Modifier = Modifier,
 ) {
     val hasPeriod = periodStart.isNotBlank() && periodEnd.isNotBlank()
     WorkshopRecordCard(modifier = modifier) {
+        DetailRow(
+            label = stringResource(Res.string.assigner_field_status),
+            value = status?.let { stringResource(it.title) } ?: stringResource(Res.string.settlement_value_missing),
+            valueStyle = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+            numeric = false,
+            verticalPadding = WorkshopDimens.cellVerticalPadding,
+        )
+        TaminDivider()
         DetailRow(
             label = stringResource(Res.string.assigner_field_letter_number),
             value = letterNumber,
@@ -217,6 +239,18 @@ private fun BaseFiguresCard(
         DetailRow(
             label = stringResource(Res.string.assigner_field_amount),
             value = amount,
+            verticalPadding = WorkshopDimens.cellVerticalPadding,
+        )
+        TaminDivider()
+        DetailRow(
+            label = stringResource(Res.string.assigner_field_final_order),
+            value = finalOrderNumber,
+            verticalPadding = WorkshopDimens.cellVerticalPadding,
+        )
+        TaminDivider()
+        DetailRow(
+            label = stringResource(Res.string.assigner_field_estimated_order),
+            value = estimatedOrderNumber,
             verticalPadding = WorkshopDimens.cellVerticalPadding,
         )
     }
@@ -389,6 +423,9 @@ private val PreviewBase = ComputationalBasePR(
     periodStart = "۱۴۰۰/۰۷/۰۱",
     periodEnd = "۱۴۰۰/۰۹/۳۰",
     documentCount = "۲",
+    status = ComputationalBaseStatus.FINAL_ORDER_ISSUED,
+    finalOrderNumber = "۴۵۱۲۰۰۹",
+    estimatedOrderNumber = "—",
     documents = persistentListOf(
         BaseDocumentPR(
             documentId = "img-1",

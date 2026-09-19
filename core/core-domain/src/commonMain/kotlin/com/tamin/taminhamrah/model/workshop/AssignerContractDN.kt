@@ -58,6 +58,12 @@ data class ComputationalBaseDN(
     /** Epoch millis; the period ends here. Null when the service sent none. */
     val endDate: Long? = null,
     val documents: List<BaseDocumentDN> = emptyList(),
+    /** The workflow stage as the service codes it, `"01"`–`"17"`; core-ui turns it into copy. */
+    val statusCode: String = "",
+    /** شمارهٔ برگهٔ پرداخت بدهی قطعی; blank until one is issued. */
+    val finalOrderNumber: String = "",
+    /** شمارهٔ برگهٔ پرداخت بدهی برآوردی; blank until one is issued. */
+    val estimatedOrderNumber: String = "",
 )
 
 /**

@@ -13,6 +13,7 @@ import com.tamin.taminhamrah.model.workshop.BaseDocumentDN
 import com.tamin.taminhamrah.model.workshop.BaseDocumentPR
 import com.tamin.taminhamrah.model.workshop.ComputationalBaseDN
 import com.tamin.taminhamrah.model.workshop.ComputationalBasePR
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseStatus
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoDN
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoPR
 import com.tamin.taminhamrah.model.workshop.ContractRowPR
@@ -205,6 +206,9 @@ fun ComputationalBaseDN.toPresentation(): ComputationalBasePR = ComputationalBas
     // detail screen's documents section is then legitimately empty.
     documentCount = documents.size.toString().toPersianDigits(),
     documents = documents.map { it.toPresentation() }.toImmutableList(),
+    status = ComputationalBaseStatus.fromCode(statusCode),
+    finalOrderNumber = finalOrderNumber.orDashDigits(),
+    estimatedOrderNumber = estimatedOrderNumber.orDashDigits(),
 )
 
 fun BaseDocumentDN.toPresentation(): BaseDocumentPR = BaseDocumentPR(

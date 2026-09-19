@@ -241,6 +241,9 @@ fun ComputationalBaseDTO.toDomain(): ComputationalBaseDN = ComputationalBaseDN(
     startDate = startDate,
     endDate = endDate,
     documents = documents.orEmpty().map { it.toDomain() },
+    statusCode = status.orEmpty(),
+    finalOrderNumber = finalOrderNumber.orEmpty(),
+    estimatedOrderNumber = estimatedOrderNumber.orEmpty(),
 )
 
 fun ComputationalBaseDocumentDTO.toDomain(): BaseDocumentDN = BaseDocumentDN(

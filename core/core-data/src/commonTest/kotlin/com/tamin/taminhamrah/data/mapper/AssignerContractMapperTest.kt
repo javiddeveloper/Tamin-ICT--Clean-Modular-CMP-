@@ -111,6 +111,9 @@ class AssignerContractMapperTest {
               "letno": "12044",
               "senddate": 1670000000000,
               "cntamount": 84000000,
+              "status": "11",
+              "ordno1": "4512009",
+              "ordno2": null,
               "contract": { "contractRow": "1", "contractSequence": "3" },
               "dataDetail": [
                 { "documentId": "a1", "documentType": "1", "documentCode": "1" },
@@ -125,6 +128,20 @@ class AssignerContractMapperTest {
         assertEquals(1670000000000L, domain.sendDate)
         assertEquals(84000000L, domain.amount)
         assertEquals(2, domain.documents.size)
+        assertEquals("11", domain.statusCode)
+        assertEquals("4512009", domain.finalOrderNumber)
+        assertEquals("", domain.estimatedOrderNumber)
+    }
+
+    /**
+     * The old app declares `status` a string, but Gson would have taken a bare number too. The
+     * lenient decoder does the same rather than failing the whole list over one field.
+     */
+    @Test
+    fun aNumericStatusStillDecodes() {
+        val domain = json.decodeFromString<ComputationalBaseDTO>("""{"letno":"7","status":3}""").toDomain()
+
+        assertEquals("3", domain.statusCode)
     }
 
     /**

@@ -5,6 +5,23 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.StringResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.assigner_base_status_01
+import taminx.core.core_ui.assigner_base_status_02
+import taminx.core.core_ui.assigner_base_status_03
+import taminx.core.core_ui.assigner_base_status_04
+import taminx.core.core_ui.assigner_base_status_05
+import taminx.core.core_ui.assigner_base_status_06
+import taminx.core.core_ui.assigner_base_status_07
+import taminx.core.core_ui.assigner_base_status_08
+import taminx.core.core_ui.assigner_base_status_09
+import taminx.core.core_ui.assigner_base_status_10
+import taminx.core.core_ui.assigner_base_status_11
+import taminx.core.core_ui.assigner_base_status_12
+import taminx.core.core_ui.assigner_base_status_13
+import taminx.core.core_ui.assigner_base_status_14
+import taminx.core.core_ui.assigner_base_status_15
+import taminx.core.core_ui.assigner_base_status_16
+import taminx.core.core_ui.assigner_base_status_17
 import taminx.core.core_ui.assigner_doc_category_other
 import taminx.core.core_ui.assigner_doc_kind_image
 import taminx.core.core_ui.assigner_doc_kind_pdf
@@ -112,7 +129,54 @@ data class ComputationalBasePR(
     /** How many documents are attached, in Persian digits — the row prints «N سند». */
     val documentCount: String = "",
     val documents: ImmutableList<BaseDocumentPR> = persistentListOf(),
+    /** The workflow stage; null when the service sent a code the table does not hold. */
+    val status: ComputationalBaseStatus? = null,
+    /** شمارهٔ برگهٔ پرداخت بدهی قطعی, Persian digits; dashed until one is issued. */
+    val finalOrderNumber: String = "",
+    /** شمارهٔ برگهٔ پرداخت بدهی برآوردی, Persian digits; dashed until one is issued. */
+    val estimatedOrderNumber: String = "",
 )
+
+/**
+ * Where a مبنای محاسباتی stands in the workflow, keyed by the `status` the service sends.
+ *
+ * One table, as [BaseDocumentCategory] is: the code and its wording are columns of the same row. The
+ * seventeen codes and their wording are the old app's own (`ComputationalBaseResponse.statusDescription`),
+ * the only place they are written down.
+ */
+enum class ComputationalBaseStatus(val code: String, val title: StringResource) {
+    SMS_SENT("01", Res.string.assigner_base_status_01),
+    BASES_REGISTERED("02", Res.string.assigner_base_status_02),
+    CONFIRMED("03", Res.string.assigner_base_status_03),
+    REJECTED("04", Res.string.assigner_base_status_04),
+    FACTOR_SET("05", Res.string.assigner_base_status_05),
+    CALCULATED("06", Res.string.assigner_base_status_06),
+    FORM_ONE_ISSUED("07", Res.string.assigner_base_status_07),
+    FORM_ONE_SERVED("08", Res.string.assigner_base_status_08),
+    FORM_TWO_ISSUED("09", Res.string.assigner_base_status_09),
+    FORM_TWO_SERVED("10", Res.string.assigner_base_status_10),
+    FINAL_ORDER_ISSUED("11", Res.string.assigner_base_status_11),
+    ESTIMATED_ORDER_ISSUED("12", Res.string.assigner_base_status_12),
+    FINAL_DEBT_COLLECTED("13", Res.string.assigner_base_status_13),
+    ESTIMATED_DEBT_COLLECTED("14", Res.string.assigner_base_status_14),
+    BOTH_DEBTS_COLLECTED("15", Res.string.assigner_base_status_15),
+    SETTLEMENT_ISSUED("16", Res.string.assigner_base_status_16),
+    SETTLEMENT_SERVED("17", Res.string.assigner_base_status_17);
+
+    companion object {
+        /**
+         * The stage [code] names, or null for a code outside the table — the old app prints a dash
+         * then, and so does the detail screen. A code that arrives as a bare number (`1`) is read as
+         * its two-digit form, since the lenient decoder hands it over without the leading zero.
+         */
+        fun fromCode(code: String?): ComputationalBaseStatus? {
+            val normalized = code?.trim()?.padStart(CODE_LENGTH, '0') ?: return null
+            return entries.firstOrNull { it.code == normalized }
+        }
+
+        private const val CODE_LENGTH = 2
+    }
+}
 
 /**
  * One attached document.

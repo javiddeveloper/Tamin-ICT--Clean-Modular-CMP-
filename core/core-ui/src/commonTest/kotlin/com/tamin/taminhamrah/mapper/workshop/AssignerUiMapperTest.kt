@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.model.workshop.BaseDocumentCategory
 import com.tamin.taminhamrah.model.workshop.BaseDocumentDN
 import com.tamin.taminhamrah.model.workshop.BaseDocumentKind
 import com.tamin.taminhamrah.model.workshop.ComputationalBaseDN
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseStatus
 import com.tamin.taminhamrah.model.workshop.SettlementCertificateDN
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -111,6 +112,34 @@ class AssignerUiMapperTest {
             ComputationalBaseDN(amount = null).toPresentation().amount,
             listOf(ComputationalBaseDN(amount = null).toPresentation()).declaredTotal(),
         )
+    }
+
+    /**
+     * The workflow stage the detail screen leads with. Each code is its old-app stage; a bare `3`
+     * reads as `03`; a code outside the table is null, which the screen dashes as the old app did.
+     */
+    @Test
+    fun theStatusCodeNamesItsStage() {
+        assertEquals(ComputationalBaseStatus.SMS_SENT, ComputationalBaseDN(statusCode = "01").toPresentation().status)
+        assertEquals(ComputationalBaseStatus.REJECTED, ComputationalBaseDN(statusCode = "04").toPresentation().status)
+        assertEquals(
+            ComputationalBaseStatus.SETTLEMENT_SERVED,
+            ComputationalBaseDN(statusCode = "17").toPresentation().status,
+        )
+        assertEquals(ComputationalBaseStatus.CONFIRMED, ComputationalBaseDN(statusCode = "3").toPresentation().status)
+        assertEquals(null, ComputationalBaseDN(statusCode = "18").toPresentation().status)
+        assertEquals(null, ComputationalBaseDN(statusCode = "").toPresentation().status)
+        // Seventeen stages, each with its own code.
+        assertEquals(17, ComputationalBaseStatus.entries.map { it.code }.toSet().size)
+    }
+
+    /** A debt order not yet issued dashes, one that is prints in Persian digits. */
+    @Test
+    fun debtOrderNumbersPrintInPersianOrDash() {
+        val base = ComputationalBaseDN(finalOrderNumber = "4512009").toPresentation()
+
+        assertEquals("۴۵۱۲۰۰۹", base.finalOrderNumber)
+        assertEquals(ComputationalBaseDN().toPresentation().letterNumber, base.estimatedOrderNumber)
     }
 
     /** A base with no period leaves both ends blank, so the row drops the line instead of «— تا —». */

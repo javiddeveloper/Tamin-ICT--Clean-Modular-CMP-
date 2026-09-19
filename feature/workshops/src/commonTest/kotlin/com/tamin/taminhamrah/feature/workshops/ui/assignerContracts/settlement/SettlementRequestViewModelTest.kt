@@ -12,10 +12,12 @@ import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.settlement.S
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.settlement.SettlementField.END_DATE
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.settlement.SettlementField.LETTER_DATE
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.settlement.SettlementField.LETTER_NUMBER
+import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.settlement.SettlementField.OWNER
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.settlement.SettlementField.START_DATE
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.settlement.SettlementField.SUBCONTRACTOR
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.settlement.SettlementField.SUBJECT_IMAGE
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.settlement.SettlementField.TEXT1
+import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.settlement.SettlementField.TEXT2
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.settlement.SettlementRequestIntent.AddDocument
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.settlement.SettlementRequestIntent.AddSubjectImage
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.settlement.SettlementRequestIntent.DateChanged
@@ -44,6 +46,7 @@ import taminx.core.core_ui.settlement_err_build_sum
 import taminx.core.core_ui.settlement_err_date_order
 import taminx.core.core_ui.settlement_err_dates_required
 import taminx.core.core_ui.settlement_err_drivers
+import taminx.core.core_ui.settlement_err_invalid
 import taminx.core.core_ui.settlement_err_letter_number_invalid
 import taminx.core.core_ui.settlement_err_letter_number_required
 import taminx.core.core_ui.settlement_err_subject_required
@@ -144,6 +147,21 @@ class SettlementRequestViewModelTest {
             assertEquals(setOf(LETTER_NUMBER, END_DATE, CURRENCY_IN_RIAL), state.errors.keys)
             assertEquals(Res.string.settlement_err_date_order, state.errors[END_DATE])
         }
+
+    /** Zero is not a blank: the field is filled, and still refused as an amount no پیمان declares. */
+    @Test
+    fun `a zero gross amount is refused as invalid rather than missing`() = runTest(testDispatcher) {
+        val viewModel = opened()
+        viewModel.reachLetter()
+        viewModel.fillLetterStep(amount = "0")
+
+        viewModel.sendIntent(Next)
+
+        val state = viewModel.uiState.value
+        assertEquals(SettlementStep.LETTER, state.step)
+        assertEquals(setOf(AMOUNT), state.errors.keys)
+        assertEquals(Res.string.settlement_err_invalid, state.errors[AMOUNT])
+    }
 
     /** The answer decides whether «مستندات لیست فهرست» is offered, and it goes last, as the design lists it. */
     @Test
@@ -281,6 +299,81 @@ class SettlementRequestViewModelTest {
         assertEquals(IMAGE_GUID, assertNotNull(repository.lastSettlementRequest).subjectImageGuid)
     }
 
+    /**
+     * Subject 01 asks for who supplies the materials, the credit line, the budget row and the premium
+     * paid, plus an image of its conditions — all of them, and each lands in its own request field.
+     */
+    @Test
+    fun `a price list subject needs all four answers and its image, and sends them`() =
+        runTest(testDispatcher) {
+            val viewModel = opened()
+            viewModel.reachTerms(amount = "1000000")
+            viewModel.sendIntent(SubjectSelected(PRICE_LIST_SUBJECT))
+
+            viewModel.sendIntent(Next)
+            assertEquals(
+                setOf(OWNER, TEXT1, TEXT2, AMOUNT1, SUBJECT_IMAGE),
+                viewModel.uiState.value.errors.keys,
+            )
+            assertNull(repository.lastSettlementRequest)
+
+            viewModel.sendIntent(FieldChanged(OWNER, "1"))
+            viewModel.sendIntent(FieldChanged(TEXT1, "محل اعتبار"))
+            viewModel.sendIntent(FieldChanged(TEXT2, "۱۲۳"))
+            viewModel.sendIntent(FieldChanged(AMOUNT1, "5000"))
+            viewModel.sendIntent(AddSubjectImage("terms.jpg", byteArrayOf(1, 2, 3)))
+            viewModel.sendIntent(Next)
+
+            val sent = assertNotNull(repository.lastSettlementRequest)
+            assertEquals("01", sent.subjectCode)
+            assertEquals("1", sent.subjectOwner)
+            assertEquals("محل اعتبار", sent.subjectText1)
+            assertEquals("5000", sent.subjectAmount1)
+            assertEquals(IMAGE_GUID, sent.subjectImageGuid)
+        }
+
+    /**
+     * Subject 02 asks only who supplies the materials — until the answer is «قسمتی توسط واگذارنده»,
+     * which also asks for the واگذارنده's share.
+     */
+    @Test
+    fun `shared materials supply asks for the assigners share and no other answer does`() =
+        runTest(testDispatcher) {
+            val viewModel = opened()
+            viewModel.reachTerms(amount = "1000000")
+            viewModel.sendIntent(SubjectSelected(MATERIALS_SUBJECT))
+
+            viewModel.sendIntent(Next)
+            assertEquals(setOf(OWNER), viewModel.uiState.value.errors.keys)
+
+            viewModel.sendIntent(FieldChanged(OWNER, SHARED_SUPPLY_CODE))
+            viewModel.sendIntent(Next)
+            assertEquals(setOf(AMOUNT1), viewModel.uiState.value.errors.keys)
+            assertNull(repository.lastSettlementRequest)
+
+            viewModel.sendIntent(FieldChanged(AMOUNT1, "200000"))
+            viewModel.sendIntent(Next)
+
+            val sent = assertNotNull(repository.lastSettlementRequest)
+            assertEquals("02", sent.subjectCode)
+            assertEquals(SHARED_SUPPLY_CODE, sent.subjectOwner)
+            assertEquals("200000", sent.subjectAmount1)
+        }
+
+    /** Any other supplier needs no share, so subject 02 goes with the answer alone. */
+    @Test
+    fun `materials supplied by one side send without a share`() = runTest(testDispatcher) {
+        val viewModel = opened()
+        viewModel.reachTerms(amount = "1000000")
+        viewModel.sendIntent(SubjectSelected(MATERIALS_SUBJECT))
+        viewModel.sendIntent(FieldChanged(OWNER, "1"))
+
+        viewModel.sendIntent(Next)
+
+        assertTrue(viewModel.uiState.value.errors.isEmpty())
+        assertEquals("1", assertNotNull(repository.lastSettlementRequest).subjectOwner)
+    }
+
     /** The fields only turn red; the footer names the first problem, in the order the design checks. */
     @Test
     fun `the letter banner names the first problem in the design's order`() = runTest(testDispatcher) {
@@ -381,6 +474,8 @@ class SettlementRequestViewModelTest {
         val PDF_BYTES = "%PDF-1.7 settlement".encodeToByteArray()
         val DRIVERS_SUBJECT = TaminOptionSheetItem("04", "حمل و نقل")
         val BUILD_COSTS_SUBJECT = TaminOptionSheetItem("11", "ساخت و نصب")
+        val PRICE_LIST_SUBJECT = TaminOptionSheetItem("01", "انعقاد قرارداد بر اساس فهرست بهاء")
+        val MATERIALS_SUBJECT = TaminOptionSheetItem("02", "تهیه و تأمین مصالح مصرفی")
         val CONTRACT = AssignerContractDN(
             contractRow = "1",
             contractSequence = "3",

@@ -104,6 +104,15 @@ data class ComputationalBaseDTO(
     @SerialName("contract") val contract: ComputationalBaseContractDTO? = null,
     /** The attached documents. Empty is a real answer: a base can be filed without any. */
     @SerialName("dataDetail") val documents: List<ComputationalBaseDocumentDTO>? = null,
+    /**
+     * Where the base stands in the workflow, `"01"`–`"17"` — the old app's `status`, which it shows
+     * in bold on the base's detail.
+     */
+    @SerialName("status") val status: String? = null,
+    /** شمارهٔ برگهٔ پرداخت بدهی قطعی — `ordno1`, once one is issued. */
+    @SerialName("ordno1") val finalOrderNumber: String? = null,
+    /** شمارهٔ برگهٔ پرداخت بدهی برآوردی — `ordno2`, once one is issued. */
+    @SerialName("ordno2") val estimatedOrderNumber: String? = null,
 )
 
 /** Just enough of the nested پیمان to key a base row. */
