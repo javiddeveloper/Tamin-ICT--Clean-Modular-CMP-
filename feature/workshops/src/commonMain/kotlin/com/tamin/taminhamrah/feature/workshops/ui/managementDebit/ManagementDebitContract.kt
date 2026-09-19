@@ -101,6 +101,7 @@ data class ArticleSixteenSearch(
 @Immutable
 data class ArticleSixteenFormState(
     val debt: ArticleSixteenDebtPR,
+    /** Fetched before the form opens: as in the old app, a request cannot start without it. */
     val workshopInfo: ArticleSixteenWorkshopInfoPR = ArticleSixteenWorkshopInfoPR(),
     val step: Int = 1,
     val isDebtOpen: Boolean = true,
