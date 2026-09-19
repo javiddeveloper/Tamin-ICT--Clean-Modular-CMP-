@@ -27,6 +27,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import com.tamin.taminhamrah.feature.workshops.ui.components.label
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestStatus
 import com.tamin.taminhamrah.model.workshop.NewMemberRequestStatus
 import com.tamin.taminhamrah.model.workshop.WorkshopActivityStatus
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -36,6 +38,7 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.article_sixteen_request_status
 import taminx.core.core_ui.new_member_request_status
 import taminx.core.core_ui.new_member_status_awaiting_confirmation
 import taminx.core.core_ui.new_member_status_closed_approved
@@ -103,6 +106,36 @@ fun NewMemberStatusSheet(
         NewMemberRequestStatus.entries.forEach { status ->
             SheetRow(
                 label = stringResource(status.labelRes),
+                isSelected = selected == status,
+                onClick = { onSelect(status) },
+            )
+        }
+    }
+}
+
+/**
+ * وضعیت درخواست رسیدگی به بدهی ماده ۱۶.
+ */
+@Composable
+fun ArticleSixteenStatusSheet(
+    selected: ArticleSixteenRequestStatus?,
+    onDismiss: () -> Unit,
+    onSelect: (ArticleSixteenRequestStatus?) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    OptionSheet(
+        title = stringResource(Res.string.article_sixteen_request_status),
+        onDismiss = onDismiss,
+        modifier = modifier,
+    ) {
+        SheetRow(
+            label = stringResource(Res.string.workshop_all_items),
+            isSelected = selected == null,
+            onClick = { onSelect(null) },
+        )
+        ArticleSixteenRequestStatus.entries.filter { it != ArticleSixteenRequestStatus.UNKNOWN }.forEach { status ->
+            SheetRow(
+                label = stringResource(status.label),
                 isSelected = selected == status,
                 onClick = { onSelect(status) },
             )
