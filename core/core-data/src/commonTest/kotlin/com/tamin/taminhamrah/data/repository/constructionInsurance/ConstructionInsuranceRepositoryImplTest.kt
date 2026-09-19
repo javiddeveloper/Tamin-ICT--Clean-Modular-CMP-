@@ -39,15 +39,9 @@ class ConstructionInsuranceRepositoryImplTest {
 
     @BeforeTest
     fun setup() {
-        USE_MOCK_DATA = false
         remoteDataSource = FakeConstructionInsuranceRemoteDataSource()
         dao = FakeConstructionFileDao()
         repository = ConstructionInsuranceRepositoryImpl(remoteDataSource, dao)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        USE_MOCK_DATA = true
     }
 
     @Test
