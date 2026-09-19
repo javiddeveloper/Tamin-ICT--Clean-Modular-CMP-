@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
  * One row of `debit-objection/management-workshop-debit/{workshopId}/{branchId}` — the debts a
  * ماده ۱۶ request can be filed against.
  *
- * Amounts are read as `Long`: the old app modelled them as `Int`, which overflows on a workshop
+ * Amounts are read as `Long`: the old app modeled them as `Int`, which overflows on a workshop
  * debt above ~۲۱۴ کرور ریال. Every one of them is echoed back verbatim when the request is
  * submitted, so the same width is used in [ArticleSixteenSaveRequestDTO].
  */
@@ -32,7 +32,7 @@ data class WorkshopsDebtListModelDTO(
     @SerialName("kindDoc") val kindDoc: String? = null,
     @SerialName("docNoEjra") val executiveNumber: String? = null,
     @SerialName("docDateEjra") val executiveDate: String? = null,
-    /** تاریخ ابلاغ اجراییه — the date the one-day filing deadline is measured from. */
+    /** تاریخ ابلاغ اجراییه — the date the one-year filing deadline is measured from. */
     @SerialName("docDateEblaghEjra") val executiveNotifyDate: String? = null,
     @SerialName("docNoEkhtar") val warningNumber: String? = null,
     @SerialName("docDateEkhtar") val warningDate: String? = null,

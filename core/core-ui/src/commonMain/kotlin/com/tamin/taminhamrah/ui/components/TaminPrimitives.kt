@@ -34,10 +34,10 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.LinearGradientShader
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -59,10 +59,6 @@ import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
-import kotlin.math.PI
-import kotlin.math.abs
-import kotlin.math.cos
-import kotlin.math.sin
 import kotlin.jvm.JvmName
 import kotlin.math.PI
 import kotlin.math.abs
@@ -656,6 +652,8 @@ fun TaminOutlinedButton(
     disabledContentColor: Color = LocalTaminColors.current.textMuted,
     textStyle: TextStyle = MaterialTheme.typography.titleMedium,
     iconPosition: IconPosition? = null,
+    /** The glyph's size. Defaults to the medium icon every existing caller draws. */
+    iconSize: Dp = IconSize.medium,
 ) {
     val currentBorderColor = if (enabled) borderColor else disabledBorderColor
     val currentContainerColor = if (enabled) containerColor else disabledContainerColor
@@ -690,7 +688,7 @@ fun TaminOutlinedButton(
                 imageVector = icon,
                 contentDescription = null,
                 tint = currentContentColor,
-                modifier = Modifier.size(IconSize.medium).then(iconModifier),
+                modifier = Modifier.size(iconSize).then(iconModifier),
             )
         }
 
@@ -705,7 +703,7 @@ fun TaminOutlinedButton(
                 imageVector = icon,
                 contentDescription = null,
                 tint = currentContentColor,
-                modifier = Modifier.size(IconSize.medium).then(iconModifier),
+                modifier = Modifier.size(iconSize).then(iconModifier),
             )
         }
     }

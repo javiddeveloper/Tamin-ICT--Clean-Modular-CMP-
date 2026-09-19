@@ -7,6 +7,8 @@ import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestInfoDTO
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveRequestDTO
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveResultDTO
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoDTO
+import com.tamin.taminhamrah.model.workshop.AssignerContractDTO
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseDTO
 import com.tamin.taminhamrah.model.workshop.DebitObjectionSaveRequestDTO
 import com.tamin.taminhamrah.model.workshop.DebitObjectionSaveResultDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentDTO
@@ -24,6 +26,10 @@ import com.tamin.taminhamrah.model.workshop.NewMemberConfirmResultDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
+import com.tamin.taminhamrah.model.workshop.SettlementCertificateDTO
+import com.tamin.taminhamrah.model.workshop.SettlementCertificateDetailDTO
+import com.tamin.taminhamrah.model.workshop.SettlementRequestDTO
+import com.tamin.taminhamrah.model.workshop.SettlementSubjectDTO
 import com.tamin.taminhamrah.model.workshop.SmsMessageDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDTO
@@ -43,19 +49,74 @@ interface WorkShopsRemoteDataSource {
         query: ApiQueryParamDN
     ): ListData<EmployerAgreementDTO>
 
-    /** ردیف پیمان‌های one workshop that has a تعهدنامه. */
+    /** ردیف پیمانهای one workshop that has a تعهدنامه. */
     suspend fun getEmployerAgreementsByWorkshop(
         workshopId: String,
         branchCode: String,
         query: ApiQueryParamDN,
     ): ListData<EmployerAgreementDTO>
 
-    /** ردیف پیمان‌های one workshop with no تعهدنامه — a different row model. */
+    /** ردیف پیمانهای one workshop with no تعهدنامه — a different row model. */
     suspend fun getWorkshopContracts(
         workshopId: String,
         branchCode: String,
         query: ApiQueryParamDN,
     ): ListData<WorkshopContractDTO>
+
+    // ---------------------------------------------------------------------------- واگذارندگان
+
+    /**
+     * پیمانهایی که کارفرما واگذارندهٔ آنهاست.
+     *
+     * Unlike the two calls above, the identity travels in [query]'s filter array rather than in the
+     * path — the repository builds those clauses, so a blank code widens the result instead of
+     * addressing a different route.
+     */
+    suspend fun getAssignerContracts(query: ApiQueryParamDN): ListData<AssignerContractDTO>
+
+    /**
+     * مبانی محاسباتی of one پیمان.
+     *
+     * All four keys are required by the caller, not by the wire: the service answers a partial set
+     * with every base it holds for the workshop, which is a different record than the one the user
+     * tapped. See `ComputationalBaseQuery` for where the four come from.
+     */
+    suspend fun getComputationalBases(
+        workshopId: String,
+        contractRow: String,
+        brchCode: String,
+        contractSequence: String,
+        query: ApiQueryParamDN,
+    ): ListData<ComputationalBaseDTO>
+
+    /** A PDF document attached to a مبنای محاسباتی, drained to bytes before the response closes. */
+    suspend fun getComputationalBasePdf(documentId: String): PdfDownloadDTO
+
+    /** موضوعات کار a درخواست مفاصاحساب can be filed under. */
+    suspend fun getSettlementSubjects(query: ApiQueryParamDN): ListData<SettlementSubjectDTO>
+
+    /** Stores one PDF of a درخواست مفاصاحساب; returns the id the request names it by. */
+    suspend fun uploadSettlementPdf(fileName: String, bytes: ByteArray): String
+
+    /** Files a درخواست مفاصاحساب under [id]; returns the service's confirmation. */
+    suspend fun submitSettlementRequest(id: String, request: SettlementRequestDTO): String
+
+    /** مفاصاحسابهای ماده ۳۸ of one ردیف پیمان, as the service lists them. */
+    suspend fun getSettlementCertificates(
+        workshopId: String,
+        branchCode: String,
+        contractRow: String,
+        query: ApiQueryParamDN,
+    ): ListData<SettlementCertificateDTO>
+
+    /** The certificate [getSettlementCertificates] listed under [serial]. */
+    suspend fun getSettlementCertificateDetail(
+        workshopId: String,
+        branchCode: String,
+        contractRow: String,
+        serial: String,
+        query: ApiQueryParamDN,
+    ): ListData<SettlementCertificateDetailDTO>
 
     suspend fun getWorkshopPaymentSheets(
         query: ApiQueryParamDN
