@@ -5,7 +5,6 @@ import com.tamin.taminhamrah.model.common.FeatureFlag
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.ic_tamin_workshop_article_sixteen
 import taminx.core.core_ui.contract_rows_action_desc
 import taminx.core.core_ui.contract_rows_title
 import taminx.core.core_ui.ic_tamin_workshop_contract_rows
@@ -14,6 +13,7 @@ import taminx.core.core_ui.ic_tamin_workshop_new_member
 import taminx.core.core_ui.ic_tamin_workshop_payment
 import taminx.core.core_ui.ic_tamin_workshop_objection
 import taminx.core.core_ui.ic_tamin_workshop_turnover
+import taminx.core.core_ui.ic_tamin_workshop_article_sixteen
 import taminx.core.core_ui.workshop_action_article_sixteen
 import taminx.core.core_ui.workshop_action_article_sixteen_desc
 import taminx.core.core_ui.workshop_action_debit_turnover
