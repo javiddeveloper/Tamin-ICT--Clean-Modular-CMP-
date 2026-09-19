@@ -103,9 +103,10 @@ import com.tamin.taminhamrah.feature.inquiryEducation.inquiryEducationScreen
 import com.tamin.taminhamrah.feature.weddingPresent.navigateToWeddingPresentCalculate
 import com.tamin.taminhamrah.feature.weddingPresent.weddingPresentCalculateScreen
 import com.tamin.taminhamrah.feature.weddingPresent.weddingPresentScreen
+import com.tamin.taminhamrah.feature.calculateWagePension.calculateWagePensionScreen
+import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
 import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
 import com.tamin.taminhamrah.feature.orotezprotez.orotezProtezScreen
-import com.tamin.taminhamrah.feature.pensionInquiry.calculatePensionScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.deservedTreatmentScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.disabilityPensionScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.edictScreen
@@ -134,7 +135,6 @@ import com.tamin.taminhamrah.feature.contractaffair.contractPremiumPaymentScreen
 import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPaymentCalcDetail
 import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPaymentHistory
 import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPremiumPayment
-import com.tamin.taminhamrah.feature.payment.navigateToPayment
 import com.tamin.taminhamrah.feature.requestPaymentForIllDays.requestPaymentForIllDaysScreen
 import com.tamin.taminhamrah.feature.security.SecurityRoute
 import com.tamin.taminhamrah.feature.security.securityScreen
@@ -159,9 +159,7 @@ import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.completeEmployerInfoScreen
 import com.tamin.taminhamrah.feature.workshops.debtObjectionStatusScreen
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
-import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
 import com.tamin.taminhamrah.feature.developerOptions.DeveloperOptionsRoute
-import com.tamin.taminhamrah.feature.payment.navigateToPayment
 import com.tamin.taminhamrah.feature.userRequest.UserRequestRoute
 import com.tamin.taminhamrah.feature.userRequest.userRequestGraph
 import com.tamin.taminhamrah.mapper.campaign.toPresentation
@@ -554,8 +552,8 @@ internal fun TaminHamrahNavGraph(
                     },
                 )
 
+                calculateWagePensionScreen(onBack = { navController.popBackStack() })
                 retirementPensionScreen(onBack = { navController.popBackStack() })
-                calculatePensionScreen(onBack = { navController.popBackStack() })
                 prescriptionScreen(onBack = { navController.popBackStack() })
                 deservedTreatmentScreen(onBack = { navController.popBackStack() })
                 payrollScreen(onBack = { navController.popBackStack() })
