@@ -27,6 +27,7 @@ class FakePersonalRepository : PersonalRepository {
     var confirmGirlSurvivorResult: String? = "ok"
     var shouldThrowOnPersonalInfo: Boolean = false
     var shouldThrowOnReport: Boolean = false
+    var shouldThrowOnConfirm: Boolean = false
     var lastConfirmBody: ConfirmGirlSurvivorDN? = null
 
     override fun getPersonalInfo(refreshRemote: Boolean): Flow<PersonalInfoDN?> = flow {
@@ -67,6 +68,7 @@ class FakePersonalRepository : PersonalRepository {
     }
 
     override fun confirmGirlSurvivor(body: ConfirmGirlSurvivorDN): Flow<String?> = flow {
+        if (shouldThrowOnConfirm) throw RuntimeException("confirm failed")
         lastConfirmBody = body
         emit(confirmGirlSurvivorResult)
     }
