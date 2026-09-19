@@ -33,6 +33,9 @@ Thumbs.db
 
 ## AI Tools
 .claude/settings.local.json
+.claude/skills/tamin-legacy-feature-port/
+.claude/skills/tamin-ui-theme/
+.claude/skills/tamin-kmp-feature-builder/
 
 ## Local agent / WIP artifacts (keep on disk, never commit)
 .artifacts/
@@ -86,7 +89,6 @@ docs/vault/Code-Review.md
 /claude-all-changes.patch
 /.cursor/rules/codebase-memory.mdc
 /.agents/skills/tamin-kmp-feature-builder/SKILL.md
-/.claude/skills/tamin-kmp-feature-builder/SKILL.md
 CLAUDE.local.md
 /core/core-database/schemas/com.tamin.taminhamrah.data.local.TaminXDatabase/2.json
 /core/core-database/schemas/com.tamin.taminhamrah.data.local.TaminXDatabase/4.json
