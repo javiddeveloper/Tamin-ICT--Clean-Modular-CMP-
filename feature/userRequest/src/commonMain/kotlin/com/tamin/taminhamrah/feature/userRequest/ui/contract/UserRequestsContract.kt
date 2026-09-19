@@ -77,6 +77,7 @@ data class UserRequestsUiState(
 }
 
 sealed interface UserRequestsIntent {
+    data class InitFilters(val refCode: String?, val requestTypeId: String?) : UserRequestsIntent
     data object LoadRequests : UserRequestsIntent
     data object LoadRequestTypes : UserRequestsIntent
     data class SelectTab(val tab: RequestStatusTab) : UserRequestsIntent
