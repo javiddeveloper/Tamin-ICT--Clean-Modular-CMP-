@@ -24,6 +24,8 @@ import com.tamin.taminhamrah.feature.taminServices.workshopInspection.contract.W
 import com.tamin.taminhamrah.model.inspection.SubmitInspectionRequestDN
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.BannerCard
+import com.tamin.taminhamrah.ui.components.BannerType
 import com.tamin.taminhamrah.ui.components.CustomChip
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.TaminTextArea
@@ -132,7 +134,10 @@ internal fun WorkshopRequestDescriptionStep(
 
             Spacer(Modifier.height(Spacing.md))
 
-            InfoBanner(message = stringResource(Res.string.inspection_request_description_info_banner))
+            BannerCard(
+                type = BannerType.Info ,
+                message = stringResource(Res.string.inspection_request_description_info_banner)
+            )
 
             Spacer(Modifier.height(Spacing.lg))
         }

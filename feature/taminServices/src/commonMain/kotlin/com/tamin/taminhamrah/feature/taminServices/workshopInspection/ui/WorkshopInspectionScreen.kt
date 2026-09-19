@@ -44,6 +44,8 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.BackHandler
+import com.tamin.taminhamrah.ui.components.BannerCard
+import com.tamin.taminhamrah.ui.components.BannerType
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
@@ -230,7 +232,8 @@ internal fun WorkshopInspectionScreen(
             verticalArrangement = Arrangement.spacedBy(Spacing.lg),
         ) {
             item {
-                InfoBanner(
+                BannerCard(
+                    type = BannerType.Info,
                     message = stringResource(Res.string.workshop_inspection_note),
                     modifier = Modifier.padding(horizontal = Spacing.lg, vertical = Spacing.sm),
                 )
