@@ -33,7 +33,6 @@ import com.tamin.taminhamrah.feature.taminServices.navigateToOccurrence
 import com.tamin.taminhamrah.feature.taminServices.navigateToInspection
 import com.tamin.taminhamrah.feature.taminServices.navigateToEmployerOnlineServices
 import com.tamin.taminhamrah.feature.taminServices.navigateToSendInsuranceHistoryToInstitutions
-import com.tamin.taminhamrah.feature.taminServices.navigateToFuneralAllowance
 import com.tamin.taminhamrah.feature.workshops.navigateToContractRows
 import com.tamin.taminhamrah.feature.taminServices.navigateToWorkersPaymentInfo
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
@@ -118,7 +117,6 @@ fun NavController.navigateToFeature(flag: FeatureFlag, beforeOpen: () -> Unit = 
         FeatureFlag.WEDDING_PRESENT -> screen { navigateToWeddingPresent() }
         FeatureFlag.CALCULATE_MARRIAGE_ALLOWANCE -> screen { navigateToWeddingPresentCalculate() }
         FeatureFlag.REQUEST_FOR_PREGNANCY_PAY -> screen { navigateToPregnancyPay() }
-        FeatureFlag.REQUEST_FUNERAL_GRANT -> screen {navigateToFuneralAllowance() }
         else -> return false
     }
     beforeOpen()

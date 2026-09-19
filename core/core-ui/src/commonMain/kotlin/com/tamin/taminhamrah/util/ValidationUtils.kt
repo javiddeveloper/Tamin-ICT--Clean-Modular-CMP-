@@ -85,23 +85,6 @@ object ValidationUtils {
         return emailRegex.matches(email.trim())
     }
 
-    /** Iranian national-ID check digit is invalid for this all-zeros value even though it's 10 digits. */
-    private const val NATIONAL_CODE_ALL_ZEROS = "0000000000"
-
-    /**
-     * Returns true if [nationalCode] is a checksum-valid 10-digit Iranian national ID, matching the
-     * legacy app's `ValidationUtil.nationalCode` algorithm: the weighted sum of the first 9 digits
-     * mod 11 must match the 10th (check) digit.
-     */
-    fun isNationalCodeValid(nationalCode: String): Boolean {
-        if (nationalCode.length != 10 || nationalCode == NATIONAL_CODE_ALL_ZEROS) return false
-        val digits = nationalCode.map { it.digitToIntOrNull() ?: return false }
-        val sum = (0..8).sumOf { digits[it] * (10 - it) }
-        val remainder = sum % 11
-        val checkDigit = if (remainder < 2) remainder else 11 - remainder
-        return digits[9] == checkDigit
-    }
-
     /**
      * Returns true if [endTimestamp] (epoch millis) is on or after [startTimestamp] — the
      * general "end date must not be before start date" range check shared across date-range form

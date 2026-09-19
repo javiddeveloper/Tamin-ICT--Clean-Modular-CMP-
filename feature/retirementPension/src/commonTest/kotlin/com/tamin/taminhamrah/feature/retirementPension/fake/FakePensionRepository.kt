@@ -48,8 +48,6 @@ class FakePensionRepository : PensionRepository {
     var shouldThrowError: Boolean = false
     var errorToThrow: Throwable = RuntimeException("Fake error")
 
-    private fun notUsed(): Nothing = error("not used here")
-
     override suspend fun getUserAge(filters: List<ApiFilterDN>): Flow<AgeDN> = flow {
         if (shouldThrowError) throw errorToThrow
         emit(userAgeResult)
