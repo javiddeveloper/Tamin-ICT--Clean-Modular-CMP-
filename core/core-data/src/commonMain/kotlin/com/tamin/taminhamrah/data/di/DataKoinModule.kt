@@ -61,6 +61,8 @@ import com.tamin.taminhamrah.data.repository.InspectionRepositoryImpl
 import com.tamin.taminhamrah.repository.inspection.InspectionRepository
 import com.tamin.taminhamrah.data.repository.occurrence.OccurrenceRepositoryImpl
 import com.tamin.taminhamrah.repository.occurrence.OccurrenceRepository
+import com.tamin.taminhamrah.data.repository.funeralAllowance.FuneralAllowanceRepositoryImpl
+import com.tamin.taminhamrah.repository.funeralAllowance.FuneralAllowanceRepository
 import com.tamin.taminhamrah.data.repository.historyObjection.HistoryObjectionRepositoryImpl
 import com.tamin.taminhamrah.repository.historyObjection.HistoryObjectionRepository
 import com.tamin.taminhamrah.data.repository.employerInfo.EmployerInfoRepositoryImpl
@@ -111,4 +113,5 @@ val dataKoinModule = module {
     singleOf(::WeddingPresentRepositoryImpl) { bind<WeddingPresentRepository>() }
     singleOf(::StoryRepositoryImpl) { bind<StoryRepository>() }
     single<HomeRepository> { HomeRepositoryImpl(get(), get(), get(), get(), get(), get()) }
+    singleOf(::FuneralAllowanceRepositoryImpl) { bind<FuneralAllowanceRepository>() }
 }
