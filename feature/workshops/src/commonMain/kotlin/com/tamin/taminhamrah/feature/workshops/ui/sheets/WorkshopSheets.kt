@@ -27,15 +27,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import com.tamin.taminhamrah.feature.workshops.ui.components.label
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestStatus
 import com.tamin.taminhamrah.model.workshop.NewMemberRequestStatus
 import com.tamin.taminhamrah.model.workshop.WorkshopActivityStatus
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.article_sixteen_request_status
 import taminx.core.core_ui.new_member_request_status
 import taminx.core.core_ui.new_member_status_awaiting_confirmation
 import taminx.core.core_ui.new_member_status_closed_approved
@@ -103,6 +107,52 @@ fun NewMemberStatusSheet(
         NewMemberRequestStatus.entries.forEach { status ->
             SheetRow(
                 label = stringResource(status.labelRes),
+                isSelected = selected == status,
+                onClick = { onSelect(status) },
+            )
+        }
+    }
+}
+
+/**
+ * What the ماده ۱۶ status filter offers, in the old app's order: its «فیلتر براساس وضعیت درخواست»
+ * lists these and no «بدون درخواست».
+ *
+ * «نامشخص» selects the rows the card itself labels «نامشخص». In the old app every status it did
+ * not model read «نامشخص», and its filter matched a missing status — the rows the design now
+ * calls «بدون درخواست».
+ */
+private val ArticleSixteenStatusFilters = persistentListOf(
+    ArticleSixteenRequestStatus.SUBMITTED,
+    ArticleSixteenRequestStatus.DOCUMENT_DEFECT,
+    ArticleSixteenRequestStatus.REJECTED,
+    ArticleSixteenRequestStatus.APPROVED,
+    ArticleSixteenRequestStatus.UNKNOWN,
+)
+
+/**
+ * وضعیت درخواست رسیدگی به بدهی ماده ۱۶.
+ */
+@Composable
+fun ArticleSixteenStatusSheet(
+    selected: ArticleSixteenRequestStatus?,
+    onDismiss: () -> Unit,
+    onSelect: (ArticleSixteenRequestStatus?) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    OptionSheet(
+        title = stringResource(Res.string.article_sixteen_request_status),
+        onDismiss = onDismiss,
+        modifier = modifier,
+    ) {
+        SheetRow(
+            label = stringResource(Res.string.workshop_all_items),
+            isSelected = selected == null,
+            onClick = { onSelect(null) },
+        )
+        ArticleSixteenStatusFilters.forEach { status ->
+            SheetRow(
+                label = stringResource(status.label),
                 isSelected = selected == status,
                 onClick = { onSelect(status) },
             )

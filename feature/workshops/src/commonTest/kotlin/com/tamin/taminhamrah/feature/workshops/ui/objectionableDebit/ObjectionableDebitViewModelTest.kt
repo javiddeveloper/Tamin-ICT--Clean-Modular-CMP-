@@ -5,7 +5,9 @@ import com.tamin.taminhamrah.feature.workshops.fake.FakeWorkShopsRepository
 import com.tamin.taminhamrah.feature.workshops.ui.model.ObjectionDocumentTypes
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachmentUploader
 import com.tamin.taminhamrah.model.util.PagedListDN
+import com.tamin.taminhamrah.model.workshop.DebitObjectionResultDN
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
+import com.tamin.taminhamrah.tools.errorHandling.TaminApiException
 import com.tamin.taminhamrah.useCases.workshops.CheckObjectionDeadlineUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetDebitObjectionPdfUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetObjectionableDebitsUseCase
@@ -181,6 +183,41 @@ class ObjectionableDebitViewModelTest {
 
         assertNotNull(repository.lastDebitObjectionRequest, "confirming must file it")
         assertNull(viewModel.uiState.value.form, "the form closes once it is filed")
+    }
+
+    /** The design answers a filed objection with a dialog carrying its tracking code, not a toast. */
+    @Test
+    fun `a filed objection keeps its tracking code on screen until dismissed`() = runTest(testDispatcher) {
+        repository.objectionResult = DebitObjectionResultDN(referenceCode = "2740913")
+        val viewModel = readyToSubmit()
+
+        viewModel.sendIntent(ObjectionableDebitIntent.FormSubmit)
+        viewModel.sendIntent(ObjectionableDebitIntent.FormConfirmAccepted)
+        assertEquals("2740913", viewModel.uiState.value.filedReferenceCode)
+
+        viewModel.sendIntent(ObjectionableDebitIntent.DismissFiled)
+        assertNull(viewModel.uiState.value.filedReferenceCode)
+    }
+
+    /** A failed PDF used to go into the list's error state, which is not drawn while rows are up. */
+    @Test
+    fun `a failed filed-objection pdf says why and leaves the list as it was`() = runTest(testDispatcher) {
+        repository.objectionableDebits = PagedListDN(items = listOf(filedDebt()), total = 1)
+        val viewModel = viewModel()
+        open(viewModel)
+        repository.error = TaminApiException(title = "فایل یافت نشد")
+
+        viewModel.events.test {
+            viewModel.sendIntent(
+                ObjectionableDebitIntent.RowAction(viewModel.uiState.value.list.items[0])
+            )
+
+            assertEquals(ObjectionableDebitEvent.ShowServerMessage("فایل یافت نشد"), awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+        assertNull(viewModel.uiState.value.list.error)
+        assertEquals(1, viewModel.uiState.value.list.items.size)
+        assertFalse(viewModel.uiState.value.isBusy)
     }
 
     @Test
