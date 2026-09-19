@@ -18,11 +18,30 @@ data class WorkshopAttachment(
     val type: WorkshopDocumentType,
     /** Whole kilobytes, in Persian digits — what the upload box prints beside the name. */
     val size: String,
+    /**
+     * Which picked file this is, so the same image is not attached twice ([holdsFile]).
+     *
+     * Null for a document read back from the service: its bytes are only counted, never decoded.
+     */
+    val fingerprint: String? = null,
 ) {
     /** An image of [byteCount] bytes, sized the way the upload box prints it. */
-    constructor(guid: String, type: WorkshopDocumentType, byteCount: Int) :
-        this(guid = guid, type = type, size = byteCount.asKilobytes())
+    constructor(guid: String, type: WorkshopDocumentType, byteCount: Int, fingerprint: String? = null) :
+        this(guid = guid, type = type, size = byteCount.asKilobytes(), fingerprint = fingerprint)
 }
+
+/**
+ * Whether [bytes] are already attached here — the old app's «تصویر تکراری انتخاب شده است».
+ *
+ * By content rather than by name, since a picker names the same photo differently each time.
+ */
+fun List<WorkshopAttachment>.holdsFile(bytes: ByteArray): Boolean {
+    val fingerprint = bytes.fingerprint()
+    return any { it.fingerprint == fingerprint }
+}
+
+/** Length plus content hash: two different photos agreeing on both is not a practical case. */
+private fun ByteArray.fingerprint(): String = "$size:${contentHashCode()}"
 
 /**
  * Puts a picked image on the server and names what came back.
@@ -56,7 +75,12 @@ class WorkshopAttachmentUploader(
             "Unknown document type '$typeCode'"
         }
         val guid = uploadImage(UploadImageRequestDN(fileName = fileName, bytes = bytes))
-        return WorkshopAttachment(guid = guid, type = type, byteCount = bytes.size)
+        return WorkshopAttachment(
+            guid = guid,
+            type = type,
+            byteCount = bytes.size,
+            fingerprint = bytes.fingerprint(),
+        )
     }
 }
 

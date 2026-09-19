@@ -38,6 +38,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,6 +55,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachment
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopDocumentType
+import com.tamin.taminhamrah.feature.workshops.ui.model.holdsFile
+import com.tamin.taminhamrah.ui.components.toast.LocalToaster
+import com.tamin.taminhamrah.ui.components.toast.warning
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.ui.components.InputRestriction
 import com.tamin.taminhamrah.ui.components.LoadingButton
@@ -84,6 +88,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.error_image_duplicate
 import taminx.core.core_ui.ic_info
 import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.ic_tamin_chevron_back
@@ -416,10 +421,23 @@ fun WorkshopDocumentsPanel(
         if (hasLanded) attachments.dropLast(1) else attachments
     }
 
+    // The picker answers after the pick, so it reads the list as it is then, not as it was when
+    // the launcher was built.
+    val currentAttachments by rememberUpdatedState(attachments)
+    val toaster = LocalToaster.current
+    val duplicateMessage = stringResource(Res.string.error_image_duplicate)
     val filePicker = rememberFilePickerLauncher(type = FileKitType.Image) { file ->
         val type = pendingType
         if (file == null || type == null) return@rememberFilePickerLauncher
-        scope.launch { onAdd(file.name, file.readBytes(), type.code) }
+        scope.launch {
+            val bytes = file.readBytes()
+            // The same image twice is refused before it is uploaded, as the old app did.
+            if (currentAttachments.holdsFile(bytes)) {
+                toaster.warning(duplicateMessage)
+                return@launch
+            }
+            onAdd(file.name, bytes, type.code)
+        }
     }
 
     Column(

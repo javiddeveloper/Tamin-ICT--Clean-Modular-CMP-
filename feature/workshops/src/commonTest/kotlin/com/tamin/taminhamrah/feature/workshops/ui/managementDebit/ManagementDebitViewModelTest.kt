@@ -10,8 +10,10 @@ import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtPR
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestInfoDN
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestStatus
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveResultDN
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoDN
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
 import com.tamin.taminhamrah.ui.digitsOnly
+import com.tamin.taminhamrah.tools.errorHandling.TaminApiException
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.article_sixteen_deadline_passed
@@ -166,18 +168,29 @@ class ManagementDebitViewModelTest {
 
         vm.sendIntent(ManagementDebitIntent.RequestReview(debtNotifiedDaysAgo(30)))
 
-        // The window is a year: a one-day window refused nearly every real debt.
+        // The design's «یک روز» would have refused this.
         val form = assertNotNull(vm.uiState.value.form)
         assertFalse(form.isResubmitNoticeOpen)
     }
 
     @Test
-    fun `a request more than a year after the executive notice is refused`() = runTest {
+    fun `day 729 after the executive notice is still accepted, as the old app counts`() = runTest {
+        val vm = viewModel()
+        open(vm)
+
+        // Whole years of 365 days, refused only once the count exceeds one.
+        vm.sendIntent(ManagementDebitIntent.RequestReview(debtNotifiedDaysAgo(729)))
+
+        assertNotNull(vm.uiState.value.form)
+    }
+
+    @Test
+    fun `day 730 after the executive notice is refused`() = runTest {
         val vm = viewModel()
         open(vm)
 
         vm.events.test {
-            vm.sendIntent(ManagementDebitIntent.RequestReview(debtNotifiedDaysAgo(400)))
+            vm.sendIntent(ManagementDebitIntent.RequestReview(debtNotifiedDaysAgo(730)))
 
             assertEquals(
                 ManagementDebitEvent.ShowMessage(Res.string.article_sixteen_deadline_passed),
@@ -193,7 +206,7 @@ class ManagementDebitViewModelTest {
         val vm = viewModel()
         open(vm)
 
-        vm.sendIntent(ManagementDebitIntent.FixRequest(debtNotifiedDaysAgo(400)))
+        vm.sendIntent(ManagementDebitIntent.FixRequest(debtNotifiedDaysAgo(800)))
         assertTrue(assertNotNull(vm.uiState.value.form).isResubmitNoticeOpen)
 
         vm.sendIntent(ManagementDebitIntent.FormResubmitNoticeDismissed)
@@ -254,6 +267,63 @@ class ManagementDebitViewModelTest {
 
         vm.sendIntent(ManagementDebitIntent.DismissFiled)
         assertNull(vm.uiState.value.filedReferenceCode)
+    }
+
+    @Test
+    fun `a request does not open without its workshop info, as in the old app`() = runTest {
+        val vm = viewModel()
+        open(vm)
+        repository.error = TaminApiException(title = "کارگاه یافت نشد")
+
+        vm.events.test {
+            vm.sendIntent(ManagementDebitIntent.RequestReview(debtNotifiedDaysAgo(30)))
+
+            assertEquals(ManagementDebitEvent.ShowServerMessage("کارگاه یافت نشد"), awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+        assertNull(vm.uiState.value.form)
+        assertFalse(vm.uiState.value.isBusy)
+    }
+
+    @Test
+    fun `the form opens on the workshop the service describes`() = runTest {
+        repository.articleSixteenWorkshopInfo = ArticleSixteenWorkshopInfoDN(
+            workshopId = "0968210170",
+            branchCode = "0010",
+            employerName = "حسین توکلی کرمانی",
+        )
+        val vm = viewModel()
+        open(vm)
+
+        vm.sendIntent(ManagementDebitIntent.RequestReview(debtNotifiedDaysAgo(30)))
+
+        val info = assertNotNull(vm.uiState.value.form).workshopInfo
+        assertEquals("۰۹۶۸۲۱۰۱۷۰", info.workshopId)
+        assertEquals("۰۰۱۰", info.branchCode)
+        assertEquals("حسین توکلی کرمانی", info.employerName)
+    }
+
+    @Test
+    fun `a failed request pdf says why and leaves the list as it was`() = runTest {
+        repository.articleSixteenDebts = PagedListDN(items = listOf(WorkshopsDebtListModelDN(debitNumber = "1003")))
+        val vm = viewModel()
+        open(vm)
+        repository.error = TaminApiException(title = "فایل یافت نشد")
+
+        vm.events.test {
+            vm.sendIntent(
+                ManagementDebitIntent.ShowRequestPdf(
+                    ArticleSixteenDebtPR(debitNumber = "1003", seqNo = 15L),
+                ),
+            )
+
+            // It used to go into the list's error state, which is not drawn while rows are up.
+            assertEquals(ManagementDebitEvent.ShowServerMessage("فایل یافت نشد"), awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+        assertNull(vm.uiState.value.list.error)
+        assertEquals(1, vm.uiState.value.list.items.size)
+        assertFalse(vm.uiState.value.isBusy)
     }
 
     /** A debt with no request yet, whose ابلاغ اجراییه was [days] days before today. */
