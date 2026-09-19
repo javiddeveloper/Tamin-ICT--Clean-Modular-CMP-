@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import com.tamin.taminhamrah.model.pension.PensionInquiryPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -153,10 +154,16 @@ internal fun PensionStatusCard(
 private fun StatusHeader(isActive: Boolean) {
     val colors = LocalTaminColors.current
     val headerColor = if (isActive) colors.springGreenText else colors.dangerText
+    val headerGradient = Brush.horizontalGradient(
+        colors = listOf(
+            if (isActive) colors.greenBg else colors.dangerBorder.copy(alpha = 0.12f),
+            colors.bgSurface,
+        ),
+    )
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(if (isActive) colors.greenBg else colors.dangerBorder.copy(alpha = 0.12f))
+            .background(headerGradient)
             .padding(horizontal = Spacing.lg, vertical = Spacing.md),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,

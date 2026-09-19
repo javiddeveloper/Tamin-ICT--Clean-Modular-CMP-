@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -61,11 +62,12 @@ internal fun ActiveRelationItemCard(
 ) {
     val taminColors = LocalTaminColors.current
 
-    val topHeaderBackgroundColor = if (item.isActive) {
-        taminColors.greenBg
-    } else {
-        taminColors.border.copy(alpha = 0.12f)
-    }
+    val topHeaderGradient = Brush.horizontalGradient(
+        colors = listOf(
+            if (item.isActive) taminColors.greenBg else taminColors.border.copy(alpha = 0.12f),
+            taminColors.bgSurface,
+        ),
+    )
 
     Card(
         modifier = modifier
@@ -85,7 +87,7 @@ internal fun ActiveRelationItemCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(topHeaderBackgroundColor)
+                    .background(topHeaderGradient)
                     .padding(horizontal = Spacing.lg, vertical = Spacing.md),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
