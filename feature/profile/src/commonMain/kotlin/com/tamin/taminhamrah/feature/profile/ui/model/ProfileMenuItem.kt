@@ -9,11 +9,13 @@ enum class ProfileMenuItem {
     CHANGE_MOBILE,
     REQUESTS,
     PERSONAL_INBOX,
+    SAVE_EVENTS,
     SECURITY,
     SETTINGS,
     SUPPORT,
     CONTACT_ME,
     SHARE,
     VERSION_HISTORY,
-    LOGOUT
+    LOGOUT,
+    DEVELOPER_OPTIONS
 }

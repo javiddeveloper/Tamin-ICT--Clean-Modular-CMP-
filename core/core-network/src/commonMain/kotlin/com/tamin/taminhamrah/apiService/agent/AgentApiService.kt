@@ -11,6 +11,7 @@ import com.tamin.taminhamrah.model.agent.AgentRequestDTO
 import com.tamin.taminhamrah.model.agent.CancelResponseDTO
 import com.tamin.taminhamrah.model.agent.PollingResponseDTO
 import de.jensklingenberg.ktorfit.http.Body
+import io.ktor.http.content.ByteArrayContent
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.Path
@@ -28,7 +29,7 @@ interface AgentApiService {
      */
     @POST("search/service")
     suspend fun sendServicePrompt(
-        @Body request: io.ktor.client.request.forms.MultiPartFormDataContent
+        @Body request: ByteArrayContent
     ): PollingResponseDTO
 
     /**
@@ -36,7 +37,7 @@ interface AgentApiService {
      */
     @POST("search/rule")
     suspend fun sendLawPrompt(
-        @Body request: io.ktor.client.request.forms.MultiPartFormDataContent
+        @Body request: ByteArrayContent
     ): PollingResponseDTO
 
     /**

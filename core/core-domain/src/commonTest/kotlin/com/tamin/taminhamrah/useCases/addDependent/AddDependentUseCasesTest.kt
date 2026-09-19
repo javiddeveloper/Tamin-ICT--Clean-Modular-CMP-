@@ -27,6 +27,7 @@ class AddDependentUseCasesTest : BaseUseCaseTest() {
     private lateinit var inquiryEducationCodeUseCase: InquiryEducationCodeUseCase
     private lateinit var uploadDependentImageUseCase: UploadDependentImageUseCase
     private lateinit var addNewDependentUseCase: AddNewDependentUseCase
+    private lateinit var refreshDependentsUseCase: RefreshDependentsUseCase
 
     @BeforeTest
     fun setup() {
@@ -38,6 +39,7 @@ class AddDependentUseCasesTest : BaseUseCaseTest() {
         inquiryEducationCodeUseCase = InquiryEducationCodeUseCase(repository)
         uploadDependentImageUseCase = UploadDependentImageUseCase(repository)
         addNewDependentUseCase = AddNewDependentUseCase(repository)
+        refreshDependentsUseCase = RefreshDependentsUseCase(repository)
     }
 
     @Test
@@ -138,6 +140,29 @@ class AddDependentUseCasesTest : BaseUseCaseTest() {
         }
 
         assertEquals(request, repository.lastAddedRequest)
+    }
+
+    @Test
+    fun `RefreshDependentsUseCase should return general result from repository`() = runTest {
+        val expectedResult = GeneralResultDN(isSuccess = true, message = "بروزرسانی شد", code = 200)
+        repository.refreshDependentsResult = expectedResult
+
+        refreshDependentsUseCase().test {
+            assertEquals(expectedResult, awaitItem())
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `RefreshDependentsUseCase should propagate errors from repository`() = runTest {
+        val expectedException = RuntimeException("Refresh failed")
+        repository.shouldThrowError = true
+        repository.error = expectedException
+
+        refreshDependentsUseCase().test {
+            val actualException = awaitError()
+            assertEquals(expectedException.message, actualException.message)
+        }
     }
 
     @Test

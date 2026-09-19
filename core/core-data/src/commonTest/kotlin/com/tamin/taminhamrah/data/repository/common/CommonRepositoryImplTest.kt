@@ -14,6 +14,7 @@ import com.tamin.taminhamrah.model.common.RecipientDTO
 import com.tamin.taminhamrah.model.common.UserInsuredInfoDTO
 import com.tamin.taminhamrah.model.common.UserType
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.auth.TokenSlot
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.repository.TokenStoreManager
 import io.ktor.client.statement.HttpStatement
@@ -77,6 +78,25 @@ class CommonRepositoryImplTest {
         assertEquals(UserType.PENSIONER.name, tokenStoreManager.storedUserType)
     }
 
+    @Test
+    fun `getJobTitlePage fetches and maps to PageDN`() = runTest {
+        remoteDataSource.jobTitleResult = ListData(
+            list = listOf(
+                JobTitleDTO(jobCode = "101", jobDescription = "برنامه‌نویس", status = "1", statusDate = "1402/01/01"),
+            ),
+            total = 100,
+        )
+
+        repository.getJobTitlePage(ApiQueryParamDN(page = 0, limit = 10)).test {
+            val page = awaitItem()
+            assertEquals(1, page.items.size)
+            assertEquals("101", page.items.first().jobCode)
+            assertEquals("برنامه‌نویس", page.items.first().jobDescription)
+            assertEquals(100, page.total)
+            awaitComplete()
+        }
+    }
+
     // Fakes
     private class FakeRemoteDataSource : CommonRemoteDataSource {
         var checkInsuredInfoResult = UserInsuredInfoDTO()
@@ -111,8 +131,10 @@ class CommonRepositoryImplTest {
         override suspend fun getRegistrationDeclarationForm(): HttpStatement =
             throw NotImplementedError("not used by these tests")
 
+        var jobTitleResult: ListData<JobTitleDTO>? = null
+
         override suspend fun getJobTitle(query: ApiQueryParamDN): ListData<JobTitleDTO>? =
-            throw NotImplementedError("not used by these tests")
+            jobTitleResult
     }
 
     private class FakeMenuDao : MenuDao {
@@ -130,6 +152,13 @@ class CommonRepositoryImplTest {
         override fun getToken(): String? = null
         override fun saveRefreshToken(refreshToken: String?) = Unit
         override fun getRefreshToken(): String? = null
+        override fun getToken(slot: TokenSlot): String? = null
+        override fun saveToken(slot: TokenSlot, token: String?) = Unit
+        override fun getRefreshToken(slot: TokenSlot): String? = null
+        override fun saveRefreshToken(slot: TokenSlot, refreshToken: String?) = Unit
+        override fun getActiveSlot(): TokenSlot = TokenSlot.USER
+        override fun activeSlotFlow(): Flow<TokenSlot> = MutableStateFlow(TokenSlot.USER).asStateFlow()
+        override suspend fun setActiveSlot(slot: TokenSlot) = Unit
         override fun saveUserId(userId: String?) = Unit
         override fun getUserId(): String? = null
         override fun saveUserType(userType: String?) { storedUserType = userType }

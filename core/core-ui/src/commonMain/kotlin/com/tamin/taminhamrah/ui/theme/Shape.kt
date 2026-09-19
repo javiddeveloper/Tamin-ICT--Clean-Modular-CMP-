@@ -117,11 +117,15 @@ object IconSize {
     val stepperConnectorWidth = 44.dp
     /** Segment height for [com.tamin.taminhamrah.ui.components.TaminHeroStepProgress] on hero headers. */
     val heroStepSegmentHeight = 4.dp
+    /** Visual box for [com.tamin.taminhamrah.ui.components.TaminCheckBox]. */
+    val checkbox = 20.dp
+    val checkboxCheck = 14.dp
 }
 
 object Thickness {
     val border = 1.dp
     val medium = 2.dp
+    val chartBar = 3.dp
 }
 
 /** Decorative wash behind [com.tamin.taminhamrah.ui.components.TaminTopAppBar] hero content. */
@@ -131,6 +135,15 @@ object HeaderDecoration {
     val circleYOffset = (-150).dp
 }
 
+object ChartDimens {
+    val barChartHeight = 180.dp
+    val barWidth = 32.dp
+    val barGap = 6.dp
+    val barCorner = 10.dp
+    val legendDot = 8.dp
+    val yAxisLabelWidth = 40.dp
+}
+
 /**
  * Placeholder sizes for a value that has not arrived, so a shimmering figure occupies roughly what
  * the real one will and nothing resizes when it lands.
@@ -138,10 +151,94 @@ object HeaderDecoration {
 object ShimmerSize {
     val valueWidth = 56.dp
     val valueHeight = 14.dp
-    val titleWidth = 120.dp
+    val labelWidth = 72.dp
+    val sectionLabelWidth = 48.dp
+    val hintWidth = 120.dp
+    val titleWidth = 160.dp
+    val chipWidth = 64.dp
+    val infoBodyHeight = 80.dp
+    val copyRowHeight = 36.dp
+    val sonCardHeight = 72.dp
+    val fieldHeight = ButtonDimens.height
+    val helperLineWidth = 200.dp
     val titleHeight = 14.dp
     val subtitleWidth = 180.dp
     val subtitleHeight = 12.dp
     val badgeWidth = 56.dp
     val badgeHeight = 24.dp
+
+    /** A whole card standing in for one the list has not loaded yet. */
+    val cardHeight = 120.dp
+
+    /** One row of a list inside a sheet. */
+    val rowHeight = 56.dp
+    val uploadCardHeight = 120.dp
+    val bannerHeight = 56.dp
+    val rateChipHeight = 48.dp
+    val wageValueHeight = 28.dp
+    val sliderTrackHeight = 4.dp
+    val stepperButtonSize = 40.dp
+}
+
+/** Scrollable list area inside modal option sheets (city / branch pickers). */
+object SheetDimens {
+    val listMaxHeight = 300.dp
+    /** Max height for long copy inside a modal sheet before the sticky footer. */
+    val contentMaxHeight = 440.dp
+}
+
+/**
+ * Geometry for the home campaigns carousel
+ * ([com.tamin.taminhamrah.ui.components.CampaignCarousel]).
+ *
+ * The design is a CSS scroll-snap track whose lengths are pixels at a 391px viewport, and they map
+ * 1:1 to dp. Verified against the rendered markup: card 329×154.8 resting 18 from the trailing
+ * edge, its neighbor peeking 34, body copy 92%/82% of the 299 content width, dots 18×5.
+ *
+ * Type lives in [taminx.core.core_ui] `Type.kt` as `campaignTextStyles()`, not here.
+ */
+object CampaignDimens {
+    /** `width: calc(100% - 26px)` — how much narrower each card is than the track holding it. */
+    val cardNarrowing = 26.dp
+    val trackGap = Spacing.smPlus            // gap: 10px
+    val trackVerticalPadding = Spacing.xxs   // padding: 2px 18px
+    val headerBottomGap = 11.dp
+
+    val cardMinHeight = 146.dp
+    val cardShadowBlur = 26.dp               // box-shadow: 0 12px 26px
+    val cardShadowOffsetY = 12.dp
+    val cardPaddingHorizontal = 15.dp        // padding: 13px 15px
+    val cardPaddingVertical = 13.dp
+    val cardContentGap = Spacing.smPlus
+
+    val badgePaddingHorizontal = 9.dp        // padding: 3px 9px
+    val badgePaddingVertical = 3.dp
+    val titleTopGap = Spacing.sm             // margin-top: 8px
+    val bodyTopGap = 5.dp
+
+    val ctaPaddingHorizontal = 13.dp         // padding: 7px 13px
+    val ctaPaddingVertical = 7.dp
+    val ctaInnerGap = 6.dp
+    val ctaChevronSize = 13.dp
+
+    val dotsTopGap = Spacing.smPlus
+
+    // The two aria-hidden decoration circles every card carries, resolved from the design's
+    // negative offsets to a center and a radius.
+
+    /** `top:-46px; left:-30px; 170×170` — the soft corner glow. */
+    val glowCenterX = 55.dp
+    val glowCenterY = 39.dp
+    val glowRadius = 85.dp
+
+    /** Where the glow has faded out completely, as a fraction of [glowRadius]. */
+    const val glowFadeStop = 0.68f
+
+    /** `bottom:-58px; left:38%; 150×150` — the flat bubble under the footer row. */
+    const val bubbleCenterXFraction = 0.38f
+    val bubbleCenterYFromBottom = 17.dp
+    val bubbleRadius = 75.dp
+
+    /** `linear-gradient(150deg, …)`, in CSS degrees: 0 points to the top and turns clockwise. */
+    const val gradientAngleDeg = 150f
 }

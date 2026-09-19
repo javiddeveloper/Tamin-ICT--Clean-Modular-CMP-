@@ -1,5 +1,7 @@
 package com.tamin.taminhamrah.useCases.auth
 
+import com.tamin.taminhamrah.model.BaseUrlKey
+import com.tamin.taminhamrah.repository.DeveloperOptionsRepository
 import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.util.NetworkConstants
 import com.tamin.taminhamrah.util.deriveCodeChallenge
@@ -9,11 +11,12 @@ import com.tamin.taminhamrah.util.getCodeVerifierChallengeMethod
 
 class AuthAuthorizeUrlUseCaseImpl(
     private val tokenStoreManager: TokenStoreManager,
+    private val developerOptionsRepository: DeveloperOptionsRepository,
 ) : AuthAuthorizeUrlUseCase {
     override fun invoke(): String {
         val codeVerifier = generateCodeVerifier()
         tokenStoreManager.saveCodeVerifier(codeVerifier)
-        val base = NetworkConstants.BASE_URL_ACCOUNT
+        val base = developerOptionsRepository.getEffectiveBaseUrl(BaseUrlKey.ACCOUNT)
         val clientId = NetworkConstants.CLIENT_ID
         val challenge = deriveCodeVerifierChallenge(codeVerifier) ?: deriveCodeChallenge(codeVerifier)
         val method = getCodeVerifierChallengeMethod()

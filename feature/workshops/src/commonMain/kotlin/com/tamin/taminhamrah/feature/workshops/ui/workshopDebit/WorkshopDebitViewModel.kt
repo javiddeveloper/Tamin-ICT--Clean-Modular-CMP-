@@ -33,7 +33,14 @@ class WorkshopDebitViewModel(
     private fun open(intent: WorkshopDebitIntent.Open): Flow<PartialState> = flow {
         val state = uiState.value
         if (state.workshopId == intent.workshopId && state.branchCode == intent.branchCode) return@flow
-        emit(PartialState.Opened(intent.workshopId, intent.branchCode))
+        emit(
+            PartialState.Opened(
+                workshopId = intent.workshopId,
+                branchCode = intent.branchCode,
+                characterCode = intent.characterCode,
+                legalNationalId = intent.legalNationalId,
+            )
+        )
         emitAll(loadPage(page = 0, identity = intent.workshopId to intent.branchCode))
     }
 
@@ -76,18 +83,38 @@ class WorkshopDebitViewModel(
                 branchCode = state.branchCode,
                 debitNumber = debt.debitNumber,
                 agreementRow = debt.agreementRow,
+                characterCode = state.characterCode,
+                legalNationalId = state.legalNationalId,
             )
         )
         emit(PartialState.Paying(null))
 
-        when {
-            result.isPayable -> sendEvent(WorkshopDebitEvent.OpenPaymentPage(result.paymentPageUrl))
-            result.message.isNotBlank() -> sendEvent(WorkshopDebitEvent.ShowServerMessage(result.message))
-            else -> sendEvent(WorkshopDebitEvent.ShowMessage(Res.string.workshop_debt_payment_refused))
+        if (result.isPayable) {
+            sendEvent(WorkshopDebitEvent.StartPayment(result.toPaymentRequest()))
+        } else {
+            reportPaymentFailure(result.message)
         }
     }.catch {
         emit(PartialState.Paying(null))
-        emit(PartialState.Error(it.toSingleLineMessage()))
+        // Not [PartialState.Error]: that sets the *list*'s error, which the scaffold only draws
+        // for an empty list — so a debt that failed to reach the payment service at all (a 500,
+        // a dropped connection) told the user nothing while the rows sat there unchanged.
+        reportPaymentFailure(it.toSingleLineMessage())
+    }
+
+    /**
+     * Why a payment did not happen, said out loud.
+     *
+     * Refusals and transport failures arrive by different routes but read the same to the user, and
+     * both go through here so that neither can end up silent: a blank reason still produces the
+     * fallback wording rather than an empty toast.
+     */
+    private fun reportPaymentFailure(message: String) {
+        if (message.isBlank()) {
+            sendEvent(WorkshopDebitEvent.ShowMessage(Res.string.workshop_debt_payment_refused))
+        } else {
+            sendEvent(WorkshopDebitEvent.ShowServerMessage(message))
+        }
     }
 
     override fun reduceState(
@@ -97,6 +124,8 @@ class WorkshopDebitViewModel(
         is PartialState.Opened -> currentState.copy(
             workshopId = partialState.workshopId,
             branchCode = partialState.branchCode,
+            characterCode = partialState.characterCode,
+            legalNationalId = partialState.legalNationalId,
         )
 
         PartialState.Loading -> currentState.copy(list = currentState.list.loading())

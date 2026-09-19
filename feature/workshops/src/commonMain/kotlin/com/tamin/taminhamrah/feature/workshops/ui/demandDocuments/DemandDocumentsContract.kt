@@ -11,8 +11,7 @@ data class DemandDocumentsUiState(
     val debitNumber: String = "",
     val branchCode: String = "",
     val list: PagedListState<WorkshopDemandDocPR> = PagedListState(),
-    val isDownloading: Boolean = false,
-    /** Non-null while the viewer is open. */
+    /** Non-null once the bytes have arrived; the viewer spins on null until then. */
     val viewerPdf: PdfDownloadPR? = null,
     val downloadFailed: Boolean = false,
 ) {
@@ -22,7 +21,6 @@ data class DemandDocumentsUiState(
         data object LoadingMore : PartialState
         data class Error(val message: String?) : PartialState
         data class Loaded(val list: PagedListState<WorkshopDemandDocPR>) : PartialState
-        data class Downloading(val isDownloading: Boolean) : PartialState
         data class ViewerPdfChanged(val pdf: PdfDownloadPR?) : PartialState
         data object DownloadFailed : PartialState
     }

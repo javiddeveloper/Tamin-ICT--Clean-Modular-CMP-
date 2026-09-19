@@ -3,6 +3,8 @@ package com.tamin.taminhamrah.feature.profile.ui
 
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Code
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +39,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.dp
@@ -71,6 +74,7 @@ import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
+import com.tamin.taminhamrah.util.AppConfig
 import com.tamin.taminhamrah.ui.util.ExternalAppLauncher
 import com.tamin.taminhamrah.util.toPersianDigits
 import dev.chrisbanes.haze.HazeState
@@ -98,6 +102,7 @@ import taminx.core.core_ui.ic_send
 import taminx.core.core_ui.ic_setting
 import taminx.core.core_ui.ic_share
 import taminx.core.core_ui.ic_sun
+import taminx.core.core_ui.ic_tamin_calendar
 import taminx.core.core_ui.ic_support
 import taminx.core.core_ui.profile_active_relation
 import taminx.core.core_ui.profile_bank_account
@@ -105,12 +110,14 @@ import taminx.core.core_ui.profile_cartable
 import taminx.core.core_ui.profile_change_mobile
 import taminx.core.core_ui.profile_dependents
 import taminx.core.core_ui.profile_dependents_badge_test
+import taminx.core.core_ui.profile_developer_options
 import taminx.core.core_ui.profile_electronic_file
 import taminx.core.core_ui.profile_identity_info
 import taminx.core.core_ui.profile_logout
 import taminx.core.core_ui.profile_personal_inbox
 import taminx.core.core_ui.profile_personal_info
 import taminx.core.core_ui.profile_requests
+import taminx.core.core_ui.profile_save_events
 import taminx.core.core_ui.profile_security
 import taminx.core.core_ui.profile_security_settings
 import taminx.core.core_ui.profile_settings
@@ -140,8 +147,10 @@ fun ProfileScreen(
     onNavigateToMyInbox: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
     onNavigateToUserRequests: () -> Unit = {},
+    onNavigateToSaveEvents: () -> Unit = {},
     onOpenUrl: (String) -> Unit = {},
     onNavigateToSecurity: () -> Unit = {},
+    onNavigateToDeveloperOptions: () -> Unit = {},
     onBackClicked: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -169,9 +178,11 @@ fun ProfileScreen(
         onNavigateToContactUs = onNavigateToContactUs,
         onNavigateToMyInbox = onNavigateToMyInbox,
         onNavigateToSecurity = onNavigateToSecurity,
+        onNavigateToDeveloperOptions = onNavigateToDeveloperOptions,
         onNavigateToDependentsList = onNavigateToDependentsList,
         onNavigateToSettings = onNavigateToSettings,
         onNavigateToUserRequests = onNavigateToUserRequests,
+        onNavigateToSaveEvents = onNavigateToSaveEvents,
         onOpenUrl = onOpenUrl,
         onBackClicked = onBackClicked
     )
@@ -201,7 +212,9 @@ fun HandleProfileEvents(
     onNavigateToMyInbox: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToUserRequests: () -> Unit,
+    onNavigateToSaveEvents: () -> Unit,
     onNavigateToSecurity: () -> Unit,
+    onNavigateToDeveloperOptions: () -> Unit,
     onOpenUrl: (String) -> Unit,
     onBackClicked: () -> Unit
 ) {
@@ -257,6 +270,9 @@ fun HandleProfileEvents(
             ProfileEvent.NavigateToUserContracts ->{
                 onNavigateToUserRequests()
             }
+            ProfileEvent.NavigateToSaveEvents -> {
+                onNavigateToSaveEvents()
+            }
 
             is ProfileEvent.OpenUrl -> {
                 onOpenUrl(it.url)
@@ -268,6 +284,10 @@ fun HandleProfileEvents(
 
             ProfileEvent.NavigateToSecurity -> {
                 onNavigateToSecurity()
+            }
+
+            ProfileEvent.NavigateToDeveloperOptions -> {
+                onNavigateToDeveloperOptions()
             }
 
             is ProfileEvent.ShareAppLink -> {
@@ -549,6 +569,16 @@ fun ProfileContent(
                                 ),
                                 showArrow = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.PERSONAL_INBOX)) }
+                            ),
+                            ListItemData(
+                                title = stringResource(Res.string.profile_save_events),
+                                leadingIconPainter = painterResource(Res.drawable.ic_tamin_calendar),
+                                colors = ListItemColors(
+                                    leadingIconTintColor = taminColors.bgIconProfile,
+                                    leadingIconBackgroundGradient = taminColors.iconGradientSecondary
+                                ),
+                                showArrow = true,
+                                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.SAVE_EVENTS)) }
                             )
                         )
                     )
@@ -653,6 +683,27 @@ fun ProfileContent(
                             )
                         )
                     )
+                }
+            }
+            if (AppConfig.isDebug) {
+                item {
+                    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.lg)) {
+                        ListGroupView(
+                            containerBorder = defaultBorder,
+                            items = persistentListOf(
+                                ListItemData(
+                                    title = stringResource(Res.string.profile_developer_options),
+                                    leadingIconPainter = rememberVectorPainter(Icons.Rounded.Code),
+                                    colors = ListItemColors(
+                                        leadingIconTintColor = taminColors.bgIconProfile,
+                                        leadingIconBackgroundGradient = taminColors.iconGradientNeutral
+                                    ),
+                                    showArrow = true,
+                                    onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.DEVELOPER_OPTIONS)) }
+                                )
+                            )
+                        )
+                    }
                 }
             }
             item {

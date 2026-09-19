@@ -3,78 +3,66 @@ package com.tamin.taminhamrah.feature.agent.service.impl
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceParams
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceResult
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceUseCase
+import com.tamin.taminhamrah.feature.agent.service.base.AgentStrings
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
-import com.tamin.taminhamrah.feature.agent.service.base.KeyValueRow
-import com.tamin.taminhamrah.feature.agent.service.base.buildBubbles
-import com.tamin.taminhamrah.feature.agent.service.base.toKeyValueRows
+import com.tamin.taminhamrah.feature.agent.service.base.agentMarkdown
 import com.tamin.taminhamrah.model.agent.AgentActionKey
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.JsonPrimitive
+import org.jetbrains.compose.resources.StringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.agent_empty_appointment
+import taminx.core.core_ui.agent_label_clinic
+import taminx.core.core_ui.agent_label_date
+import taminx.core.core_ui.agent_label_doctor
+import taminx.core.core_ui.agent_label_location
+import taminx.core.core_ui.agent_label_specialty
+import taminx.core.core_ui.agent_label_status
+import taminx.core.core_ui.agent_label_time
+import taminx.core.core_ui.agent_label_type
 
 /**
- * Handles appointment data returned directly by the AI — نوبت‌دهی.
- *
- * Ported from old_Android's AppointmentUseCase. The AI pre-fills the appointment
- * list in [AgentServiceParams.rawData]; this service only needs to parse and
- * display it.  When the AI returns no data, a friendly empty-state message is shown.
+ * Appointments the assistant found itself — نوبت‌دهی. The items arrive in the entity's `data`;
+ * this only lays them out.
  */
-class AppointmentAgentService : AgentServiceUseCase {
+class AppointmentAgentService(
+    private val strings: AgentStrings,
+) : AgentServiceUseCase {
 
-    override val supportedKeys: List<AgentActionKey> = listOf(
-        AgentActionKey.APPOINTMENT
-    )
+    override val supportedKeys: List<AgentActionKey> = listOf(AgentActionKey.APPOINTMENT)
 
     override suspend fun execute(params: AgentServiceParams): AgentServiceResult {
-        return try {
-            val items = parseAppointments(params)
-
-            if (items.isEmpty()) {
-                return AgentServiceResult.Success(
-                    params.buildBubbles { add(ChatBubbleContent.Text("متاسفانه نوبتی یافت نشد.")) }
-                )
+        val appointments = (params.rawData as? JsonArray).orEmpty().mapNotNull { it as? JsonObject }
+        val rows = appointments.map { item ->
+            FIELDS.mapNotNull { (keys, label) ->
+                keys.firstNotNullOfOrNull { key -> (item[key] as? JsonPrimitive)?.content?.takeIf { it.isNotBlank() } }
+                    ?.let { strings.get(label) to it }
             }
+        }.filter { it.isNotEmpty() }
 
-            // Each appointment becomes its own KeyValue bubble, separated visually.
-            val bubbles = mutableListOf<ChatBubbleContent>()
-            params.message?.takeIf { it.isNotBlank() }?.let { bubbles.add(ChatBubbleContent.Text(it)) }
-
-            items.forEachIndexed { idx, appt ->
-                bubbles.add(ChatBubbleContent.KeyValue(
-                    title = "نوبت ${idx + 1}",
-                    items = appt.toKeyValueRows()
-                ))
+        val markdown = agentMarkdown {
+            heading(params.message)
+            if (rows.isEmpty()) paragraph(strings.get(Res.string.agent_empty_appointment))
+            rows.forEach {
+                fields(it)
+                rule()
             }
-
-            AgentServiceResult.Success(bubbles)
-        } catch (e: Exception) {
-            AgentServiceResult.Error("خطا در نمایش نوبت‌ها: ${e.message}", e)
         }
+        return AgentServiceResult.Success(listOf(ChatBubbleContent.Markdown(markdown)))
     }
 
-    /**
-     * Tries to extract a list of appointment maps from [AgentServiceParams.rawData].
-     * The AI typically sends an array of objects, each with fields like
-     * doctorName, date, time, location, status, etc.
-     */
-    private fun parseAppointments(params: AgentServiceParams): List<List<Pair<String, String>>> {
-        val array = params.rawData as? JsonArray ?: return emptyList()
-        return array.mapNotNull { element ->
-            val obj = element as? JsonObject ?: return@mapNotNull null
-            buildList {
-                obj["doctorName"]?.jsonPrimitive?.contentOrNull?.takeIf { it.isNotBlank() }?.let { add("پزشک" to it) }
-                obj["docName"]?.jsonPrimitive?.contentOrNull?.takeIf { it.isNotBlank() }?.let { add("پزشک" to it) }
-                obj["speciality"]?.jsonPrimitive?.contentOrNull?.takeIf { it.isNotBlank() }?.let { add("تخصص" to it) }
-                obj["specDesc"]?.jsonPrimitive?.contentOrNull?.takeIf { it.isNotBlank() }?.let { add("تخصص" to it) }
-                obj["date"]?.jsonPrimitive?.contentOrNull?.takeIf { it.isNotBlank() }?.let { add("تاریخ" to it) }
-                obj["time"]?.jsonPrimitive?.contentOrNull?.takeIf { it.isNotBlank() }?.let { add("ساعت" to it) }
-                obj["location"]?.jsonPrimitive?.contentOrNull?.takeIf { it.isNotBlank() }?.let { add("مکان" to it) }
-                obj["status"]?.jsonPrimitive?.contentOrNull?.takeIf { it.isNotBlank() }?.let { add("وضعیت" to it) }
-                obj["clinicName"]?.jsonPrimitive?.contentOrNull?.takeIf { it.isNotBlank() }?.let { add("کلینیک" to it) }
-                obj["type"]?.jsonPrimitive?.contentOrNull?.takeIf { it.isNotBlank() }?.let { add("نوع" to it) }
-            }.ifEmpty { null }
-        }
+    private companion object {
+        /** Field names the assistant may use for each label, first match wins. */
+        val FIELDS: List<Pair<List<String>, StringResource>> = listOf(
+            listOf("doctorName", "docName", "NAME") to Res.string.agent_label_doctor,
+            listOf("speciality", "specDesc", "PROFICIENCY") to Res.string.agent_label_specialty,
+            listOf("date") to Res.string.agent_label_date,
+            listOf("time") to Res.string.agent_label_time,
+            listOf("location", "ADDRESS", "CITY") to Res.string.agent_label_location,
+            listOf("clinicName", "CENTER") to Res.string.agent_label_clinic,
+            listOf("status") to Res.string.agent_label_status,
+            listOf("type", "TITLE") to Res.string.agent_label_type,
+        )
     }
 }

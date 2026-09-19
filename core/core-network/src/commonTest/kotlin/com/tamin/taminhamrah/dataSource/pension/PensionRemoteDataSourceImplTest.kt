@@ -6,10 +6,17 @@ import com.tamin.taminhamrah.model.pension.PensionIdDTO
 import com.tamin.taminhamrah.model.pension.PensionInquiryDTO
 import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDTO
 import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDTO
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityFinalConfirmRequest
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveDocumentRequest
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoRequest
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoResponseDTO
+import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.RegisteredMedicalCommissionDTO
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequest
 import com.tamin.taminhamrah.model.pension.retirement.RetirementPersonalDTO
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestCreatedDTO
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestFormDTO
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDTO
 import com.tamin.taminhamrah.model.pension.sendRetirementDocument.RetirementSaveDocumentRequest
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
@@ -20,17 +27,18 @@ import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseDTO
+import com.tamin.taminhamrah.tools.FakeIOException
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.TaminApiException
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import io.ktor.client.statement.HttpStatement
-import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonPrimitive
 
 class PensionRemoteDataSourceImplTest {
 
@@ -116,7 +124,7 @@ private class FakePensionApiService(
         error("not used in PensionRemoteDataSourceImplTest")
 
     override suspend fun getPensionerId(): BaseDTO<ListData<PensionIdDTO>> {
-        if (shouldThrow) throw IllegalStateException("network")
+        if (shouldThrow) throw FakeIOException()
         return success(ListData(total = 1, list = listOf(PensionIdDTO(pensionerId = "123"))))
     }
 
@@ -138,7 +146,7 @@ private class FakePensionApiService(
         error("not used in PensionRemoteDataSourceImplTest")
 
     override suspend fun getPensionerPayRoll(filter: String): BaseDTO<ListData<PayRollDTO>> {
-        if (shouldThrow) throw IllegalStateException("network")
+        if (shouldThrow) throw FakeIOException()
         return success(
             ListData(
                 total = 1,
@@ -157,8 +165,8 @@ private class FakePensionApiService(
         )
     }
 
-    override suspend fun sendPayRollToInbox(filter: String): BaseDTO<JsonElement?>? {
-        if (shouldThrow) throw IllegalStateException("network")
+    override suspend fun sendPayRollToInbox(filter: String): BaseDTO<JsonElement?> {
+        if (shouldThrow) throw FakeIOException()
         return success(JsonPrimitive("عملیات با موفقیت انجام شد"))
     }
 
@@ -169,6 +177,12 @@ private class FakePensionApiService(
         error("not used in PensionRemoteDataSourceImplTest")
 
     override suspend fun authenticationAndGetPersonalInfo(authenticationsCode: Long): BaseDTO<RetirementPersonalDTO> =
+        error("not used in PensionRemoteDataSourceImplTest")
+
+    override suspend fun createRetirementRequest(
+        authenticationsCode: Long,
+        body: RetirementRequestFormDTO
+    ): BaseDTO<RetirementRequestCreatedDTO> =
         error("not used in PensionRemoteDataSourceImplTest")
 
     override suspend fun checkRetirementStatus(): BaseDTO<RetirementStatusDTO> =
@@ -187,6 +201,29 @@ private class FakePensionApiService(
         error("not used in PensionRemoteDataSourceImplTest")
 
     override suspend fun sendEdictPensionerToMyInbox(parameters: Map<String, String>): BaseDTO<JsonElement?> =
+        error("not used in PensionRemoteDataSourceImplTest")
+
+    override suspend fun saveDisabilityUserInfo(body: DisabilitySaveInfoRequest): BaseDTO<DisabilitySaveInfoResponseDTO> =
+        error("not used in PensionRemoteDataSourceImplTest")
+
+    override suspend fun finalConfirmDisabilityRequest(
+        requestId: Long,
+        body: DisabilityFinalConfirmRequest
+    ): BaseDTO<DisabilitySaveInfoResponseDTO> =
+        error("not used in PensionRemoteDataSourceImplTest")
+
+    override suspend fun saveDocumentDisability(
+        requestId: Long,
+        body: DisabilitySaveDocumentRequest
+    ): BaseDTO<JsonElement?> =
+        error("not used in PensionRemoteDataSourceImplTest")
+
+    override suspend fun getMedicalCommissionPdf(lastWorkshop: String): HttpStatement =
+        error("not used in PensionRemoteDataSourceImplTest")
+
+    override suspend fun getRegisteredMedicalCommission(
+        parameters: Map<String, String>
+    ): BaseDTO<ListData<RegisteredMedicalCommissionDTO>> =
         error("not used in PensionRemoteDataSourceImplTest")
 
     private fun <T> success(data: T) = BaseDTO(

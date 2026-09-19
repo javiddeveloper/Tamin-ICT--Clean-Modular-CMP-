@@ -3,25 +3,54 @@ package com.tamin.taminhamrah.feature.agent.service.impl
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceParams
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceResult
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceUseCase
+import com.tamin.taminhamrah.feature.agent.service.base.AgentStrings
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
-import com.tamin.taminhamrah.feature.agent.service.base.toKeyValueRows
-import com.tamin.taminhamrah.feature.agent.service.base.buildBubbles
-import com.tamin.taminhamrah.feature.agent.service.base.formatAmount
+import com.tamin.taminhamrah.feature.agent.service.base.agentMarkdown
+import com.tamin.taminhamrah.feature.agent.service.base.dateRange
 import com.tamin.taminhamrah.feature.agent.service.base.getFilters
+import com.tamin.taminhamrah.feature.agent.service.impl.wage.inYears
+import com.tamin.taminhamrah.feature.agent.service.impl.wage.lastPaidYear
+import com.tamin.taminhamrah.feature.agent.service.impl.wage.paidMonths
+import com.tamin.taminhamrah.feature.agent.service.impl.wage.year
 import com.tamin.taminhamrah.model.agent.AgentActionKey
 import com.tamin.taminhamrah.model.history.DastmozdInfoItemDN
-import com.tamin.taminhamrah.ui.orDash
+import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
+import com.tamin.taminhamrah.util.PersianDateFormatter
+import kotlinx.coroutines.CancellationException
+import org.jetbrains.compose.resources.StringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.agent_empty_last_payment
+import taminx.core.core_ui.agent_empty_wage_average
+import taminx.core.core_ui.agent_empty_wage_in_range
+import taminx.core.core_ui.agent_error_wage_calculation
+import taminx.core.core_ui.agent_label_average_wage
+import taminx.core.core_ui.agent_label_average_wage_in_range
+import taminx.core.core_ui.agent_label_branch
+import taminx.core.core_ui.agent_label_days
+import taminx.core.core_ui.agent_label_history_type
+import taminx.core.core_ui.agent_label_history_year
+import taminx.core.core_ui.agent_label_last_payment_month
+import taminx.core.core_ui.agent_label_month
+import taminx.core.core_ui.agent_label_wage
+import taminx.core.core_ui.agent_label_workshop
+import taminx.core.core_ui.agent_value_days
+import taminx.core.core_ui.agent_value_rial
+import kotlin.math.ceil
 
 /**
- * Aggregate views over the wage history — میانگین دستمزد و آخرین پرداخت.
+ * Summaries over the wage history, ported from the native `AverageWageUseCase`,
+ * `AverageWagePerDateUseCase` and `LastPayUseCase`.
  *
- * Ported from old_Android's `AverageWageUseCase`, `AverageWagePerDateUseCase` and
- * `LastPayUseCase`, all of which read the same wage-history source and then
- * summarise it rather than listing every row (that is [DastmozdInfosAgentService]).
+ * - `average_dastmozd_infos` with an `averageSalary:N` filter: walks paid months from the newest
+ *   back until N×365 days are covered and divides their wages by N×12 — the pension calculator's
+ *   average. Without that filter it lists the paid months of the years in the date range.
+ * - `average_dastmozd_infos_per_date`: wages ÷ days worked inside the month-bounded range, × 30.
+ * - `dastmozdinfos_last_pay`: the newest paid month of the newest paid year.
  */
 class AverageWageAgentService(
-    private val getDastmozdInfosUseCase: GetDastmozdInfosUseCase
+    private val getDastmozdInfosUseCase: GetDastmozdInfosUseCase,
+    private val strings: AgentStrings,
 ) : AgentServiceUseCase {
 
     override val supportedKeys: List<AgentActionKey> = listOf(
@@ -30,113 +59,123 @@ class AverageWageAgentService(
         AgentActionKey.DASTMOZD_INFOS_LAST_PAY
     )
 
-    override suspend fun execute(params: AgentServiceParams): AgentServiceResult {
-        return try {
-            val list = getDastmozdInfosUseCase().list.orEmpty()
-            if (list.isEmpty()) {
-                return AgentServiceResult.Success(
-                    params.buildBubbles {
-                        add(ChatBubbleContent.Text(params.message ?: "سابقه دستمزدی برای شما یافت نشد."))
-                    }
-                )
-            }
+    override suspend fun execute(params: AgentServiceParams): AgentServiceResult = try {
+        val records = getDastmozdInfosUseCase().list.orEmpty()
+        val markdown = when (params.requestedKey) {
+            AgentActionKey.DASTMOZD_INFOS_LAST_PAY -> lastPay(params, records)
+            AgentActionKey.AVERAGE_DASTMOZD_INFOS_PER_DATE -> averagePerDate(params, records)
+            else -> average(params, records)
+        }
+        AgentServiceResult.Success(listOf(ChatBubbleContent.Markdown(markdown)))
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        AgentServiceResult.Error(strings.get(Res.string.agent_error_wage_calculation), e)
+    }
 
-            return when (params.requestedKey) {
-                AgentActionKey.DASTMOZD_INFOS_LAST_PAY -> lastPay(params, list)
-                else -> average(params, list)
+    private suspend fun average(params: AgentServiceParams, records: List<DastmozdInfoItemDN>): String {
+        val years = params.getFilters()[AVERAGE_SALARY_FILTER]?.trim()?.toIntOrNull()?.takeIf { it > 0 }
+        if (years == null) return yearsInRange(params, records)
+
+        val targetDays = years * DAYS_PER_YEAR
+        var coveredDays = 0
+        var totalWages = 0L
+        records.sortedByDescending { it.year ?: 0 }
+            .flatMap { record -> record.paidMonths().sortedByDescending { it.month } }
+            .forEach { month ->
+                if (coveredDays >= targetDays) return@forEach
+                coveredDays += month.days
+                totalWages += month.wage
             }
-        } catch (e: Exception) {
-            AgentServiceResult.Error("خطا در محاسبه دستمزد: ${e.message}", e)
+        if (coveredDays == 0) return emptyAnswer(params, Res.string.agent_empty_wage_average)
+
+        val average = ceil(totalWages.toDouble() / (years * MONTHS_PER_YEAR)).toLong()
+        return agentMarkdown {
+            heading(params.message)
+            fields(listOf(strings.get(Res.string.agent_label_average_wage) to rial(average)))
         }
     }
 
-    /** Latest recorded monthly wage (most recent year, last month with a value). */
-    private fun lastPay(
-        params: AgentServiceParams,
-        list: List<DastmozdInfoItemDN>
-    ): AgentServiceResult {
-        val latest = list.maxByOrNull { it.hisyear?.toIntOrNull() ?: Int.MIN_VALUE }
-        val lastDetail = latest?.wageDetails?.lastOrNull { !it.wage.isNullOrBlank() }
+    /** The native service's fallback without `averageSalary`: the paid months of each year in range. */
+    private suspend fun yearsInRange(params: AgentServiceParams, records: List<DastmozdInfoItemDN>): String {
+        val years = records.inYears(params.dateRange())
+            .sortedBy { it.year }
+            .mapNotNull { record -> record.paidMonths().takeIf { it.isNotEmpty() }?.let { record to it } }
+        if (years.isEmpty()) return emptyAnswer(params, Res.string.agent_empty_wage_average)
 
-        if (latest == null || lastDetail == null) {
-            return AgentServiceResult.Success(
-                params.buildBubbles {
-                    add(ChatBubbleContent.Text("آخرین دستمزد ثبت‌شده‌ای یافت نشد."))
-                }
+        val columns = listOf(
+            strings.get(Res.string.agent_label_month),
+            strings.get(Res.string.agent_label_days),
+            strings.get(Res.string.agent_label_wage),
+        )
+        return agentMarkdown {
+            heading(params.message)
+            years.forEach { (record, months) ->
+                fields(recordFields(record))
+                table(columns, months.map { listOf(monthName(it.month), it.days.toString(), rial(it.wage)) })
+                rule()
+            }
+        }
+    }
+
+    private suspend fun averagePerDate(params: AgentServiceParams, records: List<DastmozdInfoItemDN>): String {
+        val range = params.dateRange()
+        var totalWages = 0L
+        var totalDays = 0
+        records.inYears(range).forEach { record ->
+            val year = record.year ?: return@forEach
+            record.paidMonths(range.monthsOf(year)).forEach { month ->
+                totalWages += month.wage
+                totalDays += month.days
+            }
+        }
+        if (totalDays == 0) return emptyAnswer(params, Res.string.agent_empty_wage_in_range)
+
+        val average = ceil(totalWages.toDouble() / totalDays * DAYS_PER_MONTH).toLong()
+        return agentMarkdown {
+            heading(params.message)
+            fields(listOf(strings.get(Res.string.agent_label_average_wage_in_range) to rial(average)))
+        }
+    }
+
+    private suspend fun lastPay(params: AgentServiceParams, records: List<DastmozdInfoItemDN>): String {
+        val record = records.lastPaidYear() ?: return emptyAnswer(params, Res.string.agent_empty_last_payment)
+        val month = record.paidMonths().last()
+        return agentMarkdown {
+            heading(params.message)
+            fields(
+                listOf(
+                    strings.get(Res.string.agent_label_workshop) to record.rwshname,
+                    strings.get(Res.string.agent_label_history_type) to record.historytypedesc,
+                    strings.get(Res.string.agent_label_branch) to record.brhname,
+                    strings.get(Res.string.agent_label_last_payment_month) to "${monthName(month.month)} ${record.hisyear.orEmpty()}",
+                    strings.get(Res.string.agent_label_days) to strings.get(Res.string.agent_value_days, month.days),
+                    strings.get(Res.string.agent_label_wage) to rial(month.wage),
+                )
             )
         }
-
-        val rows = listOf(
-            "سال" to latest.hisyear.orDash(),
-            "ماه" to lastDetail.month.orDash(),
-            "مبلغ دستمزد" to lastDetail.wage?.toLongOrNull().formatAmount(),
-            "نام کارگاه" to latest.rwshname.orDash(),
-            "نام شعبه" to latest.brhname.orDash()
-        )
-        return AgentServiceResult.Success(
-            params.buildBubbles {
-                add(
-                    ChatBubbleContent.KeyValue(
-                        title = params.message?.takeIf { it.isNotBlank() } ?: "آخرین دستمزد",
-                        items = rows.toKeyValueRows()
-                    )
-                )
-            }
-        )
     }
 
-    /** Average monthly wage, optionally restricted to a year range chosen by the AI. */
-    private fun average(
-        params: AgentServiceParams,
-        list: List<DastmozdInfoItemDN>
-    ): AgentServiceResult {
-        val filters = params.getFilters()
-        val startYear = filters["startDate"]?.take(YEAR_LENGTH)?.toIntOrNull()
-            ?: filters["startYear"]?.toIntOrNull()
-        val endYear = filters["endDate"]?.take(YEAR_LENGTH)?.toIntOrNull()
-            ?: filters["endYear"]?.toIntOrNull()
+    private suspend fun recordFields(record: DastmozdInfoItemDN): List<Pair<String, String?>> = listOf(
+        strings.get(Res.string.agent_label_history_year) to record.hisyear,
+        strings.get(Res.string.agent_label_workshop) to record.rwshname,
+        strings.get(Res.string.agent_label_history_type) to record.historytypedesc,
+        strings.get(Res.string.agent_label_branch) to record.brhname,
+    )
 
-        val scoped = list.filter { item ->
-            val year = item.hisyear?.toIntOrNull() ?: return@filter true
-            (startYear == null || year >= startYear) && (endYear == null || year <= endYear)
-        }
-
-        val amounts = scoped.flatMap { it.wageDetails }.mapNotNull { it.wage?.toLongOrNull() }
-            .filter { it > 0 }
-
-        if (amounts.isEmpty()) {
-            return AgentServiceResult.Success(
-                params.buildBubbles {
-                    add(ChatBubbleContent.Text("دستمزدی در این بازه برای محاسبه میانگین یافت نشد."))
-                }
-            )
-        }
-
-        val average = amounts.sum() / amounts.size
-        val rows = buildList {
-            val range = listOfNotNull(startYear, endYear)
-            if (range.isNotEmpty()) {
-                add("بازه" to listOfNotNull(startYear, endYear).joinToString(" تا "))
-            }
-            add("میانگین دستمزد ماهانه" to average.formatAmount())
-            add("بیشترین دستمزد" to amounts.max().formatAmount())
-            add("کمترین دستمزد" to amounts.min().formatAmount())
-            add("تعداد ماه‌های محاسبه‌شده" to amounts.size.toString())
-        }
-
-        return AgentServiceResult.Success(
-            params.buildBubbles {
-                add(
-                    ChatBubbleContent.KeyValue(
-                        title = params.message?.takeIf { it.isNotBlank() } ?: "میانگین دستمزد",
-                        items = rows.toKeyValueRows()
-                    )
-                )
-            }
-        )
+    private suspend fun emptyAnswer(params: AgentServiceParams, message: StringResource): String = agentMarkdown {
+        heading(params.message)
+        paragraph(strings.get(message))
     }
+
+    private suspend fun rial(amount: Long): String = strings.get(Res.string.agent_value_rial, amount.toPriceFormat())
+
+    private fun monthName(month: Int): String = PersianDateFormatter.monthNames.getOrElse(month - 1) { month.toString() }
 
     private companion object {
-        const val YEAR_LENGTH = 4
+        const val AVERAGE_SALARY_FILTER = "averageSalary"
+        const val DAYS_PER_YEAR = 365
+        const val DAYS_PER_MONTH = 30
+        const val MONTHS_PER_YEAR = 12
     }
 }

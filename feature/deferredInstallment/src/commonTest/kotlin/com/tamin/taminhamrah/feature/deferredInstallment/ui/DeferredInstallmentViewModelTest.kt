@@ -10,8 +10,10 @@ import com.tamin.taminhamrah.model.common.BeneficiaryDN
 import com.tamin.taminhamrah.model.common.InsuranceTypeDN
 import com.tamin.taminhamrah.model.common.UserType
 import com.tamin.taminhamrah.model.common.UserTypeInfoDN
+import com.tamin.taminhamrah.model.common.JobTitleDN
 import com.tamin.taminhamrah.model.common.JobTitleListDN
 import com.tamin.taminhamrah.model.common.MainServiceDN
+import com.tamin.taminhamrah.model.paging.PageDN
 import com.tamin.taminhamrah.model.pension.EdictPensionerDN
 import com.tamin.taminhamrah.model.pension.EdictPensionerInboxDN
 import com.tamin.taminhamrah.model.pension.InquirePensionCertificateDN
@@ -89,7 +91,7 @@ class DeferredInstallmentViewModelTest {
         val state = viewModel.uiState.value
         assertFalse(state.isLoading)
         assertNotNull(state.error)
-        assertTrue(state.error!!.isNotBlank())
+        assertTrue(state.error.isNotBlank())
     }
 
     @Test
@@ -306,6 +308,10 @@ private class FakeDeferredInstallmentPensionRepository : PensionRepository {
         error("not used")
     override suspend fun getRetirementRequestInfo(filters: List<ApiFilterDN>): Flow<List<RetirementRequestDN>> =
         error("not used")
+    override suspend fun createRetirementRequest(
+        authenticationsCode: Long,
+        form: com.tamin.taminhamrah.model.pension.retirement.RetirementRequestFormDN
+    ): Flow<com.tamin.taminhamrah.model.pension.retirement.RetirementRequestCreatedDN> = error("not used")
     override suspend fun checkRetirementStatus(): Flow<RetirementStatusDN> =
         error("not used")
     override suspend fun sendRetirementDocument(requestId: String, request: RetirementSaveDocumentDN): Flow<String?> =
@@ -318,6 +324,16 @@ private class FakeDeferredInstallmentPensionRepository : PensionRepository {
         error("not used")
     override suspend fun sendPayRollToInbox(filters: List<ApiFilterDN>): Flow<PayRollInboxDN> =
         error("not used")
+    override suspend fun saveDisabilityUserInfo(body: com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoDN): Flow<com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityRequestRefDN?> =
+        error("not used")
+    override suspend fun finalConfirmDisabilityRequest(requestId: Long, body: com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityFinalConfirmDN): Flow<com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityRequestRefDN?> =
+        error("not used")
+    override suspend fun saveDocumentDisability(requestId: Long, body: com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveDocumentDN): Flow<String?> =
+        error("not used")
+    override suspend fun getMedicalCommissionPdf(lastWorkshop: String): Flow<PdfDownloadDN> =
+        error("not used")
+    override suspend fun getRegisteredMedicalCommission(filters: List<ApiFilterDN>): Flow<List<com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.RegisteredMedicalCommissionDN>> =
+        error("not used")
 }
 
 private class FakeDeferredInstallmentCommonRepository : CommonRepository {
@@ -329,6 +345,7 @@ private class FakeDeferredInstallmentCommonRepository : CommonRepository {
         error("not used")
     override fun getRegistrationDeclarationForm(): Flow<ByteArray> = error("not used")
     override fun getJobTitle(query: ApiQueryParamDN): Flow<JobTitleListDN?> = error("not used")
+    override fun getJobTitlePage(query: ApiQueryParamDN): Flow<PageDN<JobTitleDN>> = error("not used")
     override fun getRoles(): Flow<List<com.tamin.taminhamrah.model.common.RoleDN>> = error("not used")
     override fun getInsuranceTypes(searchText: String?): Flow<List<InsuranceTypeDN>> {
         error("not used")

@@ -1,14 +1,18 @@
 package com.tamin.taminhamrah.feature.workshops.ui.model
 
 import com.tamin.taminhamrah.feature.workshops.ui.components.StatusTint
+import com.tamin.taminhamrah.model.common.FeatureFlag
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_workshop_article_sixteen
+import taminx.core.core_ui.contract_rows_action_desc
+import taminx.core.core_ui.contract_rows_title
+import taminx.core.core_ui.ic_tamin_workshop_contract_rows
 import taminx.core.core_ui.ic_tamin_workshop_inquiry
 import taminx.core.core_ui.ic_tamin_workshop_new_member
-import taminx.core.core_ui.ic_tamin_workshop_objection
 import taminx.core.core_ui.ic_tamin_workshop_payment
+import taminx.core.core_ui.ic_tamin_workshop_objection
 import taminx.core.core_ui.ic_tamin_workshop_turnover
 import taminx.core.core_ui.workshop_action_article_sixteen
 import taminx.core.core_ui.workshop_action_article_sixteen_desc
@@ -39,6 +43,13 @@ enum class WorkshopAction(
     val description: StringResource,
     val icon: DrawableResource,
     val tint: StatusTint,
+    /**
+     * The server-side switch that hides this service, or null when it has none.
+     *
+     * A service reachable from the services grid is reachable from here too, so the flag that turns
+     * it off there has to turn it off here — otherwise disabling it only closes one of two doors.
+     */
+    val featureFlag: FeatureFlag? = null,
 ) {
     PAYMENT_SHEETS(
         label = Res.string.workshop_action_payment_sheets,
@@ -75,5 +86,14 @@ enum class WorkshopAction(
         description = Res.string.workshop_action_article_sixteen_desc,
         icon = Res.drawable.ic_tamin_workshop_article_sixteen,
         tint = StatusTint.PURPLE,
+    ),
+
+    CONTRACT_ROWS(
+        label = Res.string.contract_rows_title,
+        description = Res.string.contract_rows_action_desc,
+        icon = Res.drawable.ic_tamin_workshop_contract_rows,
+        tint = StatusTint.INFO,
+        // «اطلاعات پیمان» in the server menu — the same flag the services-grid tile routes through.
+        featureFlag = FeatureFlag.CONTRACT_INFO,
     ),
 }

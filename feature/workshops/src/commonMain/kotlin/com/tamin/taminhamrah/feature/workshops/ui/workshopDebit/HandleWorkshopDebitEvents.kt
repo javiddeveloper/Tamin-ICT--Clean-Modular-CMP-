@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.workshops.ui.workshopDebit
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import com.tamin.taminhamrah.model.payment.PaymentRequestDN
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
 import kotlinx.coroutines.flow.Flow
@@ -17,13 +18,13 @@ import org.jetbrains.compose.resources.getString
 @Composable
 fun HandleWorkshopDebitEvents(
     events: Flow<WorkshopDebitEvent>,
-    onOpenUrl: (String) -> Unit,
+    onStartPayment: (PaymentRequestDN) -> Unit,
 ) {
     val toaster = LocalToaster.current
     LaunchedEffect(events, toaster) {
         events.collect { event ->
             when (event) {
-                is WorkshopDebitEvent.OpenPaymentPage -> onOpenUrl(event.url)
+                is WorkshopDebitEvent.StartPayment -> onStartPayment(event.request)
                 is WorkshopDebitEvent.ShowServerMessage -> toaster.error(event.message)
                 is WorkshopDebitEvent.ShowMessage -> toaster.error(getString(event.message))
             }

@@ -10,6 +10,7 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopListSkeleton
@@ -22,6 +23,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
+import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -59,10 +61,15 @@ fun WorkshopDebtInquiryScreen(
         viewModel.sendIntent(WorkshopDebtInquiryIntent.Open(workshopId, branchCode))
     }
 
+    val onRetry = remember(viewModel) {
+        { viewModel.sendIntent(WorkshopDebtInquiryIntent.Retry) }
+    }
+
     WorkshopDebtInquiryContent(
         state = state,
         workshopName = workshopName,
         onBack = onBack,
+        onRetry = onRetry,
         modifier = modifier,
     )
 }
@@ -72,18 +79,35 @@ fun WorkshopDebtInquiryContent(
     state: WorkshopDebtInquiryUiState,
     workshopName: String,
     onBack: () -> Unit,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val workshopCode = remember(state.workshopId) {
+        state.workshopId.takeIf { it.isNotBlank() }?.toPersianDigits()
+    }
+    val safeWorkshopName = remember(workshopName) {
+        workshopName.takeIf { it.isNotBlank() }
+    }
+
     WorkshopScreenShell(
         title = stringResource(Res.string.workshop_action_debt_inquiry),
         onBack = onBack,
-        workshopName = workshopName.takeIf { it.isNotBlank() },
-        workshopCode = state.workshopId.takeIf { it.isNotBlank() }?.toPersianDigits(),
+        workshopName = safeWorkshopName,
+        workshopCode = workshopCode,
         modifier = modifier,
     ) {
         val inquiry = state.inquiry
         when {
             state.isLoading -> WorkshopListSkeleton(rowCount = 1)
+
+            // Before the empty branch, because a failed inquiry leaves [inquiry] null too — and
+            // telling someone their workshop has no debt record when the service simply could not
+            // be reached is the wrong answer to give about a debt.
+            state.error != null -> ErrorStateView(
+                message = state.error,
+                onDismiss = onBack,
+                onRetry = onRetry,
+            )
 
             inquiry == null -> EmptyStateMessage(
                 icon = Icons.Outlined.Info,
@@ -166,6 +190,7 @@ private fun WorkshopDebtInquiryScreenPreview() {
             ),
             workshopName = "آموزشگاه کامپیوتر توکلی-ایمیل",
             onBack = {},
+            onRetry = {},
         )
     }
 }

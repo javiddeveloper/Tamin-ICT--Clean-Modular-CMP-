@@ -18,11 +18,17 @@ tags: [moc]
 - [[Dependency-Injection]] — Koin modules and registration order
 - [[Networking]] — Ktor, the five HTTP clients, auth and token refresh
 - [[Database]] — Room KMP, DAOs, schemas
+- [[Data-and-Caching]] — repository patterns, offline-first decision rubric, the `.first()` vs `.collect()` shipped bug
+- [[Error-Handling]] — exception-based error chain, `BaseDTO`, no `Result<T>` wrapper
+- [[Payments]] — the one payment flow every feature uses, and its mock gateway
+- [[Debug-Tooling]] — `TokenSlot`, the back-to-back debug login, and the `isDebug` gate
 
 ## Conventions
 
 - [[Naming-Conventions]] — the file-naming contract (and why the build does not enforce it) ⚠️
 - [[Adding-a-Feature]] — checklist for a new screen or feature module
+- [[Mock-Data-Pattern]] — repository-decorator pattern for temporary manual-QA mock data
+- [[Gotchas]] — recurring, non-obvious traps worth checking before repeating them
 - [[Pagination]] — the cross-platform `Paginator` (no AndroidX Paging in this project)
 - [[Typography]] — Vazirmatn, `ss01` Persian digits vs `toPersianDigits()`
 - [[Theme]] — colors, spacing, radius, and string tokens (no hardcoded UI values)
@@ -36,8 +42,13 @@ tags: [moc]
 
 - [[Feature-Flags]] — dynamic menu, `FeatureFlag`, `FeatureManager`
 - [[History-Objection]] — اعتراض به سوابق ناموجود, and why its repository is still a stub ⚠️
+- [[Disability-Pension-Status]] — مستمری از کارافتادگی, network/domain/usecase layer done, UI not started ⚠️
+- [[Debt-Objection-Status]] — پیگیری وضعیت اعتراض به بدهی, `:feature:workshops` → `ui/objectionStatus`
+- [[Stories]] — «تازه‌ها» rail and the full-screen story viewer (front-end only, mock catalogue) ⚠️
 - [[AI-Agent]] — architecture of the AI assistant rewrite
 - [[AI-Agent-API-Contract]] — exact JSON contract the client parses
+- [[Agent-Markdown]] — the markdown every assistant answer uses, formulas, service ports
+- [[Deep-Links]] — the one feature-flag gate every link goes through
 - [[Glossary]] — Persian domain term ↔ name in code
 
 ## Reference

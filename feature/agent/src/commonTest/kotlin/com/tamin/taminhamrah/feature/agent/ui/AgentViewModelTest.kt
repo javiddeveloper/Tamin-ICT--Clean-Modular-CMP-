@@ -45,8 +45,10 @@ class FakeVoiceRecorder : com.tamin.taminhamrah.feature.agent.audio.VoiceRecorde
     override val amplitude = MutableStateFlow(0)
     override val isRecording = MutableStateFlow(false)
     override fun start(filePath: String) { isRecording.value = true }
-    override fun stop() { isRecording.value = false }
-    override fun newRecordingPath(): String = "/tmp/fake_voice.m4a"
+    var cancelled = false
+    override suspend fun stop() { isRecording.value = false }
+    override fun cancel() { cancelled = true; isRecording.value = false }
+    override fun newRecordingPath(): String = "/tmp/fake_voice.wav"
 }
 
 class FakeVoicePlayer : com.tamin.taminhamrah.feature.agent.audio.VoicePlayer {
@@ -91,8 +93,8 @@ class FakeAgentChatCacheRepository : com.tamin.taminhamrah.repository.AgentChatC
         sessions[sessionId] = sessions[sessionId]?.copy(title = title) ?: return
     }
 
-    override suspend fun updateSessionLastEntity(sessionId: String, lastEntity: String?) {
-        sessions[sessionId] = sessions[sessionId]?.copy(lastEntity = lastEntity) ?: return
+    override suspend fun updateSessionContext(sessionId: String, lastEntity: String?, state: String?, history: String?) {
+        sessions[sessionId] = sessions[sessionId]?.copy(lastEntity = lastEntity, state = state, history = history) ?: return
     }
 
     override suspend fun addMessage(message: com.tamin.taminhamrah.model.agent.AgentCachedMessageDN) {
@@ -151,6 +153,59 @@ class FakeAgentRepository : AgentRepository {
     }
 }
 
+/**
+ * Only here because [com.tamin.taminhamrah.useCases.agent.CheckChatAllowedUseCase] files the chat
+ * token away for the Developer Options token screen. Nothing in these tests reads it back.
+ */
+class FakeAgentTokenStore : com.tamin.taminhamrah.repository.TokenStoreManager {
+    private val tokens = mutableMapOf<com.tamin.taminhamrah.model.auth.TokenSlot, String?>()
+    private val tokenValid = MutableStateFlow(false)
+    private val authProcessing = MutableStateFlow(false)
+    private val activeSlot = MutableStateFlow(com.tamin.taminhamrah.model.auth.TokenSlot.USER)
+
+    override fun saveToken(token: String?) = Unit
+    override fun getToken(): String? = null
+    override fun saveRefreshToken(refreshToken: String?) = Unit
+    override fun getRefreshToken(): String? = null
+    override fun getToken(slot: com.tamin.taminhamrah.model.auth.TokenSlot): String? = tokens[slot]
+    override fun saveToken(slot: com.tamin.taminhamrah.model.auth.TokenSlot, token: String?) {
+        tokens[slot] = token
+    }
+
+    override fun getRefreshToken(slot: com.tamin.taminhamrah.model.auth.TokenSlot): String? = null
+    override fun saveRefreshToken(
+        slot: com.tamin.taminhamrah.model.auth.TokenSlot,
+        refreshToken: String?,
+    ) = Unit
+
+    override fun getActiveSlot() = activeSlot.value
+    override fun activeSlotFlow() = activeSlot
+    override suspend fun setActiveSlot(slot: com.tamin.taminhamrah.model.auth.TokenSlot) {
+        activeSlot.value = slot
+    }
+
+    override fun saveUserId(userId: String?) = Unit
+    override fun getUserId(): String? = null
+    override fun saveUserType(userType: String?) = Unit
+    override fun getUserType(): String? = null
+    override fun saveCodeVerifier(codeVerifier: String?) = Unit
+    override fun getCodeVerifier(): String? = null
+    override fun tokenValidFlow() = tokenValid
+    override suspend fun setTokenValid(isValid: Boolean) { tokenValid.value = isValid }
+    override fun isAuthProcessingFlow() = authProcessing
+    override fun setAuthProcessing(isProcessing: Boolean) { authProcessing.value = isProcessing }
+}
+
+/** In-memory chat permission cache. */
+class FakeAgentAccessStore : com.tamin.taminhamrah.repository.AgentAccessStore {
+    private val state = MutableStateFlow<com.tamin.taminhamrah.model.agent.AgentAccessDN?>(null)
+    override val access: kotlinx.coroutines.flow.StateFlow<com.tamin.taminhamrah.model.agent.AgentAccessDN?> = state
+    override fun save(access: com.tamin.taminhamrah.model.agent.AgentAccessDN) { state.value = access }
+    override fun updateChatToken(token: String?) { state.value = state.value?.copy(chatToken = token) }
+    override fun clearChatToken() = updateChatToken(null)
+    override fun clear() { state.value = null }
+}
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class AgentViewModelTest {
 
@@ -161,6 +216,8 @@ class AgentViewModelTest {
     private lateinit var checkChatAllowedUseCase: CheckChatAllowedUseCase
     private lateinit var sendAgentPromptUseCase: SendAgentPromptUseCase
     private lateinit var fakeCacheRepository: FakeAgentChatCacheRepository
+    private lateinit var fakeTokenStore: FakeAgentTokenStore
+    private lateinit var fakeAccessStore: FakeAgentAccessStore
 
     // A single StandardTestDispatcher shared between Dispatchers.Main (viewModelScope)
     // and the runTest scope, so advanceUntilIdle() drains ALL pending coroutines.
@@ -177,9 +234,16 @@ class AgentViewModelTest {
         actionDispatcher = AgentActionDispatcher(registry, fakeFeatureManager, json)
 
         fakeAgentRepository = FakeAgentRepository()
+        fakeTokenStore = FakeAgentTokenStore()
         fakeCacheRepository = FakeAgentChatCacheRepository()
-        checkChatAllowedUseCase = CheckChatAllowedUseCase(fakeAgentRepository)
-        sendAgentPromptUseCase = SendAgentPromptUseCase(fakeAgentRepository)
+        fakeAccessStore = FakeAgentAccessStore()
+        checkChatAllowedUseCase = CheckChatAllowedUseCase(fakeAgentRepository, fakeTokenStore, fakeAccessStore)
+        sendAgentPromptUseCase = SendAgentPromptUseCase(
+            fakeAgentRepository,
+            checkChatAllowedUseCase,
+            fakeAccessStore,
+            fakeTokenStore,
+        ) { null }
     }
 
     @AfterTest
@@ -192,6 +256,7 @@ class AgentViewModelTest {
         return AgentViewModel(
             sendAgentPromptUseCase,
             checkChatAllowedUseCase,
+            com.tamin.taminhamrah.useCases.agent.CancelAgentRequestUseCase(fakeAgentRepository),
             actionDispatcher,
             fakeFeatureManager,
             FakeVoiceRecorder(),
@@ -221,7 +286,9 @@ class AgentViewModelTest {
     @Test
     fun `CheckPermission intent updates state to allowed when repository returns success`() = runTest(testDispatcher) {
         viewModel = createViewModel()
-        fakeAgentRepository.checkChatAllowedResult = Result.success(ChatAllowedDN(canStartChat = true, chatToken = "test-token", errorMessage = null))
+        fakeAgentRepository.checkChatAllowedResult = Result.success(
+            ChatAllowedDN(canStartChat = true, chatToken = "test-token", errorMessage = null, canSendVoice = true)
+        )
 
         viewModel.sendIntent(AgentIntent.CheckPermission)
         advanceUntilIdle()
@@ -229,7 +296,9 @@ class AgentViewModelTest {
         val state = viewModel.uiState.value
         assertFalse(state.isCheckingPermission)
         assertFalse(state.isNotAllowed)
-        assertEquals("test-token", state.chatToken)
+        assertTrue(state.canSendVoice)
+        // The token lives in the shared store, where every prompt reads it.
+        assertEquals("test-token", fakeAccessStore.access.value?.chatToken)
     }
 
     @Test
@@ -244,6 +313,92 @@ class AgentViewModelTest {
         assertFalse(state.isCheckingPermission)
         assertTrue(state.isNotAllowed)
         assertEquals("You are blocked", state.notAllowedMessage)
+        assertNull(state.activeSessionId, "a refused user must not get a conversation row")
+        assertEquals(false, fakeAccessStore.access.value?.canStartChat)
+    }
+
+    @Test
+    fun `voice input stays off unless the server allows it`() = runTest(testDispatcher) {
+        viewModel = createViewModel()
+        viewModel.sendIntent(AgentIntent.CheckPermission)
+        advanceUntilIdle()
+        assertFalse(viewModel.uiState.value.canSendVoice)
+    }
+
+    @Test
+    fun `retry while offline checks the permission again`() = runTest(testDispatcher) {
+        fakeAgentRepository.checkChatAllowedResult = Result.failure(RuntimeException("offline"))
+        viewModel = createViewModel()
+        viewModel.sendIntent(AgentIntent.CheckPermission)
+        advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.isOffline)
+
+        fakeAgentRepository.checkChatAllowedResult =
+            Result.success(ChatAllowedDN(canStartChat = true, chatToken = "t", errorMessage = null))
+        viewModel.sendIntent(AgentIntent.OnRetryClick)
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isOffline)
+    }
+
+    @Test
+    fun `cancelling stops the prompt in flight and tells the server`() = runTest(testDispatcher) {
+        viewModel = createViewModel()
+        viewModel.sendIntent(AgentIntent.CheckPermission)
+        advanceUntilIdle()
+        fakeAgentRepository.sendPromptFlow = flow {
+            emit(AgentPollingState.Pending(requestId = "req-1", etaSeconds = 1))
+            kotlinx.coroutines.awaitCancellation()
+        }
+
+        viewModel.sendIntent(AgentIntent.SendTextPrompt("سلام"))
+        advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.isGenerating)
+
+        viewModel.sendIntent(AgentIntent.CancelGeneration)
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isGenerating)
+        assertTrue(fakeAgentRepository.cancelRequestCalled)
+    }
+
+    @Test
+    fun `server markdown becomes one markdown reply with its suggestions`() = runTest(testDispatcher) {
+        viewModel = createViewModel()
+        viewModel.sendIntent(AgentIntent.CheckPermission)
+        advanceUntilIdle()
+        val data = kotlinx.serialization.json.Json.parseToJsonElement(
+            """[{"item_type":"prompt_item","prompt":"بعدی"}]"""
+        )
+        fakeAgentRepository.sendPromptFlow = flowOf(
+            AgentPollingState.Done(
+                com.tamin.taminhamrah.model.agent.AgentResponseDN(
+                    sessionId = "s",
+                    lastEntity = null,
+                    entities = listOf(
+                        com.tamin.taminhamrah.model.agent.AiEntityDN(
+                            action = com.tamin.taminhamrah.model.agent.AgentActionKey.GENERAL_RESPONSE,
+                            stepNumber = 1,
+                            payload = null,
+                            data = data,
+                            message = null,
+                            itemType = com.tamin.taminhamrah.model.agent.AgentItemType.MARKDOWN,
+                            markdown = listOf("### عنوان\n\nمتن")
+                        )
+                    )
+                )
+            )
+        )
+
+        viewModel.sendIntent(AgentIntent.SendTextPrompt("سلام"))
+        advanceUntilIdle()
+
+        val reply = viewModel.uiState.value.chatItems.single { it.sender == ChatSender.Agent }
+        assertEquals(
+            com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent.Markdown("### عنوان\n\nمتن"),
+            reply.content,
+        )
+        assertEquals(listOf("بعدی"), reply.suggestedPrompts)
     }
 
     @Test

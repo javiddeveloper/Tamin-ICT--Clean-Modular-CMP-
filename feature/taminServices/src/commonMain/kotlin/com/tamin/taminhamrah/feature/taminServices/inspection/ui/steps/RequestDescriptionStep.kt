@@ -86,7 +86,7 @@ internal fun RequestDescriptionStep(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = padding.calculateTopPadding())
+                .padding(padding)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = Spacing.lg),
         ) {
@@ -144,7 +144,6 @@ internal fun RequestDescriptionStep(
             InfoBanner(message = stringResource(Res.string.inspection_request_description_info_banner))
 
             Spacer(Modifier.height(Spacing.lg))
-            Spacer(Modifier.height(padding.calculateBottomPadding()))
         }
     }
 }

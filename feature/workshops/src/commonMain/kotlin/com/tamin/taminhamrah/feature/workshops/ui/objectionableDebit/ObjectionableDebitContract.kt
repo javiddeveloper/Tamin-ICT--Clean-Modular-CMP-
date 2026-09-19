@@ -52,6 +52,7 @@ data class ObjectionableDebitUiState(
         data object FormSubmitRejected : PartialState
         data class FormUploadingChanged(val isUploading: Boolean) : PartialState
         data class FormSubmittingChanged(val isSubmitting: Boolean) : PartialState
+        data class FormConfirmVisible(val isVisible: Boolean) : PartialState
     }
 }
 
@@ -78,10 +79,17 @@ data class ObjectionFormState(
     val hasTriedSubmit: Boolean = false,
     val isUploading: Boolean = false,
     val isSubmitting: Boolean = false,
+    /**
+     * Whether the last word is being asked for.
+     *
+     * Raised only once every rule below has passed, so the dialog never appears over a form
+     * that would be refused anyway.
+     */
+    val isConfirmVisible: Boolean = false,
 ) {
     val isBusy: Boolean get() = isUploading || isSubmitting
 
-    /** Which rule is stopping the submit, or null once none is. */
+    /** Which rule is stopping to submit, or null once none is. */
     val error: StringResource?
         get() = when {
             !hasTriedSubmit -> null
@@ -122,7 +130,11 @@ sealed interface ObjectionableDebitIntent {
     ) : ObjectionableDebitIntent
 
     data class FormRemoveDocument(val index: Int) : ObjectionableDebitIntent
+
+    /** The footer button: it asks for confirmation rather than filing straight away. */
     data object FormSubmit : ObjectionableDebitIntent
+    data object FormConfirmDismissed : ObjectionableDebitIntent
+    data object FormConfirmAccepted : ObjectionableDebitIntent
     data object DismissViewer : ObjectionableDebitIntent
 }
 
