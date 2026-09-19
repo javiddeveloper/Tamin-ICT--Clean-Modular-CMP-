@@ -742,7 +742,7 @@ fun HistoryContent(
                             val span = uiState.years.span()
                             if (span != null) {
                                 HistorySpanNote(
-                                    yearCount = uiState.years.size,
+                                    careerTotal = uiState.careerTotal,
                                     firstYear = span.oldest,
                                     lastYear = span.newest,
                                     gapYears = remember(uiState.years) { uiState.years.gapYearCount() },

@@ -1,5 +1,18 @@
 package com.tamin.taminhamrah.feature.agent.ui
 
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.SolidColor
+import org.jetbrains.compose.resources.stringResource
+import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
+import com.tamin.taminhamrah.ui.theme.IconSize
+import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.Thickness
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.agent_stop_recording
+import taminx.core.core_ui.agent_delete_recording
+import taminx.core.core_ui.agent_pause
+import taminx.core.core_ui.agent_play
+import taminx.core.core_ui.agent_send
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -111,14 +124,14 @@ fun VoiceRecorderBar(
 ) {
     val taminColors = LocalTaminColors.current
     val remaining = (VOICE_MAX_DURATION_MS - state.elapsedMs).coerceAtLeast(0)
-    val waveColor = if (state.isNearLimit) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+    val waveColor = if (state.isNearLimit) taminColors.dangerText else taminColors.blueText
 
     PillContainer(modifier) {
         // Countdown
         Text(
             text = formatMillis(remaining),
             style = MaterialTheme.typography.labelLarge,
-            color = if (state.isNearLimit) MaterialTheme.colorScheme.error else taminColors.textSecondary
+            color = if (state.isNearLimit) taminColors.dangerText else taminColors.textSecondary
         )
         Spacer(Modifier.width(12.dp))
         VoiceWaveform(
@@ -131,9 +144,9 @@ fun VoiceRecorderBar(
         Spacer(Modifier.width(12.dp))
         RoundIconButton(
             icon = Icons.Default.Stop,
-            tint = Color.White,
-            background = MaterialTheme.colorScheme.error,
-            contentDescription = "توقف ضبط",
+            tint = taminColors.dangerText,
+            background = SolidColor(taminColors.dangerBg),
+            contentDescription = stringResource(Res.string.agent_stop_recording),
             onClick = onStop
         )
     }
@@ -154,17 +167,17 @@ fun VoicePreviewBar(
     PillContainer(modifier) {
         RoundIconButton(
             icon = Icons.Default.Delete,
-            tint = MaterialTheme.colorScheme.error,
-            background = MaterialTheme.colorScheme.error.copy(alpha = 0.12f),
-            contentDescription = "حذف",
+            tint = taminColors.dangerText,
+            background = SolidColor(taminColors.dangerBg),
+            contentDescription = stringResource(Res.string.agent_delete_recording),
             onClick = onDelete
         )
         Spacer(Modifier.width(8.dp))
         RoundIconButton(
             icon = if (state.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-            tint = MaterialTheme.colorScheme.primary,
-            background = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-            contentDescription = if (state.isPlaying) "توقف" else "پخش",
+            tint = taminColors.blueText,
+            background = SolidColor(taminColors.iconBgSubtle),
+            contentDescription = stringResource(if (state.isPlaying) Res.string.agent_pause else Res.string.agent_play),
             onClick = onTogglePlay
         )
         Spacer(Modifier.width(8.dp))
@@ -184,9 +197,9 @@ fun VoicePreviewBar(
         Spacer(Modifier.width(8.dp))
         RoundIconButton(
             icon = Icons.Default.ArrowUpward,
-            tint = Color.White,
-            background = MaterialTheme.colorScheme.primary,
-            contentDescription = "ارسال",
+            tint = taminColors.onGradient,
+            background = taminTopAppBarGradient(),
+            contentDescription = stringResource(Res.string.agent_send),
             onClick = onSend
         )
     }
@@ -207,33 +220,30 @@ fun VoiceChatBubble(
     modifier: Modifier = Modifier
 ) {
     val taminColors = LocalTaminColors.current
-    // User bubble is a filled primary pill (white content); agent bubble is neutral.
-    val bg = if (isUser) MaterialTheme.colorScheme.primary else taminColors.bgSurface
-    val buttonBg = if (isUser) Color.White else MaterialTheme.colorScheme.primary
-    val buttonTint = if (isUser) MaterialTheme.colorScheme.primary else Color.White
-    val activeColor = if (isUser) Color.White else MaterialTheme.colorScheme.primary
-    val inactiveColor = if (isUser) Color.White.copy(alpha = 0.4f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
-    val timeColor = if (isUser) Color.White.copy(alpha = 0.85f) else taminColors.textMuted
+    // The user's clip sits on the brand gradient like the user's text bubble; the assistant's on the
+    // app's surface card.
+    val onGradient = taminColors.onGradient
+    val background: Brush = if (isUser) taminTopAppBarGradient() else SolidColor(taminColors.bgSurface)
+    val buttonBg: Brush = if (isUser) SolidColor(onGradient) else taminTopAppBarGradient()
+    val buttonTint = if (isUser) taminColors.blueText else onGradient
+    val activeColor = if (isUser) onGradient else taminColors.blueText
+    val inactiveColor = if (isUser) onGradient.copy(alpha = 0.4f) else taminColors.chevron
+    val timeColor = if (isUser) taminColors.textHeaderSubtitle else taminColors.textMuted
+    val shape = androidx.compose.foundation.shape.RoundedCornerShape(com.tamin.taminhamrah.ui.theme.CornerRadius.xl)
 
     Row(
         modifier = modifier
-            .clip(androidx.compose.foundation.shape.RoundedCornerShape(20.dp))
-            .background(bg)
-            .then(
-                if (isUser) Modifier
-                else Modifier.border(
-                    BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)),
-                    androidx.compose.foundation.shape.RoundedCornerShape(20.dp)
-                )
-            )
-            .padding(horizontal = 10.dp, vertical = 8.dp),
+            .clip(shape)
+            .background(background)
+            .then(if (isUser) Modifier else Modifier.border(Thickness.border, taminColors.border, shape))
+            .padding(horizontal = Spacing.smPlus, vertical = Spacing.sm),
         verticalAlignment = Alignment.CenterVertically
     ) {
         RoundIconButton(
             icon = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
             tint = buttonTint,
             background = buttonBg,
-            contentDescription = if (isPlaying) "توقف" else "پخش",
+            contentDescription = stringResource(if (isPlaying) Res.string.agent_pause else Res.string.agent_play),
             onClick = onToggle
         )
         Spacer(Modifier.width(10.dp))
@@ -272,8 +282,8 @@ private fun SeekableWaveform(
     durationMs: Int,
     onSeek: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    activeColor: Color = MaterialTheme.colorScheme.primary,
-    inactiveColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.20f)
+    activeColor: Color = LocalTaminColors.current.blueText,
+    inactiveColor: Color = LocalTaminColors.current.chevron
 ) {
     val progress = if (durationMs > 0) positionMs.toFloat() / durationMs else 0f
     Box(
@@ -299,17 +309,16 @@ private fun PillContainer(
     modifier: Modifier = Modifier,
     content: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit
 ) {
+    // Same box as the text input it replaces while recording.
     val taminColors = LocalTaminColors.current
+    val shape = androidx.compose.foundation.shape.RoundedCornerShape(com.tamin.taminhamrah.ui.theme.CornerRadius.lg)
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(androidx.compose.foundation.shape.RoundedCornerShape(32.dp))
+            .clip(shape)
             .background(taminColors.bgSurface)
-            .border(
-                BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
-                androidx.compose.foundation.shape.RoundedCornerShape(32.dp)
-            )
-            .padding(horizontal = 12.dp, vertical = 10.dp),
+            .border(Thickness.border, taminColors.border, shape)
+            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start,
         content = content
@@ -320,18 +329,18 @@ private fun PillContainer(
 private fun RoundIconButton(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     tint: Color,
-    background: Color,
+    background: Brush,
     contentDescription: String,
     onClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
-            .size(40.dp)
-            .clip(CircleShape)
+            .size(IconSize.largePlus)
+            .clip(androidx.compose.foundation.shape.RoundedCornerShape(com.tamin.taminhamrah.ui.theme.CornerRadius.md))
             .background(background)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Icon(icon, contentDescription = contentDescription, tint = tint, modifier = Modifier.size(20.dp))
+        Icon(icon, contentDescription = contentDescription, tint = tint, modifier = Modifier.size(IconSize.banner))
     }
 }

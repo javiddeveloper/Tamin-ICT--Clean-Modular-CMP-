@@ -142,10 +142,10 @@ ever added.
 
 A CTA uses a nullable `deepLink: String?`. 
 - If `deepLink` is null, no button is shown.
-- If it's an internal route (e.g., `tamin://feature/AGENT`), the host delegates it to standard Compose Navigation.
-- If it's an external URL (`http(s)://...`), the host resolves it using the app's cross-platform `openUrl` mechanism.
-- If a deep link is malformed or unrecognized, the navigation handles it gracefully (fails silently) without crashing.
-- Feature Stories is unaware of how the link resolves and delegates it upward to prevent feature module coupling.
+- Links use the same format as the assistant's buttons: `@key` for a service (keys in `DeepLinkKey`, e.g. `@agent`, `@pensioner_pay_roll`) or `https://…` for a page. `tamin://feature/FLAG_NAME` is still accepted for older content.
+- A link the parser rejects shows **no button** (`StoryUiMapper`).
+- Tapping hands the link to `LocalDeepLinkHandler` with `DeepLinkSource.APP_CONTENT`; `ResolveDeepLinkUseCase` checks the service's **feature flag** at that moment. A disabled service shows its message and the story stays open; only a link that opens something closes the viewer, so back lands on home.
+- Stories never import another feature. Rules and gate: [[Deep-Links]].
 
 ### Tap vs. hold — three traps, all already sprung
 

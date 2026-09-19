@@ -99,6 +99,10 @@ class FakePensionSurvivorPersonalRepository : PersonalRepository {
         error("Not needed in these tests")
     }
 
+    override fun getInsuredRegistrationDocList(personalId: String): Flow<List<InsuredDocDN>> = flow {
+        error("Not needed in these tests")
+    }
+
     override fun getRequestSummary(requestId: String): Flow<NewInsuredSummaryDN?> = flow {
         emit(null)
     }

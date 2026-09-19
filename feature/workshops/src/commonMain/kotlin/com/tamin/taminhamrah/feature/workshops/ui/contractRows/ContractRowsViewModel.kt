@@ -68,6 +68,7 @@ class ContractRowsViewModel(
 
         ContractRowsIntent.ApplyPicker -> applyPicker()
         ContractRowsIntent.ClearPicker -> clearPicker()
+        ContractRowsIntent.LoadMoreMyWorkshops -> loadMoreMyWorkshops()
     }
 
     /**
@@ -184,28 +185,46 @@ class ContractRowsViewModel(
         }
         emit(PartialState.WorkshopIdErrorChanged(isVisible = false))
         emit(PartialState.BranchCodeErrorChanged(isVisible = false))
-        if (state.myWorkshops.isNotEmpty()) return@flow
+        if (state.myWorkshops.items.isNotEmpty()) return@flow
+        emitAll(loadMyWorkshops(page = 0))
+    }
 
-        val workshops = getMyWorkshops(WorkshopListQuery(page = 0))
+    private fun loadMoreMyWorkshops(): Flow<PartialState> {
+        val workshops = uiState.value.myWorkshops
+        if (!workshops.canLoadMore) return flow { }
+        return loadMyWorkshops(page = workshops.nextPage)
+    }
+
+    /** One page of کارگاه‌های شما, folded into what the sheet already lists. */
+    private fun loadMyWorkshops(page: Int): Flow<PartialState> = flow {
+        if (page > 0) emit(PartialState.MyWorkshopsLoadingMore)
+        val result = getMyWorkshops(WorkshopListQuery(page = page))
+        val workshops = uiState.value.myWorkshops.loaded(result, isFirstPage = page == 0) {
+            it.toPresentation()
+        }
         emit(
             PartialState.MyWorkshopsLoaded(
-                workshops.items
-                    .map { it.toPresentation() }
-                    // One workshop reaches this list once per agreement it holds, so the same
-                    // کارگاه arrives two or three times — seen on device, where «دبستان غیر دولتي
-                    // کارن» was offered twice. The paged list this comes from dedupes rows for the
-                    // same reason; here the rows are mapped straight through, so it is done here.
-                    // Keyed on the identity the pick actually uses, not on the whole card.
-                    .distinctBy { it.workshopId to it.branchCode }
-                    .toImmutableList(),
-                total = workshops.total,
+                // One workshop reaches this list once per agreement it holds, so the same کارگاه
+                // arrives two or three times — seen on device, where «دبستان غیر دولتي کارن» was
+                // offered twice. Keyed on the identity the pick actually uses, not on the whole
+                // card, which is also what the sheet keys its rows on.
+                workshops.copy(
+                    items = workshops.items
+                        .distinctBy { it.workshopId to it.branchCode }
+                        .toImmutableList(),
+                ),
             )
         )
     }.catch {
         // کارگاه‌های شما is a convenience above two fields that already work. Failing to fetch it
-        // must not put an error on the list the user has not asked for yet, so it is swallowed and
-        // the section simply does not appear.
-        emit(PartialState.MyWorkshopsLoaded(uiState.value.myWorkshops, uiState.value.myWorkshopsTotal))
+        // must not put an error on the list the user has not asked for yet, so it is swallowed:
+        // the section keeps what it has, or does not appear. Paging stops with it, so a failing
+        // page is not asked for again on every scroll.
+        emit(
+            PartialState.MyWorkshopsLoaded(
+                uiState.value.myWorkshops.copy(isLoadingMore = false, hasMore = false),
+            )
+        )
     }
 
     /**
@@ -298,10 +317,10 @@ class ContractRowsViewModel(
         is PartialState.AutoSwitchedTab ->
             currentState.copy(tab = partialState.tab, didAutoSwitchTab = true)
 
-        is PartialState.MyWorkshopsLoaded -> currentState.copy(
-            myWorkshops = partialState.workshops,
-            myWorkshopsTotal = partialState.total,
-        )
+        PartialState.MyWorkshopsLoadingMore ->
+            currentState.copy(myWorkshops = currentState.myWorkshops.loadingMore())
+
+        is PartialState.MyWorkshopsLoaded -> currentState.copy(myWorkshops = partialState.workshops)
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)

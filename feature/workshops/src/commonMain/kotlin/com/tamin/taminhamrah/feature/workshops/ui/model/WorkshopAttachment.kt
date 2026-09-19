@@ -18,7 +18,11 @@ data class WorkshopAttachment(
     val type: WorkshopDocumentType,
     /** Whole kilobytes, in Persian digits — what the upload box prints beside the name. */
     val size: String,
-)
+) {
+    /** An image of [byteCount] bytes, sized the way the upload box prints it. */
+    constructor(guid: String, type: WorkshopDocumentType, byteCount: Int) :
+        this(guid = guid, type = type, size = byteCount.asKilobytes())
+}
 
 /**
  * Puts a picked image on the server and names what came back.
@@ -52,8 +56,42 @@ class WorkshopAttachmentUploader(
             "Unknown document type '$typeCode'"
         }
         val guid = uploadImage(UploadImageRequestDN(fileName = fileName, bytes = bytes))
-        return WorkshopAttachment(guid = guid, type = type, size = bytes.size.asKilobytes())
+        return WorkshopAttachment(guid = guid, type = type, byteCount = bytes.size)
     }
+}
+
+/**
+ * Reads back an image the service already holds, as the [WorkshopAttachment] an upload of it
+ * would have produced.
+ *
+ * The counterpart of [WorkshopAttachmentUploader] for a form re-opened on documents already on
+ * file: the same `upload-image` store, read by the guid each document was filed under.
+ */
+class WorkshopAttachmentDownloader(
+    /**
+     * The image's raw base64 payload for a guid, as the service returns it.
+     *
+     * A function rather than the use case itself, for the same reason the uploader takes one.
+     */
+    private val downloadImage: suspend (guid: String) -> String,
+) {
+
+    /** @throws IllegalStateException if the service has no image for [guid]. */
+    suspend operator fun invoke(guid: String, type: WorkshopDocumentType): WorkshopAttachment {
+        val payload = downloadImage(guid)
+        check(payload.isNotBlank()) { "No image on file for '$guid'" }
+        return WorkshopAttachment(guid = guid, type = type, byteCount = decodedByteCount(payload))
+    }
+}
+
+/**
+ * How many bytes a base64 payload decodes to, counted rather than decoded: only the size is kept,
+ * and decoding a whole photograph on the caller's thread to learn it is wasted work.
+ */
+private fun decodedByteCount(base64: String): Int {
+    val length = base64.count { !it.isWhitespace() }
+    val padding = base64.trimEnd().takeLastWhile { it == '=' }.length
+    return length / 4 * 3 - padding
 }
 
 /**

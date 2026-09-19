@@ -539,7 +539,7 @@ class DisabilityPensionViewModelTest {
         viewModel.uiState.test {
             viewModel.sendIntent(DisabilityPensionIntent.NextStepClicked)
             val state = expectMostRecentItem()
-            
+
             assertEquals(DisabilityPensionStep.CommissionRecord, state.currentStep)
             assertFalse(state.showCommissionValidationError)
             cancelAndIgnoreRemainingEvents()
@@ -763,6 +763,11 @@ internal class FakeDisabilityPersonalRepository : PersonalRepository {
         error("not used in DisabilityPensionViewModel")
     override fun putInsuredRegistrationDocList(personalId: String, docs: List<InsuredDocDN>): Flow<String?> =
         error("not used in DisabilityPensionViewModel")
+
+    override fun getInsuredRegistrationDocList(personalId: String): Flow<List<InsuredDocDN>> {
+        error("not used in DisabilityPensionViewModel")
+    }
+
     override fun getRequestSummary(requestId: String): Flow<NewInsuredSummaryDN?> =
         error("not used in DisabilityPensionViewModel")
 }
