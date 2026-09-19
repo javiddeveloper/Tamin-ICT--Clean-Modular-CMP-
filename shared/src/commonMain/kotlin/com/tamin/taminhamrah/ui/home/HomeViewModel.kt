@@ -3,21 +3,16 @@ package com.tamin.taminhamrah.ui.home
 import androidx.lifecycle.viewModelScope
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.FeatureManager
-import com.tamin.taminhamrah.model.campaign.CampaignKind
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.model.common.MainServiceDN
-import com.tamin.taminhamrah.model.common.featureStatusOf
 import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.ui.home.contract.*
 import com.tamin.taminhamrah.useCases.agent.CheckChatAllowedUseCase
-import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
 import com.tamin.taminhamrah.useCases.home.GetHomeContentUseCase
 import com.tamin.taminhamrah.useCases.home.SyncHomeContentUseCase
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
-import com.tamin.taminhamrah.util.AppConfig
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
@@ -29,7 +24,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 
 class HomeViewModel(
-    private val getMainMenuUseCase: GetMainMenuUseCase,
     private val checkChatAllowedUseCase: CheckChatAllowedUseCase,
     private val featureManager: FeatureManager,
     private val getHomeContentUseCase: GetHomeContentUseCase,
@@ -40,15 +34,17 @@ class HomeViewModel(
 ) {
 
     init {
-        sendIntent(HomeIntent.LoadMenu)
         sendIntent(HomeIntent.LoadHeader)
-        // trigger background fetch for offline first and react to login state
+        // trigger background fetch for offline first and react to login state — this also covers
+        // the initial sync, since tokenValidFlow() emits once immediately on subscribe
         viewModelScope.launch {
             tokenStoreManager.tokenValidFlow()
                 .distinctUntilChanged()
                 .collectLatest {
                     try {
                         syncHomeContentUseCase()
+                    } catch (e: CancellationException) {
+                        throw e
                     } catch (e: Exception) {
                         // Ignore sync errors and fallback to cached data
                     }
@@ -56,16 +52,22 @@ class HomeViewModel(
         }
     }
 
+    /** Fire-and-forget: failures are swallowed the same way the token-driven sync above is —
+     *  [homeContentFlow] renders whatever is already cached regardless of how this call ends. */
+    private fun triggerSync() {
+        viewModelScope.launch {
+            try {
+                syncHomeContentUseCase()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // Ignore; the screen falls back to cached data via homeContentFlow().
+            }
+        }
+    }
+
     override fun handleIntent(intent: HomeIntent): Flow<HomeUiState.HomePartialState> = flow {
         when (intent) {
-            is HomeIntent.LoadMenu -> {
-                emit(HomeUiState.HomePartialState.Loading(true))
-                emitAll(
-                    getMainMenuUseCase(AppConfig.versionName, false).map { menu ->
-                        HomeUiState.HomePartialState.MenuLoaded(menu, menu.visibleCampaigns())
-                    }
-                )
-            }
             is HomeIntent.LoadHeader -> {
                 emitAll(
                     merge(homeContentFlow(), agentAvailabilityFlow())
@@ -73,6 +75,9 @@ class HomeViewModel(
             }
             is HomeIntent.LoadLastRequests -> {
                 // Deprecated: Requests are now handled by LoadHeader via GetHomeContentUseCase
+            }
+            is HomeIntent.Retry -> {
+                triggerSync()
             }
             is HomeIntent.OnServiceClick -> {
                 handleServiceClick(intent.service)
@@ -142,30 +147,16 @@ class HomeViewModel(
         }
     }
 
-    /**
-     * Read off the menu that has just arrived rather than asked of [featureManager] per campaign:
-     * `getFeatureStatus` refetches the menu on every call, so three campaigns would cost three
-     * extra round trips for an answer this list already holds.
-     */
-    private fun List<MainServiceDN>.visibleCampaigns(): ImmutableList<CampaignKind> =
-        CampaignKind.entries
-            .filter { featureStatusOf(it.flag).opensSomething }
-            .toImmutableList()
-
     override fun reduceState(
         currentState: HomeUiState,
         partialState: HomeUiState.HomePartialState
     ): HomeUiState = when (partialState) {
         is  HomeUiState.HomePartialState.Loading -> currentState.copy(isLoading = partialState.isLoading)
-        is  HomeUiState.HomePartialState.MenuLoaded -> currentState.copy(
-            isLoading = false,
-            menuItems = partialState.menuItems,
-            campaigns = partialState.campaigns
-        )
         is  HomeUiState.HomePartialState.SectionSelected -> currentState.copy(
             selectedSection = partialState.section
         )
         is  HomeUiState.HomePartialState.HomeContentLoaded -> currentState.copy(
+            isLoading = false,
             homeContent = partialState.content
         )
         is  HomeUiState.HomePartialState.AgentAvailability -> currentState.copy(

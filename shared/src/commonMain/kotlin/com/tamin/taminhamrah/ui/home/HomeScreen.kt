@@ -29,16 +29,21 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.stories.ui.rail.StoryRail
+import com.tamin.taminhamrah.mapper.campaign.toCampaignKinds
 import com.tamin.taminhamrah.mapper.campaign.toPresentation
-import com.tamin.taminhamrah.mapper.home.featuredServices
-import com.tamin.taminhamrah.mapper.home.toQuickAccessSections
+import com.tamin.taminhamrah.mapper.home.toHomeSections
+import com.tamin.taminhamrah.mapper.home.toMainServices
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
+import com.tamin.taminhamrah.model.home.CampaignDN
 import com.tamin.taminhamrah.model.home.HomeContentDN
 import com.tamin.taminhamrah.model.home.HomeServiceSection
+import com.tamin.taminhamrah.model.home.QuickAccessDN
 import com.tamin.taminhamrah.model.home.RequestDN
+import com.tamin.taminhamrah.model.home.SpecialServiceDN
 import com.tamin.taminhamrah.model.home.UserInfoDN
+import com.tamin.taminhamrah.repository.home.HomeContentPlaceholders
 import com.tamin.taminhamrah.model.userRequest.UserRequestPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
@@ -55,12 +60,14 @@ import com.tamin.taminhamrah.ui.home.contract.HomeIntent
 import com.tamin.taminhamrah.ui.home.contract.HomeUiState
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.PersianDateFormatter
+import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.error_load_menu_failed
 import taminx.core.core_ui.home_ask_agent_cd
 import taminx.core.core_ui.home_ask_agent_hint
+import taminx.core.core_ui.home_header_fallback_name
 import taminx.core.core_ui.home_suggestion_booklet
 import taminx.core.core_ui.home_suggestion_history
 import taminx.core.core_ui.home_suggestion_retirement
@@ -139,7 +146,7 @@ fun HomeScreen(
         onCampaignClick = { viewModel.sendIntent(HomeIntent.OnCampaignClick(it)) },
         onSectionSelected = { viewModel.sendIntent(HomeIntent.OnSectionSelected(it)) },
         onServiceClick = { viewModel.sendIntent(HomeIntent.OnServiceClick(it)) },
-        onRetry = { viewModel.sendIntent(HomeIntent.LoadMenu) },
+        onRetry = { viewModel.sendIntent(HomeIntent.Retry) },
         storyRail = {
             // «تازه‌ها» sits directly above the campaigns, as on the design, and is full-bleed for
             // the same reason: a row that scrolls has to be able to run a ring off the screen edge.
@@ -196,7 +203,14 @@ private fun HomeScreenContent(
             Box(modifier = Modifier.ignoreHorizontalPadding(HomeContentPadding)) {
                 Column {
                     HomeHeader(
-                        fullName = uiState.homeContent?.userInfo?.fullName,
+                        // null here means "still loading" to HomeHeader (it shows a shimmer) — that
+                        // is only true while homeContent itself hasn't arrived yet. Once it has, a
+                        // blank/unavailable name is resolved to the localized fallback text right
+                        // here rather than in core-data, which has no Compose-resources access.
+                        fullName = uiState.homeContent?.let {
+                            it.userInfo?.fullName?.takeIf { name -> name.isNotBlank() }
+                                ?: stringResource(Res.string.home_header_fallback_name)
+                        },
                         hasDarmanCoverage = uiState.homeContent?.userInfo?.hasDarmanCoverage,
                         hasActiveRelation = uiState.homeContent?.userInfo?.hasActiveRelation,
                     )
@@ -244,7 +258,7 @@ private fun HomeScreenContent(
             // column's 16dp inset would cut the peeking neighbor down from 34 to 18 and leave the
             // cards' merged shadow with a hard vertical edge 16dp in from the screen.
             CampaignCarousel(
-                campaigns = uiState.campaigns.toPresentation(),
+                campaigns = (uiState.homeContent?.campaigns?.toCampaignKinds() ?: persistentListOf()).toPresentation(),
                 onCampaignClick = onCampaignClick,
                 isLoading = uiState.isLoading,
                 modifier = Modifier
@@ -255,7 +269,7 @@ private fun HomeScreenContent(
             Spacer(modifier = Modifier.height(8.dp))
 
             HomeQuickAccessSection(
-                sections = uiState.menuItems.toQuickAccessSections(),
+                sections = uiState.homeContent?.quickAccess?.toHomeSections() ?: persistentListOf(),
                 selectedSection = uiState.selectedSection,
                 onSectionSelected = onSectionSelected,
                 onServiceClick = onServiceClick,
@@ -265,7 +279,7 @@ private fun HomeScreenContent(
             )
 
             HomeFeaturedSection(
-                services = uiState.menuItems.featuredServices(),
+                services = uiState.homeContent?.specialServices?.toMainServices() ?: persistentListOf(),
                 onServiceClick = onServiceClick,
                 isLoading = uiState.isLoading,
                 modifier = Modifier.padding(top = Spacing.md),
@@ -281,8 +295,8 @@ private fun HomeScreenContent(
                         ?.let { ms -> PersianDateFormatter.formatTimestamp(ms) } ?: it.date,
                     createByName = "",
                     statusDesc = it.status,
-                    statusCode = "",
-                    requestTypeId = 0L,
+                    statusCode = it.statusCode,
+                    requestTypeId = it.requestTypeId,
                     requestTypeTitle = it.title
                 )
             }
@@ -295,7 +309,7 @@ private fun HomeScreenContent(
             )
 
 
-            if (uiState.menuItems.isEmpty() && !uiState.isLoading) {
+            if (uiState.homeContent == null && !uiState.isLoading) {
                 Text(
                     stringResource(Res.string.error_load_menu_failed),
                     style = MaterialTheme.typography.bodyLarge,
@@ -314,9 +328,6 @@ private fun HomeScreenContent(
 
 private fun previewHomeUiState() = HomeUiState(
     isLoading = false,
-    menuItems = (HomeServiceSection.FREQUENT.members + HomeServiceSection.FEATURED.members)
-        .distinct()
-        .map { MainServiceDN(id = it.id, name = it.name, status = MenuServiceStatusDN.ACTIVE) },
     homeContent = HomeContentDN(
         userInfo = UserInfoDN(
             fullName = "سنا حقیقی",
@@ -324,23 +335,35 @@ private fun previewHomeUiState() = HomeUiState(
             hasActiveRelation = true
         ),
         stories = null,
-        campaigns = null,
-        quickAccess = null,
-        specialServices = null,
+        campaigns = HomeContentPlaceholders.campaignFlags.map { flag ->
+            CampaignDN(flag = flag, title = flag.name, bannerUrl = null, isOpenable = true)
+        },
+        quickAccess = HomeContentPlaceholders.quickAccessGroups.flatMap { (group, flags) ->
+            flags.map { flag ->
+                QuickAccessDN(flag = flag, title = flag.name, iconUrl = null, group = group, status = MenuServiceStatusDN.ACTIVE)
+            }
+        },
+        specialServices = HomeContentPlaceholders.specialServiceFlags.map { flag ->
+            SpecialServiceDN(flag = flag, title = flag.name, iconUrl = null, status = MenuServiceStatusDN.ACTIVE)
+        },
         requests = listOf(
             RequestDN(
                 id = "1048384001",
                 title = "تأییدیه پزشکی",
                 date = "۱۴۰۴/۰۳/۲۸",
                 status = "تأیید شد",
-                refCode = "1045678902"
+                refCode = "1045678902",
+                statusCode = "18",
+                requestTypeId = 1L,
             ),
             RequestDN(
                 id = "1048384002",
                 title = "استعلام سوابق",
                 date = "۱۴۰۴/۰۳/۲۵",
                 status = "در حال بررسی",
-                refCode = "1045698765"
+                refCode = "1045698765",
+                statusCode = "2",
+                requestTypeId = 2L,
             )
         )
     ),

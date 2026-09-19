@@ -73,6 +73,6 @@ fun StoryCtaDN.toEntity(): StoryCtaEntity = StoryCtaEntity(label = label, deepLi
  * retired) has nothing left to render, so it is dropped rather than surfaced with a null identity —
  * callers should use `mapNotNull` over these.
  */
-fun CampaignEntity.toDomain(): CampaignDN? = FeatureFlag.fromId(flagId)?.let { CampaignDN(it, title, bannerUrl) }
-fun QuickAccessEntity.toDomain(): QuickAccessDN? = FeatureFlag.fromId(flagId)?.let { QuickAccessDN(it, title, iconUrl) }
-fun SpecialServiceEntity.toDomain(): SpecialServiceDN? = FeatureFlag.fromId(flagId)?.let { SpecialServiceDN(it, title, iconUrl) }
+fun CampaignEntity.toDomain(): CampaignDN? = FeatureFlag.fromId(flagId)?.let { CampaignDN(it, title, bannerUrl, isOpenable) }
+fun QuickAccessEntity.toDomain(): QuickAccessDN? = FeatureFlag.fromId(flagId)?.let { QuickAccessDN(it, title, iconUrl, group, status) }
+fun SpecialServiceEntity.toDomain(): SpecialServiceDN? = FeatureFlag.fromId(flagId)?.let { SpecialServiceDN(it, title, iconUrl, status) }

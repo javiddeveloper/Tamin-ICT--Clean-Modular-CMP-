@@ -34,9 +34,11 @@ data class HomeContentDN(
     val requests: List<RequestDN>?
 )
 
-data class CampaignDN(val flag: FeatureFlag, val title: String, val bannerUrl: String?)
-data class QuickAccessDN(val flag: FeatureFlag, val title: String, val iconUrl: String?)
-data class SpecialServiceDN(val flag: FeatureFlag, val title: String, val iconUrl: String?)
+// isOpenable/status/group let the UI gate/dim exactly like the live menu does when it
+// renders from this cache instead — see step 5, "the UI actually reads this now".
+data class CampaignDN(val flag: FeatureFlag, val title: String, val bannerUrl: String?, val isOpenable: Boolean)
+data class QuickAccessDN(val flag: FeatureFlag, val title: String, val iconUrl: String?, val group: HomeQuickAccessGroup, val status: MenuServiceStatusDN?)
+data class SpecialServiceDN(val flag: FeatureFlag, val title: String, val iconUrl: String?, val status: MenuServiceStatusDN?)
 ```
 
 `HomeContentEntity` (core-database) mirrors it as **one Room row** (fixed `id = 1`,
@@ -70,8 +72,11 @@ Triggered from `HomeViewModel.init` on every `tokenStoreManager.tokenValidFlow()
 — the cache (or nothing, for a fresh install) is the fallback.
 
 Inside `HomeRepositoryImpl.syncHomeContent()`, each of the six pieces gets its own
-`async { runCatching { ... } }` and falls back to whatever's already cached
-(`currentContent?.xxx`) if its own fetch fails — one piece failing never blanks another:
+`async { safeCall { ... } }` and falls back to whatever's already cached
+(`currentContent?.xxx`) if its own fetch fails — one piece failing never blanks another.
+`safeCall` is a private helper (`try { block() } catch (e: CancellationException) { throw e }
+catch (e: Exception) { null }`) — **not** `runCatching { }`, which would also swallow
+`CancellationException` and let a torn-down scope silently finish writing a stale cache row.
 
 | Piece | Real source today |
 |---|---|
@@ -79,7 +84,7 @@ Inside `HomeRepositoryImpl.syncHomeContent()`, each of the six pieces gets its o
 | **stories** | `StoryRepository.getChannels()` (real repository; internally a bundled catalogue, see [[Stories]]) |
 | **requests** | `UserRequestRepository.refreshUserRequests()` |
 | **campaigns** | `CommonRepository.getMainMenu()` (mocked, see [[Feature-Flags]]) + `HomeContentPlaceholders.campaignFlags` |
-| **quickAccess** | same menu + `HomeContentPlaceholders.quickAccessFlags` |
+| **quickAccess** | same menu + `HomeContentPlaceholders.quickAccessGroups` (all 5 «دسترسی سریع» chip sections, not just FREQUENT) |
 | **specialServices** | same menu + `HomeContentPlaceholders.specialServiceFlags` |
 
 ## 4. The placeholder mechanism — how campaign/quickAccess/specialServices avoid hardcoding
@@ -92,38 +97,78 @@ through:
 
 ```
 HomeContentPlaceholders (core-domain)      — decides WHICH FeatureFlags are featured
-        │  campaignFlags / quickAccessFlags / specialServiceFlags
+        │  campaignFlags / quickAccessGroups (5 sections) / specialServiceFlags
         ▼
 HomeServiceMembership (core-domain)        — single source of truth for flag membership
         │  frequent / history / aid / pensioner / employer / featured
         ├──────────────► HomeServiceSection (core-ui) — same lists, home-screen section UI
-        │
+        │                (HomeQuickAccessGroup, also core-domain, tags each cached
+        │                 quick-access row by name-matching HomeServiceSection's 5
+        │                 QUICK_ACCESS-placement entries — core-domain can't reference
+        │                 core-ui's enum directly)
         ▼
-menu.titleOf(flag)  — HomeRepositoryImpl looks up the display title by flag.id
-        │             in the menu just fetched via CommonRepository.getMainMenu()
+byId[flag.id]  — HomeRepositoryImpl looks up the display title/icon/status by flag.id
+        │        in the menu just fetched via CommonRepository.getMainMenu()
         ▼
-CampaignEntity(flagId = flag.id, title = <from menu>, bannerUrl = null)
+CampaignEntity(flagId = flag.id, title = <from menu>, bannerUrl = null, isOpenable = <from featureStatusOf>)
 ```
 
 - [`HomeContentPlaceholders`](../../core/core-domain/src/commonMain/kotlin/com/tamin/taminhamrah/repository/home/HomeContentPlaceholders.kt)
-  holds **no strings** — only `FeatureFlag` lists.
+  holds **no strings** — only `FeatureFlag` lists/maps, plus `HomeQuickAccessGroup`, the
+  small enum that tags which of the 5 quick-access chip sections a cached row belongs to.
 - [`HomeServiceMembership`](../../core/core-domain/src/commonMain/kotlin/com/tamin/taminhamrah/repository/home/HomeServiceMembership.kt)
   is the one place flag-to-section membership is defined; both `HomeContentPlaceholders`
   (core-data's fetch) and `HomeServiceSection` (core-ui's rendering, see the real
   "خدمات ویژه" section = `featured = [VIEW_TITLE_JOB, OCCURRENCE, REQUEST_FOR_PREGNANCY_PAY]`)
   reference it, so they cannot drift apart.
-- `HomeRepositoryImpl.titleOf(flag)` (private extension on `List<MainServiceDN>`) is the
-  only place a menu row's `name` becomes a placeholder row's `title`.
+- `status`/`isOpenable` are read off the same menu row (`MainServiceDN.status`,
+  `featureStatusOf(flag).opensSomething`) at cache-write time, so cache-sourced rendering
+  can gate/dim exactly like the live menu path did before this existed.
+- The three `menu -> entities` builders (`buildCampaignEntities`/`buildQuickAccessEntities`/
+  `buildSpecialServiceEntities`) are `internal` top-level functions in `HomeRepositoryImpl.kt`,
+  not private lambdas inside `syncHomeContent()` — pulled out specifically so tests can call them
+  directly with a hand-built `menu` list. Going through `syncHomeContent()` itself to exercise
+  this logic doesn't work in a plain JVM unit test: it needs `AppConfig.versionName`, whose
+  Android `actual` reads a Koin-registered `Context` (`GlobalContext.get().get<Context>()`,
+  unguarded) that a plain unit test has no way to provide short of a Robolectric+Koin bootstrap.
+  Keep new `menu`-derived logic in these functions (or ones like them) rather than back inline.
 
 This is why `core-data` never imports anything from `core-ui`, and why no display copy for
-these three sections is typed as a literal anywhere in `core-data` or `core-domain`.
+these three sections — nor the header's fallback name — is typed as a literal anywhere in
+`core-data` or `core-domain`. `UserInfoDN.fullName`/`UserInfoEntity.fullName` are `String?`:
+`HomeRepositoryImpl` leaves it `null` when the identity fetch/cache genuinely has no name,
+rather than injecting a literal `core-data` can't localize (it has no Compose-resources plugin,
+so it cannot reach `Res.string.*`). `HomeScreen.kt` resolves the localized fallback
+(`Res.string.home_header_fallback_name`) at the point it builds `HomeHeader`'s `fullName` prop
+— careful to only do this once `homeContent` itself is non-null, since `HomeHeader` treats a
+`null` `fullName` as "still loading" (shows a shimmer); a blank *name* is a different state
+from *no data yet* and must not collapse into the same shimmer.
 
-## 5. Consumption
+## 5. Consumption — the UI actually reads this now
 
 `HomeViewModel` depends on `GetHomeContentUseCase`/`SyncHomeContentUseCase`, **not**
 `HomeRepository` directly (repository interfaces are injected into use cases only, per
 [[MVI-Pattern]] / clean-architecture layering — a ViewModel importing a repository type is
 a structural violation).
+
+`HomeScreen.kt` renders campaigns/quickAccess/specialServices **from `uiState.homeContent`**,
+via three core-ui mapper functions that reconstruct what the live-menu path used to build
+directly:
+
+- `List<CampaignDN>.toCampaignKinds()` (`mapper/campaign/CampaignMapper.kt`) — filters
+  `isOpenable`, matches each row back to a `CampaignKind` by `.flag`.
+- `List<QuickAccessDN>.toHomeSections()` (`mapper/home/HomeServiceSectionMapper.kt`) —
+  groups by `HomeQuickAccessGroup`, matched to `HomeServiceSection` by enum-entry name,
+  reconstructing a minimal `MainServiceDN` per row (only `id`/`name`/`icon`/`status` — a tap
+  only ever needs `id`, the rest of the gating is re-resolved live via `FeatureManager`).
+- `List<SpecialServiceDN>.toMainServices()` — same reconstruction, no grouping.
+
+There is no second, independent `getMainMenuUseCase()` call for these sections anymore —
+that was the original bug this section describes fixing: the sync computed and cached this
+data, but the UI rendered from a separate live menu fetch instead, so the cache was dead
+weight and the menu was fetched twice per home load. `HomeIntent.LoadMenu`/`MenuLoaded` and
+the `menuItems`/`campaigns` `HomeUiState` fields were removed along with it; the empty-state
+retry button now sends `HomeIntent.Retry`, which re-triggers `SyncHomeContentUseCase`.
 
 ## 6. How to replace campaigns / quickAccess / specialServices with a real API later
 
@@ -134,10 +179,10 @@ ViewModel/UI needs to change:
 1. Add a `XxxRemoteDataSource` call (core-network) for the new endpoint, returning a DTO
    with its own `id`/`title`/`iconUrl`/etc. straight from the wire.
 2. In `syncHomeContent()`, replace the `menu?.let { ... HomeContentPlaceholders.xxxFlags ... }`
-   block for that piece with `async { runCatching { xxxRemoteDataSource.getXxx() }.getOrNull() }`,
-   mapped to the existing `XxxEntity` shape (`flagId` becomes whatever the response's own
-   flag/id field is — or drop `flagId` and add real fields directly to the entity/DN if the
-   response carries its own display data instead of being flag-keyed).
+   block for that piece with `async { safeCall { xxxRemoteDataSource.getXxx() } }`, mapped to
+   the existing `XxxEntity` shape (`flagId` becomes whatever the response's own flag/id field
+   is — or drop `flagId` and add real fields directly to the entity/DN if the response carries
+   its own display data instead of being flag-keyed).
 3. Delete the now-unused entries from `HomeContentPlaceholders` for that piece (leave the
    other two alone if they're still mocked).
 4. `HomeContentDN`, `HomeContentEntity`, `HomeMapper`, `GetHomeContentUseCase`,

@@ -2,6 +2,8 @@ package com.tamin.taminhamrah.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
+import com.tamin.taminhamrah.repository.home.HomeQuickAccessGroup
 import kotlinx.serialization.Serializable
 
 @Entity(tableName = "home_content")
@@ -18,7 +20,7 @@ data class HomeContentEntity(
 
 @Serializable
 data class UserInfoEntity(
-    val fullName: String,
+    val fullName: String?,
     val hasDarmanCoverage: Boolean?,
     val hasActiveRelation: Boolean?
 )
@@ -74,15 +76,20 @@ data class StoryCtaEntity(
 data class CampaignEntity(
     val flagId: Int,
     val title: String,
-    val bannerUrl: String?
+    val bannerUrl: String?,
+    val isOpenable: Boolean = false
 )
 
-/** Mirrors [com.tamin.taminhamrah.model.home.QuickAccessDN]. */
+/** Mirrors [com.tamin.taminhamrah.model.home.QuickAccessDN]. Defaults exist so a row cached
+ *  before this field was added still deserializes (this list is a JSON blob column, not SQL
+ *  columns — see `TaminHamrahConverters.fromQuickAccessEntityList`). */
 @Serializable
 data class QuickAccessEntity(
     val flagId: Int,
     val title: String,
-    val iconUrl: String?
+    val iconUrl: String?,
+    val group: HomeQuickAccessGroup = HomeQuickAccessGroup.FREQUENT,
+    val status: MenuServiceStatusDN? = null
 )
 
 /** Mirrors [com.tamin.taminhamrah.model.home.SpecialServiceDN]. */
@@ -90,7 +97,8 @@ data class QuickAccessEntity(
 data class SpecialServiceEntity(
     val flagId: Int,
     val title: String,
-    val iconUrl: String?
+    val iconUrl: String?,
+    val status: MenuServiceStatusDN? = null
 )
 
 @Serializable
@@ -99,5 +107,7 @@ data class RequestEntity(
     val title: String,
     val date: String,
     val status: String,
-    val refCode: String
+    val refCode: String,
+    val statusCode: String = "",
+    val requestTypeId: Long = 0L
 )

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import com.tamin.taminhamrah.model.campaign.CampaignKind
 import com.tamin.taminhamrah.model.campaign.CampaignPR
+import com.tamin.taminhamrah.model.home.CampaignDN
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import org.jetbrains.compose.resources.stringResource
@@ -76,3 +77,14 @@ fun ImmutableList<CampaignKind>.toPresentation(): ImmutableList<CampaignPR> {
     val resolved = map { it.toPresentation() }
     return remember(resolved) { resolved.toImmutableList() }
 }
+
+/**
+ * The cached campaign rows, resolved to the [CampaignKind]s the carousel can actually show.
+ * Mirrors what the live menu path used to filter with (`featureStatusOf(flag).opensSomething`,
+ * now captured in [CampaignDN.isOpenable] at cache-write time): a campaign whose flag isn't
+ * openable, or that no longer matches a known [CampaignKind], is dropped.
+ */
+fun List<CampaignDN>.toCampaignKinds(): ImmutableList<CampaignKind> =
+    filter { it.isOpenable }
+        .mapNotNull { dn -> CampaignKind.entries.find { it.flag == dn.flag } }
+        .toImmutableList()

@@ -1,7 +1,9 @@
 package com.tamin.taminhamrah.model.home
 
 import com.tamin.taminhamrah.model.common.FeatureFlag
+import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.model.stories.StoryChannelDN
+import com.tamin.taminhamrah.repository.home.HomeQuickAccessGroup
 
 data class HomeContentDN(
     val userInfo: UserInfoDN?,
@@ -14,7 +16,10 @@ data class HomeContentDN(
 )
 
 data class UserInfoDN(
-    val fullName: String,
+    /** Null when the identity fetch/cache genuinely has no usable name — the UI layer (which has
+     *  string-resource access, unlike core-data) supplies the localized fallback text for that
+     *  case; this is distinct from "not loaded yet" (`HomeContentDN` itself being null). */
+    val fullName: String?,
     val hasDarmanCoverage: Boolean?,
     val hasActiveRelation: Boolean?
 )
@@ -30,19 +35,27 @@ data class UserInfoDN(
 data class CampaignDN(
     val flag: FeatureFlag,
     val title: String,
-    val bannerUrl: String?
+    val bannerUrl: String?,
+    /** Mirrors `FeatureStatus.opensSomething` at cache-write time — a campaign whose feature is
+     *  currently disabled server-side is still recorded (so it round-trips), but shouldn't be
+     *  rendered as tappable. */
+    val isOpenable: Boolean
 )
 
 data class QuickAccessDN(
     val flag: FeatureFlag,
     val title: String,
-    val iconUrl: String?
+    val iconUrl: String?,
+    /** Which of the 5 «دسترسی سریع» chip sections this row belongs to. */
+    val group: HomeQuickAccessGroup,
+    val status: MenuServiceStatusDN?
 )
 
 data class SpecialServiceDN(
     val flag: FeatureFlag,
     val title: String,
-    val iconUrl: String?
+    val iconUrl: String?,
+    val status: MenuServiceStatusDN?
 )
 
 data class RequestDN(
@@ -50,5 +63,7 @@ data class RequestDN(
     val title: String,
     val date: String,
     val status: String,
-    val refCode:String
+    val refCode: String,
+    val statusCode: String,
+    val requestTypeId: Long
 )

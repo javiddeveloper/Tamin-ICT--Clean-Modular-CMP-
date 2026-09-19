@@ -250,6 +250,8 @@
     <string name="home_header_title">تأمین من</string>
     <string name="home_header_support_cd">پشتیبانی</string>
     <string name="home_header_shield_cd">وضعیت حساب</string>
+    <!-- Shown once the home sync has loaded but the server returned no usable name. -->
+    <string name="home_header_fallback_name">کاربر تامین</string>
     <string name="home_ask_agent_hint">از یارا بپرسید...</string>
     <string name="home_ask_agent_cd">پرسش از دستیار هوشمند</string>
     <string name="home_chip_darman_covered">بیمهٔ درمانی · برخوردار</string>

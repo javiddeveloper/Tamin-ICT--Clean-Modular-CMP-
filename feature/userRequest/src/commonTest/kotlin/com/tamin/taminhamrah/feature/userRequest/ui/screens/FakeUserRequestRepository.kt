@@ -24,8 +24,10 @@ class FakeUserRequestRepository : UserRequestRepository {
     var userRequestsResult: List<UserRequestDN> = emptyList()
     var requestErrorsResult: List<RequestErrorDN> = emptyList()
     var lastErrorsRequestId: Long? = null
+    var lastSearch: UserRequestSearchParams? = null
 
     override fun getUserRequests(search: UserRequestSearchParams): Flow<List<UserRequestDN>> = flow {
+        lastSearch = search
         if (shouldThrowError) throw error
         emit(userRequestsResult)
     }
