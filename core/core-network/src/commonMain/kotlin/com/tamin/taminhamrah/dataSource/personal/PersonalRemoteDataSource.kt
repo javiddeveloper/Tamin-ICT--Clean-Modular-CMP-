@@ -37,5 +37,6 @@ interface PersonalRemoteDataSource {
     suspend fun saveSurvivorInfo(body: SaveSurvivorInfoRequest): String?
     suspend fun checkGirlSurvivorConditions(nationalCode: String, pensionerId: String): String?
     suspend fun putInsuredRegistrationDocList(personalId: String, body: List<InsuredDocDTO>): String?
+    suspend fun getInsuredRegistrationDocList(query: ApiQueryParamDN): List<InsuredDocDTO>
     suspend fun getRequestSummary(requestId: String): NewInsuredSummaryDTO?
 }

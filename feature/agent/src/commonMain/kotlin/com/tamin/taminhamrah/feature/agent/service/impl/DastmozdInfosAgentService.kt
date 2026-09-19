@@ -1,24 +1,57 @@
 package com.tamin.taminhamrah.feature.agent.service.impl
 
+import com.tamin.taminhamrah.feature.agent.service.base.AgentDateRange
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceParams
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceResult
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceUseCase
+import com.tamin.taminhamrah.feature.agent.service.base.AgentStrings
+import com.tamin.taminhamrah.feature.agent.service.base.ChartKind
+import com.tamin.taminhamrah.feature.agent.service.base.ChartSeries
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
-import com.tamin.taminhamrah.feature.agent.service.base.toKeyValueRows
+import com.tamin.taminhamrah.feature.agent.service.base.agentMarkdown
+import com.tamin.taminhamrah.feature.agent.service.base.dateRange
+import com.tamin.taminhamrah.feature.agent.service.impl.wage.inYears
+import com.tamin.taminhamrah.feature.agent.service.impl.wage.paidMonths
+import com.tamin.taminhamrah.feature.agent.service.impl.wage.workedDays
+import com.tamin.taminhamrah.feature.agent.service.impl.wage.year
 import com.tamin.taminhamrah.model.agent.AgentActionKey
-import com.tamin.taminhamrah.ui.toRialAmount
+import com.tamin.taminhamrah.model.history.DastmozdInfoItemDN
+import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.useCases.history.GetDastmozdInfosUseCase
-import com.tamin.taminhamrah.util.toPersianDigits
+import com.tamin.taminhamrah.util.PersianDateFormatter
+import kotlinx.coroutines.CancellationException
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.agent_empty_wage_history
+import taminx.core.core_ui.agent_error_wage_history
+import taminx.core.core_ui.agent_label_branch
+import taminx.core.core_ui.agent_label_days
+import taminx.core.core_ui.agent_label_history_type
+import taminx.core.core_ui.agent_label_history_year
+import taminx.core.core_ui.agent_label_month
+import taminx.core.core_ui.agent_label_total_days
+import taminx.core.core_ui.agent_label_total_history_days
+import taminx.core.core_ui.agent_label_wage
+import taminx.core.core_ui.agent_label_workshop
+import taminx.core.core_ui.agent_label_year
+import taminx.core.core_ui.agent_value_days
+import taminx.core.core_ui.agent_unit_day
+import taminx.core.core_ui.agent_value_rial
 
 /**
- * Dedicated handler for the "Wage History" service in the chatbot.
+ * The wage-history answers — سوابق و دستمزد — ported from the native `DastmozdInfos*` use cases.
  *
- * When AI determines that wage history should be shown to the user,
- * it returns the action [AgentActionKey.DASTMOZD_INFOS].
- * The Dispatcher finds this class and calls its execute method.
+ * | Key          | Answer |
+ * |--------------|--------|
+ * | `dastmozd_infos`, `_salary` | every paid month in the date range, year by year; the first and last year are trimmed to the range's months |
+ * | `_last`      | only the latest paid month in the range |
+ * | `_per_year`  | one row per year with the days worked |
+ * | `_sum_total` | days worked per year inside the range, the grand total, and a chart of days per year |
+ *
+ * Output is markdown: the server's title, then the data. Nothing else is added.
  */
 class DastmozdInfosAgentService(
-    private val getDastmozdInfosUseCase: GetDastmozdInfosUseCase
+    private val getDastmozdInfosUseCase: GetDastmozdInfosUseCase,
+    private val strings: AgentStrings,
 ) : AgentServiceUseCase {
 
     override val supportedKeys: List<AgentActionKey> = listOf(
@@ -29,119 +62,148 @@ class DastmozdInfosAgentService(
         AgentActionKey.DASTMOZD_INFOS_SUM_TOTAL
     )
 
-    override suspend fun execute(params: AgentServiceParams): AgentServiceResult {
-        return try {
-            // 1. Retrieve data from the project's main Use Case
-            val response = getDastmozdInfosUseCase()
-            val list = response.list
+    override suspend fun execute(params: AgentServiceParams): AgentServiceResult = try {
+        val range = params.dateRange()
+        val records = getDastmozdInfosUseCase().list.orEmpty().inYears(range)
+            .sortedBy { it.year }
 
-            // 2. Check for empty data
-            if (list.isNullOrEmpty()) {
-                return AgentServiceResult.Success(
-                    bubbles = listOf(
-                        ChatBubbleContent.Text(params.message ?: "No wage history found for you.")
-                    )
-                )
-            }
-
-            // 3. Map data to displayable chat bubbles
-            // 3. Map data to displayable chat bubbles with full formatting exactly like old_Android
-            val bubbles = mutableListOf<ChatBubbleContent>()
-
-            // Remove adding message as a separate Text bubble. We'll use it as KeyValue title.
-            val msg = params.message
-            
-            var filteredList = list
-
-            // 4. Extract filters from payload
-            val payload = params.payload
-            var startYear: Int? = null
-            var endYear: Int? = null
-
-            if (payload != null && payload is kotlinx.serialization.json.JsonObject) {
-                val filterArray = payload["filter"] as? kotlinx.serialization.json.JsonArray
-                filterArray?.forEach { element ->
-                    val filterStr = element.run { if (this is kotlinx.serialization.json.JsonPrimitive) this.content else "" }
-                    if (filterStr.startsWith("startDate:")) {
-                        val date = filterStr.removePrefix("startDate:")
-                        if (date.length >= 4) startYear = date.substring(0, 4).toIntOrNull()
-                    }
-                    if (filterStr.startsWith("endDate:")) {
-                        val date = filterStr.removePrefix("endDate:")
-                        if (date.length >= 4) endYear = date.substring(0, 4).toIntOrNull()
-                    }
-                }
-            }
-
-            // 5. Apply filters
-            if (startYear != null || endYear != null) {
-                filteredList = list.filter { info ->
-                    val year = info.hisyear?.toIntOrNull() ?: return@filter true
-                    when {
-                        startYear != null && endYear != null -> year in startYear..endYear
-                        startYear != null -> year >= startYear
-                        endYear != null -> year <= endYear
-                        else -> true
-                    }
-                }
-            }
-
-            if (filteredList.isEmpty()) {
-                return AgentServiceResult.Success(
-                    bubbles = listOf(
-                        ChatBubbleContent.Text(msg ?: "رکوردی در این بازه تاریخی یافت نشد.")
-                    )
-                )
-            }
-
-            // 6. Combine all data into ONE single KeyValue bubble (like old Android GroupButton)
-            val allDetails = mutableListOf<Pair<String, String>>()
-
-            filteredList.forEachIndexed { index, info ->
-                val year = info.hisyear ?: return@forEachIndexed
-                allDetails.add("سال سابقه" to year)
-                allDetails.add("نام کارگاه" to (info.rwshname ?: "-"))
-                allDetails.add("نوع سابقه" to (info.historytypedesc ?: "-"))
-                allDetails.add("نام شعبه" to (info.brhname ?: "-"))
-
-                // Map monthly wage details
-                info.wageDetails.forEachIndexed { index, detail ->
-                    val amount = detail.wage ?: return@forEachIndexed
-                    if (amount == "0") return@forEachIndexed
-
-                    val monthName = MONTH_NAMES.getOrNull(index) ?: return@forEachIndexed
-                    val formattedAmount = amount.toRialAmount().toPersianDigits()
-                    allDetails.add("مبلغ دستمزد $monthName" to formattedAmount)
-                }
-
-                if (index < filteredList.lastIndex) {
-                    allDetails.add("----------------" to "")
-                }
-            }
-
-            bubbles.add(
-                ChatBubbleContent.KeyValue(
-                    title = msg?.takeIf { it.isNotBlank() } ?: "اطلاعات دستمزد",
-                    items = allDetails.toKeyValueRows()
-                )
-            )
-
-            AgentServiceResult.Success(bubbles)
-
-        } catch (e: Exception) {
-            AgentServiceResult.Error(
-                message = "Error retrieving wage history: ${e.message}",
-                cause = e
-            )
+        val bubbles = when (params.requestedKey) {
+            AgentActionKey.DASTMOZD_INFOS_LAST -> lastMonth(params, records, range)
+            AgentActionKey.DASTMOZD_INFOS_PER_YEAR -> perYear(params, records)
+            AgentActionKey.DASTMOZD_INFOS_SUM_TOTAL -> sumTotal(params, records, range)
+            else -> monthly(params, records, range)
         }
+        AgentServiceResult.Success(bubbles ?: listOf(empty(params)))
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        AgentServiceResult.Error(strings.get(Res.string.agent_error_wage_history), e)
     }
 
-    private companion object {
-        /** Persian month names in order — allocated once, shared across all execute() calls. */
-        val MONTH_NAMES = listOf(
-            "فروردین", "اردیبهشت", "خرداد", "تیر",
-            "مرداد", "شهریور", "مهر", "آبان",
-            "آذر", "دی", "بهمن", "اسفند"
+    private suspend fun monthly(
+        params: AgentServiceParams,
+        records: List<DastmozdInfoItemDN>,
+        range: AgentDateRange,
+    ): List<ChatBubbleContent>? {
+        val years = records.mapNotNull { record ->
+            val year = record.year ?: return@mapNotNull null
+            record.paidMonths(range.monthsOf(year)).takeIf { it.isNotEmpty() }?.let { record to it }
+        }
+        if (years.isEmpty()) return null
+
+        val columns = listOf(
+            strings.get(Res.string.agent_label_month),
+            strings.get(Res.string.agent_label_days),
+            strings.get(Res.string.agent_label_wage),
         )
+        val markdown = agentMarkdown {
+            heading(params.message)
+            years.forEach { (record, months) ->
+                fields(recordFields(record))
+                table(columns, months.map { listOf(monthName(it.month), it.days.toString(), rial(it.wage)) })
+                rule()
+            }
+        }
+        return listOf(ChatBubbleContent.Markdown(markdown))
+    }
+
+    private suspend fun lastMonth(
+        params: AgentServiceParams,
+        records: List<DastmozdInfoItemDN>,
+        range: AgentDateRange,
+    ): List<ChatBubbleContent>? {
+        val latest = records.sortedByDescending { it.year }.firstNotNullOfOrNull { record ->
+            val year = record.year ?: return@firstNotNullOfOrNull null
+            record.paidMonths(range.monthsOf(year)).lastOrNull()?.let { record to it }
+        } ?: return null
+
+        val (record, month) = latest
+        val markdown = agentMarkdown {
+            heading(params.message)
+            fields(
+                recordFields(record) + listOf(
+                    strings.get(Res.string.agent_label_month) to monthName(month.month),
+                    strings.get(Res.string.agent_label_days) to strings.get(Res.string.agent_value_days, month.days),
+                    strings.get(Res.string.agent_label_wage) to rial(month.wage),
+                )
+            )
+        }
+        return listOf(ChatBubbleContent.Markdown(markdown))
+    }
+
+    private suspend fun perYear(
+        params: AgentServiceParams,
+        records: List<DastmozdInfoItemDN>,
+    ): List<ChatBubbleContent>? {
+        if (records.isEmpty()) return null
+        val columns = listOf(
+            strings.get(Res.string.agent_label_history_year),
+            strings.get(Res.string.agent_label_workshop),
+            strings.get(Res.string.agent_label_history_type),
+            strings.get(Res.string.agent_label_branch),
+            strings.get(Res.string.agent_label_total_days),
+        )
+        val markdown = agentMarkdown {
+            heading(params.message)
+            table(
+                columns,
+                records.map { listOf(it.hisyear, it.rwshname, it.historytypedesc, it.brhname, it.workedDays().toString()) },
+            )
+        }
+        return listOf(ChatBubbleContent.Markdown(markdown))
+    }
+
+    private suspend fun sumTotal(
+        params: AgentServiceParams,
+        records: List<DastmozdInfoItemDN>,
+        range: AgentDateRange,
+    ): List<ChatBubbleContent>? {
+        if (records.isEmpty()) return null
+        val perRecord = records.map { record -> record to record.workedDays(range.monthsOf(record.year ?: 0)) }
+        val total = perRecord.sumOf { it.second }
+        val daysLabel = strings.get(Res.string.agent_label_total_days)
+
+        val markdown = agentMarkdown {
+            heading(params.message)
+            table(
+                listOf(strings.get(Res.string.agent_label_year), strings.get(Res.string.agent_label_workshop), daysLabel),
+                perRecord.map { (record, days) -> listOf(record.hisyear, record.rwshname, days.toString()) },
+            )
+            fields(listOf(strings.get(Res.string.agent_label_total_history_days) to strings.get(Res.string.agent_value_days, total)))
+        }
+        // Days per year, one bar per year: several workshops in the same year add up. A single year
+        // is already the total above, and one lone bar carries no comparison, so it gets no chart.
+        val byYear = perRecord.groupBy { it.first.hisyear.orEmpty() }.mapValues { (_, rows) -> rows.sumOf { it.second } }
+        if (byYear.size < MIN_CHART_YEARS) return listOf(ChatBubbleContent.Markdown(markdown))
+        val chart = ChatBubbleContent.Chart(
+            title = daysLabel,
+            kind = ChartKind.BAR,
+            labels = byYear.keys.toList(),
+            series = listOf(ChartSeries(name = daysLabel, values = byYear.values.map { it.toDouble() })),
+            valueUnit = strings.get(Res.string.agent_unit_day),
+        )
+        return listOf(ChatBubbleContent.Markdown(markdown), chart)
+    }
+
+    private suspend fun recordFields(record: DastmozdInfoItemDN): List<Pair<String, String?>> = listOf(
+        strings.get(Res.string.agent_label_history_year) to record.hisyear,
+        strings.get(Res.string.agent_label_workshop) to record.rwshname,
+        strings.get(Res.string.agent_label_history_type) to record.historytypedesc,
+        strings.get(Res.string.agent_label_branch) to record.brhname,
+    )
+
+    private suspend fun empty(params: AgentServiceParams) = ChatBubbleContent.Markdown(
+        agentMarkdown {
+            heading(params.message)
+            paragraph(strings.get(Res.string.agent_empty_wage_history))
+        }
+    )
+
+    private suspend fun rial(amount: Long): String = strings.get(Res.string.agent_value_rial, amount.toPriceFormat())
+
+    private fun monthName(month: Int): String = PersianDateFormatter.monthNames.getOrElse(month - 1) { month.toString() }
+
+    private companion object {
+        const val MIN_CHART_YEARS = 2
     }
 }

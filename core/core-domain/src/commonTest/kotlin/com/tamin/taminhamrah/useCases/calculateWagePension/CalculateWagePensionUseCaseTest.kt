@@ -70,18 +70,38 @@ class CalculateWagePensionUseCaseTest {
         assertEquals(emptyList(), result.chartItems)
     }
 
+    @Test
+    fun `normalizes history duration by carrying days into months and months into years`() {
+        val result = useCase(
+            talfigh = talfigh(
+                sumHistoryYears = 3650,
+                historyYears = 10,
+                historyMonths = 13,
+                historyDays = 35,
+            ),
+            dastmozd = dastmozdWithTwoFullYears(wage = "1000"),
+        )
+
+        // 35 days → +1 month + 5 days; 13+1 months → +1 year + 2 months → 11y 2m 5d
+        assertEquals(11, result.historyYears)
+        assertEquals(2, result.historyMonths)
+        assertEquals(5, result.historyDays)
+    }
+
     private fun talfigh(
         sumHistoryYears: Int,
-        historyYears: Int
+        historyYears: Int,
+        historyMonths: Int = 4,
+        historyDays: Int = 5,
     ) = TalfighInfoDN(
         list = listOf(
             TalfighInfoItemDN(
                 months = emptyList(),
                 risuid = "0033261750",
                 historyYears = historyYears,
-                historyMonths = 4,
+                historyMonths = historyMonths,
                 sumYear = 107,
-                historyDays = 5,
+                historyDays = historyDays,
                 sumHistoryYears = sumHistoryYears,
                 id = 1,
                 hisYear = "1393"

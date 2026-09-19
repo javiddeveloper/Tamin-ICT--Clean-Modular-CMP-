@@ -41,8 +41,8 @@ class AgentChatCacheRepositoryImpl(
     override suspend fun updateSessionTitle(sessionId: String, title: String) =
         dao.updateSessionTitle(sessionId, title)
 
-    override suspend fun updateSessionLastEntity(sessionId: String, lastEntity: String?) =
-        dao.updateSessionLastEntity(sessionId, lastEntity)
+    override suspend fun updateSessionContext(sessionId: String, lastEntity: String?, state: String?, history: String?) =
+        dao.updateSessionContext(sessionId, lastEntity, state, history)
 
     // ── Messages ──────────────────────────────────────────────────────────────
 
@@ -80,7 +80,9 @@ private fun AgentSessionDN.toEntity() = AgentSessionEntity(
     createdAt = createdAt,
     lastMessageAt = lastMessageAt,
     messageCount = messageCount,
-    lastEntity = lastEntity
+    lastEntity = lastEntity,
+    agentState = state,
+    agentHistory = history,
 )
 
 private fun AgentSessionEntity.toDomain() = AgentSessionDN(
@@ -90,7 +92,9 @@ private fun AgentSessionEntity.toDomain() = AgentSessionDN(
     createdAt = createdAt,
     lastMessageAt = lastMessageAt,
     messageCount = messageCount,
-    lastEntity = lastEntity
+    lastEntity = lastEntity,
+    state = agentState,
+    history = agentHistory,
 )
 
 private fun AgentCachedMessageDN.toEntity() = AgentMessageEntity(

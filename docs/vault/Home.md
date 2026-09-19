@@ -47,6 +47,8 @@ tags: [moc]
 - [[Stories]] — «تازه‌ها» rail and the full-screen story viewer (front-end only, mock catalogue) ⚠️
 - [[AI-Agent]] — architecture of the AI assistant rewrite
 - [[AI-Agent-API-Contract]] — exact JSON contract the client parses
+- [[Agent-Markdown]] — the markdown every assistant answer uses, formulas, service ports
+- [[Deep-Links]] — the one feature-flag gate every link goes through
 - [[Glossary]] — Persian domain term ↔ name in code
 
 ## Reference

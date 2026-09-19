@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah
 
+import com.tamin.taminhamrah.deeplink.DeepLinkKey
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -7,6 +8,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
+import com.tamin.taminhamrah.deeplink.DeepLinkDispatcher
+import com.tamin.taminhamrah.deeplink.DeepLinkSource
 import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.repository.payment.PaymentReturnNotifier
 import com.tamin.taminhamrah.ui.MainApp
@@ -19,6 +22,7 @@ class MainActivity : FragmentActivity() {
     private val handleAuthDeepLinkUseCase: HandleAuthDeepLinkUseCase by inject()
     private val tokenStoreManager: TokenStoreManager by inject()
     private val paymentReturnNotifier: PaymentReturnNotifier by inject()
+    private val deepLinkDispatcher: DeepLinkDispatcher by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -49,6 +53,11 @@ class MainActivity : FragmentActivity() {
             lifecycleScope.launch { paymentReturnNotifier.notifyReturn(ticket) }
             return
         }
+        // mytamin://feature/<key>, or a native-era link naming the screen as its host.
+        if (data.host == FEATURE_HOST || DeepLinkKey.fromKey(data.host.orEmpty()) != null) {
+            deepLinkDispatcher.submit(data.toString(), DeepLinkSource.SYSTEM)
+            return
+        }
         lifecycleScope.launch {
             handleAuthDeepLinkUseCase(data.toString())
         }
@@ -56,6 +65,7 @@ class MainActivity : FragmentActivity() {
 
     private companion object {
         const val PAYMENT_CALLBACK_HOST = "payment_callback"
+        const val FEATURE_HOST = "feature"
         const val PAYMENT_TICKET_QUERY = "ticket"
     }
 }

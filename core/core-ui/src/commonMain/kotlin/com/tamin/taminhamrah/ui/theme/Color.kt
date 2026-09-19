@@ -18,6 +18,8 @@ val TaminTeal300 = Color(0xFF1FA6AD)
 // ---- Purple accent (AI assistant / featured banner) ----
 val TaminPurple900 = Color(0xFF3B1E86)
 val TaminPurple700 = Color(0xFF5B2FC4)
+/** The middle stop of the AI assistant gradient. */
+val TaminNeonBlue = Color(0xFF3F5BD9)
 val TaminPurple500 = Color(0xFF6D4BE0)
 val TaminPurple300 = Color(0xFFA78BFA)
 

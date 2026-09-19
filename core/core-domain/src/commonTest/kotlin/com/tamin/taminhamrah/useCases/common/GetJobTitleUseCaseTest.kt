@@ -44,7 +44,7 @@ class GetJobTitleUseCaseTest : BaseUseCaseTest() {
     fun `invoke should return error when repository fails`() = runTest {
         val expectedException = RuntimeException("Search Error")
         commonRepository.shouldThrowError = true
-        commonRepository.getBeneficiaryError = expectedException
+        commonRepository.getJobTitleError = expectedException
 
         useCase.invoke(emptyList()).test {
             val actualException = awaitError()
