@@ -365,22 +365,7 @@ private fun SendCertificateRow(
 private fun PreviewPensionStatusCard() {
     PreviewRtlThemeContent {
         PensionStatusCard(
-            item = PensionInquiryPR(
-                branchCode = "5750",
-                insuranceNumber = "0043007196",
-                pensionerRisUid = "1003406938",
-                pensionerType = "بازنشستگی",
-                paymentDate = "14050530",
-                pensionerBaseDate = "13881201",
-                fullName = "سیدرحمت اله میرفضلی",
-                statusDesc = "01",
-                isActive = true,
-                sexDesc = "",
-                branchName = "یک کرج",
-                pensionEndDate = "",
-                nationalId = "6319889391",
-                paymentAmount = "0",
-            ),
+            item = PreviewPensionStatusItem(isActive = true),
             isSendingCertificate = false,
             onSendCertificateClicked = {},
             modifier = Modifier.padding(Spacing.lg),
@@ -393,25 +378,40 @@ private fun PreviewPensionStatusCard() {
 private fun PreviewPensionStatusCardInactive() {
     PreviewRtlThemeContent {
         PensionStatusCard(
-            item = PensionInquiryPR(
-                branchCode = "5750",
-                insuranceNumber = "0043007196",
-                pensionerRisUid = "1003406938",
-                pensionerType = "بازنشستگی",
-                paymentDate = "14050530",
-                pensionerBaseDate = "13881201",
-                fullName = "سیدرحمت اله میرفضلی",
-                statusDesc = "02",
-                isActive = false,
-                sexDesc = "",
-                branchName = "یک کرج",
-                pensionEndDate = "",
-                nationalId = "6319889391",
-                paymentAmount = "0",
-            ),
+            item = PreviewPensionStatusItem(isActive = false),
             isSendingCertificate = false,
             onSendCertificateClicked = {},
             modifier = Modifier.padding(Spacing.lg),
         )
     }
 }
+
+@PreviewRtlTheme
+@Composable
+private fun PreviewPensionStatusCardSending() {
+    PreviewRtlThemeContent {
+        PensionStatusCard(
+            item = PreviewPensionStatusItem(isActive = true),
+            isSendingCertificate = true,
+            onSendCertificateClicked = {},
+            modifier = Modifier.padding(Spacing.lg),
+        )
+    }
+}
+
+private fun PreviewPensionStatusItem(isActive: Boolean) = PensionInquiryPR(
+    branchCode = "5750",
+    insuranceNumber = "0043007196",
+    pensionerRisUid = "1003406938",
+    pensionerType = "بازنشستگی",
+    paymentDate = "14050530",
+    pensionerBaseDate = "13881201",
+    fullName = "سیدرحمت اله میرفضلی",
+    statusDesc = if (isActive) "01" else "02",
+    isActive = isActive,
+    sexDesc = "",
+    branchName = "یک کرج",
+    pensionEndDate = "",
+    nationalId = "6319889391",
+    paymentAmount = "0",
+)

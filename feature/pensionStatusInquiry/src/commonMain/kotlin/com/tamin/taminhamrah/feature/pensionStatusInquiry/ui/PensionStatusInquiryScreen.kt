@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -26,9 +25,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.ui.components.PensionStatusCard
+import com.tamin.taminhamrah.feature.pensionStatusInquiry.ui.components.PensionStatusListSkeleton
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.ui.contract.PensionStatusInquiryEvent
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.ui.contract.PensionStatusInquiryIntent
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.ui.contract.PensionStatusInquiryUiState
+import com.tamin.taminhamrah.model.pension.PensionInquiryPR
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
@@ -163,7 +166,11 @@ fun PensionStatusInquiryContent(
         ) {
             when {
                 state.isLoading && state.pensionList.isEmpty() -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    PensionStatusListSkeleton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(Spacing.page),
+                    )
                 }
 
                 blockingError != null -> {
@@ -211,7 +218,7 @@ fun PensionStatusInquiryContent(
         }
     }
 
-    state.successMessage?.let { message ->
+    state.successMessage?.let {
         TaminConfirmationDialog(
             title = stringResource(Res.string.pension_status_send_success_title),
             description = stringResource(Res.string.pension_status_send_success_desc),
@@ -230,3 +237,90 @@ fun PensionStatusInquiryContent(
         )
     }
 }
+
+@PreviewRtlTheme
+@Composable
+private fun PreviewPensionStatusInquiryLoaded() {
+    PreviewRtlThemeContent {
+        PensionStatusInquiryContent(
+            state = PensionStatusInquiryUiState(pensionList = PreviewPensionList),
+            onBackClicked = {},
+            onIntent = {},
+            snackbarHostState = remember { SnackbarHostState() },
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PreviewPensionStatusInquiryLoading() {
+    PreviewRtlThemeContent {
+        PensionStatusInquiryContent(
+            state = PensionStatusInquiryUiState(isLoading = true),
+            onBackClicked = {},
+            onIntent = {},
+            snackbarHostState = remember { SnackbarHostState() },
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PreviewPensionStatusInquiryEmpty() {
+    PreviewRtlThemeContent {
+        PensionStatusInquiryContent(
+            state = PensionStatusInquiryUiState(),
+            onBackClicked = {},
+            onIntent = {},
+            snackbarHostState = remember { SnackbarHostState() },
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PreviewPensionStatusInquiryError() {
+    PreviewRtlThemeContent {
+        PensionStatusInquiryContent(
+            state = PensionStatusInquiryUiState(error = "خطا در دریافت اطلاعات"),
+            onBackClicked = {},
+            onIntent = {},
+            snackbarHostState = remember { SnackbarHostState() },
+        )
+    }
+}
+
+private val PreviewPensionList = listOf(
+    PensionInquiryPR(
+        branchCode = "5750",
+        insuranceNumber = "0043007196",
+        pensionerRisUid = "1003406938",
+        pensionerType = "بازنشستگی",
+        paymentDate = "14050530",
+        pensionerBaseDate = "13881201",
+        fullName = "سیدرحمت اله میرفضلی",
+        statusDesc = "01",
+        isActive = true,
+        sexDesc = "",
+        branchName = "یک کرج",
+        pensionEndDate = "",
+        nationalId = "6319889391",
+        paymentAmount = "0",
+    ),
+    PensionInquiryPR(
+        branchCode = "0100",
+        insuranceNumber = "0043007196",
+        pensionerRisUid = "1003406939",
+        pensionerType = "ازکارافتادگی",
+        paymentDate = "14040101",
+        pensionerBaseDate = "13900101",
+        fullName = "سیدرحمت اله میرفضلی",
+        statusDesc = "02",
+        isActive = false,
+        sexDesc = "",
+        branchName = "تهران مرکزی",
+        pensionEndDate = "",
+        nationalId = "6319889391",
+        paymentAmount = "0",
+    ),
+)
