@@ -50,6 +50,32 @@
                     android:scheme="mytamin"
                     android:host="logout" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="mytamin"
+                    android:host="payment_callback" />
+            </intent-filter>
+            <!-- The native app's external links, which name the screen as the host. Same gate as below. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="mytamin" />
+                <data android:host="prescription_detail" />
+                <data android:host="workers_payment_info" />
+            </intent-filter>
+            <!-- mytamin://feature/<key>: resolved by ResolveDeepLinkUseCase, which applies the feature flag. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="mytamin"
+                    android:host="feature" />
+            </intent-filter>
         </activity>
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"

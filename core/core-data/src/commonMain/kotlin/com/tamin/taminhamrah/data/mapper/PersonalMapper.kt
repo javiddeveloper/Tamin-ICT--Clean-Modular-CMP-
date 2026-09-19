@@ -12,6 +12,7 @@ import com.tamin.taminhamrah.model.personal.DisabilityWorkDN
 import com.tamin.taminhamrah.model.personal.GirlSurvivorConditionDN
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
 import com.tamin.taminhamrah.model.personal.DisabilityDependentDN
+import com.tamin.taminhamrah.model.personal.DocumentFileDN
 import com.tamin.taminhamrah.model.personal.DocumentFileDTO
 import com.tamin.taminhamrah.model.personal.InsuredDocDN
 import com.tamin.taminhamrah.model.personal.InsuredDocDTO
@@ -95,8 +96,9 @@ fun DisabilityDependentDTO.toDomain(): DisabilityDependentDN {
         nationalId = personal?.nationalId,
         dateOfBirth = personal?.dateOfBirth,
         fatherName = personal?.fatherName,
+        genderCode = personal?.gender?.genderCode,
         genderDesc = personal?.gender?.genderDesc,
-        relation = personal?.relation,
+        tendencyCode = tendency?.tendencyCode,
         tendencyDescription = tendency?.tendencyDescription
     )
 }
@@ -146,7 +148,8 @@ fun DisabilityPersonalDTO.toDomain(): DisabilityPersonalDN {
         idCardNumber = idCardNumber,
         cityOfIssue = cityOfIssue?.description,
         dateOfBirth = dateOfBirth,
-        genderDesc = gender?.genderDesc
+        genderDesc = gender?.genderDesc,
+        genderCode = gender?.genderCode
     )
 }
 
@@ -302,6 +305,18 @@ fun InsuredDocDN.toDTO(): InsuredDocDTO {
             createdBy = documentFile.createdBy,
             id = documentFile.id,
             image = documentFile.image
+        )
+    )
+}
+
+fun InsuredDocDTO.toDomain(): InsuredDocDN {
+    return InsuredDocDN(
+        documentType = documentType ?: "",
+        id = id ?: 0,
+        documentFile = DocumentFileDN(
+            createdBy = documentFile?.createdBy ?: "",
+            id = documentFile?.id ?: "",
+            image = documentFile?.image ?: ""
         )
     )
 }

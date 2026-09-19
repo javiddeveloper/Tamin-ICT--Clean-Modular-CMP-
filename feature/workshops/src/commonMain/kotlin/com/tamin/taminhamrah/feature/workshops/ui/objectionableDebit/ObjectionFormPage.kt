@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -23,14 +25,22 @@ import com.tamin.taminhamrah.feature.workshops.ui.model.ObjectionDocumentTypes
 import com.tamin.taminhamrah.model.workshop.ObjectionKind
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
+import com.tamin.taminhamrah.ui.components.TaminFilledButton
+import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.action_cancel
+import taminx.core.core_ui.action_confirm
 import taminx.core.core_ui.obj_form_area_hint
 import taminx.core.core_ui.obj_form_area_label
 import taminx.core.core_ui.obj_form_check_confirm
 import taminx.core.core_ui.obj_form_check_deposit
+import taminx.core.core_ui.obj_form_confirm_body
+import taminx.core.core_ui.obj_form_confirm_title
 import taminx.core.core_ui.obj_form_desc_estimate
 import taminx.core.core_ui.obj_form_desc_primary_vote
 import taminx.core.core_ui.obj_form_group_debt
@@ -68,7 +78,15 @@ fun ObjectionFormPage(
     val periodToLabel = stringResource(Res.string.obj_form_period_to)
     val amountLabel = stringResource(Res.string.workshop_debt_amount)
     val notifyDateLabel = stringResource(Res.string.workshop_debt_notify_date)
-    val debtRows = remember(debt, debtNumberLabel) {
+    val debtRows = remember(
+        debt,
+        debtNumberLabel,
+        agreementRowLabel,
+        periodFromLabel,
+        periodToLabel,
+        amountLabel,
+        notifyDateLabel,
+    ) {
         persistentListOf(
             WorkshopReviewRow(debtNumberLabel, debt.debitNumberLabel),
             WorkshopReviewRow(agreementRowLabel, debt.agreementRow),
@@ -79,10 +97,42 @@ fun ObjectionFormPage(
         )
     }
 
+    val safeWorkshopName = remember(workshopName) {
+        workshopName.takeIf { it.isNotBlank() }
+    }
+
+    val onToggleDebt = remember(form.isDebtOpen, onIntent) {
+        { onIntent(ObjectionableDebitIntent.FormDebtOpenChanged(!form.isDebtOpen)) }
+    }
+    val onAddDocument = remember(onIntent) {
+        { fileName: String, bytes: ByteArray, typeCode: String ->
+            onIntent(ObjectionableDebitIntent.FormAddDocument(fileName, bytes, typeCode))
+        }
+    }
+    val onRemoveDocument = remember(onIntent) {
+        { index: Int ->
+            onIntent(ObjectionableDebitIntent.FormRemoveDocument(index))
+        }
+    }
+    val onDescriptionChange = remember(onIntent) {
+        { text: String ->
+            onIntent(ObjectionableDebitIntent.FormDescriptionChanged(text))
+        }
+    }
+    val onToggleDeposit = remember(form.isDeposit, onIntent) {
+        { onIntent(ObjectionableDebitIntent.FormDepositChanged(!form.isDeposit)) }
+    }
+    val onToggleConfirmed = remember(form.isConfirmed, onIntent) {
+        { onIntent(ObjectionableDebitIntent.FormConfirmedChanged(!form.isConfirmed)) }
+    }
+    val onSubmit = remember(onIntent) {
+        { onIntent(ObjectionableDebitIntent.FormSubmit) }
+    }
+
     WorkshopScreenShell(
         title = stringResource(Res.string.obj_form_title),
         onBack = onBack,
-        workshopName = workshopName.takeIf { it.isNotBlank() },
+        workshopName = safeWorkshopName,
         workshopCode = workshopCode,
         modifier = modifier,
     ) {
@@ -110,23 +160,15 @@ fun ObjectionFormPage(
                 title = stringResource(Res.string.obj_form_group_debt),
                 rows = debtRows,
                 isOpen = form.isDebtOpen,
-                onToggle = {
-                    onIntent(ObjectionableDebitIntent.FormDebtOpenChanged(!form.isDebtOpen))
-                },
+                onToggle = onToggleDebt,
             )
 
             WorkshopDocumentsPanel(
                 attachments = form.attachments,
                 types = ObjectionDocumentTypes,
                 capacity = OBJECTION_MAX_DOCUMENTS,
-                onAdd = { fileName, bytes, typeCode ->
-                    onIntent(
-                        ObjectionableDebitIntent.FormAddDocument(fileName, bytes, typeCode),
-                    )
-                },
-                onRemove = { index ->
-                    onIntent(ObjectionableDebitIntent.FormRemoveDocument(index))
-                },
+                onAdd = onAddDocument,
+                onRemove = onRemoveDocument,
                 isUploading = form.isUploading,
                 isError = form.isDocumentsError,
             )
@@ -134,25 +176,19 @@ fun ObjectionFormPage(
             WorkshopFormTextArea(
                 label = stringResource(Res.string.obj_form_area_label),
                 value = form.description,
-                onValueChange = {
-                    onIntent(ObjectionableDebitIntent.FormDescriptionChanged(it))
-                },
+                onValueChange = onDescriptionChange,
                 placeholder = stringResource(Res.string.obj_form_area_hint),
             )
 
             WorkshopFormCheck(
                 label = stringResource(Res.string.obj_form_check_deposit),
                 isChecked = form.isDeposit,
-                onToggle = {
-                    onIntent(ObjectionableDebitIntent.FormDepositChanged(!form.isDeposit))
-                },
+                onToggle = onToggleDeposit,
             )
             WorkshopFormCheck(
                 label = stringResource(Res.string.obj_form_check_confirm),
                 isChecked = form.isConfirmed,
-                onToggle = {
-                    onIntent(ObjectionableDebitIntent.FormConfirmedChanged(!form.isConfirmed))
-                },
+                onToggle = onToggleConfirmed,
             )
 
             // The missing-document rule is drawn round the panel; this is what is left.
@@ -163,10 +199,53 @@ fun ObjectionFormPage(
 
         WorkshopFormFooter(
             nextLabel = stringResource(Res.string.obj_form_submit),
-            onNext = { onIntent(ObjectionableDebitIntent.FormSubmit) },
+            onNext = onSubmit,
             isBusy = form.isBusy,
         )
     }
+
+    if (form.isConfirmVisible) {
+        ObjectionSubmitConfirmDialog(onIntent = onIntent)
+    }
+}
+
+/**
+ * The last word before the objection is filed.
+ *
+ * The old app put the same modal between the تعهدنامه tick and the API call, and its text is
+ * kept verbatim: it is not an "are you sure" but the undertaking the employer is agreeing to —
+ * that the branch reviews the documents, that the right to a هیات بدوی hearing survives a
+ * rejection, and that the answer comes within a week through پیگیری وضعیت اعتراض.
+ */
+@Composable
+private fun ObjectionSubmitConfirmDialog(
+    onIntent: (ObjectionableDebitIntent) -> Unit,
+) {
+    val colors = LocalTaminColors.current
+    val onConfirm = remember(onIntent) { { onIntent(ObjectionableDebitIntent.FormConfirmAccepted) } }
+    val onDismiss = remember(onIntent) { { onIntent(ObjectionableDebitIntent.FormConfirmDismissed) } }
+    TaminConfirmationDialog(
+        title = stringResource(Res.string.obj_form_confirm_title),
+        description = stringResource(Res.string.obj_form_confirm_body),
+        confirmButton = {
+            TaminFilledButton(
+                text = stringResource(Res.string.action_confirm),
+                onClick = onConfirm,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
+        dismissButton = {
+            TaminOutlinedButton(
+                text = stringResource(Res.string.action_cancel),
+                onClick = onDismiss,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
+        onDismissRequest = onDismiss,
+        icon = Icons.Outlined.Info,
+        iconTint = colors.orangeText,
+        iconBackground = colors.orangeBg,
+    )
 }
 
 @PreviewRtlTheme

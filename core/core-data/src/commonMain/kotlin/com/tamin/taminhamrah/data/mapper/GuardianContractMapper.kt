@@ -10,6 +10,7 @@ import com.tamin.taminhamrah.model.contracts.InsurancePaymentDTO
 import com.tamin.taminhamrah.model.contracts.OptionalContractByGuardianRequestDTO
 import com.tamin.taminhamrah.model.contracts.OptionalMakeContractRequestDN
 import com.tamin.taminhamrah.model.contracts.OptionalMakeContractRequestDTO
+import com.tamin.taminhamrah.model.contracts.UpdateOptionalContractByGuardianRequestDTO
 
 internal fun GuardianShipDetailDN.toDto(): GuardianShipDetailDTO =
     GuardianShipDetailDTO(
@@ -40,6 +41,11 @@ internal fun FreelanceContractByGuardianParams.toDto(): ContractByGuardianReques
 internal fun OptionalContractByGuardianParams.toDto(): OptionalContractByGuardianRequestDTO =
     OptionalContractByGuardianRequestDTO(
         contract = contract.toDto(),
+        protector = protector.toDto(),
+    )
+
+internal fun OptionalContractByGuardianParams.toUpdateDto(): UpdateOptionalContractByGuardianRequestDTO =
+    UpdateOptionalContractByGuardianRequestDTO(
         protector = protector.toDto(),
     )
 

@@ -4,7 +4,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
-import com.tamin.taminhamrah.feature.pensionInquiry.ui.calculatePension.CalculatePensionScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.prescription.PrescriptionScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.deservedTreatment.DeservedTreatmentScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.payroll.PayRollScreen
@@ -12,9 +11,6 @@ import com.tamin.taminhamrah.feature.pensionInquiry.ui.edict.EdictScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.issuanceCertificate.IssuanceCertificateScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.ui.disabilityPension.DisabilityPensionScreen
 import kotlinx.serialization.Serializable
-
-@Serializable
-data object CalculatePensionRoute
 
 @Serializable
 data object PrescriptionRoute
@@ -33,10 +29,6 @@ data object IssuanceCertificateRoute
 
 @Serializable
 data object DisabilityPensionRoute
-
-fun NavController.navigateToCalculatePension(navOptions: NavOptions? = null) {
-    navigate(CalculatePensionRoute, navOptions)
-}
 
 fun NavController.navigateToPrescription(navOptions: NavOptions? = null) {
     navigate(PrescriptionRoute, navOptions)
@@ -60,12 +52,6 @@ fun NavController.navigateToIssuanceCertificate(navOptions: NavOptions? = null) 
 
 fun NavController.navigateToDisabilityPension(navOptions: NavOptions? = null) {
     navigate(DisabilityPensionRoute, navOptions)
-}
-
-fun NavGraphBuilder.calculatePensionScreen(onBack: () -> Unit) {
-    composableWithFadeTransitions<CalculatePensionRoute> {
-        CalculatePensionScreen(onBack = onBack)
-    }
 }
 
 fun NavGraphBuilder.prescriptionScreen(onBack: () -> Unit) {
@@ -98,8 +84,11 @@ fun NavGraphBuilder.issuanceCertificateScreen(onBack: () -> Unit, onGoHome: () -
     }
 }
 
-fun NavGraphBuilder.disabilityPensionScreen(onBack: () -> Unit) {
+fun NavGraphBuilder.disabilityPensionScreen(
+    onBack: () -> Unit,
+    onNavigateToAddDependent: () -> Unit = {},
+) {
     composableWithFadeTransitions<DisabilityPensionRoute> {
-        DisabilityPensionScreen(onBack = onBack)
+        DisabilityPensionScreen(onBack = onBack, onNavigateToAddDependent = onNavigateToAddDependent)
     }
 }

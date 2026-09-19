@@ -1,15 +1,27 @@
 package com.tamin.taminhamrah.mapper.workshop
 
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeContractDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeWorkshopDN
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtPR
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoDN
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoPR
+import com.tamin.taminhamrah.model.workshop.ContractRowPR
 import com.tamin.taminhamrah.model.workshop.DebitReasonDN
 import com.tamin.taminhamrah.model.workshop.DebitReasonPR
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopDN
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopPR
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
+import com.tamin.taminhamrah.model.workshop.EmployerContactInfoDN
+import com.tamin.taminhamrah.model.workshop.EmployerContactInfoPR
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeContractPR
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativePR
+import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopPR
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetPR
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtPR
+import com.tamin.taminhamrah.model.workshop.WorkshopContractDN
 import com.tamin.taminhamrah.model.workshop.WorkshopActivityStatus
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryPR
@@ -20,9 +32,17 @@ import com.tamin.taminhamrah.model.workshop.WorkshopMemberPR
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDN
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberPR
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
+import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDN
+import com.tamin.taminhamrah.model.workshop.WorkshopContractRowPR
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDN
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderPR
+import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDN
+import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractPR
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionPR
+import com.tamin.taminhamrah.model.workshop.SmsMessageDN
+import com.tamin.taminhamrah.model.workshop.SmsMessagePR
 import com.tamin.taminhamrah.ui.orDash
 import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.util.toPersianDigits
@@ -44,6 +64,10 @@ fun EmployerAgreementDN.toPresentation(): WorkshopPR = with(workshop) {
     WorkshopPR(
         workshopId = workshopId,
         branchCode = branchCode,
+        // Raw, like the two identity fields above: these travel into a request body, where a
+        // dash or a Persian digit would be wrong.
+        characterCode = characterCode,
+        legalNationalId = legalNationalId,
         hasIdentity = hasIdentity,
         name = name.orDash(),
         codeLabel = workshopId.orDashDigits(),
@@ -58,6 +82,88 @@ fun EmployerAgreementDN.toPresentation(): WorkshopPR = with(workshop) {
         approveDate = approveDate.orDashDate(),
     )
 }
+
+// ------------------------------------------------------------------------ ردیف‌های پیمان
+
+/**
+ * A تعهدنامه‌دار row: seven fields, from the agreement envelope and the workshop nested in it.
+ *
+ * ردیف پیمان comes from the agreement's own `pymseq`, *not* from the workshop's `contractRow` —
+ * the two are different columns and the نام کارگاه on this card belongs to the workshop while the
+ * ردیف belongs to the agreement.
+ */
+fun EmployerAgreementDN.toContractRow(): ContractRowPR = ContractRowPR(
+    workshopId = workshop.workshopId,
+    branchCode = workshop.branchCode,
+    name = workshop.name.orDash(),
+    rowLabel = contractRow.orDashDigits(),
+    workshopCodeLabel = workshop.workshopId.orDashDigits(),
+    commitmentDate = startDate.orDashDate(),
+    mobile = mobile.orDashDigits(),
+    email = email.orDash(),
+    // Blank, not dashed: the card drops the tile entirely rather than drawing a dash across it.
+    address = workshop.address,
+)
+
+/** A بدون تعهدنامه row: the same card with the contact block absent, because the data is. */
+fun WorkshopContractDN.toContractRow(): ContractRowPR = ContractRowPR(
+    workshopId = workshopId,
+    branchCode = branchCode,
+    name = workshopName.orDash(),
+    rowLabel = contractRow.orDashDigits(),
+    workshopCodeLabel = workshopId.orDashDigits(),
+    commitmentDate = startDate.orDashDate(),
+)
+
+// ---------------------------------------------- خدمات غیرحضوری کارفرما (employerEservicesAgreement)
+
+fun EmployerContactInfoDN.toPresentation(): EmployerContactInfoPR = EmployerContactInfoPR(
+    fullName = fullName.orDash(),
+    nationalCode = nationalCode.orDashDigits(),
+    currentMobile = currentMobile.orDashDigits(),
+    currentEmail = currentEmail.orDash(),
+)
+
+fun WorkshopWithoutContractDN.toPresentation(): WorkshopWithoutContractPR = WorkshopWithoutContractPR(
+    workshopId = workshopId,
+    branchCode = branchCode,
+    hasIdentity = hasIdentity,
+    name = name.orDash(),
+    codeLabel = workshopId.orDashDigits(),
+    nationalId = nationalId.orDashDigits(),
+    postalCode = postalCode.orDashDigits(),
+    tel = tel.orDashDigits(),
+    address = address.orDash(),
+    branchOfficeName = branchOfficeName.orDash(),
+)
+
+fun WorkshopContractRowDN.toPresentation(): WorkshopContractRowPR = WorkshopContractRowPR(
+    contractRow = contractRow.orDashDigits(),
+    fullName = fullName.orDash(),
+    nationalCode = nationalCode.orDashDigits(),
+    mobile = mobile.orDashDigits(),
+    email = email.orDash(),
+    tel = tel.orDashDigits(),
+    postalCode = postalCode.orDashDigits(),
+    startDate = startDate.orDashDate(),
+    endDate = endDate.orDashDate(),
+    workshopName = workshop.name.orDash(),
+    workshopCodeLabel = workshop.workshopId.orDashDigits(),
+)
+
+fun EmployerAgreementByWorkshopDN.toPresentation(): EmployerAgreementByWorkshopPR =
+    EmployerAgreementByWorkshopPR(
+        workshopId = workshop.workshopId,
+        branchCode = workshop.branchCode,
+        paymentSequence = paymentSequence.orDashDigits(),
+        workshopName = workshop.name.orDash(),
+        workshopCodeLabel = workshop.workshopId.orDashDigits(),
+        address = workshop.address.orDash(),
+        startDate = startDate.orDashDate(),
+        commitmentDate = commitmentDate.orDashDate(),
+        mobile = mobile.orDashDigits(),
+        email = email.orDash(),
+    )
 
 // -------------------------------------------------------------------------- برگ پرداخت‌ها
 
@@ -84,7 +190,8 @@ fun DebitReasonDN.toPresentation(): DebitReasonPR = DebitReasonPR(
 fun WorkShopDebtDN.toPresentation(): WorkShopDebtPR = WorkShopDebtPR(
     debitNumber = debitNumber,
     debitNumberLabel = debitNumber.orDashDigits(),
-    agreementRow = agreementRow.orDashDigits(),
+    agreementRow = agreementRow,
+    agreementRowLabel = agreementRow.orDashDigits(),
     notifyDate = orderRecipeDate.orDashDate(),
     customerCode = customerCode.orDashDigits(),
     amount = debitAmount.orDashAmount(),
@@ -102,9 +209,9 @@ fun WorkshopDemandDocDN.toPresentation(): WorkshopDemandDocPR = WorkshopDemandDo
     docNumber = docNumber,
     docNumberLabel = docNumber.orDashDigits(),
     docDate = docDate.orDashDate(),
-    docType = docTypeDescription.orDash(),
-    step = debitStepDescription.orDash(),
-    state = debitStateDescription.orDash(),
+    docType = docTypeDescription.orDashProse(),
+    step = debitStepDescription.orDashProse(),
+    state = debitStateDescription.orDashProse(),
     isViewable = isViewable,
 )
 
@@ -176,7 +283,10 @@ fun WorkshopMemberDN.toPresentation(): WorkshopMemberPR = WorkshopMemberPR(
     relationType = relationTypeDescription.orDash(),
     leavingWorkStatus = leavingWorkStatus.orDash(),
     leavingWorkDate = leavingWorkDate.orDashDate(),
-    isEmployed = leavingWorkDate == null,
+    // Blank, not null: the service sends `leavingWorkDate` nullable but the domain model
+    // flattens it with `orEmpty()`, so a null-check here is always false and marked every
+    // member as having left.
+    isEmployed = leavingWorkDate.isBlank(),
 )
 
 fun WorkshopStackHolderDN.toPresentation(): WorkshopStackHolderPR = WorkshopStackHolderPR(
@@ -187,9 +297,49 @@ fun WorkshopStackHolderDN.toPresentation(): WorkshopStackHolderPR = WorkshopStac
     stackType = stackType.orDash(),
 )
 
+fun WorkShopObjectionDN.toPresentation(): WorkShopObjectionPR = WorkShopObjectionPR(
+    seqNo = seqNo,
+    workshopId = workshopId.orDashDigits(),
+    debitNumber = debitNumber.orDashDigits(),
+    objectionNumber = (seqNo?.toString() ?: "").orDashDigits(),
+    objectionDate = objectionDate.orDashDate(),
+    objectionDescription = objectionDescription.orDash(),
+    voteTypeDescription = voteTypeDescription.orDash(),
+    objectionType = objectionType,
+    status = status,
+)
+
+fun SmsMessageDN.toPresentation(): SmsMessagePR = SmsMessagePR(
+    id = id,
+    description = description.orDash(),
+    status = status,
+)
+
 // ------------------------------------------------------------------ formatting
 
 /** Digits the user reads are Persian; a value the service omitted is the design's dash. */
+/**
+ * A description as the reader expects to see it, or a dash.
+ *
+ * Service descriptions arrive with round brackets — «محاسبه (اعلام نشده)» — and a bracket is
+ * bidi-neutral: in a right-to-left run it is drawn with its mirror glyph, so the one the service
+ * opens with reaches the screen as a closing bracket and the value reads «محاسبه )اعلام نشده(».
+ * Swapping the pair cancels that. It is the reordering-safe half of the problem: both brackets are
+ * bidi class ON and both mirror, so each keeps the position the algorithm gives it and only the
+ * glyph changes.
+ *
+ * Stated here, at the presentation edge, so the domain keeps the service's own spelling.
+ */
+private fun String.orDashProse(): String = ifBlank { null }?.swapBrackets().orDash()
+
+private fun String.swapBrackets(): String = map { character ->
+    when (character) {
+        '(' -> ')'
+        ')' -> '('
+        else -> character
+    }
+}.joinToString("")
+
 private fun String.orDashDigits(): String = ifBlank { null }?.toPersianDigits().orDash()
 
 /** Compact Jalali (`14050131`) renders as `۱۴۰۵/۰۱/۳۱`; an absent date is a dash. */
@@ -205,3 +355,38 @@ private fun Long?.orDashTimestamp(): String = PersianDateFormatter.formatTimesta
  * zero are different answers, and the dash is the one that does not claim a figure.
  */
 private fun Long?.orDashAmount(): String = this?.let { "${it.toPriceFormat()} ریال" }.orDash()
+
+fun LegalRepresentativeWorkshopDN.toPresentation(): LegalRepresentativeWorkshopPR {
+    return LegalRepresentativeWorkshopPR(
+        workshopId = workshopId,
+        branchCode = branchCode,
+        workshopName = workshopName ?: "",
+        branchName = branchName,
+        special = special,
+        representativeCount = representativeCount,
+    )
+}
+
+fun LegalRepresentativeDN.toPresentation(contractRows: List<String> = emptyList()): LegalRepresentativePR {
+    return LegalRepresentativePR(
+        stakeId = stakeId,
+        nationalId = nationalId,
+        mobile = mobile,
+        fullName = fullName,
+        hasElectronicNotification = hasElectronicNotification,
+        hasInternetList = hasInternetList,
+        hasInsuredRegistration = hasInsuredRegistration,
+        startDateLabel = PersianDateFormatter.formatTimestamp(startDate),
+        workshopId = workshopId,
+        branchCode = branchCode,
+        special = special,
+        contractRows = contractRows,
+    )
+}
+
+fun LegalRepresentativeContractDN.toPresentation(): LegalRepresentativeContractPR {
+    return LegalRepresentativeContractPR(
+        contractRow = contractRow,
+        title = title,
+    )
+}

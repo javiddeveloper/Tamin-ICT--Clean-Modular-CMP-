@@ -2,38 +2,53 @@ package com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers
 
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.model.RegistrationDocumentTypes
+import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachment
+import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachmentDownloader
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachmentUploader
+import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopDocumentType
 import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersUiState.PartialState
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
 import com.tamin.taminhamrah.model.common.isValidIranianNationalId
 import com.tamin.taminhamrah.model.personal.DocumentFileDN
 import com.tamin.taminhamrah.model.personal.InsuredDocDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.asPdfDownload
+import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.request.FilterOperator
+import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberPR
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberQuery
+import com.tamin.taminhamrah.paging.Paginator
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.ui.digitsOnly
 import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
 import com.tamin.taminhamrah.useCases.common.GetCityUseCase
-import com.tamin.taminhamrah.useCases.common.GetJobTitleUseCase
+import com.tamin.taminhamrah.useCases.common.GetJobTitlePageUseCase
 import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
+import com.tamin.taminhamrah.useCases.personal.GetInsuredRegistrationDocListUseCase
 import com.tamin.taminhamrah.useCases.personal.PutInsuredRegistrationDocListUseCase
 import com.tamin.taminhamrah.useCases.workshops.CheckNewMemberIsNewUseCase
 import com.tamin.taminhamrah.useCases.workshops.ConfirmRecentlyAddedMemberUseCase
 import com.tamin.taminhamrah.useCases.workshops.CreateNewMemberRegistrationUseCase
 import com.tamin.taminhamrah.useCases.workshops.DeleteRecentlyAddedMemberUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetRecentlyAddedMembersUseCase
-import com.tamin.taminhamrah.util.toPersianDigits
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.transform
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.abs_doc_unknown
 import taminx.core.core_ui.abs_form_err_already_known
+import taminx.core.core_ui.error_image_duplicate
 import taminx.core.core_ui.new_member_cannot_edit
 
 /** نام نویسی غیر حضوری بیمه شده. */
@@ -44,10 +59,12 @@ class WorkshopRecentlyAddedMembersViewModel(
     private val checkNewMemberIsNew: CheckNewMemberIsNewUseCase,
     private val createNewMemberRegistration: CreateNewMemberRegistrationUseCase,
     private val uploadAttachment: WorkshopAttachmentUploader,
+    private val downloadAttachment: WorkshopAttachmentDownloader,
     private val putRegistrationDocuments: PutInsuredRegistrationDocListUseCase,
+    private val getFiledDocuments: GetInsuredRegistrationDocListUseCase,
     private val getCities: GetCitiesUseCase,
     private val getCity: GetCityUseCase,
-    private val getJobTitle: GetJobTitleUseCase,
+    private val getJobTitlePage: GetJobTitlePageUseCase,
     private val getRegistrationDeclarationForm: GetRegistrationDeclarationFormUseCase,
 ) : BaseViewModel<
     WorkshopRecentlyAddedMembersUiState,
@@ -55,6 +72,14 @@ class WorkshopRecentlyAddedMembersViewModel(
     WorkshopRecentlyAddedMembersEvent,
     WorkshopRecentlyAddedMembersIntent,
     >(initialState = WorkshopRecentlyAddedMembersUiState()) {
+
+    private val jobPaginator = Paginator(
+        loadPage = { query -> getJobTitlePage(query).first() },
+    )
+
+    init {
+        sendIntent(WorkshopRecentlyAddedMembersIntent.InitJobPaging)
+    }
 
     override fun handleIntent(
         intent: WorkshopRecentlyAddedMembersIntent,
@@ -70,11 +95,14 @@ class WorkshopRecentlyAddedMembersViewModel(
 
         WorkshopRecentlyAddedMembersIntent.ApplySearch -> applySearch(uiState.value.draft)
         WorkshopRecentlyAddedMembersIntent.ClearSearch -> applySearch(NewMemberSearch())
-        is WorkshopRecentlyAddedMembersIntent.Confirm -> confirm(intent.member)
-        is WorkshopRecentlyAddedMembersIntent.Delete -> delete(intent.member)
+        is WorkshopRecentlyAddedMembersIntent.Confirm -> ask(intent.member, MemberAction.CONFIRM)
+        is WorkshopRecentlyAddedMembersIntent.Delete -> ask(intent.member, MemberAction.DELETE)
+        WorkshopRecentlyAddedMembersIntent.PendingActionAccepted -> acceptPendingAction()
+        WorkshopRecentlyAddedMembersIntent.PendingActionDismissed ->
+            just(PartialState.PendingActionChanged(null))
+
         is WorkshopRecentlyAddedMembersIntent.Edit -> edit(intent.member)
-        WorkshopRecentlyAddedMembersIntent.FormDismissed ->
-            flow { emit(PartialState.FormChanged(null)) }
+        WorkshopRecentlyAddedMembersIntent.FormDismissed -> dismissForm()
 
         WorkshopRecentlyAddedMembersIntent.FormNext -> formNext()
         WorkshopRecentlyAddedMembersIntent.FormPrev ->
@@ -94,6 +122,12 @@ class WorkshopRecentlyAddedMembersViewModel(
 
         is WorkshopRecentlyAddedMembersIntent.FormPickerOpened -> openPicker(intent.picker)
         is WorkshopRecentlyAddedMembersIntent.FormPickerQueryChanged -> searchPicker(intent.query)
+        WorkshopRecentlyAddedMembersIntent.FormPickerLoadMore -> flow {
+            if (uiState.value.form?.picker == RegistrationPicker.JOB) {
+                jobPaginator.loadNext()
+            }
+        }
+        WorkshopRecentlyAddedMembersIntent.InitJobPaging -> observeJobPaging()
         WorkshopRecentlyAddedMembersIntent.FormDownloadDeclaration -> downloadDeclaration()
         WorkshopRecentlyAddedMembersIntent.DeclarationViewerDismissed ->
             just(PartialState.DeclarationPdfChanged(null))
@@ -156,13 +190,39 @@ class WorkshopRecentlyAddedMembersViewModel(
         emitAll(loadPage(page = 0, search = search))
     }
 
-    /** Confirming reloads the list, because the row's own state changes with it. */
-    private fun confirm(member: WorkshopNewMemberPR): Flow<PartialState> = flow {
-        val requestId = member.requestId
-        if (!member.canConfirm || requestId == null) {
+    /**
+     * Asks «آیا مطمئن هستید؟» before a row action is sent: confirming files the request and deleting
+     * discards the draft, and neither can be taken back from this list.
+     *
+     * A row that cannot take the action is refused before it is asked about, as the old app did —
+     * a question whose "yes" is then turned down is worse than no question.
+     */
+    private fun ask(member: WorkshopNewMemberPR, action: MemberAction): Flow<PartialState> = flow {
+        val isAllowed = when (action) {
+            MemberAction.CONFIRM -> member.canConfirm && member.requestId != null
+            MemberAction.DELETE -> member.isDraft && member.personalId != null
+        }
+        if (!isAllowed) {
             sendEvent(WorkshopRecentlyAddedMembersEvent.ShowMessage(Res.string.new_member_cannot_edit))
             return@flow
         }
+        emit(PartialState.PendingActionChanged(PendingMemberAction(member, action)))
+    }
+
+    private fun acceptPendingAction(): Flow<PartialState> = flow {
+        val pending = uiState.value.pendingAction ?: return@flow
+        emit(PartialState.PendingActionChanged(null))
+        emitAll(
+            when (pending.action) {
+                MemberAction.CONFIRM -> confirm(pending.member)
+                MemberAction.DELETE -> delete(pending.member)
+            },
+        )
+    }
+
+    /** Confirming reloads the list, because the row's own state changes with it. */
+    private fun confirm(member: WorkshopNewMemberPR): Flow<PartialState> = flow {
+        val requestId = member.requestId ?: return@flow
         emit(PartialState.Busy(member.personalId))
         val referenceCode = confirmRecentlyAddedMember(requestId)
         emit(PartialState.Busy(null))
@@ -174,11 +234,7 @@ class WorkshopRecentlyAddedMembersViewModel(
     }
 
     private fun delete(member: WorkshopNewMemberPR): Flow<PartialState> = flow {
-        val personalId = member.personalId
-        if (!member.isDraft || personalId == null) {
-            sendEvent(WorkshopRecentlyAddedMembersEvent.ShowMessage(Res.string.new_member_cannot_edit))
-            return@flow
-        }
+        val personalId = member.personalId ?: return@flow
         emit(PartialState.Busy(personalId))
         deleteRecentlyAddedMember(personalId)
         emit(PartialState.Busy(null))
@@ -189,19 +245,67 @@ class WorkshopRecentlyAddedMembersViewModel(
     }
 
     /**
+     * Closes the form. From step two on the person is on file as a draft, so the list is reloaded
+     * to show the row the registration can be resumed from.
+     */
+    private fun dismissForm(): Flow<PartialState> = flow {
+        val isOnFile = uiState.value.form?.personalId != null
+        emit(PartialState.FormChanged(null))
+        if (isOnFile) emitAll(loadPage(page = 0))
+    }
+
+    /**
      * Opens the registration form.
      *
      * A blank member is «افزودن پرسنل جدید»; a drafted one re-opens what was filled in, as far as
      * the list row carries it. A submitted registration cannot be edited at all.
+     *
+     * A draft's documents already on file are read before its form opens, not after: the last
+     * step writes the document list back whole, as the old app does, so a form that could not
+     * read them must not be the one to overwrite them. A failed read is said, and the form stays
+     * shut.
      */
     private fun edit(member: WorkshopNewMemberPR): Flow<PartialState> = flow {
         if (!member.isDraft && member.nationalId.isNotBlank()) {
             sendEvent(WorkshopRecentlyAddedMembersEvent.ShowMessage(Res.string.new_member_cannot_edit))
             return@flow
         }
-        emit(PartialState.FormChanged(member.asFormState()))
+        val personalId = member.personalId
+        val filedDocuments: PersistentList<WorkshopAttachment> = if (personalId == null) {
+            persistentListOf()
+        } else {
+            // One draft opens at a time; a second tap while its documents load would read them twice.
+            if (uiState.value.openingPersonalId != null) return@flow
+            emit(PartialState.OpeningChanged(personalId))
+            val documents = readFiledDocuments(personalId)
+            emit(PartialState.OpeningChanged(null))
+            documents
+        }
+        emit(PartialState.FormChanged(member.asFormState(filedDocuments)))
         emitAll(resolveDraftLabels(member))
+    }.catch {
+        emit(PartialState.OpeningChanged(null))
+        sendEvent(WorkshopRecentlyAddedMembersEvent.ShowServerMessage(it.toSingleLineMessage()))
     }
+
+    /**
+     * The documents already filed against [personalId], each image read back by its guid — so the
+     * form holds exactly what an upload of them would have left it holding.
+     */
+    private suspend fun readFiledDocuments(personalId: Long): PersistentList<WorkshopAttachment> =
+        coroutineScope {
+            getFiledDocuments(personalId.toString()).first()
+                .map { document ->
+                    async {
+                        downloadAttachment(
+                            guid = document.documentFile.id,
+                            type = filedDocumentType(document.documentType),
+                        )
+                    }
+                }
+                .awaitAll()
+                .toPersistentList()
+        }
 
     /**
      * Turns the codes a re-opened draft carries into the names the fields should show.
@@ -216,8 +320,13 @@ class WorkshopRecentlyAddedMembersViewModel(
 
         val jobCode = member.jobCode
         if (jobCode.isNotBlank()) {
+            // Asked for by code, as the old app does: an unfiltered first page holds ten of the
+            // thousands of jobs, so any other job would never be found there.
+            val byCode = ApiQueryParamDN(
+                filters = listOf(ApiFilterDN(FilterProperty.JOB_CODE, jobCode, FilterOperator.EQUAL)),
+            )
             val name = runCatching {
-                getJobTitle(emptyList()).first()?.list.orEmpty()
+                getJobTitlePage(byCode).first().items
                     .firstOrNull { it.jobCode == jobCode }?.jobDescription
             }.getOrNull()
             if (name != null) {
@@ -243,18 +352,22 @@ class WorkshopRecentlyAddedMembersViewModel(
     /**
      * A draft re-opened as the form that produced it.
      *
-     * Everything comes off the list row, which already carries the codes — `relation-tamins`
-     * returns the person's cities and job on the row itself, so re-opening costs no request.
-     * The row carries codes, not names, so the fields start empty and [resolveDraftLabels] fills
-     * them in as each lookup answers — a code is not a thing the user can read.
+     * The identity, cities and job come off the list row, which already carries the codes —
+     * `relation-tamins` returns the person's cities and job on the row itself. The row carries
+     * codes, not names, so the fields start empty and [resolveDraftLabels] fills them in as each
+     * lookup answers — a code is not a thing the user can read. The row does not carry the
+     * documents, so [filedDocuments] are read separately.
      */
-    private fun WorkshopNewMemberPR.asFormState(): RegistrationFormState = RegistrationFormState(
+    private fun WorkshopNewMemberPR.asFormState(
+        filedDocuments: PersistentList<WorkshopAttachment>,
+    ): RegistrationFormState = RegistrationFormState(
         firstName = firstName,
         lastName = lastName,
         nationalId = nationalId.digitsOnly(),
         birthDate = birthDate,
         startDate = startDate,
         personalId = personalId,
+        attachments = filedDocuments,
     )
 
     /**
@@ -284,15 +397,19 @@ class WorkshopRecentlyAddedMembersViewModel(
      * «مرحلهٔ بعد» on the first two steps, and the submission on the last.
      *
      * A step that is not complete reveals why instead of advancing — and step one additionally
-     * refuses a national id whose check digit does not add up, before the service is asked.
+     * refuses a national id whose check digit does not add up, before the service is asked. Step
+     * two puts the person on file before moving on; the last step files the documents.
      */
     private fun formNext(): Flow<PartialState> {
         val form = uiState.value.form ?: return flow { }
         val isStepValid = form.isStepComplete &&
             (form.step != 1 || isValidIranianNationalId(form.nationalId))
         if (!isStepValid) return just(PartialState.FormNextRejected)
-        if (!form.isLastStep) return just(PartialState.FormStepChanged(form.step + 1))
-        return submitRegistration()
+        return when {
+            form.isLastStep -> fileDocuments()
+            form.step == SAVE_STEP -> saveRegistration()
+            else -> just(PartialState.FormStepChanged(form.step + 1))
+        }
     }
 
     /**
@@ -303,13 +420,21 @@ class WorkshopRecentlyAddedMembersViewModel(
      */
     private fun openPicker(picker: RegistrationPicker?): Flow<PartialState> = flow {
         emit(PartialState.FormPickerOpened(picker))
-        if (picker != null) emitAll(loadPickerOptions(picker, query = ""))
+        if (picker == RegistrationPicker.JOB) {
+            jobPaginator.refresh(jobBaseQuery(""))
+        } else if (picker != null) {
+            emitAll(loadPickerOptions(picker, query = ""))
+        }
     }
 
     private fun searchPicker(query: String): Flow<PartialState> = flow {
         val picker = uiState.value.form?.picker ?: return@flow
         emit(PartialState.FormPickerQueryChanged(query))
-        emitAll(loadPickerOptions(picker, query))
+        if (picker == RegistrationPicker.JOB) {
+            jobPaginator.refresh(jobBaseQuery(query))
+        } else {
+            emitAll(loadPickerOptions(picker, query))
+        }
     }
 
     private fun loadPickerOptions(
@@ -317,26 +442,53 @@ class WorkshopRecentlyAddedMembersViewModel(
         query: String,
     ): Flow<PartialState> = flow {
         emit(PartialState.FormPickerLoading(true))
-        val options = when (picker) {
-            // The job list has no server-side name filter — there is no such property on the
-            // wire — so it is fetched once and narrowed here.
-            RegistrationPicker.JOB -> getJobTitle(emptyList()).first()?.list.orEmpty()
-                .filter { query.isBlank() || it.jobDescription.contains(query) }
-                .map { PickedOption(it.jobCode, it.jobDescription) }
-
-            else -> getCities(cityName = query.takeIf { it.isNotBlank() }).first()
-                .map { PickedOption(it.cityCode, it.cityName.orEmpty()) }
-        }
+        val options = getCities(cityName = query.takeIf { it.isNotBlank() }).first()
+            .map { PickedOption(it.cityCode, it.cityName.orEmpty()) }
         emit(PartialState.FormPickerOptionsLoaded(options.toPersistentList()))
     }.catch {
         emit(PartialState.FormPickerLoading(false))
         emit(reportFailure(it))
     }
 
-    /** Sends the picked image up and keeps only the guid that comes back. */
+    private fun observeJobPaging(): Flow<PartialState> = jobPaginator.state.transform { paging ->
+        emit(
+            PartialState.FormPickerJobPagingChanged(
+                items = paging.items.map { PickedOption(it.jobCode, it.jobDescription) }.toPersistentList(),
+                isLoadingFirstPage = paging.isLoadingFirstPage,
+                isLoadingNextPage = paging.isLoadingNextPage,
+                endReached = paging.endReached,
+            ),
+        )
+        // The paginator keeps a failure in its state instead of throwing, so without this a job
+        // search that failed would read as a search that found nothing. Said the way a failed
+        // city search is.
+        paging.error?.let { emit(reportFailure(it)) }
+    }
+
+    /** `jobDescription LIKE "*query*"`, and `LIKE "*"` for a blank one — what the old app sends. */
+    private fun jobBaseQuery(query: String): ApiQueryParamDN = ApiQueryParamDN(
+        filters = listOf(
+            ApiFilterDN(
+                property = FilterProperty.JOB_DESCRIPTION,
+                value = query.trim().takeIf { it.isNotEmpty() }?.let { "*$it*" } ?: "*",
+                operator = FilterOperator.LIKE,
+            ),
+        ),
+    )
+
+    /**
+     * Sends the picked image up and keeps only the guid that comes back.
+     *
+     * Each type takes one image. The sheet stops offering a type once it is filed, and one that
+     * arrives anyway is refused here, before anything is uploaded.
+     */
     private fun addAttachment(
         intent: WorkshopRecentlyAddedMembersIntent.FormAddDocument,
     ): Flow<PartialState> = flow {
+        if (uiState.value.form?.hasDocumentOfType(intent.typeCode) == true) {
+            sendEvent(WorkshopRecentlyAddedMembersEvent.ShowMessage(Res.string.error_image_duplicate))
+            return@flow
+        }
         emit(PartialState.FormUploadingChanged(true))
         val attachment = uploadAttachment(
             fileName = intent.fileName,
@@ -351,21 +503,23 @@ class WorkshopRecentlyAddedMembersViewModel(
     }
 
     /**
-     * Creates the registration, then files its documents against the person it created.
+     * Puts the person on file as a draft once step two is complete, before any document is asked
+     * for — where the old app creates the record too, so a registration abandoned at the documents
+     * is still in the list to be resumed.
      *
-     * Three calls in order, as the old app makes them: ask whether this national id is already
-     * known so an existing person is updated rather than duplicated, create, then attach. The
-     * documents go last because they are filed against the `personalId` the create returns.
+     * Someone not yet on file is checked against `relation-tamins/isnew` first, so a person the
+     * organization already knows is refused here rather than after their documents are uploaded.
+     * Someone already on file — a re-opened draft, or this form back on step two — is updated
+     * rather than created again.
      */
-    private fun submitRegistration(): Flow<PartialState> = flow {
+    private fun saveRegistration(): Flow<PartialState> = flow {
         val state = uiState.value
         val form = state.form ?: return@flow
         emit(PartialState.FormSubmittingChanged(true))
 
         // `relation-tamins/isnew` answers a bare boolean and carries no id, so it is a gate, not
         // a lookup: a person the organization already knows cannot be registered again here.
-        val isNew = checkNewMemberIsNew(form.nationalId)
-        if (!isNew && form.personalId == null) {
+        if (form.personalId == null && !checkNewMemberIsNew(form.nationalId)) {
             emit(PartialState.FormSubmittingChanged(false))
             sendEvent(
                 WorkshopRecentlyAddedMembersEvent.ShowMessage(Res.string.abs_form_err_already_known),
@@ -385,28 +539,31 @@ class WorkshopRecentlyAddedMembersViewModel(
                 startDate = form.startDate,
                 workshopId = state.workshopId,
                 branchCode = state.branchCode,
-                // A re-opened draft already names its person; otherwise the service says.
+                // Set once the person is on file, which makes this an update, not a second record.
                 personalId = form.personalId,
             ),
         )
-
-        val personalId = result.personalId ?: form.personalId
-        if (personalId != null) {
-            putRegistrationDocuments(
-                personalId.toString(),
-                form.attachments.map { document ->
-                    InsuredDocDN(
-                        documentType = document.type.code,
-                        id = 0,
-                        documentFile = DocumentFileDN(
-                            createdBy = "",
-                            id = document.guid,
-                            image = "",
-                        ),
-                    )
-                },
-            ).first()
+        // The documents are filed against this id; going on without one would only fail at the
+        // last step, after they have been uploaded.
+        val personalId = checkNotNull(result.personalId ?: form.personalId) {
+            "employers answered without the person's id"
         }
+        emit(PartialState.FormSaved(personalId))
+    }.catch {
+        emit(PartialState.FormSubmittingChanged(false))
+        emit(reportFailure(it))
+    }
+
+    /** Files the documents against the person step two put on file, then closes the form. */
+    private fun fileDocuments(): Flow<PartialState> = flow {
+        val form = uiState.value.form ?: return@flow
+        val personalId = checkNotNull(form.personalId) {
+            "the last step is reached only after step two has saved the person"
+        }
+        emit(PartialState.FormSubmittingChanged(true))
+        // The list replaces what is on file, so it carries the documents that were already there.
+        putRegistrationDocuments(personalId.toString(), form.attachments.map { it.toInsuredDoc() })
+            .first()
 
         emit(PartialState.FormChanged(null))
         // The creation returns the person, not a tracking code — the row that appears in the list
@@ -439,6 +596,12 @@ class WorkshopRecentlyAddedMembersViewModel(
         is PartialState.Applied -> currentState.copy(applied = partialState.search)
         is PartialState.SearchOpenChanged -> currentState.copy(isSearchOpen = partialState.isOpen)
         is PartialState.Busy -> currentState.copy(busyPersonalId = partialState.personalId)
+        is PartialState.PendingActionChanged ->
+            currentState.copy(pendingAction = partialState.pending)
+
+        is PartialState.OpeningChanged ->
+            currentState.copy(openingPersonalId = partialState.personalId)
+
         is PartialState.FormChanged -> currentState.copy(form = partialState.form)
         is PartialState.FormStepChanged -> currentState.editForm {
             copy(step = partialState.step, hasTriedNext = false)
@@ -483,6 +646,15 @@ class WorkshopRecentlyAddedMembersViewModel(
         }
 
         PartialState.FormNextRejected -> currentState.editForm { copy(hasTriedNext = true) }
+        is PartialState.FormSaved -> currentState.editForm {
+            copy(
+                personalId = partialState.personalId,
+                step = step + 1,
+                isSubmitting = false,
+                hasTriedNext = false,
+            )
+        }
+
         is PartialState.FormUploadingChanged -> currentState.editForm {
             copy(isUploading = partialState.isUploading)
         }
@@ -499,7 +671,14 @@ class WorkshopRecentlyAddedMembersViewModel(
         }
 
         is PartialState.FormPickerOpened -> currentState.editForm {
-            copy(picker = partialState.picker, pickerQuery = "", pickerOptions = persistentListOf())
+            copy(
+                picker = partialState.picker,
+                pickerQuery = "",
+                pickerOptions = persistentListOf(),
+                isPickerLoading = false,
+                isPickerLoadingMore = false,
+                canPickerLoadMore = false,
+            )
         }
 
         is PartialState.FormPickerQueryChanged -> currentState.editForm {
@@ -511,7 +690,25 @@ class WorkshopRecentlyAddedMembersViewModel(
         }
 
         is PartialState.FormPickerOptionsLoaded -> currentState.editForm {
-            copy(isPickerLoading = false, pickerOptions = partialState.options)
+            copy(
+                isPickerLoading = false,
+                isPickerLoadingMore = false,
+                canPickerLoadMore = false,
+                pickerOptions = partialState.options,
+            )
+        }
+
+        is PartialState.FormPickerJobPagingChanged -> currentState.editForm {
+            if (picker == RegistrationPicker.JOB) {
+                copy(
+                    pickerOptions = partialState.items,
+                    isPickerLoading = partialState.isLoadingFirstPage,
+                    isPickerLoadingMore = partialState.isLoadingNextPage,
+                    canPickerLoadMore = !partialState.endReached,
+                )
+            } else {
+                this
+            }
         }
     }
 
@@ -532,16 +729,6 @@ class WorkshopRecentlyAddedMembersViewModel(
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)
 }
 
-/**
- * A byte count as the whole kilobytes the upload box prints.
- *
- * Rounded up, so a file that is genuinely there never reads as «۰ کیلوبایت».
- */
-private fun Int.asKilobytes(): String =
-    ((this + BYTES_PER_KB - 1) / BYTES_PER_KB).toString().toPersianDigits()
-
-private const val BYTES_PER_KB = 1024
-
 /** Applies [edit] to the open form, or does nothing when no form is open. */
 private inline fun WorkshopRecentlyAddedMembersUiState.editForm(
     edit: RegistrationFormState.() -> RegistrationFormState,
@@ -549,3 +736,24 @@ private inline fun WorkshopRecentlyAddedMembersUiState.editForm(
 
 /** Forms count their steps from one. */
 private const val FIRST_STEP = 1
+
+/** The step whose «مرحلهٔ بعد» puts the person on file — everything the create needs is in by then. */
+private const val SAVE_STEP = 2
+
+/**
+ * The registration type a document on file was filed under.
+ *
+ * A code the table does not list keeps a generic label rather than being dropped: the document
+ * list is written back whole, so dropping one here would delete it from the person's file. The old
+ * app kept such documents too, untitled.
+ */
+private fun filedDocumentType(code: String): WorkshopDocumentType =
+    RegistrationDocumentTypes.firstOrNull { it.code == code }
+        ?: WorkshopDocumentType(code, Res.string.abs_doc_unknown)
+
+/** An attachment as `documents/{personalId}` files it: the uploaded image's guid, under its type. */
+private fun WorkshopAttachment.toInsuredDoc(): InsuredDocDN = InsuredDocDN(
+    documentType = type.code,
+    id = 0,
+    documentFile = DocumentFileDN(createdBy = "", id = guid, image = ""),
+)

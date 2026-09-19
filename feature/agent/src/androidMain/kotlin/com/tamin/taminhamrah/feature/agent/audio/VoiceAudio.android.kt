@@ -1,9 +1,12 @@
 package com.tamin.taminhamrah.feature.agent.audio
 
+import kotlinx.coroutines.withContext
+import android.annotation.SuppressLint
 import android.content.Context
+import android.media.AudioFormat
+import android.media.AudioRecord
 import android.media.MediaPlayer
 import android.media.MediaRecorder
-import android.os.Build
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -17,15 +20,22 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.koin.core.context.GlobalContext
 import java.io.File
+import java.io.RandomAccessFile
+import kotlin.math.abs
 import java.util.UUID
 
 private fun appContext(): Context = GlobalContext.get().get()
 
-private const val AMPLITUDE_POLL_MS = 80L
+private const val MIN_BUFFER_BYTES = 3_200 // 100 ms of 16 kHz 16-bit mono
+private const val WRITER_JOIN_TIMEOUT_MS = 1_000L
 private const val POSITION_POLL_MS = 100L
 
 // ─── Recorder ───────────────────────────────────────────────────────────────
 
+/**
+ * Records raw 16 kHz mono PCM with [AudioRecord] straight into a WAV file ([WavFormat]); the
+ * header's sizes are filled in when recording stops. MediaRecorder cannot write WAV.
+ */
 private class AndroidVoiceRecorder : VoiceRecorder {
     private val _amplitude = MutableStateFlow(0)
     override val amplitude: StateFlow<Int> = _amplitude.asStateFlow()
@@ -33,57 +43,105 @@ private class AndroidVoiceRecorder : VoiceRecorder {
     private val _isRecording = MutableStateFlow(false)
     override val isRecording: StateFlow<Boolean> = _isRecording.asStateFlow()
 
-    private var recorder: MediaRecorder? = null
-    private var scope: CoroutineScope? = null
+    private var recorder: AudioRecord? = null
+    private var writer: Thread? = null
 
+    /** Set by [cancel]: the writer deletes the file instead of finishing it. */
+    @Volatile
+    private var discard = false
+
+    @SuppressLint("MissingPermission") // The screen asks for RECORD_AUDIO before recording starts.
     override fun start(filePath: String) {
         if (_isRecording.value) return
-        @Suppress("DEPRECATION")
-        val mr = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            MediaRecorder(appContext())
-        } else {
-            MediaRecorder()
-        }
-        mr.apply {
-            setAudioSource(MediaRecorder.AudioSource.MIC)
-            setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-            setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-            setAudioEncodingBitRate(128_000)
-            setAudioSamplingRate(44_100)
-            setOutputFile(filePath)
-            prepare()
-            start()
-        }
-        recorder = mr
-        _isRecording.value = true
+        val bufferSize = maxOf(
+            AudioRecord.getMinBufferSize(WavFormat.SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT),
+            MIN_BUFFER_BYTES,
+        )
+        val record = runCatching {
+            AudioRecord(
+                MediaRecorder.AudioSource.MIC,
+                WavFormat.SAMPLE_RATE,
+                AudioFormat.CHANNEL_IN_MONO,
+                AudioFormat.ENCODING_PCM_16BIT,
+                bufferSize,
+            ).takeIf { it.state == AudioRecord.STATE_INITIALIZED }
+        }.getOrNull() ?: return
 
-        val s = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-        scope = s
-        s.launch {
-            while (isActive && _isRecording.value) {
-                _amplitude.value = runCatching { recorder?.maxAmplitude ?: 0 }.getOrDefault(0)
-                delay(AMPLITUDE_POLL_MS)
-            }
+        if (runCatching { record.startRecording() }.isFailure) {
+            record.release()
+            return
         }
+        recorder = record
+        discard = false
+        _isRecording.value = true
+        writer = Thread({ writeWav(record, filePath, bufferSize) }, "agent-voice-writer").apply { start() }
     }
 
-    override fun stop() {
-        if (!_isRecording.value) return
-        _isRecording.value = false
-        scope?.cancel()
-        scope = null
+    /**
+     * Runs on the writer thread and owns the [AudioRecord] from here on: it releases it when the loop
+     * ends, so nobody has to wait for the loop before releasing.
+     */
+    private fun writeWav(record: AudioRecord, filePath: String, bufferSize: Int) {
+        val target = File(filePath)
         runCatching {
-            recorder?.stop()
+            RandomAccessFile(target, "rw").use { file ->
+                file.setLength(0)
+                file.write(ByteArray(WavFormat.HEADER_SIZE))
+                val buffer = ByteArray(bufferSize)
+                var dataSize = 0
+                while (_isRecording.value) {
+                    val read = record.read(buffer, 0, buffer.size)
+                    if (read <= 0) continue
+                    file.write(buffer, 0, read)
+                    dataSize += read
+                    _amplitude.value = peakOf(buffer, read)
+                }
+                file.seek(0)
+                file.write(WavFormat.header(dataSize))
+            }
         }
-        runCatching { recorder?.release() }
+        runCatching { record.release() }
+        if (discard) runCatching { target.delete() }
+    }
+
+    /** Loudest 16-bit little-endian sample in the chunk, 0..32767 like MediaRecorder's maxAmplitude. */
+    private fun peakOf(buffer: ByteArray, length: Int): Int {
+        var peak = 0
+        var i = 0
+        while (i + 1 < length) {
+            val sample = (buffer[i].toInt() and 0xFF) or (buffer[i + 1].toInt() shl 8)
+            peak = maxOf(peak, abs(sample))
+            i += 2
+        }
+        return peak.coerceAtMost(Short.MAX_VALUE.toInt())
+    }
+
+    override suspend fun stop() {
+        val finishing = endRecording() ?: return
+        // The file is read for upload right after this returns, so its header must be written. The
+        // wait happens off the caller's thread.
+        withContext(Dispatchers.IO) { finishing.join(WRITER_JOIN_TIMEOUT_MS) }
+    }
+
+    override fun cancel() {
+        discard = true
+        endRecording()
+    }
+
+    /** Ends the read loop and hands back the writer thread, which finishes and releases on its own. */
+    private fun endRecording(): Thread? {
+        if (!_isRecording.value) return null
+        _isRecording.value = false
+        runCatching { recorder?.stop() }
         recorder = null
         _amplitude.value = 0
+        return writer.also { writer = null }
     }
 
     override fun newRecordingPath(): String {
         val dir = File(agentCacheDir())
         if (!dir.exists()) dir.mkdirs()
-        return File(dir, "voice_${UUID.randomUUID()}.m4a").absolutePath
+        return File(dir, "${UUID.randomUUID()}.${WavFormat.EXTENSION}").absolutePath
     }
 }
 

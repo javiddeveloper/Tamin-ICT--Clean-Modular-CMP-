@@ -6,11 +6,10 @@ import com.tamin.taminhamrah.feature.taminServices.inspection.ui.model.Inspectio
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.model.JobPR
 import com.tamin.taminhamrah.model.inspection.SubmitInspectionRequestDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
-import com.tamin.taminhamrah.model.request.ApiFilterDN
-import com.tamin.taminhamrah.model.request.FilterOperator
-import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.util.ValidationUtils
 import com.tamin.taminhamrah.util.ValidationUtils.isPhoneNumberValid
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 private const val MIN_REQUEST_DESCRIPTION_LENGTH = 10
 
@@ -63,9 +62,27 @@ data class WorkshopInfoStepState(
 @Immutable
 data class InspectionUiState(
     val isLoading: Boolean = false,
-    val inspections: List<InspectionPerformedPR> = emptyList(),
-    val branches: List<BranchPR> = emptyList(),
-    val jobs: List<JobPR> = emptyList(),
+    // --- Inspection list (inspection-header/get-all-insurance), offset-paginated (no search — the
+    //     endpoint takes no filters, matching the legacy app) ---
+    val inspections: ImmutableList<InspectionPerformedPR> = persistentListOf(),
+    val isLoadingInspections: Boolean = false,
+    val isLoadingNextInspections: Boolean = false,
+    val inspectionsEndReached: Boolean = false,
+    val inspectionsPagingError: String? = null,
+    // --- Branch picker (proxy/models/branch), offset-paginated + server search ---
+    val branches: ImmutableList<BranchPR> = persistentListOf(),
+    val isLoadingBranches: Boolean = false,
+    val isLoadingNextBranches: Boolean = false,
+    val branchesEndReached: Boolean = false,
+    val branchesPagingError: String? = null,
+    val branchQuery: String = "",
+    // --- Job picker (baseinfo/job), offset-paginated + server search ---
+    val jobs: ImmutableList<JobPR> = persistentListOf(),
+    val isLoadingJobs: Boolean = false,
+    val isLoadingNextJobs: Boolean = false,
+    val jobsEndReached: Boolean = false,
+    val jobsPagingError: String? = null,
+    val jobQuery: String = "",
     val isSubmitted: Boolean = false,
     val viewerPdf: PdfDownloadPR? = null,
     val viewerDownloadFailed: Boolean = false,
@@ -105,11 +122,39 @@ data class InspectionUiState(
     val requestStepNumber: Int get() = requestStep.ordinal + 1
     val requestTotalSteps: Int get() = InspectionRequestStep.entries.size
 
+    /** Step 2 (Workshop Info) is still loading while the wizard prefetch or either picker's first page is in flight. */
+    val isRequestStep2Loading: Boolean get() = isLoading || isLoadingBranches || isLoadingJobs
+
     sealed interface PartialState {
         data class Loading(val isLoading: Boolean) : PartialState
-        data class InspectionsLoaded(val list: List<InspectionPerformedPR>) : PartialState
-        data class BranchesLoaded(val list: List<BranchPR>) : PartialState
-        data class JobsLoaded(val list: List<JobPR>) : PartialState
+
+        data class InspectionsPagingChanged(
+            val items: ImmutableList<InspectionPerformedPR>,
+            val isLoadingFirstPage: Boolean,
+            val isLoadingNextPage: Boolean,
+            val endReached: Boolean,
+            val error: String?,
+        ) : PartialState
+
+        data class BranchesPagingChanged(
+            val items: ImmutableList<BranchPR>,
+            val isLoadingFirstPage: Boolean,
+            val isLoadingNextPage: Boolean,
+            val endReached: Boolean,
+            val error: String?,
+        ) : PartialState
+
+        data class JobsPagingChanged(
+            val items: ImmutableList<JobPR>,
+            val isLoadingFirstPage: Boolean,
+            val isLoadingNextPage: Boolean,
+            val endReached: Boolean,
+            val error: String?,
+        ) : PartialState
+
+        data class BranchQueryChanged(val query: String) : PartialState
+        data class JobQueryChanged(val query: String) : PartialState
+
         data class SubmitSuccess(val id: Long?) : PartialState
         data class ViewerPdfChanged(val pdf: PdfDownloadPR?) : PartialState
         data object ViewerDownloadFailed : PartialState
@@ -132,22 +177,18 @@ data class InspectionUiState(
 }
 
 sealed interface InspectionIntent {
-    data class LoadInspections(
-        val filters: List<ApiFilterDN> = emptyList()
-    ) : InspectionIntent
+    /** Starts observing all three paginators and loads the first page of the inspection list. */
+    data object LoadInspections : InspectionIntent
+    data object LoadNextInspections : InspectionIntent
+    data object RetryNextInspections : InspectionIntent
 
-    data class LoadBranches(
-        val filters: List<ApiFilterDN> = listOf(
-            ApiFilterDN(FilterProperty.TYPE, "1", FilterOperator.EQUAL),
-            ApiFilterDN(FilterProperty.STATUS, "1", FilterOperator.EQUAL)
-        )
-    ) : InspectionIntent
+    data object LoadNextBranches : InspectionIntent
+    data object RetryNextBranches : InspectionIntent
+    data class SearchBranches(val query: String) : InspectionIntent
 
-    data class LoadJobs(
-        val filters: List<ApiFilterDN> = listOf(
-            ApiFilterDN(FilterProperty.JOB_DESCRIPTION, "*", FilterOperator.LIKE)
-        )
-    ) : InspectionIntent
+    data object LoadNextJobs : InspectionIntent
+    data object RetryNextJobs : InspectionIntent
+    data class SearchJobs(val query: String) : InspectionIntent
 
     data class SubmitRequest(
         val request: SubmitInspectionRequestDN

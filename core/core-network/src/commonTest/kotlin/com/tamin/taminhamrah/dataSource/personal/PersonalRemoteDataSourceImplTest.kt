@@ -17,6 +17,7 @@ import com.tamin.taminhamrah.model.personal.survivorDependent.SurvivorDependentD
 import com.tamin.taminhamrah.model.personal.survivorList.ConfirmSurvivorDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseDTO
+import com.tamin.taminhamrah.tools.FakeIOException
 import com.tamin.taminhamrah.tools.ProblemDTO
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilderImpl
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
@@ -25,17 +26,16 @@ import com.tamin.taminhamrah.util.PersonalTestData
 import io.ktor.client.statement.HttpStatement
 import io.ktor.http.ContentType
 import io.ktor.utils.io.readRemaining
-import kotlinx.io.readByteArray
-import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
+import kotlinx.coroutines.test.runTest
+import kotlinx.io.readByteArray
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonPrimitive
 
 private val testJson = Json { ignoreUnknownKeys = true }
 
@@ -79,7 +79,7 @@ class PersonalRemoteDataSourceImplTest : BaseApiTest() {
 
     @Test
     fun getPersonalInfo_onNetworkError_throwsParsedTaminApiException() = runTest {
-        fakeApiService.shouldThrowException = IllegalStateException("network")
+        fakeApiService.shouldThrowException = FakeIOException()
 
         val exception = assertFailsWith<TaminApiException> {
             dataSource.getPersonalInfo()
@@ -144,12 +144,12 @@ class PersonalRemoteDataSourceImplTest : BaseApiTest() {
         }
 
         assertEquals("خطا", exception.title)
-        assertTrue(exception.subtitle?.contains("مشمول") == true)
+        assertEquals(exception.subtitle?.contains("مشمول"), true)
     }
 
     @Test
     fun checkGirlSurvivorConditions_onNetworkError_throwsParsedTaminApiException() = runTest {
-        fakeApiService.shouldThrowException = IllegalStateException("network")
+        fakeApiService.shouldThrowException = FakeIOException()
 
         val exception = assertFailsWith<TaminApiException> {
             dataSource.checkGirlSurvivorConditions("001", "002")
@@ -188,7 +188,7 @@ class PersonalRemoteDataSourceImplTest : BaseApiTest() {
 
     @Test
     fun confirmGirlSurvivor_onNetworkError_throwsParsedTaminApiException() = runTest {
-        fakeApiService.shouldThrowException = IllegalStateException("network")
+        fakeApiService.shouldThrowException = FakeIOException()
 
         val exception = assertFailsWith<TaminApiException> {
             dataSource.confirmGirlSurvivor(sampleConfirmRequest())
@@ -227,7 +227,7 @@ class PersonalRemoteDataSourceImplTest : BaseApiTest() {
 
     @Test
     fun getGirlSurvivorReport_onNetworkError_throwsParsedTaminApiException() = runTest {
-        fakeApiService.shouldThrowException = IllegalStateException("network")
+        fakeApiService.shouldThrowException = FakeIOException()
 
         val exception = assertFailsWith<TaminApiException> {
             dataSource.getGirlSurvivorReport(
@@ -368,6 +368,13 @@ private class FakePersonalApiService : PersonalApiService {
     }
 
     override suspend fun getRequestSummary(requestId: String): BaseDTO<NewInsuredSummaryDTO> {
+        shouldThrowException?.let { throw it }
+        error("Not stubbed")
+    }
+
+    override suspend fun getInsuredRegistrationDocList(
+        parameters: Map<String, String>
+    ): BaseDTO<ListData<InsuredDocDTO>> {
         shouldThrowException?.let { throw it }
         error("Not stubbed")
     }

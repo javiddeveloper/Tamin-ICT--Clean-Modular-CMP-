@@ -16,14 +16,14 @@ internal fun SubDominantResponseDTO.toDomain(): SubdominantDN = SubdominantDN(
             fatherName = personal?.fatherName,
             nationalCode = personal?.nationalId,
             dateOfBirthTimestamp = personal?.dateOfBirthTimestamp,
-            // "status" and "relationDescription" both come from the same relationDescription
-            // field on the payload (e.g. "تبعي - تحت پوشش بيمه شده اصلي - کفالت زن توسط شوهر-
-            // عقد دائم") — there's a separate numeric "status" code ("1") alongside it, but the
-            // description is what's actually meant to display as either. Revisit if a
-            // machine-readable status code turns out to be needed instead.
-            relationDescription = relationSub?.relationDescription,
+            // Short relation label for chips (e.g. "همسر") comes from baseTendency.
+            // relationDescription is the long coverage sentence and is kept on status.
+            relationDescription = relationSub?.baseTendency?.tendencyDescription
+                ?: relationSub?.relationDescription,
             status = relationSub?.relationDescription,
-            insuranceId = relation?.insuranceId
+            insuranceId = relation?.insuranceId,
+            tendencyCode = relationSub?.baseTendency?.tendencyCode,
+            genderCode = personal?.gender?.genderCode,
         )
     },
     total = totalCount?.toString()

@@ -1,5 +1,8 @@
 package com.tamin.taminhamrah.feature.agent.ui
 
+import taminx.core.core_ui.agent_history
+import taminx.core.core_ui.Res
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -78,7 +81,7 @@ fun ChatHistorySheet(
                 .padding(horizontal = 16.dp)
         ) {
             Text(
-                text = "گفتگوهای من",
+                text = stringResource(Res.string.agent_history),
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 color = taminColors.textPrimary
             )

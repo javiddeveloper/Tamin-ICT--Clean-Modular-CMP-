@@ -58,6 +58,9 @@ sealed interface ProfileRoute {
 
     @Serializable
     data object UserRequests : ProfileRoute
+
+    @Serializable
+    data object SaveEvents : ProfileRoute
 }
 
 fun NavGraphBuilder.profileGraph(
@@ -67,6 +70,7 @@ fun NavGraphBuilder.profileGraph(
     onNavigateToMyInbox: () -> Unit,
     onNavigateToChangeMobile: () -> Unit,
     onNavigateToSecurity: () -> Unit,
+    onNavigateToDeveloperOptions: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToAddDependent: () -> Unit,
     onNavigateToUserRequests: () -> Unit,
@@ -90,9 +94,11 @@ fun NavGraphBuilder.profileGraph(
                 onNavigateToMyInbox = onNavigateToMyInbox,
                 onNavigateToContactUs = { navController.navigate(ProfileRoute.ContactUs) },
                 onNavigateToSecurity = onNavigateToSecurity,
+                onNavigateToDeveloperOptions = onNavigateToDeveloperOptions,
                 onNavigateToDependentsList = {navController.navigate(ProfileRoute.DependentsList)},
                 onNavigateToSettings = onNavigateToSettings,
                 onNavigateToUserRequests = onNavigateToUserRequests,
+                onNavigateToSaveEvents = { navController.navigate(ProfileRoute.SaveEvents) },
                 onOpenUrl = onOpenUrl,
                 onBackClicked = onBack
             )
@@ -168,6 +174,15 @@ fun NavGraphBuilder.profileGraph(
             ContactUsRoute(
                 viewModel = viewModel,
                 onOpenUrl = onOpenUrl,
+                onBackClicked = { navController.popBackStack() }
+            )
+        }
+
+        composable<ProfileRoute.SaveEvents> {
+            val viewModel = koinViewModel<com.tamin.taminhamrah.feature.profile.ui.saveEvents.SaveEventsViewModel>()
+
+            com.tamin.taminhamrah.feature.profile.ui.saveEvents.SaveEventsRoute(
+                viewModel = viewModel,
                 onBackClicked = { navController.popBackStack() }
             )
         }

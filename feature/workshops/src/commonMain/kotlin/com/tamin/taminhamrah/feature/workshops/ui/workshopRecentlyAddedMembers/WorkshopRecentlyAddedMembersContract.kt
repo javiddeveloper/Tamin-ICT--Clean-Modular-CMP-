@@ -8,6 +8,10 @@ import taminx.core.core_ui.ws_form_err_agree
 import taminx.core.core_ui.abs_form_err_national_id
 import taminx.core.core_ui.abs_form_err_incomplete
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.new_member_confirm
+import taminx.core.core_ui.new_member_confirm_question
+import taminx.core.core_ui.new_member_delete
+import taminx.core.core_ui.new_member_delete_question
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.PersistentList
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachment
@@ -33,6 +37,10 @@ data class WorkshopRecentlyAddedMembersUiState(
     val isSearchOpen: Boolean = false,
     /** The row being confirmed or deleted; its actions show progress meanwhile. */
     val busyPersonalId: Long? = null,
+    /** The draft whose documents are being read before its form opens; its «ویرایش» says so. */
+    val openingPersonalId: Long? = null,
+    /** The row action waiting on «آیا مطمئن هستید؟»; nothing is sent until it is answered. */
+    val pendingAction: PendingMemberAction? = null,
     /** The blank declaration form, once fetched — shown in the app's PDF viewer. */
     val declarationPdf: PdfDownloadPR? = null,
     /** افزودن پرسنل جدید, once the list has asked for it. */
@@ -48,6 +56,8 @@ data class WorkshopRecentlyAddedMembersUiState(
         data class Applied(val search: NewMemberSearch) : PartialState
         data class SearchOpenChanged(val isOpen: Boolean) : PartialState
         data class Busy(val personalId: Long?) : PartialState
+        data class OpeningChanged(val personalId: Long?) : PartialState
+        data class PendingActionChanged(val pending: PendingMemberAction?) : PartialState
 
         // --------------------------------------------------- نام‌نویسی غیرحضوری
         data class FormChanged(val form: RegistrationFormState?) : PartialState
@@ -65,6 +75,9 @@ data class WorkshopRecentlyAddedMembersUiState(
         data class FormAttachmentAdded(val attachment: WorkshopAttachment) : PartialState
         data class FormAttachmentRemoved(val index: Int) : PartialState
         data object FormNextRejected : PartialState
+
+        /** Step two put the person on file; the form moves on carrying their id. */
+        data class FormSaved(val personalId: Long) : PartialState
         data class FormUploadingChanged(val isUploading: Boolean) : PartialState
         data class FormSubmittingChanged(val isSubmitting: Boolean) : PartialState
         data class FormDeclarationDownloading(val isDownloading: Boolean) : PartialState
@@ -74,6 +87,12 @@ data class WorkshopRecentlyAddedMembersUiState(
         data class FormPickerLoading(val isLoading: Boolean) : PartialState
         data class FormPickerOptionsLoaded(val options: PersistentList<PickedOption>) :
             PartialState
+        data class FormPickerJobPagingChanged(
+            val items: PersistentList<PickedOption>,
+            val isLoadingFirstPage: Boolean,
+            val isLoadingNextPage: Boolean,
+            val endReached: Boolean,
+        ) : PartialState
 
     }
 }
@@ -111,13 +130,18 @@ data class RegistrationFormState(
     val isUploading: Boolean = false,
     val isSubmitting: Boolean = false,
     val isDownloadingDeclaration: Boolean = false,
-    /** Set when a draft was re-opened, so the create updates that person. */
+    /**
+     * Set once the person is on file — a re-opened draft, or step two saved — so saving again
+     * updates that person instead of adding another.
+     */
     val personalId: Long? = null,
     /** Which lookup sheet is open, and what it has to offer. */
     val picker: RegistrationPicker? = null,
     val pickerQuery: String = "",
     val pickerOptions: PersistentList<PickedOption> = persistentListOf(),
     val isPickerLoading: Boolean = false,
+    val isPickerLoadingMore: Boolean = false,
+    val canPickerLoadMore: Boolean = false,
 ) {
     val isBusy: Boolean get() = isUploading || isSubmitting
     val isLastStep: Boolean get() = step == REGISTRATION_FORM_STEPS
@@ -156,6 +180,9 @@ data class RegistrationFormState(
      */
     val isDocumentsError: Boolean
         get() = error == Res.string.ws_form_err_docs
+
+    /** Whether an image is already filed under this type — each type takes one, as in the old app. */
+    fun hasDocumentOfType(code: String): Boolean = attachments.any { it.type.code == code }
 }
 
 /** A value chosen from a lookup: what the service files, and what the field shows. */
@@ -171,6 +198,14 @@ enum class RegistrationPicker { BIRTH_CITY, ISSUE_CITY, JOB }
 /** How many steps نام‌نویسی غیرحضوری has. */
 const val REGISTRATION_FORM_STEPS = 3
 
+/** A row action that is asked about before it is sent, and the words it is asked in. */
+enum class MemberAction(val title: StringResource, val question: StringResource) {
+    CONFIRM(Res.string.new_member_confirm, Res.string.new_member_confirm_question),
+    DELETE(Res.string.new_member_delete, Res.string.new_member_delete_question),
+}
+
+@Immutable
+data class PendingMemberAction(val member: WorkshopNewMemberPR, val action: MemberAction)
 
 sealed interface WorkshopRecentlyAddedMembersIntent {
     data class Open(
@@ -185,11 +220,14 @@ sealed interface WorkshopRecentlyAddedMembersIntent {
     data object ApplySearch : WorkshopRecentlyAddedMembersIntent
     data object ClearSearch : WorkshopRecentlyAddedMembersIntent
 
-    /** تایید — only a drafted registration can be confirmed. */
+    /** تایید — asks first; only a drafted registration with a request id can be confirmed. */
     data class Confirm(val member: WorkshopNewMemberPR) : WorkshopRecentlyAddedMembersIntent
 
-    /** حذف — same guard as confirm. */
+    /** حذف — asks first; only a drafted registration can be deleted. */
     data class Delete(val member: WorkshopNewMemberPR) : WorkshopRecentlyAddedMembersIntent
+
+    data object PendingActionAccepted : WorkshopRecentlyAddedMembersIntent
+    data object PendingActionDismissed : WorkshopRecentlyAddedMembersIntent
 
     data class Edit(val member: WorkshopNewMemberPR) : WorkshopRecentlyAddedMembersIntent
     data class Follow(val member: WorkshopNewMemberPR) : WorkshopRecentlyAddedMembersIntent
@@ -218,6 +256,12 @@ sealed interface WorkshopRecentlyAddedMembersIntent {
         WorkshopRecentlyAddedMembersIntent
 
     data class FormPickerQueryChanged(val query: String) : WorkshopRecentlyAddedMembersIntent
+
+    /** Loads the next page of options for paginated pickers (Job). */
+    data object FormPickerLoadMore : WorkshopRecentlyAddedMembersIntent
+
+    /** Subscribes the job paginator's state to the UI. */
+    data object InitJobPaging : WorkshopRecentlyAddedMembersIntent
 
     /** «دریافت فرم اظهارنامهٔ نام‌نویسی» — the blank declaration the person fills in. */
     data object FormDownloadDeclaration : WorkshopRecentlyAddedMembersIntent
@@ -249,7 +293,6 @@ sealed interface WorkshopRecentlyAddedMembersEvent {
 
     data class ShowMessage(val message: StringResource) : WorkshopRecentlyAddedMembersEvent
 
-    /** The member form opens on this registration; a new one is [personalRequestId] `0`. */
     /** The registration was filed; the list row carries its tracking code. */
     data object RegistrationFiled : WorkshopRecentlyAddedMembersEvent
 

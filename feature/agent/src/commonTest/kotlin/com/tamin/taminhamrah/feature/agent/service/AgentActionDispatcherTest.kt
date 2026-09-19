@@ -161,7 +161,7 @@ class AgentActionDispatcherTest {
     // ─── Scenario 4: Disabled + No Message -> Fallback ───────────────────────
 
     @Test
-    fun `dispatch - when DISABLED with no messages anywhere - uses fallback text`() = runTest {
+    fun `dispatch - when DISABLED with no messages anywhere - leaves the message to the screen`() = runTest {
         // Arrange: Neither AI nor FeatureManager provides a message
         fakeFeatureManager.setStatus(FeatureFlag.WAGE_AND_HISTORY, FeatureStatus.TemporaryDisabled(null))
         fakeFeatureManager.setDisabledMessage(FeatureFlag.WAGE_AND_HISTORY, null)
@@ -170,9 +170,9 @@ class AgentActionDispatcherTest {
         // Act
         val result = dispatcher.dispatch(entity, context)
 
-        // Assert: A default fallback text should be shown instead of null
+        // Assert: still disabled; the screen supplies its own default text for a missing reason
         val disabledResult = result as AgentServiceResult.FeatureDisabled
-        assertTrue(disabledResult.message.isNotBlank(), "Fallback message should not be blank")
+        assertEquals(null, disabledResult.message)
     }
 
     // ─── Scenario 5: No Handler Available ────────────────────────────────────

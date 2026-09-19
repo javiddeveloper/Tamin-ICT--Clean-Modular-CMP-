@@ -4,6 +4,10 @@ import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toDomainPage
 import com.tamin.taminhamrah.data.mapper.toDto
 import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSource
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeContractListDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeListDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeRequestDN
+import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeWorkshopListDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
@@ -20,25 +24,36 @@ import com.tamin.taminhamrah.model.workshop.DebitObjectionResultDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDN
+import com.tamin.taminhamrah.model.workshop.ContractRowQuery
 import com.tamin.taminhamrah.model.workshop.DebitReasonDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
+import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmissionDN
+import com.tamin.taminhamrah.model.workshop.EmployerContactInfoDN
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetQuery
 import com.tamin.taminhamrah.model.workshop.WORKSHOP_PAGE_SIZE
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
+import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDN
+import com.tamin.taminhamrah.model.workshop.WorkshopContractDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDN
 import com.tamin.taminhamrah.model.workshop.WorkshopListQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDN
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberQuery
-import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
-import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDN
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDN
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderQuery
+import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDN
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionQuery
+import com.tamin.taminhamrah.model.workshop.SmsMessageDN
 import com.tamin.taminhamrah.repository.WorkShopsRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 /**
  * Turns the feature's typed queries into the ExtJS-style `filter` array every workshop service
@@ -67,6 +82,31 @@ class WorkShopsRepositoryImpl(
             .getAllEmployerAgreementByNationalId(pageQuery(query.page, query.pageSize, filters))
             .toDomainPage { it.toDomain() }
     }
+
+    // ------------------------------------------------------------------ ردیف‌های پیمان
+
+    /*
+     * Both contract-row calls take the workshop and branch as path segments, so neither builds a
+     * filter — the query carries page and size only.
+     */
+
+    override suspend fun getContractRowsWithAgreement(
+        query: ContractRowQuery,
+    ): PagedListDN<EmployerAgreementDN> =
+        remoteDataSource.getEmployerAgreementsByWorkshop(
+            workshopId = query.workshopId,
+            branchCode = query.branchCode,
+            query = pageQuery(query.page, query.pageSize),
+        ).toDomainPage { it.toDomain() }
+
+    override suspend fun getContractRowsWithoutAgreement(
+        query: ContractRowQuery,
+    ): PagedListDN<WorkshopContractDN> =
+        remoteDataSource.getWorkshopContracts(
+            workshopId = query.workshopId,
+            branchCode = query.branchCode,
+            query = pageQuery(query.page, query.pageSize),
+        ).toDomainPage { it.toDomain() }
 
     // -------------------------------------------------------------------- برگ پرداخت‌ها
 
@@ -123,6 +163,10 @@ class WorkShopsRepositoryImpl(
     override suspend fun payWorkshopDebit(request: DebitPaymentRequestDN): DebitPaymentDN =
         remoteDataSource.payWorkshopDebit(request.toDto()).toDomain()
 
+    override suspend fun confirmPaymentTicket(ticket: String) {
+        remoteDataSource.confirmPaymentTicket(ticket)
+    }
+
     // ------------------------------------------------------------ استعلام بدهی کارگاه
 
     override suspend fun getWorkshopDebtInquiry(
@@ -178,8 +222,16 @@ class WorkShopsRepositoryImpl(
 
     override suspend fun createNewMemberRegistration(
         request: NewMemberRegistrationDN,
-    ): NewMemberRegistrationResultDN =
-        remoteDataSource.createNewMemberRegistration(request.toDto()).toDomain()
+    ): NewMemberRegistrationResultDN {
+        val body = request.toDto()
+        val personalId = request.personalId
+        val result = if (personalId == null) {
+            remoteDataSource.createNewMemberRegistration(body)
+        } else {
+            remoteDataSource.updateNewMemberRegistration(personalId, body)
+        }
+        return result.toDomain()
+    }
 
     // ------------------------------------------------------------------------- ماده ۱۶
 
@@ -246,6 +298,51 @@ class WorkShopsRepositoryImpl(
             .toDomainPage { it.toDomain() }
     }
 
+    // ------------------------------------------------- خدمات غیرحضوری کارفرما (employerServicesAgreement)
+
+    override suspend fun requestEmployerAgreementTicket(mobile: String, email: String): String =
+        remoteDataSource.requestEmployerAgreementTicket(mobileNumber = mobile, email = email)
+
+    override suspend fun getEmployerAgreementContactInfo(
+        verificationCode: String,
+    ): EmployerContactInfoDN =
+        remoteDataSource.getEmployerAgreementUserInfo(verificationCode).toDomain()
+
+    override suspend fun getWorkshopsWithoutContract(
+        page: Int,
+    ): PagedListDN<WorkshopWithoutContractDN> =
+        remoteDataSource.getEmployerWorkshopsWithoutContract(pageQuery(page))
+            .toDomainPage { it.toDomain() }
+
+    override suspend fun getWorkshopContractRows(
+        workshopId: String,
+        branchCode: String,
+        page: Int,
+    ): PagedListDN<WorkshopContractRowDN> =
+        remoteDataSource
+            .getEmployerWorkshopContractList(workshopId, branchCode, pageQuery(page))
+            .toDomainPage { it.toDomain() }
+
+    override suspend fun submitEmployerAgreement(request: EmployerAgreementSubmissionDN): String =
+        remoteDataSource.submitEmployerAgreement(request.toDto())
+
+    override suspend fun getWorkShopObjections(
+        query: WorkShopObjectionQuery,
+    ): PagedListDN<WorkShopObjectionDN> {
+        val filters = buildFilters {
+            add(FilterProperty.PAYMENT_WORKSHOP_ID, query.workshopId)
+            add(FilterProperty.SEQ_NO, query.objectionNumber)
+            add(FilterProperty.DEBIT_NUMBER, query.debitNumber)
+        }
+        return remoteDataSource
+            .getWorkShopObjections(pageQuery(query.page, query.pageSize, filters))
+            .toDomainPage { it.toDomain() }
+    }
+
+    override suspend fun getWorkShopObjectionSms(seqNo: Long, page: Int): PagedListDN<SmsMessageDN> =
+        remoteDataSource.getWorkShopObjectionSms(seqNo, pageQuery(page))
+            .toDomainPage { it.toDomain() }
+
     private fun pageQuery(
         page: Int,
         pageSize: Int = WORKSHOP_PAGE_SIZE,
@@ -269,5 +366,63 @@ class WorkShopsRepositoryImpl(
                 filters += ApiFilterDN(property, value, FilterOperator.EQ)
             }
         }
+    }
+
+    override fun getLegalRepresentativeWorkshops(): Flow<LegalRepresentativeWorkshopListDN?> = flow {
+        val response = remoteDataSource.getLegalRepresentativeWorkshops()
+        emit(
+            response?.let {
+                LegalRepresentativeWorkshopListDN(
+                    list = it.list?.map { item -> item.toDomain() } ?: emptyList(),
+                    total = it.total
+                )
+            }
+        )
+    }
+
+    override fun getLegalRepresentatives(
+        workshopId: String,
+        branchCode: String
+    ): Flow<LegalRepresentativeListDN?> = flow {
+        val response = remoteDataSource.getLegalRepresentatives(workshopId, branchCode)
+        emit(
+            response?.let {
+                LegalRepresentativeListDN(
+                    list = it.list?.map { item -> item.toDomain() } ?: emptyList(),
+                    total = it.total
+                )
+            }
+        )
+    }
+
+    override fun getLegalRepresentativeWorkshopContracts(
+        workshopId: String,
+        branchCode: String
+    ): Flow<LegalRepresentativeContractListDN?> = flow {
+        val response = remoteDataSource.getLegalRepresentativeWorkshopContracts(workshopId, branchCode)
+        emit(
+            response?.let {
+                LegalRepresentativeContractListDN(
+                    list = it.list?.map { item -> item.toDomain() } ?: emptyList(),
+                    total = it.total
+                )
+            }
+        )
+    }
+
+    override suspend fun requestLegalRepresentativeTicket(nationalCode: String?) {
+        remoteDataSource.requestLegalRepresentativeTicket(nationalCode)
+    }
+
+    override suspend fun verifyLegalRepresentativeTicket(ticket: String) {
+        remoteDataSource.verifyLegalRepresentativeTicket(ticket)
+    }
+
+    override suspend fun submitLegalRepresentative(ticket: String, request: LegalRepresentativeRequestDN) {
+        remoteDataSource.submitLegalRepresentative(ticket, request.toDto(ticket))
+    }
+
+    override suspend fun deleteLegalRepresentative(ticket: String, stakeId: Long) {
+        remoteDataSource.deleteLegalRepresentative(ticket, stakeId)
     }
 }

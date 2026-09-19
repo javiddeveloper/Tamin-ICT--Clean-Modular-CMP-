@@ -20,12 +20,15 @@ Read the relevant page there before searching the codebase:
 | Scroll-driven collapsing headers (fold/unfold on drag) | `docs/vault/TopArea-System.md` |
 | DI and Koin | `docs/vault/Dependency-Injection.md` |
 | Networking, tokens, endpoints | `docs/vault/Networking.md` |
+| Payments (any feature, and the mock gateway) | `docs/vault/Payments.md` |
 | Database and schemas | `docs/vault/Database.md` |
 | Build, flavors, JDK | `docs/vault/Build-and-Run.md` |
 | CI | `docs/vault/CI-CD.md` |
 | Dynamic menu and FeatureFlag | `docs/vault/Feature-Flags.md` |
 | AI assistant architecture | `docs/vault/AI-Agent.md` |
 | AI assistant JSON contract | `docs/vault/AI-Agent-API-Contract.md` |
+| Assistant markdown, formulas, service answers | `docs/vault/Agent-Markdown.md` |
+| Deep links and the feature-flag gate | `docs/vault/Deep-Links.md` |
 | Persian domain term ↔ name in code | `docs/vault/Glossary.md` |
 
 All documentation is written in English. The vault uses Obsidian-style `[[…]]` links, which resolve to the file name without its extension.

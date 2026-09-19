@@ -21,7 +21,7 @@ interface AgentChatCacheRepository {
     suspend fun getSessions(userNationalCode: String): List<AgentSessionDN>
     suspend fun deleteSession(sessionId: String)
     suspend fun updateSessionTitle(sessionId: String, title: String)
-    suspend fun updateSessionLastEntity(sessionId: String, lastEntity: String?)
+    suspend fun updateSessionContext(sessionId: String, lastEntity: String?, state: String?, history: String?)
 
     // ── Messages ──
     suspend fun addMessage(message: AgentCachedMessageDN)

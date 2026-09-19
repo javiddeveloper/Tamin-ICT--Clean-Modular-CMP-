@@ -47,9 +47,8 @@ Colors, spacing, radius: [[Theme]] — never hardcode `Color`, `.dp`, or UI copy
 | `:feature:pensioner` | `feature/pensioner` | `…feature.pensionInquiry` ⚠️ |
 | `:feature:cartable` | `feature/cartable` | `…feature.cartable` |
 | `:feature:history` | `feature/history` | `…feature.history` |
-| `:feature:contracts` | `feature/contracts` | `…feature.contracts` |
+| `:feature:contracts` | `feature/contracts` | `…feature.contracts` — list, create/edit flows (`flow/` package) |
 | `:feature:workshops` | `feature/workshops` | `…feature.workshops` |
-| `:feature:studentInsuranceContract` | `feature/studentInsuranceContract` | `…feature.studentInsuranceContract` |
 | `:feature:agent` | `feature/agent` | `…feature.agent` |
 | `:feature:healthProfile` | `feature/healthProfile` | `…feature.healthProfile` |
 | `:feature:taminServices` | `feature/taminServices` | `…feature.taminServices` |
@@ -60,7 +59,11 @@ Colors, spacing, radius: [[Theme]] — never hardcode `Color`, `.dp`, or UI copy
 | `:feature:deferredInstallment` | `feature/deferredInstallment` | `…feature.deferredInstallment` |
 | `:feature:pensionStatusInquiry` | `feature/pensionStatusInquiry` | `…feature.pensionStatusInquiry` |
 | `:feature:girlSurvivor` | `feature/girlSurvivor` | `…feature.girlSurvivor` |
+| `:feature:inquiryEducation` | `feature/inquiryEducation` | `…feature.inquiryEducation` |
+| `:feature:fractionContract` | `feature/fractionContract` | `…feature.fractionContract` — تکمیل سوابق کسری از ماه |
 | `:feature:pensionSurvivor` | `feature/pensionSurvivor` | `…feature.pensionSurvivor` |
+| `:feature:stories` | `feature/stories` | `…feature.stories` — «تازه‌ها» rail + story viewer, [[Stories]] |
+| `:feature:payment` | `feature/payment` | `…feature.payment` — the shared payment flow, see [[Payments]] |
 
 ### Layout of a feature module
 

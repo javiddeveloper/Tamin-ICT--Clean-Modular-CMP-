@@ -103,6 +103,7 @@ internal fun CertificateBottomSheet(
                 text = stringResource(Res.string.active_relation_issue_and_send),
                 onClick = onIssueClick,
                 enabled = state.selectedRecipient != null && state.branchName.isNotBlank(),
+                isLoading = state.isLoading,
                 modifier = Modifier.fillMaxWidth()
             )
         }

@@ -31,5 +31,8 @@ interface PersonalRepository {
     fun getGirlSurvivorReport(params: GirlSurvivorReportParamsDN): Flow<PdfDownloadDN>
     fun confirmGirlSurvivor(body: ConfirmGirlSurvivorDN): Flow<String?>
     fun putInsuredRegistrationDocList(personalId: String, docs: List<InsuredDocDN>): Flow<String?>
+
+    /** Every document filed against a person — what [putInsuredRegistrationDocList] replaces. */
+    fun getInsuredRegistrationDocList(personalId: String): Flow<List<InsuredDocDN>>
     fun getRequestSummary(requestId: String): Flow<NewInsuredSummaryDN?>
 }
