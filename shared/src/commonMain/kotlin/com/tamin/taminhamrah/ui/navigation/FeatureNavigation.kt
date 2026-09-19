@@ -68,14 +68,14 @@ fun NavController.navigateToDeepLink(key: DeepLinkKey, args: Map<String, String>
 fun NavController.navigateToFeature(flag: FeatureFlag, beforeOpen: () -> Unit = {}): Boolean {
     val open: () -> Unit = when (flag) {
         FeatureFlag.AGENT -> screen { navigateToAgent() }
-        // «مجموع سوابق» — the insured years added up. Menu id 8; it reached nothing before.
+        // «کلیه سوابق» — menu id 3, the one history row left after «سوابق تلفیقی» and «سوابق و دستمزد»
+        // were dropped from the menu. MERGE_HISTORY and WAGE_AND_HISTORY have no menu row of their
+        // own any more, so only a deep link or the assistant can reach them — and the flag gate
+        // turns both down until a row exists again. Kept here so they open the right page if it does.
         FeatureFlag.COMBINED_RECORD -> screen { navigateToHistory() }
         FeatureFlag.MERGE_HISTORY -> screen { navigateToHistory() }
-        // «سوابق و دستمزد» — menu id 7. The same page: it is where the wage rows are read, and it
-        // reached nothing before.
         FeatureFlag.WAGE_AND_HISTORY -> screen { navigateToHistory() }
         FeatureFlag.WORKSHOPS -> screen { navigateToWorkshops() }
-        // «اطلاعات پیمان» in the server menu; the screen it opens is titled «ردیف‌های پیمان».
         FeatureFlag.CONTRACT_INFO -> screen { navigateToContractRows() }
         FeatureFlag.COMPLETE_WORKSHOP_INFO -> screen { navigateToCompleteEmployerInfo() }
         FeatureFlag.STACK_HOLDER_LIST -> screen { navigateToLegalRepresentativeWorkshops() }
@@ -87,20 +87,21 @@ fun NavController.navigateToFeature(flag: FeatureFlag, beforeOpen: () -> Unit = 
         FeatureFlag.HOUSEWIFE_INSURANCE -> screen { navigateToContractFlow(ContractType.HOUSEWIFE) }
         FeatureFlag.PENSION_INQUIRY -> screen { navigateToPensionStatusInquiry() }
         FeatureFlag.CALCULATE_WAGE_PENSION,
-        FeatureFlag.CALCULATE_WAGE_PENSION_109 -> screen { navigateToCalculateWagePension() }
+        FeatureFlag.CALCULATE_WAGE_PENSION_PENSIONER -> screen { navigateToCalculateWagePension() }
         FeatureFlag.RETIREMENT_PENSION -> screen { navigateToRetirementPension() }
         // «نسخه‌های الکترونیک» lives in the treatment tab; the pensioner module's PrescriptionScreen
         // is an empty placeholder and showed a blank page.
         FeatureFlag.PRESCRIPTION -> screen { navigateToPrescriptions() }
-        FeatureFlag.DESERVED_TREATMENT_101 -> screen { navigateToDeservedTreatment() }
+        FeatureFlag.DESERVED_TREATMENT_PENSIONER -> screen { navigateToDeservedTreatment() }
         FeatureFlag.PAY_ROLL -> screen { navigateToPayRoll() }
         FeatureFlag.EDICT_PENSIONER -> screen { navigateToEdict() }
         FeatureFlag.ISSUANCE_WAGE_CERTIFICATE -> screen { navigateToIssuanceCertificate() }
         FeatureFlag.DEFERRED_INSTALLMENT_CERTIFICATE -> screen { navigateToDeferredInstallment() }
         FeatureFlag.GIRL_SURVIVOR -> screen { navigateToGirlSurvivor() }
         FeatureFlag.REQUEST_PENSION_BY_SURVIVOR,
-        FeatureFlag.REQUEST_PENSION_BY_SURVIVOR_112 -> screen { navigateToPensionSurvivor() }
-        FeatureFlag.DISABILITY_PENSION -> screen { navigateToDisabilityPension() }
+        FeatureFlag.REQUEST_PENSION_BY_SURVIVOR_PENSIONER -> screen { navigateToPensionSurvivor() }
+        FeatureFlag.DISABILITY_PENSION,
+        FeatureFlag.DISABILITY_PENSION_PENSIONER -> screen { navigateToDisabilityPension() }
         FeatureFlag.VIEW_TITLE_JOB -> screen { navigateToHistoryJobInfo() }
         FeatureFlag.SEND_INSURANCE_HISTORY_TO_INSTITUTION -> screen { navigateToSendInsuranceHistoryToInstitutions() }
         FeatureFlag.OROTEZ_PROTEZ -> screen { navigateToOrotezProtez() }

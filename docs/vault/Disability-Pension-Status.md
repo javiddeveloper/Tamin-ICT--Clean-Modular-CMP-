@@ -4,7 +4,7 @@ tags: [domain, gotcha]
 
 # مستمری از کارافتادگی — Disability Pension Status Tracking
 
-`FeatureFlag.DISABILITY_PENSION(113)` · `:feature:pensioner` → `ui/disabilityPension`
+`FeatureFlag.DISABILITY_PENSION(17) · `DISABILITY_PENSION_PENSIONER`(107)` · `:feature:pensioner` → `ui/disabilityPension`
 (UI stub only — `DisabilityPensionViewModel` is currently a no-op, `Init` intent does
 nothing) · network/domain/data layers live in `PensionApiService`/`PensionRepository`
 (not `Personal*`, except the dependents endpoint — see table below).

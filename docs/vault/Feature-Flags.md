@@ -12,14 +12,57 @@ The home screen's services arrive dynamically from a web service in the data lay
 
 | Field | Meaning |
 |---|---|
-| `id` | unique service id (e.g. 35 for contract affairs) |
+| `id` | unique service id (e.g. 15 for contract affairs) — also decides the order on screen, see below |
 | `name` | display name |
 | `showRole` | array of role numbers (e.g. `[1, 2]`) controlling who sees the service |
 | `status` | current service state (active, disabled, webview, …) |
 | `message` | error message to display when the service is unavailable |
+| `sorting` | the server's explicit ordering key; **null for every locally served row** |
 | `url` | target link when the service is a webview |
 
 `menu.json` at the repo root is a local sample of this structure.
+
+### `id` decides the order on screen, not the order of `MockMenuData`
+
+The menu is not rendered straight off the list the data source returns. `CommonRepositoryImpl.getMainMenu`
+writes it into Room (`menu_items`, `MenuEntity.id` as the primary key) and the UI reads it back
+through `MenuDao.getMenuItems()` — `ORDER BY sorting ASC, id ASC`. Since `sorting` is null for every
+row in `MockMenuData`, **`id` is the tie-break that actually orders the menu**. Writing the list in
+one order and numbering it in another silently renders it in the numbering's order.
+
+So each block of `MockMenuData` is written in display order with its ids ascending in step. Ids are
+banded by audience:
+
+| Band | Audience | `showRole` |
+|---|---|---|
+| `1`–`37` | insured | `1` |
+| `101`–`110` | pensioners | `2` |
+| `1001`–`1010` | employers | `3` |
+| `2000` | AI assistant | all |
+| `90`–`93` | **no menu row** — flags kept only for deep links / assistant actions | — |
+
+⚠️ These ids are the app's own. They were the legacy server's until 2026-09-19 (the canonical dump is
+`my-tamin-droid/temp_menu.csv`, see [[Reference-old-android]]), when the menu was reordered and
+renumbered to match. So if `menu_data_<version>.txt` is ever switched back on in
+`CommonRemoteDataSourceImpl.getMainMenu`, the server payload's ids will **not** line up — every
+`FeatureFlag` id has to be remapped back to whatever that file sends before the remote menu can be
+trusted.
+
+### One service, two audiences
+
+A service both an insured person and a pensioner reach is modelled one of two ways:
+
+- **One row, `showRole = [1, 2]`** when a single position serves both (id `28`, نسخ الکترونیک).
+- **Two rows with two ids and one `FeatureFlag` each** when each audience needs it in its own
+  position — the pensioner's flag suffixed `_PENSIONER`, both routed to the same screen in
+  `FeatureNavigation.kt`: `CALCULATE_WAGE_PENSION(11)`/`…_PENSIONER(104)`,
+  `DISABILITY_PENSION(17)`/`…_PENSIONER(107)`, `REQUEST_PENSION_BY_SURVIVOR(21)`/`…_PENSIONER(108)`,
+  `DESERVED_TREATMENT(27)`/`…_PENSIONER(110)`.
+
+⚠️ Never give two rows the same id. `MenuEntity.id` is the primary key and the insert is
+`OnConflictStrategy.REPLACE`, so the second row silently overwrites the first in the cache and one of
+them disappears. `FeatureFlag.fromId` likewise takes the *first* match, so a repeated id in the enum
+routes a menu row to whichever flag happens to be declared first.
 
 ## 2. User roles via `showRole`
 
@@ -71,9 +114,9 @@ A deep link, a story call-to-action or an assistant button never navigates on it
 - Availability and error messages take effect from the server without shipping a new app version.
 - Routing errors and view handling are centralized in `FeatureManager`.
 
-## 5a. `STACK_HOLDER_LIST(1005)` — legal representative introduction, not `workshopStackholders`
+## 5a. `STACK_HOLDER_LIST(1008)` — legal representative introduction, not `workshopStackholders`
 
-`STACK_HOLDER_LIST(1005)` (in the employer `1001`–`1012` range) routes to
+`STACK_HOLDER_LIST(1008)` (in the employer `1001`–`1010` range) routes to
 `feature:workshops`' `ui/legalRepresentative/**` flow — "معرفی نماینده اشخاص
 حقوقی" (introducing a representative for a legal-entity employer). Wired via
 `navigateToLegalRepresentativeWorkshops()` in `FeatureNavigation.kt`.
@@ -84,7 +127,7 @@ A deep link, a story call-to-action or an assistant button never navigates on it
 nationalId/mobile list) with no relation to legal representatives, no OTP, and
 no add/edit/delete. The two happen to share the word "stakeholder/stack
 holder" in their naming, purely coincidentally (`WorkshopStackHolderDN` came
-first); nothing currently links them and none of the flag id `1005` overlaps
+first); nothing currently links them and none of the flag id `1008` overlaps
 with the flag that fronts `workshopStackholders` — searching for "stackholder"
 across the module will surface both, so check which feature you actually mean
 before touching either.
@@ -99,7 +142,7 @@ re-verifying against a live backend.
 
 The AI assistant is a standalone feature in the flag system.
 
-**Id:** `AGENT(2000)` in `FeatureFlag.kt` — deliberately outside the employer range (`1001`–`1012`) so it is semantically distinct.
+**Id:** `AGENT(2000)` in `FeatureFlag.kt` — deliberately outside the employer range (`1001`–`1010`) so it is semantically distinct.
 
 ### Two-stage access control
 
