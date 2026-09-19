@@ -235,6 +235,33 @@
     <!-- Stands in for an amount that has not loaded; must never read as a real figure. -->
     <string name="amount_unknown">—</string>
 
+    <!-- Home service sections (دسترسی سریع / خدمات ویژه) -->
+    <string name="home_section_frequent">پرکاربرد</string>
+    <string name="home_section_history">سابقه</string>
+    <string name="home_section_aid">کمک‌هزینه</string>
+    <string name="home_section_pensioner">مستمری</string>
+    <string name="home_section_employer">کارفرما</string>
+    <string name="home_section_featured">خدمات ویژه</string>
+    <string name="home_section_last_requests">آخرین درخواست‌ها</string>
+    <string name="home_see_all">همه</string>
+    <string name="home_quick_access_all">همهٔ خدمات</string>
+
+    <!-- Home header: title, name area, AI ask-bar, status chips, suggestion chips -->
+    <string name="home_header_title">تأمین من</string>
+    <string name="home_header_support_cd">پشتیبانی</string>
+    <string name="home_header_shield_cd">وضعیت حساب</string>
+    <!-- Shown once the home sync has loaded but the server returned no usable name. -->
+    <string name="home_header_fallback_name">کاربر تامین</string>
+    <string name="home_ask_agent_hint">از یارا بپرسید...</string>
+    <string name="home_ask_agent_cd">پرسش از دستیار هوشمند</string>
+    <string name="home_chip_darman_covered">بیمهٔ درمانی · برخوردار</string>
+    <string name="home_chip_darman_uncovered">بیمهٔ درمانی · فاقد</string>
+    <string name="home_chip_relation_active">ارتباط فعال</string>
+    <string name="home_chip_relation_inactive">ارتباط غیرفعال</string>
+    <string name="home_suggestion_retirement">چقدر تا بازنشستگی مانده؟</string>
+    <string name="home_suggestion_history">سابقه‌ام کامل است؟</string>
+    <string name="home_suggestion_booklet">دفترچه چطور تمدید می‌شود؟</string>
+
     <!-- Treatment hub -->
     <string name="hub_empty_patients">بیمه‌شده‌ای برای نمایش وجود ندارد</string>
     <string name="hub_quick_access">دسترسی سریع</string>
