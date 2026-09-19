@@ -32,4 +32,13 @@ class FeatureManagerImpl(
             null
         }
     }
+
+    override suspend fun getFeatureTitle(flag: FeatureFlag): String? {
+        return try {
+            val menu = commonRepository.getMainMenu("", false).first()
+            menu.find { it.id == flag.id }?.name?.takeIf { it.isNotBlank() }
+        } catch (e: Exception) {
+            null
+        }
+    }
 }

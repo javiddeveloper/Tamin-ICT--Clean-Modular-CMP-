@@ -3,7 +3,6 @@ package com.tamin.taminhamrah.feature.workshops.ui.objectionStatus.list
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,16 +39,17 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.feature.workshops.ui.objectionStatus.components.labelRes
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.workshops.ui.components.DashedEmptyStateCard
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopListScaffold
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopTextField
 import com.tamin.taminhamrah.feature.workshops.ui.components.colors
 import com.tamin.taminhamrah.feature.workshops.ui.components.tint
 import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
+import com.tamin.taminhamrah.feature.workshops.ui.objectionStatus.components.labelRes
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionPR
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionStatus
@@ -88,6 +87,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_chevron_down
+import taminx.core.core_ui.ic_tamin_cross
 import taminx.core.core_ui.ic_tamin_objection_document
 import taminx.core.core_ui.ic_tamin_objection_sms
 import taminx.core.core_ui.objection_status_action_document
@@ -111,7 +111,6 @@ import taminx.core.core_ui.objection_status_objection_date
 import taminx.core.core_ui.objection_status_objection_number
 import taminx.core.core_ui.objection_status_remove_filters
 import taminx.core.core_ui.objection_status_search
-import taminx.core.core_ui.objection_status_search_field
 import taminx.core.core_ui.objection_status_search_title
 import taminx.core.core_ui.objection_status_stat_count
 import taminx.core.core_ui.objection_status_subtitle
@@ -121,6 +120,7 @@ import taminx.core.core_ui.objection_status_workshop_id
 import taminx.core.core_ui.workshop_card_collapse
 import taminx.core.core_ui.workshop_card_expand
 import taminx.core.core_ui.workshop_code
+import taminx.core.core_ui.workshop_filter_clear
 
 @Composable
 fun ObjectionStatusScreen(
@@ -188,6 +188,7 @@ fun ObjectionStatusContent(
                         AppliedFiltersRow(
                             applied = state.applied,
                             onRemoveFilter = { onIntent(ObjectionStatusIntent.RemoveFilter(it)) },
+                            onClearAll = { onIntent(ObjectionStatusIntent.ClearFilters) },
                         )
                     }
                 }
@@ -387,12 +388,12 @@ private fun IdentityCell(value: String, label: String, modifier: Modifier = Modi
 private fun AppliedFiltersRow(
     applied: ObjectionStatusFilters,
     onRemoveFilter: (ObjectionStatusFilterField) -> Unit,
+    onClearAll: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
     Row(
-        modifier = modifier.fillMaxWidth().padding(vertical = Spacing.sm)
-        ,
+        modifier = modifier.fillMaxWidth().padding(vertical = Spacing.sm),
         horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -432,18 +433,28 @@ private fun AppliedFiltersRow(
                 modifier = Modifier.weight(1f),
             )
         }
-        Text(
-            text = stringResource(Res.string.objection_status_remove_filters),
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Bold,
-            color = colors.textSecondary,
-        )
-        Icon(
-            imageVector = Icons.Default.Close,
-            contentDescription = null,
-            tint = colors.textSecondary,
-            modifier = Modifier.size(IconSize.small),
-        )
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(CornerRadius.chip))
+                .clickable(onClick = onClearAll)
+                .padding(horizontal = Spacing.xs, vertical = Spacing.xxs),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xxs),
+        ) {
+            Text(
+                text = stringResource(Res.string.objection_status_remove_filters),
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                color = colors.textSecondary,
+            )
+            Icon(
+                imageVector = vectorResource(Res.drawable.ic_tamin_cross),
+                // «حذف» beside it already names the action; a description here is read out twice.
+                contentDescription = null,
+                tint = colors.textSecondary,
+                modifier = Modifier.size(WorkshopDimens.chipCrossSize),
+            )
+        }
     }
 }
 
@@ -456,7 +467,7 @@ private fun FilterChip(text: String, onRemove: () -> Unit, modifier: Modifier = 
             .background(colors.blueBg)
             .clickable(onClick = onRemove)
             .padding(horizontal = Spacing.sm, vertical = Spacing.xs),
-        horizontalArrangement = Arrangement.Center,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xxs),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
@@ -465,6 +476,14 @@ private fun FilterChip(text: String, onRemove: () -> Unit, modifier: Modifier = 
             fontWeight = FontWeight.Bold,
             color = colors.blueText,
             maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f, fill = false),
+        )
+        Icon(
+            imageVector = vectorResource(Res.drawable.ic_tamin_cross),
+            contentDescription = stringResource(Res.string.workshop_filter_clear),
+            tint = colors.blueText,
+            modifier = Modifier.size(WorkshopDimens.chipCrossSize),
         )
     }
 }

@@ -55,6 +55,8 @@ data class HomeUiState(
 sealed interface HomeIntent {
     object LoadMenu : HomeIntent
     object LoadHistorySummary : HomeIntent
+    /** Re-asks whether this user may chat with the assistant; runs whenever home is shown. */
+    object RefreshAgentAccess : HomeIntent
     data class OnServiceClick(val service: MainServiceDN) : HomeIntent
     data class OnCampaignClick(val flag: FeatureFlag) : HomeIntent
     /** Anywhere on خلاصهٔ سابقه — the card, its year pill and «جزئیات ماه‌به‌ماه» all open سوابق. */

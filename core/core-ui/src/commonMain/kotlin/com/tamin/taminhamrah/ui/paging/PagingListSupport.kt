@@ -11,8 +11,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,11 +24,13 @@ import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.action_retry
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val DEFAULT_PREFETCH_DISTANCE = 2
 
@@ -48,6 +53,33 @@ fun LazyListState.OnLoadMore(
             .filter { it }
             .collect { currentOnLoadMore() }
     }
+}
+
+/** How long typing has to pause before a server-side search is sent. */
+private const val SEARCH_DEBOUNCE_MILLIS = 300L
+
+/**
+ * The text a server-side search field shows, handed to [onQueryChange] only once typing pauses.
+ *
+ * Without the pause every keystroke is a request of its own, against lists that run to hundreds
+ * of thousands of rows. The field reads and writes the returned state; [query] seeds it and is
+ * what an unchanged text is compared against, so opening a sheet does not re-send its query.
+ */
+@Composable
+fun rememberDebouncedQuery(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    delayMillis: Long = SEARCH_DEBOUNCE_MILLIS,
+): MutableState<String> {
+    val text = remember { mutableStateOf(query) }
+    val currentQuery by rememberUpdatedState(query)
+    val currentOnQueryChange by rememberUpdatedState(onQueryChange)
+    LaunchedEffect(text.value, delayMillis) {
+        if (text.value == currentQuery) return@LaunchedEffect
+        delay(delayMillis.milliseconds)
+        currentOnQueryChange(text.value)
+    }
+    return text
 }
 
 @Composable

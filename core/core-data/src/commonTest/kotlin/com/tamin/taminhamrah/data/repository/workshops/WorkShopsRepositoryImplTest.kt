@@ -23,6 +23,7 @@ import com.tamin.taminhamrah.model.workshop.LegalRepresentativeDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeRequestDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberConfirmResultDTO
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.SmsMessageDTO
@@ -32,10 +33,19 @@ import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
-/** Only what `getWorkShopObjections`/`getWorkShopObjectionSms` need — every other method is unused stub. */
+/**
+ * Only what the objection lookups and the registration's create-or-update need — every other method
+ * is an unused stub.
+ */
 private class FakeWorkShopsRemoteDataSource : WorkShopsRemoteDataSource {
     var lastObjectionsQuery: ApiQueryParamDN? = null
+        private set
+    var createdRegistration: NewMemberRegistrationDTO? = null
+        private set
+    var updatedPersonalId: Long? = null
         private set
     var lastSmsSeqNo: Long? = null
         private set
@@ -105,8 +115,20 @@ private class FakeWorkShopsRemoteDataSource : WorkShopsRemoteDataSource {
 
     override suspend fun deleteRecentlyAddedMember(personalId: Long) = Unit
     override suspend fun checkNewMemberIsNew(nationalId: String): Boolean = notImplemented()
-    override suspend fun createNewMemberRegistration(request: NewMemberRegistrationDTO): NewMemberRegistrationResultDTO =
-        notImplemented()
+    override suspend fun createNewMemberRegistration(
+        request: NewMemberRegistrationDTO,
+    ): NewMemberRegistrationResultDTO {
+        createdRegistration = request
+        return NewMemberRegistrationResultDTO(id = CREATED_PERSONAL_ID)
+    }
+
+    override suspend fun updateNewMemberRegistration(
+        personalId: Long,
+        request: NewMemberRegistrationDTO,
+    ): NewMemberRegistrationResultDTO {
+        updatedPersonalId = personalId
+        return NewMemberRegistrationResultDTO(id = personalId)
+    }
 
     override suspend fun getWorkshopsDebtsList(
         workshopId: String,
@@ -234,4 +256,42 @@ class WorkShopsRepositoryImplTest {
 
         assertEquals(1403008720L, remote.lastSmsSeqNo)
     }
+
+    @Test
+    fun createNewMemberRegistration_createsAPersonNotYetOnFile() = runTest {
+        val result = repository.createNewMemberRegistration(registration(personalId = null))
+
+        assertNotNull(remote.createdRegistration)
+        assertNull(remote.updatedPersonalId)
+        assertEquals(CREATED_PERSONAL_ID, result.personalId)
+    }
+
+    /**
+     * A person already on file is updated under their own id. Creating them again adds a second
+     * `employers` record for the same person — the duplicate a re-opened draft used to leave.
+     */
+    @Test
+    fun createNewMemberRegistration_updatesAPersonAlreadyOnFile() = runTest {
+        val result = repository.createNewMemberRegistration(registration(personalId = 42L))
+
+        assertEquals(42L, remote.updatedPersonalId)
+        assertNull(remote.createdRegistration)
+        assertEquals(42L, result.personalId)
+    }
+
+    private fun registration(personalId: Long?) = NewMemberRegistrationDN(
+        firstName = "احمد",
+        lastName = "احمدی",
+        nationalId = "1234567891",
+        dateOfBirth = "1370/01/01",
+        cityOfBirthId = "0701",
+        cityOfIssueId = "0701",
+        jobCode = "7",
+        startDate = "1405/01/01",
+        workshopId = "9028218513",
+        branchCode = "14",
+        personalId = personalId,
+    )
 }
+
+private const val CREATED_PERSONAL_ID = 7L

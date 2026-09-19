@@ -14,5 +14,8 @@ data class SubdominantItemDN(
     val dateOfBirthTimestamp: Long? = null,
     val relationDescription: String? = null,
     val status: String? = null,
-    val insuranceId: String? = null
+    val insuranceId: String? = null,
+    /** Relation code (`baseTendency.tendencyCode`), e.g. 101 for a son. */
+    val tendencyCode: String? = null,
+    val genderCode: String? = null,
 )

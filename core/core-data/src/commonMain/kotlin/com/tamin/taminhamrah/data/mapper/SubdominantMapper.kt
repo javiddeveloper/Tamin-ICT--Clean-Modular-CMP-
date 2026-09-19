@@ -21,7 +21,9 @@ internal fun SubDominantResponseDTO.toDomain(): SubdominantDN = SubdominantDN(
             relationDescription = relationSub?.baseTendency?.tendencyDescription
                 ?: relationSub?.relationDescription,
             status = relationSub?.relationDescription,
-            insuranceId = relation?.insuranceId
+            insuranceId = relation?.insuranceId,
+            tendencyCode = relationSub?.baseTendency?.tendencyCode,
+            genderCode = personal?.gender?.genderCode,
         )
     },
     total = totalCount?.toString()

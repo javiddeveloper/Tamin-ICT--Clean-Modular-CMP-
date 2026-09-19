@@ -53,5 +53,6 @@ class FakePersonalRepository : PersonalRepository {
     override fun getGirlSurvivorReport(params: GirlSurvivorReportParamsDN): Flow<PdfDownloadDN> = flow {}
     override fun confirmGirlSurvivor(body: ConfirmGirlSurvivorDN): Flow<String?> = flow { emit(null) }
     override fun putInsuredRegistrationDocList(personalId: String, docs: List<InsuredDocDN>): Flow<String?> = flow { emit(null) }
+    override fun getInsuredRegistrationDocList(personalId: String): Flow<List<InsuredDocDN>> = flow { emit(emptyList()) }
     override fun getRequestSummary(requestId: String): Flow<NewInsuredSummaryDN?> = flow { emit(null) }
 }
