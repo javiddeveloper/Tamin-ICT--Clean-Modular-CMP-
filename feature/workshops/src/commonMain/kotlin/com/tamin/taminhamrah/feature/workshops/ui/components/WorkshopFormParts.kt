@@ -35,10 +35,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -57,6 +62,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachment
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopDocumentType
+import com.tamin.taminhamrah.ui.components.toast.LocalToaster
+import com.tamin.taminhamrah.ui.components.toast.warning
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.ui.components.InputRestriction
 import com.tamin.taminhamrah.ui.components.LoadingButton
@@ -88,6 +95,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.error_image_duplicate
 import taminx.core.core_ui.ic_info
 import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.ic_tamin_chevron_back
@@ -401,6 +409,29 @@ fun WorkshopReviewGroup(
 }
 
 /**
+ * Whether the picked file with [fingerprint] is already one of these attachments — the old app's
+ * «تصویر تکراری انتخاب شده است». By content, since a picker names the same photo differently each
+ * time; [fingerprints] maps each attachment's guid to the file it was picked from.
+ */
+internal fun List<WorkshopAttachment>.holdsFile(
+    fingerprint: String,
+    fingerprints: Map<String, String>,
+): Boolean = any { fingerprints[it.guid] == fingerprint }
+
+/** Length plus content hash: two different photos agreeing on both is not a practical case. */
+internal fun ByteArray.fingerprint(): String = "$size:${contentHashCode()}"
+
+/** Keeps a panel's fingerprints across a configuration change, flattened to guid, fingerprint, … */
+private val FingerprintsSaver = listSaver<SnapshotStateMap<String, String>, String>(
+    save = { map -> map.flatMap { (guid, fingerprint) -> listOf(guid, fingerprint) } },
+    restore = { flat ->
+        mutableStateMapOf<String, String>().apply {
+            flat.chunked(2).forEach { (guid, fingerprint) -> put(guid, fingerprint) }
+        }
+    },
+)
+
+/**
  * The files attached so far, the control that adds another, and the sheet that names its type.
  *
  * The rows are core-ui's [TaminDocumentUploadCard] — the same card the occurrence report uses —
@@ -451,6 +482,28 @@ fun WorkshopDocumentsPanel(
     // Never cleared: a canceled pick hands back a null file, which is what the callback tests.
     var pendingType by remember { mutableStateOf<WorkshopDocumentType?>(null) }
 
+    // Which picked file each attachment came from, by guid. Kept here rather than on the
+    // attachment because only the panel ever holds the bytes; a document read back from the
+    // service has no entry, so it never counts as a duplicate.
+    // ponytail: forgotten when a multi-step form leaves its documents step and comes back; hoist
+    // the map into the form page if a repeat pick across steps ever matters.
+    val fingerprints = rememberSaveable(saver = FingerprintsSaver) { mutableStateMapOf() }
+    var pendingFingerprint by rememberSaveable { mutableStateOf<String?>(null) }
+    var countAtHandOff by rememberSaveable { mutableStateOf(0) }
+    // The file handed on is the newest attachment once the list grows past where it was; a failed
+    // upload adds nothing, and the next pick replaces what is pending.
+    LaunchedEffect(attachments) {
+        val fingerprint = pendingFingerprint ?: return@LaunchedEffect
+        if (attachments.size <= countAtHandOff) return@LaunchedEffect
+        fingerprints[attachments.last().guid] = fingerprint
+        pendingFingerprint = null
+    }
+    // The picker answers after the pick, so it reads the list as it is then, not as it was when
+    // the launcher was built.
+    val currentAttachments by rememberUpdatedState(attachments)
+    val toaster = LocalToaster.current
+    val duplicateMessage = stringResource(Res.string.error_image_duplicate)
+
     // The wave outlives the upload by [WAVE_TAIL_MILLIS], the way step 6 of the occurrence report
     // does it — a fast upload otherwise flashes the card and is gone before it reads as progress.
     var isWaving by remember { mutableStateOf(false) }
@@ -476,7 +529,18 @@ fun WorkshopDocumentsPanel(
     ) { file ->
         val type = pendingType
         if (file == null || type == null) return@rememberFilePickerLauncher
-        scope.launch { onAdd(file.name, file.readBytes(), type.code) }
+        scope.launch {
+            val bytes = file.readBytes()
+            val fingerprint = bytes.fingerprint()
+            // The same image twice is refused before it is uploaded, as the old app did.
+            if (currentAttachments.holdsFile(fingerprint, fingerprints)) {
+                toaster.warning(duplicateMessage)
+                return@launch
+            }
+            pendingFingerprint = fingerprint
+            countAtHandOff = currentAttachments.size
+            onAdd(file.name, bytes, type.code)
+        }
     }
 
     Column(
