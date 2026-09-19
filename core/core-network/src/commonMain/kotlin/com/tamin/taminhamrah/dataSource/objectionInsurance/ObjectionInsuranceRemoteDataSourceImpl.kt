@@ -12,6 +12,7 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.HttpStatusErrorMapper
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
+import com.tamin.taminhamrah.tools.safeCall
 
 class ObjectionInsuranceRemoteDataSourceImpl(
     private val objectionInsuranceApiService: ObjectionInsuranceApiService,
@@ -19,51 +20,32 @@ class ObjectionInsuranceRemoteDataSourceImpl(
     private val errorParser: ErrorParser,
 ) : ObjectionInsuranceRemoteDataSource {
 
-    override suspend fun checkStatusConflict(): Boolean {
-        return fetchData { objectionInsuranceApiService.checkStatusConflict() }
-    }
-
-    override suspend fun getConflictHistories(query: ApiQueryParamDN): ListData<ObjectionInsuranceHistoryDTO> {
-        return fetchData {
-            objectionInsuranceApiService.getConflictHistories(apiQueryBuilder.buildQuery(query))
+    override suspend fun checkStatusConflict(): Boolean =
+        errorParser.safeCall(TAG_CHECK_STATUS) {
+            objectionInsuranceApiService.checkStatusConflict().extractData()
         }
-    }
 
-    override suspend fun saveConflict(items: List<ObjectionInsuranceHistoryDTO>): String? {
-        return try {
+    override suspend fun getConflictHistories(query: ApiQueryParamDN): ListData<ObjectionInsuranceHistoryDTO> =
+        errorParser.safeCall(TAG_GET_HISTORIES) {
+            objectionInsuranceApiService.getConflictHistories(apiQueryBuilder.buildQuery(query)).extractData()
+        }
+
+    override suspend fun saveConflict(items: List<ObjectionInsuranceHistoryDTO>): String? =
+        errorParser.safeCall(TAG_SAVE_CONFLICT) {
             objectionInsuranceApiService.saveConflict(items).extractNullableData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
-    }
 
-    override suspend fun confirmConflict(description: String?): Boolean {
-        return fetchData {
+    override suspend fun confirmConflict(description: String?): Boolean =
+        errorParser.safeCall(TAG_CONFIRM) {
             objectionInsuranceApiService.confirmConflict(
                 listOf(ConfirmConflictItemDTO(userDesc = description))
-            )
+            ).extractData()
         }
-    }
 
-    override suspend fun finalConfirmConflict(): String {
-        return fetchData { objectionInsuranceApiService.finalConfirmConflict() }
-    }
-
-    private suspend fun <T> fetchData(call: suspend () -> BaseDTO<T>): T {
-        return try {
-            call().extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
+    override suspend fun finalConfirmConflict(): String =
+        errorParser.safeCall(TAG_FINAL_CONFIRM) {
+            objectionInsuranceApiService.finalConfirmConflict().extractData()
         }
-    }
 
     /**
      * Like [extractData], but allows null [BaseDTO.data] on 2xx (legacy null-data success).
@@ -92,5 +74,13 @@ class ObjectionInsuranceRemoteDataSourceImpl(
                 )
             }
         }
+    }
+
+    private companion object {
+        const val TAG_CHECK_STATUS = "checkStatusConflict"
+        const val TAG_GET_HISTORIES = "getConflictHistories"
+        const val TAG_SAVE_CONFLICT = "saveConflict"
+        const val TAG_CONFIRM = "confirmConflict"
+        const val TAG_FINAL_CONFIRM = "finalConfirmConflict"
     }
 }

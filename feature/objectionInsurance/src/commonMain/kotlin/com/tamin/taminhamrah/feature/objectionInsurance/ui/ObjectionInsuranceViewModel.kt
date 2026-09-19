@@ -19,6 +19,7 @@ import com.tamin.taminhamrah.util.PersianDateFormatter
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.collections.immutable.toPersistentMap
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
@@ -137,6 +138,8 @@ class ObjectionInsuranceViewModel(
                 val records = getObjectionInsuranceHistoriesUseCase().first().toPresentation()
                 emit(PartialState.RecordsLoaded(records.toPersistentList()))
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
         }
@@ -158,6 +161,8 @@ class ObjectionInsuranceViewModel(
             } else {
                 emit(PartialState.Error(getString(Res.string.objection_insurance_submit_rejected_error)))
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
         } finally {
