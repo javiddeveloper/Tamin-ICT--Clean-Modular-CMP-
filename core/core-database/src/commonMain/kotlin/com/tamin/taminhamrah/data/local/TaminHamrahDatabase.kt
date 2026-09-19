@@ -56,6 +56,8 @@ import com.tamin.taminhamrah.data.local.entity.AgentMessageEntity
 import com.tamin.taminhamrah.data.local.entity.VersionHistoryEntity
 import com.tamin.taminhamrah.data.local.dao.AgentChatDao
 import com.tamin.taminhamrah.data.local.dao.VersionHistoryDao
+import com.tamin.taminhamrah.data.local.dao.HomeContentDao
+import com.tamin.taminhamrah.data.local.entity.HomeContentEntity
 import androidx.room.TypeConverters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -95,6 +97,7 @@ import kotlinx.coroutines.IO
         HistoryJobInfoEntity::class,
         HistoryYearEntity::class,
         HistoryWageRowEntity::class,
+        HomeContentEntity::class,
     ],
     version = 4,
 )
@@ -119,6 +122,7 @@ expect abstract class TaminXDatabase : RoomDatabase {
     abstract fun historyJobInfoDao(): HistoryJobInfoDao
 
     abstract fun historyCacheDao(): HistoryCacheDao
+    abstract fun homeContentDao(): HomeContentDao
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT")

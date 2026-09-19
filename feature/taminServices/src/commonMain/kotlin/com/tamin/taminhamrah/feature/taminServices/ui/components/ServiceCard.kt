@@ -7,8 +7,6 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -33,6 +31,7 @@ import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.serviceIconFor
 import com.tamin.taminhamrah.ui.theme.*
 
 @Composable
@@ -167,7 +166,7 @@ fun ServiceCard(
 }
 
 @Composable
-private fun AutoResizeText(
+ fun AutoResizeText(
     text: String,
     style: TextStyle,
     modifier: Modifier = Modifier,
@@ -197,55 +196,7 @@ private fun AutoResizeText(
     )
 }
 
-internal fun getIconForName(name: String?): ImageVector {
-    return when (name) {
-        "user" -> Icons.Default.Person
-        "relation" -> Icons.Default.Link
-        "credit-card" -> Icons.Default.CreditCard
-        "camera" -> Icons.Default.PhotoCamera
-        "relationship" -> Icons.Default.People
-        "inbox" -> Icons.Default.Inbox
-        "bill" -> Icons.Default.Receipt
-        "budget" -> Icons.Default.AttachMoney
-        "paper-plane" -> Icons.Default.Send
-        "protest" -> Icons.Default.Gavel
-        "list" -> Icons.Default.List
-        "obligation" -> Icons.Default.Assignment
-        "love" -> Icons.Default.Favorite
-        "crutch" -> Icons.Default.Accessibility
-        "medical" -> Icons.Default.LocalHospital
-        "death" -> Icons.Default.LocalFlorist
-        "cctv" -> Icons.Default.Visibility
-        "wedding-presents" -> Icons.Default.CardGiftcard
-        "medicine" -> Icons.Default.Healing
-        "scan" -> Icons.Default.QrCodeScanner
-        "calc" -> Icons.Default.Calculate
-        "first-aid-kit" -> Icons.Default.MedicalServices
-        "folder" -> Icons.Default.Folder
-        "agreement-freelance" -> Icons.Default.Handshake
-        "student" -> Icons.Default.School
-        "contract_payment" -> Icons.Default.Payment
-        "woman_agreement-freelance" -> Icons.Default.Face
-        "optional-insurance" -> Icons.Default.VerifiedUser
-        "student_inquiry" -> Icons.Default.Search
-        "survivors" -> Icons.Default.FamilyRestroom
-        "ticket" -> Icons.Default.ConfirmationNumber
-        "objecting_history_bugs" -> Icons.Default.ReportProblem
-        "insurance" -> Icons.Default.Policy
-        "announcement" -> Icons.Default.Campaign
-        "stamp" -> Icons.Default.AppRegistration
-        "document" -> Icons.Default.Description
-        "agreement" -> Icons.Default.AssignmentTurnedIn
-        "disability" -> Icons.Default.WheelchairPickup
-        "workshop" -> Icons.Default.Business
-        "contract" -> Icons.Default.BorderColor
-        "ic_assigner" -> Icons.Default.TransferWithinAStation
-        "employer_info" -> Icons.Default.Info
-        "onlineServiceReq" -> Icons.Default.CloudQueue
-        "update" -> Icons.Default.Update
-        else -> Icons.Default.HelpOutline
-    }
-}
+internal fun getIconForName(name: String?): ImageVector = serviceIconFor(name)
 
 @PreviewRtlTheme
 @Composable

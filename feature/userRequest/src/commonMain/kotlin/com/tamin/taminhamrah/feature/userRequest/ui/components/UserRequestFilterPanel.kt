@@ -18,8 +18,6 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -44,7 +42,6 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import org.jetbrains.compose.resources.stringResource
 import taminx.feature.userrequest.generated.resources.Res as UserRequestRes
-import taminx.feature.userrequest.generated.resources.user_request_all_types
 import taminx.feature.userrequest.generated.resources.user_request_filter_close_desc
 import taminx.feature.userrequest.generated.resources.user_request_search_button
 import taminx.feature.userrequest.generated.resources.user_request_search_ref_code_placeholder
@@ -54,6 +51,7 @@ import taminx.feature.userrequest.generated.resources.user_request_type_placehol
 @Composable
 fun UserRequestFilterPanel(
     refCode: String,
+    selectedTypeId: String?,
     selectedTypeName: String?,
     requestTypes: List<UserRequestTypePR>,
     onRefCodeChanged: (String) -> Unit,
@@ -62,7 +60,7 @@ fun UserRequestFilterPanel(
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var isDropdownOpen by remember { mutableStateOf(false) }
+    var isTypeSheetOpen by remember { mutableStateOf(false) }
     val taminColors = LocalTaminColors.current
 
     Card(
@@ -127,53 +125,37 @@ fun UserRequestFilterPanel(
                 )
             )
 
-            // Request Type Selector Dropdown Box
-            Box(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(CornerRadius.chip))
-                        .border(Thickness.border, taminColors.divider, RoundedCornerShape(CornerRadius.chip))
-                        .clickable { isDropdownOpen = true }
-                        .padding(horizontal = Spacing.md, vertical = Spacing.md),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    TaminText(
-                        text = selectedTypeName ?: stringResource(UserRequestRes.string.user_request_type_placeholder),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = if (selectedTypeName != null) taminColors.textPrimary else taminColors.textTertiary
-                    )
+            // Request Type Selector
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(CornerRadius.chip))
+                    .border(Thickness.border, taminColors.divider, RoundedCornerShape(CornerRadius.chip))
+                    .clickable { isTypeSheetOpen = true }
+                    .padding(horizontal = Spacing.md, vertical = Spacing.md),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TaminText(
+                    text = selectedTypeName ?: stringResource(UserRequestRes.string.user_request_type_placeholder),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (selectedTypeName != null) taminColors.textPrimary else taminColors.textTertiary
+                )
 
-                    Icon(
-                        imageVector = Icons.Default.ArrowDropDown,
-                        contentDescription = null,
-                        tint = taminColors.textSecondary
-                    )
-                }
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = null,
+                    tint = taminColors.textSecondary
+                )
+            }
 
-                DropdownMenu(
-                    expanded = isDropdownOpen,
-                    onDismissRequest = { isDropdownOpen = false },
-                    modifier = Modifier.fillMaxWidth(0.9f)
-                ) {
-                    DropdownMenuItem(
-                        text = { TaminText(stringResource(UserRequestRes.string.user_request_all_types)) },
-                        onClick = {
-                            onTypeSelected(null, null)
-                            isDropdownOpen = false
-                        }
-                    )
-                    requestTypes.forEach { type ->
-                        DropdownMenuItem(
-                            text = { TaminText(type.title) },
-                            onClick = {
-                                onTypeSelected(type.id.toString(), type.title)
-                                isDropdownOpen = false
-                            }
-                        )
-                    }
-                }
+            if (isTypeSheetOpen) {
+                UserRequestTypeBottomSheet(
+                    selectedTypeId = selectedTypeId,
+                    requestTypes = requestTypes,
+                    onTypeSelected = onTypeSelected,
+                    onDismissRequest = { isTypeSheetOpen = false }
+                )
             }
 
             Spacer(modifier = Modifier.height(Spacing.xs))
@@ -193,6 +175,7 @@ private fun UserRequestFilterPanelPreview() {
     com.tamin.taminhamrah.ui.PreviewRtlThemeContent {
         UserRequestFilterPanel(
             refCode = "۱۰۴۸۴۰۱۸۴۹",
+            selectedTypeId = "10",
             selectedTypeName = "غرامت دستمزد ایام بیماری",
             requestTypes = emptyList(),
             onRefCodeChanged = {},

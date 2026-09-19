@@ -35,6 +35,7 @@ class UserRequestsViewModel(
 
     override fun handleIntent(intent: UserRequestsIntent): Flow<PartialState> {
         return when (intent) {
+            is UserRequestsIntent.InitFilters -> handleInitFilters(intent.refCode, intent.requestTypeId)
             is UserRequestsIntent.LoadRequests -> handleLoadRequests(UserRequestSearchParams())
             is UserRequestsIntent.LoadRequestTypes -> handleLoadRequestTypes()
             is UserRequestsIntent.SelectTab -> flow { emit(PartialState.TabChanged(intent.tab)) }
@@ -58,6 +59,31 @@ class UserRequestsViewModel(
                 sendEvent(UserRequestsEvent.ShowToast(message))
             }
         }
+    }
+
+    private fun handleInitFilters(refCode: String?, requestTypeId: String?): Flow<PartialState> = flow {
+        val cleanRef = refCode?.takeIf { it.isNotBlank() }
+        val cleanTypeId = requestTypeId?.takeIf { it.isNotBlank() }
+        if (cleanRef != null) {
+            emit(PartialState.RefCodeChanged(cleanRef))
+        }
+        if (cleanTypeId != null) {
+            emit(PartialState.RequestTypeSelected(cleanTypeId, null))
+        }
+        if (cleanRef != null || cleanTypeId != null) {
+            emit(PartialState.FilterToggled(true))
+        }
+        val search = UserRequestSearchParams(
+            refCode = cleanRef,
+            requestTypeId = cleanTypeId,
+        )
+        emit(PartialState.Loading(true))
+        getUserRequestsUseCase(search)
+            .catch { emit(PartialState.Error(it.message)) }
+            .collect { requests ->
+                val presentation = requests.toPresentation()
+                emit(PartialState.RequestsLoaded(presentation))
+            }
     }
 
     private fun currentSearchParams(): UserRequestSearchParams {
