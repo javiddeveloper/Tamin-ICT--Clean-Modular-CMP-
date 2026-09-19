@@ -2,7 +2,6 @@ package com.tamin.taminhamrah.data.repository.workshops
 
 import com.tamin.taminhamrah.data.repository.WorkShopsRepositoryImpl
 import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSource
-import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.workshop.*
@@ -114,10 +113,11 @@ class WorkShopsRepositoryEmployerOnlineServicesTest {
     }
 
     /**
-     * A [WorkShopsRemoteDataSource] scoped to the six خدمات غیرحضوری کارفرما calls the tests above
-     * touch. Every other method throws so an unintended call surfaces instead of a silent default.
+     * A [WorkShopsRemoteDataSource] scoped to the خدمات غیرحضوری کارفرما calls the tests above
+     * touch. Everything else is inherited from [NotUsedWorkShopsRemoteDataSource] and throws, so an
+     * unintended call surfaces instead of returning a silent default.
      */
-    private class FakeRemote : WorkShopsRemoteDataSource {
+    private class FakeRemote : NotUsedWorkShopsRemoteDataSource() {
         var workshopsWithoutContract: ListData<WorkshopWithoutContractDTO> = ListData()
         var contractRows: ListData<WorkshopContractRowDTO> = ListData()
         var agreementsByWorkshop: ListData<EmployerAgreementByWorkshopDTO> = ListData()
@@ -168,65 +168,5 @@ class WorkShopsRepositoryEmployerOnlineServicesTest {
             lastSubmitBody = request
             return submitMessage
         }
-        // ------------------------------------------------------- not used by these tests
-
-        private fun notUsed(): Nothing = error("not exercised by the employer online-services repository tests")
-
-        override suspend fun getWorkShopObjections(query: ApiQueryParamDN) = notUsed()
-        override suspend fun getWorkShopObjectionSms(objectionCode: Long, query: ApiQueryParamDN) = notUsed()
-        override suspend fun getAllEmployerAgreementByNationalId(query: ApiQueryParamDN): ListData<EmployerAgreementDTO> = notUsed()
-        override suspend fun confirmPaymentTicket(ticket: String) = notUsed()
-        override suspend fun getEmployerAgreementsByWorkshop(workshopId: String, branchCode: String, query: ApiQueryParamDN): ListData<EmployerAgreementDTO> = notUsed()
-        override suspend fun getWorkshopContracts(workshopId: String, branchCode: String, query: ApiQueryParamDN): ListData<WorkshopContractDTO> = notUsed()
-        override suspend fun getWorkshopPaymentSheets(query: ApiQueryParamDN): ListData<PaymentSheetDTO> = notUsed()
-        override suspend fun getDebitReasons(query: ApiQueryParamDN): ListData<DebitReasonDTO> = notUsed()
-        override suspend fun getWorkshopDebitList(workshopId: String, branchCode: String, query: ApiQueryParamDN): ListData<WorkShopDebtDTO> = notUsed()
-        override suspend fun getWorkshopDemandDocuments(debitNumber: String, branchCode: String, query: ApiQueryParamDN): ListData<WorkshopDemandDocDTO> = notUsed()
-        override suspend fun getDebitTurnoverPdf(debitNumber: String, branchCode: String): PdfDownloadDTO = notUsed()
-        override suspend fun checkDebitPayment(debitNumber: String, branchCode: String): DebitPaymentPreCheckDTO = notUsed()
-        override suspend fun payWorkshopDebit(request: DebitPaymentRequestDTO): DebitPaymentDTO = notUsed()
-        override suspend fun getWorkshopDebtInquiry(workshopId: String, branchCode: String): WorkshopDebtInquiryDTO = notUsed()
-        override suspend fun getWorkshopObjectionableDebitList(workshopNumber: String, branchCode: String, query: ApiQueryParamDN): ListData<WorkShopDebtDTO> = notUsed()
-        override suspend fun getObjectionElapsedDays(orderRecipeDate: String): Int = notUsed()
-        override suspend fun saveDebitObjection(request: DebitObjectionSaveRequestDTO): DebitObjectionSaveResultDTO = notUsed()
-        override suspend fun getDebitObjectionPdf(seqNumber: Long): PdfDownloadDTO = notUsed()
-        override suspend fun getWorkshopRecentlyAddedMembers(query: ApiQueryParamDN): ListData<WorkshopNewMemberDTO> = notUsed()
-        override suspend fun confirmRecentlyAddedMember(requestId: Long): NewMemberConfirmResultDTO = notUsed()
-        override suspend fun deleteRecentlyAddedMember(personalId: Long) = notUsed()
-        override suspend fun checkNewMemberIsNew(nationalId: String): Boolean = notUsed()
-        override suspend fun createNewMemberRegistration(request: NewMemberRegistrationDTO): NewMemberRegistrationResultDTO = notUsed()
-        override suspend fun updateNewMemberRegistration(personalId: Long, request: NewMemberRegistrationDTO): NewMemberRegistrationResultDTO = notUsed()
-        override suspend fun getWorkshopsDebtsList(workshopId: String, branchId: String, query: ApiQueryParamDN): ListData<WorkshopsDebtListModelDTO> = notUsed()
-        override suspend fun getArticleSixteenWorkshopInfo(workshopId: String, branchCode: String): ArticleSixteenWorkshopInfoDTO = notUsed()
-        override suspend fun getArticleSixteenRequestInfo(objectionNumber: Long): ArticleSixteenRequestInfoDTO = notUsed()
-        override suspend fun saveArticleSixteenRequest(request: ArticleSixteenSaveRequestDTO): ArticleSixteenSaveResultDTO = notUsed()
-        override suspend fun getArticleSixteenReportPdf(seqNumber: Long): PdfDownloadDTO = notUsed()
-        override suspend fun getWorkshopMembers(query: ApiQueryParamDN): ListData<WorkshopMemberDTO> = notUsed()
-        override suspend fun getWorkshopStackHolders(query: ApiQueryParamDN): ListData<WorkshopStackHolderDTO> = notUsed()
-        override suspend fun getLegalRepresentativeWorkshops(): ListData<LegalRepresentativeWorkshopDTO> = notUsed()
-
-        override suspend fun getLegalRepresentatives(
-            workshopId: String,
-            branchCode: String
-        ): ListData<LegalRepresentativeDTO> = notUsed()
-
-        override suspend fun getLegalRepresentativeWorkshopContracts(
-            workshopId: String,
-            branchCode: String
-        ): ListData<LegalRepresentativeContractDTO> = notUsed()
-
-        override suspend fun requestLegalRepresentativeTicket(nationalCode: String?) = notUsed()
-
-        override suspend fun verifyLegalRepresentativeTicket(ticket: String) = notUsed()
-
-        override suspend fun submitLegalRepresentative(
-            ticket: String,
-            request: LegalRepresentativeRequestDTO
-        )  = notUsed()
-
-        override suspend fun deleteLegalRepresentative(
-            ticket: String,
-            stackId: Long
-        ) = notUsed()
     }
 }

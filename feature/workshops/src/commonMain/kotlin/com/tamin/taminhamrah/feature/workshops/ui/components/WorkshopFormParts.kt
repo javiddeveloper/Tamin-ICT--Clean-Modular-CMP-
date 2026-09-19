@@ -49,12 +49,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachment
@@ -67,6 +70,7 @@ import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
+import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.components.animatedErrorBorder
 import com.tamin.taminhamrah.ui.components.document.TaminDocumentUploadCard
 import com.tamin.taminhamrah.ui.components.document.TaminDocumentUploadState
@@ -111,7 +115,7 @@ import kotlin.time.Duration.Companion.milliseconds
 /**
  * The parts every کارگاه form is assembled from.
  *
- * The design draws all three — ثبت اعتراض, ماده ۱۶ and نام‌نویسی — from one template: a stepper, a
+ * The design draws all three — ثبت اعتراض, ماده ۱۶ and نامنویسی — from one template: a stepper, a
  * titled section, collapsible review groups, an upload box, amber notes, tick-boxes, an error line
  * and a sticky footer. Each is a piece here, so a form is a list of them rather than a re-drawing.
  */
@@ -258,9 +262,17 @@ fun WorkshopReviewGroup(
     onToggle: () -> Unit,
     modifier: Modifier = Modifier,
     onEdit: (() -> Unit)? = null,
+    /** A tinted glyph ahead of the title. Null, the default, draws the title alone. */
+    icon: ImageVector? = null,
+    iconTint: Color = Color.Unspecified,
+    iconBackground: Color = Color.Unspecified,
+    /** One muted line under the title — the group at a glance. Null, the default, draws none. */
+    preview: String? = null,
+    /** The «N مورد» beside the title. True, the default, keeps it. */
+    showCount: Boolean = true,
 ) {
     val colors = LocalTaminColors.current
-    val rotation = animateFloatAsState(
+    val rotation by animateFloatAsState(
         if (isOpen) WorkshopDimens.toggleHalfTurn else 0f,
         label = "review-group",
     )
@@ -279,29 +291,61 @@ fun WorkshopReviewGroup(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.ExtraBold,
-                color = colors.textPrimary,
-                modifier = Modifier.weight(1f),
-            )
-            Text(
-                text = stringResource(
-                    Res.string.ws_form_group_count,
-                    rows.size.toString().toPersianDigits(),
-                ),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-                color = colors.textMuted,
-            )
+            if (icon != null) {
+                Box(
+                    modifier = Modifier
+                        .size(IconSize.badge)
+                        .clip(RoundedCornerShape(CornerRadius.md))
+                        .background(iconBackground),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = iconTint,
+                        modifier = Modifier.size(IconSize.small),
+                    )
+                }
+            }
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .then(if (preview != null) Modifier.padding(vertical = Spacing.sm) else Modifier),
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = colors.textPrimary,
+                )
+                if (preview != null) {
+                    Text(
+                        text = preview,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = colors.textMuted,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+            if (showCount) {
+                Text(
+                    text = stringResource(
+                        Res.string.ws_form_group_count,
+                        rows.size.toString().toPersianDigits(),
+                    ),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.textMuted,
+                )
+            }
             Icon(
                 imageVector = vectorResource(Res.drawable.ic_tamin_chevron_down),
                 contentDescription = null,
                 tint = colors.chevron,
                 modifier = Modifier
                     .size(WorkshopDimens.serviceRowChevronSize)
-                    .graphicsLayer { rotationZ = rotation.value },
+                    .graphicsLayer { rotationZ = rotation },
             )
         }
 
@@ -420,6 +464,17 @@ fun WorkshopDocumentsPanel(
      * points at the field to fill in.
      */
     isError: Boolean = false,
+    /**
+     * Lets a PDF be picked as well as an image. False — the default — keeps the image picker every
+     * existing form was built against; only درخواست مفاصاحساب files PDFs.
+     */
+    acceptsPdf: Boolean = false,
+    /**
+     * Asks for the type before opening the picker. True — the default — is how every existing form
+     * behaves; a panel with a single type it never needs to ask about passes false and the picker
+     * opens straight away under that type.
+     */
+    asksForType: Boolean = true,
 ) {
     val colors = LocalTaminColors.current
     val scope = rememberCoroutineScope()
@@ -469,7 +524,9 @@ fun WorkshopDocumentsPanel(
         if (hasLanded) attachments.dropLast(1) else attachments
     }
 
-    val filePicker = rememberFilePickerLauncher(type = FileKitType.Image) { file ->
+    val filePicker = rememberFilePickerLauncher(
+        type = if (acceptsPdf) PdfOrImageFiles else FileKitType.Image,
+    ) { file ->
         val type = pendingType
         if (file == null || type == null) return@rememberFilePickerLauncher
         scope.launch {
@@ -503,7 +560,10 @@ fun WorkshopDocumentsPanel(
                 fontWeight = FontWeight.Bold,
                 color = colors.textPrimary,
             )
-            NumericText(
+            // A plain Text, in the page's own direction: «۰ از ۱۰» is a sentence, not a number, and
+            // NumericText's forced LTR would reorder «از» between the two digit runs so the badge
+            // read «از ۱۰ ۰».
+            Text(
                 text = stringResource(
                     Res.string.ws_form_docs_count,
                     attachments.size.toString().toPersianDigits(),
@@ -511,6 +571,7 @@ fun WorkshopDocumentsPanel(
                 ),
                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                 color = colors.blueText,
+                maxLines = 1,
                 modifier = Modifier
                     .clip(DocsBadgeShape)
                     .background(colors.blueBg)
@@ -530,51 +591,57 @@ fun WorkshopDocumentsPanel(
                 onDeleteClick = { onRemove(index) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = WorkshopDimens.cardButtonsTopMargin),
+                    .padding(top = Spacing.cardGap),
             )
         }
 
         if (isWaving) {
-            // Replaces the upload button until the wave finishes, so only one upload runs at a
-            // time and the card cannot be covered up while playing.
-            ShimmerBlock(
+            val waving = attachments.lastOrNull()?.type?.takeIf { hasLanded } ?: pendingType
+            TaminDocumentUploadCard(
+                title = waving?.label?.let { stringResource(it) }.orEmpty(),
+                state = TaminDocumentUploadState.Uploading,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(WorkshopDimens.panelButtonHeight)
-                    .padding(top = WorkshopDimens.cardButtonsTopMargin),
-                cornerRadius = CornerRadius.chip,
-            )
-        } else if (attachments.size < capacity) {
-            TaminOutlinedButton(
-                text = stringResource(Res.string.ws_form_add_doc),
-                onClick = { isTypeSheetOpen = true },
-                icon = Icons.Default.Add,
-                shape = BannerShape,
-                height = WorkshopDimens.panelButtonHeight,
-                borderWidth = WorkshopDimens.panelButtonBorderWidth,
-                borderColor = if (isError) colors.dangerText else colors.blueBorder,
-                containerColor = colors.bgSurface,
-                contentColor = if (isError) colors.dangerText else colors.blueText,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = WorkshopDimens.cardButtonsTopMargin)
-                    .animatedErrorBorder(
-                        isError = isError,
-                        errorColor = colors.dangerText,
-                        normalColor = colors.blueBorder,
-                        borderWidth = WorkshopDimens.panelButtonBorderWidth,
-                        cornerRadius = CornerRadius.chip,
-                    ),
+                    .padding(top = Spacing.cardGap),
             )
         }
 
-        if (isError) {
-            Text(
-                text = stringResource(Res.string.ws_form_err_docs),
-                style = MaterialTheme.typography.labelSmall,
-                color = colors.dangerText,
-                modifier = Modifier.padding(top = Spacing.xs),
+        if (attachments.size < capacity && !isWaving) {
+            TaminPrimaryButton(
+                text = stringResource(Res.string.ws_form_add_doc),
+                onClick = {
+                    val presetType = types.firstOrNull()?.takeIf { !asksForType }
+                    if (presetType == null) {
+                        isTypeSheetOpen = true
+                    } else {
+                        pendingType = presetType
+                        filePicker.launch()
+                    }
+                },
+                icon = Icons.Default.Add,
+                iconAtStart = true,
+                background = colors.successGradient,
+                height = WorkshopDimens.panelButtonHeight,
+                shape = BannerShape,
+                textStyle = MaterialTheme.typography.labelLarge
+                    .copy(fontWeight = FontWeight.ExtraBold),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = Spacing.cardGap)
+                    .animatedErrorBorder(
+                        isError = isError,
+                        errorColor = colors.dangerText,
+                        normalColor = Color.Transparent,
+                        borderWidth = Thickness.border,
+                        cornerRadius = CornerRadius.chip,
+                    ),
             )
+            if (isError) {
+                WorkshopFieldError(
+                    text = stringResource(Res.string.ws_form_err_docs),
+                    modifier = Modifier.padding(top = Spacing.xs),
+                )
+            }
         }
     }
 
@@ -583,8 +650,8 @@ fun WorkshopDocumentsPanel(
             types = types,
             onDismiss = { isTypeSheetOpen = false },
             onSelect = { type ->
-                pendingType = type
                 isTypeSheetOpen = false
+                pendingType = type
                 filePicker.launch()
             },
         )
@@ -593,6 +660,9 @@ fun WorkshopDocumentsPanel(
 
 /** How long the upload wave keeps playing after the file has actually landed. */
 private const val WAVE_TAIL_MILLIS = 1600L
+
+/** What [WorkshopDocumentsPanel] offers once it accepts PDFs: the PDF, and the images it always took. */
+private val PdfOrImageFiles = FileKitType.File(extensions = setOf("pdf", "jpg", "jpeg", "png"))
 
 /** A rule the user must know before submitting, in the design's amber. */
 @Composable
@@ -761,8 +831,18 @@ fun WorkshopFormFooter(
     onPrev: (() -> Unit)? = null,
     /** While true the forward action shows the app's spinner and refuses further taps. */
     isBusy: Boolean = false,
+    /** The forward button's glyph. Null, the default, is the chevron every form points on with. */
+    nextIcon: ImageVector? = null,
+    /** The forward button's fill. Null, the default, is the app's primary gradient. */
+    nextBackground: Brush? = null,
+    /**
+     * Shows [isBusy] as a shimmer passing over the forward button instead of the spinner. False —
+     * the default — keeps the spinner every existing form shows.
+     */
+    shimmerWhileBusy: Boolean = false,
 ) {
     val colors = LocalTaminColors.current
+    val chevron = vectorResource(Res.drawable.ic_tamin_chevron_forward)
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -805,17 +885,19 @@ fun WorkshopFormFooter(
             isLoading = isBusy,
             enabled = !isBusy,
             // Points the way on: autoMirrored, so under RTL it draws "‹" as the design has it.
-            icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
+            icon = nextIcon ?: chevron,
             iconPosition = LoadingButtonIconPosition.TRAILING,
+            background = nextBackground,
             height = FooterButtonHeight,
             shape = FooterButtonShape,
+            shimmerWhileLoading = shimmerWhileBusy,
             modifier = Modifier.weight(NextButtonWeight),
         )
     }
 }
 
 /** The dashed rule the design puts above a card's footer control. */
-private fun Modifier.dashedTopRule(color: Color): Modifier =
+internal fun Modifier.dashedTopRule(color: Color): Modifier =
     drawBehind {
         drawLine(
             color = color,
@@ -1043,31 +1125,47 @@ fun <T> WorkshopLookupSheet(
 
 /** Something the user needs to know before starting, in the design's blue. */
 @Composable
-fun WorkshopFormBanner(text: String, modifier: Modifier = Modifier) {
+fun WorkshopFormBanner(
+    text: String,
+    modifier: Modifier = Modifier,
+    /** The blue information box, the default, or the green one that says nothing more is needed. */
+    tone: WorkshopBannerTone = WorkshopBannerTone.INFO,
+    /** Drawn in place of the tone's icon — a status pill, say. Null, the default, keeps the icon. */
+    leading: (@Composable () -> Unit)? = null,
+) {
     val colors = LocalTaminColors.current
+    val isSuccess = tone == WorkshopBannerTone.SUCCESS
     Row(
         modifier = modifier
             .fillMaxWidth()
             .clip(BannerShape)
-            .background(colors.blueBg)
-            .border(Thickness.border, colors.blueBorder, BannerShape)
+            .background(if (isSuccess) colors.greenBg else colors.blueBg)
+            .border(Thickness.border, if (isSuccess) colors.greenBorder else colors.blueBorder, BannerShape)
             .padding(horizontal = NoteHorizontalPadding, vertical = NoteVerticalPadding),
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        verticalAlignment = if (leading != null) Alignment.CenterVertically else Alignment.Top,
     ) {
-        Icon(
-            imageVector = vectorResource(Res.drawable.ic_info),
-            contentDescription = null,
-            tint = colors.blueText,
-            modifier = Modifier.size(IconSize.small),
-        )
+        if (leading != null) {
+            leading()
+        } else {
+            Icon(
+                imageVector = vectorResource(if (isSuccess) Res.drawable.ic_tamin_check else Res.drawable.ic_info),
+                contentDescription = null,
+                tint = if (isSuccess) colors.greenText else colors.blueText,
+                modifier = Modifier.size(IconSize.small),
+            )
+        }
         Text(
             text = text,
             style = MaterialTheme.typography.labelSmall,
-            color = colors.textSecondary,
+            color = if (isSuccess) colors.greenText else colors.textSecondary,
             lineHeight = NoteLineHeight,
         )
     }
 }
+
+/** How a [WorkshopFormBanner] reads. */
+enum class WorkshopBannerTone { INFO, SUCCESS }
 
 /** A lookup waits as four row-shaped blocks — about a sheet's worth before it scrolls. */
 private const val LookupShimmerRows = 4
@@ -1082,4 +1180,3 @@ private val FooterButtonShape = RoundedCornerShape(FooterButtonCorner)
 private val DocTypeItemShape = RoundedCornerShape(CornerRadius.md)
 private val OptionItemShape = RoundedCornerShape(CornerRadius.md)
 private val BannerShape = RoundedCornerShape(CornerRadius.chip)
-

@@ -189,7 +189,7 @@ fun WorkshopsScreen(
             state = state.list,
             onLoadMore = { onIntent(WorkshopsIntent.LoadMore) },
             onRetry = { onIntent(WorkshopsIntent.Load) },
-            key = { it.workshopId + it.branchCode },
+            key = { "${it.workshopId}_${it.branchCode}" },
             header = {
                 WorkshopSectionHeader(
                     count = workshops.size,
