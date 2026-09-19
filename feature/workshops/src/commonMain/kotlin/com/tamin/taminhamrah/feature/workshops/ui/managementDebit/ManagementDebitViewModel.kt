@@ -1,13 +1,13 @@
 package com.tamin.taminhamrah.feature.workshops.ui.managementDebit
 
-import androidx.compose.runtime.mutableStateMapOf
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.managementDebit.ManagementDebitUiState.PartialState
 import com.tamin.taminhamrah.feature.workshops.ui.model.ArticleSixteenDocumentTypes
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachmentUploader
 import com.tamin.taminhamrah.mapper.personal.toPresentation
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
-import com.tamin.taminhamrah.model.workshop.ARTICLE_SIXTEEN_FILING_WINDOW_DAYS
+import com.tamin.taminhamrah.model.workshop.ARTICLE_SIXTEEN_FILING_WINDOW_YEARS
+import com.tamin.taminhamrah.model.workshop.ARTICLE_SIXTEEN_DAYS_PER_YEAR
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtPR
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtQuery
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveRequestDN
@@ -20,7 +20,6 @@ import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenRequestInfoUseC
 import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenWorkshopInfoUseCase
 import com.tamin.taminhamrah.useCases.workshops.SaveArticleSixteenRequestUseCase
 import com.tamin.taminhamrah.util.PersianDateFormatter
-import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
@@ -48,7 +47,7 @@ class ManagementDebitViewModel(
      * The domain rows the presentation rows were built from, kept so the submission works on the
      * debt the service sent rather than on its formatted copy.
      */
-    private val debtsByNumber = mutableStateMapOf<String, WorkshopsDebtListModelDN>()
+    private val debtsByNumber = mutableMapOf<String, WorkshopsDebtListModelDN>()
 
     override fun handleIntent(intent: ManagementDebitIntent): Flow<PartialState> = when (intent) {
         is ManagementDebitIntent.Open -> open(intent)
@@ -156,7 +155,7 @@ class ManagementDebitViewModel(
      */
     private fun requestReview(debt: ArticleSixteenDebtPR): Flow<PartialState> = flow {
         val elapsed = PersianDateFormatter.daysSince(debt.executiveNotifyDate)
-        if (elapsed == null || elapsed / DAYS_PER_YEAR > ARTICLE_SIXTEEN_FILING_WINDOW_YEARS) {
+        if (elapsed == null || elapsed / ARTICLE_SIXTEEN_DAYS_PER_YEAR > ARTICLE_SIXTEEN_FILING_WINDOW_YEARS) {
             sendEvent(ManagementDebitEvent.ShowMessage(Res.string.article_sixteen_deadline_passed))
             return@flow
         }
@@ -172,7 +171,6 @@ class ManagementDebitViewModel(
         emit(PartialState.Busy(true))
         emit(PartialState.ViewerPdfChanged(getArticleSixteenReportPdf(seqNo).toPresentation()))
     }.catch {
-        emit(PartialState.Busy(false))
         emit(reportFailure(it))
     }
 
@@ -192,7 +190,6 @@ class ManagementDebitViewModel(
         }
         emit(PartialState.ExpertMessageChanged(message))
     }.catch {
-        emit(PartialState.Busy(false))
         emit(reportFailure(it))
     }
 
@@ -227,7 +224,6 @@ class ManagementDebitViewModel(
             ),
         )
     }.catch {
-        emit(PartialState.Busy(false))
         emit(reportFailure(it))
     }
 
@@ -334,9 +330,6 @@ class ManagementDebitViewModel(
             copy(isWorkshopOpen = partialState.isOpen)
         }
 
-        is PartialState.FormWorkshopInfoLoaded -> currentState.editForm {
-            copy(workshopInfo = partialState.info)
-        }
         is PartialState.FormConfirmedChanged -> currentState.editForm {
             copy(isConfirmed = partialState.isConfirmed, hasTriedSubmit = false)
         }

@@ -36,10 +36,14 @@ data class ArticleSixteenSaveResultDN(
 const val ARTICLE_SIXTEEN_MAX_DOCUMENTS = 10
 
 /**
- * How long after تاریخ ابلاغ اجراییه a ماده ۱۶ request may still be filed, in days: one year.
+ * How long after تاریخ ابلاغ اجراییه a ماده ۱۶ request may still be filed, counted exactly as the
+ * old app counts it: whole years of [ARTICLE_SIXTEEN_DAYS_PER_YEAR] days, truncated, and refused
+ * only once that count *exceeds* this — so day 729 is the last one accepted, although the message
+ * it refuses with reads «بیش از یک سال».
  *
- * The old app refuses with «بیش از یک سال از تاریخ ابلاغیه اجراییه»; the design's note reads «یک
- * روز», which would refuse nearly every real debt. (The old app's own arithmetic, whole years `> 1`,
- * lets a debt through until day 730 — its message, not that slip, is the rule kept here.)
+ * The design's note says «یک روز», which would refuse nearly every real debt; it is not the rule.
  */
-const val ARTICLE_SIXTEEN_FILING_WINDOW_DAYS = 365
+const val ARTICLE_SIXTEEN_FILING_WINDOW_YEARS = 1
+
+/** The old app's year for [ARTICLE_SIXTEEN_FILING_WINDOW_YEARS]: a flat 365 days, leap or not. */
+const val ARTICLE_SIXTEEN_DAYS_PER_YEAR = 365
