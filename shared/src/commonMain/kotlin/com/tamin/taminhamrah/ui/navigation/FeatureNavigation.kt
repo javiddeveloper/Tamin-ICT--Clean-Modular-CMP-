@@ -100,25 +100,8 @@ fun NavController.navigateToFeature(flag: FeatureFlag, beforeOpen: () -> Unit = 
         FeatureFlag.DEFERRED_INSTALLMENT_CERTIFICATE -> screen { navigateToDeferredInstallment() }
         FeatureFlag.GIRL_SURVIVOR -> screen { navigateToGirlSurvivor() }
         FeatureFlag.REQUEST_PENSION_BY_SURVIVOR,
-        FeatureFlag.REQUEST_PENSION_BY_SURVIVOR_112 -> navigateToPensionSurvivor()
-        FeatureFlag.DISABILITY_PENSION -> navigateToDisabilityPension()
-        FeatureFlag.VIEW_TITLE_JOB -> navigateToHistoryJobInfo()
-        FeatureFlag.SEND_INSURANCE_HISTORY_TO_INSTITUTION -> navigateToSendInsuranceHistoryToInstitutions()
-        FeatureFlag.OROTEZ_PROTEZ -> navigateToOrotezProtez()
-        FeatureFlag.REQUEST_PAYMENT_FOR_ILL_DAYS -> navigateToRequestPaymentForIllDays()
-        FeatureFlag.OCCURRENCE -> navigateToOccurrence()
-        FeatureFlag.WORKERS_PAYMENT_INFO -> navigateToWorkersPaymentInfo()
-        FeatureFlag.LIST_OF_INSPECTIONS_PERFORMED -> navigateToInspection()
-        FeatureFlag.PERFORMED_INSPECTION -> navigateToWorkshopInspection()
-        FeatureFlag.REGISTER_AGREEMENT -> navigateToEmployerOnlineServices()
-        FeatureFlag.OBJECTION_NON_EXISTENT_HISTORY -> navigateToHistoryObjection()
-        FeatureFlag.INQUIRY_EDUCATION -> navigateToInquiryEducation()
-        FeatureFlag.FRACTION_CONTRACT -> navigateToFractionContract()
-        FeatureFlag.WEDDING_PRESENT -> navigateToWeddingPresent()
-        FeatureFlag.CALCULATE_MARRIAGE_ALLOWANCE -> navigateToWeddingPresentCalculate()
-        FeatureFlag.REQUEST_FOR_PREGNANCY_PAY -> navigateToPregnancyPay()
-        else -> Unit
         FeatureFlag.REQUEST_PENSION_BY_SURVIVOR_112 -> screen { navigateToPensionSurvivor() }
+        FeatureFlag.PERFORMED_INSPECTION -> screen { navigateToWorkshopInspection() }
         FeatureFlag.DISABILITY_PENSION -> screen { navigateToDisabilityPension() }
         FeatureFlag.VIEW_TITLE_JOB -> screen { navigateToHistoryJobInfo() }
         FeatureFlag.SEND_INSURANCE_HISTORY_TO_INSTITUTION -> screen { navigateToSendInsuranceHistoryToInstitutions() }
@@ -130,8 +113,6 @@ fun NavController.navigateToFeature(flag: FeatureFlag, beforeOpen: () -> Unit = 
         FeatureFlag.REGISTER_AGREEMENT -> screen { navigateToEmployerOnlineServices() }
         FeatureFlag.OBJECTION_NON_EXISTENT_HISTORY -> screen { navigateToHistoryObjection() }
         FeatureFlag.INQUIRY_EDUCATION -> screen { navigateToInquiryEducation() }
-        // «کسری از ماه» has only an empty placeholder screen until its phase 2 UI is built; opening
-        // it showed a blank page, so it counts as not built yet.
         FeatureFlag.FRACTION_CONTRACT -> return false
         FeatureFlag.WEDDING_PRESENT -> screen { navigateToWeddingPresent() }
         FeatureFlag.CALCULATE_MARRIAGE_ALLOWANCE -> screen { navigateToWeddingPresentCalculate() }
