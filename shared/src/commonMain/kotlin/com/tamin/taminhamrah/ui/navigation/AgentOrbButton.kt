@@ -23,20 +23,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.ui.components.coloredShadow
 
 /** Matches the glass pill's height so the two read as one row. */
 private val OrbSize = 60.dp
+
+/** How far the breathing glow is allowed to bleed past the orb's edge at its widest. */
+private val GlowSpread = 16.dp
 
 /**
  * The Agent entry point, rendered as a standalone circular button that sits beside the bottom
@@ -91,52 +92,72 @@ internal fun AgentOrbButton(
     val onPrimary = MaterialTheme.colorScheme.onPrimary
 
     Box(
-        modifier = modifier
-            .size(OrbSize)
-            .scale(pressScale)
-            .coloredShadow(
-                color = primary,
-                borderRadius = OrbSize / 2,
-                blurRadius = glowRadius.dp,
-            )
-            .clip(CircleShape)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = ripple(bounded = true, color = onPrimary),
-                role = Role.Button,
-                onClickLabel = contentDescription,
-                onClick = onClick,
-            ),
+        // Stays sized to the orb itself; Box doesn't clip children, so the oversized glow
+        // Canvas below can still bleed past it without nudging sibling layout.
+        modifier = modifier.size(OrbSize),
         contentAlignment = Alignment.Center,
     ) {
-        Canvas(modifier = Modifier.size(OrbSize)) {
+        // glowRadius is read inside this draw lambda (not the composable body) so the pulse
+        // only invalidates this Canvas's draw, instead of recomposing AgentOrbButton every frame.
+        Canvas(modifier = Modifier.size(OrbSize + GlowSpread * 2)) {
+            val orbRadius = OrbSize.toPx() / 2f
+            val glowExtent = glowRadius.dp.toPx()
             drawCircle(
-                brush = Brush.linearGradient(
-                    colors = listOf(primary, secondary),
-                    start = Offset(0f, 0f),
-                    end = Offset(size.width, size.height),
+                brush = Brush.radialGradient(
+                    colors = listOf(primary.copy(alpha = 0.5f), primary.copy(alpha = 0f)),
+                    center = center,
+                    radius = orbRadius + glowExtent,
                 ),
+                radius = orbRadius + glowExtent,
             )
-            drawSparkPath(color = onPrimary)
         }
 
-        Canvas(
+        Box(
             modifier = Modifier
                 .size(OrbSize)
-                .rotate(auraRotation),
-        ) {
-            drawCircle(
-                brush = Brush.sweepGradient(
-                    colors = listOf(
-                        onPrimary.copy(alpha = 0f),
-                        onPrimary.copy(alpha = 0.45f),
-                        onPrimary.copy(alpha = 0f),
-                    ),
-                    center = center,
+                .graphicsLayer {
+                    scaleX = pressScale
+                    scaleY = pressScale
+                }
+                .clip(CircleShape)
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = ripple(bounded = true, color = onPrimary),
+                    role = Role.Button,
+                    onClickLabel = contentDescription,
+                    onClick = onClick,
                 ),
-                radius = (size.minDimension - 3.dp.toPx()) / 2f,
-                style = Stroke(width = 1.5.dp.toPx()),
-            )
+            contentAlignment = Alignment.Center,
+        ) {
+            Canvas(modifier = Modifier.size(OrbSize)) {
+                drawCircle(
+                    brush = Brush.linearGradient(
+                        colors = listOf(primary, secondary),
+                        start = Offset(0f, 0f),
+                        end = Offset(size.width, size.height),
+                    ),
+                )
+                drawSparkPath(color = onPrimary)
+            }
+
+            Canvas(
+                modifier = Modifier
+                    .size(OrbSize)
+                    .graphicsLayer { rotationZ = auraRotation },
+            ) {
+                drawCircle(
+                    brush = Brush.sweepGradient(
+                        colors = listOf(
+                            onPrimary.copy(alpha = 0f),
+                            onPrimary.copy(alpha = 0.45f),
+                            onPrimary.copy(alpha = 0f),
+                        ),
+                        center = center,
+                    ),
+                    radius = (size.minDimension - 3.dp.toPx()) / 2f,
+                    style = Stroke(width = 1.5.dp.toPx()),
+                )
+            }
         }
     }
 }

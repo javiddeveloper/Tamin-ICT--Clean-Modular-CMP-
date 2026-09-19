@@ -23,7 +23,8 @@ data class MultipleWorkshopResultPR(
 @Serializable
 data class WagePensionChartItemPR(
     val hisYear: String,
-    val sumYear: Int
+    val sumYear: Int,
+    val months: List<Int> = emptyList(),
 )
 
 @Immutable
@@ -36,5 +37,6 @@ data class WagePensionCalculationPR(
     val historyMonths: Int,
     val historyDays: Int,
     val totalHistoryDays: Int,
-    val chartItems: List<WagePensionChartItemPR>
+    val chartItems: List<WagePensionChartItemPR>,
+    val legalFloorApplied: Boolean = false,
 )

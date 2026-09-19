@@ -233,4 +233,16 @@ class AddDependentRepositoryImplTest {
 
         assertEquals(expectedError.message, actualError.message)
     }
+
+    @Test
+    fun refreshDependents_onError_emitsError() = runTest {
+        val expectedError = RuntimeException("Refresh failed")
+        remoteDataSource.shouldThrowError = expectedError
+
+        val actualError = assertFailsWith<RuntimeException> {
+            repository.refreshDependents().first()
+        }
+
+        assertEquals(expectedError.message, actualError.message)
+    }
 }
