@@ -21,7 +21,6 @@ import kotlinx.coroutines.test.setMain
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertTrue
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
@@ -168,6 +167,40 @@ class TreatmentViewModelTest {
             val event = assertIs<TreatmentEvent.NavigateToRecords>(awaitItem())
             assertEquals(RecordTab.MEDICINE, event.tab)
         }
+    }
+
+    /**
+     * A flag lookup that fails must not lock the person out — the gate opens rather than closing,
+     * which is the whole point of the fallback in `openRecords`.
+     */
+    @Test
+    fun openRecords_whenFlagLookupFails_navigatesAnyway() = runTest(testDispatcher) {
+        featureManager.error = RuntimeException("flags unreachable")
+        viewModel.sendIntent(TreatmentIntent.InitTreatmentFlow)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.events.test {
+            viewModel.sendIntent(TreatmentIntent.OpenRecords(RecordTab.MEDICINE))
+            val event = assertIs<TreatmentEvent.NavigateToRecords>(awaitItem())
+            assertEquals(RecordTab.MEDICINE, event.tab)
+        }
+    }
+
+    /**
+     * An identity lookup that fails leaves no national code, and the flow stops with the same
+     * message an empty one produces rather than loading a nameless patient.
+     */
+    @Test
+    fun testInitTreatmentFlow_whenIdentityLookupFails_emitsUserNotFoundError() = runTest(testDispatcher) {
+        userRepository = FakeUserRepository().apply {
+            identityError = RuntimeException("identity unreachable")
+        }
+        viewModel = buildViewModel()
+
+        viewModel.sendIntent(TreatmentIntent.InitTreatmentFlow)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals("اطلاعات کاربری یافت نشد.", viewModel.uiState.value.error)
     }
 
     @Test
