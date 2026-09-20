@@ -11,6 +11,8 @@ enum class CachedStatus { SENDING, SUCCESS, FAILED }
  *
  * @param lastEntity server conversation context, replayed into the next request so a
  *   resumed chat keeps its thread.
+ * @param state the server's conversation state, as the JSON it sent; replayed the same way
+ * @param history the server's conversation history, as the JSON it sent; replayed the same way
  */
 data class AgentSessionDN(
     val id: String,
@@ -19,7 +21,9 @@ data class AgentSessionDN(
     val createdAt: Long,
     val lastMessageAt: Long,
     val messageCount: Int = 0,
-    val lastEntity: String? = null
+    val lastEntity: String? = null,
+    val state: String? = null,
+    val history: String? = null,
 )
 
 /**

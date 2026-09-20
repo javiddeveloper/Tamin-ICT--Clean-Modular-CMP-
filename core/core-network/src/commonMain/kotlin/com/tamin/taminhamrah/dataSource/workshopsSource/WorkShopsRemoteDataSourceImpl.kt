@@ -1,9 +1,9 @@
 package com.tamin.taminhamrah.dataSource.workshopsSource
 
 import com.tamin.taminhamrah.apiService.WorkShopsApiService
+import com.tamin.taminhamrah.model.BaseUrlKey
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
-import com.tamin.taminhamrah.model.BaseUrlKey
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.FilterOperator
@@ -13,14 +13,14 @@ import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestInfoDTO
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveRequestDTO
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveResultDTO
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoDTO
+import com.tamin.taminhamrah.model.workshop.AssignerContractDTO
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseDTO
 import com.tamin.taminhamrah.model.workshop.DebitObjectionSaveRequestDTO
 import com.tamin.taminhamrah.model.workshop.DebitObjectionSaveResultDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDTO
 import com.tamin.taminhamrah.model.workshop.DebitReasonDTO
-import com.tamin.taminhamrah.util.NetworkConstants
-import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmitRequestDTO
 import com.tamin.taminhamrah.model.workshop.EmployerCommitmentInfoDTO
@@ -29,32 +29,47 @@ import com.tamin.taminhamrah.model.workshop.LegalRepresentativeDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeRequestDTO
 import com.tamin.taminhamrah.model.workshop.LegalRepresentativeWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberConfirmResultDTO
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
+import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
+import com.tamin.taminhamrah.model.workshop.SettlementCertificateDTO
+import com.tamin.taminhamrah.model.workshop.SettlementCertificateDetailDTO
+import com.tamin.taminhamrah.model.workshop.SettlementRequestDTO
+import com.tamin.taminhamrah.model.workshop.SettlementSubjectDTO
+import com.tamin.taminhamrah.model.workshop.SmsMessageDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDTO
-import com.tamin.taminhamrah.model.workshop.SmsMessageDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopContractDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopMemberDTO
-import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDTO
-import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
-import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberDTO
-import com.tamin.taminhamrah.model.workshop.WorkshopContractDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDTO
+import com.tamin.taminhamrah.repository.DeveloperOptionsRepository
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
-import com.tamin.taminhamrah.repository.DeveloperOptionsRepository
 import com.tamin.taminhamrah.tools.readPdfChannel
+import com.tamin.taminhamrah.util.NetworkConstants
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
+import io.ktor.http.ContentType
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
 
 /** `serviceName` the `request-ticket` endpoint expects for the Employer → Online Services flow. */
 private const val EMPLOYER_ESERVICES_AGREEMENT = "employerEservicesAgreement"
+
+/** What the old client puts in a `mad38-head` path segment it does not filter on. */
+private const val UNFILTERED_PATH_SEGMENT = "-"
 
 internal class WorkShopsRemoteDataSourceImpl(
     private val apiService: WorkShopsApiService,
@@ -63,7 +78,8 @@ internal class WorkShopsRemoteDataSourceImpl(
     private val developerOptionsRepository: DeveloperOptionsRepository,
 ) : WorkShopsRemoteDataSource {
     private val legalRepresentativeListQuery = ApiQueryParamDN(page = 1, start = 0, limit = 1000)
-    // ---------------------------------------------------------------- کارگاه‌های کارفرما
+
+    // ---------------------------------------------------------------- کارگاههای کارفرما
 
     override suspend fun getAllEmployerAgreementByNationalId(
         query: ApiQueryParamDN
@@ -71,7 +87,7 @@ internal class WorkShopsRemoteDataSourceImpl(
         apiService.getAllEmployerAgreementByNationalId(query.toQueries()).extractData()
     }
 
-    // ------------------------------------------------------------------- ردیف‌های پیمان
+    // ------------------------------------------------------------------- ردیفهای پیمان
 
     override suspend fun getEmployerAgreementsByWorkshop(
         workshopId: String,
@@ -90,7 +106,107 @@ internal class WorkShopsRemoteDataSourceImpl(
         apiService.getWorkshopContracts(workshopId, branchCode, query.toQueries()).extractData()
     }
 
-    // -------------------------------------------------------------------------- برگ پرداخت‌ها
+    // ---------------------------------------------------------------------------- واگذارندگان
+
+    override suspend fun getAssignerContracts(
+        query: ApiQueryParamDN,
+    ): ListData<AssignerContractDTO> = call {
+        apiService.getAssignerContracts(query.toQueries()).extractData()
+    }
+
+    override suspend fun getComputationalBases(
+        workshopId: String,
+        contractRow: String,
+        brchCode: String,
+        contractSequence: String,
+        query: ApiQueryParamDN,
+    ): ListData<ComputationalBaseDTO> = call {
+        apiService.getComputationalBases(
+            workshopId = workshopId,
+            contractRow = contractRow,
+            // Abbreviated on purpose — the published parameter is `brchCode`, not `branchCode`.
+            brchCode = brchCode,
+            contractSequence = contractSequence,
+            queries = query.toQueries(),
+        ).extractData()
+    }
+
+    override suspend fun getComputationalBasePdf(documentId: String): PdfDownloadDTO = call {
+        PdfDownloadDTO(
+            pdf = InputStreamDTO(
+                // Drained inside `execute`; `body<ByteReadChannel>()` hands back a channel the
+                // response has already finalized and reads as an empty file.
+                pdf = apiService.getComputationalBasePdf(documentId).readPdfChannel()
+            )
+        )
+    }
+
+    override suspend fun getSettlementSubjects(
+        query: ApiQueryParamDN,
+    ): ListData<SettlementSubjectDTO> = call {
+        apiService.getSettlementSubjects(query.toQueries()).extractData()
+    }
+
+    override suspend fun getSettlementCertificates(
+        workshopId: String,
+        branchCode: String,
+        contractRow: String,
+        query: ApiQueryParamDN,
+    ): ListData<SettlementCertificateDTO> = call {
+        apiService.getSettlementCertificates(
+            workshopCode = workshopId,
+            branchCode = branchCode,
+            contractRow = contractRow,
+            // The old client sends its "no filter" value for both, hardcoded there too.
+            mafasaStatus = UNFILTERED_PATH_SEGMENT,
+            contractNumber = UNFILTERED_PATH_SEGMENT,
+            queries = query.toQueries(),
+        ).extractData()
+    }
+
+    override suspend fun getSettlementCertificateDetail(
+        workshopId: String,
+        branchCode: String,
+        contractRow: String,
+        serial: String,
+        query: ApiQueryParamDN,
+    ): ListData<SettlementCertificateDetailDTO> = call {
+        apiService.getSettlementCertificateDetail(
+            workshopCode = workshopId,
+            branchCode = branchCode,
+            contractRow = contractRow,
+            serial = serial,
+            queries = query.toQueries(),
+        ).extractData()
+    }
+
+    override suspend fun uploadSettlementPdf(fileName: String, bytes: ByteArray): String = call {
+        val content = MultiPartFormDataContent(
+            formData {
+                // `file`, the part name the old app's multipart body uses.
+                append(
+                    key = "file",
+                    value = bytes,
+                    headers = Headers.build {
+                        append(HttpHeaders.ContentType, ContentType.Application.Pdf.toString())
+                        append(HttpHeaders.ContentDisposition, "filename=\"$fileName\"")
+                    },
+                )
+            },
+        )
+        val id = apiService.uploadSettlementPdf(content).extractData()?.jsonPrimitive?.contentOrNull
+        // A blank id would file the document under nothing, so it fails here instead of at submit.
+        requireNotNull(id?.takeIf { it.isNotBlank() }) { "persistPdf answered without an id" }
+    }
+
+    override suspend fun submitSettlementRequest(
+        id: String,
+        request: SettlementRequestDTO,
+    ): String = call {
+        apiService.submitSettlementRequest(id, request).extractMessage()
+    }
+
+    // -------------------------------------------------------------------------- برگ پرداختها
 
     override suspend fun getWorkshopPaymentSheets(
         query: ApiQueryParamDN
@@ -219,6 +335,13 @@ internal class WorkShopsRemoteDataSourceImpl(
         request: NewMemberRegistrationDTO,
     ): NewMemberRegistrationResultDTO = call {
         apiService.createNewMemberRegistration(request).extractData()
+    }
+
+    override suspend fun updateNewMemberRegistration(
+        personalId: Long,
+        request: NewMemberRegistrationDTO,
+    ): NewMemberRegistrationResultDTO = call {
+        apiService.updateNewMemberRegistration(personalId, request).extractData()
     }
 
     // ---------------------------------------------------------------------- رسیدگی به بدهی ماده ۱۶

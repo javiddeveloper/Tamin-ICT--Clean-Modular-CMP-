@@ -57,4 +57,10 @@ class JalaliConversionTest {
         assertEquals(Triple(2026, 3, 20), PersianDateFormatter.jalaliToGregorian(1404, 12, 29))
         assertEquals(Triple(1404, 12, 29), PersianDateFormatter.gregorianToJalali(2026, 3, 20))
     }
+
+    @Test
+    fun `iso gregorian days are zero padded`() {
+        assertEquals("2024-03-20", PersianDateFormatter.toIsoGregorian(1403, 1, 1))
+        assertEquals("2026-08-23", PersianDateFormatter.toIsoGregorian(1405, 6, 1))
+    }
 }

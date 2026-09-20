@@ -5,17 +5,26 @@ import com.tamin.taminhamrah.model.common.FeatureFlag
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.assigner_contracts_action_desc
+import taminx.core.core_ui.assigner_contracts_title
 import taminx.core.core_ui.contract_rows_action_desc
 import taminx.core.core_ui.contract_rows_title
+import taminx.core.core_ui.ic_tamin_assigner_contracts
 import taminx.core.core_ui.ic_tamin_workshop_contract_rows
 import taminx.core.core_ui.ic_tamin_workshop_inquiry
+import taminx.core.core_ui.ic_tamin_workshop_new_member
 import taminx.core.core_ui.ic_tamin_workshop_payment
 import taminx.core.core_ui.ic_tamin_workshop_objection
 import taminx.core.core_ui.ic_tamin_workshop_turnover
+import taminx.core.core_ui.ic_tamin_workshop_article_sixteen
+import taminx.core.core_ui.workshop_action_article_sixteen
+import taminx.core.core_ui.workshop_action_article_sixteen_desc
 import taminx.core.core_ui.workshop_action_debit_turnover
 import taminx.core.core_ui.workshop_action_debit_turnover_desc
 import taminx.core.core_ui.workshop_action_debt_inquiry
 import taminx.core.core_ui.workshop_action_debt_inquiry_desc
+import taminx.core.core_ui.workshop_action_new_member
+import taminx.core.core_ui.workshop_action_new_member_desc
 import taminx.core.core_ui.workshop_action_objection
 import taminx.core.core_ui.workshop_action_objection_desc
 import taminx.core.core_ui.workshop_action_payment_sheets
@@ -69,6 +78,18 @@ enum class WorkshopAction(
         icon = Res.drawable.ic_tamin_workshop_objection,
         tint = StatusTint.WARNING,
     ),
+    NEW_MEMBER(
+        label = Res.string.workshop_action_new_member,
+        description = Res.string.workshop_action_new_member_desc,
+        icon = Res.drawable.ic_tamin_workshop_new_member,
+        tint = StatusTint.INFO,
+    ),
+    ARTICLE_SIXTEEN(
+        label = Res.string.workshop_action_article_sixteen,
+        description = Res.string.workshop_action_article_sixteen_desc,
+        icon = Res.drawable.ic_tamin_workshop_article_sixteen,
+        tint = StatusTint.PURPLE,
+    ),
 
     CONTRACT_ROWS(
         label = Res.string.contract_rows_title,
@@ -77,5 +98,14 @@ enum class WorkshopAction(
         tint = StatusTint.INFO,
         // «اطلاعات پیمان» in the server menu — the same flag the services-grid tile routes through.
         featureFlag = FeatureFlag.CONTRACT_INFO,
+    ),
+
+    ASSIGNER_CONTRACTS(
+        label = Res.string.assigner_contracts_title,
+        description = Res.string.assigner_contracts_action_desc,
+        icon = Res.drawable.ic_tamin_assigner_contracts,
+        tint = StatusTint.MINT,
+        // 1003 in the server menu, under the same name the screen carries.
+        featureFlag = FeatureFlag.ASSIGNER_CONTRACT,
     ),
 }

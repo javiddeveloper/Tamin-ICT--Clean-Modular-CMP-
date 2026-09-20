@@ -146,10 +146,7 @@ val networkModule = module {
             timeoutMillis = NetworkConstants.REQUEST_TIMEOUT_60_SEC,
             baseUrl = aiBaseUrl
         ).config {
-            install(com.tamin.taminhamrah.apiService.agent.AiChatTokenPlugin) {
-                this.json = get<Json>()
-                this.aiBaseUrl = aiBaseUrl
-            }
+            install(com.tamin.taminhamrah.apiService.agent.AiChatTokenPlugin)
         }
     }
 }

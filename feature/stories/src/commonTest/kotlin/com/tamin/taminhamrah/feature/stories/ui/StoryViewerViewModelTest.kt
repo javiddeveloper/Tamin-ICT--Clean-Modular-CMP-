@@ -468,7 +468,7 @@ class StoryViewerViewModelTest {
 
         viewModel.events.test {
             viewModel.sendIntent(StoryViewerIntent.CtaClicked)
-            assertEquals(StoryViewerEvent.OpenDeepLink("tamin://feature/AGENT"), awaitItem())
+            assertEquals(StoryViewerEvent.OpenDeepLink("@agent"), awaitItem())
         }
     }
 

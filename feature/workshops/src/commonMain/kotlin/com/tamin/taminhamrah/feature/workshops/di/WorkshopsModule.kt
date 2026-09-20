@@ -1,12 +1,16 @@
 package com.tamin.taminhamrah.feature.workshops.di
 
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopsViewModel
+import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.AssignerContractsViewModel
+import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.settlement.SettlementRequestViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.contractRows.ContractRowsViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.demandDocuments.DemandDocumentsViewModel
+import com.tamin.taminhamrah.feature.workshops.ui.managementDebit.ManagementDebitViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.add.AddLegalRepresentativeViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.list.LegalRepresentativeListViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.otp.LegalRepresentativeOtpViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.workshops.LegalRepresentativeWorkshopsViewModel
+import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachmentDownloader
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachmentUploader
 import com.tamin.taminhamrah.feature.workshops.ui.objectionableDebit.ObjectionableDebitViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.objectionStatus.document.ObjectionDocumentViewModel
@@ -15,7 +19,9 @@ import com.tamin.taminhamrah.feature.workshops.ui.objectionStatus.sms.ObjectionS
 import com.tamin.taminhamrah.feature.workshops.ui.paymentSheets.PaymentSheetsViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebit.WorkshopDebitViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebtInquiry.WorkshopDebtInquiryViewModel
+import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersViewModel
 import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
+import com.tamin.taminhamrah.useCases.userRequest.DownloadUserRequestDocumentUseCase
 import kotlinx.coroutines.flow.first
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
@@ -27,10 +33,18 @@ val workshopsModule = module {
         val uploadImage: UploadImageUseCase = get()
         WorkshopAttachmentUploader { uploadImage(it).first() }
     }
+    // Its counterpart for a form re-opened on documents already on file: the same image store,
+    // read back by guid through the download the request details already use.
+    factory {
+        val downloadImage: DownloadUserRequestDocumentUseCase = get()
+        WorkshopAttachmentDownloader { downloadImage(it) }
+    }
 
     viewModelOf(::WorkshopsViewModel)
+    viewModelOf(::ManagementDebitViewModel)
     viewModelOf(::WorkshopDebtInquiryViewModel)
     viewModelOf(::ObjectionableDebitViewModel)
+    viewModelOf(::WorkshopRecentlyAddedMembersViewModel)
     viewModelOf(::PaymentSheetsViewModel)
     viewModelOf(::WorkshopDebitViewModel)
     viewModelOf(::DemandDocumentsViewModel)
@@ -39,6 +53,8 @@ val workshopsModule = module {
     viewModelOf(::LegalRepresentativeListViewModel)
     viewModelOf(::AddLegalRepresentativeViewModel)
     viewModelOf(::ContractRowsViewModel)
+    viewModelOf(::AssignerContractsViewModel)
+    viewModelOf(::SettlementRequestViewModel)
     viewModelOf(::ObjectionStatusViewModel)
     viewModelOf(::ObjectionSmsViewModel)
     viewModelOf(::ObjectionDocumentViewModel)

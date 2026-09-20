@@ -203,6 +203,7 @@
     <string name="select_group">انتخاب گروه</string>
     <string name="user_type_insured">بیمه شدگان</string>
     <string name="invalid_deep_link">لینک نامعتبر است</string>
+    <string name="deep_link_feature_unavailable">این سرویس در حال حاضر در دسترس نیست</string>
     <string name="user_type_pensioner">مستمری بگیران</string>
     <string name="user_type_employer">کارفرمایان</string>
     <string name="error_load_menu_failed">خطا در دریافت اطلاعات یا لیست خالی است</string>
@@ -233,6 +234,33 @@
     <string name="amount_total">جمع کل</string>
     <!-- Stands in for an amount that has not loaded; must never read as a real figure. -->
     <string name="amount_unknown">—</string>
+
+    <!-- Home service sections (دسترسی سریع / خدمات ویژه) -->
+    <string name="home_section_frequent">پرکاربرد</string>
+    <string name="home_section_history">سابقه</string>
+    <string name="home_section_aid">کمک‌هزینه</string>
+    <string name="home_section_pensioner">مستمری</string>
+    <string name="home_section_employer">کارفرما</string>
+    <string name="home_section_featured">خدمات ویژه</string>
+    <string name="home_section_last_requests">آخرین درخواست‌ها</string>
+    <string name="home_see_all">همه</string>
+    <string name="home_quick_access_all">همهٔ خدمات</string>
+
+    <!-- Home header: title, name area, AI ask-bar, status chips, suggestion chips -->
+    <string name="home_header_title">تأمین من</string>
+    <string name="home_header_support_cd">پشتیبانی</string>
+    <string name="home_header_shield_cd">وضعیت حساب</string>
+    <!-- Shown once the home sync has loaded but the server returned no usable name. -->
+    <string name="home_header_fallback_name">کاربر تامین</string>
+    <string name="home_ask_agent_hint">از یارا بپرسید...</string>
+    <string name="home_ask_agent_cd">پرسش از دستیار هوشمند</string>
+    <string name="home_chip_darman_covered">بیمهٔ درمانی · برخوردار</string>
+    <string name="home_chip_darman_uncovered">بیمهٔ درمانی · فاقد</string>
+    <string name="home_chip_relation_active">ارتباط فعال</string>
+    <string name="home_chip_relation_inactive">ارتباط غیرفعال</string>
+    <string name="home_suggestion_retirement">چقدر تا بازنشستگی مانده؟</string>
+    <string name="home_suggestion_history">سابقه‌ام کامل است؟</string>
+    <string name="home_suggestion_booklet">دفترچه چطور تمدید می‌شود؟</string>
 
     <!-- Treatment hub -->
     <string name="hub_empty_patients">بیمه‌شده‌ای برای نمایش وجود ندارد</string>
@@ -654,6 +682,52 @@
     <string name="error_enter_education_code">لطفا کد استعلام تحصیلی را وارد کنید</string>
     <string name="error_education_inquiry_required">لطفا استعلام کد تحصیلی را انجام دهید</string>
     <string name="error_inquiry_education_failed">خطا در استعلام کد تحصیلی</string>
+    <string name="calculate_wage_pension_title">محاسبه مبلغ بازنشستگی</string>
+    <string name="calculate_wage_pension_amount_label">مبلغ استحقاقی بازنشستگی - ماهانه</string>
+    <string name="calculate_wage_pension_chip_estimated">برآوردی بر پایه سوابق ثبت‌شده</string>
+    <string name="calculate_wage_pension_chip_legal_floor">کف قانونی اعمال شد</string>
+    <string name="calculate_wage_pension_chip_simultaneous">با احتساب اشتغال همزمان</string>
+    <string name="calculate_wage_pension_premium_duration_label">مدت سابقه پرداخت حق بیمه</string>
+    <string name="calculate_wage_pension_premium_years_value">%1$s سال</string>
+    <string name="calculate_wage_pension_avg_wage_label">میانگین دستمزد دو سال آخر</string>
+    <string name="calculate_wage_pension_workshop_title">اشتغال در چند کارگاه به‌صورت همزمان</string>
+    <string name="calculate_wage_pension_workshop_subtitle_off">برای بازمحاسبه بر پایه سوابق همزمان فعال کنید.</string>
+    <string name="calculate_wage_pension_workshop_subtitle_on">مبلغ با احتساب سوابق همزمان بازمحاسبه شد.</string>
+    <string name="calculate_wage_pension_history_title">سابقه پرداخت حق بیمه</string>
+    <string name="calculate_wage_pension_history_days">%1$s روز</string>
+    <string name="calculate_wage_pension_history_years">%1$s سال</string>
+    <string name="calculate_wage_pension_history_months">%1$s ماه</string>
+    <string name="calculate_wage_pension_history_days_unit">%1$s روز</string>
+    <string name="calculate_wage_pension_chart_full_year">سال کامل</string>
+    <string name="calculate_wage_pension_chart_partial_year">سال ناقص</string>
+    <string name="calculate_wage_pension_chart_tap_hint">روی هر سال بزنید</string>
+    <string name="calculate_wage_pension_year_detail_title">جزئیات سابقه %1$s</string>
+    <string name="calculate_wage_pension_month_leap">%1$s (کبیسه)</string>
+    <string name="calculate_wage_pension_season_spring">بهار</string>
+    <string name="calculate_wage_pension_season_summer">تابستان</string>
+    <string name="calculate_wage_pension_season_autumn">پاییز</string>
+    <string name="calculate_wage_pension_season_winter">زمستان</string>
+    <string name="calculate_wage_pension_chart_months_12">۱۲ ماه</string>
+    <string name="calculate_wage_pension_chart_months_6">۶ ماه</string>
+    <string name="calculate_wage_pension_disclaimer">با توجه به غیرقطعی بودن میزان سابقه، مبلغ مستمری محاسبه‌شده قابل استناد در مراجع قانونی نمی‌باشد. </string>
+    <string name="calculate_wage_pension_disclaimer_link">نحوه محاسبه و نکته‌ها</string>
+    <string name="calculate_wage_pension_info_title">نحوه محاسبه و نکته‌ها</string>
+    <string name="calculate_wage_pension_info_formula_label">فرمول محاسبه</string>
+    <string name="calculate_wage_pension_info_formula">( میانگین دستمزد ۲۴ ماه ÷ ۳۰ ) × سال سابقه</string>
+    <string name="calculate_wage_pension_info_avg_label">میانگین دستمزد ۲۴ ماه آخر</string>
+    <string name="calculate_wage_pension_info_years_label">مدت سابقه (سال)</string>
+    <string name="calculate_wage_pension_info_floor_label">حداقل دستمزد پایه (کف مبلغ)</string>
+    <string name="calculate_wage_pension_info_estimated_label">مبلغ برآوردی ماهانه</string>
+    <string name="calculate_wage_pension_info_note_1">حداقل دستمزد هر سال بر اساس مصوبات شورای عالی کار تعیین و به تبع آن حداکثر دستمزد محاسبه می‌گردد.</string>
+    <string name="calculate_wage_pension_info_note_2">به موجب قانون تأمین‌اجتماعی مبلغ مستمری تا سقف ۳۵ سال پرداخت حق بیمه قابل محاسبه می‌باشد.</string>
+    <string name="calculate_wage_pension_info_note_3">مبلغ مستمری محاسبه‌شده بر اساس قوانین عام سازمان می‌باشد و چنانچه بیمه‌شده از قانون خاصی استفاده نماید، نحوه محاسبه مستمری متفاوت خواهد بود.</string>
+    <string name="calculate_wage_pension_info_note_4">با توجه به غیرقطعی بودن میزان سابقه، مبلغ مستمری محاسبه‌شده قابل استناد در مراجع قانونی نمی‌باشد.</string>
+    <string name="calculate_wage_pension_info_body">مبلغ نمایش‌داده‌شده برآوردی و بر پایه سوابق ثبت‌شده در سامانه است و تا زمان قطعی‌شدن سوابق، مبنای تصمیم‌گیری قانونی نیست.</string>
+    <string name="calculate_wage_pension_info_confirm">متوجه شدم</string>
+    <string name="calculate_wage_pension_multiple_info_title">اطلاع</string>
+    <string name="calculate_wage_pension_multiple_info_body">سوابق اشتغال همزمان برای این بیمه شده یافت نشد.</string>
+    <string name="calculate_wage_pension_cd_info">راهنما</string>
+    <string name="calculate_wage_pension_retry">تلاش مجدد</string>
     <string name="inquiry_education_title">استعلام گواهی اشتغال به تحصیل</string>
     <string name="inquiry_education_subtitle">تمدید پوشش بیمه‌ای فرزند پسر دانشجو با کد رهگیری سامانه وزارت علوم</string>
     <string name="inquiry_education_info_body">متقاضی محترم، ثبت درخواست به منظور تحت پوشش قرار دادن فرد مورد نظر، منوط به ثبت نام وی در سامانه استعلام گواهی تحصیلی وزارت علوم، تحقیقات و فناوری و دریافت کد رهگیری از آن سامانه است.</string>
@@ -1801,6 +1875,17 @@
     <string name="new_member_cannot_edit">این درخواست ثبت شده است و قابل تغییر نیست.</string>
     <string name="new_member_confirmed">درخواست با کد رهگیری %1$s ثبت شد.</string>
     <string name="new_member_follow_body">درخواست با کد پیگیری %1$s در حال بررسی است. نتیجه از طریق پیامک اطلاع داده می‌شود.</string>
+    <string name="new_member_confirm_question">آیا می‌خواهید این پرسنل را تأیید کنید؟</string>
+    <string name="new_member_delete_question">آیا می‌خواهید این پرسنل را حذف کنید؟</string>
+    <string name="new_member_request_status">وضعیت درخواست</string>
+    <!-- The seven request states the search filters by; wording is the old app's search sheet. -->
+    <string name="new_member_status_awaiting_confirmation">در انتظار تایید</string>
+    <string name="new_member_status_submitted">ثبت درخواست</string>
+    <string name="new_member_status_invalid">درخواست نامعتبر</string>
+    <string name="new_member_status_needs_branch_review">درحال بررسی-نیاز به رسیدگی شعبه</string>
+    <string name="new_member_status_under_review">درحال بررسی</string>
+    <string name="new_member_status_closed_approved">مختومه-تایید نهایی</string>
+    <string name="new_member_status_closed_rejected">مختومه-عدم تایید</string>
 
     <!-- ماده ۱۶ -->
     <string name="article_sixteen_debt_amount">مبلغ بدهی (ریال)</string>
@@ -1810,13 +1895,21 @@
     <string name="article_sixteen_status_submitted">ثبت درخواست</string>
     <string name="article_sixteen_status_document_defect">نقص مدارک</string>
     <string name="article_sixteen_status_rejected">رد درخواست</string>
-    <string name="article_sixteen_status_approved">تایید درخواست</string>
+    <string name="article_sixteen_status_approved">تأیید درخواست</string>
     <string name="article_sixteen_status_unknown">نامشخص</string>
     <string name="article_sixteen_status_none">بدون درخواست</string>
     <string name="article_sixteen_action_request">درخواست رسیدگی به بدهی</string>
     <string name="article_sixteen_action_expert_message">پیام کارشناس</string>
     <string name="article_sixteen_action_fix_request">اصلاح درخواست</string>
-    <string name="article_sixteen_deadline_passed">مهلت ثبت درخواست برای این بدهی به پایان رسیده است.</string>
+    <string name="article_sixteen_action_show_request">مشاهده درخواست</string>
+    <string name="article_sixteen_proceeding_type">نوع رسیدگی</string>
+    <string name="article_42">ماده ۴۲</string>
+    <string name="article_43">ماده ۴۳</string>
+    <string name="article_44">ماده ۴۴</string>
+    <string name="article_sixteen_deadline_passed">به دلیل گذشت بیش از یک سال از تاریخ ابلاغ اجراییهٔ این بدهی، امکان ثبت درخواست رسیدگی وجود ندارد.</string>
+    <string name="article_sixteen_resubmit_warning">کارفرمای گرامی، ارسال مجدد مستندات در خصوص بدهی صرفاً برای یک‌بار امکان‌پذیر است؛ لذا خواهشمند است دقت لازم را در این خصوص معمول دارید.</string>
+    <string name="article_sixteen_no_debt_title">نتیجهٔ پردازش</string>
+    <string name="article_sixteen_no_debt_body">لیست بدهی برای این کارگاه یافت نشد.</string>
 
     <!-- کارکنان / ذینفعان -->
     <string name="member_insurance_number">شماره بیمه</string>
@@ -1842,6 +1935,7 @@
     <string name="ws_form_doc_type_title">نوع مدرک را انتخاب کنید</string>
     <string name="ws_form_err_docs">بارگذاری حداقل یک مدرک الزامی است.</string>
     <string name="ws_form_err_agree">لطفاً تعهدنامه را تأیید کنید.</string>
+    <string name="ws_dialog_ok">باشه</string>
 
     <!-- ثبت اعتراض به بدهی -->
     <string name="obj_form_title">ثبت اعتراض به بدهی</string>
@@ -1859,6 +1953,7 @@
     <string name="obj_form_confirm_body">کارفرمای محترم مدارک و مستندات ارائه شده توسط شعبه بررسی و در صورت تایید آنها، اصلاح بدهی بدون حضور در جلسه هیات بدوی انجام میگردد. بدیهی است در صورت عدم کافی بودن مستندات یا عدم تایید آنها توسط شعبه حق اعتراض به بدهی و طرح آن در هیات بدوی محفوظ می‌باشد. لذا پس از بررسی‌های معمول، نتیجه ظرف مهلت یک هفته به جنابعالی اطلاع‌رسانی خواهد شد.
 
 نتیجه بررسی‌های معمول و وضعیت رسیدگی به بدهی مورد اعتراض کارفرما پس از ثبت و تایید نهایی از طریق منوی پیگیری وضعیت اعتراض و درخواست رسیدگی این سامانه قابل مشاهده خواهد بود.</string>
+    <string name="obj_form_done_title">اعتراض ثبت شد</string>
     <string name="obj_form_done_body">اعتراض شما با شمارهٔ پیگیری %1$s ثبت شد و به هیئت رسیدگی ارجاع گردید.</string>
 
     <!-- درخواست رسیدگی به بدهی ماده ۱۶ -->
@@ -1875,10 +1970,11 @@
     <string name="article_sixteen_form_employer_name">نام کارفرما</string>
     <string name="article_sixteen_form_workshop_name">نام کارگاه</string>
     <string name="article_sixteen_form_address">نشانی</string>
-    <string name="article_sixteen_form_note_window">رسیدگی به بدهی موضوع ماده ۱۶ آیین‌نامهٔ هیئت‌ها تنها برای بدهی‌هایی امکان‌پذیر است که از تاریخ ابلاغ اجراییه بیش از یک روز نگذشته باشد.</string>
+    <string name="article_sixteen_form_note_window">رسیدگی به بدهی موضوع ماده ۱۶ آیین‌نامهٔ هیئت‌ها تنها برای بدهی‌هایی امکان‌پذیر است که از تاریخ ابلاغ اجراییه بیش از یک سال نگذشته باشد.</string>
     <string name="article_sixteen_form_note_result">در صورت تأیید، نتیجه از طریق کارتابل درخواست‌ها و پیامک اطلاع داده می‌شود.</string>
     <string name="article_sixteen_form_check">مفاد فوق را مطالعه کردم و صحت مدارک ارسالی را تأیید می‌کنم.</string>
     <string name="article_sixteen_form_submit">ثبت درخواست</string>
+    <string name="article_sixteen_form_done_title">درخواست شما ثبت شد</string>
     <string name="article_sixteen_form_done_body">درخواست رسیدگی به بدهی ماده ۱۶ با کد پیگیری %1$s ثبت شد.</string>
 
     <!-- انواع مدرک اعتراض — codes are the service's own, mirrored from the old app's asset -->
@@ -1963,6 +2059,8 @@
     <string name="abs_doc_07">تصویر توضیحات شناسنامه</string>
     <string name="abs_doc_05">تصویر روی کارت ملی</string>
     <string name="abs_doc_06">تصویر پشت کارت ملی</string>
+    <!-- A document already on file under a type the table above does not list. -->
+    <string name="abs_doc_unknown">مدرک</string>
     <!-- Employer Info Completion (تکمیل اطلاعات کارفرمایی) -->
     <string name="employer_info_title">تکمیل اطلاعات کارفرمایی</string>
     <string name="employer_info_subtitle">تکمیل اطلاعات هویتی کارگاه‌های شما</string>
@@ -2459,7 +2557,6 @@
     <string name="contract_rows_four_digits">۴ رقم</string>
     <string name="contract_rows_workshop_code_required">لطفاً کد کارگاه را وارد کنید.</string>
     <string name="contract_rows_my_workshops">کارگاه‌های شما</string>
-    <string name="contract_rows_my_workshops_partial">%1$s کارگاه از %2$s نمایش داده شده — بقیه را با شمارهٔ کارگاه جست‌وجو کنید.</string>
     <string name="contract_rows_apply">مشاهدهٔ ردیف پیمان‌ها</string>
     <string name="contract_rows_reset">حذف</string>
     <!-- Contract flow -->
@@ -2675,6 +2772,192 @@
     <string name="contract_treatment_support_yes">حمایت درمان دارد</string>
     <string name="contract_treatment_support_no">حمایت درمان ندارد</string>
 
+    <!-- واگذارندگان (assigner contracts) -->
+    <string name="assigner_contracts_title">واگذارندگان</string>
+    <string name="assigner_contracts_action_desc">پیمان‌هایی که واگذارندهٔ آن‌ها هستید</string>
+    <string name="assigner_contract_detail_title">جزئیات پیمان</string>
+    <string name="assigner_bases_title">مبانی محاسباتی</string>
+    <string name="assigner_base_detail_title">جزئیات مبنا</string>
+
+    <!-- Screen A — the searched list -->
+    <string name="assigner_empty_no_search_title">کارگاهی جست‌وجو نشده است</string>
+    <string name="assigner_empty_no_search_body">برای مشاهدهٔ ردیف پیمان‌ها، کد کارگاه را جست‌وجو کنید.</string>
+    <string name="assigner_empty_not_found_title">نتیجه‌ای یافت نشد</string>
+    <string name="assigner_empty_not_found_body">کد کارگاه یا کد شعبه را بررسی کنید و دوباره جست‌وجو کنید.</string>
+    <string name="assigner_empty_active_title">پیمان جاری ندارید</string>
+    <string name="assigner_empty_finished_title">پیمان خاتمه‌یافته ندارید</string>
+    <string name="assigner_empty_tab_body">پیمان‌های این وضعیت در کارگاه انتخاب‌شده ثبت نشده است. کارگاه دیگری را انتخاب کنید.</string>
+    <string name="assigner_select_workshop">انتخاب کارگاه</string>
+    <string name="assigner_filter_change">تغییر</string>
+    <string name="assigner_filter_workshop">کد کارگاه %1$s</string>
+    <string name="assigner_filter_branch">کد شعبه %1$s</string>
+    <string name="assigner_filter_row">ردیف %1$s</string>
+    <string name="assigner_filter_clear">حذف</string>
+    <string name="assigner_contract_date">تاریخ قرارداد</string>
+    <string name="assigner_contract_subtitle">%1$s · ردیف %2$s</string>
+    <string name="assigner_tab_active">جاری</string>
+    <string name="assigner_tab_finished">خاتمه‌یافته</string>
+    <string name="assigner_count_label">واگذارنده</string>
+    <string name="assigner_action_detail">جزئیات</string>
+    <string name="assigner_action_bases">مبانی</string>
+    <string name="assigner_action_settlement">مفاصاحساب</string>
+    <string name="assigner_action_certificate">گواهی صادرشده</string>
+    <string name="assigner_card_subtitle">پیمانکار · %1$s</string>
+
+    <!-- Search sheet -->
+    <string name="assigner_search_subtitle">ردیف پیمان‌ها بر اساس کارگاه و شعبه نمایش داده می‌شود.</string>
+    <string name="assigner_search_apply">مشاهدهٔ ردیف پیمان‌ها</string>
+    <string name="assigner_search_branch_code_optional">کد شعبه (اختیاری)</string>
+    <string name="assigner_search_contract_row_optional">ردیف پیمان (اختیاری)</string>
+    <string name="assigner_search_workshop_hint">۱۰ رقم</string>
+    <string name="assigner_search_branch_hint">۴ رقم</string>
+    <string name="assigner_search_row_hint">مثلاً ۳</string>
+
+    <!-- Screen B — جزئیات پیمان -->
+    <string name="assigner_group_contract">اطلاعات پیمان</string>
+    <string name="assigner_group_assigner">اطلاعات واگذارنده</string>
+    <string name="assigner_group_contractor">اطلاعات پیمانکار</string>
+    <string name="assigner_field_contract_row">ردیف پیمان</string>
+    <string name="assigner_field_contract_sequence">توالی پیمان</string>
+    <string name="assigner_status_active_note">این پیمان فعال است؛ پس از پایان عملیات می‌توانید درخواست صدور مفاصاحساب ثبت کنید.</string>
+    <string name="assigner_status_finished_note">این پیمان خاتمه یافته است و امکان ثبت درخواست جدید مفاصاحساب ندارد.</string>
+    <string name="assigner_certificate_issued">گواهی مفاصاحساب %1$s در تاریخ %2$s صادر شده است.</string>
+    <string name="assigner_certificate_not_found">گواهی مفاصاحسابی برای این پیمان ثبت نشده است.</string>
+    <string name="assigner_field_contract_number">شمارهٔ قرارداد</string>
+    <string name="assigner_field_contract_subject">موضوع پیمان</string>
+    <string name="assigner_field_workshop_name">نام کارگاه</string>
+    <string name="assigner_field_national_id">کد ملی/شناسهٔ ملی</string>
+    <string name="assigner_field_branch">شعبه</string>
+    <string name="assigner_field_address">نشانی</string>
+    <string name="assigner_group_contract_preview">قرارداد %1$s · %2$s</string>
+
+    <!-- Screen C — مبانی محاسباتی -->
+    <string name="assigner_bases_empty_title">مبنای محاسباتی ثبت نشده است</string>
+    <string name="assigner_bases_empty_body">برای این پیمان هنوز صورت‌وضعیتی از سوی شعبه ثبت نشده. پس از ثبت، سوابق در همین صفحه نمایش داده می‌شود.</string>
+    <string name="assigner_bases_total">جمع کارکرد اعلامی</string>
+    <string name="assigner_base_period">%1$s تا %2$s</string>
+    <string name="assigner_base_document_badge">سند %1$s</string>
+    <string name="assigner_base_documents_count">%1$s مستند</string>
+
+    <!-- Screen D — جزئیات مبنا -->
+    <string name="assigner_field_letter_number">شمارهٔ سند</string>
+    <string name="assigner_field_period">دورهٔ کارکرد</string>
+    <string name="assigner_field_amount">مبلغ کارکرد</string>
+    <string name="assigner_field_status">وضعیت</string>
+    <string name="assigner_field_final_order">شمارهٔ برگهٔ پرداخت بدهی قطعی</string>
+    <string name="assigner_field_estimated_order">شمارهٔ برگهٔ پرداخت بدهی برآوردی</string>
+    <string name="assigner_base_status_01">ارسال پیامک</string>
+    <string name="assigner_base_status_02">ثبت مبانی محاسباتی توسط واگذارنده</string>
+    <string name="assigner_base_status_03">تأیید و ثبت در اطلاعات تکمیلی پیمان</string>
+    <string name="assigner_base_status_04">عدم تأیید</string>
+    <string name="assigner_base_status_05">تعیین ضریب</string>
+    <string name="assigner_base_status_06">محاسبهٔ پیمان</string>
+    <string name="assigner_base_status_07">صدور فرم یک تبصرهٔ الحاقی</string>
+    <string name="assigner_base_status_08">ابلاغ فرم یک تبصرهٔ الحاقی</string>
+    <string name="assigner_base_status_09">صدور فرم دو تبصرهٔ الحاقی</string>
+    <string name="assigner_base_status_10">ابلاغ فرم دو تبصرهٔ الحاقی</string>
+    <string name="assigner_base_status_11">صدور برگهٔ پرداخت بدهی قطعی</string>
+    <string name="assigner_base_status_12">صدور برگهٔ پرداخت بدهی برآوردی</string>
+    <string name="assigner_base_status_13">وصول بدهی قطعی</string>
+    <string name="assigner_base_status_14">وصول بدهی برآوردی</string>
+    <string name="assigner_base_status_15">وصول بدهی قطعی و برآوردی</string>
+    <string name="assigner_base_status_16">صدور مفاصاحساب</string>
+    <string name="assigner_base_status_17">ابلاغ مفاصاحساب</string>
+    <string name="assigner_base_detail_header">سند %1$s · %2$s</string>
+    <string name="assigner_documents_title">مستندات پیوست‌شده</string>
+    <string name="assigner_documents_empty">مستندی پیوست نشده است</string>
+    <string name="assigner_document_unavailable">در دسترس نیست</string>
+    <string name="assigner_document_open_failed">دریافت سند ناموفق بود</string>
+    <string name="assigner_doc_category_other">سایر مدارک</string>
+    <string name="assigner_doc_kind_image">تصویر</string>
+    <string name="assigner_doc_kind_pdf">فایل PDF</string>
+
+    <!-- واگذارندگان — درخواست مفاصاحساب. Wording is the old app's unless the design names it. -->
+    <string name="settlement_title">درخواست مفاصاحساب</string>
+    <string name="settlement_step_contract">اطلاعات قرارداد</string>
+    <string name="settlement_step_letter">اعلام مشخصات نامه و ارسال آن</string>
+    <string name="settlement_step_documents">بارگذاری مدارک</string>
+    <string name="settlement_step_terms">شرایط قرارداد با توجه به موضوع کار</string>
+    <string name="settlement_selected_contract">پیمان انتخاب‌شده</string>
+    <string name="settlement_contract_row_sequence">ردیف / توالی پیمان</string>
+    <string name="settlement_contractor_name">نام پیمانکار</string>
+    <string name="settlement_contractor_workshop">کد کارگاه پیمانکار</string>
+    <string name="settlement_contractor_branch">شعبهٔ پیمانکار</string>
+    <string name="settlement_contract_info_note">این اطلاعات از پروندهٔ پیمان خوانده می‌شود و قابل ویرایش نیست. در مرحلهٔ بعد مشخصات نامهٔ درخواست و مبالغ کارکرد را وارد می‌کنید.</string>
+    <string name="settlement_letter_number">شمارهٔ نامه</string>
+    <string name="settlement_letter_date">تاریخ نامه</string>
+    <string name="settlement_start_date">تاریخ شروع قرارداد</string>
+    <string name="settlement_end_date">تاریخ اجرای عملیات پیمان</string>
+    <string name="settlement_has_subcontractor">آیا پیمان، پیمانکار جزء دارد؟</string>
+    <string name="settlement_subcontractor_hint">پاسخ «بله» نوع مستند «مستندات لیست فهرست» را در مرحلهٔ بارگذاری فعال می‌کند.</string>
+    <string name="settlement_yes">بله</string>
+    <string name="settlement_no">خیر</string>
+    <string name="settlement_amount">مبلغ ناخالص کارکرد (ریال)</string>
+    <string name="settlement_foreign_exchange_note">در صورتی که قرارداد فاقد کارکرد ارزی می‌باشد، نیازی به تکمیل مبلغ ارزی و معادل آن نمی‌باشد.</string>
+    <string name="settlement_currency_amount">مبلغ ارزی کارکرد</string>
+    <string name="settlement_currency_in_rial">معادل ریالی مبلغ ارزی</string>
+    <string name="settlement_total_label">جمع کل کارکرد پیمان</string>
+    <string name="settlement_total_hint">ناخالص + معادل ریالی ارز</string>
+    <string name="settlement_amount_rial">%1$s ریال</string>
+    <string name="settlement_documents_hint">دست‌کم یک مستند لازم است. نوع مستند را پیش از انتخاب فایل مشخص کنید.</string>
+    <string name="settlement_doc_letter">مستندات نامه</string>
+    <string name="settlement_doc_supplement">مستندات مدارک الحاقیه</string>
+    <string name="settlement_doc_final_status">مستندات صورت‌وضعیت قطعی</string>
+    <string name="settlement_doc_subcontractor">مستندات لیست فهرست</string>
+    <string name="settlement_subject">موضوع کار پیمان</string>
+    <string name="settlement_subject_none_note">این موضوع کار به اطلاعات تکمیلی نیاز ندارد. برای ارسال درخواست، «ثبت مفاصاحساب» را بزنید.</string>
+    <string name="settlement_subject_search_hint">جست‌وجو در موضوع‌ها…</string>
+    <string name="settlement_subject_search_empty">موضوعی با این عبارت یافت نشد.</string>
+    <string name="settlement_price_list_owner">انعقاد قرارداد (تهیه مصالح به عهده)</string>
+    <string name="settlement_price_list_owner_hint">انعقاد قرارداد بر اساس فهرست بهاء پایه سازمان برنامه و بودجه</string>
+    <string name="settlement_owner_contractor">پیمانکار</string>
+    <string name="settlement_owner_employer">کارفرما</string>
+    <string name="settlement_owner_budget_type">انعقاد قرارداد بر اساس ضوابط تیپ سازمان برنامه و بودجه</string>
+    <string name="settlement_plan_number">شماره طرح</string>
+    <string name="settlement_plan_number_hint">اعتبار طرح از محل اعتبارات طرح تملک دارایی‌های سرمایه‌ای دولت به شماره طرح</string>
+    <string name="settlement_budget_row">ردیف بودجه</string>
+    <string name="settlement_insurance_paid">مبلغ حق بیمه پرداخت شده (ریال)</string>
+    <string name="settlement_supply_owner">تهیه و تأمین مصالح مصرفی به عهده</string>
+    <string name="settlement_supply_contractor">مقاطعه کار</string>
+    <string name="settlement_supply_assigner">واگذارنده</string>
+    <string name="settlement_supply_shared">قسمتی از مصالح توسط پیمانکار و قسمتی توسط واگذارنده کار تأمین شده است</string>
+    <string name="settlement_assigner_materials_value">ارزش مصالح واگذارنده (ریال)</string>
+    <string name="settlement_mechanical_percent">درصد مکانیکی</string>
+    <string name="settlement_manual_percent_label">درصد دستی</string>
+    <string name="settlement_percent_value">%1$s٪</string>
+    <string name="settlement_drivers_price">مبلغ کارکرد رانندگان</string>
+    <string name="settlement_drivers_price_hint">مبلغ کارکرد انجام شده توسط رانندگان در اختیار پیمانکار (ریال)</string>
+    <string name="settlement_owner_drivers_label">مبلغ کارکرد انجام شده توسط رانندگان خود مالک</string>
+    <string name="settlement_equipment_price">هزینه خرید تجهیزات غیر از مواد مصرفی</string>
+    <string name="settlement_services_label">هزینه خدمات، اجرا و مصالح مصرفی</string>
+    <string name="settlement_value_missing">—</string>
+    <string name="settlement_contractor_address">آدرس کارگاه ثابت پیمانکار</string>
+    <string name="settlement_build_price">هزینه ساخت (ریال)</string>
+    <string name="settlement_transport_price">هزینه حمل (ریال)</string>
+    <string name="settlement_installation_price">هزینه نصب (ریال)</string>
+    <string name="settlement_execution_price">هزینه اجرا (ریال)</string>
+    <string name="settlement_foreign_equipment">مبلغ ارزی تجهیزات خارجی</string>
+    <string name="settlement_equivalent_rial">معادل ریالی</string>
+    <string name="settlement_subject_image">تصویر مستند شرایط قرارداد</string>
+    <string name="settlement_err_invalid">اطلاعات را به درستی وارد کنید.</string>
+    <string name="settlement_err_date_order">تاریخ اجرای عملیات پیمان، نباید کوچک‌تر از تاریخ شروع قرارداد باشد!</string>
+    <string name="settlement_err_currency_rial">لطفاً ریالی که معادل ارزی است را وارد نمایید!</string>
+    <string name="settlement_err_drivers">مبلغ کارکرد رانندگان در اختیار پیمانکار وارد شده از مبلغ ناخالص کارکرد بزرگ‌تر است!</string>
+    <string name="settlement_err_equipment">هزینه خرید تجهیزات از مبلغ ناخالص کارکرد بزرگ‌تر است!</string>
+    <string name="settlement_err_build_sum">مجموع مبالغ وارد‌شده از مبلغ ناخالص کارکرد بزرگ‌تر است!</string>
+    <string name="settlement_err_subcontractor">لطفاً وضعیت پیمانکار جزء را مشخص کنید.</string>
+    <string name="settlement_err_letter_number_required">لطفاً شمارهٔ نامه را وارد کنید.</string>
+    <string name="settlement_err_letter_number_invalid">شمارهٔ نامهٔ وارد‌شده معتبر نیست.</string>
+    <string name="settlement_err_dates_required">لطفاً تاریخ نامه، شروع قرارداد و اجرای عملیات پیمان را کامل وارد کنید.</string>
+    <string name="settlement_err_amount_required">لطفاً مبلغ ناخالص کارکرد را وارد کنید.</string>
+    <string name="settlement_err_documents">لطفا مدارک را بارگذاری نمایید.</string>
+    <string name="settlement_err_subject_required">لطفاً موضوع کار پیمان را انتخاب کنید.</string>
+    <string name="settlement_err_terms_incomplete">لطفاً همهٔ فیلدهای این بخش را تکمیل کنید.</string>
+    <string name="settlement_submit">ثبت مفاصاحساب</string>
+    <string name="settlement_submitted">اطلاعات با موفقیت ارسال شد</string>
+    <string name="settlement_done_body">درخواست صدور مفاصاحساب ماده ۳۸ ثبت شد. نتیجهٔ بررسی شعبه از طریق کارتابل و پیامک اعلام می‌شود.</string>
+    <string name="settlement_done_back">بازگشت به فهرست پیمان‌ها</string>
+
     <!-- Shared payment flow (feature:payment) -->
     <string name="payment_title">پرداخت</string>
     <string name="payment_currency_unit">ریال</string>
@@ -2832,7 +3115,6 @@
     <string name="objection_status_title">پیگیری وضعیت اعتراض به بدهی</string>
     <string name="objection_status_subtitle">وضعیت اعتراض‌های ثبت‌شدهٔ شما</string>
     <string name="objection_status_search">جستجو</string>
-    <string name="objection_status_search_field">جستجوی اعتراض</string>
     <string name="objection_status_search_title">جستجو در اعتراض‌ها</string>
     <string name="objection_status_stat_count">اعتراض</string>
     <string name="objection_status_identity_national_id">کد ملی</string>
@@ -3095,6 +3377,154 @@
     <string name="error_not_valid_national_id">کد ملی معتبر نیست</string>
     <string name="error_select_check_box">تایید تعهدنامه الزامی است</string>
 
+    <!-- AI assistant (feature/agent) -->
+    <string name="agent_service_unavailable">سرویس دستیار هوشمند در حال حاضر در دسترس نیست.</string>
+    <string name="agent_not_allowed_title">دسترسی محدود</string>
+    <string name="agent_screen_title">دستیار هوشمند تأمین</string>
+    <string name="agent_processing">در حال پردازش…</string>
+    <string name="agent_processing_done">پردازش تمام شد</string>
+    <string name="agent_step_done">انجام شد</string>
+    <string name="agent_history">گفتگوهای من</string>
+    <string name="agent_new_chat">گفتگوی جدید</string>
+    <string name="agent_input_placeholder">هر چیزی بپرسید…</string>
+    <string name="agent_send">ارسال</string>
+    <string name="agent_stop">توقف</string>
+    <string name="agent_record_voice">ضبط صدا</string>
+    <string name="agent_stop_recording">توقف ضبط</string>
+    <string name="agent_delete_recording">حذف</string>
+    <string name="agent_play">پخش</string>
+    <string name="agent_pause">توقف</string>
+    <string name="agent_suggestions_label">پیشنهادها</string>
+    <string name="agent_offline_banner">اتصال به دستیار برقرار نشد. گفتگوی قبلی شما نمایش داده می‌شود.</string>
+    <string name="agent_checking_permission">در حال بررسی دسترسی…</string>
+    <string name="agent_empty_subtitle">سوالات خود درباره بیمه، سوابق و حقوق بازنشستگی را بپرسید</string>
+    <string name="agent_suggestion_history">تاریخچه بیمه‌ام را نشان بده</string>
+    <string name="agent_suggestion_pension">حقوق بازنشستگی ماهانه‌ام</string>
+    <string name="agent_suggestion_prescription">آخرین نسخه پزشکی من</string>
+    <string name="agent_suggestion_early_retirement">قوانین بازنشستگی پیش از موعد</string>
+    <string name="agent_like">پسندیدن</string>
+    <string name="agent_dislike">نپسندیدن</string>
+    <string name="agent_share">اشتراک‌گذاری</string>
+    <string name="agent_not_allowed_default">دستیار هوشمند برای شما فعال نیست.</string>
+    <string name="agent_request_failed">عملیات ناموفق بود</string>
+    <string name="agent_offline_error">برای گفتگو با دستیار به اینترنت نیاز دارید.</string>
+    <string name="agent_markdown_table">جدول</string>
+    <string name="agent_markdown_formula">فرمول</string>
+    <string name="agent_action_prescription_detail">مشاهده جزئیات نسخه</string>
+    <string name="agent_empty_appointment">متاسفانه نوبتی یافت نشد.</string>
+    <string name="agent_empty_dependents">تبعی یافت نشد!</string>
+    <string name="agent_empty_edict">در تاریخ انتخاب شده فاقد حکم مستمری می باشید.</string>
+    <string name="agent_empty_job_history">متاسفانه سوابق شغلی یافت نشد.</string>
+    <string name="agent_empty_last_payment">متاسفانه سابقه بیمه پردازی وجود ندارد!</string>
+    <string name="agent_empty_law">اطلاعات قانون دریافت نشد.</string>
+    <string name="agent_empty_medical_entitlement">متاسفانه اطلاعات استحقاق درمان یافت نشد!</string>
+    <string name="agent_empty_payroll">متاسفانه فیشی یافت نشد.</string>
+    <string name="agent_empty_pension_inquiry">متاسفانه اطلاعات استعلام مستمری یافت نشد!</string>
+    <string name="agent_empty_prescription">نسخه‌ای یافت نشد.</string>
+    <string name="agent_empty_tracking_code">متاسفانه کد پیگیری یافت نشد.</string>
+    <string name="agent_empty_treatment_costs">متاسفانه اطلاعات خسارت متفرقه ای یافت نشد.</string>
+    <string name="agent_empty_wage_average">متاسفانه اطلاعات دستمزد یافت نشد.</string>
+    <string name="agent_empty_wage_history">متاسفانه سوابق پرداخت بیمه یافت نشد.</string>
+    <string name="agent_empty_wage_in_range">متاسفانه اطلاعات دستمزد در بازه زمانی مشخص شده یافت نشد.</string>
+    <string name="agent_error_dependents">خطا در دریافت اطلاعات افراد تبعی.</string>
+    <string name="agent_error_edict">خطا در دریافت اطلاعات حکم مستمری.</string>
+    <string name="agent_error_job_history">خطا در دریافت اطلاعات عناوین شغلی.</string>
+    <string name="agent_error_medical_entitlement">متاسفانه در دریافت وضعیت استحقاق درمان خطایی رخ داده است!</string>
+    <string name="agent_error_national_code">کد ملی شما در دسترس نیست.</string>
+    <string name="agent_error_payroll">خطا در دریافت فیش حقوقی.</string>
+    <string name="agent_error_pension_inquiry">متاسفانه در دریافت استعلام مستمری خطایی رخ داده است!</string>
+    <string name="agent_error_prescription">متاسفانه در دریافت نسخ الکترونیک خطایی رخ داده است.</string>
+    <string name="agent_error_profile">متاسفانه مشکلی در دریافت اطلاعات پیش آمده است!</string>
+    <string name="agent_error_tracking_code">متاسفانه در دریافت کد پیگیری خطایی رخ داده است!</string>
+    <string name="agent_error_treatment_costs">متاسفانه در دریافت اطلاعات خسارت متفرقه خطایی رخ داده است!</string>
+    <string name="agent_error_wage_calculation">خطا در دریافت و محاسبه میانگین دستمزد.</string>
+    <string name="agent_error_wage_history">سرویس سابقه در دسترس نیست.</string>
+    <string name="agent_label_additional_history">سابقه ارفاقی</string>
+    <string name="agent_label_admission_date">تاریخ پذیرش</string>
+    <string name="agent_label_average_wage">میانگین دستمزد</string>
+    <string name="agent_label_average_wage_in_range">میانگین دستمزد در بازه زمانی</string>
+    <string name="agent_label_average_wage_two_years">متوسط دستمزد دو سال آخر</string>
+    <string name="agent_label_basis_implementation">اساس برقراری</string>
+    <string name="agent_label_birth_city">شهر محل تولد</string>
+    <string name="agent_label_booklet_validity">تاریخ اعتبار دفترچه</string>
+    <string name="agent_label_branch">نام شعبه</string>
+    <string name="agent_label_branch_code">کد سازمان</string>
+    <string name="agent_label_clinic">مرکز درمانی</string>
+    <string name="agent_label_date">تاریخ</string>
+    <string name="agent_label_days">روزهای کارکرد</string>
+    <string name="agent_label_deductions">کسورات</string>
+    <string name="agent_label_doctor">نام پزشک</string>
+    <string name="agent_label_edict_type">نوع حکم</string>
+    <string name="agent_label_eligible_pension">مبلغ استحقاقی مستمری</string>
+    <string name="agent_label_estimated_pay_date">تاریخ تخمینی پرداخت</string>
+    <string name="agent_label_execution_date">تاریخ اجرا</string>
+    <string name="agent_label_father_name">نام پدر</string>
+    <string name="agent_label_first_name">نام</string>
+    <string name="agent_label_franchise">فرانشیز</string>
+    <string name="agent_label_full_name">نام و نام خانوادگی</string>
+    <string name="agent_label_gender">جنسیت</string>
+    <string name="agent_label_health_center">مرکز درمانی</string>
+    <string name="agent_label_history_length">میزان سابقه</string>
+    <string name="agent_label_history_type">نوع سابقه</string>
+    <string name="agent_label_history_year">سابقه سال</string>
+    <string name="agent_label_id_card_number">شماره شناسنامه</string>
+    <string name="agent_label_id_card_serial">سریال شناسنامه</string>
+    <string name="agent_label_id_card_series">سری شناسنامه</string>
+    <string name="agent_label_insurance_number">شماره بیمه</string>
+    <string name="agent_label_insurance_type">نوع بیمه</string>
+    <string name="agent_label_issue_city">شهر محل صدور</string>
+    <string name="agent_label_job_title">عنوان شغل</string>
+    <string name="agent_label_last_name">نام خانوادگی</string>
+    <string name="agent_label_last_payment_month">آخرین بیمه پردازی</string>
+    <string name="agent_label_loans">وام‌ها</string>
+    <string name="agent_label_location">نشانی</string>
+    <string name="agent_label_mobile">شماره تلفن همراه</string>
+    <string name="agent_label_month">ماه</string>
+    <string name="agent_label_national_code">کد ملی</string>
+    <string name="agent_label_nationality">ملیت</string>
+    <string name="agent_label_organization_unit">نام واحد سازمانی</string>
+    <string name="agent_label_original_history">سابقه اصلی</string>
+    <string name="agent_label_other_costs">سایر هزینه‌ها</string>
+    <string name="agent_label_patient_name">نام بیمار</string>
+    <string name="agent_label_pay_status">وضعیت پرداخت</string>
+    <string name="agent_label_payment_amount">میزان پرداختی</string>
+    <string name="agent_label_payment_date">تاریخ پرداخت</string>
+    <string name="agent_label_payments">پرداخت‌ها</string>
+    <string name="agent_label_payroll_date">تاریخ فیش</string>
+    <string name="agent_label_pension_end_date">تاریخ پایان مستمری</string>
+    <string name="agent_label_pension_number">شماره مستمری</string>
+    <string name="agent_label_pension_start_date">تاریخ برقراری مستمری</string>
+    <string name="agent_label_prescription_type">نوع نسخه</string>
+    <string name="agent_label_province">استان</string>
+    <string name="agent_label_rejection_reason">علت رد</string>
+    <string name="agent_label_relation">نسبت</string>
+    <string name="agent_label_service_cost">هزینه خدمت</string>
+    <string name="agent_label_service_date">تاریخ خدمت</string>
+    <string name="agent_label_social_security_number">شماره تامین اجتماعی</string>
+    <string name="agent_label_specialty">تخصص</string>
+    <string name="agent_label_start_date">تاریخ شروع</string>
+    <string name="agent_label_status">وضعیت</string>
+    <string name="agent_label_time">ساعت</string>
+    <string name="agent_label_total_days">مجموع روزها</string>
+    <string name="agent_label_total_history_days">مجموع کل روزهای سوابق</string>
+    <string name="agent_label_total_pension_before_increase">مجموع مستمری و متناسب سازی مراحل اول و دوم قبل از افزایش</string>
+    <string name="agent_label_tracking_code">شماره پیگیری</string>
+    <string name="agent_label_type">نوع</string>
+    <string name="agent_label_visit_date">تاریخ ویزیت</string>
+    <string name="agent_label_wage">دستمزد</string>
+    <string name="agent_label_workshop">اطلاعات کارگاه</string>
+    <string name="agent_label_year">سال</string>
+    <string name="agent_not_pensioner">شما مستمری بگیر نمی باشید.</string>
+    <string name="agent_not_pensioner_access">کاربر گرامی؛ شما مستمری بگیر سازمان تأمین اجتماعی نمی‌باشید. به همین دلیل مجوز دسترسی به سرویس فوق را ندارید.</string>
+    <string name="agent_not_understood">متوجه نشدم. لطفاً درخواستتان را واضح‌تر بفرمایید.</string>
+    <string name="agent_value_days">%1$s روز</string>
+    <string name="agent_unit_day">روز</string>
+    <string name="agent_value_female">زن</string>
+    <string name="agent_value_foreign">غیر ایرانی</string>
+    <string name="agent_value_history_length">%1$s سال و %2$s ماه</string>
+    <string name="agent_value_iranian">ایرانی</string>
+    <string name="agent_value_male">مرد</string>
+    <string name="agent_value_rial">%1$s ریال</string>
     <!-- Fraction contract (تکمیل سوابق کسری از ماه) -->
     <string name="fraction_contract_title">تکمیل سوابق کسری از ماه</string>
     <string name="fraction_contract_guide_title">راهنمای این خدمت</string>
@@ -3138,4 +3568,3 @@
     <string name="fraction_contract_submit_commitment">اینجانب %1$s دارای کد ملی شماره %2$s با آگاهی کامل از مفاد آئین نامه و مقررات تکمیل سوابق کسری از ماه، و با سلامت کامل عقل، صحت اطلاعات و اسناد مربوطه را تایید می‌نمایم و چنانچه در هر زمان خلاف آن ثابت گردد، قرارداد منعقده باطل بوده و از این نظر هیچ‌گونه حقی نخواهم داشت و ملزم به جبران خسارات احتمالی وارده به سازمان تأمین‌ اجتماعی خواهم بود.\nدرخواست تکمیل سوابق کسری از ماه با نرخ %3$s و تاریخ شروع %4$s را تایید می‌نمایم.</string>
 
 </resources>
-

@@ -7,6 +7,10 @@ import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeWorksh
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtQuery
+import com.tamin.taminhamrah.model.workshop.AssignerContractDN
+import com.tamin.taminhamrah.model.workshop.AssignerContractQuery
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseDN
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseQuery
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestInfoDN
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveRequestDN
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveResultDN
@@ -25,6 +29,9 @@ import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetQuery
+import com.tamin.taminhamrah.model.workshop.SettlementCertificateDN
+import com.tamin.taminhamrah.model.workshop.SettlementRequestDN
+import com.tamin.taminhamrah.model.workshop.SettlementSubjectDN
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
 import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDN
 import com.tamin.taminhamrah.model.workshop.WorkshopContractDN
@@ -65,6 +72,44 @@ interface WorkShopsRepository {
     suspend fun getContractRowsWithoutAgreement(
         query: ContractRowQuery,
     ): PagedListDN<WorkshopContractDN>
+
+    // ---------------------------------------------------------------------------- واگذارندگان
+
+    /** پیمان‌هایی که کارفرما واگذارندهٔ آن‌هاست، narrowed by کد کارگاه / کد شعبه / ردیف. */
+    suspend fun getAssignerContracts(
+        query: AssignerContractQuery,
+    ): PagedListDN<AssignerContractDN>
+
+    /** مبانی محاسباتی of one پیمان. */
+    suspend fun getComputationalBases(
+        query: ComputationalBaseQuery,
+    ): PagedListDN<ComputationalBaseDN>
+
+    /** A PDF attached to a مبنای محاسباتی. */
+    suspend fun getComputationalBasePdf(documentId: String): PdfDownloadDN
+
+    /** موضوعات کار a درخواست مفاصاحساب can be filed under. */
+    suspend fun getSettlementSubjects(): List<SettlementSubjectDN>
+
+    /** Stores one PDF of a درخواست مفاصاحساب; returns the id the request names it by. */
+    suspend fun uploadSettlementPdf(fileName: String, bytes: ByteArray): String
+
+    /** Files a درخواست مفاصاحساب; returns the service's confirmation. */
+    suspend fun submitSettlementRequest(request: SettlementRequestDN): String
+
+    /**
+     * The مفاصاحساب certificate issued for one پیمان, or null when none is on file.
+     *
+     * [workshopId] is the پیمانکار's کد کارگاه and [branchCode] the پیمان's own branch — the keys the
+     * old app's مفاصاحساب ماده ۳۸ list is addressed with. [contractNumber] picks this پیمان out of the
+     * certificates its ردیف holds.
+     */
+    suspend fun getSettlementCertificate(
+        workshopId: String,
+        branchCode: String,
+        contractRow: String,
+        contractNumber: String,
+    ): SettlementCertificateDN?
 
     // -------------------------------------------------------------------------- برگ پرداخت‌ها
 
@@ -133,6 +178,11 @@ interface WorkShopsRepository {
      */
     suspend fun checkNewMemberIsNew(nationalId: String): Boolean
 
+    /**
+     * Files the registration: a person not yet on file is created, and one whose
+     * [NewMemberRegistrationDN.personalId] is set is updated in place — creating it again would
+     * add a second `employers` record for the same person.
+     */
     suspend fun createNewMemberRegistration(
         request: NewMemberRegistrationDN,
     ): NewMemberRegistrationResultDN

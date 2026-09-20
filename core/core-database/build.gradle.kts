@@ -3,6 +3,7 @@ plugins {
     id("TaminHamrah.naming.convention")
     alias(libs.plugins.ksp)
     alias(libs.plugins.androidx.room)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
@@ -12,6 +13,7 @@ kotlin {
             api(libs.room.runtime)
             api(libs.sqlite.bundled)
             implementation(libs.koin.core)
+            implementation(libs.kotlinx.serialization.json)
         }
 
         commonTest.dependencies {

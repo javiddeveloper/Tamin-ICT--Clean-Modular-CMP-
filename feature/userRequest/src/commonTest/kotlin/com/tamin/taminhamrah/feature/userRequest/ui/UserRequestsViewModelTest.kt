@@ -6,6 +6,7 @@ import com.tamin.taminhamrah.feature.userRequest.ui.contract.UserRequestsEvent
 import com.tamin.taminhamrah.feature.userRequest.ui.contract.UserRequestsIntent
 import com.tamin.taminhamrah.feature.userRequest.ui.screens.FakeUserRequestRepository
 import com.tamin.taminhamrah.model.userRequest.RequestErrorDN
+import com.tamin.taminhamrah.model.userRequest.UserRequestDN
 import com.tamin.taminhamrah.model.userRequest.UserRequestPR
 import com.tamin.taminhamrah.useCases.userRequest.GetSmartGuideListUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestErrorsUseCase
@@ -130,6 +131,59 @@ class UserRequestsViewModelTest {
             while (state.selectedTab != RequestStatusTab.COMPLETED) state = awaitItem()
 
             assertEquals(RequestStatusTab.COMPLETED, state.selectedTab)
+        }
+    }
+
+
+
+
+    @Test
+    fun `InitFilters seeds refCode and requestTypeId, opens the filter panel, and searches with both`() = runTest(testDispatcher) {
+        viewModel.uiState.test {
+            awaitItem()
+            viewModel.sendIntent(UserRequestsIntent.InitFilters(refCode = "REF-1", requestTypeId = "42"))
+
+            var state = awaitItem()
+            while (!state.isFilterOpen) state = awaitItem()
+
+            assertEquals("REF-1", state.refCode)
+            assertEquals("42", state.selectedRequestTypeId)
+            assertTrue(state.isFilterOpen)
+            assertEquals("REF-1", repository.lastSearch?.refCode)
+            assertEquals("42", repository.lastSearch?.requestTypeId)
+        }
+    }
+
+    @Test
+    fun `InitFilters with a blank refCode and requestTypeId does not open the filter panel`() = runTest(testDispatcher) {
+        repository.userRequestsResult = listOf(
+            UserRequestDN(
+                id = 1L,
+                refCode = "1075558440",
+                title = "تست",
+                comment = null,
+                creationTime = null,
+                createByName = null,
+                status = null,
+                requestType = null,
+                referenceId = null,
+            )
+        )
+
+        viewModel.uiState.test {
+            awaitItem()
+            viewModel.sendIntent(UserRequestsIntent.InitFilters(refCode = null, requestTypeId = ""))
+
+            // Blank/null filters are treated as absent: the search still runs (unfiltered), but
+            // nothing seeds refCode/selectedRequestTypeId or opens the filter panel.
+            var state = awaitItem()
+            while (state.isLoading) state = awaitItem()
+
+            assertFalse(state.isFilterOpen)
+            assertEquals("", state.refCode)
+            assertEquals(null, state.selectedRequestTypeId)
+            assertEquals(null, repository.lastSearch?.refCode)
+            assertEquals(null, repository.lastSearch?.requestTypeId)
         }
     }
 

@@ -8,7 +8,7 @@ import org.koin.dsl.module
 
 val databaseModule = module {
     single<TaminXDatabase> { getRoomDatabase(get()) }
-    single<LocalDataClearer> { LocalDataClearerImpl(get()) }
+    single<LocalDataClearer> { LocalDataClearerImpl(get(), get()) }
     single { get<TaminXDatabase>().testDao() }
     single { get<TaminXDatabase>().cityProvinceDao() }
     single { get<TaminXDatabase>().userDao() }
@@ -26,4 +26,5 @@ val databaseModule = module {
     single { get<TaminXDatabase>().versionHistoryDao() }
     single { get<TaminXDatabase>().historyJobInfoDao() }
     single { get<TaminXDatabase>().historyCacheDao() }
+    single { get<TaminXDatabase>().homeContentDao() }
 }

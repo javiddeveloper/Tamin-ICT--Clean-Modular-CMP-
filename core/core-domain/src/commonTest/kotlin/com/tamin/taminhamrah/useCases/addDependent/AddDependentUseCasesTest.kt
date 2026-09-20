@@ -154,6 +154,18 @@ class AddDependentUseCasesTest : BaseUseCaseTest() {
     }
 
     @Test
+    fun `RefreshDependentsUseCase should propagate errors from repository`() = runTest {
+        val expectedException = RuntimeException("Refresh failed")
+        repository.shouldThrowError = true
+        repository.error = expectedException
+
+        refreshDependentsUseCase().test {
+            val actualException = awaitError()
+            assertEquals(expectedException.message, actualException.message)
+        }
+    }
+
+    @Test
     fun `UseCases should propagate errors from repository`() = runTest {
         val expectedException = RuntimeException("Repository error")
         repository.shouldThrowError = true

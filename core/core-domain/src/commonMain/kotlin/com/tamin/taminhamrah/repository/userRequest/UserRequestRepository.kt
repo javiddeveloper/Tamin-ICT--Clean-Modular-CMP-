@@ -13,6 +13,13 @@ import kotlinx.coroutines.flow.Flow
 interface UserRequestRepository {
     fun getUserRequests(search: UserRequestSearchParams = UserRequestSearchParams()): Flow<List<UserRequestDN>>
 
+    /**
+     * One-shot network refresh, for callers that need the fresh value directly rather than
+     * observing [getUserRequests]'s cache-then-network `Flow`. Still writes through to the local
+     * cache, so [getUserRequests] observers see the update too.
+     */
+    suspend fun refreshUserRequests(search: UserRequestSearchParams = UserRequestSearchParams()): List<UserRequestDN>
+
     suspend fun getRequestTypes(query: ApiQueryParamDN? = null): List<UserRequestTypeDN>
 
     suspend fun getRequestErrors(requestId: Long): List<RequestErrorDN>

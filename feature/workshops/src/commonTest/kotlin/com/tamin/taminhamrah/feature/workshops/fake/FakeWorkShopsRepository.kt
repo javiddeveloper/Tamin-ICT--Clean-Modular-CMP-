@@ -19,6 +19,10 @@ import com.tamin.taminhamrah.model.workshop.DebitPaymentDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDN
 import com.tamin.taminhamrah.model.workshop.ContractRowQuery
+import com.tamin.taminhamrah.model.workshop.AssignerContractDN
+import com.tamin.taminhamrah.model.workshop.AssignerContractQuery
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseDN
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseQuery
 import com.tamin.taminhamrah.model.workshop.DebitReasonDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmissionDN
@@ -42,6 +46,9 @@ import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionQuery
 import com.tamin.taminhamrah.model.workshop.SmsMessageDN
+import com.tamin.taminhamrah.model.workshop.SettlementCertificateDN
+import com.tamin.taminhamrah.model.workshop.SettlementRequestDN
+import com.tamin.taminhamrah.model.workshop.SettlementSubjectDN
 import com.tamin.taminhamrah.repository.WorkShopsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -110,6 +117,8 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     var confirmedTicket: String? = null
         private set
     var deletedPersonalId: Long? = null
+    var confirmedRequestId: Long? = null
+        private set
     var newMemberIsNew: Boolean = true
     var registrationResult: NewMemberRegistrationResultDN = NewMemberRegistrationResultDN()
     var lastRegistrationRequest: NewMemberRegistrationDN? = null
@@ -142,6 +151,78 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     ): PagedListDN<WorkshopContractDN> = answer {
         lastContractRowQuery = query
         contractRowsWithoutAgreement
+    }
+
+    // ------------------------------------------------------------------------ واگذارندگان
+
+    var assignerContracts: PagedListDN<AssignerContractDN> = PagedListDN()
+
+    /** One answer per page, for the paging tests; a page with no entry answers [assignerContracts]. */
+    var assignerContractPages: Map<Int, PagedListDN<AssignerContractDN>> = emptyMap()
+    var lastAssignerContractQuery: AssignerContractQuery? = null
+    val assignerContractQueries = mutableListOf<AssignerContractQuery>()
+    var computationalBases: PagedListDN<ComputationalBaseDN> = PagedListDN()
+    var lastComputationalBaseQuery: ComputationalBaseQuery? = null
+    var computationalBasePdf: PdfDownloadDN = PdfDownloadDN(pdf = null)
+    var lastPdfDocumentId: String? = null
+
+    override suspend fun getAssignerContracts(
+        query: AssignerContractQuery,
+    ): PagedListDN<AssignerContractDN> = answer {
+        lastAssignerContractQuery = query
+        assignerContractQueries += query
+        assignerContractPages[query.page] ?: assignerContracts
+    }
+
+    override suspend fun getComputationalBases(
+        query: ComputationalBaseQuery,
+    ): PagedListDN<ComputationalBaseDN> = answer {
+        lastComputationalBaseQuery = query
+        computationalBases
+    }
+
+    override suspend fun getComputationalBasePdf(documentId: String): PdfDownloadDN = answer {
+        lastPdfDocumentId = documentId
+        computationalBasePdf
+    }
+
+    // --------------------------------------------------------------- درخواست مفاصاحساب
+
+    var settlementSubjects: List<SettlementSubjectDN> = emptyList()
+    var settlementPdfId: String = "pdf-id"
+    var settlementSubmitMessage: String = ""
+    var lastSettlementPdfName: String? = null
+        private set
+    var lastSettlementRequest: SettlementRequestDN? = null
+        private set
+
+    override suspend fun getSettlementSubjects(): List<SettlementSubjectDN> =
+        answer { settlementSubjects }
+
+    override suspend fun uploadSettlementPdf(fileName: String, bytes: ByteArray): String = answer {
+        lastSettlementPdfName = fileName
+        settlementPdfId
+    }
+
+    override suspend fun submitSettlementRequest(request: SettlementRequestDN): String = answer {
+        lastSettlementRequest = request
+        settlementSubmitMessage
+    }
+
+    var settlementCertificate: SettlementCertificateDN? = null
+
+    /** workshopId, branchCode, contractRow, contractNumber — as the last certificate call sent them. */
+    var lastCertificateArgs: List<String>? = null
+        private set
+
+    override suspend fun getSettlementCertificate(
+        workshopId: String,
+        branchCode: String,
+        contractRow: String,
+        contractNumber: String,
+    ): SettlementCertificateDN? = answer {
+        lastCertificateArgs = listOf(workshopId, branchCode, contractRow, contractNumber)
+        settlementCertificate
     }
 
     override suspend fun getPaymentSheets(query: PaymentSheetQuery): PagedListDN<PaymentSheetDN> =
@@ -228,8 +309,10 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         recentlyAddedMembers
     }
 
-    override suspend fun confirmRecentlyAddedMember(requestId: Long): String =
-        answer { confirmReferenceCode }
+    override suspend fun confirmRecentlyAddedMember(requestId: Long): String = answer {
+        confirmedRequestId = requestId
+        confirmReferenceCode
+    }
 
     override suspend fun deleteRecentlyAddedMember(personalId: Long) {
         answer { deletedPersonalId = personalId }

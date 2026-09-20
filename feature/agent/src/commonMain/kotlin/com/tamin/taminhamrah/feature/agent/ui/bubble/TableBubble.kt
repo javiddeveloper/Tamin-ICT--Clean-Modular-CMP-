@@ -18,12 +18,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
+import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.Spacing
 
 /**
  * A responsive table.
@@ -33,11 +36,19 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
  * for the two- and three-column answers that make up most replies. Wider tables keep
  * their columns readable and scroll horizontally instead of squeezing text into
  * unreadable slivers — the chat itself never scrolls sideways.
+ *
+ * @param renderCell turns a header or cell string into the text drawn, e.g. inline markdown with
+ *   tappable links; plain by default
+ * @param cellContent draws a body cell itself instead, e.g. a button for a link; null draws text
+ * @param framed draws the table on its own surface; false when it already sits inside a card
  */
 @Composable
 fun TableBubble(
     content: ChatBubbleContent.Table,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    framed: Boolean = true,
+    renderCell: (String) -> AnnotatedString = { AnnotatedString(it) },
+    cellContent: (@Composable (cell: String) -> Unit)? = null,
 ) {
     val taminColors = LocalTaminColors.current
     if (content.columns.isEmpty()) return
@@ -45,9 +56,16 @@ fun TableBubble(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(taminColors.bgSurface)
-            .padding(12.dp)
+            .then(
+                if (framed) {
+                    Modifier
+                        .clip(RoundedCornerShape(CornerRadius.xl))
+                        .background(taminColors.bgSurface)
+                        .padding(Spacing.md)
+                } else {
+                    Modifier
+                }
+            )
     ) {
         content.title?.takeIf { it.isNotBlank() }?.let { title ->
             Text(
@@ -55,7 +73,7 @@ fun TableBubble(
                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                 color = taminColors.textPrimary
             )
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(Spacing.smPlus))
         }
 
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
@@ -67,10 +85,12 @@ fun TableBubble(
 
             val grid: @Composable () -> Unit = {
                 Column {
-                    TableHeader(content.columns, columnWidth)
+                    TableHeader(content.columns.map(renderCell), columnWidth)
                     content.rows.forEachIndexed { index, row ->
                         TableBodyRow(
                             cells = row.cells,
+                            renderCell = renderCell,
+                            cellContent = cellContent,
                             columnCount = columnCount,
                             columnWidth = columnWidth,
                             isStriped = index % 2 == 1
@@ -89,24 +109,25 @@ fun TableBubble(
 }
 
 @Composable
-private fun TableHeader(columns: List<String>, columnWidth: Dp?) {
+private fun TableHeader(columns: List<AnnotatedString>, columnWidth: Dp?) {
+    val taminColors = LocalTaminColors.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.10f))
-            .padding(vertical = 8.dp)
+            .clip(RoundedCornerShape(CornerRadius.md))
+            .background(taminColors.blueBg)
+            .padding(vertical = Spacing.sm)
     ) {
         columns.forEach { column ->
             Text(
                 text = column,
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.primary,
+                color = taminColors.blueText,
                 textAlign = TextAlign.Start,
                 maxLines = 2,
                 modifier = Modifier
                     .cellWidth(columnWidth, this@Row)
-                    .padding(horizontal = 8.dp)
+                    .padding(horizontal = Spacing.sm)
             )
         }
     }
@@ -115,33 +136,39 @@ private fun TableHeader(columns: List<String>, columnWidth: Dp?) {
 @Composable
 private fun TableBodyRow(
     cells: List<String>,
+    renderCell: (String) -> AnnotatedString,
+    cellContent: (@Composable (cell: String) -> Unit)?,
     columnCount: Int,
     columnWidth: Dp?,
     isStriped: Boolean
 ) {
     val taminColors = LocalTaminColors.current
-    val background = if (isStriped) {
-        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.03f)
-    } else {
-        androidx.compose.ui.graphics.Color.Transparent
-    }
+    val background = if (isStriped) taminColors.bgPage else androidx.compose.ui.graphics.Color.Transparent
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(CornerRadius.md))
             .background(background)
-            .padding(vertical = 8.dp)
+            .padding(vertical = Spacing.sm),
+        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
     ) {
         // Pad short rows so cells stay aligned with their headers.
         repeat(columnCount) { index ->
-            Text(
-                text = cells.getOrElse(index) { "-" },
-                style = MaterialTheme.typography.bodySmall,
-                color = taminColors.textPrimary,
-                maxLines = 3,
-                modifier = Modifier
-                    .cellWidth(columnWidth, this@Row)
-                    .padding(horizontal = 8.dp)
-            )
+            val cell = cells.getOrElse(index) { "-" }
+            val cellModifier = Modifier
+                .cellWidth(columnWidth, this@Row)
+                .padding(horizontal = Spacing.sm)
+            if (cellContent != null) {
+                Box(modifier = cellModifier) { cellContent(cell) }
+            } else {
+                Text(
+                    text = renderCell(cell),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = taminColors.textPrimary,
+                    maxLines = MAX_CELL_LINES,
+                    modifier = cellModifier,
+                )
+            }
         }
     }
 }
@@ -151,6 +178,9 @@ private fun Modifier.cellWidth(
     columnWidth: Dp?,
     scope: androidx.compose.foundation.layout.RowScope
 ): Modifier = if (columnWidth != null) width(columnWidth) else with(scope) { weight(1f) }
+
+/** Enough for a short link label or a long value; a cell rarely needs more. */
+private const val MAX_CELL_LINES = 4
 
 /** Narrower than this and Persian labels start wrapping into unreadable columns. */
 private val MIN_COLUMN_WIDTH = 96.dp

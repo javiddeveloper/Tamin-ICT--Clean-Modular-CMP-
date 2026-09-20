@@ -1,15 +1,20 @@
 package com.tamin.taminhamrah.feature.workshops.ui.objectionableDebit
 
-import androidx.compose.runtime.Composable
+import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.obj_form_done_body
+import taminx.core.core_ui.obj_form_done_title
+import taminx.core.core_ui.ws_dialog_ok
 import org.jetbrains.compose.resources.getString
 import kotlinx.coroutines.flow.Flow
-import com.tamin.taminhamrah.ui.components.toast.success
 import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -29,12 +34,16 @@ import taminx.core.core_ui.objection_pdf_file
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.BackHandler
+import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
+import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
+import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.objection_estimate
@@ -75,10 +84,14 @@ fun ObjectionableDebitScreen(
 
     HandleObjectionableDebitEvents(viewModel.events)
 
+    val onIntent = remember(viewModel) {
+        { intent: ObjectionableDebitIntent -> viewModel.sendIntent(intent) }
+    }
+
     ObjectionableDebitContent(
         state = state,
         workshopName = workshopName,
-        onIntent = viewModel::sendIntent,
+        onIntent = onIntent,
         onBack = onBack,
         modifier = modifier,
     )
@@ -92,59 +105,109 @@ fun ObjectionableDebitContent(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val workshopCode = remember(state.workshopId) {
+        state.workshopId.takeIf { it.isNotBlank() }?.toPersianDigits()
+    }
+    val safeWorkshopName = remember(workshopName) {
+        workshopName.takeIf { it.isNotBlank() }
+    }
+
     // ثبت اعتراض is a page of this screen, not a route: only this ViewModel holds the domain row
     // the objection is filed against.
     // The already-filed objection, rendered by the app's own viewer rather than dropped into
     // Downloads unseen — it saves a copy itself.
     state.viewerPdf?.let { pdf ->
+        val onDismissViewer = remember(onIntent) {
+            { onIntent(ObjectionableDebitIntent.DismissViewer) }
+        }
         TaminPdfViewer(
             fileName = stringResource(Res.string.objection_pdf_file, state.workshopId),
             pdf = pdf,
             downloadFailed = false,
             onRequestDownload = {},
-            onDismiss = { onIntent(ObjectionableDebitIntent.DismissViewer) },
+            onDismiss = onDismissViewer,
             title = stringResource(Res.string.workshop_action_objection),
         )
     }
 
     state.form?.let { form ->
-        BackHandler { onIntent(ObjectionableDebitIntent.FormDismissed) }
+        val onDismissForm = remember(onIntent) {
+            { onIntent(ObjectionableDebitIntent.FormDismissed) }
+        }
+        BackHandler(onBack = onDismissForm)
         ObjectionFormPage(
             form = form,
             workshopName = workshopName,
-            workshopCode = state.workshopId.takeIf { it.isNotBlank() }?.toPersianDigits(),
+            workshopCode = workshopCode,
             onIntent = onIntent,
-            onBack = { onIntent(ObjectionableDebitIntent.FormDismissed) },
+            onBack = onDismissForm,
             modifier = modifier,
         )
         return
     }
 
-    WorkshopScreenShell(
-        title = stringResource(Res.string.workshop_action_objection),
-        onBack = onBack,
-        workshopName = workshopName.takeIf { it.isNotBlank() },
-        workshopCode = state.workshopId.takeIf { it.isNotBlank() }?.toPersianDigits(),
-        modifier = modifier,
-    ) {
-        WorkshopListScaffold(
-            state = state.list,
-            onLoadMore = { onIntent(ObjectionableDebitIntent.LoadMore) },
-            onRetry = { onIntent(ObjectionableDebitIntent.Retry) },
-            key = { it.debitNumber },
-            header = {
-                WorkshopSectionHeader(
-                    title = stringResource(Res.string.workshop_action_objection),
-                    count = state.list.items.size,
+    val onLoadMore = remember(onIntent) {
+        { onIntent(ObjectionableDebitIntent.LoadMore) }
+    }
+    val onRetry = remember(onIntent) {
+        { onIntent(ObjectionableDebitIntent.Retry) }
+    }
+
+    // A dialog rather than a toast, as the design shows it: the tracking code is what the
+    // employer follows the objection up with, and a toast is gone before it is copied.
+    state.filedReferenceCode?.let { referenceCode ->
+        val colors = LocalTaminColors.current
+        val onDismissFiled = remember(onIntent) {
+            { onIntent(ObjectionableDebitIntent.DismissFiled) }
+        }
+        TaminConfirmationDialog(
+            title = stringResource(Res.string.obj_form_done_title),
+            description = stringResource(Res.string.obj_form_done_body, referenceCode.toPersianDigits()),
+            icon = vectorResource(Res.drawable.ic_tamin_check),
+            iconTint = colors.teal,
+            iconBackground = colors.greenBg,
+            confirmButton = {
+                TaminFilledButton(
+                    text = stringResource(Res.string.ws_dialog_ok),
+                    onClick = onDismissFiled,
+                    modifier = Modifier.fillMaxWidth(),
                 )
             },
-        ) { debt, rowModifier ->
-            ObjectionableDebtCard(
-                debt = debt,
-                onAction = { onIntent(ObjectionableDebitIntent.RowAction(debt)) },
-                modifier = rowModifier,
-            )
+            dismissButton = {},
+            onDismissRequest = onDismissFiled,
+        )
+    }
+
+    Box(modifier = modifier) {
+        WorkshopScreenShell(
+            title = stringResource(Res.string.workshop_action_objection),
+            onBack = onBack,
+            workshopName = safeWorkshopName,
+            workshopCode = workshopCode,
+        ) {
+            WorkshopListScaffold(
+                state = state.list,
+                onLoadMore = onLoadMore,
+                onRetry = onRetry,
+                key = { it.debitNumber },
+                header = {
+                    WorkshopSectionHeader(
+                        title = stringResource(Res.string.workshop_action_objection),
+                        count = state.list.items.size,
+                    )
+                },
+            ) { debt, rowModifier ->
+                ObjectionableDebtCard(
+                    debt = debt,
+                    onAction = remember(debt, onIntent) {
+                        { onIntent(ObjectionableDebitIntent.RowAction(debt)) }
+                    },
+                    modifier = rowModifier,
+                )
+            }
         }
+        // The deadline check and «مشاهدهٔ اعتراض» each wait on a request before anything opens.
+        if (state.isBusy) LoadingStateOverlay()
     }
 }
 
@@ -156,12 +219,13 @@ private fun ObjectionableDebtCard(
 ) {
     val colors = LocalTaminColors.current
     var isExpanded by rememberSaveable(debt.debitNumber) { mutableStateOf(false) }
+    val onToggle = remember { { isExpanded = !isExpanded } }
     val kind = debt.objectionKind
 
     WorkshopRecordCard(
         modifier = modifier,
         isExpanded = isExpanded,
-        onToggle = { isExpanded = !isExpanded },
+        onToggle = onToggle,
         buttons = {
             WorkshopCardButton(
                 text = stringResource(kind.label),
@@ -283,10 +347,6 @@ private fun HandleObjectionableDebitEvents(events: Flow<ObjectionableDebitEvent>
 
                 is ObjectionableDebitEvent.ShowMessage ->
                     toaster.error(getString(event.message))
-
-                is ObjectionableDebitEvent.ObjectionFiled -> toaster.success(
-                    getString(Res.string.obj_form_done_body, event.referenceCode),
-                )
             }
         }
     }

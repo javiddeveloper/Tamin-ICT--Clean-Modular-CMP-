@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.data.repository
 
+import com.tamin.taminhamrah.data.mapper.requestId
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toDomainPage
 import com.tamin.taminhamrah.data.mapper.toDto
@@ -15,6 +16,10 @@ import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtQuery
+import com.tamin.taminhamrah.model.workshop.AssignerContractDN
+import com.tamin.taminhamrah.model.workshop.AssignerContractQuery
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseDN
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseQuery
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestInfoDN
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveRequestDN
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveResultDN
@@ -33,6 +38,9 @@ import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDN
 import com.tamin.taminhamrah.model.workshop.PaymentSheetQuery
+import com.tamin.taminhamrah.model.workshop.SettlementCertificateDN
+import com.tamin.taminhamrah.model.workshop.SettlementRequestDN
+import com.tamin.taminhamrah.model.workshop.SettlementSubjectDN
 import com.tamin.taminhamrah.model.workshop.WORKSHOP_PAGE_SIZE
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
 import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDN
@@ -54,6 +62,8 @@ import com.tamin.taminhamrah.model.workshop.SmsMessageDN
 import com.tamin.taminhamrah.repository.WorkShopsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+
+private const val SETTLEMENT_SUBJECTS_PAGE_SIZE = 100
 
 /**
  * Turns the feature's typed queries into the ExtJS-style `filter` array every workshop service
@@ -107,6 +117,91 @@ class WorkShopsRepositoryImpl(
             branchCode = query.branchCode,
             query = pageQuery(query.page, query.pageSize),
         ).toDomainPage { it.toDomain() }
+
+    // ---------------------------------------------------------------------------- واگذارندگان
+
+    /**
+     * The one workshop list whose identity travels as a *filter*, not as path segments.
+     *
+     * The old client builds exactly these three clauses — `workshop.workshopId`,
+     * `workshop.branchCode`, `contractRow` — and omits any that is blank. `FilterBuilder` already
+     * drops blanks, so an optional کد شعبه simply widens the search here instead of addressing a
+     * route that does not exist, which is what the same blank does on ردیف‌های پیمان.
+     */
+    override suspend fun getAssignerContracts(
+        query: AssignerContractQuery,
+    ): PagedListDN<AssignerContractDN> {
+        val filters = buildFilters {
+            add(FilterProperty.WORKSHOP_ID, query.workshopId)
+            add(FilterProperty.WORKSHOP_BRANCH_CODE, query.branchCode)
+            add(FilterProperty.CONTRACT_ROW, query.contractRow)
+        }
+        return remoteDataSource
+            .getAssignerContracts(pageQuery(query.page, query.pageSize, filters))
+            .toDomainPage { it.toDomain() }
+    }
+
+    /**
+     * The four identity keys go as plain query parameters, not as a filter array — the only
+     * workshop call that mixes the two styles. `brchCode` is the service's own abbreviation.
+     */
+    override suspend fun getComputationalBases(
+        query: ComputationalBaseQuery,
+    ): PagedListDN<ComputationalBaseDN> =
+        remoteDataSource.getComputationalBases(
+            workshopId = query.workshopId,
+            contractRow = query.contractRow,
+            brchCode = query.branchCode,
+            contractSequence = query.contractSequence,
+            query = pageQuery(query.page, query.pageSize),
+        ).toDomainPage { it.toDomain() }
+
+    override suspend fun getComputationalBasePdf(documentId: String): PdfDownloadDN =
+        remoteDataSource.getComputationalBasePdf(documentId).toDomain()
+
+    // ------------------------------------------------------------ درخواست مفاصاحساب
+
+    override suspend fun getSettlementSubjects(): List<SettlementSubjectDN> =
+        // ponytail: one page wide enough for the whole table (thirty codes); page it if it ever grows.
+        remoteDataSource
+            .getSettlementSubjects(pageQuery(page = 0, pageSize = SETTLEMENT_SUBJECTS_PAGE_SIZE))
+            .list.orEmpty()
+            .map { it.toDomain() }
+            // The code is the last part of the request id; a subject without one cannot be filed.
+            .filter { it.code.isNotBlank() }
+
+    override suspend fun uploadSettlementPdf(fileName: String, bytes: ByteArray): String =
+        remoteDataSource.uploadSettlementPdf(fileName, bytes)
+
+    override suspend fun submitSettlementRequest(request: SettlementRequestDN): String =
+        remoteDataSource.submitSettlementRequest(request.requestId(), request.toDto())
+
+    /**
+     * Two reads, as the old app's مفاصاحساب ماده ۳۸ screens make them: the certificates filed under
+     * the ردیف, then the detail of the one belonging to this پیمان.
+     */
+    override suspend fun getSettlementCertificate(
+        workshopId: String,
+        branchCode: String,
+        contractRow: String,
+        contractNumber: String,
+    ): SettlementCertificateDN? {
+        val certificates = remoteDataSource
+            .getSettlementCertificates(workshopId, branchCode, contractRow, pageQuery(page = 0))
+            .list.orEmpty()
+            .filter { !it.clearanceSerial.isNullOrBlank() }
+        // One ردیف can carry several پیمان, so the contract number picks this one; a lone certificate
+        // that names no number at all is taken as this پیمان's.
+        val certificate = certificates.firstOrNull { it.contractNumber?.trim() == contractNumber.trim() }
+            ?: certificates.singleOrNull()?.takeIf { it.contractNumber.isNullOrBlank() }
+            ?: return null
+        val serial = certificate.clearanceSerial.orEmpty()
+        return remoteDataSource
+            .getSettlementCertificateDetail(workshopId, branchCode, contractRow, serial, pageQuery(page = 0))
+            .list.orEmpty()
+            .firstOrNull()
+            .toDomain(serial)
+    }
 
     // -------------------------------------------------------------------- برگ پرداخت‌ها
 
@@ -222,8 +317,16 @@ class WorkShopsRepositoryImpl(
 
     override suspend fun createNewMemberRegistration(
         request: NewMemberRegistrationDN,
-    ): NewMemberRegistrationResultDN =
-        remoteDataSource.createNewMemberRegistration(request.toDto()).toDomain()
+    ): NewMemberRegistrationResultDN {
+        val body = request.toDto()
+        val personalId = request.personalId
+        val result = if (personalId == null) {
+            remoteDataSource.createNewMemberRegistration(body)
+        } else {
+            remoteDataSource.updateNewMemberRegistration(personalId, body)
+        }
+        return result.toDomain()
+    }
 
     // ------------------------------------------------------------------------- ماده ۱۶
 
