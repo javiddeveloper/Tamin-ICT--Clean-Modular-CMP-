@@ -78,6 +78,8 @@ class FakePersonalRepository : PersonalRepository {
         docs: List<InsuredDocDN>,
     ): Flow<String?> = flow { emit(null) }
 
+    override fun getInsuredRegistrationDocList(personalId: String): Flow<List<InsuredDocDN>> =  error("not used here")
+
     override fun getRequestSummary(requestId: String): Flow<NewInsuredSummaryDN?> = flow { emit(null) }
 
     companion object {
