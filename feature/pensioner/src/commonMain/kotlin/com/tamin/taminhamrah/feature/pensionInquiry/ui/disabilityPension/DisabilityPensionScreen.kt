@@ -16,8 +16,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -59,6 +57,7 @@ import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
+import com.tamin.taminhamrah.ui.components.TaminFormAbandonDialog
 import com.tamin.taminhamrah.ui.components.TaminHeroStepProgress
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
@@ -90,10 +89,6 @@ import taminx.core.core_ui.close_content_description
 import taminx.core.core_ui.disability_pension_commission_pdf_title
 import taminx.core.core_ui.disability_pension_documents_confirm_message
 import taminx.core.core_ui.disability_pension_documents_confirm_title
-import taminx.core.core_ui.disability_pension_exit_confirm_continue
-import taminx.core.core_ui.disability_pension_exit_confirm_leave
-import taminx.core.core_ui.disability_pension_exit_confirm_message
-import taminx.core.core_ui.disability_pension_exit_confirm_title
 import taminx.core.core_ui.disability_pension_next_step
 import taminx.core.core_ui.disability_pension_refresh_confirm_message
 import taminx.core.core_ui.disability_pension_refresh_confirm_title
@@ -202,27 +197,10 @@ fun DisabilityPensionScreen(
     )
 
     if (state.showExitConfirmDialog) {
-        TaminConfirmationDialog(
-            title = stringResource(Res.string.disability_pension_exit_confirm_title),
-            description = stringResource(Res.string.disability_pension_exit_confirm_message),
-            icon = Icons.Default.Warning,
-            iconTint = LocalTaminColors.current.orangeText,
-            iconBackground = LocalTaminColors.current.orangeBg,
-            confirmButton = {
-                TaminFilledButton(
-                    text = stringResource(Res.string.disability_pension_exit_confirm_continue),
-                    onClick = { viewModel.sendIntent(DisabilityPensionIntent.DismissExitConfirmDialog) },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            },
-            dismissButton = {
-                TaminOutlinedButton(
-                    text = stringResource(Res.string.disability_pension_exit_confirm_leave),
-                    onClick = { viewModel.sendIntent(DisabilityPensionIntent.ConfirmExitClicked) },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            },
-            onDismissRequest = { viewModel.sendIntent(DisabilityPensionIntent.DismissExitConfirmDialog) },
+        TaminFormAbandonDialog(
+            formName = stringResource(Res.string.disability_pension_title),
+            onStay = { viewModel.sendIntent(DisabilityPensionIntent.DismissExitConfirmDialog) },
+            onAbandon = { viewModel.sendIntent(DisabilityPensionIntent.ConfirmExitClicked) },
         )
     }
 
