@@ -92,7 +92,9 @@ fun ObjectionFormPage(
             WorkshopReviewRow(agreementRowLabel, debt.agreementRow),
             WorkshopReviewRow(periodFromLabel, debt.fromDate),
             WorkshopReviewRow(periodToLabel, debt.toDate),
-            WorkshopReviewRow(amountLabel, debt.amount),
+            // The amount arrives formatted with its unit — «۱۲۳٬۴۵۶ ریال» — so it is ordinary text.
+            // The numeric path forces left-to-right and prints «ریال» in front of the figure.
+            WorkshopReviewRow(amountLabel, debt.amount, isNumeric = false),
             WorkshopReviewRow(notifyDateLabel, debt.notifyDate),
         )
     }
