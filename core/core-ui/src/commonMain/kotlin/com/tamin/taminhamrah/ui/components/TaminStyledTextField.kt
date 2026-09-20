@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -91,7 +92,13 @@ fun TaminStyledTextField(
     onFocusChanged: ((Boolean) -> Unit)? = null,
     maxLength: Int? = null,
     inputRestriction: InputRestriction = InputRestriction.None,
-    textFieldBg: Color = LocalTaminColors.current.bgSurface
+    textFieldBg: Color = LocalTaminColors.current.bgSurface,
+    /**
+     * Draws the value differently from how it is held — [ThousandsSeparatorTransformation] for an
+     * amount. [VisualTransformation.None], the default, draws it exactly as typed, as every existing
+     * field does.
+     */
+    visualTransformation: VisualTransformation = VisualTransformation.None,
 ) {
     val taminColors = LocalTaminColors.current
     var isFocused by remember { mutableStateOf(false) }
@@ -162,6 +169,7 @@ fun TaminStyledTextField(
                     singleLine = singleLine,
                     readOnly = readOnly || onClick != null,
                     keyboardOptions = keyboardOptions,
+                    visualTransformation = visualTransformation,
                     textStyle = MaterialTheme.typography.bodyLarge.copy(
                         color = taminColors.textPrimary,
                         fontWeight = FontWeight.Medium,

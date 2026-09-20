@@ -19,6 +19,7 @@ tags: [moc]
 - [[Networking]] — Ktor, the five HTTP clients, auth and token refresh
 - [[Database]] — Room KMP, DAOs, schemas
 - [[Data-and-Caching]] — repository patterns, offline-first decision rubric, the `.first()` vs `.collect()` shipped bug
+- [[Home-Content-Unification]] — how home screen data (identity, stories, campaigns, quick access, special services, requests) is unified offline-first, and how to swap the mocked sections for real endpoints
 - [[Error-Handling]] — exception-based error chain, `BaseDTO`, no `Result<T>` wrapper
 - [[Payments]] — the one payment flow every feature uses, and its mock gateway
 - [[Debug-Tooling]] — `TokenSlot`, the back-to-back debug login, and the `isDebug` gate

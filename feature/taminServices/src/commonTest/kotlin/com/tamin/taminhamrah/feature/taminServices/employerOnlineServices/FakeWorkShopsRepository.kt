@@ -55,7 +55,7 @@ class FakeWorkShopsRepository : WorkShopsRepository {
      * "load more" through the ViewModel's [com.tamin.taminhamrah.paging.Paginator], not just assert on
      * a canned single response.
      *
-     * When unfiltered, [PagedListDN.total] on [agreements] is honoured as-is (a test may set it above
+     * When unfiltered, [PagedListDN.total] on [agreements] is honored as-is (a test may set it above
      * `items.size` to simulate more server-side rows than were stubbed); a filtered query reports the
      * filtered count instead, matching what a real search would answer.
      */
@@ -127,9 +127,14 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     private fun notUsed(): Nothing = error("not used by EmployerOnlineServicesViewModel tests")
 
     override suspend fun confirmPaymentTicket(ticket: String) = notUsed()
-    override suspend fun getPaymentSheets(query: PaymentSheetQuery): PagedListDN<PaymentSheetDN> =
-        notUsed()
-
+    override suspend fun getPaymentSheets(query: PaymentSheetQuery): PagedListDN<PaymentSheetDN> = notUsed()
+    override suspend fun getAssignerContracts(query: AssignerContractQuery): PagedListDN<AssignerContractDN> = notUsed()
+    override suspend fun getComputationalBases(query: ComputationalBaseQuery): PagedListDN<ComputationalBaseDN> = notUsed()
+    override suspend fun getComputationalBasePdf(documentId: String): PdfDownloadDN = notUsed()
+    override suspend fun getSettlementSubjects(): List<SettlementSubjectDN> = notUsed()
+    override suspend fun uploadSettlementPdf(fileName: String, bytes: ByteArray): String = notUsed()
+    override suspend fun submitSettlementRequest(request: SettlementRequestDN): String = notUsed()
+    override suspend fun getSettlementCertificate(workshopId: String, branchCode: String, contractRow: String, contractNumber: String): SettlementCertificateDN? = notUsed()
     override suspend fun getDebitReasons(page: Int): PagedListDN<DebitReasonDN> = notUsed()
     override suspend fun getWorkshopDebits(
         workshopId: String,

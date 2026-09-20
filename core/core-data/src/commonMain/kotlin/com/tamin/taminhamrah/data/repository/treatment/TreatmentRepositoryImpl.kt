@@ -52,6 +52,18 @@ internal class TreatmentRepositoryImpl(
         emitAll(treatmentDao.getDeservedTreatment(nationalCode).map { list -> list.map { it.toDomain() } })
     }.distinctUntilChanged()
 
+    /**
+     * One-shot network refresh, for callers (like the Home sync) that need the fresh value
+     * directly rather than observing [getDeservedTreatment]'s cache-then-network `Flow`. Still
+     * writes through to the Room cache, so [getDeservedTreatment] observers see the update too.
+     */
+    override suspend fun refreshDeservedTreatment(nationalCode: String): List<DeservedTreatmentDN> {
+        val result = treatmentRemoteDataSource.getDeservedTreatment(nationalCode)
+        val remote = result?.list?.map { it.toDomain() } ?: emptyList()
+        treatmentDao.replaceDeservedTreatment(nationalCode, remote.map { it.toEntity(nationalCode) })
+        return remote
+    }
+
     override suspend fun getElectronicPrescriptionList(
         requestTypeId: String,
         nationalCode: String,

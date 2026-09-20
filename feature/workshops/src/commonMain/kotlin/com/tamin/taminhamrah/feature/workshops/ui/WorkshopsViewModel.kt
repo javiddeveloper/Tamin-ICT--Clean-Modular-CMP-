@@ -11,10 +11,12 @@ import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState.PartialState
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
+import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopActivityStatus
 import com.tamin.taminhamrah.model.workshop.WorkshopListQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
+import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenDebtsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetEmployerAgreementsUseCase
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
@@ -28,6 +30,7 @@ import taminx.core.core_ui.workshop_error_receive_data
 class WorkshopsViewModel(
     private val getEmployerAgreements: GetEmployerAgreementsUseCase,
     private val featureManager: FeatureManager,
+    private val getArticleSixteenDebts: GetArticleSixteenDebtsUseCase,
 ) : BaseViewModel<WorkshopsUiState, PartialState, WorkshopsEvent, WorkshopsIntent>(
     initialState = WorkshopsUiState()
 ) {
@@ -77,6 +80,8 @@ class WorkshopsViewModel(
         is WorkshopsIntent.ActionSelected -> selectAction(intent.action, intent.workshop)
         is WorkshopsIntent.AvailableActionsResolved ->
             flow { emit(PartialState.ActionsResolved(intent.actions)) }
+
+        WorkshopsIntent.NoDebtDialogDismissed -> flow { emit(PartialState.NoDebtDialogChanged(false)) }
     }
 
     private fun loadPage(
@@ -158,10 +163,9 @@ class WorkshopsViewModel(
     /**
      * Opens the service the menu picked.
      *
-     * Every action navigates, including رسیدگی به بدهی ماده ۱۶. That one used to fetch its debts
-     * first and refuse with a message when there were none — which cost a request on every tap and
-     * made it the one row in the list that answers with a toast instead of a screen. Its own list
-     * shows the same «نتیجه‌ای یافت نشد» empty state every other workshop screen does.
+     * رسیدگی به بدهی ماده ۱۶ asks first whether the workshop has any debt, and answers «لیست بدهی
+     * برای این کارگاه یافت نشد» in a dialog when it has none — as the design and the old app both
+     * do — rather than opening a screen with nothing on it.
      */
     private fun selectAction(
         action: WorkshopAction,
@@ -175,7 +179,26 @@ class WorkshopsViewModel(
             sendEvent(WorkshopsEvent.ShowMessage(Res.string.workshop_action_missing_identity))
             return@flow
         }
-        sendEvent(workshop.navigationEvent(action))
+        if (action != WorkshopAction.ARTICLE_SIXTEEN) {
+            sendEvent(workshop.navigationEvent(action))
+            return@flow
+        }
+        if (uiState.value.isCheckingDebts) return@flow
+
+        emit(PartialState.CheckingDebtsChanged(true))
+        val debts = getArticleSixteenDebts(
+            ArticleSixteenDebtQuery(workshopId = workshop.workshopId, branchCode = workshop.branchCode),
+        )
+        emit(PartialState.CheckingDebtsChanged(false))
+        if (debts.items.isEmpty()) {
+            emit(PartialState.NoDebtDialogChanged(true))
+        } else {
+            sendEvent(workshop.navigationEvent(action))
+        }
+    }.catch {
+        // The workshop list stays as it was; only the check failed.
+        emit(PartialState.CheckingDebtsChanged(false))
+        sendEvent(WorkshopsEvent.ShowToast(it.toSingleLineMessage()))
     }
 
     private fun WorkshopPR.navigationEvent(action: WorkshopAction) = WorkshopsEvent.Navigate(
@@ -212,6 +235,12 @@ class WorkshopsViewModel(
         is PartialState.StatsLoaded -> currentState.copy(stats = partialState.stats)
         is PartialState.ActionsResolved ->
             currentState.copy(availableActions = partialState.actions)
+
+        is PartialState.CheckingDebtsChanged ->
+            currentState.copy(isCheckingDebts = partialState.isChecking)
+
+        is PartialState.NoDebtDialogChanged ->
+            currentState.copy(isNoDebtDialogOpen = partialState.isOpen)
 
         is PartialState.DetailForChanged -> currentState.copy(detailFor = partialState.workshop)
 

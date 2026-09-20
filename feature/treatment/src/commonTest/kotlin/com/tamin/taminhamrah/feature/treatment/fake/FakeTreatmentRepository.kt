@@ -46,6 +46,11 @@ class FakeTreatmentRepository : TreatmentRepository {
     override suspend fun getDeservedTreatment(nationalCode: String): Flow<List<DeservedTreatmentDN>> =
         result(deservedResult)
 
+    override suspend fun refreshDeservedTreatment(nationalCode: String): List<DeservedTreatmentDN> {
+        if (shouldThrowError) throw error
+        return deservedResult
+    }
+
     /**
      * Per-category answers and how slow each one is, for driving two searches that resolve out of
      * order. Empty by default, so every existing test keeps getting [prescriptionListResult].

@@ -50,6 +50,7 @@ class ObjectionableDebitViewModel(
         ObjectionableDebitIntent.Retry -> loadPage(page = 0)
         is ObjectionableDebitIntent.RowAction -> rowAction(intent.debt)
         ObjectionableDebitIntent.DismissViewer -> flow { emit(PartialState.ViewerPdfChanged(null)) }
+        ObjectionableDebitIntent.DismissFiled -> just(PartialState.FiledChanged(null))
 
         ObjectionableDebitIntent.FormDismissed -> flow { emit(PartialState.FormChanged(null)) }
         is ObjectionableDebitIntent.FormDebtOpenChanged ->
@@ -129,7 +130,7 @@ class ObjectionableDebitViewModel(
         emit(PartialState.ViewerPdfChanged(getDebitObjectionPdf(seqNo).toPresentation()))
     }.catch {
         emit(PartialState.Downloading(false))
-        emit(reportFailure(it))
+        reportFailure(it)
     }
 
     private fun checkDeadline(debt: WorkShopDebtPR): Flow<PartialState> = flow {
@@ -148,7 +149,7 @@ class ObjectionableDebitViewModel(
         }
     }.catch {
         emit(PartialState.Checking(null))
-        emit(reportFailure(it))
+        reportFailure(it)
     }
 
     /**
@@ -170,7 +171,7 @@ class ObjectionableDebitViewModel(
         emit(PartialState.FormAttachmentAdded(attachment))
     }.catch {
         emit(PartialState.FormUploadingChanged(false))
-        emit(reportFailure(it))
+        reportFailure(it)
     }
 
     /**
@@ -216,11 +217,11 @@ class ObjectionableDebitViewModel(
             ),
         )
         emit(PartialState.FormChanged(null))
-        sendEvent(ObjectionableDebitEvent.ObjectionFiled(result.referenceCode))
+        emit(PartialState.FiledChanged(result.referenceCode))
         emitAll(loadPage(page = 0))
     }.catch {
         emit(PartialState.FormSubmittingChanged(false))
-        emit(reportFailure(it))
+        reportFailure(it)
     }
 
     override fun reduceState(
@@ -288,20 +289,22 @@ class ObjectionableDebitViewModel(
         is PartialState.FormConfirmVisible -> currentState.editForm {
             copy(isConfirmVisible = partialState.isVisible)
         }
+
+        is PartialState.FiledChanged -> currentState.copy(
+            filedReferenceCode = partialState.referenceCode,
+        )
     }
 
     /**
-     * A failure the user must see now.
+     * A failed row action or form step, in the service's words.
      *
-     * With a form open the list is not on screen, so its error state is not either; the
-     * message is raised as an event instead and the toast host shows it.
+     * Always a toast, never the list's error state: with rows on screen that state is not drawn
+     * (a failed «مشاهدهٔ اعتراض» used to do nothing visible), and with rows gone it would replace a
+     * list that loaded fine with an error about something else. Each caller resets its own
+     * progress flag first.
      */
-    private fun reportFailure(throwable: Throwable): PartialState {
-        val message = throwable.toSingleLineMessage()
-        if (uiState.value.form != null) {
-            sendEvent(ObjectionableDebitEvent.ShowServerMessage(message))
-        }
-        return PartialState.Error(message)
+    private fun reportFailure(throwable: Throwable) {
+        sendEvent(ObjectionableDebitEvent.ShowServerMessage(throwable.toSingleLineMessage()))
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)
