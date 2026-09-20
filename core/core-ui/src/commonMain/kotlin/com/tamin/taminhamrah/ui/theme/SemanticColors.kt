@@ -124,6 +124,34 @@ data class TaminColors(
     /** The treatment hub's own wash — the design ends it a shade deeper than [topAppBarStops]. */
     val treatmentHubStops: List<Color>,
     val profileGradientStops: List<Color>,
+
+    // خلاصهٔ سابقه — the home page's history summary card. Its blues are a shade of their own
+    // rather than the brand primaries, so they are named here instead of borrowed from a token
+    // that would drag the card along the next time the primary palette moves.
+    val historySummaryBorder: Color,
+    val historySummaryShadow: Color,
+    val historyCardDivider: Color,
+    /** The soft radial wash in the card's top corner. */
+    val historyGlow: Color,
+    val historyYearPillBorder: Color,
+    /** Stops of the header icon's tile, start to end. */
+    val historyIconStops: List<Color>,
+    /** The large "months registered" figure. */
+    val historyFigure: Color,
+    /** A month whose premium is registered — also the filled stretch of the progress bar. */
+    val historyMonthStops: List<Color>,
+    /** The current month, a shade deeper so it reads as today rather than as one more cell. */
+    val historyMonthCurrentStops: List<Color>,
+    val historyUnpaidBg: Color,
+    val historyUnpaidBorder: Color,
+    /** The two tones the unpaid stretch of the progress bar hatches between. */
+    val historyUnpaidStripe: Color,
+    val historyUnpaidStripeSoft: Color,
+    val historyUpcomingBg: Color,
+    val historyUpcomingBorder: Color,
+    val historyProgressTrack: Color,
+    val historyWarningBorder: Color,
+    val historyWarningText: Color,
     val aiAssistantGradient: Brush,
     val grey900 : Color,
 
@@ -143,8 +171,8 @@ data class TaminColors(
     // scheme already carries, and the page reads those rather than restating them.
     /** The wash at the top of the career-duration card, above [bgSurface]. */
     val historyCardBgStart: Color,
-    val historyCardBorder: Color,
-    val historyCardShadow: Color,
+    val historyDurationCardBorder: Color,
+    val historyDurationCardShadow: Color,
     /** The blue the card's headline figure and its step arrows are drawn in. */
     val historyAccent: Color,
     /** The quietest of the three duration figures. */
@@ -203,8 +231,8 @@ data class TaminColors(
 
 val LightTaminColors = TaminColors(
     historyCardBgStart = TaminHistoryDurationCardBgStart,
-    historyCardBorder = TaminHistoryDurationCardBorder,
-    historyCardShadow = TaminHistoryDurationShadow,
+    historyDurationCardBorder = TaminHistoryDurationCardBorder,
+    historyDurationCardShadow = TaminHistoryDurationShadow,
     historyAccent = TaminHistoryDurationFigureMajor,
     historyFigureLeast = TaminHistoryDurationFigureLeast,
     historyPanelStart = TaminHistorySubChartBgStart,
@@ -315,6 +343,24 @@ val LightTaminColors = TaminColors(
     topAppBarStops = listOf(TaminTeal900, TaminTeal500),
     treatmentHubStops = listOf(TaminTeal900, TaminTeal700),
     profileGradientStops = listOf(TaminNavy900, TaminNavy700),
+    historySummaryBorder = HistoryCardBorder,
+    historySummaryShadow = HistoryCardShadow,
+    historyCardDivider = HistoryCardDivider,
+    historyGlow = HistoryCardGlow,
+    historyYearPillBorder = HistoryYearPillBorder,
+    historyIconStops = listOf(HistoryIconStart, HistoryIconEnd),
+    historyFigure = HistoryFigure,
+    historyMonthStops = listOf(HistoryMonthStart, HistoryMonthEnd),
+    historyMonthCurrentStops = listOf(HistoryMonthCurrentStart, HistoryMonthCurrentEnd),
+    historyUnpaidBg = HistoryUnpaidBg,
+    historyUnpaidBorder = HistoryUnpaidBorder,
+    historyUnpaidStripe = HistoryUnpaidStripe,
+    historyUnpaidStripeSoft = HistoryUnpaidStripeSoft,
+    historyUpcomingBg = HistoryUpcomingBg,
+    historyUpcomingBorder = HistoryUpcomingBorder,
+    historyProgressTrack = HistoryProgressTrack,
+    historyWarningBorder = HistoryWarningBorder,
+    historyWarningText = HistoryWarningText,
     aiAssistantGradient = Brush.linearGradient(
         listOf(TaminPurple900, TaminPurple700, Color(0xFF3F5BD9), TaminNavy700)
     ),
@@ -352,8 +398,8 @@ val LightTaminColors = TaminColors(
 
 val DarkTaminColors = TaminColors(
     historyCardBgStart = TaminDarkHistoryPanel,
-    historyCardBorder = TaminDarkBorder,
-    historyCardShadow = TaminDarkShadow,
+    historyDurationCardBorder = TaminDarkBorder,
+    historyDurationCardShadow = TaminDarkShadow,
     historyAccent = TaminDarkBlueText,
     historyFigureLeast = TaminDarkTextSecondary,
     historyPanelStart = TaminDarkHistoryPanel,
@@ -468,6 +514,24 @@ val DarkTaminColors = TaminColors(
     topAppBarStops = listOf(TaminDarkHeroStart, TaminDarkHeroEnd),
     treatmentHubStops = listOf(TaminDarkHeroStart, TaminDarkHeroEnd),
     profileGradientStops = listOf(TaminDarkHeroStart, TaminDarkHeroEnd),
+    historySummaryBorder = TaminDarkBorder,
+    historySummaryShadow = HistoryDarkCardShadow,
+    historyCardDivider = TaminDarkDivider,
+    historyGlow = HistoryDarkCardGlow,
+    historyYearPillBorder = TaminDarkBorder,
+    historyIconStops = listOf(HistoryIconStart, HistoryIconEnd),
+    historyFigure = TaminDarkInfo,
+    historyMonthStops = listOf(HistoryMonthStart, HistoryMonthEnd),
+    historyMonthCurrentStops = listOf(HistoryMonthCurrentStart, HistoryMonthCurrentEnd),
+    historyUnpaidBg = HistoryDarkUnpaidBg,
+    historyUnpaidBorder = HistoryDarkUnpaidBorder,
+    historyUnpaidStripe = HistoryDarkUnpaidStripe,
+    historyUnpaidStripeSoft = HistoryDarkUnpaidStripeSoft,
+    historyUpcomingBg = HistoryDarkUpcomingBg,
+    historyUpcomingBorder = HistoryDarkUpcomingBorder,
+    historyProgressTrack = HistoryDarkProgressTrack,
+    historyWarningBorder = TaminDarkOrangeBg,
+    historyWarningText = HistoryDarkWarningText,
     aiAssistantGradient = Brush.linearGradient(
         listOf(TaminPurple900, TaminPurple700, Color(0xFF3F5BD9), TaminNavy700)
     ),

@@ -313,12 +313,16 @@ private fun ContractSummaryCard(contract: ContractPR) {
             SummaryCell(
                 label = stringResource(Res.string.contract_affairs_premium_rate),
                 value = contract.premiumRatePercentLabel.ifBlank { "—" },
-                numeric = contract.premiumRatePercentLabel.isNotBlank(),
+                // «۲۷ درصد» and «۱۲۳٬۴۵۶ ریال» carry their unit, so they are ordinary text: the
+                // numeric path forces the paragraph left-to-right and the unit lands in front of
+                // its own number.
+                numeric = false,
                 modifier = Modifier.weight(1f),
             )
             SummaryCell(
                 label = stringResource(Res.string.contract_affairs_monthly_wage),
                 value = contract.monthlyIncome.toRialAmount(),
+                numeric = false,
                 modifier = Modifier.weight(1f),
             )
         }

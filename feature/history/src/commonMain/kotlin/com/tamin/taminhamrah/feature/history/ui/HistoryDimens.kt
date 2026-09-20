@@ -143,6 +143,17 @@ object HistoryDimens {
     val chipPaddingH = 11.dp
     val chipPaddingV = 8.dp
 
+    /**
+     * The hero's year strip — «همه» plus the years beside it.
+     *
+     * One table for three call sites: the chip, the «more» chip and the skeleton that stands in for
+     * the whole strip while the career loads. A skeleton measured separately is a skeleton that
+     * stops matching the thing it stands in for.
+     */
+    val yearChipHeight = 34.dp
+    val yearChipCorner = 16.dp
+    val yearChipGap = 6.dp
+
     val orbSize = 104.dp
     val haloSize = 150.dp
     val haloBlur = 5.dp

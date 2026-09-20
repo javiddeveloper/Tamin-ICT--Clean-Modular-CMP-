@@ -46,6 +46,17 @@ fun Throwable.getTaminApiExceptionSubtitle() = this.asTaminApiException().subtit
 fun Throwable.getTaminErrorUri() = (this.asTaminApiException().cause as TaminErrorUriException).uri
 fun Throwable.getServerErrorCode() = (this.asTaminApiException().cause as? TaminErrorUriException)?.errorCode
 
+/**
+ * Which [ErrorUri] this failure was classified as, or null when it carries none.
+ *
+ * The null-safe counterpart of [getTaminErrorUri], which casts and therefore throws for anything
+ * that is not a parsed API failure — a caller that only wants to tell a connection problem from a
+ * server's answer must not have to risk that.
+ */
+fun Throwable.taminErrorUriOrNull(): ErrorUri? =
+    (this as? TaminErrorUriException)?.uri
+        ?: ((this as? TaminApiException)?.cause as? TaminErrorUriException)?.uri
+
 fun Throwable.shouldNavigateBack(): Boolean = when (this) {
     is TaminApiException -> navigateBack
     is TaminErrorUriException -> navigateBack
