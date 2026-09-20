@@ -50,6 +50,7 @@ import com.tamin.taminhamrah.model.workshop.SettlementCertificateDN
 import com.tamin.taminhamrah.model.workshop.SettlementRequestDN
 import com.tamin.taminhamrah.model.workshop.SettlementSubjectDN
 import com.tamin.taminhamrah.repository.WorkShopsRepository
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -72,6 +73,15 @@ class FakeWorkShopsRepository : WorkShopsRepository {
     var objectionableDebits: PagedListDN<WorkShopDebtDN> = PagedListDN()
     var articleSixteenDebts: PagedListDN<WorkshopsDebtListModelDN> = PagedListDN()
     var members: PagedListDN<WorkshopMemberDN> = PagedListDN()
+
+    /** One answer per page, as the assigner list has; a page with no entry answers [members]. */
+    var memberPages: Map<Int, PagedListDN<WorkshopMemberDN>> = emptyMap()
+
+    /**
+     * A page put here suspends until the test completes it, so a test can decide which answer
+     * lands first — the only way to reproduce an out-of-order page.
+     */
+    val heldMemberPages: MutableMap<Int, CompletableDeferred<Unit>> = mutableMapOf()
     var stackHolders: PagedListDN<WorkshopStackHolderDN> = PagedListDN()
     var recentlyAddedMembers: PagedListDN<WorkshopNewMemberDN> = PagedListDN()
     var workshopsWithoutContract: PagedListDN<WorkshopWithoutContractDN> = PagedListDN()
@@ -292,7 +302,7 @@ class FakeWorkShopsRepository : WorkShopsRepository {
 
     var debitObjectionPdfCallCount: Int = 0
         private set
-    var debitObjectionPdfGate: kotlinx.coroutines.CompletableDeferred<Unit>? = null
+    var debitObjectionPdfGate: CompletableDeferred<Unit>? = null
 
     override suspend fun getDebitObjectionPdf(seqNo: Long): PdfDownloadDN {
         error?.let { throw it }
@@ -354,9 +364,10 @@ class FakeWorkShopsRepository : WorkShopsRepository {
 
     override suspend fun getWorkshopMembers(
         query: WorkshopMemberQuery,
-    ): PagedListDN<WorkshopMemberDN> = answer {
+    ): PagedListDN<WorkshopMemberDN> {
         lastMemberQuery = query
-        members
+        heldMemberPages[query.page]?.await()
+        return answer { memberPages[query.page] ?: members }
     }
 
     override suspend fun getWorkshopStackHolders(
