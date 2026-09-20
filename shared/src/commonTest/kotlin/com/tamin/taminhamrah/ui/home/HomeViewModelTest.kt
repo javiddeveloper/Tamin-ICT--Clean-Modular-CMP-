@@ -31,6 +31,7 @@ import com.tamin.taminhamrah.useCases.agent.CheckChatAllowedUseCase
 import com.tamin.taminhamrah.useCases.history.GetTalfighInfosUseCase
 import com.tamin.taminhamrah.useCases.home.GetHomeContentUseCase
 import com.tamin.taminhamrah.useCases.home.SyncHomeContentUseCase
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -101,7 +102,11 @@ private class FakeHistoryRepository : HistoryRepository {
     var talfighError: Throwable? = null
     var talfighResult = TalfighInfoDN(list = null, total = null)
 
+    /** Set to hold the call open, so a test can read the state while it is still in flight. */
+    var talfighGate: CompletableDeferred<Unit>? = null
+
     override suspend fun getTalfighInfos(filters: List<ApiFilterDN>): TalfighInfoDN {
+        talfighGate?.await()
         talfighError?.let { throw it }
         return talfighResult
     }
@@ -308,6 +313,37 @@ class HomeViewModelTest {
         val state = viewModel.uiState.value
         assertFalse(state.historySummaryFailed)
         assertEquals("۱۴۰۳", state.historySummary?.yearLabel)
+    }
+
+    /**
+     * A retry has to clear the failure as it starts, not when it answers: the slot goes back to its
+     * skeleton, so the person sees the tap do something rather than the same row they just tapped.
+     */
+    @Test
+    fun `retrying puts the slot back to loading while the call is in flight`() = runTest(testDispatcher) {
+        fakeHistoryRepository.talfighError = ErrorUri.NO_CONNECTION_ERROR.toApiException()
+        val viewModel = createViewModel()
+        advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.historySummaryFailed)
+
+        val gate = CompletableDeferred<Unit>()
+        fakeHistoryRepository.talfighGate = gate
+        fakeHistoryRepository.talfighError = null
+        fakeHistoryRepository.talfighResult = talfighInfo(year = "1404", months = listOf("31"))
+
+        viewModel.sendIntent(HomeIntent.LoadHistorySummary)
+        advanceUntilIdle()
+
+        val inFlight = viewModel.uiState.value
+        assertTrue(inFlight.isHistorySummaryLoading)
+        assertFalse(inFlight.historySummaryFailed)
+
+        gate.complete(Unit)
+        advanceUntilIdle()
+
+        val answered = viewModel.uiState.value
+        assertFalse(answered.isHistorySummaryLoading)
+        assertEquals("۱۴۰۴", answered.historySummary?.yearLabel)
     }
 
     @Test
