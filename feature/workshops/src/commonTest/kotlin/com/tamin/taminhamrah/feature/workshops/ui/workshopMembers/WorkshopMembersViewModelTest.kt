@@ -21,6 +21,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -298,7 +299,12 @@ class WorkshopMembersViewModelTest {
 
             // Scrolling to the end, then searching before that page comes back.
             viewModel.sendIntent(WorkshopMembersIntent.LoadMore)
-            repository.memberPages = mapOf(0 to membersPage(count = 1, total = 1, from = 99))
+            // Page 1 keeps its own answer: the held request reads this map only once it resumes,
+            // and a page that came back empty would append nothing whether it was dropped or not.
+            repository.memberPages = mapOf(
+                0 to membersPage(count = 1, total = 1, from = 99),
+                1 to membersPage(count = WORKSHOP_PAGE_SIZE, total = 30, from = WORKSHOP_PAGE_SIZE),
+            )
             viewModel.sendIntent(
                 WorkshopMembersIntent.DraftChanged(PersonSearch(nationalId = "0024567899")),
             )
@@ -307,8 +313,9 @@ class WorkshopMembersViewModelTest {
             assertEquals(1, searched.list.total)
 
             heldPageOne.complete(Unit)
+            advanceUntilIdle()
 
-            // The old page lands now, and must change nothing about the search's list.
+            // The old page has landed by now, and must have changed nothing about the search's list.
             val settled = viewModel.uiState.value
             assertEquals(1, settled.list.items.size)
             assertEquals(1, settled.list.receivedCount)
@@ -338,6 +345,7 @@ class WorkshopMembersViewModelTest {
                 // The abandoned page-1 request answers with a failure.
                 repository.error = TaminApiException(title = "خطا")
                 heldPageOne.complete(Unit)
+                advanceUntilIdle()
 
                 val settled = viewModel.uiState.value
                 assertNull(settled.list.error)
