@@ -56,7 +56,7 @@ val mockMenuData = listOf(
     MainServiceDto(id = 23, name = "درخواست‌های تعهدات کوتاه مدت", showRole = listOf(1), icon = "obligation", status = MenuServiceStatus.DISABLED),
     MainServiceDto(id = 24, name = "محاسبه هدیه ازدواج", showRole = listOf(1), icon = "wedding-presents", status = MenuServiceStatus.ACTIVE),
     MainServiceDto(id = 25, name = "محاسبه غرامت ایام بیماری", showRole = listOf(1), icon = "medicine", status = MenuServiceStatus.DISABLED),
-    MainServiceDto(id = 26, name = "محاسبه غرامت ایام بارداری", showRole = listOf(1), icon = "scan", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 26, name = "محاسبه غرامت ایام بارداری", showRole = listOf(1), icon = "scan", status = MenuServiceStatus.DISABLED),
     MainServiceDto(id = 27, name = "وضعیت حمایت درمانی", showRole = listOf(1), icon = "first-aid-kit", status = MenuServiceStatus.DISABLED),
     MainServiceDto(id = 28, name = "نسخ الکترونیک", showRole = listOf(1, 2), icon = "folder", status = MenuServiceStatus.ACTIVE),
     MainServiceDto(id = 29, name = "انعقاد قرارداد بیمه صاحبان حرف و مشاغل آزاد", showRole = listOf(1), icon = "agreement-freelance", status = MenuServiceStatus.ACTIVE),
