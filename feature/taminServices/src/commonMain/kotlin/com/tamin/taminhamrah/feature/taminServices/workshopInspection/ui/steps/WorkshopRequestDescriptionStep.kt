@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionRequestStepScaffold
+import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.RequestDescriptionTextField
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.InfoBanner
 import com.tamin.taminhamrah.feature.taminServices.workshopInspection.contract.WorkshopInspectionIntent
 import com.tamin.taminhamrah.feature.taminServices.workshopInspection.contract.WorkshopInspectionUiState
@@ -28,7 +29,6 @@ import com.tamin.taminhamrah.ui.components.BannerCard
 import com.tamin.taminhamrah.ui.components.BannerType
 import com.tamin.taminhamrah.ui.components.CustomChip
 import com.tamin.taminhamrah.ui.components.TaminText
-import com.tamin.taminhamrah.ui.components.TaminTextArea
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.toPersianDigits
@@ -113,23 +113,13 @@ internal fun WorkshopRequestDescriptionStep(
 
             Spacer(Modifier.height(Spacing.xl))
 
-            TaminTextArea(
-                value = description,
-                onValueChange = { onIntent(WorkshopInspectionIntent.UpdateRequestDescription(it)) },
-                placeholder = stringResource(Res.string.inspection_request_description_placeholder_objection),
+            RequestDescriptionTextField(
+                description = description,
+                onDescriptionChange = { onIntent(WorkshopInspectionIntent.UpdateRequestDescription(it)) },
                 label = stringResource(Res.string.inspection_request_description_label_objection),
+                placeholder = stringResource(Res.string.inspection_request_description_placeholder_objection),
                 isRequired = true,
                 maxLength = MAX_DESCRIPTION_LENGTH,
-            )
-
-            Spacer(Modifier.height(Spacing.xs))
-
-            TaminText(
-                text = "${
-                    description.length.toString().toPersianDigits()
-                }/${MAX_DESCRIPTION_LENGTH.toString().toPersianDigits()}",
-                style = MaterialTheme.typography.labelSmall,
-                color = LocalTaminColors.current.textMuted,
             )
 
             Spacer(Modifier.height(Spacing.md))

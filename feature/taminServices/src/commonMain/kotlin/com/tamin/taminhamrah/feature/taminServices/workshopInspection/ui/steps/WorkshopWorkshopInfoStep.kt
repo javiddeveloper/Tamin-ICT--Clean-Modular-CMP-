@@ -78,9 +78,11 @@ import taminx.core.core_ui.inspection_request_step2_section_title
 import taminx.core.core_ui.search_hint
 
 /**
- * The employer variant always opens as an objection against an existing list item, so — unlike the
- * insured-side step this is ported from — the workshop name/code/branch fields are always prefilled
- * and locked (no blank "request new inspection" path exists here).
+ * The employer variant always opens as an objection against an existing list item. The insured-side
+ * step this is ported from already locks workshop name/code/branch specifically when
+ * `isObjectionRequest` is true (see its `isPrefillLocked`) — since this screen has no non-objection
+ * path, those fields (and the branch picker, which doesn't exist here at all) stay locked
+ * unconditionally, consistent with that same rule rather than a new one.
  */
 @Composable
 internal fun WorkshopWorkshopInfoStep(

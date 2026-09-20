@@ -15,6 +15,7 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
+import kotlinx.coroutines.CancellationException
 
 internal class InspectionRemoteDataSourceImpl(
     private val apiService: InspectionApiService,
@@ -47,6 +48,8 @@ internal class InspectionRemoteDataSourceImpl(
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)

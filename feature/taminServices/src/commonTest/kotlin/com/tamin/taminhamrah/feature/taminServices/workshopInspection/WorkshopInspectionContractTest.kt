@@ -14,16 +14,29 @@ import kotlin.test.assertTrue
 class WorkshopInspectionContractTest {
 
     @Test
-    fun `step1 is invalid when mobile is blank`() {
+    fun `step1 is valid when mobile is blank`() {
+        // Matches legacy's SubmitInspectionRequestFragment#checkValidInputIdentityInfoStep, which
+        // treats mobile as optional for this same employer/objection flow (see MR !249 review item 3).
         val state = WorkshopInspectionUiState(identityContact = IdentityContactStepState())
 
-        assertFalse(state.isRequestStep1Valid)
+        assertTrue(state.isRequestStep1Valid)
     }
 
     @Test
     fun `step1 is invalid when mobile is provided but malformed`() {
         val state = WorkshopInspectionUiState(
             identityContact = IdentityContactStepState(mobile = "123"),
+        )
+
+        assertFalse(state.isRequestStep1Valid)
+    }
+
+    @Test
+    fun `step1 is invalid when mobile has 11 digits but not a real mobile pattern`() {
+        // Legacy validates with the real ^09\d{9}$ pattern, not just length — a landline-shaped
+        // 11-digit string must not pass as a mobile number.
+        val state = WorkshopInspectionUiState(
+            identityContact = IdentityContactStepState(mobile = "02112345678"),
         )
 
         assertFalse(state.isRequestStep1Valid)

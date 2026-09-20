@@ -10,19 +10,26 @@ import com.tamin.taminhamrah.feature.taminServices.inspection.ui.model.JobPR
 import com.tamin.taminhamrah.model.inspection.SubmitInspectionRequestDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
 import com.tamin.taminhamrah.util.ValidationUtils
-import com.tamin.taminhamrah.util.ValidationUtils.isPhoneNumberValid
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 
 private const val MIN_REQUEST_DESCRIPTION_LENGTH = 10
 
+/** Legacy `Utility.checkMobileNumber`: mobile is optional, validated only when non-blank. */
+private fun isMobileNumberAcceptable(mobile: String): Boolean {
+    return mobile.isEmpty() || ValidationUtils.isMobileNumberValid(mobile)
+}
+
 /**
  * The list's client-side search filter — see [WorkshopInspectionUiState.filteredInspections].
  * There is no confirmed backend support for filtering `inspection-header/get-all-manager` by these
- * fields (the legacy production app's equivalent call takes no filter params at all, and the design
- * mock this screen is built from only filters its own local mock array). Filtering the already-loaded
- * page in memory here is the honest behavior until a real server filter contract is confirmed.
+ * fields (the legacy production app's equivalent call takes no filter params at all — it has no
+ * search on this list at all — and the design mock this screen is built from only filters its own
+ * local mock array). Filtering the already-loaded page in memory here is the honest behavior until
+ * a real server filter contract is confirmed; WorkshopInspectionScreen compensates for pagination by
+ * auto-loading remaining pages when a filter comes up empty, so "not found" is only shown once the
+ * whole list has actually been searched.
  */
 @Immutable
 data class WorkshopInspectionFilter(
@@ -80,10 +87,11 @@ data class WorkshopInspectionUiState(
             }.toImmutableList()
         }
 
-    // Unlike the insured-side flow this is ported from, the employer/workshop objection wizard
-    // requires a mobile number rather than treating it as optional.
+    // Legacy's SubmitInspectionRequestFragment (checkValidInputIdentityInfoStep) treats mobile as
+    // optional for this same employer/objection flow, validating it only when non-blank — matched
+    // here rather than the required-mobile behavior this contract previously had.
     val isRequestStep1Valid: Boolean
-        get() = isPhoneNumberValid(identityContact.mobile) &&
+        get() = isMobileNumberAcceptable(identityContact.mobile) &&
             ValidationUtils.isLandlineValid(identityContact.landline) &&
             ValidationUtils.isEmailValid(identityContact.email)
 

@@ -24,6 +24,7 @@ import com.tamin.taminhamrah.useCases.inspection.GetWorkshopInspectionsPageUseCa
 import com.tamin.taminhamrah.useCases.inspection.SubmitInspectionUseCase
 import com.tamin.taminhamrah.useCases.user.GetUserProfileUseCase
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
@@ -187,10 +188,16 @@ class WorkshopInspectionViewModel(
     }
 
     private fun handleSubmitRequest(intent: WorkshopInspectionIntent.SubmitRequest): Flow<PartialState> = flow {
+        // handleIntent runs concurrently (flatMapMerge) — a second SubmitRequest fired before the
+        // first resolves must not also submit, matching the isSubmitting-guard convention this
+        // project uses for non-idempotent actions (see .claude/rules/state-management.md).
+        if (uiState.value.isLoading) return@flow
         emit(PartialState.Loading(true))
         try {
             val result = submitInspectionUseCase(intent.request)
             emit(PartialState.SubmitSuccess(result.id))
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(PartialState.Loading(false))
             sendEvent(WorkshopInspectionEvent.ShowToast(e.toSingleLineMessage()))
@@ -203,6 +210,8 @@ class WorkshopInspectionViewModel(
         try {
             val pdf = getInspectionReportPDFUseCase(intent.inspectionNo)
             emit(PartialState.ViewerPdfChanged(pdf.toPresentation()))
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(PartialState.Loading(false))
             emit(PartialState.ViewerDownloadFailed)

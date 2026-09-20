@@ -19,6 +19,7 @@ import com.tamin.taminhamrah.useCases.inspection.GetJobPageUseCase
 import com.tamin.taminhamrah.useCases.inspection.GetWorkshopInspectionsPageUseCase
 import com.tamin.taminhamrah.useCases.inspection.SubmitInspectionUseCase
 import com.tamin.taminhamrah.useCases.user.GetUserProfileUseCase
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -189,6 +190,76 @@ class WorkshopInspectionViewModelTest {
             assertTrue(state.isSubmitted)
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    @Test
+    fun submitRequest_failure_showsToastAndResetsLoading() = runTest(testDispatcher) {
+        val viewModel = buildViewModel()
+        advanceUntilIdle() // let the (successful) first-page load finish before flipping the flag
+        repository.shouldThrowError = true
+
+        viewModel.events.test {
+            viewModel.sendIntent(
+                WorkshopInspectionIntent.SubmitRequest(
+                    SubmitInspectionRequestDN(
+                        brchCode = "", endDate = 0L, inspectionNumberOld = "",
+                        insuranceId = "", insuranceJob = "", requestDescription = "",
+                        startDate = 0L, workshopAddress = "", workshopManager = "",
+                        workshopName = "", workshopNumber = "", workshopTel = ""
+                    )
+                )
+            )
+            assertIs<WorkshopInspectionEvent.ShowToast>(awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        val state = viewModel.uiState.value
+        assertEquals(false, state.isLoading)
+        assertEquals(false, state.isSubmitted)
+    }
+
+    @Test
+    fun submitRequest_calledTwiceInARow_onlySubmitsOnce() = runTest(testDispatcher) {
+        repository.submitResult = SubmitInspectionRequestResultDN(id = 123L)
+        val gate = CompletableDeferred<Unit>()
+        repository.submitGate = gate
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+
+        val request = SubmitInspectionRequestDN(
+            brchCode = "", endDate = 0L, inspectionNumberOld = "",
+            insuranceId = "", insuranceJob = "", requestDescription = "",
+            startDate = 0L, workshopAddress = "", workshopManager = "",
+            workshopName = "", workshopNumber = "", workshopTel = ""
+        )
+        // The first submission suspends inside the repository (holding isLoading = true) before
+        // the second is sent, so the ViewModel's in-flight guard — not test timing — is what's
+        // actually being exercised here.
+        viewModel.sendIntent(WorkshopInspectionIntent.SubmitRequest(request))
+        viewModel.sendIntent(WorkshopInspectionIntent.SubmitRequest(request))
+        gate.complete(Unit)
+        advanceUntilIdle()
+
+        assertEquals(1, repository.submitCallCount)
+        assertTrue(viewModel.uiState.value.isSubmitted)
+    }
+
+    @Test
+    fun downloadReportPdf_failure_setsViewerDownloadFailedAndShowsToast() = runTest(testDispatcher) {
+        val viewModel = buildViewModel()
+        advanceUntilIdle()
+        repository.shouldThrowError = true
+
+        viewModel.events.test {
+            viewModel.sendIntent(WorkshopInspectionIntent.DownloadReportPdf("6310020000706"))
+            assertIs<WorkshopInspectionEvent.ShowToast>(awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        val state = viewModel.uiState.value
+        assertEquals(false, state.isLoading)
+        assertEquals(true, state.viewerDownloadFailed)
+        assertNull(state.viewerPdf)
     }
 
     @Test

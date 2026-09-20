@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.Assignment
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -203,12 +204,31 @@ internal fun WorkshopInspectionScreen(
     val staggerState = rememberStaggeredEntranceState(key = filtered.size)
 
     listState.OnLoadMore(
-        enabled = uiState.appliedFilter == null &&
-            !uiState.inspectionsEndReached &&
+        enabled = !uiState.inspectionsEndReached &&
             uiState.inspectionsPagingError == null &&
             uiState.inspections.isNotEmpty(),
     ) {
         onIntent(WorkshopInspectionIntent.LoadNextInspections)
+    }
+
+    // A filter only matches what's been paged in so far (see WorkshopInspectionFilter's kdoc) —
+    // if it comes up empty while more pages remain, keep loading automatically so "no results" is
+    // only shown once the whole list has actually been searched, not just the pages scrolled past.
+    LaunchedEffect(
+        uiState.appliedFilter,
+        filtered.isEmpty(),
+        uiState.inspectionsEndReached,
+        uiState.isLoadingNextInspections,
+        uiState.inspectionsPagingError,
+    ) {
+        if (uiState.appliedFilter != null &&
+            filtered.isEmpty() &&
+            !uiState.inspectionsEndReached &&
+            !uiState.isLoadingNextInspections &&
+            uiState.inspectionsPagingError == null
+        ) {
+            onIntent(WorkshopInspectionIntent.LoadNextInspections)
+        }
     }
 
     Box(
@@ -251,6 +271,13 @@ internal fun WorkshopInspectionScreen(
                         onRetry = { onIntent(WorkshopInspectionIntent.RetryNextInspections) },
                         modifier = Modifier.padding(horizontal = Spacing.lg),
                     )
+                }
+
+                filtered.isEmpty() && uiState.appliedFilter != null && !uiState.inspectionsEndReached -> item {
+                    // Still paging through the rest of the list looking for a match — see the
+                    // LaunchedEffect above. Only once inspectionsEndReached is true have we
+                    // actually searched everything, and the "not found" state below applies.
+                    InspectionListSkeleton()
                 }
 
                 filtered.isEmpty() && uiState.appliedFilter != null -> item {
