@@ -189,6 +189,12 @@ fun angledLinearGradient(
  * Numeric text. Amounts, national IDs and tracking codes are always laid out
  * left-to-right, matching the `dir="ltr"` the design puts on every number even inside an
  * otherwise right-to-left page.
+ *
+ * **Digits and punctuation only.** This flips the whole paragraph, not just the digits, so a
+ * Persian word anywhere in [text] is laid out relative to a left-to-right paragraph and lands on
+ * the far side of its own number — «۱۲ روز» prints as «روز ۱۲». A number *with a unit* is two
+ * pieces: a [NumericText] for the figure and an ordinary `Text` for the word beside it, the way
+ * `WageText` does it. A whole sentence that merely contains numbers is an ordinary `Text`.
  */
 @Composable
 fun NumericText(
