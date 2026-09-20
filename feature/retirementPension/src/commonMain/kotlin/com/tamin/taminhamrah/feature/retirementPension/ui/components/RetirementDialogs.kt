@@ -16,6 +16,7 @@ import com.tamin.taminhamrah.ui.components.CopyIconButton
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
+import com.tamin.taminhamrah.ui.components.TaminFormAbandonDialog
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -38,10 +39,7 @@ import taminx.core.core_ui.retirement_pension_dialog_objection_title
 import taminx.core.core_ui.retirement_pension_dialog_rules_body
 import taminx.core.core_ui.retirement_pension_dialog_rules_title
 import taminx.core.core_ui.retirement_pension_dialog_understood
-import taminx.core.core_ui.retirement_pension_leave_body
-import taminx.core.core_ui.retirement_pension_leave_confirm
-import taminx.core.core_ui.retirement_pension_leave_stay
-import taminx.core.core_ui.retirement_pension_leave_title
+import taminx.core.core_ui.retirement_pension_title
 import taminx.core.core_ui.retirement_pension_track_code_label
 
 /**
@@ -101,27 +99,10 @@ internal fun RetirementDialogHost(
             },
         )
 
-        RetirementDialog.Leave -> TaminConfirmationDialog(
-            title = stringResource(Res.string.retirement_pension_leave_title),
-            description = stringResource(Res.string.retirement_pension_leave_body),
-            icon = vectorResource(Res.drawable.ic_tamin_alert_triangle),
-            iconTint = colors.orangeText,
-            iconBackground = colors.orangeBg,
-            confirmButton = {
-                TaminOutlinedButton(
-                    text = stringResource(Res.string.retirement_pension_leave_stay),
-                    onClick = onDismiss,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            },
-            dismissButton = {
-                TaminFilledButton(
-                    text = stringResource(Res.string.retirement_pension_leave_confirm),
-                    onClick = onLeaveConfirmed,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            },
-            onDismissRequest = onDismiss,
+        RetirementDialog.Leave -> TaminFormAbandonDialog(
+            formName = stringResource(Res.string.retirement_pension_title),
+            onStay = onDismiss,
+            onAbandon = onLeaveConfirmed,
         )
     }
 }

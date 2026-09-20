@@ -43,6 +43,7 @@ import com.tamin.taminhamrah.feature.girlSurvivor.ui.contract.GirlSurvivorStep
 import com.tamin.taminhamrah.feature.girlSurvivor.ui.contract.GirlSurvivorUiState
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
+import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.IconBox
 import com.tamin.taminhamrah.ui.components.LoadingButton
@@ -53,6 +54,7 @@ import com.tamin.taminhamrah.ui.components.StepState
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminBottomBar
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
+import com.tamin.taminhamrah.ui.components.TaminFormAbandonDialog
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
@@ -101,10 +103,7 @@ fun GirlSurvivorScreen(
 
     GirlSurvivorContent(
         state = state,
-        onBack = {
-            if (state.currentStep == GirlSurvivorStep.Details) onBack()
-            else viewModel.sendIntent(GirlSurvivorIntent.GoToPreviousStep)
-        },
+        onClose = onBack,
         onIntent = viewModel::sendIntent,
         onDownloadPdf = { showPdfViewer = true },
     )
@@ -149,11 +148,20 @@ private fun HandleGirlSurvivorEvents(
 @Composable
 private fun GirlSurvivorContent(
     state: GirlSurvivorUiState,
-    onBack: () -> Unit,
+    onClose: () -> Unit,
     onIntent: (GirlSurvivorIntent) -> Unit,
     onDownloadPdf: () -> Unit,
 ) {
     val taminColors = LocalTaminColors.current
+    var showAbandonDialog by remember { mutableStateOf(false) }
+    val handleBack: () -> Unit = {
+        if (state.currentStep == GirlSurvivorStep.Details) {
+            showAbandonDialog = true
+        } else {
+            onIntent(GirlSurvivorIntent.GoToPreviousStep)
+        }
+    }
+    BackHandler(onBack = handleBack)
     val headerBrush = remember(taminColors.profileGradientStops) {
         Brush.horizontalGradient(taminColors.profileGradientStops)
     }
@@ -198,7 +206,7 @@ private fun GirlSurvivorContent(
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                         contentDescription = null,
-                        onClick = onBack,
+                        onClick = handleBack,
                         bordered = true,
                     )
                 },
@@ -206,7 +214,7 @@ private fun GirlSurvivorContent(
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_cross),
                         contentDescription = null,
-                        onClick = onBack,
+                        onClick = { showAbandonDialog = true },
                         bordered = true,
                     )
                 },
@@ -289,6 +297,17 @@ private fun GirlSurvivorContent(
                 }
             }
         }
+    }
+
+    if (showAbandonDialog) {
+        TaminFormAbandonDialog(
+            formName = stringResource(Res.string.girl_survivor_title),
+            onStay = { showAbandonDialog = false },
+            onAbandon = {
+                showAbandonDialog = false
+                onClose()
+            },
+        )
     }
 }
 
