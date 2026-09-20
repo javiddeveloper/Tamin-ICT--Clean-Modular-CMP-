@@ -42,6 +42,7 @@ import com.tamin.taminhamrah.feature.girlSurvivor.ui.contract.GirlSurvivorIntent
 import com.tamin.taminhamrah.feature.girlSurvivor.ui.contract.GirlSurvivorStep
 import com.tamin.taminhamrah.feature.girlSurvivor.ui.contract.GirlSurvivorUiState
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
 import com.tamin.taminhamrah.ui.components.StepIndicator
@@ -50,6 +51,7 @@ import com.tamin.taminhamrah.ui.components.StepState
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminBottomBar
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
+import com.tamin.taminhamrah.ui.components.TaminFormAbandonDialog
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
@@ -85,6 +87,7 @@ fun GirlSurvivorScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val toaster = LocalToaster.current
     var showPdfViewer by remember { mutableStateOf(false) }
+    var showAbandonDialog by remember { mutableStateOf(false) }
 
     HandleGirlSurvivorEvents(
         events = viewModel.events,
@@ -93,12 +96,19 @@ fun GirlSurvivorScreen(
         onOpenPdfViewer = { showPdfViewer = true },
     )
 
+    val handleBack: () -> Unit = {
+        if (state.currentStep == GirlSurvivorStep.Details) {
+            showAbandonDialog = true
+        } else {
+            viewModel.sendIntent(GirlSurvivorIntent.GoToPreviousStep)
+        }
+    }
+    BackHandler(onBack = handleBack)
+
     GirlSurvivorContent(
         state = state,
-        onBack = {
-            if (state.currentStep == GirlSurvivorStep.Details) onBack()
-            else viewModel.sendIntent(GirlSurvivorIntent.GoToPreviousStep)
-        },
+        onBack = handleBack,
+        onClose = { showAbandonDialog = true },
         onIntent = viewModel::sendIntent,
         onDownloadPdf = { showPdfViewer = true },
     )
@@ -120,6 +130,17 @@ fun GirlSurvivorScreen(
     if (state.showSuccessDialog) {
         GirlSurvivorSuccessDialog(
             onConfirm = { viewModel.sendIntent(GirlSurvivorIntent.DismissSuccessDialog) },
+        )
+    }
+
+    if (showAbandonDialog) {
+        TaminFormAbandonDialog(
+            formName = stringResource(Res.string.girl_survivor_title),
+            onStay = { showAbandonDialog = false },
+            onAbandon = {
+                showAbandonDialog = false
+                onBack()
+            },
         )
     }
 }
@@ -144,6 +165,7 @@ private fun HandleGirlSurvivorEvents(
 private fun GirlSurvivorContent(
     state: GirlSurvivorUiState,
     onBack: () -> Unit,
+    onClose: () -> Unit,
     onIntent: (GirlSurvivorIntent) -> Unit,
     onDownloadPdf: () -> Unit,
 ) {
@@ -264,7 +286,7 @@ private fun GirlSurvivorContent(
 
         GirlSurvivorHeader(
             onBackClicked = onBack,
-            onCloseClicked = onBack,
+            onCloseClicked = onClose,
             topAreaState = topArea,
             modifier = Modifier
                 .align(Alignment.TopCenter)

@@ -32,7 +32,7 @@ data class WorkshopsDebtListModelDTO(
     @SerialName("kindDoc") val kindDoc: String? = null,
     @SerialName("docNoEjra") val executiveNumber: String? = null,
     @SerialName("docDateEjra") val executiveDate: String? = null,
-    /** تاریخ ابلاغ اجراییه — the date the one-day filing deadline is measured from. */
+    /** تاریخ ابلاغ اجراییه — the date the one-year filing deadline is measured from. */
     @SerialName("docDateEblaghEjra") val executiveNotifyDate: String? = null,
     @SerialName("docNoEkhtar") val warningNumber: String? = null,
     @SerialName("docDateEkhtar") val warningDate: String? = null,
