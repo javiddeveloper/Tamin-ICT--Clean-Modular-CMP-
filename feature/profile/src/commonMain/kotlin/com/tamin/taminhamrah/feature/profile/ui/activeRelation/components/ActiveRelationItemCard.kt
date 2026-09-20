@@ -19,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,12 +63,19 @@ internal fun ActiveRelationItemCard(
 ) {
     val taminColors = LocalTaminColors.current
 
-    val topHeaderGradient = Brush.horizontalGradient(
-        colors = listOf(
-            if (item.isActive) taminColors.greenBg else taminColors.border.copy(alpha = 0.12f),
-            taminColors.bgSurface,
-        ),
-    )
+    val topHeaderGradient = remember(
+        item.isActive,
+        taminColors.greenBg,
+        taminColors.border,
+        taminColors.bgSurface,
+    ) {
+        Brush.horizontalGradient(
+            colors = listOf(
+                if (item.isActive) taminColors.greenBg else taminColors.border.copy(alpha = 0.12f),
+                taminColors.bgSurface,
+            ),
+        )
+    }
 
     Card(
         modifier = modifier

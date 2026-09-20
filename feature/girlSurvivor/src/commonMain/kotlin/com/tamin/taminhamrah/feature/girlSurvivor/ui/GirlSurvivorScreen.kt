@@ -66,6 +66,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.back_content_description
 import taminx.core.core_ui.girl_survivor_step_commitment
 import taminx.core.core_ui.girl_survivor_step_details
 import taminx.core.core_ui.girl_survivor_download_form
@@ -309,7 +310,7 @@ private fun GirlSurvivorBottomBar(
                     )
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                        contentDescription = null,
+                        contentDescription = stringResource(Res.string.back_content_description),
                         onClick = { onIntent(GirlSurvivorIntent.GoToPreviousStep) },
                         bordered = true,
                     )

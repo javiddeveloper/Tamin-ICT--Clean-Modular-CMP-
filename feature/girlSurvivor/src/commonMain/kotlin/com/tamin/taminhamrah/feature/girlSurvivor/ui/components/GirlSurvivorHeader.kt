@@ -22,7 +22,6 @@ import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.HeaderDecoration
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -33,6 +32,8 @@ import kotlin.math.roundToInt
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.back_content_description
+import taminx.core.core_ui.close_content_description
 import taminx.core.core_ui.girl_survivor_subtitle
 import taminx.core.core_ui.girl_survivor_title
 import taminx.core.core_ui.ic_request
@@ -60,7 +61,7 @@ internal fun GirlSurvivorHeader(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(bottomStart = CornerRadius.x3l, bottomEnd = CornerRadius.x3l))
-            .background(taminTopAppBarGradient(taminColors.profileGradientStops)),
+            .background(gradient),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         TaminTopAppBar(
@@ -70,7 +71,7 @@ internal fun GirlSurvivorHeader(
             navigationIcon = {
                 TaminTopAppBarButton(
                     icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                    contentDescription = null,
+                    contentDescription = stringResource(Res.string.back_content_description),
                     onClick = onBackClicked,
                     bordered = true,
                 )
@@ -78,7 +79,7 @@ internal fun GirlSurvivorHeader(
             action = {
                 TaminTopAppBarButton(
                     icon = vectorResource(Res.drawable.ic_tamin_cross),
-                    contentDescription = null,
+                    contentDescription = stringResource(Res.string.close_content_description),
                     onClick = onCloseClicked,
                     bordered = true,
                 )
