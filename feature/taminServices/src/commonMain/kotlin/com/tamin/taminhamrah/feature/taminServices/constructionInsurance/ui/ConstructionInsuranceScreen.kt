@@ -28,9 +28,10 @@ import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.comp
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.components.ConstructionFileCard
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.components.ConstructionInsuranceHeader
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.components.ConstructionInsuranceListSkeleton
-import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.components.ConstructionSearchCard
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.components.ConstructionNoticeBottomSheet
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.components.ConstructionSearchEmptyState
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.components.ConstructionSearchFilterChipRow
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.components.ConstructionSearchSheet
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.components.ConstructionUserInfoCard
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFilePR
 import com.tamin.taminhamrah.model.constructionInsurance.WorkshopIdInfoPR
@@ -140,7 +141,10 @@ fun ConstructionInsuranceScreen(
         ConstructionInsuranceTopArea(
             userName = state.userName,
             nationalCode = state.nationalCode,
+            itemCount = state.items.size,
             onBackClicked = onBackClicked,
+            onSearchClicked = { onIntent(ConstructionInsuranceIntent.ToggleSearchExpanded(true)) },
+            onInfoClicked = { onIntent(ConstructionInsuranceIntent.ToggleNoticeVisibility) },
             topAreaState = probeState,
         )
     }
@@ -169,58 +173,6 @@ fun ConstructionInsuranceScreen(
             verticalArrangement = Arrangement.spacedBy(Spacing.md),
             overscrollEffect = rememberJellyOverscroll(),
         ) {
-            item {
-                ConstructionSearchCard(
-                    itemCount = state.items.size,
-                    isExpanded = state.isSearchExpanded,
-                    isNoticeVisible = state.isNoticeVisible,
-                    fileNoQuery = state.fileNoQuery,
-                    reqNoQuery = state.reqNoQuery,
-                    workshopIdQuery = state.workshopIdQuery,
-                    branchCodeQuery = state.branchCodeQuery,
-                    onToggleExpanded = {
-                        onIntent(
-                            ConstructionInsuranceIntent.ToggleSearchExpanded(
-                                it
-                            )
-                        )
-                    },
-                    onFileNoChanged = {
-                        onIntent(
-                            ConstructionInsuranceIntent.OnFileNoQueryChanged(
-                                it
-                            )
-                        )
-                    },
-                    onReqNoChanged = {
-                        onIntent(
-                            ConstructionInsuranceIntent.OnReqNoQueryChanged(
-                                it
-                            )
-                        )
-                    },
-                    onWorkshopIdChanged = {
-                        onIntent(
-                            ConstructionInsuranceIntent.OnWorkshopIdQueryChanged(
-                                it
-                            )
-                        )
-                    },
-                    onBranchCodeChanged = {
-                        onIntent(
-                            ConstructionInsuranceIntent.OnBranchCodeQueryChanged(
-                                it
-                            )
-                        )
-                    },
-                    onExecuteSearch = { onIntent(ConstructionInsuranceIntent.ExecuteSearch) },
-                    onResetSearch = { onIntent(ConstructionInsuranceIntent.ResetSearch) },
-                    onInfoIconClicked = {
-                        onIntent(ConstructionInsuranceIntent.ToggleNoticeVisibility)
-                    }
-                )
-            }
-
             if (state.isLoading && state.items.isEmpty()) {
                 item {
                     ConstructionInsuranceListSkeleton(modifier = Modifier.padding(top = Spacing.sm))
@@ -306,7 +258,10 @@ fun ConstructionInsuranceScreen(
         ConstructionInsuranceTopArea(
             userName = state.userName,
             nationalCode = state.nationalCode,
+            itemCount = state.items.size,
             onBackClicked = onBackClicked,
+            onSearchClicked = { onIntent(ConstructionInsuranceIntent.ToggleSearchExpanded(true)) },
+            onInfoClicked = { onIntent(ConstructionInsuranceIntent.ToggleNoticeVisibility) },
             topAreaState = topArea,
             modifier = Modifier
                 .align(Alignment.TopCenter)
@@ -316,6 +271,34 @@ fun ConstructionInsuranceScreen(
         if (state.isLoading && state.items.isNotEmpty()) {
             LoadingStateOverlay()
         }
+    }
+
+    if (state.isSearchExpanded) {
+        ConstructionSearchSheet(
+            fileNoQuery = state.fileNoQuery,
+            reqNoQuery = state.reqNoQuery,
+            workshopIdQuery = state.workshopIdQuery,
+            branchCodeQuery = state.branchCodeQuery,
+            onFileNoChanged = { onIntent(ConstructionInsuranceIntent.OnFileNoQueryChanged(it)) },
+            onReqNoChanged = { onIntent(ConstructionInsuranceIntent.OnReqNoQueryChanged(it)) },
+            onWorkshopIdChanged = { onIntent(ConstructionInsuranceIntent.OnWorkshopIdQueryChanged(it)) },
+            onBranchCodeChanged = { onIntent(ConstructionInsuranceIntent.OnBranchCodeQueryChanged(it)) },
+            onExecuteSearch = {
+                onIntent(ConstructionInsuranceIntent.ExecuteSearch)
+                onIntent(ConstructionInsuranceIntent.ToggleSearchExpanded(false))
+            },
+            onResetSearch = {
+                onIntent(ConstructionInsuranceIntent.ResetSearch)
+                onIntent(ConstructionInsuranceIntent.ToggleSearchExpanded(false))
+            },
+            onDismiss = { onIntent(ConstructionInsuranceIntent.ToggleSearchExpanded(false)) },
+        )
+    }
+
+    if (state.isNoticeVisible) {
+        ConstructionNoticeBottomSheet(
+            onDismiss = { onIntent(ConstructionInsuranceIntent.ToggleNoticeVisibility) },
+        )
     }
 }
 
@@ -333,7 +316,10 @@ private val UserInfoCardOverhang = 40.dp
 private fun ConstructionInsuranceTopArea(
     userName: String,
     nationalCode: String,
+    itemCount: Int,
     onBackClicked: () -> Unit,
+    onSearchClicked: () -> Unit,
+    onInfoClicked: () -> Unit,
     topAreaState: TopAreaState,
     modifier: Modifier = Modifier,
 ) {
@@ -343,10 +329,13 @@ private fun ConstructionInsuranceTopArea(
             onBackClicked = onBackClicked,
             topAreaState = topAreaState,
             heroCardOverlap = UserInfoCardOverhang,
+            onSearchClicked = onSearchClicked,
+            onInfoClicked = onInfoClicked,
         )
         ConstructionUserInfoCard(
             userName = userName,
             nationalCode = nationalCode,
+            itemCount = itemCount,
             // Rides up into the header's reserved bottom space so it straddles the seam, and
             // reports a height reduced by the same overlap so reportTopAreaHeight sees the true
             // footprint instead of counting the overlap twice as reserved list space.

@@ -28,6 +28,7 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.file_unit
 import taminx.core.core_ui.label_full_name
 import taminx.core.core_ui.label_national_code
 
@@ -35,6 +36,7 @@ import taminx.core.core_ui.label_national_code
 fun ConstructionUserInfoCard(
     userName: String,
     nationalCode: String,
+    itemCount: Int,
     modifier: Modifier = Modifier
 ) {
     if (userName.isBlank() && nationalCode.isBlank()) return
@@ -77,6 +79,18 @@ fun ConstructionUserInfoCard(
                 value = nationalCode,
                 label = stringResource(Res.string.label_national_code)
             )
+
+            Box(
+                modifier = Modifier
+                    .width(1.dp)
+                    .height(Spacing.xxl)
+                    .background(taminColors.divider)
+            )
+
+            InfoColumn(
+                value = "$itemCount",
+                label = stringResource(Res.string.file_unit)
+            )
         }
     }
 }
@@ -112,6 +126,7 @@ private fun ConstructionUserInfoCardPreview() {
         ConstructionUserInfoCard(
             userName = "حسین توکلی کرمانی",
             nationalCode = "۴۴۷۹۸۹۰۸۸۲",
+            itemCount = 24,
             modifier = Modifier.padding(Spacing.page)
         )
     }
@@ -124,6 +139,7 @@ private fun ConstructionUserInfoCardPreviewDark() {
         ConstructionUserInfoCard(
             userName = "حسین توکلی کرمانی",
             nationalCode = "۴۴۷۹۸۹۰۸۸۲",
+            itemCount = 24,
             modifier = Modifier.padding(Spacing.page)
         )
     }

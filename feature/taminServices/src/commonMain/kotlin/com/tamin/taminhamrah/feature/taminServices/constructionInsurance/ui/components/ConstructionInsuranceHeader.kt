@@ -1,8 +1,10 @@
 package com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -36,10 +38,15 @@ import com.tamin.taminhamrah.ui.toparea.TopAreaState
 import com.tamin.taminhamrah.ui.toparea.rememberTopAreaState
 import com.tamin.taminhamrah.ui.toparea.topAreaHide
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.action_back
+import taminx.core.core_ui.btn_search
 import taminx.core.core_ui.construction_insurance_subtitle
 import taminx.core.core_ui.construction_insurance_title
+import taminx.core.core_ui.ic_info
+import taminx.core.core_ui.ic_tamin_search
+import taminx.core.core_ui.notice_title
 
 /**
  * The navy gradient header of the بیمه ساختمانی list screen. Folds on the list's own drag through
@@ -55,6 +62,8 @@ internal fun ConstructionInsuranceHeader(
     topAreaState: TopAreaState,
     modifier: Modifier = Modifier,
     heroCardOverlap: Dp = Spacing.none,
+    onSearchClicked: () -> Unit = {},
+    onInfoClicked: () -> Unit = {},
 ) {
     val taminColors = LocalTaminColors.current
     val gradient = remember(taminColors.profileGradientStops) {
@@ -79,6 +88,20 @@ internal fun ConstructionInsuranceHeader(
                     onClick = onBackClicked,
                     bordered = true,
                 )
+            },
+            action = {
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                    TaminTopAppBarButton(
+                        icon = vectorResource(Res.drawable.ic_info),
+                        contentDescription = stringResource(Res.string.notice_title),
+                        onClick = onInfoClicked,
+                    )
+                    TaminTopAppBarButton(
+                        icon = vectorResource(Res.drawable.ic_tamin_search),
+                        contentDescription = stringResource(Res.string.btn_search),
+                        onClick = onSearchClicked,
+                    )
+                }
             },
         ) {
             Box(modifier = Modifier.fillMaxWidth()) {

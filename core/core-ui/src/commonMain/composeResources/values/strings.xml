@@ -3328,7 +3328,6 @@
     <string name="construction_insurance_subtitle">پرونده‌های ساختمانی و گواهی مفاصاحساب</string>
     <string name="label_full_name">نام و نام خانوادگی</string>
     <string name="label_national_code">کد ملی</string>
-    <string name="label_workshop_search">جستجوی کارگاه</string>
     <string name="file_number">شماره پرونده</string>
     <string name="label_request_number">شماره درخواست</string>
     <string name="label_registration_date">تاریخ ثبت</string>
@@ -3376,6 +3375,7 @@
     <string name="construction_insurance_filter_clear">حذف</string>
     <string name="construction_insurance_search_empty_title">پرونده‌ای با این مشخصات یافت نشد</string>
     <string name="construction_insurance_search_empty_subtitle">فیلتر را حذف کنید یا مشخصات دیگری را جستجو کنید.</string>
+    <string name="construction_insurance_search_sheet_title">جستجوی پرونده ساختمانی</string>
 
     <!-- Construction Insurance — عملیات menu + its 4 destination screens -->
     <string name="action_menu_payment_sheet">صدور و مدیریت برگه پرداخت</string>
