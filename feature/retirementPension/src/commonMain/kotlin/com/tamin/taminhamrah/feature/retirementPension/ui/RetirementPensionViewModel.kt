@@ -98,6 +98,14 @@ class RetirementPensionViewModel(
 
             RetirementPensionIntent.Back -> goBack()
 
+            RetirementPensionIntent.CloseClicked -> {
+                if (uiState.value.screen == RetirementScreen.Form) {
+                    emit(PartialState.DialogChanged(RetirementDialog.Leave))
+                } else {
+                    sendEvent(RetirementPensionEvent.NavigateBack)
+                }
+            }
+
             RetirementPensionIntent.LeaveConfirmed -> {
                 emit(PartialState.DialogChanged(null))
                 sendEvent(RetirementPensionEvent.NavigateBack)

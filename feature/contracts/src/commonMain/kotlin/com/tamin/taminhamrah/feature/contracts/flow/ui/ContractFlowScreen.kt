@@ -42,9 +42,11 @@ import com.tamin.taminhamrah.feature.contracts.flow.ui.contract.ContractFlowInte
 import com.tamin.taminhamrah.feature.contracts.flow.ui.contract.ContractFlowUiState
 import com.tamin.taminhamrah.feature.contracts.flow.ui.contract.isUserInfoStepComplete
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
 import com.tamin.taminhamrah.ui.components.TaminBottomBar
+import com.tamin.taminhamrah.ui.components.TaminFormAbandonDialog
 import com.tamin.taminhamrah.ui.components.TaminHeroStepProgress
 import com.tamin.taminhamrah.ui.components.TaminLocalPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminText
@@ -215,6 +217,7 @@ fun ContractFlowScreenContent(
     val currentStepIndex = (steps.indexOf(state.currentStep) + 1).coerceAtLeast(1)
     val totalSteps = steps.size.coerceAtLeast(1)
     val screenTitle = state.config?.screenTitleRes?.let { stringResource(it) }.orEmpty()
+    var showAbandonDialog by remember { mutableStateOf(false) }
     val isEditInfoStep =
         state.isEditingExistingContract && state.currentStep == ContractStep.STEP_REGISTRATION
     val stepTitle = if (isEditInfoStep) {
@@ -241,10 +244,11 @@ fun ContractFlowScreenContent(
     val handleNavigateBack: () -> Unit = {
         when {
             state.isEditMode -> onIntent(ContractFlowIntent.GoToPreviousStep)
-            steps.isFirstStep(state.currentStep) -> onBack()
+            steps.isFirstStep(state.currentStep) -> showAbandonDialog = true
             else -> onIntent(ContractFlowIntent.GoToPreviousStep)
         }
     }
+    BackHandler(onBack = handleNavigateBack)
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -277,7 +281,7 @@ fun ContractFlowScreenContent(
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_cross),
                         contentDescription = null,
-                        onClick = onBack,
+                        onClick = { showAbandonDialog = true },
                         bordered = true,
                     )
                 },
@@ -629,6 +633,17 @@ fun ContractFlowScreenContent(
                 }
             }
         }
+    }
+
+    if (showAbandonDialog) {
+        TaminFormAbandonDialog(
+            formName = screenTitle,
+            onStay = { showAbandonDialog = false },
+            onAbandon = {
+                showAbandonDialog = false
+                onBack()
+            },
+        )
     }
 }
 
