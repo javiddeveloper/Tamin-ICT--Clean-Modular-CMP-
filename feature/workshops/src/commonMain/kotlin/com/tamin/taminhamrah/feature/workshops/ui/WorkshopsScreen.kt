@@ -1,10 +1,13 @@
 ﻿package com.tamin.taminhamrah.feature.workshops.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,6 +37,9 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.BackHandler
+import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
+import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
+import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.rideUpIntoHeader
@@ -44,6 +50,9 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.article_sixteen_no_debt_body
+import taminx.core.core_ui.article_sixteen_no_debt_title
+import taminx.core.core_ui.btn_understood
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_search
 import taminx.core.core_ui.ic_tamin_workshop
@@ -86,13 +95,32 @@ fun WorkshopsScreen(
     // with the workshop, so it costs no request and needs no route of its own.
     state.detailFor?.let { workshop ->
         BackHandler { onIntent(WorkshopsIntent.DetailDismissed) }
-        WorkshopDetailScreen(
-            workshop = workshop,
-            actions = state.availableActions,
-            onBack = { onIntent(WorkshopsIntent.DetailDismissed) },
-            onAction = { action -> onIntent(WorkshopsIntent.ActionSelected(action, workshop)) },
-            modifier = modifier,
-        )
+        Box(modifier = modifier) {
+            WorkshopDetailScreen(
+                workshop = workshop,
+                actions = state.availableActions,
+                onBack = { onIntent(WorkshopsIntent.DetailDismissed) },
+                onAction = { action -> onIntent(WorkshopsIntent.ActionSelected(action, workshop)) },
+            )
+            // رسیدگی به بدهی ماده ۱۶ asks for the workshop's debts before it opens.
+            if (state.isCheckingDebts) LoadingStateOverlay()
+        }
+        if (state.isNoDebtDialogOpen) {
+            TaminConfirmationDialog(
+                title = stringResource(Res.string.article_sixteen_no_debt_title),
+                description = stringResource(Res.string.article_sixteen_no_debt_body),
+                icon = Icons.Outlined.Info,
+                confirmButton = {
+                    TaminFilledButton(
+                        text = stringResource(Res.string.btn_understood),
+                        onClick = { onIntent(WorkshopsIntent.NoDebtDialogDismissed) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                },
+                dismissButton = {},
+                onDismissRequest = { onIntent(WorkshopsIntent.NoDebtDialogDismissed) },
+            )
+        }
         return
     }
 
@@ -161,7 +189,7 @@ fun WorkshopsScreen(
             state = state.list,
             onLoadMore = { onIntent(WorkshopsIntent.LoadMore) },
             onRetry = { onIntent(WorkshopsIntent.Load) },
-            key = { it.workshopId + it.branchCode },
+            key = { "${it.workshopId}_${it.branchCode}" },
             header = {
                 WorkshopSectionHeader(
                     count = workshops.size,

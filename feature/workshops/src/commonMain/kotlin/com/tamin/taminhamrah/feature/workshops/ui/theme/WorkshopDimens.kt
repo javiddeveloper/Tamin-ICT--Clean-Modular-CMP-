@@ -64,6 +64,9 @@ object WorkshopDimens {
     val cardButtonMinWidth = 96.dp
     val cardButtonBorderWidth = 1.3.dp
 
+    /** The glyph in a compact card button: the design's `width="13"` on واگذارندگان's three-up row. */
+    val cardButtonCompactIcon = 13.dp
+
     /**
      * How strongly a tinted button's outline shows through.
      *

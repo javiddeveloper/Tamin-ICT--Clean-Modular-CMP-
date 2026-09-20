@@ -19,6 +19,10 @@ import com.tamin.taminhamrah.model.workshop.DebitPaymentDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentPreCheckDN
 import com.tamin.taminhamrah.model.workshop.DebitPaymentRequestDN
 import com.tamin.taminhamrah.model.workshop.ContractRowQuery
+import com.tamin.taminhamrah.model.workshop.AssignerContractDN
+import com.tamin.taminhamrah.model.workshop.AssignerContractQuery
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseDN
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseQuery
 import com.tamin.taminhamrah.model.workshop.DebitReasonDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopDN
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDN
@@ -43,6 +47,9 @@ import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionQuery
 import com.tamin.taminhamrah.model.workshop.SmsMessageDN
+import com.tamin.taminhamrah.model.workshop.SettlementCertificateDN
+import com.tamin.taminhamrah.model.workshop.SettlementRequestDN
+import com.tamin.taminhamrah.model.workshop.SettlementSubjectDN
 import com.tamin.taminhamrah.repository.WorkShopsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -151,6 +158,44 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         lastContractRowQuery = query
         contractRowsWithoutAgreement
     }
+
+    // ------------------------------------------------------------------------ واگذارندگان
+
+    var assignerContracts: PagedListDN<AssignerContractDN> = PagedListDN()
+    var lastAssignerContractQuery: AssignerContractQuery? = null
+    var computationalBases: PagedListDN<ComputationalBaseDN> = PagedListDN()
+    var lastComputationalBaseQuery: ComputationalBaseQuery? = null
+
+    override suspend fun getAssignerContracts(
+        query: AssignerContractQuery,
+    ): PagedListDN<AssignerContractDN> = answer {
+        lastAssignerContractQuery = query
+        assignerContracts
+    }
+
+    override suspend fun getComputationalBases(
+        query: ComputationalBaseQuery,
+    ): PagedListDN<ComputationalBaseDN> = answer {
+        lastComputationalBaseQuery = query
+        computationalBases
+    }
+
+    override suspend fun getComputationalBasePdf(documentId: String): PdfDownloadDN = answer { pdf }
+
+    override suspend fun getSettlementSubjects(): List<SettlementSubjectDN> = answer { emptyList() }
+
+    override suspend fun uploadSettlementPdf(fileName: String, bytes: ByteArray): String =
+        answer { "" }
+
+    override suspend fun submitSettlementRequest(request: SettlementRequestDN): String =
+        answer { "" }
+
+    override suspend fun getSettlementCertificate(
+        workshopId: String,
+        branchCode: String,
+        contractRow: String,
+        contractNumber: String,
+    ): SettlementCertificateDN? = answer { null }
 
     override suspend fun getPaymentSheets(query: PaymentSheetQuery): PagedListDN<PaymentSheetDN> =
         answer {

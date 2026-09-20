@@ -11,6 +11,8 @@ import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestInfoDTO
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveRequestDTO
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenSaveResultDTO
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoDTO
+import com.tamin.taminhamrah.model.workshop.AssignerContractDTO
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseDTO
 import com.tamin.taminhamrah.model.workshop.DebitObjectionSaveRequestDTO
 import com.tamin.taminhamrah.model.workshop.DebitObjectionSaveResultDTO
 import com.tamin.taminhamrah.model.workshop.DebitPaymentDTO
@@ -29,6 +31,10 @@ import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
 import com.tamin.taminhamrah.model.workshop.PaymentTicketInfoDTO
+import com.tamin.taminhamrah.model.workshop.SettlementCertificateDTO
+import com.tamin.taminhamrah.model.workshop.SettlementCertificateDetailDTO
+import com.tamin.taminhamrah.model.workshop.SettlementRequestDTO
+import com.tamin.taminhamrah.model.workshop.SettlementSubjectDTO
 import com.tamin.taminhamrah.model.workshop.SmsMessageDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDTO
@@ -51,22 +57,23 @@ import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.Query
 import de.jensklingenberg.ktorfit.http.QueryMap
 import de.jensklingenberg.ktorfit.http.Url
+import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.statement.HttpStatement
 import kotlinx.serialization.json.JsonElement
 
 internal interface WorkShopsApiService {
 
-    // ---------------------------------------------------------------- کارگاه‌های کارفرما (the list)
+    // ---------------------------------------------------------------- کارگاههای کارفرما (the list)
 
     @GET("workshop-services/employer/get-all-employer-agreement-by-national-id")
     suspend fun getAllEmployerAgreementByNationalId(
         @QueryMap queries: Map<String, String>
     ): BaseDTO<ListData<EmployerAgreementDTO>>
 
-    // ------------------------------------------------------------------------ ردیف‌های پیمان
+    // ------------------------------------------------------------------------ ردیفهای پیمان
 
     /**
-     * ردیف پیمان‌های a workshop that *has* a تعهدنامه — same row shape as the list above, narrowed
+     * ردیف پیمانهای a workshop that *has* a تعهدنامه — same row shape as the list above, narrowed
      * to one workshop/branch instead of every workshop the signed-in national id holds.
      */
     @GET("workshop-services/get-employer-agreement-by-workshop-id-and-branch-code/{workshopId}/{branchCode}")
@@ -77,7 +84,7 @@ internal interface WorkShopsApiService {
     ): BaseDTO<ListData<EmployerAgreementDTO>>
 
     /**
-     * ردیف پیمان‌های a workshop with no تعهدنامه on file — a leaner row, and a different model.
+     * ردیف پیمانهای a workshop with no تعهدنامه on file — a leaner row, and a different model.
      *
      * `contract-employer-workshop-info-…` is the service's own spelling, and the response names
      * two fields differently from the call above; see [WorkshopContractDTO].
@@ -89,7 +96,115 @@ internal interface WorkShopsApiService {
         @QueryMap queries: Map<String, String>,
     ): BaseDTO<ListData<WorkshopContractDTO>>
 
-    // -------------------------------------------------------------------------- برگ پرداخت‌ها
+    // ---------------------------------------------------------------------------- واگذارندگان
+    //
+    // پیمانهایی که کارفرمای واردشده «واگذارنده»ی آنهاست, plus the computational bases filed under
+    // each and the documents attached to those.
+    //
+    // `requestissuanceinvoices38` is all lower case with no separators. That is the published
+    // route, not a typo — the tidy spelling 404s. Do not let a formatter or a rename touch it.
+
+    /**
+     * لیست پیمانهای واگذارنده, paged.
+     *
+     * The workshop, branch and ردیف are **filter clauses**, not path segments — they travel inside
+     * the `filter` array `query` already carries (`workshop.workshopId`, `workshop.branchCode`,
+     * `contractRow`). A blank one is simply omitted and widens the result; it does not address a
+     * different route the way it does on the ردیفهای پیمان endpoints.
+     */
+    @GET("requestissuanceinvoices38/assignersContracts-request-issuance-invoices38")
+    suspend fun getAssignerContracts(
+        @QueryMap queries: Map<String, String>,
+    ): BaseDTO<ListData<AssignerContractDTO>>
+
+    /**
+     * مبانی محاسباتی of one پیمان, paged.
+     *
+     * Four identity parameters, all of them **query** parameters here.
+     *
+     * ⚠️ `brchCode` is spelled exactly that way — abbreviated, and *not* the `branchCode` every
+     * neighboring workshop service uses. It was read off the old app's published interface. A
+     * linter or an IDE rename that "corrects" it leaves the request looking fine while the branch
+     * silently stops narrowing anything.
+     */
+    @GET("requestissuanceinvoices38/det-request-issuance-invoices38")
+    suspend fun getComputationalBases(
+        @Query("workshopId") workshopId: String,
+        @Query("contractRow") contractRow: String,
+        @Query("brchCode") brchCode: String,
+        @Query("contractSequence") contractSequence: String,
+        @QueryMap queries: Map<String, String>,
+    ): BaseDTO<ListData<ComputationalBaseDTO>>
+
+    /**
+     * A document attached to a مبنای محاسباتی, as a PDF byte stream.
+     *
+     * Typed [HttpStatement] so the bytes can be drained inside `execute` — see `readPdfChannel`.
+     */
+    @GET("requestissuanceinvoices38/getPdf-request-issuance-invoices38/{documentId}")
+    suspend fun getComputationalBasePdf(
+        @Path("documentId") documentId: String,
+    ): HttpStatement
+
+    /**
+     * مفاصاحسابهای ماده ۳۸ issued under one ردیف پیمان — the old app's `getClause38List`.
+     *
+     * [mafasaStatus] and [contractNumber] are path segments the old client always fills with `-`, its
+     * "no filter" placeholder; the caller picks the پیمان out of the list itself.
+     */
+    @GET("workshop-services/mad38-head/{workshopCode}/{branchCode}/{contractRow}/{mafasaStatus}/{contractNumber}")
+    suspend fun getSettlementCertificates(
+        @Path("workshopCode") workshopCode: String,
+        @Path("branchCode") branchCode: String,
+        @Path("contractRow") contractRow: String,
+        @Path("mafasaStatus") mafasaStatus: String,
+        @Path("contractNumber") contractNumber: String,
+        @QueryMap queries: Map<String, String>,
+    ): BaseDTO<ListData<SettlementCertificateDTO>>
+
+    /** One certificate, by the serial [getSettlementCertificates] listed it under — `getClause38Detail`. */
+    @GET("workshop-services/mad38-detail/{workshopCode}/{branchCode}/{contractRow}/{mafasaSerialNo}")
+    suspend fun getSettlementCertificateDetail(
+        @Path("workshopCode") workshopCode: String,
+        @Path("branchCode") branchCode: String,
+        @Path("contractRow") contractRow: String,
+        @Path("mafasaSerialNo") serial: String,
+        @QueryMap queries: Map<String, String>,
+    ): BaseDTO<ListData<SettlementCertificateDetailDTO>>
+
+    // ------------------------------------------------------------- درخواست مفاصاحساب
+
+    /** موضوعات کار a درخواست مفاصاحساب can be filed under, paged like every ExtJS list. */
+    @GET("requestissuanceinvoices38/contractSubject-request-issuance-invoices38")
+    suspend fun getSettlementSubjects(
+        @QueryMap queries: Map<String, String>,
+    ): BaseDTO<ListData<SettlementSubjectDTO>>
+
+    /**
+     * Stores one PDF of a درخواست مفاصاحساب and answers with the id the request names it by.
+     *
+     * The id is `data`, a bare string. Typed [JsonElement] rather than `String` so a failure, which
+     * puts `{cause, message}` in the same slot, still deserializes and reaches the user in the
+     * service's words. An image goes to the shared `upload-image` instead.
+     */
+    @POST("requestissuanceinvoices38/persistPdf-request-issuance-invoices38")
+    suspend fun uploadSettlementPdf(
+        @Body content: MultiPartFormDataContent,
+    ): BaseDTO<JsonElement?>
+
+    /**
+     * Files a درخواست مفاصاحساب.
+     *
+     * A PUT onto an id the client composes (`SettlementRequestDN.requestId`), e.g.
+     * `0082810145TT02100001TT0210TT01TT01` — not a POST that returns one.
+     */
+    @PUT("requestissuanceinvoices38/update-request-issuance-invoices38/{id}")
+    suspend fun submitSettlementRequest(
+        @Path("id") id: String,
+        @Body request: SettlementRequestDTO,
+    ): BaseDTO<JsonElement?>
+
+    // -------------------------------------------------------------------------- برگ پرداختها
 
     @GET("workshop-services/payment-sheets")
     suspend fun getWorkshopPaymentSheets(
@@ -352,7 +467,7 @@ internal interface WorkShopsApiService {
     ): BaseDTO<EmployerCommitmentInfoDTO>
 
     /**
-     * Step 2 — لیست کارگاه‌های بدون قرارداد کارفرما.
+     * Step 2 — لیست کارگاههای بدون قرارداد کارفرما.
      *
      * Paged list shown on the second stepper page while the employer confirms the agreement.
      * Tapping a row opens [getEmployerWorkshopContractList] for that workshop.
@@ -391,7 +506,7 @@ internal interface WorkShopsApiService {
         @QueryMap queries: Map<String, String>
     ): BaseDTO<ListData<WorkShopObjectionDTO>>
 
-    /** پیامک‌های one filed objection. `objectionCode` is the row's own `seqNo`. */
+    /** پیامکهای one filed objection. `objectionCode` is the row's own `seqNo`. */
     @GET("debit-objection/objection-detail/{objectionCode}/")
     suspend fun getWorkShopObjectionSms(
         @Path("objectionCode") objectionCode: Long,
