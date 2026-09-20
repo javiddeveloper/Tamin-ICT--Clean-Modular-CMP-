@@ -3176,6 +3176,7 @@
     <string name="history_summary_legend_registered">ثبت‌شده</string>
     <string name="history_summary_legend_unpaid">پرداخت‌نشده</string>
     <string name="history_summary_details">جزئیات ماه‌به‌ماه</string>
+    <string name="history_summary_unavailable">دریافت خلاصهٔ سابقه انجام نشد</string>
 
 
     <!-- ═══ Construction-worker premium payment (حق بیمهٔ کارگران ساختمانی) ═══ -->

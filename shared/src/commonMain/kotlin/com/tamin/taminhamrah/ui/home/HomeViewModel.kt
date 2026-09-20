@@ -7,9 +7,10 @@ import com.tamin.taminhamrah.mapper.history.toPresentation
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.model.common.MainServiceDN
-import com.tamin.taminhamrah.model.history.HistorySummaryPR
 import com.tamin.taminhamrah.model.history.toHistorySummary
 import com.tamin.taminhamrah.repository.TokenStoreManager
+import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
+import com.tamin.taminhamrah.tools.errorHandling.taminErrorUriOrNull
 import com.tamin.taminhamrah.ui.home.contract.HomeEvent
 import com.tamin.taminhamrah.ui.home.contract.HomeIntent
 import com.tamin.taminhamrah.ui.home.contract.HomeUiState
@@ -28,6 +29,12 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
+
+/**
+ * The failures خلاصهٔ سابقه offers a retry for: the request never got an answer, so asking again
+ * is the only thing that can produce one. Anything the server did answer is its answer.
+ */
+private val RetryableHistoryErrors = setOf(ErrorUri.NO_CONNECTION_ERROR, ErrorUri.SERVICE_TIMEOUT)
 
 class HomeViewModel(
     private val checkChatAllowedUseCase: CheckChatAllowedUseCase,
@@ -84,7 +91,8 @@ class HomeViewModel(
                 )
             }
             is HomeIntent.LoadHistorySummary -> {
-                emit(HomeUiState.HomePartialState.HistorySummaryLoaded(loadHistorySummary()))
+                emit(HomeUiState.HomePartialState.HistorySummaryLoading)
+                emit(loadHistorySummary())
             }
             is HomeIntent.LoadLastRequests -> {
                 // Deprecated: Requests are now handled by LoadHeader via GetHomeContentUseCase
@@ -113,19 +121,27 @@ class HomeViewModel(
     }
 
     /**
-     * The newest year on record, or null when there is none to show.
+     * The newest year on record, and whether asking for it failed.
      *
-     * Failure is not raised: the repository already falls back to the last successful load, so what
-     * reaches here is a person the service will not answer for — a کارفرما or a مستمری‌بگیر has no
-     * premiums of their own — or an outage. Neither is worth putting an error on the home page for,
-     * and both mean the same thing for this card: leave it out.
+     * The repository already falls back to the last successful load, so a failure here means the
+     * call did not arrive **and** nothing was cached — a first launch without a connection. That
+     * one offers a retry.
+     *
+     * Every other failure leaves the card out as before, which is what a person the service will
+     * not answer for needs: a کارفرما and a مستمری‌بگیر have no premiums of their own, and a retry
+     * row they could never clear would tell them something is broken when nothing is.
      */
-    private suspend fun loadHistorySummary(): HistorySummaryPR? = try {
-        getTalfighInfosUseCase().list?.toPresentation()?.toHistorySummary()
+    private suspend fun loadHistorySummary(): HomeUiState.HomePartialState = try {
+        HomeUiState.HomePartialState.HistorySummaryLoaded(
+            getTalfighInfosUseCase().list?.toPresentation()?.toHistorySummary()
+        )
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
-        null
+        HomeUiState.HomePartialState.HistorySummaryLoaded(
+            summary = null,
+            failed = e.taminErrorUriOrNull() in RetryableHistoryErrors,
+        )
     }
 
     /**
@@ -192,9 +208,14 @@ class HomeViewModel(
         is HomeUiState.HomePartialState.AgentAvailability -> currentState.copy(
             isAgentEnabled = partialState.enabled
         )
+        is HomeUiState.HomePartialState.HistorySummaryLoading -> currentState.copy(
+            isHistorySummaryLoading = true,
+            historySummaryFailed = false,
+        )
         is HomeUiState.HomePartialState.HistorySummaryLoaded -> currentState.copy(
             isHistorySummaryLoading = false,
-            historySummary = partialState.summary
+            historySummary = partialState.summary,
+            historySummaryFailed = partialState.failed,
         )
         is HomeUiState.HomePartialState.Error -> currentState.copy(
             isLoading = false,

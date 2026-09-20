@@ -36,6 +36,14 @@ data class HomeUiState(
      * card shows its skeleton.
      */
     val isHistorySummaryLoading: Boolean = true,
+    /**
+     * Whether the summary's load failed on the way out rather than answering.
+     *
+     * Only a connection failure sets this, and only when nothing was cached to fall back to. The
+     * service answering "nothing for this person" is [historySummary] `null` instead: trying that
+     * again cannot change it, and a retry row that never goes away would claim otherwise.
+     */
+    val historySummaryFailed: Boolean = false,
     val error: String? = null,
 ) {
     sealed interface HomePartialState {
@@ -43,8 +51,18 @@ data class HomeUiState(
         data class SectionSelected(val section: HomeServiceSection) : HomePartialState
         data class HomeContentLoaded(val content: HomeContentDN?) : HomePartialState
         data class AgentAvailability(val enabled: Boolean) : HomePartialState
-        /** Null is an answer: the load finished and there is no year to show. */
-        data class HistorySummaryLoaded(val summary: HistorySummaryPR?) : HomePartialState
+        /** The summary is being fetched — on first load, and again on every retry. */
+        data object HistorySummaryLoading : HomePartialState
+        /**
+         * Null is an answer: the load finished and there is no year to show.
+         *
+         * [failed] separates the two ways of having no year — a connection that never delivered
+         * one, which a retry can fix, from a service that has none to give, which it cannot.
+         */
+        data class HistorySummaryLoaded(
+            val summary: HistorySummaryPR?,
+            val failed: Boolean = false,
+        ) : HomePartialState
         data class Error(val message: String?) : HomePartialState
     }
 }

@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.layout
@@ -43,18 +44,20 @@ import com.tamin.taminhamrah.model.home.QuickAccessDN
 import com.tamin.taminhamrah.model.home.RequestDN
 import com.tamin.taminhamrah.model.home.SpecialServiceDN
 import com.tamin.taminhamrah.model.home.UserInfoDN
-import com.tamin.taminhamrah.repository.home.HomeContentPlaceholders
 import com.tamin.taminhamrah.model.userRequest.UserRequestPR
+import com.tamin.taminhamrah.repository.home.HomeContentPlaceholders
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.CampaignCarousel
 import com.tamin.taminhamrah.ui.components.HeaderSuggestionChip
+import com.tamin.taminhamrah.ui.components.HistorySummaryCard
+import com.tamin.taminhamrah.ui.components.HistorySummaryCardSkeleton
+import com.tamin.taminhamrah.ui.components.HistorySummaryCardUnavailable
 import com.tamin.taminhamrah.ui.components.HomeAgentAskBar
 import com.tamin.taminhamrah.ui.components.HomeFeaturedSection
 import com.tamin.taminhamrah.ui.components.HomeHeader
 import com.tamin.taminhamrah.ui.components.HomeLastRequestsSection
 import com.tamin.taminhamrah.ui.components.HomeQuickAccessSection
-import com.tamin.taminhamrah.ui.home.HomeScreen
 import com.tamin.taminhamrah.ui.home.contract.HomeEvent
 import com.tamin.taminhamrah.ui.home.contract.HomeIntent
 import com.tamin.taminhamrah.ui.home.contract.HomeUiState
@@ -76,6 +79,9 @@ import taminx.core.core_ui.retry
 
 /** What the placeholder home column insets its content by; the carousel needs to know it. */
 private val HomeContentPadding = 16.dp
+
+/** Top-level so it is the same instance on every recomposition, not a fresh modifier each time. */
+private val HistorySummaryPadding = Modifier.padding(top = Spacing.xlg)
 
 /**
  * How far the AI ask-bar drops below the header's bottom edge — half its own height
@@ -147,6 +153,15 @@ fun HomeScreen(
         onSectionSelected = { viewModel.sendIntent(HomeIntent.OnSectionSelected(it)) },
         onServiceClick = { viewModel.sendIntent(HomeIntent.OnServiceClick(it)) },
         onRetry = { viewModel.sendIntent(HomeIntent.Retry) },
+        // Hoisted: the card's three actions are one action, and a lambda built at the call site
+        // would capture `viewModel` — not a stable type, so the compiler cannot memoize it and the
+        // card would recompose on every emission of `uiState` instead of when its own year changes.
+        onHistorySummaryClick = remember(viewModel) {
+            { viewModel.sendIntent(HomeIntent.OnHistorySummaryClick) }
+        },
+        onRetryHistorySummary = remember(viewModel) {
+            { viewModel.sendIntent(HomeIntent.LoadHistorySummary) }
+        },
         storyRail = {
             // «تازه‌ها» sits directly above the campaigns, as on the design, and is full-bleed for
             // the same reason: a row that scrolls has to be able to run a ring off the screen edge.
@@ -177,6 +192,9 @@ private fun HomeScreenContent(
     onSectionSelected: (HomeServiceSection) -> Unit,
     onServiceClick: (MainServiceDN) -> Unit,
     onRetry: () -> Unit,
+    /** Anywhere on خلاصهٔ سابقه — the card, its year pill and «جزئیات ماه‌به‌ماه» all open سوابق. */
+    onHistorySummaryClick: () -> Unit = {},
+    onRetryHistorySummary: () -> Unit = {},
     storyRail: @Composable () -> Unit = {},
 ) {
     Box(
@@ -251,6 +269,34 @@ private fun HomeScreenContent(
             Spacer(modifier = Modifier.height(8.dp))
 
             storyRail()
+
+            // خلاصهٔ سابقه, between «تازه‌ها» and the campaigns exactly as the design orders them.
+            //
+            // Nothing at all once the load has answered with no year: someone not yet insured has
+            // no summary, and neither has a کارفرما or a مستمری‌بگیر, whose premiums are not their
+            // own — an empty card would say so at the size of a full one. A connection that never
+            // answered is the one case that keeps the slot, to offer the retry.
+            //
+            // The warning row is icon-and-text, as the design draws it: «پیگیری» is not offered
+            // here, so `onFollowUpClick` stays null.
+            val summary = uiState.historySummary
+            when {
+                uiState.isHistorySummaryLoading ->
+                    HistorySummaryCardSkeleton(modifier = HistorySummaryPadding)
+
+                summary != null -> HistorySummaryCard(
+                    summary = summary,
+                    onCardClick = onHistorySummaryClick,
+                    onYearClick = onHistorySummaryClick,
+                    onDetailsClick = onHistorySummaryClick,
+                    modifier = HistorySummaryPadding,
+                )
+
+                uiState.historySummaryFailed -> HistorySummaryCardUnavailable(
+                    onRetry = onRetryHistorySummary,
+                    modifier = HistorySummaryPadding,
+                )
+            }
 
             // The same for every role: campaigns are not filtered by the picker above.
             //

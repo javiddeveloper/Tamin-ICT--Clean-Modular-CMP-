@@ -51,6 +51,7 @@ import kotlinx.collections.immutable.toImmutableList
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.action_retry
 import taminx.core.core_ui.history_summary_details
 import taminx.core.core_ui.history_summary_follow_up
 import taminx.core.core_ui.history_summary_last_registered
@@ -59,6 +60,7 @@ import taminx.core.core_ui.history_summary_legend_unpaid
 import taminx.core.core_ui.history_summary_registered_of_elapsed
 import taminx.core.core_ui.history_summary_subtitle
 import taminx.core.core_ui.history_summary_title
+import taminx.core.core_ui.history_summary_unavailable
 import taminx.core.core_ui.history_summary_unpaid_warning
 import taminx.core.core_ui.history_summary_year
 import taminx.core.core_ui.ic_tamin_calendar_check
@@ -200,6 +202,59 @@ fun HistorySummaryCardSkeleton(modifier: Modifier = Modifier) {
     }
 }
 
+/**
+ * The card's spot when the year could not be fetched and nothing was cached to fall back to.
+ *
+ * Header and one row, not a whole card: there are no figures to frame, and a full-height card
+ * holding nothing but an apology would take the page's most prominent slot to say so. It stays in
+ * the card's place rather than collapsing, so the retry is where the person was already looking.
+ */
+@Composable
+fun HistorySummaryCardUnavailable(
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+
+    HistoryCardShell(colors = colors, modifier = modifier) {
+        HistoryCardHeader(colors = colors)
+
+        Row(
+            modifier = Modifier
+                .padding(horizontal = CardPadding)
+                .padding(top = WarningTopGap)
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(CornerRadius.listRow))
+                .background(colors.historyUnpaidBg)
+                .border(BorderThickness, colors.historyWarningBorder, RoundedCornerShape(CornerRadius.listRow))
+                .padding(horizontal = WarningPaddingHorizontal, vertical = WarningPaddingVertical),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        ) {
+            Icon(
+                imageVector = vectorResource(Res.drawable.ic_warning),
+                contentDescription = null,
+                tint = colors.orangeText,
+                modifier = Modifier.size(WarningIconSize),
+            )
+            TaminText(
+                text = stringResource(Res.string.history_summary_unavailable),
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.ExtraBold,
+                color = colors.historyWarningText,
+                modifier = Modifier.weight(1f),
+            )
+            ActionPill(
+                colors = colors,
+                label = stringResource(Res.string.action_retry),
+                onClick = onRetry,
+            )
+        }
+
+        Spacer(modifier = Modifier.height(FooterPaddingVertical))
+    }
+}
+
 // ─── Shell ────────────────────────────────────────────────────────────────────────────────────
 
 /**
@@ -250,11 +305,12 @@ private fun HistoryCardShell(
 
 // ─── Header ───────────────────────────────────────────────────────────────────────────────────
 
+/** [yearLabel] is null when there is no year to name — the failed state has the title but no pill. */
 @Composable
 private fun HistoryCardHeader(
     colors: TaminColors,
-    yearLabel: String,
-    onYearClick: () -> Unit,
+    yearLabel: String? = null,
+    onYearClick: (() -> Unit)? = null,
 ) {
     val iconStops = colors.historyIconStops
     val tileBrush = remember(iconStops) { Brush.linearGradient(iconStops) }
@@ -299,7 +355,9 @@ private fun HistoryCardHeader(
             )
         }
 
-        YearPill(colors = colors, yearLabel = yearLabel, onClick = onYearClick)
+        if (yearLabel != null && onYearClick != null) {
+            YearPill(colors = colors, yearLabel = yearLabel, onClick = onYearClick)
+        }
     }
 }
 
@@ -606,13 +664,18 @@ private fun HistoryUnpaidWarning(
             modifier = Modifier.weight(1f),
         )
         if (onFollowUpClick != null) {
-            FollowUpPill(colors = colors, onClick = onFollowUpClick)
+            ActionPill(
+                colors = colors,
+                label = stringResource(Res.string.history_summary_follow_up),
+                onClick = onFollowUpClick,
+            )
         }
     }
 }
 
+/** The pill an inline row ends with — «پیگیری» on the unpaid warning, «تلاش دوباره» on a failure. */
 @Composable
-private fun FollowUpPill(colors: TaminColors, onClick: () -> Unit) {
+private fun ActionPill(colors: TaminColors, label: String, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .clip(CircleShape)
@@ -623,7 +686,7 @@ private fun FollowUpPill(colors: TaminColors, onClick: () -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(PillGap),
     ) {
         TaminText(
-            text = stringResource(Res.string.history_summary_follow_up),
+            text = label,
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.ExtraBold,
             color = colors.orangeText,
@@ -895,6 +958,16 @@ private fun HistorySummaryCardSkeletonPreview() {
     PreviewRtlThemeContent {
         Box(modifier = Modifier.background(LocalTaminColors.current.bgPage).padding(Spacing.page)) {
             HistorySummaryCardSkeleton()
+        }
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun HistorySummaryCardUnavailablePreview() {
+    PreviewRtlThemeContent {
+        Box(modifier = Modifier.background(LocalTaminColors.current.bgPage).padding(Spacing.page)) {
+            HistorySummaryCardUnavailable(onRetry = {})
         }
     }
 }
