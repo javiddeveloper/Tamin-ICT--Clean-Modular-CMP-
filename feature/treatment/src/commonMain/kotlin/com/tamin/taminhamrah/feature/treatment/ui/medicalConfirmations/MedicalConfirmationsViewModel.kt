@@ -12,6 +12,7 @@ import com.tamin.taminhamrah.useCases.treatment.GetMedicalConfirmationPDFUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetMedicalConfirmationsUseCase
 import com.tamin.taminhamrah.useCases.treatment.SendToInboxMedicalConfirmationUseCase
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
@@ -47,6 +48,8 @@ class MedicalConfirmationsViewModel(
             getMedicalConfirmationPDFUseCase(intent.repId).collect { pdfDn ->
                 emit(PartialState.ViewerPdfChanged(pdfDn.toPresentation()))
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
             emit(PartialState.ViewerDownloadFailed)
@@ -60,6 +63,8 @@ class MedicalConfirmationsViewModel(
                 sendEvent(ConfirmationsEvent.SavedToInbox)
                 emit(PartialState.Loading(false))
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
         }
