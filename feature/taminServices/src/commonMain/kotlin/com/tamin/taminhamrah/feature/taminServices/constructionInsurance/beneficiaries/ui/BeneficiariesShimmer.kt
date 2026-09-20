@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.taminServices.constructionInsurance.beneficiaries.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,12 +10,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.coloredShadow
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -33,16 +34,13 @@ fun BeneficiariesSkeleton(modifier: Modifier = Modifier) {
             .padding(horizontal = Spacing.page, vertical = Spacing.md),
         verticalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
-        ShimmerBlock(
-            modifier = Modifier.width(64.dp).height(16.dp).padding(bottom = Spacing.xs),
-            cornerRadius = CornerRadius.sm,
-        )
         repeat(PLACEHOLDER_CARDS) {
             BeneficiaryCardSkeleton()
         }
     }
 }
 
+/** Mirrors `BeneficiaryCard`'s layout: avatar + name/code beside the role pill, then the mobile strip. */
 @Composable
 private fun BeneficiaryCardSkeleton(modifier: Modifier = Modifier) {
     val colors = LocalTaminColors.current
@@ -55,50 +53,58 @@ private fun BeneficiaryCardSkeleton(modifier: Modifier = Modifier) {
                 blurRadius = 20.dp,
                 offsetY = 8.dp,
             )
-            .taminSurface()
-            .padding(Spacing.lg),
-        verticalArrangement = Arrangement.spacedBy(Spacing.md),
+            .taminSurface(),
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Spacing.lg),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            ShimmerBlock(
-                modifier = Modifier.size(IconSize.xlarge),
-                cornerRadius = CornerRadius.avatarTile,
-            )
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 ShimmerBlock(
-                    modifier = Modifier.width(120.dp).height(18.dp),
-                    cornerRadius = CornerRadius.sm
+                    modifier = Modifier.size(IconSize.xlarge),
+                    cornerRadius = IconSize.xlarge / 2,
                 )
-                ShimmerBlock(
-                    modifier = Modifier.width(64.dp).height(22.dp),
-                    cornerRadius = CornerRadius.chip
-                )
-            }
-        }
-        TaminDivider()
-        Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-            repeat(2) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.xs),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    ShimmerBlock(
-                        modifier = Modifier.width(72.dp).height(14.dp),
-                        cornerRadius = CornerRadius.sm
-                    )
+                Column(verticalArrangement = Arrangement.spacedBy(Spacing.xxs)) {
                     ShimmerBlock(
                         modifier = Modifier.width(100.dp).height(16.dp),
-                        cornerRadius = CornerRadius.sm
+                        cornerRadius = CornerRadius.sm,
+                    )
+                    ShimmerBlock(
+                        modifier = Modifier.width(70.dp).height(12.dp),
+                        cornerRadius = CornerRadius.sm,
                     )
                 }
             }
+            ShimmerBlock(
+                modifier = Modifier.width(56.dp).height(24.dp),
+                cornerRadius = CornerRadius.chip,
+            )
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    colors.bgPage,
+                    RoundedCornerShape(bottomStart = CornerRadius.card, bottomEnd = CornerRadius.card),
+                )
+                .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            ShimmerBlock(
+                modifier = Modifier.width(90.dp).height(14.dp),
+                cornerRadius = CornerRadius.sm,
+            )
+            ShimmerBlock(
+                modifier = Modifier.width(110.dp).height(16.dp),
+                cornerRadius = CornerRadius.sm,
+            )
         }
     }
 }

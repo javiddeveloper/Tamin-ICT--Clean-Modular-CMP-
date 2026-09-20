@@ -15,6 +15,10 @@ data class BeneficiariesUiState(
     val requestNumber: Long? = null,
     val fileNumber: Long? = null,
     val requestDate: String? = null,
+    /** Carried only for the header hero card — not sent as a query filter. */
+    val workshopId: String? = null,
+    /** Carried only for the header hero card — not sent as a query filter. */
+    val branchCode: String? = null,
     /** True only while the first page is in flight — drives the full-screen skeleton. */
     val isLoading: Boolean = false,
     val items: ImmutableList<BeneficiaryConstructionPR> = persistentListOf(),
@@ -31,6 +35,8 @@ data class BeneficiariesUiState(
             val requestNumber: Long?,
             val fileNumber: Long?,
             val requestDate: String?,
+            val workshopId: String?,
+            val branchCode: String?,
         ) : PartialState
         data class PagingChanged(
             val items: ImmutableList<BeneficiaryConstructionPR>,
@@ -49,6 +55,8 @@ sealed interface BeneficiariesIntent {
         val requestNumber: Long?,
         val fileNumber: Long?,
         val requestDate: String?,
+        val workshopId: String?,
+        val branchCode: String?,
     ) : BeneficiariesIntent
 
     data object LoadNextPage : BeneficiariesIntent

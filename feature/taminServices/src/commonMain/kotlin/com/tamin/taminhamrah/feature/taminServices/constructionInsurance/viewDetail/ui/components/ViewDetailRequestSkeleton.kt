@@ -27,14 +27,15 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 private val SectionShadowBlur = 26.dp
 private val SectionShadowOffsetY = 10.dp
 
-/** Row counts per placeholder card — just enough visual variety to read as three distinct sections. */
-private val SKELETON_ROW_COUNTS = listOf(4, 5, 4)
+/** Row counts per placeholder card — just enough visual variety to read as two distinct sections. */
+private val SKELETON_ROW_COUNTS = listOf(5, 4)
 
 /**
  * Loading placeholder for [com.tamin.taminhamrah.feature.taminServices.constructionInsurance.viewDetail.ui.ViewDetailRequestScreen],
  * shaped exactly like the loaded `ExpandableDetailCard`s it stands in for — same shadow, corner
  * radius and header row — the way `ConstructionInsuranceListSkeleton` mirrors `ConstructionFileCard`
- * for the list screen.
+ * for the list screen. Two cards, matching اطلاعات درخواست + اطلاعات محاسبه — the hero summary
+ * card renders separately, inside the top bar, not as part of this list placeholder.
  */
 @Composable
 fun ViewDetailRequestSkeleton(modifier: Modifier = Modifier) {
@@ -42,14 +43,14 @@ fun ViewDetailRequestSkeleton(modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
-        SKELETON_ROW_COUNTS.forEach { rowCount ->
-            ExpandableDetailCardSkeleton(rowCount = rowCount)
+        SKELETON_ROW_COUNTS.forEach { _ ->
+            ExpandableDetailCardSkeleton()
         }
     }
 }
 
 @Composable
-private fun ExpandableDetailCardSkeleton(rowCount: Int, modifier: Modifier = Modifier) {
+private fun ExpandableDetailCardSkeleton(modifier: Modifier = Modifier) {
     val colors = LocalTaminColors.current
     val cardShape = RoundedCornerShape(CornerRadius.lg)
 

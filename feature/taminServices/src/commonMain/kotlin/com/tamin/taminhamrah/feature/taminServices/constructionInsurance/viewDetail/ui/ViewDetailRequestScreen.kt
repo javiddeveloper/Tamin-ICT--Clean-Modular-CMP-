@@ -36,12 +36,12 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.components.ConstructionRequestHeroCard
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.viewDetail.contract.ViewDetailRequestEvent
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.viewDetail.contract.ViewDetailRequestIntent
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.viewDetail.contract.ViewDetailRequestUiState
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.viewDetail.ui.components.ViewDetailRequestSkeleton
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFilePR
-import com.tamin.taminhamrah.model.constructionInsurance.EnumTextColor
 import com.tamin.taminhamrah.model.constructionInsurance.KeyValueModel
 import com.tamin.taminhamrah.model.constructionInsurance.WorkshopIdInfoPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -50,6 +50,7 @@ import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
+import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.coloredShadow
@@ -59,6 +60,7 @@ import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.toPriceFormat
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -67,9 +69,9 @@ import taminx.core.core_ui.action_hide_details
 import taminx.core.core_ui.action_show_details
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.no_construction_files_found
+import taminx.core.core_ui.pregnancy_pay_estimate_result_rial_unit
 import taminx.core.core_ui.view_detail_request_title
 import taminx.core.core_ui.view_detail_section_computing_info
-import taminx.core.core_ui.view_detail_section_file_info
 import taminx.core.core_ui.view_detail_section_request_info
 import taminx.core.core_ui.Res as CoreRes
 
@@ -135,6 +137,18 @@ fun ViewDetailRequestScreen(
                         bordered = true,
                     )
                 },
+                content = {
+                    state.file?.let { file ->
+                        ConstructionRequestHeroCard(
+                            fileNumber = file.fileNumber,
+                            workshopId = file.workshopInfo?.workshopId,
+                            branchCode = file.workshopInfo?.brhCode,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = Spacing.md),
+                        )
+                    }
+                },
             )
         },
     ) { paddingValues ->
@@ -181,20 +195,28 @@ private fun ViewDetailContent(file: ConstructionFilePR, modifier: Modifier = Mod
     ) {
         item {
             ExpandableDetailCard(
-                title = stringResource(CoreRes.string.view_detail_section_file_info),
-                items = file.getDetailConstructionFile(),
-            )
-        }
-        item {
-            ExpandableDetailCard(
                 title = stringResource(CoreRes.string.view_detail_section_request_info),
                 items = file.getRequestInfo(),
+                initiallyExpanded = true,
             )
         }
         item {
+            val rialUnit = stringResource(CoreRes.string.pregnancy_pay_estimate_result_rial_unit)
             ExpandableDetailCard(
                 title = stringResource(CoreRes.string.view_detail_section_computing_info),
                 items = file.getComputingInfo(),
+                headerPreview = {
+                    NumericText(
+                        text = (file.totalPayment ?: 0L).toPriceFormat(),
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = LocalTaminColors.current.textPrimary,
+                    )
+                    Text(
+                        text = rialUnit,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = LocalTaminColors.current.textPrimary,
+                    )
+                },
             )
         }
     }
@@ -205,9 +227,11 @@ private fun ExpandableDetailCard(
     title: String,
     items: List<KeyValueModel>,
     modifier: Modifier = Modifier,
+    initiallyExpanded: Boolean = false,
+    headerPreview: (@Composable () -> Unit)? = null,
 ) {
     val colors = LocalTaminColors.current
-    var expanded by rememberSaveable(title) { mutableStateOf(false) }
+    var expanded by rememberSaveable(title) { mutableStateOf(initiallyExpanded) }
     val rotation by animateFloatAsState(
         targetValue = if (expanded) -90f else 90f,
         label = "view-detail-section-chevron",
@@ -240,16 +264,22 @@ private fun ExpandableDetailCard(
                 fontWeight = FontWeight.Bold,
                 color = colors.textPrimary,
             )
-            Icon(
-                imageVector = vectorResource(CoreRes.drawable.ic_tamin_chevron_back),
-                contentDescription = stringResource(
-                    if (expanded) CoreRes.string.action_hide_details else CoreRes.string.action_show_details,
-                ),
-                tint = colors.blueText,
-                modifier = Modifier
-                    .size(Spacing.lg)
-                    .graphicsLayer { rotationZ = rotation },
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+            ) {
+                headerPreview?.invoke()
+                Icon(
+                    imageVector = vectorResource(CoreRes.drawable.ic_tamin_chevron_back),
+                    contentDescription = stringResource(
+                        if (expanded) CoreRes.string.action_hide_details else CoreRes.string.action_show_details,
+                    ),
+                    tint = colors.blueText,
+                    modifier = Modifier
+                        .size(Spacing.lg)
+                        .graphicsLayer { rotationZ = rotation },
+                )
+            }
         }
 
         AnimatedVisibility(visible = expanded) {
@@ -266,7 +296,7 @@ private fun ExpandableDetailCard(
                     DetailRow(
                         label = label,
                         value = value,
-                        valueColor = colorFor(kv.textColor),
+                        valueColor = LocalTaminColors.current.textPrimary,
                         numeric = kv.numeric,
                         unit = kv.unit,
                     )
@@ -274,15 +304,6 @@ private fun ExpandableDetailCard(
             }
         }
     }
-}
-
-@Composable
-private fun colorFor(textColor: EnumTextColor) = when (textColor) {
-    EnumTextColor.DEFAULT -> LocalTaminColors.current.textPrimary
-    EnumTextColor.AMBER -> LocalTaminColors.current.orangeText
-    EnumTextColor.GREEN -> LocalTaminColors.current.greenText
-    EnumTextColor.RED -> LocalTaminColors.current.dangerText
-    EnumTextColor.BLUE -> LocalTaminColors.current.blueText
 }
 
 // ─── Preview ──────────────────────────────────────────────────────────────────

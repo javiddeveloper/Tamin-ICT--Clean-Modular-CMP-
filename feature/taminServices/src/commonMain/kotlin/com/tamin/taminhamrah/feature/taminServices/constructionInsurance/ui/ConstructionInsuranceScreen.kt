@@ -71,7 +71,13 @@ fun ConstructionInsuranceRoute(
     onNavigateToViewDetail: (fileNumber: Long?, requestNumber: Long?) -> Unit,
     onNavigateToPaymentSheet: (debitNumber: String, branchCode: String) -> Unit,
     onNavigateToInstallmentLetter: (workshopId: String, branchId: String) -> Unit,
-    onNavigateToBeneficiaries: (requestNumber: Long?, fileNumber: Long?, requestDate: String?) -> Unit,
+    onNavigateToBeneficiaries: (
+        requestNumber: Long?,
+        fileNumber: Long?,
+        requestDate: String?,
+        workshopId: String?,
+        branchCode: String?,
+    ) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -122,8 +128,13 @@ fun ConstructionInsuranceScreen(
     onNavigateToViewDetail: (fileNumber: Long?, requestNumber: Long?) -> Unit = { _, _ -> },
     onNavigateToPaymentSheet: (debitNumber: String, branchCode: String) -> Unit = { _, _ -> },
     onNavigateToInstallmentLetter: (workshopId: String, branchId: String) -> Unit = { _, _ -> },
-    onNavigateToBeneficiaries: (requestNumber: Long?, fileNumber: Long?, requestDate: String?) -> Unit =
-        { _, _, _ -> },
+    onNavigateToBeneficiaries: (
+        requestNumber: Long?,
+        fileNumber: Long?,
+        requestDate: String?,
+        workshopId: String?,
+        branchCode: String?,
+    ) -> Unit = { _, _, _, _, _ -> },
     modifier: Modifier = Modifier
 ) {
     val taminColors = LocalTaminColors.current
@@ -213,7 +224,13 @@ fun ConstructionInsuranceScreen(
                                     )
 
                                 ConstructionInsuranceAction.Beneficiaries ->
-                                    onNavigateToBeneficiaries(file.requestNumber, file.fileNumber, file.requestDate)
+                                    onNavigateToBeneficiaries(
+                                        file.requestNumber,
+                                        file.fileNumber,
+                                        file.requestDate,
+                                        file.workshopInfo?.workshopId,
+                                        file.workshopInfo?.brhCode,
+                                    )
                             }
                         },
                     )

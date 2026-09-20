@@ -536,8 +536,14 @@ internal fun TaminHamrahNavGraph(
                     onNavigateToInstallmentLetter = { workshopId, branchId ->
                         navController.navigateToInstallmentLetter(workshopId, branchId)
                     },
-                    onNavigateToBeneficiaries = { requestNumber, fileNumber, requestDate ->
-                        navController.navigateToBeneficiaries(requestNumber, fileNumber, requestDate)
+                    onNavigateToBeneficiaries = { requestNumber, fileNumber, requestDate, workshopId, branchCode ->
+                        navController.navigateToBeneficiaries(
+                            requestNumber,
+                            fileNumber,
+                            requestDate,
+                            workshopId,
+                            branchCode,
+                        )
                     },
                 )
 

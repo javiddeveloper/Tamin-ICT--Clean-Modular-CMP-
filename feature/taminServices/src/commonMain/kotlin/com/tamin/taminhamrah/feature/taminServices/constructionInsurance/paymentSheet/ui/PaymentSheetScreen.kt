@@ -1,10 +1,6 @@
 package com.tamin.taminhamrah.feature.taminServices.constructionInsurance.paymentSheet.ui
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,9 +19,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.ReceiptLong
-import androidx.compose.material3.Icon
+import androidx.compose.material.icons.outlined.PriorityHigh
+import androidx.compose.material.icons.outlined.Verified
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -35,22 +29,18 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.paymentSheet.contract.PaymentSheetEvent
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.paymentSheet.contract.PaymentSheetIntent
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.paymentSheet.contract.PaymentSheetUiState
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.components.ConstructionRequestHeroCard
 import com.tamin.taminhamrah.model.constructionInsurance.BuildingRequestSummaryPR
-import com.tamin.taminhamrah.model.constructionInsurance.KeyValueModel
-import com.tamin.taminhamrah.model.constructionInsurance.EnumTextColor
 import com.tamin.taminhamrah.model.constructionInsurance.PaymentSheetConstructionFilePR
 import com.tamin.taminhamrah.model.constructionInsurance.WorkshopIdInfoPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -63,7 +53,6 @@ import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
-import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
@@ -82,28 +71,27 @@ import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.util.toFormattedDate
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.action_back
 import taminx.core.core_ui.action_cancel
-import taminx.core.core_ui.action_confirm
-import taminx.core.core_ui.action_hide_details
-import taminx.core.core_ui.action_show_details
 import taminx.core.core_ui.btn_download_certificate
 import taminx.core.core_ui.btn_issue_payment_sheet
-import taminx.core.core_ui.deferred_installment_rial
-import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.issue_payment_sheet_confirm_button
 import taminx.core.core_ui.issue_payment_sheet_confirm_message
 import taminx.core.core_ui.issue_payment_sheet_confirm_title
-import taminx.core.core_ui.label_order_number
+import taminx.core.core_ui.label_calculated_amount
+import taminx.core.core_ui.label_debit_number
 import taminx.core.core_ui.label_payment_code
 import taminx.core.core_ui.label_payment_date
-import taminx.core.core_ui.label_payment_sheet_amount
+import taminx.core.core_ui.label_payment_dead_line
+import taminx.core.core_ui.payment_sheet_amount
 import taminx.core.core_ui.payment_sheet_empty
 import taminx.core.core_ui.payment_sheet_issuance_processing_notice
-import taminx.core.core_ui.payment_sheet_request_summary_title
+import taminx.core.core_ui.payment_sheet_item_title
+import taminx.core.core_ui.payment_sheet_list_section_title
 import taminx.core.core_ui.payment_sheet_status_paid
 import taminx.core.core_ui.payment_sheet_status_unpaid
 import taminx.core.core_ui.payment_sheet_title
+import taminx.core.core_ui.pregnancy_pay_estimate_result_rial_unit
 import taminx.core.core_ui.objection_document_got_it
 import taminx.core.core_ui.Res as CoreRes
 
@@ -171,6 +159,18 @@ fun PaymentSheetScreen(
                         bordered = true,
                     )
                 },
+                content = {
+                    state.items.firstOrNull()?.buildingRequest?.let { buildingRequest ->
+                        ConstructionRequestHeroCard(
+                            fileNumber = buildingRequest.fileNumber,
+                            workshopId = buildingRequest.workshopInfo?.workshopId,
+                            branchCode = buildingRequest.workshopInfo?.brhCode,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = Spacing.md),
+                        )
+                    }
+                },
             )
         },
     ) { paddingValues ->
@@ -197,8 +197,16 @@ fun PaymentSheetScreen(
                     ) {
                         state.items.firstOrNull()?.buildingRequest?.let { buildingRequest ->
                             item {
-                                RequestSummaryCard(items = buildingRequest.getRequestInfo())
+                                PaymentSheetSummaryCard(buildingRequest = buildingRequest)
                             }
+                        }
+                        item {
+                            Text(
+                                text = stringResource(CoreRes.string.payment_sheet_list_section_title),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = colors.textPrimary,
+                            )
                         }
                         items(
                             items = state.items,
@@ -226,7 +234,7 @@ fun PaymentSheetScreen(
         TaminConfirmationDialog(
             title = stringResource(CoreRes.string.issue_payment_sheet_confirm_title),
             description = stringResource(CoreRes.string.payment_sheet_issuance_processing_notice),
-            icon = Icons.AutoMirrored.Outlined.ReceiptLong,
+            icon = Icons.Outlined.PriorityHigh,
             confirmButton = {
                 TaminFilledButton(
                     text = stringResource(CoreRes.string.objection_document_got_it),
@@ -243,10 +251,10 @@ fun PaymentSheetScreen(
         TaminConfirmationDialog(
             title = stringResource(CoreRes.string.issue_payment_sheet_confirm_title),
             description = stringResource(CoreRes.string.issue_payment_sheet_confirm_message),
-            icon = Icons.AutoMirrored.Outlined.ReceiptLong,
+            icon = Icons.Outlined.PriorityHigh,
             confirmButton = {
                 TaminFilledButton(
-                    text = stringResource(CoreRes.string.action_confirm),
+                    text = stringResource(CoreRes.string.issue_payment_sheet_confirm_button),
                     onClick = {
                         showIssueConfirm = false
                         onIntent(PaymentSheetIntent.IssuePaymentSheet)
@@ -313,6 +321,7 @@ private const val PAID_STATUS_CODE = "1"
 private fun PaymentSheetCard(item: PaymentSheetConstructionFilePR, modifier: Modifier = Modifier) {
     val colors = LocalTaminColors.current
     val (statusText, tileColor, accent) = paymentStatusDisplay(item.status)
+    val rialUnit = stringResource(CoreRes.string.pregnancy_pay_estimate_result_rial_unit)
 
     Column(
         modifier = modifier
@@ -332,21 +341,12 @@ private fun PaymentSheetCard(item: PaymentSheetConstructionFilePR, modifier: Mod
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(Spacing.xs)
-            ) {
-                Text(
-                    text = stringResource(CoreRes.string.label_order_number),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = colors.textMuted,
-                )
-                NumericText(
-                    text = item.orderNumber ?: "-",
-                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                    color = colors.textPrimary,
-                )
-            }
+            Text(
+                text = stringResource(CoreRes.string.payment_sheet_item_title, item.orderNumber ?: "-"),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = colors.textPrimary,
+            )
             StatusPill(
                 text = statusText,
                 containerColor = tileColor,
@@ -354,55 +354,44 @@ private fun PaymentSheetCard(item: PaymentSheetConstructionFilePR, modifier: Mod
             )
         }
 
-        TaminDivider()
-
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(Spacing.xxs)) {
-                Text(
-                    text = stringResource(CoreRes.string.label_payment_sheet_amount),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = colors.textMuted,
-                )
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.xxs)
-                ) {
-                    NumericText(
-                        text = (item.paymentSheetAmount ?: 0L).toPriceFormat(),
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color = accent,
-                    )
-                    Text(
-                        text = stringResource(CoreRes.string.deferred_installment_rial),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = colors.textMuted
-                    )
-                }
-            }
-            Column(
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.spacedBy(Spacing.xxs)
-            ) {
-                Text(
-                    text = stringResource(CoreRes.string.label_payment_date),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = colors.textMuted,
-                )
-                NumericText(
-                    text = item.paymentDate?.toFormattedDate().orDash(),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = colors.textPrimary,
-                )
-            }
+            PaymentSheetInfoTile(
+                label = stringResource(CoreRes.string.label_payment_code),
+                value = item.paymentCode ?: "-",
+                modifier = Modifier.weight(1f),
+            )
+            PaymentSheetInfoTile(
+                label = stringResource(CoreRes.string.label_payment_date),
+                value = item.paymentDate?.toFormattedDate().orDash(),
+                modifier = Modifier.weight(1f),
+            )
         }
 
         DetailRow(
-            label = stringResource(CoreRes.string.label_payment_code),
-            value = item.paymentCode ?: "-",
+            label = stringResource(CoreRes.string.payment_sheet_amount),
+            value = (item.paymentSheetAmount ?: 0L).toPriceFormat(),
+            unit = rialUnit,
+        )
+    }
+}
+
+@Composable
+private fun PaymentSheetInfoTile(label: String, value: String, modifier: Modifier = Modifier) {
+    val colors = LocalTaminColors.current
+    Column(
+        modifier = modifier
+            .background(colors.bgPage, RoundedCornerShape(CornerRadius.xl))
+            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
+        verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
+    ) {
+        Text(text = label, style = MaterialTheme.typography.labelSmall, color = colors.textMuted)
+        NumericText(
+            text = value,
+            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+            color = colors.textPrimary,
         )
     }
 }
@@ -419,53 +408,46 @@ private fun PaymentSheetActionBar(
     val colors = LocalTaminColors.current
     val bottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
-    Row(
+    Column(
         modifier = modifier
             .fillMaxWidth()
             .background(colors.glassSolid)
             .padding(horizontal = Spacing.page, vertical = Spacing.md)
             .padding(bottom = bottomInset),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
-        // Legacy hides this when the file has no issued sheets yet — there is nothing to certify.
-        if (showCertificateAction) {
-            TaminOutlinedButton(
-                containerColor = colors.chipBg,
-                textStyle = MaterialTheme.typography.titleSmall,
-                text = stringResource(CoreRes.string.btn_download_certificate),
-                onClick = onDownloadCertificate,
-                icon = Icons.Filled.Description,
-                shape = RoundedCornerShape(CornerRadius.lg),
-                modifier = Modifier.weight(1f),
-                borderWidth = 1.dp,
-                borderColor = colors.blueBorder
-            )
-        }
         LoadingButton(
             textStyle = MaterialTheme.typography.titleSmall,
             text = stringResource(CoreRes.string.btn_issue_payment_sheet),
             onClick = onIssueClicked,
             icon = Icons.Filled.Add,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.fillMaxWidth(),
             enabled = !isIssuing,
             isLoading = isIssuing
         )
+        // Legacy hides this when the file has no issued sheets yet — there is nothing to certify.
+        if (showCertificateAction) {
+            TaminOutlinedButton(
+                containerColor = colors.greenBg,
+                textStyle = MaterialTheme.typography.titleSmall,
+                text = stringResource(CoreRes.string.btn_download_certificate),
+                onClick = onDownloadCertificate,
+                icon = Icons.Outlined.Verified,
+                contentColor = colors.greenText,
+                shape = RoundedCornerShape(CornerRadius.lg),
+                modifier = Modifier.fillMaxWidth(),
+                borderWidth = 1.dp,
+                borderColor = colors.greenBorder,
+            )
+        }
     }
 }
 
-/** The expandable «خلاصه درخواست» block legacy shows above the payment-sheet list. */
+/** The static «مبلغ محاسبه‌شده / شماره بدهی / مهلت پرداخت» summary legacy shows above the list. */
 @Composable
-private fun RequestSummaryCard(
-    items: List<KeyValueModel>,
-    modifier: Modifier = Modifier,
-    initiallyExpanded: Boolean = false,
-) {
+private fun PaymentSheetSummaryCard(buildingRequest: BuildingRequestSummaryPR, modifier: Modifier = Modifier) {
     val colors = LocalTaminColors.current
-    var expanded by rememberSaveable { mutableStateOf(initiallyExpanded) }
-    val rotation by animateFloatAsState(
-        targetValue = if (expanded) -90f else 90f,
-        label = "payment-sheet-request-summary-chevron",
-    )
+    val rialUnit = stringResource(CoreRes.string.pregnancy_pay_estimate_result_rial_unit)
 
     Column(
         modifier = modifier
@@ -476,69 +458,25 @@ private fun RequestSummaryCard(
                 blurRadius = 20.dp,
                 offsetY = 8.dp,
             )
-            .clip(RoundedCornerShape(CornerRadius.lg))
-            .background(colors.bgSurface)
-            .border(1.dp, colors.border, RoundedCornerShape(CornerRadius.lg)),
+            .taminSurface()
+            .padding(horizontal = Spacing.lg),
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { expanded = !expanded }
-                .padding(horizontal = Spacing.lg, vertical = Spacing.md),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = stringResource(CoreRes.string.payment_sheet_request_summary_title),
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = colors.textPrimary,
-            )
-            Icon(
-                imageVector = vectorResource(CoreRes.drawable.ic_tamin_chevron_back),
-                contentDescription = stringResource(
-                    if (expanded) CoreRes.string.action_hide_details else CoreRes.string.action_show_details,
-                ),
-                tint = colors.blueText,
-                modifier = Modifier
-                    .size(Spacing.lg)
-                    .graphicsLayer { rotationZ = rotation },
-            )
-        }
-
-        AnimatedVisibility(visible = expanded) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = Spacing.lg)
-                    .padding(bottom = Spacing.md),
-                verticalArrangement = Arrangement.spacedBy(Spacing.xs),
-            ) {
-                items.forEach { kv ->
-                    val label = kv.keyResId?.let { stringResource(it) } ?: kv.keyString.orEmpty()
-                    val value = kv.valueResId?.let { stringResource(it) } ?: kv.value
-                    DetailRow(
-                        label = label,
-                        value = value,
-                        valueColor = colorForKeyValue(kv.textColor),
-                        numeric = kv.numeric,
-                        unit = kv.unit,
-                    )
-                }
-            }
-        }
+        DetailRow(
+            label = stringResource(CoreRes.string.label_calculated_amount),
+            value = (buildingRequest.totalPayment ?: 0L).toPriceFormat(),
+            unit = rialUnit,
+            valueColor = colors.blueText,
+        )
+        DetailRow(
+            label = stringResource(CoreRes.string.label_debit_number),
+            value = buildingRequest.debitNumber ?: "-",
+        )
+        DetailRow(
+            label = stringResource(CoreRes.string.label_payment_dead_line),
+            value = buildingRequest.paymentDeadLine?.toFormattedDate().orDash(),
+        )
     }
 }
-
-@Composable
-private fun colorForKeyValue(textColor: EnumTextColor) = when (textColor) {
-    EnumTextColor.DEFAULT -> LocalTaminColors.current.textPrimary
-    EnumTextColor.AMBER -> LocalTaminColors.current.orangeText
-    EnumTextColor.GREEN -> LocalTaminColors.current.greenText
-    EnumTextColor.RED -> LocalTaminColors.current.dangerText
-    EnumTextColor.BLUE -> LocalTaminColors.current.blueText
-}
-
 
 // ─── Preview ──────────────────────────────────────────────────────────────────
 
@@ -589,11 +527,33 @@ private fun PaymentSheetScreenPreview() {
 
 @PreviewRtlTheme
 @Composable
-private fun RequestSummaryCardExpandedPreview() {
+private fun PaymentSheetScreenPreviewDark() {
+    PreviewRtlThemeContent(darkTheme = true) {
+        PaymentSheetScreen(
+            state = PaymentSheetUiState(debitNumber = "123456789012", items = PreviewSheets),
+            onIntent = {},
+            onBackClicked = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PaymentSheetSummaryCardPreview() {
     PreviewRtlThemeContent {
-        RequestSummaryCard(
-            items = PreviewBuildingRequest.getRequestInfo(),
-            initiallyExpanded = true,
+        PaymentSheetSummaryCard(
+            buildingRequest = PreviewBuildingRequest,
+            modifier = Modifier.padding(Spacing.lg),
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PaymentSheetSummaryCardPreviewDark() {
+    PreviewRtlThemeContent(darkTheme = true) {
+        PaymentSheetSummaryCard(
+            buildingRequest = PreviewBuildingRequest,
             modifier = Modifier.padding(Spacing.lg),
         )
     }
@@ -613,8 +573,32 @@ private fun PaymentSheetScreenEmptyPreview() {
 
 @PreviewRtlTheme
 @Composable
+private fun PaymentSheetScreenEmptyPreviewDark() {
+    PreviewRtlThemeContent(darkTheme = true) {
+        PaymentSheetScreen(
+            state = PaymentSheetUiState(debitNumber = "123456789012"),
+            onIntent = {},
+            onBackClicked = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
 private fun PaymentSheetScreenLoadingPreview() {
     PreviewRtlThemeContent {
+        PaymentSheetScreen(
+            state = PaymentSheetUiState(debitNumber = "123456789012", isLoading = true),
+            onIntent = {},
+            onBackClicked = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PaymentSheetScreenLoadingPreviewDark() {
+    PreviewRtlThemeContent(darkTheme = true) {
         PaymentSheetScreen(
             state = PaymentSheetUiState(debitNumber = "123456789012", isLoading = true),
             onIntent = {},

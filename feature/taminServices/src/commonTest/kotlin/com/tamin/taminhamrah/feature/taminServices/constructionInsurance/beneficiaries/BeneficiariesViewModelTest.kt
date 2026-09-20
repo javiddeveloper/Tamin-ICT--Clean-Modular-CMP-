@@ -64,13 +64,23 @@ class BeneficiariesViewModelTest {
         fakeRepository.allBeneficiaries = listOf(sampleBeneficiary())
         val viewModel = buildViewModel()
 
-        viewModel.sendIntent(BeneficiariesIntent.Load(requestNumber = 123L, fileNumber = 456L, requestDate = "14020901"))
+        viewModel.sendIntent(
+            BeneficiariesIntent.Load(
+                requestNumber = 123L,
+                fileNumber = 456L,
+                requestDate = "14020901",
+                workshopId = "9028222442",
+                branchCode = "6400",
+            )
+        )
 
         val state = viewModel.uiState.value
         assertEquals(1, state.items.size)
         assertEquals("علی", state.items.first().name)
         assertEquals(123L, state.requestNumber)
         assertEquals(456L, state.fileNumber)
+        assertEquals("9028222442", state.workshopId)
+        assertEquals("6400", state.branchCode)
         assertFalse(state.isLoading)
     }
 
@@ -78,7 +88,15 @@ class BeneficiariesViewModelTest {
     fun load_forwardsNonZeroIdentifiersAsEqFilters() = runTest {
         val viewModel = buildViewModel()
 
-        viewModel.sendIntent(BeneficiariesIntent.Load(requestNumber = 123L, fileNumber = 0L, requestDate = null))
+        viewModel.sendIntent(
+            BeneficiariesIntent.Load(
+                requestNumber = 123L,
+                fileNumber = 0L,
+                requestDate = null,
+                workshopId = null,
+                branchCode = null,
+            )
+        )
 
         val filterProperties = fakeRepository.lastPageQuery?.filters.orEmpty().map { it.property }
         assertEquals(listOf(FilterProperty.REQ_NO), filterProperties)
@@ -88,8 +106,24 @@ class BeneficiariesViewModelTest {
     fun load_calledTwice_onlyLoadsOnce() = runTest {
         val viewModel = buildViewModel()
 
-        viewModel.sendIntent(BeneficiariesIntent.Load(requestNumber = 1L, fileNumber = 1L, requestDate = null))
-        viewModel.sendIntent(BeneficiariesIntent.Load(requestNumber = 2L, fileNumber = 2L, requestDate = null))
+        viewModel.sendIntent(
+            BeneficiariesIntent.Load(
+                requestNumber = 1L,
+                fileNumber = 1L,
+                requestDate = null,
+                workshopId = null,
+                branchCode = null,
+            )
+        )
+        viewModel.sendIntent(
+            BeneficiariesIntent.Load(
+                requestNumber = 2L,
+                fileNumber = 2L,
+                requestDate = null,
+                workshopId = null,
+                branchCode = null,
+            )
+        )
 
         assertEquals(1L, viewModel.uiState.value.requestNumber)
     }
@@ -99,7 +133,15 @@ class BeneficiariesViewModelTest {
         fakeRepository.shouldThrowOnPage = true
         val viewModel = buildViewModel()
 
-        viewModel.sendIntent(BeneficiariesIntent.Load(requestNumber = 1L, fileNumber = 1L, requestDate = null))
+        viewModel.sendIntent(
+            BeneficiariesIntent.Load(
+                requestNumber = 1L,
+                fileNumber = 1L,
+                requestDate = null,
+                workshopId = null,
+                branchCode = null,
+            )
+        )
 
         assertNotNull(viewModel.uiState.value.paginationError)
         assertFalse(viewModel.uiState.value.isLoading)
@@ -110,7 +152,15 @@ class BeneficiariesViewModelTest {
         fakeRepository.allBeneficiaries = (1..15).map { sampleBeneficiary(nationalCode = "093012345$it") }
         val viewModel = buildViewModel()
 
-        viewModel.sendIntent(BeneficiariesIntent.Load(requestNumber = null, fileNumber = null, requestDate = null))
+        viewModel.sendIntent(
+            BeneficiariesIntent.Load(
+                requestNumber = null,
+                fileNumber = null,
+                requestDate = null,
+                workshopId = null,
+                branchCode = null,
+            )
+        )
         assertEquals(10, viewModel.uiState.value.items.size)
         assertFalse(viewModel.uiState.value.endReached)
 
@@ -124,7 +174,15 @@ class BeneficiariesViewModelTest {
     fun retryNextPage_recoversAfterAFailedPage() = runTest {
         fakeRepository.allBeneficiaries = (1..15).map { sampleBeneficiary(nationalCode = "093012345$it") }
         val viewModel = buildViewModel()
-        viewModel.sendIntent(BeneficiariesIntent.Load(requestNumber = null, fileNumber = null, requestDate = null))
+        viewModel.sendIntent(
+            BeneficiariesIntent.Load(
+                requestNumber = null,
+                fileNumber = null,
+                requestDate = null,
+                workshopId = null,
+                branchCode = null,
+            )
+        )
 
         fakeRepository.shouldThrowOnPage = true
         viewModel.sendIntent(BeneficiariesIntent.LoadNextPage)

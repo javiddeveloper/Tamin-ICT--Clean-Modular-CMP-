@@ -62,7 +62,13 @@ data class InstallmentLetterRoute(val workshopId: String, val branchId: String)
 
 /** ذینفعان کارگاه — عملیات option "۴". */
 @Serializable
-data class BeneficiariesRoute(val requestNumber: Long?, val fileNumber: Long?, val requestDate: String?)
+data class BeneficiariesRoute(
+    val requestNumber: Long?,
+    val fileNumber: Long?,
+    val requestDate: String?,
+    val workshopId: String?,
+    val branchCode: String?,
+)
 
 @Serializable
 data object WorkersPaymentInfoRoute
@@ -87,8 +93,14 @@ fun NavController.navigateToInstallmentLetter(workshopId: String, branchId: Stri
     navigate(InstallmentLetterRoute(workshopId, branchId))
 }
 
-fun NavController.navigateToBeneficiaries(requestNumber: Long?, fileNumber: Long?, requestDate: String?) {
-    navigate(BeneficiariesRoute(requestNumber, fileNumber, requestDate))
+fun NavController.navigateToBeneficiaries(
+    requestNumber: Long?,
+    fileNumber: Long?,
+    requestDate: String?,
+    workshopId: String?,
+    branchCode: String?,
+) {
+    navigate(BeneficiariesRoute(requestNumber, fileNumber, requestDate, workshopId, branchCode))
 }
 
 fun NavController.navigateToSendInsuranceHistoryToInstitutions(builder: NavOptionsBuilder.() -> Unit = {}) {
@@ -192,7 +204,13 @@ fun NavGraphBuilder.constructionInsuranceScreen(
     onNavigateToViewDetail: (fileNumber: Long?, requestNumber: Long?) -> Unit,
     onNavigateToPaymentSheet: (debitNumber: String, branchCode: String) -> Unit,
     onNavigateToInstallmentLetter: (workshopId: String, branchId: String) -> Unit,
-    onNavigateToBeneficiaries: (requestNumber: Long?, fileNumber: Long?, requestDate: String?) -> Unit,
+    onNavigateToBeneficiaries: (
+        requestNumber: Long?,
+        fileNumber: Long?,
+        requestDate: String?,
+        workshopId: String?,
+        branchCode: String?,
+    ) -> Unit,
 ) {
     composableWithFadeTransitions<ConstructionInsuranceRoute> {
         val viewModel: ConstructionInsuranceViewModel = koinViewModel()
@@ -255,6 +273,8 @@ fun NavGraphBuilder.beneficiariesScreen(onBack: () -> Unit) {
             requestNumber = route.requestNumber,
             fileNumber = route.fileNumber,
             requestDate = route.requestDate,
+            workshopId = route.workshopId,
+            branchCode = route.branchCode,
             onBackClicked = onBack,
         )
     }

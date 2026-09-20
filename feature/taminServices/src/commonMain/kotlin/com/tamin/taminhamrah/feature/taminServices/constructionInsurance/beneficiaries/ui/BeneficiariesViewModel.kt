@@ -30,6 +30,8 @@ class BeneficiariesViewModel(
     private var requestNumber: Long? = null
     private var fileNumber: Long? = null
     private var requestDate: String? = null
+    private var workshopId: String? = null
+    private var branchCode: String? = null
     private var hasLoaded = false
 
     private val paginator = Paginator(
@@ -46,8 +48,20 @@ class BeneficiariesViewModel(
                     requestNumber = intent.requestNumber
                     fileNumber = intent.fileNumber
                     requestDate = intent.requestDate
+                    workshopId = intent.workshopId
+                    branchCode = intent.branchCode
                     merge(
-                        flow { emit(PartialState.HeaderSeeded(requestNumber, fileNumber, requestDate)) },
+                        flow {
+                            emit(
+                                PartialState.HeaderSeeded(
+                                    requestNumber,
+                                    fileNumber,
+                                    requestDate,
+                                    workshopId,
+                                    branchCode,
+                                )
+                            )
+                        },
                         observePaging(),
                         flow { paginator.refresh(query = buildQuery()) },
                     )
@@ -101,6 +115,8 @@ class BeneficiariesViewModel(
             requestNumber = partialState.requestNumber,
             fileNumber = partialState.fileNumber,
             requestDate = partialState.requestDate,
+            workshopId = partialState.workshopId,
+            branchCode = partialState.branchCode,
         )
 
         is PartialState.PagingChanged -> currentState.copy(
