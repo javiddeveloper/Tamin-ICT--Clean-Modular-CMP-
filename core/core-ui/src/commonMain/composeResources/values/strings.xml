@@ -1915,10 +1915,10 @@
     <string name="member_insurance_number">شماره بیمه</string>
     <string name="member_full_name">نام و نام خانوادگی</string>
     <string name="member_national_id">کد ملی</string>
-    <string name="member_id_card_number">شماره شناسنامه</string>
+    <string name="member_id_card_number">شمارهٔ شناسنامه</string>
     <string name="member_father_name">نام پدر</string>
     <string name="member_nationality">ملیت</string>
-    <string name="member_leaving_status">وضعیت ترک کار</string>
+    <string name="member_leaving_status">وضعیت</string>
     <string name="member_leaving_date">تاریخ ترک کار</string>
     <string name="stackholder_type">نوع ذینفع</string>
     <string name="stackholder_birth_date">تاریخ تولد</string>
@@ -3170,6 +3170,19 @@
     <string name="objection_document_no_document_title">سندی برای نمایش نیست</string>
     <string name="objection_document_no_document_desc">برای این نوع درخواست، سندی در سامانه بارگذاری نشده است. برای پیگیری با شعبهٔ مربوطه تماس بگیرید.</string>
     <string name="objection_document_got_it">متوجه شدم</string>
+
+    <!-- خلاصهٔ سابقه — home history summary card -->
+    <string name="history_summary_title">خلاصهٔ سابقه</string>
+    <string name="history_summary_subtitle">وضعیت پرداخت حق بیمه</string>
+    <string name="history_summary_year">سال %1$s</string>
+    <string name="history_summary_registered_of_elapsed">از %1$s ماه سپری‌شده ثبت شده</string>
+    <string name="history_summary_last_registered">آخرین ثبت: %1$s</string>
+    <string name="history_summary_unpaid_warning">%1$s ماه حق بیمه پرداخت نشده است</string>
+    <string name="history_summary_follow_up">پیگیری</string>
+    <string name="history_summary_legend_registered">ثبت‌شده</string>
+    <string name="history_summary_legend_unpaid">پرداخت‌نشده</string>
+    <string name="history_summary_details">جزئیات ماه‌به‌ماه</string>
+    <string name="history_summary_unavailable">دریافت خلاصهٔ سابقه انجام نشد</string>
 
 
     <!-- ═══ Construction-worker premium payment (حق بیمهٔ کارگران ساختمانی) ═══ -->

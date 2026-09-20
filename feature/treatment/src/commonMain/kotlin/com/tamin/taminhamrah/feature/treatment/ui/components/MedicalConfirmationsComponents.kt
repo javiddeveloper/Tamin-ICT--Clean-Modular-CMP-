@@ -1,6 +1,10 @@
 package com.tamin.taminhamrah.feature.treatment.ui.components
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
+import com.tamin.taminhamrah.ui.theme.Duration
+import com.tamin.taminhamrah.ui.theme.Easing
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -216,45 +220,63 @@ internal fun ConfirmationsList(
     onSelectDetail: (MedicalConfirmationPR) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier.fillMaxSize()) {
-        when {
-            isLoading && confirmations.isEmpty() -> ConfirmationsShimmerSkeleton()
+    val phase = when {
+        isLoading && confirmations.isEmpty() -> ConfirmationsPhase.Loading
+        error != null -> ConfirmationsPhase.Failed
+        confirmations.isEmpty() -> ConfirmationsPhase.Empty
+        else -> ConfirmationsPhase.Rows
+    }
 
-            error != null -> ConfirmationsErrorState(message = error)
+    // The skeleton hands over with a fade rather than a cut, as the hub's insurance card does.
+    Crossfade(
+        targetState = phase,
+        animationSpec = tween(durationMillis = Duration.normal, easing = Easing.standard),
+        label = "confirmations-list",
+        modifier = modifier.fillMaxSize(),
+    ) { shown ->
+        Column(modifier = Modifier.fillMaxSize()) {
+            when (shown) {
+                ConfirmationsPhase.Loading -> ConfirmationsShimmerSkeleton()
 
-            confirmations.isEmpty() ->
-                TaminEmptyState(message = stringResource(Res.string.confirmations_empty))
+                ConfirmationsPhase.Failed -> ConfirmationsErrorState(message = error.orEmpty())
 
-            else -> {
-                // The chips sit above the swap rather than scrolling with the rows: the control
-                // you just tapped has to stay under your thumb while its list travels.
-                ConfirmationsFilterRow(
-                    selectedIndex = selectedFilterIndex,
-                    onSelect = onFilterSelected,
-                )
+                ConfirmationsPhase.Empty ->
+                    TaminEmptyState(message = stringResource(Res.string.confirmations_empty))
 
-                // Each pane filters for its own chip, which is the whole reason this reads as a
-                // change of tab: the list on its way out keeps showing the rows it was showing,
-                // instead of both halves rendering the same already-filtered result.
-                AnimatedContent(
-                    targetState = selectedFilterIndex,
-                    transitionSpec = {
-                        if (targetState > initialState) pushForward() else pushBack()
-                    },
-                    label = "confirmations-filter",
-                    modifier = Modifier.weight(1f),
-                ) { filterIndex ->
-                    ConfirmationRows(
-                        confirmations = confirmations,
-                        filterIndex = filterIndex,
-                        staggerState = staggerState,
-                        onSelectDetail = onSelectDetail,
+                ConfirmationsPhase.Rows -> {
+                    // The chips sit above the swap rather than scrolling with the rows: the control
+                    // you just tapped has to stay under your thumb while its list travels.
+                    ConfirmationsFilterRow(
+                        selectedIndex = selectedFilterIndex,
+                        onSelect = onFilterSelected,
                     )
+
+                    // Each pane filters for its own chip, which is the whole reason this reads as a
+                    // change of tab: the list on its way out keeps showing the rows it was showing,
+                    // instead of both halves rendering the same already-filtered result.
+                    AnimatedContent(
+                        targetState = selectedFilterIndex,
+                        transitionSpec = {
+                            if (targetState > initialState) pushForward() else pushBack()
+                        },
+                        label = "confirmations-filter",
+                        modifier = Modifier.weight(1f),
+                    ) { filterIndex ->
+                        ConfirmationRows(
+                            confirmations = confirmations,
+                            filterIndex = filterIndex,
+                            staggerState = staggerState,
+                            onSelectDetail = onSelectDetail,
+                        )
+                    }
                 }
             }
         }
     }
 }
+
+/** What the confirmations body is showing — the four states it fades between. */
+private enum class ConfirmationsPhase { Loading, Failed, Empty, Rows }
 
 /** «همه» · «تأییدشده» · «در انتظار», the three the design offers. */
 @Composable

@@ -136,12 +136,16 @@ internal fun ContractAffairsItemCard(
                 StatBox(
                     label = stringResource(Res.string.contract_affairs_premium_rate),
                     value = item.premiumRatePercentLabel.ifBlank { "—" },
-                    numeric = item.premiumRatePercentLabel.isNotBlank(),
+                    // «۲۷ درصد» and «۱۲۳٬۴۵۶ ریال» are figures *with a unit*, not bare figures:
+                    // the numeric path forces the paragraph left-to-right and prints the unit in
+                    // front of its own number.
+                    numeric = false,
                     modifier = Modifier.weight(1f),
                 )
                 StatBox(
                     label = stringResource(Res.string.contract_affairs_monthly_wage),
                     value = item.monthlyIncome.toRialAmount(),
+                    numeric = false,
                     valueColor = colors.greenText,
                     modifier = Modifier.weight(1f),
                 )

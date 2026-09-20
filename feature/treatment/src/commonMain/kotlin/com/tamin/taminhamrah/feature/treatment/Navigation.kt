@@ -1,5 +1,7 @@
 package com.tamin.taminhamrah.feature.treatment
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -12,6 +14,7 @@ import com.tamin.taminhamrah.feature.treatment.ui.records.MedicalRecordsScreen
 import com.tamin.taminhamrah.feature.treatment.ui.records.RecordDetailScreen
 import com.tamin.taminhamrah.feature.treatment.ui.treatmentCosts.TreatmentCostsRoute
 import com.tamin.taminhamrah.feature.treatment.ui.medicalConfirmations.MedicalConfirmationsRoute
+import com.tamin.taminhamrah.ui.theme.LocalSynchronizedShimmer
 import kotlinx.serialization.Serializable
 
 /**
@@ -101,62 +104,78 @@ fun NavGraphBuilder.treatmentGraph(
 ) {
     navigation<TreatmentRoute.Graph>(startDestination = TreatmentRoute.Main) {
         composableWithFadeTransitions<TreatmentRoute.Main> {
-            TreatmentScreen(
-                onOpenMedicalRecords = { nationalCode ->
-                    navController.navigate(TreatmentRoute.MedicalRecords(nationalCode, RecordTab.Default))
-                },
-                onOpenPrescriptions = { nationalCode ->
-                    navController.navigate(TreatmentRoute.MedicalRecords(nationalCode, RecordTab.MEDICINE))
-                },
-                onOpenHealthProfile = onNavigateToHealthProfile,
-                onOpenMiscClaims = { navController.navigate(TreatmentRoute.TreatmentCosts) },
-                onOpenApprovals = { navController.navigate(TreatmentRoute.MedicalConfirmations) },
-            )
+            TreatmentShimmers {
+                TreatmentScreen(
+                    onOpenMedicalRecords = { nationalCode ->
+                        navController.navigate(TreatmentRoute.MedicalRecords(nationalCode, RecordTab.Default))
+                    },
+                    onOpenPrescriptions = { nationalCode ->
+                        navController.navigate(TreatmentRoute.MedicalRecords(nationalCode, RecordTab.MEDICINE))
+                    },
+                    onOpenHealthProfile = onNavigateToHealthProfile,
+                    onOpenMiscClaims = { navController.navigate(TreatmentRoute.TreatmentCosts) },
+                    onOpenApprovals = { navController.navigate(TreatmentRoute.MedicalConfirmations) },
+                )
+            }
         }
 
         composable<TreatmentRoute.TreatmentCosts> {
-            TreatmentCostsRoute(onBackClicked = onBack)
+            TreatmentShimmers { TreatmentCostsRoute(onBackClicked = onBack) }
         }
 
         composable<TreatmentRoute.MedicalConfirmations> {
-            MedicalConfirmationsRoute(onBackClicked = onBack)
+            TreatmentShimmers { MedicalConfirmationsRoute(onBackClicked = onBack) }
         }
 
         composableWithFadeTransitions<TreatmentRoute.MedicalRecords> { backStackEntry ->
             val route = backStackEntry.toRoute<TreatmentRoute.MedicalRecords>()
-            MedicalRecordsScreen(
-                nationalCode = route.nationalCode,
-                initialTab = route.tab,
-                onBack = onBack,
-                onOpenRecord = { record, patientNationalCode ->
-                    navController.navigate(
-                        TreatmentRoute.RecordDetail(
-                            nationalCode = patientNationalCode,
-                            noteHeadId = record.noteHeadEprescID,
-                            type = record.prescType,
-                            flagSata = record.flagSata,
-                            docName = record.docName,
-                            prescDate = record.prescDate,
-                            trackingCode = record.trackingCode,
+            TreatmentShimmers {
+                MedicalRecordsScreen(
+                    nationalCode = route.nationalCode,
+                    initialTab = route.tab,
+                    onBack = onBack,
+                    onOpenRecord = { record, patientNationalCode ->
+                        navController.navigate(
+                            TreatmentRoute.RecordDetail(
+                                nationalCode = patientNationalCode,
+                                noteHeadId = record.noteHeadEprescID,
+                                type = record.prescType,
+                                flagSata = record.flagSata,
+                                docName = record.docName,
+                                prescDate = record.prescDate,
+                                trackingCode = record.trackingCode,
+                            )
                         )
-                    )
-                },
-            )
+                    },
+                )
+            }
         }
 
         composableWithFadeTransitions<TreatmentRoute.RecordDetail> { backStackEntry ->
             val route = backStackEntry.toRoute<TreatmentRoute.RecordDetail>()
-            RecordDetailScreen(
-                nationalCode = route.nationalCode,
-                noteHeadId = route.noteHeadId,
-                type = route.type,
-                flagSata = route.flagSata,
-                docName = route.docName,
-                prescDate = route.prescDate,
-                trackingCode = route.trackingCode,
-                onBack = onBack,
-            )
+            TreatmentShimmers {
+                RecordDetailScreen(
+                    nationalCode = route.nationalCode,
+                    noteHeadId = route.noteHeadId,
+                    type = route.type,
+                    flagSata = route.flagSata,
+                    docName = route.docName,
+                    prescDate = route.prescDate,
+                    trackingCode = route.trackingCode,
+                    onBack = onBack,
+                )
+            }
         }
     }
+}
+
+/**
+ * Every treatment skeleton is built from many small blocks — the insurance card alone is a dozen —
+ * so the tab opts into core-ui's shared shimmer band, which sweeps them as one surface instead of a
+ * dozen out-of-step sweeps. Provided here, once per destination, so no other feature's shimmer changes.
+ */
+@Composable
+private fun TreatmentShimmers(content: @Composable () -> Unit) {
+    CompositionLocalProvider(LocalSynchronizedShimmer provides true, content = content)
 }
 

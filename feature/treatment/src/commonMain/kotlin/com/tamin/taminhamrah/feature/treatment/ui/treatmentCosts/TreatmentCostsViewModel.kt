@@ -11,6 +11,7 @@ import com.tamin.taminhamrah.mapper.personal.toPresentation
 import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsPDFUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetTreatmentCostsUseCase
 import com.tamin.taminhamrah.useCases.treatment.SendToInboxTreatmentCostsUseCase
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import taminx.core.core_ui.Res
@@ -40,6 +41,8 @@ class TreatmentCostsViewModel(
             getTreatmentCostsUseCase().collect { list ->
                 emit(PartialState.TreatmentCostsLoaded(list.toPresentation()))
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
         }
@@ -56,6 +59,8 @@ class TreatmentCostsViewModel(
             getTreatmentCostsPDFUseCase(intent.repId).collect { pdfDn ->
                 emit(PartialState.ViewerPdfChanged(pdfDn.toPresentation()))
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
             emit(PartialState.ViewerDownloadFailed)
@@ -76,6 +81,8 @@ class TreatmentCostsViewModel(
                 sendEvent(CostsEvent.ShowToast(Res.string.costs_sent_to_inbox))
                 emit(PartialState.Loading(false))
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
         }

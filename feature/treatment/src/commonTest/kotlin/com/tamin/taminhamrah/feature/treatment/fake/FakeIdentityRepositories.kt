@@ -29,6 +29,9 @@ import kotlinx.coroutines.flow.flowOf
  * is only exercised when no user id is stored, so most methods return empty/no-op values.
  */
 class FakeUserRepository : UserRepository {
+    /** Set to fail the identity lookup; a `CancellationException` stands in for a canceled screen. */
+    var identityError: Throwable? = null
+
     var identityResult: IdentityInfoDN = IdentityInfoDN(
         cityOfBirthId = null,
         cityOfIssueId = null,
@@ -46,7 +49,10 @@ class FakeUserRepository : UserRepository {
         ssn = null
     )
 
-    override fun getIdentityInfo(): Flow<IdentityInfoDN> = flow { emit(identityResult) }
+    override fun getIdentityInfo(): Flow<IdentityInfoDN> = flow {
+        identityError?.let { throw it }
+        emit(identityResult)
+    }
     override suspend fun getUserProfileImage(): Flow<String> = flowOf("")
     override suspend fun fetchTaminRelation(): Flow<TaminRelationDN> = flow {}
     override fun checkUserIsNew(nationalId: String): Flow<Boolean> = flow {}

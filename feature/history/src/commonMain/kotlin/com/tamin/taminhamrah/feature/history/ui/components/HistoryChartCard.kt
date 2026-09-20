@@ -456,13 +456,18 @@ private fun WorkshopTimelineRow(row: WorkshopSplitRowPR) {
                     maxLines = 1,
                 )
             }
-            NumericText(
+            // Text, not NumericText: this is «۸۲ روز · ۱۴۹ م ریال» — a sentence with two numbers in
+            // it, not a number. NumericText forces the paragraph left-to-right, which is right for
+            // a bare figure and wrong here: the bidi algorithm then lays the Persian words out on
+            // the far side of their own digits, so «روز» drifted onto the wrong number entirely.
+            Text(
                 text = row.totalText,
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontSize = 9.5.sp,
                     fontWeight = FontWeight.Bold,
                 ),
                 color = colors.textSecondary,
+                maxLines = 1,
             )
         }
 

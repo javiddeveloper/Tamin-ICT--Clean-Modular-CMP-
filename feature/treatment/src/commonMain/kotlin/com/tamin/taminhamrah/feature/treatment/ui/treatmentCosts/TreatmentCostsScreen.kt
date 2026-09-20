@@ -114,7 +114,7 @@ fun TreatmentCostsScreen(
         topBar = {
             TaminTopAppBar(
                 title = stringResource(Res.string.category_misc_claims),
-                background = taminHeroGradient(colors.topAppBarStops),
+                background = taminHeroGradient(colors.treatmentHubStops),
                 navigationIcon = {
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
