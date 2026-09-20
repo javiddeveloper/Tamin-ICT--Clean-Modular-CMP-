@@ -80,8 +80,8 @@ import kotlin.math.roundToInt
  */
 @Composable
 internal fun IdentityCard(
+    firstName: String,
     lastName: String,
-    fullName: String,
     fatherName: String,
     ssn: String,
     nationalId: String,
@@ -92,6 +92,9 @@ internal fun IdentityCard(
 ) {
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val shape = RoundedCornerShape(IdentityDimens.cardCorner)
+    // How much smaller the surname sits in its open-card field than beside the first name in the bar.
+    val lastNameOpenScale =
+        MaterialTheme.typography.labelMedium.fontSize.value / MaterialTheme.typography.titleSmall.fontSize.value
 
     Box(
         modifier = modifier
@@ -110,12 +113,23 @@ internal fun IdentityCard(
         Layout(
             content = {
                 CardNameRow(
-                    fullName = fullName,
+                    firstName = firstName,
                     collapseProgress = collapseProgress,
                     modifier = Modifier.layoutId(CardSlot.Name),
                 )
+                Text(
+                    text = stringResource(Res.string.identity_field_last_name),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = TaminIdentityCardMuted,
+                    modifier = Modifier.layoutId(CardSlot.LastNameLabel),
+                )
+                // Laid out at the bar's size and scaled down to the field's while the card is open, so
+                // the fold only scales it — nothing re-measures, and it is sharp where it ends up.
+                CardHolderName(
+                    name = lastName,
+                    modifier = Modifier.layoutId(CardSlot.LastName),
+                )
                 CardTopInfo(
-                    lastName = lastName,
                     fatherName = fatherName,
                     dateOfBirth = dateOfBirth,
                     modifier = Modifier
@@ -153,6 +167,8 @@ internal fun IdentityCard(
             val textC = Constraints(maxWidth = (width - 2 * pad - avatarW - gap).coerceAtLeast(0))
 
             val name = measurables.slot(CardSlot.Name).measure(textC)
+            val lastNameLabel = measurables.slot(CardSlot.LastNameLabel).measure(textC)
+            val lastName = measurables.slot(CardSlot.LastName).measure(textC)
             val topInfo = measurables.slot(CardSlot.TopInfo).measure(textC)
             val avatar = measurables.slot(CardSlot.Avatar).measure(Constraints.fixed(avatarW, avatarH))
             val nationalIdPlaceable = measurables.slot(CardSlot.NationalId).measure(inner)
@@ -167,7 +183,16 @@ internal fun IdentityCard(
             val expAvatarY = scaled(IdentityDimens.avatarTop)
             val expTopInfoX = if (rtl) pad else avatarW + gap + pad
             val expNameY = scaled(IdentityDimens.topInfoTop)
-            val expTopInfoY = expNameY + name.height + IdentityDimens.cardFieldGap.roundToPx()
+            val fieldGap = IdentityDimens.cardFieldGap.roundToPx()
+            val wordGap = Spacing.xs.roundToPx()
+            // «نام خانوادگی» and the surname: the first row of fields under the name.
+            val lastRowY = expNameY + name.height + fieldGap
+            val openLastNameHeight = (lastName.height * lastNameOpenScale).roundToInt()
+            val lastRowHeight = maxOf(lastNameLabel.height, openLastNameHeight)
+            val expLastNameLabelY = lastRowY + (lastRowHeight - lastNameLabel.height) / 2
+            val expLastNameX = expTopInfoX + lastNameLabel.width + wordGap
+            val expLastNameY = lastRowY + (lastRowHeight - openLastNameHeight) / 2
+            val expTopInfoY = lastRowY + lastRowHeight + fieldGap
             val expFooterY = scaled(IdentityDimens.footerTop)
             val expNationalIdX = if (rtl) pad else width - pad - nationalIdPlaceable.width
             val expSsnX = if (rtl) width - pad - ssnPlaceable.width else pad
@@ -178,8 +203,15 @@ internal fun IdentityCard(
             val avatarWCollapsed = (avatarW * avatarScale).toInt()
             val collAvatarY = (barH - avatarHCollapsed) / 2
             val collAvatarX = if (rtl) pad else width - pad - avatarWCollapsed
-            val collNameX = if (rtl) pad + avatarWCollapsed + gap else width - pad - avatarWCollapsed - gap - name.width
+            // The surname reads straight after the first name, and the pair sits beside the avatar.
+            val collNameX = if (rtl) {
+                pad + avatarWCollapsed + gap
+            } else {
+                width - pad - avatarWCollapsed - gap - name.width - wordGap - lastName.width
+            }
             val collNameY = (barH - name.height) / 2
+            val collLastNameX = collNameX + name.width + wordGap
+            val collLastNameY = (barH - lastName.height) / 2
             val collSsnX = if (rtl) width - pad - ssnPlaceable.width else pad
             val collSsnY = (barH - ssnPlaceable.height) / 2
 
@@ -187,6 +219,20 @@ internal fun IdentityCard(
                 // Secondary fields fade out smoothly
                 topInfo.placeRelativeWithLayer(expTopInfoX, expTopInfoY) {
                     alpha = (1f - t * 2f).coerceIn(0f, 1f)
+                }
+                lastNameLabel.placeRelativeWithLayer(expTopInfoX, expLastNameLabelY) {
+                    alpha = (1f - t * 2f).coerceIn(0f, 1f)
+                }
+
+                // The surname leaves its field and grows into place beside the first name.
+                lastName.placeRelativeWithLayer(
+                    lerp(expLastNameX, collLastNameX, t),
+                    lerp(expLastNameY, collLastNameY, t),
+                ) {
+                    val s = lerp(lastNameOpenScale, 1f, t)
+                    scaleX = s
+                    scaleY = s
+                    transformOrigin = TransformOrigin(if (rtl) 1f else 0f, 0f)
                 }
                 nationalIdPlaceable.placeRelativeWithLayer(expNationalIdX, expFooterY) {
                     alpha = (1f - t * 2f).coerceIn(0f, 1f)
@@ -221,7 +267,7 @@ internal fun IdentityCard(
 
 /** The card's pieces, addressed by name rather than by index into the measurables. */
 private enum class CardSlot {
-    Name, TopInfo, Avatar, NationalId, SsnNumber
+    Name, LastNameLabel, LastName, TopInfo, Avatar, NationalId, SsnNumber
 }
 
 private fun List<Measurable>.slot(id: CardSlot): Measurable = first { it.layoutId == id }
@@ -262,9 +308,16 @@ private fun AvatarGlyph() {
     )
 }
 
+/**
+ * «نام» and the first name.
+ *
+ * The open card lists the name field by field — «نام» here, «نام خانوادگی» beneath it — so this row
+ * holds the first name alone. As the card folds, the surname travels up out of its own field to
+ * join it in the bar; that move is [IdentityCard]'s layout, since it crosses rows.
+ */
 @Composable
 private fun CardNameRow(
-    fullName: String,
+    firstName: String,
     collapseProgress: () -> Float,
     modifier: Modifier = Modifier,
 ) {
@@ -279,20 +332,26 @@ private fun CardNameRow(
             color = TaminIdentityCardMuted,
             modifier = Modifier.collapseAway(collapseProgress, IdentityDimens.VANISH_RATE),
         )
-        Text(
-            text = fullName,
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold,
-            color = Color.White,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
+        CardHolderName(name = firstName)
     }
+}
+
+/** A part of the holder's name, at the size the collapsed bar shows it. */
+@Composable
+private fun CardHolderName(name: String, modifier: Modifier = Modifier) {
+    Text(
+        text = name,
+        style = MaterialTheme.typography.titleSmall,
+        fontWeight = FontWeight.Bold,
+        color = Color.White,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        modifier = modifier,
+    )
 }
 
 @Composable
 private fun CardTopInfo(
-    lastName: String,
     fatherName: String,
     dateOfBirth: String,
     modifier: Modifier = Modifier,
@@ -302,10 +361,6 @@ private fun CardTopInfo(
         verticalArrangement = Arrangement.spacedBy(IdentityDimens.cardFieldGap),
         horizontalAlignment = Alignment.Start,
     ) {
-        CardFieldRow(
-            label = stringResource(Res.string.identity_field_last_name),
-            value = lastName,
-        )
         CardFieldRow(
             label = stringResource(Res.string.identity_field_father_name),
             value = fatherName,
