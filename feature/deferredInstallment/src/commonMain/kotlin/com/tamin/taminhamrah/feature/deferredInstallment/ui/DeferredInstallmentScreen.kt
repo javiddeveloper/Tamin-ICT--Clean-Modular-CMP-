@@ -34,7 +34,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -75,6 +77,7 @@ import com.tamin.taminhamrah.ui.components.StepIndicatorModel
 import com.tamin.taminhamrah.ui.components.StepState
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
+import com.tamin.taminhamrah.ui.components.TaminFormAbandonDialog
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
@@ -165,9 +168,11 @@ fun DeferredInstallmentScreen(
         onBackClicked = onBackClicked,
     )
 
+    var showAbandonDialog by remember { mutableStateOf(false) }
+
     val handleBack: () -> Unit = {
         if (uiState.currentStep == DeferredInstallmentStep.CertificateRequest) {
-            onBackClicked()
+            showAbandonDialog = true
         } else {
             viewModel.sendIntent(DeferredInstallmentIntent.BackToPreviousStep)
         }
@@ -179,8 +184,20 @@ fun DeferredInstallmentScreen(
         state = uiState,
         onIntent = viewModel::sendIntent,
         onBackClicked = handleBack,
-        onCloseClicked = onBackClicked,
+        onCloseClicked = { showAbandonDialog = true },
+        onExitRequested = onBackClicked,
     )
+
+    if (showAbandonDialog) {
+        TaminFormAbandonDialog(
+            formName = stringResource(Res.string.deferred_installment_title),
+            onStay = { showAbandonDialog = false },
+            onAbandon = {
+                showAbandonDialog = false
+                onBackClicked()
+            },
+        )
+    }
 }
 
 @Composable
@@ -201,6 +218,7 @@ private fun DeferredInstallmentContent(
     onIntent: (DeferredInstallmentIntent) -> Unit,
     onBackClicked: () -> Unit,
     onCloseClicked: () -> Unit,
+    onExitRequested: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
@@ -414,7 +432,7 @@ private fun DeferredInstallmentContent(
 
     ErrorStateView(
         message = state.error,
-        onDismiss = onCloseClicked,
+        onDismiss = onExitRequested,
         onRetry = { onIntent(DeferredInstallmentIntent.LoadInitialData) },
     )
 }
@@ -758,6 +776,7 @@ private fun PreviewDeferredInstallmentStepOne() {
             onIntent = {},
             onBackClicked = {},
             onCloseClicked = {},
+            onExitRequested = {},
         )
     }
 }

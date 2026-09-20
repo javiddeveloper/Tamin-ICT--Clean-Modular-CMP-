@@ -16,7 +16,9 @@ import com.tamin.taminhamrah.model.workshop.WORKSHOP_PAGE_SIZE
 import com.tamin.taminhamrah.model.workshop.WorkshopActivityStatus
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
 import com.tamin.taminhamrah.model.workshop.WorkshopSummaryDN
+import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
 import com.tamin.taminhamrah.tools.errorHandling.TaminApiException
+import com.tamin.taminhamrah.useCases.workshops.GetArticleSixteenDebtsUseCase
 import com.tamin.taminhamrah.useCases.workshops.GetEmployerAgreementsUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -59,7 +61,11 @@ class WorkshopsViewModelTest {
     fun tearDown() = Dispatchers.resetMain()
 
     /** Built after the answer is staged, because the ViewModel loads as soon as it exists. */
-    private fun viewModel() = WorkshopsViewModel(GetEmployerAgreementsUseCase(repository), featureManager)
+    private fun viewModel() = WorkshopsViewModel(
+        GetEmployerAgreementsUseCase(repository),
+        featureManager,
+        GetArticleSixteenDebtsUseCase(repository),
+    )
 
     @Test
     fun `the list loads itself without being asked`() = runTest(testDispatcher) {
@@ -160,6 +166,7 @@ class WorkshopsViewModelTest {
         val viewModel = WorkshopsViewModel(
             GetEmployerAgreementsUseCase(FailAfterFirstCall(repository)),
             featureManager,
+            GetArticleSixteenDebtsUseCase(repository),
         )
 
         val stats = assertNotNull(viewModel.uiState.value.stats)
@@ -349,6 +356,8 @@ class WorkshopsViewModelTest {
     @Test
     fun `every action navigates, carrying the row's identity`() = runTest(testDispatcher) {
         repository.employerAgreements = agreementsPage(count = 1, total = 1)
+        // ماده ۱۶ only opens on a workshop that has a debt to open on.
+        repository.articleSixteenDebts = PagedListDN(items = listOf(WorkshopsDebtListModelDN(debitNumber = "1")))
         val viewModel = viewModel()
         val workshop = viewModel.uiState.value.list.items.first()
 
@@ -368,8 +377,9 @@ class WorkshopsViewModelTest {
     }
 
     @Test
-    fun `article sixteen navigates rather than pre-checking for debts`() = runTest(testDispatcher) {
+    fun `article sixteen on a workshop with no debt answers with the dialog`() = runTest(testDispatcher) {
         repository.employerAgreements = agreementsPage(count = 1, total = 1)
+        repository.articleSixteenDebts = PagedListDN()
         val viewModel = viewModel()
         val workshop = viewModel.uiState.value.list.items.first()
 
@@ -378,11 +388,35 @@ class WorkshopsViewModelTest {
                 WorkshopsIntent.ActionSelected(WorkshopAction.ARTICLE_SIXTEEN, workshop),
             )
 
-            // It used to answer with a toast when the debt list came back empty, which cost a
-            // request per tap and made it the one row that does not open a screen.
-            assertTrue(awaitItem() is WorkshopsEvent.Navigate)
+            // «لیست بدهی برای این کارگاه یافت نشد», as the design and the old app say it.
+            assertTrue(viewModel.uiState.value.isNoDebtDialogOpen)
+            assertFalse(viewModel.uiState.value.isCheckingDebts)
+            expectNoEvents()
+        }
+
+        viewModel.sendIntent(WorkshopsIntent.NoDebtDialogDismissed)
+        assertFalse(viewModel.uiState.value.isNoDebtDialogOpen)
+    }
+
+    @Test
+    fun `a failed debt check says why and leaves the list alone`() = runTest(testDispatcher) {
+        repository.employerAgreements = agreementsPage(count = 1, total = 1)
+        val viewModel = viewModel()
+        val workshop = viewModel.uiState.value.list.items.first()
+        repository.error = TaminApiException(title = "سرویس در دسترس نیست")
+
+        viewModel.events.test {
+            viewModel.sendIntent(
+                WorkshopsIntent.ActionSelected(WorkshopAction.ARTICLE_SIXTEEN, workshop),
+            )
+
+            assertEquals(WorkshopsEvent.ShowToast("سرویس در دسترس نیست"), awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
+        assertFalse(viewModel.uiState.value.isCheckingDebts)
+        assertFalse(viewModel.uiState.value.isNoDebtDialogOpen)
+        assertEquals(1, viewModel.uiState.value.list.items.size)
+        assertNull(viewModel.uiState.value.list.error)
     }
 
     @Test

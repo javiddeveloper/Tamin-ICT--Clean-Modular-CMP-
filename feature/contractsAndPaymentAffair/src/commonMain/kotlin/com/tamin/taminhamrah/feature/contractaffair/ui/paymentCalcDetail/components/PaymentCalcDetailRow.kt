@@ -113,6 +113,8 @@ internal fun PaymentCalcDetailRow(
             InfoTile(
                 label = stringResource(Res.string.contract_payment_details_rate),
                 value = rateValue,
+                // «۲۷ درصد» carries its unit, so it is ordinary text rather than a bare figure.
+                numeric = false,
                 modifier = Modifier.weight(1f),
             )
         }
@@ -166,7 +168,13 @@ private fun MonthTile(monthNumberLabel: String) {
 }
 
 @Composable
-private fun InfoTile(label: String, value: String, modifier: Modifier = Modifier) {
+private fun InfoTile(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier,
+    /** False for a figure that carries its unit — see [NumericText]: it flips the whole paragraph. */
+    numeric: Boolean = true,
+) {
     val colors = LocalTaminColors.current
     Column(
         modifier = modifier
@@ -179,11 +187,12 @@ private fun InfoTile(label: String, value: String, modifier: Modifier = Modifier
             style = MaterialTheme.typography.bodySmall,
             color = colors.textMuted,
         )
-        NumericText(
-            text = value,
-            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-            color = colors.textPrimary,
-        )
+        val valueStyle = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
+        if (numeric) {
+            NumericText(text = value, style = valueStyle, color = colors.textPrimary)
+        } else {
+            TaminText(text = value, style = valueStyle, color = colors.textPrimary)
+        }
     }
 }
 
