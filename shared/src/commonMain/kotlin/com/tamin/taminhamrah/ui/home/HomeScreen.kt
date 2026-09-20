@@ -37,6 +37,8 @@ import com.tamin.taminhamrah.mapper.home.toMainServices
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
+import com.tamin.taminhamrah.model.history.TalfighInfoItemPR
+import com.tamin.taminhamrah.model.history.toHistorySummary
 import com.tamin.taminhamrah.model.home.CampaignDN
 import com.tamin.taminhamrah.model.home.HomeContentDN
 import com.tamin.taminhamrah.model.home.HomeServiceSection
@@ -414,40 +416,71 @@ private fun previewHomeUiState() = HomeUiState(
         )
     ),
     isAgentEnabled = true,
+    // Through the real mapper, not a hand-built summary: the card's figures and its twelve cells
+    // are derived from the rows, so a preview that assembled them itself would still look right
+    // after the derivation broke.
+    isHistorySummaryLoading = false,
+    historySummary = listOf(
+        TalfighInfoItemPR(
+            months = listOf("31", "31", "0", "30", "31", "30"),
+            risuid = "",
+            historyYears = 0,
+            historyMonths = 0,
+            sumYear = 0,
+            historyDays = 0,
+            sumHistoryYears = 0,
+            id = 0,
+            hisYear = PersianDateFormatter.currentJalaliYear().toString(),
+        )
+    ).toHistorySummary(),
 )
 
+@Composable
+private fun PreviewHome(uiState: HomeUiState) {
+    HomeScreenContent(
+        uiState = uiState,
+        onNavigateToAgent = {},
+        onNavigateToAllServices = {},
+        onNavigateToUserRequests = {},
+        onRequestClick = {},
+        onCampaignClick = {},
+        onSectionSelected = {},
+        onServiceClick = {},
+        onRetry = {},
+    )
+}
+
+/** خلاصهٔ سابقه still being fetched — the one slot on this page with a skeleton of its own. */
 @PreviewRtlTheme
 @Composable
-private fun HomeScreenPreview() {
+private fun HomeScreenHistoryLoadingPreview() {
     PreviewRtlThemeContent {
-        HomeScreenContent(
-            uiState = previewHomeUiState(),
-            onNavigateToAgent = {},
-            onNavigateToAllServices = {},
-            onNavigateToUserRequests = {},
-            onRequestClick = {},
-            onCampaignClick = {},
-            onSectionSelected = {},
-            onServiceClick = {},
-            onRetry = {},
+        PreviewHome(previewHomeUiState().copy(isHistorySummaryLoading = true))
+    }
+}
+
+/** The connection never answered and nothing was cached: the slot holds a retry instead. */
+@PreviewRtlTheme
+@Composable
+private fun HomeScreenHistoryUnavailablePreview() {
+    PreviewRtlThemeContent {
+        PreviewHome(
+            previewHomeUiState().copy(
+                historySummary = null,
+                historySummaryFailed = true,
+            )
         )
     }
 }
 
 @PreviewRtlTheme
 @Composable
+private fun HomeScreenPreview() {
+    PreviewRtlThemeContent { PreviewHome(previewHomeUiState()) }
+}
+
+@PreviewRtlTheme
+@Composable
 private fun HomeScreenPreviewDark() {
-    PreviewRtlThemeContent(darkTheme = true) {
-        HomeScreenContent(
-            uiState = previewHomeUiState(),
-            onNavigateToAgent = {},
-            onNavigateToAllServices = {},
-            onNavigateToUserRequests = {},
-            onRequestClick = {},
-            onCampaignClick = {},
-            onSectionSelected = {},
-            onServiceClick = {},
-            onRetry = {},
-        )
-    }
+    PreviewRtlThemeContent(darkTheme = true) { PreviewHome(previewHomeUiState()) }
 }
