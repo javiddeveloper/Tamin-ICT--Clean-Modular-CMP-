@@ -4,7 +4,7 @@ tags: [domain, gotcha]
 
 # اعتراض به سوابق ناموجود — Objection to Missing History
 
-`FeatureFlag.OBJECTION_NON_EXISTENT_HISTORY(1)` · `:feature:history-objection` ·
+`FeatureFlag.OBJECTION_NON_EXISTENT_HISTORY(10)` · `:feature:history-objection` ·
 package `com.tamin.taminhamrah.feature.historyobjection`
 
 An insured person claims a period they worked is missing from their insurance record and

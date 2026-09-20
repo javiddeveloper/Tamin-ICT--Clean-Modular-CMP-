@@ -6,7 +6,7 @@ tags: [domain, gotcha]
 # پیگیری وضعیت اعتراض به بدهی — Debt-Objection Status Tracking
 
 `FeatureFlag.FOLLOW_PROTEST_STATUS` · `:feature:workshops` → `ui/objectionStatus` ·
-`FeatureFlag.FOLLOW_PROTEST_STATUS(1004)` · `:feature:workshops` → `ui/objectionStatus` ·
+`FeatureFlag.FOLLOW_PROTEST_STATUS(1006)` · `:feature:workshops` → `ui/objectionStatus` ·
 package `com.tamin.taminhamrah.feature.workshops.ui.objectionStatus`
 
 An employer has already filed an objection against a debt notice (estimated-debt objection,

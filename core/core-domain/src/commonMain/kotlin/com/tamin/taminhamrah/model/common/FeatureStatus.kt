@@ -44,85 +44,103 @@ fun List<MainServiceDN>.featureStatusOf(flag: FeatureFlag): FeatureStatus =
  * `MockMenuData` must appear here exactly once — `fromId` takes the *first* match, so a repeated id
  * would silently route one menu row to the wrong feature.
  *
- * Ids are banded by audience and, within a band, ascend in the order the rows are shown (the menu is
- * read back from Room ordered by `sorting`, then `id`): `1`–`37` insured, `101`–`110` pensioners,
- * `1001`–`1010` employers, `2000` the assistant. A service that both an insured person and a
- * pensioner reach has one flag per audience, the pensioner's suffixed `_PENSIONER`, when each
- * audience needs its own menu row.
+ * **These are the legacy server's own ids** (`1`–`47` insured, `101`–`113` pensioners, `1001`–`1012`
+ * employers, `2000` the assistant), not a scheme this app invented — `menu_data_<version>.txt`, once
+ * switched back on, has to line up with these without a remap. The numbers are *not* sequential
+ * within a band (the server left gaps — e.g. `12`, `24`, `27`–`32` in the insured band — for
+ * services this app doesn't carry, or hasn't been assigned) and do **not** decide display order;
+ * that's `MockMenuData`'s `sorting` field, read by `MenuDao.getMenuItems()` before `id` is ever
+ * consulted as a tie-break. A service that both an insured person and a pensioner reach has one flag
+ * per audience, the pensioner's suffixed `_PENSIONER`, when each audience needs its own menu row.
  */
 enum class FeatureFlag(val id: Int) {
-    // ─── Insured (menu ids 1–37) ─────────────────────────────────────────────
-    OBJECTION_NON_EXISTENT_HISTORY(1),
-    SEND_INSURANCE_HISTORY_TO_INSTITUTION(2),
-    COMBINED_RECORD(3),
-    OROTEZ_PROTEZ(4),
-    WEDDING_PRESENT(5),
-    VIEW_TITLE_JOB(6),
-    REQUEST_FUNERAL_GRANT(7),
-    REQUEST_PAYMENT_FOR_ILL_DAYS(8),
-    REQUEST_FOR_PREGNANCY_PAY(9),
-    FRACTION_CONTRACT(10),
-    CALCULATE_WAGE_PENSION(11),
-    LIST_OF_INSPECTIONS_PERFORMED(12),
-    INQUIRY_EDUCATION(13),
-    OPTIONAL_INSURANCE(14),
-    CONTRACTS(15),
-    RETIREMENT_PENSION(16),
-    DISABILITY_PENSION(17),
-    OBJECTION_INSURANCE_HISTORY(18),
-    OCCURRENCE(19),
-    WORKERS_PAYMENT_INFO(20),
-    REQUEST_PENSION_BY_SURVIVOR(21),
-    LAWS(22),
-    VIEW_SHORT_TERM(23),
-    CALCULATE_MARRIAGE_ALLOWANCE(24),
-    CALCULATE_WAGE_ILL_DAYS(25),
-    CALCULATE_WAGE_PREGNANCY(26),
-    DESERVED_TREATMENT(27),
-    PRESCRIPTION(28),
-    FREELANCE_INSURANCE(29),
-    STUDENT_INSURANCE(30),
-    HOUSEWIFE_INSURANCE(31),
-    MY_ELECTRONIC_FILE(32),
-    IDENTITY_INFO(33),
-    ACTIVE_RELATION(34),
-    BANK_ACCOUNT_LIST(35),
-    EDIT_IMAGE(36),
-    DEPENDENTS(37),
+    // ─── Insured ──────────────────────────────────────────────────────────────
+    IDENTITY_INFO(1),
+    ACTIVE_RELATION(2),
+    BANK_ACCOUNT_LIST(3),
+    EDIT_IMAGE(4),
+    DEPENDENTS(5),
+    COMBINED_RECORD(8),
+    SEND_INSURANCE_HISTORY_TO_INSTITUTION(9),
+    OBJECTION_NON_EXISTENT_HISTORY(10),
+    VIEW_TITLE_JOB(11),
+    VIEW_SHORT_TERM(13),
+    WEDDING_PRESENT(14),
+    OROTEZ_PROTEZ(15),
+    REQUEST_FOR_PREGNANCY_PAY(16),
+    REQUEST_PAYMENT_FOR_ILL_DAYS(17),
+    REQUEST_FUNERAL_GRANT(18),
+    LIST_OF_INSPECTIONS_PERFORMED(19),
+    CALCULATE_MARRIAGE_ALLOWANCE(20),
+    CALCULATE_WAGE_ILL_DAYS(21),
+    CALCULATE_WAGE_PREGNANCY(22),
+    CALCULATE_WAGE_PENSION(23),
+    DESERVED_TREATMENT(25),
+    PRESCRIPTION(26),
+    FREELANCE_INSURANCE(33),
+    STUDENT_INSURANCE(34),
+    CONTRACTS(35),
+    HOUSEWIFE_INSURANCE(36),
+    OPTIONAL_INSURANCE(37),
+    INQUIRY_EDUCATION(38),
+    FRACTION_CONTRACT(39),
+    REQUEST_PENSION_BY_SURVIVOR(40),
+    RETIREMENT_PENSION(41),
+    OBJECTION_INSURANCE_HISTORY(42),
+    // No legacy row ever carried an insured-audience "مستمری از کارافتادگی" (the server only ever
+    // sent one, pensioner-only, at id 113 — see DISABILITY_PENSION_PENSIONER). This id and the
+    // MockMenuData row that uses it are new; 44 is simply an unused gap in the legacy insured band,
+    // not a number the server has ever assigned to anything.
+    DISABILITY_PENSION(44),
+    MY_ELECTRONIC_FILE(46),
+    WORKERS_PAYMENT_INFO(47),
 
-    // ─── Pensioners (menu ids 101–110) ───────────────────────────────────────
-    EDICT_PENSIONER(101),
-    PAY_ROLL(102),
-    PENSION_INQUIRY(103),
-    CALCULATE_WAGE_PENSION_PENSIONER(104),
-    DEFERRED_INSTALLMENT_CERTIFICATE(105),
-    ISSUANCE_WAGE_CERTIFICATE(106),
-    DISABILITY_PENSION_PENSIONER(107),
-    REQUEST_PENSION_BY_SURVIVOR_PENSIONER(108),
-    GIRL_SURVIVOR(109),
-    DESERVED_TREATMENT_PENSIONER(110),
+    // «اعلام حادثه» and «سامانه قوانین و مقررات» keep the *employer* ids the legacy server assigned
+    // them (`1011`/`1012`) even though `MockMenuData` currently places both rows in the insured
+    // audience (`showRole = [1]`) — the id is the server's identity for the service, `showRole` is
+    // separate, server-supplied audience metadata this mock is only guessing at.
+    OCCURRENCE(1011),
+    LAWS(1012),
 
-    // ─── Employers (menu ids 1001–1010) ──────────────────────────────────────
-    COMPLETE_WORKSHOP_INFO(1001),
-    ASSIGNER_CONTRACT(1002),
-    WORKSHOPS(1003),
-    FOLLOW_PROTEST_STATUS(1004),
-    PERFORMED_INSPECTION(1005),
-    REGISTER_AGREEMENT(1006),
-    CONSTRUCTION_INSURANCE(1007),
-    STACK_HOLDER_LIST(1008),
-    CONTRACT_INFO(1009),
-    INSTALLMENT_DEBT(1010),
+    // ─── Pensioners ───────────────────────────────────────────────────────────
+    DESERVED_TREATMENT_PENSIONER(101),
+    PENSION_INQUIRY(104),
+    PAY_ROLL(105),
+    EDICT_PENSIONER(106),
+    ISSUANCE_WAGE_CERTIFICATE(107),
+    DEFERRED_INSTALLMENT_CERTIFICATE(108),
+    GIRL_SURVIVOR(110),
+    REQUEST_PENSION_BY_SURVIVOR_PENSIONER(112),
+    DISABILITY_PENSION_PENSIONER(113),
+    // The legacy server never sent a dedicated pensioner row for this — `CALCULATE_WAGE_PENSION`
+    // covered both audiences with one row (id 23, showRole [1, 2]). 109 was already reserved for it
+    // in the old enum (as a rowless placeholder) when a service needed a pensioner-only position;
+    // reused here now that MockMenuData gives it a real, separate row.
+    CALCULATE_WAGE_PENSION_PENSIONER(109),
+
+    // ─── Employers ────────────────────────────────────────────────────────────
+    WORKSHOPS(1001),
+    CONTRACT_INFO(1002),
+    ASSIGNER_CONTRACT(1003),
+    COMPLETE_WORKSHOP_INFO(1004),
+    STACK_HOLDER_LIST(1005),
+    FOLLOW_PROTEST_STATUS(1006),
+    REGISTER_AGREEMENT(1007),
+    PERFORMED_INSPECTION(1008),
+    INSTALLMENT_DEBT(1009),
+    CONSTRUCTION_INSURANCE(1010),
 
     // ─── No menu row today ───────────────────────────────────────────────────
     // Nothing in `MockMenuData` carries these ids, so `featureStatusOf` reads them as Disabled and
     // the deep links and assistant actions pointing at them are gated off. They are kept because
-    // those callers still name them. The ids are unique keys only — the 90s band is deliberately
-    // clear of the insured band so it can never shadow a real menu row in `fromId`.
-    MERGE_HISTORY(90),
-    WAGE_AND_HISTORY(91),
-    OBJECTION_INSURANCE_HISTORY_LEGACY(92),
-    PRESCRIPTION_PENSIONER(93),
+    // those callers still name them — these are the same legacy ids the pre-renumbering server menu
+    // used for these exact services, before the three history rows were merged into COMBINED_RECORD
+    // and this pair lost their own row.
+    MERGE_HISTORY(6),
+    WAGE_AND_HISTORY(7),
+    // Legacy server placeholders that never had a menu row either — kept under their original ids.
+    OBJECTION_INSURANCE_HISTORY_LEGACY(45),
+    PRESCRIPTION_PENSIONER(102),
 
     // ─── AI Assistant / Chatbot ──────────────────────────────────────────────
     /** Controls the entry point for the Agent and chatbot access */

@@ -69,7 +69,7 @@ fun NavController.navigateToDeepLink(key: DeepLinkKey, args: Map<String, String>
 fun NavController.navigateToFeature(flag: FeatureFlag, beforeOpen: () -> Unit = {}): Boolean {
     val open: () -> Unit = when (flag) {
         FeatureFlag.AGENT -> screen { navigateToAgent() }
-        // «کلیه سوابق» — menu id 3, the one history row left after «سوابق تلفیقی» and «سوابق و دستمزد»
+        // «کلیه سوابق» — the one history row left after «سوابق تلفیقی» and «سوابق و دستمزد»
         // were dropped from the menu. MERGE_HISTORY and WAGE_AND_HISTORY have no menu row of their
         // own any more, so only a deep link or the assistant can reach them — and the flag gate
         // turns both down until a row exists again. Kept here so they open the right page if it does.
@@ -78,7 +78,7 @@ fun NavController.navigateToFeature(flag: FeatureFlag, beforeOpen: () -> Unit = 
         FeatureFlag.WAGE_AND_HISTORY -> screen { navigateToHistory() }
         FeatureFlag.WORKSHOPS -> screen { navigateToWorkshops() }
         FeatureFlag.CONTRACT_INFO -> screen { navigateToContractRows() }
-        // «واگذارندگان» (1003) — the پیمان‌ها this employer assigned out.
+        // «واگذارندگان» — the پیمان‌ها this employer assigned out.
         FeatureFlag.ASSIGNER_CONTRACT -> screen { navigateToAssignerContracts() }
         FeatureFlag.COMPLETE_WORKSHOP_INFO -> screen { navigateToCompleteEmployerInfo() }
         FeatureFlag.STACK_HOLDER_LIST -> screen { navigateToLegalRepresentativeWorkshops() }
