@@ -138,7 +138,9 @@ fun WorkshopMembersContent(
                     }
                     WorkshopSectionHeader(
                         title = stringResource(Res.string.workshop_action_members),
-                        count = state.list.items.size,
+                        // The service's own total, not how much of it has been paged in: a count
+                        // that climbs while the user scrolls reads as though the first one was wrong.
+                        count = state.list.total,
                     )
                     WorkshopFilterChips(
                         chips = filterChips,
@@ -255,6 +257,7 @@ private fun WorkshopMembersSearchedPreview() {
 
 /** The design's three sample rows: two at work, one who has left. */
 private val PreviewMembers = PagedListState(
+    total = 3,
     items = persistentListOf(
         WorkshopMemberPR(
             insuranceNumber = "۰۰۱۰۵۱۷۴۷۵",

@@ -62,12 +62,29 @@ class WorkshopMembersViewModel(
                 page = page,
             )
         )
+        if (hasMovedOn(search, identity)) return@flow
         emit(
             PartialState.Loaded(
                 uiState.value.list.loaded(result, isFirstPage = page == 0) { it.toPresentation() }
             )
         )
-    }.catch { emit(PartialState.Error(it.toSingleLineMessage())) }
+    }.catch { if (!hasMovedOn(search, identity)) emit(PartialState.Error(it.toSingleLineMessage())) }
+
+    /**
+     * Whether the answer now in hand belongs to a list the screen has already left behind.
+     *
+     * `BaseViewModel` merges intent flows rather than switching between them, so applying a search
+     * does not cancel the page already in flight. A slow page-N answer for the previous search can
+     * land after the new search's page 0, and `loaded(isFirstPage = false)` would append the old
+     * search's people to the new search's results — rows that match nothing the user asked for.
+     * The request carries the search and the workshop it was made for; anything else is dropped.
+     */
+    private fun hasMovedOn(search: PersonSearch, identity: Pair<String, String>): Boolean {
+        val state = uiState.value
+        return state.applied != search ||
+            state.workshopId != identity.first ||
+            state.branchCode != identity.second
+    }
 
     private fun loadMore(): Flow<PartialState> {
         val list = uiState.value.list
