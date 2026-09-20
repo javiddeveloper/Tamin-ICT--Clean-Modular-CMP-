@@ -38,19 +38,16 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.tamin.taminhamrah.feature.FeatureManager
-import com.tamin.taminhamrah.feature.addDependent.AddDependentRoute
-import com.tamin.taminhamrah.feature.addDependent.addDependentGraph
 import com.tamin.taminhamrah.deeplink.DeepLinkDispatcher
 import com.tamin.taminhamrah.deeplink.DeepLinkKey
-import com.tamin.taminhamrah.useCases.agent.ObserveAgentAvailabilityUseCase
 import com.tamin.taminhamrah.deeplink.DeepLinkResolution
 import com.tamin.taminhamrah.deeplink.DeepLinkSource
 import com.tamin.taminhamrah.deeplink.ResolveDeepLinkUseCase
-import com.tamin.taminhamrah.ui.deeplink.DeepLinkHandler
-import com.tamin.taminhamrah.ui.deeplink.LocalDeepLinkHandler
+import com.tamin.taminhamrah.feature.addDependent.AddDependentRoute
+import com.tamin.taminhamrah.feature.addDependent.addDependentGraph
 import com.tamin.taminhamrah.feature.agent.agentScreen
 import com.tamin.taminhamrah.feature.agent.navigateToAgent
+import com.tamin.taminhamrah.feature.calculateWagePension.calculateWagePensionScreen
 import com.tamin.taminhamrah.feature.cartable.CartableRoute
 import com.tamin.taminhamrah.feature.cartable.cartableGraph
 import com.tamin.taminhamrah.feature.changemobile.changeMobileScreen
@@ -113,14 +110,6 @@ import com.tamin.taminhamrah.feature.pensionSurvivor.pensionSurvivorScreen
 import com.tamin.taminhamrah.feature.pregnancyPay.pregnancyPayScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
-import com.tamin.taminhamrah.feature.contractaffair.CONTRACT_AFFAIRS_REFRESH_KEY
-import com.tamin.taminhamrah.feature.contractaffair.contractAffairsScreen
-import com.tamin.taminhamrah.feature.contractaffair.contractPaymentHistoryScreen
-import com.tamin.taminhamrah.feature.contractaffair.contractPaymentCalcDetailScreen
-import com.tamin.taminhamrah.feature.contractaffair.contractPremiumPaymentScreen
-import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPaymentCalcDetail
-import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPaymentHistory
-import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPremiumPayment
 import com.tamin.taminhamrah.feature.requestPaymentForIllDays.requestPaymentForIllDaysScreen
 import com.tamin.taminhamrah.feature.retirementPension.retirementPensionScreen
 import com.tamin.taminhamrah.feature.security.SecurityRoute
@@ -148,10 +137,7 @@ import com.tamin.taminhamrah.feature.workshops.completeEmployerInfoScreen
 import com.tamin.taminhamrah.feature.workshops.debtObjectionStatusScreen
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
-import com.tamin.taminhamrah.feature.userRequest.userRequestGraph
-import com.tamin.taminhamrah.mapper.campaign.toPresentation
 import com.tamin.taminhamrah.model.common.FeatureFlag
-import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.openUrl
 import com.tamin.taminhamrah.ui.blur.AppBarScrim
 import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
@@ -160,16 +146,19 @@ import com.tamin.taminhamrah.ui.blur.TopBarScrim
 import com.tamin.taminhamrah.ui.blur.safeHazeSource
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import com.tamin.taminhamrah.ui.contract.CustomNavigationBarItem
+import com.tamin.taminhamrah.ui.deeplink.DeepLinkHandler
+import com.tamin.taminhamrah.ui.deeplink.LocalDeepLinkHandler
 import com.tamin.taminhamrah.ui.home.HomeScreen
+import com.tamin.taminhamrah.useCases.agent.ObserveAgentAvailabilityUseCase
 import com.tamin.taminhamrah.util.AppConfig
 import dev.chrisbanes.haze.HazeState
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.deep_link_feature_unavailable
 import taminx.core.core_ui.ic_home_menu
 import taminx.core.core_ui.ic_profile_menu
 import taminx.core.core_ui.ic_services_menu
@@ -179,7 +168,6 @@ import taminx.core.core_ui.login_required_desc
 import taminx.core.core_ui.login_to_tamin_man
 import taminx.core.core_ui.please_login_to_your_account
 import taminx.core.core_ui.tab_agent
-import taminx.core.core_ui.deep_link_feature_unavailable
 import taminx.core.core_ui.tab_home
 import taminx.core.core_ui.tab_profile
 import taminx.core.core_ui.tab_services
@@ -274,9 +262,7 @@ internal fun TaminHamrahNavGraph(
                 }
             }
         ),
-
-        )
-
+    )
 
     val hazeState = remember { HazeState(initialBlurEnabled = true) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -357,9 +343,7 @@ internal fun TaminHamrahNavGraph(
                             }
                         } else null,
                     ) {
-
                         navigationItems.forEach { navigationItem ->
-
                             val containerColor: Brush =
                                 if (navigationItem.isSelected) Brush.linearGradient(
                                     listOf(
@@ -778,4 +762,3 @@ internal fun TaminHamrahNavGraph(
         )
     }
 }
-
