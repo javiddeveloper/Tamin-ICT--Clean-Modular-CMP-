@@ -95,6 +95,33 @@ class TreatmentCostsViewModelTest {
         }
     }
 
+    /**
+     * A failed download says so twice: the banner explains, and [viewerDownloadFailed] lets the
+     * viewer close itself instead of sitting on an empty page.
+     */
+    @Test
+    fun testDownloadPdf_whenRepositoryFails_reportsTheFailureToTheViewer() = runTest(testDispatcher) {
+        repository.shouldThrowError = true
+
+        viewModel.sendIntent(CostsIntent.DownloadPdf("1"))
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertNotNull(state.error)
+        assertTrue(state.viewerDownloadFailed)
+        assertNull(state.viewerPdf)
+    }
+
+    @Test
+    fun testSendToInbox_whenRepositoryFails_emitsErrorInsteadOfAConfirmation() = runTest(testDispatcher) {
+        repository.shouldThrowError = true
+
+        viewModel.sendIntent(CostsIntent.SendToInbox("1"))
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertNotNull(viewModel.uiState.value.error)
+    }
+
     @Test
     fun testSendToInbox_setsResult() = runTest(testDispatcher) {
         repository.sendToInboxResult = "SUCCESS"
