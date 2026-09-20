@@ -1,25 +1,48 @@
 package com.tamin.taminhamrah.ui.toparea
 
+import androidx.compose.runtime.MonotonicFrameClock
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.unit.Velocity
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
  * Covers [TopAreaState]'s drag arithmetic: how `onPreScroll`/`onPostScroll` fold and unfold the
- * header, and how far each clamps at the fully collapsed/expanded edges. `onPreFling`'s
- * release-to-edge spring is left untested here since it's a suspend/animation concern, not a
- * geometry one.
+ * header, how far each clamps at the fully collapsed/expanded edges, and the snap helpers
+ * (`collapseFully` / `settleToNearestEdge` / release fling) that drive the header to an edge.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class TopAreaStateTest {
 
     private val alwaysForward: () -> Boolean = { true }
     private val neverForward: () -> Boolean = { false }
 
-    private fun stateOf(maxOffsetPx: Float): TopAreaState =
-        TopAreaState(maxOffsetPx, initialMeasuredHeightPx = 0, scope = CoroutineScope(Job()))
+    /**
+     * Advances ~16 ms per frame so Compose [androidx.compose.animation.core.animate] can finish
+     * without a real choreographer. Paired with [UnconfinedTestDispatcher] the spring runs to
+     * completion inside the launching call.
+     */
+    private fun animatingScope(): CoroutineScope {
+        val clock = object : MonotonicFrameClock {
+            private var frameTimeNanos = 0L
+            override suspend fun <R> withFrameNanos(onFrame: (frameTimeNanos: Long) -> R): R {
+                frameTimeNanos += 16_000_000L
+                return onFrame(frameTimeNanos)
+            }
+        }
+        return CoroutineScope(Job() + UnconfinedTestDispatcher() + clock)
+    }
+
+    private fun stateOf(
+        maxOffsetPx: Float,
+        scope: CoroutineScope = CoroutineScope(Job()),
+    ): TopAreaState = TopAreaState(maxOffsetPx, initialMeasuredHeightPx = 0, scope = scope)
 
     private fun TopAreaState.foldBy(dy: Float, canScrollForward: () -> Boolean = alwaysForward): Offset =
         connection(canScrollForward).onPreScroll(Offset(0f, dy), NestedScrollSource.UserInput)
@@ -29,6 +52,9 @@ class TopAreaStateTest {
 
     private fun TopAreaState.foldBySideEffect(dy: Float): Offset =
         connection(alwaysForward).onPreScroll(Offset(0f, dy), NestedScrollSource.SideEffect)
+
+    private fun TopAreaState.unfoldBySideEffect(dy: Float): Offset =
+        connection(alwaysForward).onPostScroll(Offset.Zero, Offset(0f, dy), NestedScrollSource.SideEffect)
 
     @Test
     fun `folding consumes the drag 1 to 1 away from the boundaries`() {
@@ -170,5 +196,112 @@ class TopAreaStateTest {
 
         assertEquals(Offset.Zero, consumed)
         assertEquals(30f, state.rawOffsetPx)
+    }
+
+    @Test
+    fun `onPostScroll ignores SideEffect leftovers so IME cannot unfold the header`() {
+        val state = stateOf(maxOffsetPx = 100f)
+        state.foldBy(dy = -50f)
+
+        val consumed = state.unfoldBySideEffect(dy = 40f)
+
+        assertEquals(Offset.Zero, consumed)
+        assertEquals(50f, state.rawOffsetPx)
+    }
+
+    @Test
+    fun `collapseFully is a no-op when the header is already collapsed`() {
+        val state = stateOf(maxOffsetPx = 100f, scope = animatingScope())
+        state.foldBy(dy = -100f)
+
+        state.collapseFully()
+
+        assertEquals(100f, state.rawOffsetPx)
+        assertEquals(1f, state.progress)
+    }
+
+    @Test
+    fun `collapseFully springs an expanded header to the collapsed edge`() {
+        val state = stateOf(maxOffsetPx = 100f, scope = animatingScope())
+
+        state.collapseFully()
+
+        assertEquals(100f, state.rawOffsetPx)
+        assertEquals(1f, state.progress)
+    }
+
+    @Test
+    fun `collapseFully springs a mid-fold header to the collapsed edge`() {
+        val state = stateOf(maxOffsetPx = 100f, scope = animatingScope())
+        state.foldBy(dy = -40f)
+
+        state.collapseFully()
+
+        assertEquals(100f, state.rawOffsetPx)
+        assertEquals(1f, state.progress)
+    }
+
+    @Test
+    fun `settleToNearestEdge is a no-op when already at an edge`() {
+        val state = stateOf(maxOffsetPx = 100f, scope = animatingScope())
+
+        state.settleToNearestEdge(scrollVelocityY = -500f)
+
+        assertEquals(0f, state.rawOffsetPx)
+    }
+
+    @Test
+    fun `settleToNearestEdge expands when released below the midpoint`() {
+        val state = stateOf(maxOffsetPx = 100f, scope = animatingScope())
+        state.foldBy(dy = -40f)
+
+        state.settleToNearestEdge()
+
+        assertEquals(0f, state.rawOffsetPx)
+        assertEquals(0f, state.progress)
+    }
+
+    @Test
+    fun `settleToNearestEdge collapses when released at or above the midpoint`() {
+        val state = stateOf(maxOffsetPx = 100f, scope = animatingScope())
+        state.foldBy(dy = -60f)
+
+        state.settleToNearestEdge()
+
+        assertEquals(100f, state.rawOffsetPx)
+        assertEquals(1f, state.progress)
+    }
+
+    @Test
+    fun `settleToNearestEdge collapses when fling velocity is strongly upward`() {
+        val state = stateOf(maxOffsetPx = 100f, scope = animatingScope())
+        state.foldBy(dy = -20f)
+
+        state.settleToNearestEdge(scrollVelocityY = -300f)
+
+        assertEquals(100f, state.rawOffsetPx)
+        assertEquals(1f, state.progress)
+    }
+
+    @Test
+    fun `settleToNearestEdge expands when fling velocity is strongly downward`() {
+        val state = stateOf(maxOffsetPx = 100f, scope = animatingScope())
+        state.foldBy(dy = -80f)
+
+        state.settleToNearestEdge(scrollVelocityY = 300f)
+
+        assertEquals(0f, state.rawOffsetPx)
+        assertEquals(0f, state.progress)
+    }
+
+    @Test
+    fun `a user drag followed by an upward fling snaps the header collapsed`() = runTest {
+        val state = stateOf(maxOffsetPx = 100f, scope = animatingScope())
+        state.foldBy(dy = -35f)
+
+        state.connection(alwaysForward).onPreFling(Velocity(0f, -300f))
+
+        assertEquals(100f, state.rawOffsetPx)
+        assertEquals(1f, state.progress)
     }
 }

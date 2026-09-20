@@ -19,11 +19,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -33,6 +31,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.CustomChip
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminDivider
+import com.tamin.taminhamrah.ui.components.startToEndGradient
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
@@ -63,19 +62,12 @@ internal fun ActiveRelationItemCard(
 ) {
     val taminColors = LocalTaminColors.current
 
-    val topHeaderGradient = remember(
-        item.isActive,
-        taminColors.greenBg,
-        taminColors.border,
-        taminColors.bgSurface,
-    ) {
-        Brush.horizontalGradient(
-            colors = listOf(
-                if (item.isActive) taminColors.greenBg else taminColors.border.copy(alpha = 0.12f),
-                taminColors.bgSurface,
-            ),
-        )
-    }
+    val topHeaderGradient = startToEndGradient(
+        listOf(
+            if (item.isActive) taminColors.greenBg else taminColors.border.copy(alpha = 0.12f),
+            taminColors.bgSurface,
+        ),
+    )
 
     Card(
         modifier = modifier
