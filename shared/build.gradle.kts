@@ -61,6 +61,7 @@ kotlin {
             api(project(":feature:fractionContract"))
             api(project(":feature:weddingPresent"))
             api(project(":feature:payment"))
+            api(project(":feature:calculateWagePension"))
             api(project(":feature:developerOptions"))
             api(project(":feature:stories"))
             api(libs.androidx.lifecycle.viewmodel)

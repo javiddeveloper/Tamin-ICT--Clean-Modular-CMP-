@@ -4,7 +4,7 @@ package com.tamin.taminhamrah.feature.workshops.ui
  * The non-visual constants the کارگاه‌های کارفرما screens run on.
  *
  * Sibling to `WorkshopDimens`, and deliberately separate from it: those are measurements the
- * design dictates, these are limits the *service* dictates and behaviour the list agreed on. A
+ * design dictates, these are limits the *service* dictates and behavior the list agreed on. A
  * designer changing a padding should never be editing the same table as a field length the
  * server validates against.
  */
@@ -34,6 +34,19 @@ object WorkshopConstants {
      */
     const val CONTRACT_ROW_WORKSHOP_CODE_LENGTH = 10
     const val CONTRACT_ROW_BRANCH_CODE_LENGTH = 4
+
+    /**
+     * The caps واگذارندگان holds its three search codes to — 10, 4 and 3, as the design prints
+     * them.
+     *
+     * Declared apart from the contract-row pair above despite two of them matching, because they
+     * are caps of a different *kind*: these three are filter clauses, so an over-long value simply
+     * matches nothing, where a contract-row code the wrong length addresses another route. Folding
+     * the two tables together would put a path-segment rule and a search rule under one name.
+     */
+    const val ASSIGNER_WORKSHOP_CODE_LENGTH = 10
+    const val ASSIGNER_BRANCH_CODE_LENGTH = 4
+    const val ASSIGNER_CONTRACT_ROW_LENGTH = 3
 
     // ---------------------------------------------------------------------- paging
     /**

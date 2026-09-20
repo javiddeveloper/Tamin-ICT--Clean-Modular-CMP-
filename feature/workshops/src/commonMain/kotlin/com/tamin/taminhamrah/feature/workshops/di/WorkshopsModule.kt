@@ -1,8 +1,11 @@
 package com.tamin.taminhamrah.feature.workshops.di
 
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopsViewModel
+import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.AssignerContractsViewModel
+import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.settlement.SettlementRequestViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.contractRows.ContractRowsViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.demandDocuments.DemandDocumentsViewModel
+import com.tamin.taminhamrah.feature.workshops.ui.managementDebit.ManagementDebitViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.add.AddLegalRepresentativeViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.list.LegalRepresentativeListViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.otp.LegalRepresentativeOtpViewModel
@@ -38,6 +41,7 @@ val workshopsModule = module {
     }
 
     viewModelOf(::WorkshopsViewModel)
+    viewModelOf(::ManagementDebitViewModel)
     viewModelOf(::WorkshopDebtInquiryViewModel)
     viewModelOf(::ObjectionableDebitViewModel)
     viewModelOf(::WorkshopRecentlyAddedMembersViewModel)
@@ -49,6 +53,8 @@ val workshopsModule = module {
     viewModelOf(::LegalRepresentativeListViewModel)
     viewModelOf(::AddLegalRepresentativeViewModel)
     viewModelOf(::ContractRowsViewModel)
+    viewModelOf(::AssignerContractsViewModel)
+    viewModelOf(::SettlementRequestViewModel)
     viewModelOf(::ObjectionStatusViewModel)
     viewModelOf(::ObjectionSmsViewModel)
     viewModelOf(::ObjectionDocumentViewModel)

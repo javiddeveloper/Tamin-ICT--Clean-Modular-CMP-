@@ -30,7 +30,12 @@ data class ObjectionableDebitUiState(
     val viewerPdf: PdfDownloadPR? = null,
     /** ثبت اعتراض به بدهی, once a row's filing window has been confirmed open. */
     val form: ObjectionFormState? = null,
+    /** The tracking code of the objection just filed, held until its dialog is dismissed. */
+    val filedReferenceCode: String? = null,
 ) {
+    /** A row's action is waiting on the service — its deadline check or its PDF. */
+    val isBusy: Boolean get() = isDownloading || checkingDebitNumber != null
+
     sealed interface PartialState {
         data class Opened(val workshopId: String, val branchCode: String) : PartialState
         data object Loading : PartialState
@@ -53,6 +58,7 @@ data class ObjectionableDebitUiState(
         data class FormUploadingChanged(val isUploading: Boolean) : PartialState
         data class FormSubmittingChanged(val isSubmitting: Boolean) : PartialState
         data class FormConfirmVisible(val isVisible: Boolean) : PartialState
+        data class FiledChanged(val referenceCode: String?) : PartialState
     }
 }
 
@@ -136,6 +142,7 @@ sealed interface ObjectionableDebitIntent {
     data object FormConfirmDismissed : ObjectionableDebitIntent
     data object FormConfirmAccepted : ObjectionableDebitIntent
     data object DismissViewer : ObjectionableDebitIntent
+    data object DismissFiled : ObjectionableDebitIntent
 }
 
 sealed interface ObjectionableDebitEvent {
@@ -148,9 +155,5 @@ sealed interface ObjectionableDebitEvent {
      */
     data class ShowServerMessage(val message: String) : ObjectionableDebitEvent
 
-
     data class ShowMessage(val message: StringResource) : ObjectionableDebitEvent
-
-    /** Filed, with the tracking code the service returned. */
-    data class ObjectionFiled(val referenceCode: String) : ObjectionableDebitEvent
 }
