@@ -31,7 +31,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -60,6 +62,7 @@ import com.tamin.taminhamrah.ui.components.StepIndicatorModel
 import com.tamin.taminhamrah.ui.components.StepState
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
+import com.tamin.taminhamrah.ui.components.TaminFormAbandonDialog
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetResult
@@ -185,8 +188,19 @@ private fun HistoryObjectionStepperContent(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
+    var showAbandonDialog by remember { mutableStateOf(false) }
+    // ✕ leaves to home; first-step back leaves via the nav back stack (same as OnBackClicked).
+    var abandonToHome by remember { mutableStateOf(true) }
 
-    BackHandler(onBack = { onIntent(HistoryObjectionStepperIntent.OnBackClicked) })
+    val handleBack: () -> Unit = {
+        if (state.currentStep == STEP_BRANCH) {
+            abandonToHome = false
+            showAbandonDialog = true
+        } else {
+            onIntent(HistoryObjectionStepperIntent.OnBackClicked)
+        }
+    }
+    BackHandler(onBack = handleBack)
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -200,7 +214,7 @@ private fun HistoryObjectionStepperContent(
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                         contentDescription = stringResource(Res.string.action_back),
-                        onClick = { onIntent(HistoryObjectionStepperIntent.OnBackClicked) },
+                        onClick = handleBack,
                         bordered = true,
                     )
                 },
@@ -209,7 +223,10 @@ private fun HistoryObjectionStepperContent(
                         TaminTopAppBarButton(
                             icon = vectorResource(Res.drawable.ic_close),
                             contentDescription = null,
-                            onClick = onNavigateHome,
+                            onClick = {
+                                abandonToHome = true
+                                showAbandonDialog = true
+                            },
                             bordered = true
                         )
                     }
@@ -250,7 +267,7 @@ private fun HistoryObjectionStepperContent(
                         TaminTopAppBarButton(
                             icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                             contentDescription = null,
-                            onClick = { onIntent(HistoryObjectionStepperIntent.OnBackClicked) },
+                            onClick = handleBack,
                             bordered = true,
                             containerColor = LocalTaminColors.current.bgSurface,
                             contentColor = LocalTaminColors.current.textPrimary,
@@ -274,7 +291,7 @@ private fun HistoryObjectionStepperContent(
                         TaminTopAppBarButton(
                             icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                             contentDescription = null,
-                            onClick = { onIntent(HistoryObjectionStepperIntent.OnBackClicked) },
+                            onClick = handleBack,
                             bordered = true,
                             containerColor = LocalTaminColors.current.bgSurface,
                             contentColor = LocalTaminColors.current.textPrimary,
@@ -337,6 +354,17 @@ private fun HistoryObjectionStepperContent(
     if (state.hasSubmitted) {
         HistoryObjectionSubmitSuccessDialog(
             onAcknowledged = { onIntent(HistoryObjectionStepperIntent.OnSubmitSuccessAcknowledged) },
+        )
+    }
+
+    if (showAbandonDialog) {
+        TaminFormAbandonDialog(
+            formName = stringResource(Res.string.history_objection_title),
+            onStay = { showAbandonDialog = false },
+            onAbandon = {
+                showAbandonDialog = false
+                if (abandonToHome) onNavigateHome() else onNavigateBack()
+            },
         )
     }
 }
