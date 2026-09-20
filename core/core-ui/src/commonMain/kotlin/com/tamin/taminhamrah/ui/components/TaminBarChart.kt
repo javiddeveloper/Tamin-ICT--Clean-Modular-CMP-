@@ -516,7 +516,7 @@ private fun PillLabel(text: String) {
  * Rotating alone would leave the text laid out at its horizontal size and overlapping its
  * neighbors, so the measurement is swapped first and the rotation applied after.
  */
-private fun Modifier.rotateVertically(): Modifier = this
+internal fun Modifier.rotateVertically(): Modifier = this
     .layout { measurable, constraints ->
         val placeable = measurable.measure(
             constraints.copy(
@@ -539,7 +539,7 @@ private fun Modifier.rotateVertically(): Modifier = this
 private const val QuarterTurn = -90f
 
 /** Room for a rotated month name. */
-private val RotatedLabelLane = 62.dp
+internal val RotatedLabelLane = 62.dp
 
 /** The design's own rise: long enough to read as growth, short enough not to be waited on. */
 private const val GrowDurationMs = 400

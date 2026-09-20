@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -22,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
@@ -37,6 +40,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import com.tamin.taminhamrah.feature.treatment.ui.TreatmentDimens
 import com.tamin.taminhamrah.feature.treatment.ui.model.CoverageStatus
@@ -49,6 +53,7 @@ import com.tamin.taminhamrah.ui.components.vanishOnCollapse
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.Easing
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminCardAmberEnd
 import com.tamin.taminhamrah.ui.theme.TaminCardAmberMid
@@ -64,11 +69,12 @@ import com.tamin.taminhamrah.ui.theme.TaminCardTealMid
 import com.tamin.taminhamrah.ui.theme.TaminCardTealStart
 import com.tamin.taminhamrah.ui.theme.TaminCoverageBadgeBg
 import com.tamin.taminhamrah.ui.theme.TaminCoverageBadgeFg
+import com.tamin.taminhamrah.ui.theme.TaminCoverageRejectedBadgeBg
+import com.tamin.taminhamrah.ui.theme.TaminCoverageRejectedBadgeFg
 import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardChipBg
 import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardDivider
 import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardInk
 import com.tamin.taminhamrah.ui.theme.TaminInsuranceCardInkMuted
-import com.tamin.taminhamrah.ui.theme.TaminRed
 import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.ui.theme.insuranceCardTextStyles
 import com.tamin.taminhamrah.util.toPersianDigits
@@ -503,8 +509,8 @@ private fun CoverageStatus.cardStyle(
             badge = {
                 CoverageBadge(
                     icon = vectorResource(Res.drawable.ic_tamin_cross),
-                    containerColor = TaminRed,
-                    contentColor = TaminInsuranceCardInk,
+                    containerColor = TaminCoverageRejectedBadgeBg,
+                    contentColor = TaminCoverageRejectedBadgeFg,
                 )
             },
         )
@@ -547,14 +553,22 @@ fun InsuranceCardCarousel(
             // resting at scroll 0, which under RTL holds the first card against the right inset
             // and lets the next one peek on the left. Padding both sides equally centres every
             // card instead and opens a gutter beside the first one.
-            HorizontalPager(
-                state = pagerState,
-                key = { page -> page },
-                contentPadding = PaddingValues(
+            //
+            // A lone card is the exception: with no neighbor to peek, pinning it leaves an empty
+            // strip on one side. It keeps the carousel's card width and sits centred instead.
+            val trackPadding = if (pageCount > 1) {
+                PaddingValues(
                     start = TreatmentDimens.cardTrackPadding,
                     end = (maxWidth - TreatmentDimens.cardTrackPadding - cardWidth)
                         .coerceAtLeast(TreatmentDimens.cardTrackPadding),
-                ),
+                )
+            } else {
+                PaddingValues(horizontal = (maxWidth - cardWidth) / 2)
+            }
+            HorizontalPager(
+                state = pagerState,
+                key = { page -> page },
+                contentPadding = trackPadding,
                 pageSpacing = TreatmentDimens.cardTrackGap,
                 modifier = Modifier.fillMaxWidth(),
             ) { page ->
@@ -570,6 +584,250 @@ fun InsuranceCardCarousel(
                     .padding(top = TreatmentDimens.pageIndicatorTopGap),
             )
         }
+    }
+}
+
+/**
+ * Skeleton placeholder for the brand row inside [InsuranceCardSkeleton].
+ */
+@Composable
+private fun InsuranceCardBrandRowSkeleton(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        ShimmerBlock(
+            modifier = Modifier.size(TreatmentDimens.brandTileSize),
+            cornerRadius = TreatmentDimens.brandTileRadius,
+        )
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+        ) {
+            ShimmerBlock(
+                modifier = Modifier.width(110.dp).height(12.dp),
+                cornerRadius = CornerRadius.xs,
+            )
+            ShimmerBlock(
+                modifier = Modifier.width(140.dp).height(10.dp),
+                cornerRadius = CornerRadius.xs,
+            )
+        }
+        ShimmerBlock(
+            modifier = Modifier.size(TreatmentDimens.brandTickSize),
+            cornerRadius = CornerRadius.full,
+        )
+    }
+}
+
+/**
+ * Skeleton placeholder for the footer row inside [InsuranceCardSkeleton].
+ */
+@Composable
+private fun InsuranceCardFooterSkeleton(modifier: Modifier = Modifier) {
+    val colors = LocalTaminColors.current
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .drawBehind {
+                drawRect(
+                    color = colors.border,
+                    size = Size(size.width, Thickness.border.toPx()),
+                )
+            }
+            .padding(
+                horizontal = TreatmentDimens.cardFooterPaddingHorizontal,
+                vertical = TreatmentDimens.cardFooterPaddingVertical,
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(TreatmentDimens.cardFooterGap),
+    ) {
+        ShimmerBlock(
+            modifier = Modifier.size(TreatmentDimens.coverageBadgeSize),
+            cornerRadius = CornerRadius.full,
+        )
+        ShimmerBlock(
+            modifier = Modifier.width(180.dp).height(13.dp),
+            cornerRadius = CornerRadius.xs,
+        )
+    }
+}
+
+/**
+ * Skeleton placeholder for an electronic health-insurance card during initial load.
+ * Matches the expanded → collapsed geometry of [InsuranceCard] to eliminate layout shift,
+ * styled as a surface card with standard shimmer blocks like other features' cards.
+ */
+@Composable
+fun InsuranceCardSkeleton(
+    modifier: Modifier = Modifier,
+    collapseProgress: () -> Float = { 0f },
+) {
+    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .raisedCard(CornerRadius.cardCompact),
+    ) {
+        Layout(
+            content = {
+                InsuranceCardBrandRowSkeleton(
+                    modifier = Modifier
+                        .layoutId(CardSlot.Brand)
+                        .vanishOnCollapse(collapseProgress),
+                )
+                ShimmerBlock(
+                    modifier = Modifier
+                        .layoutId(CardSlot.Name)
+                        .shrinkOnCollapse(
+                            progress = collapseProgress,
+                            minScale = TreatmentDimens.cardNameCollapsedScale,
+                            rtl = rtl,
+                        )
+                        .size(width = 120.dp, height = 20.dp),
+                    cornerRadius = CornerRadius.xs,
+                )
+                ShimmerBlock(
+                    modifier = Modifier
+                        .layoutId(CardSlot.CodeLabel)
+                        .vanishOnCollapse(collapseProgress)
+                        .size(width = 44.dp, height = 11.dp),
+                    cornerRadius = CornerRadius.xs,
+                )
+                ShimmerBlock(
+                    modifier = Modifier
+                        .layoutId(CardSlot.Code)
+                        .size(width = 100.dp, height = 15.dp),
+                    cornerRadius = CornerRadius.xs,
+                )
+                ShimmerBlock(
+                    modifier = Modifier
+                        .layoutId(CardSlot.Badge)
+                        .size(TreatmentDimens.coverageBadgeSize),
+                    cornerRadius = CornerRadius.full,
+                )
+                InsuranceCardFooterSkeleton(
+                    modifier = Modifier
+                        .layoutId(CardSlot.Footer)
+                        .vanishOnCollapse(collapseProgress),
+                )
+            },
+        ) { measurables, constraints ->
+            val width = constraints.maxWidth
+            val pad = TreatmentDimens.cardPaddingHorizontal.roundToPx()
+            val padTop = TreatmentDimens.cardPaddingTop.roundToPx()
+            val padBottom = TreatmentDimens.cardPaddingBottom.roundToPx()
+            val nameGap = TreatmentDimens.cardNameTopGap.roundToPx()
+            val codeLabelGap = TreatmentDimens.cardCodeLabelTopGap.roundToPx()
+            val codeGap = TreatmentDimens.cardCodeTopGap.roundToPx()
+            val sm = Spacing.sm.roundToPx()
+            val innerC = Constraints(maxWidth = (width - 2 * pad).coerceAtLeast(0))
+
+            val brand = measurables.slot(CardSlot.Brand).measure(innerC)
+            val name = measurables.slot(CardSlot.Name).measure(innerC)
+            val label = measurables.slot(CardSlot.CodeLabel).measure(innerC)
+            val number = measurables.slot(CardSlot.Code).measure(innerC)
+            val badge = measurables.slot(CardSlot.Badge).measure(Constraints())
+            val footer = measurables.slot(CardSlot.Footer).measure(Constraints.fixedWidth(width))
+
+            val nameExpTop = padTop + brand.height + nameGap
+            val labelExpTop = nameExpTop + name.height + codeLabelGap
+            val numberExpTop = labelExpTop + label.height + codeGap
+            val footerTop = numberExpTop + number.height + padBottom
+            val badgeExpTop = footerTop + (footer.height - badge.height) / 2
+            val expandedH = footerTop + footer.height
+
+            val barH = maxOf(badge.height, name.height, number.height) +
+                TreatmentDimens.cardBarPadding.roundToPx()
+            val badgeColTop = (barH - badge.height) / 2
+            val nameColStart = pad + badge.width + sm
+            val nameColTop = (barH - name.height) / 2
+            val numberColStart =
+                nameColStart + (name.width * TreatmentDimens.cardNameCollapsedScale).toInt() + sm
+            val numberColTop = (barH - number.height) / 2
+
+            val t = Easing.standard.transform(collapseProgress())
+
+            layout(width, lerp(expandedH, barH, t)) {
+                brand.placeRelative(pad, padTop)
+                label.placeRelative(pad, labelExpTop)
+                footer.placeRelative(0, footerTop)
+                name.placeRelative(lerp(pad, nameColStart, t), lerp(nameExpTop, nameColTop, t))
+                number.placeRelative(lerp(pad, numberColStart, t), lerp(numberExpTop, numberColTop, t))
+                badge.placeRelative(pad, lerp(badgeExpTop, badgeColTop, t))
+            }
+        }
+    }
+}
+
+/**
+ * Shimmering placeholder for [TaminPageIndicator] during initial load.
+ */
+@Composable
+fun TaminPageIndicatorSkeleton(
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        ShimmerBlock(
+            modifier = Modifier.size(width = 24.dp, height = 7.dp),
+            cornerRadius = CornerRadius.full,
+        )
+        repeat(2) {
+            ShimmerBlock(
+                modifier = Modifier.size(7.dp),
+                cornerRadius = CornerRadius.full,
+            )
+        }
+    }
+}
+
+/**
+ * Skeleton carousel matching [InsuranceCardCarousel] during initial load:
+ * displays the main insured person's card, peeking dependant card, and page indicator.
+ */
+@Composable
+fun InsuranceCardCarouselSkeleton(
+    modifier: Modifier = Modifier,
+    collapseProgress: () -> Float = { 0f },
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clipToBounds(),
+        ) {
+            val cardWidth =
+                (maxWidth - TreatmentDimens.cardTrackPadding * 2) * TreatmentDimens.cardPeekFraction
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = TreatmentDimens.cardTrackPadding),
+                horizontalArrangement = Arrangement.spacedBy(TreatmentDimens.cardTrackGap),
+            ) {
+                InsuranceCardSkeleton(
+                    modifier = Modifier.width(cardWidth),
+                    collapseProgress = collapseProgress,
+                )
+                InsuranceCardSkeleton(
+                    modifier = Modifier
+                        .width(cardWidth)
+                        .vanishOnCollapse(collapseProgress),
+                    collapseProgress = collapseProgress,
+                )
+            }
+        }
+        TaminPageIndicatorSkeleton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = TreatmentDimens.pageIndicatorTopGap)
+                .vanishOnCollapse(collapseProgress),
+        )
     }
 }
 

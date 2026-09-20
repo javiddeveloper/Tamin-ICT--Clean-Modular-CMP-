@@ -35,5 +35,15 @@ data class ArticleSixteenSaveResultDN(
 /** The upload ceiling step 3 enforces — the add control disappears at this many files. */
 const val ARTICLE_SIXTEEN_MAX_DOCUMENTS = 10
 
-/** How long after تاریخ ابلاغ اجراییه a ماده ۱۶ request may still be filed, in Jalali days. */
-const val ARTICLE_SIXTEEN_FILING_WINDOW_DAYS = 1
+/**
+ * How long after تاریخ ابلاغ اجراییه a ماده ۱۶ request may still be filed, counted exactly as the
+ * old app counts it: whole years of [ARTICLE_SIXTEEN_DAYS_PER_YEAR] days, truncated, and refused
+ * only once that count *exceeds* this — so day 729 is the last one accepted, although the message
+ * it refuses with reads «بیش از یک سال».
+ *
+ * The design's note says «یک روز», which would refuse nearly every real debt; it is not the rule.
+ */
+const val ARTICLE_SIXTEEN_FILING_WINDOW_YEARS = 1
+
+/** The old app's year for [ARTICLE_SIXTEEN_FILING_WINDOW_YEARS]: a flat 365 days, leap or not. */
+const val ARTICLE_SIXTEEN_DAYS_PER_YEAR = 365
