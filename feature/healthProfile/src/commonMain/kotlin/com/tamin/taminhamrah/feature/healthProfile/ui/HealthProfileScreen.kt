@@ -8,9 +8,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.HelpOutline
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -38,9 +35,7 @@ import com.tamin.taminhamrah.feature.healthProfile.ui.components.HealthTopAppBar
 import com.tamin.taminhamrah.feature.healthProfile.ui.components.LocalIsEditMode
 import com.tamin.taminhamrah.feature.healthProfile.ui.screens.*
 import com.tamin.taminhamrah.ui.components.SectionHeaderTitle
-import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
-import com.tamin.taminhamrah.ui.components.TaminFilledButton
-import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
+import com.tamin.taminhamrah.ui.components.TaminFormAbandonDialog
 import com.tamin.taminhamrah.util.formatDecimal
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
@@ -49,10 +44,7 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.feature.healthprofile.generated.resources.Res
-import taminx.feature.healthprofile.generated.resources.health_exit_confirmation_confirm
-import taminx.feature.healthprofile.generated.resources.health_exit_confirmation_desc
-import taminx.feature.healthprofile.generated.resources.health_exit_confirmation_dismiss
-import taminx.feature.healthprofile.generated.resources.health_exit_confirmation_title
+import taminx.feature.healthprofile.generated.resources.health_intro_title
 
 private fun SelfDeclarationStep.previousStep(): SelfDeclarationStep? = when (this) {
     SelfDeclarationStep.INTRO -> SelfDeclarationStep.GATE
@@ -188,36 +180,13 @@ fun HealthProfileMainContent(
     BackHandler(onBack = navigateBack)
 
     if (showExitConfirmation) {
-        val taminColors = LocalTaminColors.current
-        TaminConfirmationDialog(
-            title = stringResource(Res.string.health_exit_confirmation_title),
-            description = stringResource(Res.string.health_exit_confirmation_desc),
-            confirmButton = {
-                TaminFilledButton(
-                    text = stringResource(Res.string.health_exit_confirmation_confirm),
-                    onClick = { showExitConfirmation = false },
-                    modifier = Modifier.fillMaxWidth(),
-                    height = 50.dp,
-                    shape = RoundedCornerShape(14.dp),
-                    icon = Icons.Default.Check
-                )
+        TaminFormAbandonDialog(
+            formName = stringResource(Res.string.health_intro_title),
+            onStay = { showExitConfirmation = false },
+            onAbandon = {
+                showExitConfirmation = false
+                onBackClicked()
             },
-            dismissButton = {
-                TaminOutlinedButton(
-                    text = stringResource(Res.string.health_exit_confirmation_dismiss),
-                    onClick = {
-                        showExitConfirmation = false
-                        onBackClicked()
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    height = 50.dp,
-                    shape = RoundedCornerShape(14.dp),
-                    borderWidth = 0.dp,
-                    contentColor = taminColors.textSecondary
-                )
-            },
-            onDismissRequest = { showExitConfirmation = false },
-            icon = Icons.AutoMirrored.Outlined.HelpOutline
         )
     }
 

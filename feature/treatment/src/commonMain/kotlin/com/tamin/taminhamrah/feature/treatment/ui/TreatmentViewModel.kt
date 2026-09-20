@@ -18,6 +18,7 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
@@ -57,6 +58,8 @@ class TreatmentViewModel(
 
         val status = try {
             featureManager.getFeatureStatus(FeatureFlag.PRESCRIPTION).first()
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             // A flag lookup that fails must not lock the person out of the feature.
             FeatureStatus.Enabled
@@ -103,6 +106,8 @@ class TreatmentViewModel(
 
         val nationalCode = try {
             identityInfoUseCase().first().nationalId ?: ""
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             ""
         }

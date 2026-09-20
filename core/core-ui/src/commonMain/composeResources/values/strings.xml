@@ -1509,6 +1509,12 @@
     <string name="occurrence_exit_confirmation_confirm">ادامه تکمیل فرم</string>
     <string name="occurrence_exit_confirmation_dismiss">بی‌خیال، خروج از فرم</string>
 
+    <!-- Shared multi-step form abandon dialog (TaminFormAbandonDialog) -->
+    <string name="form_abandon_title">رها کردن %1$s؟</string>
+    <string name="form_abandon_description">اطلاعاتی که تا این مرحله در فرم %1$s وارد کرده‌اید ذخیره نمی‌شود و در صورت خروج، باید درخواست را از ابتدا تکمیل کنید.</string>
+    <string name="form_abandon_stay">ادامه تکمیل فرم</string>
+    <string name="form_abandon_leave">رها می‌کنم</string>
+
     <!-- ===================== Inspection Screen ===================== -->
     <string name="inspection_title">بازرسی‌ها</string>
     <string name="inspection_subtitle">بازرسی‌های انجام‌شده توسط سازمان</string>
@@ -3164,6 +3170,19 @@
     <string name="objection_document_no_document_title">سندی برای نمایش نیست</string>
     <string name="objection_document_no_document_desc">برای این نوع درخواست، سندی در سامانه بارگذاری نشده است. برای پیگیری با شعبهٔ مربوطه تماس بگیرید.</string>
     <string name="objection_document_got_it">متوجه شدم</string>
+
+    <!-- خلاصهٔ سابقه — home history summary card -->
+    <string name="history_summary_title">خلاصهٔ سابقه</string>
+    <string name="history_summary_subtitle">وضعیت پرداخت حق بیمه</string>
+    <string name="history_summary_year">سال %1$s</string>
+    <string name="history_summary_registered_of_elapsed">از %1$s ماه سپری‌شده ثبت شده</string>
+    <string name="history_summary_last_registered">آخرین ثبت: %1$s</string>
+    <string name="history_summary_unpaid_warning">%1$s ماه حق بیمه پرداخت نشده است</string>
+    <string name="history_summary_follow_up">پیگیری</string>
+    <string name="history_summary_legend_registered">ثبت‌شده</string>
+    <string name="history_summary_legend_unpaid">پرداخت‌نشده</string>
+    <string name="history_summary_details">جزئیات ماه‌به‌ماه</string>
+    <string name="history_summary_unavailable">دریافت خلاصهٔ سابقه انجام نشد</string>
 
 
     <!-- ═══ Construction-worker premium payment (حق بیمهٔ کارگران ساختمانی) ═══ -->

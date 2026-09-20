@@ -46,6 +46,7 @@ import com.tamin.taminhamrah.feature.retirementPension.ui.contract.RetirementPen
 import com.tamin.taminhamrah.feature.retirementPension.ui.contract.RetirementScreen
 import com.tamin.taminhamrah.feature.retirementPension.ui.contract.RetirementStep
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
 import com.tamin.taminhamrah.ui.components.TaminBottomBar
@@ -150,6 +151,8 @@ fun RetirementPensionRoute(
             }
         },
     )
+
+    BackHandler { viewModel.sendIntent(RetirementPensionIntent.Back) }
 
     RetirementPensionScreen(
         state = state,
@@ -332,7 +335,7 @@ private fun RetirementHeader(
             TaminTopAppBarButton(
                 icon = vectorResource(Res.drawable.ic_tamin_cross),
                 contentDescription = null,
-                onClick = { onIntent(RetirementPensionIntent.Back) },
+                onClick = { onIntent(RetirementPensionIntent.CloseClicked) },
                 bordered = true,
             )
         },

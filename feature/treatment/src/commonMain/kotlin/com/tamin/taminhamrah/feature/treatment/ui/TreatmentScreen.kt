@@ -191,7 +191,9 @@ fun TreatmentContent(
                 .verticalScroll(scrollState, overscrollEffect = rememberJellyOverscroll()),
         ) {
             Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
-            Spacer(modifier = Modifier.height(Spacing.lg))
+            // Tighter than the gaps between the sections below: the carousel above already ends in
+            // its own margin, and a full section gap on top of it read as a hole.
+            Spacer(modifier = Modifier.height(Spacing.sm))
             TreatmentQuickAccess(
                 healthProfileCompleted = state.healthProfileCompleted,
                 onOpenMedicalRecords = handleOpenMedicalRecords,
