@@ -112,6 +112,35 @@ class ObjectionInsuranceUiMapperTest {
     }
 
     @Test
+    fun buildEditedRecords_appliesLegacySaveDefaults() {
+        val records = listOf(
+            ObjectionInsuranceHistoryPR(
+                year = "1403",
+                prow = "should-clear",
+                requestNumber = "R1",
+                requestType = "T1",
+                userDesc = "stale",
+                isDeleted = true,
+                newMonth2 = "",
+                newMonth3 = "15",
+                oldMonth1 = "20",
+            )
+        )
+        val edited = buildEditedRecords(records, edits = mapOf(0 to mapOf(0 to "25")))
+
+        val payload = edited.single()
+        assertEquals("25", payload.newMonth1)
+        assertEquals("0", payload.newMonth2)
+        assertEquals("15", payload.newMonth3)
+        assertEquals("0", payload.newMonth12)
+        assertEquals(null, payload.prow)
+        assertEquals(null, payload.requestNumber)
+        assertEquals(null, payload.requestType)
+        assertEquals("", payload.userDesc)
+        assertEquals(false, payload.isDeleted)
+    }
+
+    @Test
     fun buildSeasonGroups_groupsTwelveMonthsIntoFourSeasonsWithJalaliMaxDays() {
         val groups = buildSeasonGroups(
             record = record(year = "1403", monthDays = List(12) { 31 }),

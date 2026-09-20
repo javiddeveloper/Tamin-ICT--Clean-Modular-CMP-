@@ -28,13 +28,19 @@ core-network  ObjectionInsuranceApiService
 core-domain   ObjectionInsuranceRepository
               model/objectionInsurance/ObjectionInsuranceHistoryDN
               Check / Get / Save / Confirm / FinalConfirm *UseCase
-core-data     ObjectionInsuranceRepositoryImpl (network-only; list limit = 60)
+core-data     ObjectionInsuranceRepositoryImpl (network-only; pages `conflicthistories` at
+              limit 60 until `total` is reached, cap 500)
               data/mapper/ObjectionInsuranceMapper.kt — DTO ↔ DN
 core-ui       model/objectionInsurance/ObjectionInsuranceHistoryPR
               mapper/objectionInsurance/ObjectionInsuranceMapper.kt — DN ↔ PR (`toDomain()` added
               for Phase 2, to rebuild the save payload from staged UI edits)
 feature       ObjectionInsuranceContract/ViewModel/Screen — see below
 ```
+
+`buildEditedRecords` mirrors legacy before `saveconflict`: blank/`null` `mm*` → `"0"`,
+`prow`/`reqno`/`reqtype` → `null`, `userDesc` → `""`, `isDeleted` → `false`. A blank tracking
+number from `finalconfirmconflict` is treated as an error (legacy
+`ObjectionInsuranceHistoryFragment`), not a success dialog.
 
 ### UI design
 
@@ -64,7 +70,7 @@ own components:
 | Call | Method | Path | Notes |
 |---|---|---|---|
 | check status | GET | `checkstatusconflict` | `BaseDTO<Boolean>` — `true` = already reviewing; do not load list |
-| list | GET | `conflicthistories` | `page`/`start`/`limit`/`filter`/`sort`; Impl uses `limit = 60` |
+| list | GET | `conflicthistories` | `page`/`start`/`limit`/`filter`/`sort`; Impl pages at `limit = 60` until `total` |
 | save edits | POST | `saveconflict` | body `List<item>`; `data` may be null on 2xx |
 | confirm | POST | `confirmconflict` | body `List<{userDesc}>` (one item); `BaseDTO<Boolean>` |
 | final confirm | POST | `finalconfirmconflict` | empty string body; `BaseDTO<String>` tracking number |

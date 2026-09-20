@@ -133,6 +133,36 @@ class ObjectionInsuranceViewModelTest {
         }
     }
 
+    @Test
+    fun stageEditThenSubmitConfirmed_blankTracking_showsError() = runTest(testDispatcher) {
+        repository.histories = listOf(ObjectionInsuranceHistoryDN(year = "1403", oldMonth1 = "20"))
+        repository.confirmResult = true
+        repository.finalConfirmResult = "   "
+        val viewModel = createViewModel()
+
+        viewModel.uiState.test {
+            viewModel.sendIntent(ObjectionInsuranceIntent.Load)
+            awaitUntil { !it.isLoading }
+
+            viewModel.sendIntent(ObjectionInsuranceIntent.OnYearCardClicked(persistentListOf(0)))
+            awaitUntil { it.detailRecordIndex == 0 }
+
+            viewModel.sendIntent(ObjectionInsuranceIntent.OnMonthValueChanged(month = 0, value = "25"))
+            awaitUntil { it.detailDraft[0] == "25" }
+
+            viewModel.sendIntent(ObjectionInsuranceIntent.OnDetailConfirmClicked)
+            awaitUntil { it.detailRecordIndex == null }
+
+            viewModel.sendIntent(ObjectionInsuranceIntent.OnSubmitClicked)
+            awaitUntil { it.showSubmitConfirmationDialog }
+
+            viewModel.sendIntent(ObjectionInsuranceIntent.OnSubmitConfirmed)
+            val state = awaitUntil { it.error != null }
+            assertNotNull(state.error)
+            assertEquals(null, state.trackingNumber)
+        }
+    }
+
     private suspend fun ReceiveTurbine<ObjectionInsuranceUiState>.awaitUntil(
         predicate: (ObjectionInsuranceUiState) -> Boolean,
     ): ObjectionInsuranceUiState {

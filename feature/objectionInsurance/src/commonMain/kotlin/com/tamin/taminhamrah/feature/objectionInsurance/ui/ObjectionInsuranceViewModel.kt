@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import org.jetbrains.compose.resources.getString
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.objection_insurance_blank_tracking_error
 import taminx.core.core_ui.objection_insurance_no_staged_edits_error
 import taminx.core.core_ui.objection_insurance_submit_rejected_error
 
@@ -157,7 +158,13 @@ class ObjectionInsuranceViewModel(
             val confirmed = confirmObjectionInsuranceConflictUseCase(description).first()
             if (confirmed) {
                 val trackingNumber = finalConfirmObjectionInsuranceConflictUseCase().first()
-                emit(PartialState.SubmitSucceeded(trackingNumber))
+                // Legacy ObjectionInsuranceHistoryFragment treats blank/null tracking as an error,
+                // not a success dialog with an empty number.
+                if (trackingNumber.isBlank()) {
+                    emit(PartialState.Error(getString(Res.string.objection_insurance_blank_tracking_error)))
+                } else {
+                    emit(PartialState.SubmitSucceeded(trackingNumber))
+                }
             } else {
                 emit(PartialState.Error(getString(Res.string.objection_insurance_submit_rejected_error)))
             }

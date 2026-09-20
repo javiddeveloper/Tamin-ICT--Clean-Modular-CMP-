@@ -3397,6 +3397,7 @@
     <string name="objection_insurance_submit_confirmation_title">تأیید و ارسال درخواست</string>
     <string name="objection_insurance_submit_confirmation_message">در صورت تایید و ثبت نهایی درخواست، تا زمان رسیدگی کامل به درخواست ثبت شده امکان ثبت درخواست مجدد نمی‌باشد.</string>
     <string name="objection_insurance_submit_rejected_error">درخواست شما رد شد. لطفاً دوباره تلاش کنید.</string>
+    <string name="objection_insurance_blank_tracking_error">خطا در دریافت اطلاعات</string>
     <string name="objection_insurance_active_request_title">درخواست در حال بررسی</string>
     <string name="objection_insurance_active_request_message">کاربر گرامی، در حال حاضر دارای یک درخواست در حال بررسی می‌باشید و امکان ثبت مجدد درخواست وجود ندارد.</string>
     <string name="objection_insurance_ack_button">متوجه شدم</string>

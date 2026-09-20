@@ -225,13 +225,45 @@ private fun ObjectionInsuranceHistoryDN.withMonthEdits(edits: Map<Int, String>):
     return result
 }
 
+/**
+ * Legacy `ObjectionInsuranceHistoryModel.setDefaultValue()` plus the detail dialog's
+ * `editedValue = newMonth ?: "0"` seed: blank/null `mm*` become `"0"`, and `prow`/`reqno`/
+ * `reqtype` are cleared to null before `saveconflict`.
+ */
+private fun ObjectionInsuranceHistoryDN.withLegacySaveDefaults(): ObjectionInsuranceHistoryDN = copy(
+    newMonth1 = newMonth1.blankToZero(),
+    newMonth2 = newMonth2.blankToZero(),
+    newMonth3 = newMonth3.blankToZero(),
+    newMonth4 = newMonth4.blankToZero(),
+    newMonth5 = newMonth5.blankToZero(),
+    newMonth6 = newMonth6.blankToZero(),
+    newMonth7 = newMonth7.blankToZero(),
+    newMonth8 = newMonth8.blankToZero(),
+    newMonth9 = newMonth9.blankToZero(),
+    newMonth10 = newMonth10.blankToZero(),
+    newMonth11 = newMonth11.blankToZero(),
+    newMonth12 = newMonth12.blankToZero(),
+    prow = null,
+    requestNumber = null,
+    requestType = null,
+    userDesc = "",
+    isDeleted = false,
+)
+
+private fun String?.blankToZero(): String = if (isNullOrBlank()) "0" else this
+
 /** The records to send to `saveconflict` — only the ones this session actually declared a change for. */
 fun buildEditedRecords(
     records: List<ObjectionInsuranceHistoryPR>,
     edits: Map<Int, Map<Int, String>>,
 ): List<ObjectionInsuranceHistoryDN> = edits
     .filterValues { it.hasRealEdit() }
-    .mapNotNull { (index, recordEdits) -> records.getOrNull(index)?.toDomain()?.withMonthEdits(recordEdits) }
+    .mapNotNull { (index, recordEdits) ->
+        records.getOrNull(index)
+            ?.toDomain()
+            ?.withMonthEdits(recordEdits)
+            ?.withLegacySaveDefaults()
+    }
 
 private const val MONTHS_IN_YEAR = 12
 private const val MONTHS_PER_SEASON = 3
