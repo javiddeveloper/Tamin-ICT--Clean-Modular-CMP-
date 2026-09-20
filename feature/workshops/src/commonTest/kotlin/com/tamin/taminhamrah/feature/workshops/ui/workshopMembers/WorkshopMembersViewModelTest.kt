@@ -17,6 +17,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -276,6 +277,74 @@ class WorkshopMembersViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
     }
+
+    /**
+     * The intents are merged, not switched, so applying a search does not cancel the page already
+     * in flight. The page the user has scrolled past must not be appended to what they searched for.
+     */
+    @Test
+    fun `a page answered after a new search was applied is dropped`() = runTest(testDispatcher) {
+        repository.memberPages = mapOf(
+            0 to membersPage(count = WORKSHOP_PAGE_SIZE, total = 30),
+            1 to membersPage(count = WORKSHOP_PAGE_SIZE, total = 30, from = WORKSHOP_PAGE_SIZE),
+        )
+        val heldPageOne = CompletableDeferred<Unit>()
+        repository.heldMemberPages[1] = heldPageOne
+
+        viewModel.uiState.test {
+            awaitItem()
+            viewModel.sendIntent(WorkshopMembersIntent.Open(WORKSHOP_ID, BRANCH_CODE))
+            awaitUntil { it.list.items.size == WORKSHOP_PAGE_SIZE }
+
+            // Scrolling to the end, then searching before that page comes back.
+            viewModel.sendIntent(WorkshopMembersIntent.LoadMore)
+            repository.memberPages = mapOf(0 to membersPage(count = 1, total = 1, from = 99))
+            viewModel.sendIntent(
+                WorkshopMembersIntent.DraftChanged(PersonSearch(nationalId = "0024567899")),
+            )
+            viewModel.sendIntent(WorkshopMembersIntent.ApplySearch)
+            val searched = awaitUntil { it.list.items.size == 1 }
+            assertEquals(1, searched.list.total)
+
+            heldPageOne.complete(Unit)
+
+            // The old page lands now, and must change nothing about the search's list.
+            val settled = viewModel.uiState.value
+            assertEquals(1, settled.list.items.size)
+            assertEquals(1, settled.list.receivedCount)
+            assertFalse(settled.list.isLoadingMore)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    /** The same applies to a failure: the abandoned request must not put its error on the new list. */
+    @Test
+    fun `a page that fails after a new search was applied does not fail the new list`() =
+        runTest(testDispatcher) {
+            repository.members = membersPage(count = WORKSHOP_PAGE_SIZE, total = 30)
+            val heldPageOne = CompletableDeferred<Unit>()
+            repository.heldMemberPages[1] = heldPageOne
+
+            viewModel.uiState.test {
+                awaitItem()
+                viewModel.sendIntent(WorkshopMembersIntent.Open(WORKSHOP_ID, BRANCH_CODE))
+                awaitUntil { it.list.items.size == WORKSHOP_PAGE_SIZE }
+
+                viewModel.sendIntent(WorkshopMembersIntent.LoadMore)
+                repository.members = membersPage(count = 1, total = 1, from = 99)
+                viewModel.sendIntent(WorkshopMembersIntent.ApplySearch)
+                awaitUntil { it.list.items.size == 1 }
+
+                // The abandoned page-1 request answers with a failure.
+                repository.error = TaminApiException(title = "خطا")
+                heldPageOne.complete(Unit)
+
+                val settled = viewModel.uiState.value
+                assertNull(settled.list.error)
+                assertEquals(1, settled.list.items.size)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
 
     @Test
     fun `a member with one missing name half does not render a literal null`() = runTest(testDispatcher) {
