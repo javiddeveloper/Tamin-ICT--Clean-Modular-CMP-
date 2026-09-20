@@ -272,7 +272,17 @@ private fun HomeScreenContent(
 
             storyRail()
 
-            // خلاصهٔ سابقه, between «تازه‌ها» and the campaigns exactly as the design orders them.
+            HomeQuickAccessSection(
+                sections = uiState.homeContent?.quickAccess?.toHomeSections() ?: persistentListOf(),
+                selectedSection = uiState.selectedSection,
+                onSectionSelected = onSectionSelected,
+                onServiceClick = onServiceClick,
+                onSeeAll = onNavigateToAllServices,
+                isLoading = uiState.isLoading,
+                modifier = Modifier.padding(top = Spacing.lg),
+            )
+
+            // خلاصهٔ سابقه, between «دسترسی سریع» and «کمپین‌ها», the place the design gives it.
             //
             // Nothing at all once the load has answered with no year: someone not yet insured has
             // no summary, and neither has a کارفرما or a مستمری‌بگیر, whose premiums are not their
@@ -315,16 +325,6 @@ private fun HomeScreenContent(
             )
 
             Spacer(modifier = Modifier.height(8.dp))
-
-            HomeQuickAccessSection(
-                sections = uiState.homeContent?.quickAccess?.toHomeSections() ?: persistentListOf(),
-                selectedSection = uiState.selectedSection,
-                onSectionSelected = onSectionSelected,
-                onServiceClick = onServiceClick,
-                onSeeAll = onNavigateToAllServices,
-                isLoading = uiState.isLoading,
-                modifier = Modifier.padding(top = Spacing.lg),
-            )
 
             HomeFeaturedSection(
                 services = uiState.homeContent?.specialServices?.toMainServices() ?: persistentListOf(),
