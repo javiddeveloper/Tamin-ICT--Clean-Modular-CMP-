@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFilePR
+import com.tamin.taminhamrah.model.constructionInsurance.INSTALLMENT_DEBIT_STATUS_CODE
 import com.tamin.taminhamrah.model.constructionInsurance.WorkshopIdInfoPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
@@ -55,10 +56,9 @@ import taminx.core.core_ui.installment_type
 import taminx.core.core_ui.label_calculated_amount
 import taminx.core.core_ui.label_registration_date
 import taminx.core.core_ui.label_request_number
+import taminx.core.core_ui.pregnancy_pay_estimate_result_rial_unit
+import taminx.core.core_ui.sum_of_complications
 import taminx.core.core_ui.workshop_number
-
-/** The literal every money line in the app appends to a grouped amount — see `Extentions.kt`. */
-private const val RIAL_UNIT = "ریال"
 
 /**
  * One پروندهٔ ساختمانی row — file number + payment-type pill, a کارگاه/درخواست grid, a تاریخ ثبت /
@@ -129,6 +129,7 @@ fun ConstructionFileCard(
                 .padding(horizontal = Spacing.xlg),
             verticalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
+            val rialUnit = stringResource(Res.string.pregnancy_pay_estimate_result_rial_unit)
             DetailGridRow(
                 labelStart = stringResource(Res.string.workshop_number),
                 valueStart = item.workshopInfo?.workshopId ?: "-",
@@ -140,9 +141,16 @@ fun ConstructionFileCard(
                 valueStart = item.workshopInfo?.workshopRegisterDate ?: item.requestDate ?: "-",
                 labelEnd = stringResource(Res.string.label_calculated_amount),
                 valueEnd = (item.totalPayment ?: 0L).toPriceFormat(),
-                unitEnd = RIAL_UNIT,
+                unitEnd = rialUnit,
                 valueEndColor = colors.blueText,
                 weightEnd = AmountTileWeight,
+            )
+            InfoBox(
+                label = stringResource(Res.string.sum_of_complications),
+                value = (item.sumOfComplications ?: 0L).toPriceFormat(),
+                unit = rialUnit,
+                valueColor = colors.blueText,
+                modifier = Modifier.fillMaxWidth(),
             )
 
             val branchCode = item.workshopInfo?.brhCode
@@ -202,8 +210,6 @@ fun ConstructionFileCard(
         }
     }
 }
-
-private const val INSTALLMENT_DEBIT_STATUS_CODE = "51"
 
 /** How much wider مبلغ محاسبه‌شده / جزئیات درخواست read next to their one-unit-weight neighbor. */
 private const val AmountTileWeight = 2f
@@ -284,6 +290,7 @@ private val PreviewInstallmentFile = ConstructionFilePR(
         brhCode = "7",
     ),
     totalPayment = 1_284_000_000L,
+    sumOfComplications = 96_000_000L,
     debitStatusCode = "51",
 )
 
@@ -297,6 +304,7 @@ private val PreviewCashFile = ConstructionFilePR(
         brhCode = "7",
     ),
     totalPayment = 486_000_000L,
+    sumOfComplications = 32_000_000L,
     debitStatusCode = "10",
 )
 

@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -183,9 +183,10 @@ fun BeneficiariesScreen(
                             modifier = Modifier.padding(bottom = Spacing.xs),
                         )
                     }
-                    items(
+                    itemsIndexed(
                         items = state.items,
-                        key = { it.nationalCode ?: it.hashCode() }) { beneficiary ->
+                        key = { index, item -> "${item.nationalCode}-${item.ownerType}-$index" }
+                    ) { _, beneficiary ->
                         BeneficiaryCard(item = beneficiary)
                     }
                     item {

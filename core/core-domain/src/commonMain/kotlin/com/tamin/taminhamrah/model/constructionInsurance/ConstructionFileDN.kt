@@ -5,6 +5,14 @@ import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
 
+/**
+ * [ConstructionFileDN.debitStatusCode] value meaning the file's debit is being paid in
+ * installments — drives the عملیات-menu split between «صدور و مدیریت برگه پرداخت» and «مدیریت
+ * پرداخت اقساط», and the fee row's cash/installment pill. One shared constant instead of separate
+ * literal copies in core-ui and feature/taminServices.
+ */
+const val INSTALLMENT_DEBIT_STATUS_CODE = "51"
+
 data class ConstructionFileDN(
     val fileNumber: Long?,
     val requestNumber: Long?,

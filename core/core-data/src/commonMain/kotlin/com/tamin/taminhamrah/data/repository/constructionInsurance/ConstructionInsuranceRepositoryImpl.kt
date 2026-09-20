@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.data.repository.constructionInsurance
 
 import com.tamin.taminhamrah.data.local.dao.ConstructionFileDao
+import com.tamin.taminhamrah.data.local.entity.ConstructionFileEntity
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
 import com.tamin.taminhamrah.dataSource.constructionInsurance.ConstructionInsuranceRemoteDataSource
@@ -20,6 +21,7 @@ import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.repository.constructionInsurance.ConstructionInsuranceRepository
 import io.ktor.utils.io.ByteReadChannel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
@@ -36,26 +38,47 @@ internal class ConstructionInsuranceRepositoryImpl(
         search: ConstructionFileSearchParamsDN?
     ): Flow<List<ConstructionFileDN>> {
         return flow {
-            val localFiles = constructionFileDao.getConstructionFiles().first()
-            emit(localFiles.map { it.toDomain() })
+            val matchingLocalFiles = constructionFileDao.getConstructionFiles().first()
+                .filter { it.matches(search) }
+            emit(matchingLocalFiles.map { it.toDomain() })
 
             try {
                 val query = buildQuery(search)
                 val response = remoteDataSource.getConstructionFiles(query)
                 val remoteFiles = response.list.orEmpty()
                 constructionFileDao.replaceAll(remoteFiles.map { it.toEntity() })
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
-                if (localFiles.isEmpty()) {
+                if (matchingLocalFiles.isEmpty()) {
                     throw e
                 }
             }
 
             emitAll(
                 constructionFileDao.getConstructionFiles().map { entities ->
-                    entities.map { it.toDomain() }
+                    entities.filter { it.matches(search) }.map { it.toDomain() }
                 }
             )
         }.distinctUntilChanged()
+    }
+
+    /**
+     * Same EQ-per-non-blank-field semantics as [buildQuery], applied to the local cache so a
+     * search for one file never surfaces another file's cached row while the network call is
+     * in flight or has failed.
+     */
+    private fun ConstructionFileEntity.matches(search: ConstructionFileSearchParamsDN?): Boolean {
+        if (search == null) return true
+        val fileNo = search.fileNo
+        if (!fileNo.isNullOrBlank() && fileNumber.toString() != fileNo) return false
+        val reqNo = search.reqNo
+        if (!reqNo.isNullOrBlank() && requestNumber?.toString() != reqNo) return false
+        val workshopId = search.workshopId
+        if (!workshopId.isNullOrBlank() && this.workshopId != workshopId) return false
+        val branchCode = search.branchCode
+        if (!branchCode.isNullOrBlank() && brhCode != branchCode) return false
+        return true
     }
 
     override fun getConstructionFilesPage(query: ApiQueryParamDN): Flow<PageDN<ConstructionFileDN>> = flow {

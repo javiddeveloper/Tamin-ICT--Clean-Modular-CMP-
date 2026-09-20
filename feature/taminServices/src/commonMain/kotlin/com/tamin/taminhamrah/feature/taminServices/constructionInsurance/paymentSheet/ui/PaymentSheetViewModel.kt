@@ -12,6 +12,7 @@ import com.tamin.taminhamrah.useCases.constructionInsurance.GetCertificatePaymen
 import com.tamin.taminhamrah.useCases.constructionInsurance.GetPaymentSheetConstructionInfoUseCase
 import com.tamin.taminhamrah.useCases.constructionInsurance.IssuancePaymentSheetUseCase
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
@@ -57,6 +58,10 @@ class PaymentSheetViewModel(
 
             PaymentSheetIntent.IssuePaymentSheet -> issuePaymentSheet()
 
+            PaymentSheetIntent.DismissIssuanceNotice -> flow {
+                emit(PartialState.IssuanceNoticeDismissed)
+            }
+
             PaymentSheetIntent.OnBackClicked -> {
                 sendEvent(PaymentSheetEvent.NavigateBack)
                 emptyFlow()
@@ -94,6 +99,8 @@ class PaymentSheetViewModel(
             } else {
                 emit(PartialState.PdfFailed(true))
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             sendEvent(PaymentSheetEvent.ShowError(e.toSingleLineMessage()))
             emit(PartialState.PdfFailed(true))
@@ -105,14 +112,19 @@ class PaymentSheetViewModel(
     /**
      * «صدور برگه پرداخت». The old UI gates this behind a confirm dialog
      * (`DialogManagerMessageOfRequest`) before sending the intent — that confirmation is a UI
-     * concern, so this fires the request immediately once the intent arrives.
+     * concern, so this fires the request immediately once the intent arrives. Intents are merged
+     * rather than serialized ([BaseViewModel]), so a second confirm fired before this flow starts
+     * running must be rejected here rather than relying on the UI's disabled-button state alone.
      */
     private fun issuePaymentSheet(): Flow<PartialState> = flow {
+        if (uiState.value.isIssuing) return@flow
         emit(PartialState.IssuanceFailed(false))
         emit(PartialState.IssuanceLoading(true))
         try {
             val message = issuancePaymentSheetUseCase(debitNumber).first()
             emit(PartialState.IssuanceSucceeded(message))
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             sendEvent(PaymentSheetEvent.ShowError(e.toSingleLineMessage()))
             emit(PartialState.IssuanceFailed(true))
@@ -156,6 +168,7 @@ class PaymentSheetViewModel(
             issuanceFailed = false,
         )
         is PartialState.IssuanceFailed -> currentState.copy(issuanceFailed = partialState.failed)
+        is PartialState.IssuanceNoticeDismissed -> currentState.copy(issuanceMessage = null)
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)

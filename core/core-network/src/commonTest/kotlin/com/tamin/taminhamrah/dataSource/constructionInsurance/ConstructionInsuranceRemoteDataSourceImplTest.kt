@@ -26,6 +26,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.test.runTest
 import kotlinx.io.readByteArray
 import kotlinx.serialization.json.JsonElement
@@ -123,10 +124,12 @@ class ConstructionInsuranceRemoteDataSourceImplTest : BaseApiTest() {
     }
 
     @Test
-    fun getConstructionFiles_alwaysSendsPositionOne() = runTest {
+    fun getConstructionFiles_doesNotSendPositionParam() = runTest {
+        // Legacy never actually sent this — it only kept it in a local map. Sending it was a
+        // porting mistake (MR !244 review item 10), not a real backend requirement.
         dataSource.getConstructionFiles(ApiQueryParamDN())
 
-        assertEquals("1", fakeApiService.lastConstructionFilesParameters?.get("position"))
+        assertEquals(null, fakeApiService.lastConstructionFilesParameters?.get("position"))
     }
 
     @Test
@@ -145,10 +148,10 @@ class ConstructionInsuranceRemoteDataSourceImplTest : BaseApiTest() {
     }
 
     @Test
-    fun getBeneficiariesWorkshop_alwaysSendsPositionOne() = runTest {
+    fun getBeneficiariesWorkshop_doesNotSendPositionParam() = runTest {
         dataSource.getBeneficiariesWorkshop(ApiQueryParamDN())
 
-        assertEquals("1", fakeApiService.lastBeneficiariesParameters?.get("position"))
+        assertEquals(null, fakeApiService.lastBeneficiariesParameters?.get("position"))
     }
 
     @Test
@@ -242,5 +245,14 @@ class ConstructionInsuranceRemoteDataSourceImplTest : BaseApiTest() {
         }
 
         assertEquals("خطای اتصال", exception.title)
+    }
+
+    @Test
+    fun getConstructionFiles_onCancellation_propagatesCancellationRatherThanWrappingIt() = runTest {
+        fakeApiService.shouldThrowException = CancellationException("left the screen")
+
+        assertFailsWith<CancellationException> {
+            dataSource.getConstructionFiles(ApiQueryParamDN())
+        }
     }
 }

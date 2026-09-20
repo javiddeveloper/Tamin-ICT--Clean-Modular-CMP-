@@ -95,6 +95,49 @@ class ConstructionInsuranceRepositoryImplTest {
     }
 
     @Test
+    fun `getConstructionFiles should not surface a cached file that does not match the search`() = runTest {
+        dao.filesFlow.value = listOf(createFileEntity(fileNumber = 1L))
+        remoteDataSource.constructionFilesResult = ListData(total = 1, list = listOf(createFileDTO(fileNumber = 2L)))
+        val search = ConstructionFileSearchParamsDN(fileNo = "2", reqNo = null, workshopId = null, branchCode = null)
+
+        repository.getConstructionFiles(search).test {
+            val firstEmission = awaitItem()
+            assertEquals(emptyList<Long>(), firstEmission.map { it.fileNumber })
+
+            val secondEmission = awaitItem()
+            assertEquals(listOf(2L), secondEmission.map { it.fileNumber })
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `getConstructionFiles should keep showing the matching cached file when remote fails`() = runTest {
+        dao.filesFlow.value = listOf(createFileEntity(fileNumber = 1L))
+        remoteDataSource.shouldThrowError = true
+        val search = ConstructionFileSearchParamsDN(fileNo = "1", reqNo = null, workshopId = null, branchCode = null)
+
+        repository.getConstructionFiles(search).test {
+            val firstEmission = awaitItem()
+            assertEquals(listOf(1L), firstEmission.map { it.fileNumber })
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `getConstructionFiles should throw when the cache has no match for the search and remote fails`() = runTest {
+        dao.filesFlow.value = listOf(createFileEntity(fileNumber = 1L))
+        remoteDataSource.shouldThrowError = true
+        val search = ConstructionFileSearchParamsDN(fileNo = "2", reqNo = null, workshopId = null, branchCode = null)
+
+        repository.getConstructionFiles(search).test {
+            val firstEmission = awaitItem()
+            assertEquals(emptyList<Long>(), firstEmission.map { it.fileNumber })
+            awaitError()
+        }
+    }
+
+    @Test
     fun `getConstructionFiles should forward non-blank search fields as EQ filters`() = runTest {
         val search = ConstructionFileSearchParamsDN(fileNo = "1234", reqNo = "5678", workshopId = null, branchCode = null)
 

@@ -48,6 +48,7 @@ data class PaymentSheetUiState(
         data class IssuanceLoading(val loading: Boolean) : PartialState
         data class IssuanceSucceeded(val message: String?) : PartialState
         data class IssuanceFailed(val failed: Boolean) : PartialState
+        data object IssuanceNoticeDismissed : PartialState
     }
 }
 
@@ -58,6 +59,8 @@ sealed interface PaymentSheetIntent {
     data object DownloadCertificate : PaymentSheetIntent
     data object DismissPdfViewer : PaymentSheetIntent
     data object IssuePaymentSheet : PaymentSheetIntent
+    /** Dismisses the post-issuance "processing, please wait" notice; the screen stays open. */
+    data object DismissIssuanceNotice : PaymentSheetIntent
     data object OnBackClicked : PaymentSheetIntent
 }
 

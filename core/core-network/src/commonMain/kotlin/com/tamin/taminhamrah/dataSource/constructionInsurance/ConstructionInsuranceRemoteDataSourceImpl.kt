@@ -11,18 +11,10 @@ import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
-import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
-import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
 import com.tamin.taminhamrah.tools.readPdfChannel
-
-/**
- * Sent by the legacy native app on every `getConstructionFiles`/`getBeneficiariesWorkshop` call
- * (`ConstructionInsurancePremiumViewModel`, `D:\my-tamin`) — a fixed literal unrelated to the real
- * `page`/`start`/`limit` paging params below, kept for backend parity.
- */
-private val POSITION_PARAM = "position" to "1"
+import com.tamin.taminhamrah.tools.safeCall
 
 internal class ConstructionInsuranceRemoteDataSourceImpl(
     private val apiService: ConstructionInsuranceApiService,
@@ -32,24 +24,26 @@ internal class ConstructionInsuranceRemoteDataSourceImpl(
 
     override suspend fun getConstructionFiles(
         query: ApiQueryParamDN
-    ): ListData<ConstructionFileDTO> = call {
-        apiService.getConstructionFiles(queryBuilder.buildQuery(query) + POSITION_PARAM).extractData()
+    ): ListData<ConstructionFileDTO> = errorParser.safeCall("getConstructionFiles") {
+        apiService.getConstructionFiles(queryBuilder.buildQuery(query)).extractData()
     }
 
-    override suspend fun getBeneficiariesWorkshop(query: ApiQueryParamDN): ListData<BeneficiaryConstructionDTO> = call {
-        apiService.getBeneficiariesWorkshop(queryBuilder.buildQuery(query) + POSITION_PARAM).extractData()
+    override suspend fun getBeneficiariesWorkshop(
+        query: ApiQueryParamDN
+    ): ListData<BeneficiaryConstructionDTO> = errorParser.safeCall("getBeneficiariesWorkshop") {
+        apiService.getBeneficiariesWorkshop(queryBuilder.buildQuery(query)).extractData()
     }
 
     override suspend fun getPaymentSheetConstructionInfo(
         debitNumber: String
-    ): ListData<PaymentSheetConstructionFileDTO> = call {
+    ): ListData<PaymentSheetConstructionFileDTO> = errorParser.safeCall("getPaymentSheetConstructionInfo") {
         apiService.getPaymentSheetConstructionInfo(debitNumber).extractData()
     }
 
     override suspend fun getCertificatePaymentSheetPdf(
         debitNumber: String,
         branchCode: String,
-    ): PdfDownloadDTO = call {
+    ): PdfDownloadDTO = errorParser.safeCall("getCertificatePaymentSheetPdf") {
         PdfDownloadDTO(
             pdf = InputStreamDTO(
                 pdf = apiService.getCertificatePaymentSheetPdf(debitNumber, branchCode).readPdfChannel()
@@ -57,25 +51,16 @@ internal class ConstructionInsuranceRemoteDataSourceImpl(
         )
     }
 
-    override suspend fun issuancePaymentSheet(debitNumber: String): String = call {
-        apiService.issuancePaymentSheet(debitNumber).extractMessage()
-    }
+    override suspend fun issuancePaymentSheet(debitNumber: String): String =
+        errorParser.safeCall("issuancePaymentSheet") {
+            apiService.issuancePaymentSheet(debitNumber).extractMessage()
+        }
 
     override suspend fun getInstallmentLetterList(
         workshopId: String,
         branchId: String,
         query: ApiQueryParamDN,
-    ): ListData<InstallmentLetterDTO> = call {
+    ): ListData<InstallmentLetterDTO> = errorParser.safeCall("getInstallmentLetterList") {
         apiService.getInstallmentLetterList(workshopId, branchId, queryBuilder.buildQuery(query)).extractData()
-    }
-
-    private suspend fun <T> call(block: suspend () -> T): T = try {
-        block()
-    } catch (e: TaminErrorUriException) {
-        throw errorParser.parseGeneralError(e)
-    } catch (e: Exception) {
-        throw errorParser.parseGeneralError(
-            TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-        )
     }
 }

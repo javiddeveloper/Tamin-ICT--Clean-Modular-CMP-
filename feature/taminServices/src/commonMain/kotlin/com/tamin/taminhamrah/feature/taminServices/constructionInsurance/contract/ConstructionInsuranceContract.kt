@@ -9,7 +9,6 @@ import kotlinx.collections.immutable.persistentListOf
 data class ConstructionInsuranceState(
     /** True only while the first page is in flight — drives the full-screen skeleton. */
     val isLoading: Boolean = false,
-    val isRefreshing: Boolean = false,
     val items: ImmutableList<ConstructionFilePR> = persistentListOf(),
     val error: String? = null,
     /** True while a further page is in flight — drives the list-footer spinner, not the skeleton. */
@@ -31,7 +30,6 @@ data class ConstructionInsuranceState(
     val appliedReqNoQuery: String = "",
     val appliedWorkshopIdQuery: String = "",
     val appliedBranchCodeQuery: String = "",
-    val isOfflineData: Boolean = false,
     val userName: String = "",
     val nationalCode: String = "",
 
@@ -49,7 +47,6 @@ sealed interface ConstructionInsuranceIntent {
     data object ExecuteSearch : ConstructionInsuranceIntent
     data object ResetSearch : ConstructionInsuranceIntent
     data class OnDetailClick(val item: ConstructionFilePR) : ConstructionInsuranceIntent
-    data class OnActionClick(val item: ConstructionFilePR) : ConstructionInsuranceIntent
 
     data object ToggleNoticeVisibility : ConstructionInsuranceIntent
     data object LoadNextPage : ConstructionInsuranceIntent

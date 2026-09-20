@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.com
 
 import androidx.compose.runtime.Composable
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFilePR
+import com.tamin.taminhamrah.model.constructionInsurance.INSTALLMENT_DEBIT_STATUS_CODE
 import com.tamin.taminhamrah.ui.ActionMenuItem
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -25,8 +26,6 @@ enum class ConstructionInsuranceAction {
     InstallmentLetter,
     Beneficiaries,
 }
-
-private const val INSTALLMENT_DEBIT_STATUS_CODE = "51"
 
 @Composable
 fun constructionInsuranceActions(item: ConstructionFilePR): ImmutableList<ActionMenuItem<ConstructionInsuranceAction>> {

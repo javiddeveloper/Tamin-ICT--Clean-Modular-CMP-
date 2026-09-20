@@ -29,6 +29,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -211,6 +212,35 @@ class PaymentSheetViewModelTest {
     }
 
     @Test
+    fun issuePaymentSheet_whileAlreadyIssuing_doesNotCallRepositoryTwice() = runTest {
+        fakeRepository.issuanceNeverCompletes = true
+        val viewModel = buildViewModel()
+        viewModel.sendIntent(PaymentSheetIntent.Load(debitNumber = "123456789010", branchCode = "6400"))
+
+        viewModel.sendIntent(PaymentSheetIntent.IssuePaymentSheet)
+        assertTrue(viewModel.uiState.value.isIssuing)
+
+        viewModel.sendIntent(PaymentSheetIntent.IssuePaymentSheet)
+
+        assertEquals(1, fakeRepository.issuanceCallCount)
+    }
+
+    @Test
+    fun dismissIssuanceNotice_clearsIssuanceMessageWithoutNavigatingBack() = runTest {
+        fakeRepository.issuanceMessageResult = "برگه پرداخت با موفقیت صادر شد."
+        val viewModel = buildViewModel()
+        viewModel.sendIntent(PaymentSheetIntent.Load(debitNumber = "123456789010", branchCode = "6400"))
+        viewModel.sendIntent(PaymentSheetIntent.IssuePaymentSheet)
+        assertNotNull(viewModel.uiState.value.issuanceMessage)
+
+        viewModel.events.test {
+            viewModel.sendIntent(PaymentSheetIntent.DismissIssuanceNotice)
+            expectNoEvents()
+        }
+        assertNull(viewModel.uiState.value.issuanceMessage)
+    }
+
+    @Test
     fun onBackClicked_sendsNavigateBackEvent() = runTest {
         val viewModel = buildViewModel()
 
@@ -232,11 +262,13 @@ private class FakeConstructionInsuranceRepository : ConstructionInsuranceReposit
     var shouldThrowOnPaymentSheets = false
     var shouldThrowOnPdf = false
     var shouldThrowOnIssuance = false
+    var issuanceNeverCompletes = false
 
     var lastPaymentSheetDebitNumber: String? = null
     var lastPdfDebitNumber: String? = null
     var lastPdfBranchCode: String? = null
     var lastIssuanceDebitNumber: String? = null
+    var issuanceCallCount = 0
 
     override fun getConstructionFiles(search: ConstructionFileSearchParamsDN?): Flow<List<ConstructionFileDN>> = flow {
         emit(constructionFilesResult)
@@ -264,7 +296,9 @@ private class FakeConstructionInsuranceRepository : ConstructionInsuranceReposit
     }
 
     override fun issuancePaymentSheet(debitNumber: String): Flow<String> = flow {
+        issuanceCallCount++
         lastIssuanceDebitNumber = debitNumber
+        if (issuanceNeverCompletes) awaitCancellation()
         if (shouldThrowOnIssuance) throw RuntimeException("Error")
         emit(issuanceMessageResult)
     }

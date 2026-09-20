@@ -21,9 +21,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
-import org.jetbrains.compose.resources.getString
-import taminx.core.core_ui.Res
-import taminx.core.core_ui.operation_request_selected
 
 class ConstructionInsuranceViewModel(
     private val getConstructionFilesPageUseCase: GetConstructionFilesPageUseCase,
@@ -119,10 +116,6 @@ class ConstructionInsuranceViewModel(
 
                 is ConstructionInsuranceIntent.OnDetailClick -> {
                     sendEvent(ConstructionInsuranceEvent.NavigateToDetails(intent.item))
-                }
-
-                is ConstructionInsuranceIntent.OnActionClick -> {
-                    sendEvent(ConstructionInsuranceEvent.ShowToast(getString(Res.string.operation_request_selected)))
                 }
 
                 is ConstructionInsuranceIntent.ToggleNoticeVisibility -> {
