@@ -124,7 +124,10 @@ fun WorkshopStackholdersContent(
                     )
                 }
             },
-        ) { holder -> StackHolderCard(holder) }
+        ) { holder, _ ->
+            StackHolderCard(
+                holder = holder
+            ) }
     }
 }
 
