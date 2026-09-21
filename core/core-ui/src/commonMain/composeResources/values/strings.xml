@@ -1915,10 +1915,10 @@
     <string name="member_insurance_number">شماره بیمه</string>
     <string name="member_full_name">نام و نام خانوادگی</string>
     <string name="member_national_id">کد ملی</string>
-    <string name="member_id_card_number">شماره شناسنامه</string>
+    <string name="member_id_card_number">شمارهٔ شناسنامه</string>
     <string name="member_father_name">نام پدر</string>
     <string name="member_nationality">ملیت</string>
-    <string name="member_leaving_status">وضعیت ترک کار</string>
+    <string name="member_leaving_status">وضعیت</string>
     <string name="member_leaving_date">تاریخ ترک کار</string>
     <string name="stackholder_type">نوع ذینفع</string>
     <string name="stackholder_birth_date">تاریخ تولد</string>

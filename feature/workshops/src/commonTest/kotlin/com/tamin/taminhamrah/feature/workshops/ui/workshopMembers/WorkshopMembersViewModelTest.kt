@@ -17,9 +17,11 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -103,6 +105,7 @@ class WorkshopMembersViewModelTest {
             viewModel.sendIntent(WorkshopMembersIntent.Open(WORKSHOP_ID, BRANCH_CODE))
             awaitUntil { it.list.items.size == WORKSHOP_PAGE_SIZE }
 
+            repository.members = membersPage(count = WORKSHOP_PAGE_SIZE, total = 30, from = WORKSHOP_PAGE_SIZE)
             viewModel.sendIntent(WorkshopMembersIntent.LoadMore)
             val appended = awaitUntil { it.list.items.size > WORKSHOP_PAGE_SIZE }
 
@@ -137,6 +140,7 @@ class WorkshopMembersViewModelTest {
             awaitItem()
             viewModel.sendIntent(WorkshopMembersIntent.Open(WORKSHOP_ID, BRANCH_CODE))
             awaitUntil { it.list.items.isNotEmpty() }
+            repository.members = membersPage(count = WORKSHOP_PAGE_SIZE, total = 30, from = WORKSHOP_PAGE_SIZE)
             viewModel.sendIntent(WorkshopMembersIntent.LoadMore)
             awaitUntil { it.list.items.size > WORKSHOP_PAGE_SIZE }
 
@@ -217,6 +221,30 @@ class WorkshopMembersViewModelTest {
     }
 
     @Test
+    fun `removing one search chip keeps the other and reloads with it`() = runTest(testDispatcher) {
+        repository.members = membersPage(count = 1, total = 1)
+
+        viewModel.uiState.test {
+            awaitItem()
+            viewModel.sendIntent(WorkshopMembersIntent.Open(WORKSHOP_ID, BRANCH_CODE))
+            awaitUntil { it.list.items.isNotEmpty() }
+            val both = PersonSearch(nationalId = "0024567891", insuranceNumber = "0010517475")
+            viewModel.sendIntent(WorkshopMembersIntent.DraftChanged(both))
+            viewModel.sendIntent(WorkshopMembersIntent.ApplySearch)
+            awaitUntil { it.applied == both }
+
+            viewModel.sendIntent(WorkshopMembersIntent.ReplaceSearch(both.copy(nationalId = "")))
+            val narrowed = awaitUntil { it.applied.nationalId.isBlank() }
+
+            assertEquals("0010517475", narrowed.applied.insuranceNumber)
+            assertEquals(narrowed.applied, narrowed.draft)
+            assertNull(repository.lastMemberQuery?.nationalId)
+            assertEquals("0010517475", repository.lastMemberQuery?.insuranceNumber)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun `a refused request becomes the list's error, in the service's words`() = runTest(testDispatcher) {
         repository.error = TaminApiException(title = "دسترسی مجاز نیست")
 
@@ -251,6 +279,81 @@ class WorkshopMembersViewModelTest {
         }
     }
 
+    /**
+     * The intents are merged, not switched, so applying a search does not cancel the page already
+     * in flight. The page the user has scrolled past must not be appended to what they searched for.
+     */
+    @Test
+    fun `a page answered after a new search was applied is dropped`() = runTest(testDispatcher) {
+        repository.memberPages = mapOf(
+            0 to membersPage(count = WORKSHOP_PAGE_SIZE, total = 30),
+            1 to membersPage(count = WORKSHOP_PAGE_SIZE, total = 30, from = WORKSHOP_PAGE_SIZE),
+        )
+        val heldPageOne = CompletableDeferred<Unit>()
+        repository.heldMemberPages[1] = heldPageOne
+
+        viewModel.uiState.test {
+            awaitItem()
+            viewModel.sendIntent(WorkshopMembersIntent.Open(WORKSHOP_ID, BRANCH_CODE))
+            awaitUntil { it.list.items.size == WORKSHOP_PAGE_SIZE }
+
+            // Scrolling to the end, then searching before that page comes back.
+            viewModel.sendIntent(WorkshopMembersIntent.LoadMore)
+            // Page 1 keeps its own answer: the held request reads this map only once it resumes,
+            // and a page that came back empty would append nothing whether it was dropped or not.
+            repository.memberPages = mapOf(
+                0 to membersPage(count = 1, total = 1, from = 99),
+                1 to membersPage(count = WORKSHOP_PAGE_SIZE, total = 30, from = WORKSHOP_PAGE_SIZE),
+            )
+            viewModel.sendIntent(
+                WorkshopMembersIntent.DraftChanged(PersonSearch(nationalId = "0024567899")),
+            )
+            viewModel.sendIntent(WorkshopMembersIntent.ApplySearch)
+            val searched = awaitUntil { it.list.items.size == 1 }
+            assertEquals(1, searched.list.total)
+
+            heldPageOne.complete(Unit)
+            advanceUntilIdle()
+
+            // The old page has landed by now, and must have changed nothing about the search's list.
+            val settled = viewModel.uiState.value
+            assertEquals(1, settled.list.items.size)
+            assertEquals(1, settled.list.receivedCount)
+            assertFalse(settled.list.isLoadingMore)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    /** The same applies to a failure: the abandoned request must not put its error on the new list. */
+    @Test
+    fun `a page that fails after a new search was applied does not fail the new list`() =
+        runTest(testDispatcher) {
+            repository.members = membersPage(count = WORKSHOP_PAGE_SIZE, total = 30)
+            val heldPageOne = CompletableDeferred<Unit>()
+            repository.heldMemberPages[1] = heldPageOne
+
+            viewModel.uiState.test {
+                awaitItem()
+                viewModel.sendIntent(WorkshopMembersIntent.Open(WORKSHOP_ID, BRANCH_CODE))
+                awaitUntil { it.list.items.size == WORKSHOP_PAGE_SIZE }
+
+                viewModel.sendIntent(WorkshopMembersIntent.LoadMore)
+                repository.members = membersPage(count = 1, total = 1, from = 99)
+                viewModel.sendIntent(WorkshopMembersIntent.ApplySearch)
+                awaitUntil { it.list.items.size == 1 }
+
+                // The abandoned page-1 request answers with a failure.
+                repository.error = TaminApiException(title = "خطا")
+                heldPageOne.complete(Unit)
+                advanceUntilIdle()
+
+                val settled = viewModel.uiState.value
+                assertNull(settled.list.error)
+                assertEquals(1, settled.list.items.size)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
     @Test
     fun `a member with one missing name half does not render a literal null`() = runTest(testDispatcher) {
         repository.members = PagedListDN(
@@ -269,13 +372,18 @@ class WorkshopMembersViewModelTest {
         }
     }
 
-    private fun membersPage(count: Int, total: Int) = PagedListDN(
+    /**
+     * [count] distinct people, numbered from [from]. A second page must hold different people:
+     * the list drops a row identical to one already shown, so a repeated page appends nothing.
+     */
+    private fun membersPage(count: Int, total: Int, from: Int = 0) = PagedListDN(
         items = List(count) {
+            val n = from + it
             WorkshopMemberDN(
-                insuranceNumber = "1000000$it",
+                insuranceNumber = "1000000$n",
                 firstName = "کارمند",
-                lastName = "شماره $it",
-                nationalId = "002456789$it",
+                lastName = "شماره $n",
+                nationalId = "002456789$n",
             )
         },
         total = total,

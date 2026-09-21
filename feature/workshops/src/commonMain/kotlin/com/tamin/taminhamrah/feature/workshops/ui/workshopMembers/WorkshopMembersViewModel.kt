@@ -22,6 +22,18 @@ class WorkshopMembersViewModel(
     WorkshopMembersIntent,
     >(initialState = WorkshopMembersUiState()) {
 
+    /**
+     * Which load the screen is waiting for; an answer from an earlier one is dropped.
+     *
+     * `BaseViewModel` merges intent flows rather than switching between them, so applying a search
+     * does not cancel the page already in flight. Without this, a slow page-N answer for the
+     * previous search arriving after the new search's page 0 would be *appended* to it — people
+     * who match nothing the user asked for, and a `receivedCount` advanced by them. The reduced
+     * state cannot be consulted for this: `flatMapMerge` buffers, so it still lags the emission
+     * that this very flow just made.
+     */
+    private var latestLoad = 0
+
     override fun handleIntent(intent: WorkshopMembersIntent): Flow<PartialState> = when (intent) {
         is WorkshopMembersIntent.Open -> open(intent)
         WorkshopMembersIntent.LoadMore -> loadMore()
@@ -32,6 +44,7 @@ class WorkshopMembersViewModel(
         is WorkshopMembersIntent.DraftChanged -> flow { emit(PartialState.DraftChanged(intent.draft)) }
         WorkshopMembersIntent.ApplySearch -> applySearch(uiState.value.draft)
         WorkshopMembersIntent.ClearSearch -> applySearch(PersonSearch())
+        is WorkshopMembersIntent.ReplaceSearch -> applySearch(intent.search)
     }
 
     private fun open(intent: WorkshopMembersIntent.Open): Flow<PartialState> = flow {
@@ -45,28 +58,34 @@ class WorkshopMembersViewModel(
         page: Int,
         search: PersonSearch = uiState.value.applied,
         identity: Pair<String, String> = uiState.value.workshopId to uiState.value.branchCode,
-    ): Flow<PartialState> = flow {
-        val (workshopId, branchCode) = identity
-        if (workshopId.isBlank() || branchCode.isBlank()) {
-            emit(PartialState.Error(null))
-            return@flow
-        }
-        emit(if (page == 0) PartialState.Loading else PartialState.LoadingMore)
-        val result = getWorkshopMembers(
-            WorkshopMemberQuery(
-                workshopId = workshopId,
-                branchCode = branchCode,
-                insuranceNumber = search.insuranceNumber.takeIf { it.isNotBlank() },
-                nationalId = search.nationalId.takeIf { it.isNotBlank() },
-                page = page,
+    ): Flow<PartialState> {
+        // Claimed before the request goes out, so an answer can tell whether the list it was asked
+        // for is still the list on screen.
+        val load = ++latestLoad
+        return flow {
+            val (workshopId, branchCode) = identity
+            if (workshopId.isBlank() || branchCode.isBlank()) {
+                emit(PartialState.Error(null))
+                return@flow
+            }
+            emit(if (page == 0) PartialState.Loading else PartialState.LoadingMore)
+            val result = getWorkshopMembers(
+                WorkshopMemberQuery(
+                    workshopId = workshopId,
+                    branchCode = branchCode,
+                    insuranceNumber = search.insuranceNumber.takeIf { it.isNotBlank() },
+                    nationalId = search.nationalId.takeIf { it.isNotBlank() },
+                    page = page,
+                )
             )
-        )
-        emit(
-            PartialState.Loaded(
-                uiState.value.list.loaded(result, isFirstPage = page == 0) { it.toPresentation() }
+            if (load != latestLoad) return@flow
+            emit(
+                PartialState.Loaded(
+                    uiState.value.list.loaded(result, isFirstPage = page == 0) { it.toPresentation() }
+                )
             )
-        )
-    }.catch { emit(PartialState.Error(it.toSingleLineMessage())) }
+        }.catch { if (load == latestLoad) emit(PartialState.Error(it.toSingleLineMessage())) }
+    }
 
     private fun loadMore(): Flow<PartialState> {
         val list = uiState.value.list
