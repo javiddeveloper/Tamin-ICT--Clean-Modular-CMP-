@@ -1370,23 +1370,36 @@ private fun ChatBubbleItem(
 
                 isUser -> {
                     // The user's words on the app's brand gradient, like its primary buttons; the
-                    // corner nearest the screen edge is tucked in to point at the sender.
+                    // corner nearest the screen edge is tucked in slightly to point at the sender.
                     val taminColors = LocalTaminColors.current
+                    val userBubbleShape = RoundedCornerShape(
+                        topStart = CornerRadius.xl,
+                        topEnd = CornerRadius.xl,
+                        bottomStart = CornerRadius.xl,
+                        bottomEnd = CornerRadius.sm,
+                    )
+                    val userBubbleBorderBrush = Brush.linearGradient(
+                        colors = listOf(Color.White.copy(alpha = 0.05f), Color.White.copy(alpha = 0.3f))
+                    )
                     Box(
                         modifier = Modifier
                             .widthIn(max = USER_BUBBLE_MAX_WIDTH)
-                            .clip(
-                                RoundedCornerShape(
-                                    topStart = CornerRadius.xl,
-                                    topEnd = CornerRadius.sm,
-                                    bottomStart = CornerRadius.xl,
-                                    bottomEnd = CornerRadius.xl,
-                                )
-                            )
+                            .clip(userBubbleShape)
                             .background(taminTopAppBarGradient())
+                            .border(Thickness.border, userBubbleBorderBrush, userBubbleShape)
                             .padding(vertical = Spacing.smPlus, horizontal = Spacing.smd)
                     ) {
-                        renderContent(taminColors.onGradient)
+                        Column {
+                            renderContent(taminColors.onGradient)
+                            Text(
+                                text = rememberChatTimeString(),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = taminColors.onGradient.copy(alpha = 0.5f),
+                                modifier = Modifier
+                                    .align(Alignment.Start)
+                                    .padding(top = Spacing.sm)
+                            )
+                        }
                     }
                 }
 
@@ -1467,7 +1480,8 @@ private fun BubbleContentRenderer(
         } else {
             val textStyle = MaterialTheme.typography.bodyMedium.copy(
                 color = contentColor,
-                lineHeight = 22.sp
+                lineHeight = 22.sp,
+                fontWeight = if (isUser) FontWeight.Medium else FontWeight.Normal,
             )
             if (isTypingAnimating) {
                 TypewriterText(text = content.message, style = textStyle, onRequestScroll = onRequestScroll, onAnimationFinished = onAnimationFinished)
@@ -2081,11 +2095,14 @@ private fun NotAllowedMessage(message: String?) {
 // ─── Agent Bubble Footer ──────────────────────────────────────────────────────
 
 @Composable
+private fun rememberChatTimeString(): String = rememberSaveable {
+    val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+    "${now.hour.toString().padStart(2, '0')}:${now.minute.toString().padStart(2, '0')}".toPersianDigits()
+}
+
+@Composable
 private fun AgentBubbleFooter(item: ChatItem, onIntent: (AgentIntent) -> Unit) {
-    val timeString = rememberSaveable {
-        val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-        "${now.hour.toString().padStart(2, '0')}:${now.minute.toString().padStart(2, '0')}".toPersianDigits()
-    }
+    val timeString = rememberChatTimeString()
 
     // State for like/dislike toggle
     var liked    by rememberSaveable { mutableStateOf<Boolean?>(null) }
@@ -2097,7 +2114,7 @@ private fun AgentBubbleFooter(item: ChatItem, onIntent: (AgentIntent) -> Unit) {
     val taminColors = LocalTaminColors.current
     // Sits directly on AgentBackground (no card), so it follows that fixed-dark
     // backdrop's white-based palette rather than the theme's textMuted/blueText.
-    val iconTint = Color.White.copy(alpha = 0.6f)
+    val iconTint = Color.White.copy(alpha = 0.5f)
     val activeTint = Color.White
 
     Row(
