@@ -93,7 +93,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -132,6 +131,9 @@ import com.tamin.taminhamrah.ui.components.toast.info
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.TaminCardPurpleStart
+import com.tamin.taminhamrah.ui.theme.TaminCardPurpleMid
+import com.tamin.taminhamrah.ui.theme.TaminCardPurpleEnd
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.coloredShadow
 import androidx.compose.material.icons.outlined.ContentCopy
@@ -363,9 +365,9 @@ private fun ChatLayout(
                     )
                 }
 
-                // Only the processing card stays inline with the conversation; the bare
-                // 3-dot indicator is lifted out into a floating chip (see overlay below).
-                if (uiState.isGenerating && uiState.processingState != null) {
+                // Both the bare 3-dot indicator and the processing card render inline,
+                // directly under the last message, instead of floating elsewhere.
+                if (uiState.isGenerating) {
                     item { TypingIndicatorBubble(processingState = uiState.processingState) }
                 }
             }
@@ -400,18 +402,6 @@ private fun ChatLayout(
                     .align(Alignment.TopCenter)
                     .padding(top = topPad + 8.dp, start = 16.dp, end = 16.dp)
             )
-        }
-
-        // ── Floating 3-dot indicator: separated from the list, pinned top-center ──
-        AnimatedVisibility(
-            visible = uiState.isGenerating && uiState.processingState == null,
-            enter = fadeIn() + scaleIn(initialScale = 0.8f),
-            exit = fadeOut() + scaleOut(targetScale = 0.8f),
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = topPad + 12.dp)
-        ) {
-            FloatingTypingIndicator()
         }
 
         // ── Top toolbar: blurred, overlays the content, seen-through from the top ──
@@ -1042,33 +1032,13 @@ private fun OfflineBanner(modifier: Modifier = Modifier) {
     )
 }
 
-/**
- * Standalone "thinking" indicator shown floating at the top-center of the chat, separate
- * from the message list. Used while the agent is generating but has no processing card yet.
- */
-@Composable
-private fun FloatingTypingIndicator() {
-    val taminColors = LocalTaminColors.current
-    Box(
-        modifier = Modifier
-            .shadow(
-                elevation = Elevation.md,
-                shape = CircleShape,
-                ambientColor = taminColors.shadowSubtle,
-                spotColor = taminColors.shadowSubtle
-            )
-            .clip(CircleShape)
-            .background(taminColors.bgSurface)
-            .border(Thickness.border, taminColors.border, CircleShape)
-            .padding(horizontal = Spacing.xlg, vertical = Spacing.smd)
-    ) {
-        TypingDotsIndicator()
-    }
-}
+// Same three-stop purple used for a dependant's insurance card (see
+// InsuranceCardComponents.kt) — reused here so each dot carries one stop of that
+// gradient instead of a single flat tint.
+private val TypingDotColors = listOf(TaminCardPurpleStart, TaminCardPurpleMid, TaminCardPurpleEnd)
 
 @Composable
 private fun TypingDotsIndicator() {
-    val taminColors = LocalTaminColors.current
     val transition = rememberInfiniteTransition(label = "typing")
     val dots = List(3) { index ->
         transition.animateFloat(
@@ -1084,15 +1054,15 @@ private fun TypingDotsIndicator() {
     val density = LocalDensity.current
     val maxOffsetPx = with(density) { (-4).dp.toPx() }
     Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
-        dots.forEach { anim ->
+        dots.forEachIndexed { index, anim ->
             Box(
                 modifier = Modifier
-                    .size(6.dp)
+                    .size(8.dp)
                     // Lambda-based offset: reads the animated value at layout time so
                     // each frame only re-lays-out/redraws instead of recomposing.
                     .offset { IntOffset(x = 0, y = (maxOffsetPx * anim.value).roundToInt()) }
                     .clip(CircleShape)
-                    .background(taminColors.blueText.copy(alpha = 0.4f + (anim.value * 0.6f)))
+                    .background(TypingDotColors[index].copy(alpha = 0.5f + (anim.value * 0.5f)))
             )
         }
     }
