@@ -16,7 +16,7 @@ class WorkshopInspectionContractTest {
     @Test
     fun `step1 is valid when mobile is blank`() {
         // Matches legacy's SubmitInspectionRequestFragment#checkValidInputIdentityInfoStep, which
-        // treats mobile as optional for this same employer/objection flow (see MR !249 review item 3).
+        // treats mobile as optional for this same employer/objection flow.
         val state = WorkshopInspectionUiState(identityContact = IdentityContactStepState())
 
         assertTrue(state.isRequestStep1Valid)

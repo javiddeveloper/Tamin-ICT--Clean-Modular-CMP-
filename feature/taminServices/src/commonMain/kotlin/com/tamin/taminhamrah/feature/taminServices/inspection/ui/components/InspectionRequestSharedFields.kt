@@ -24,7 +24,7 @@ import com.tamin.taminhamrah.util.toPersianDigits
  * and the employer-side `WorkshopIdentityContactStep` it was ported from. Validity and the mobile
  * field's label/required-ness are passed in rather than computed here, since the two flows validate
  * mobile differently (workshop enforces the real `09`+9-digit pattern; the insured flow still only
- * checks length — see the code review discussion on MR !249 item 3).
+ * checks length).
  */
 @Composable
 internal fun ContactDetailsFields(

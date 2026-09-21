@@ -187,11 +187,14 @@ class WorkshopInspectionViewModel(
         }
     }
 
+    // handleIntent runs concurrently (flatMapMerge), so a second SubmitRequest fired before the
+    // first resolves can still observe stale uiState — this plain field is set synchronously,
+    // before the first suspension point, so the second call sees the update.
+    private var isSubmitting = false
+
     private fun handleSubmitRequest(intent: WorkshopInspectionIntent.SubmitRequest): Flow<PartialState> = flow {
-        // handleIntent runs concurrently (flatMapMerge) — a second SubmitRequest fired before the
-        // first resolves must not also submit, matching the isSubmitting-guard convention this
-        // project uses for non-idempotent actions (see .claude/rules/state-management.md).
-        if (uiState.value.isLoading) return@flow
+        if (isSubmitting) return@flow
+        isSubmitting = true
         emit(PartialState.Loading(true))
         try {
             val result = submitInspectionUseCase(intent.request)
@@ -201,6 +204,8 @@ class WorkshopInspectionViewModel(
         } catch (e: Exception) {
             emit(PartialState.Loading(false))
             sendEvent(WorkshopInspectionEvent.ShowToast(e.toSingleLineMessage()))
+        } finally {
+            isSubmitting = false
         }
     }
 

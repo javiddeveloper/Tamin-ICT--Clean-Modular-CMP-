@@ -22,6 +22,7 @@ import com.tamin.taminhamrah.useCases.user.GetUserProfileUseCase
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -219,29 +220,37 @@ class WorkshopInspectionViewModelTest {
     }
 
     @Test
-    fun submitRequest_calledTwiceInARow_onlySubmitsOnce() = runTest(testDispatcher) {
-        repository.submitResult = SubmitInspectionRequestResultDN(id = 123L)
-        val gate = CompletableDeferred<Unit>()
-        repository.submitGate = gate
-        val viewModel = buildViewModel()
-        advanceUntilIdle()
+    fun submitRequest_calledTwiceInARow_onlySubmitsOnce() {
+        // Runs on a StandardTestDispatcher (unlike the rest of this class) because it orders work
+        // the way a real main thread does. On UnconfinedTestDispatcher every step runs eagerly and
+        // back-to-back, which passed even when the guard read reduced uiState instead of a plain
+        // field set before the first suspension point — this test must actually exercise the race.
+        val standardDispatcher = StandardTestDispatcher()
+        Dispatchers.setMain(standardDispatcher)
+        runTest(standardDispatcher) {
+            repository.submitResult = SubmitInspectionRequestResultDN(id = 123L)
+            val gate = CompletableDeferred<Unit>()
+            repository.submitGate = gate
+            val viewModel = buildViewModel()
+            advanceUntilIdle()
 
-        val request = SubmitInspectionRequestDN(
-            brchCode = "", endDate = 0L, inspectionNumberOld = "",
-            insuranceId = "", insuranceJob = "", requestDescription = "",
-            startDate = 0L, workshopAddress = "", workshopManager = "",
-            workshopName = "", workshopNumber = "", workshopTel = ""
-        )
-        // The first submission suspends inside the repository (holding isLoading = true) before
-        // the second is sent, so the ViewModel's in-flight guard — not test timing — is what's
-        // actually being exercised here.
-        viewModel.sendIntent(WorkshopInspectionIntent.SubmitRequest(request))
-        viewModel.sendIntent(WorkshopInspectionIntent.SubmitRequest(request))
-        gate.complete(Unit)
-        advanceUntilIdle()
+            val request = SubmitInspectionRequestDN(
+                brchCode = "", endDate = 0L, inspectionNumberOld = "",
+                insuranceId = "", insuranceJob = "", requestDescription = "",
+                startDate = 0L, workshopAddress = "", workshopManager = "",
+                workshopName = "", workshopNumber = "", workshopTel = ""
+            )
+            viewModel.sendIntent(WorkshopInspectionIntent.SubmitRequest(request))
+            viewModel.sendIntent(WorkshopInspectionIntent.SubmitRequest(request))
+            // Lets the first submission reach and suspend on the repository gate, and the second
+            // reach the guard, before either is allowed to complete.
+            advanceUntilIdle()
+            gate.complete(Unit)
+            advanceUntilIdle()
 
-        assertEquals(1, repository.submitCallCount)
-        assertTrue(viewModel.uiState.value.isSubmitted)
+            assertEquals(1, repository.submitCallCount)
+            assertTrue(viewModel.uiState.value.isSubmitted)
+        }
     }
 
     @Test
