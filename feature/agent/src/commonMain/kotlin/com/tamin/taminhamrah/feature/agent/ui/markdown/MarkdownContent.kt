@@ -75,9 +75,10 @@ import com.tamin.taminhamrah.feature.agent.markdown.MathParser
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
 import com.tamin.taminhamrah.feature.agent.service.base.TableRow
 import com.tamin.taminhamrah.feature.agent.ui.bubble.TableBubble
+import com.tamin.taminhamrah.feature.agent.ui.AgentGlass
+import com.tamin.taminhamrah.feature.agent.ui.agentGlassCard
 import com.tamin.taminhamrah.ui.components.CopyIconButton
 import com.tamin.taminhamrah.ui.components.TaminDivider
-import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -193,15 +194,16 @@ private fun MarkdownBlockView(
         ) {
             // Cells keep their inline markdown. A cell that is just a link is a button, like the
             // links outside tables; a link inside other text is tapped in place.
-            val linkColor = colors.blueText
-            val cellStyle = MaterialTheme.typography.bodySmall.copy(color = colors.textPrimary)
+            // On the glass card the cells take the reply's own text color, not the theme's.
+            val linkColor = AgentGlass.accent
+            val cellStyle = MaterialTheme.typography.bodySmall.copy(color = contentColor)
             TableBubble(
                 content = ChatBubbleContent.Table(
                     columns = block.header.map { it.toPersianDigits() },
                     rows = block.rows.map { row -> TableRow(row) },
                 ),
                 framed = false,
-                renderCell = { cell -> cell.styledText(colors.bgPage, linkColor, onLinkClick) },
+                renderCell = { cell -> cell.styledText(AgentGlass.tileFill, linkColor, onLinkClick) },
                 cellContent = { cell ->
                     val link = remember(cell) { MarkdownParser.loneLink(cell) }
                     if (link != null) {
@@ -278,11 +280,13 @@ private fun MarkdownSection(
     copyText: String,
     content: @Composable () -> Unit,
 ) {
-    val colors = LocalTaminColors.current
+    // The same glass card as the screen's top/input bars, not the theme's opaque surface:
+    // the reply sits on the fixed-dark AgentBackground, so the card and everything on it
+    // use the AgentGlass palette rather than the light/dark TaminColors.
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .taminSurface(cornerRadius = CornerRadius.xl)
+            .agentGlassCard(RoundedCornerShape(CornerRadius.xl))
             .padding(Spacing.md),
         verticalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
@@ -294,18 +298,18 @@ private fun MarkdownSection(
             Box(
                 modifier = Modifier
                     .size(IconSize.badge)
-                    .background(colors.iconBgSubtle, RoundedCornerShape(CornerRadius.avatarTile)),
+                    .background(AgentGlass.tileFill, RoundedCornerShape(CornerRadius.avatarTile)),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(imageVector = icon, contentDescription = null, tint = colors.blueText, modifier = Modifier.size(IconSize.small))
+                Icon(imageVector = icon, contentDescription = null, tint = AgentGlass.iconTint, modifier = Modifier.size(IconSize.small))
             }
             Text(
                 text = title,
                 style = MaterialTheme.typography.labelLarge,
-                color = colors.textSecondary,
+                color = AgentGlass.textSecondary,
                 modifier = Modifier.weight(1f),
             )
-            CopyIconButton(value = copyText, label = title)
+            CopyIconButton(value = copyText, label = title, tint = AgentGlass.textSecondary)
         }
         content()
     }
@@ -320,7 +324,7 @@ private fun MarkdownSection(
 private fun FormulaRow(formula: MarkdownBlock.Formula, color: Color) {
     // The app's font, like the prose around it; a bare TextStyle would fall back to the system font.
     val style = MaterialTheme.typography.bodyMedium.copy(color = color, fontSize = FORMULA_FONT_SIZE, lineHeight = FORMULA_LINE_HEIGHT)
-    val mathStyle = style.copy(color = LocalTaminColors.current.blueText)
+    val mathStyle = style.copy(color = AgentGlass.accent)
     val direction = if (MathParser.isRightToLeft(formula.expression)) LayoutDirection.Rtl else LayoutDirection.Ltr
     CompositionLocalProvider(LocalLayoutDirection provides direction) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {

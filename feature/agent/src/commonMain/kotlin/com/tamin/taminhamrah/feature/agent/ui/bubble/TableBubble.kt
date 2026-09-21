@@ -24,8 +24,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
+import com.tamin.taminhamrah.feature.agent.ui.AgentGlass
+import com.tamin.taminhamrah.feature.agent.ui.agentGlassCard
 import com.tamin.taminhamrah.ui.theme.CornerRadius
-import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 
 /**
@@ -50,7 +51,6 @@ fun TableBubble(
     renderCell: (String) -> AnnotatedString = { AnnotatedString(it) },
     cellContent: (@Composable (cell: String) -> Unit)? = null,
 ) {
-    val taminColors = LocalTaminColors.current
     if (content.columns.isEmpty()) return
 
     Column(
@@ -59,8 +59,7 @@ fun TableBubble(
             .then(
                 if (framed) {
                     Modifier
-                        .clip(RoundedCornerShape(CornerRadius.xl))
-                        .background(taminColors.bgSurface)
+                        .agentGlassCard(RoundedCornerShape(CornerRadius.xl))
                         .padding(Spacing.md)
                 } else {
                     Modifier
@@ -71,7 +70,7 @@ fun TableBubble(
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                color = taminColors.textPrimary
+                color = AgentGlass.textPrimary
             )
             Spacer(Modifier.height(Spacing.smPlus))
         }
@@ -110,19 +109,18 @@ fun TableBubble(
 
 @Composable
 private fun TableHeader(columns: List<AnnotatedString>, columnWidth: Dp?) {
-    val taminColors = LocalTaminColors.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(CornerRadius.md))
-            .background(taminColors.blueBg)
+            .background(AgentGlass.tileFill)
             .padding(vertical = Spacing.sm)
     ) {
         columns.forEach { column ->
             Text(
                 text = column,
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                color = taminColors.blueText,
+                color = AgentGlass.accent,
                 textAlign = TextAlign.Start,
                 maxLines = 2,
                 modifier = Modifier
@@ -142,8 +140,7 @@ private fun TableBodyRow(
     columnWidth: Dp?,
     isStriped: Boolean
 ) {
-    val taminColors = LocalTaminColors.current
-    val background = if (isStriped) taminColors.bgPage else androidx.compose.ui.graphics.Color.Transparent
+    val background = if (isStriped) AgentGlass.tileFillSubtle else androidx.compose.ui.graphics.Color.Transparent
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -164,7 +161,7 @@ private fun TableBodyRow(
                 Text(
                     text = renderCell(cell),
                     style = MaterialTheme.typography.bodySmall,
-                    color = taminColors.textPrimary,
+                    color = AgentGlass.textPrimary,
                     maxLines = MAX_CELL_LINES,
                     modifier = cellModifier,
                 )

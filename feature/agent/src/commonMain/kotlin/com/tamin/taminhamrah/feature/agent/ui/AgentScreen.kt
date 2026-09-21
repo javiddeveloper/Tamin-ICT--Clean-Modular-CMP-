@@ -124,7 +124,6 @@ import com.tamin.taminhamrah.feature.agent.ui.contract.ChatSender
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.blur.AppBarScrim
-import com.tamin.taminhamrah.ui.blur.safeHazeEffect
 import com.tamin.taminhamrah.ui.blur.safeHazeSource
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.info
@@ -143,8 +142,6 @@ import androidx.compose.material.icons.outlined.ThumbDown
 import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.ui.text.font.FontVariation.weight
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.HazeTint
 import kotlinx.coroutines.NonCancellable.start
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -491,9 +488,9 @@ private fun ChatLayout(
 private val TopBarCardRadius = 22.dp
 private val TopBarCardShape = RoundedCornerShape(TopBarCardRadius)
 private val TopBarTileShape = RoundedCornerShape(13.dp)
-private val TopBarIconTint = Color(0xFFD5E1FA)
-private val TopBarSubtitleColor = Color(0xFFA9BDE6)
-private val TopBarShadowColor = Color(0xFF040A1E)
+private val TopBarIconTint = AgentGlass.iconTint
+private val TopBarSubtitleColor = AgentGlass.textSecondary
+private val TopBarShadowColor = AgentGlass.shadowColor
 private val TopBarBadgeGradient = Brush.linearGradient(listOf(Color(0xFF7C5CFF), Color(0xFF3B6FD4)))
 
 /** One blink half-cycle for the online/offline status dot (fade out, then back in). */
@@ -537,20 +534,11 @@ private fun AgentTopBar(
                     blurRadius = 24.dp,
                     offsetY = 10.dp
                 )
-                .clip(TopBarCardShape)
-                .border(1.dp, Color.White.copy(alpha = 0.18f), TopBarCardShape)
+                // Frosted blur of the chat scrolling underneath, then the sheen + hairline
+                // border. Without the blur the 16%-white sheen alone was see-through and
+                // the messages stayed legible behind the bar.
+                .agentFrostedGlassCard(TopBarCardShape, hazeState)
         ) {
-            // The card's own subtle glass sheen — 16% white fading to 5%, diagonal.
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(
-                        Brush.linearGradient(
-                            listOf(Color.White.copy(alpha = 0.16f), Color.White.copy(alpha = 0.05f))
-                        )
-                    )
-            )
-
             Row(
                 modifier = Modifier
                     .fillMaxSize()
@@ -1766,20 +1754,9 @@ private fun AgentInputBar(
                     blurRadius = 24.dp,
                     offsetY = 10.dp
                 )
-                .clip(InputBarCardShape)
-                .border(1.dp, Color.White.copy(alpha = 0.18f), InputBarCardShape)
+                // Same frosted glass as the top bar — see AgentGlass.
+                .agentFrostedGlassCard(InputBarCardShape, hazeState)
         ) {
-            // The card's own subtle glass sheen — 15% white fading to 5%, diagonal.
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(
-                        Brush.linearGradient(
-                            listOf(Color.White.copy(alpha = 0.15f), Color.White.copy(alpha = 0.05f))
-                        )
-                    )
-            )
-
             Row(
                 modifier = Modifier
                     .fillMaxSize()
