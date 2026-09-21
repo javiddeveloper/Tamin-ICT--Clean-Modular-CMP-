@@ -8,6 +8,8 @@ val TaminNavy900 = Color(0xFF173D7E) // status bar / header base
 val TaminNavy700 = Color(0xFF1F4FA3) // primary blue / links / active tab
 val TaminNavy500 = Color(0xFF2B5FBF)
 val TaminNavy300 = Color(0xFF3B6FD4)
+val TaminCameraBadgeBorder = Color(0xFF21519F)
+val TaminCameraBadgeShadow = Color(0x59061838) // rgba(6,24,56,.35)
 
 // ---- Teal (medical / درمان section) ----
 val TaminTeal900 = Color(0xFF0E7C82)
