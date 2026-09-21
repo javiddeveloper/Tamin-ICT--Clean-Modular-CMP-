@@ -21,8 +21,10 @@ import com.tamin.taminhamrah.useCases.inspection.GetInsurancePageUseCase
 import com.tamin.taminhamrah.useCases.inspection.GetBranchPageUseCase
 import com.tamin.taminhamrah.useCases.inspection.GetInspectionReportPDFUseCase
 import com.tamin.taminhamrah.useCases.inspection.GetJobPageUseCase
+import com.tamin.taminhamrah.useCases.inspection.GetWorkshopInspectionsPageUseCase
 import com.tamin.taminhamrah.useCases.inspection.SubmitInspectionUseCase
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.InspectionViewModel
+import com.tamin.taminhamrah.feature.taminServices.workshopInspection.ui.WorkshopInspectionViewModel
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.EmployerOnlineServicesViewModel
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.ConstructionInsuranceViewModel
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.viewDetail.ui.ViewDetailRequestViewModel
@@ -67,6 +69,8 @@ val TaminServicesModule = module {
     factoryOf(::SubmitInspectionUseCase)
     factoryOf(::GetInspectionReportPDFUseCase)
     viewModelOf(::InspectionViewModel)
+    factoryOf(::GetWorkshopInspectionsPageUseCase)
+    viewModelOf(::WorkshopInspectionViewModel)
 
     // خدمات غیرحضوری کارفرمایان — use cases (GetUserProfileUseCase, GetEmployerAgreementsUseCase)
     // are already provided by core-domain's DomainModule.

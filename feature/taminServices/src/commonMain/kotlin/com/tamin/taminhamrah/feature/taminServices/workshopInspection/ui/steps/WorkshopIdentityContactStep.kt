@@ -1,5 +1,6 @@
-package com.tamin.taminhamrah.feature.taminServices.inspection.ui.steps
+package com.tamin.taminhamrah.feature.taminServices.workshopInspection.ui.steps
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,14 +16,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionRequestErrorSource
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.ContactDetailsFields
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.IdentityContactShimmerSkeleton
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionRequestErrorWrapper
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionRequestStepScaffold
-import com.tamin.taminhamrah.feature.taminServices.inspection.contract.IdentityContactStepState
-import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionIntent
-import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionRequestErrorSource
-import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionUiState
+import com.tamin.taminhamrah.feature.taminServices.workshopInspection.contract.WorkshopInspectionIntent
+import com.tamin.taminhamrah.feature.taminServices.workshopInspection.contract.WorkshopInspectionUiState
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.CustomChip
@@ -49,9 +50,9 @@ import taminx.core.core_ui.inspection_request_source_chip_format
 import taminx.core.core_ui.inspection_request_step1_section_title
 
 @Composable
-internal fun IdentityContactStep(
-    uiState: InspectionUiState,
-    onIntent: (InspectionIntent) -> Unit,
+internal fun WorkshopIdentityContactStep(
+    uiState: WorkshopInspectionUiState,
+    onIntent: (WorkshopInspectionIntent) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     error: String? = null,
@@ -64,14 +65,19 @@ internal fun IdentityContactStep(
         modifier = modifier,
         primaryText = stringResource(Res.string.inspection_request_next_step),
         primaryEnabled = uiState.isRequestStep1Valid && !uiState.isLoading,
-        onPrimaryClick = { onIntent(InspectionIntent.GoToNextRequestStep) },
+        // Non-null routes the primary button through LoadingButton, whose default gradient is
+        // taminColors.buttonGradient — the orotez-protez-style wash this wizard's design calls
+        // for, unlike TaminBottomActionBar's plain-TaminFilledButton path (heroGradient). This
+        // step never actually loads on its own click, so the value is always false.
+        isPrimaryLoading = false,
+        onPrimaryClick = { onIntent(WorkshopInspectionIntent.GoToNextRequestStep) },
         secondaryText = stringResource(Res.string.inspection_request_prev_step),
         onSecondaryClick = onBack,
     ) { padding ->
         InspectionRequestErrorWrapper(
             isLoading = uiState.isLoading,
             error = error,
-            onRetry = { onIntent(InspectionIntent.RetrySource(InspectionRequestErrorSource.USER_INFO)) },
+            onRetry = { onIntent(WorkshopInspectionIntent.RetrySource(InspectionRequestErrorSource.USER_INFO)) },
             modifier = Modifier.padding(padding),
             shimmerContent = { IdentityContactShimmerSkeleton(modifier = Modifier.padding(padding)) },
         ) {
@@ -93,7 +99,7 @@ internal fun IdentityContactStep(
                         text = stringResource(Res.string.inspection_request_step1_section_title),
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     )
-                    if (uiState.isObjectionRequest && !uiState.requestInspectionNo.isNullOrBlank()) {
+                    if (!uiState.requestInspectionNo.isNullOrBlank()) {
                         CustomChip(
                             text = stringResource(
                                 Res.string.inspection_request_source_chip_format,
@@ -101,6 +107,7 @@ internal fun IdentityContactStep(
                             ),
                             containerColor = colors.blueBg,
                             textColor = colors.blueText,
+                            border = BorderStroke(width = 1.dp, color = colors.blueBorder),
                         )
                     }
                 }
@@ -112,17 +119,17 @@ internal fun IdentityContactStep(
                     horizontalArrangement = Arrangement.spacedBy(Spacing.md),
                 ) {
                     TaminStyledTextField(
-                        value = step.nationalCode,
+                        value = step.fullName,
                         onValueChange = {},
-                        label = stringResource(Res.string.inspection_request_field_national_code),
+                        label = stringResource(Res.string.inspection_request_field_full_name),
                         placeholder = placeholder,
                         readOnly = true,
                         modifier = Modifier.weight(1f),
                     )
                     TaminStyledTextField(
-                        value = step.fullName,
+                        value = step.nationalCode,
                         onValueChange = {},
-                        label = stringResource(Res.string.inspection_request_field_full_name),
+                        label = stringResource(Res.string.inspection_request_field_national_code),
                         placeholder = placeholder,
                         readOnly = true,
                         modifier = Modifier.weight(1f),
@@ -133,17 +140,17 @@ internal fun IdentityContactStep(
 
                 ContactDetailsFields(
                     mobile = step.mobile,
-                    onMobileChange = { onIntent(InspectionIntent.UpdateIdentityContact(step.copy(mobile = it))) },
-                    isMobileValid = step.mobile.takeIf { it.isNotBlank() }?.let { ValidationUtils.isPhoneNumberValid(it) },
+                    onMobileChange = { onIntent(WorkshopInspectionIntent.UpdateIdentityContact(step.copy(mobile = it))) },
+                    isMobileValid = step.mobile.takeIf { it.isNotBlank() }?.let { ValidationUtils.isMobileNumberValid(it) },
                     mobileLabel = stringResource(Res.string.inspection_request_field_mobile_optional),
                     mobileErrorText = stringResource(Res.string.inspection_request_field_mobile_error),
                     landline = step.landline,
-                    onLandlineChange = { onIntent(InspectionIntent.UpdateIdentityContact(step.copy(landline = it))) },
+                    onLandlineChange = { onIntent(WorkshopInspectionIntent.UpdateIdentityContact(step.copy(landline = it))) },
                     isLandlineValid = step.landline.takeIf { it.isNotBlank() }?.let { ValidationUtils.isLandlineValid(it) },
                     landlineLabel = stringResource(Res.string.inspection_request_field_landline_optional),
                     landlineErrorText = stringResource(Res.string.inspection_request_field_landline_error),
                     email = step.email,
-                    onEmailChange = { onIntent(InspectionIntent.UpdateIdentityContact(step.copy(email = it))) },
+                    onEmailChange = { onIntent(WorkshopInspectionIntent.UpdateIdentityContact(step.copy(email = it))) },
                     isEmailValid = step.email.takeIf { it.isNotBlank() }?.let { ValidationUtils.isEmailValid(it) },
                     emailLabel = stringResource(Res.string.inspection_request_field_email_optional),
                     emailErrorText = stringResource(Res.string.inspection_request_field_email_error),
@@ -158,14 +165,14 @@ internal fun IdentityContactStep(
 
 @PreviewRtlTheme
 @Composable
-private fun IdentityContactStepPreview() {
+private fun WorkshopIdentityContactStepPreview() {
     PreviewRtlThemeContent {
-        IdentityContactStep(
-            uiState = InspectionUiState(
-                identityContact = IdentityContactStepState(
-                    fullName = "رضا دریکوند",
-                    nationalCode = "4060434061",
-                    mobile = "09338042024",
+        WorkshopIdentityContactStep(
+            uiState = WorkshopInspectionUiState(
+                identityContact = com.tamin.taminhamrah.feature.taminServices.inspection.contract.IdentityContactStepState(
+                    fullName = "مجتبی غلامیان",
+                    nationalCode = "0681895705",
+                    mobile = "09143018372",
                 ),
             ),
             onIntent = {},
@@ -176,8 +183,8 @@ private fun IdentityContactStepPreview() {
 
 @PreviewRtlTheme
 @Composable
-private fun IdentityContactStepEmptyPreview() {
+private fun WorkshopIdentityContactStepEmptyPreview() {
     PreviewRtlThemeContent {
-        IdentityContactStep(uiState = InspectionUiState(), onIntent = {}, onBack = {})
+        WorkshopIdentityContactStep(uiState = WorkshopInspectionUiState(), onIntent = {}, onBack = {})
     }
 }

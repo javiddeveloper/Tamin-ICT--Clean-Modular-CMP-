@@ -1554,6 +1554,7 @@
     <string name="inspection_request_field_national_code">کد ملی</string>
     <string name="inspection_request_field_full_name">نام و نام خانوادگی</string>
     <string name="inspection_request_field_mobile_optional">شمارهٔ تلفن همراه (اختیاری)</string>
+    <string name="inspection_request_field_mobile_required">شمارهٔ تلفن همراه</string>
     <string name="inspection_request_field_mobile_error">شماره همراه معتبر نیست</string>
     <string name="inspection_request_field_email_optional">پست الکترونیک (اختیاری)</string>
     <string name="inspection_request_field_email_error">ایمیل معتبر نیست</string>
@@ -1564,7 +1565,8 @@
     <string name="inspection_request_prev_step">مرحلهٔ قبل</string>
     <string name="inspection_request_objection_title">ثبت اعتراض</string>
     <string name="inspection_request_selection_empty">موردی یافت نشد</string>
-    <string name="inspection_request_step2_section_title">اطلاعات کارگاه محل اشتغال</string>
+    <string name="inspection_request_step2_section_title">اطلاعات کارگاه</string>
+    <string name="inspection_request_step2_section_banner">اطلاعات کارگاه از بازرسی انتخاب‌شده پر شده است؛ فیلدهای قابل ویرایش را در صورت نیاز اصلاح کنید.</string>
     <string name="inspection_request_field_workshop_name">نام کارگاه</string>
     <string name="inspection_request_field_workshop_name_placeholder">نام کارگاه محل اشتغال</string>
     <string name="inspection_request_field_workshop_phone_optional">تلفن کارگاه (اختیاری)</string>
@@ -1599,6 +1601,16 @@
     <string name="inspection_request_success_subtitle_objection_format">اعتراض شما برای بررسی به شعبهٔ %1$s ارسال شد.</string>
     <string name="inspection_request_success_dismiss_button">متوجه شدم</string>
     <string name="inspection_request_success_tracking_label">کد رهگیری</string>
+
+    <string name="workshop_inspection_title">بازرسی‌های کارگاه</string>
+    <string name="workshop_inspection_subtitle">بازرسی‌های انجام‌شده در کارگاه‌های شما</string>
+    <string name="workshop_inspection_banner_subtitle">گزارش هر بازرسی قابل دریافت است؛ اعتراض تنها برای بازرسی واجد شرط.</string>
+    <string name="workshop_inspection_note">اعتراض به بازرسی فقط برای آخرین بازرسی انجام‌شده سال جاری امکان‌پذیر است. جهت اعتراض به بدهی‌های خود از منوی مدیریت بدهی و گزینهٔ اعتراض به بدهی اقدام نمایید.</string>
+    <string name="workshop_inspection_empty_title">بازرسی‌ای ثبت نشده است</string>
+    <string name="workshop_inspection_empty_subtitle">تا این لحظه بازرسی‌ای از کارگاه‌های شما در سامانه ثبت نشده است.</string>
+    <string name="workshop_inspection_search_empty_subtitle">فیلتر را حذف کنید و همهٔ بازرسی‌ها را ببینید.</string>
+    <string name="workshop_inspection_search_action_content_description">جست‌وجو در بازرسی‌ها</string>
+    <string name="workshop_inspection_report_filename_format">workshop_inspection_report_%1$s.pdf</string>
 
     <!-- ===================== Employer Online Services (خدمات غیرحضوری کارفرمایان) ===================== -->
     <string name="employer_online_services_title">خدمات غیرحضوری کارفرمایان</string>
@@ -1915,10 +1927,10 @@
     <string name="member_insurance_number">شماره بیمه</string>
     <string name="member_full_name">نام و نام خانوادگی</string>
     <string name="member_national_id">کد ملی</string>
-    <string name="member_id_card_number">شماره شناسنامه</string>
+    <string name="member_id_card_number">شمارهٔ شناسنامه</string>
     <string name="member_father_name">نام پدر</string>
     <string name="member_nationality">ملیت</string>
-    <string name="member_leaving_status">وضعیت ترک کار</string>
+    <string name="member_leaving_status">وضعیت</string>
     <string name="member_leaving_date">تاریخ ترک کار</string>
     <string name="stackholder_type">نوع ذینفع</string>
     <string name="stackholder_birth_date">تاریخ تولد</string>

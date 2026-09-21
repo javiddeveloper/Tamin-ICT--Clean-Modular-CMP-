@@ -32,6 +32,9 @@ import com.tamin.taminhamrah.feature.treatment.navigateToPrescriptions
 import com.tamin.taminhamrah.feature.contracts.navigateToContractFlow
 import com.tamin.taminhamrah.feature.taminServices.navigateToConstructionInsurance
 import com.tamin.taminhamrah.feature.taminServices.navigateToOccurrence
+import com.tamin.taminhamrah.feature.taminServices.navigateToInspection
+import com.tamin.taminhamrah.feature.taminServices.navigateToWorkshopInspection
+import com.tamin.taminhamrah.feature.taminServices.navigateToEmployerOnlineServices
 import com.tamin.taminhamrah.feature.taminServices.navigateToSendInsuranceHistoryToInstitutions
 import com.tamin.taminhamrah.feature.taminServices.navigateToWorkersPaymentInfo
 import com.tamin.taminhamrah.feature.treatment.navigateToPrescriptionDetail
@@ -107,6 +110,7 @@ fun NavController.navigateToFeature(flag: FeatureFlag, beforeOpen: () -> Unit = 
         FeatureFlag.GIRL_SURVIVOR -> screen { navigateToGirlSurvivor() }
         FeatureFlag.REQUEST_PENSION_BY_SURVIVOR,
         FeatureFlag.REQUEST_PENSION_BY_SURVIVOR_112 -> screen { navigateToPensionSurvivor() }
+        FeatureFlag.PERFORMED_INSPECTION -> screen { navigateToWorkshopInspection() }
         FeatureFlag.DISABILITY_PENSION -> screen { navigateToDisabilityPension() }
         FeatureFlag.VIEW_TITLE_JOB -> screen { navigateToHistoryJobInfo() }
         FeatureFlag.SEND_INSURANCE_HISTORY_TO_INSTITUTION -> screen { navigateToSendInsuranceHistoryToInstitutions() }
@@ -118,8 +122,6 @@ fun NavController.navigateToFeature(flag: FeatureFlag, beforeOpen: () -> Unit = 
         FeatureFlag.REGISTER_AGREEMENT -> screen { navigateToEmployerOnlineServices() }
         FeatureFlag.OBJECTION_NON_EXISTENT_HISTORY -> screen { navigateToHistoryObjection() }
         FeatureFlag.INQUIRY_EDUCATION -> screen { navigateToInquiryEducation() }
-        // «کسری از ماه» has only an empty placeholder screen until its phase 2 UI is built; opening
-        // it showed a blank page, so it counts as not built yet.
         FeatureFlag.FRACTION_CONTRACT -> return false
         FeatureFlag.WEDDING_PRESENT -> screen { navigateToWeddingPresent() }
         FeatureFlag.CALCULATE_MARRIAGE_ALLOWANCE -> screen { navigateToWeddingPresentCalculate() }
