@@ -1,7 +1,6 @@
 package com.tamin.taminhamrah.feature.agent.ui
 
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.SolidColor
 import org.jetbrains.compose.resources.stringResource
 import com.tamin.taminhamrah.ui.components.coloredShadow
 import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
@@ -241,32 +240,50 @@ fun VoiceChatBubble(
     modifier: Modifier = Modifier
 ) {
     val taminColors = LocalTaminColors.current
-    // The user's clip sits on the brand gradient like the user's text bubble; the assistant's on the
-    // app's surface card.
+    // The user's clip is drawn inside the same gradient card as the user's text (the caller
+    // provides that card), so it only lays out its row; the assistant's clip draws its own
+    // surface card.
     val onGradient = taminColors.onGradient
-    val background: Brush = if (isUser) taminTopAppBarGradient() else SolidColor(taminColors.bgSurface)
-    val buttonBg: Brush = if (isUser) SolidColor(onGradient) else taminTopAppBarGradient()
-    val buttonTint = if (isUser) taminColors.blueText else onGradient
     val activeColor = if (isUser) onGradient else taminColors.blueText
     val inactiveColor = if (isUser) onGradient.copy(alpha = 0.4f) else taminColors.chevron
-    val timeColor = if (isUser) taminColors.textHeaderSubtitle else taminColors.textMuted
+    val timeColor = if (isUser) onGradient.copy(alpha = 0.7f) else taminColors.textMuted
     val shape = RoundedCornerShape(com.tamin.taminhamrah.ui.theme.CornerRadius.xl)
+    val container = if (isUser) {
+        Modifier
+    } else {
+        Modifier
+            .clip(shape)
+            .background(taminColors.bgSurface)
+            .border(Thickness.border, taminColors.border, shape)
+            .padding(horizontal = Spacing.smPlus, vertical = Spacing.sm)
+    }
 
     Row(
-        modifier = modifier
-            .clip(shape)
-            .background(background)
-            .then(if (isUser) Modifier else Modifier.border(Thickness.border, taminColors.border, shape))
-            .padding(horizontal = Spacing.smPlus, vertical = Spacing.sm),
+        modifier = modifier.then(container),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        RoundIconButton(
-            icon = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-            tint = buttonTint,
-            background = buttonBg,
-            contentDescription = stringResource(if (isPlaying) Res.string.agent_pause else Res.string.agent_play),
-            onClick = onToggle
-        )
+        val playDescription = stringResource(if (isPlaying) Res.string.agent_pause else Res.string.agent_play)
+        val playIcon = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow
+        if (isUser) {
+            // Same muted glass play/pause as the voice preview on the input bar.
+            VoiceGlassButton(
+                icon = playIcon,
+                contentDescription = playDescription,
+                size = VoiceBarSecondaryButtonSize,
+                background = Color.White.copy(alpha = 0.09f),
+                borderColor = Color.White.copy(alpha = 0.14f),
+                iconTint = VoiceBarMutedIconTint,
+                onClick = onToggle
+            )
+        } else {
+            RoundIconButton(
+                icon = playIcon,
+                tint = onGradient,
+                background = taminTopAppBarGradient(),
+                contentDescription = playDescription,
+                onClick = onToggle
+            )
+        }
         Spacer(Modifier.width(10.dp))
         val dur = durationMs.toInt().coerceAtLeast(1)
         SeekableWaveform(

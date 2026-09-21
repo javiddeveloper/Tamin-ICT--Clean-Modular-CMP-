@@ -1377,9 +1377,10 @@ private fun ChatBubbleItem(
                                          item.content is ChatBubbleContent.DataView
 
             when {
-                // Voice draws its own container (with waveform + progress), so it must
-                // not be wrapped in the plain text Surface — otherwise the bar is hidden.
-                item.content is ChatBubbleContent.Voice -> {
+                // The assistant's voice draws its own container (with waveform + progress), so
+                // it must not be wrapped in the plain text Surface — otherwise the bar is hidden.
+                // The user's voice, by contrast, sits in the same gradient card as their text.
+                item.content is ChatBubbleContent.Voice && !isUser -> {
                     Box { renderContent(MaterialTheme.colorScheme.onSurface) }
                 }
 
@@ -1389,40 +1390,7 @@ private fun ChatBubbleItem(
                     }
                 }
 
-                isUser -> {
-                    // The user's words on the app's brand gradient, like its primary buttons; the
-                    // corner nearest the screen edge is tucked in slightly to point at the sender.
-                    val taminColors = LocalTaminColors.current
-                    val userBubbleShape = RoundedCornerShape(
-                        topStart = CornerRadius.xl,
-                        topEnd = CornerRadius.xl,
-                        bottomStart = CornerRadius.xl,
-                        bottomEnd = CornerRadius.sm,
-                    )
-                    val userBubbleBorderBrush = Brush.linearGradient(
-                        colors = listOf(Color.White.copy(alpha = 0.05f), Color.White.copy(alpha = 0.3f))
-                    )
-                    Box(
-                        modifier = Modifier
-                            .widthIn(max = USER_BUBBLE_MAX_WIDTH)
-                            .clip(userBubbleShape)
-                            .background(taminTopAppBarGradient())
-                            .border(Thickness.border, userBubbleBorderBrush, userBubbleShape)
-                            .padding(vertical = Spacing.smPlus, horizontal = Spacing.smd)
-                    ) {
-                        Column {
-                            renderContent(taminColors.onGradient)
-                            Text(
-                                text = rememberChatTimeString(),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = taminColors.onGradient.copy(alpha = 0.5f),
-                                modifier = Modifier
-                                    .align(Alignment.Start)
-                                    .padding(top = Spacing.sm)
-                            )
-                        }
-                    }
-                }
+                isUser -> UserBubbleCard { contentColor -> renderContent(contentColor) }
 
                 else -> {
                     // Agent: full width, no Surface card background, no avatar padding.
@@ -1450,6 +1418,45 @@ private fun ChatBubbleItem(
                 }
             }
 
+        }
+    }
+}
+
+/**
+ * The user's card — text or voice — on the app's brand gradient, like its primary buttons;
+ * the corner nearest the screen edge is tucked in slightly to point at the sender. [content]
+ * receives the on-gradient color to draw with; the send time is appended underneath.
+ */
+@Composable
+private fun UserBubbleCard(content: @Composable (contentColor: Color) -> Unit) {
+    val taminColors = LocalTaminColors.current
+    val userBubbleShape = RoundedCornerShape(
+        topStart = CornerRadius.xl,
+        topEnd = CornerRadius.xl,
+        bottomStart = CornerRadius.xl,
+        bottomEnd = CornerRadius.sm,
+    )
+    val userBubbleBorderBrush = Brush.linearGradient(
+        colors = listOf(Color.White.copy(alpha = 0.05f), Color.White.copy(alpha = 0.3f))
+    )
+    Box(
+        modifier = Modifier
+            .widthIn(max = USER_BUBBLE_MAX_WIDTH)
+            .clip(userBubbleShape)
+            .background(taminTopAppBarGradient())
+            .border(Thickness.border, userBubbleBorderBrush, userBubbleShape)
+            .padding(vertical = Spacing.smPlus, horizontal = Spacing.smd)
+    ) {
+        Column {
+            content(taminColors.onGradient)
+            Text(
+                text = rememberChatTimeString(),
+                style = MaterialTheme.typography.labelSmall,
+                color = taminColors.onGradient.copy(alpha = 0.5f),
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(top = Spacing.sm)
+            )
         }
     }
 }
