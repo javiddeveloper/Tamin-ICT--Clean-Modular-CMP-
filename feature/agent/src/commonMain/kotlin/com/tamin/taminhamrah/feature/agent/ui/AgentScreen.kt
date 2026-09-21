@@ -2078,18 +2078,22 @@ private fun AgentSuggestionRow(
 
 @Composable
 private fun PermissionCheckingIndicator() {
-    val taminColors = LocalTaminColors.current
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(Spacing.md)
-        ) {
-            CircularProgressIndicator(color = taminColors.blueText)
-            Text(
-                text = stringResource(Res.string.agent_checking_permission),
-                style = MaterialTheme.typography.bodyMedium,
-                color = taminColors.textSecondary,
-            )
+    Box(modifier = Modifier.fillMaxSize()) {
+        AgentBackground(modifier = Modifier.fillMaxSize())
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(Spacing.md)
+            ) {
+                // Straight on AgentBackground — see the EmptyState greeting for the
+                // same white/0.75-alpha split used on that fixed-dark backdrop.
+                CircularProgressIndicator(color = Color.White)
+                Text(
+                    text = stringResource(Res.string.agent_checking_permission),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White.copy(alpha = 0.75f),
+                )
+            }
         }
     }
 }
@@ -2097,29 +2101,35 @@ private fun PermissionCheckingIndicator() {
 @Composable
 private fun NotAllowedMessage(message: String?) {
     val taminColors = LocalTaminColors.current
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(Spacing.md),
-            modifier = Modifier.padding(Spacing.xxl)
-        ) {
-            IconTile(
-                icon = Icons.Rounded.Block,
-                tint = taminColors.onGradient,
-                background = taminColors.iconGradientDanger,
-                size = IconSize.xxlarge,
-            )
-            Text(
-                text = stringResource(Res.string.agent_not_allowed_title),
-                style = MaterialTheme.typography.titleLarge,
-                color = taminColors.textPrimary,
-            )
-            Text(
-                text = message ?: stringResource(Res.string.agent_not_allowed_default),
-                style = MaterialTheme.typography.bodyMedium,
-                color = taminColors.textSecondary,
-                textAlign = TextAlign.Center,
-            )
+    Box(modifier = Modifier.fillMaxSize()) {
+        AgentBackground(modifier = Modifier.fillMaxSize())
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(Spacing.md),
+                modifier = Modifier.padding(Spacing.xxl)
+            ) {
+                IconTile(
+                    icon = Icons.Rounded.Block,
+                    tint = taminColors.onGradient,
+                    background = taminColors.iconGradientDanger,
+                    size = IconSize.xxlarge,
+                )
+                // Straight on AgentBackground — theme's textPrimary/textSecondary are
+                // too dark to read there, so white/0.75-alpha is used instead (same
+                // split as the EmptyState greeting).
+                Text(
+                    text = stringResource(Res.string.agent_not_allowed_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = Color.White,
+                )
+                Text(
+                    text = message ?: stringResource(Res.string.agent_not_allowed_default),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White.copy(alpha = 0.75f),
+                    textAlign = TextAlign.Center,
+                )
+            }
         }
     }
 }
