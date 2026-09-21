@@ -93,12 +93,6 @@ enum class WorkshopAction(
         icon = Res.drawable.ic_tamin_workshop_new_member,
         tint = StatusTint.INFO,
     ),
-    ARTICLE_SIXTEEN(
-        label = Res.string.workshop_action_article_sixteen,
-        description = Res.string.workshop_action_article_sixteen_desc,
-        icon = Res.drawable.ic_tamin_workshop_article_sixteen,
-        tint = StatusTint.PURPLE,
-    ),
     MEMBERS(
         label = Res.string.workshop_action_members,
         description = Res.string.workshop_action_members_desc,

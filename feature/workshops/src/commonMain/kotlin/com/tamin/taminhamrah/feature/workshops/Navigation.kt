@@ -242,12 +242,6 @@ data class WorkshopStackholdersRoute(
     val workshopName: String = "",
 )
 
-@Serializable
-data class ManagementDebitRoute(
-    val workshopId: String,
-    val branchCode: String,
-    val workshopName: String = "",
-)
 
 fun NavController.navigateToWorkshops() {
     navigate(WorkshopsListRoute)
@@ -622,6 +616,4 @@ private fun WorkshopsEvent.Navigate.route(): Any = when (action) {
         WorkshopMembersRoute(workshopId, branchCode, workshopName)
     WorkshopAction.STACKHOLDERS ->
         WorkshopStackholdersRoute(workshopId, branchCode, workshopName)
-    WorkshopAction.ARTICLE_SIXTEEN ->
-        ManagementDebitRoute(workshopId, branchCode, workshopName)
 }
