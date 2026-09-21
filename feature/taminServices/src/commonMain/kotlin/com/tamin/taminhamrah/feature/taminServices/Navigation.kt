@@ -9,6 +9,8 @@ import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.Emp
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.EmployerOnlineServicesViewModel
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.InspectionRoute
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.InspectionViewModel
+import com.tamin.taminhamrah.feature.taminServices.workshopInspection.ui.WorkshopInspectionRoute
+import com.tamin.taminhamrah.feature.taminServices.workshopInspection.ui.WorkshopInspectionViewModel
 import com.tamin.taminhamrah.feature.taminServices.sendHistoryToInstitutions.SendHistoryToInstitutionsScreen
 import com.tamin.taminhamrah.feature.taminServices.ui.TaminServicesRoute
 import com.tamin.taminhamrah.feature.taminServices.ui.TamminServicesViewModel
@@ -27,6 +29,9 @@ data object SendInsuranceHistoryToInstitutionsRoute
 
 @Serializable
 data object InspectionRoute
+
+@Serializable
+data object WorkshopInspectionRoute
 
 @Serializable
 data object OccurrenceRoute
@@ -89,6 +94,20 @@ fun NavGraphBuilder.inspectionScreen(onBack: () -> Unit) {
     composableWithFadeTransitions<InspectionRoute> {
         val viewModel: InspectionViewModel = koinViewModel()
         InspectionRoute(
+            viewModel = viewModel,
+            onBackClicked = onBack
+        )
+    }
+}
+
+fun NavController.navigateToWorkshopInspection(builder: NavOptionsBuilder.() -> Unit = {}) {
+    navigate(WorkshopInspectionRoute, builder)
+}
+
+fun NavGraphBuilder.workshopInspectionScreen(onBack: () -> Unit) {
+    composableWithFadeTransitions<WorkshopInspectionRoute> {
+        val viewModel: WorkshopInspectionViewModel = koinViewModel()
+        WorkshopInspectionRoute(
             viewModel = viewModel,
             onBackClicked = onBack
         )

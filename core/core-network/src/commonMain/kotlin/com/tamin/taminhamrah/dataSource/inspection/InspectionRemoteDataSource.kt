@@ -14,6 +14,10 @@ interface InspectionRemoteDataSource {
         query: ApiQueryParamDN
     ): ListData<InspectionPerformedDTO>
 
+    suspend fun getAllManager(
+        query: ApiQueryParamDN
+    ): ListData<InspectionPerformedDTO>
+
     suspend fun getBranches(
         query: ApiQueryParamDN
     ): ListData<BranchDTO>

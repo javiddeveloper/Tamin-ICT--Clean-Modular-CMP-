@@ -9,12 +9,15 @@ import com.tamin.taminhamrah.model.paging.PageDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.inspection.InspectionRepository
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 class FakeInspectionRepository : InspectionRepository {
     var insurancePageResult: List<InspectionPerformedDN> = emptyList()
     var insurancePageTotal: Int? = null
+    var workshopInspectionsPageResult: List<InspectionPerformedDN> = emptyList()
+    var workshopInspectionsPageTotal: Int? = null
     var branchPageResult: List<BranchDN> = emptyList()
     var branchPageTotal: Int? = null
     var jobPageResult: List<JobDN> = emptyList()
@@ -24,15 +27,27 @@ class FakeInspectionRepository : InspectionRepository {
 
     var shouldThrowError = false
     var lastInsuranceQuery: ApiQueryParamDN? = null
+    var lastWorkshopInspectionsQuery: ApiQueryParamDN? = null
     var lastBranchQuery: ApiQueryParamDN? = null
     var lastJobQuery: ApiQueryParamDN? = null
     var lastSubmitRequest: SubmitInspectionRequestDN? = null
     var lastReportPdfInspectionNo: String? = null
+    var submitCallCount = 0
+
+    /** When set, submitInspectionRequest suspends here until the test completes it — lets a test
+     *  hold one submission "in flight" to exercise the ViewModel's double-submit guard. */
+    var submitGate: CompletableDeferred<Unit>? = null
 
     override fun getInsurancePage(query: ApiQueryParamDN): Flow<PageDN<InspectionPerformedDN>> = flow {
         if (shouldThrowError) throw RuntimeException("Error")
         lastInsuranceQuery = query
         emit(PageDN(items = insurancePageResult, total = insurancePageTotal))
+    }
+
+    override fun getWorkshopInspectionsPage(query: ApiQueryParamDN): Flow<PageDN<InspectionPerformedDN>> = flow {
+        if (shouldThrowError) throw RuntimeException("Error")
+        lastWorkshopInspectionsQuery = query
+        emit(PageDN(items = workshopInspectionsPageResult, total = workshopInspectionsPageTotal))
     }
 
     override fun getBranchesPage(query: ApiQueryParamDN): Flow<PageDN<BranchDN>> = flow {
@@ -48,6 +63,8 @@ class FakeInspectionRepository : InspectionRepository {
     }
 
     override suspend fun submitInspectionRequest(request: SubmitInspectionRequestDN): SubmitInspectionRequestResultDN {
+        submitCallCount++
+        submitGate?.await()
         if (shouldThrowError) throw RuntimeException("Error")
         lastSubmitRequest = request
         return submitResult
