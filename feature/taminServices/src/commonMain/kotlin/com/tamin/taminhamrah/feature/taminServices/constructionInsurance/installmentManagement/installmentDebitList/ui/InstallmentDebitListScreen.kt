@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.size
@@ -188,10 +188,13 @@ fun InstallmentDebitListScreen(
                     ),
                     verticalArrangement = Arrangement.spacedBy(Spacing.md),
                 ) {
-                    items(
+                    itemsIndexed(
                         items = state.items,
-                        key = { "${it.debitNumber}-${it.debitStepDescription}" }
-                    ) { debit ->
+                        // All rows on this screen share one debitNumber (they're periods of the
+                        // same debit), and debitStepDescription is free text with no uniqueness
+                        // guarantee from the API — the index is the only value guaranteed distinct.
+                        key = { index, debit -> "${debit.debitNumber}-${debit.debitStepDescription}-$index" }
+                    ) { _, debit ->
                         InstallmentDebitCard(item = debit)
                     }
                     item {

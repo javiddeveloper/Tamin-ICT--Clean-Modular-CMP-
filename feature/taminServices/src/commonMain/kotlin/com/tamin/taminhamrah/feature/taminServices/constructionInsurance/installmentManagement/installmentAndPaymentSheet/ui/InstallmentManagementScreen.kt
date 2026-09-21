@@ -397,6 +397,7 @@ private fun InstallmentCard(
 
         if (!paid) {
             LoadingButton(
+                textStyle = MaterialTheme.typography.titleSmall,
                 text = stringResource(CoreRes.string.btn_issue_payment_sheet_for_installment),
                 onClick = onIssuePaymentSheetClick,
                 icon = Icons.AutoMirrored.Outlined.ReceiptLong,
