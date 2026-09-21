@@ -11,11 +11,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.workshops.ui.components.PersonSearchPanel
+import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFilterChips
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopListScaffold
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopRecordCard
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopScreenShell
@@ -32,6 +34,7 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
@@ -83,6 +86,18 @@ fun WorkshopStackholdersContent(
 ) {
     val isSearchOpen = state.isSearchOpen
     val draft = state.draft
+    val applied = state.applied
+    val filters = remember(applied) {
+        buildList {
+            applied.nationalId.takeIf { it.isNotBlank() }?.let {
+                add(it.toPersianDigits() to WorkshopStackholdersIntent.ReplaceSearch(applied.copy(nationalId = "")))
+            }
+            applied.insuranceNumber.takeIf { it.isNotBlank() }?.let {
+                add(it.toPersianDigits() to WorkshopStackholdersIntent.ReplaceSearch(applied.copy(insuranceNumber = "")))
+            }
+        }
+    }
+    val filterChips = remember(filters) { filters.map { it.first }.toImmutableList() }
 
     WorkshopScreenShell(
         title = stringResource(Res.string.workshop_action_stackholders),
@@ -101,7 +116,6 @@ fun WorkshopStackholdersContent(
         WorkshopListScaffold(
             state = state.list,
             onLoadMore = { onIntent(WorkshopStackholdersIntent.LoadMore) },
-            key = { it.nationalId },
             header = {
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.cardGap)) {
                     AnimatedVisibility(
@@ -120,7 +134,11 @@ fun WorkshopStackholdersContent(
                     }
                     WorkshopSectionHeader(
                         title = stringResource(Res.string.workshop_action_stackholders),
-                        count = state.list.items.size,
+                        count = state.list.total,
+                    )
+                    WorkshopFilterChips(
+                        chips = filterChips,
+                        onRemove = { index -> onIntent(filters[index].second) },
                     )
                 }
             },
@@ -194,7 +212,7 @@ private fun WorkshopStackholdersScreenPreview() {
                             fullName = "حسین توکلی کرمانی",
                             fatherName = "عزیزالله",
                             birthDate = "۱۳۵۲/۰۴/۱۱",
-                            stackType = "کارفرما",
+                            stackType = "مدیرعامل",
                         ),
                     ),
                 ),

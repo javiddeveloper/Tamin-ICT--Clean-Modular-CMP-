@@ -573,15 +573,6 @@ fun NavGraphBuilder.workshopsScreen(
             onBack = { navController.popBackStack() },
         )
     }
-    composableWithFadeTransitions<ManagementDebitRoute> { entry ->
-        val route = entry.toRoute<ManagementDebitRoute>()
-        ManagementDebitScreen(
-            workshopId = route.workshopId,
-            branchCode = route.branchCode,
-            workshopName = route.workshopName,
-            onBack = { navController.popBackStack() },
-        )
-    }
 }
 
 /**

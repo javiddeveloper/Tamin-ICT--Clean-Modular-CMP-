@@ -383,10 +383,11 @@ class WorkShopsRepositoryImpl(
         val filters = buildFilters {
             add(FilterProperty.WORKSHOPID_ID, query.workshopId)
             add(FilterProperty.WORKSHOPID_BRANCH_CODE, query.branchCode)
-            // The old client crossed these two over, so a stakeholder search filtered on the wrong
-            // column. Each value goes to the property that names it.
-            add(FilterProperty.INSURANCE_ID, query.insuranceNumber)
-            add(FilterProperty.INSURANCE_NATIONAL_ID, query.nationalId)
+            // The stakeholder endpoint nests person fields under `workshopId`, not `insurance` —
+            // the old client sent insurance.* here which the data source silently dropped, so
+            // stakeholder search was always unfiltered. These are the keys the endpoint reads.
+            add(FilterProperty.WORKSHOPID_PERSON_ID, query.insuranceNumber)
+            add(FilterProperty.WORKSHOPID_PERSON_NATIONAL_ID, query.nationalId)
         }
         return remoteDataSource
             .getWorkshopStackHolders(pageQuery(query.page, query.pageSize, filters))

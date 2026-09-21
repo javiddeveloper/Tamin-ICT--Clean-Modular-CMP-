@@ -94,6 +94,12 @@ data class WorkshopMemberQuery(
  *
  * The stakeholder service nests the workshop one level deeper (`workshopId.workshopId`) than every
  * other workshop list; that difference lives in the repository, not here.
+ *
+ * **Search fields**: despite the names, [insuranceNumber] maps to `workshopId.id` (a person
+ * registration ID) and [nationalId] maps to `workshopId.nationalId` on the wire. The old client
+ * sent these under `insurance.*`, which the endpoint silently ignored — stakeholder search was
+ * always unfiltered. The names are kept for compatibility with [PersonSearch], which both this
+ * list and کارکنان share.
  */
 data class WorkshopStackHolderQuery(
     val workshopId: String,

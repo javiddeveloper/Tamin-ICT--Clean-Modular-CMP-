@@ -21,9 +21,6 @@ import taminx.core.core_ui.ic_tamin_workshop_objection
 import taminx.core.core_ui.ic_tamin_workshop_turnover
 import taminx.core.core_ui.workshop_action_article_sixteen
 import taminx.core.core_ui.workshop_action_article_sixteen_desc
-import taminx.core.core_ui.ic_tamin_workshop_article_sixteen
-import taminx.core.core_ui.workshop_action_article_sixteen
-import taminx.core.core_ui.workshop_action_article_sixteen_desc
 import taminx.core.core_ui.workshop_action_debit_turnover
 import taminx.core.core_ui.workshop_action_debit_turnover_desc
 import taminx.core.core_ui.workshop_action_debt_inquiry

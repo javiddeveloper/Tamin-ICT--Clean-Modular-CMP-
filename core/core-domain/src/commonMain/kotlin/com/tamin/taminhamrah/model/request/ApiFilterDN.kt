@@ -62,6 +62,10 @@ enum class FilterProperty(val key: String) {
     @SerialName("workshopId.workshopId") WORKSHOPID_ID("workshopId.workshopId"),
     @SerialName("workshop.branchCode") WORKSHOP_BRANCH_CODE("workshop.branchCode"),
     @SerialName("workshopId.branchCode") WORKSHOPID_BRANCH_CODE("workshopId.branchCode"),
+    /** Stakeholder person-search: the person's registration ID, under `workshopId.id`. */
+    @SerialName("workshopId.id") WORKSHOPID_PERSON_ID("workshopId.id"),
+    /** Stakeholder person-search: the person's national code, under `workshopId.nationalId`. */
+    @SerialName("workshopId.nationalId") WORKSHOPID_PERSON_NATIONAL_ID("workshopId.nationalId"),
     @SerialName("workshop.workshopStatus.workshopStatusCode") WORKSHOP_STATUS_CODE("workshop.workshopStatus.workshopStatusCode"),
     @SerialName("workshopId") PAYMENT_WORKSHOP_ID("workshopId"),
     @SerialName("branchCode") PAYMENT_BRANCH_CODE("branchCode"),
