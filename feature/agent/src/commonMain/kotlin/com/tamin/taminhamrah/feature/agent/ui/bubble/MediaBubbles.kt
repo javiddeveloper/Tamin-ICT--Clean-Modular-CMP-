@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.agent.ui.bubble
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,10 +21,12 @@ import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.outlined.BrokenImage
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,14 +40,32 @@ import coil3.compose.SubcomposeAsyncImage
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.agent.audio.MediaPlaybackCoordinator
 import com.tamin.taminhamrah.feature.agent.service.base.ChartKind
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
+import com.tamin.taminhamrah.feature.agent.ui.AgentGlass
+import com.tamin.taminhamrah.feature.agent.ui.agentGlassCard
+import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.Thickness
+import com.tamin.taminhamrah.util.toPersianDigits
 import org.koin.compose.koinInject
+import kotlin.math.roundToInt
+
+private val MEDIA_WIDTH = 240.dp
+private val IMAGE_HEIGHT = 160.dp
+private val VIDEO_HEIGHT = 140.dp
 
 /**
  * Renderers for the media and data-view bubble families.
@@ -61,7 +82,6 @@ fun RichTextBubble(
     contentColor: Color,
     modifier: Modifier = Modifier
 ) {
-    val taminColors = LocalTaminColors.current
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
             text = content.header,
@@ -79,58 +99,62 @@ fun RichTextBubble(
             Text(
                 text = note,
                 style = MaterialTheme.typography.labelSmall,
-                color = taminColors.textMuted
+                color = AgentGlass.textSecondary
             )
         }
     }
 }
 
-/** An image attachment with an optional caption underneath. */
+/**
+ * An image attachment with an optional caption underneath. The frame is a glass tile so the
+ * loading and failed states read as part of the reply, not as a grey block.
+ */
 @Composable
 fun ImageBubble(
     content: ChatBubbleContent.Image,
     modifier: Modifier = Modifier
 ) {
-    val taminColors = LocalTaminColors.current
-    Column(modifier = modifier.width(240.dp)) {
+    val frameShape = RoundedCornerShape(com.tamin.taminhamrah.ui.theme.CornerRadius.lg)
+    Column(modifier = modifier.width(MEDIA_WIDTH)) {
         SubcomposeAsyncImage(
             model = content.source,
             contentDescription = content.caption,
             contentScale = ContentScale.Crop,
             loading = {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(160.dp)
-                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
-                )
+                Box(modifier = Modifier.fillMaxWidth().height(IMAGE_HEIGHT).background(AgentGlass.tileFill))
             },
             error = {
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(160.dp)
-                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f)),
+                    modifier = Modifier.fillMaxWidth().height(IMAGE_HEIGHT).background(AgentGlass.tileFill),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "تصویر بارگذاری نشد",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = taminColors.textMuted
-                    )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                        Icon(
+                            Icons.Outlined.BrokenImage,
+                            contentDescription = null,
+                            tint = AgentGlass.textSecondary,
+                            modifier = Modifier.size(IconSize.medium)
+                        )
+                        Text(
+                            text = "تصویر بارگذاری نشد",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = AgentGlass.textSecondary
+                        )
+                    }
                 }
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(160.dp)
-                .clip(RoundedCornerShape(12.dp))
+                .height(IMAGE_HEIGHT)
+                .clip(frameShape)
+                .border(AgentGlass.borderWidth, AgentGlass.borderColor, frameShape)
         )
         content.caption?.takeIf { it.isNotBlank() }?.let { caption ->
             Spacer(Modifier.height(6.dp))
             Text(
                 text = caption,
                 style = MaterialTheme.typography.labelSmall,
-                color = taminColors.textMuted
+                color = AgentGlass.textSecondary
             )
         }
     }
@@ -157,14 +181,17 @@ fun VideoBubble(
     // Inline playback starts silent: a bubble that shouts audio the moment it scrolls
     // into view is hostile. Fullscreen opts back in.
     var isMuted by remember { mutableStateOf(true) }
+    val frameShape = RoundedCornerShape(com.tamin.taminhamrah.ui.theme.CornerRadius.lg)
 
-    Column(modifier = modifier.width(240.dp)) {
+    Column(modifier = modifier.width(MEDIA_WIDTH)) {
+        // The frame is a glass tile: a poster-less clip shows the tile, not a grey block.
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(140.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)),
+                .height(VIDEO_HEIGHT)
+                .clip(frameShape)
+                .background(AgentGlass.tileFill)
+                .border(AgentGlass.borderWidth, AgentGlass.borderColor, frameShape),
             contentAlignment = Alignment.Center
         ) {
             if (isPlayingInline) {
@@ -190,18 +217,20 @@ fun VideoBubble(
                         modifier = Modifier.matchParentSize()
                     )
                 }
+                // The same gradient as the voice play button and the reply's action buttons.
                 Box(
                     modifier = Modifier
                         .size(48.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary)
+                        .background(taminColors.buttonGradient)
+                        .border(AgentGlass.borderWidth, AgentGlass.borderColor, CircleShape)
                         .clickable { isPlayingInline = true },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         Icons.Default.PlayArrow,
                         contentDescription = "پخش ویدیو",
-                        tint = MaterialTheme.colorScheme.onPrimary
+                        tint = Color.White
                     )
                 }
                 content.durationMs?.let { duration ->
@@ -249,7 +278,7 @@ fun VideoBubble(
             Text(
                 text = caption,
                 style = MaterialTheme.typography.labelSmall,
-                color = taminColors.textMuted
+                color = AgentGlass.textSecondary
             )
         }
     }
@@ -288,30 +317,27 @@ private fun OverlayIconButton(
 
 /**
  * A chart drawn from plain data, so it renders identically whether it just arrived or
- * was restored from a saved conversation.
+ * was restored from a saved conversation. It sits on the reply's glass card, like a table,
+ * and draws in the [AgentGlass] palette — the theme's surface is white in light mode.
  */
 @Composable
 fun ChartBubble(
     content: ChatBubbleContent.Chart,
     modifier: Modifier = Modifier
 ) {
-    val taminColors = LocalTaminColors.current
-    val accent = MaterialTheme.colorScheme.primary
-
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(taminColors.bgSurface)
-            .padding(12.dp)
+            .agentGlassCard(RoundedCornerShape(com.tamin.taminhamrah.ui.theme.CornerRadius.xl))
+            .padding(Spacing.md)
     ) {
         content.title?.takeIf { it.isNotBlank() }?.let { title ->
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                color = taminColors.textPrimary
+                color = AgentGlass.textPrimary
             )
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(Spacing.smPlus))
         }
 
         val values = content.series.firstOrNull()?.values.orEmpty()
@@ -319,77 +345,216 @@ fun ChartBubble(
             Text(
                 text = "داده‌ای برای نمایش نمودار نیست.",
                 style = MaterialTheme.typography.bodySmall,
-                color = taminColors.textMuted
+                color = AgentGlass.textSecondary
             )
             return@Column
         }
 
+        val labels = content.labels.take(values.size)
         when (content.kind) {
-            ChartKind.BAR, ChartKind.PIE -> BarChart(values, accent)
-            ChartKind.LINE -> LineChart(values, accent)
+            ChartKind.BAR -> {
+                BarChart(values)
+                ChartAxisLabels(labels)
+            }
+            ChartKind.LINE -> {
+                LineChart(values)
+                ChartAxisLabels(labels)
+            }
+            ChartKind.PIE -> PieChart(values, labels, content.valueUnit)
         }
 
-        if (content.labels.isNotEmpty()) {
-            Spacer(Modifier.height(8.dp))
-            Row(modifier = Modifier.fillMaxWidth()) {
-                content.labels.take(values.size).forEach { label ->
+        content.valueUnit?.takeIf { it.isNotBlank() && content.kind != ChartKind.PIE }?.let { unit ->
+            Spacer(Modifier.height(Spacing.xs))
+            Text(
+                text = "واحد: $unit",
+                style = MaterialTheme.typography.labelSmall,
+                color = AgentGlass.textSecondary
+            )
+        }
+    }
+}
+
+/** One label under each bar/point, in plot order (left to right, whatever the layout direction). */
+@Composable
+private fun ChartAxisLabels(labels: List<String>) {
+    if (labels.isEmpty()) return
+    Spacer(Modifier.height(Spacing.sm))
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+        Row(modifier = Modifier.fillMaxWidth()) {
+            labels.forEach { label ->
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = AgentGlass.textSecondary,
+                    maxLines = 1,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
+}
+
+/** Bars fade from the accent at the top into the card, with a hairline baseline. */
+@Composable
+private fun BarChart(values: List<Double>) {
+    val max = values.maxOrNull()?.takeIf { it > 0.0 } ?: 1.0
+    val accent = AgentGlass.accent
+    val baseline = AgentGlass.borderColor
+    Canvas(modifier = Modifier.fillMaxWidth().height(CHART_HEIGHT)) {
+        val gap = Spacing.sm.toPx()
+        val barWidth = ((size.width - gap * (values.size - 1)) / values.size).coerceAtLeast(1f)
+        values.forEachIndexed { index, value ->
+            val barHeight = (value / max * size.height).toFloat().coerceAtLeast(2f)
+            val top = size.height - barHeight
+            drawRoundRect(
+                brush = Brush.verticalGradient(
+                    colors = listOf(accent, accent.copy(alpha = 0.45f)),
+                    startY = top,
+                    endY = size.height,
+                ),
+                topLeft = Offset(index * (barWidth + gap), top),
+                size = Size(barWidth, barHeight),
+                cornerRadius = CornerRadius(BAR_CORNER.toPx(), BAR_CORNER.toPx())
+            )
+        }
+        drawLine(
+            color = baseline,
+            start = Offset(0f, size.height),
+            end = Offset(size.width, size.height),
+            strokeWidth = Thickness.border.toPx()
+        )
+    }
+}
+
+/** A line with a soft area beneath it and a dot on every point. */
+@Composable
+private fun LineChart(values: List<Double>) {
+    val max = values.maxOrNull()?.takeIf { it > 0.0 } ?: 1.0
+    val accent = AgentGlass.accent
+    val baseline = AgentGlass.borderColor
+    Canvas(modifier = Modifier.fillMaxWidth().height(CHART_HEIGHT)) {
+        // Points are inset so the end dots are not clipped by the canvas edge.
+        val inset = LINE_DOT_RADIUS.toPx()
+        val plotWidth = size.width - inset * 2
+        val plotHeight = size.height - inset * 2
+        val points = values.mapIndexed { index, value ->
+            val x = if (values.size == 1) inset + plotWidth / 2 else inset + index * (plotWidth / (values.size - 1))
+            Offset(x, inset + plotHeight - (value / max * plotHeight).toFloat())
+        }
+        drawLine(
+            color = baseline,
+            start = Offset(0f, size.height),
+            end = Offset(size.width, size.height),
+            strokeWidth = Thickness.border.toPx()
+        )
+        if (points.size >= 2) {
+            val area = Path().apply {
+                moveTo(points.first().x, size.height)
+                points.forEach { lineTo(it.x, it.y) }
+                lineTo(points.last().x, size.height)
+                close()
+            }
+            drawPath(
+                path = area,
+                brush = Brush.verticalGradient(listOf(accent.copy(alpha = 0.35f), accent.copy(alpha = 0f)))
+            )
+            val line = Path().apply {
+                moveTo(points.first().x, points.first().y)
+                points.drop(1).forEach { lineTo(it.x, it.y) }
+            }
+            drawPath(path = line, color = accent, style = Stroke(width = LINE_WIDTH.toPx(), cap = StrokeCap.Round))
+        }
+        points.forEach { point ->
+            drawCircle(color = accent, radius = LINE_DOT_RADIUS.toPx(), center = point)
+            drawCircle(color = AgentGlass.shadowColor, radius = LINE_DOT_RADIUS.toPx() * 0.45f, center = point)
+        }
+    }
+}
+
+/**
+ * A donut with a legend: one slice per value in the [AgentGlass.chartPalette], each legend row
+ * carrying its label, value and share. Non-positive values are skipped rather than drawn.
+ */
+@Composable
+private fun PieChart(values: List<Double>, labels: List<String>, unit: String?) {
+    val slices = values.mapIndexedNotNull { index, value ->
+        if (value > 0.0) Triple(labels.getOrNull(index) ?: "", value, AgentGlass.chartPalette[index % AgentGlass.chartPalette.size]) else null
+    }
+    val total = slices.sumOf { it.second }
+    if (slices.isEmpty() || total <= 0.0) {
+        Text(
+            text = "داده‌ای برای نمایش نمودار نیست.",
+            style = MaterialTheme.typography.bodySmall,
+            color = AgentGlass.textSecondary
+        )
+        return
+    }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.md)
+    ) {
+        Canvas(modifier = Modifier.size(PIE_SIZE)) {
+            val stroke = PIE_RING_WIDTH.toPx()
+            val diameter = size.minDimension - stroke
+            val topLeft = Offset((size.width - diameter) / 2, (size.height - diameter) / 2)
+            var startAngle = -90f
+            slices.forEach { (_, value, color) ->
+                val sweep = (value / total * 360.0).toFloat()
+                drawArc(
+                    color = color,
+                    startAngle = startAngle,
+                    sweepAngle = (sweep - PIE_SLICE_GAP_DEG).coerceAtLeast(0.5f),
+                    useCenter = false,
+                    topLeft = topLeft,
+                    size = Size(diameter, diameter),
+                    style = Stroke(width = stroke, cap = StrokeCap.Butt)
+                )
+                startAngle += sweep
+            }
+        }
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+        ) {
+            slices.forEach { (label, value, color) ->
+                val share = (value / total * 100).roundToInt()
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                    Box(modifier = Modifier.size(LEGEND_DOT).clip(CircleShape).background(color))
                     Text(
                         text = label,
                         style = MaterialTheme.typography.labelSmall,
-                        color = taminColors.textMuted,
+                        color = AgentGlass.textPrimary,
                         maxLines = 1,
                         modifier = Modifier.weight(1f)
+                    )
+                    Text(
+                        text = "${formatChartValue(value)}${unit?.takeIf { it.isNotBlank() }?.let { " $it" } ?: ""} · $share٪".toPersianDigits(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = AgentGlass.textSecondary,
+                        maxLines = 1
                     )
                 }
             }
         }
-
-        content.valueUnit?.takeIf { it.isNotBlank() }?.let { unit ->
-            Spacer(Modifier.height(6.dp))
-            Text(
-                text = "واحد: $unit",
-                style = MaterialTheme.typography.labelSmall,
-                color = taminColors.textMuted
-            )
-        }
     }
 }
 
-@Composable
-private fun BarChart(values: List<Double>, color: Color) {
-    val max = values.maxOrNull()?.takeIf { it > 0.0 } ?: 1.0
-    Canvas(modifier = Modifier.fillMaxWidth().height(120.dp)) {
-        val gap = 6.dp.toPx()
-        val barWidth = ((size.width - gap * (values.size - 1)) / values.size).coerceAtLeast(1f)
-        values.forEachIndexed { index, value ->
-            val barHeight = (value / max * size.height).toFloat().coerceAtLeast(2f)
-            drawRoundRect(
-                color = color,
-                topLeft = Offset(index * (barWidth + gap), size.height - barHeight),
-                size = Size(barWidth, barHeight),
-                cornerRadius = CornerRadius(4f, 4f)
-            )
-        }
-    }
+/** Whole numbers without a trailing `.0`, otherwise one decimal. */
+private fun formatChartValue(value: Double): String {
+    val rounded = (value * 10).roundToInt() / 10.0
+    return if (rounded == rounded.toLong().toDouble()) rounded.toLong().toString() else rounded.toString()
 }
 
-@Composable
-private fun LineChart(values: List<Double>, color: Color) {
-    val max = values.maxOrNull()?.takeIf { it > 0.0 } ?: 1.0
-    Canvas(modifier = Modifier.fillMaxWidth().height(120.dp)) {
-        if (values.size < 2) return@Canvas
-        val step = size.width / (values.size - 1)
-        var previous = Offset(0f, size.height - (values[0] / max * size.height).toFloat())
-        values.drop(1).forEachIndexed { index, value ->
-            val point = Offset(
-                (index + 1) * step,
-                size.height - (value / max * size.height).toFloat()
-            )
-            drawLine(color = color, start = previous, end = point, strokeWidth = 3f)
-            previous = point
-        }
-    }
-}
+private val CHART_HEIGHT = 120.dp
+private val BAR_CORNER = 4.dp
+private val LINE_WIDTH = 2.5.dp
+private val LINE_DOT_RADIUS = 4.dp
+private val PIE_SIZE = 108.dp
+private val PIE_RING_WIDTH = 18.dp
+private val LEGEND_DOT = 8.dp
+private const val PIE_SLICE_GAP_DEG = 2f
 
 private fun formatDuration(ms: Long): String {
     val totalSeconds = (ms / 1000).toInt()

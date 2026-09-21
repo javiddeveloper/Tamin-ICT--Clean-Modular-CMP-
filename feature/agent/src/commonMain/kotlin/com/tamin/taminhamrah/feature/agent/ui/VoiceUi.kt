@@ -3,10 +3,8 @@ package com.tamin.taminhamrah.feature.agent.ui
 import androidx.compose.ui.graphics.Brush
 import org.jetbrains.compose.resources.stringResource
 import com.tamin.taminhamrah.ui.components.coloredShadow
-import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.ui.theme.Thickness
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.agent_stop_recording
 import taminx.core.core_ui.agent_delete_recording
@@ -131,7 +129,7 @@ fun VoiceRecorderBar(
     modifier: Modifier = Modifier
 ) {
     val remaining = (VOICE_MAX_DURATION_MS - state.elapsedMs).coerceAtLeast(0)
-    val dangerColor = MaterialTheme.colorScheme.error
+    val dangerColor = AgentGlass.danger
     val waveColor = if (state.isNearLimit) dangerColor else AgentGlass.accent
 
     VoiceGlassBar(hazeState = hazeState, modifier = modifier) {
@@ -177,7 +175,7 @@ fun VoicePreviewBar(
     modifier: Modifier = Modifier
 ) {
     val taminColors = LocalTaminColors.current
-    val dangerColor = MaterialTheme.colorScheme.error
+    val dangerColor = AgentGlass.danger
     VoiceGlassBar(hazeState = hazeState, modifier = modifier) {
         SeekableWaveform(
             amplitudes = state.amplitudes,
@@ -242,19 +240,18 @@ fun VoiceChatBubble(
     val taminColors = LocalTaminColors.current
     // The user's clip is drawn inside the same gradient card as the user's text (the caller
     // provides that card), so it only lays out its row; the assistant's clip draws its own
-    // surface card.
+    // glass card — the same one as the reply's tables and charts, since it sits on the dark
+    // AgentBackground where the theme's surface would be a white block.
     val onGradient = taminColors.onGradient
-    val activeColor = if (isUser) onGradient else taminColors.blueText
-    val inactiveColor = if (isUser) onGradient.copy(alpha = 0.4f) else taminColors.chevron
-    val timeColor = if (isUser) onGradient.copy(alpha = 0.7f) else taminColors.textMuted
+    val activeColor = if (isUser) onGradient else AgentGlass.accent
+    val inactiveColor = if (isUser) onGradient.copy(alpha = 0.4f) else Color.White.copy(alpha = 0.25f)
+    val timeColor = if (isUser) onGradient.copy(alpha = 0.7f) else AgentGlass.textSecondary
     val shape = RoundedCornerShape(com.tamin.taminhamrah.ui.theme.CornerRadius.xl)
     val container = if (isUser) {
         Modifier
     } else {
         Modifier
-            .clip(shape)
-            .background(taminColors.bgSurface)
-            .border(Thickness.border, taminColors.border, shape)
+            .agentGlassCard(shape)
             .padding(horizontal = Spacing.smPlus, vertical = Spacing.sm)
     }
 
@@ -276,10 +273,11 @@ fun VoiceChatBubble(
                 onClick = onToggle
             )
         } else {
+            // The reply's button gradient, like the video play button and action buttons.
             RoundIconButton(
                 icon = playIcon,
-                tint = onGradient,
-                background = taminTopAppBarGradient(),
+                tint = Color.White,
+                background = taminColors.buttonGradient,
                 contentDescription = playDescription,
                 onClick = onToggle
             )
@@ -418,11 +416,13 @@ private fun RoundIconButton(
     contentDescription: String,
     onClick: () -> Unit
 ) {
+    // A circle, like the video bubble's play button, so the two media controls match.
     Box(
         modifier = Modifier
             .size(IconSize.largePlus)
-            .clip(RoundedCornerShape(com.tamin.taminhamrah.ui.theme.CornerRadius.md))
+            .clip(CircleShape)
             .background(background)
+            .border(AgentGlass.borderWidth, AgentGlass.borderColor, CircleShape)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {

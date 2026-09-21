@@ -37,6 +37,25 @@ internal object AgentGlass {
     val iconTint: Color = Color(0xFFD5E1FA)
     /** Links, math and table headers — the dark theme's info blue, readable on the dark glass. */
     val accent: Color = Color(0xFF7FB0FF)
+    /** Chart slices and series beside [accent], in the same lightness so none recedes. */
+    val chartPalette: List<Color> = listOf(
+        accent,
+        Color(0xFF6FDDC4),
+        Color(0xFFFFC46B),
+        Color(0xFFF08BAB),
+        Color(0xFFB69CFF),
+        Color(0xFF9AD0FF),
+    )
+
+    /**
+     * Errors. The theme's error red is tuned for a light surface and reads as a dark smear
+     * on the backdrop; this is the same hue lifted to the glass palette's lightness, with a
+     * tinted tile so the note is a card like everything else in a reply.
+     */
+    val danger: Color = Color(0xFFFF8E8E)
+    val dangerText: Color = Color(0xFFFFC4C4)
+    val dangerFill: Color = Color(0xFFFF6B6B).copy(alpha = 0.12f)
+    val dangerBorder: Color = Color(0xFFFF8E8E).copy(alpha = 0.35f)
 
     /**
      * The blur itself. The tint is dark and opaque enough that scrolled-under text reads as a

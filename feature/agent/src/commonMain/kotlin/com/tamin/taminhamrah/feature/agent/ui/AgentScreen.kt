@@ -75,6 +75,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.InputTransformation.Companion.keyboardOptions
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.rounded.OpenInNew
+import androidx.compose.material.icons.rounded.ErrorOutline
 import kotlinx.coroutines.delay
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -992,21 +994,23 @@ private fun SuggestedPromptChips(
     }
 }
 
-/** A prompt the user can send with one tap, in the app's blue chip style. */
+/**
+ * A prompt the user can send with one tap. A glass chip rather than the gradient action button:
+ * suggestions are options, and should not compete with the reply's real calls to action.
+ */
 @Composable
 private fun PromptChip(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val taminColors = LocalTaminColors.current
     val shape = RoundedCornerShape(CornerRadius.chip)
     Text(
         text = text,
         style = MaterialTheme.typography.bodySmall,
-        color = taminColors.blueText,
+        color = AgentGlass.textPrimary,
         fontWeight = FontWeight.Medium,
         textAlign = TextAlign.Center,
         modifier = modifier
             .clip(shape)
-            .background(taminColors.blueBg)
-            .border(Thickness.border, taminColors.blueBorder, shape)
+            .background(AgentGlass.tileFill)
+            .border(AgentGlass.borderWidth, AgentGlass.borderColor, shape)
             .clickable(onClick = onClick)
             .padding(horizontal = Spacing.md, vertical = Spacing.sm),
     )
@@ -1536,12 +1540,12 @@ private fun BubbleContentRenderer(
                     Text(
                         text = title,
                         style = MaterialTheme.typography.labelLarge.copy(
-                            color = MaterialTheme.colorScheme.primary,
+                            color = AgentGlass.accent,
                             fontWeight = FontWeight.Bold
                         )
                     )
                     HorizontalDivider(
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f),
+                        color = AgentGlass.borderColor,
                         thickness = 0.5.dp,
                         modifier = Modifier.padding(vertical = 2.dp)
                     )
@@ -1571,14 +1575,14 @@ private fun BubbleContentRenderer(
                             Box(modifier = androidx.compose.ui.Modifier.graphicsLayer { this.alpha = alpha.value }) {
                                 if (key.startsWith("----") || key.startsWith("────")) {
                                     HorizontalDivider(
-                                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                                        color = AgentGlass.borderColor,
                                         thickness = 0.5.dp,
                                         modifier = Modifier.padding(vertical = 3.dp)
                                     )
                                 } else {
                                     Text(
                                         text = androidx.compose.ui.text.buildAnnotatedString {
-                                            withStyle(style = androidx.compose.ui.text.SpanStyle(color = taminColors.textSecondary)) {
+                                            withStyle(style = androidx.compose.ui.text.SpanStyle(color = AgentGlass.textSecondary)) {
                                                 append("${key.toPersianDigits()}: ")
                                             }
                                             withStyle(style = androidx.compose.ui.text.SpanStyle(
@@ -1601,25 +1605,27 @@ private fun BubbleContentRenderer(
             }
         }
 
+        // Both are the reply's gradient action button, like a markdown link button; the deep
+        // link gate applies the target's feature flag and the web host allow-list on tap.
         is ChatBubbleContent.DeepLink -> {
             val deepLinkHandler = LocalDeepLinkHandler.current
-            OutlinedButton(
+            AgentActionButton(
+                label = content.title,
                 onClick = { deepLinkHandler.open(content.destination.toAgentDeepLink(), DeepLinkSource.AGENT) },
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
-            ) {
-                Text(content.title)
-            }
+            )
         }
 
         is ChatBubbleContent.WebLink -> {
-            OutlinedButton(
-                onClick = { /* open browser */ },
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
-            ) {
-                Text("🔗 ${content.title}")
+            val deepLinkHandler = LocalDeepLinkHandler.current
+            val isActionable = remember(content.url) {
+                DeepLinkParser.parse(content.url, DeepLinkSource.AGENT) != ParsedDeepLink.Invalid
             }
+            AgentActionButton(
+                label = content.title,
+                onClick = { deepLinkHandler.open(content.url, DeepLinkSource.AGENT) },
+                enabled = isActionable,
+                trailingIcon = Icons.AutoMirrored.Rounded.OpenInNew,
+            )
         }
 
         is ChatBubbleContent.SuggestedPrompts -> {
@@ -1680,11 +1686,20 @@ private fun BubbleContentRenderer(
             Text("📝 فرم پویا", color = MaterialTheme.colorScheme.primary)
         }
 
+        // A tinted glass note. The theme's error red is for light surfaces and read as a dark
+        // smear on the backdrop; AgentGlass.danger* is the same hue at the glass palette's
+        // lightness. A retryable note is the whole tile, with the retry icon as its cue.
         is ChatBubbleContent.ServiceError -> {
+            val canAct = content.canRetryPrompt || content.actionKey != null
+            val noteShape = RoundedCornerShape(CornerRadius.lg)
             Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(noteShape)
+                    .background(AgentGlass.dangerFill)
+                    .border(Thickness.border, AgentGlass.dangerBorder, noteShape)
                     .run {
                         when {
                             content.canRetryPrompt ->
@@ -1694,21 +1709,18 @@ private fun BubbleContentRenderer(
                             else -> this
                         }
                     }
-                    .padding(4.dp)
+                    .padding(horizontal = Spacing.md, vertical = Spacing.smPlus)
             ) {
-                if (content.canRetryPrompt || content.actionKey != null) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = "تلاش مجدد",
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(20.dp)
-                    )
-                } else {
-                    Text("⚠️", fontSize = 16.sp)
-                }
+                Icon(
+                    imageVector = if (canAct) Icons.Default.Refresh else Icons.Rounded.ErrorOutline,
+                    contentDescription = if (canAct) "تلاش مجدد" else null,
+                    tint = AgentGlass.danger,
+                    modifier = Modifier.size(IconSize.small)
+                )
                 Text(
                     text = content.message,
-                    style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.error)
+                    style = MaterialTheme.typography.bodySmall.copy(color = AgentGlass.dangerText, lineHeight = 20.sp),
+                    modifier = Modifier.weight(1f)
                 )
             }
         }
