@@ -445,20 +445,21 @@ private fun ChatLayout(
                 .background(AppBarScrim.bottomGradient)
                 .windowInsetsPadding(WindowInsets.navigationBars)
         ) {
-            val barPadding = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 8.dp)
+            // The voice bars carry the same outer padding as AgentInputBar themselves, so the
+            // glass pill stays exactly in place when the composer swaps mode.
             when {
                 uiState.voiceRecording != null -> VoiceRecorderBar(
                     state = uiState.voiceRecording,
-                    onStop = { onIntent(AgentIntent.StopVoiceRecording) },
-                    modifier = barPadding
+                    hazeState = hazeState,
+                    onStop = { onIntent(AgentIntent.StopVoiceRecording) }
                 )
                 uiState.voicePreview != null -> VoicePreviewBar(
                     state = uiState.voicePreview,
+                    hazeState = hazeState,
                     onDelete = { onIntent(AgentIntent.DeleteVoiceRecording) },
                     onTogglePlay = { onIntent(AgentIntent.TogglePreviewPlayback) },
                     onSeek = { onIntent(AgentIntent.SeekPreview(it)) },
-                    onSend = { onIntent(AgentIntent.SendVoiceRecording) },
-                    modifier = barPadding
+                    onSend = { onIntent(AgentIntent.SendVoiceRecording) }
                 )
                 else -> AgentInputBar(
                     isGenerating = uiState.isGenerating,
