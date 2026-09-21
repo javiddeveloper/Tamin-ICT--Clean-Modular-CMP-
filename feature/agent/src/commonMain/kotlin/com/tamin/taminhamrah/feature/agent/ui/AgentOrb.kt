@@ -243,13 +243,13 @@ fun AgentOrb(modifier: Modifier = Modifier) {
         )
 
         // 90:44 — the mascot face, fixed in place on top of the (rotating) sphere.
-        Image(
-            painter = painterResource(Res.drawable.robot),
-            contentDescription = null,
-            modifier = Modifier
-                .width(RobotWidth)
-                .aspectRatio(RobotAspectRatio)
-        )
+//        Image(
+//            painter = painterResource(Res.drawable.robot),
+//            contentDescription = null,
+//            modifier = Modifier
+//                .width(RobotWidth)
+//                .aspectRatio(RobotAspectRatio)
+//        )
     }
 }
 

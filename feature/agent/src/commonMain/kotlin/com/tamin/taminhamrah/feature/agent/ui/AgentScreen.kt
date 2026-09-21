@@ -14,10 +14,8 @@ import com.tamin.taminhamrah.ui.components.IconTile
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
-import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.IconSize
-import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import taminx.core.core_ui.agent_screen_title
 import taminx.core.core_ui.agent_processing
@@ -93,7 +91,6 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.shadow
@@ -143,7 +140,6 @@ import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.ThumbDown
 import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.ui.text.font.FontVariation.weight
-import de.jensklingenberg.ktorfit.http.HEAD
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
@@ -157,8 +153,6 @@ import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.agent_not_allowed_default
 import taminx.core.core_ui.agent_not_allowed_title
-import taminx.feature.agent.generated.resources.Res as AgentRes
-import taminx.feature.agent.generated.resources.ic_star
 import kotlin.math.roundToInt
 
 // ─── AgentScreen ──────────────────────────────────────────────────────────────
@@ -501,15 +495,7 @@ private val TopBarTileShape = RoundedCornerShape(13.dp)
 private val TopBarIconTint = Color(0xFFD5E1FA)
 private val TopBarSubtitleColor = Color(0xFFA9BDE6)
 private val TopBarShadowColor = Color(0xFF040A1E)
-private val TopBarAvatarGlow = Color(0xFF7850F0)
 private val TopBarBadgeGradient = Brush.linearGradient(listOf(Color(0xFF7C5CFF), Color(0xFF3B6FD4)))
-private val TopBarAvatarSweep = Brush.sweepGradient(
-    listOf(Color(0xFF5B46E4), Color(0xFFBA6CFF), Color(0xFF1B3A8A), Color(0xFFB6D0FF), Color(0xFF5B46E4))
-)
-
-/** One full turn of the avatar's sweep — matches AgentOrb's rotation speed on the welcome
- *  screen, so both read as the same "living" assistant color rather than two different ones. */
-private const val TOP_BAR_AVATAR_ROTATION_DURATION_MS = 12000
 
 /** One blink half-cycle for the online/offline status dot (fade out, then back in). */
 private const val TOP_BAR_STATUS_DOT_BLINK_DURATION_MS = 900
@@ -581,7 +567,7 @@ private fun AgentTopBar(
                 // block and the add button.
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Right-edge cluster (RTL start): chevron, avatar, persona block.
+                // Right-edge cluster (RTL start): chevron, persona block.
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -592,58 +578,6 @@ private fun AgentTopBar(
                         contentDescription = "بازگشت",
                         onClick = onNavigateBack
                     )
-
-                    // Avatar — conic sweep + a soft top-left glare, glowing purple shadow.
-                    // The sweep rotates continuously around the avatar's own center, same as
-                    // the welcome-screen AgentOrb; the avatar's position/size never change.
-                    val avatarSweepRotation by rememberInfiniteTransition(label = "top_bar_avatar_rotation").animateFloat(
-                        initialValue = 0f,
-                        targetValue = 360f,
-                        animationSpec = infiniteRepeatable(
-                            animation = tween(TOP_BAR_AVATAR_ROTATION_DURATION_MS, easing = LinearEasing),
-                            repeatMode = RepeatMode.Restart
-                        ),
-                        label = "top_bar_avatar_rotation_angle"
-                    )
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .coloredShadow(color = TopBarAvatarGlow.copy(alpha = 0.5f), borderRadius = 20.dp, blurRadius = 16.dp, offsetY = 6.dp)
-                            .clip(CircleShape)
-                            .drawBehind {
-                                rotate(degrees = avatarSweepRotation) {
-                                    drawCircle(brush = TopBarAvatarSweep)
-                                }
-                            }
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .matchParentSize()
-                                .drawBehind {
-                                    // Glossy top-left highlight — center matches the Figma radial
-                                    // gradient's handle position (0.32, 0.28) within the avatar.
-                                    // Fixed in place (not rotating with the sweep beneath it) so
-                                    // it reads as a light source reflecting off the sphere.
-                                    drawCircle(
-                                        brush = Brush.radialGradient(
-                                            colors = listOf(Color.White.copy(alpha = 0.55f), Color.Transparent),
-                                            center = Offset(size.width * 0.32f, size.height * 0.28f),
-                                            radius = size.minDimension
-                                        ),
-                                        radius = size.minDimension / 2f,
-                                        center = Offset(size.width / 2f, size.height / 2f)
-                                    )
-                                }
-                        )
-                        Icon(
-                            imageVector = vectorResource(AgentRes.drawable.ic_star),
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier
-                                .align(Alignment.Center)
-                                .size(12.dp)
-                        )
-                    }
 
                     // Persona block: name + "AI" pill, then the online-status row beneath it.
                     Column(horizontalAlignment = Alignment.Start, verticalArrangement = Arrangement.spacedBy(3.dp)) {
@@ -1993,9 +1927,9 @@ private fun EmptyState(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = Spacing.lg, vertical = Spacing.xl),
+                .padding(start = Spacing.lg, end = Spacing.lg, top = Spacing.xxxxxl, bottom = Spacing.xl),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Top
         ) {
             // Figma 90:40 - the sphere carries its own 16 dp bottom margin.
             AgentOrb()
@@ -2070,7 +2004,8 @@ private fun AgentSuggestions(
         )
     }
     Column(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth()
+            .padding(vertical = Spacing.lg),
         verticalArrangement = Arrangement.spacedBy(Spacing.sm)
     ) {
         suggestions.forEach { suggestion ->
@@ -2096,26 +2031,10 @@ private fun AgentSuggestionRow(
             .background(Color.White.copy(alpha = 0.08f))
             .border(1.dp, Color.White.copy(alpha = 0.14f), shape)
             .clickable(onClick = onClick)
-            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
+            .padding(horizontal = Spacing.md, vertical = Spacing.lg),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
     ) {
-        Box(
-            modifier = Modifier
-                .size(36.dp)
-                .clip(RoundedCornerShape(CornerRadius.lg))
-                .background(suggestion.iconBackground),
-            contentAlignment = Alignment.Center
-        ) {
-            suggestion.icon?.let {
-                Icon(
-                    imageVector = it,
-                    contentDescription = null,
-                    tint = suggestion.iconTint,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-        }
         Text(
             text = suggestion.text,
             modifier = Modifier.weight(1f),
