@@ -19,6 +19,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.objectionStatus.sms.ObjectionS
 import com.tamin.taminhamrah.feature.workshops.ui.paymentSheets.PaymentSheetsViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebit.WorkshopDebitViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebtInquiry.WorkshopDebtInquiryViewModel
+import com.tamin.taminhamrah.feature.workshops.ui.workshopMembers.WorkshopMembersViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersViewModel
 import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
 import com.tamin.taminhamrah.useCases.userRequest.DownloadUserRequestDocumentUseCase
@@ -41,6 +42,7 @@ val workshopsModule = module {
     }
 
     viewModelOf(::WorkshopsViewModel)
+    viewModelOf(::WorkshopMembersViewModel)
     viewModelOf(::ManagementDebitViewModel)
     viewModelOf(::WorkshopDebtInquiryViewModel)
     viewModelOf(::ObjectionableDebitViewModel)
