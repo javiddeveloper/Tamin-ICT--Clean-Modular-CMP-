@@ -301,7 +301,6 @@ private fun ChatLayout(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(LocalTaminColors.current.bgPage)
             // The app runs edge-to-edge (MainActivity.enableEdgeToEdge()), so the
             // manifest's windowSoftInputMode="adjustResize" is not honored by the
             // system — Compose must consume the IME inset itself, same as every other
@@ -312,13 +311,12 @@ private fun ChatLayout(
     ) {
         // Full-bleed backdrop (Figma 90:14), behind the top bar too — otherwise its
         // glass blur has nothing colorful to sample and washes out to the plain page.
-        if (isEmptyState) {
-            AgentBackground(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .safeHazeSource(state = hazeState)
-            )
-        }
+        // Always drawn, not just for the empty/orb state, so the message list matches it.
+        AgentBackground(
+            modifier = Modifier
+                .fillMaxSize()
+                .safeHazeSource(state = hazeState)
+        )
 
         // ── Scrolling content: the haze source, sitting behind both bars ──
         if (isEmptyState) {
@@ -772,7 +770,9 @@ private fun ExtensionCard(
                 Text(
                     text = stringResource(if (state.isCompleted) Res.string.agent_processing_done else Res.string.agent_processing),
                     style = MaterialTheme.typography.labelMedium.copy(
-                        color = if (state.isCompleted) taminColors.greenText else taminColors.blueText,
+                        // Transparent card straight on AgentBackground — the theme's
+                        // blueText is too dark to read there, white keeps it legible.
+                        color = if (state.isCompleted) taminColors.greenText else Color.White,
                         fontWeight = FontWeight.SemiBold
                     )
                 )
@@ -828,7 +828,7 @@ private fun ExtensionCardStep(
                         .width(2.dp)
                         .height(24.dp)
                         .offset(y = 16.dp)
-                        .background(taminColors.divider)
+                        .background(Color.White.copy(alpha = 0.14f))
                 )
             }
             androidx.compose.animation.AnimatedVisibility(
@@ -850,7 +850,7 @@ private fun ExtensionCardStep(
             ) {
                 IosSpinner(
                     modifier = Modifier.size(14.dp),
-                    color = taminColors.blueText
+                    color = Color.White
                 )
             }
             androidx.compose.animation.AnimatedVisibility(
@@ -862,21 +862,24 @@ private fun ExtensionCardStep(
                     modifier = Modifier
                         .size(6.dp)
                         .clip(CircleShape)
-                        .background(taminColors.chevron)
+                        .background(Color.White.copy(alpha = 0.35f))
                 )
             }
         }
 
         Spacer(Modifier.width(10.dp))
 
+        // Transparent card straight on AgentBackground — white-based tones instead
+        // of the theme's textPrimary/textSecondary/textMuted, which are too dark
+        // to read against that fixed-dark backdrop.
         Text(
             text = label,
             modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.bodySmall.copy(
                 color = when {
-                    isDone   -> taminColors.textSecondary
-                    isActive -> taminColors.textPrimary
-                    else     -> taminColors.textMuted
+                    isDone   -> Color.White.copy(alpha = 0.7f)
+                    isActive -> Color.White
+                    else     -> Color.White.copy(alpha = 0.4f)
                 }
             )
         )
@@ -981,7 +984,6 @@ private fun SuggestedPromptChips(
     onPromptClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val taminColors = LocalTaminColors.current
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(Spacing.sm)
@@ -989,7 +991,7 @@ private fun SuggestedPromptChips(
         Text(
             text = stringResource(Res.string.agent_suggestions_label),
             style = MaterialTheme.typography.labelMedium,
-            color = taminColors.textMuted,
+            color = Color.White.copy(alpha = 0.6f),
         )
         androidx.compose.foundation.layout.FlowRow(
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
@@ -1419,10 +1421,13 @@ private fun ChatBubbleItem(
                 }
 
                 else -> {
-                    // Agent: full width, no Surface card background, no avatar padding
+                    // Agent: full width, no Surface card background, no avatar padding.
+                    // Renders directly on AgentBackground (no card of its own), so its
+                    // text follows that backdrop's fixed-dark palette rather than the
+                    // light/dark app theme's textPrimary — same reasoning as EmptyState.
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Box(modifier = Modifier.padding(vertical = Spacing.xs)) {
-                            renderContent(LocalTaminColors.current.textPrimary)
+                            renderContent(Color.White)
                         }
                         // Follow-up suggestions belong to this reply, so they render inside
                         // the same bubble instead of forming their own chat row.
@@ -2120,8 +2125,10 @@ private fun AgentBubbleFooter(item: ChatItem, onIntent: (AgentIntent) -> Unit) {
                     val clipboardManager = androidx.compose.ui.platform.LocalClipboardManager.current
 
     val taminColors = LocalTaminColors.current
-    val iconTint = taminColors.textMuted
-    val activeTint = taminColors.blueText
+    // Sits directly on AgentBackground (no card), so it follows that fixed-dark
+    // backdrop's white-based palette rather than the theme's textMuted/blueText.
+    val iconTint = Color.White.copy(alpha = 0.6f)
+    val activeTint = Color.White
 
     Row(
         modifier = Modifier
@@ -2133,7 +2140,7 @@ private fun AgentBubbleFooter(item: ChatItem, onIntent: (AgentIntent) -> Unit) {
         Text(
             text = timeString,
             style = MaterialTheme.typography.labelSmall,
-            color = taminColors.textMuted,
+            color = Color.White.copy(alpha = 0.6f),
         )
 
         Row(
@@ -2157,7 +2164,7 @@ private fun AgentBubbleFooter(item: ChatItem, onIntent: (AgentIntent) -> Unit) {
                     .padding(horizontal = Spacing.xs)
                     .height(Spacing.md)
                     .width(Thickness.border)
-                    .background(taminColors.divider)
+                    .background(Color.White.copy(alpha = 0.14f))
             )
             FooterAction(
                 icon = painterResource(Res.drawable.ic_tamin_copy),
